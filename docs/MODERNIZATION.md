@@ -203,14 +203,62 @@ interleave once P0 is done.
   downstream of Phase 3 (DXLib collapse) and Phase 5 (GDI removal)
   because the types are consumed by code those phases will rewrite.
 
-### Phase 3 — Collapse DXLib into a thin SDL facade (client)
-- [ ] Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
-      `AudioManager`; delete `CDirect{Input,Sound,Music,Draw}` shims
-      and their `_Adapter.cpp` twins; grep-replace callers.
-- [ ] Delete `CDirectSetup*`, `CDirectDrawSurface*`, `BIT_RES.*`,
-      `CDirectDraw_StaticMembers.cpp`.
-- [ ] Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
-      `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`.
+### Phase 3 — Collapse DXLib into a thin SDL facade (client, in progress 2026-04-18)
+
+Audit of `Client/DXLib/` (46 files) against `DXLIB_SOURCES` in
+`Client/DXLib/CMakeLists.txt` turned up **25 files / ~5,933 lines that
+are not in the build target at all**. Those are the low-risk start.
+
+Sub-commits in the order they will land:
+
+- [ ] **C1 — Delete the 25 files that CMake never sees.** They break
+      into three piles:
+    - **Native DirectX leftovers (no SDL path)**: `CDirectInput.cpp`,
+      `CDirectSetup.h`, `CDirectSetupGetVersion.cpp`. These are the
+      pre-SDL Win32 implementations; the SDL path uses the
+      `*_Adapter.cpp` files instead and the Windows path is no longer
+      built.
+    - **`BIT_RES.CPP` / `BIT_RES.H`**: duplicate of the live
+      `Client/BIT_RES.*` in the main source tree (the one
+      `compile_commands.json` actually references). The DXLib copy is
+      orphaned.
+    - **Vendored mp3 + vorbis decoder dupes**: `mp3.cpp/h`,
+      `huffman.cpp/h`, `subdecoder.cpp`, `synfilt.cpp`, `reader.cpp/h`,
+      `soundbuf.cpp/h`, `header.cpp/h`, `codec.h`, `common.h`,
+      `config_types.h`, `l3types.h`, `ogg.h`, `os_types.h`,
+      `vorbisenc.h`, `vorbisfile.h`. Byte-for-byte duplicates of
+      the live copies in `Client/` root. The live copies are
+      preserved; these are deleted.
+
+      (Note: `Client/BIT_RES.CPP`, `Client/huffman.cpp`, and the
+      sibling vendored files do `#include "bit_res.h"` in lowercase
+      while only `BIT_RES.H` exists on disk. That only resolves on
+      case-insensitive filesystems (macOS default, Windows). On
+      case-sensitive Linux the current build is already broken
+      here. Fixing the lowercase-include bug is Phase 6
+      touch-as-you-go scope, not Phase 3 — we're only removing the
+      DXLib copies.)
+
+- [ ] **C2 — Rename `CSDLInput`, `CSDLAudio`, `CSDLStream` →
+      `InputManager`, `AudioManager`, `AudioStream`**; delete the
+      `CDirect{Input,Sound,Music,SoundStream}` shims and their
+      `_Adapter.cpp` twins; grep-replace the ~20 call sites in
+      `Client/Client.cpp`, `Client/Client.h`, and the DXLib
+      `DXLibBackendSDL.cpp`.
+- [ ] **C3 — Collapse `CDirectDraw*` / `CDirectDrawSurface*`.** These
+      are thicker than the input/audio shims because the draw path is
+      the hottest one; plan to land this as its own commit with a
+      compile smoke-test before the rename.
+- [ ] **C4 — Move the surviving SDL-backed files out of
+      `Client/DXLib/` into `Client/Platform/`; delete
+      `Client/DXLib/`**; update include paths and CMake globs.
+- [ ] **C5 — Update this file** with Phase 3 outcome, final line
+      count, and any discrepancies surfaced along the way.
+
+Rationale for the commit split: each sub-commit is individually
+reviewable and individually revertable. C1 is pure deletion
+(5,933 lines) and can land before any code rewrites; the renames in
+C2/C3 are the risky edits; C4 is mechanical path shuffling.
 
 ### Phase 4 — One sprite pipeline (client)
 - [ ] Decide here, in writing, whether `tools/engine/sprite/` absorbs
