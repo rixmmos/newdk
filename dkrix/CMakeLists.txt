@@ -508,10 +508,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${VS_UI_CLIENT_SOURCES}
 	)
 
-	# Note: Cpackets contains CG (Client to Game) handlers
-	# These are server-side handlers that shouldn't be compiled in the client
-	# The client-side packet handling is done through different mechanisms
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
+	# Note: Cpackets contains CG (Client to Game) handlers. The server-side
+	# *Handler.cpp sources that used to live here were deleted outright (see
+	# docs/MODERNIZATION.md Phase 1); the 14 Handler methods that needed a
+	# client-side link target are stubbed in Client/CGHandlersStub.cpp.
+	# The FILTER EXCLUDE that used to remove these files is no longer needed.
 
 
 	# Exclude Windows-specific files
