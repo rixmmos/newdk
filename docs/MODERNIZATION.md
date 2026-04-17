@@ -152,21 +152,56 @@ interleave once P0 is done.
   the sandbox can't run the client build. Human verification
   pending before declaring Phase 1 fully complete.
 
-### Phase 2 — Shrink `basic/Platform.h` (client)
-- [ ] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
-      371; collapse to a single `using id_t = std::uint32_t;`.
-- [ ] Delete the dead `_T`, `_tcscpy`, `_tcscat`, `stricmp`, `_itoa`
-      macro shims (no callers).
-- [ ] Delete the fake `HRESULT`/`S_OK`/`S_FALSE` machinery; update the
-      DXLib adapters that return it but never have it checked.
-- [ ] Either define `platform_get_scan_code()` or delete the
-      `SCAN_CODE()` macro that claims to call it.
-- [ ] Pick one mutex primitive (`SDL_mutex *` or `std::mutex`); remove
-      the `CRITICAL_SECTION` → pthread shim and its 20-odd callers.
-- [ ] Defer the GDI stubs (`DeleteObject`, `CreateFontIndirect`,
-      `LOGFONT`) to Phase 5 — they come out when `VS_UI_Base.cpp` stops
-      calling them.
-- Target: `Platform.h` shrinks from 1,968 lines to under 600.
+### Phase 2 — Shrink `basic/Platform.h` (client, in progress 2026-04-17)
+- [x] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
+      371; collapse to a single `typedef uint32_t id_t;` with a comment
+      noting the POSIX `<sys/types.h>` collision risk.
+- [~] Delete the dead `_T`, `_tcscpy`, `_tcscat`, `stricmp`, `_itoa`
+      macro shims. The claim that all five were unused was half right:
+      `_tcs*` family (`_tcscpy`, `_tcscat`, `_tcslen`, `_tcschr`,
+      `_tcsrchr`, `_stprintf`, `_tprintf`, `_tmain`) and `_L(x)` had no
+      callers and were deleted outright. `_T(x)` / `TEXT(x)` / `TCHAR`
+      and `stricmp` are still live; there is no `_itoa` shim at all
+      (the six `itoa` call sites are inside `#ifdef __DEBUG_OUTPUT__`
+      dead code). Remaining live shims migrate touch-as-you-go per
+      Phase 6.
+- [x] Delete the fake `HRESULT`/`S_OK`/`S_FALSE`/`SUCCEEDED`/`FAILED`
+      machinery. The only live SDL-path consumers were three DXLib
+      adapter methods that always returned `S_OK` and a `::InitFail()`
+      in `Client/Client.cpp` whose return value nobody read; those
+      signatures were switched to `BOOL` or `void`. Every other
+      `HRESULT` reference in the tree is in a build-excluded file
+      (Imm/\*, `VS_UI/WinMain.cpp`, `WebBrowser.cpp`, `CDirectInput.cpp`,
+      etc.), inside `#ifdef PLATFORM_WINDOWS` or `#ifdef OUTPUT_DEBUG`,
+      or inside a comment.
+- [x] `platform_get_scan_code()` / `SCAN_CODE()` — no action needed.
+      The orphan claim in the original plan was wrong:
+      `platform_get_scan_code()` is defined in `basic/PlatformSDL.cpp`
+      and `SCAN_CODE()` forwards to it through `basic/PlatformUtil.h`.
+      Verified by grep 2026-04-17.
+- [x] Back `CRITICAL_SECTION` with `std::recursive_mutex` instead of a
+      hand-rolled `pthread_mutex_t` + `initialized` flag. Windows
+      `CRITICAL_SECTION` is recursive; `std::recursive_mutex` has
+      matching semantics. The `Initialize/Enter/Leave/Delete`
+      wrappers are kept as one-liners so the ~60 existing call sites
+      in `ProfileManager`, `WhisperManager`, `RequestUserManager`,
+      `RequestClientPlayerManager`, `RequestServerPlayerManager`,
+      `MWorkThread`, `DebugLog`, `CMessageArray`, and the global
+      `g_Lock` / `g_log_lock` don't have to change. Per-site migration
+      to `std::lock_guard` is deferred to Phase 6.
+- [!] GDI stubs (`DeleteObject`, `CreateFontIndirect`, `LOGFONT`)
+      deferred to Phase 5 as planned — they come out when
+      `VS_UI_Base.cpp` stops calling them.
+- Outcome: `Platform.h` went from **1,968 to 1,950 lines** (−18).
+  The under-600 target was aspirational; the remaining bulk is the
+  Windows-type forward-declaration storm (`WAVEFORMATEX`, `MMCKINFO`,
+  `DDSURFACEDESC`, `DDCAPS`, `DDSCAPS2`, `DSBUFFERDESC`,
+  `DSBPOSITIONNOTIFY`, `LOGFONT`, the DirectDraw/DirectSound opaque
+  struct forwards, `RECT`, `POINT`, `FILETIME`, `SECURITY_ATTRIBUTES`,
+  `MAKELONG`/`LOWORD`/`HIWORD`, etc.) and the platform-thread/mutex/
+  library-loader C API around `platform_*`. Those deletions are
+  downstream of Phase 3 (DXLib collapse) and Phase 5 (GDI removal)
+  because the types are consumed by code those phases will rewrite.
 
 ### Phase 3 — Collapse DXLib into a thin SDL facade (client)
 - [ ] Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
