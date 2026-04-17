@@ -7,6 +7,7 @@ Makefile
 *.cmake
 !CMakeLists.txt
 .cache
+compile_commands.json
 
 # Build directory
 build/
@@ -19,7 +20,15 @@ build/
 # Backup files
 *.bak
 *_bak*
+*_bak-*.cpp
 *.old
+
+# Legacy Visual C++ 6 project files (no longer supported, see CLAUDE.md)
+*.dsp
+*.dsw
+*.ncb
+*.opt
+*.plg
 
 # Temporary files
 *.o
