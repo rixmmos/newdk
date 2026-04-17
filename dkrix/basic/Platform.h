@@ -192,47 +192,39 @@ typedef struct IDirectSound* LPDIRECTSOUND;
 typedef struct IDirectSoundNotify* LPDIRECTSOUNDNOTIFY;
 #endif
 
-/* CRITICAL_SECTION for thread synchronization */
+/* CRITICAL_SECTION — std::recursive_mutex shim.
+ *
+ * Windows CRITICAL_SECTION is recursive (a thread that already owns the
+ * lock can re-enter it); std::recursive_mutex matches that semantics.
+ * Previously this was a hand-rolled pthread_mutex_t wrapper; see Phase 2
+ * in docs/MODERNIZATION.md.
+ *
+ * New code should use std::recursive_mutex + std::lock_guard directly.
+ * Existing Enter/Leave call sites are left in place and will be migrated
+ * touch-as-you-go (Phase 6).
+ *
+ * We temporarily close the enclosing `extern "C"` block because <mutex>
+ * is a C++ header, std::recursive_mutex is a C++ class, and the shim
+ * wrappers forward to its member functions — none of which belongs in
+ * C linkage.
+ */
 #ifndef _CRITICAL_SECTION_DEFINED
 #define _CRITICAL_SECTION_DEFINED
-#include <pthread.h>
+#ifdef __cplusplus
+}  /* close extern "C" */
 
-typedef struct _CRITICAL_SECTION {
-	pthread_mutex_t mutex;
-	int initialized;
-} CRITICAL_SECTION, *PCRITICAL_SECTION, *LPCRITICAL_SECTION;
+#include <mutex>
 
-/* Critical section functions - pthread-based implementations for macOS */
-/* Note: Use recursive mutex to match Windows CRITICAL_SECTION behavior */
-static inline void InitializeCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL) {
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  // 递归锁
-		pthread_mutex_init(&cs->mutex, &attr);
-		pthread_mutexattr_destroy(&attr);
-		cs->initialized = 1;
-	}
-}
+typedef std::recursive_mutex CRITICAL_SECTION;
+typedef CRITICAL_SECTION *PCRITICAL_SECTION, *LPCRITICAL_SECTION;
 
-static inline void EnterCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_lock(&cs->mutex);
-	}
-}
+static inline void InitializeCriticalSection(CRITICAL_SECTION*) { /* default-constructed */ }
+static inline void EnterCriticalSection(CRITICAL_SECTION* cs)   { if (cs) cs->lock(); }
+static inline void LeaveCriticalSection(CRITICAL_SECTION* cs)   { if (cs) cs->unlock(); }
+static inline void DeleteCriticalSection(CRITICAL_SECTION*)     { /* destructor handles it */ }
 
-static inline void LeaveCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_unlock(&cs->mutex);
-	}
-}
-
-static inline void DeleteCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_destroy(&cs->mutex);
-		cs->initialized = 0;
-	}
-}
+extern "C" {  /* reopen extern "C" */
+#endif
 
 /* GDI object management functions - stub implementations */
 static inline int DeleteObject(void* hObject) {
