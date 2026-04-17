@@ -238,8 +238,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/DebugInfo.cpp
 		Client/ClientConfig.cpp
 		Client/UtilityFunction.cpp
-		# GameFunctions.cpp - Moved to CLIENT_MAIN_SOURCES to avoid duplicates with GameMain.cpp
-		# GamePacketFunctions.cpp - Removed, all functions now in PacketFunction.cpp
 		Client/RenderingFunctions.cpp
 		Client/UIUtilityFunctions.cpp
 
@@ -491,11 +489,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Add additional source files
 	list(APPEND CLIENT_MAIN_SOURCES
 		Client/COGGSTREAM.cpp
-		# Time functions extracted from PacketFunction.cpp (which has Windows-specific networking code)
+		# Time functions extracted from PacketFunction.cpp (which has
+		# Windows-specific networking code).
 		Client/ClientTimeFunctions.cpp
-		# ActionFunctions.cpp excluded - functions now in PacketFunction.cpp
-		# Client/ActionFunctions.cpp
-		# Globals.cpp - Global variables and utility functions (from GamePacketFunctions.cpp)
+		# Global variables and small utility functions that used to live
+		# in GamePacketFunctions.cpp.
 		Client/Globals.cpp
 	)
 
