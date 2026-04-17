@@ -124,10 +124,16 @@ typedef uintptr_t		DWORD_PTR;
 typedef int32_t			LONG;
 typedef int				BOOL;
 
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
+/*
+ * id_t: cross-platform game entity id. Unsigned 32-bit on every platform.
+ *
+ * Note: this name collides with POSIX <sys/types.h>'s id_t (a process/user
+ * id). On macOS and Linux this typedef still wins inside translation units
+ * that include Platform.h before <sys/types.h>, which is the case for the
+ * client. Do not move this declaration below the POSIX includes.
+ */
+typedef uint32_t id_t;
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -353,10 +359,7 @@ static inline void* CreateFontIndirect(LOGFONT* lplf) {
 typedef DWORD			COLORREF;
 #define RGB(r,g,b)		((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
 
-/* id_t conflicts with POSIX on macOS/Linux, only define on Windows */
-#ifdef PLATFORM_WINDOWS
-typedef DWORD			id_t;
-#endif
+/* id_t is defined above (unconditionally, as uint32_t). */
 
 typedef WORD			char_t;
 
@@ -367,8 +370,7 @@ typedef WORD			char_t;
 #ifndef PLATFORM_WINDOWS
 	/* Windows-compatible type definitions for non-Windows platforms */
 	typedef int				BOOL;
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
+	/* id_t is defined above (unconditionally, as uint32_t). */
 	#ifndef TRUE
 		#define TRUE	1
 	#endif
