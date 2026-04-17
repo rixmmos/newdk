@@ -1,0 +1,34 @@
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+
+#pragma warning(push)
+#pragma warning(disable:4018)
+#pragma warning(disable:4786)
+#include <string>
+#include <vector>
+#include <map>
+#include <list>
+#include <deque>
+#include <bitset>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#else
+#include "../../basic/Platform.h"
+#endif
+#pragma warning(pop)
+
+using std::string;
+using std::vector;
+using std::map;
+using std::list;
+using std::deque;
+using std::bitset;
+using std::ifstream;
+using std::ofstream;
+

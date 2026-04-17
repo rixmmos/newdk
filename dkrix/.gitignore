@@ -1,0 +1,28 @@
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+.cache
+
+# Build directory
+build/
+
+# macOS
+.DS_Store
+*.dSYM
+*.dSYM/
+
+# Backup files
+*.bak
+*_bak*
+*.old
+
+# Temporary files
+*.o
+*.a
+*.so
+*.dylib
