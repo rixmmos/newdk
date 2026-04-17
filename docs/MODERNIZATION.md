@@ -106,21 +106,51 @@ interleave once P0 is done.
 - [x] Add `docs/README.md` explaining the three-repo layout and
       routing readers to `CLAUDE.md` / `MODERNIZATION.md`.
 
-### Phase 1 — Delete the unambiguously dead (client, not started)
-- [ ] Delete `Client/MItemTable_bak-2007-5-7.cpp` (14,965 lines).
-- [ ] Delete the nine CMake-excluded duplicate `.cpp` files
+### Phase 1 — Delete the unambiguously dead (client, in progress 2026-04-17)
+- [~] Delete `Client/MItemTable_bak-2007-5-7.cpp` (14,965 lines).
+      **Not present in the current tree or git history** as of
+      2026-04-17. The file was apparently deleted before this plan was
+      written. No action taken; noted for the record.
+- [x] Delete the nine CMake-excluded duplicate `.cpp` files
       (`GlobalVariables`, `MissingGlobals`, `GameHelpers`,
       `GameFunctions`, `GamePacketFunctions`, `ActionFunctions`,
-      `MitemTableinit2`, `GCNotifyWinHandler`, `GCNotifyWin`) —
-      ~7,550 lines.
-- [ ] Delete `Client/Packet/Cpackets/*Handler.cpp` (35 files,
-      ~1,609 lines; these are server-side handlers).
-- [ ] Remove the matching `REMOVE_ITEM` / `FILTER EXCLUDE` lines from
-      `CMakeLists.txt`.
-- [ ] Delete `Client/WinLib/` (3 files, all dead).
-- [ ] Add `build/`, `compile_commands.json`, `*.dsp`, `*.dsw`,
-      `*_bak-*.cpp`, `*.bak` to `.gitignore`.
-- Success: tree is ~24k lines lighter; `make debug-asan` still green.
+      `MitemTableinit2`, `GCNotifyWinHandler`, `GCNotifyWin`) plus
+      the two orphan headers that came with them
+      (`GameHelpers.h`, `Client/GCNotifyWin.h` — the latter a
+      duplicate of `Client/Packet/Gpackets/GCNotifyWin.h`). Measured
+      ~7,750 lines removed (the .cpp alone were 7,550; the two
+      orphan headers added ~180). The `REMOVE_ITEM` block in
+      `dkrix/CMakeLists.txt` was shrunk to just the
+      `${VS_UI_CLIENT_SOURCES}` entry in the same commit.
+- [x] Delete `Client/Packet/Cpackets/*Handler.cpp` (35 files,
+      ~1,609 lines; server-side handlers). The 14 of these that
+      needed a client-side link target already had stubs in
+      `Client/CGHandlersStub.cpp`; the other 21 had no client
+      references at all. The matching
+      `FILTER EXCLUDE ".*Cpackets/.*Handler\\.cpp"` line was
+      dropped from `dkrix/CMakeLists.txt` in the same commit.
+- [!] Delete `Client/WinLib/` (3 files). **Deferred** — the
+      "no subclasses, no live callers" claim was stale:
+      `CWinUpdate` is actively subclassed by `CWaitUIUpdate`,
+      `CWaitPacketUpdate`, `CGameUpdate`, `COpeningUpdate`, and
+      `g_pUpdate` is referenced in `Client.h`, `GameMain.cpp`,
+      and `Client.cpp`. Removing `WinLib/` here would require
+      restructuring the update-state hierarchy, which is bigger
+      than "delete the unambiguously dead." Re-scoped: folded
+      into Phase 3 (DXLib collapse) since both involve flattening
+      a legacy facade in the same neighborhood.
+- [x] Add `compile_commands.json`, `*_bak-*.cpp`, `*.dsp`, `*.dsw`,
+      `*.ncb`, `*.opt`, `*.plg` to `dkrix/.gitignore`, and untrack
+      the 3.4 MB `dkrix/compile_commands.json` that had been
+      checked in. `build/`, `*.bak`, and `*_bak*` were already
+      covered.
+- Net: roughly **~9,400 lines** of source removed from the client
+  tree (plus 3.4 MB of generated JSON untracked), against an
+  original headline target of "~24,100 lines." The shortfall is
+  entirely the missing `MItemTable_bak-2007-5-7.cpp` (14,965).
+- Follow-up: `make debug-asan` not yet exercised —
+  the sandbox can't run the client build. Human verification
+  pending before declaring Phase 1 fully complete.
 
 ### Phase 2 — Shrink `basic/Platform.h` (client)
 - [ ] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
