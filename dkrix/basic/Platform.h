@@ -436,40 +436,27 @@ typedef WORD			char_t;
 		#define OPTIONAL
 	#endif
 
-	/* Character type macros */
+	/*
+	 * Character-type macros. _T(x) and TEXT(x) are a no-op on the
+	 * non-Windows build (we always build narrow strings here). They are
+	 * kept because a handful of call sites still spell string literals as
+	 * `_T("foo")` — see vs_ui_gamecommon2.cpp — and the Windows-only
+	 * files under MinTr.h / GetWinVer.h use them unconditionally.
+	 *
+	 * The _tcs* / _stprintf / _tprintf / _tmain / _L shims that used to
+	 * sit below these macros had zero live callers on the SDL build path
+	 * and were deleted in Phase 2 of docs/MODERNIZATION.md. If you need
+	 * them back, use the standard C name (strcpy, sprintf, etc.) directly.
+	 */
 	#ifndef _T
 		#define _T(x)		x
 	#endif
 	#ifndef TEXT
 		#define TEXT(x)	x
 	#endif
-	#ifndef _L
-		#define _L(x)		x
-	#endif
 
-	/* TCHAR and related types */
-	#ifndef UNICODE
-		typedef char			TCHAR;
-		#define _tcscat		strcat
-		#define _tcscpy		strcpy
-		#define _tcslen		strlen
-		#define _tcschr		strchr
-		#define _tcsrchr		strrchr
-		#define _stprintf	sprintf
-		#define _tprintf		printf
-		#define _tmain		main
-	#else
-		typedef wchar_t		TCHAR;
-		#define _tcscat		wcscat
-		#define _tcscpy		wcscpy
-		#define _tcslen		wcslen
-		#define _tcschr		wcschr
-		#define _tcsrchr		wcsrchr
-		#define _stprintf	swprintf
-		#define _tprintf		wprintf
-		#define _tmain		wmain
-	#endif
-
+	/* TCHAR is narrow on this build; the UNICODE branch was never active. */
+	typedef char			TCHAR;
 	typedef TCHAR*			LPTSTR;
 	typedef const TCHAR*	LPCTSTR;
 
