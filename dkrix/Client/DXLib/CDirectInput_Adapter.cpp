@@ -201,11 +201,10 @@ void CSDLInput::UpdateInput()
 }
 
 /* Set acquire (SDL backend - no-op) */
-HRESULT CSDLInput::SetAcquire(bool active_app)
+void CSDLInput::SetAcquire(bool active_app)
 {
-	if (!m_pMouse || !m_pKeyboard)
-		return S_FALSE;
-	return S_OK;
+	(void)active_app;
+	// SDL backend has no device acquire/unacquire concept; nothing to do.
 }
 
 /* Set mouse position (SDL backend) */
@@ -253,8 +252,8 @@ void CSDLInput::SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, D
 /* Stub implementations for unused methods */
 void CSDLInput::OnMouseInput() { /* Handled in UpdateInput */ }
 void CSDLInput::OnKeyboardInput() { /* Handled in UpdateInput */ }
-HRESULT CSDLInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) { 
-	return Init(hWnd, hInst, ex) ? S_OK : S_FALSE; 
+BOOL CSDLInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) {
+	return Init(hWnd, hInst, ex);
 }
 
 #endif /* DXLIB_BACKEND_SDL */

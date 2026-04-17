@@ -86,7 +86,7 @@ private:
 	int							m_limit_x; // mouse 이동 제한
 	int							m_limit_y; // mouse 이동 제한
 
-	HRESULT	InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex);
+	BOOL	InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex);
 	void		FreeDirectInput();
 	void		OnMouseInput();
 	void		OnKeyboardInput();
@@ -102,7 +102,7 @@ public:
 
 	void		Clear();
 	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
-	HRESULT		SetAcquire(bool active_app);
+	void		SetAcquire(bool active_app);
 	void		SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int));
 	void		SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD));
 	void		SetMouseMoveLimit(int x, int y);

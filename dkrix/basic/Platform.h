@@ -378,23 +378,24 @@ typedef WORD			char_t;
 		#define FALSE	0
 	#endif
 
-	typedef int32_t			HRESULT;
 	typedef intptr_t		LRESULT;
 	typedef uintptr_t		UINT_PTR;
-	#ifndef S_OK
-		#define S_OK		0
-	#endif
-	#ifndef S_FALSE
-		#define S_FALSE		1
-	#endif
 
-	/* HRESULT macros */
-	#ifndef SUCCEEDED
-		#define SUCCEEDED(hr)	(((HRESULT)(hr)) >= 0)
-	#endif
-	#ifndef FAILED
-		#define FAILED(hr)		(((HRESULT)(hr)) < 0)
-	#endif
+	/*
+	 * HRESULT / S_OK / S_FALSE / SUCCEEDED / FAILED are intentionally not
+	 * provided on non-Windows builds. The fake HRESULT shim used to sit
+	 * here, but the only live callers were the DXLib SDL adapters that
+	 * returned S_OK unconditionally; those have been rewritten to return
+	 * BOOL or void. If you bring in new code that needs HRESULT, update
+	 * that code to use the native return type instead — don't reinstate
+	 * the shim. Phase 2 in docs/MODERNIZATION.md.
+	 *
+	 * The surviving Windows-only files (VS_UI/WinMain.cpp, Imm/*,
+	 * VS_UI_WebBrowser.cpp, Client/Client.cpp, Client/DXLib/CDirectInput.cpp,
+	 * and the OUTPUT_DEBUG-guarded blocks in MTopView.cpp) are excluded
+	 * from the non-Windows build and get HRESULT from <windows.h> on the
+	 * Windows path.
+	 */
 
 	/* VOID type */
 	#ifndef VOID

@@ -8,11 +8,6 @@
 
 #include "CDirectSoundStream.h"
 
-// Define E_FAIL for compatibility (Windows HRESULT value)
-#ifndef E_FAIL
-#define E_FAIL 0x80004005L
-#endif
-
 //-----------------------------------------------------------------------------
 // Constructor/Destructor
 //-----------------------------------------------------------------------------
@@ -85,7 +80,7 @@ BOOL CSDLStream::Reset()
 	return FALSE;
 }
 
-HRESULT CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
+BOOL CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
 	MMCKINFO* pckIn, UINT* cbActualRead)
 {
 	// Not implemented - Windows multimedia API only
@@ -94,7 +89,7 @@ HRESULT CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
 	(void)pbDest;
 	(void)pckIn;
 	(void)cbActualRead;
-	return E_FAIL;
+	return FALSE;
 }
 
 //-----------------------------------------------------------------------------

@@ -363,7 +363,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 // Name: InitFail()
 // Desc: This function is called if an initialization function fails
 //-----------------------------------------------------------------------------
-HRESULT InitFail(LPCTSTR szError,...)
+void InitFail(LPCTSTR szError,...)
 {
 	// ÇÁ·Î±×·¥ Áß´Ü..
 	g_bActiveApp = FALSE;
@@ -385,9 +385,7 @@ HRESULT InitFail(LPCTSTR szError,...)
     DestroyWindow(g_hWnd);
 #endif
     va_end(vl);
-//end 
-
-    return 0;
+//end
 }
 
 //-----------------------------------------------------------------------------

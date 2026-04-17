@@ -225,7 +225,7 @@ extern CWinUpdate*				g_pUpdate;
 // Global Function Prototypes
 //-----------------------------------------------------------------------------
 
-HRESULT		InitFail(LPCTSTR szError,...);
+void		InitFail(LPCTSTR szError,...);
 //bool		CheckDXVersion();
 void		ReleaseAllObjects();
 void		ReleaseSocket();
