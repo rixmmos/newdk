@@ -1,0 +1,33 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : EffectLoud.h
+// Written by  : crazydog
+// Description :
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __EFFECT_LOUD__
+#define __EFFECT_LOUD__
+
+#include "Effect.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// class EffectLoud
+//////////////////////////////////////////////////////////////////////////////
+
+class EffectLoud : public Effect {
+public:
+    EffectLoud(Creature* pCreature);
+
+public:
+    EffectClass getEffectClass() const {
+        return EFFECT_CLASS_LOUD;
+    }
+
+    void affect() {}
+
+    void unaffect(Creature* pCreature);
+    void unaffect();
+
+    string toString() const;
+};
+
+#endif // __EFFECT_LOUD__

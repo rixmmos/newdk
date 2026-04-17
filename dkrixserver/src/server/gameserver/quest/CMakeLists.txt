@@ -1,0 +1,173 @@
+set(QUEST_OBJS
+	Trigger.cpp
+	TriggerManager.cpp
+	PropertyBuffer.cpp
+	VariableBuffer.cpp
+	VariableInfo.cpp
+	TriggerParser.cpp
+)
+
+set(CONDITION_OBJS
+	ConditionFactoryManager.cpp
+	ConditionEveryTime.cpp
+	ConditionAnsweredBy.cpp
+	ConditionFlagOn.cpp
+	ConditionFlagOff.cpp
+	ConditionAttrComp.cpp
+	ConditionRaceComp.cpp
+	ConditionSameClan.cpp
+	ConditionPayPlay.cpp
+	ConditionEnterMasterLair.cpp
+	ConditionEnterCastle.cpp
+	ConditionEnterHolyLand.cpp
+	ConditionEnterCastleDungeon.cpp
+	ConditionHasQuest.cpp
+	ConditionHasInvenSpace.cpp
+	ConditionCanEnterPayZone.cpp
+	ConditionCanEnterBeginnerZone.cpp
+	ConditionCanWarpGate.cpp
+	ConditionCanEnterLevelWarZone.cpp
+	ConditionCanPetQuest.cpp
+	ConditionCanEnterEventZone.cpp
+	ConditionEffectFlag.cpp
+	ConditionCanEnterGDRLair.cpp
+	ConditionExistReinforce.cpp
+	ConditionSiegeDefenderSide.cpp
+	ConditionSiegeAttackerSide.cpp
+	ConditionNotGuildMember.cpp
+	ConditionIsGuildMember.cpp
+	ConditionCanEnterQuestZone.cpp
+#	ConditionHasEnoughFamilyCoin.cpp
+)
+
+set(ACTION_OBJS
+	ActionFactoryManager.cpp
+	ActionSetPosition.cpp
+	ActionWander.cpp
+	ActionSay.cpp
+	ActionRandomSay.cpp
+	ActionAsk.cpp
+	ActionQuitDialogue.cpp
+	ActionPrepareShop.cpp
+	ActionSell.cpp
+	ActionBuy.cpp
+	ActionRegenShop.cpp
+	ActionTeachSkill.cpp
+	ActionHeal.cpp
+	ActionRedeemMotorcycle.cpp
+	ActionSearchMotorcycle.cpp
+	ActionRepair.cpp
+	ActionStashSell.cpp
+	ActionStashOpen.cpp
+	ActionRestore.cpp
+	ActionSetResurrectZone.cpp
+	ActionSilverCoating.cpp
+	ActionCreateGuild.cpp
+	ActionDestroyGuild.cpp
+	ActionTutorial.cpp
+	ActionGiveNewbieItem.cpp
+	ActionActivatePortal.cpp
+	ActionTurnOnFlag.cpp
+	ActionTurnOffFlag.cpp
+	ActionSystemMessage.cpp
+	ActionTakeDonation.cpp
+	ActionCallHelicopter.cpp
+	ActionRegenEventShop.cpp
+	ActionAskDynamic.cpp
+	ActionSayDynamic.cpp
+	ActionGiveSpecialEventItem.cpp
+	ActionRedistributeAttr.cpp
+	ActionTradeEventItem.cpp
+	ActionTradeLairItem.cpp
+	ActionShowGuildDialog.cpp
+	ActionSimpleQuestList.cpp
+	ActionSimpleQuestComplete.cpp
+	ActionSimpleQuestRegen.cpp
+	ActionTradeGiftBox.cpp
+	ActionGiveTestServerReward.cpp
+	ActionEnterCastleWithFee.cpp
+	ActionShowTaxBalance.cpp
+	ActionAskVariable.cpp
+	ActionWarRegistration.cpp
+	ActionShowWarSchedule.cpp
+	ActionJoinRaceWar.cpp
+	ActionGiveEventItem.cpp
+	ActionGiveAccountEventItem.cpp
+	ActionInitPartnerWaitingManager.cpp
+	ActionWaitForMeetCouple.cpp
+	ActionWaitForApartCouple.cpp
+	ActionAcceptCoupleRequest.cpp
+	ActionAcceptApartCouple.cpp
+	ActionForceApartCouple.cpp
+	ActionEnterPKZone.cpp
+	ActionWarpToResurrectPosition.cpp
+	ActionSelectQuest.cpp
+	ActionQuestReward.cpp
+	ActionWarpToNoviceZone.cpp
+	ActionCancelQuest.cpp
+	ActionInitSimpleQuest.cpp
+	ActionWanderZone.cpp
+	ActionInitEventQuest.cpp
+	ActionAskByQuestLevel.cpp
+	ActionGiveEventQuest.cpp
+	ActionAdvanceEventQuest.cpp
+	ActionCancelEventQuestScript.cpp
+	ActionRewardEventQuest.cpp
+	ActionGiveLotto.cpp
+	ActionGiveEventQuestScript.cpp
+	ActionStartEventQuest.cpp
+	ActionWarpInZone.cpp
+	ActionEventMeet.cpp
+	ActionGiveFinalLottoScript.cpp
+	ActionGiveQuestItem.cpp
+	ActionTakeOutGoods.cpp
+	ActionClearRankBonus.cpp
+	ActionContractGnomesHorn.cpp
+	ActionDownSkill.cpp
+	ActionMiniGame.cpp
+	ActionGiveItem.cpp
+	ActionActivateMazeExit.cpp
+	ActionActivateMazeEnter.cpp
+	ActionActivateMazeReturn.cpp
+	ActionSystemMessagePerRace.cpp
+	ActionWarpLevelWarZone.cpp
+	ActionCheckPartnerName.cpp
+	ActionStartPetQuest.cpp
+	ActionPetWithdraw.cpp
+	ActionPetDeposit.cpp
+	ActionEnterEventZone.cpp
+	ActionEnterGDRLair.cpp
+	ActionTradeGQuestEventItem.cpp
+	ActionRegisterSiege.cpp
+	ActionRegisterReinforce.cpp
+	ActionAcceptReinforce.cpp
+	ActionDenyReinforce.cpp
+	ActionEnterSiege.cpp
+	ActionRecallSiege.cpp
+	ActionSelectBloodBible.cpp
+	ActionClearBloodBible.cpp
+	ActionModifyTaxRatio.cpp
+	ActionSwapAdvancementItem.cpp
+	ActionShowDonationDialog.cpp
+	ActionEnterQuestZone.cpp
+	ActionShowConfirmGetEventItemDialog.cpp
+#	ActionGiveCommonEventItem.cpp
+)
+
+set(LIBQUEST_SRCS ${QUEST_OBJS} ${CONDITION_OBJS} ${ACTION_OBJS})
+
+add_library(Quest STATIC ${LIBQUEST_SRCS})
+target_compile_definitions(Quest PRIVATE __GAME_SERVER__)
+target_include_directories(Quest PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/luaScript
+	${CMAKE_SOURCE_DIR}/src/Core
+	${CMAKE_SOURCE_DIR}/src/server
+	${CMAKE_SOURCE_DIR}/src/server/database
+	${CMAKE_SOURCE_DIR}/src/server/gameserver
+	${CMAKE_SOURCE_DIR}/src/server/gameserver/war
+	${CMAKE_SOURCE_DIR}/src/server/gameserver/item
+	${CMAKE_SOURCE_DIR}/src/server/gameserver/skill	
+)
+
+add_subdirectory(luaScript)

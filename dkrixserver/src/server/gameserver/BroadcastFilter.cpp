@@ -1,0 +1,39 @@
+/////////////////////////////////////////////////////////////////////////////
+// BroadcastFilter.cpp
+/////////////////////////////////////////////////////////////////////////////
+
+// include files
+#include "BroadcastFilter.h"
+
+#include "Creature.h"
+#include "GamePlayer.h"
+
+/////////////////////////////////////////////////////////////////////////////
+// class BroadcastFilterRace
+/////////////////////////////////////////////////////////////////////////////
+bool BroadcastFilterRace::isSatisfy(GamePlayer* pGamePlayer)
+
+{
+    __BEGIN_TRY
+
+    Assert(pGamePlayer != NULL);
+
+    Creature* pCreature = pGamePlayer->getCreature();
+    Assert(pCreature != NULL);
+
+    return pCreature->getRace() == m_Race;
+
+    __END_CATCH
+}
+
+BroadcastFilter* BroadcastFilterRace::Clone()
+
+{
+    __BEGIN_TRY
+
+    BroadcastFilter* pFilter = new BroadcastFilterRace(m_Race);
+
+    return pFilter;
+
+    __END_CATCH
+}

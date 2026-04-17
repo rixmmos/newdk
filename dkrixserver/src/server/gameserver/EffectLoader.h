@@ -1,0 +1,30 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : EffectLoader.h
+// Written By  : elca
+// Description :
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __EFFECT_LOADER_H__
+#define __EFFECT_LOADER_H__
+
+#include "Effect.h"
+#include "Types.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// class EffectLoader;
+//////////////////////////////////////////////////////////////////////////////
+
+class Creature;
+
+class EffectLoader {
+public:
+    virtual ~EffectLoader() {}
+
+public:
+    virtual Effect::EffectClass getEffectClass() const = 0;
+    virtual string getEffectClassName() const = 0;
+    virtual void load(Creature* pCreature) = 0;
+    virtual void load(Zone* pZone) {}
+};
+
+#endif

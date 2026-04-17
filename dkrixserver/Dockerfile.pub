@@ -1,0 +1,20 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && apt install -y \
+    libxerces-c-dev \
+    libmysqlclient-dev \
+    liblua5.1-dev \
+    psmisc \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /home/darkeden
+RUN mkdir /home/darkeden/vs
+RUN mkdir /home/darkeden/vs/src
+
+COPY bin /home/darkeden/vs/bin/
+COPY data /home/darkeden/vs/data/
+COPY docker/conf /home/darkeden/vs/conf/
+
+WORKDIR /home/darkeden/vs/bin

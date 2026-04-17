@@ -1,0 +1,33 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : InventorySlot.h
+// Written by  : elca
+// Description :
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __INVENTORY_SLOT_H__
+#define __INVENTORY_SLOT_H__
+
+#include "Assert.h"
+#include "Item.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// class InventorySlot
+//////////////////////////////////////////////////////////////////////////////
+
+class InventorySlot {
+public:
+    InventorySlot() : m_pItem(NULL) {}
+    ~InventorySlot();
+
+public:
+    Item* getItem() {
+        return m_pItem;
+    }
+    void addItem(Item* pItem);
+    void deleteItem();
+
+private:
+    Item* m_pItem;
+};
+
+#endif // __INVENTORY_SLOT_H__

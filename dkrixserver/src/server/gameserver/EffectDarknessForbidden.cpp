@@ -1,0 +1,58 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : EffectDarknessForbidden.cpp
+// Written by  :
+// Description :
+//////////////////////////////////////////////////////////////////////////////
+
+#include "EffectDarknessForbidden.h"
+
+#include "GCModifyInformation.h"
+#include "GCStatusCurrentHP.h"
+#include "Tile.h"
+#include "Zone.h"
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+EffectDarknessForbidden::EffectDarknessForbidden(Zone* pZone, ZoneCoord_t zoneX, ZoneCoord_t zoneY)
+
+{
+    __BEGIN_TRY
+
+    m_pZone = pZone;
+    m_X = zoneX;
+    m_Y = zoneY;
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void EffectDarknessForbidden::unaffect()
+
+{
+    __BEGIN_TRY
+
+    // cout << "EffectDarknessForbidden" << "unaffect BEGIN" << endl;
+
+    Tile& tile = m_pZone->getTile(m_X, m_Y);
+    tile.deleteEffect(m_ObjectID);
+
+    // cout << "EffectDarknessForbidden" << "unaffect END" << endl;
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+string EffectDarknessForbidden::toString() const {
+    __BEGIN_TRY
+
+    StringStream msg;
+
+    msg << "EffectDarknessForbidden("
+        << "ObjectID:" << getObjectID() << ")";
+
+    return msg.toString();
+
+    __END_CATCH
+}

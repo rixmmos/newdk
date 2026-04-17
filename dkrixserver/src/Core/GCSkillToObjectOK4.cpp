@@ -1,0 +1,103 @@
+//////////////////////////////////////////////////////////////////////
+//
+// Filename    : GCSkillToObjectOK4.cpp
+// Written By  : elca@ewestsoft.com
+// Description : Packet notifying the player that their skill on a target began.
+//
+//////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
+// include files
+//////////////////////////////////////////////////////////////////////
+#include "GCSkillToObjectOK4.h"
+
+
+//////////////////////////////////////////////////////////////////////
+// constructor
+//////////////////////////////////////////////////////////////////////
+GCSkillToObjectOK4::GCSkillToObjectOK4()
+
+{
+    __BEGIN_TRY
+    m_Grade = 0;
+    __END_CATCH
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// destructor
+//////////////////////////////////////////////////////////////////////
+GCSkillToObjectOK4::~GCSkillToObjectOK4()
+
+{
+    __BEGIN_TRY
+    __END_CATCH_NO_RETHROW
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// Initialize packet by reading data from the incoming stream.
+//////////////////////////////////////////////////////////////////////
+void GCSkillToObjectOK4::read(SocketInputStream& iStream)
+
+{
+    __BEGIN_TRY
+
+    // Read skill target, type, duration, and grade.
+    iStream.read(m_ObjectID);
+    iStream.read(m_SkillType);
+    iStream.read(m_Duration);
+    iStream.read(m_Grade);
+
+    __END_CATCH
+}
+
+
+//////////////////////////////////////////////////////////////////////
+// Serialize packet data to the outgoing stream.
+//////////////////////////////////////////////////////////////////////
+void GCSkillToObjectOK4::write(SocketOutputStream& oStream) const {
+    __BEGIN_TRY
+
+    // Write skill target, type, duration, and grade.
+    oStream.write(m_ObjectID);
+    oStream.write(m_SkillType);
+    oStream.write(m_Duration);
+    oStream.write(m_Grade);
+
+    __END_CATCH
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// execute packet's handler
+//
+//////////////////////////////////////////////////////////////////////
+void GCSkillToObjectOK4::execute(Player* pPlayer)
+
+{
+    __BEGIN_TRY
+
+    GCSkillToObjectOK4Handler::execute(this, pPlayer);
+
+    __END_CATCH
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// get packet's debug string
+//
+//////////////////////////////////////////////////////////////////////
+string GCSkillToObjectOK4::toString() const {
+    __BEGIN_TRY
+
+    StringStream msg;
+    msg << "GCSkillToObjectOK4("
+        << "SkillType:" << (int)m_SkillType << ",TargetObjectID:" << (int)m_ObjectID << ",Duration:" << (int)m_Duration
+        << ",Grade:" << (int)m_Grade << " )";
+    return msg.toString();
+
+    __END_CATCH
+}

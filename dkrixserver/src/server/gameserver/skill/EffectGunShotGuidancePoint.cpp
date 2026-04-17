@@ -1,0 +1,59 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : EffectGunShotGuidancePoint.cpp
+// Written by  : bezz
+//////////////////////////////////////////////////////////////////////////////
+
+#include "EffectGunShotGuidancePoint.h"
+
+#include "GCAddEffectToTile.h"
+#include "GCRemoveEffect.h"
+#include "GCSkillToObjectOK2.h"
+#include "GCStatusCurrentHP.h"
+#include "GamePlayer.h"
+#include "Monster.h"
+#include "PCFinder.h"
+#include "SkillUtil.h"
+#include "Slayer.h"
+#include "Vampire.h"
+#include "ZoneInfoManager.h"
+#include "ZoneUtil.h"
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+EffectGunShotGuidancePoint::EffectGunShotGuidancePoint(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y)
+
+{
+    __BEGIN_TRY
+
+    m_pZone = pZone;
+    m_X = x;
+    m_Y = y;
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+void EffectGunShotGuidancePoint::unaffect()
+
+{
+    __BEGIN_TRY
+
+    Tile& tile = m_pZone->getTile(m_X, m_Y);
+    tile.deleteEffect(m_ObjectID);
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+string EffectGunShotGuidancePoint::toString() const throw() {
+    __BEGIN_TRY
+
+    StringStream msg;
+    msg << "EffectGunShotGuidancePoint("
+        << ")";
+    return msg.toString();
+
+    __END_CATCH
+}

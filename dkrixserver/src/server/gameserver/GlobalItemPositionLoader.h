@@ -1,0 +1,33 @@
+#ifndef __GLOBAL_ITEM_POSITION_LOADER_H__
+#define __GLOBAL_ITEM_POSITION_LOADER_H__
+
+#include "GlobalItemPosition.h"
+#include "Item.h"
+#include "Types.h"
+
+class GlobalItemPositionLoader {
+private:
+    class GlobalDBItemPosition {
+    public:
+        string OwnerID;
+        Storage ItemStorage;
+        StorageID_t StorageID;
+        WORD X;
+        WORD Y;
+        ObjectID_t ObjectID;
+    };
+
+public:
+    GlobalItemPosition* load(Item::ItemClass itemClass, ItemID_t itemID);
+    GlobalItemPosition* makeGlobalItemPosition(GlobalDBItemPosition& gip);
+
+    static GlobalItemPositionLoader* getInstance() {
+        static GlobalItemPositionLoader globalItemPositionLoader;
+        return &globalItemPositionLoader;
+    }
+
+private:
+    GlobalItemPositionLoader() {}
+};
+
+#endif

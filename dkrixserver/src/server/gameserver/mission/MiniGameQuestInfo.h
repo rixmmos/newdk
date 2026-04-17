@@ -1,0 +1,32 @@
+#ifndef __MINI_GAME_QUEST_INFO_H__
+#define __MINI_GAME_QUEST_INFO_H__
+
+#include "Exception.h"
+#include "MiniGameQuestStatus.h"
+#include "QuestInfo.h"
+#include "Types.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// class GatherItemQuestInfo;
+//////////////////////////////////////////////////////////////////////////////
+
+class MiniGameQuestInfo : public QuestInfo {
+public:
+    MiniGameQuestInfo(QuestID_t questID, Race_t race, QuestGrade_t maxGrade, QuestGrade_t minGrade, DWORD timeLimitSec,
+                      RewardClass_t rClass, uint gameType)
+        : QuestInfo(questID, race, maxGrade, minGrade, timeLimitSec, rClass, QUEST_CLASS_MINI_GAME),
+          m_GameType(gameType) {}
+
+    virtual ~MiniGameQuestInfo() {}
+
+public:
+    int getGameType() const {
+        return m_GameType;
+    }
+    MiniGameQuestStatus* makeQuestStatus(PlayerCreature* pPC) const;
+
+private:
+    int m_GameType;
+};
+
+#endif // __MINI_GAME_QUEST_INFO_H__

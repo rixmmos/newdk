@@ -1,0 +1,35 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : EffectHasPet.h
+// Written by  :
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __EFFECT_HAS_PET__
+#define __EFFECT_HAS_PET__
+
+#include "Effect.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// class EffectHasPet
+//////////////////////////////////////////////////////////////////////////////
+
+class EffectHasPet : public Effect {
+public:
+    EffectHasPet(Creature* pCreature);
+
+public:
+    EffectClass getEffectClass() const {
+        return EFFECT_CLASS_HAS_PET;
+    }
+
+    void affect();
+    void affect(Creature* pCreature);
+
+    void unaffect(Creature* pCreature);
+    void unaffect();
+
+    string toString() const;
+
+private:
+};
+
+#endif
