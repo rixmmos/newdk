@@ -499,25 +499,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/Globals.cpp
 	)
 
-	# Remove files that are already compiled in VS_UI library
+	# Remove files that are already compiled in VS_UI library.
+	# The nine duplicate .cpp files that used to be excluded here
+	# (GlobalVariables, GCNotifyWin{,Handler}, MitemTableinit2, MissingGlobals,
+	# GameHelpers, GameFunctions, GamePacketFunctions, ActionFunctions) have
+	# been deleted from the tree outright — see docs/MODERNIZATION.md Phase 1.
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES
 		${VS_UI_CLIENT_SOURCES}
-		# Explicitly remove files that duplicate globals in Client.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWin.cpp
-		# Exclude MitemTableinit2.cpp - duplicates InitItem2() from MitemTableInit.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MitemTableinit2.cpp
-		# Exclude MissingGlobals.cpp - duplicates globals with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MissingGlobals.cpp
-		# Exclude GameHelpers.cpp - duplicates many functions with GamePacketFunctions.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameHelpers.cpp
-		# Exclude GameFunctions.cpp - duplicates functions with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameFunctions.cpp
-		# Exclude GamePacketFunctions.cpp - all functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GamePacketFunctions.cpp
-		# Exclude ActionFunctions.cpp - functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/ActionFunctions.cpp
 	)
 
 	# Note: Cpackets contains CG (Client to Game) handlers
