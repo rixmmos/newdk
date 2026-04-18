@@ -119,7 +119,7 @@ BOOL g_bEnable3DHAL = FALSE;
 bool			g_bTitleLoading = false;
 CSprite*		g_pTitleLoadingSprite = NULL;
 int				g_TitleSpriteAlpha = 32;
-//CDirectDrawSurface	g_TitleSurface;
+//CSDLSurface	g_TitleSurface;
 
 
 // [Futec수정]
@@ -187,7 +187,7 @@ StartTitleLoading()
 //	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 //	{
 //		g_bTitleLoading = true;
-//		CDirectDrawSurface &surface = g_TitleSurface;
+//		CSDLSurface &surface = g_TitleSurface;
 //		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
 //
 //		if (surface.InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))
@@ -1336,7 +1336,7 @@ InitDraw()
 	CSpriteSurface::InitEffectTable();
 
 #ifdef PLATFORM_WINDOWS
-	CDirectDrawSurface::SetGammaFunction();
+	CSDLSurface::SetGammaFunction();
 #endif
 
 	return TRUE;
@@ -2663,7 +2663,7 @@ void ReleaseAllObjects()
 	DEBUG_ADD("[Release] CDirect3D");
 	// CDirect3D::Release() removed (SDL2)
 
-	DEBUG_ADD("[Release] CDirectDraw");
+	DEBUG_ADD("[Release] CSDLGraphics");
 	CSDLGraphics::ReleaseAll();
 
 	//---------------------------------------------------------------------

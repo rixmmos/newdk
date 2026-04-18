@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
-// CDirectDraw.cpp
+// CSDLGraphics.cpp
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectX implementation removed - using SDL2 on all platforms
-// NOTE: Static member definitions are in CDirectDraw_StaticMembers.cpp
+// NOTE: Static member definitions are in CSDLGraphics_StaticMembers.cpp
 //----------------------------------------------------------------------
 
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 
 //-----------------------------------------------------------------------------
 // Static member initialization for DirectDraw objects
@@ -34,7 +34,7 @@ RECT								CSDLGraphics::m_rcWindow;
 RECT								CSDLGraphics::m_rcScreen;
 RECT								CSDLGraphics::m_rcViewport;
 
-// Note: Color mask static members are defined in CDirectDraw_StaticMembers.cpp
+// Note: Color mask static members are defined in CSDLGraphics_StaticMembers.cpp
 
 //-----------------------------------------------------------------------------
 // Constructor/Destructor (stub - not implemented)

@@ -323,7 +323,7 @@ CSpriteSurface::ClippingRectToPoint(RECT*& pRect, POINT*& pPoint)
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltHalf(POINT* pPoint, 
-							   CDirectDrawSurface* SourceSurface, RECT*  pRect)
+							   CSDLSurface* SourceSurface, RECT*  pRect)
 {
 	//------------------------
 	// Clipping
@@ -397,7 +397,7 @@ CSpriteSurface::BltHalf(POINT* pPoint,
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltDarkness(POINT* pPoint, 
-							   CDirectDrawSurface* SourceSurface, RECT*  pRect,
+							   CSDLSurface* SourceSurface, RECT*  pRect,
 							   BYTE DarkBits)
 {
 	//------------------------
@@ -471,7 +471,7 @@ CSpriteSurface::BltDarkness(POINT* pPoint,
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltBrightness(POINT* pPoint, 
-							   CDirectDrawSurface* SourceSurface, RECT*  pRect,
+							   CSDLSurface* SourceSurface, RECT*  pRect,
 							   BYTE BrightBits)
 {
 	//------------------------
@@ -547,7 +547,7 @@ CSpriteSurface::BltBrightness(POINT* pPoint,
 //----------------------------------------------------------------------
 void
 CSpriteSurface::BltDarknessFilter(POINT* pPoint, 
-							   CDirectDrawSurface* SourceSurface, RECT*  pRect,
+							   CSDLSurface* SourceSurface, RECT*  pRect,
 							   WORD TransColor)
 {
 	//------------------------

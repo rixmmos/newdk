@@ -81,7 +81,7 @@ class CAlphaSprite
 		//void		LoadFromBuffer();
 			
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CSDLSurface�� ������ �о m_Pixels�� �����Ѵ�.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 
 							 WORD* pFilter, WORD filterPitch, 

@@ -2715,7 +2715,7 @@ bool C_VS_UI_FILE_DIALOG::MouseControl(UINT message, int _x, int _y)
 			if(temp_m_select != m_tempselect && !(m_vs_file_list_attr[m_tempselect] & FILE_ATTRIBUTE_DIRECTORY))
 			{
 				#ifdef PLATFORM_WINDOWS
-						CDirectDrawSurface bmpSurface;
+						CSDLSurface bmpSurface;
 #else
 						CSpriteSurface bmpSurface;
 #endif

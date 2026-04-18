@@ -1,13 +1,13 @@
 #include <fstream>
 //----------------------------------------------------------------------
-// CDirectDrawSurface.h
+// CSDLSurface.h
 //----------------------------------------------------------------------
 //
 //
 // 5:6:5 ��  5:5:5�� ���̴� 
 // Bit Mask�� ���� ó���Ǵ� �κп��� �߻��ϴµ�
-// CDirectDraw class�� InitMask()���� Video Card�� �´�
-// ������ Mask�� �����ϹǷ� �׳�~ CDirectDraw�� Mask�� ����ϸ� �ȴ�.
+// CSDLGraphics class�� InitMask()���� Video Card�� �´�
+// ������ Mask�� �����ϹǷ� �׳�~ CSDLGraphics�� Mask�� ����ϸ� �ȴ�.
 //
 //
 //
@@ -46,7 +46,7 @@
 /* Backend selection */
 #ifdef SPRITELIB_BACKEND_SDL
 	#include "SpriteLibBackend.h"
-	/* SDL backend: Independent class, not inheriting from CDirectDrawSurface */
+	/* SDL backend: Independent class, not inheriting from CSDLSurface */
 	#define SPRITESURFACE_STANDALONE
 	#include "../../basic/2d.h"  // For S_SURFACEINFO
 #endif
@@ -67,7 +67,7 @@ typedef void (*FUNCTION_MEMCPYPALEFFECT)(WORD*, BYTE*, WORD, MPalette &);
 #ifdef SPRITESURFACE_STANDALONE
 
 /* ============================================================================
- * SDL Backend: Standalone CSpriteSurface (not inheriting from CDirectDrawSurface)
+ * SDL Backend: Standalone CSpriteSurface (not inheriting from CSDLSurface)
  * ============================================================================ */
 
 class CSpriteSurface {
@@ -93,7 +93,7 @@ class CSpriteSurface {
 
 		//------------------------------------------------------------
 		// BltFast methods (stubs for compatibility)
-		// Note: In SDL backend, use CSpriteSurface* instead of CDirectDrawSurface*
+		// Note: In SDL backend, use CSpriteSurface* instead of CSDLSurface*
 		//------------------------------------------------------------
 		void	BltHalf(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect);
 		void	BltNoColorkey(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect);
@@ -281,7 +281,7 @@ class CSpriteSurface {
 #endif
 		bool				InitTextureSurface(int width, int height, void* pixels = NULL, void* pixelFormat = NULL);
 
-		// Off-screen surface initialization (compatibility with CDirectDrawSurface)
+		// Off-screen surface initialization (compatibility with CSDLSurface)
 		bool				InitOffsurface(int width, int height);
 		void				SetTransparency(int value);
 		int					GetTransparency() const;
@@ -289,18 +289,18 @@ class CSpriteSurface {
 		// GDI text rendering (stub for SDL backend - text rendering not implemented)
 		void				GDI_Text(int x, int y, const char* text, DWORD color);
 
-		// FillSurface (compatibility with CDirectDrawSurface)
+		// FillSurface (compatibility with CSDLSurface)
 		void				FillSurface(WORD color);
 
-		// Clipping methods (compatibility with CDirectDrawSurface)
+		// Clipping methods (compatibility with CSDLSurface)
 		void				SetClip(RECT* rect);
 		void				SetClipNULL();
 
-		// Blt method (compatibility with CDirectDrawSurface)
+		// Blt method (compatibility with CSDLSurface)
 		void				Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect);
 
 		//------------------------------------------------------------
-		// Clip methods (compatibility with CDirectDrawSurface)
+		// Clip methods (compatibility with CSDLSurface)
 		//------------------------------------------------------------
 		inline int		GetClipRight() const		{ return m_width; }  // Stub: return full width
 		inline int		GetClipBottom() const		{ return m_height; } // Stub: return full height
@@ -324,13 +324,13 @@ class CSpriteSurface {
 		// Lock state tracking to prevent double-locking
 		int m_lock_count;    // Number of times Lock() was called
 
-		// Clipping rectangles (compatibility with CDirectDrawSurface)
+		// Clipping rectangles (compatibility with CSDLSurface)
 		int m_ClipLeft;
 		int m_ClipTop;
 		int m_ClipRight;
 		int m_ClipBottom;
 
-		// Surface description (compatibility with CDirectDrawSurface)
+		// Surface description (compatibility with CSDLSurface)
 		S_SURFACEINFO m_ddsd;  // Using SDL-compatible surface info structure
 #endif
 };
@@ -338,12 +338,12 @@ class CSpriteSurface {
 #else
 
 /* ============================================================================
- * Windows Backend: Original implementation inheriting from CDirectDrawSurface
+ * Windows Backend: Original implementation inheriting from CSDLSurface
  * ============================================================================ */
 
-// CDirectDraw include removed - using ColorDraw instead
+// CSDLGraphics include removed - using ColorDraw instead
 
-class CSpriteSurface : public CDirectDrawSurface {
+class CSpriteSurface : public CSDLSurface {
 	public :
 		CSpriteSurface();		
 		~CSpriteSurface();
@@ -351,10 +351,10 @@ class CSpriteSurface : public CDirectDrawSurface {
 		//------------------------------------------------------------
 		// BltFast
 		//------------------------------------------------------------
-		void	BltHalf(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect);
-		void	BltDarkness(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, BYTE DarkBits);
-		void	BltBrightness(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, BYTE BrightBits);
-		void	BltDarknessFilter(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, WORD TransColor=0);
+		void	BltHalf(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect);
+		void	BltDarkness(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, BYTE DarkBits);
+		void	BltBrightness(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, BYTE BrightBits);
+		void	BltDarknessFilter(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, WORD TransColor=0);
 
 		//------------------------------------------------------------
 		// Drawing �Լ�
@@ -382,13 +382,13 @@ class CSpriteSurface : public CDirectDrawSurface {
 		//------------------------------------------------------------
 		void	BltColorAlpha(RECT* pRect, WORD color, BYTE alpha2);
 
-		//virtual void	BltHalf(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, DWORD ColorKey=0);
-		//virtual void	BltDarkness(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, BYTE bits, WORD ColorKey=0);		
+		//virtual void	BltHalf(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, DWORD ColorKey=0);
+		//virtual void	BltDarkness(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, BYTE bits, WORD ColorKey=0);		
 
 		//------------------------------------------------------------
 		// AlphaDepth�� 1~32�̴�.
 		//------------------------------------------------------------		
-		//virtual void	BltTransAlpha(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect, int alphaDepth, DWORD ColorKey=0);
+		//virtual void	BltTransAlpha(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect, int alphaDepth, DWORD ColorKey=0);
 
 		//------------------------------------------------------------
 		//

@@ -78,7 +78,7 @@ class CShadowSprite
 		bool		LoadFromFile(std::ifstream& file);
 	
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CSDLSurface�� ������ �о m_Pixels�� �����Ѵ�.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 							 
 							 WORD width, WORD height);

@@ -14,9 +14,9 @@
 #include "CSpriteSetManager.h"
 #include "COrderedList.h"
 #ifdef PLATFORM_WINDOWS
-	// CDirectDraw include removed - using ColorDraw instead
+	// CSDLGraphics include removed - using ColorDraw instead
 #else
-	// CDirectDraw include removed - using ColorDraw instead
+	// CSDLGraphics include removed - using ColorDraw instead
 #endif
 #include <vector>
 

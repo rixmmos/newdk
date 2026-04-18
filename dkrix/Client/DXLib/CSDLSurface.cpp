@@ -1,23 +1,23 @@
 //----------------------------------------------------------------------
-// CDirectDrawSurface.cpp
+// CSDLSurface.cpp
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectDraw implementation removed - using SDL2 on all platforms
 // NOTE: This class is deprecated. Use SDL_Surface directly instead.
 //----------------------------------------------------------------------
 
-#include "CDirectDrawSurface.h"
+#include "CSDLSurface.h"
 
 //-----------------------------------------------------------------------------
 // Static member initialization for SDL2
 //-----------------------------------------------------------------------------
-void (*CDirectDrawSurface::s_GammaFunction)(void *pDest, int len, int p) = nullptr;
+void (*CSDLSurface::s_GammaFunction)(void *pDest, int len, int p) = nullptr;
 
 //-----------------------------------------------------------------------------
 // Constructor/Destructor
 //-----------------------------------------------------------------------------
 
-CDirectDrawSurface::CDirectDrawSurface()
+CSDLSurface::CSDLSurface()
 {
 	m_pDDSurface = nullptr;
 	m_Width = 0;
@@ -30,7 +30,7 @@ CDirectDrawSurface::CDirectDrawSurface()
 	m_bLock = false;
 }
 
-CDirectDrawSurface::~CDirectDrawSurface()
+CSDLSurface::~CSDLSurface()
 {
 	// Stub - SDL surfaces are managed elsewhere
 }
@@ -39,13 +39,13 @@ CDirectDrawSurface::~CDirectDrawSurface()
 // Surface Initialization (Stubs - deprecated)
 //-----------------------------------------------------------------------------
 
-bool CDirectDrawSurface::InitBacksurface()
+bool CSDLSurface::InitBacksurface()
 {
 	// Not implemented - use SDL surfaces directly
 	return false;
 }
 
-bool CDirectDrawSurface::InitOffsurface(int wWidth, int wHeight, DWORD dwCaps)
+bool CSDLSurface::InitOffsurface(int wWidth, int wHeight, DWORD dwCaps)
 {
 	m_Width = wWidth;
 	m_Height = wHeight;
@@ -55,7 +55,7 @@ bool CDirectDrawSurface::InitOffsurface(int wWidth, int wHeight, DWORD dwCaps)
 	return true;
 }
 
-bool CDirectDrawSurface::InitTextureSurface(int wWidth, int wHeight, DWORD dwCaps, const LPDDPIXELFORMAT pDDPF)
+bool CSDLSurface::InitTextureSurface(int wWidth, int wHeight, DWORD dwCaps, const LPDDPIXELFORMAT pDDPF)
 {
 	// Not implemented - use SDL textures directly
 	(void)wWidth;
@@ -65,7 +65,7 @@ bool CDirectDrawSurface::InitTextureSurface(int wWidth, int wHeight, DWORD dwCap
 	return false;
 }
 
-bool CDirectDrawSurface::InitTextureSurfaceFromBMP(LPCSTR szBitmap, DWORD dwCaps)
+bool CSDLSurface::InitTextureSurfaceFromBMP(LPCSTR szBitmap, DWORD dwCaps)
 {
 	// Not implemented - use SDL_image to load BMPs
 	(void)szBitmap;
@@ -73,7 +73,7 @@ bool CDirectDrawSurface::InitTextureSurfaceFromBMP(LPCSTR szBitmap, DWORD dwCaps
 	return false;
 }
 
-bool CDirectDrawSurface::InitFromBMP(LPCSTR szBitmap, DWORD dwCaps)
+bool CSDLSurface::InitFromBMP(LPCSTR szBitmap, DWORD dwCaps)
 {
 	// Not implemented - use SDL_image to load BMPs
 	(void)szBitmap;
@@ -81,14 +81,14 @@ bool CDirectDrawSurface::InitFromBMP(LPCSTR szBitmap, DWORD dwCaps)
 	return false;
 }
 
-bool CDirectDrawSurface::ReLoadBMP(LPCSTR szBitmap)
+bool CSDLSurface::ReLoadBMP(LPCSTR szBitmap)
 {
 	// Not implemented
 	(void)szBitmap;
 	return false;
 }
 
-bool CDirectDrawSurface::Restore()
+bool CSDLSurface::Restore()
 {
 	// Not implemented - SDL surfaces don't need restore
 	return false;
@@ -98,19 +98,19 @@ bool CDirectDrawSurface::Restore()
 // Surface Operations (Stubs - deprecated)
 //-----------------------------------------------------------------------------
 
-void CDirectDrawSurface::SetTransparency(DWORD dwValue)
+void CSDLSurface::SetTransparency(DWORD dwValue)
 {
 	// Not implemented - use SDL blend modes instead
 	(void)dwValue;
 }
 
-void CDirectDrawSurface::FillSurface(WORD color)
+void CSDLSurface::FillSurface(WORD color)
 {
 	// Not implemented - use SDL_FillRect instead
 	(void)color;
 }
 
-void CDirectDrawSurface::FillRect(RECT* pRect, WORD color)
+void CSDLSurface::FillRect(RECT* pRect, WORD color)
 {
 	// Not implemented - use SDL_FillRect instead
 	(void)pRect;
@@ -121,7 +121,7 @@ void CDirectDrawSurface::FillRect(RECT* pRect, WORD color)
 // Lock/Unlock (Minimal stub for compatibility)
 //-----------------------------------------------------------------------------
 
-bool CDirectDrawSurface::Lock()
+bool CSDLSurface::Lock()
 {
 	ZeroMemory(&m_ddsd, sizeof(m_ddsd));
 	m_ddsd.dwSize = sizeof(m_ddsd);
@@ -131,13 +131,13 @@ bool CDirectDrawSurface::Lock()
 	return true;
 }
 
-bool CDirectDrawSurface::Unlock()
+bool CSDLSurface::Unlock()
 {
 	m_bLock = false;
 	return true;
 }
 
-void CDirectDrawSurface::LockW(WORD*& lpSurface, WORD& lPitch)
+void CSDLSurface::LockW(WORD*& lpSurface, WORD& lPitch)
 {
 	// Stub - no actual surface to lock
 	lpSurface = nullptr;
@@ -149,7 +149,7 @@ void CDirectDrawSurface::LockW(WORD*& lpSurface, WORD& lPitch)
 // Blitting (Stubs - deprecated)
 //-----------------------------------------------------------------------------
 
-void CDirectDrawSurface::Blt(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT* pRect)
+void CSDLSurface::Blt(POINT* pPoint, CSDLSurface* SourceSurface, RECT* pRect)
 {
 	// Not implemented - use SDL_BlitSurface instead
 	(void)pPoint;
@@ -157,7 +157,7 @@ void CDirectDrawSurface::Blt(POINT* pPoint, CDirectDrawSurface* SourceSurface, R
 	(void)pRect;
 }
 
-void CDirectDrawSurface::BltNoColorkey(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT* pRect)
+void CSDLSurface::BltNoColorkey(POINT* pPoint, CSDLSurface* SourceSurface, RECT* pRect)
 {
 	// Not implemented - use SDL_BlitSurface instead
 	(void)pPoint;
@@ -165,7 +165,7 @@ void CDirectDrawSurface::BltNoColorkey(POINT* pPoint, CDirectDrawSurface* Source
 	(void)pRect;
 }
 
-void CDirectDrawSurface::Blt(RECT* pDestRect, CDirectDrawSurface* SourceSurface, RECT* pSourceRect)
+void CSDLSurface::Blt(RECT* pDestRect, CSDLSurface* SourceSurface, RECT* pSourceRect)
 {
 	// Not implemented - use SDL_BlitSurface instead
 	(void)pDestRect;
@@ -173,7 +173,7 @@ void CDirectDrawSurface::Blt(RECT* pDestRect, CDirectDrawSurface* SourceSurface,
 	(void)pSourceRect;
 }
 
-void CDirectDrawSurface::BltPrimarySurface(POINT* pPoint, RECT* pRect)
+void CSDLSurface::BltPrimarySurface(POINT* pPoint, RECT* pRect)
 {
 	// Not implemented
 	(void)pPoint;
@@ -184,21 +184,21 @@ void CDirectDrawSurface::BltPrimarySurface(POINT* pPoint, RECT* pRect)
 // Gamma Correction (Not implemented - use shader effects instead)
 //-----------------------------------------------------------------------------
 
-void CDirectDrawSurface::GammaBox555(RECT* pRect, int p)
+void CSDLSurface::GammaBox555(RECT* pRect, int p)
 {
 	// Not implemented - use SDL2 shader effects
 	(void)pRect;
 	(void)p;
 }
 
-void CDirectDrawSurface::GammaBox565(RECT* pRect, int p)
+void CSDLSurface::GammaBox565(RECT* pRect, int p)
 {
 	// Not implemented - use SDL2 shader effects
 	(void)pRect;
 	(void)p;
 }
 
-void CDirectDrawSurface::Gamma4Pixel565(void *pDest, int len, int p)
+void CSDLSurface::Gamma4Pixel565(void *pDest, int len, int p)
 {
 	// Not implemented - use SDL2 shader effects
 	(void)pDest;
@@ -206,7 +206,7 @@ void CDirectDrawSurface::Gamma4Pixel565(void *pDest, int len, int p)
 	(void)p;
 }
 
-void CDirectDrawSurface::Gamma4Pixel555(void *pDest, int len, int p)
+void CSDLSurface::Gamma4Pixel555(void *pDest, int len, int p)
 {
 	// Not implemented - use SDL2 shader effects
 	(void)pDest;
@@ -218,7 +218,7 @@ void CDirectDrawSurface::Gamma4Pixel555(void *pDest, int len, int p)
 // GDI Text (Not implemented - use SDL2 text rendering instead)
 //-----------------------------------------------------------------------------
 
-void CDirectDrawSurface::ShowFPS(int x, int y, COLORREF fcolor, COLORREF bcolor)
+void CSDLSurface::ShowFPS(int x, int y, COLORREF fcolor, COLORREF bcolor)
 {
 	// Not implemented - use SDL2 text rendering
 	(void)x;
@@ -227,7 +227,7 @@ void CDirectDrawSurface::ShowFPS(int x, int y, COLORREF fcolor, COLORREF bcolor)
 	(void)bcolor;
 }
 
-void CDirectDrawSurface::GDI_Text(int x, int y, const char *str, COLORREF fcolor, COLORREF bcolor, bool option)
+void CSDLSurface::GDI_Text(int x, int y, const char *str, COLORREF fcolor, COLORREF bcolor, bool option)
 {
 	// Not implemented - use SDL2 text rendering
 	(void)x;
@@ -242,14 +242,14 @@ void CDirectDrawSurface::GDI_Text(int x, int y, const char *str, COLORREF fcolor
 // BMP Save/Load (Not implemented - use SDL_image instead)
 //-----------------------------------------------------------------------------
 
-bool CDirectDrawSurface::SaveToBMP(const char* szFilename)
+bool CSDLSurface::SaveToBMP(const char* szFilename)
 {
 	// Not implemented - use SDL_image PNG/BMP saving
 	(void)szFilename;
 	return false;
 }
 
-bool CDirectDrawSurface::CopyBitmap(HBITMAP hbm, int x, int y, int dx, int dy)
+bool CSDLSurface::CopyBitmap(HBITMAP hbm, int x, int y, int dx, int dy)
 {
 	// Not implemented - Windows GDI only
 	(void)hbm;

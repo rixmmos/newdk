@@ -4,14 +4,14 @@
 
 	Implementation file for ColorDraw class.
 
-	2025.02.04 - Extracted from CDirectDraw to eliminate SpriteLib->DXLib dependency
+	2025.02.04 - Extracted from CSDLGraphics to eliminate SpriteLib->DXLib dependency
 
 -----------------------------------------------------------------------------*/
 
 #include "ColorDraw.h"
 
 //----------------------------------------------------------------------
-// Static member definitions (same as CDirectDraw)
+// Static member definitions (same as CSDLGraphics)
 //----------------------------------------------------------------------
 BYTE ColorDraw::s_bSHIFT_R = 11;
 BYTE ColorDraw::s_bSHIFT_G = 5;

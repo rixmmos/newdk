@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectDraw.h
+	CSDLGraphics.h
 
 	SDL2 Implementation (Cross-platform)
 	Windows DirectDraw implementation removed - using SDL2 on all platforms
@@ -132,7 +132,7 @@ typedef void* HBITMAP;
 #define DDSD_LPSURFACE 0x00000800
 
 /*-----------------------------------------------------------------------------
-  Class CDirectDraw - SDL2 Cross-platform Stub
+  Class CSDLGraphics - SDL2 Cross-platform Stub
   NOTE: Most methods are stubs. Use SDL2 functions directly instead.
 -----------------------------------------------------------------------------*/
 

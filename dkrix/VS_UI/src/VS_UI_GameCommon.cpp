@@ -11495,7 +11495,7 @@ void	C_VS_UI_PARTY_MANAGER::Start()
 	
 	//	if(temp_surface.InitFromBMP(profile_filename.c_str()) == true)
 	//	{
-	//		CDirectDrawSurface *p_temp_surface = new CDirectDrawSurface;
+	//		CSDLSurface *p_temp_surface = new CSDLSurface;
 	//		p_temp_surface->InitOffsurface(73, 89);
 	//		RECT dest_rect = {0, 0, p_temp_surface->GetWidth(), p_temp_surface->GetHeight()};
 	//		RECT src_rect = {0, 0, temp_surface.GetWidth(), temp_surface.GetHeight()};
@@ -27956,7 +27956,7 @@ void C_VS_UI_TEAM_REGIST::Show()
 		//���� �޾ƿ���
 		//		if(gC_vs_ui.GetFileName())
 		//		{
-		//			m_guild_mark = new CDirectDrawSurface;
+		//			m_guild_mark = new CSDLSurface;
 		//
 		//			m_guild_mark->InitFromBMP(gC_vs_ui.GetFileName());
 		//			if(m_guild_mark->GetWidth() != 20 || m_guild_mark->GetHeight() != 20)

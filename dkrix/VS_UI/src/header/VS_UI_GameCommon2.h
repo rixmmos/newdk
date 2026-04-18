@@ -969,11 +969,11 @@ public:
 	std::vector<std::string>	parsing_data;	
 	std::vector<std::string>	custom_strting;
 	std::vector<std::string>	jpg_file;
-	CDirectDrawSurface*		GetJpgFileLoading(std::string filename) { return  m_jpgData[filename];}
+	CSDLSurface*		GetJpgFileLoading(std::string filename) { return  m_jpgData[filename];}
 	void	LoadHelpJpg(std::string filename);
 	void    ClearHelpJpg();
 protected:
-	typedef std::map<std::string , CDirectDrawSurface*> JPGIMG_MAP;
+	typedef std::map<std::string , CSDLSurface*> JPGIMG_MAP;
 	JPGIMG_MAP m_jpgData;
 };
 

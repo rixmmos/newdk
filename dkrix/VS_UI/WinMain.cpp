@@ -92,7 +92,7 @@ int		g_LeftPremiumDays =10;
 extern EventButton *g_EventButton;
 
 bool						gbl_active; // Is application active?
-CDirectDraw				gC_DD;
+CSDLGraphics				gC_DD;
 CSpriteSurface			gC_DDSurface;
 extern CSDLInput*			g_pSDLInput;// = new CSDLInput;
 
@@ -1538,13 +1538,13 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 				{
 					const POINT bigSize = { 55, 70 };
 					
-					CDirectDrawSurface surface;
+					CSDLSurface surface;
 					
 					surface.InitOffsurface( bigSize.x, bigSize.y, DDSCAPS_SYSTEMMEMORY );
 					
 					RECT destBigRect = { 0, 0, bigSize.x, bigSize.y };
 					
-					CDirectDrawSurface bmpSurface;
+					CSDLSurface bmpSurface;
 					
 					if (LoadImageToSurface(p_str, bmpSurface))
 					{

@@ -12,9 +12,9 @@
 #define __DX_LIBRARY_H__
 
 #ifdef PLATFORM_WINDOWS
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 #endif
-#include "CDirectDrawSurface.h"
+#include "CSDLSurface.h"
 #include "CSDLAudio.h"
 #include "CSDLStream.h"
 #include "CSDLMusic.h"  // Now CSDLMusic

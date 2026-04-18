@@ -4,7 +4,7 @@
 
 	SDL2 backend implementation for CSpriteSurface.
 	This file contains all CSpriteSurface methods implemented using SpriteLibBackend.
-	Does not depend on CDirectDraw or any Windows-specific code.
+	Does not depend on CSDLGraphics or any Windows-specific code.
 
 	2025.01.14
 
@@ -506,7 +506,7 @@ S_SURFACEINFO* CSpriteSurface::GetDDSD()
 }
 
 /* ============================================================================
- * Clipping Methods (compatibility with CDirectDrawSurface)
+ * Clipping Methods (compatibility with CSDLSurface)
  * ============================================================================ */
 
 void CSpriteSurface::SetClip(RECT* rect)
@@ -521,7 +521,7 @@ void CSpriteSurface::SetClipNULL()
 }
 
 /* ============================================================================
- * Blt Method (compatibility with CDirectDrawSurface)
+ * Blt Method (compatibility with CSDLSurface)
  * ============================================================================ */
 
 void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRect)
@@ -586,7 +586,7 @@ void CSpriteSurface::Blt(POINT* pPoint, CSpriteSurface* SourceSurface, RECT* pRe
 }
 
 /* ============================================================================
- * FillSurface Method (compatibility with CDirectDrawSurface)
+ * FillSurface Method (compatibility with CSDLSurface)
  * ============================================================================ */
 
 void CSpriteSurface::FillSurface(WORD color)

@@ -202,7 +202,7 @@ CShadowSprite::LoadFromFile(ifstream& file)
 }
 
 //----------------------------------------------------------------------
-// CDirectDrawSurface�� (x,y)+(width, height)������ �о m_Pixels�� �����Ѵ�.
+// CSDLSurface�� (x,y)+(width, height)������ �о m_Pixels�� �����Ѵ�.
 //----------------------------------------------------------------------
 // m_Pixels�� 0�� ���� Format���� �ٲ۴�.
 //

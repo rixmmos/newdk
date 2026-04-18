@@ -8,7 +8,7 @@
 #pragma warning(disable:4786)
 
 #include "ctypetable.h"
-#include "CDirectDrawSurface.h"
+#include "CSDLSurface.h"
 #include <map>
 
 #define	EVENTFLAG_SHOW_STRING				0x00000001		// 화면에 string를 표시한다
@@ -129,13 +129,13 @@ class MEventManager
 		void			RemoveAllEventByType(EVENT_TYPE type);
 
 		bool					AssertEventBackground(EVENTBACKGROUND_ID id);
-		CDirectDrawSurface*		GetEventBackground(EVENTBACKGROUND_ID id) { AssertEventBackground(id); return &m_EventBackGround[id]; }
+		CSDLSurface*		GetEventBackground(EVENTBACKGROUND_ID id) { AssertEventBackground(id); return &m_EventBackGround[id]; }
 		
 		typedef std::map<EVENT_ID, MEvent>		EVENT_MAP;
 		
 	protected :
 		EVENT_MAP		m_Events;
-		CTypeTable<CDirectDrawSurface>	m_EventBackGround;	// 이벤트 배경그림...
+		CTypeTable<CSDLSurface>	m_EventBackGround;	// 이벤트 배경그림...
 		
 };
 

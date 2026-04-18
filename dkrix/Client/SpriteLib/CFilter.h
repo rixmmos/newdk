@@ -38,7 +38,7 @@ class CFilter {
 		//---------------------------------------------------------
 		// Set Filter Value
 		//---------------------------------------------------------
-		// CDirectDrawSurface에서 값을 읽어온다.
+		// CSDLSurface에서 값을 읽어온다.
 		void		SetFilter(WORD* pSurface, WORD pitch, WORD width, WORD height);
 		
 		// 다른 Filter를 대입한다.

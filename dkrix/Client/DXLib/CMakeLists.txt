@@ -49,9 +49,9 @@ endif()
 
 # DXLib source files
 #
-# The Sound/Music/SoundStream classes have two parallel .cpp files:
-#   CDirect<Thing>.cpp         -- stub implementation (no-ops)
-#   CDirect<Thing>_Adapter.cpp -- real SDL_mixer implementation
+# The Audio/Music/Stream classes have two parallel .cpp files:
+#   CSDL<Thing>.cpp         -- stub implementation (no-ops)
+#   CSDL<Thing>_Adapter.cpp -- real SDL_mixer implementation
 # Both define the same CSDL* methods, so we pick *one* at configure
 # time: adapter when SDL2_mixer is available, stubs otherwise.
 # (Compiling both was a link-time duplicate-symbol error that happened
@@ -60,12 +60,12 @@ set(DXLIB_SOURCES
 	# Platform backend
 	DXLibBackendSDL.cpp
 
-	# Core DirectDraw implementations
-	CDirectDraw.cpp
-	CDirectDrawSurface.cpp
+	# Core draw / surface implementations (SDL-backed)
+	CSDLGraphics.cpp
+	CSDLSurface.cpp
 
-	# Static member definitions for CDirectDraw
-	CDirectDraw_StaticMembers.cpp
+	# Static member definitions for CSDLGraphics
+	CSDLGraphics_StaticMembers.cpp
 
 	# Adapter layers - Input (always available)
 	CSDLInput_Adapter.cpp

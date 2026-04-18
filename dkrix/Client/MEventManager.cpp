@@ -294,7 +294,7 @@ bool MEventManager::AssertEventBackground(EVENTBACKGROUND_ID id)
 	bool bOpen = jpg.Open(strFilename[id].c_str());
 	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 	{
-		CDirectDrawSurface &surface = m_EventBackGround[id];
+		CSDLSurface &surface = m_EventBackGround[id];
 		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
 
 		if (surface.InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))

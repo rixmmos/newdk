@@ -98,7 +98,7 @@ class CSprite
 		DWORD		GetFileSize();
 		
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CSDLSurface�� ������ �о m_Pixels�� �����Ѵ�.
 		//---------------------------------------------------------
 		static void	GetTightColorRect(WORD *pSource, WORD pitch, WORD width, WORD height, WORD colorkey, RECT& rect);
 		void		SetPixel(WORD* pSource, WORD pitch, WORD width, WORD height);

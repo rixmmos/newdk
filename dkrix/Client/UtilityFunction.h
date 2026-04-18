@@ -5,7 +5,7 @@
 #ifndef __UTILITYFUNCTION_H__
 #define __UTILITYFUNCTION_H__
 
-class CDirectDrawSurface;
+class CSDLSurface;
 
 #ifndef PLATFORM_WINDOWS
 class CSpriteSurface;
@@ -34,12 +34,12 @@ int		IsValidPassword(const char* str);
 //-----------------------------------------------------------------------------
 // LoadImageToSurface
 //-----------------------------------------------------------------------------
-bool	LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface);
+bool	LoadImageToSurface(const char* pFilename, CSDLSurface& surface);
 
 //-----------------------------------------------------------------------------
 // SaveSurfaceToImage
 //-----------------------------------------------------------------------------
-bool	SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface);
+bool	SaveSurfaceToImage(const char* pFilename, CSDLSurface& surface);
 
 //-----------------------------------------------------------------------------
 // Get DiskFreeSpace

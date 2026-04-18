@@ -10424,7 +10424,7 @@ void C_VS_UI_HELPDESC::Show()
 				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
 				tempspk += ".jpg";
 				
-				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
+				CSDLSurface *pSurface = GetJpgFileLoading(tempspk);
 				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
 				m_height = pSurface->GetHeight();		
 				
@@ -10539,7 +10539,7 @@ void C_VS_UI_HELPDESC::Show()
 //				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
 //				tempspk += ".jpg";
 //				
-//				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
+//				CSDLSurface *pSurface = GetJpgFileLoading(tempspk);
 //				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
 //				m_height = pSurface->GetHeight();		
 //				
@@ -10614,7 +10614,7 @@ void C_VS_UI_HELPDESC::Show()
 				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
 				tempspk += ".jpg";
 				
-				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
+				CSDLSurface *pSurface = GetJpgFileLoading(tempspk);
 				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
 				m_height = pSurface->GetHeight();		
 				
@@ -10715,14 +10715,14 @@ void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename
 	RECT r = {0, 0 , m_width, m_height};
 
 
-		CDirectDrawSurface *pSurface = GetJpgFileLoading(filename);
+		CSDLSurface *pSurface = GetJpgFileLoading(filename);
 		RECT re = {x ,  y+30 , x+ 500, y +400};
 		gpC_base->m_p_DDSurface_back->SetClip(&re);
 
 #ifdef PLATFORM_WINDOWS
 		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, pSurface, &r );
 #else
-		// SDL backend: cast CDirectDrawSurface* to CSpriteSurface*
+		// SDL backend: cast CSDLSurface* to CSpriteSurface*
 		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, reinterpret_cast<CSpriteSurface*>(pSurface), &r );
 #endif
 		// add by Sonic 2006.9.26
@@ -10748,12 +10748,12 @@ void C_VS_UI_HELPDESC::LoadHelpJpg(std::string filename)
 	file_path += filename;
 	
 	
-	CDirectDrawSurface *pHelpmsgSurface = new CDirectDrawSurface;
+	CSDLSurface *pHelpmsgSurface = new CSDLSurface;
 	
 	bool bOpen = jpg.Open(file_path.c_str());
 	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 	{		
-		CDirectDrawSurface *surface = pHelpmsgSurface;
+		CSDLSurface *surface = pHelpmsgSurface;
 		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
 		
 		if (surface->InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))
@@ -10832,7 +10832,7 @@ bool C_VS_UI_HELPDESC::jpgdraw(const  char * filename)
 	file_path += "\\HelpImg\\";
 	file_path += filename;
 
-	helpmsgSurface = new CDirectDrawSurface;
+	helpmsgSurface = new CSDLSurface;
 	if(helpmsgSurface->GetSurface() != NULL)
 	{
 		return true;
@@ -10841,7 +10841,7 @@ bool C_VS_UI_HELPDESC::jpgdraw(const  char * filename)
 	bool bOpen = jpg.Open(file_path.c_str());
 	if(bOpen == true && jpg.GetWidth() > 0 && jpg.GetHeight() > 0 && jpg.GetHeight() > 0)
 	{		
-		CDirectDrawSurface *surface = helpmsgSurface;
+		CSDLSurface *surface = helpmsgSurface;
 		const int bpp = jpg.GetBpp(), width = jpg.GetWidth(), height = jpg.GetHeight(), pitch = width*bpp;
 		
 		if (surface->InitOffsurface(width, height, DDSCAPS_SYSTEMMEMORY))
@@ -11198,7 +11198,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				LoadHelpJpg(tempspk);
 //				jpg.Open(file_path.c_str());
 				
-				CDirectDrawSurface *pJpgSurface = GetJpgFileLoading( tempspk );
+				CSDLSurface *pJpgSurface = GetJpgFileLoading( tempspk );
 				m_width = pJpgSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
 				m_height = pJpgSurface->GetHeight();	
 			//	m_width = m_SPK.GetWidth(atoi(tempindex.c_str()));										// ������ spk ��m_midth �� ���´�

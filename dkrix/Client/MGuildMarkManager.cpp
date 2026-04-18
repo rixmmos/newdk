@@ -109,7 +109,7 @@ MGuildMarkManager::CreateGuildMark(WORD guildID, const char* pFilename)
 	//-----------------------------------------------------
 	// pFilename을 Surface에 load한다.
 	//-----------------------------------------------------
-	CDirectDrawSurface bmpSurface;
+	CSDLSurface bmpSurface;
 	if (!LoadImageToSurface(pFilename, bmpSurface))
 	{
 		return false;
@@ -118,7 +118,7 @@ MGuildMarkManager::CreateGuildMark(WORD guildID, const char* pFilename)
 	const POINT bigSize = { 40, 40 };
 	const POINT smallSize = { 20, 20 };
 
-	CDirectDrawSurface surface;
+	CSDLSurface surface;
 	surface.InitOffsurface( bigSize.x, bigSize.y, DDSCAPS_SYSTEMMEMORY );
 
 	RECT destBigRect = { 0, 0, bigSize.x, bigSize.y };
@@ -820,7 +820,7 @@ MGuildMarkManager::CreateGuildMark(const char* pFilename, CSprite *&pSprite, CSp
 	//-----------------------------------------------------
 	// pFilename을 Surface에 load한다.
 	//-----------------------------------------------------
-	CDirectDrawSurface bmpSurface;
+	CSDLSurface bmpSurface;
 	if (!LoadImageToSurface(pFilename, bmpSurface))
 	{
 		return false;
@@ -829,7 +829,7 @@ MGuildMarkManager::CreateGuildMark(const char* pFilename, CSprite *&pSprite, CSp
 	const POINT bigSize = { 40, 40 };
 	const POINT smallSize = { 20, 20 };
 
-	CDirectDrawSurface surface;
+	CSDLSurface surface;
 	surface.InitOffsurface( bigSize.x, bigSize.y, DDSCAPS_SYSTEMMEMORY );
 
 	RECT destBigRect = { 0, 0, bigSize.x, bigSize.y };

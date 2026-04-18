@@ -347,7 +347,7 @@ IsValidPassword(const char* strPWD)
 // *.bmp, *.jpg만 읽는다.
 //-----------------------------------------------------------------------------
 bool	
-LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
+LoadImageToSurface(const char* pFilename, CSDLSurface& surface)
 {
 	if (pFilename==NULL)
 	{
@@ -492,7 +492,7 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 // *.bmp, *.jpg만 쓴다.
 //-----------------------------------------------------------------------------
 bool	
-SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
+SaveSurfaceToImage(const char* pFilename, CSDLSurface& surface)
 {
 	if (pFilename==NULL)
 	{

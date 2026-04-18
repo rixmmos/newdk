@@ -2,7 +2,7 @@
 
 	ColorDraw.h
 
-	Color manipulation utilities extracted from CDirectDraw.
+	Color manipulation utilities extracted from CSDLGraphics.
 	These are pure mathematical operations for RGB 5:6:5 format,
 	independent of any graphics API.
 

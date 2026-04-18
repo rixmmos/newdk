@@ -11,8 +11,8 @@
 #ifndef __DX_LIBRARY_H__
 #define __DX_LIBRARY_H__
 
-#include "CDirectDraw.h"
-#include "CDirectDrawSurface.h"
+#include "CSDLGraphics.h"
+#include "CSDLSurface.h"
 #include "CSDLAudio.h"
 #include "CSDLStream.h"
 #include "CSDLMusic.h"

@@ -12653,13 +12653,13 @@ MTopView::DrawZone(int firstPointX,int firstPointY)
 //	event = g_pEventManager->GetEventByFlag(EVENTFLAG_CLOUD_BACKGROUND);
 	if(g_pPlayer->IsShowAdamCloud())
 	{
-		CDirectDrawSurface *pCloudSurface = g_pEventManager->GetEventBackground(EVENTBACKGROUNDID_CLOUD);
+		CSDLSurface *pCloudSurface = g_pEventManager->GetEventBackground(EVENTBACKGROUNDID_CLOUD);
 		if(pCloudSurface != NULL)
 		{
 			int CloudPos = g_CurrentFrame % g_GameRect.right;
 			POINT CloudPoint = {0,0};
 			RECT CloudRect = { CloudPos, 0, g_GameRect.left, g_GameRect.top };
-// SDL2: Cast CDirectDrawSurface* to CSpriteSurface* for compatibility (unified path)
+// SDL2: Cast CSDLSurface* to CSpriteSurface* for compatibility (unified path)
 			CSpriteSurface* pCloudSprite = reinterpret_cast<CSpriteSurface*>(pCloudSurface);
 			if(CloudPos != g_GameRect.left)
 				m_pSurface->BltNoColorkey(&CloudPoint, pCloudSprite, &CloudRect);
@@ -19868,9 +19868,9 @@ MTopView::ExcuteOustersFinEvent()
 			RECT r = {0, 0, g_GameRect.left, g_GameRect.top };
 //			if(!m_pSurface->Lock()) return;
 
-			CDirectDrawSurface *pSurface = g_pEventManager->GetEventBackground((EVENTBACKGROUND_ID)event->parameter4);
+			CSDLSurface *pSurface = g_pEventManager->GetEventBackground((EVENTBACKGROUND_ID)event->parameter4);
 
-// SDL2: Cast CDirectDrawSurface* to CSpriteSurface* for compatibility (unified path)
+// SDL2: Cast CSDLSurface* to CSpriteSurface* for compatibility (unified path)
 		CSpriteSurface* pSpriteSurface = reinterpret_cast<CSpriteSurface*>(pSurface);
 		m_pSurface->BltNoColorkey(&p, pSpriteSurface, &r);
 

@@ -112,7 +112,7 @@ class CIndexSprite {
 
 
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		// CSDLSurface�� ������ �о m_Pixels�� �����Ѵ�.
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 
 							 WORD* pIndex1, WORD indexPitch1,	// ù��° index

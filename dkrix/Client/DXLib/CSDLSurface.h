@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectDrawSurface.h
+	CSDLSurface.h
 
 	DirectX class library component.
 
@@ -9,14 +9,14 @@
 -----------------------------------------------------------------------------*/
 
 //----------------------------------------------------------------------
-// CDirectDrawSurface.h
+// CSDLSurface.h
 //----------------------------------------------------------------------
 //
 //
 // 5:6:5 와  5:5:5의 차이는 
 // Bit Mask에 의해 처리되는 부분에서 발생하는데
-// CDirectDraw class의 InitMask()에서 Video Card에 맞는
-// 적절한 Mask를 생성하므로 그냥~ CDirectDraw의 Mask를 사용하면 된다.
+// CSDLGraphics class의 InitMask()에서 Video Card에 맞는
+// 적절한 Mask를 생성하므로 그냥~ CSDLGraphics의 Mask를 사용하면 된다.
 //
 //
 //
@@ -39,20 +39,20 @@
 */
 //----------------------------------------------------------------------
 
-#ifndef	__CDIRECTDRAWSURFACE_H__
-#define	__CDIRECTDRAWSURFACE_H__
+#ifndef	__CSDLSURFACE_H__
+#define	__CSDLSURFACE_H__
 
 
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 
 /*-----------------------------------------------------------------------------
   Class DirectDraw Surface
 -----------------------------------------------------------------------------*/
-class CDirectDrawSurface : public CSDLGraphics 
+class CSDLSurface : public CSDLGraphics 
 {
 public :
-	CDirectDrawSurface();
-	~CDirectDrawSurface();
+	CSDLSurface();
+	~CSDLSurface();
 
 	// text out for debugging.
 	void	GDI_Text(int x, int y, const char *str, COLORREF fcolor, 
@@ -106,9 +106,9 @@ public :
 	//------------------------------------------------------------
 	// Blt
 	//------------------------------------------------------------
-	void	Blt(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect);
-	void	BltNoColorkey(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect);
-	void	Blt(RECT* pDestRect, CDirectDrawSurface* SourceSurface, RECT* pSourceRect);	
+	void	Blt(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect);
+	void	BltNoColorkey(POINT* pPoint, CSDLSurface* SourceSurface, RECT*  pRect);
+	void	Blt(RECT* pDestRect, CSDLSurface* SourceSurface, RECT* pSourceRect);	
 
 	// 현재 surface의 pPoint에 PrimarySurface의 pRect를 blt한다.
 	void	BltPrimarySurface(POINT* pPoint, RECT* pRect);
@@ -169,7 +169,7 @@ public :
 	//*/
 
 	//
-	// ! Pitch와 Surface pointer를 얻으려면, CDirectDraw의 GetDDDesc()를 이용한다.
+	// ! Pitch와 Surface pointer를 얻으려면, CSDLGraphics의 GetDDDesc()를 이용한다.
 	//
 
 	//------------------------------------------------------------

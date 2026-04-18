@@ -3342,7 +3342,7 @@ private:
 	int		m_guild_id;
 	int		m_reg_fee, m_rank;
 	std::string m_team_name, m_introduction, m_date;
-	CDirectDrawSurface				*m_guild_mark;
+	CSDLSurface				*m_guild_mark;
 
 public:
 	C_VS_UI_TEAM_REGIST(bool member, int reg_fee, int rank, char *team_name = NULL, char *date = NULL, int guild_id = -1); // team_name�� member�� ��쿡��

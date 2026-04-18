@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <sys/dir.h>
 #endif
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 #include "CSpritePack.h"
 #include "UserInformation.h"
 //#include "MFileDef.h"
@@ -461,7 +461,7 @@ ProfileManager::InitProfiles()
 		SPK.Init( 2);
 
 #ifdef PLATFORM_WINDOWS
-		CDirectDrawSurface surface;
+		CSDLSurface surface;
 
 		const POINT bigSize = { 55, 70 };
 		const POINT smallSize = { 30, 38 };
@@ -504,7 +504,7 @@ ProfileManager::InitProfiles()
 			charName[lenFilename-4] = '\0';
 
 #ifdef PLATFORM_WINDOWS
-			CDirectDrawSurface bmpSurface;
+			CSDLSurface bmpSurface;
 
 			if (LoadImageToSurface(bmpFilename, bmpSurface))
 			{

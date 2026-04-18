@@ -9405,13 +9405,13 @@ UIMessageManager::Execute_UI_CLOSE_FILE_DIALOG(int left, int right, void* void_p
 			{
 				const POINT bigSize = { 55, 70 };
 				
-				CDirectDrawSurface surface;
+				CSDLSurface surface;
 
 				surface.InitOffsurface( bigSize.x, bigSize.y, DDSCAPS_SYSTEMMEMORY );
 				
 				RECT destBigRect = { 0, 0, bigSize.x, bigSize.y };
 
-				CDirectDrawSurface bmpSurface;
+				CSDLSurface bmpSurface;
 				
 				if (LoadImageToSurface(p_str, bmpSurface))
 				{
