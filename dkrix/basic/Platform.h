@@ -237,14 +237,12 @@ extern "C" {  /* reopen extern "C" */
  * directly.
  */
 
-/* Font weight constants */
+/* Font weight constants (Phase 5C: trimmed to the two values the
+ * tree actually uses — FW_NORMAL in SetDefaultLogfont, FW_BOLD in
+ * VS_UI_Base::InitFont. FW_THIN/MEDIUM/HEAVY/EXTRABOLD/LIGHT had
+ * zero references.) */
 #define FW_NORMAL 400
 #define FW_BOLD 700
-#define FW_THIN 100
-#define FW_MEDIUM 500
-#define FW_HEAVY 900
-#define FW_EXTRABOLD 800
-#define FW_LIGHT 300
 
 /* LOGFONT structure for font creation */
 #ifndef LOGFONT_DEFINED
@@ -267,68 +265,35 @@ typedef struct tagLOGFONT {
 } LOGFONT, *PLOGFONT, *LPLOGFONT;
 #endif
 
-/* Character set constants */
-#define ANSI_CHARSET 0
+/* LOGFONT-related constants (Phase 5C: kept only what
+ * VS_UI_Base::SetDefaultLogfont + InitFont actually reference.
+ * The full Windows GDI constant families were trimmed to:
+ *   - DEFAULT_CHARSET:         lf.lfCharSet
+ *   - OUT_DEFAULT_PRECIS:      lf.lfOutPrecision
+ *   - CLIP_DEFAULT_PRECIS:     lf.lfClipPrecision
+ *   - DEFAULT_QUALITY:         lf.lfQuality
+ *   - DEFAULT_PITCH|FF_DONTCARE: lf.lfPitchAndFamily
+ * All *_CHARSET, OUT_*_PRECIS, CLIP_* flags, *_QUALITY,
+ * FIXED_PITCH / VARIABLE_PITCH, FF_ROMAN / _SWISS / _MODERN /
+ * _SCRIPT / _DECORATIVE had zero references across dkrix/ and
+ * were deleted. */
 #define DEFAULT_CHARSET 1
-#define SYMBOL_CHARSET 2
-#define SHIFTJIS_CHARSET 128
-#define HANGUL_CHARSET 129
-#define GB2312_CHARSET 134
-#define OEM_CHARSET 255
-
-/* Output precision constants */
 #define OUT_DEFAULT_PRECIS 0
-#define OUT_STRING_PRECIS 1
-#define OUT_CHARACTER_PRECIS 2
-#define OUT_STROKE_PRECIS 3
-#define OUT_TT_PRECIS 4
-#define OUT_DEVICE_PRECIS 5
-#define OUT_RASTER_PRECIS 6
-#define OUT_TT_ONLY_PRECIS 7
-#define OUT_OUTLINE_PRECIS 8
-#define OUT_SCREEN_OUTLINE_PRECIS 9
-#define OUT_PS_ONLY_PRECIS 10
-
-/* Clip precision constants */
 #define CLIP_DEFAULT_PRECIS 0
-#define CLIP_CHARACTER_PRECIS 1
-#define CLIP_STROKE_PRECIS 2
-#define CLIP_MASK 0xf
-#define CLIP_LH_ANGLES (1<<4)
-#define CLIP_TT_ALWAYS (2<<4)
-#define CLIP_EMBEDDED (8<<4)
-
-/* Font quality constants */
 #define DEFAULT_QUALITY 0
-#define DRAFT_QUALITY 1
-#define PROOF_QUALITY 2
-#define NONANTIALIASED_QUALITY 3
-#define ANTIALIASED_QUALITY 4
-#define CLEARTYPE_QUALITY 5
-
-/* Font pitch and family constants */
 #define DEFAULT_PITCH 0
-#define FIXED_PITCH 1
-#define VARIABLE_PITCH 2
 #define FF_DONTCARE 0
-#define FF_ROMAN 1
-#define FF_SWISS 2
-#define FF_MODERN 3
-#define FF_SCRIPT 4
-#define FF_DECORATIVE 5
 
-/* Background mode constants */
+/* Background mode constants (Phase 5C: OPAQUE had zero refs). */
 #define TRANSPARENT 1
-#define OPAQUE 2
 
-/* Text alignment constants */
-#define TA_NOUPDATECP 0
+/* Text alignment constants (Phase 5C: kept TA_LEFT / TA_RIGHT /
+ * TA_CENTER — used in VS_UI_Base defaults and
+ * RenderingFunctions::DrawText alignment logic.
+ * TA_NOUPDATECP / TA_TOP / TA_UPDATECP / TA_BASELINE: zero refs.) */
 #define TA_LEFT 0
-#define TA_TOP 0
-#define TA_UPDATECP 1
 #define TA_RIGHT 2
 #define TA_CENTER 6
-#define TA_BASELINE 24
 
 /* DirectDraw surface capabilities */
 #define DDSCAPS_SYSTEMMEMORY 0x00000800L
