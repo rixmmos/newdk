@@ -507,16 +507,19 @@ are compiled directly into the `map_viewer` target.
   against `CSprite` / `CFramePack` / etc.
 
 ### Phase 5 — One text pipeline (client) — plan 2026-04-18
-- [~] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
+- [x] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
       PLATFORM_WINDOWS` GDI branch and route Windows through
-      `TextSystem` like every other platform.
+      `TextSystem` like every other platform. **(5A, audit-only —
+      2026-04-18.)**
   - **Already done upstream.** `VS_UI_Base.cpp` no longer contains
     any `#ifdef PLATFORM_WINDOWS` / `WIN32` guards; the destructor,
     `SetFont`, and `InitSurface` are unconditional and call into
     `TextSystem::EncodeFontSizeHandle()` directly. Comments in the
     file document the removal (`// GDI removed (SDL2) - All platforms
-    use TextSystem ...`). The Phase-5 work here collapses to
-    *auditing and certifying*, not deleting.
+    use TextSystem ...`). Audit verified: `grep -nE 'ifdef
+    PLATFORM_WINDOWS|ifndef PLATFORM_WINDOWS|if.*WIN32'
+    dkrix/VS_UI/src/VS_UI_Base.cpp` returns zero matches. No code
+    delta needed in 5A.
 - [ ] Verify Korean and Chinese glyph coverage in the fallback fonts.
 - [ ] Delete the GDI stubs in `Platform.h` (previously deferred from
       Phase 2). **Narrow scope:** delete only the function-shaped
