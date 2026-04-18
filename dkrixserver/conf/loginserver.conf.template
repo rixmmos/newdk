@@ -1,0 +1,75 @@
+#
+# loginserver.conf.template — Phase 8B template showing env-var placeholders.
+#
+# To deploy: copy to loginserver.conf on the target host and ensure the
+# DKRIX_* environment variables below are set when the server process
+# starts. Properties::load() expands ${VAR} to getenv(VAR) at parse time.
+#
+# If a ${VAR} reference can't be resolved (variable unset), the loader
+# leaves the placeholder literal and prints a one-line warning to stderr
+# — the server will still start, but SQL connections using the unresolved
+# value will fail at first use. Set the variables before starting the
+# process.
+#
+# Every value below that was previously a plaintext secret in
+# loginserver.conf has been promoted to a ${DKRIX_...} placeholder.
+# Non-secret values (ports, paths, IDs) are left as plaintext.
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+# User Section
+#--------------------------------------------------------------------------------
+
+User : excel96
+HomePath : /home/genius/project/opendarkeden/server
+LoginServerPort : 9999
+LoginServerUDPPort : 9996
+LoginServerBasePort : 9900
+LoginServerBaseUDPPort : 9800
+GameServerUDPPort : 9997
+
+#--------------------------------------------------
+# BillingSystem Server
+#--------------------------------------------------
+BillingServerIP : ${DKRIX_BILLING_SERVER_IP}
+BillingServerPort : 3001
+
+BillingGameNo : 1
+
+FreePlaySlayerSum : 30
+FreePlayVampireLevel : 30
+
+ServerInfoReloadTime : 1
+
+#--------------------------------------------------
+# DB connection
+#--------------------------------------------------
+DB_HOST : ${DKRIX_DB_HOST}
+DB_PORT : 3306
+DB_DB : DARKEDEN
+DB_USER : ${DKRIX_DB_USER}
+DB_PASSWORD : ${DKRIX_DB_PASSWORD}
+
+UI_DB_HOST : ${DKRIX_UI_DB_HOST}
+UI_DB_DB : USERINFO
+UI_DB_USER : ${DKRIX_UI_DB_USER}
+UI_DB_PASSWORD : ${DKRIX_UI_DB_PASSWORD}
+
+DIST_DB_HOST : ${DKRIX_DIST_DB_HOST}
+DIST_DB_DB : DARKEDEN
+DIST_DB_USER : ${DKRIX_DIST_DB_USER}
+DIST_DB_PASSWORD : ${DKRIX_DIST_DB_PASSWORD}
+
+#--------------------------------------------------------------------------------
+# LogThread Section
+#--------------------------------------------------------------------------------
+
+LogServerIP : ${DKRIX_LOG_SERVER_IP}
+LogServerPort : 5000
+LogLevel : 2999
+
+
+LoginServerID : 0
+LoginServerBaseID : 100
+
+IsNetMarble : 0

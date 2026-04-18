@@ -1,0 +1,93 @@
+#
+# excel96-gameserver.conf.template — Phase 8B template showing env-var placeholders.
+#
+# To deploy: copy to excel96-gameserver.conf on the target host and ensure
+# the DKRIX_* environment variables below are set when the server process
+# starts. Properties::load() expands ${VAR} to getenv(VAR) at parse time.
+#
+# Every value below that was previously a plaintext secret in
+# excel96-gameserver.conf has been promoted to a ${DKRIX_...} placeholder.
+# Non-secret values (ports, paths, IDs) are left as plaintext.
+#--------------------------------------------------------------------------------
+
+User : excel96
+HomePath : /home/darkeden/vs
+TCPPort : 9998
+MonitorClientIP1 : ${DKRIX_MONITOR_CLIENT_IP}
+MonitorClient1UDPORT : 9876
+MonitorClientIP2 : ${DKRIX_MONITOR_CLIENT_IP}
+MonitorClient2UDPORT : 9876
+
+LoginServerIP: ${DKRIX_LOGIN_SERVER_IP}
+LoginServerUDPPort : 9996
+LoginServerBaseUDPPort : 9800
+LoginServerUDPPortNum : 1
+GameServerUDPPort : 9997
+#--------------------------------------------------
+SharedServerIP : ${DKRIX_SHARED_SERVER_IP}
+SharedServerPort : 9977
+
+#--------------------------------------------------
+# BillingSystem Server
+#--------------------------------------------------
+BillingServerIP : ${DKRIX_BILLING_SERVER_IP}
+BillingServerPort : 1111
+
+BillingGameNo : 1
+
+ChinaBillingServerIP : ${DKRIX_CBILLING_SERVER_IP}
+ChinaBillingServerPort : 19009
+ChinaBillingVersionNumber : 1000
+ChinaBillingMinusInterval : 10
+
+CBILLING_DB_HOST : ${DKRIX_CBILLING_DB_HOST}
+CBILLING_DB_DB : BILLING_LOG
+CBILLING_DB_USER : ${DKRIX_CBILLING_DB_USER}
+CBILLING_DB_PASSWORD : ${DKRIX_CBILLING_DB_PASSWORD}
+
+#--------------------------------------------------
+# Time
+#--------------------------------------------------
+BaseGameTime : 1996-1-1
+BaseRealTime : 2000-5-1
+
+#--------------------------------------------------
+# DB connection
+#--------------------------------------------------
+DB_HOST : ${DKRIX_DB_HOST}
+DB_DB : DARKEDEN
+DB_USER : ${DKRIX_DB_USER}
+DB_PASSWORD : ${DKRIX_DB_PASSWORD}
+
+UI_DB_HOST : ${DKRIX_UI_DB_HOST}
+UI_DB_DB : USERINFO
+UI_DB_USER : ${DKRIX_UI_DB_USER}
+UI_DB_PASSWORD : ${DKRIX_UI_DB_PASSWORD}
+
+
+LogServerIP : ${DKRIX_LOG_SERVER_IP}
+LogServerPort : 1111
+LogLevel : 2999
+
+#--------------------------------------------------
+# item id section
+#--------------------------------------------------
+Dimension : 0
+
+WorldID : 1
+
+ServerCount : 1
+ServerID :0
+
+IsNetMarble : 0
+
+ActiveRaceWar : 1
+
+ActiveFlagWar : 0
+
+JoinRaceWar : 1
+
+ActiveGuildWar : 1
+
+HeadCount : 0
+ActiveLevelWar : 1

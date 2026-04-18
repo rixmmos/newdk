@@ -9,7 +9,66 @@
 // include files
 #include "Properties.h"
 
-#include <stdlib.h> // atoi()
+#include <iostream>
+#include <stdlib.h> // atoi(), getenv()
+
+
+//--------------------------------------------------------------------------------
+// Expand ${VAR} placeholders in a value string using environment variables.
+//
+// Phase 8B (2026-04-18): lets conf/*.conf files reference secrets without
+// storing them in plaintext. Existing plaintext values pass through
+// untouched — only substrings matching the exact pattern ${...} are
+// considered for expansion.
+//
+// Rules:
+//   - "${NAME}" with NAME non-empty and set in the environment   →  getenv(NAME)
+//   - "${NAME}" with NAME set to empty string                    →  "" (respected)
+//   - "${NAME}" with NAME unset or empty name (${})              →  leaves the
+//                                                                   literal "${NAME}"
+//                                                                   in place and writes
+//                                                                   a one-line warning
+//                                                                   to stderr
+//   - "$VAR" (no braces), "\${VAR}" (escaped), or anything else  →  passes through
+//
+// The "leave literal on missing" rule matches how shell scripts without `set -u`
+// behave and preserves the old plaintext fallback path: a conf file that
+// accidentally contains a "${" sequence still parses.
+//--------------------------------------------------------------------------------
+static string expandEnvVars(const string& value) {
+    string out;
+    out.reserve(value.size());
+
+    size_t i = 0;
+    while (i < value.size()) {
+        // Look for the start of a ${...} placeholder.
+        if (i + 1 < value.size() && value[i] == '$' && value[i + 1] == '{') {
+            size_t close = value.find('}', i + 2);
+            if (close != string::npos) {
+                string name = value.substr(i + 2, close - (i + 2));
+                if (!name.empty()) {
+                    const char* env = ::getenv(name.c_str());
+                    if (env != NULL) {
+                        // Resolved — splice in the environment value.
+                        out.append(env);
+                        i = close + 1;
+                        continue;
+                    }
+                    // Missing — warn once, leave literal in place.
+                    std::cerr << "Properties: warning: environment variable '"
+                              << name << "' referenced in config is unset; "
+                              << "leaving placeholder literal in value"
+                              << std::endl;
+                }
+                // Empty name (${}) — leave literal, no warning needed.
+            }
+            // Unterminated or empty-name: fall through, copy '$' literally.
+        }
+        out.push_back(value[i]);
+        ++i;
+    }
+    return out;
+}
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -96,6 +155,10 @@ void Properties::load() {
         // line �� substring �� key �� value �� �����Ѵ�.
         string key = line.substr(key_begin, key_end - key_begin + 1);
         string value = line.substr(value_begin, value_end - value_begin + 1);
+
+        // Phase 8B: expand ${VAR} placeholders via environment. Zero-change
+        // for values that contain no ${...} sequence.
+        value = expandEnvVars(value);
 
         // property �� ����Ѵ�.
         setProperty(key, value);
