@@ -664,8 +664,8 @@ exclusions) or unreferenced (zero callers tree-wide).
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
-### Phase 7 — Server: retire dead binaries — plan 2026-04-18
-- [ ] Delete the dead top-level server trees. Audit (2026-04-18)
+### Phase 7 — Server: retire dead binaries — done 2026-04-18
+- [x] Delete the dead top-level server trees. Audit (2026-04-18)
       confirms the following are not in any `add_subdirectory(...)`
       call reachable from `dkrixserver/CMakeLists.txt` and have no
       live CMake target anywhere:
@@ -683,10 +683,10 @@ exclusions) or unreferenced (zero callers tree-wide).
     files (already orphaned from the CMake build). Those Makefiles
     are themselves candidates for a separate build-hygiene pass
     but are left in place for Phase 7 to keep scope narrow.
-- [ ] Delete the stub `testAlone/Mutex.h` — handled as part of the
+- [x] Delete the stub `testAlone/Mutex.h` — handled as part of the
       `gameserver/testAlone/` tree-delete above (the whole dir
       goes, so the stub goes with it).
-- [ ] Retire `__OLD_GUILD_WAR__` `#ifdef` gates. Audit shows 41
+- [x] Retire `__OLD_GUILD_WAR__` `#ifdef` gates. Audit shows 41
       gate occurrences across 26 files; `__OLD_GUILD_WAR__` is
       never defined in any `CMakeLists.txt`, `target_compile_def*`,
       or command line — the `#ifdef` branches are preprocessor-
@@ -694,9 +694,41 @@ exclusions) or unreferenced (zero callers tree-wide).
       ...] #endif` blocks keeping only the `#else` side (i.e. the
       "new guild war" code path that has been live since the flag
       was introduced). No runtime behaviour change.
-- [ ] Delete `.old.cpp` files in `server/database/`. Audit: one
+- [x] Delete `.old.cpp` files in `server/database/`. Audit: one
       file, `server/database/DatabaseManager.old.cpp`, not in
       CMake. Single-file delete.
+
+**Outcome (2026-04-18):**
+
+| #    | Commit    | Subject                                                    |
+| ---- | --------- | ---------------------------------------------------------- |
+| 0001 | `31fc11c` | `docs: pin Phase 7 plan in MODERNIZATION.md`               |
+| 0002 | `50196f5` | `server: 7B — delete 7 dead server trees (-18,905 lines)`  |
+| 0003 | `baba038` | `server: 7C — delete DatabaseManager.old.cpp (-234 lines)` |
+| 0004 | `53c8e93` | `server: 7D — retire __OLD_GUILD_WAR__ gates (-237 lines)` |
+| 0005 | ` ------` | `docs: 7E — close out Phase 7 in MODERNIZATION.md`         |
+
+Net code delta: **-19,376 lines** across 135 files. No behaviour
+change — every path touched was already preprocessor-dead or
+orphaned from the live CMake build. Verified with `grep -rl
+'__OLD_GUILD_WAR__' dkrixserver/src/` returning zero matches after
+7D, and with `grep -rn '#include.*\(cacheserver\|theoneserver\|
+updateserver\|chinabilling/stress\|chinabilling/testserver\|mofus/
+testserver\|gameserver/testAlone\|testAlone/Mutex\)'` returning
+zero matches before 7B.
+
+**Deferred from Phase 7 (narrow-scope reasons):**
+
+- **Legacy `src/**/Makefile` files** that reference the deleted
+  trees (e.g. `alltheoneserver`, `updateserver clean`). These
+  aren't in the live CMake build but still make the tree messier
+  than it has to be. Separate build-hygiene sweep — out of Phase
+  7 scope.
+- **`chinabilling/` modernisation.** The parent dir stays live
+  (builds `GameServerCBilling` / `LoginServerCBilling`). It still
+  uses Korean-encoded comments and legacy naming conventions that
+  Phase 6 (touch-as-you-go) would clean up incrementally.
+- Items previously deferred from Phases 3–5 remain deferred.
 
 **Plan (sub-commits):**
 
