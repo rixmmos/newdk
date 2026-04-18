@@ -520,7 +520,30 @@ are compiled directly into the `map_viewer` target.
     PLATFORM_WINDOWS|ifndef PLATFORM_WINDOWS|if.*WIN32'
     dkrix/VS_UI/src/VS_UI_Base.cpp` returns zero matches. No code
     delta needed in 5A.
-- [ ] Verify Korean and Chinese glyph coverage in the fallback fonts.
+- [x] Verify Korean and Chinese glyph coverage in the fallback fonts.
+      **(5D, audit-only — 2026-04-18.)**
+  - Primary font: `Data/Font/NotoSansCJK-Regular.ttc` (Noto Sans CJK
+    Regular). Noto Sans CJK ships Korean Hangul + Hanja, Chinese
+    Simplified + Traditional, and Japanese in a single TTC, so the
+    primary load path covers every script the client renders.
+  - Fallback chain (see `Client/TextSystem/TextBackendSDL.cpp`
+    lines 90–97): `NotoSans-Regular.ttf` →  `DejaVuSans.ttf` →
+    `Hiragino Sans GB.ttc` (bundled) →  macOS system
+    `Helvetica.ttc` →  macOS system `Hiragino Sans GB.ttc`. Order
+    is well-chosen: NotoSansCJK is tried first, and Hiragino Sans GB
+    (Chinese Simplified) is retained as a last-resort CJK fallback
+    on macOS if the bundled assets are missing.
+  - Legacy-encoding inputs are normalised to UTF-8 before reaching
+    `TTF_RenderUTF8_Blended`. `TextService::NormalizeToUTF8` tries
+    `CP949 → EUC-KR → GBK → GB2312 → BIG5` via `SDL_iconv` and
+    returns the first that decodes cleanly
+    (`Client/TextSystem/TextService.cpp:99`). This matches the
+    encodings the pre-SDL client used on-disk.
+  - Note: the `.ttc` / `.ttf` files themselves are runtime assets
+    shipped under `Data/Font/` and are **not** in the source tree
+    (confirmed: `find dkrix -path '*/Data/Font/*'` returns empty).
+    Audit is correctness-of-wiring only; asset presence is a
+    packaging concern tracked separately.
 - [ ] Delete the GDI stubs in `Platform.h` (previously deferred from
       Phase 2). **Narrow scope:** delete only the function-shaped
       stubs whose implementations are dead; keep the data-shape
