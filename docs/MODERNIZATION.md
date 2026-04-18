@@ -506,7 +506,7 @@ are compiled directly into the `map_viewer` target.
   `test_framepack.c`, etc. into equivalent GTest/Catch2 cases
   against `CSprite` / `CFramePack` / etc.
 
-### Phase 5 — One text pipeline (client) — plan 2026-04-18
+### Phase 5 — One text pipeline (client) — done 2026-04-18
 - [x] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
       PLATFORM_WINDOWS` GDI branch and route Windows through
       `TextSystem` like every other platform. **(5A, audit-only —
@@ -544,12 +544,66 @@ are compiled directly into the `map_viewer` target.
     (confirmed: `find dkrix -path '*/Data/Font/*'` returns empty).
     Audit is correctness-of-wiring only; asset presence is a
     packaging concern tracked separately.
-- [ ] Delete the GDI stubs in `Platform.h` (previously deferred from
+- [x] Delete the GDI stubs in `Platform.h` (previously deferred from
       Phase 2). **Narrow scope:** delete only the function-shaped
       stubs whose implementations are dead; keep the data-shape
       types (`LOGFONT`, `COLORREF`, `HDC`, `HFONT`) and the `RGB()`
       macro because the client still uses them pervasively as
-      cross-platform font-descriptor / color types.
+      cross-platform font-descriptor / color types. **(5B + 5C —
+      2026-04-18.)**
+  - **5B:** deleted `CreateFontIndirect`, `DeleteObject`, and
+    `GetStockObject` stubs from `basic/Platform.h` (-17 lines). The
+    sole live caller of `GetStockObject` in `Client/Client.cpp`
+    (inside a `RegisterClass`/`CreateWindow` block) was guarded
+    behind `#ifdef PLATFORM_WINDOWS`; on non-Windows
+    `wc.hbrBackground` is left NULL because `RegisterClass` is
+    itself a no-op stub there. The two `DeleteObject` call paths
+    (`Client.cpp:4299`, `VS_UI_WebBrowser.cpp:220`) were both
+    already preprocessor-dead — `VS_UI_WebBrowser.cpp` is excluded
+    from the non-Windows build via `list(FILTER … EXCLUDE REGEX)`
+    in `Client/VS_UI/CMakeLists.txt`, and the Win32 branch in
+    `Client.cpp` is gated by `#ifdef __WEB_BROWSER__` (never
+    defined). `CreateFontIndirect` had zero callers tree-wide.
+  - **5C:** trimmed 45 unused `FW_*` / `OUT_*` / `CLIP_*` / `FF_*` /
+    `TA_*` / charset / pitch / quality / brush constants from
+    `Platform.h` (-35 lines). Kept the 12 constants actually
+    referenced by the live SDL build: `FW_NORMAL`, `FW_BOLD`,
+    `DEFAULT_CHARSET`, `OUT_DEFAULT_PRECIS`, `CLIP_DEFAULT_PRECIS`,
+    `DEFAULT_QUALITY`, `DEFAULT_PITCH`, `FF_DONTCARE`, `TRANSPARENT`
+    (background mode), `TA_LEFT`, `TA_RIGHT`, `TA_CENTER`.
+
+**Outcome (2026-04-18):**
+
+| #    | Commit    | Subject                                                         |
+| ---- | --------- | --------------------------------------------------------------- |
+| 0001 | `26770be` | `docs: pin Phase 5 plan in MODERNIZATION.md`                    |
+| 0002 | `6bee386` | `docs: 5A — record that VS_UI_Base GDI branch was already gone` |
+| 0003 | `680cdad` | `client: 5B — delete dead GDI stubs from Platform.h`            |
+| 0004 | `1a71063` | `client: 5C — trim unused GDI constant macros in Platform.h`    |
+| 0005 | `ac8018a` | `docs: 5D — record CJK glyph-coverage audit outcome`            |
+| 0006 | ` ------` | `docs: 5E — close out Phase 5 in MODERNIZATION.md`              |
+
+Net code delta: **-52 lines** in `basic/Platform.h`, **+6 lines**
+(one `#ifdef PLATFORM_WINDOWS` guard with `else`-branch comment)
+in `Client/Client.cpp`. No source files deleted; this phase was
+a dead-stub sweep, not a tree retirement. No behaviour change on
+either Windows or non-Windows targets — everything removed was
+either provably unreachable (preprocessor-gated dead code, CMake
+exclusions) or unreferenced (zero callers tree-wide).
+
+**Deferred from Phase 5 (narrow-scope reasons):**
+
+- **`LOGFONT` / `COLORREF` type renames** — both are used as
+  cross-platform data-shape types across ~49 files. A rename to
+  `UI_FontDesc` / `SDL_Color`-equivalent is Phase-6
+  touch-as-you-go territory, not a flag-day.
+- **`SetFont(PrintInfo&, LOGFONT&, COLORREF, ...)` API signature
+  change** — same cross-module ripple argument.
+- **Win32 `RegisterClass` / `CreateWindow` path cleanup** — the
+  `Client.cpp` window-setup code still carries the Windows-only
+  path verbatim. Not touched in Phase 5; the `GetStockObject`
+  call site was guarded behind `#ifdef PLATFORM_WINDOWS` and the
+  rest of the path is already under that same guard transitively.
 
 **Plan (sub-commits):**
 
