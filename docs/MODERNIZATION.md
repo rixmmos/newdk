@@ -239,12 +239,35 @@ Sub-commits in the order they will land:
       touch-as-you-go scope, not Phase 3 — we're only removing the
       DXLib copies.)
 
-- [ ] **C2 — Rename `CSDLInput`, `CSDLAudio`, `CSDLStream` →
-      `InputManager`, `AudioManager`, `AudioStream`**; delete the
-      `CDirect{Input,Sound,Music,SoundStream}` shims and their
-      `_Adapter.cpp` twins; grep-replace the ~20 call sites in
-      `Client/Client.cpp`, `Client/Client.h`, and the DXLib
-      `DXLibBackendSDL.cpp`.
+- [ ] **C2 — Merge the `CDirect*.cpp` / `*_Adapter.cpp` pairs, rename
+      to `CSDL*.{h,cpp}`.** Audit during C1 discovered that the
+      class names in the headers are **already** `CSDLInput` /
+      `CSDLAudio` / `CSDLMusic` / `CSDLStream` — the Phase 3 plan's
+      "rename the classes" step is a no-op. What still needs doing is
+      architectural, not cosmetic:
+    - `CDirectSound.cpp` (287 lines, stub) and `CDirectSound_Adapter.cpp`
+      (379 lines, SDL_mixer path, guarded by `#ifdef DXLIB_BACKEND_SDL`)
+      **define the same `CSDLAudio` methods unconditionally in both
+      files**. That's ~20 duplicate-symbol link errors the moment
+      `HAVE_SDL2_MIXER=ON`. Same shape for Music (10 dupes) and
+      SoundStream (13 dupes).
+    - The adapter twins have byte-level bugs the current macOS build
+      hides. `CDirectSound_Adapter.cpp` defines
+      `CSDLAudio::CDirectSound()` and `CSDLAudio::~CDirectSound()`
+      (mismatched class::method pair — not a ctor/dtor).
+      `CDirectSoundStream_Adapter.cpp` has the same pattern with
+      `CSDLStream::CDirectSoundStream()`. These compile today only
+      because Enrico's `compile_commands.json` was generated on a
+      macOS box without SDL2_mixer installed, so `HAVE_SDL2_MIXER`
+      was OFF and the adapters were excluded.
+    - Fix: fold each pair into a single `CSDL<Thing>.cpp` that picks
+      stub vs SDL_mixer path by `#ifdef` inside the method, not by
+      file. Rename `CDirectInput_Adapter.cpp` → `CSDLInput.cpp`
+      (only one file in that family after C1, no merge needed).
+      Rename each `CDirect<Thing>.h` to `CSDL<Thing>.h` and update
+      includes.
+    - Grep-replace the ~20 call sites in `Client/Client.cpp`,
+      `Client/Client.h`, and the DXLib `DXLibBackendSDL.cpp`.
 - [ ] **C3 — Collapse `CDirectDraw*` / `CDirectDrawSurface*`.** These
       are thicker than the input/audio shims because the draw path is
       the hottest one; plan to land this as its own commit with a
