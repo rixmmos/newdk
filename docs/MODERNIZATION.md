@@ -203,7 +203,7 @@ interleave once P0 is done.
   downstream of Phase 3 (DXLib collapse) and Phase 5 (GDI removal)
   because the types are consumed by code those phases will rewrite.
 
-### Phase 3 — Collapse DXLib into a thin SDL facade (client, in progress 2026-04-18)
+### Phase 3 — Collapse DXLib into a thin SDL facade (client, done 2026-04-18)
 
 Audit of `Client/DXLib/` (46 files) against `DXLIB_SOURCES` in
 `Client/DXLib/CMakeLists.txt` turned up **25 files / ~5,933 lines that
@@ -285,20 +285,82 @@ Sub-commits in the order they will land:
       Stale `__CDirectSound_H__` include guard in `CSDLAudio.h`
       renamed to `__CSDLAUDIO_H__`. `git grep -nE '\bCDirect(Input|Sound|Music|SoundStream)\b'` returns nothing
       outside `docs/archive/`.
-- [ ] **C3 — Collapse `CDirectDraw*` / `CDirectDrawSurface*`.** These
-      are thicker than the input/audio shims because the draw path is
-      the hottest one; plan to land this as its own commit with a
-      compile smoke-test before the rename.
-- [ ] **C4 — Move the surviving SDL-backed files out of
-      `Client/DXLib/` into `Client/Platform/`; delete
-      `Client/DXLib/`**; update include paths and CMake globs.
-- [ ] **C5 — Update this file** with Phase 3 outcome, final line
-      count, and any discrepancies surfaced along the way.
+- [x] **C3-pre — Consolidate the `CDirectDrawSurface.h` shadow.** Same
+      pattern as C2c-pre: `Client/CDirectDrawSurface.h` was a divergent
+      shadow of `Client/DXLib/CDirectDrawSurface.h`, winning on the
+      `-I` path for every unprefixed consumer outside `DXLib/`. The
+      DXLib copy had the `m_ddsd` field declared and Win32-only
+      accessors; the shadow had `PLATFORM_WINDOWS`-wrapped stubs but
+      no `m_ddsd`. Folded the stubs into the canonical copy (keeping
+      `m_ddsd`, which is needed by `CSpriteSurface.cpp`) and deleted
+      the shadow. Single source of truth restored.
+- [x] **C3 — Rename `CDirectDraw{,Surface}.{h,cpp}` →
+      `CSDL{Graphics,Surface}.{h,cpp}`.** Same mechanical shape as
+      C2c, 39 files touched. Five `git mv` plus longest-first
+      word-bounded perl substitution. `CDirectDrawSurface` became
+      `CSDLSurface` cleanly (123 refs). `CDirectDraw` turned out to
+      already be half-renamed: the class inside had been changed to
+      `CSDLGraphics` (include guard was already `__CSDLGRAPHICS_H__`)
+      but 24 stragglers still referred to `CDirectDraw` as a class
+      name, including the live `CDirectDraw gC_DD;` declaration in
+      `VS_UI/WinMain.cpp`. Finished that rename by aligning the
+      filename to the existing class name (`CSDLGraphics.h`) and
+      substituting the stragglers. Surviving `CDirect*` symbols are
+      `CDirect3D` / `CDirectSetup` (both in commented-out blocks),
+      `CDirectSoundBuffer` (distinct class, Win32 surface handle),
+      and `CDirectionFramePack` (unrelated).
+- [x] **C4 — Move `Client/DXLib/` → `Client/Platform/`, delete
+      `Client/DXLib/`.** 19 files renamed via `git mv`. Also:
+      deleted the redundant `Client/DXLib/DXLib.h` internal router
+      (duplicated `Client/DXLib.h`, differing only in a
+      `PLATFORM_WINDOWS` gate on `CSDLGraphics.h`), renamed the
+      CMake target `dxlib` → `platform` (17 refs across top-level
+      and library `CMakeLists.txt`), updated
+      `add_subdirectory(Client/DXLib)` → `Client/Platform`, all
+      eight `target_include_directories` paths pointing at the old
+      directory, the one include path in
+      `Client/SpriteLib/CMakeLists.txt`, and eight
+      `#include "DXLib/..."` prefix-path includes to
+      `"Platform/..."`. Install destination `include/dxlib` →
+      `include/platform`. Left intentionally alone (scope control):
+      `DXLibBackend.h` / `DXLibBackendSDL.cpp` filenames and the
+      `Client/DXLib.h` client-facing router (10 consumers).
+- [x] **C5 — This file, updated with Phase 3 outcomes.**
+
+#### Phase 3 outcome
+
+Final state of `Client/Platform/` (former `Client/DXLib/`): 19 files,
+covering the SDL2 abstraction layer. All files now use CSDL*-style
+naming for class headers and the `DXLibBackend` pair as the backend
+interface. The 25 dead files from C1 (~5,933 lines) plus two shadow
+headers from C2c-pre and one from C3-pre are gone; the duplicate
+`.cpp`/`_Adapter.cpp` pairs are structurally resolved by the
+CMakeLists `if(HAVE_SDL2_MIXER)` gate from C2a.
+
+Net Phase 3 line count across eleven core commits
+(`49e7a8a..20ffd70`): roughly **-6,100** deletions against
+**+~200** insertions, almost all of the insertions being
+CMakeLists adjustments and the C3-pre stub-accessor fold.
+
+Deferred (not blocking close-out):
+
+- **C2b** — merge each `CSDL*.cpp` / `_Adapter.cpp` pair into one
+  file with `#ifdef HAVE_SDL2_MIXER` inside the methods. The
+  duplicate-symbol bug it would have fixed is structurally resolved
+  by C2a already, so this is pure cleanup. Demoted to Phase 6
+  touch-as-you-go.
+- The `DXLibBackend{.h,SDL.cpp}` filenames and the `Client/DXLib.h`
+  client-facing router, left intact in C4. Each has a chain of
+  consumers whose rename would be scope creep; defer as
+  touch-as-you-go.
+- Lowercase `#include "bit_res.h"` / uppercase `BIT_RES.H` mismatch
+  in `Client/huffman.cpp` and siblings — Phase 6 scope, noted in
+  C1.
 
 Rationale for the commit split: each sub-commit is individually
-reviewable and individually revertable. C1 is pure deletion
-(5,933 lines) and can land before any code rewrites; the renames in
-C2/C3 are the risky edits; C4 is mechanical path shuffling.
+reviewable and individually revertable. C1 is pure deletion and
+can land before any code rewrites; the renames in C2/C3 are the
+risky edits; C4 is mechanical path shuffling.
 
 ### Phase 4 — One sprite pipeline (client)
 - [ ] Decide here, in writing, whether `tools/engine/sprite/` absorbs
