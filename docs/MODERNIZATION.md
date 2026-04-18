@@ -250,18 +250,41 @@ Sub-commits in the order they will land:
       On Enrico's current macOS build (`HAVE_SDL2_MIXER=OFF`) the
       behavior is unchanged — the stubs still run. Any box with
       mixer now links.
-- [ ] **C2b — Merge each `CDirect<Thing>.cpp` / `_Adapter.cpp` pair
-      into a single file** that picks stub-vs-SDL by `#ifdef` inside
-      methods. With C2a in place the duplicate-symbol bug is
-      structurally resolved, so this becomes a pure cleanup (remove
-      the two-file split, keep one). Demoted from blocker to
-      touch-as-you-go scope.
-- [ ] **C2c — Rename `CDirect<Thing>.{h,cpp}` → `CSDL<Thing>.{h,cpp}`.**
+- [ ] **C2b — Merge each `CSDL*.cpp` / `_Adapter.cpp` pair into a
+      single file** that picks stub-vs-SDL by `#ifdef` inside methods.
+      With C2a in place the duplicate-symbol bug is structurally
+      resolved, so this becomes a pure cleanup (remove the two-file
+      split, keep one). Demoted from blocker to touch-as-you-go scope.
+- [x] **C2c-pre — Consolidate header duplicates between `Client/` and
+      `Client/DXLib/`.** Audit found 5 `CDirect*.h` files living in
+      both places with minor diffs, shadowing each other on the
+      include path depending on whether the consumer was in `Client/`
+      or `Client/DXLib/`. Landed in three commits:
+      (1) delete three modulo-whitespace-identical shadow copies in
+          `Client/` root (`CDirectInput.h`, `CDirectSound.h`,
+          `CDirectSoundStream.h`);
+      (2) fold the richer `Client/CDirectMusic.h` content (extra
+          `DDSCAPS_*`/`DD_OK` macros used by MTopView/GameInit/
+          CShadowPartManager, plus `typedef long long MUSIC_TIME`)
+          into the `Client/DXLib/` copy and delete the shadow;
+      (3) delete the orphan `Client/CDirectSetup.h` (C1 oversight —
+          only refs were in a fully commented-out `/* */` block in
+          `Client/Client.cpp`).
+      Every class header in scope is now single-source.
+- [x] **C2c — Rename `CDirect<Thing>.{h,cpp}` → `CSDL<Thing>.{h,cpp}`.**
       The class names in the headers already read `CSDLInput` /
       `CSDLAudio` / `CSDLMusic` / `CSDLStream`; only the filenames
-      still carry the DirectX brand. Update the ~20 include lines in
-      `Client/Client.cpp`, `Client/Client.h`, `Client/DXLib.h`, and
-      the DXLib `DXLibBackendSDL.cpp` glue.
+      carried the DirectX brand. `git mv` on 11 files in
+      `Client/DXLib/` plus word-bounded perl substitution across 38
+      consumers in `Client/`, `VS_UI/`, `basic/`, `CMakeLists.txt`
+      and `CLAUDE.md`. `CDirectSoundBuffer` (a distinct class from
+      the Win32 sound API surface) protected by the word boundary
+      and left intact. Live class reference in `VS_UI/WinMain.cpp`
+      (`extern CDirectInput*` / `new CDirectInput`) also updated so
+      the file stops referring to a name that didn't exist anywhere.
+      Stale `__CDirectSound_H__` include guard in `CSDLAudio.h`
+      renamed to `__CSDLAUDIO_H__`. `git grep -nE '\bCDirect(Input|Sound|Music|SoundStream)\b'` returns nothing
+      outside `docs/archive/`.
 - [ ] **C3 — Collapse `CDirectDraw*` / `CDirectDrawSurface*`.** These
       are thicker than the input/audio shims because the draw path is
       the hottest one; plan to land this as its own commit with a
