@@ -19,7 +19,7 @@
 #ifdef DXLIB_BACKEND_SDL
 
 /* Constructor */
-CSDLStream::CDirectSoundStream()
+CSDLStream::CSDLStream()
 {
 	m_bLoad = false;
 	m_bPlay = false;
@@ -39,7 +39,7 @@ CSDLStream::CDirectSoundStream()
 }
 
 /* Destructor */
-CSDLStream::~CDirectSoundStream()
+CSDLStream::~CSDLStream()
 {
 	Release();
 }

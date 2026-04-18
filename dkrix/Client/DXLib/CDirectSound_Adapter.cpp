@@ -13,7 +13,7 @@
 #include "DXLibBackend.h"
 
 /* Global instance */
-CDirectSound	g_SDLAudio;
+CSDLAudio	g_SDLAudio;
 
 /*=============================================================================
  * SDL Backend Implementation
@@ -32,7 +32,7 @@ struct SoundBufferWrapper {
 };
 
 /* Constructor */
-CSDLAudio::CDirectSound()
+CSDLAudio::CSDLAudio()
 {
 	m_pDS = NULL;
 	m_bInit = false;
@@ -42,7 +42,7 @@ CSDLAudio::CDirectSound()
 }
 
 /* Destructor */
-CSDLAudio::~CDirectSound()
+CSDLAudio::~CSDLAudio()
 {
 	Release();
 }

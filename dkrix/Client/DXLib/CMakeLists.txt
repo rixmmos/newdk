@@ -48,16 +48,21 @@ else()
 endif()
 
 # DXLib source files
+#
+# The Sound/Music/SoundStream classes have two parallel .cpp files:
+#   CDirect<Thing>.cpp         -- stub implementation (no-ops)
+#   CDirect<Thing>_Adapter.cpp -- real SDL_mixer implementation
+# Both define the same CSDL* methods, so we pick *one* at configure
+# time: adapter when SDL2_mixer is available, stubs otherwise.
+# (Compiling both was a link-time duplicate-symbol error that happened
+# to stay hidden while no one's CMake run found mixer.)
 set(DXLIB_SOURCES
 	# Platform backend
 	DXLibBackendSDL.cpp
 
-	# Core DirectDraw/Sound/Music implementations
+	# Core DirectDraw implementations
 	CDirectDraw.cpp
 	CDirectDrawSurface.cpp
-	CDirectSound.cpp
-	CDirectMusic.cpp
-	CDirectSoundStream.cpp
 
 	# Static member definitions for CDirectDraw
 	CDirectDraw_StaticMembers.cpp
@@ -66,12 +71,17 @@ set(DXLIB_SOURCES
 	CDirectInput_Adapter.cpp
 )
 
-# Add audio adapters only if SDL2_mixer is available
 if(HAVE_SDL2_MIXER)
 	list(APPEND DXLIB_SOURCES
 		CDirectSound_Adapter.cpp
 		CDirectMusic_Adapter.cpp
 		CDirectSoundStream_Adapter.cpp
+	)
+else()
+	list(APPEND DXLIB_SOURCES
+		CDirectSound.cpp
+		CDirectMusic.cpp
+		CDirectSoundStream.cpp
 	)
 endif()
 
