@@ -53,7 +53,9 @@ endif()
 # SDL backend is now mandatory on all platforms (Windows native support removed)
 set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows APIs" FORCE)
 
-option(BUILD_ENGINE "Build new SDL-based engine" ON)
+# Phase 4C: BUILD_ENGINE option retired. The tools/engine/sprite/ tree
+# is being absorbed into Client/SpriteLib (C++ side wins). The only
+# still-live C file was zone.c — moved into tools/viewers/map_viewer/.
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -67,9 +69,9 @@ elseif(EXISTS "/usr/local/include/SDL2")
 	include_directories(/usr/local/include/SDL2)
 endif()
 
-# Find SDL2 (needed for engine and DXLib)
+# Find SDL2 (needed for viewers and Client/Platform)
 # Skip for Emscripten - it uses -s USE_SDL=2 linker flags instead
-if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
+if(USE_SDL_BACKEND OR NOT WIN32)
 	if(EMSCRIPTEN)
 		# Emscripten provides SDL2 through its port system
 		message(STATUS "Emscripten build: SDL2 will be provided through linker flags")
@@ -151,9 +153,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	message(STATUS "TextSystem library will be built from ${TEXTSYSTEM_SOURCES}")
 endif()
 
-if(BUILD_ENGINE)
-	add_subdirectory(tools/engine/sprite)
-endif()
+# Phase 4C: tools/engine/sprite/ no longer wired (retired in 4D).
 
 # ============================================================
 # VS_UI Library - UI System (按需编译必要的 Client 文件)
@@ -401,10 +401,13 @@ set_target_properties(creature_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib)
+# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib).
+# Phase 4C: zone.c is now compiled in-tree rather than linked from the retired
+# tools/engine/sprite `sprite` library.
 add_executable(map_viewer
 	tools/viewers/map_viewer/main.cpp
 	tools/viewers/map_viewer/zoneloader.cpp
+	tools/viewers/map_viewer/zone.c
 	Client/TileRenderer.cpp
 )
 
@@ -413,11 +416,10 @@ target_include_directories(map_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/Client
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
-	${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
+	${CMAKE_CURRENT_SOURCE_DIR}/tools/viewers/map_viewer
 )
 
 target_link_libraries(map_viewer PRIVATE
-	sprite
 	SpriteLib
 	platform
 	basic
@@ -448,7 +450,6 @@ target_include_directories(effect_viewer PRIVATE
 )
 
 target_link_libraries(effect_viewer PRIVATE
-	sprite
 	SpriteLib
 	framelib
 	platform
@@ -588,8 +589,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
-#		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
-#		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/ui/include
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/header
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/widget
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/hangul
@@ -622,7 +621,6 @@ message(STATUS "")
 message(STATUS "=== Dark Eden Client Configuration ===")
 message(STATUS "  Build Tests:      ${BUILD_TESTS}")
 message(STATUS "  Use SDL Backend:  ${USE_SDL_BACKEND}")
-message(STATUS "  Build Engine:     ${BUILD_ENGINE}")
 message(STATUS "  C++ Standard:     ${CMAKE_CXX_STANDARD}")
 message(STATUS "=======================================")
 message(STATUS "")

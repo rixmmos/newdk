@@ -172,11 +172,5 @@ if(WIN32 AND NOT SPRITELIB_USE_SDL)
 	)
 endif()
 
-# Optional: Link with engine/sprite for reference implementation
-if(EXISTS ${CMAKE_SOURCE_DIR}/engine/sprite/CMakeLists.txt AND SPRITELIB_USE_SDL)
-	# Add engine/sprite as a dependency for reference
-	# This is optional and can be enabled by the user
-	# add_subdirectory(${CMAKE_SOURCE_DIR}/engine/sprite)
-	# target_link_libraries(SpriteLib PRIVATE sprite)
-	message(STATUS "SpriteLib: engine/sprite reference implementation available")
-endif()
+# Phase 4C: engine/sprite reference-implementation link removed
+# (the `sprite` library is being retired in 4D).
