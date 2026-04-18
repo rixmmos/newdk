@@ -271,14 +271,13 @@ class CSprite
 		void		BltDarkerFilterClipWidth(WORD *pDest, WORD pitch, RECT* pRect);
 		void		BltDarkerFilterClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 	
-		//---------------------------------------------------------		
-		// Alpha 4444 Small Not Trans
-		//---------------------------------------------------------		
-		void		BltAlpha4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE alpha, BYTE shift);
-		void		BltAlpha4444NotTrans(WORD *pDest, WORD pitch, BYTE alpha);
+		//---------------------------------------------------------
+		// Phase 4B: BltAlpha4444* family deleted — only callers lived in
+		// the orphaned CSpriteSurface.cpp (removed in 4B.1).
+		//---------------------------------------------------------
 
-		//---------------------------------------------------------		
-		// 1555 
+		//---------------------------------------------------------
+		// 1555
 		//---------------------------------------------------------		
 		void		Blt1555SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift);
 		void		Blt1555NotTrans(WORD *pDest, WORD pitch);
@@ -294,8 +293,6 @@ class CSprite
 		static void		memcpyAlphaFilterDarkness(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels);
 		static void		memcpyDarkerFilter(WORD* pDest, WORD* pSource, BYTE* pFilter, WORD pixels);
 		
-		static void		memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels);
-		static void		memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels);
 		static void		memcpy1555(WORD* pDest, WORD* pSource, WORD pixels);
 		static void		memcpy1555Small(WORD* pDest, WORD* pSource, WORD pixels);
 

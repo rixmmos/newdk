@@ -184,23 +184,9 @@ class CShadowSprite
 		void		BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
 
 		//---------------------------------------------------------
-		// Texture������ 4444 Blt
+		// Phase 4B: Blt4444* / BltSmall4444* families deleted — only
+		// callers lived in the orphaned CSpriteSurface.cpp (4B.1).
 		//---------------------------------------------------------
-		void		Blt4444(WORD *pDest, WORD pitch, WORD pixel);				
-		void		Blt4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
-		void		Blt4444ClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
-		void		Blt4444ClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
-		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
-
-		//---------------------------------------------------------
-		// Texture������ �۰� ����ϴ� 4444 Blt
-		//---------------------------------------------------------
-		void		BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift);				
-		void		BltSmall4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
-		void		BltSmall4444ClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
-		void		BltSmall4444ClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
-		void		BltSmall4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
-
 
 		//---------------------------------------------------------
 		// Effect
@@ -219,7 +205,6 @@ class CShadowSprite
 		// Utility Functions
 		//---------------------------------------------------------
 		void		memcpyShadowDarkness(WORD* pDest, WORD pixels);
-		inline void		memcpyShadow4444(WORD* pDest, WORD pixels);
 		//void			memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels);
 		//void		memcpyShadow(WORD* pDest, WORD* pSource, WORD pixels);
 		//void			memcpyColor(WORD* pDest, WORD* pSource, WORD pixels);

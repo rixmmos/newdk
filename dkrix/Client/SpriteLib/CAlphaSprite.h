@@ -123,32 +123,14 @@ class CAlphaSprite
 		void		BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// Blt 4444  for Texture
+		// Phase 4B: Blt4444* family deleted — only callers lived in
+		// the orphaned CSpriteSurface.cpp (removed in 4B.1).
 		//---------------------------------------------------------
-		void		Blt4444(WORD *pDest, WORD pitch);				
-		void		Blt4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444ClipRight(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444ClipWidth(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
-
-		//---------------------------------------------------------
-		// Blt 4444 NotTrans for Texture (�����κе� �˰� ĥ�Ѵ�)
-		//---------------------------------------------------------
-		void		Blt4444NotTrans(WORD *pDest, WORD pitch);				
-		void		Blt4444NotTransClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444NotTransClipRight(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444NotTransClipWidth(WORD *pDest, WORD pitch, RECT* pRect);
-		void		Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
-
-		//---------------------------------------------------------
-		// shift��ŭ shift�ؼ� ũ�⸦ �۰� ��½�Ų��.
-		//---------------------------------------------------------
-		void		Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift);
 
 		//---------------------------------------------------------
 		// �¿� �ٲ�
 		//---------------------------------------------------------
-	
+
 
 		//---------------------------------------------------------
 		// ������
@@ -201,8 +183,6 @@ class CAlphaSprite
 		//---------------------------------------------------------
 		//void			memcpyHalf(WORD* pDest, WORD* pSource, WORD pixels);
 		void		memcpyAlpha(WORD* pDest, WORD* pSource, WORD pixels);
-		void		memcpyAlpha4444(WORD* pDest, WORD* pSource, WORD pixels);
-		void		memcpyAlpha4444Small(WORD* pDest, WORD* pSource, WORD pixels);
 		void		memcpyAlphaValue(WORD* pDest, WORD* pSource, WORD pixels);
 		//void			memcpyColor(WORD* pDest, WORD* pSource, WORD pixels);
 		//void			memcpyDarkness(WORD* pDest, WORD* pSource, WORD pixels);

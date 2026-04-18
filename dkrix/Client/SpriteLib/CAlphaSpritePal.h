@@ -35,28 +35,10 @@ public:
 	void		BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
 	
 	//---------------------------------------------------------
-	// Blt 4444  for Texture
+	// Phase 4B: Blt4444* family deleted — only callers lived in
+	// the orphaned CSpriteSurface.cpp (removed in 4B.1).
 	//---------------------------------------------------------
-	void		Blt4444(WORD *pDest, WORD pitch, MPalette &pal);				
-	void		Blt4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444ClipRight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444ClipWidth(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	
-	//---------------------------------------------------------
-	// Blt 4444 NotTrans for Texture (�����κе� �˰� ĥ�Ѵ�)
-	//---------------------------------------------------------
-	void		Blt4444NotTrans(WORD *pDest, WORD pitch, MPalette &pal);				
-	void		Blt4444NotTransClipLeft(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444NotTransClipRight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444NotTransClipWidth(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	void		Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
-	
-	//---------------------------------------------------------
-	// shift��ŭ shift�ؼ� ũ�⸦ �۰� ��½�Ų��.
-	//---------------------------------------------------------
-	void		Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPalette &pal);
-	
+
 	//---------------------------------------------------------
 	// Alpha Blending
 	//---------------------------------------------------------
@@ -69,8 +51,6 @@ public:
 	//---------------------------------------------------------
 	// Utility Functions
 	//---------------------------------------------------------
-	void		memcpyAlpha4444(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal);
-	void		memcpyAlpha4444Small(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal);
 	void		memcpyAlphaValue(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal);
 	void		memcpyAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal);
 	
