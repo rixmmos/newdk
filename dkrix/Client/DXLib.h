@@ -15,10 +15,10 @@
 #include "CDirectDraw.h"
 #endif
 #include "CDirectDrawSurface.h"
-#include "CDirectSound.h"
-#include "CDirectSoundStream.h"
-#include "CDirectMusic.h"  // Now CSDLMusic
+#include "CSDLAudio.h"
+#include "CSDLStream.h"
+#include "CSDLMusic.h"  // Now CSDLMusic
 //#include "CDirectSetup.h"
-#include "CDirectInput.h"
+#include "CSDLInput.h"
 
 #endif

@@ -383,7 +383,7 @@ typedef WORD			char_t;
 	 * the shim. Phase 2 in docs/MODERNIZATION.md.
 	 *
 	 * The surviving Windows-only files (VS_UI/WinMain.cpp, Imm/*,
-	 * VS_UI_WebBrowser.cpp, Client/Client.cpp, Client/DXLib/CDirectInput.cpp,
+	 * VS_UI_WebBrowser.cpp, Client/Client.cpp, Client/DXLib/CSDLInput.cpp,
 	 * and the OUTPUT_DEBUG-guarded blocks in MTopView.cpp) are excluded
 	 * from the non-Windows build and get HRESULT from <windows.h> on the
 	 * Windows path.

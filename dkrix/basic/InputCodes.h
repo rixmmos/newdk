@@ -151,7 +151,7 @@
 	Compatibility aliases: Map old DIK_* constants to their original values
 
 	These maintain the ORIGINAL DirectInput DIK_* values for backward compatibility.
-	The CDirectInput implementation will map SDL scancodes to these DIK_* values.
+	The CSDLInput implementation will map SDL scancodes to these DIK_* values.
 
 	DEPRECATED: These will be removed in a future update.
 	Please use KEYCODE_* directly in new code.

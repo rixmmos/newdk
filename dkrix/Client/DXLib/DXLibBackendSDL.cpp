@@ -11,8 +11,8 @@
 
 #define DXLIB_BACKEND_SDL_IMPL
 
-/* Include CDirectInput.h first to get DIK constants */
-#include "CDirectInput.h"
+/* Include CSDLInput.h first to get DIK constants */
+#include "CSDLInput.h"
 #include "DXLibBackend.h"
 
 #ifdef DXLIB_BACKEND_SDL

@@ -21,7 +21,7 @@
 #include "assert.h"
 #include "MHelpDef.h"
 #include "../../basic/timer2.h"
-#include "CDirectInput.h"
+#include "CSDLInput.h"
 
 #ifdef PLATFORM_WINDOWS
 // On Windows, gpC_Imm is a macro defined in VS_UI_Widget.h

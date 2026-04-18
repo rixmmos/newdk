@@ -1060,7 +1060,7 @@ InitMusic()
 	
 //	if (g_pSDLStream==NULL)
 //	{
-//		g_pSDLStream = new CDirectSoundStream;
+//		g_pSDLStream = new CSDLStream;
 //
 //		int value = g_pUserOption->VolumeMusic;	
 //

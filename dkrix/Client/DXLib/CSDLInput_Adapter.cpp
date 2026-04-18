@@ -1,15 +1,15 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectInput_Adapter.cpp
+	CSDLInput_Adapter.cpp
 
 	DirectInput adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectInput class.
+	This file provides SDL2 backend support for CSDLInput class.
 
 	2025.01.14
 
 -----------------------------------------------------------------------------*/
 
-#include "CDirectInput.h"
+#include "CSDLInput.h"
 #include "DXLibBackend.h"
 
 #define MSB		0x80

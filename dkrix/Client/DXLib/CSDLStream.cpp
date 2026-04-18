@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------------------
-// CDirectSoundStream.cpp
+// CSDLStream.cpp
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectSoundStream implementation removed - using SDL2_mixer on all platforms
 // NOTE: This class is deprecated. Use Mix_PlayChannel() from SDL_mixer for streaming audio.
 //-----------------------------------------------------------------------------
 
-#include "CDirectSoundStream.h"
+#include "CSDLStream.h"
 
 //-----------------------------------------------------------------------------
 // Constructor/Destructor

@@ -7,7 +7,7 @@ DXLib 平台抽象层为 Dark Eden 客户端的输入和音频系统提供跨平
 ## 架构
 
 ```
-上层代码（CDirectInput, CDirectSound, CDirectMusic）
+上层代码（CSDLInput, CSDLAudio, CSDLMusic）
     ↓ (保持 API 不变)
 DXLibBackend.h（统一接口）
     ↓
@@ -176,7 +176,7 @@ dxlib_music_release();
 
 ### 输入系统
 
-| 原始 CDirectInput | DXLibBackend API | SDL 实现 |
+| 原始 CSDLInput | DXLibBackend API | SDL 实现 |
 |-------------------|------------------|----------|
 | `KeyDown(DIK_W)` | `dxlib_input_key_down(DIK_W)` | SDL_GetKeyboardState |
 | `m_mouse_x, m_mouse_y` | `dxlib_input_get_mouse_pos()` | SDL_GetMouseState |
@@ -186,7 +186,7 @@ dxlib_music_release();
 
 ### 音效系统
 
-| 原始 CDirectSound | DXLibBackend API | SDL 实现 |
+| 原始 CSDLAudio | DXLibBackend API | SDL 实现 |
 |-------------------|------------------|----------|
 | `LoadWav(filename)` | `dxlib_sound_load_wav()` | Mix_LoadWAV |
 | `Play(buffer, loop)` | `dxlib_sound_play(sound, loop)` | Mix_PlayChannel |
@@ -196,7 +196,7 @@ dxlib_music_release();
 
 ### 音乐系统
 
-| 原始 CDirectMusic | DXLibBackend API | SDL 实现 |
+| 原始 CSDLMusic | DXLibBackend API | SDL 实现 |
 |-------------------|------------------|----------|
 | `Play(filename)` | `dxlib_music_load() + play()` | Mix_LoadMUS + Mix_PlayMusic |
 | `Stop()` | `dxlib_music_stop()` | Mix_HaltMusic |
@@ -235,10 +235,10 @@ dxlib_music_release();
 
 ### ✅ 已完成（适配层）
 
-- [x] CDirectInput_Adapter.cpp - CDirectInput 适配层
-- [x] CDirectSound_Adapter.cpp - CDirectSound 适配层
-- [x] CDirectMusic_Adapter.cpp - CDirectMusic 适配层
-- [x] CDirectSoundStream_Adapter.cpp - CDirectSoundStream 适配层
+- [x] CSDLInput_Adapter.cpp - CSDLInput 适配层
+- [x] CSDLAudio_Adapter.cpp - CSDLAudio 适配层
+- [x] CSDLMusic_Adapter.cpp - CSDLMusic 适配层
+- [x] CSDLStream_Adapter.cpp - CSDLStream 适配层
 - [x] CMakeLists.txt - 编译配置（支持后端选择）
 
 ### 🔧 已知限制
@@ -258,17 +258,17 @@ dxlib_music_release();
 
 ### 适配器文件
 
-- **CDirectInput_Adapter.cpp** - CDirectInput 的 SDL2 后端适配
-- **CDirectSound_Adapter.cpp** - CDirectSound 的 SDL2 后端适配
-- **CDirectMusic_Adapter.cpp** - CDirectMusic 的 SDL2 后端适配
-- **CDirectSoundStream_Adapter.cpp** - CDirectSoundStream 的 SDL2 后端适配
+- **CSDLInput_Adapter.cpp** - CSDLInput 的 SDL2 后端适配
+- **CSDLAudio_Adapter.cpp** - CSDLAudio 的 SDL2 后端适配
+- **CSDLMusic_Adapter.cpp** - CSDLMusic 的 SDL2 后端适配
+- **CSDLStream_Adapter.cpp** - CSDLStream 的 SDL2 后端适配
 
 ### 适配层工作原理
 
 适配器使用条件编译 (`#ifdef DXLIB_BACKEND_SDL`) 在同一类中支持两种后端：
 
 ```cpp
-// CDirectInput.cpp / CDirectInput_Adapter.cpp
+// CSDLInput.cpp / CSDLInput_Adapter.cpp
 #ifdef DXLIB_BACKEND_SDL
     // 使用 DXLibBackend API (SDL2)
     dxlib_input_init(hWnd);
@@ -297,7 +297,7 @@ dxlib_music_release();
 ```cpp
 class CDirectInputSDL {
     // 内部完全使用 dxlib_input_* 函数
-    // API 与 CDirectInput 兼容
+    // API 与 CSDLInput 兼容
 };
 ```
 
@@ -315,7 +315,7 @@ class CDirectInputSDL {
 
 ```cpp
 // 替换
-// #include "CDirectInput.h"
+// #include "CSDLInput.h"
 // 为
 #include "DXLibBackend.h"
 
@@ -363,10 +363,10 @@ cd build
 - `DXLibBackend.h` - 平台抽象接口
 - `DXLibBackendSDL.cpp` - SDL2 实现
 - `DXLibBackendWindows.cpp` - Windows 实现（待创建）
-- `CDirectInput_Adapter.cpp` - CDirectInput 适配层
-- `CDirectSound_Adapter.cpp` - CDirectSound 适配层
-- `CDirectMusic_Adapter.cpp` - CDirectMusic 适配层
-- `CDirectSoundStream_Adapter.cpp` - CDirectSoundStream 适配层
+- `CSDLInput_Adapter.cpp` - CSDLInput 适配层
+- `CSDLAudio_Adapter.cpp` - CSDLAudio 适配层
+- `CSDLMusic_Adapter.cpp` - CSDLMusic 适配层
+- `CSDLStream_Adapter.cpp` - CSDLStream 适配层
 - `CMakeLists.txt` - 编译配置
 
 ## 许可证

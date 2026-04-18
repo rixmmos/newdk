@@ -90,9 +90,9 @@ always-true branches queued for removal — see `../docs/MODERNIZATION.md`.
     builds and is scheduled for removal in MODERNIZATION.md Phase 5.
 
 ### Input & Sound (`Client/DXLib/`)
-- **CDirectInput**: SDL-based keyboard/mouse input handling
-- **CDirectSound/SoundStream**: SDL_mixer-based sound playback
-- **CDirectMusic**: SDL_mixer-based music playback (MP3, OGG support)
+- **CSDLInput**: SDL-based keyboard/mouse input handling
+- **CSDLAudio/SoundStream**: SDL_mixer-based sound playback
+- **CSDLMusic**: SDL_mixer-based music playback (MP3, OGG support)
 - **Backend**: SDL2 implementations with DirectX-compatible interface
 - **Huffman compression**: Network data compression (platform-independent)
 

@@ -9,7 +9,7 @@
 
 -----------------------------------------------------------------------------*/
 
-#include "CDirectMusic.h"
+#include "CSDLMusic.h"
 #include "DXLibBackend.h"
 
 /* Global instance */

@@ -68,20 +68,20 @@ set(DXLIB_SOURCES
 	CDirectDraw_StaticMembers.cpp
 
 	# Adapter layers - Input (always available)
-	CDirectInput_Adapter.cpp
+	CSDLInput_Adapter.cpp
 )
 
 if(HAVE_SDL2_MIXER)
 	list(APPEND DXLIB_SOURCES
-		CDirectSound_Adapter.cpp
-		CDirectMusic_Adapter.cpp
-		CDirectSoundStream_Adapter.cpp
+		CSDLAudio_Adapter.cpp
+		CSDLMusic_Adapter.cpp
+		CSDLStream_Adapter.cpp
 	)
 else()
 	list(APPEND DXLIB_SOURCES
-		CDirectSound.cpp
-		CDirectMusic.cpp
-		CDirectSoundStream.cpp
+		CSDLAudio.cpp
+		CSDLMusic.cpp
+		CSDLStream.cpp
 	)
 endif()
 
@@ -145,10 +145,10 @@ install(TARGETS dxlib
 install(FILES
 	DXLibBackend.h
 	DXLib.h
-	CDirectInput.h
-	CDirectSound.h
-	CDirectMusic.h
-	CDirectSoundStream.h
+	CSDLInput.h
+	CSDLAudio.h
+	CSDLMusic.h
+	CSDLStream.h
 	DESTINATION include/dxlib
 )
 

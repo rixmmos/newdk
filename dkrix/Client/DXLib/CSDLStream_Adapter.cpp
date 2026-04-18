@@ -1,15 +1,15 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectSoundStream_Adapter.cpp
+	CSDLStream_Adapter.cpp
 
 	DirectSoundStream adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectSoundStream class.
+	This file provides SDL2 backend support for CSDLStream class.
 
 	2025.01.14
 
 -----------------------------------------------------------------------------*/
 
-#include "CDirectSoundStream.h"
+#include "CSDLStream.h"
 #include "DXLibBackend.h"
 
 /*=============================================================================

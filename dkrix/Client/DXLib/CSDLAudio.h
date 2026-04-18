@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
-// CDirectSound.h
+// CSDLAudio.h
 //----------------------------------------------------------------------
 
-#ifndef __CDirectSound_H__
-#define __CDirectSound_H__
+#ifndef __CSDLAUDIO_H__
+#define __CSDLAUDIO_H__
 
 #pragma warning(disable:4786)
 

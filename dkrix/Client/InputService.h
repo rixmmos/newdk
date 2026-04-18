@@ -6,7 +6,7 @@
 	This provides a cleaner include path for game code.
 
 	2025.02.04 - Created to reduce DXLib header dependencies
-	            2025.02.04 - Updated to use InputCodes instead of CDirectInput
+	            2025.02.04 - Updated to use InputCodes instead of CSDLInput
 
 -----------------------------------------------------------------------------*/
 
@@ -19,7 +19,7 @@
 // Forward declaration for input service class
 class CSDLInput;
 
-// Global input service instance (defined in DXLib/CDirectInput.cpp)
+// Global input service instance (defined in DXLib/CSDLInput.cpp)
 extern CSDLInput* g_pSDLInput;
 
 #endif // __INPUTSERVICE_H__

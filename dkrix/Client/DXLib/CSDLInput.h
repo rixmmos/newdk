@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectInput.h
+	CSDLInput.h
 
 	Direct Input Class library.
 

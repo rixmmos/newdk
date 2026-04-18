@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
-// CDirectSound.cpp
+// CSDLAudio.cpp
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectSound implementation removed - using SDL2_mixer on all platforms
 // NOTE: This class is deprecated. Use SDL_mixer functions directly instead.
 //----------------------------------------------------------------------
 
-#include "CDirectSound.h"
+#include "CSDLAudio.h"
 
 //-----------------------------------------------------------------------------
 // Global instance

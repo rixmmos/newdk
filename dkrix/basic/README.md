@@ -206,8 +206,8 @@ platform_config_get_string("SOFTWARE\\DarkEden", "RunFileName", buffer, &size);
 创建 `DXLib/PlatformDX.h`，使用平台抽象层：
 
 ```cpp
-// CDirectInput 可使用 platform_thread_* 和 SDL2
-// CDirectSound 可使用 SDL_mixer
+// CSDLInput 可使用 platform_thread_* 和 SDL2
+// CSDLAudio 可使用 SDL_mixer
 ```
 
 ### 阶段 3：替换 SpriteLib

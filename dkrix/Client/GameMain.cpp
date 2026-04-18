@@ -46,7 +46,7 @@
 #include "COrderedList.h"
 #include "SpriteIDDef.h"
 #include "MMusic.h"
-#include "CDirectSoundStream.h"
+#include "CSDLStream.h"
 #include "MChatManager.h"
 #include "MGameStringTable.h"
 #include "MHelpManager.h"

@@ -1,15 +1,15 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectSound_Adapter.cpp
+	CSDLAudio_Adapter.cpp
 
 	DirectSound adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectSound class.
+	This file provides SDL2 backend support for CSDLAudio class.
 
 	2025.01.14
 
 -----------------------------------------------------------------------------*/
 
-#include "CDirectSound.h"
+#include "CSDLAudio.h"
 #include "DXLibBackend.h"
 
 /* Global instance */
