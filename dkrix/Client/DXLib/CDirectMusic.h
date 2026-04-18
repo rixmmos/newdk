@@ -17,9 +17,26 @@ struct IDirectMusicLoader;
 struct IDirectMusicSegment;
 struct IDirectMusicSegmentState;
 
-/* DirectMusic type definitions */
-typedef long MUSIC_TIME;
+/* DirectMusic time types */
+typedef long long MUSIC_TIME;
 typedef long long REFERENCE_TIME;
+
+/* DirectDraw compat constants consumed by MTopView.cpp, GameInit.cpp,
+ * CShadowPartManager.cpp. They used to be supplied by a shadow copy
+ * of this header in Client/ root; consolidated here so there is one
+ * source of truth. Proper home is probably basic/Platform.h once the
+ * DirectDraw compat surface is formally audited. */
+#ifndef DDSCAPS_OFFSCREENPLAIN
+#define DDSCAPS_OFFSCREENPLAIN  0x00000001
+#endif
+
+#ifndef DDSCAPS_TEXTURE
+#define DDSCAPS_TEXTURE         0x00000400
+#endif
+
+#ifndef DD_OK
+#define DD_OK                   0x00000000
+#endif
 
 typedef enum DIRECTMUSIC_TYPE
 {
