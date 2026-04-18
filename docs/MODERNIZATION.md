@@ -475,6 +475,24 @@ archived with the engine source — Phase 4 D decides.
       Linux and macOS.
 - [ ] Both trees: `.gitignore` for `build/`,
       `compile_commands.json`, editor detritus.
+- [ ] **Windows MSVC build** — the SDL backend port was never
+      validated on MSVC; attempting a build on Windows during 4A
+      verification surfaced ~2,700 pre-existing errors, all
+      upstream of Phase 4 code:
+      - `basic/Platform.h` redefines `ULONG`/`DWORD`/`LONG`/
+        `HRESULT` etc. as fallback typedefs, which collide with
+        the real Windows SDK (`winnt.h`, `wingdi.h`, `synchapi.h`)
+        and cascade into `<ratio>`/`<chrono>` C-linkage breakage
+        (~1,900 errors).
+      - `tools/engine/sprite/src/frame.c` + `framepack.c` use
+        GCC's `typeof()` extension (~40 errors). Moot once Phase
+        4D lands — engine tree goes to `docs/archive/`.
+      - `Client/SpriteLib/CTypePack.h` includes pre-standard
+        `fstream.h` (17 errors). Change to `<fstream>`.
+      - `Client/DebugLog.cpp` includes `sys/time.h` (1 error).
+        Needs a `_WIN32` branch.
+      Fix is guarded by proper `#ifdef _WIN32` / SDK include order
+      in Platform.h, not in scope for any of Phases 4–9.
 
 ## Explicit non-goals
 
