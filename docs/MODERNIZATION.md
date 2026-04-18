@@ -664,16 +664,67 @@ exclusions) or unreferenced (zero callers tree-wide).
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
-### Phase 7 — Server: retire dead binaries
-- [ ] Archive or delete `cacheserver/`, `chinabilling/` (all three
-      subdirs), `theoneserver/`, `updateserver/`,
-      `gameserver/mofus/testserver/`. Verify CMake isn't building
-      them.
-- [ ] Replace the stub `testAlone/Mutex.h` with a real primitive or
-      delete `testAlone/` outright.
-- [ ] Retire `__OLD_GUILD_WAR__` `#ifdef` gates — either delete the
-      branches or move to a runtime config flag.
-- [ ] Delete `.old.cpp` files in `server/database/`.
+### Phase 7 — Server: retire dead binaries — plan 2026-04-18
+- [ ] Delete the dead top-level server trees. Audit (2026-04-18)
+      confirms the following are not in any `add_subdirectory(...)`
+      call reachable from `dkrixserver/CMakeLists.txt` and have no
+      live CMake target anywhere:
+      `cacheserver/`, `theoneserver/`, `updateserver/`,
+      `chinabilling/stress/`, `chinabilling/testserver/`,
+      `gameserver/mofus/testserver/`, `gameserver/testAlone/`.
+  - **Correction to earlier wording:** `chinabilling/` top-level
+    is **not** dead — it builds the `GameServerCBilling` and
+    `LoginServerCBilling` static libs (linked by `gameserver` and
+    `loginserver` via their CMake targets). Only its two subdirs
+    (`stress/`, `testserver/`) retire, not the parent. "All three
+    subdirs" in the previous wording was wrong on both count and
+    contents.
+  - Only stale references are in the legacy `src/**/Makefile`
+    files (already orphaned from the CMake build). Those Makefiles
+    are themselves candidates for a separate build-hygiene pass
+    but are left in place for Phase 7 to keep scope narrow.
+- [ ] Delete the stub `testAlone/Mutex.h` — handled as part of the
+      `gameserver/testAlone/` tree-delete above (the whole dir
+      goes, so the stub goes with it).
+- [ ] Retire `__OLD_GUILD_WAR__` `#ifdef` gates. Audit shows 41
+      gate occurrences across 26 files; `__OLD_GUILD_WAR__` is
+      never defined in any `CMakeLists.txt`, `target_compile_def*`,
+      or command line — the `#ifdef` branches are preprocessor-
+      dead. Plan: delete the `#if[n]def __OLD_GUILD_WAR__ ... [#else
+      ...] #endif` blocks keeping only the `#else` side (i.e. the
+      "new guild war" code path that has been live since the flag
+      was introduced). No runtime behaviour change.
+- [ ] Delete `.old.cpp` files in `server/database/`. Audit: one
+      file, `server/database/DatabaseManager.old.cpp`, not in
+      CMake. Single-file delete.
+
+**Plan (sub-commits):**
+
+- **7A — Pin plan in `MODERNIZATION.md`.** (This commit.)
+- **7B — Delete the 7 dead server trees.** One `git rm -r`
+  commit. No CMake edits needed because none of the seven dirs is
+  in any `add_subdirectory(...)` call. Legacy `Makefile`
+  references stay; they are orphaned from the live build already.
+- **7C — Delete `DatabaseManager.old.cpp`.** Single-file `git rm`.
+- **7D — Retire `__OLD_GUILD_WAR__` gates.** Walk the 26 files
+  identified by `grep -rl '__OLD_GUILD_WAR__' dkrixserver/src/`
+  and collapse each `#ifdef __OLD_GUILD_WAR__` / `#ifndef
+  __OLD_GUILD_WAR__` block, keeping the non-defined branch. Purely
+  mechanical dead-code removal.
+- **7E — Close-out.** Flip this block to `done`, fill in outcome
+  notes and commit table.
+
+**Explicit non-goals for Phase 7:**
+
+- Touching `chinabilling/` top-level. It's live; rename / modernise
+  in a later phase if desired.
+- Modernising the legacy `src/**/Makefile` files themselves. They
+  reference the dead trees but aren't part of the live CMake
+  build. Build-hygiene sweep, out of scope here.
+- `testAlone/Mutex.h` "replace with real primitive" — the whole
+  `testAlone/` dir is unreferenced dead code (it has its own
+  `Mutex.h` shadowing the live `server/Mutex.h`), so the stub
+  goes with the dir. Zero live call sites to port.
 
 ### Phase 8 — Server: SQL and secrets
 - [ ] Introduce a `PreparedStatement` wrapper over `mysql_stmt_*`.
