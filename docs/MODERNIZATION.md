@@ -362,7 +362,7 @@ reviewable and individually revertable. C1 is pure deletion and
 can land before any code rewrites; the renames in C2/C3 are the
 risky edits; C4 is mechanical path shuffling.
 
-### Phase 4 — One sprite pipeline (client, in progress 2026-04-18)
+### Phase 4 — One sprite pipeline (client, done 2026-04-18)
 
 **Absorption-direction decision (2026-04-18):** `Client/SpriteLib/`
 stays canonical; `tools/engine/sprite/` gets retired. The C engine
@@ -396,23 +396,115 @@ archived with the engine source — Phase 4 D decides.
       (CTypePack2 machinery untouched — single-type collapse is
       follow-up); `CSpriteSet::Init` and `CAlphaSpritePack::Init`
       Is565() branches collapsed. Net: -1,166 lines.
-- [ ] **B — Delete `CAlphaSprite::Blt4444*`** methods plus any
+- [x] **B — Delete `CAlphaSprite::Blt4444*`** methods plus any
       helpers only they use. Check `CSpriteSurface` for matching
-      4444 surface paths.
-- [ ] **C — Migrate viewers to one sprite lib.** Viewers split:
+      4444 surface paths. **Done 2026-04-18.** The audit surfaced
+      that every external caller of the 4444 family lived inside
+      `CSpriteSurface.cpp`, and that file was not in
+      `SPRITELIB_SOURCES` — it had been fully orphaned by the SDL
+      adapter. Split into two commits. **4B.1** deleted
+      `CSpriteSurface.cpp` (-13,778 lines); its static members
+      (`s_Value1`, `s_Value2`, `s_pMemcpyEffectFunction`, …) were
+      already redefined in `CSpriteSurface_SDL.cpp`, so no link-level
+      fallout. **4B.2** then deleted the now-provably-dead methods
+      from four classes (-4,014 lines): `CAlphaSprite` (11 Blt4444*
+      + 2 memcpy helpers), `CAlphaSpritePal` (same 11 with
+      `MPalette&` overloads + 2 helpers), `CSprite` (2
+      `BltAlpha4444*` + 2 static memcpy helpers), `CShadowSprite`
+      (5 `Blt4444*` + 5 `BltSmall4444*` + `memcpyShadow4444`).
+      Headers got "Phase 4B: Blt4444* family deleted" defer comments
+      pointing back to 4B.1. `CFilter::Blt4444` and
+      `CFilter::Blt4444Color` remain — different class, live code
+      called from `MTopView.cpp:10486`. Combined 4B trim: -17,792
+      lines across 9 files.
+- [x] **C — Migrate viewers to one sprite lib.** Viewers split:
       creature_viewer and item_viewer ship both `main.c` and
       `main.cpp` (dual-consumer); map_viewer and zone_parser lean
       on `tools/engine/sprite/`; sprite_viewer and effect_viewer
       already use SpriteLib. Port the engine-side viewers onto
       SpriteLib, delete the `main.c` halves, leave one `main.cpp`
-      per viewer.
-- [ ] **D — Retire `tools/engine/sprite/`**: move the directory to
+      per viewer. **Done 2026-04-18.** Audit showed the `.cpp`
+      siblings were already the ones in `CMakeLists.txt` — the
+      `main.c` / `viewer.c` / `viewer.h` halves were dead.
+      **4C.1** deleted six `.c` viewer sources (-1,698 lines):
+      `creature_viewer/main.c`, `item_viewer/main.{c,viewer.c,h}`,
+      `map_viewer/main.c`, `zone_parser/main.c`. **4C.2** unhooked
+      the `sprite` static library by `git-mv`'ing the only
+      still-live file — `tools/engine/sprite/src/zone.c` plus its
+      `zone.h`/`error.h` headers — into `tools/viewers/map_viewer/`
+      and compiling it directly into the `map_viewer` target. The
+      `sprite` link was dropped from `map_viewer` and
+      `effect_viewer` (the latter's linkage was vestigial —
+      `effect_viewer/main.cpp` never included any engine/sprite
+      headers). Top-level `CMakeLists.txt` lost
+      `add_subdirectory(tools/engine/sprite)` and the
+      `BUILD_ENGINE` option. `zone.c` verified to compile cleanly
+      standalone (`gcc -std=c99`), `zoneloader.cpp` the same
+      (`g++ -std=c++11`).
+- [x] **D — Retire `tools/engine/sprite/`**: move the directory to
       `docs/archive/` (source-only, no build) once no viewer
       references it. CMake `add_subdirectory(tools/engine/sprite)`
       and any `target_link_libraries(... sprite)` call sites get
-      deleted.
-- [ ] **E — Phase 4 close-out**: MODERNIZATION.md update with
-      outcome block (net line count, deferred items).
+      deleted. **Done 2026-04-18.** `git-mv`'d 43 files
+      (CMakeLists.txt, 18 headers, 12 src .c's, 11 tests) to
+      `docs/archive/2026-engine-sprite/` and added a README
+      explaining the retirement rationale — including that
+      `zone.c`/`zone.h`/`error.h` are **not** in the archive
+      because they were absorbed by `map_viewer` in 4C.2. The empty
+      `tools/engine/` parent directory was also removed. CMake
+      cleanup from 4C.2 already covered the
+      `add_subdirectory`/link-line work.
+- [x] **E — Phase 4 close-out**: MODERNIZATION.md update with
+      outcome block (net line count, deferred items). **Done
+      2026-04-18.** See Phase 4 outcome below.
+
+**Phase 4 outcome (landed on `modernize/phase4-sprite`):**
+
+Eight commits, all line-count deltas measured against the phase
+baseline (`b6a2921 docs: pin Phase 4 absorption-direction decision`):
+
+| Sub | Commit    | What                                                     | Δ lines |
+|-----|-----------|----------------------------------------------------------|---------|
+| 4A  | `2554309` | Delete 555/565 format-variant classes (20 files)         | -1,166  |
+| 4A  | `c74a301` | Check off Phase 4A in MODERNIZATION.md                   |    +12  |
+| —   | `3ba2d95` | Defer Windows MSVC build to Phase 10 build-hygiene       |    +17  |
+| 4B.1| `4557195` | Delete orphaned `Client/SpriteLib/CSpriteSurface.cpp`    | -13,778 |
+| 4B.2| `d656337` | Delete dead `Blt4444*` / `BltSmall4444*` / helpers       | -4,014  |
+| 4C.1| `1d96da6` | Delete six legacy `.c` viewer sources                    | -1,698  |
+| 4C.2| `74ec792` | Unhook `sprite` library; absorb `zone.c` into map_viewer |     -8  |
+| 4D  | `0ae1a98` | Archive `tools/engine/sprite/` → `docs/archive/`         |    +66  |
+
+Net across all of Phase 4: **-20,570 lines** over ~100 files. The
+`Client/SpriteLib/` directory shrunk from ~55 KLOC to ~36 KLOC. The
+`tools/engine/` directory is gone. Nothing in the live build
+references the retired `sprite` static library; the only surviving
+artifact of the C engine in-tree is
+`tools/viewers/map_viewer/zone.c` (plus its two headers), and those
+are compiled directly into the `map_viewer` target.
+
+**Deferred out of Phase 4:**
+
+- **CTypePack2 single-type collapse.** 4A collapsed the
+  `CTypePack2<CFoo, CFoo555, CFoo565>` template triples to
+  `CTypePack2<CFoo, CFoo, CFoo>`. The `CTypePack2` machinery itself
+  still takes three types — follow-up work (outside Phase 4) would
+  specialise it to one type or replace it with a single `CTypePack`.
+- **Other orphaned `.cpp` in `Client/SpriteLib/`.** The 4A audit
+  surfaced three more files in-tree but not in `SPRITELIB_SOURCES`:
+  `CAlphaSpritePackList.cpp`, `CIndexSpritePack.cpp`,
+  `CShadowSpritePack.cpp`. They may be candidates for 4B-style
+  deletion after a caller audit; left for a separate pass rather
+  than smuggled into Phase 4.
+- **Windows MSVC toolchain build.** Still deferred to Phase 10
+  build-hygiene; 4D eliminated the `typeof()`-using `frame.c` /
+  `framepack.c` from the live tree (archived), which removes one
+  of the four categories of MSVC errors documented under Phase 10.
+- **Port the C unit tests** under
+  `docs/archive/2026-engine-sprite/tests/` onto the C++ SpriteLib
+  API. The tests archive the intent but not the coverage; a
+  future test-coverage pass would translate `test_sprite.c`,
+  `test_framepack.c`, etc. into equivalent GTest/Catch2 cases
+  against `CSprite` / `CFramePack` / etc.
 
 ### Phase 5 — One text pipeline (client)
 - [ ] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
