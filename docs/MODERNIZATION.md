@@ -362,16 +362,47 @@ reviewable and individually revertable. C1 is pure deletion and
 can land before any code rewrites; the renames in C2/C3 are the
 risky edits; C4 is mechanical path shuffling.
 
-### Phase 4 — One sprite pipeline (client)
-- [ ] Decide here, in writing, whether `tools/engine/sprite/` absorbs
+### Phase 4 — One sprite pipeline (client, in progress 2026-04-18)
+
+**Absorption-direction decision (2026-04-18):** `Client/SpriteLib/`
+stays canonical; `tools/engine/sprite/` gets retired. The C engine
+is a ~7.8k-LOC parallel C/SDL2 implementation with its own unit
+tests (14 files under `tools/engine/sprite/tests/`); the C++
+SpriteLib is ~54.8k LOC across 86 files and is what the main client
+actually links. Absorbing toward SpriteLib keeps the main-client
+path untouched and is the minimum-disruption direction. Viewers that
+currently pull from `tools/engine/sprite/` migrate to the SpriteLib
+C++ API. The C unit tests either get ported onto SpriteLib or
+archived with the engine source — Phase 4 D decides.
+
+- [x] Decide here, in writing, whether `tools/engine/sprite/` absorbs
       `Client/SpriteLib/` or the other way around. Update this file
-      with the decision before touching code.
-- [ ] Delete the 555/565/4444 format-variant classes in
+      with the decision before touching code. *(Decision above:
+      SpriteLib absorbs, engine retired.)*
+- [ ] **A — Delete the 555/565 format-variant classes** in
       `Client/SpriteLib/` (`CSprite555`, `CSprite565`,
       `CAlphaSprite{555,565}`, `CAlphaSpritePackList{555,565}`,
       `CIndexSprite{555,565}`, `CSpritePackList{555,565}`).
-- [ ] Delete `CAlphaSprite::Blt4444*` methods.
-- [ ] Ensure viewer binaries and the main client share one sprite lib.
+      Twenty files total (ten `.h`, ten `.cpp`). Audit first whether
+      any consumer still pins a 555/565 subclass by name; if so,
+      switch to the 16-bit base class before deletion.
+- [ ] **B — Delete `CAlphaSprite::Blt4444*`** methods plus any
+      helpers only they use. Check `CSpriteSurface` for matching
+      4444 surface paths.
+- [ ] **C — Migrate viewers to one sprite lib.** Viewers split:
+      creature_viewer and item_viewer ship both `main.c` and
+      `main.cpp` (dual-consumer); map_viewer and zone_parser lean
+      on `tools/engine/sprite/`; sprite_viewer and effect_viewer
+      already use SpriteLib. Port the engine-side viewers onto
+      SpriteLib, delete the `main.c` halves, leave one `main.cpp`
+      per viewer.
+- [ ] **D — Retire `tools/engine/sprite/`**: move the directory to
+      `docs/archive/` (source-only, no build) once no viewer
+      references it. CMake `add_subdirectory(tools/engine/sprite)`
+      and any `target_link_libraries(... sprite)` call sites get
+      deleted.
+- [ ] **E — Phase 4 close-out**: MODERNIZATION.md update with
+      outcome block (net line count, deferred items).
 
 ### Phase 5 — One text pipeline (client)
 - [ ] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
