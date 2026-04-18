@@ -1671,7 +1671,13 @@ InitApp(int nCmdShow)
     wc.hInstance = g_hInstance;
     wc.hIcon = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_DARKEDEN));
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+#ifdef PLATFORM_WINDOWS
     wc.hbrBackground = (HBRUSH )GetStockObject(BLACK_BRUSH);
+#else
+    // Phase 5B: GetStockObject stub deleted; RegisterClass is a no-op
+    // stub on non-Windows anyway, so hbrBackground is never read.
+    wc.hbrBackground = NULL;
+#endif
     wc.lpszMenuName = NULL;//NAME;
 	wc.lpszClassName = PROGRAM_NAME;
     //wc.lpszClassName = PROGRAM_NAME;

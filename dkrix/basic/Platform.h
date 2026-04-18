@@ -226,12 +226,16 @@ static inline void DeleteCriticalSection(CRITICAL_SECTION*)     { /* destructor 
 extern "C" {  /* reopen extern "C" */
 #endif
 
-/* GDI object management functions - stub implementations */
-static inline int DeleteObject(void* hObject) {
-	(void)hObject;
-	/* Stub - Windows GDI object deletion */
-	return 1; /* Return TRUE */
-}
+/* Phase 5B: GDI DeleteObject/CreateFontIndirect stubs deleted.
+ * Platform.h is only included when !PLATFORM_WINDOWS; on Windows
+ * those symbols come from Windows.h. Non-Windows callers were all
+ * in dead/macro-gated paths: Client.cpp:4299 lived inside
+ * `#ifdef __WEB_BROWSER__` (never defined; see Client.cpp:179
+ * `//#define __WEB_BROWSER__`) and VS_UI_WebBrowser.cpp is
+ * CMake-excluded on non-Win32. CreateFontIndirect had zero live
+ * refs — VS_UI_Base now calls TextSystem::EncodeFontSizeHandle()
+ * directly.
+ */
 
 /* Font weight constants */
 #define FW_NORMAL 400
@@ -329,12 +333,7 @@ typedef struct tagLOGFONT {
 /* DirectDraw surface capabilities */
 #define DDSCAPS_SYSTEMMEMORY 0x00000800L
 
-/* GDI font creation function - stub implementation */
-static inline void* CreateFontIndirect(LOGFONT* lplf) {
-	(void)lplf;
-	/* Stub - would create a font on Windows */
-	return (void*)1; /* Return a non-null handle */
-}
+/* Phase 5B: CreateFontIndirect stub removed (see block above). */
 #endif
 
 /* Windows path constants */
@@ -735,11 +734,15 @@ typedef WORD			char_t;
 	#define WHITE_BRUSH 0
 	#define DC_BRUSH 18
 
-	/* GetStockObject stub - returns NULL on non-Windows */
-	static inline void* GetStockObject(int nIndex) {
-		(void)nIndex;
-		return NULL;
-	}
+	/* Phase 5B: GetStockObject stub removed. The one live
+	 * non-Windows caller (Client.cpp InitApp, setting
+	 * wc.hbrBackground) has been guarded behind PLATFORM_WINDOWS
+	 * — the enclosing RegisterClass is itself a no-op stub below,
+	 * so the assignment had no observable effect anyway. The
+	 * remaining compile-gated callers (Client.cpp ShowPatchLogWindow
+	 * block-commented; VS_UI/WinMain.cpp CMake-excluded on non-Win32)
+	 * never reached this stub.
+	 */
 
 	/* LoadIcon stub - returns NULL on non-Windows */
 	static inline void* LoadIcon(void* hInstance, const char* lpIconName) {
