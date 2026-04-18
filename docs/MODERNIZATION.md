@@ -506,13 +506,73 @@ are compiled directly into the `map_viewer` target.
   `test_framepack.c`, etc. into equivalent GTest/Catch2 cases
   against `CSprite` / `CFramePack` / etc.
 
-### Phase 5 — One text pipeline (client)
-- [ ] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
+### Phase 5 — One text pipeline (client) — plan 2026-04-18
+- [~] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
       PLATFORM_WINDOWS` GDI branch and route Windows through
       `TextSystem` like every other platform.
+  - **Already done upstream.** `VS_UI_Base.cpp` no longer contains
+    any `#ifdef PLATFORM_WINDOWS` / `WIN32` guards; the destructor,
+    `SetFont`, and `InitSurface` are unconditional and call into
+    `TextSystem::EncodeFontSizeHandle()` directly. Comments in the
+    file document the removal (`// GDI removed (SDL2) - All platforms
+    use TextSystem ...`). The Phase-5 work here collapses to
+    *auditing and certifying*, not deleting.
 - [ ] Verify Korean and Chinese glyph coverage in the fallback fonts.
 - [ ] Delete the GDI stubs in `Platform.h` (previously deferred from
-      Phase 2).
+      Phase 2). **Narrow scope:** delete only the function-shaped
+      stubs whose implementations are dead; keep the data-shape
+      types (`LOGFONT`, `COLORREF`, `HDC`, `HFONT`) and the `RGB()`
+      macro because the client still uses them pervasively as
+      cross-platform font-descriptor / color types.
+
+**Plan (sub-commits):**
+
+- **5A — Audit outcome commit.** Document in this file that the
+  GDI branch in `VS_UI_Base.cpp` was already absorbed upstream; no
+  code delta in 5A. Effectively converts item #1 from a
+  deletion-task into an audit-task and records the finding.
+- **5B — Delete truly-dead GDI stubs from `Platform.h`.** Three
+  stubs confirmed callable-but-dead:
+  - `CreateFontIndirect(LOGFONT*)` — 0 callers in the tree (a
+    comment in `VS_UI_Base.cpp` notes the historical caller; the
+    code now calls `TextSystem::EncodeFontSizeHandle()`).
+  - `DeleteObject(void*)` — 2 callers (`Client.cpp:4299`,
+    `VS_UI_WebBrowser.cpp:220`) that are both type-confused; they
+    pass `IWebBrowser*` objects and want `delete p` semantics, not
+    GDI object deletion. Rewrite the two sites as `delete p;` in
+    the same commit.
+  - `GetStockObject(int)` — 3 callers (`Client.cpp:685,1674`,
+    `VS_UI/WinMain.cpp:3435`) all inside Win32-only `RegisterClass`
+    / `CreateWindow` code that's already dead on non-Windows (and
+    `WinMain.cpp` itself is Win32-only). Guard those three call
+    sites behind `#ifdef PLATFORM_WINDOWS` (or delete, if the whole
+    block is already so guarded) in the same commit.
+- **5C — Trim unused GDI constant macros in `Platform.h`.** Audit
+  the `FW_*`, `OUT_*`, `CLIP_*`, `FF_*`, `TA_*`, charset, and
+  quality constants; delete any not referenced anywhere in
+  `dkrix/`. Expected to keep `FW_NORMAL`, `FW_BOLD`, `FW_LIGHT`,
+  `DEFAULT_*`, `TRANSPARENT`, `TA_RIGHT`, `DEFAULT_CHARSET`,
+  `FF_DONTCARE`, `DEFAULT_PITCH`. Pure delete-if-unused pass.
+- **5D — Glyph-coverage audit.** Inspect the fallback font wired
+  into `TextSystem` (likely under `Client/TextSystem/`) and confirm
+  Korean (Hangul) and Chinese (GB2312 / Big5 depending on
+  `IsChinese()` branch) glyphs render with the bundled `.ttf` /
+  `.ttc`. Documentation-only outcome unless we discover a missing
+  font, in which case escalate.
+- **5E — Close-out.** Flip this block to `done`, fill in outcome
+  notes and commit table.
+
+**Explicit non-goals for Phase 5:**
+
+- Removing `LOGFONT` and `COLORREF` types themselves (used as
+  font-descriptor / color data shapes across ~49 files). Touching
+  them is a separate modernization pass, probably Phase 6
+  touch-as-you-go (`LOGFONT` → `UI_FontDesc`, `COLORREF` →
+  `SDL_Color`-equivalent).
+- Replacing `SetFont(PrintInfo&, LOGFONT&, COLORREF, ...)` API
+  signatures. Same reason — cross-module ripple.
+- Auditing or rewriting the Win32 `RegisterClass` / `CreateWindow`
+  paths themselves. Gated under `PLATFORM_WINDOWS` in 5B.
 
 ### Phase 6 — Modern C++ as we touch it (ongoing)
 - Rule of thumb when a file is already being modified for another
