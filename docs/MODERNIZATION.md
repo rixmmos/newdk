@@ -379,13 +379,23 @@ archived with the engine source — Phase 4 D decides.
       `Client/SpriteLib/` or the other way around. Update this file
       with the decision before touching code. *(Decision above:
       SpriteLib absorbs, engine retired.)*
-- [ ] **A — Delete the 555/565 format-variant classes** in
+- [x] **A — Delete the 555/565 format-variant classes** in
       `Client/SpriteLib/` (`CSprite555`, `CSprite565`,
       `CAlphaSprite{555,565}`, `CAlphaSpritePackList{555,565}`,
-      `CIndexSprite{555,565}`, `CSpritePackList{555,565}`).
-      Twenty files total (ten `.h`, ten `.cpp`). Audit first whether
-      any consumer still pins a 555/565 subclass by name; if so,
-      switch to the 16-bit base class before deletion.
+      `CIndexSprite{555,565}`, `CSpritePackList{555,565}`). **Done
+      2026-04-18.** Folded the 565 subclass's
+      `SaveToFile`/`LoadFromFile` bodies into each of the five base
+      classes (CSprite, CAlphaSprite, CIndexSprite, CSpritePackList,
+      CAlphaSpritePackList), flipped the pure-virtual `= 0` to
+      concrete, deleted 20 subclass files. Five external consumers
+      updated (Client/GameInit.cpp, Client/MGuildMarkManager.cpp,
+      Client/Client.cpp, Client/MTopView.cpp — includes dropped +
+      `if (Is565()) new CFoo565 else new CFoo555` collapsed to
+      `new CFoo`). Internal consumers: `CTypePack2<CFoo, CFoo555,
+      CFoo565>` typedefs collapsed to `CTypePack2<CFoo, CFoo, CFoo>`
+      (CTypePack2 machinery untouched — single-type collapse is
+      follow-up); `CSpriteSet::Init` and `CAlphaSpritePack::Init`
+      Is565() branches collapsed. Net: -1,166 lines.
 - [ ] **B — Delete `CAlphaSprite::Blt4444*`** methods plus any
       helpers only they use. Check `CSpriteSurface` for matching
       4444 surface paths.
