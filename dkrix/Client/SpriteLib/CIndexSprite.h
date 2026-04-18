@@ -145,8 +145,9 @@ class CIndexSprite {
 		//---------------------------------------------------------
 		// fstream���� save/load�� �Ѵ�.
 		//---------------------------------------------------------
-		virtual bool		SaveToFile(std::ofstream& file) = 0;
-		virtual bool		LoadFromFile(std::ifstream& file) = 0;		
+		virtual bool		SaveToFile(std::ofstream& file);
+		virtual bool		LoadFromFile(std::ifstream& file);
+
 
 		//---------------------------------------------------------
 		// get functions		

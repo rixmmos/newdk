@@ -4,8 +4,7 @@
 #include "Client_PCH.h"
 #include "MGuildMarkManager.h"
 #include "MGuildInfoMapper.h"
-#include "CSprite555.h"
-#include "CSprite565.h"
+#include "CSprite.h"
 #include "UtilityFunction.h"
 #include "basic/ColorDraw.h"
 
@@ -130,16 +129,9 @@ MGuildMarkManager::CreateGuildMark(WORD guildID, const char* pFilename)
 	CSprite* pSprite = NULL;
 	CSprite* pSpriteSmall = NULL;
 
-	if (ColorDraw::Is565())
-	{
-		pSprite = new CSprite565;
-		pSpriteSmall = new CSprite565;
-	}
-	else
-	{
-		pSprite = new CSprite555;
-		pSpriteSmall = new CSprite555;
-	}
+	// SDL backend is always 5:6:5; 555 branch retired in Phase 4A.
+	pSprite = new CSprite;
+	pSpriteSmall = new CSprite;
 
 	//-----------------------------------------------------
 	// surface --> CSprite
@@ -326,16 +318,9 @@ MGuildMarkManager::LoadGuildMark(WORD guildID)
 				CSprite* pSprite = NULL;
 				CSprite* pSpriteSmall = NULL;
 
-				if (ColorDraw::Is565())
-				{
-					pSprite = new CSprite565;
-					pSpriteSmall = new CSprite565;
-				}
-				else
-				{
-					pSprite = new CSprite555;
-					pSpriteSmall = new CSprite555;
-				}
+				// SDL backend is always 5:6:5; 555 branch retired in Phase 4A.
+				pSprite = new CSprite;
+				pSpriteSmall = new CSprite;
 
 				//-----------------------------------------------------
 				// Load 해서 
@@ -838,16 +823,9 @@ MGuildMarkManager::CreateGuildMark(const char* pFilename, CSprite *&pSprite, CSp
 	//-----------------------------------------------------
 	// CSprite생성
 	//-----------------------------------------------------
-	if (ColorDraw::Is565())
-	{
-		pSprite = new CSprite565;
-		pSpriteSmall = new CSprite565;
-	}
-	else
-	{
-		pSprite = new CSprite555;
-		pSpriteSmall = new CSprite555;
-	}
+	// SDL backend is always 5:6:5; 555 branch retired in Phase 4A.
+	pSprite = new CSprite;
+	pSpriteSmall = new CSprite;
 
 	//-----------------------------------------------------
 	// surface --> CSprite

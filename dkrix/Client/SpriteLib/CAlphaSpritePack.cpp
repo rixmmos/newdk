@@ -3,8 +3,7 @@
 //----------------------------------------------------------------------
 
 #include "CSpriteSurface.h"
-#include "CAlphaSprite555.h"
-#include "CAlphaSprite565.h"
+#include "CAlphaSprite.h"
 #include "CAlphaSpritePack.h"
 #include <fstream>
 #include <cstdint>
@@ -49,14 +48,11 @@ CAlphaSpritePack::Init(TYPE_SPRITEID count, bool b565)
 	// 메모리 잡기
 	m_nSprites = count;
 
-	if (b565)
-	{
-		m_pSprites = new CAlphaSprite565 [m_nSprites];
-	}
-	else
-	{
-		m_pSprites = new CAlphaSprite555 [m_nSprites];
-	}
+	// Phase 4A: 555/565 format variants deleted; always allocate
+	// base CAlphaSprite. b565 parameter kept for API compatibility;
+	// callers still pass ColorDraw::Is565() which always returns true.
+	(void)b565;
+	m_pSprites = new CAlphaSprite [m_nSprites];
 }
 
 

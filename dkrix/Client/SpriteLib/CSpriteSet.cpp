@@ -3,9 +3,8 @@
 //----------------------------------------------------------------------
 #include "client_PCH.h"
 #include "CSpriteSurface.h"
-#include "CSprite565.h"
+#include "CSprite.h"
 #include <cstdint>
-#include "CSprite555.h"
 #include "CSpritePack.h"
 #include "CSpriteSet.h"
 
@@ -49,14 +48,8 @@ CSpriteSet::Init(TYPE_SPRITEID count)
 	// 메모리 잡기
 	m_nSprites = count;
 
-	if (ColorDraw::Is565())
-	{
-		m_pSprites = new CSprite565 [m_nSprites];
-	}
-	else
-	{
-		m_pSprites = new CSprite555 [m_nSprites];
-	}
+	// Phase 4A: 555/565 variants deleted; always allocate CSprite.
+	m_pSprites = new CSprite [m_nSprites];
 }
 
 //----------------------------------------------------------------------

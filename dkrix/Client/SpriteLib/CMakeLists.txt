@@ -46,14 +46,8 @@ set(SPRITELIB_SOURCES
 	CIndexSprite.cpp
 	CAlphaSprite.cpp
 
-	# Sprite format implementations (needed for vtables)
-	CSprite555.cpp
-	CSprite565.cpp
-	CAlphaSprite555.cpp
-	CAlphaSprite565.cpp
+	# Palette-backed sprite variants
 	CAlphaSpritePal.cpp
-	CIndexSprite555.cpp
-	CIndexSprite565.cpp
 	CSpritePalBase.cpp
 
 	# Sprite pack implementations (minimal set)
@@ -96,13 +90,9 @@ set(SPRITELIB_HEADERS
 
 	# Core classes
 	CSprite.h
-	CSprite555.h
-	CSprite565.h
 	CSpriteSurface.h
 	CSpritePack.h
 	CSpritePackList.h
-	CSpritePackList555.h
-	CSpritePackList565.h
 	CSpriteDef.h
 	CSpritePal.h
 	CSpritePalBase.h
@@ -112,18 +102,12 @@ set(SPRITELIB_HEADERS
 
 	# Alpha sprites
 	CAlphaSprite.h
-	CAlphaSprite555.h
-	CAlphaSprite565.h
 	CAlphaSpritePack.h
 	CAlphaSpritePackList.h
-	CAlphaSpritePackList555.h
-	CAlphaSpritePackList565.h
 	CAlphaSpritePal.h
 
 	# Index sprites
 	CIndexSprite.h
-	CIndexSprite555.h
-	CIndexSprite565.h
 	CIndexSpritePack.h
 
 	# Shadow sprites

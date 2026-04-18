@@ -12,10 +12,13 @@
 #define	__CSPRITEPACK_H__
 
 #include "CTypePack.h"
-#include "CSprite555.h"
-#include "CSprite565.h"
+#include "CSprite.h"
 
-typedef CTypePack2<CSprite, CSprite555, CSprite565> CSpritePack;
+// Phase 4A: 555/565 format-variant subclasses deleted. CTypePack2's
+// Is565() branching now always picks Type2, but kept as-is (Type1 ==
+// Type2 == CSprite) to avoid touching the template machinery in this
+// commit. CTypePack2 → single-type collapse is a follow-up cleanup.
+typedef CTypePack2<CSprite, CSprite, CSprite> CSpritePack;
 
 //class CSpritePack : public CTypePack<CSprite>
 //{

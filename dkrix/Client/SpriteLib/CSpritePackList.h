@@ -56,7 +56,7 @@ class CSpritePackList {
 		// file I/O
 		//---------------------------------------------------
 		bool				SaveToFile(std::ofstream& spkFile, std::ofstream& indexFile);
-		virtual void		LoadFromFile(std::ifstream& file) = 0;
+		virtual void		LoadFromFile(std::ifstream& file);
 
 	protected :		
 		SPRITE_LIST		m_listSprite;		// CSprite들을 저장해둔다.

@@ -11,11 +11,11 @@
 #ifndef	__CINDEXSPRITEPACK_H__
 #define	__CINDEXSPRITEPACK_H__
 
-#include "CIndexSprite555.h"
-#include "CIndexSprite565.h"
+#include "CIndexSprite.h"
 #include "CTypePack.h"
 
-typedef CTypePack2<CIndexSprite, CIndexSprite555, CIndexSprite565> CIndexSpritePack;
+// Phase 4A: see CSpritePack.h for the single-type typedef rationale.
+typedef CTypePack2<CIndexSprite, CIndexSprite, CIndexSprite> CIndexSpritePack;
 
 //class CIndexSpritePack : public CTypePack<CIndexSprite>
 //{

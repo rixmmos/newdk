@@ -13,8 +13,7 @@
 #define	__CALPHASPRITEPACK_H__
 
 #include "DrawTypeDef.h"
-#include "CAlphaSprite565.h"
-#include "CAlphaSprite555.h"
+#include "CAlphaSprite.h"
 
 class CAlphaSpritePack {
 	public :

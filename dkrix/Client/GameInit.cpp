@@ -81,8 +81,8 @@
 #include "MTimeItemManager.h"
 #include "FameInfo.h"
 #include "MWarManager.H"
-#include "CSprite555.h"
-#include "CSprite565.h"
+#include "CSprite.h"
+#include "CIndexSprite.h"
 #include "Properties.h"
 #include "UIFunction.h"
 #include "SoundSetting.h"
@@ -256,14 +256,8 @@ StartTitleLoading()
 	
 	if (g_pTitleLoadingSprite==NULL)
 	{
-		if (CSDLGraphics::Is565())
-		{
-			g_pTitleLoadingSprite = new CSprite565;
-		}
-		else
-		{
-			g_pTitleLoadingSprite = new CSprite555;
-		}
+		// SDL backend is always 5:6:5; 555 branch retired in Phase 4A.
+		g_pTitleLoadingSprite = new CSprite;
 
 		CFileIndexTable	FIT;
 		std::ifstream indexFile(g_pFileDef->getProperty("FILE_SPRITEINDEX_UI").c_str(), ios::binary);
@@ -817,7 +811,7 @@ InitSurface()
 	indexSurface1.LockW(lpIndex1, indexPitch1);
 	//indexSurface2.LockW(lpIndex2, indexPitch2);
 
-	CIndexSprite565 is;
+	CIndexSprite is;
 
 	RECT rect;
 

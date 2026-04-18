@@ -2405,7 +2405,7 @@ ConvertScreenEffect()
 	POINT point0 = { 0, 0 };
 	
 	 
-	CAlphaSprite565		ASPR;
+	CAlphaSprite		ASPR;
 
 	std::ifstream aspkiFile(FILE_ASPRITEINDEX_ALPHAEFFECT, ios::binary);
 	std::ifstream aspkFile(FILE_ASPRITE_ALPHAEFFECT, ios::binary);	
