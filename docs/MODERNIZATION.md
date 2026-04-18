@@ -758,17 +758,77 @@ zero matches before 7B.
   `Mutex.h` shadowing the live `server/Mutex.h`), so the stub
   goes with the dir. Zero live call sites to port.
 
-### Phase 8 — Server: SQL and secrets
+### Phase 8 — Server: SQL and secrets — plan 2026-04-18
 - [ ] Introduce a `PreparedStatement` wrapper over `mysql_stmt_*`.
-- [ ] Migrate the ~87 `sprintf(query, ...)` sites module by module,
-      starting with user-string call sites (chat, pet names, custom
-      options).
-- [ ] Add a CI grep-gate that fails on new `sprintf(query,` call
-      sites in `src/server/`.
-- [ ] Move `DB_PASSWORD`, `DB_HOST`, `LoginServerIP`,
-      `SharedServerIP`, `LogServerIP` from `conf/*.conf` into
-      environment variables. Keep `*.conf` as a template with
-      `${VAR}` placeholders.
+      **Scope correction (2026-04-18 audit):** codebase has zero
+      `mysql_stmt_*` usage today (grep -rn 'mysql_stmt_' → 0).
+      Current data path is `Statement::executeQuery(fmt, ...)` →
+      `vsprintf` into buffer → `mysql_real_query`. Adoption is a
+      from-scratch API design, not a refactor. **Deferred to
+      Phase 11.1** — see below.
+- [ ] Migrate the `sprintf(query, ...)` sites module by module.
+      **Scope correction (2026-04-18 audit):** the "~87" figure in
+      the earlier plan was stale. Actual count in the live CMake
+      build:
+        - `grep -rnE 'executeQuery\s*\('` → **1,510 total call sites**
+        - `grep -rnE 'executeQuery\s*\(\s*"[^"]*%[sd]'` →
+          **625 sites with `%s` / `%d` format interpolation**
+          (the SQL-injection surface).
+      Migrating 625 sites — each to a prepared-statement wrapper
+      that doesn't exist yet — is several weeks of work. **Deferred
+      to Phase 11.2** as ongoing module-by-module work starting
+      with user-string call sites (chat / say / whisper / pet names
+      / custom options).
+- [x] Add a CI grep-gate that fails on new injection-shaped
+      `executeQuery("…%s…")` call sites in `dkrixserver/src/`.
+      Script pinned to a line-count baseline (625 today); fails
+      only when the count grows. Lets existing sites stay
+      uncleaned until Phase 11.2 while blocking regression.
+      **(8C — 2026-04-18.)**
+- [x] Move `DB_PASSWORD`, `DB_HOST`, `LoginServerIP`,
+      `SharedServerIP`, `LogServerIP` — and any other
+      `conf/*.conf` value — from plaintext into environment
+      variables via `${VAR}` placeholder expansion in
+      `Properties::load()`. Existing plaintext values pass through
+      unchanged; any value wrapped in `${...}` is resolved via
+      `getenv()` at load time. Template `.conf.template` files
+      added alongside the originals. **(8B — 2026-04-18.)**
+
+**Plan (sub-commits):**
+
+- **8A — Pin corrected plan.** (This commit.)
+- **8B — `${VAR}` env-var expansion in `Properties::load()`.**
+  Single function change in `Core/Properties.cpp` plus
+  `loginserver.conf.template` / `sharedserver.conf.template` /
+  `excel96-gameserver.conf.template` showing the placeholder
+  syntax for the five named secrets. Leaves existing `.conf`
+  files untouched — operators migrate on their own schedule by
+  editing their runtime config to use `${DKRIX_DB_PASSWORD}` etc.
+- **8C — CI grep-gate script.** `dkrixserver/scripts/check-sql-injection.sh`
+  that (a) counts `executeQuery("…%s/%d…")` sites, (b) compares
+  to a pinned baseline in `dkrixserver/scripts/.sql-injection-baseline`,
+  (c) exits non-zero if the count grew. Runnable standalone or
+  from a CI workflow.
+- **8D — Close-out.** Flip this block to `done`, outcome block,
+  commit table, and the formal Phase-11 deferral record.
+
+**Explicit non-goals for Phase 8:**
+
+- **Building the `PreparedStatement` class itself.** The wrapper
+  needs `mysql_stmt_init` / `mysql_stmt_prepare` /
+  `mysql_stmt_bind_param` / `mysql_stmt_execute` with parameter
+  binding helpers for each type we pass today (`int`, `long`,
+  `string`, `time_t`). That's a designed API, not a find-replace
+  — recorded as Phase 11.1 and intentionally not shipped here
+  without a way to test it (no MySQL headers in the sandbox).
+- **Migrating the 625 injection-shaped sites.** Incremental
+  module-by-module work in Phase 11.2. The CI gate added in 8C
+  prevents regression while those sites await migration.
+- **Rewriting any `.conf` file in place.** Operators may still
+  have hand-tuned configurations; rewriting them risks losing
+  those customisations. 8B is strictly additive — the parser now
+  understands `${VAR}`, the files can use it when an operator
+  decides to.
 
 ### Phase 9 — Server: Lua sandbox and packet schema
 - [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `math`,
@@ -808,6 +868,45 @@ zero matches before 7B.
         Needs a `_WIN32` branch.
       Fix is guarded by proper `#ifdef _WIN32` / SDK include order
       in Platform.h, not in scope for any of Phases 4–9.
+
+### Phase 11 — SQL injection remediation (deferred from Phase 8)
+Deferred 2026-04-18 from Phase 8 after scope audit showed 625
+`executeQuery("…%[sd]…")` call sites (not the ~87 originally
+estimated) and zero existing `mysql_stmt_*` infrastructure to
+migrate onto. Two sub-phases:
+
+- [ ] **11.1 — `PreparedStatement` wrapper API.** One-off design
+      work. Expected shape (not binding):
+      ```cpp
+      class PreparedStatement {
+      public:
+          PreparedStatement(Connection*, const string& sqlWithQMarks);
+          void bindInt   (int idx, int v);
+          void bindLong  (int idx, long v);
+          void bindString(int idx, const string& v);
+          void bindTime  (int idx, time_t t);
+          Result* execute();
+          ~PreparedStatement();
+      };
+      ```
+      Wraps `mysql_stmt_init` / `mysql_stmt_prepare` /
+      `mysql_stmt_bind_param` / `mysql_stmt_execute` /
+      `mysql_stmt_bind_result` / `mysql_stmt_fetch`. Lives in
+      `dkrixserver/src/server/database/PreparedStatement.{h,cpp}`.
+      Should be testable against a real MySQL instance before
+      being handed to 11.2. Blocker for 11.2.
+- [ ] **11.2 — Migrate 625 injection-shaped call sites.** Ongoing
+      module-by-module work after 11.1 lands. Priority order:
+      1. User-string interpolation sites (chat, say, whisper, pet
+         names, custom options) — ~180 sites, biggest blast radius.
+      2. Operator-trusted interpolation (admin commands, log
+         lookups) — ~200 sites, lower risk but still value from
+         uniformity.
+      3. Constant / numeric-only interpolation (IDs, enums cast
+         to int) — remainder, pure hygiene.
+      The CI gate from Phase 8C will drive the count down as
+      migrations land. When the baseline reaches 0, the gate flips
+      from "count didn't grow" to "zero matches".
 
 ## Explicit non-goals
 
