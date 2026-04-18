@@ -45,12 +45,6 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
 
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
 
     GCGuildResponse gcGuildResponse;
 

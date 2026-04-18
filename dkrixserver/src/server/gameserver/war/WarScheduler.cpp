@@ -140,13 +140,9 @@ void WarScheduler::load()
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery(
-#ifndef __OLD_GUILD_WAR__
             "SELECT WarID, WarType, AttackerCount, AttackGuildID, AttackGuildID2, AttackGuildID3, AttackGuildID4, "
             "AttackGuildID5, "
             "WarFee, StartTime FROM WarScheduleInfo "
-#else
-            "SELECT WarID, WarType, AttackGuildID, WarFee, StartTime FROM WarScheduleInfo "
-#endif
             "WHERE ServerID = %u AND ZoneID = %u AND ( Status = 'WAIT' OR Status = 'START' ) "
             "ORDER BY StartTime",
             g_pConfig->getPropertyInt("ServerID"), (int)m_pZone->getZoneID());
@@ -154,12 +150,8 @@ void WarScheduler::load()
         if (pResult->getRowCount() > 0) {
             WarID_t warID;
             WarType_t warType;
-#ifndef __OLD_GUILD_WAR__
             uint challengerNum;
             GuildID_t challengerGuildID[5];
-#else
-            GuildID_t challengerGuildID;
-#endif
             Gold_t warRegistrationFee;
             string dateTemp;
             VSDateTime warStartTime;
@@ -176,15 +168,11 @@ void WarScheduler::load()
                     continue; // warType = WAR_RACE;
                 else
                     Assert(false);
-#ifndef __OLD_GUILD_WAR__
                 challengerNum = pResult->getInt(++i);
 
                 for (int j = 0; j < 5; ++j) {
                     challengerGuildID[j] = (GuildID_t)pResult->getInt(++i);
                 }
-#else
-                challengerGuildID = (GuildID_t)pResult->getInt(++i);
-#endif
 
                 warRegistrationFee = (Gold_t)pResult->getInt(++i);
                 dateTemp = pResult->getString(++i);
@@ -195,15 +183,10 @@ void WarScheduler::load()
                     warStartTime = currentDateTime;
                 }
 
-#ifndef __OLD_GUILD_WAR__
                 SiegeWar* pWar = new SiegeWar(m_pZone->getZoneID(), War::WAR_STATE_WAIT, warID);
-#else
-                GuildWar* pWar = new GuildWar(m_pZone->getZoneID(), challengerGuildID, War::WAR_STATE_WAIT, warID);
-#endif
                 pWar->setWarStartTime(warStartTime);
                 pWar->setRegistrationFee(warRegistrationFee);
 
-#ifndef __OLD_GUILD_WAR__
                 pResult = pStmt->executeQuery(
                     "SELECT ReinforceGuildID FROM ReinforceRegisterInfo WHERE WarID=%u AND Status='ACCEPT'", warID);
 
@@ -214,7 +197,6 @@ void WarScheduler::load()
                 for (int j = 0; j < challengerNum; ++j) {
                     pWar->addChallengerGuild(challengerGuildID[j]);
                 }
-#endif
 
                 WarSchedule* pWarSchedule = new WarSchedule(pWar, warStartTime, Schedule::SCHEDULE_TYPE_ONCE);
                 addSchedule(pWarSchedule);
@@ -459,18 +441,10 @@ bool WarScheduler::hasSchedule(GuildID_t gID) {
 
         War* pWar = dynamic_cast<War*>(pSchedule->getWork());
         if (pWar != NULL && pWar->getWarType() == WAR_GUILD) {
-#ifndef __OLD_GUILD_WAR__
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
             if (pSiegeWar != NULL && pSiegeWar->isWarParticipant(gID) && pSiegeWar->getState() == War::WAR_STATE_WAIT) {
                 return true;
             }
-#else
-            GuildWar* pGuildWar = dynamic_cast<GuildWar*>(pWar);
-            if (pGuildWar != NULL && pGuildWar->getChallangerGuildID() == gID &&
-                pGuildWar->getState() == War::WAR_STATE_WAIT) {
-                return true;
-            }
-#endif
         }
     }
 

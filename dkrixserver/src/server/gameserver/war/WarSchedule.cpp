@@ -102,13 +102,8 @@ void WarSchedule::create()
     if (pWar->getWarType() != WAR_GUILD)
         return;
 
-#ifndef __OLD_GUILD_WAR__
     SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
     Assert(pSiegeWar != NULL);
-#else
-    GuildWar* pSiegeWar = dynamic_cast<GuildWar*>(pWar);
-    Assert(pSiegeWar != NULL);
-#endif
 
     Statement* pStmt = NULL;
 
@@ -135,7 +130,6 @@ void WarSchedule::create()
     __END_CATCH
 }
 
-#ifndef __OLD_GUILD_WAR__
 void WarSchedule::save()
 
 {
@@ -177,7 +171,6 @@ void WarSchedule::save()
 
     __END_CATCH
 }
-#endif
 
 void WarSchedule::tinysave(const string& query)
 
