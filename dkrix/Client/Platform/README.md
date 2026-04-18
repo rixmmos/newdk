@@ -86,7 +86,7 @@ cmake --build build
 ### 输入系统
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 // 初始化
 dxlib_input_init(window_handle);
@@ -120,7 +120,7 @@ dxlib_input_release();
 ### 音效系统
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 // 初始化
 dxlib_sound_init(window_handle);
@@ -147,7 +147,7 @@ dxlib_sound_release();
 ### 音乐系统
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 // 初始化
 dxlib_music_init(window_handle);

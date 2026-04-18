@@ -7,7 +7,7 @@
 #ifdef PLATFORM_WINDOWS
 #include "DXLib\CSDLAudio.h"
 #else
-#include "DXLib/CSDLAudio.h"
+#include "Platform/CSDLAudio.h"
 #endif
 #include "debuginfo.h"
 #include <math.h>

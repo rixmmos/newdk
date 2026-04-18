@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 # DXLib Library - DirectX abstraction with backend selection
 # Supports both Windows DirectX and SDL2 backends
 
-project(dxlib)
+project(platform)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -93,10 +93,10 @@ if(WIN32 AND NOT USE_SDL_BACKEND)
 endif()
 
 # Create library
-add_library(dxlib STATIC ${DXLIB_SOURCES})
+add_library(platform STATIC ${DXLIB_SOURCES})
 
 # Public include directories
-target_include_directories(dxlib
+target_include_directories(platform
 	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_SOURCE_DIR}/basic  # For platform abstraction
@@ -105,29 +105,29 @@ target_include_directories(dxlib
 # Link SDL2 if using SDL backend
 if(USE_SDL_BACKEND OR NOT WIN32)
 	if(TARGET SDL2::SDL2)
-		target_link_libraries(dxlib PUBLIC SDL2::SDL2)
+		target_link_libraries(platform PUBLIC SDL2::SDL2)
 	else()
-		target_link_libraries(dxlib PUBLIC ${SDL2_LIBRARIES})
-		target_include_directories(dxlib PUBLIC ${SDL2_INCLUDE_DIRS})
+		target_link_libraries(platform PUBLIC ${SDL2_LIBRARIES})
+		target_include_directories(platform PUBLIC ${SDL2_INCLUDE_DIRS})
 	endif()
 
 	# Link SDL2_mixer if available
 	if(HAVE_SDL2_MIXER)
 		if(TARGET SDL2::SDL2_mixer)
-			target_link_libraries(dxlib PUBLIC SDL2::SDL2_mixer)
+			target_link_libraries(platform PUBLIC SDL2::SDL2_mixer)
 		else()
-			target_link_libraries(dxlib PUBLIC ${SDL2_MIXER_LIBRARIES})
-			target_include_directories(dxlib PUBLIC ${SDL2_MIXER_INCLUDE_DIRS})
+			target_link_libraries(platform PUBLIC ${SDL2_MIXER_LIBRARIES})
+			target_include_directories(platform PUBLIC ${SDL2_MIXER_INCLUDE_DIRS})
 		endif()
 	endif()
 endif()
 
 # Link basic library for platform abstraction
-target_link_libraries(dxlib PUBLIC basic)
+target_link_libraries(platform PUBLIC basic)
 
 # Windows-specific libraries
 if(WIN32 AND NOT USE_SDL_BACKEND)
-	target_link_libraries(dxlib PUBLIC
+	target_link_libraries(platform PUBLIC
 		dinput8
 		dsound
 		dxguid
@@ -136,7 +136,7 @@ if(WIN32 AND NOT USE_SDL_BACKEND)
 endif()
 
 # Installation
-install(TARGETS dxlib
+install(TARGETS platform
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 )
@@ -149,7 +149,7 @@ install(FILES
 	CSDLAudio.h
 	CSDLMusic.h
 	CSDLStream.h
-	DESTINATION include/dxlib
+	DESTINATION include/platform
 )
 
 # Build options message

@@ -5,7 +5,7 @@
 #include "dxlib/CSDLAudio.h"
 #else
 #include "../../basic/Platform.h"
-#include "DXLib/CSDLAudio.h"
+#include "Platform/CSDLAudio.h"
 #endif
 #include "CMP3.h"
 #include "DebugInfo.h"

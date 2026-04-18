@@ -6,7 +6,7 @@
 #include "MPlayer.h"
 #include "MJusticeAttackManager.h"
 #include "InputService.h"
-#include "DXLib/CSDLInput.h"
+#include "Platform/CSDLInput.h"
 #include "MEventManager.h"
 #include "MWarManager.h"
 #include "MZone.h"

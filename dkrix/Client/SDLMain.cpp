@@ -42,7 +42,7 @@
 #include "MPlayer.h"
 #include "../basic/Platform.h"
 #include "Packet/Exception.h"  // For NoSuchElementException, Throwable
-#include "DXLib/DXLibBackend.h"  // For dxlib_input_update
+#include "Platform/DXLibBackend.h"  // For dxlib_input_update
 
 // Language detection
 enum DARKEDEN_LANGUAGE

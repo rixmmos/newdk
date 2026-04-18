@@ -36,7 +36,7 @@
 #include "ClientFunction.h"
 #include "MMusic.h"
 #include "InputService.h"  // For DIK_* key code definitions
-#include "DXLib/CSDLInput.h"
+#include "Platform/CSDLInput.h"
 #include "MZoneSoundManager.h"
 #include "TempInformation.h"
 #include "MFakeCreature.h"
