@@ -1024,15 +1024,56 @@ Deployment notes for operators:
    the dispatch table. Error message names slot index + value +
    legal range for quick triage.
 
-### Phase 10 — Build hygiene & CI
-- [ ] Add `.clang-format` to `client/`; implement
-      `make fmt` / `fmt-check` (remove the TODO stubs).
+### Phase 10 — Build hygiene & CI — plan 2026-04-19
+- [ ] Add `.clang-format` to `dkrix/` and a `Makefile` with
+      `fmt` / `fmt-check` / `fmt-check-all` targets mirroring
+      the server Makefile. **Scope audit (2026-04-19):** client
+      tree has no `.clang-format` today and no `Makefile`
+      (only `build_and_run_effect_viewer.sh`). The "remove the
+      TODO stubs" phrasing in the original plan was aspirational
+      — there are no actual `TODO`-marked fmt stubs in the
+      client tree. Tractable in one commit: copy the server's
+      `.clang-format` (tested, 1468-byte LLVM-derived config
+      already used in production), add a client `Makefile` with
+      the same `fmt` / `fmt-check` / `fmt-check-all` targets.
+- [ ] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
+      editor detritus, and `git rm --cached` the one tracked
+      `compile_commands.json`. **Scope audit (2026-04-19):** gap
+      map is narrow — client `.gitignore` has `compile_commands.json`
+      and `.cache` but is missing `.vscode/` / `.idea/` / `*.swp` /
+      `*.swo` / `*~`; server `.gitignore` has `.vscode/` / `.idea/`
+      / editor swap files but is missing `.cache` / `compile_commands.json`.
+      Client tree also has `dkrix/Client/compile_commands.json`
+      (3.3 MB) tracked in spite of its own `.gitignore` rule —
+      added before the rule existed (see `df4895e`). Needs
+      `git rm --cached`. Single commit.
 - [ ] Replace `file(GLOB …)` with explicit source lists in the
-      client CMake.
+      client CMake. **Scope audit (2026-04-19) — DEFERRED TO
+      PHASE 14.** Two `file(GLOB)` call sites in
+      `dkrix/CMakeLists.txt`: line 163 globs `VS_UI/src/*.cpp` +
+      `VS_UI/*.cpp` (56 files), line 482 globs `Client/*.cpp` +
+      `Client/Packet/*.cpp` + `Client/Packet/**/*.cpp` +
+      `Client/SXml/*.cpp` + `Client/WinLib/*.cpp` (1045 files).
+      Explicit listing means enumerating ~1100 files in CMake —
+      doable but noisy, and every new `.cpp` becomes a CMake
+      edit. Has real value (CMake doesn't re-glob on incremental
+      builds, so adding a file requires reconfiguring), but not
+      a single-commit change. Booked as Phase 14.
 - [ ] Add a GitHub Actions matrix that runs `make debug-asan` on
-      Linux and macOS.
-- [ ] Both trees: `.gitignore` for `build/`,
-      `compile_commands.json`, editor detritus.
+      Linux and macOS. **Scope audit (2026-04-19) — DEFERRED TO
+      PHASE 15.** Server has one workflow today
+      (`.github/workflows/format-check.yml` — clang-format diff
+      gate); client has no `.github/` directory. Neither tree
+      has a `make debug-asan` target (server Makefile has `debug`
+      without sanitizers; the client has no Makefile). Building
+      requires: (a) adding `debug-asan` Makefile targets that
+      forward to cmake's `-DUSE_ASAN=ON`, (b) CI runner install
+      scripts for every transitive dep (MySQL headers + libmysql
+      for server, SDL2 + Lua 5.1 + libpng + libjpeg for client),
+      (c) the matrix workflow YAML, (d) deciding what counts as
+      a passing build given the tree still has MSVC-unsuitable
+      files (see the Windows MSVC deferral below). Not a single-
+      commit change. Booked as Phase 15.
 - [ ] **Windows MSVC build** — the SDL backend port was never
       validated on MSVC; attempting a build on Windows during 4A
       verification surfaced ~2,700 pre-existing errors, all
@@ -1050,7 +1091,88 @@ Deployment notes for operators:
       - `Client/DebugLog.cpp` includes `sys/time.h` (1 error).
         Needs a `_WIN32` branch.
       Fix is guarded by proper `#ifdef _WIN32` / SDK include order
-      in Platform.h, not in scope for any of Phases 4–9.
+      in Platform.h, not in scope for any of Phases 4–10.
+
+**Plan (sub-commits):**
+
+- **10A — Pin corrected plan.** (This commit.) Records the audit
+  findings that narrow Phase 10 to the two cheap wins (client
+  clang-format + fmt targets, gitignore unification) and books
+  the two expensive items (explicit CMake source lists, CI
+  matrix) as Phase 14 and Phase 15.
+- **10B — Client clang-format + Makefile fmt targets.** Copy
+  `dkrixserver/.clang-format` to `dkrix/.clang-format`; add
+  `dkrix/Makefile` with `fmt` / `fmt-check` / `fmt-check-all`
+  targets wrapping `clang-format` over `Client/` + `VS_UI/` +
+  `basic/`. Does NOT run clang-format over the tree in this
+  commit — format-fixing the ~1100-file client tree in a single
+  commit would obliterate `git blame` for the next five years.
+  The tool + recipe ship now; operators choose when to apply.
+- **10C — gitignore unification + un-track stray
+  compile_commands.json.** Fill in the missing rules on each
+  side (client: editor detritus; server: `.cache` +
+  `compile_commands.json`). `git rm --cached
+  dkrix/Client/compile_commands.json` to stop tracking the
+  stale 3.3 MB artifact; `.gitignore` rule keeps it from being
+  re-added.
+- **10D — Close-out.** Flip this block to `done`, outcome
+  block, commit table, explicit deferral record for Phase 14 +
+  Phase 15.
+
+**Explicit non-goals for Phase 10:**
+
+- **Running clang-format over the client tree.** Tool ships,
+  blame-preserving choice to apply is operator's. A bulk-format
+  commit is an independent operational decision.
+- **Replacing `file(GLOB)` in client CMake.** See Phase 14.
+- **CI build matrix.** See Phase 15.
+- **Windows MSVC build.** Still deferred (see block above).
+
+### Phase 14 — Explicit CMake source lists (deferred from Phase 10)
+Deferred 2026-04-19 from Phase 10 after scope audit showed two
+`file(GLOB)` sites in `dkrix/CMakeLists.txt` together covering
+~1100 `.cpp` files. CMake globs are not re-evaluated on
+incremental builds — adding a new source file silently fails
+to compile until the next `cmake` reconfigure — so the payoff
+is real (deterministic builds, no mystery-silent-miss), but the
+cost is noise (every new `.cpp` becomes a CMake edit).
+
+- [ ] Replace `file(GLOB_RECURSE VS_UI_SRC_SOURCES
+      VS_UI/src/*.cpp VS_UI/*.cpp)` at
+      `dkrix/CMakeLists.txt:163` with an explicit list of the
+      56 files. Keep the `list(FILTER EXCLUDE)` windows-specific
+      drops in place — those are independent of how the list is
+      built.
+- [ ] Replace the larger `file(GLOB CLIENT_MAIN_SOURCES
+      Client/*.cpp Client/Packet/*.cpp Client/Packet/**/*.cpp
+      Client/SXml/*.cpp Client/WinLib/*.cpp)` at
+      `dkrix/CMakeLists.txt:482` with an explicit list of the
+      ~1045 files. Largest source list in the tree.
+- [ ] Document the "add a new `.cpp` → edit CMakeLists.txt"
+      workflow in `dkrix/CLAUDE.md` so future contributors
+      don't hit the silent-miss trap the globs used to hide.
+
+### Phase 15 — CI build matrix (deferred from Phase 10)
+Deferred 2026-04-19 from Phase 10. Server has one workflow today
+(clang-format diff gate); client has no CI. Adding a real build
+matrix means landing infrastructure, not just a YAML file.
+
+- [ ] Add `debug-asan`, `debug-tsan`, `debug-ubsan` Makefile
+      targets to both trees that forward to CMake with the
+      existing `USE_ASAN` / `USE_TSAN` / `USE_UBSAN` options
+      already wired in `dkrix/CMakeLists.txt:23-25`.
+- [ ] Script the server's CI toolchain install: `libmysqlclient-dev`,
+      `liblua5.1-0-dev`, `libboost-dev` (which headers the server
+      actually consumes needs a sub-audit).
+- [ ] Script the client's CI toolchain install: `libsdl2-dev`,
+      `libsdl2-mixer-dev`, `libsdl2-image-dev`, `liblua5.1-0-dev`,
+      `libpng-dev`, `libjpeg-dev`, plus macOS `brew install`
+      equivalents.
+- [ ] Write `.github/workflows/build.yml` at the repo root (not
+      per-tree) with a matrix `{os: [ubuntu-latest, macos-latest],
+      sanitizer: [none, asan, ubsan]}`. Keep TSan out of the
+      default matrix — runs slower and produces too much noise
+      on an un-audited codebase.
 
 ### Phase 11 — SQL injection remediation (deferred from Phase 8)
 Deferred 2026-04-18 from Phase 8 after scope audit showed 625
