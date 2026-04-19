@@ -1384,7 +1384,7 @@ Deployment notes for operators:
    before and after Phase 14. The 14B VS_UI swap was
    verified byte-for-byte via `find | sort`.
 
-### Phase 15 — CI build matrix — plan 2026-04-19
+### Phase 15 — CI build matrix — done 2026-04-19
 Deferred 2026-04-19 from Phase 10. Server has one workflow today
 (clang-format diff gate); client has no CI. Adding a real build
 matrix means landing infrastructure, not just a YAML file.
@@ -1426,7 +1426,7 @@ matrix means landing infrastructure, not just a YAML file.
 
 **Corrected plan items:**
 
-- [ ] **Server CMake sanitizer wiring.** Add
+- [x] **Server CMake sanitizer wiring.** Add
       `option(USE_ASAN ...)` / `option(USE_TSAN ...)` /
       `option(USE_UBSAN ...)` and the `SANITIZER_FLAGS`
       pipeline to `dkrixserver/CMakeLists.txt`, mirroring the
@@ -1434,36 +1434,36 @@ matrix means landing infrastructure, not just a YAML file.
       same flag strings (`-fsanitize=address
       -fno-omit-frame-pointer`, `-fsanitize=thread`,
       `-fsanitize=undefined`) and the same CMAKE_CXX/C_FLAGS
-      application.
-- [ ] **Sanitizer Makefile targets, both trees.**
+      application. **Shipped in 15B (`9f3a860`)**: +39 lines,
+      verbatim copy of client block with an extra `message
+      (WARNING ...)` on unknown compilers.
+- [x] **Sanitizer Makefile targets, both trees.**
       `debug-asan`, `debug-tsan`, `debug-ubsan` targets that
-      invoke `cmake -B build -DCMAKE_BUILD_TYPE=Debug
-      -DUSE_<SAN>=ON && cmake --build build`. Server has
-      existing `debug` / `release` targets to base from;
-      client's fmt-only Makefile grows `debug` / `release` /
-      `debug-asan` / `debug-tsan` / `debug-ubsan` from
-      scratch.
-- [ ] **Server CI toolchain install script.** `apt install -y
-      build-essential libxerces-c-dev libmysqlclient-dev
-      liblua5.1-dev` (matches Dockerfile.dev). No boost, no
-      sdl2 — pure server deps.
-- [ ] **Client CI toolchain install script.** Ubuntu: `apt
-      install -y build-essential libsdl2-dev libsdl2-image-dev
-      libsdl2-ttf-dev libsdl2-mixer-dev libjpeg-dev`. macOS:
-      `brew install sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg`.
-      iconv is in glibc on Linux and in libiconv on macOS
-      (homebrew's is keg-only but CMake already knows where
-      to look).
-- [ ] **Per-tree `build.yml` workflows.** Each tree gets its
+      invoke `cmake -B build-<san> -DCMAKE_BUILD_TYPE=Debug
+      -DUSE_<SAN>=ON && cmake --build build-<san>`. Each
+      sanitizer uses its own build dir so switches don't
+      reconfigure. Client's fmt-only Makefile grew `debug` /
+      `release` / `clean` from scratch. **Shipped in 15C
+      (`e224e77`)**: server +38 / client +72 lines.
+- [x] **Server CI toolchain install script.** `apt install -y
+      build-essential cmake pkg-config libxerces-c-dev
+      libmysqlclient-dev liblua5.1-dev` (matches Dockerfile.dev
+      plus cmake/pkg-config defensively). No boost, no sdl2 —
+      pure server deps. **Shipped in 15D (`4712a0b`)**.
+- [x] **Client CI toolchain install script.** Ubuntu: `apt
+      install -y build-essential cmake pkg-config libsdl2-dev
+      libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
+      libjpeg-dev`. macOS: `brew install sdl2 sdl2_image
+      sdl2_ttf sdl2_mixer jpeg`. iconv is in glibc on Linux
+      and libiconv is handled by the existing CMake probe on
+      macOS. **Shipped in 15E (`3ac9f61`)**.
+- [x] **Per-tree `build.yml` workflows.** Each tree gets its
       own `.github/workflows/build.yml`. Server: `{os:
-      [ubuntu-latest], sanitizer: [none, asan, ubsan]}` —
-      Ubuntu-only because MySQL + Xerces-C on macOS is a
-      homebrew pathing rabbit hole not worth the CI
-      complexity in this phase. Client: `{os: [ubuntu-latest,
-      macos-latest], sanitizer: [none, asan, ubsan]}` —
-      client already has working homebrew paths in
-      `dkrix/CMakeLists.txt`. TSan excluded from default
-      matrix (slower + noisier on an un-audited codebase).
+      [ubuntu-latest], sanitizer: [none, asan, ubsan]}` — 3
+      jobs. Client: `{os: [ubuntu-latest, macos-latest],
+      sanitizer: [none, asan, ubsan]}` — 6 jobs. TSan
+      excluded from default matrix (still runnable locally
+      via `make debug-tsan`). **Shipped in 15D + 15E**.
 
 **Plan (sub-commits):**
 
@@ -1515,6 +1515,90 @@ matrix means landing infrastructure, not just a YAML file.
   connections or the client opens a window needs real
   service deps (MySQL, SDL2 video sink, X11/Wayland) that
   are awkward in CI — separate problem.
+
+**Outcome (2026-04-19):**
+
+| #    | Commit    | Subject                                                                       |
+| ---- | --------- | ----------------------------------------------------------------------------- |
+| 0001 | `d830799` | `docs: pin Phase 15 plan (CI build matrix, with scope corrections)`           |
+| 0002 | `9f3a860` | `server: 15B — USE_ASAN/TSAN/UBSAN options + sanitizer flags`                 |
+| 0003 | `e224e77` | `15C — Makefile sanitizer + build targets (server + client)`                  |
+| 0004 | `4712a0b` | `server: 15D — GitHub Actions build matrix (ubuntu + sanitizers)`             |
+| 0005 | `3ac9f61` | `client: 15E — GitHub Actions build matrix (ubuntu + macos × sanitizers)`     |
+| 0006 | `15ea8e2` | `docs: 15F — close out Phase 15 in MODERNIZATION.md`                          |
+
+Net delta: **+440 lines / -34 lines across 6 files**
+(`docs/MODERNIZATION.md` +144/-17 across 15A+15F,
+`dkrixserver/CMakeLists.txt` +39/-0,
+`dkrix/Makefile` +72/-17,
+`dkrixserver/Makefile` +38/-17,
+`dkrixserver/.github/workflows/build.yml` +74 new,
+`dkrix/.github/workflows/build.yml` +107 new). All new
+files; zero source-code edits.
+
+What shipped
+------------
+
+- **Shipped (15B):** Sanitizer plumbing added to
+  `dkrixserver/CMakeLists.txt` — three options
+  (`USE_ASAN` / `USE_TSAN` / `USE_UBSAN`) plus a
+  compiler-guarded flags pipeline verbatim copy of the
+  client block at `dkrix/CMakeLists.txt:28-56`. Default
+  OFF; no build behavior change without explicit opt-in.
+- **Shipped (15C):** Makefile sanitizer targets on both
+  trees. Server gains `debug-asan` / `debug-tsan` /
+  `debug-ubsan` (it already had `debug` / `release`);
+  client's previously format-only Makefile gains `debug` /
+  `release` / `clean` plus the three sanitizer variants.
+  Each sanitizer uses a dedicated build dir
+  (`build-asan` / `build-tsan` / `build-ubsan`) so
+  switching between them doesn't force a reconfigure.
+- **Shipped (15D):** Server `.github/workflows/build.yml`.
+  Matrix `{sanitizer: [none, asan, ubsan]}` on
+  ubuntu-latest. Deps from Dockerfile.dev
+  (`build-essential libxerces-c-dev libmysqlclient-dev
+  liblua5.1-dev`) plus `cmake` / `pkg-config` defensively.
+  Verify step confirms `bin/` is non-empty after build.
+  Triggers on PR + push to master.
+- **Shipped (15E):** Client `.github/workflows/build.yml`.
+  Matrix `{os: [ubuntu-latest, macos-latest],
+  sanitizer: [none, asan, ubsan]}` — 6 jobs. Branching
+  dep-install: apt for Linux, `brew` for macOS
+  (`sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg`). Verify
+  step reads the per-sanitizer build dir and confirms
+  `DarkEden` executable landed.
+
+Deployment notes for operators:
+
+1. **Nothing breaks on pull.** Default OFF on all
+   `USE_<SAN>=ON` options; `make` on server still runs
+   debug build; client's `make` default changed from
+   `help` to `debug` (now actually builds instead of
+   printing a menu). If you were relying on `make` doing
+   nothing in the client tree, use `make help`.
+2. **Client needs SDL2 installed to build.** The new
+   client Makefile targets invoke cmake, which does
+   `find_package(SDL2 REQUIRED)`. If your local dev
+   setup didn't have SDL2 before (because you only ever
+   ran `make fmt`), install it via your OS package
+   manager before running `make debug`.
+3. **`.github/workflows/build.yml` triggers on PR to
+   master and push to master.** If either repo has
+   branch-protection rules, add the new matrix job names
+   (build (none) / build (asan) / build (ubsan) /
+   build (ubuntu-latest, none) / etc.) to required
+   checks once the first run has gone green.
+4. **First CI run will be slow.** No caching yet — every
+   PR reinstalls deps and does a full build from scratch.
+   Phase 15 deliberately didn't add caching (see non-
+   goals). A future phase can layer `actions/cache@v4`
+   on top of the existing matrix without touching 15's
+   structure.
+5. **macOS runners have monthly billing quotas.** If
+   running against a private repo, the 6-job client
+   matrix × macOS surface will eat minutes fast. Public
+   repos get unlimited macOS runner time on GitHub-
+   hosted runners.
 
 ### Phase 11 — SQL injection remediation (deferred from Phase 8)
 Deferred 2026-04-18 from Phase 8 after scope audit showed 625
