@@ -882,16 +882,81 @@ Deployment notes for operators:
    connect or IP dial will then fail visibly rather than the
    server silently reading an empty credential.
 
-### Phase 9 — Server: Lua sandbox and packet schema
-- [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `math`,
-      `string`); drop `io`.
+### Phase 9 — Server: Lua sandbox and packet schema — plan 2026-04-19
+- [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `table`,
+      `string`, `math`); drop `io`, `os`, `debug`, `package`,
+      `coroutine`. **Scope audit (2026-04-19):** single call site
+      at `dkrixserver/src/server/gameserver/quest/luaScript/LuaState.cpp:27`.
+      Tractable in one commit.
 - [ ] Wrap every `lua_to*` → enum cast in a range-checked helper.
-- [ ] Share packet definitions between client and server: either a
-      git submodule of `src/Core/Packets/` consumed by both, or a
-      generated file from a small schema (pick when we get there,
-      record the decision here).
+      **Scope audit (2026-04-19):** only four call sites, all in
+      `LuaSelectItem.cpp::executeFile()` (lines 21–24, reading
+      `ItemClass` / `ItemType` / `OptionType` / `OptionType2` from
+      the Lua stack via `lua_tonumber` + C-style cast). Tractable
+      in one commit.
+- [ ] Share packet definitions between client and server.
+      **Scope audit (2026-04-19) — DEFERRED TO PHASE 12.** The
+      current state is 149 `.cpp/.h` files under
+      `dkrix/Client/Packet/` plus another 326 under
+      `dkrix/Client/Packet/Cpackets/`, near-duplicated against
+      ~800 matching files under `dkrixserver/src/Core/` (CG*, GC*,
+      CL*, LC*, GS*, SG*, GT*, TG*). Spot-check of
+      `CGAbsorbSoul.{h,cpp}` shows the pair differs only in
+      whitespace, exception-spec, and comment formatting — the
+      wire format is identical. Unifying them requires either:
+      (a) promoting one tree to canonical + deleting the other +
+      adjusting both builds, or (b) extracting a third shared
+      submodule. Both are multi-day projects. Booked as Phase 12.
 - [ ] Add endian-safe read/write primitives in
       `SocketInputStream` / `SocketOutputStream`.
+      **Scope audit (2026-04-19) — DEFERRED TO PHASE 13.** The
+      current `template<T> read(T&)` does `buf = *(T*)(m_Buffer +
+      m_Head)` — a raw host-endian cast
+      (`dkrixserver/src/Core/SocketInputStream.h:159`). Zero
+      `ntoh*/hton*/htobe*/betoh*` calls in the tree. Both server
+      and desktop client are x86 little-endian, so wire format is
+      implicitly "LE host order, same as everyone else on the
+      wire." Making this endian-safe requires: (1) choosing a
+      wire byte order (LE keeps compat, BE breaks every existing
+      client build), (2) adding `htole*`/`le*toh` wrappers around
+      every primitive read/write, (3) deciding what to do about
+      struct-copy reads like `buf = *(Packet*)(buffer)` which
+      happen inside the packet classes themselves, not just the
+      stream API. Not a single-commit change. Booked as Phase 13.
+
+**Plan (sub-commits):**
+
+- **9A — Pin corrected plan.** (This commit.) Records the audit
+  findings that shrink Phase 9 to just the two cheap wins (Lua
+  sandbox + lua_to* wrappers) and books the two expensive items
+  (packet sharing, endian-safe I/O) as separate phases.
+- **9B — Lua library whitelist.** Replace the single
+  `luaL_openlibs(m_pState)` call in
+  `dkrixserver/src/server/gameserver/quest/luaScript/LuaState.cpp`
+  with explicit `luaopen_base` / `luaopen_table` / `luaopen_string`
+  / `luaopen_math` via the Lua 5.1 `lua_pushcfunction` + `lua_call`
+  idiom. Drop `io`, `os`, `debug`, `package`, `coroutine`. Quest
+  scripts run in a locked-down VM that can't touch the filesystem,
+  spawn processes, or escape via `require`.
+- **9C — lua_to* range-checked enum helper.** New
+  `lua_toboundedenum<T>(L, idx, min, max)` inline template in
+  `LuaState.h` that throws `InvalidProtocolException` on out-of-
+  range values. Migrate the four `(Enum)lua_tonumber(...)` sites
+  in `LuaSelectItem.cpp::executeFile`.
+- **9D — Close-out.** Flip this block to `done`, outcome block,
+  commit table, explicit deferral record for Phase 12 + Phase 13.
+
+**Explicit non-goals for Phase 9:**
+
+- **Packet schema unification.** See Phase 12 block below for
+  the full scope. 9 doesn't touch either packet tree.
+- **Endian-safe socket stream primitives.** See Phase 13 block
+  below. 9 leaves the existing raw-cast `read<T>` / write paths
+  untouched.
+- **Sandboxing beyond library whitelist.** No instruction count
+  cap, no memory ceiling, no `lua_setreadonly` on globals —
+  those are policy knobs that need a test harness to exercise,
+  and are out of scope here.
 
 ### Phase 10 — Build hygiene & CI
 - [ ] Add `.clang-format` to `client/`; implement
@@ -964,6 +1029,70 @@ migrate onto. Two sub-phases:
       The CI gate from Phase 8C will drive the count down as
       migrations land. When the baseline reaches 0, the gate flips
       from "count didn't grow" to "zero matches".
+
+### Phase 12 — Packet schema unification (deferred from Phase 9)
+Deferred 2026-04-19 from Phase 9 after scope audit. Today the
+packet definitions live in two places:
+
+- `dkrix/Client/Packet/` (149 files) + `dkrix/Client/Packet/Cpackets/`
+  (326 files) on the client side.
+- `dkrixserver/src/Core/` — ~800 `CG*/GC*/CL*/LC*/GS*/SG*/GT*/TG*`
+  `.cpp`/`.h` pairs mixed with the server-side `*Handler.cpp`
+  files.
+
+Spot-check diff on `CGAbsorbSoul.{h,cpp}` pair shows the two
+copies differ only in whitespace, exception-specs, and comment
+formatting — byte layout on the wire is identical. So the
+duplication is a maintenance burden, not a protocol divergence.
+
+- [ ] **12.1 — Canonicalise one tree + delete the other.**
+      Pick the server copy as canonical (it's the more-edited
+      tree and has richer `*Handler.cpp` companions). Move
+      `dkrixserver/src/Core/*{CG,GC,CL,LC,GS,SG,GT,TG}*.{cpp,h}`
+      to a new `shared/Packets/` at the repo root. Rewrite both
+      builds to consume it.
+- [ ] **12.2 — Strip client-tree duplicates + fix includes.**
+      Delete `dkrix/Client/Packet/Cpackets/` and any file in
+      `dkrix/Client/Packet/` whose name matches a moved file.
+      Update client `#include` paths to the new location.
+- [ ] **12.3 — CI structural check.** A grep-gate that fails if
+      a matching-name pair ever reappears in both trees.
+
+Blocker: Phase 10 (build hygiene) should land first — moving
+headers triggers CMake glob updates and the client still uses
+`file(GLOB)` today.
+
+### Phase 13 — Endian-safe wire I/O (deferred from Phase 9)
+Deferred 2026-04-19 from Phase 9. Current state: the socket
+stream API's `template<T> read(T&)` does `buf = *(T*)(buffer +
+head)` — host-endian raw cast. Works everywhere on x86 (server +
+desktop client both LE), but quietly breaks on any BE port and
+gives no protection against partial-struct tears if `T` is a
+compound type.
+
+- [ ] **13.1 — Pick and document a wire byte order.** LE keeps
+      compatibility with every existing client binary. BE is
+      "network order" but would require every deployed client to
+      be rebuilt and re-shipped. Default recommendation: LE, with
+      explicit `htole*` / `le*toh` wrappers documenting the
+      choice. Decision gets recorded here when taken.
+- [ ] **13.2 — Add endian-safe primitives.** Inline helpers in
+      `Core/Endian.h` wrapping `htole16/32/64` +
+      `le16/32/64toh`. For platforms without `<endian.h>`
+      (macOS, mingw), provide an `#ifdef` fallback using byte-
+      swap intrinsics.
+- [ ] **13.3 — Migrate the primitive reads/writes.** The
+      `read<T>` / write<T> templates become `read/write` of
+      primitive types routing through the helpers; compound
+      types continue to use memberwise `read`/`write` of their
+      fields (packet classes already do this pattern manually).
+- [ ] **13.4 — Audit for remaining raw casts.** Any surviving
+      `*(T*)(...)` over stream-buffer memory gets a CI grep-gate
+      similar to 8C's SQL-injection ratchet, pinned to 0 once
+      13.3 lands.
+
+Blocker: Phase 12 (packet unification) should land first so the
+migration only edits one copy of each packet class.
 
 ## Explicit non-goals
 
