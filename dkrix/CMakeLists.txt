@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.10)
+# CMake 3.12+ required for file(GLOB ... CONFIGURE_DEPENDS) support —
+# see the CLIENT_MAIN_SOURCES glob below. 3.12 shipped 2018-07, so every
+# mainstream distro (Ubuntu 20.04+, Debian 11+, macOS Homebrew, etc.)
+# has it; only Ubuntu 18.04 LTS with system cmake (3.10) needs an
+# upgrade. Phase 14 (2026-04-19).
+cmake_minimum_required(VERSION 3.12)
 
 # Set SDL2 include path before project() for it to take effect
 if(EXISTS "/opt/homebrew/include/SDL2")
@@ -545,8 +550,29 @@ endif()
 
 # Dark Eden Client Executable
 if(USE_SDL_BACKEND OR NOT WIN32)
-	# Collect remaining Client source files (excluding those already in VS_UI)
-	file(GLOB CLIENT_MAIN_SOURCES
+	# Collect remaining Client source files (excluding those already in VS_UI).
+	#
+	# Phase 14C (2026-04-19): CONFIGURE_DEPENDS added so CMake re-evaluates
+	# the glob on every build instead of caching the file list at initial
+	# configure time. Covers ~1045 .cpp files across Client/ root (242),
+	# Client/Packet/ recursive (801), Client/SXml/ (1), Client/WinLib/ (1).
+	#
+	# Why a glob + CONFIGURE_DEPENDS instead of an explicit list:
+	#   - The Packet tree alone is 801 files across 6 sub-packages; an
+	#     explicit enumeration would add ~1060 lines of CMake and a
+	#     CMake edit for every new packet.
+	#   - CONFIGURE_DEPENDS (CMake 3.12+) solves the exact problem the
+	#     explicit-list plan was meant to solve: "adding a new source
+	#     file silently fails to compile until the next cmake reconfigure."
+	#     With CONFIGURE_DEPENDS, cmake re-runs the glob automatically.
+	#   - VS_UI (Phase 14B) kept its explicit list because it's small
+	#     (56 files) and stable.
+	#
+	# The subdirectories NOT matched by this glob (Client/Platform,
+	# Client/SpriteLib, Client/framelib, Client/TextSystem, Client/Updater,
+	# Client/OtherClass, Client/JpegLib, Client/tools) are wired through
+	# separate add_subdirectory() / add_library() targets above.
+	file(GLOB CLIENT_MAIN_SOURCES CONFIGURE_DEPENDS
 		Client/*.cpp
 		Client/Packet/*.cpp
 		Client/Packet/**/*.cpp
