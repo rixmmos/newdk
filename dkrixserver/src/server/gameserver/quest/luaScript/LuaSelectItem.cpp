@@ -18,10 +18,19 @@ int LuaSelectItem::executeFile(const string& filename)
     lua_getglobal(m_pState->getState(), "OptionType");
     lua_getglobal(m_pState->getState(), "OptionType2"); // -_-; 한개 더 추가되면 list로 바꾸자~
 
-    m_ItemClass = (Item::ItemClass)lua_tonumber(m_pState->getState(), 1);
-    m_ItemType = (ItemType_t)lua_tonumber(m_pState->getState(), 2);
-    m_OptionType = (OptionType_t)lua_tonumber(m_pState->getState(), 3);
-    m_OptionType2 = (OptionType_t)lua_tonumber(m_pState->getState(), 4);
+    // Phase 9C: range-checked enum casts. lua_toboundedenum throws
+    // InvalidProtocolException if the stack slot is non-numeric or
+    // out of range, instead of silently wrapping / truncating to an
+    // in-range-looking enumerator.
+    //
+    //   ItemClass     : enum, 0 .. ITEM_CLASS_MAX-1
+    //   ItemType_t    : WORD (uint16), 0 .. 65535
+    //   OptionType_t  : BYTE (uint8),  0 .. 255
+    lua_State* L = m_pState->getState();
+    m_ItemClass   = lua_toboundedenum<Item::ItemClass>(L, 1, 0, Item::ITEM_CLASS_MAX - 1);
+    m_ItemType    = lua_toboundedenum<ItemType_t>     (L, 2, 0, 0xFFFF);
+    m_OptionType  = lua_toboundedenum<OptionType_t>   (L, 3, 0, 0xFF);
+    m_OptionType2 = lua_toboundedenum<OptionType_t>   (L, 4, 0, 0xFF);
 
     // cout << "ItemClass=" << ItemClass
     //	<< ", ItemType=" << ItemType
