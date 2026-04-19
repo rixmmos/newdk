@@ -2192,7 +2192,7 @@ migrations now have a CI gate that enforces forward
 progress; Phase 13.3/13.4 still blocked on post-Phase-12
 stream-file consolidation as before.
 
-### Phase 17 — Packet divergence audit (plan 2026-04-19)
+### Phase 17 — Packet divergence audit — done 2026-04-19
 Phase 12's close-out asserted, based on a single spot-check on
 `CGAbsorbSoul.{h,cpp}`, that the 326 name-matched packet pairs
 "differ only in whitespace, exception-specs, and comment
@@ -2287,18 +2287,18 @@ pick a canonical version and verify both builds still compile
 
 **What 17 ships:**
 
-- [ ] **17.1 — Audit script.**
+- [x] **17.1 — Audit script.**
       `dkrixserver/scripts/audit-packet-divergence.sh`
       (shape mirrors `check-sql-injection.sh`:
       `--count`, `--list-cosmetic`, `--list-semantic`,
       default = classify summary). Reproducible + can be
       run by a future migration PR to sanity-check
       the cosmetic-pair list.
-- [ ] **17.2 — Migration-class addendum to
+- [x] **17.2 — Migration-class addendum to
       `shared/Packets/README.md`.** Explicit list of the 7
       cosmetic pairs as first-wave canaries; pointer to the
       audit script for the 319 semantic pairs.
-- [ ] **17.3 — Update Phase 12 close-out claim.** The
+- [x] **17.3 — Update Phase 12 close-out claim.** The
       Phase 12 block's sentence "Spot-check diff on
       `CGAbsorbSoul.{h,cpp}` shows the two copies differ
       only in whitespace..." is based on a narrow spot-check
@@ -2328,6 +2328,45 @@ pick a canonical version and verify both builds still compile
 
 **Blocker status:** None. Pure audit + doc work; no source,
 CMake, or workflow dependencies.
+
+**Outcome (2026-04-19):**
+
+| Sub-commit | Hash      | Subject                                                                          |
+| ---------- | --------- | -------------------------------------------------------------------------------- |
+| 17A        | `2fd305b` | `docs: 17A — pin Phase 17 plan (packet divergence audit)`                        |
+| 17B        | `804b0a6` | `server: 17B — add packet divergence audit script + README migration-class addendum` |
+| 17C        | HEAD      | `docs: 17C — close out Phase 17 in MODERNIZATION.md`                             |
+
+Net delta: **+230 lines** in the new audit script
+(`dkrixserver/scripts/audit-packet-divergence.sh`), **+75
+lines** added to `shared/Packets/README.md`, and docs-only
+edits to `docs/MODERNIZATION.md` (Phase 12 claim softened;
+Phase 17 block added and closed out). Zero source-tree
+changes; zero CMake changes; zero workflow changes. The
+`ratchets.yml` CI workflow from Phase 16 is intentionally
+unchanged — the audit script is investigation-only, not a
+gate.
+
+**Audit-script re-run verification (2026-04-19):**
+
+- `audit-packet-divergence.sh --count` → pairs: 163 /
+  identical: 0 / cosmetic: 0 / semantic: 163.
+- `audit-packet-divergence.sh --by-file` → files: 326 /
+  identical: 0 / cosmetic: 7 / semantic: 319. Cosmetic
+  .cpp shortlist matches the README first-wave list
+  (CGDisplayItem, CGGQuestCancel, CGRequestStoreInfo,
+  CGStoreClose, CGStoreOpen, CGStoreSign, CGUndisplayItem).
+- `check-packet-duplicates.sh` → OK: 326 duplicates
+  (matches baseline). Phase 16's ratchet still green.
+
+**Follow-up work:** unchanged from Phase 12 close-out —
+per-PR packet migrations under the now-CI-gated 12.0
+ratchet, each starting with a reconciliation step as
+documented in `shared/Packets/README.md`'s Migration-class
+section. First-wave candidates (shortest reconciliation
+work expected) listed by hash in the README; re-run
+`audit-packet-divergence.sh` after each migration to track
+the cosmetic-.cpp shortlist as it shrinks.
 
 The following are deliberately out of scope for this modernization
 pass. If we change our minds, update this list first.
