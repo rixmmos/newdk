@@ -4,6 +4,7 @@ CMakeFiles/
 cmake_install.cmake
 CTestTestfile.cmake
 Makefile
+!/Makefile
 *.cmake
 !CMakeLists.txt
 .cache
