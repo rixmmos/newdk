@@ -71,9 +71,78 @@ Per-PR template for moving one packet family:
 6. Run
    `dkrixserver/scripts/check-packet-duplicates.sh --update`
    and commit the new baseline alongside the migration.
-7. Compile both trees; no behaviour change expected (the two
-   copies had identical byte layout per the CGAbsorbSoul
-   spot-check in Phase 12A).
+7. Compile both trees; no behaviour change expected —
+   **but this requires reconciliation work first** (see
+   "Migration class" below; the two copies are almost
+   never byte-identical).
+
+## Migration class (what "reconciliation" means)
+
+Phase 17's tree-wide divergence audit (run
+`dkrixserver/scripts/audit-packet-divergence.sh`) classifies
+each of the 163 complete class pairs (all four of
+server.cpp, server.h, client.cpp, client.h present) into:
+
+| Class     | Pair-level count | What it means                                                                |
+| --------- | ---------------: | ---------------------------------------------------------------------------- |
+| identical |                0 | Byte-equal .cpp AND .h across trees; `git mv` is safe.                       |
+| cosmetic  |                0 | Only whitespace / `throw()` / PCH / guard differences in both files.         |
+| semantic  |              163 | At least one of .cpp or .h still differs after aggressive normalization.     |
+
+**There are no zero-effort canaries.** Every one of the 163
+classes has at least one semantic-diff file. Per-PR migration
+effort always includes at least one reconciliation step.
+
+**Reconciliation checklist** (per-PR, before step 1 in the
+template above):
+
+- Diff server.cpp vs client.cpp side-by-side; pick canonical
+  version. The server side is usually more modern (no
+  `throw()` exception specs, which are deprecated in C++17);
+  prefer it unless the diff has evidence to the contrary
+  (e.g. client has a correct fix for a bug the server copy
+  still carries).
+- Diff server.h vs client.h; same choice logic. Headers
+  differ more often than .cpp files because they carry
+  `#ifdef __DEBUG_OUTPUT__` gates around `toString()` /
+  `getPacketName()` that the server copy has unconditional.
+- Verify wire format hasn't drifted: `getPacketSize()`
+  expressions should be algebraically equivalent (different
+  textual spellings of the same sum are OK); `read()` and
+  `write()` method bodies must call `readByte/Short/Long`
+  and `writeByte/Short/Long` in the same order with the same
+  types. If either diverges, the packets have been versioned
+  by accident and the migration PR needs to stop and flag.
+- Verify method signatures are call-site compatible on both
+  sides. If server declares `void execute(Player* pPlayer)`
+  and client declares `void execute(Player* pPlayer) throw
+  (ProtocolException, Error)`, picking the server version is
+  safe — `throw()` specs are exception behavior, not part of
+  the ABI as far as call sites are concerned, and C++17
+  ignores them anyway. If signatures differ in parameter
+  types or order, the migration PR needs to stop and flag.
+
+**First-wave candidates** (smallest expected reconciliation
+work): the 7 classes whose .cpp file is at most cosmetic
+(their .h files will still need reconciliation, but the .cpp
+side is a straight `git mv`):
+
+- `CGDisplayItem`
+- `CGGQuestCancel`
+- `CGRequestStoreInfo`
+- `CGStoreClose`
+- `CGStoreOpen`
+- `CGStoreSign`
+- `CGUndisplayItem`
+
+Pick one of these for the first migration PR to minimize
+new-pattern risk; the remaining 156 classes follow the same
+shape once the first migration's CMake wiring is in place.
+
+Run
+`dkrixserver/scripts/audit-packet-divergence.sh --by-file`
+after each migration to see the updated file-level
+breakdown + current cosmetic-.cpp shortlist.
 
 ## Ratchet
 

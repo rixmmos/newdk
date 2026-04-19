@@ -1797,10 +1797,18 @@ the client GLOB). Audit 2026-04-19 refined the raw scope:
 - Duplicate-name intersection between server packet tree and
   client Cpackets: **326** files.
 
-Spot-check diff on `CGAbsorbSoul.{h,cpp}` shows the two copies
-differ only in whitespace, exception-specs, and comment
-formatting — byte layout on the wire is identical. So the
-duplication is a maintenance burden, not a protocol divergence.
+Spot-check diff on `CGAbsorbSoul.{h,cpp}` suggested the two
+copies differ only in whitespace, exception-specs, and comment
+formatting — byte layout on the wire likely identical. This
+spot-check was subsequently refined by Phase 17's tree-wide
+divergence audit: 0 of 163 class pairs are actually cosmetic-
+only at the class level; every pair has at least one file with
+semantic divergence (different `__END_CATCH_NO_RETHROW` vs
+`__END_CATCH`, method-body inlining, `toString()` debug-string
+drift, etc.). The wire format still looks identical under
+algebraic equivalence of `getPacketSize()` expressions, but
+per-class reconciliation is needed before each migration PR
+can `git mv` + delete. See Phase 17 below for the details.
 
 **Scope correction (2026-04-19, revised under session-
 preservation directive):**
@@ -2194,16 +2202,17 @@ migration shows that spot-check was not representative.
 
 **Audit finding:**
 
-Of 326 name-matched packet pairs between
+At the **file level** (each .cpp and each .h classified
+separately) across the 326 name-matched files between
 `dkrixserver/src/Core/` and `dkrix/Client/Packet/Cpackets/`:
 
-- **0 pairs** are bit-identical.
-- **7 pairs** are cosmetic-only divergent — after normalizing
+- **0 files** are bit-identical.
+- **7 files** are cosmetic-only divergent — after normalizing
   away whitespace, `throw(...)` exception specifications,
   `#include "Client_PCH.h"`, and `#ifndef __GAME_CLIENT__` /
   `#ifdef __DEBUG_OUTPUT__` guard placement, the two files
-  become byte-equal.
-- **319 pairs** carry semantic divergence that remains after
+  become byte-equal. (All 7 are .cpp files.)
+- **319 files** carry semantic divergence that remains after
   that normalization. Examples: different `__END_CATCH` vs
   `__END_CATCH_NO_RETHROW` behavior, different `toString()`
   debug-string contents, method-body inlining differences,
@@ -2211,6 +2220,21 @@ Of 326 name-matched packet pairs between
   `getPacketSize()` expressions, `string` vs `std::string`
   qualification, and include-order / include-set
   differences.
+
+But **the migration unit is a class** (a .cpp + its .h
+together — they can't move independently). The actual
+pair-level count is:
+
+- **163 complete class pairs** (server has both .cpp + .h
+  AND client has both .cpp + .h).
+- **0 pair-level identical** (no class is byte-equal in
+  both files).
+- **0 pair-level cosmetic** (no class has both its .cpp
+  AND its .h at cosmetic-or-better). All 7 cosmetic .cpp
+  files pair with .h files that carry semantic divergence.
+- **163 pair-level semantic** (every class has at least
+  one file — .cpp or .h or both — that truly differs after
+  normalization).
 
 Algebraic equivalence of packet-size expressions and
 inlining-style differences argue that the wire format likely
@@ -2221,26 +2245,45 @@ pick a canonical version and verify both builds still compile
 
 **Implications for Phase 12 migration path:**
 
-- **7 cosmetic-only pairs** are safe canary candidates.
-  Pick the server version (already has modern C++ style — no
-  `throw(...)` specs), `git mv` into `shared/Packets/`,
-  delete the Cpackets sibling, run
-  `check-packet-duplicates.sh --update` to drop baseline
-  326 → 325. Client build just picks up the server-style
-  file unchanged in function signatures (both sides already
-  compile one or the other, and method signatures reconcile
-  via the normalized view).
-- **319 semantic-divergent pairs** each need a reconciliation
-  step before migration: pick canonical content, verify
-  signature compatibility on both sides, confirm wire format
-  hasn't drifted between copies. This is the "920-file
-  surgery" Phase 12's scope-correction deferred to ratchet-
-  driven per-PR work — now more clearly scoped as "reconcile
-  first, migrate second."
+- **No zero-effort canaries exist.** The refined audit
+  shows that every class has at least one semantic-diff
+  file in either its .cpp or its .h. The earliest
+  file-level read of this audit (7 cosmetic .cpp files —
+  `CGDisplayItem`, `CGGQuestCancel`, `CGRequestStoreInfo`,
+  `CGStoreClose`, `CGStoreOpen`, `CGStoreSign`,
+  `CGUndisplayItem`) suggested a trivial first wave, but
+  each of those 7 classes has a sibling .h file in the
+  semantic bucket — so even the "easiest" migration still
+  requires reconciling one header.
+- **Per-PR migration effort is higher than Phase 12's
+  outcome block suggested.** Each PR has to:
+  1. Pick canonical content for both .cpp and .h.
+  2. Verify method signatures are compatible with both
+     sides' existing call sites (server code calls
+     `foo(bar)` vs client code calls `foo (bar)` is a
+     rename-and-fix the compiler catches, but
+     `throw(ProtocolException, Error)` being declared on
+     one side and not the other is a C++17 deprecation
+     warning that depends on toolchain flags).
+  3. Confirm wire format hasn't drifted between copies —
+     this is the critical invariant. Algebraic equivalence
+     of `getPacketSize()` expressions argues for "yes,
+     same wire format", but `read()` and `write()` method
+     bodies need direct inspection to confirm field order
+     + encoding match.
+  4. Migrate, delete Cpackets sibling, update both
+     CMakeLists.txt, run `check-packet-duplicates.sh
+     --update` to drop the baseline by 1.
 - **The ratchet baseline is unaffected.** It counts
-  name-matches, not content-equality. Moving any of the 7
-  cosmetic pairs drops the count by 1 per pair; the same
-  holds for any of the 319 semantic pairs once reconciled.
+  name-matches, not content-equality. Each migration
+  (however much reconciliation work it needed) drops the
+  count by 1 when the last duplicate is removed, same
+  as any other.
+- **The first few migration PRs should pick classes with
+  the smallest .cpp + .h combined diff.** The 7
+  cosmetic-.cpp candidates are still the best starting
+  point — a cosmetic .cpp plus a small semantic-.h means
+  the reconciliation step is bounded to header work.
 
 **What 17 ships:**
 
