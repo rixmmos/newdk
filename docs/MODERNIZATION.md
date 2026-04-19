@@ -1676,37 +1676,109 @@ Blocker: Phase 10 (build hygiene) should land first — moving
 headers triggers CMake glob updates and the client still uses
 `file(GLOB)` today.
 
-### Phase 13 — Endian-safe wire I/O (deferred from Phase 9)
-Deferred 2026-04-19 from Phase 9. Current state: the socket
-stream API's `template<T> read(T&)` does `buf = *(T*)(buffer +
-head)` — host-endian raw cast. Works everywhere on x86 (server +
-desktop client both LE), but quietly breaks on any BE port and
-gives no protection against partial-struct tears if `T` is a
-compound type.
+### Phase 13 — Endian-safe wire I/O — plan 2026-04-19
+Originally deferred 2026-04-19 from Phase 9. Current state: the
+socket stream API's `template<T> read(T&)` does `buf = *(T*)
+(buffer + head)` — host-endian raw cast. Works everywhere on
+x86 (server + desktop client both LE), but quietly breaks on any
+BE port and gives no protection against partial-struct tears if
+`T` is a compound type.
+
+Audit 2026-04-19 confirmed the bug pattern exists in both trees:
+
+- Server: `dkrixserver/src/Core/SocketInputStream.h:159,170`
+  (`read<T>`), `dkrixserver/src/Core/SocketOutputStream.h:174,
+  178,191` (`write<T>`).
+- Client: `dkrix/Client/Packet/SocketInputStream.{h,cpp}` and
+  `SocketOutputStream.{h,cpp}` — duplicate of the server's
+  `Core/` stream files with the same raw-cast pattern. Phase 12
+  (packet unification) will fold the two copies into one shared
+  tree.
+
+**Scope correction from the initial deferred block (audit
+2026-04-19):**
+
+Ship 13.1 + 13.2 now; defer 13.3 + 13.4 to post-Phase-12.
+Rationale: adding `Core/Endian.h` to both trees today means
+physically copying the file into `dkrix/Client/Packet/Endian.h`
+and `dkrixserver/src/Core/Endian.h`, only to move one copy and
+delete the other when Phase 12 unifies the packet tree. Land
+the primitive helpers in the server tree now (server is the
+authoritative source for stream code), leave the client
+duplicate untouched, and have Phase 12 bring the client over
+when it merges the two stream trees. The migration work (13.3)
+and the CI grep-gate (13.4) then happen once against the
+unified tree instead of twice with intermediate fixups.
+
+**Corrected plan items:**
 
 - [ ] **13.1 — Pick and document a wire byte order.** LE keeps
       compatibility with every existing client binary. BE is
       "network order" but would require every deployed client to
-      be rebuilt and re-shipped. Default recommendation: LE, with
-      explicit `htole*` / `le*toh` wrappers documenting the
-      choice. Decision gets recorded here when taken.
-- [ ] **13.2 — Add endian-safe primitives.** Inline helpers in
-      `Core/Endian.h` wrapping `htole16/32/64` +
-      `le16/32/64toh`. For platforms without `<endian.h>`
-      (macOS, mingw), provide an `#ifdef` fallback using byte-
-      swap intrinsics.
-- [ ] **13.3 — Migrate the primitive reads/writes.** The
-      `read<T>` / write<T> templates become `read/write` of
-      primitive types routing through the helpers; compound
-      types continue to use memberwise `read`/`write` of their
-      fields (packet classes already do this pattern manually).
-- [ ] **13.4 — Audit for remaining raw casts.** Any surviving
-      `*(T*)(...)` over stream-buffer memory gets a CI grep-gate
-      similar to 8C's SQL-injection ratchet, pinned to 0 once
-      13.3 lands.
+      be rebuilt and re-shipped. **Decision: LE.** Every
+      deployed server and every deployed desktop client is
+      already x86 LE, so picking LE is a no-op on the wire while
+      making the choice explicit. Future BE hosts (e.g. a PPC
+      port) can opt in by rebuilding against the same helpers.
+      Recorded in 13A.
+- [ ] **13.2 — Add endian-safe primitives (server).** Inline
+      helpers in `dkrixserver/src/Core/Endian.h` wrapping
+      `htole16/32/64` + `le16/32/64toh`. On Linux this is a
+      thin wrapper around `<endian.h>`. On macOS / mingw, the
+      same names get `#ifdef` fallbacks built from byte-swap
+      intrinsics (`__builtin_bswap*` on GCC/Clang). Header-only
+      so nothing gets linked in for LE hosts. Shipped in 13B.
+- [ ] **~~13.3~~ — Migrate the primitive reads/writes.**
+      **Deferred to post-Phase-12.** The client has its own copy
+      of `SocketInputStream.h`/`SocketOutputStream.h`; migrating
+      the templates in both trees simultaneously means writing
+      the same migration twice and then throwing one copy away
+      when Phase 12 unifies the stream files. Once Phase 12
+      lands, 13.3 becomes a single-commit edit of the unified
+      `shared/Core/Socket*Stream.h` instead of a two-tree
+      coordinated patch.
+- [ ] **~~13.4~~ — Audit for remaining raw casts.** **Deferred
+      to post-Phase-12.** A grep-gate pinned at 0 only works
+      once 13.3 has driven the count to 0; pinning it early
+      would either fail CI or require a threshold that drifts
+      each time Phase 12 moves files.
 
-Blocker: Phase 12 (packet unification) should land first so the
-migration only edits one copy of each packet class.
+**Plan (sub-commits):**
+
+- **13A — Pin plan.** (This commit.) Records the LE decision
+  (13.1), the scope-correction split (13.2 ships now; 13.3 +
+  13.4 move to post-Phase-12), and the sub-commit order below.
+- **13B — Add `dkrixserver/src/Core/Endian.h`.** Header-only
+  LE helpers wrapping `htole16/32/64` + `le16/32/64toh`. Linux
+  path uses `<endian.h>` directly; macOS path uses
+  `<libkern/OSByteOrder.h>`'s `OSSwapHostToLittleInt*` or
+  `__builtin_bswap*` fallbacks; mingw path uses
+  `__builtin_bswap*` fallbacks. Unused until 13.3 migrates the
+  stream templates — this commit only lands the file so the
+  primitives are available when Phase 12 folds the packet
+  trees together.
+- **13C — Close-out.** Flip this block to `done`, commit
+  table, pointers to the deferred-to-post-Phase-12 follow-ups.
+  No source-code edits beyond 13B's new header.
+
+**Blocker cleared:** Phase 12 (packet unification) was the
+stated blocker when the deferred block was written. Splitting
+13.1 + 13.2 out from 13.3 + 13.4 lets Phase 13 make forward
+progress on the *primitives* without waiting on Phase 12; the
+*migration* correctly still waits for the unified tree.
+
+**Explicit non-goals for this sub-phase (13A-13C):**
+
+- **No client-side `Endian.h` copy.** The client tree has
+  duplicate stream files; adding an `Endian.h` there today
+  would be thrown away by Phase 12. The helpers only land in
+  the server tree.
+- **No template migration.** 13.3 stays deferred until Phase
+  12 unifies the stream trees.
+- **No CI grep-gate.** 13.4 stays deferred until 13.3 has
+  driven `*(T*)(m_Buffer + ...)` casts to 0.
+- **No behavior change.** 13B's header is unused code until
+  13.3 touches it; nothing on the wire changes in this phase.
 
 ## Explicit non-goals
 
