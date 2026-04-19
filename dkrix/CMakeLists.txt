@@ -159,10 +159,77 @@ endif()
 # VS_UI Library - UI System (按需编译必要的 Client 文件)
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
-	# VS_UI source files
-	file(GLOB_RECURSE VS_UI_SRC_SOURCES
-		VS_UI/src/*.cpp
-		VS_UI/*.cpp  # Include VS_UI root directory for RarFile.cpp
+	# VS_UI source files — explicit list (Phase 14B, 2026-04-19).
+	# Replaces the previous file(GLOB_RECURSE VS_UI/src/*.cpp VS_UI/*.cpp)
+	# because CMake globs are not re-evaluated on incremental builds.
+	# See docs/MODERNIZATION.md Phase 14 block. Adding or removing a
+	# .cpp under VS_UI/ now requires editing this list.
+	#
+	# Regenerate with:
+	#   cd dkrix && find VS_UI -name "*.cpp" | sort
+	#
+	# Generated 2026-04-19: 56 files (6 root + 50 under src/).
+	set(VS_UI_SRC_SOURCES
+		# VS_UI root (6 files)
+		VS_UI/Client_PCH.cpp
+		VS_UI/DebugInfo.cpp
+		VS_UI/MitemTableInit.cpp
+		VS_UI/RarFile.cpp
+		VS_UI/SXml.cpp
+		VS_UI/WinMain.cpp
+		# VS_UI/src (44 flat files)
+		VS_UI/src/AcceleratorDef.cpp
+		VS_UI/src/AcceleratorManager.cpp
+		VS_UI/src/Imm/CImm.cpp
+		VS_UI/src/InputFocusManager.cpp
+		VS_UI/src/KeyAccelerator.cpp
+		VS_UI/src/SkinManager.cpp
+		VS_UI/src/VS_UI_BBS.cpp
+		VS_UI/src/VS_UI_Base.cpp
+		VS_UI/src/VS_UI_DESC.cpp
+		VS_UI/src/VS_UI_Description.cpp
+		VS_UI/src/VS_UI_Descriptor.cpp
+		VS_UI/src/VS_UI_Dialog.cpp
+		VS_UI/src/VS_UI_ELEVATOR.cpp
+		VS_UI/src/VS_UI_Exception.cpp
+		VS_UI/src/VS_UI_Exchange.cpp
+		VS_UI/src/VS_UI_ExtraDialog.cpp
+		VS_UI/src/VS_UI_Game.cpp
+		VS_UI/src/VS_UI_GameCommon.cpp
+		VS_UI/src/VS_UI_GameOusters.cpp
+		VS_UI/src/VS_UI_GameSlayer.cpp
+		VS_UI/src/VS_UI_GameVampire.cpp
+		VS_UI/src/VS_UI_GlobalResource.cpp
+		VS_UI/src/VS_UI_Helper.cpp
+		VS_UI/src/VS_UI_Item.cpp
+		VS_UI/src/VS_UI_Message.cpp
+		VS_UI/src/VS_UI_PetStorage.cpp
+		VS_UI/src/VS_UI_PointExchange.cpp
+		VS_UI/src/VS_UI_SKILL_VIEW.cpp
+		VS_UI/src/VS_UI_Shop.cpp
+		VS_UI/src/VS_UI_Storage.cpp
+		VS_UI/src/VS_UI_Title.cpp
+		VS_UI/src/VS_UI_Tutorial.cpp
+		VS_UI/src/VS_UI_WebBrowser.cpp
+		VS_UI/src/VS_UI_mouse_pointer.cpp
+		VS_UI/src/VS_UI_progress.cpp
+		VS_UI/src/VS_UI_skill_tree.cpp
+		VS_UI/src/VS_UI_ui_result_receiver.cpp
+		VS_UI/src/VS_UI_util.cpp
+		VS_UI/src/VS_UI_widget.cpp
+		VS_UI/src/Vs_ui.cpp
+		VS_UI/src/vs_ui_gamecommon2.cpp
+		# VS_UI/src/hangul (3 files)
+		VS_UI/src/hangul/Ci.cpp
+		VS_UI/src/hangul/Ci_macOS.cpp
+		VS_UI/src/hangul/FL2.cpp
+		# VS_UI/src/widget (6 files)
+		VS_UI/src/widget/U_edit.cpp
+		VS_UI/src/widget/mother.cpp
+		VS_UI/src/widget/pi_core.cpp
+		VS_UI/src/widget/u_button.cpp
+		VS_UI/src/widget/u_scrollbar.cpp
+		VS_UI/src/widget/u_window.cpp
 	)
 
 	# Exclude Windows-specific files
