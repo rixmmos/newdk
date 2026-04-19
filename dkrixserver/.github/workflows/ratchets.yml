@@ -1,0 +1,76 @@
+name: Ratchets
+
+# Phase 16 — wires the two hand-rolled ratchet gates into CI so they
+# fire on every PR instead of only when a contributor runs them by
+# hand.
+#
+# Ratchets:
+#
+#   - dkrixserver/scripts/check-sql-injection.sh
+#       Landed in Phase 8C (baseline 567). Counts variadic SQL format
+#       sites in compiled server sources; CI fails if the count goes
+#       UP. Each migration to PreparedStatement (Phase 11.1) lowers
+#       the baseline via --update. At baseline 0, Statement gets a
+#       deprecation notice.
+#
+#   - dkrixserver/scripts/check-packet-duplicates.sh
+#       Landed in Phase 12.0 (baseline 326). Counts name-equal packet
+#       class files between dkrixserver/src/Core/ and
+#       dkrix/Client/Packet/Cpackets/; CI fails if the count goes UP.
+#       Each migration of a packet family into shared/Packets/ plus
+#       deletion of the Cpackets sibling lowers the baseline via
+#       --update. At baseline 0, the gate becomes the "no duplicates
+#       ever" structural check originally scoped as Phase 12.3.
+#
+# Both scripts are pure POSIX sh + grep + comm; no build dependencies
+# needed, so this workflow runs in seconds on a bare ubuntu-latest
+# runner without an apt step.
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+jobs:
+  ratchets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # No fetch-depth needed — neither script walks history; both
+        # grep the working tree as-is.
+
+      - name: Show script versions
+        run: |
+          echo "=== SQL injection gate ==="
+          head -3 dkrixserver/scripts/check-sql-injection.sh
+          echo
+          echo "=== Packet duplicates gate ==="
+          head -3 dkrixserver/scripts/check-packet-duplicates.sh
+          echo
+          echo "=== Baselines ==="
+          printf 'sql-injection:        '
+          cat dkrixserver/scripts/.sql-injection-baseline
+          printf 'packet-duplicates:    '
+          cat dkrixserver/scripts/.packet-duplicates-baseline
+
+      # The SQL-injection gate. Exits 1 if the count rose above
+      # dkrixserver/scripts/.sql-injection-baseline (567 at the time
+      # Phase 16B shipped).
+      - name: Check SQL-injection sites (Phase 8C ratchet)
+        run: |
+          dkrixserver/scripts/check-sql-injection.sh
+
+      # The packet-duplicates gate. Exits 1 if the count of
+      # name-equal packet class files rose above
+      # dkrixserver/scripts/.packet-duplicates-baseline (326 at the
+      # time Phase 16B shipped). This script reaches across into
+      # dkrix/Client/Packet/Cpackets/ via relative path — the single-
+      # repo checkout from the step above gives it access to both
+      # trees without a second checkout.
+      - name: Check packet duplicates (Phase 12.0 ratchet)
+        run: |
+          dkrixserver/scripts/check-packet-duplicates.sh
