@@ -1766,7 +1766,7 @@ Implementation notes vs. the 11A sketch:
   around `mysql_stmt_close` on shared connections; real-world
   use after migrations start will surface any such issues.
 
-### Phase 12 — Packet schema unification — plan 2026-04-19
+### Phase 12 — Packet schema unification (12.0 scaffolding) — done 2026-04-19
 Originally deferred 2026-04-19 from Phase 9; blocker cleared
 by Phase 10 (build hygiene) + Phase 14C (CONFIGURE_DEPENDS on
 the client GLOB). Audit 2026-04-19 refined the raw scope:
@@ -1824,7 +1824,7 @@ the one-off scaffolding that makes that ratchet possible.
 
 **Corrected plan items:**
 
-- [ ] **12.0 — Scaffolding + duplicate-count ratchet.**
+- [x] **12.0 — Scaffolding + duplicate-count ratchet.**
       Create `shared/Packets/` at the repo root with a
       canonical-tree README. Add
       `scripts/check-packet-duplicates.sh` +
@@ -1886,6 +1886,56 @@ automatically if `add_subdirectory(../shared/Packets)` is
 wired into `dkrix/CMakeLists.txt` during the first migration
 PR. 12.0 does NOT do that wiring; the first migration PR
 does.
+
+**Outcome (2026-04-19):**
+
+| Sub-commit | Hash      | Subject                                                           |
+| ---------- | --------- | ----------------------------------------------------------------- |
+| 12A        | `de0792c` | `docs: 12A — pin Phase 12 plan (scope-corrected; 12.0 scaffolding only)` |
+| 12B        | `f66b2ac` | `server: 12B — add shared/Packets/ + packet-duplicates ratchet`   |
+| 12C        | HEAD      | `docs: 12C — close out Phase 12 (12.0 only) in MODERNIZATION.md`  |
+
+Net delta: **+286 lines across 3 new files** (empty
+`shared/Packets/` target dir + README; duplicate-count
+gate + baseline) plus docs-only edits in `docs/MODERNIZATION.md`.
+Zero source-tree file moves; zero edits to existing
+`dkrixserver/src/Core/*.{cpp,h}` or `dkrix/Client/Packet/**`
+files. The ratchet baseline is the current duplicate count
+(326) — the gate fails on increase, lowers via `--update`
+after each migration PR.
+
+**Follow-up work (ratchet-driven, not a scheduled phase):**
+
+- **Per-PR packet migrations.** Each PR moves one small
+  self-contained packet family (e.g. CL/LC for
+  LoginServer traffic, GS/SG for Game↔Shared server
+  traffic) from `dkrixserver/src/Core/` into
+  `shared/Packets/`, deletes the Cpackets sibling, updates
+  both builds' CMakeLists.txt, and runs
+  `dkrixserver/scripts/check-packet-duplicates.sh --update`.
+  The first such PR also adds `shared/Packets/CMakeLists.txt`
+  and wires `add_subdirectory(../shared/Packets)` into both
+  root CMake files.
+- **Post-Phase-12.0 Phase 13.3 unblocked.** Once the first
+  few migrations land and `shared/Packets/` has a real
+  library target, the Socket stream files
+  (`SocketInputStream.{h,cpp}`, `SocketOutputStream.{h,cpp}`)
+  can be consolidated into `shared/Core/` alongside them,
+  at which point Phase 13.3's endian-safe
+  `template<T> read(T&)`/`write(T&)` migration becomes a
+  single-commit edit of the unified headers rather than
+  a two-tree coordinated patch. 13.4 (grep-gate for raw
+  casts, pinned at 0) follows immediately after 13.3.
+- **Stream-file consolidation itself is not a Phase 12
+  item.** It's flagged as a separate follow-up because
+  the stream files aren't packet classes — they're the
+  wire-format plumbing that packet classes ride on. Same
+  shape of duplication (server Core / client Packet), but
+  the ratchet script deliberately does NOT count them: a
+  second ratchet at baseline 6 (the stream-file pair
+  count) can ship when Phase 13.3 needs it, or they can
+  ride the first migration PR that touches
+  `shared/Core/`.
 
 ### Phase 13 — Endian-safe wire I/O (13.1 + 13.2) — done 2026-04-19
 Originally deferred 2026-04-19 from Phase 9. Current state: the
