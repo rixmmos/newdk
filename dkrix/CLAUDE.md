@@ -25,6 +25,39 @@ For development, the most commonly used one is:
 make debug-asan 
 ```
 
+## Adding new source files
+
+After Phase 14 (2026-04-19), the two CMake source collections
+in `CMakeLists.txt` behave differently:
+
+- **`Client/` tree (`CLIENT_MAIN_SOURCES`)** — collected by
+  `file(GLOB ... CONFIGURE_DEPENDS Client/*.cpp
+  Client/Packet/*.cpp Client/Packet/**/*.cpp Client/SXml/*.cpp
+  Client/WinLib/*.cpp)`. CMake re-evaluates this glob on every
+  build (that's what `CONFIGURE_DEPENDS` does), so dropping a
+  new `.cpp` into any of those directories is automatically
+  picked up on the next `make` / `cmake --build build`. **No
+  CMake edit required.**
+
+- **`VS_UI/` tree (`VS_UI_SRC_SOURCES`)** — an explicit
+  `set(VS_UI_SRC_SOURCES ...)` list of 56 files at
+  `CMakeLists.txt:163`. Adding a new `.cpp` under `VS_UI/` or
+  `VS_UI/src/` requires editing this list. Keep the list
+  sorted (it was built from `find VS_UI -name "*.cpp" | sort`
+  so re-running that command is the easy way to place a new
+  entry).
+
+Other subtrees — `Client/Platform/`, `Client/SpriteLib/`,
+`Client/framelib/`, `Client/TextSystem/`, `Client/Updater/`,
+`Client/OtherClass/`, `Client/JpegLib/`, `Client/tools/`,
+`basic/` — are wired through separate `add_subdirectory()` /
+`add_library()` targets, each with their own source lists
+inside their own `CMakeLists.txt`. Follow the pattern of
+whichever subdir you're adding to.
+
+**Minimum CMake:** 3.12 (for `CONFIGURE_DEPENDS`). Shipped
+2018-07; every mainstream distro has it.
+
 ## Repository Structure
 
 ```
