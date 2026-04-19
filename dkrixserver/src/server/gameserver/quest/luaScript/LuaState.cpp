@@ -20,18 +20,51 @@ LuaState::~LuaState() {
 //--------------------------------------------------------------------------------
 // init
 //--------------------------------------------------------------------------------
+//
+// Phase 9B (2026-04-19): Lua sandbox whitelist.
+//
+// Quest scripts run untrusted Lua loaded from disk. The old path
+// called luaL_openlibs(), which registers EVERY standard library
+// including:
+//
+//   io       - file I/O (io.open, io.read, io.write, io.popen)
+//   os       - os.execute, os.remove, os.rename, os.exit, os.getenv
+//   debug    - debug.sethook, debug.getupvalue, sandbox escape
+//   package  - require/loadlib, dynamic loading of C modules
+//   (coroutine is bundled with base in 5.1; unexposed by choice)
+//
+// Any of those is enough for a malicious quest file to read
+// config, exfiltrate creds, shell out, or patch the VM at runtime.
+//
+// Only the four libraries actually used by quest scripts are
+// loaded here:
+//
+//   base     (print, tostring, pairs, ipairs, type, unpack, etc.)
+//   table    (table.insert, table.remove, table.concat)
+//   string   (string.format, string.sub, string.find, string.gsub)
+//   math     (math.random, math.floor, math.sin, math.pi, etc.)
+//
+// Pattern mirrors luaL_openlibs' own implementation from Lua 5.1
+// linit.c: push the luaopen_* function, push its lib name, call
+// with one arg (the name). `luaopen_base` uses "" by convention.
+//--------------------------------------------------------------------------------
 void LuaState::init(int stackSize) {
     open(stackSize);
 
-    // load all libs.
-    luaL_openlibs(m_pState);
-
-    // This is the old lua4.x API
-    // lua5.1 doesn't need the following lines, otherwise it get PANIC: unprotected error in call to Lua API
-    // baselibopen();
-    // mathlibopen();
-    // strlibopen();
-    // iolibopen();
+    // Whitelisted standard libs only — io/os/debug/package deliberately
+    // excluded to prevent filesystem / process / reflection escape.
+    static const luaL_Reg kAllowedLibs[] = {
+        {"",              luaopen_base},
+        {LUA_TABLIBNAME,  luaopen_table},
+        {LUA_STRLIBNAME,  luaopen_string},
+        {LUA_MATHLIBNAME, luaopen_math},
+        {NULL, NULL}
+    };
+    for (const luaL_Reg* lib = kAllowedLibs; lib->func; ++lib) {
+        lua_pushcfunction(m_pState, lib->func);
+        lua_pushstring(m_pState, lib->name);
+        lua_call(m_pState, 1, 0);
+    }
 
     randomseed();
 }
