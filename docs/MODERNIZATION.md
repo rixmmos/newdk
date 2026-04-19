@@ -882,18 +882,18 @@ Deployment notes for operators:
    connect or IP dial will then fail visibly rather than the
    server silently reading an empty credential.
 
-### Phase 9 — Server: Lua sandbox and packet schema — plan 2026-04-19
-- [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `table`,
+### Phase 9 — Server: Lua sandbox and packet schema — done 2026-04-19
+- [x] Replace `luaL_openlibs()` with a whitelist (`base`, `table`,
       `string`, `math`); drop `io`, `os`, `debug`, `package`,
       `coroutine`. **Scope audit (2026-04-19):** single call site
       at `dkrixserver/src/server/gameserver/quest/luaScript/LuaState.cpp:27`.
-      Tractable in one commit.
-- [ ] Wrap every `lua_to*` → enum cast in a range-checked helper.
+      Tractable in one commit. **Shipped in 9B (`5c2c28f`).**
+- [x] Wrap every `lua_to*` → enum cast in a range-checked helper.
       **Scope audit (2026-04-19):** only four call sites, all in
       `LuaSelectItem.cpp::executeFile()` (lines 21–24, reading
       `ItemClass` / `ItemType` / `OptionType` / `OptionType2` from
       the Lua stack via `lua_tonumber` + C-style cast). Tractable
-      in one commit.
+      in one commit. **Shipped in 9C (`499a33d`).**
 - [ ] Share packet definitions between client and server.
       **Scope audit (2026-04-19) — DEFERRED TO PHASE 12.** The
       current state is 149 `.cpp/.h` files under
@@ -957,6 +957,72 @@ Deployment notes for operators:
   cap, no memory ceiling, no `lua_setreadonly` on globals —
   those are policy knobs that need a test harness to exercise,
   and are out of scope here.
+
+**Outcome (2026-04-19):**
+
+| #    | Commit    | Subject                                                                 |
+| ---- | --------- | ----------------------------------------------------------------------- |
+| 0001 | `03631d2` | `docs: pin Phase 9 plan (with scope correction) + add Phase 12 + Phase 13` |
+| 0002 | `5c2c28f` | `server: 9B — Lua sandbox whitelist (drop io/os/debug/package)`         |
+| 0003 | `499a33d` | `server: 9C — lua_toboundedenum<T> helper + migrate LuaSelectItem`      |
+| 0004 | `99bc7b5` | `docs: 9D — close out Phase 9 in MODERNIZATION.md`                      |
+
+Net delta: **+239 lines / -20 lines across 4 files**. The bulk is
+the docs block (~143 lines), the new inline `lua_toboundedenum<T>`
+template + comment in `LuaState.h` (~48 lines), the whitelist
+rewrite in `LuaState.cpp` (+51 / -35), and the four migrated call
+sites in `LuaSelectItem.cpp` (+17 / -10).
+
+What shipped vs. what was deferred:
+
+- **Shipped (9B):** Single-call-site swap of `luaL_openlibs()` for
+  an explicit `luaL_Reg`-driven whitelist (`luaopen_base`,
+  `luaopen_table`, `luaopen_string`, `luaopen_math`) using the Lua
+  5.1 `lua_pushcfunction` + `lua_call` pattern from `linit.c`.
+  Quest scripts can no longer `require`, touch the filesystem
+  (`io.*`), shell out (`os.execute`), introspect/patch the VM
+  (`debug.*`), or load C modules (`package.loadlib`). Base, table,
+  string, math — the four libs actually referenced by quest Lua —
+  remain available.
+- **Shipped (9C):** New inline `lua_toboundedenum<T>(L, idx, min,
+  max)` template in `LuaState.h` that throws
+  `InvalidProtocolException` with slot index / actual value /
+  legal range in the message on non-numeric or out-of-range
+  stack slots. Migrated all four call sites in
+  `LuaSelectItem.cpp::executeFile`:
+  - `m_ItemClass` bounded `[0, Item::ITEM_CLASS_MAX - 1]`
+  - `m_ItemType` bounded `[0, 0xFFFF]` (WORD max)
+  - `m_OptionType` / `m_OptionType2` bounded `[0, 0xFF]` (BYTE max)
+  Confirmed no other `lua_tonumber` + enum-cast sites remain in
+  `dkrixserver/src`.
+- **Deferred to Phase 12:** packet schema unification across the
+  ~475-file client tree (`dkrix/Client/Packet/` + Cpackets) and
+  the ~800-file server tree (`dkrixserver/src/Core/` CG/GC/CL/LC/
+  GS/SG/GT/TG). Near-duplicated but not a find-replace — requires
+  choosing a canonical tree plus cross-build wiring.
+- **Deferred to Phase 13:** endian-safe wire I/O. Current
+  `template<T> read(T&)` in `SocketInputStream.h:159` does a raw
+  host-endian cast. Making this endian-safe requires picking a
+  wire byte order, adding `htole*`/`le*toh` wrappers around every
+  primitive stream op, and deciding what to do about struct-copy
+  reads inside packet classes themselves — not a single-commit
+  change.
+
+Deployment notes for operators:
+
+1. **No config or operational changes required.** The Lua
+   whitelist is a compile-time change; quest scripts that use
+   only base/table/string/math continue to load identically.
+2. **Quest scripts that call `io.*`, `os.*`, `require`, or
+   `debug.*` will now error at load time with the usual Lua
+   "attempt to index global 'io'" message.** If any production
+   quest was relying on these — audit pre-deploy. No in-tree
+   quest script found that does.
+3. **Quest scripts feeding out-of-range enum values to
+   `LuaSelectItem` now throw `InvalidProtocolException` at the
+   quest-load site** rather than silently wrapping or corrupting
+   the dispatch table. Error message names slot index + value +
+   legal range for quick triage.
 
 ### Phase 10 — Build hygiene & CI
 - [ ] Add `.clang-format` to `client/`; implement
