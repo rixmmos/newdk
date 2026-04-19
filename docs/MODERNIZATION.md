@@ -2072,7 +2072,7 @@ links to Endian.h yet — it sits waiting for 13.3.
 Both follow-ups are cleanly unblocked by Phase 12; both are
 deliberately *not* scheduled against today's two-tree state.
 
-### Phase 16 — CI ratchet activation — plan 2026-04-19
+### Phase 16 — CI ratchet activation — done 2026-04-19
 Two ratchet scripts currently exist with baseline files pinned
 to today's counts:
 
@@ -2091,7 +2091,7 @@ Phases 8C and 12.0 explicitly flagged CI wiring as "small
 follow-up not yet phase-banner-wrapped"; this phase is that
 wrap-up.
 
-- [ ] **16.1 — Wire both ratchets into a single GitHub
+- [x] **16.1 — Wire both ratchets into a single GitHub
       Actions workflow.** Since the scripts live under
       `dkrixserver/scripts/` and the duplicate gate reaches
       across into `dkrix/Client/Packet/Cpackets/` via
@@ -2100,12 +2100,12 @@ wrap-up.
       checks out both trees as sibling directories (the
       same layout they sit in under this repo) and runs
       both scripts in sequence.
-- [ ] **16.2 — Trigger shape.** Fire on
+- [x] **16.2 — Trigger shape.** Fire on
       `pull_request: [opened, synchronize, reopened]`
       targeting `master`, plus `push: [master]` for
       post-merge verification. Matches the existing
       `build.yml` and `format-check.yml` patterns.
-- [ ] **16.3 — No separate client-side workflow.** Both
+- [x] **16.3 — No separate client-side workflow.** Both
       ratchets are about the SERVER tree (one measures
       server-tree SQL sites; the other measures server vs.
       client packet-tree duplicates). Adding a client-side
@@ -2157,6 +2157,32 @@ the split ever happens.
 **Blocker status:** None. Both scripts exist and are known-
 good (verified in-tree during their respective phases).
 This phase is pure workflow wiring.
+
+**Outcome (2026-04-19):**
+
+| Sub-commit | Hash      | Subject                                                          |
+| ---------- | --------- | ---------------------------------------------------------------- |
+| 16A        | `39c7a0b` | `docs: 16A — pin Phase 16 plan (CI ratchet activation)`          |
+| 16B        | `cef4571` | `ci: 16B — add ratchets.yml workflow (activates 8C + 12.0 gates)` |
+| 16C        | HEAD      | `docs: 16C — close out Phase 16 in MODERNIZATION.md`             |
+
+Net delta: **+76 lines of workflow** in
+`dkrixserver/.github/workflows/ratchets.yml` plus docs-only
+edits in `docs/MODERNIZATION.md`. Zero edits to existing
+workflows, scripts, source, or CMake. Zero new dependencies.
+
+Both ratchets are now active on every PR targeting master
+and on every push to master. Migration PRs that move the
+baseline down via `--update` on either script will see the
+next CI run print `OK: <lower count> (baseline <higher count>
+— N migrated; consider --update).` — the baseline-drop is
+noisy-by-design to prompt the PR author to commit the
+`--update` result in the same PR.
+
+**Follow-up work:** none. Phases 11.2, 12.1, 12.2 per-PR
+migrations now have a CI gate that enforces forward
+progress; Phase 13.3/13.4 still blocked on post-Phase-12
+stream-file consolidation as before.
 
 The following are deliberately out of scope for this modernization
 pass. If we change our minds, update this list first.
