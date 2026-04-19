@@ -2072,7 +2072,91 @@ links to Endian.h yet — it sits waiting for 13.3.
 Both follow-ups are cleanly unblocked by Phase 12; both are
 deliberately *not* scheduled against today's two-tree state.
 
-## Explicit non-goals
+### Phase 16 — CI ratchet activation — plan 2026-04-19
+Two ratchet scripts currently exist with baseline files pinned
+to today's counts:
+
+- `dkrixserver/scripts/check-sql-injection.sh` (Phase 8C,
+  baseline 567 — variadic SQL-format sites that need
+  migration to `PreparedStatement` from Phase 11.1).
+- `dkrixserver/scripts/check-packet-duplicates.sh` (Phase
+  12.0, baseline 326 — CG/CL packet class pairs that
+  duplicate between `dkrixserver/src/Core/` and
+  `dkrix/Client/Packet/Cpackets/`).
+
+Neither is referenced from any file in
+`dkrixserver/.github/workflows/` or `dkrix/.github/workflows/`,
+so both fire only when a contributor runs them by hand.
+Phases 8C and 12.0 explicitly flagged CI wiring as "small
+follow-up not yet phase-banner-wrapped"; this phase is that
+wrap-up.
+
+- [ ] **16.1 — Wire both ratchets into a single GitHub
+      Actions workflow.** Since the scripts live under
+      `dkrixserver/scripts/` and the duplicate gate reaches
+      across into `dkrix/Client/Packet/Cpackets/` via
+      relative path, the simplest shape is a
+      `dkrixserver/.github/workflows/ratchets.yml` that
+      checks out both trees as sibling directories (the
+      same layout they sit in under this repo) and runs
+      both scripts in sequence.
+- [ ] **16.2 — Trigger shape.** Fire on
+      `pull_request: [opened, synchronize, reopened]`
+      targeting `master`, plus `push: [master]` for
+      post-merge verification. Matches the existing
+      `build.yml` and `format-check.yml` patterns.
+- [ ] **16.3 — No separate client-side workflow.** Both
+      ratchets are about the SERVER tree (one measures
+      server-tree SQL sites; the other measures server vs.
+      client packet-tree duplicates). Adding a client-side
+      copy of the workflow would just duplicate the same
+      two script invocations. Server-side `ratchets.yml`
+      is the single source of truth.
+
+**Scope correction note (2026-04-19):**
+
+There's a subtle repo-layout issue here. Under the current
+single-repo-with-two-trees layout
+(`work/dkrix/` + `work/dkrixserver/` as sibling subdirs of
+one git root), the packet-duplicates script's relative-path
+resolution (`$script_dir/../..` reaches into
+`work/dkrix/Client/Packet/Cpackets/`) works because the
+checkout IS the whole repo. If `dkrixserver` and `dkrix` ever
+get split into separate upstream repos (each with its own
+.git), the ratchet workflow needs either:
+
+1. A checkout of the SIBLING repo in the workflow (easy
+   via `actions/checkout` with a `path:` pointing at a
+   sibling dir), or
+2. A second ratchet in the client-side workflow that
+   measures the same thing from the other direction.
+
+For now (single repo), the workflow just checks out the
+repo once and both scripts find everything they need. 16A
+pins this assumption and calls out the migration path if
+the split ever happens.
+
+**Plan (sub-commits):**
+
+- **16A — Pin plan.** (This commit.) Records the activation
+  gap (8C + 12.0 ratchet scripts land but aren't wired
+  into CI), the workflow shape, the single-workflow
+  decision, and the upstream-split migration note.
+- **16B — Add `ratchets.yml` workflow.** One GitHub Actions
+  workflow file at
+  `dkrixserver/.github/workflows/ratchets.yml`. Fires on
+  PR + push-to-master. Installs no build dependencies
+  (both scripts are pure POSIX sh + grep + comm); runs
+  `dkrixserver/scripts/check-sql-injection.sh` and
+  `dkrixserver/scripts/check-packet-duplicates.sh` in
+  sequence. Either failing fails the job.
+- **16C — Close-out.** Flip this block to `done`, commit
+  table, note that both ratchets are now active on every
+  PR and lower as migrations happen.
+
+**Blocker status:** None. Both scripts exist and are known-
+good (verified in-tree during their respective phases).
+This phase is pure workflow wiring.
 
 The following are deliberately out of scope for this modernization
 pass. If we change our minds, update this list first.
