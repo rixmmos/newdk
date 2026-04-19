@@ -758,7 +758,7 @@ zero matches before 7B.
   `Mutex.h` shadowing the live `server/Mutex.h`), so the stub
   goes with the dir. Zero live call sites to port.
 
-### Phase 8 — Server: SQL and secrets — plan 2026-04-18
+### Phase 8 — Server: SQL and secrets — done 2026-04-18
 - [ ] Introduce a `PreparedStatement` wrapper over `mysql_stmt_*`.
       **Scope correction (2026-04-18 audit):** codebase has zero
       `mysql_stmt_*` usage today (grep -rn 'mysql_stmt_' → 0).
@@ -781,10 +781,12 @@ zero matches before 7B.
       / custom options).
 - [x] Add a CI grep-gate that fails on new injection-shaped
       `executeQuery("…%s…")` call sites in `dkrixserver/src/`.
-      Script pinned to a line-count baseline (625 today); fails
-      only when the count grows. Lets existing sites stay
-      uncleaned until Phase 11.2 while blocking regression.
-      **(8C — 2026-04-18.)**
+      Script pinned to a line-count baseline (567 today — the
+      stricter `%[sdluxc]` pattern plus exclusion of `*.backup`,
+      `Query.txt`, and `testdb.cpp` trims the wider 625-count
+      audit down to only compiled sites); fails only when the
+      count grows. Lets existing sites stay uncleaned until
+      Phase 11.2 while blocking regression. **(8C — 2026-04-18.)**
 - [x] Move `DB_PASSWORD`, `DB_HOST`, `LoginServerIP`,
       `SharedServerIP`, `LogServerIP` — and any other
       `conf/*.conf` value — from plaintext into environment
@@ -829,6 +831,56 @@ zero matches before 7B.
   those customisations. 8B is strictly additive — the parser now
   understands `${VAR}`, the files can use it when an operator
   decides to.
+
+**Outcome (2026-04-18):**
+
+| #    | Commit    | Subject                                                        |
+| ---- | --------- | -------------------------------------------------------------- |
+| 0001 | `03e0e58` | `docs: pin Phase 8 plan (with scope correction) + add Phase 11`|
+| 0002 | `0971ec0` | `server: 8B — expand ${VAR} env-var placeholders`              |
+| 0003 | `1642dcd` | `server: 8C — add SQL-injection ratchet gate (baseline 567)`   |
+| 0004 | `TBD`     | `docs: 8D — close out Phase 8 in MODERNIZATION.md`             |
+
+Net delta: **+415 lines across 7 files** (pure addition — no
+existing files rewritten). The bulk is 3 new `.conf.template`
+files (~175 lines), the `check-sql-injection.sh` gate (~100
+lines), 65 lines of new C++ in `Properties.cpp`, and the updated
+Phase 8 + Phase 11 blocks in this file.
+
+What shipped vs. what was deferred:
+
+- **Shipped (8B):** `${VAR}` expansion in `Properties::load()`
+  with the "missing = literal + stderr warning" rule, plus three
+  template `.conf` files (loginserver / sharedserver /
+  excel96-gameserver) demonstrating the named-secret pattern for
+  DB credentials, log-server IP, billing IPs, and monitor-client
+  IP. Backward-compatible: existing plaintext `.conf` files parse
+  identically.
+- **Shipped (8C):** POSIX-sh ratchet gate with a 567-site
+  baseline on the variadic SQL API. Gates `check`, `--count`,
+  `--list`, `--update`. Stops new injection-shaped call sites
+  from landing while the existing surface awaits migration.
+- **Deferred to Phase 11.1:** PreparedStatement wrapper over
+  `mysql_stmt_*`. Not a refactor — zero existing `mysql_stmt_*`
+  usage in the tree — so this is a designed API to build, not a
+  find-replace. Non-shippable in the sandbox without MySQL
+  headers to link against.
+- **Deferred to Phase 11.2:** migration of the 567 injection-
+  shaped sites. Incremental module-by-module work, prioritising
+  player-string → SQL paths (chat / say / whisper / nicknames /
+  custom options) first.
+
+Deployment notes for operators:
+
+1. Copy the `.template` files alongside the live configs (they do
+   NOT replace existing configs — operators choose the cut-over).
+2. Export `DKRIX_*` env vars in the service unit / init script
+   (systemd `Environment=`, or shell `export` in the launcher).
+3. Start the server. If any `${VAR}` is unset, `Properties.cpp`
+   prints a stderr warning naming the missing var and leaves the
+   literal placeholder in the parsed value — the first SQL
+   connect or IP dial will then fail visibly rather than the
+   server silently reading an empty credential.
 
 ### Phase 9 — Server: Lua sandbox and packet schema
 - [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `math`,
@@ -895,8 +947,13 @@ migrate onto. Two sub-phases:
       `dkrixserver/src/server/database/PreparedStatement.{h,cpp}`.
       Should be testable against a real MySQL instance before
       being handed to 11.2. Blocker for 11.2.
-- [ ] **11.2 — Migrate 625 injection-shaped call sites.** Ongoing
-      module-by-module work after 11.1 lands. Priority order:
+- [ ] **11.2 — Migrate 567 injection-shaped call sites.** Ongoing
+      module-by-module work after 11.1 lands. The tighter 567
+      number is what the 8C ratchet tracks (compiled `.cpp`/`.h`/
+      `.inl` only, `%[sdluxc]` format set); the wider 625 from the
+      original audit also counted `*.backup`, `Query.txt`, and
+      `testdb.cpp`, none of which are in the live build.
+      Priority order:
       1. User-string interpolation sites (chat, say, whisper, pet
          names, custom options) — ~180 sites, biggest blast radius.
       2. Operator-trusted interpolation (admin commands, log
