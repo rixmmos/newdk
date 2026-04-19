@@ -1,0 +1,107 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    # Matrix: OS × sanitizer config.
+    #
+    # OS set: ubuntu-latest (primary Linux target) + macos-latest
+    # (primary dev platform for the SDL2 port — CMakeLists.txt has
+    # homebrew pathing baked in). Both share the same Makefile
+    # recipe; the difference is in the dep-install step.
+    #
+    # Sanitizer set: [none, asan, ubsan]. TSan excluded from the
+    # default matrix (slower, noisier; still runnable via
+    # `make debug-tsan` locally).
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        sanitizer: [none, asan, ubsan]
+        include:
+          - sanitizer: none
+            make_target: debug
+          - sanitizer: asan
+            make_target: debug-asan
+          - sanitizer: ubsan
+            make_target: debug-ubsan
+
+    runs-on: ${{ matrix.os }}
+
+    name: build (${{ matrix.os }}, ${{ matrix.sanitizer }})
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Linux deps — see CMakeLists.txt SDL2/JPEG find_package() calls.
+      # SDL2_mixer is optional (platform library's CMakeLists.txt
+      # switches behavior based on whether it's found) but install it
+      # anyway so `HAVE_SDL2_MIXER` is ON in CI.
+      - name: Install build dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            pkg-config \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-ttf-dev \
+            libsdl2-mixer-dev \
+            libjpeg-dev
+
+      # macOS deps via Homebrew. The SDL2 stack and libjpeg all
+      # install cleanly; iconv on macOS is handled via libiconv
+      # which CMakeLists.txt already knows how to find
+      # (dkrix/CMakeLists.txt links `iconv` on non-EMSCRIPTEN builds).
+      # Homebrew ships CMake too, so no separate install.
+      - name: Install build dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install \
+            sdl2 \
+            sdl2_image \
+            sdl2_ttf \
+            sdl2_mixer \
+            jpeg
+
+      - name: Show toolchain versions
+        run: |
+          cc --version | head -1
+          c++ --version | head -1
+          cmake --version | head -1
+
+      # Invokes the Makefile target from Phase 15C, which wires
+      # -DCMAKE_BUILD_TYPE=Debug plus (for sanitizer configs) the
+      # matching -DUSE_<SAN>=ON flag. Same recipe as local dev.
+      - name: Build (${{ matrix.make_target }})
+        run: make ${{ matrix.make_target }}
+
+      # Confirm the DarkEden binary actually landed. CMakeLists.txt
+      # writes into build{,-asan,-tsan,-ubsan}/bin via
+      # RUNTIME_OUTPUT_DIRECTORY on the DarkEden target.
+      - name: Verify binary
+        run: |
+          case "${{ matrix.sanitizer }}" in
+            none)  build_dir=build ;;
+            asan)  build_dir=build-asan ;;
+            ubsan) build_dir=build-ubsan ;;
+          esac
+          binary="$build_dir/bin/DarkEden"
+          if [ -x "$binary" ]; then
+            echo "Built: $binary"
+            ls -la "$binary"
+          else
+            echo "ERROR: expected binary $binary was not produced"
+            ls -la "$build_dir/bin/" 2>/dev/null || echo "(no $build_dir/bin/)"
+            exit 1
+          fi
