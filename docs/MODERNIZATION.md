@@ -1024,8 +1024,8 @@ Deployment notes for operators:
    the dispatch table. Error message names slot index + value +
    legal range for quick triage.
 
-### Phase 10 — Build hygiene & CI — plan 2026-04-19
-- [ ] Add `.clang-format` to `dkrix/` and a `Makefile` with
+### Phase 10 — Build hygiene & CI — done 2026-04-19
+- [x] Add `.clang-format` to `dkrix/` and a `Makefile` with
       `fmt` / `fmt-check` / `fmt-check-all` targets mirroring
       the server Makefile. **Scope audit (2026-04-19):** client
       tree has no `.clang-format` today and no `Makefile`
@@ -1036,7 +1036,8 @@ Deployment notes for operators:
       `.clang-format` (tested, 1468-byte LLVM-derived config
       already used in production), add a client `Makefile` with
       the same `fmt` / `fmt-check` / `fmt-check-all` targets.
-- [ ] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
+      **Shipped in 10B (`a760899`).**
+- [x] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
       editor detritus, and `git rm --cached` the one tracked
       `compile_commands.json`. **Scope audit (2026-04-19):** gap
       map is narrow — client `.gitignore` has `compile_commands.json`
@@ -1047,6 +1048,7 @@ Deployment notes for operators:
       (3.3 MB) tracked in spite of its own `.gitignore` rule —
       added before the rule existed (see `df4895e`). Needs
       `git rm --cached`. Single commit.
+      **Shipped in 10C (`ddd8654`).**
 - [ ] Replace `file(GLOB …)` with explicit source lists in the
       client CMake. **Scope audit (2026-04-19) — DEFERRED TO
       PHASE 14.** Two `file(GLOB)` call sites in
@@ -1127,6 +1129,69 @@ Deployment notes for operators:
 - **Replacing `file(GLOB)` in client CMake.** See Phase 14.
 - **CI build matrix.** See Phase 15.
 - **Windows MSVC build.** Still deferred (see block above).
+
+**Outcome (2026-04-19):**
+
+| #    | Commit    | Subject                                                                  |
+| ---- | --------- | ------------------------------------------------------------------------ |
+| 0001 | `50516f1` | `docs: pin Phase 10 plan (with scope correction) + add Phase 14 + Phase 15` |
+| 0002 | `a760899` | `client: 10B — add .clang-format + Makefile with fmt/fmt-check targets`  |
+| 0003 | `ddd8654` | `10C — gitignore unification + un-track stale compile_commands.json`     |
+| 0004 | `89e784c` | `docs: 10D — close out Phase 10 in MODERNIZATION.md`                     |
+
+Net delta: **+279 lines / -7348 lines across 6 files**. The
+-7348 is almost entirely the un-tracked
+`dkrix/Client/compile_commands.json` (-7339 lines); real
+additive content is ~+279 lines — the docs plan/close-out
+(~+175 lines), the new client `.clang-format` (+54), the client
+`Makefile` (+85), the `.gitignore` edits on both trees (+10 net).
+
+What shipped vs. what was deferred:
+
+- **Shipped (10B):** `dkrix/.clang-format` (verbatim copy of
+  `dkrixserver/.clang-format` — LLVM-derived, 4-space indent,
+  120-col wrap, `PointerAlignment: Left`) plus `dkrix/Makefile`
+  with `fmt` / `fmt-check` / `fmt-check-all` targets that mirror
+  the server Makefile's recipes. `FMT_DIRS` spans
+  `Client VS_UI basic tools` — everything CMake compiles plus
+  the Windows-only sources that are currently `list(FILTER
+  EXCLUDE)`'d. Narrow `.gitignore` tweak (`!/Makefile` anchor)
+  included so the top-level Makefile tracks while the existing
+  bare `Makefile` rule still hides any in-source cmake-generated
+  Makefile.
+- **Shipped (10C):** Gap-fill between the two `.gitignore` files.
+  Client gained `.vscode/`, `.idea/`, `*.swp`, `*.swo`, `*~`;
+  server gained `.cache` and `compile_commands.json`. Untracked
+  the 3.3 MB `dkrix/Client/compile_commands.json` via
+  `git rm --cached` — file stays on disk as a regenerated build
+  artifact; the existing `.gitignore` rule prevents re-add.
+- **Deferred to Phase 14:** Explicit CMake source lists to
+  replace the two `file(GLOB)` sites in `dkrix/CMakeLists.txt`
+  covering ~1100 `.cpp` files. Real value (CMake globs aren't
+  re-evaluated on incremental builds) but not a single-commit
+  change.
+- **Deferred to Phase 15:** CI build matrix. Neither tree has
+  `make debug-asan` targets, dep-install scripting, or a build
+  workflow YAML today. Multi-commit infrastructure project.
+- **Still deferred:** Windows MSVC build (was and remains out
+  of scope — the 2,700-error analysis in the Phase 10 block
+  above is retained verbatim).
+
+Deployment notes for operators:
+
+1. **`make fmt` is opt-in.** 10B ships the recipe; no mass-
+   format commit was run. Operators choose when (and if) to
+   bulk-format the client tree — `git blame` stays usable until
+   then.
+2. **`make fmt-check` is the CI-friendly target.** Matches what
+   the existing server `format-check.yml` workflow invokes; the
+   same gate extends to the client tree when Phase 15 lands the
+   matrix build.
+3. **Old local clones may still have
+   `dkrix/Client/compile_commands.json` tracked.** After pulling
+   10C, a `git pull` will delete the file from the index (it's
+   now ignored). The file remains on disk and any new
+   incremental builds regenerate it.
 
 ### Phase 14 — Explicit CMake source lists (deferred from Phase 10)
 Deferred 2026-04-19 from Phase 10 after scope audit showed two
