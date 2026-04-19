@@ -1766,37 +1766,126 @@ Implementation notes vs. the 11A sketch:
   around `mysql_stmt_close` on shared connections; real-world
   use after migrations start will surface any such issues.
 
-### Phase 12 — Packet schema unification (deferred from Phase 9)
-Deferred 2026-04-19 from Phase 9 after scope audit. Today the
-packet definitions live in two places:
+### Phase 12 — Packet schema unification — plan 2026-04-19
+Originally deferred 2026-04-19 from Phase 9; blocker cleared
+by Phase 10 (build hygiene) + Phase 14C (CONFIGURE_DEPENDS on
+the client GLOB). Audit 2026-04-19 refined the raw scope:
 
-- `dkrix/Client/Packet/` (149 files) + `dkrix/Client/Packet/Cpackets/`
-  (326 files) on the client side.
-- `dkrixserver/src/Core/` — ~800 `CG*/GC*/CL*/LC*/GS*/SG*/GT*/TG*`
-  `.cpp`/`.h` pairs mixed with the server-side `*Handler.cpp`
-  files.
+- `dkrixserver/src/Core/` holds **460 + 460 = 920** packet
+  `.{h,cpp}` pairs matching
+  `^(CG|GC|CL|LC|GS|SG|GT|TG)` and NOT ending in `Handler`:
+  300 CG (Client→Game), 516 GC (Game→Client), 34 CL
+  (Client→Login), 34 LC (Login→Client), 16 GS (Game→Shared),
+  20 SG (Shared→Game). `GT`/`TG` named in the original block
+  turned out to be 0 files in tree.
+- `dkrix/Client/Packet/Cpackets/` holds **163 + 163 = 326**
+  packet `.{h,cpp}` pairs — exclusively CG (294) + CL (32).
+  No GC/LC/GS/SG on client: receive-side packets are decoded
+  inline from the wire buffer rather than through a class
+  hierarchy, so the client only duplicates the send-side
+  packet families.
+- `dkrix/Client/Packet/` root (148 non-Cpackets files) is
+  infrastructure (`SocketInputStream`, `SocketOutputStream`,
+  `Encrypter`, `Datagram`, etc.) duplicated against
+  `dkrixserver/src/Core/`'s non-packet files — a SEPARATE
+  duplication from the packet tree, distinct from Phase 12's
+  scope. The Phase 13 close-out flagged these stream files
+  (`SocketInputStream.{h,cpp}`, `SocketOutputStream.{h,cpp}`)
+  as needing consolidation alongside Phase 12's packet move
+  for the 13.3 migration to land once; that remains true but
+  is not what this phase owns.
+- Duplicate-name intersection between server packet tree and
+  client Cpackets: **326** files.
 
-Spot-check diff on `CGAbsorbSoul.{h,cpp}` pair shows the two
-copies differ only in whitespace, exception-specs, and comment
+Spot-check diff on `CGAbsorbSoul.{h,cpp}` shows the two copies
+differ only in whitespace, exception-specs, and comment
 formatting — byte layout on the wire is identical. So the
 duplication is a maintenance burden, not a protocol divergence.
 
-- [ ] **12.1 — Canonicalise one tree + delete the other.**
-      Pick the server copy as canonical (it's the more-edited
-      tree and has richer `*Handler.cpp` companions). Move
-      `dkrixserver/src/Core/*{CG,GC,CL,LC,GS,SG,GT,TG}*.{cpp,h}`
-      to a new `shared/Packets/` at the repo root. Rewrite both
-      builds to consume it.
-- [ ] **12.2 — Strip client-tree duplicates + fix includes.**
-      Delete `dkrix/Client/Packet/Cpackets/` and any file in
-      `dkrix/Client/Packet/` whose name matches a moved file.
-      Update client `#include` paths to the new location.
-- [ ] **12.3 — CI structural check.** A grep-gate that fails if
-      a matching-name pair ever reappears in both trees.
+**Scope correction (2026-04-19, revised under session-
+preservation directive):**
 
-Blocker: Phase 10 (build hygiene) should land first — moving
-headers triggers CMake glob updates and the client still uses
-`file(GLOB)` today.
+Ship 12.0 (scaffolding + duplicate-count ratchet) now; defer
+12.1 (the 920-file physical move) and 12.2 + 12.3 to
+ratchet-driven follow-up work, same shape as Phase 11.2 under
+the 8C ratchet.
+
+Rationale: the 920-file `git mv` + CMake rewiring is a
+mechanical but large surgery that doesn't fit a single close-
+out commit. Landing it all in one commit risks a broken build
+with high debug-cost and no incremental recovery; landing it
+piecewise inside "Phase 12" either blocks the phase
+indefinitely or produces a rubber-stamp close-out that
+misrepresents progress. The Phase 11.1 + 8C precedent works
+here: a ratchet-driven gate at baseline 326 turns "Phase 12
+migration" into ongoing per-PR-measurable work instead of a
+monolithic phase, and Phase 12 itself can close cleanly on
+the one-off scaffolding that makes that ratchet possible.
+
+**Corrected plan items:**
+
+- [ ] **12.0 — Scaffolding + duplicate-count ratchet.**
+      Create `shared/Packets/` at the repo root with a
+      canonical-tree README. Add
+      `scripts/check-packet-duplicates.sh` +
+      `.packet-duplicates-baseline` pinned at 326; script
+      shape mirrors `check-sql-injection.sh` — CI fails on
+      count increase, `--update` is the explicit knob for
+      lowering the baseline after a migration PR. No file
+      moves in this commit; this only lands the target
+      directory + the tracking gate.
+- [ ] **~~12.1~~ — Canonicalise one tree + delete the
+      other.** **Deferred to ratchet-driven follow-up
+      work.** Each migration PR moves one small packet
+      family (GS/SG, a CL subset, one CG-sub-feature, etc.)
+      from `dkrixserver/src/Core/` to `shared/Packets/`,
+      updates both builds' CMakeLists.txt, and runs
+      `check-packet-duplicates.sh --update` to lower the
+      baseline by the migrated count. No Phase 12.1 close-
+      out commit; the ratchet is the progress indicator.
+- [ ] **~~12.2~~ — Strip client-tree duplicates + fix
+      includes.** **Folded into 12.1 per-PR work.** Each
+      migration PR that moves a server packet also deletes
+      its Cpackets duplicate and fixes the client's include
+      path. The ratchet counts both trees, so a migration
+      only drops the count if BOTH sides are unified.
+- [ ] **~~12.3~~ — CI structural check.** **Implemented as
+      part of 12.0 (the ratchet IS the gate).** The
+      original plan was a grep-gate that fails if a matching
+      name ever reappears in both trees; the ratchet does
+      exactly that at baseline 0 — and at baselines > 0
+      during the migration, it gates against REGRESSION
+      which is the same guarantee in weaker form.
+
+**Plan (sub-commits):**
+
+- **12A — Pin plan.** (This commit.) Records the scope
+  audit (920 server / 326 client / 326 duplicate-name
+  intersection), the scope-correction split (12.0 ships now;
+  12.1 + 12.2 fold into ratchet-driven per-PR work; 12.3 is
+  the ratchet itself), and the sub-commit order below.
+- **12B — Add `shared/Packets/` + duplicate ratchet.**
+  Creates `shared/Packets/README.md` documenting the
+  canonical-tree policy and the migration-PR shape. Adds
+  `dkrixserver/scripts/check-packet-duplicates.sh` + sibling
+  `.packet-duplicates-baseline` pinned at 326. Script shape
+  matches `check-sql-injection.sh` (check / --count /
+  --list / --update modes). No source-tree file moves in
+  this commit.
+- **12C — Close-out.** Flip this block to `done (12.0
+  scaffolding)`, commit table, pointers to the ratchet-
+  driven follow-up for 12.1 + 12.2 and the Phase 13.3
+  migration that unblocks once `shared/Core/Socket*Stream.h`
+  lands alongside the first few packet migrations.
+
+**Blocker status:** Phase 10 (build hygiene) and Phase 14C
+(client-side CONFIGURE_DEPENDS) are both done. The original
+"CMake glob update required before moving headers" blocker
+is cleared — client picks up new `shared/Packets/*.cpp`
+automatically if `add_subdirectory(../shared/Packets)` is
+wired into `dkrix/CMakeLists.txt` during the first migration
+PR. 12.0 does NOT do that wiring; the first migration PR
+does.
 
 ### Phase 13 — Endian-safe wire I/O (13.1 + 13.2) — done 2026-04-19
 Originally deferred 2026-04-19 from Phase 9. Current state: the
