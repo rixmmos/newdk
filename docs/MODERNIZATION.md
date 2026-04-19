@@ -1384,27 +1384,137 @@ Deployment notes for operators:
    before and after Phase 14. The 14B VS_UI swap was
    verified byte-for-byte via `find | sort`.
 
-### Phase 15 — CI build matrix (deferred from Phase 10)
+### Phase 15 — CI build matrix — plan 2026-04-19
 Deferred 2026-04-19 from Phase 10. Server has one workflow today
 (clang-format diff gate); client has no CI. Adding a real build
 matrix means landing infrastructure, not just a YAML file.
 
-- [ ] Add `debug-asan`, `debug-tsan`, `debug-ubsan` Makefile
-      targets to both trees that forward to CMake with the
-      existing `USE_ASAN` / `USE_TSAN` / `USE_UBSAN` options
-      already wired in `dkrix/CMakeLists.txt:23-25`.
-- [ ] Script the server's CI toolchain install: `libmysqlclient-dev`,
-      `liblua5.1-0-dev`, `libboost-dev` (which headers the server
-      actually consumes needs a sub-audit).
-- [ ] Script the client's CI toolchain install: `libsdl2-dev`,
-      `libsdl2-mixer-dev`, `libsdl2-image-dev`, `liblua5.1-0-dev`,
-      `libpng-dev`, `libjpeg-dev`, plus macOS `brew install`
-      equivalents.
-- [ ] Write `.github/workflows/build.yml` at the repo root (not
-      per-tree) with a matrix `{os: [ubuntu-latest, macos-latest],
-      sanitizer: [none, asan, ubsan]}`. Keep TSan out of the
-      default matrix — runs slower and produces too much noise
-      on an un-audited codebase.
+**Scope corrections from the initial Phase 10-deferred block
+(audit 2026-04-19):**
+
+1. **No Boost dep.** `dkrixserver/CMakeLists.txt` calls
+   `find_package(Threads)`, pkg-config for Lua 5.1, and
+   `find_path/find_library` for MySQL and Xerces-C. Zero
+   `Boost*`, zero `#include <boost/...>` anywhere in
+   `dkrixserver/src/`. Dockerfile.dev confirms: apt installs
+   `gcc build-essential libxerces-c-dev libmysqlclient-dev
+   liblua5.1-dev xutils-dev psmisc` — no boost.
+2. **Client does not link lua.** Initial plan listed
+   `liblua5.1-0-dev` in client deps. That's wrong —
+   `dkrix/CMakeLists.txt` never calls `find_package(Lua)` nor
+   links a lua library. Client scripting, if any, is future
+   work.
+3. **Server CMake has NO sanitizer options.** Initial plan
+   assumed `USE_ASAN/TSAN/UBSAN` were already wired in both
+   trees. Client has them at `dkrix/CMakeLists.txt:28-30`;
+   server has nothing. 15B must add the three `option()`s and
+   the sanitizer-flags pipeline to `dkrixserver/CMakeLists.txt`
+   before sanitizer Makefile targets are wired.
+4. **Client Makefile has no build targets.** Phase 10B shipped
+   a format-only Makefile (`fmt` / `fmt-check` / `fmt-check-all`)
+   — no `debug`, no `release`, no build targets at all.
+   Sanitizer targets presume there's already a `debug` target
+   to base them on; for client, 15C has to add build targets
+   first.
+5. **Repo boundary.** `dkrix/` and `dkrixserver/` publish to
+   separate upstreams (`opendarkeden/client` and
+   `opendarkeden/server`), confirmed by the existing
+   `dkrixserver/.github/workflows/format-check.yml` being
+   nested under the server tree. CI workflows therefore land
+   under each tree's own `.github/workflows/build.yml`, NOT at
+   the combined-repo root. Two workflow files, not one.
+
+**Corrected plan items:**
+
+- [ ] **Server CMake sanitizer wiring.** Add
+      `option(USE_ASAN ...)` / `option(USE_TSAN ...)` /
+      `option(USE_UBSAN ...)` and the `SANITIZER_FLAGS`
+      pipeline to `dkrixserver/CMakeLists.txt`, mirroring the
+      client block at `dkrix/CMakeLists.txt:28-56`. Port the
+      same flag strings (`-fsanitize=address
+      -fno-omit-frame-pointer`, `-fsanitize=thread`,
+      `-fsanitize=undefined`) and the same CMAKE_CXX/C_FLAGS
+      application.
+- [ ] **Sanitizer Makefile targets, both trees.**
+      `debug-asan`, `debug-tsan`, `debug-ubsan` targets that
+      invoke `cmake -B build -DCMAKE_BUILD_TYPE=Debug
+      -DUSE_<SAN>=ON && cmake --build build`. Server has
+      existing `debug` / `release` targets to base from;
+      client's fmt-only Makefile grows `debug` / `release` /
+      `debug-asan` / `debug-tsan` / `debug-ubsan` from
+      scratch.
+- [ ] **Server CI toolchain install script.** `apt install -y
+      build-essential libxerces-c-dev libmysqlclient-dev
+      liblua5.1-dev` (matches Dockerfile.dev). No boost, no
+      sdl2 — pure server deps.
+- [ ] **Client CI toolchain install script.** Ubuntu: `apt
+      install -y build-essential libsdl2-dev libsdl2-image-dev
+      libsdl2-ttf-dev libsdl2-mixer-dev libjpeg-dev`. macOS:
+      `brew install sdl2 sdl2_image sdl2_ttf sdl2_mixer jpeg`.
+      iconv is in glibc on Linux and in libiconv on macOS
+      (homebrew's is keg-only but CMake already knows where
+      to look).
+- [ ] **Per-tree `build.yml` workflows.** Each tree gets its
+      own `.github/workflows/build.yml`. Server: `{os:
+      [ubuntu-latest], sanitizer: [none, asan, ubsan]}` —
+      Ubuntu-only because MySQL + Xerces-C on macOS is a
+      homebrew pathing rabbit hole not worth the CI
+      complexity in this phase. Client: `{os: [ubuntu-latest,
+      macos-latest], sanitizer: [none, asan, ubsan]}` —
+      client already has working homebrew paths in
+      `dkrix/CMakeLists.txt`. TSan excluded from default
+      matrix (slower + noisier on an un-audited codebase).
+
+**Plan (sub-commits):**
+
+- **15A — Pin plan.** (This commit.) Records the 5 scope
+  corrections above and the sub-commit order below.
+- **15B — Server CMake sanitizer options.** Add USE_ASAN /
+  USE_TSAN / USE_UBSAN options + the flags pipeline to
+  `dkrixserver/CMakeLists.txt`. Pure build-infrastructure
+  edit; no source changes, no new dependencies.
+- **15C — Makefile targets: server + client.** Server gets
+  `debug-asan` / `debug-tsan` / `debug-ubsan`. Client's
+  fmt-only Makefile gets `debug` / `release` / sanitizer
+  targets so there's something for the CI to invoke.
+- **15D — Server `.github/workflows/build.yml`.** Matrix
+  `{sanitizer: [none, asan, ubsan]}` on ubuntu-latest. Apt-
+  installs the Dockerfile.dev dep set. Builds the server and
+  runs the resulting binary through `--help` or similar
+  smoke check (if one exists — fallback: confirm the binary
+  was produced).
+- **15E — Client `.github/workflows/build.yml`.** Matrix
+  `{os: [ubuntu-latest, macos-latest], sanitizer: [none,
+  asan, ubsan]}`. Conditional apt/brew install scripting.
+  Builds `DarkEden` target and confirms binary produced.
+- **15F — Close-out.** Flip this block to `done`, outcome
+  block, commit table. No CLAUDE.md changes expected — the
+  new Makefile targets are self-documenting in `make help`.
+
+**Explicit non-goals for Phase 15:**
+
+- **TSan in the default matrix.** Built as a Makefile target
+  (operators can run it locally) but CI matrix stops at
+  none/asan/ubsan to keep runner time reasonable.
+- **macOS server CI.** Server CMake has macOS branches for
+  MySQL/Lua/Xerces homebrew paths, but we've never built the
+  server on macOS. Out of scope — add later if a contributor
+  actually needs it.
+- **Docker-based CI.** Dockerfile.dev exists for local dev;
+  using it in CI would slow runs down for no additional
+  coverage. Apt-install in the workflow step is enough.
+- **Cache keys / build artifacts / release workflow.**
+  Benchmarking, caching, and artifact upload are separate
+  sophistication layers on top of a working build matrix.
+  Once the matrix is green, those can be added in a follow-
+  up without touching Phase 15's scope.
+- **Windows MSVC build.** Same disposition as in every prior
+  phase: out of scope.
+- **Running the actual game/server.** CI confirms the build
+  succeeds. Smoke-testing that the server accepts
+  connections or the client opens a window needs real
+  service deps (MySQL, SDL2 video sink, X11/Wayland) that
+  are awkward in CI — separate problem.
 
 ### Phase 11 — SQL injection remediation (deferred from Phase 8)
 Deferred 2026-04-18 from Phase 8 after scope audit showed 625
