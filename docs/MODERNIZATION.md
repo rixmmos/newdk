@@ -1600,7 +1600,7 @@ Deployment notes for operators:
    repos get unlimited macOS runner time on GitHub-
    hosted runners.
 
-### Phase 11 — SQL injection remediation — plan 2026-04-19
+### Phase 11 — SQL injection remediation (11.1 only) — done 2026-04-19
 Originally deferred 2026-04-18 from Phase 8 after scope audit
 showed 625 `executeQuery("…%[sd]…")` call sites (not the ~87
 originally estimated) and zero existing `mysql_stmt_*`
@@ -1625,7 +1625,7 @@ ongoing work that closes when the ratchet reaches 0.
 
 **Corrected plan items:**
 
-- [ ] **11.1 — `PreparedStatement` wrapper API.** One-off
+- [x] **11.1 — `PreparedStatement` wrapper API.** One-off
       design + implementation commit. Locked shape:
       ```cpp
       class PreparedStatement {
@@ -1713,6 +1713,58 @@ ongoing work that closes when the ratchet reaches 0.
 - **No deprecation of `Statement`.** Both APIs coexist until
   the ratchet reaches 0; only then does `Statement` get
   deprecated, and that's a separate commit.
+
+**Outcome (2026-04-19):**
+
+| #    | Commit    | Subject                                                                |
+| ---- | --------- | ---------------------------------------------------------------------- |
+| 11A  | `6ba74bc` | `docs: 11A — pin Phase 11 plan (scope: 11.1 API only)`                 |
+| 11B  | `d5fb1b1` | `server: 11B — add PreparedStatement.{h,cpp} to server/database/`      |
+| 11C  | `HEAD`    | `docs: 11C — close out Phase 11 (11.1 only) in MODERNIZATION.md`       |
+
+Net delta this phase: **+505 lines across 2 new files + 1 CMake
+edit** (`PreparedStatement.h`, `PreparedStatement.cpp`,
+`server/database/CMakeLists.txt`) plus **docs-only edits** in
+MODERNIZATION.md. Zero edits to existing source files. The new
+class compiles into all five database-library flavors but isn't
+referenced by any call site yet — first migration PR picks the
+first one up.
+
+Implementation notes vs. the 11A sketch:
+
+- **Server-side prepared statements** via `mysql_stmt_*` as
+  planned, not a client-side escape-and-substitute shim.
+- **`bindUInt`/`bindULong`/`bindDouble`/`bindNull` included
+  alongside the sketch's `bindInt`/`bindLong`/`bindString`/
+  `bindTime`.** The server uses unsigned IDs in many places
+  (player / item / creature IDs are `uint`/`UINT64`), so the
+  unsigned variants are load-bearing for call-site
+  readability.
+- **`execute()` returns `NULL` for SELECT too (not just
+  INSERT/UPDATE/DELETE) in 11.1 scope.** Full Result*
+  integration for SELECT requires plumbing
+  `mysql_stmt_bind_result` + `mysql_stmt_fetch` into a new
+  Result construction path. Deferred to the first call-site
+  migration PR that needs a SELECT — lands alongside that PR
+  instead of as dead code here. See the header's scope
+  block.
+
+**Follow-up work (not part of Phase 11, tracked by 8C ratchet):**
+
+- **SELECT result-set integration.** First migration PR that
+  needs to convert a SELECT site will extend Result (or add a
+  sibling class) to iterate `mysql_stmt_fetch`-produced rows.
+  Lock the design decision (extend vs. new class) in that PR;
+  this close-out deliberately doesn't pre-decide.
+- **Call-site migrations against the 8C ratchet.** No
+  scheduled phase close-out; each migration PR moves the
+  ratchet count down. When it hits 0, the gate flips from
+  "count didn't grow" to "zero matches" and `Statement` can
+  be deprecated.
+- **Stress test the MYSQL_STMT lifecycle under load.**
+  libmysqlclient has historically had resource-cleanup bugs
+  around `mysql_stmt_close` on shared connections; real-world
+  use after migrations start will surface any such issues.
 
 ### Phase 12 — Packet schema unification (deferred from Phase 9)
 Deferred 2026-04-19 from Phase 9 after scope audit. Today the
