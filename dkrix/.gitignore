@@ -18,6 +18,13 @@ build/
 *.dSYM
 *.dSYM/
 
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # Backup files
 *.bak
 *_bak*
