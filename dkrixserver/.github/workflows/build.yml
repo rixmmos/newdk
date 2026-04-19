@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    # Matrix: three sanitizer configs. TSan excluded from the default
+    # matrix — slower, noisier, and the server is un-audited enough
+    # that it will produce a firehose of false positives. Still runnable
+    # locally via `make debug-tsan`.
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [none, asan, ubsan]
+        include:
+          - sanitizer: none
+            make_target: debug
+          - sanitizer: asan
+            make_target: debug-asan
+          - sanitizer: ubsan
+            make_target: debug-ubsan
+
+    runs-on: ubuntu-latest
+
+    name: build (${{ matrix.sanitizer }})
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Dep set matches Dockerfile.dev: build-essential + libxerces-c-dev
+      # + libmysqlclient-dev + liblua5.1-dev. `cmake` and `pkg-config` are
+      # preinstalled on ubuntu-latest runners but listed here for
+      # resilience against runner-image changes.
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            pkg-config \
+            libxerces-c-dev \
+            libmysqlclient-dev \
+            liblua5.1-dev
+
+      - name: Show toolchain versions
+        run: |
+          gcc --version | head -1
+          g++ --version | head -1
+          cmake --version | head -1
+
+      # Invokes the Makefile target from Phase 15C, which wires
+      # -DCMAKE_BUILD_TYPE=Debug plus (for sanitizer configs) the
+      # matching -DUSE_<SAN>=ON flag.
+      - name: Build (${{ matrix.make_target }})
+        run: make ${{ matrix.make_target }}
+
+      # Confirm the binary actually landed. CMakeLists.txt writes into
+      # bin/ via CMAKE_RUNTIME_OUTPUT_DIRECTORY — the exact executable
+      # name(s) come from add_executable() targets in src/**/*.
+      - name: Verify binaries
+        run: |
+          if [ -d bin ] && [ -n "$(ls -A bin 2>/dev/null)" ]; then
+            echo "bin/ contains:"
+            ls -la bin/
+          else
+            echo "ERROR: bin/ is empty or missing after build"
+            exit 1
+          fi
