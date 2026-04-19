@@ -36,6 +36,45 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 # ============================================================================
+# Sanitizer configuration (Phase 15B, 2026-04-19)
+# ============================================================================
+# Mirrors the client block at dkrix/CMakeLists.txt:28-56 so both trees
+# expose the same -DUSE_<SAN>=ON switches. Wired here (rather than in
+# per-target properties) because the server is a monolithic build —
+# a single CMAKE_CXX/C_FLAGS fold-in is enough.
+option(USE_ASAN "Enable AddressSanitizer for memory error detection" OFF)
+option(USE_TSAN "Enable ThreadSanitizer for race condition detection" OFF)
+option(USE_UBSAN "Enable UndefinedBehaviorSanitizer for undefined behavior detection" OFF)
+
+if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        set(SANITIZER_FLAGS "")
+
+        if(USE_ASAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+        endif()
+
+        if(USE_TSAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=thread")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
+        endif()
+
+        if(USE_UBSAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=undefined")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+        endif()
+
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+
+        message(STATUS "Sanitizer flags: ${SANITIZER_FLAGS}")
+    else()
+        message(WARNING "Sanitizers requested but compiler is not GCC/Clang — flags not applied")
+    endif()
+endif()
+
+# ============================================================================
 # 查找依赖
 # ============================================================================
 find_package(Threads REQUIRED)
