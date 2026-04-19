@@ -2184,6 +2184,108 @@ migrations now have a CI gate that enforces forward
 progress; Phase 13.3/13.4 still blocked on post-Phase-12
 stream-file consolidation as before.
 
+### Phase 17 — Packet divergence audit (plan 2026-04-19)
+Phase 12's close-out asserted, based on a single spot-check on
+`CGAbsorbSoul.{h,cpp}`, that the 326 name-matched packet pairs
+"differ only in whitespace, exception-specs, and comment
+formatting — byte layout on the wire is identical." A
+full-tree sweep before starting the first ratchet-lowering
+migration shows that spot-check was not representative.
+
+**Audit finding:**
+
+Of 326 name-matched packet pairs between
+`dkrixserver/src/Core/` and `dkrix/Client/Packet/Cpackets/`:
+
+- **0 pairs** are bit-identical.
+- **7 pairs** are cosmetic-only divergent — after normalizing
+  away whitespace, `throw(...)` exception specifications,
+  `#include "Client_PCH.h"`, and `#ifndef __GAME_CLIENT__` /
+  `#ifdef __DEBUG_OUTPUT__` guard placement, the two files
+  become byte-equal.
+- **319 pairs** carry semantic divergence that remains after
+  that normalization. Examples: different `__END_CATCH` vs
+  `__END_CATCH_NO_RETHROW` behavior, different `toString()`
+  debug-string contents, method-body inlining differences,
+  algebraically-equivalent-but-textually-different
+  `getPacketSize()` expressions, `string` vs `std::string`
+  qualification, and include-order / include-set
+  differences.
+
+Algebraic equivalence of packet-size expressions and
+inlining-style differences argue that the wire format likely
+IS identical across all 326 pairs — but that's not something
+a mechanical `git mv` can assume. Each migration PR has to
+pick a canonical version and verify both builds still compile
++ link against the unified file.
+
+**Implications for Phase 12 migration path:**
+
+- **7 cosmetic-only pairs** are safe canary candidates.
+  Pick the server version (already has modern C++ style — no
+  `throw(...)` specs), `git mv` into `shared/Packets/`,
+  delete the Cpackets sibling, run
+  `check-packet-duplicates.sh --update` to drop baseline
+  326 → 325. Client build just picks up the server-style
+  file unchanged in function signatures (both sides already
+  compile one or the other, and method signatures reconcile
+  via the normalized view).
+- **319 semantic-divergent pairs** each need a reconciliation
+  step before migration: pick canonical content, verify
+  signature compatibility on both sides, confirm wire format
+  hasn't drifted between copies. This is the "920-file
+  surgery" Phase 12's scope-correction deferred to ratchet-
+  driven per-PR work — now more clearly scoped as "reconcile
+  first, migrate second."
+- **The ratchet baseline is unaffected.** It counts
+  name-matches, not content-equality. Moving any of the 7
+  cosmetic pairs drops the count by 1 per pair; the same
+  holds for any of the 319 semantic pairs once reconciled.
+
+**What 17 ships:**
+
+- [ ] **17.1 — Audit script.**
+      `dkrixserver/scripts/audit-packet-divergence.sh`
+      (shape mirrors `check-sql-injection.sh`:
+      `--count`, `--list-cosmetic`, `--list-semantic`,
+      default = classify summary). Reproducible + can be
+      run by a future migration PR to sanity-check
+      the cosmetic-pair list.
+- [ ] **17.2 — Migration-class addendum to
+      `shared/Packets/README.md`.** Explicit list of the 7
+      cosmetic pairs as first-wave canaries; pointer to the
+      audit script for the 319 semantic pairs.
+- [ ] **17.3 — Update Phase 12 close-out claim.** The
+      Phase 12 block's sentence "Spot-check diff on
+      `CGAbsorbSoul.{h,cpp}` shows the two copies differ
+      only in whitespace..." is based on a narrow spot-check
+      that doesn't hold tree-wide. Replace with a pointer
+      to the 17 audit.
+
+**Plan (sub-commits):**
+
+- **17A — Pin plan.** (This commit.) Records the audit
+  finding (0 / 7 / 319 split), the migration-class
+  implications, and the sub-commit order below.
+- **17B — Add audit script + README addendum + Phase 12
+  claim correction.** Three touched files:
+  `dkrixserver/scripts/audit-packet-divergence.sh` (new),
+  `shared/Packets/README.md` (canary list added),
+  `docs/MODERNIZATION.md` (Phase 12 claim softened from
+  "differ only in whitespace" to "spot-check only; see
+  Phase 17 for tree-wide audit"). No source tree edits;
+  no workflow edits; the audit script is an
+  investigation-only tool and does NOT get wired into
+  `ratchets.yml` — unlike the two ratchet scripts, this
+  one reports classification rather than enforcing a
+  gate, so CI noise would be off-message.
+- **17C — Close-out.** Flip this block to `done`,
+  commit table, pointer to the 7 cosmetic canary pairs
+  as the first-wave migration candidates.
+
+**Blocker status:** None. Pure audit + doc work; no source,
+CMake, or workflow dependencies.
+
 The following are deliberately out of scope for this modernization
 pass. If we change our minds, update this list first.
 
