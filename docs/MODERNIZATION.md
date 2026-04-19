@@ -1600,49 +1600,119 @@ Deployment notes for operators:
    repos get unlimited macOS runner time on GitHub-
    hosted runners.
 
-### Phase 11 — SQL injection remediation (deferred from Phase 8)
-Deferred 2026-04-18 from Phase 8 after scope audit showed 625
-`executeQuery("…%[sd]…")` call sites (not the ~87 originally
-estimated) and zero existing `mysql_stmt_*` infrastructure to
-migrate onto. Two sub-phases:
+### Phase 11 — SQL injection remediation — plan 2026-04-19
+Originally deferred 2026-04-18 from Phase 8 after scope audit
+showed 625 `executeQuery("…%[sd]…")` call sites (not the ~87
+originally estimated) and zero existing `mysql_stmt_*`
+infrastructure to migrate onto.
 
-- [ ] **11.1 — `PreparedStatement` wrapper API.** One-off design
-      work. Expected shape (not binding):
+**Scope correction from the initial deferred block (audit
+2026-04-19):**
+
+Ship 11.1 (PreparedStatement wrapper API) as a single close-
+out phase now; treat 11.2 (call-site migrations) as an
+ongoing post-11.1 effort driven by the Phase 8C CI ratchet
+rather than trying to land it under a single "Phase 11 done"
+banner. Rationale: the ratchet infrastructure *already exists*
+(8C pinned the baseline at 567 in `scripts/check-sql-
+injection.sh` and CI fails any PR that pushes the count up);
+every migration PR that ships afterwards is measured by that
+gate. Forcing all 567 migrations under one phase close-out
+either blocks Phase 11 indefinitely or produces a rubber-stamp
+close-out that doesn't reflect actual migration work. Split:
+11.1 is a one-off API commit that can close cleanly; 11.2 is
+ongoing work that closes when the ratchet reaches 0.
+
+**Corrected plan items:**
+
+- [ ] **11.1 — `PreparedStatement` wrapper API.** One-off
+      design + implementation commit. Locked shape:
       ```cpp
       class PreparedStatement {
       public:
-          PreparedStatement(Connection*, const string& sqlWithQMarks);
-          void bindInt   (int idx, int v);
-          void bindLong  (int idx, long v);
-          void bindString(int idx, const string& v);
-          void bindTime  (int idx, time_t t);
-          Result* execute();
+          PreparedStatement(Connection*, const std::string& sqlWithQMarks);
           ~PreparedStatement();
+
+          // Parameter binding (1-indexed to match `?` position).
+          void bindInt    (uint idx, int v);
+          void bindUInt   (uint idx, uint v);
+          void bindLong   (uint idx, long long v);
+          void bindULong  (uint idx, unsigned long long v);
+          void bindDouble (uint idx, double v);
+          void bindString (uint idx, const std::string& v);
+          void bindTime   (uint idx, time_t t);
+          void bindNull   (uint idx);
+
+          // Execution. Ownership of Result* transferred to caller.
+          Result* execute();
+
+          // Last-ditch diagnostics for exception paths.
+          std::string getError() const;
+          uint        getAffectedRowCount() const;
+          uint        getInsertID() const;
       };
       ```
       Wraps `mysql_stmt_init` / `mysql_stmt_prepare` /
       `mysql_stmt_bind_param` / `mysql_stmt_execute` /
       `mysql_stmt_bind_result` / `mysql_stmt_fetch`. Lives in
-      `dkrixserver/src/server/database/PreparedStatement.{h,cpp}`.
-      Should be testable against a real MySQL instance before
-      being handed to 11.2. Blocker for 11.2.
-- [ ] **11.2 — Migrate 567 injection-shaped call sites.** Ongoing
-      module-by-module work after 11.1 lands. The tighter 567
-      number is what the 8C ratchet tracks (compiled `.cpp`/`.h`/
-      `.inl` only, `%[sdluxc]` format set); the wider 625 from the
-      original audit also counted `*.backup`, `Query.txt`, and
-      `testdb.cpp`, none of which are in the live build.
-      Priority order:
-      1. User-string interpolation sites (chat, say, whisper, pet
-         names, custom options) — ~180 sites, biggest blast radius.
+      `dkrixserver/src/server/database/PreparedStatement.
+      {h,cpp}`. Registered in
+      `dkrixserver/src/server/database/CMakeLists.txt` so all
+      five compile flavors (`Database`, `GameServerDatabase`,
+      `LoginServerDatabase`, `SharedServerDatabase`,
+      `UpdateServerDatabase`) pick it up. Throws
+      `SQLException` on driver error, same as the existing
+      `Statement` class.
+- [ ] **~~11.2~~ — Migrate 567 injection-shaped call sites.**
+      **Reclassified as ongoing follow-up work, not a Phase 11
+      sub-item.** Tracked by the Phase 8C CI ratchet in
+      `scripts/check-sql-injection.sh` (baseline pinned at
+      567; CI fails on any PR that increases the count). Each
+      migration PR is its own small commit against the
+      existing ratchet; there is no "Phase 11.2 close-out" —
+      the work closes when the ratchet reaches 0 and the gate
+      flips from "count didn't grow" to "zero matches".
+
+      Priority order (unchanged from the deferred block):
+      1. User-string interpolation sites (chat, say, whisper,
+         pet names, custom options) — ~180 sites, biggest
+         blast radius.
       2. Operator-trusted interpolation (admin commands, log
-         lookups) — ~200 sites, lower risk but still value from
-         uniformity.
+         lookups) — ~200 sites.
       3. Constant / numeric-only interpolation (IDs, enums cast
          to int) — remainder, pure hygiene.
-      The CI gate from Phase 8C will drive the count down as
-      migrations land. When the baseline reaches 0, the gate flips
-      from "count didn't grow" to "zero matches".
+
+**Plan (sub-commits):**
+
+- **11A — Pin plan.** (This commit.) Records the scope
+  correction that separates 11.1 (one-off API commit) from
+  11.2 (ongoing ratchet-driven migration).
+- **11B — Add `PreparedStatement.{h,cpp}`.** The full API
+  above, implementation routed through `mysql_stmt_*`.
+  Registered in all five database-library flavors in
+  `server/database/CMakeLists.txt`. No call-site migrations
+  in this commit — the API lands first, migrations follow as
+  separate PRs driven by the 8C ratchet.
+- **11C — Close-out.** Flip this block to `done (11.1 only)`,
+  commit table, pointer to the 8C ratchet for 11.2 progress
+  tracking.
+
+**Explicit non-goals for Phase 11 (this round):**
+
+- **No call-site migrations in Phase 11 itself.** 11B ships
+  the API; migrations happen as separate PRs measured against
+  the 8C ratchet. This keeps Phase 11's diff small and easy
+  to review — exactly the kind of infrastructure change that
+  *should* land in isolation from behavior-affecting call-
+  site churn.
+- **No end-to-end MySQL test harness.** The API is exercised
+  via unit-style examples in the header comments; full round-
+  trip testing requires a live MySQL instance, which is out
+  of scope for this phase (same rationale as Phase 10's
+  "don't wire a MySQL container into CI").
+- **No deprecation of `Statement`.** Both APIs coexist until
+  the ratchet reaches 0; only then does `Statement` get
+  deprecated, and that's a separate commit.
 
 ### Phase 12 — Packet schema unification (deferred from Phase 9)
 Deferred 2026-04-19 from Phase 9 after scope audit. Today the
