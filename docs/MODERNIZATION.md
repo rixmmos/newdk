@@ -1676,7 +1676,7 @@ Blocker: Phase 10 (build hygiene) should land first — moving
 headers triggers CMake glob updates and the client still uses
 `file(GLOB)` today.
 
-### Phase 13 — Endian-safe wire I/O — plan 2026-04-19
+### Phase 13 — Endian-safe wire I/O (13.1 + 13.2) — done 2026-04-19
 Originally deferred 2026-04-19 from Phase 9. Current state: the
 socket stream API's `template<T> read(T&)` does `buf = *(T*)
 (buffer + head)` — host-endian raw cast. Works everywhere on
@@ -1712,7 +1712,7 @@ unified tree instead of twice with intermediate fixups.
 
 **Corrected plan items:**
 
-- [ ] **13.1 — Pick and document a wire byte order.** LE keeps
+- [x] **13.1 — Pick and document a wire byte order.** LE keeps
       compatibility with every existing client binary. BE is
       "network order" but would require every deployed client to
       be rebuilt and re-shipped. **Decision: LE.** Every
@@ -1721,7 +1721,7 @@ unified tree instead of twice with intermediate fixups.
       making the choice explicit. Future BE hosts (e.g. a PPC
       port) can opt in by rebuilding against the same helpers.
       Recorded in 13A.
-- [ ] **13.2 — Add endian-safe primitives (server).** Inline
+- [x] **13.2 — Add endian-safe primitives (server).** Inline
       helpers in `dkrixserver/src/Core/Endian.h` wrapping
       `htole16/32/64` + `le16/32/64toh`. On Linux this is a
       thin wrapper around `<endian.h>`. On macOS / mingw, the
@@ -1779,6 +1779,37 @@ progress on the *primitives* without waiting on Phase 12; the
   driven `*(T*)(m_Buffer + ...)` casts to 0.
 - **No behavior change.** 13B's header is unused code until
   13.3 touches it; nothing on the wire changes in this phase.
+
+**Outcome (2026-04-19):**
+
+| #    | Commit    | Subject                                                                |
+| ---- | --------- | ---------------------------------------------------------------------- |
+| 13A  | `73d7854` | `docs: 13A — pin Phase 13 plan (LE decision + scope correction)`       |
+| 13B  | `bf44d49` | `server: 13B — add Core/Endian.h (LE wire-format primitives)`          |
+| 13C  | `HEAD`    | `docs: 13C — close out Phase 13 (13.1 + 13.2) in MODERNIZATION.md`     |
+
+Net delta this phase: **+179 lines across 1 new file** (server-
+tree header) plus **docs-only edits** in MODERNIZATION.md. Zero
+source-code changes; zero runtime-behavior changes. Nothing
+links to Endian.h yet — it sits waiting for 13.3.
+
+**Follow-ups (post-Phase-12):**
+
+- **13.3 — Migrate Socket{Input,Output}Stream<T>::read / write.**
+  Replace the host-endian raw cast `*(T*)(m_Buffer + m_Head)`
+  with `memcpy` + `le*toh` / `htole*`. Compound types continue
+  to use memberwise `read`/`write` as they already do (packet
+  classes never relied on the raw-cast template for anything
+  past primitive fields). Single-commit edit against the
+  unified `shared/Core/Socket*Stream.h` that Phase 12 will
+  produce.
+- **13.4 — CI grep-gate.** Pattern
+  `\*\s*\(\s*\w+\s*\*\s*\)\s*\(\s*m_Buffer\s*\+` at 0; pin
+  count once 13.3 lands. Same ratchet style as Phase 8C's SQL-
+  injection gate.
+
+Both follow-ups are cleanly unblocked by Phase 12; both are
+deliberately *not* scheduled against today's two-tree state.
 
 ## Explicit non-goals
 
