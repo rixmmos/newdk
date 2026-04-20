@@ -10472,9 +10472,26 @@ MTopView::DrawLightBuffer3D()
 		DEBUG_ADD( "Start DrawLightBuffer3D" );
 	#endif
 
-	if (//true && 
+	if (//true &&
 		m_DarkBits || g_pPlayer->IsInDarkness())
 	{
+		// Bug WW: m_pLightBufferTexture is never allocated in the SDL2 port
+		// (only ever set to NULL — see ctor and InitFilters). The original
+		// DirectDraw path wrote the light filter into this auxiliary texture
+		// and composited onto the backbuffer. The SDL2-unified DrawLightBuffer2D
+		// path (see line 2684 comment) writes the filter directly into
+		// m_pSurface via Gamma4Pixel565, which doesn't need the texture.
+		// Until DrawLightBuffer3D is properly ported to SDL2, skip the
+		// overlay when the texture is null — dark zones render lit rather
+		// than crashing with SIGSEGV in CSpriteSurface::Lock(this=0x0).
+		if (m_pLightBufferTexture == NULL)
+		{
+			#ifdef OUTPUT_DEBUG_DRAW_PROCESS
+				DEBUG_ADD( "DrawLightBuffer3D: skipped (m_pLightBufferTexture=NULL, SDL2 port)" );
+			#endif
+			return;
+		}
+
 		//------------------------------------------------
 		// LightBufferFilter --> Texture (SDL2 unified path)
 		//------------------------------------------------

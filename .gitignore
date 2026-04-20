@@ -19,3 +19,8 @@ DarkEden data/
 *.swp
 .vscode/
 .idea/
+
+# server-generated runtime files (smoke test session)
+dkrixserver/GamePlayer.txt
+dkrixserver/PayPlayDateLog.txt
+loginerror.txt

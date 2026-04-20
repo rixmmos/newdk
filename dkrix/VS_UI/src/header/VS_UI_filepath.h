@@ -403,9 +403,15 @@
 #define SPK_OUSTERS_SKILL_ETC			SPK_ROOT"SkillEtcOusters.spk"
 #define SPK_EXCHANGE_OUSTERS			SPK_ROOT"ExchangeOusters.spk"
 //add by viva
-#define SPK_OUSTERS_FRIEND				SPK_ROOT"FrdWinOusters.spk"
-#define SPK_SLAYER_FRIEND				SPK_ROOT"FrdWinSlayer.spk"
-#define SPK_VAMPIRE_FRIEND				SPK_ROOT"FrdWinVampire.spk"
+// Bug VV: retail data ships these as <Race>Friend.spk, not FrdWin<Race>.spk.
+// When the name didn't match, LoadFromFileRunning() failed before Init() could
+// allocate m_pData; the next m_friend_spk[i] then dereferenced NULL as
+// (CSprite*)(i * sizeof(CSprite)) — crashed in CSprite::GetHeight with
+// this=0xc0 (=4 * 48) during C_VS_UI_FRIEND_INFO ctor → C_VS_UI_SLAYER ctor
+// → ChangeToSlayerInterface → UI_StartGame right after SET CHARINFO.
+#define SPK_OUSTERS_FRIEND				SPK_ROOT"OustersFriend.spk"
+#define SPK_SLAYER_FRIEND				SPK_ROOT"SlayerFriend.spk"
+#define SPK_VAMPIRE_FRIEND				SPK_ROOT"VampireFriend.spk"
 
 // �ͽ� ���� 2003.5.20 by gony
 #define SPK_MIXING_FORGE				SPK_ROOT"MixingForge.spk"

@@ -166,7 +166,15 @@ void LCPCList::execute(Player* pPlayer)
 PacketSize_t LCPCList::getPacketSize() const
 
 {
-    PacketSize_t packetSize = 0;
+    // Bug TT: the write() method always emits SLOT_MAX type-tag bytes
+    // (one 'S'/'V'/'O'/'0' per slot, see line 118-132) as a fixed prefix
+    // before any PC-info body. Pre-fix, this function forgot to count
+    // those bytes, producing a constant "diff=3" overshoot on every
+    // LCPCList packet (empty or filled), which desynced the client
+    // parser mid-stream and dropped the TCP connection right after
+    // character-create. getMaxSize() in the header already got this
+    // right (`... + SLOT_MAX + szBYTE`); only this sibling was stale.
+    PacketSize_t packetSize = SLOT_MAX * szBYTE;
     for (uint i = 0; i < SLOT_MAX; i++) {
         if (m_pPCInfos[i]) { // m_pPCInfos[i] != NULL
             packetSize += m_pPCInfos[i]->getSize();

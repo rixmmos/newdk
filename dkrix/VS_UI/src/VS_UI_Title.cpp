@@ -5185,9 +5185,16 @@ void C_VS_UI_TITLE::Start()
 	g_eRaceInterface = RACE_SLAYER;
 
 	// Start login window so text boxes are active
+	// Bug QQ workaround: SDL port's keyboard-to-KeyboardControl bridge
+	// (Client/CWaitUIUpdate.cpp:DXKeyboardEvent) only forwards "control
+	// keys" (TAB/RETURN/ARROWS/etc.), NOT letter keys — so the title
+	// menu's 'C'onnect shortcut (VS_UI_Title.cpp:5440) is unreachable,
+	// and the only path to m_pC_login->Start() is via clicking the
+	// CONNECT button. Auto-start the login window here to bypass that
+	// broken keyboard path and get players straight to the login box.
 	if (m_pC_login != NULL)
 	{
-//		m_pC_login->Start();
+		m_pC_login->Start();
 	}
 
 #ifndef _LIB

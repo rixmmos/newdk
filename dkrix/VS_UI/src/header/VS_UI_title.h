@@ -155,66 +155,80 @@ enum ALIGNMENT
 // character creation slot
 struct S_SLOT
 {
-	S_SLOT() { m_AdvancementLevel = 0; }
-	bool								bl_set;
+	/* Bug UU: UI_SetCharacter() used to ZeroMemory(&slot, sizeof(S_SLOT))
+	 * after declaring a local S_SLOT. MSVC6's old std::string permitted
+	 * zero-init, but libstdc++ 6 uses small-string-optimization state
+	 * (an internal pointer + capacity) that is invalid when all-zeros.
+	 * The next `slot.sz_name = ...` / `slot.sz_guild_name = ""`
+	 * then crashed inside basic_string::_M_replace.
+	 *
+	 * Fix: default-member-initialize every POD field so
+	 *     S_SLOT slot;
+	 * already yields a fully zero-initialized, safely-assignable object;
+	 * the std::string / std::vector members get their normal default
+	 * constructors and are untouched. Callers must NOT ZeroMemory this
+	 * struct anymore.
+	 */
+	S_SLOT() = default;
+	bool								bl_set		 = false;
 //	bool								bl_vampire;
-	bool								bl_female;
-	bool								bl_drained;
-	MAN_INFO							man_info;
-	WOMAN_INFO							woman_info;
-	
-	int									helmet_color;
-	int									trouser_color;
-	int									coat_color;
-	int									skin_color;
-	int									hair_color;
-	int									left_color;
-	int									right_color;
+	bool								bl_female	 = false;
+	bool								bl_drained	 = false;
+	MAN_INFO							man_info	 = {};
+	WOMAN_INFO							woman_info	 = {};
+
+	int									helmet_color = 0;
+	int									trouser_color = 0;
+	int									coat_color	 = 0;
+	int									skin_color	 = 0;
+	int									hair_color	 = 0;
+	int									left_color	 = 0;
+	int									right_color	 = 0;
 
 	std::string							sz_name;
 	std::string							sz_guild_name;
-	ALIGNMENT							alignment;
-	int									alignment_num;
-	int									level;		// vampire only
-	int									STR_PURE;	// by larosel
-	int									STR_CUR;	// by larosel
-	int									STR_MAX;	// by larosel
-	int									DEX_PURE;	// by larosel
-	int									DEX_CUR;	// by larosel
-	int									DEX_MAX;	// by larosel
-	int									INT_PURE;	// by larosel
-	int									INT_CUR;	// by larosel
-	int									INT_MAXX;
-	int									STR_EXP_REMAIN;
-	int									DEX_EXP_REMAIN;
-	int									INT_EXP_REMAIN;
-	int									EXP_REMAIN;		// vampire only
-	int									DAM;			// max
-	int									DAM2;			// min
-	int									SILVER_DAM;		//max
-	int									SILVER_DAM2;	//min
-	int									CHANGE_VAMPIRE;
+	ALIGNMENT							alignment	 = UI_NEUTRAL;
+	int									alignment_num = 0;
+	int									level		 = 0;	// vampire only
+	int									STR_PURE	 = 0;	// by larosel
+	int									STR_CUR		 = 0;	// by larosel
+	int									STR_MAX		 = 0;	// by larosel
+	int									DEX_PURE	 = 0;	// by larosel
+	int									DEX_CUR		 = 0;	// by larosel
+	int									DEX_MAX		 = 0;	// by larosel
+	int									INT_PURE	 = 0;	// by larosel
+	int									INT_CUR		 = 0;	// by larosel
+	int									INT_MAXX	 = 0;
+	int									STR_EXP_REMAIN = 0;
+	int									DEX_EXP_REMAIN = 0;
+	int									INT_EXP_REMAIN = 0;
+	int									EXP_REMAIN	 = 0;	// vampire only
+	int									DAM			 = 0;	// max
+	int									DAM2		 = 0;	// min
+	int									SILVER_DAM	 = 0;	// max
+	int									SILVER_DAM2	 = 0;	// min
+	int									CHANGE_VAMPIRE = 0;
 //	int									AC;
-	int									DEFENSE;	// by larosel
-	int									PROTECTION;	// by larosel
-	int									TOHIT;
-	int									HP;
-	int									MP;
-	int									HP_MAX;
-	int									MP_MAX;
-	int									SILVER_HP;
+	int									DEFENSE		 = 0;	// by larosel
+	int									PROTECTION	 = 0;	// by larosel
+	int									TOHIT		 = 0;
+	int									HP			 = 0;
+	int									MP			 = 0;
+	int									HP_MAX		 = 0;
+	int									MP_MAX		 = 0;
+	int									SILVER_HP	 = 0;
 
-	int									DOMAIN_SWORD;
-	int									DOMAIN_BLADE;
-	int									DOMAIN_GUN;
-	int									DOMAIN_HEAL;
-	int									DOMAIN_ENCHANT;
+	int									DOMAIN_SWORD = 0;
+	int									DOMAIN_BLADE = 0;
+	int									DOMAIN_GUN	 = 0;
+	int									DOMAIN_HEAL	 = 0;
+	int									DOMAIN_ENCHANT = 0;
 
 //	int									CC;
-	int									FAME;		// slayer only
+	int									FAME		 = 0;	// slayer only
 //	int									NOTERITY;
-	int									bonus_point; // vampire only
-	int									skill_point; // ousters only
+	int									bonus_point	 = 0;	// vampire only
+	int									skill_point	 = 0;	// ousters only
 
 	struct UI_EFFECTSTATUS_STRUCT
 	{
@@ -230,27 +244,27 @@ struct S_SLOT
 //	WORD									hp_percent;
 //	WORD									mp_percent;		// slayer only
 
-	WORD								GUILD_ID;
-	BYTE								GUILD_GRADE;
+	WORD								GUILD_ID	 = 0;
+	BYTE								GUILD_GRADE	 = 0;
 
-	BYTE								WS;
-	BYTE								WeaponSpeed;
-	int									GRADE;
-	int									GRADE_EXP_REMAIN;
+	BYTE								WS			 = 0;
+	BYTE								WeaponSpeed	 = 0;
+	int									GRADE		 = 0;
+	int									GRADE_EXP_REMAIN = 0;
 
 	/* Bug AA: member renamed `Race` → `eRace` to stop shadowing the
 	 * enum type of the same name (GCC rejects the shadow; MSVC6
 	 * accepted it). All call sites updated. */
-	Race								eRace;
-	
-	int									ElementalFire;
-	int									ElementalWater;
-	int									ElementalEarth;
-	int									ElementalWind;
-	
-	int									m_SMS_Charge;
-	int									m_Powerjjang_Point;
-	int									m_AdvancementLevel;
+	Race								eRace		 = static_cast<Race>(0);
+
+	int									ElementalFire = 0;
+	int									ElementalWater = 0;
+	int									ElementalEarth = 0;
+	int									ElementalWind = 0;
+
+	int									m_SMS_Charge = 0;
+	int									m_Powerjjang_Point = 0;
+	int									m_AdvancementLevel = 0;
 //	BYTE								m_NickNameType;
 //	std::string							m_NickName;
 };	

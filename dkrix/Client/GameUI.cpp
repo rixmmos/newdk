@@ -2102,8 +2102,11 @@ void
 UI_SetCharacter(int slotID, PCSlayerInfo * pInfo)
 {
 	// set character
+	// Bug UU: was ZeroMemory(&slot, sizeof(S_SLOT)). That corrupts the
+	// std::string / std::vector members. S_SLOT's default constructor
+	// (see VS_UI_Title.h) now zero-inits every POD field, so plain
+	// declaration is sufficient and safe.
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
@@ -2461,8 +2464,11 @@ UI_SetCharacter(int slotID, PCSlayerInfo * pInfo)
 void
 UI_SetCharacter(int slotID, PCVampireInfo * pInfo)
 {
+	// Bug UU: was ZeroMemory(&slot, sizeof(S_SLOT)). Crashed on the
+	// assignment below (std::string SSO state corrupted by zeroing).
+	// S_SLOT's constructor now zero-inits every POD field — see
+	// VS_UI_Title.h — so plain declaration is sufficient and safe.
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
@@ -2597,8 +2603,10 @@ UI_SetCharacter(int slotID, PCVampireInfo * pInfo)
 void
 UI_SetCharacter(int slotID, PCOustersInfo * pInfo)
 {
+	// Bug UU: was ZeroMemory(&slot, sizeof(S_SLOT)). S_SLOT's
+	// constructor now zero-inits every POD field (see VS_UI_Title.h),
+	// so plain declaration is sufficient and safe.
 	S_SLOT slot;
-	ZeroMemory(&slot, sizeof(S_SLOT));
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";

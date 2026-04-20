@@ -1139,6 +1139,40 @@ changes — it only reads the strings.
 
 **Verification:** pending rebuild.
 
+### Bug PP — server binaries require `-f <conf>` explicitly
+
+**Date:** 2026-04-20 (login-smoke phase 1)
+
+**Symptom:** `start_servers.sh` reports all three as started, but
+`Listening ports: (none of 9977/9998/9999 bound)`. Tailing the logs:
+
+```
+=== sharedserver.log ===
+Usage : sharedserver -f È¯°æÆÄÀÏ
+=== loginserver.log ===
+Usage : loginserver -f È¯°æÆÄÀÏ [-p port]
+=== gameserver.log ===
+>>> STARTING GAME SERVER...
+>>> RANDOMIZATION INITIALIZATION SUCCESS...
+```
+
+All three print their usage banner (or, in gameserver's case, run
+through `srand()` then silently `exit(1)`) because each `main()`
+requires `-f <config-path>` on the command line.
+
+**Cause:** `start_servers.sh` invoked the binaries bare. From
+`src/server/sharedserver/main.cpp:38`,
+`src/server/loginserver/main.cpp:41`, and
+`src/server/gameserver/main.cpp:90`, each main validates
+`argc < 3` → print Usage → exit. There is no fallback to a default
+conf path.
+
+**Fix:** pass `-f /mnt/c/newdk/dkrixserver/conf/<name>.conf`
+explicitly in the launcher. Absolute path keeps the binary's cwd
+choice from mattering for config lookup.
+
+**Verification:** pending rerun of `bash /mnt/c/newdk/start_servers.sh start`.
+
 ## Non-bug configuration gaps closed
 
 ### `odk-mysql` hostname in seeded `WorldDBInfo`
