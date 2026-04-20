@@ -62,24 +62,33 @@ public:
         // Read description (MString format)
         m_description = readMString();
 
-        // IMPORTANT: Skip Tile FP and ImageObject FP (4 bytes each)
-        file.seekg(8, std::ios::cur);
+        // NB: no 8-byte skip here. Earlier versions of this parser
+        // skipped an imagined "Tile FP + ImageObject FP" pair at
+        // this point, which does not exist in the real .smp layout —
+        // see dkrixserver/src/server/gameserver/Zone.cpp:866..877
+        // for the ground-truth reader. The bogus skip only happened
+        // to parse cleanly on adam_c.smp / adam_e.smp by coincidence
+        // (their bytes after the "desc" MString happened to sit at
+        // an offset whose subsequent two uint32_t reads didn't hit
+        // EOF), printing fantasy width/height values.
 
-        // Read dimensions
+        // Read dimensions (immediately after description)
         file.read(reinterpret_cast<char*>(&m_width), sizeof(uint16_t));
         file.read(reinterpret_cast<char*>(&m_height), sizeof(uint16_t));
 
         m_numSectors = m_width * m_height;
 
-        // Skip sector data for now
-        size_t sectorDataSize = m_numSectors * 4; // 4 bytes per sector
-        file.seekg(sectorDataSize, std::ios::cur);
-
-        // Read ImageObject count
-        file.read(reinterpret_cast<char*>(&m_numImageObjects), sizeof(uint32_t));
-
-        // Read Obstacle count
-        file.read(reinterpret_cast<char*>(&m_numObstacles), sizeof(uint32_t));
+        // Intentionally NOT skipping sector data and reading
+        // numImageObjects/numObstacles here. Each tile is 1 byte
+        // (flag bits) plus variable-length portal payload when
+        // (flag & 0x80) is set — see Zone.cpp:943..1100 for the
+        // full per-tile switch. A flat fixed-width skip can't
+        // correctly land on the object-count fields, so we don't
+        // try. Header + dimensions are enough for a viewer tool;
+        // per-tile inspection is handled in PrintSectorData() by
+        // reading the 1-byte flag directly.
+        m_numImageObjects = 0;
+        m_numObstacles = 0;
 
         file.close();
 
@@ -108,16 +117,9 @@ public:
         std::cout << "  Total:       " << m_numSectors << " sectors" << std::endl;
         std::cout << std::endl;
 
-        std::cout << "Objects:" << std::endl;
-        std::cout << "  ImageObjects: " << m_numImageObjects << std::endl;
-        std::cout << "  Obstacles:    " << m_numObstacles << std::endl;
-        std::cout << std::endl;
-
         std::cout << "Estimated file size breakdown:" << std::endl;
-        std::cout << "  Header:       ~256 bytes" << std::endl;
-        std::cout << "  Dimensions:   4 bytes" << std::endl;
-        std::cout << "  Sectors:      " << (m_numSectors * 4) << " bytes (4 bytes per sector)" << std::endl;
-        std::cout << "  Objects:      ~" << (m_numImageObjects * 16 + m_numObstacles * 12) << " bytes (estimated)" << std::endl;
+        std::cout << "  Header:       ~38 bytes (version MStr + 4B zone id/group + name MStr + 1B type + 1B level + desc MStr + 4B dims)" << std::endl;
+        std::cout << "  Sectors:      >= " << m_numSectors << " bytes (1 byte flag per tile, plus variable-length portal payload per tile when flag & 0x80)" << std::endl;
         std::cout << std::endl;
     }
 
@@ -139,47 +141,60 @@ public:
             return str;
         };
 
-        // Skip header
+        // Skip header — mirror of Parse() above. No 8-byte
+        // "Tile FP + ImageObject FP" skip: those do not exist.
         readMString(); // version
-        file.seekg(4, std::ios::cur); // zone ID + group ID
+        file.seekg(4, std::ios::cur); // zoneID (2B) + groupID (2B)
         readMString(); // name
-        file.seekg(2, std::ios::cur); // type + level
+        file.seekg(2, std::ios::cur); // type (1B) + level (1B)
         readMString(); // description
-        file.seekg(8, std::ios::cur); // Tile FP + ImageObject FP
 
-        // Read dimensions
+        // Read dimensions (immediately after description)
         uint16_t width, height;
         file.read(reinterpret_cast<char*>(&width), sizeof(uint16_t));
         file.read(reinterpret_cast<char*>(&height), sizeof(uint16_t));
 
         std::cout << "========================================" << std::endl;
         std::cout << "Sector Data (first " << maxSectors << ")" << std::endl;
+        std::cout << "Format: 1-byte flag per tile. If (flag & 0x80), a"
+                  << " variable-length portal payload follows that we"
+                  << " surface as raw hex and then STOP walking (a"
+                  << " viewer-grade tile walker would need the full"
+                  << " per-portal-type switch from Zone.cpp:967..1100)." << std::endl;
         std::cout << "========================================" << std::endl;
         std::cout << std::endl;
 
-        // Read and display first few sectors
+        // Walk tiles in row-major order, reading 1 byte per tile.
+        // Flag bits (per Zone.cpp:949..968):
+        //   0x01 = BLOCKED_BURROWING
+        //   0x02 = BLOCKED_WALKING
+        //   0x04 = BLOCKED_FLYING
+        //   0x80 = PORTAL   (variable-length payload follows)
         int count = 0;
-        for (int y = 0; y < height && count < maxSectors; y++) {
+        bool stopped = false;
+        for (int y = 0; y < height && count < maxSectors && !stopped; y++) {
             for (int x = 0; x < width && count < maxSectors; x++) {
-                uint16_t spriteID;
-                uint8_t property;
-                uint8_t light;
+                uint8_t flag;
+                file.read(reinterpret_cast<char*>(&flag), sizeof(uint8_t));
 
-                file.read(reinterpret_cast<char*>(&spriteID), sizeof(uint16_t));
-                file.read(reinterpret_cast<char*>(&property), sizeof(uint8_t));
-                file.read(reinterpret_cast<char*>(&light), sizeof(uint8_t));
-
-                std::cout << "Sector (" << x << ", " << y << "):" << std::endl;
-                std::cout << "  SpriteID: " << spriteID << std::endl;
-                std::cout << "  Property: 0x" << std::hex << (int)property << std::dec;
+                std::cout << "Tile (" << x << ", " << y << "):"
+                          << " flag=0x" << std::hex << (int)flag << std::dec;
                 std::cout << " (";
-                if (property & 0x01) std::cout << "OBSTACLE ";
-                if (property & 0x02) std::cout << "PORTAL ";
-                if (property & 0x04) std::cout << "SPECIAL ";
-                std::cout << ")" << std::endl;
-                std::cout << "  Light:    " << (int)light << std::endl;
-                std::cout << std::endl;
+                if (flag & 0x01) std::cout << "BLOCK_BURROW ";
+                if (flag & 0x02) std::cout << "BLOCK_WALK ";
+                if (flag & 0x04) std::cout << "BLOCK_FLY ";
+                if (flag & 0x80) std::cout << "PORTAL ";
+                if (flag == 0)   std::cout << "OPEN";
+                std::cout << ")";
 
+                if (flag & 0x80) {
+                    std::cout << "  [stopping — portal payload is"
+                              << " variable-length; see Zone.cpp]";
+                    std::cout << std::endl;
+                    stopped = true;
+                    break;
+                }
+                std::cout << std::endl;
                 count++;
             }
         }
