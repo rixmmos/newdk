@@ -1950,7 +1950,8 @@ after each migration PR.
 
 | Date       | Class         | Baseline after | Notes                                                                 |
 | ---------- | ------------- | -------------: | --------------------------------------------------------------------- |
-| 2026-04-20 | `CGStoreOpen` |            324 | First migration. Also lands `shared/Packets/CMakeLists.txt` (INTERFACE `shared_packets` target), both-tree `add_subdirectory(../shared/Packets)` wiring, and the Korean→English comment sweep on the migrated header. Remaining first-wave cosmetic-`.cpp` candidates: `CGDisplayItem`, `CGGQuestCancel`, `CGRequestStoreInfo`, `CGStoreClose`, `CGStoreSign`, `CGUndisplayItem` (6). |
+| 2026-04-20 | `CGStoreOpen`  |            324 | First migration. Also lands `shared/Packets/CMakeLists.txt` (INTERFACE `shared_packets` target), both-tree `add_subdirectory(../shared/Packets)` wiring, and the Korean→English comment sweep on the migrated header. Remaining first-wave cosmetic-`.cpp` candidates: `CGDisplayItem`, `CGGQuestCancel`, `CGRequestStoreInfo`, `CGStoreClose`, `CGStoreSign`, `CGUndisplayItem` (6). |
+| 2026-04-21 | `CGStoreClose` |            322 | Paired with `CGStoreOpen` (same store-UI subsystem). Korean→English comment sweep; `throw()` specs retained on all four Factory overrides to match base `PacketFactory` (C++11 rejects looser override specs). Server-side `PacketFactoryManager.cpp` and handler resolve `CGStoreClose.h` through the `shared/Packets` include path added in migration #1. Client-side `CGHandlersStub.cpp` stub's throw-spec stripped to match the migrated header. Remaining first-wave cosmetic-`.cpp` candidates: `CGDisplayItem`, `CGGQuestCancel`, `CGRequestStoreInfo`, `CGStoreSign`, `CGUndisplayItem` (5). |
 - **Post-Phase-12.0 Phase 13.3 unblocked.** Once the first
   few migrations land and `shared/Packets/` has a real
   library target, the Socket stream files
