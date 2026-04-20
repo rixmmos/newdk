@@ -29,7 +29,12 @@ int main(int argc, char* argv[]) {
     try {
         g_pConfig = new Properties();
         g_pConfig->load(Argv[2]);
-    } catch (Error& e) {
+    } catch (Throwable& e) {
+        // Phase 13C follow-up: was `catch (Error&)` — missed IOException
+        // and FileNotExistException (parallel class branch via Exception,
+        // not Error). Mirrors the fix already in place on the three main
+        // server submains (login/shared/game) and billing/main.cpp.
+        cout << "FATAL during config load: " << e.toString() << endl;
         return 1;
     }
 

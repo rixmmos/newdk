@@ -38,9 +38,15 @@ int main(int argc, char* argv[]) {
         g_pConfig->load(Argv[2]);
 
         // cout << g_pConfig->toString() << endl;
-    } catch (Error& e) {
-        cout << e.toString() << endl;
-        return 0;
+    } catch (Throwable& e) {
+        // Phase 13C follow-up: was `catch (Error&)` — missed IOException
+        // and FileNotExistException (parallel class branch via Exception,
+        // not Error). Mirrors the fix already in place on the three main
+        // server submains (login/shared/game). Also changed `return 0`
+        // to `return 1` so the shell sees a non-zero exit on config
+        // failure instead of silent success.
+        cout << "FATAL during config load: " << e.toString() << endl;
+        return 1;
     }
 
     //-------------------------------------------------------------------
