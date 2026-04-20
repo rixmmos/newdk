@@ -161,20 +161,61 @@ normalize filenames. The client does `\` → `/` conversion at runtime
 So on ext4 you get "Image/etc.spk not found" even though
 `Image/Etc.spk` exists. Don't do Option B unless you have a reason.
 
-### 4b. RAR-packed archives
+### 4b. RAR-packed archives — the `.rpk` extraction step
 
-Step 2 of the client init loads a master RAR archive via `CRarFile`
-(`Client.cpp:499`):
+Retail ships 8 `.rpk` archives — password-encrypted RAR v2.0 with the
+static password `darkeden`:
 
-```cpp
-rarfile.SetRAR(g_pFileDef->getProperty("FILE_INFO_DATA").c_str(),
-               "darkeden");
+```
+Data/Info/infodata.rpk        ← the RTI loader blocks on this one
+Data/Ui/txt/Book.rpk
+Data/Ui/txt/Help.rpk
+Data/Ui/txt/item.rpk
+Data/Ui/txt/progress.rpk
+Data/Ui/txt/skill.rpk
+Data/Ui/txt/title.rpk
+Data/Ui/txt/TutorialEtc.rpk
 ```
 
-That's a legacy path from when the retail shipped compressed. If
-`FILE_INFO_DATA` resolves to a `.rar` that isn't in your data pack,
-the client logs a warning and continues — it's not fatal at the
-boot-to-login stage. Fatal asset misses happen at the `.spk` level.
+In the original Windows client these were read through an actual RAR
+library. During Phase 3 of this port the unrar dependency was
+dropped; the replacement `CRarFile` class in `VS_UI/RarFile.{h,cpp}`
+is a stub that **doesn't read RAR archives at all** — it maps
+`Data/Info/infodata.rpk` to `Data/Info/infodata/` and reads loose
+files via `fopen`. The comment at the top of `RarFile.h:22-28`
+explicitly documents this:
+
+> RAR files are mapped to directories with the same name:
+> - `Data/Info/infodata.rpk  → Data/Info/infodata/`
+> - `Data/Ui/txt/Item.rpk    → Data/Ui/txt/Item/`
+
+So the `.rpk`s on disk are **dead weight** — every one of them needs
+to be pre-extracted into a same-named directory or the client aborts
+with `[Error] Cannot Open RTI File` during `RegenTowerInfoManager`
+init and exits before opening the window.
+
+`extract_rpks.sh` in the repo root does this. Requires real `unrar`
+(from the multiverse repo — `unrar-free` can't do passwords):
+
+```bash
+sudo add-apt-repository multiverse
+sudo apt update
+sudo apt install -y unrar
+
+cd /mnt/c/newdk
+./extract_rpks.sh
+# expect: "[ok  ] infodata.rpk → infodata/ (6 files)" etc., 8 times
+```
+
+Verify extraction:
+
+```bash
+ls "/mnt/c/newdk/Darkeden data/Data/Info/infodata/"
+# expect: Filter.inf, RegenTowerPosition.inf, Language.inf, ...
+```
+
+`client_smoke.sh` refuses to launch the client if any `.rpk` doesn't
+have a matching extracted directory, so you can't forget this step.
 
 ## 5. Launch the client
 

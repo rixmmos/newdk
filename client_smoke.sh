@@ -144,6 +144,26 @@ else
     ok "$spk_count .spk sprite packs found in Data/Image"
 fi
 
+# CRarFile (VS_UI/RarFile.cpp) is a stub in the port — it doesn't read
+# RAR archives, it reads loose files from a same-named directory.
+# Every .rpk must have a matching extracted dir next to it, or the
+# client aborts at RegenTowerInfoManager init ("Cannot Open RTI File").
+# See extract_rpks.sh.
+missing_rpk_dirs=()
+while IFS= read -r -d '' rpk; do
+    dir="${rpk%.rpk}"
+    [ -d "$dir" ] || missing_rpk_dirs+=("$(basename "$rpk")")
+done < <(find "$DKRIX_DATA_DIR" -type f -iname '*.rpk' -print0 2>/dev/null)
+
+if [ "${#missing_rpk_dirs[@]}" -gt 0 ]; then
+    bail ".rpk archives not extracted to matching directories:
+       ${missing_rpk_dirs[*]}
+       CRarFile in the port doesn't read RAR archives — it reads loose
+       files from a same-named directory (e.g. infodata.rpk →
+       infodata/). Run: ./extract_rpks.sh"
+fi
+ok ".rpk archives all extracted to matching directories"
+
 # -----------------------------------------------------------------------
 # 7. Launch
 # -----------------------------------------------------------------------
