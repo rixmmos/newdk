@@ -124,8 +124,14 @@ int main(int argc, char* argv[]) {
                 g_pTestConfig->load(Argv[4]);
             }
         }
-    } catch (Error& e) {
-        // cout << e.toString() << endl;
+    } catch (Throwable& e) {
+        // Phase 13C: widened from Error& to Throwable& AND uncommented
+        // the print. IOException from Properties::load was in the
+        // Exception subtree (parallel to Error) and silently swallowed,
+        // leaving g_pConfig half-initialised for subsequent getProperty
+        // calls to fail obscurely.
+        cout << "FATAL during config load: " << e.toString() << endl;
+        exit(1);
     }
 
     // ·Î±× ¸Å´ÏÀú¸¦ »ý¼ºÇÏ°í ÃÊ±âÈ­ÇÑÈÄ È°¼ºÈ­½ÃÅ²´Ù.
@@ -145,8 +151,9 @@ int main(int argc, char* argv[]) {
         // cout << "LogServerIP = " << LogServerIP << endl;
         // cout << "LogServerPort = " << LogServerPort << endl;
         // cout << "LogLevel = " << LogClient::getLogLevel() << endl;
-    } catch (Error& e) {
-        // cout << e.toString() << endl;
+    } catch (Throwable& e) {
+        // Phase 13C: widened from Error& to Throwable& AND uncommented.
+        cout << "WARN during LogClient init: " << e.toString() << endl;
     }
 
     cout << ">>> LOGCLIENT INITIALZATION SUCCESS..." << endl;

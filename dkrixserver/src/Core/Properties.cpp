@@ -116,6 +116,15 @@ void Properties::load() {
         if (ifile.eof())
             break;
 
+        // Phase 13C: strip trailing CR for CRLF-line-ending conf files
+        // (confs on /mnt/c via DrvFs are CRLF). Without this, a blank
+        // line in a CRLF file becomes a 1-char "\r" line after getline
+        // strips LF; it's not empty, not comment-prefixed, and has no
+        // ':', so the separator check below throws "missing separator".
+        // WhiteSpaces is " \t" only, so find_first_not_of can't save us.
+        if (!line.empty() && line[line.size() - 1] == '\r')
+            line.erase(line.size() - 1);
+
         // �ڸ�Ʈ �����̰ų� �� �����̹Ƿ� skip �Ѵ�.
         if (line.size() == 0 || line[0] == Comment)
             continue;

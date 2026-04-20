@@ -68,8 +68,14 @@
 // MySQL 8.0+ C connector replaced it with plain `bool`; libmysqlclient-
 // dev on Ubuntu ships one or the other depending on version. Alias to
 // bool to keep the MYSQL_BIND struct members consistent either way.
+#include <type_traits>
+// Derive my_bool_t from the installed library's own
+// MYSQL_BIND::is_null declaration. On MySQL 8.0+ this is
+// `bool`; on MySQL 5.7 / MariaDB it is `my_bool` (a.k.a.
+// `char`). This keeps PreparedStatement.cpp's
+// `b.is_null = &p.isNull` assignment type-correct on both.
 #ifndef MY_BOOL_DEFINED
-typedef bool my_bool_t;
+typedef std::remove_pointer<decltype(MYSQL_BIND::is_null)>::type my_bool_t;
 #define MY_BOOL_DEFINED
 #endif
 

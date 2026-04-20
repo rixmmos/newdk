@@ -61,8 +61,16 @@ int main(int argc, char* argv[]) {
 
         cout << g_pConfig->toString() << endl;
 
-    } catch (Error& e) {
-        cout << e.toString() << endl;
+    } catch (Throwable& e) {
+        // Phase 13C: was `catch (Error&)` — missed IOException and
+        // FileNotExistException (parallel class branch via Exception,
+        // not Error). That let Properties::load throws escape to
+        // terminate() with no diagnostic. Widened to Throwable& to
+        // match the other two catch blocks below. Exit non-zero so
+        // caller sees the failure rather than silently continuing to
+        // dereference a half-initialised g_pConfig.
+        cout << "FATAL during config load: " << e.toString() << endl;
+        exit(1);
     }
 
     // ·Î±× ¸Å´ÏÀú¸¦ »ý¼ºÇÏ°í ÃÊ±âÈ­ÇÑÈÄ È°¼ºÈ­½ÃÅ²´Ù.

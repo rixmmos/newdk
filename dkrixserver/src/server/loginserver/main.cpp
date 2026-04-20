@@ -64,8 +64,13 @@ int main(int argc, char* argv[]) {
 
         cout << g_pConfig->toString() << endl;
 
-    } catch (Error& e) {
-        cout << e.toString() << endl;
+    } catch (Throwable& e) {
+        // Phase 13C: widened from Error& to Throwable& — IOException
+        // from Properties::load is in the Exception subtree, parallel
+        // to Error, and was escaping to terminate(). See sharedserver
+        // main.cpp for the same fix.
+        cout << "FATAL during config load: " << e.toString() << endl;
+        exit(1);
     }
 
     try {
@@ -88,8 +93,10 @@ int main(int argc, char* argv[]) {
             cout << "LoginServerID : " << sLoginServerID << endl;
         }
 
-    } catch (Error& e) {
-        cout << e.toString() << endl;
+    } catch (Throwable& e) {
+        // Phase 13C: widened from Error& to Throwable&.
+        cout << "FATAL during -i port override: " << e.toString() << endl;
+        exit(1);
     }
 
 

@@ -201,7 +201,7 @@ Result* PreparedStatement::execute() {
         Param& p = m_Params[i];
         MYSQL_BIND& b = binds[i];
 
-        b.is_null = reinterpret_cast<char*>(&p.isNull);
+        b.is_null = &p.isNull;
 
         switch (p.type) {
         case Param::PARAM_INT:
