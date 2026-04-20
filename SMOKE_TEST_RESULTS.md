@@ -16,11 +16,12 @@ we did not drive a real login packet through the client because that
 requires a display and/or a custom packet-encoding probe neither of which
 is smoke-test scope.
 
-Four source bugs were found and fixed during the run (Bugs Q, R, S, T
-below). Two non-bug configuration gaps were closed (`odk-mysql`
-hostname, CRLF-on-DrvFs confs). One compatibility gap was discovered
-and *not* fixed: retail-format `.smp` map files don't parse against the
-port's zone parser. It is the single finding most worth acting on.
+Five source bugs were found and fixed during the run (Bugs Q, R, S,
+T, and U below). Two non-bug configuration gaps were closed
+(`odk-mysql` hostname, CRLF-on-DrvFs confs). The initial write-up
+also logged a "retail `.smp` format divergence" finding, which turned
+out on follow-up to be a viewer-tool bug, not a data issue — see Bug
+U for the retraction.
 
 ## Environment deltas from the runbook
 
@@ -83,8 +84,10 @@ when we closed the nc without speaking. Protocol is client-initiates
 (no greeting banner).
 
 **Port-shipped asset readability:** `zone_parser adam_c.smp` parsed a
-port-shipped `.smp` cleanly (ZoneID 72, 254×2 sectors, format header
-`=MAP_2000_05_10=`). The port's parser works.
+port-shipped `.smp` cleanly (ZoneID 72, 256×256 sectors, format header
+`=MAP_2000_05_10=`). The port's parser works. (*Note:* the initial
+run reported `254×2 sectors` here — that was the `zone_parser` tool
+bug later filed and fixed as Bug U below. Real dims are 256×256.)
 
 ## Bugs found and fixed during the run
 
@@ -169,6 +172,49 @@ also silently fixes a latent would-have-been-next-issue: values like
 `DB_PASSWORD : elca110` were parsing to `"elca110\r"`, which would have
 failed MySQL auth and looked exactly like a wrong-password bug.
 
+### Bug U — `zone_parser` misreads `.smp` format
+
+**Symptom:** `zone_parser <retail>/cave_office.smp` →
+`Failed to parse zone file`. Same tool against port-shipped
+`adam_c.smp` appeared to succeed but printed nonsensical dimensions
+(`Width: 254, Height: 2` for a file that is actually 256×256).
+Initial smoke-test write-up mistook this for a format divergence
+between port and retail data packs. It was not.
+
+**Cause:** `dkrix/tools/viewers/zone_parser/main.cpp` had two wrong
+assumptions about the `.smp` on-disk layout:
+
+1. An 8-byte "Tile FP + ImageObject FP" skip was inserted between the
+   description MString and the `width`/`height` fields. No such pair
+   exists. Ground-truth reader: `dkrixserver/src/server/gameserver/
+   Zone.cpp:866-877`, which reads width/height immediately after desc.
+2. The sector region was assumed to be 4 bytes per sector. Real
+   layout is **1 byte per tile** (flag bits `0x01` BLOCK_BURROW,
+   `0x02` BLOCK_WALK, `0x04` BLOCK_FLY, `0x80` PORTAL), with a
+   variable-length portal payload when `(flag & 0x80)`. Ground truth:
+   `Zone.cpp:943-1100`.
+
+Combined effect: nearly every `.smp` file failed to parse. Two files
+(`adam_c`, `adam_e`) happened to have bytes at the shifted offset
+whose subsequent `uint32_t` reads didn't overrun EOF, so they "parsed"
+— with fantasy width/height values.
+
+**Fix:** removed the bogus 8-byte skip; rewrote `PrintSectorData()`
+to read 1B/tile and decode the flag bits, stopping at the first
+portal (payload is variable-length and would require the full
+per-portal-type switch from `Zone.cpp` to walk further — out of
+scope for a viewer tool). Dropped `numImageObjects` / `numObstacles`
+from the header report, since a flat skip can't land on those
+fields when the sector region is variable-length.
+
+**Verification:** 164/164 `.smp` files (142 port-shipped + 22 retail)
+parse cleanly after the fix. Retail and port use **identical**
+`.smp` format; the earlier "divergence" finding was entirely a
+viewer-tool bug.
+
+**Impact:** removes a phantom blocker for retail-asset workflows.
+Viewer tools now agree with the server's own `Zone::load` reader.
+
 ## Non-bug configuration gaps closed
 
 ### `odk-mysql` hostname in seeded `WorldDBInfo`
@@ -199,42 +245,41 @@ repeated step.
 
 ## Findings NOT fixed (for the record)
 
-### Retail `.smp` format != port's `.smp` parser
+### ~~Retail `.smp` format != port's `.smp` parser~~ — RETRACTED
 
-`zone_parser ~/darkeden_data/Data/Map/cave_office.smp` →
-`Failed to parse zone file`. Same tool against
-`/mnt/c/newdk/dkrixserver/data/adam_c.smp` parses cleanly and prints a
-full header including `Version: =MAP_2000_05_10=`. Both files are
-non-zero, well-formed by sampling, and in the same location the
-respective consumers expect.
+**Retraction (Bug U follow-up, 2026-04-20):** this finding was wrong.
+The port and the retail pack use **identical** `.smp` formats. All
+164 `.smp` files (142 port-shipped + 22 retail) parse cleanly with
+the fixed `zone_parser`.
 
-So: the port has diverged from the retail DarkEden `.smp` format.
-Plausible reasons (in order of likelihood, not yet confirmed):
+The "divergence" was entirely a bug in `dkrix/tools/viewers/zone_parser/
+main.cpp`, not a data issue:
 
-1. Port adopted a newer `.smp` version (`MAP_2000_05_10` may be
-   newer than the retail pack's shipped version string) and rejects
-   older payloads rather than falling back.
-2. Port's parser requires fields that retail files don't populate.
-3. Same version string but slightly different record layout (tile
-   encoding, object table, etc.) that retail wrote and port no longer
-   accepts.
+1. The parser skipped a bogus 8-byte "Tile FP + ImageObject FP" pair
+   between the description MString and the width/height fields. No
+   such pair exists — see `dkrixserver/src/server/gameserver/
+   Zone.cpp:866-877` for the ground-truth reader that the real server
+   uses to load these files.
+2. The parser assumed 4 bytes per sector. The real format is **1 byte
+   per tile** (flag bits: `0x01` BLOCK_BURROW, `0x02` BLOCK_WALK,
+   `0x04` BLOCK_FLY, `0x80` PORTAL) with a variable-length portal
+   payload when `(flag & 0x80)` — see `Zone.cpp:943-1100` for the
+   full per-portal-type switch.
 
-Verify by reading the first 16 bytes of each file and comparing version
-strings:
+Combined symptom: almost every `.smp` failed with `Failed to parse
+zone file`. The two that didn't (`adam_c.smp`, `adam_e.smp`) parsed
+only because their bytes at the shifted offset happened not to
+overrun EOF — and printed fantasy dimensions (`adam_c: 254×2`
+instead of the real `256×256`), which tricked the initial smoke test
+into believing the port's parser "worked" on port files and "broke"
+on retail files. It was broken on both; retail files just failed
+louder.
 
-```bash
-hexdump -C -n 64 ~/darkeden_data/Data/Map/cave_office.smp | head -4
-hexdump -C -n 64 /mnt/c/newdk/dkrixserver/data/adam_c.smp | head -4
-```
+Fix shipped in commit `7834016 fix(zone_parser): correct .smp format
+— remove bogus 8B skip, 1B/tile`. Documented here as Bug U.
 
-If the version strings differ, case (1) is confirmed and the fix is
-either (a) teach zone_parser / the server to fall back to the older
-version or (b) transcode retail maps forward.
-
-**Impact on the bigger picture:** for a LAN smoke-test with only the
-port-shipped maps, zero impact — that's what the current green run
-uses. For any workflow that wants retail assets to be drop-in (common
-modding/restoration pattern), this is a blocking divergence.
+**Impact:** retail maps are drop-in on the port for smoke-test
+purposes. No wire-format conversion needed.
 
 ### Loginserver "Loading GameWorldInfoManager" idle loop
 
@@ -271,12 +316,11 @@ a display and drive it manually. Either is post-smoke-test work.
    fixes" commit so they're reviewable and revertable as a unit.
    `server_build_fix.sh` can stay as an applicator but the real changes
    should be in the tree.
-2. **Investigate the `.smp` format divergence.** One afternoon of
-   forensic comparison would answer whether this is a version-gate
-   problem or a real format change. Either way, surfacing the
-   divergence with a warning (rather than `Failed to parse zone file`
-   with no detail) would help every future contributor who tries
-   retail assets.
+2. ~~Investigate the `.smp` format divergence.~~ **Done** — see Bug U
+   above. There was no divergence; `zone_parser` had two bugs that
+   made retail `.smp` files look unreadable. Fixed in commit
+   `7834016`. All 164 `.smp` files (142 port + 22 retail) now parse
+   cleanly.
 3. **Re-apply the Phase 8B env-var templates.** The smoke test ended
    with DB passwords sitting in `conf/*.conf`. Copy the `.template`
    versions back over and put credentials in `~/.dkrix-env`.
