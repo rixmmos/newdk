@@ -324,11 +324,13 @@ a display and drive it manually. Either is post-smoke-test work.
 3. **Re-apply the Phase 8B env-var templates.** The smoke test ended
    with DB passwords sitting in `conf/*.conf`. Copy the `.template`
    versions back over and put credentials in `~/.dkrix-env`.
-4. **Apply the same `catch (Error&) → catch (Throwable&)` fix to the
-   two submains** that still have the old form:
-   `gameserver/billing/main.cpp:41` and `gameserver/mofus/main.cpp:32`.
-   These weren't in the critical path for this smoke test but they'll
-   bite someone eventually.
+4. ~~Apply the same `catch (Error&) → catch (Throwable&)` fix to the
+   two submains~~ **Done** — commit `ebd1af0`. Both `billing/main.cpp`
+   and `mofus/main.cpp` now catch `Throwable&` and exit non-zero on
+   config-load failure with a diagnostic. Neither is currently wired
+   into CMake, so this is defensive hardening for whoever reintroduces
+   them; no runtime effect today. Trailing-NUL tail-corruption cleaned
+   up on both files while in the area.
 5. **If you plan to run this on native ext4,** Bug Q (Endian.h shadow)
    and Bug T (CRLF) both stop being concerns. Worth moving the tree
    off DrvFs next time — also a ~3-5× build-time improvement for
