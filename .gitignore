@@ -1,0 +1,21 @@
+
+APPLY_PHASE*.md
+phase*-patches/
+phase*.bundle
+phase*.diff
+
+# --- runtime & build artifacts ---
+*.log
+*.bak
+build.log
+errors.txt
+WarLog.txt
+balanceZoneGroup.txt
+
+# --- local smoke-test pack (retail data, not redistributable) ---
+DarkEden data/
+
+# --- editor / IDE ---
+*.swp
+.vscode/
+.idea/
