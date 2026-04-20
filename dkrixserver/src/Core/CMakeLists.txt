@@ -478,7 +478,8 @@ set(CG_PACKET_SOURCES
     CGStashToMouse.cpp CGStashToMouseHandler.cpp
     CGStashWithdraw.cpp CGStashWithdrawHandler.cpp
     CGStoreClose.cpp CGStoreCloseHandler.cpp
-    CGStoreOpen.cpp CGStoreOpenHandler.cpp
+    # CGStoreOpen.cpp moved to shared/Packets/ — Phase 12 migration.
+    CGStoreOpenHandler.cpp
     CGStoreSign.cpp CGStoreSignHandler.cpp
     CGSubmitScore.cpp CGSubmitScoreHandler.cpp
     CGTakeOutGood.cpp CGTakeOutGoodHandler.cpp
@@ -643,6 +644,11 @@ target_include_directories(GameServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/skill
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
 )
+# Phase 12 migration: INTERFACE dependency pulls in shared/Packets/
+# sources (e.g. CGStoreOpen.cpp) compiled into this target with the
+# target's own __GAME_SERVER__ / __COMBAT__ defines applied. See
+# shared/Packets/CMakeLists.txt for the CG/GC/… family breakdown.
+target_link_libraries(GameServerPackets PRIVATE shared_packets)
 
 # ============================================================================
 # LoginServerPackets 库 - 使用 __LOGIN_SERVER__ 宏编译
@@ -662,6 +668,12 @@ target_include_directories(LoginServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/database
     ${CMAKE_SOURCE_DIR}/src/server/loginserver
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
+    # Phase 12: PacketFactoryManager.cpp (in PACKET_COMMON_SOURCES)
+    # unconditionally #includes "CGStoreOpen.h", which now lives in
+    # shared/Packets/. Add the path WITHOUT linking shared_packets so
+    # we don't absorb CGStoreOpen.cpp as a source (its handler symbol
+    # CGStoreOpenHandler::execute lives only in GameServerPackets).
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 # ============================================================================
@@ -680,4 +692,6 @@ target_include_directories(SharedServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/database
     ${CMAKE_SOURCE_DIR}/src/server/sharedserver
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
+    # Phase 12: see LoginServerPackets note above — include-only, no link.
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )

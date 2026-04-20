@@ -148,7 +148,9 @@
 
 #include "Packet/Cpackets/CGDisplayItem.h"
 #include "Packet/Cpackets/CGUndisplayItem.h"
-#include "Packet/Cpackets/CGStoreOpen.h"
+// Phase 12: CGStoreOpen migrated to shared/Packets/; resolved via
+// shared_packets INTERFACE include path.
+#include "CGStoreOpen.h"
 #include "Packet/Cpackets/CGStoreClose.h"
 #include "Packet/Cpackets/CGStoreSign.h"
 #include "Packet/Cpackets/CGRequestStoreInfo.h"

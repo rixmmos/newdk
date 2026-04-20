@@ -562,7 +562,9 @@
 #include "Cpackets/CGDisplayItem.h"
 #include "Cpackets/CGUndisplayItem.h"
 #include "Cpackets/CGStoreSign.h"
-#include "Cpackets/CGStoreOpen.h"
+// Phase 12: CGStoreOpen migrated to shared/Packets/; resolved via
+// shared_packets INTERFACE include path.
+#include "CGStoreOpen.h"
 #include "Gpackets/GCSubInventoryInfo.h"
 
 //add by viva 

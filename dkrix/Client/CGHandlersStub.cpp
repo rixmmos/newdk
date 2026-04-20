@@ -20,7 +20,9 @@
 #include "Packet/Cpackets/CGSelectQuest.h"
 #include "Packet/Cpackets/CGSelectRegenZone.h"
 #include "Packet/Cpackets/CGStoreClose.h"
-#include "Packet/Cpackets/CGStoreOpen.h"
+// Phase 12: CGStoreOpen migrated to shared/Packets/; resolved via
+// shared_packets INTERFACE include path.
+#include "CGStoreOpen.h"
 #include "Packet/Cpackets/CGStoreSign.h"
 #include "Packet/Cpackets/CGUndisplayItem.h"
 #include "Packet/Cpackets/CGWithdrawPet.h"
@@ -36,7 +38,10 @@ void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPl
 void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGSelectRegenZoneHandler::execute(CGSelectRegenZone* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGStoreCloseHandler::execute(CGStoreClose* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGStoreOpenHandler::execute(CGStoreOpen* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+// Phase 12: CGStoreOpen header migrated to shared/Packets/, which
+// drops the throw() specs (deprecated in C++17). Match the new
+// signature here.
+void CGStoreOpenHandler::execute(CGStoreOpen* pPacket, Player* pPlayer) {}
 void CGStoreSignHandler::execute(CGStoreSign* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGUndisplayItemHandler::execute(CGUndisplayItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGWithdrawPetHandler::execute(CGWithdrawPet* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}

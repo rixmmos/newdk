@@ -1945,6 +1945,12 @@ after each migration PR.
   The first such PR also adds `shared/Packets/CMakeLists.txt`
   and wires `add_subdirectory(../shared/Packets)` into both
   root CMake files.
+
+**Ratchet progress (migration PRs landed after 12.0):**
+
+| Date       | Class         | Baseline after | Notes                                                                 |
+| ---------- | ------------- | -------------: | --------------------------------------------------------------------- |
+| 2026-04-20 | `CGStoreOpen` |            324 | First migration. Also lands `shared/Packets/CMakeLists.txt` (INTERFACE `shared_packets` target), both-tree `add_subdirectory(../shared/Packets)` wiring, and the Korean→English comment sweep on the migrated header. Remaining first-wave cosmetic-`.cpp` candidates: `CGDisplayItem`, `CGGQuestCancel`, `CGRequestStoreInfo`, `CGStoreClose`, `CGStoreSign`, `CGUndisplayItem` (6). |
 - **Post-Phase-12.0 Phase 13.3 unblocked.** Once the first
   few migrations land and `shared/Packets/` has a real
   library target, the Socket stream files
