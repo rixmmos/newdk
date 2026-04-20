@@ -9,10 +9,19 @@ current).
 When anything here falls out of date, update this file as part of the
 change that made it stale — not after the fact.
 
-## Ground truth (as of 2026-04)
+## Ground truth (as of 2026-04-20)
 
 The following is what the trees actually contain, verified by direct read
 and grep. Where it disagrees with a per-area status doc, this file wins.
+
+**Runtime verification update (2026-04-20):** the client and server
+cluster now boot end-to-end. Full live gameplay was exercised — login
+→ character-select → gameserver handoff → spawn → zone travel → NPCs
+→ combat → XP → level-up → stat allocation. See Phase 18 below for
+the runtime bug list (PP–WW) that this pass shook out, and
+[`ROADMAP.md`](./ROADMAP.md) for product-facing follow-ups (UHD,
+English-only localization, branding scrub, Windows .exe distribution,
+bleeding-effect gate) that are explicitly *not* modernization work.
 
 ### Client (`client/`)
 - SDL2 is the only supported backend on every platform. The old Windows
@@ -148,9 +157,21 @@ interleave once P0 is done.
   tree (plus 3.4 MB of generated JSON untracked), against an
   original headline target of "~24,100 lines." The shortfall is
   entirely the missing `MItemTable_bak-2007-5-7.cpp` (14,965).
-- Follow-up: `make debug-asan` not yet exercised —
-  the sandbox can't run the client build. Human verification
-  pending before declaring Phase 1 fully complete.
+- [x] Follow-up: runtime verification. `make debug-asan` itself is
+  still not wired into CI, but the Phase 1 tree now boots
+  end-to-end through a full gameplay loop (see Phase 18) on
+  WSL2 + WSLg. Nothing in the deleted-files set regressed. The
+  original "human verification pending" note resolves here; the
+  asan-build CI task is tracked separately as a Phase 15
+  follow-up, not a Phase 1 blocker.
+- [!] WinLib deletion: still present in the tree
+  (`Client/WinLib/{CWinUpdate.cpp,CWinUpdate.h,WinLib.h}`).
+  Folded into Phase 3 at the time; Phase 3 closed without
+  removing it because the update-state hierarchy refactor it
+  depends on was out of Phase 3's scope. Remains a legitimate
+  follow-up — small, but needs the `CWaitUIUpdate` /
+  `CWaitPacketUpdate` / `CGameUpdate` / `COpeningUpdate`
+  subclasses to be re-homed first.
 
 ### Phase 2 — Shrink `basic/Platform.h` (client, in progress 2026-04-17)
 - [x] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
@@ -2367,6 +2388,69 @@ section. First-wave candidates (shortest reconciliation
 work expected) listed by hash in the README; re-run
 `audit-packet-divergence.sh` after each migration to track
 the cosmetic-.cpp shortlist as it shrinks.
+
+### Phase 18 — End-to-end runtime smoke test — done 2026-04-20
+
+The first full live run of the modernized tree — client + three-
+server cluster + MySQL — on WSL2 Ubuntu 22.04 / WSLg. Exercised
+login → character-select → gameserver handoff → spawn → zone
+travel → NPC interaction → combat → XP → level-up → stat
+allocation.
+
+Phase 18 is a **validation** phase, not a code-cleanup phase. Its
+output is a list of runtime bugs that the compile-only build
+hygiene passes (1–17) couldn't catch, plus the fixes that shook
+out of actually running the game.
+
+**Bugs found and fixed.** Letter suffixes continue the sequence
+started in the pre-smoke-test build fix wave (Q–OO).
+
+| ID | Area   | Summary                                                                          |
+| -- | ------ | -------------------------------------------------------------------------------- |
+| PP | Server | Server binaries exited on bare invocation — required explicit `-f <conf>`.       |
+| QQ | Client | Client MAINMENU stuck, no transition to login form.                              |
+| RR | Server | `gameserver` had a PID but wasn't listening on `:9998` — config / startup wiring.|
+| SS | Client | **PENDING.** SDL port's `DXKeyboardEvent` drops letter keys. Workaround in place.|
+| TT | Server | `loginserver` closed socket after sending `LCPCList` — pre-parse disconnect.     |
+| UU | Client | `S_SLOT::ZeroMemory` clobbered `std::string`/`std::vector` members (libstdc++ SSO).|
+| VV | Client | `SPK_*_FRIEND` filepath macros didn't match retail data; null-deref at `0xc0` after `SET CHARINFO`. |
+| WW | Client | `DrawLightBuffer3D` deref of never-allocated `m_pLightBufferTexture` on dark-zone entry. |
+
+**Commit reference:** `dbc3087` (`modernize/phase4-sprite`), 16
+files changed, +1771 / −95. Detailed root-cause write-ups for
+each bug live in `SMOKE_TEST_RESULTS.md` and `LOGIN_SMOKE.md`
+at the repo root.
+
+**Deferred from Phase 18:**
+
+- **Bug SS (keyboard-event letter-drop).** Workaround keeps
+  gameplay possible; real fix pending a proper
+  `SDL_TEXTINPUT` vs. `SDL_KEYDOWN` event-loop split in
+  the SDL backend. Small follow-up, not blocking.
+- **Proper SDL2 `DrawLightBuffer3D` port.** Bug WW's null-
+  guard short-circuits the overlay rather than compositing
+  it. Dark zones currently render lit. Full port requires
+  replicating the old DirectDraw auxiliary-texture
+  composite against SDL2 render targets. Not a regression
+  (current behaviour is "lit where it should be dark",
+  which is strictly better than "SIGSEGV") but worth
+  finishing when someone has a rendering-shaped afternoon.
+- **Windows-build smoke test.** The current pass validated
+  WSL2-Linux only. A cross-compile or native-MSVC build
+  will surface its own set of issues (see
+  [`ROADMAP.md`](./ROADMAP.md) R5).
+
+**Follow-up work (tracked outside MODERNIZATION.md):**
+
+Runtime-behavior and product-facing items that came out of this
+smoke test — English-only localization, bleeding-VFX gate,
+branding scrub, standalone Windows `.exe`, UHD / high-DPI
+rendering — are **not** modernization work and live in
+[`ROADMAP.md`](./ROADMAP.md) as items R1–R5. They share no
+scope with this file; update ROADMAP.md when those progress,
+not this one.
+
+## Out of scope for modernization
 
 The following are deliberately out of scope for this modernization
 pass. If we change our minds, update this list first.
