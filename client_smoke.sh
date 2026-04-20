@@ -164,6 +164,37 @@ if [ "${#missing_rpk_dirs[@]}" -gt 0 ]; then
 fi
 ok ".rpk archives all extracted to matching directories"
 
+# Font availability — TextBackendSDL falls back through a hardcoded
+# list. If NOTHING in the list exists, every TTF_OpenFont returns
+# NULL and the UI renders with no text (background image only, no
+# login form). Pre-Phase-13D binaries only probed Data/Font/* and
+# macOS /System/Library/Fonts/* — on Linux neither existed.
+font_candidates=(
+    "$DKRIX_DATA_DIR/Data/Font/NotoSansCJK-Regular.ttc"
+    "$DKRIX_DATA_DIR/Data/Font/NotoSans-Regular.ttf"
+    "$DKRIX_DATA_DIR/Data/Font/DejaVuSans.ttf"
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+    "/usr/share/fonts/opentype/noto/NotoSansCJK.ttc"
+    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+)
+font_found=""
+for f in "${font_candidates[@]}"; do
+    if [ -f "$f" ]; then
+        font_found="$f"
+        break
+    fi
+done
+
+if [ -z "$font_found" ]; then
+    yellow "[WARN] no TTF/TTC font found on the search path.
+       The UI will render without text (background only, no login form).
+       sudo apt install -y fonts-noto-cjk fonts-noto-core fonts-dejavu
+       Or drop a NotoSansCJK-Regular.ttc at \$DKRIX_DATA_DIR/Data/Font/."
+else
+    ok "font available: $font_found"
+fi
+
 # -----------------------------------------------------------------------
 # 7. Launch
 # -----------------------------------------------------------------------

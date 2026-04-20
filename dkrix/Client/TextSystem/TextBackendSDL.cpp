@@ -88,10 +88,20 @@ public:
 		}
 
 		const char* fontPaths[] = {
+			// Project-relative (retail + anyone who drops a font into Data/Font/)
 			"Data/Font/NotoSansCJK-Regular.ttc",
 			"Data/Font/NotoSans-Regular.ttf",
 			"Data/Font/DejaVuSans.ttf",
 			"Data/Font/Hiragino Sans GB.ttc",
+			// Linux system font paths (Debian/Ubuntu layout via fonts-noto-cjk,
+			// fonts-dejavu, fonts-noto-core). Added in smoke-test Phase 13D
+			// — fallback used to be macOS-only after the retail paths, so on
+			// Linux every TTF_OpenFont returned NULL and text never rendered.
+			"/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+			"/usr/share/fonts/opentype/noto/NotoSansCJK.ttc",
+			"/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+			"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+			// macOS fallbacks
 			"/System/Library/Fonts/Helvetica.ttc",
 			"/System/Library/Fonts/Hiragino Sans GB.ttc",
 			NULL
@@ -327,3 +337,4 @@ TextBackend* CreateSDLTextBackend()
 }
 
 } // namespace TextSystem
+                                                                                                                                                                                                                                                                                                                                         

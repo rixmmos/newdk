@@ -215,6 +215,54 @@ viewer-tool bug.
 **Impact:** removes a phantom blocker for retail-asset workflows.
 Viewer tools now agree with the server's own `Zone::load` reader.
 
+### Bug V — `TextBackendSDL` font fallback had no Linux system paths
+
+**Symptom:** on the first successful Step-3 client boot (post-`.rpk`
+extraction), the title screen rendered correctly but every
+`TTF_OpenFont` call failed, logging
+`TextBackendSDL: Failed to load font size 16` dozens of times. The
+UI appeared as the background image only — no login form, no
+copyright string, no button labels. Game loop entered, `MAINMENU`
+mode active, 0 glyphs drawn.
+
+**Cause:** `dkrix/Client/TextSystem/TextBackendSDL.cpp:90-98` held a
+hardcoded 6-path fallback list: four `Data/Font/*` project-relative
+paths, then two macOS `/System/Library/Fonts/*` paths. **No Linux
+system paths.** On Ubuntu/WSL, none of the first four existed (retail
+doesn't ship a `Data/Font/` dir) and neither did the macOS paths, so
+every `AcquireFont()` call returned a null handle and the text
+layer silently drew nothing.
+
+**Fix:** inserted four Debian/Ubuntu system-font paths into the
+fallback list between the `Data/Font/*` entries and the macOS ones:
+
+    /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
+    /usr/share/fonts/opentype/noto/NotoSansCJK.ttc
+    /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf
+    /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+
+Corresponds to `apt install fonts-noto-cjk fonts-noto-core
+fonts-dejavu`. NotoSansCJK is probed first because the smoke-test
+build defaults to Chinese locale on a C/POSIX WSL shell (the
+language detector falls through to Chinese when it can't identify a
+specifically-Korean environment — that's a separate finding that
+hasn't reproduced as a blocker yet).
+
+**Verification:** pending rebuild on Enrico's box. Ran 1 smoke-test
+cycle showing `[WARN] no TTF/TTC font found on the search path` from
+`client_smoke.sh`'s new font precheck, confirming the search
+walks the correct paths.
+
+**Zero-code workaround for pre-patch binaries:**
+
+    sudo apt install -y fonts-noto-cjk
+    mkdir -p "/mnt/c/newdk/Darkeden data/Data/Font"
+    ln -sf /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc \
+           "/mnt/c/newdk/Darkeden data/Data/Font/NotoSansCJK-Regular.ttc"
+
+Matches the first entry in the fallback list so the current binary
+finds a font without needing the patched search order.
+
 ## Non-bug configuration gaps closed
 
 ### `odk-mysql` hostname in seeded `WorldDBInfo`

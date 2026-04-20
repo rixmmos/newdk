@@ -69,7 +69,7 @@ If `$DISPLAY` is empty or `xeyes` doesn't appear:
   run it with "Disable access control" checked, then
   `export DISPLAY=$(ip route | awk '/^default/{print $3}'):0.0`.
 
-## 3. Install the SDL2 runtime libs
+## 3. Install the SDL2 runtime libs + CJK fonts
 
 The client was built against these via `-dev` packages; at runtime it
 only needs the SONAME libs. Ubuntu 22.04:
@@ -81,7 +81,10 @@ sudo apt install -y \
     libsdl2-ttf-2.0-0 \
     libsdl2-mixer-2.0-0 \
     libjpeg8 \
-    libfreetype6
+    libfreetype6 \
+    fonts-noto-cjk \
+    fonts-noto-core \
+    fonts-dejavu
 ```
 
 Why each:
@@ -96,6 +99,31 @@ Why each:
   the SO is missing.
 - `libjpeg8` — the retail `.jps` textures are JPEG-wrapped.
 - `libfreetype6` — pulled in by SDL2_ttf, but good to be explicit.
+- `fonts-noto-cjk` — ships `NotoSansCJK-Regular.ttc` at
+  `/usr/share/fonts/opentype/noto/`. **Required** or else
+  `TextBackendSDL: Failed to load font size 16` spams the log and the
+  whole UI renders without text (you see the background image but no
+  login form). Bug V — the port's font fallback list only had macOS
+  system paths, not Linux ones, before the fix in Phase 13D.
+- `fonts-noto-core` — non-CJK Noto fallback.
+- `fonts-dejavu` — DejaVu fallback; the port's 3rd-priority path is
+  `Data/Font/DejaVuSans.ttf`.
+
+### 3a. Zero-code workaround if you can't / don't want to rebuild
+
+Phase 13D patches `TextBackendSDL.cpp` to probe Linux system font
+paths directly. If your current binary predates that patch (i.e. you
+built before the Phase 13D commit), you can ship-of-Theseus around it
+by dropping a symlink into the data folder:
+
+```bash
+mkdir -p "/mnt/c/newdk/Darkeden data/Data/Font"
+ln -sf /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc \
+       "/mnt/c/newdk/Darkeden data/Data/Font/NotoSansCJK-Regular.ttc"
+```
+
+That matches the first-priority path in the fallback list
+(`Data/Font/NotoSansCJK-Regular.ttc`) and works without a rebuild.
 
 Verify all runtime deps resolve:
 
