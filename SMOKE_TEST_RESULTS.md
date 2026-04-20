@@ -340,6 +340,12 @@ a display and drive it manually. Either is post-smoke-test work.
    client's first login packet, and prints the server's response. That
    gives you a regression test for wire-format changes without needing
    a display.
+7. **Client+retail-data boot-to-login smoke test** — written up as
+   `STEP3_CLIENT.md` with `client_smoke.sh` as the automated
+   precheck + launcher. Scope: WSLg window, login UI renders, no
+   login packet sent (crossing into Phase 17 packet-divergence
+   territory is out of scope). Unblocks doing packet work against a
+   live, asset-loaded client once Enrico runs it.
 
 ## Companion artifacts
 
@@ -347,4 +353,7 @@ a display and drive it manually. Either is post-smoke-test work.
 - `STEP2_SERVER.md` — server build + config + launch runbook.
 - `STEP2_GREEN_SNAPSHOT.md` — captured "this is what a clean green
   launch looks like" for future regression diffs.
+- `STEP3_CLIENT.md` — client + retail-data boot-to-login runbook.
 - `server_build_fix.sh` — applies Bugs Q and R idempotently.
+- `client_smoke.sh` — launch-path prechecks + `DarkEden` launcher
+  with the `Futec(IP:Port)` command-line format.

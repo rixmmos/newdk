@@ -325,9 +325,17 @@ Expected readiness log: a GC/CG packet handler registration block then
 
 ## 7. Connect the client
 
+> **Deeper runbook:** see `STEP3_CLIENT.md` for the full client
+> bring-up procedure (WSLg sanity check, runtime SDL2 deps, retail
+> data layout, `Futec(IP:Port)` command-line format, common failures)
+> and the `client_smoke.sh` helper script that automates the
+> prechecks. The block below is the quick path once STEP3 has
+> already passed once.
+
 ```sh
-cd ~/work/dkrix-upstream/dkrix/build
-./DarkEden
+cd "/mnt/c/newdk/Darkeden data"
+/mnt/c/newdk/dkrix/build/bin/DarkEden "Futec(127.0.0.1:9999)"
+# or: ./client_smoke.sh   (from repo root — auto-prechecks everything)
 ```
 
 The client should:
