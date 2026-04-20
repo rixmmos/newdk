@@ -73,8 +73,8 @@ public:
 
 public:
     // create packet
-    // Base PacketFactory declares these three with throw() specs; the
-    // override must be at least as strict or C++11 rejects it as a
+    // Base PacketFactory declares all four of these with throw() specs;
+    // the override must be at least as strict or C++11 rejects it as a
     // looser exception specification. Keep throw() (not noexcept) to
     // match the rest of the codebase until a sweep bumps everything.
     Packet* createPacket() throw() {
@@ -82,7 +82,7 @@ public:
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGStoreOpen";
     }
 

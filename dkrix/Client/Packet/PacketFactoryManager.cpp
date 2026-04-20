@@ -552,7 +552,6 @@
 #include "Gpackets/GCRequestPowerPointResult.h"
 #include "Gpackets/GCUsePowerPointResult.h"
 
-#include "Cpackets/CGStoreClose.h"
 #include "Cpackets/CGRequestStoreInfo.h"
 #include "Cpackets/CGBuyStoreItem.h"
 #include "Gpackets/GCMyStoreInfo.h"
@@ -562,9 +561,10 @@
 #include "Cpackets/CGDisplayItem.h"
 #include "Cpackets/CGUndisplayItem.h"
 #include "Cpackets/CGStoreSign.h"
-// Phase 12: CGStoreOpen migrated to shared/Packets/; resolved via
-// shared_packets INTERFACE include path.
+// Phase 12: CGStoreOpen/CGStoreClose migrated to shared/Packets/;
+// resolved via shared_packets INTERFACE include path.
 #include "CGStoreOpen.h"
+#include "CGStoreClose.h"
 #include "Gpackets/GCSubInventoryInfo.h"
 
 //add by viva 

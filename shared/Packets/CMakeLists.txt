@@ -40,6 +40,7 @@ endif()
 # dkrixserver/src/Core/CG*.cpp / dkrix/Client/Packet/Cpackets/CG*.cpp
 set(_SHARED_PACKETS_CG_SOURCES
     CGStoreOpen.cpp
+    CGStoreClose.cpp
 )
 
 # Future families will add their own groups here, parallel to the

@@ -130,9 +130,9 @@ add_subdirectory(Client/framelib)
 # Phase 12 migration: canonical packet-class tree lives in
 # ../shared/Packets (sibling to dkrix/ and dkrixserver/). Defines
 # the shared_packets INTERFACE target that DarkEden links below so
-# its sources (e.g. CGStoreOpen.cpp) are compiled into the client
-# without the __GAME_SERVER__/__LOGIN_SERVER__ defines the server
-# packet libraries apply.
+# its sources (e.g. CGStoreOpen.cpp, CGStoreClose.cpp) are compiled
+# into the client without the __GAME_SERVER__/__LOGIN_SERVER__ defines
+# the server packet libraries apply.
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/Packets ${CMAKE_BINARY_DIR}/shared_packets_build)
 
 # ============================================================

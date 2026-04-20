@@ -477,8 +477,10 @@ set(CG_PACKET_SOURCES
     CGStashRequestBuy.cpp CGStashRequestBuyHandler.cpp
     CGStashToMouse.cpp CGStashToMouseHandler.cpp
     CGStashWithdraw.cpp CGStashWithdrawHandler.cpp
-    CGStoreClose.cpp CGStoreCloseHandler.cpp
-    # CGStoreOpen.cpp moved to shared/Packets/ — Phase 12 migration.
+    # CGStoreClose.cpp / CGStoreOpen.cpp moved to shared/Packets/ —
+    # Phase 12 migration. Handlers stay here (handler symbols are still
+    # game-server-local until the handler layer is tackled separately).
+    CGStoreCloseHandler.cpp
     CGStoreOpenHandler.cpp
     CGStoreSign.cpp CGStoreSignHandler.cpp
     CGSubmitScore.cpp CGSubmitScoreHandler.cpp
@@ -645,9 +647,10 @@ target_include_directories(GameServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
 )
 # Phase 12 migration: INTERFACE dependency pulls in shared/Packets/
-# sources (e.g. CGStoreOpen.cpp) compiled into this target with the
-# target's own __GAME_SERVER__ / __COMBAT__ defines applied. See
-# shared/Packets/CMakeLists.txt for the CG/GC/… family breakdown.
+# sources (e.g. CGStoreOpen.cpp, CGStoreClose.cpp) compiled into this
+# target with the target's own __GAME_SERVER__ / __COMBAT__ defines
+# applied. See shared/Packets/CMakeLists.txt for the CG/GC/… family
+# breakdown.
 target_link_libraries(GameServerPackets PRIVATE shared_packets)
 
 # ============================================================================
