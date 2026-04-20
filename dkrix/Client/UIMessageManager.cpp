@@ -2206,7 +2206,7 @@ UIMessageManager::Execute_UI_CONNECT(int left, int right, void* void_ptr)
 	// CGConnect ¶§ »ç¿ëÇÏ·Á¸é ¿©±â¼­ ÀúÀåÇØµÖ¾ß ÇÑ´Ù.					
 	//clSelectPC.setPCName( (const char *)g_pUserInformation->CharacterW[left] );//"sigi");
 	clSelectPC.setPCName( (const char *)g_pUserInformation->Character[left] );//"sigi");
-	clSelectPC.setPCType( (PCType)(g_pUserInformation->Race[left]));
+	clSelectPC.setPCType( (PCType)(g_pUserInformation->eRace[left]));
 
 	DEBUG_ADD_FORMAT("socket Set PC type");
 
@@ -11832,4 +11832,4 @@ UIMessageManager::Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_
 	}
 
 	// 2005, 3, 2, sobeit add end
-#endif
+#endif                                                    

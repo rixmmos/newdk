@@ -214,6 +214,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI/src/VS_UI_Shop.cpp
 		VS_UI/src/VS_UI_Storage.cpp
 		VS_UI/src/VS_UI_Title.cpp
+		# Bug OO (2026-04-20): MSVC6-era uppercase .CPP not picked up
+		# by Phase 14B's `find VS_UI -name "*.cpp"` generator. Provides
+		# C_VS_UI_NEWCHAR::_ShowCharacter{Slayer,Vampire,Ousters,AC*}
+		# referenced from VS_UI_Title.cpp.
+		VS_UI/src/VS_UI_TITLE_SHOWCHAR.CPP
 		VS_UI/src/VS_UI_Tutorial.cpp
 		VS_UI/src/VS_UI_WebBrowser.cpp
 		VS_UI/src/VS_UI_mouse_pointer.cpp
@@ -589,6 +594,17 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# Global variables and small utility functions that used to live
 		# in GamePacketFunctions.cpp.
 		Client/Globals.cpp
+		# Bug OO (2026-04-20): MSVC6-era files with uppercase .CPP
+		# extension are silently dropped by the case-sensitive
+		# file(GLOB Client/*.cpp) above on Linux. List them explicitly
+		# to get them into the build graph. BIT_RES.CPP provides the
+		# Bit_Reserve class used by mp3.cpp + subdecoder.cpp; the other
+		# four define managers referenced from various GC*Handler.cpp.
+		Client/BIT_RES.CPP
+		Client/MAttachZoneAroundEffectGenerator.CPP
+		Client/MBloodyBreakerEffectGenerator.CPP
+		Client/MTimeItemManager.CPP
+		Client/MWarManager.CPP
 	)
 
 	# Remove files that are already compiled in VS_UI library.
@@ -659,9 +675,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		SDL2::SDL2main
 	)
 
-	# Link iconv library (not needed for Emscripten - has stub implementations)
+	# Link iconv library - not needed for Emscripten (stub impls) and
+	# not needed on glibc Linux (iconv symbols are built into libc).
+	# find_package(Iconv) sets Iconv_IS_BUILT_IN when the platform's
+	# libc already provides iconv(); otherwise it resolves Iconv::Iconv
+	# to the standalone libiconv (macOS/BSD/MinGW).
 	if(NOT EMSCRIPTEN)
-		target_link_libraries(DarkEden PRIVATE iconv)
+		find_package(Iconv)
+		if(Iconv_FOUND AND NOT Iconv_IS_BUILT_IN)
+			target_link_libraries(DarkEden PRIVATE Iconv::Iconv)
+		endif()
 	endif()
 
 	# Link JPEG library if available

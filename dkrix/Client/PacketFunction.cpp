@@ -2753,7 +2753,7 @@ SetPCSlayerInfo(PCSlayerInfo2* pInfo)
 //	g_char_slot_ingame.GRADE_EXP_REMAIN = accum-pInfo->getRankExp();
 	g_char_slot_ingame.GRADE_EXP_REMAIN = pInfo->getRankExp();
 
-	g_char_slot_ingame.Race = RACE_SLAYER;
+	g_char_slot_ingame.eRace = RACE_SLAYER;
 	g_char_slot_ingame.bl_female = !g_pPlayer->IsMale();
 
 	g_char_slot_ingame.hair_color = pInfo->getHairColor();	
@@ -6498,3 +6498,4 @@ void SetSubInventoryInfo(InventoryInfo* pInventoryInfo)
 }
 
 #endif
+                                                                   

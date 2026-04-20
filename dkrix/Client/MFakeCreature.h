@@ -12,6 +12,7 @@
 #include "MCreatureWear.h"
 #include <list>
 #include <queue>
+#include <vector>
 #include "MemoryPool.h"
 
 #ifndef __DNODE_DEFINE__
@@ -290,3 +291,4 @@ class MFakeCreature : public MCreatureWear {
 #endif
 
 
+                  

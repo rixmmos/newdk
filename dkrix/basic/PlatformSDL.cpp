@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <libgen.h>  /* POSIX dirname(3) — used at platform_get_executable_dir. Bug Z. */
 
 #ifdef PLATFORM_LINUX
 	#include <limits.h>
@@ -433,3 +434,4 @@ void platform_shutdown(void) {
 }
 
 #endif /* !PLATFORM_WINDOWS */
+                                        

@@ -4,6 +4,9 @@
 #include "Client_PCH.h"
 #include "PCConfigTable.h"
 
+#include <vector>
+#include <algorithm>
+
 const int PLAYER_CONFIG_VERSION	= 2;
 
 #define LIMIT_PLAYER_CONFIG		20
@@ -477,4 +480,4 @@ WorldPlayerConfigTable::LoadFromFile(const char* pFilename)
 
 		file.close();
 	}
-}
+}                                    

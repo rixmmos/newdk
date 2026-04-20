@@ -13,12 +13,21 @@
 #ifndef __SPRITELIBBACKEND_H__
 #define __SPRITELIBBACKEND_H__
 
-/* Close Platform.h's extern "C" block to manage our own */
+/*
+ * Bug X fix: Platform.h must be included in the caller's linkage context
+ * (C++ here) — not inside our own extern "C" block. Platform.h:211-227
+ * does a <mutex> close/reopen dance that only pops ONE level of extern "C";
+ * when SpriteLibBackend.h's own extern "C" wrapped around it, <mutex>
+ * ended up at depth 1 (still in C linkage), and libstdc++11's <mutex>
+ * has templates — templates with C linkage are a hard error.
+ * Only the interface declarations below need extern "C" — they are
+ * the C-callable API this header exposes.
+ */
+#include "../basic/Platform.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "../basic/Platform.h"
 
 /* ============================================================================
  * Backend Selection
@@ -345,3 +354,4 @@ int spritectl_blt_sprite_rle(spritectl_surface_t dest, int x, int y,
 #endif
 
 #endif /* __SPRITELIBBACKEND_H__ */
+                                                                                                                                   

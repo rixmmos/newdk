@@ -3462,7 +3462,7 @@ InitPlayer(int x, int y, int dir)
 	//------------------------------------------------
 	// Á¤º¸Ã¢¿¡ º¸¿©ÁÖ´Â Á¤º¸..
 	//------------------------------------------------
-	g_char_slot_ingame.Race = g_pPlayer->GetRace();
+	g_char_slot_ingame.eRace = g_pPlayer->GetRace();
 	g_char_slot_ingame.bl_female = !g_pPlayer->IsMale();
 
 	return TRUE;
@@ -5874,3 +5874,4 @@ Add_GDR_Ghost(int ZoneID)
 	}
 	GhostFile.Release();
 }
+                                    

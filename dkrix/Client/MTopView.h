@@ -61,6 +61,7 @@
 #include <fstream>
 #include <map>
 #include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -895,3 +896,4 @@ class MTopView : public MRequestMode {
 extern MTopView*	g_pTopView;
 
 #endif
+                                  

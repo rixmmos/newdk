@@ -124,6 +124,7 @@
 #include <fstream>
 #include <list>
 #include <map>
+#include <vector>
 using namespace std;
 
 
@@ -647,3 +648,4 @@ extern bool				g_abHolyLandBonusSkills[HOLYLAND_BONUS_MAX];
 extern bool				g_abSweeperBonusSkills[SWEEPER_BONUS_MAX];
 #endif
 
+                  

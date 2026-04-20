@@ -303,7 +303,7 @@ throw ( ProtocolException , Error )
 					//g_pUserInformation->CharacterW[i] = pPCSlayerInfo->getName().c_str();
 					//g_pUserInformation->Character[i] = johapName;
 					g_pUserInformation->Character[i] = pPCSlayerInfo->getName().c_str();
-					g_pUserInformation->Race[i]	= RACE_SLAYER;
+					g_pUserInformation->eRace[i]	= RACE_SLAYER;
 					g_pUserInformation->FaceStyleSlot[i] = pPCSlayerInfo->getHairStyle();
 
 					UI_SetCharacter( i, pPCSlayerInfo );		
@@ -324,7 +324,7 @@ throw ( ProtocolException , Error )
 					//g_pUserInformation->CharacterW[i] = pPCVampireInfo->getName().c_str();
 					//g_pUserInformation->Character[i] = johapName;
 					g_pUserInformation->Character[i] = pPCVampireInfo->getName().c_str();
-					g_pUserInformation->Race[i]	= RACE_VAMPIRE;
+					g_pUserInformation->eRace[i]	= RACE_VAMPIRE;
 					g_pUserInformation->FaceStyleSlot[i] = 0;//pPCVampireInfo->
 
 					UI_SetCharacter( i, pPCVampireInfo );
@@ -345,7 +345,7 @@ throw ( ProtocolException , Error )
 					//g_pUserInformation->CharacterW[i] = pPCVampireInfo->getName().c_str();
 					//g_pUserInformation->Character[i] = johapName;
 					g_pUserInformation->Character[i] = pPCOustersInfo->getName().c_str();
-					g_pUserInformation->Race[i]	= RACE_OUSTERS;
+					g_pUserInformation->eRace[i]	= RACE_OUSTERS;
 					g_pUserInformation->FaceStyleSlot[i] = 0;//pPCVampireInfo->
 					
 					UI_SetCharacter( i, pPCOustersInfo );
@@ -376,3 +376,4 @@ throw ( ProtocolException , Error )
 		
 	__END_CATCH
 }
+                                                                                                                                                                                                                                                                                                                                                                                          

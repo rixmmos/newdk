@@ -238,7 +238,10 @@ struct S_SLOT
 	int									GRADE;
 	int									GRADE_EXP_REMAIN;
 
-	Race								Race;
+	/* Bug AA: member renamed `Race` → `eRace` to stop shadowing the
+	 * enum type of the same name (GCC rejects the shadow; MSVC6
+	 * accepted it). All call sites updated. */
+	Race								eRace;
 	
 	int									ElementalFire;
 	int									ElementalWater;

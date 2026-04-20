@@ -1209,7 +1209,7 @@ UI_SetCharInfoName(char* pName)
 void
 UI_SetCharInfoCreatureType(Race eRace)
 {
-	g_char_slot_ingame.Race = eRace;
+	g_char_slot_ingame.eRace = eRace;
 }
 
 //--------------------------------------------------------------------------------
@@ -2107,7 +2107,7 @@ UI_SetCharacter(int slotID, PCSlayerInfo * pInfo)
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
-	slot.Race = RACE_SLAYER;
+	slot.eRace = RACE_SLAYER;
 
 	short alignment = pInfo->getAlignment();
 	if (alignment > 10000)
@@ -2467,7 +2467,7 @@ UI_SetCharacter(int slotID, PCVampireInfo * pInfo)
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
 //	slot.bl_vampire = true;
-	slot.Race = RACE_VAMPIRE;
+	slot.eRace = RACE_VAMPIRE;
 
 	slot.bl_female = pInfo->getSex()==FEMALE;	
 	
@@ -2602,7 +2602,7 @@ UI_SetCharacter(int slotID, PCOustersInfo * pInfo)
 
 	slot.sz_name = g_pUserInformation->Character[slotID];
 	slot.sz_guild_name = "";
-	slot.Race = RACE_OUSTERS;
+	slot.eRace = RACE_OUSTERS;
 
 	short alignment = pInfo->getAlignment();
 	if (alignment > 10000)
@@ -4994,3 +4994,4 @@ UI_HiddenWindowCursor()
 	}
 
 #endif
+                                  

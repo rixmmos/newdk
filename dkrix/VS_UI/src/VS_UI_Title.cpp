@@ -895,7 +895,7 @@ void C_VS_UI_CHAR_DELETE::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 void C_VS_UI_NEWCHAR::RollDice(bool load)
 {
-	switch(m_p_slot->Race)
+	switch(m_p_slot->eRace)
 	{
 	case RACE_SLAYER:
 		if(load == false)
@@ -1002,7 +1002,7 @@ void C_VS_UI_NEWCHAR::SendNewCharacterToClient()
 	DeleteNew(sz_temp);
 
 	S_new_character.sz_name		= (char *)m_p_slot->sz_name.c_str();
-	S_new_character.race		= m_p_slot->Race;
+	S_new_character.race		= m_p_slot->eRace;
 	S_new_character.bl_female	= m_p_slot->bl_female;
 	S_new_character.STR			= m_p_slot->STR_PURE;
 	S_new_character.DEX			= m_p_slot->DEX_PURE;
@@ -1016,7 +1016,7 @@ void C_VS_UI_NEWCHAR::SendNewCharacterToClient()
 		S_new_character.face	= m_p_slot->woman_info.hair-W_HAIR1;
 	else
 		S_new_character.face	= m_p_slot->man_info.hair-M_HAIR1;
-	S_new_character.race		= m_p_slot->Race;
+	S_new_character.race		= m_p_slot->eRace;
 	
 
 	gpC_base->SendMessage(UI_NEW_CHARACTER, 0, 0, &S_new_character);
@@ -1536,14 +1536,14 @@ void C_VS_UI_NEWCHAR::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	else
 	{
 		if( 
-			(p_button->GetID() >= STR_PLUS_ID && p_button->GetID() <= INT_MINUS_ID && m_p_slot->Race !=  RACE_OUSTERS ) ||
-			(p_button->GetID() == REROLL_ID && m_p_slot->Race != RACE_SLAYER )
+			(p_button->GetID() >= STR_PLUS_ID && p_button->GetID() <= INT_MINUS_ID && m_p_slot->eRace !=  RACE_OUSTERS ) ||
+			(p_button->GetID() == REROLL_ID && m_p_slot->eRace != RACE_SLAYER )
 		  )
 			return;
 
 		if(p_button->GetFocusState())
 		{
-			if( m_p_slot->Race == RACE_SLAYER || !(p_button->GetID() == LOAD_ID || p_button->GetID() == SAVE_ID || p_button->GetID() == REROLL_ID || p_button->GetID() == FACE_BACK_ID || p_button->GetID() == FACE_NEXT_ID))
+			if( m_p_slot->eRace == RACE_SLAYER || !(p_button->GetID() == LOAD_ID || p_button->GetID() == SAVE_ID || p_button->GetID() == REROLL_ID || p_button->GetID() == FACE_BACK_ID || p_button->GetID() == FACE_NEXT_ID))
 			{
 				if (p_button->GetPressState()) // push state
 					m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index+1);
@@ -1572,7 +1572,7 @@ void C_VS_UI_NEWCHAR::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 		}
 		else
 		{
-			if( m_p_slot->Race == RACE_SLAYER && (p_button->GetID() == LOAD_ID || p_button->GetID() == SAVE_ID || p_button->GetID() == REROLL_ID) )
+			if( m_p_slot->eRace == RACE_SLAYER && (p_button->GetID() == LOAD_ID || p_button->GetID() == SAVE_ID || p_button->GetID() == REROLL_ID) )
 			{
 				m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index);
 				return;
@@ -1580,7 +1580,7 @@ void C_VS_UI_NEWCHAR::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 
 			if( 
 				(
-				m_p_slot->Race == RACE_SLAYER || 
+				m_p_slot->eRace == RACE_SLAYER || 
 				!(p_button->GetID() == LOAD_ID || 
 				p_button->GetID() == SAVE_ID || 
 				p_button->GetID() == REROLL_ID || 
@@ -1588,7 +1588,7 @@ void C_VS_UI_NEWCHAR::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				p_button->GetID() == FACE_NEXT_ID)
 				)
 
-				&& (m_p_slot->Race == RACE_OUSTERS && p_button->GetID() >= STR_PLUS_ID && p_button->GetID() <= INT_MINUS_ID))
+				&& (m_p_slot->eRace == RACE_OUSTERS && p_button->GetID() >= STR_PLUS_ID && p_button->GetID() <= INT_MINUS_ID))
 				m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index);
 		}
 	}
@@ -1630,7 +1630,7 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 
 	// default
 	m_p_slot->bl_female = false;
-	m_p_slot->Race = RACE_SLAYER;
+	m_p_slot->eRace = RACE_SLAYER;
 	srand(GetTickCount());
 
 	//m_p_slot->man_info.coat = M_UP_BODY;
@@ -1695,7 +1695,7 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 	m_p_slot->helmet_color = 377;
 	m_p_slot->trouser_color = 377;
 	m_p_slot->coat_color = 377;
-	if(m_p_slot->Race == RACE_OUSTERS)m_p_slot->skin_color = 377;
+	if(m_p_slot->eRace == RACE_OUSTERS)m_p_slot->skin_color = 377;
 
 //	bool skin_color_control = m_bl_skin_color_control; // backup
 
@@ -1887,8 +1887,8 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 	int i = 0;
 
 	if( 
-			(id >= STR_PLUS_ID && id <= INT_MINUS_ID && m_p_slot->Race !=  RACE_OUSTERS ) ||
-			(id == REROLL_ID && m_p_slot->Race != RACE_SLAYER )
+			(id >= STR_PLUS_ID && id <= INT_MINUS_ID && m_p_slot->eRace !=  RACE_OUSTERS ) ||
+			(id == REROLL_ID && m_p_slot->eRace != RACE_SLAYER )
 		  )
 			return;
 
@@ -1896,7 +1896,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 	{
 		case SLAYER_ID:
 //			m_p_slot->bl_vampire = false;
-			m_p_slot->Race = RACE_SLAYER;
+			m_p_slot->eRace = RACE_SLAYER;
 //			m_p_slot->man_info.coat = M_UP_BODY;
 //			m_p_slot->woman_info.coat = W_UP_BODY;
 			m_p_slot->man_info.helmet = M_NO_WEAR;
@@ -1922,7 +1922,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 
 		case VAMPIRE_ID:
 //			m_p_slot->bl_vampire = true;
-			m_p_slot->Race = RACE_VAMPIRE;
+			m_p_slot->eRace = RACE_VAMPIRE;
 			m_p_slot->man_info.coat = (CHAR_MAN)0;
 			m_p_slot->woman_info.coat = (CHAR_WOMAN)1;
 			Run(MALE_ID+rand()%2);
@@ -1934,7 +1934,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 
 		case OUSTERS_ID:
 //			m_p_slot->bl_vampire = true;
-			m_p_slot->Race = RACE_OUSTERS;
+			m_p_slot->eRace = RACE_OUSTERS;
 			m_p_slot->man_info.coat = (CHAR_MAN)1;
 			m_p_slot->woman_info.coat = (CHAR_WOMAN)1;
 			m_p_slot->man_info.right = (CHAR_MAN)0;
@@ -1962,7 +1962,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			{
 				g_msg_empty_name->Start();
 			}
-			else if(m_p_slot->Race == RACE_OUSTERS && m_p_slot->bonus_point != 0)
+			else if(m_p_slot->eRace == RACE_OUSTERS && m_p_slot->bonus_point != 0)
 			{
 				g_msg_left_bonus_point->Start();
 			}
@@ -1978,7 +1978,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			break;
 
 		case FACE_BACK_ID:			
-			if( m_p_slot->Race == RACE_SLAYER )
+			if( m_p_slot->eRace == RACE_SLAYER )
 			{
 				if(m_p_slot->bl_female)
 				{
@@ -2024,7 +2024,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			break;
 
 		case FACE_NEXT_ID:
-			if( m_p_slot->Race == RACE_SLAYER )
+			if( m_p_slot->eRace == RACE_SLAYER )
 			{
 				if(m_p_slot->bl_female)
 				{
@@ -2070,7 +2070,7 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			break;
 
 		case SAVE_ID:
-			if( m_p_slot->Race == RACE_SLAYER )
+			if( m_p_slot->eRace == RACE_SLAYER )
 			{
 				m_iSave[0] = m_p_slot->STR_PURE;
 				m_iSave[1] = m_p_slot->DEX_PURE;
@@ -2079,12 +2079,12 @@ void C_VS_UI_NEWCHAR::Run(id_t id)
 			break;
 
 		case LOAD_ID:
-			if( m_p_slot->Race == RACE_SLAYER )
+			if( m_p_slot->eRace == RACE_SLAYER )
 				RollDice(true);
 			break;
 
 		case REROLL_ID:
-			if( m_p_slot->Race == RACE_SLAYER )
+			if( m_p_slot->eRace == RACE_SLAYER )
 				RollDice();
 			break;
 
@@ -2222,7 +2222,7 @@ bool C_VS_UI_NEWCHAR::MouseControl(UINT message, int _x, int _y)
 					}
 				}
 			}
-			if(m_focused_help == HELP_BONUS && m_p_slot->Race != RACE_OUSTERS)
+			if(m_focused_help == HELP_BONUS && m_p_slot->eRace != RACE_OUSTERS)
 				m_focused_help = HELP_DEFAULT;
 			if (m_bl_pushed_table)
 				ChangeColor(_x, _y);
@@ -2358,7 +2358,7 @@ void	C_VS_UI_NEWCHAR::ShowCharacter(int _x, int _y, S_SLOT * p_slot, int index, 
 	//
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
-		switch(p_slot->Race)
+		switch(p_slot->eRace)
 		{
 		case RACE_OUSTERS:
 			if( p_slot->m_AdvancementLevel > 0 )
@@ -2408,7 +2408,7 @@ void C_VS_UI_NEWCHAR::Show()
 	{
 		m_common_spk.BltLocked(0, 0);
 		
-		switch( m_p_slot->Race )
+		switch( m_p_slot->eRace )
 		{
 		case RACE_SLAYER:
 			if(m_p_slot->bl_female)
@@ -2435,14 +2435,14 @@ void C_VS_UI_NEWCHAR::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 		RECT rect = {68, 355, 171, 475};
 		gpC_base->m_p_DDSurface_back->FillRect(&rect, 0);
-		if(m_p_slot->Race == RACE_OUSTERS)
+		if(m_p_slot->eRace == RACE_OUSTERS)
 		{
 			SetRect(&rect, 667, 470, 723, 490);
 			gpC_base->m_p_DDSurface_back->FillRect(&rect, 0);
 		}
 		gpC_base->m_p_DDSurface_back->Lock();
 		
-		if(m_p_slot->Race == RACE_OUSTERS)
+		if(m_p_slot->eRace == RACE_OUSTERS)
 		{
 			m_image_spk.BltLocked(573, 470, BONUS_LINE);
 		}
@@ -2471,7 +2471,7 @@ void C_VS_UI_NEWCHAR::Show()
 		color_unit_rect.WH(COLOR_UNIT_X, COLOR_UNIT_Y);
 
 		// hair
-		if(m_p_slot->Race != RACE_VAMPIRE)
+		if(m_p_slot->eRace != RACE_VAMPIRE)
 		{
 			for (j=0; j < COLOR_LIST_Y; j++)
 				for (i=0; i < COLOR_LIST_X; i++)
@@ -2490,7 +2490,7 @@ void C_VS_UI_NEWCHAR::Show()
 			m_p_slot->hair_color = 377;
 		}
 
-		if(m_p_slot->Race != RACE_OUSTERS)
+		if(m_p_slot->eRace != RACE_OUSTERS)
 		{
 			// body
 			for (j=0; j < COLOR_LIST_Y; j++)
@@ -2516,7 +2516,7 @@ void C_VS_UI_NEWCHAR::Show()
 
 	ShowCharacter(95, 440, m_p_slot, g_char_index, false);
 
-	switch(m_p_slot->Race)
+	switch(m_p_slot->eRace)
 	{
 	case RACE_SLAYER:
 		m_image_spk.Blt(411,229-6, MALE_CHECK);
@@ -2531,7 +2531,7 @@ void C_VS_UI_NEWCHAR::Show()
 		break;	
 	}	
 	
-	if(m_p_slot->Race != RACE_OUSTERS)
+	if(m_p_slot->eRace != RACE_OUSTERS)
 	{
 		if(m_p_slot->bl_female)
 			m_image_spk.Blt(473,268+13, MALE_CHECK);
@@ -2560,7 +2560,7 @@ void C_VS_UI_NEWCHAR::Show()
 	g_Print(699+15, 250+25*7, str, &gpC_base->m_value_pi);
 	sprintf(str, "%d~%d", m_p_slot->DAM, m_p_slot->DAM2);
 	g_Print(699+15, 250+25*8, str, &gpC_base->m_value_pi);
-	if(m_p_slot->Race == RACE_OUSTERS)
+	if(m_p_slot->eRace == RACE_OUSTERS)
 	{
 		sprintf(str, "%d", m_p_slot->bonus_point);
 		g_Print(699+15, 250+25*9, str, &gpC_base->m_value_pi);
@@ -3469,7 +3469,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 			g_PrintColorStr(px, py, m_p_slot->sz_name.c_str(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
 			py+=16;
 
-			if(m_p_slot->Race != RACE_SLAYER)
+			if(m_p_slot->eRace != RACE_SLAYER)
 			{
 				px = g_PrintColorStr(29, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString(), gpC_base->m_chatting_pi, RGB(160, 160, 160));
 				wsprintf(str, "%d", m_p_slot->level);
@@ -3492,7 +3492,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 			g_PrintColorStr(px, py, str, gpC_base->m_chatting_pi, RGB(160, 160, 160));
 			py+=16;
 
-			switch(m_p_slot->Race)
+			switch(m_p_slot->eRace)
 			{
 			case RACE_SLAYER:
 				{
@@ -7548,3 +7548,4 @@ void C_VS_UI_GO_BILING_PAGE::KeyboardControl(UINT message, UINT key, long extra)
 	}
 }
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

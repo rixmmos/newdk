@@ -12,6 +12,7 @@
 
 #include <list>
 #include <queue>
+#include <vector>
 
 //----------------------------------------------------------------------
 // define
@@ -733,3 +734,4 @@ extern MPlayer*		g_pPlayer;
 #endif
 
 
+                  

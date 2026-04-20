@@ -20212,7 +20212,7 @@ void C_VS_UI_INFO::Process()
 	{
 	case CHARACTER_INFO_MODE :
 		m_pC_char_button_group->Process();
-		if(g_char_slot_ingame.Race != RACE_SLAYER && g_char_slot_ingame.bonus_point > 0)
+		if(g_char_slot_ingame.eRace != RACE_SLAYER && g_char_slot_ingame.bonus_point > 0)
 		{
 //			gpC_base->SendMessage(UI_RUN_LEVELUP);
 			if(!gC_vs_ui.IsRunningLevelUp())

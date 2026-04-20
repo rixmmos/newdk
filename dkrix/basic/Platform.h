@@ -1727,17 +1727,50 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
     }
 }
 
-/* max and min macros for compatibility with Windows code */
+/* Bug Y fix: max/min were function-like macros for compatibility with the
+ * Windows-flavoured call sites (`max(a, b)` / `min(a, b)` — 568 of them
+ * across the client). They collided catastrophically with libstdc++11's
+ * STL: `<bits/stl_bvector.h>::_M_check_len` contains `std::max(size(), __n)`,
+ * and our `#define max(a, b) (((a) > (b)) ? (a) : (b))` expanded that into
+ * `std::(((...)))`, a hard syntax error that fired on any TU pulling
+ * `<vector>` (via `<bits/stl_bvector.h>`) after Platform.h — the exact
+ * path through SpriteLibBackend/CSpriteSurface/TextSystem.
+ *
+ * Template functions preserve every existing call site (the `max(x, y)`
+ * syntax still binds) but unlike macros they are ordinary identifiers —
+ * the preprocessor doesn't touch `std::max(...)` in STL headers. Templates
+ * can't have C linkage, so close/reopen `extern "C"` here, same dance as
+ * the `<mutex>` section above. Deduction with two parameter packs + the
+ * decltype trailing return handles mixed-type call sites (`max(0, WORD)`,
+ * `max(-10000, int)`, etc.) that the old macro quietly papered over.
+ */
 #ifndef PLATFORM_WINDOWS
+#ifdef __cplusplus
+}  /* close extern "C" — templates can't have C linkage */
+
+#ifndef DKRIX_MINMAX_DEFINED
+#define DKRIX_MINMAX_DEFINED
+template<typename T, typename U>
+static inline auto max(T a, U b) -> decltype((a > b) ? a : b) { return (a > b) ? a : b; }
+template<typename T, typename U>
+static inline auto min(T a, U b) -> decltype((a < b) ? a : b) { return (a < b) ? a : b; }
+#endif
+
+extern "C" {  /* reopen */
+#else
+/* C TUs (should be none in this tree, but preserve the old macros just in
+ * case a .c file ever slips in). */
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
-/* __int64 Windows type - use long long on macOS */
+#endif
+
+/* __int64 Windows type - use long long on non-Windows */
 typedef long long __int64;
-/* _atoi64 Windows function - use atoll on macOS */
+/* _atoi64 Windows function - use atoll on non-Windows */
 #define _atoi64(x) atoll(x)
 #endif
 
@@ -1916,3 +1949,4 @@ static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src)
 #endif
 
 #endif /* __PLATFORM_H__ */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     

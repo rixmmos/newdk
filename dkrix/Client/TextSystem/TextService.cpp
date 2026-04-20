@@ -327,8 +327,19 @@ std::vector<std::string> TextService::WrapText(const std::string& text, const Te
 
 		if (maxWidth > 0 && lineWidth + metrics.advance > maxWidth && !line.empty()) {
 			if (lastBreakIndex >= 0) {
-				lines.push_back(line.substr(0, lastBreakIndex));
-				line = line.substr(lastBreakIndex + lastBreakSkip);
+				// Bug W fix: the break index is recorded BEFORE the space is
+				// appended (see lines 323-326), so when the current codepoint
+				// IS the space that triggers overflow, lastBreakIndex equals
+				// line.size() and lastBreakIndex + lastBreakSkip is one past
+				// the end. substr(pos > size()) throws out_of_range. Clamp.
+				size_t breakPos = static_cast<size_t>(lastBreakIndex);
+				size_t resumeAt = breakPos + static_cast<size_t>(lastBreakSkip);
+				lines.push_back(line.substr(0, breakPos));
+				if (resumeAt >= line.size()) {
+					line.clear();
+				} else {
+					line = line.substr(resumeAt);
+				}
 				lineWidth = MeasureLineWidth(line, style.font);
 				lastBreakIndex = -1;
 				lastBreakSkip = 0;
@@ -462,3 +473,4 @@ void TextService::RenderText(int x, int y, const std::string& text)
 }
 
 } // namespace TextSystem
+                                    
