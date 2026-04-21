@@ -24,7 +24,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSkillToObjectHandler::execute(CGSkillToObject* pPacket, Player* pPlayer)
+void CGSkillToObjectHandler::execute(CGSkillToObject* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

@@ -20,7 +20,7 @@
 
 #endif // __GAME_SERVER__
 
-void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer)
+void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

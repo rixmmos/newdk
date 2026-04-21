@@ -14,13 +14,13 @@
 #include "Packet/Cpackets/CGConnectSetKey.h"
 // Phase 12: CGDisplayItem migrated to shared/Packets/.
 #include "CGDisplayItem.h"
-#include "Packet/Cpackets/CGDonationMoney.h"
-#include "Packet/Cpackets/CGLotterySelect.h"
+#include "../shared/Packets/CGDonationMoney.h"
+#include "../shared/Packets/CGLotterySelect.h"
 #include "Packet/Cpackets/CGMixItem.h"
 // Phase 12: CGRequestStoreInfo migrated to shared/Packets/.
 #include "CGRequestStoreInfo.h"
-#include "Packet/Cpackets/CGSelectQuest.h"
-#include "Packet/Cpackets/CGSelectRegenZone.h"
+#include "CGSelectQuest.h"
+#include "CGSelectRegenZone.h"
 // Phase 12: CGStoreOpen/CGStoreClose migrated to shared/Packets/;
 // resolved via shared_packets INTERFACE include path.
 #include "CGStoreOpen.h"
@@ -28,14 +28,14 @@
 // Phase 12: CGStoreSign migrated to shared/Packets/ too.
 #include "CGStoreSign.h"
 #include "CGUndisplayItem.h"
-#include "Packet/Cpackets/CGWithdrawPet.h"
+#include "CGWithdrawPet.h"
 
 // Stub implementations for store-related handlers
 void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) {}
 void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) {}
-void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) {}
+void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer) {}
 void CGMixItemHandler::execute(CGMixItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPlayer) {}
 void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}

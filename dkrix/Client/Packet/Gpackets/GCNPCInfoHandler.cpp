@@ -15,7 +15,7 @@
 	#include "ClientPlayer.h"
 	#include "PCSlayerInfo2.h"
 	#include "PCVampireInfo2.h"
-	#include "Cpackets/CGReady.h"
+#include "../../../shared/Packets/CGReady.h"
 	#include "ClientDef.h"
 	#include "UIFunction.h"
 

@@ -41,7 +41,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket, Player* pPlayer)
+void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

@@ -21,7 +21,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGUseBonusPointHandler::execute(CGUseBonusPoint* pPacket, Player* pPlayer)
+void CGUseBonusPointHandler::execute(CGUseBonusPoint* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX __BEGIN_DEBUG

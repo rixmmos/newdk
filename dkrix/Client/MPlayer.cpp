@@ -40,8 +40,8 @@
 #include "MObjectSelector.h"
 #include "SoundDef.h"
 #include "MItemFinder.h"
-#include "packet/Cpackets/CGSelectTileEffect.h"
-#include "packet/Cpackets/CGPartyInvite.h"
+#include "../../shared/Packets/CGSelectTileEffect.h"
+#include "../../shared/Packets/CGPartyInvite.h"
 #include "EffectSpriteTypeDef.h"
 #include "ModifyStatusManager.h"
 #include "ClientCommunicationManager.h"
@@ -52,8 +52,8 @@
 #include "Rpackets/RCPositionInfo.h"
 #include "Rpackets/RCStatusHP.h"
 #include "Rpackets/RCCharacterInfo.h"
-#include "Cpackets/CGRequestInfo.h"
-#include "Cpackets/CGUseItemFromGear.h"
+#include "../../shared/Packets/CGRequestInfo.h"
+#include "../../shared/Packets/CGUseItemFromGear.h"
 
 #include "UserInformation.h"
 #include "MParty.h"
@@ -79,7 +79,7 @@
 #include "UserOption.h"
 #include "VS_UI_GameCommon2.h"
 
-#include "Cpackets/CGPartyPosition.h"
+#include "../../shared/Packets/CGPartyPosition.h"
 
 extern void UI_RunPetInfo(struct PETINFO *pPetInfo);
 extern bool UpdateSocketOutput();

@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
+void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __LOGIN_SERVER__

@@ -23,8 +23,8 @@
 #include "PacketDef.h"
 #include "VS_UI.h"
 #include "ServerInformation.h"
-#include "packet/cpackets/CLGetServerList.h"
-#include "packet/cpackets/CLChangeServer.h"
+#include "../../shared/Packets/CLGetServerList.h"
+#include "../../shared/Packets/CLChangeServer.h"
 #include "CWaitUIUpdate.h"
 #include "MTestDef.h"
 #include "DXLibBackend.h"  // For SDL text input functions
@@ -1016,4 +1016,3 @@ CWaitUIUpdate::UpdateDraw()
 	// flip
 	CSDLGraphics::Flip();
 }
-

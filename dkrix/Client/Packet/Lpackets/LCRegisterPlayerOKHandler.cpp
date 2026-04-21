@@ -16,7 +16,7 @@
 #ifdef __GAME_CLIENT__
 
 	#include "ClientPlayer.h"
-	#include "Cpackets/CLGetPCList.h"
+#include "../../../shared/Packets/CLGetPCList.h"
 
 #endif
 

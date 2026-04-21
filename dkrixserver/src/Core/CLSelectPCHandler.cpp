@@ -32,7 +32,7 @@
 // ���� Ŭ���̾�Ʈ���� LCReconnect ��Ŷ�� ������, ���� ������ �����ϵ���
 // ���ش�.
 //////////////////////////////////////////////////////////////////////////////
-void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
+void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

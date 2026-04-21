@@ -16,7 +16,7 @@
 #include "Zone.h"
 #endif // __GAME_SERVER__
 
-void CGSelectNicknameHandler::execute(CGSelectNickname* pPacket, Player* pPlayer)
+void CGSelectNicknameHandler::execute(CGSelectNickname* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

@@ -26,7 +26,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectTileEffectHandler::execute(CGSelectTileEffect* pPacket, Player* pPlayer)
+void CGSelectTileEffectHandler::execute(CGSelectTileEffect* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

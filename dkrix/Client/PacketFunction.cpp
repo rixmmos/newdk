@@ -59,7 +59,7 @@
 #include "Packet/GearInfo.h"
 #include "Packet/ExtraInfo.h"
 #include "Packet/Cpackets/CGSay.h"
-#include "Packet/cpackets/CGCrashReport.h"
+#include "../shared/Packets/CGCrashReport.h"
 #include "EffectInfo.h"
 #include "MScreenEffectManager.h"
 #include "TempInformation.h"
@@ -82,7 +82,7 @@
 #include "MEffectSpriteTypeTable.h"
 #include "EffectSpriteTypeDef.h"
 
-#include "Packet/cpackets/CGAuthKey.h"
+#include "../shared/Packets/CGAuthKey.h"
 #include "BloodBibleSignInfo.h"
 
 #ifdef __NPROTECT__

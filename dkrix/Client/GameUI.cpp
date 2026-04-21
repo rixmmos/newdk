@@ -78,7 +78,7 @@
 	#include <io.h>
 #endif
 
-#include "packet/Cpackets/CLGetWorldList.h"
+#include "../../shared/Packets/CLGetWorldList.h"
 
 extern Race g_eRaceInterface;
 extern BOOL g_MyFull;

@@ -22,7 +22,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGReloadFromInventoryHandler::execute(CGReloadFromInventory* pPacket, Player* pPlayer)
+void CGReloadFromInventoryHandler::execute(CGReloadFromInventory* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

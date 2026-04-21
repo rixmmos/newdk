@@ -21,7 +21,7 @@
 // 클라이언트가 서버의 리스트를 달라고 요청해오면, 로그인 서버는 DB로부터
 // 서버들의 정보를 로딩해서 LCServerList 패킷에 담아서 전송한다.
 //////////////////////////////////////////////////////////////////////////////
-void CLGetServerListHandler::execute(CLGetServerList* pPacket, Player* pPlayer)
+void CLGetServerListHandler::execute(CLGetServerList* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

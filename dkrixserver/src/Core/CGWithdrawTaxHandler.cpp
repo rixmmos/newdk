@@ -17,7 +17,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGWithdrawTaxHandler::execute(CGWithdrawTax* pPacket, Player* pPlayer)
+void CGWithdrawTaxHandler::execute(CGWithdrawTax* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

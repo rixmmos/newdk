@@ -13,7 +13,7 @@
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-	#include "Cpackets/CLReconnectLogin.h"
+	#include "../../../shared/Packets/CLReconnectLogin.h"
 	#include "UserInformation.h"
 	//add by viva
 	#include "Cpackets/CGConnectSetKey.h"

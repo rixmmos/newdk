@@ -24,7 +24,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSkillToTileHandler::execute(CGSkillToTile* pPacket, Player* pPlayer)
+void CGSkillToTileHandler::execute(CGSkillToTile* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

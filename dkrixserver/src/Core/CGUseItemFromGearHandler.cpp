@@ -36,7 +36,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGUseItemFromGearHandler::execute(CGUseItemFromGear* pPacket, Player* pPlayer)
+void CGUseItemFromGearHandler::execute(CGUseItemFromGear* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -116,7 +116,7 @@ void CGUseItemFromGearHandler::execute(CGUseItemFromGear* pPacket, Player* pPlay
 //////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////
-void CGUseItemFromGearHandler::executeCoupleRing(CGUseItemFromGear* pPacket, GamePlayer* pGamePlayer)
+void CGUseItemFromGearHandler::executeCoupleRing(CGUseItemFromGear* pPacket, GamePlayer* pGamePlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

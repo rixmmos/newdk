@@ -27,7 +27,7 @@
 #ifdef __GAME_CLIENT__
 	#include "RequestUserManager.h"
 
-	#include "packet/Cpackets/CGRequestIP.h"
+	#include "../../shared/Packets/CGRequestIP.h"
 
 	#include "ServerInfo.h"
 	#include "RequestClientPlayerManager.h"
@@ -645,4 +645,3 @@ ProfileManager::DeleteProfiles()
 		_findclose( hFile );			
 	}
 }
-

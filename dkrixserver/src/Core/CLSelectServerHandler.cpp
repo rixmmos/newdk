@@ -22,7 +22,7 @@
 // 클라이언트가 PC 의 리스트를 달라고 요청해오면, 로그인 서버는 DB로부터
 // PC들의 정보를 로딩해서 LCPCList 패킷에 담아서 전송한다.
 //////////////////////////////////////////////////////////////////////////////
-void CLSelectServerHandler::execute(CLSelectServer* pPacket, Player* pPlayer)
+void CLSelectServerHandler::execute(CLSelectServer* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

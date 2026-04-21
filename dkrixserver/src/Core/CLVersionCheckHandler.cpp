@@ -20,7 +20,7 @@
 // �޾Ƽ� �÷��̾��� ���̵�� �н����尡 ��Ȯ���� DB�κ���
 // �о ���� ��, �α����� ���� ���θ� �����Ѵ�.
 //////////////////////////////////////////////////////////////////////////////
-void CLVersionCheckHandler::execute(CLVersionCheck* pPacket, Player* pPlayer)
+void CLVersionCheckHandler::execute(CLVersionCheck* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

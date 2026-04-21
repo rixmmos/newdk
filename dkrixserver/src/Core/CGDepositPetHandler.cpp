@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGDepositPetHandler::execute(CGDepositPet* pPacket, Player* pPlayer) {
+void CGDepositPetHandler::execute(CGDepositPet* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX __BEGIN_DEBUG
 
 #ifdef __GAME_SERVER__

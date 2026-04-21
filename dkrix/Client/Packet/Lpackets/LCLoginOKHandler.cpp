@@ -14,7 +14,7 @@
 
 	#include "ClientPlayer.h"
 	//#include "Cpackets/CLGetPCList.h"
-	#include "Cpackets/CLGetWorldList.h"
+#include "../../../shared/Packets/CLGetWorldList.h"
 	#include "UserInformation.h"
 	#include "MGameStringTable.h"
 	#include "UIDialog.h"

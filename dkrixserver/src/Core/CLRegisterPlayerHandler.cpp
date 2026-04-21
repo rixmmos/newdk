@@ -20,7 +20,7 @@
 // login ID is "guest", validate the registration packet, then insert into
 // the DB and respond.
 //////////////////////////////////////////////////////////////////////////////
-void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer)
+void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

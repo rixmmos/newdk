@@ -16,7 +16,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSkillToInventoryHandler::execute(CGSkillToInventory* pPacket, Player* pPlayer) {
+void CGSkillToInventoryHandler::execute(CGSkillToInventory* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__

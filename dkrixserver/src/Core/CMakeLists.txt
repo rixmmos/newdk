@@ -362,114 +362,114 @@ set(GC_PACKET_SOURCES
 set(CG_PACKET_SOURCES
     CGAbsorbSoul.cpp CGAbsorbSoulHandler.cpp
     CGAcceptUnionHandler.cpp
-    CGAddGearToMouse.cpp CGAddGearToMouseHandler.cpp
+    CGAddGearToMouseHandler.cpp
 #    CGAddInjuriousCreature.cpp CGAddInjuriousCreatureHandler.cpp
-    CGAddInventoryToMouse.cpp CGAddInventoryToMouseHandler.cpp
-    CGAddItemToCodeSheet.cpp CGAddItemToCodeSheetHandler.cpp
-    CGAddItemToItem.cpp CGAddItemToItemHandler.cpp
-    CGAddMouseToGear.cpp CGAddMouseToGearHandler.cpp
-    CGAddMouseToInventory.cpp CGAddMouseToInventoryHandler.cpp
-    CGAddMouseToQuickSlot.cpp CGAddMouseToQuickSlotHandler.cpp
-    CGAddMouseToZone.cpp CGAddMouseToZoneHandler.cpp
-    CGAddQuickSlotToMouse.cpp CGAddQuickSlotToMouseHandler.cpp
+    CGAddInventoryToMouseHandler.cpp
+    CGAddItemToCodeSheetHandler.cpp
+    CGAddItemToItemHandler.cpp
+    CGAddMouseToGearHandler.cpp
+    CGAddMouseToInventoryHandler.cpp
+    CGAddMouseToQuickSlotHandler.cpp
+    CGAddMouseToZoneHandler.cpp
+    CGAddQuickSlotToMouseHandler.cpp
     CGAddSMSAddressHandler.cpp
-    CGAddZoneToInventory.cpp CGAddZoneToInventoryHandler.cpp
-    CGAddZoneToMouse.cpp CGAddZoneToMouseHandler.cpp
-    CGAppointSubmaster.cpp CGAppointSubmasterHandler.cpp
+    CGAddZoneToInventoryHandler.cpp
+    CGAddZoneToMouseHandler.cpp
+    CGAppointSubmasterHandler.cpp
     CGAttack.cpp CGAttackHandler.cpp
-    CGAuthKey.cpp CGAuthKeyHandler.cpp
-    CGBloodDrain.cpp CGBloodDrainHandler.cpp
+    CGAuthKeyHandler.cpp
+    CGBloodDrainHandler.cpp
     CGBuyStoreItemHandler.cpp
     CGCastingSkill.cpp CGCastingSkillHandler.cpp
-    CGConnect.cpp CGConnectHandler.cpp
+    CGConnectHandler.cpp
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
-    CGCrashReport.cpp CGCrashReportHandler.cpp
+    CGCrashReportHandler.cpp
     CGDeleteSMSAddressHandler.cpp
     CGDenyUnionHandler.cpp
-    CGDepositPet.cpp CGDepositPetHandler.cpp
-    CGDialUp.cpp CGDialUpHandler.cpp
+    CGDepositPetHandler.cpp
+    CGDialUpHandler.cpp
     CGDisplayItemHandler.cpp
-    CGDissectionCorpse.cpp CGDissectionCorpseHandler.cpp
-    CGDonationMoney.cpp CGDonationMoneyHandler.cpp
-    CGDownSkill.cpp CGDownSkillHandler.cpp
+    CGDissectionCorpseHandler.cpp
+    CGDonationMoneyHandler.cpp
+    CGDownSkillHandler.cpp
     CGDropMoney.cpp CGDropMoneyHandler.cpp
     CGExpelGuildHandler.cpp
     CGExpelGuildMember.cpp CGExpelGuildMemberHandler.cpp
-    CGFailQuest.cpp CGFailQuestHandler.cpp
+    CGFailQuestHandler.cpp
     CGGetEventItem.cpp CGGetEventItemHandler.cpp
-    CGGetOffMotorCycle.cpp CGGetOffMotorCycleHandler.cpp
-    CGGlobalChat.cpp CGGlobalChatHandler.cpp
-    CGGQuestAccept.cpp CGGQuestAcceptHandler.cpp
+    CGGetOffMotorCycleHandler.cpp
+    CGGlobalChatHandler.cpp
+    CGGQuestAcceptHandler.cpp
     CGGQuestCancelHandler.cpp
-    CGGuildChat.cpp CGGuildChatHandler.cpp
-    CGJoinGuild.cpp CGJoinGuildHandler.cpp
+    CGGuildChatHandler.cpp
+    CGJoinGuildHandler.cpp
     CGLearnSkill.cpp CGLearnSkillHandler.cpp
-    CGLogout.cpp CGLogoutHandler.cpp
-    CGLotterySelect.cpp CGLotterySelectHandler.cpp
+    CGLogoutHandler.cpp
+    CGLotterySelectHandler.cpp
     CGMakeItem.cpp CGMakeItemHandler.cpp
     CGMixItem.cpp CGMixItemHandler.cpp
-    CGModifyGuildIntro.cpp CGModifyGuildIntroHandler.cpp
-    CGModifyGuildMember.cpp CGModifyGuildMemberHandler.cpp
-    CGModifyGuildMemberIntro.cpp CGModifyGuildMemberIntroHandler.cpp
-    CGModifyNickname.cpp CGModifyNicknameHandler.cpp
-    CGModifyTaxRatio.cpp CGModifyTaxRatioHandler.cpp
+    CGModifyGuildIntroHandler.cpp
+    CGModifyGuildMemberHandler.cpp
+    CGModifyGuildMemberIntroHandler.cpp
+    CGModifyNicknameHandler.cpp
+    CGModifyTaxRatioHandler.cpp
     CGMouseToStashHandler.cpp
     CGMove.cpp CGMoveHandler.cpp
-    CGNPCAskAnswer.cpp CGNPCAskAnswerHandler.cpp
+    CGNPCAskAnswerHandler.cpp
     CGNPCTalk.cpp CGNPCTalkHandler.cpp
-    CGPartyInvite.cpp CGPartyInviteHandler.cpp
-    CGPartyLeave.cpp CGPartyLeaveHandler.cpp
-    CGPartyPosition.cpp CGPartyPositionHandler.cpp
-    CGPartySay.cpp CGPartySayHandler.cpp
-    CGPetGamble.cpp CGPetGambleHandler.cpp
-    CGPhoneDisconnect.cpp CGPhoneDisconnectHandler.cpp
-    CGPhoneSay.cpp CGPhoneSayHandler.cpp
-    CGPickupMoney.cpp CGPickupMoneyHandler.cpp
-    CGPortCheck.cpp CGPortCheckHandler.cpp
+    CGPartyInviteHandler.cpp
+    CGPartyLeaveHandler.cpp
+    CGPartyPositionHandler.cpp
+    CGPartySayHandler.cpp
+    CGPetGambleHandler.cpp
+    CGPhoneDisconnectHandler.cpp
+    CGPhoneSayHandler.cpp
+    CGPickupMoneyHandler.cpp
+    CGPortCheckHandler.cpp
     CGQuitGuild.cpp CGQuitGuildHandler.cpp
     CGQuitUnionHandler.cpp
     CGQuitUnionAcceptHandler.cpp
     CGQuitUnionDenyHandler.cpp
-    CGRangerSay.cpp CGRangerSayHandler.cpp
-    CGReady.cpp CGReadyHandler.cpp
-    CGRegistGuild.cpp CGRegistGuildHandler.cpp
+    CGRangerSayHandler.cpp
+    CGReadyHandler.cpp
+    CGRegistGuildHandler.cpp
     CGRelicToObject.cpp CGRelicToObjectHandler.cpp
-    CGReloadFromInventory.cpp CGReloadFromInventoryHandler.cpp
-    CGReloadFromQuickSlot.cpp CGReloadFromQuickSlotHandler.cpp
-    CGRequestGuildList.cpp CGRequestGuildListHandler.cpp
-    CGRequestGuildMemberList.cpp CGRequestGuildMemberListHandler.cpp
-    CGRequestInfo.cpp CGRequestInfoHandler.cpp
-    CGRequestIP.cpp CGRequestIPHandler.cpp
-    CGRequestNewbieItem.cpp CGRequestNewbieItemHandler.cpp
-    CGRequestPowerPoint.cpp CGRequestPowerPointHandler.cpp
+    CGReloadFromInventoryHandler.cpp
+    CGReloadFromQuickSlotHandler.cpp
+    CGRequestGuildListHandler.cpp
+    CGRequestGuildMemberListHandler.cpp
+    CGRequestInfoHandler.cpp
+    CGRequestIPHandler.cpp
+    CGRequestNewbieItemHandler.cpp
+    CGRequestPowerPointHandler.cpp
     CGRequestRepair.cpp CGRequestRepairHandler.cpp
     CGRequestStoreInfoHandler.cpp
     CGRequestUnionHandler.cpp
     CGRequestUnionInfoHandler.cpp
-    CGResurrect.cpp CGResurrectHandler.cpp
+    CGResurrectHandler.cpp
     CGRideMotorCycle.cpp CGRideMotorCycleHandler.cpp
     CGSay.cpp CGSayHandler.cpp
-    CGSelectBloodBible.cpp CGSelectBloodBibleHandler.cpp
-    CGSelectGuild.cpp CGSelectGuildHandler.cpp
-    CGSelectGuildMember.cpp CGSelectGuildMemberHandler.cpp
-    CGSelectNickname.cpp CGSelectNicknameHandler.cpp
-    CGSelectPortal.cpp CGSelectPortalHandler.cpp
-    CGSelectQuest.cpp CGSelectQuestHandler.cpp
-    CGSelectRankBonus.cpp CGSelectRankBonusHandler.cpp
-    CGSelectRegenZone.cpp CGSelectRegenZoneHandler.cpp
-    CGSelectTileEffect.cpp CGSelectTileEffectHandler.cpp
-    CGSelectWayPoint.cpp CGSelectWayPointHandler.cpp
-    CGSetSlayerHotKey.cpp CGSetSlayerHotKeyHandler.cpp
-    CGSetVampireHotKey.cpp CGSetVampireHotKeyHandler.cpp
+    CGSelectBloodBibleHandler.cpp
+    CGSelectGuildHandler.cpp
+    CGSelectGuildMemberHandler.cpp
+    CGSelectNicknameHandler.cpp
+    CGSelectPortalHandler.cpp
+    CGSelectQuestHandler.cpp
+    CGSelectRankBonusHandler.cpp
+    CGSelectRegenZoneHandler.cpp
+    CGSelectTileEffectHandler.cpp
+    CGSelectWayPointHandler.cpp
+    CGSetSlayerHotKeyHandler.cpp
+    CGSetVampireHotKeyHandler.cpp
     CGShopRequestBuyHandler.cpp
     CGShopRequestListHandler.cpp
     CGShopRequestSellHandler.cpp
     CGSilverCoating.cpp CGSilverCoatingHandler.cpp
-    CGSkillToInventory.cpp CGSkillToInventoryHandler.cpp
-    CGSkillToNamed.cpp CGSkillToNamedHandler.cpp
-    CGSkillToObject.cpp CGSkillToObjectHandler.cpp
-    CGSkillToSelf.cpp CGSkillToSelfHandler.cpp
-    CGSkillToTile.cpp CGSkillToTileHandler.cpp
+    CGSkillToInventoryHandler.cpp
+    CGSkillToNamedHandler.cpp
+    CGSkillToObjectHandler.cpp
+    CGSkillToSelfHandler.cpp
+    CGSkillToTileHandler.cpp
     CGSMSAddressListHandler.cpp
     CGSMSSend.cpp CGSMSSendHandler.cpp
     CGStashDepositHandler.cpp
@@ -487,7 +487,7 @@ set(CG_PACKET_SOURCES
     CGStoreSignHandler.cpp
     CGSubmitScore.cpp CGSubmitScoreHandler.cpp
     CGTakeOutGood.cpp CGTakeOutGoodHandler.cpp
-    CGTameMonster.cpp CGTameMonsterHandler.cpp
+    CGTameMonsterHandler.cpp
     CGThrowBomb.cpp CGThrowBombHandler.cpp
     CGThrowItem.cpp CGThrowItemHandler.cpp
     CGTradeAddItemHandler.cpp
@@ -495,24 +495,24 @@ set(CG_PACKET_SOURCES
     CGTradeMoneyHandler.cpp
     CGTradePrepareHandler.cpp
     CGTradeRemoveItemHandler.cpp
-    CGTryJoinGuild.cpp CGTryJoinGuildHandler.cpp
+    CGTryJoinGuildHandler.cpp
     CGTypeStringList.cpp CGTypeStringListHandler.cpp
-    CGUnburrow.cpp CGUnburrowHandler.cpp
+    CGUnburrowHandler.cpp
     CGUndisplayItemHandler.cpp
-    CGUntransform.cpp CGUntransformHandler.cpp
-    CGUseBonusPoint.cpp CGUseBonusPointHandler.cpp
-    CGUseItemFromGear.cpp CGUseItemFromGearHandler.cpp
-    CGUseItemFromGQuestInventory.cpp CGUseItemFromGQuestInventoryHandler.cpp
-    CGUseItemFromInventory.cpp CGUseItemFromInventoryHandler.cpp
-    CGUseMessageItemFromInventory.cpp CGUseMessageItemFromInventoryHandler.cpp
-    CGUsePotionFromInventory.cpp CGUsePotionFromInventoryHandler.cpp
-    CGUsePotionFromQuickSlot.cpp CGUsePotionFromQuickSlotHandler.cpp
-    CGUsePowerPoint.cpp CGUsePowerPointHandler.cpp
+    CGUntransformHandler.cpp
+    CGUseBonusPointHandler.cpp
+    CGUseItemFromGearHandler.cpp
+    CGUseItemFromGQuestInventoryHandler.cpp
+    CGUseItemFromInventoryHandler.cpp
+    CGUseMessageItemFromInventoryHandler.cpp
+    CGUsePotionFromInventoryHandler.cpp
+    CGUsePotionFromQuickSlotHandler.cpp
+    CGUsePowerPointHandler.cpp
     CGVerifyTime.cpp CGVerifyTimeHandler.cpp
-    CGVisible.cpp CGVisibleHandler.cpp
+    CGVisibleHandler.cpp
     CGWhisper.cpp CGWhisperHandler.cpp
-    CGWithdrawPet.cpp CGWithdrawPetHandler.cpp
-    CGWithdrawTax.cpp CGWithdrawTaxHandler.cpp
+    CGWithdrawPetHandler.cpp
+    CGWithdrawTaxHandler.cpp
     # Exchange System Packets
     CGExchangeList.cpp CGExchangeListHandler.cpp
     CGExchangeBuy.cpp CGExchangeBuyHandler.cpp
@@ -520,22 +520,22 @@ set(CG_PACKET_SOURCES
 
 # CL Packets (Client -> Login)
 set(CL_PACKET_SOURCES
-    CLChangeServer.cpp CLChangeServerHandler.cpp
-    CLCreatePC.cpp CLCreatePCHandler.cpp
-    CLDeletePC.cpp CLDeletePCHandler.cpp
-    CLGetPCList.cpp CLGetPCListHandler.cpp
-    CLGetServerList.cpp CLGetServerListHandler.cpp
-    CLGetWorldList.cpp CLGetWorldListHandler.cpp
-    CLLogin.cpp CLLoginHandler.cpp
-    CLLogout.cpp CLLogoutHandler.cpp
-    CLQueryCharacterName.cpp CLQueryCharacterNameHandler.cpp
-    CLQueryPlayerID.cpp CLQueryPlayerIDHandler.cpp
-    CLReconnectLogin.cpp CLReconnectLoginHandler.cpp
-    CLRegisterPlayer.cpp CLRegisterPlayerHandler.cpp
-    CLSelectPC.cpp CLSelectPCHandler.cpp
-    CLSelectServer.cpp CLSelectServerHandler.cpp
-    CLSelectWorld.cpp CLSelectWorldHandler.cpp
-    CLVersionCheck.cpp CLVersionCheckHandler.cpp
+    CLChangeServerHandler.cpp
+    CLCreatePCHandler.cpp
+    CLDeletePCHandler.cpp
+    CLGetPCListHandler.cpp
+    CLGetServerListHandler.cpp
+    CLGetWorldListHandler.cpp
+    CLLoginHandler.cpp
+    CLLogoutHandler.cpp
+    CLQueryCharacterNameHandler.cpp
+    CLQueryPlayerIDHandler.cpp
+    CLReconnectLoginHandler.cpp
+    CLRegisterPlayerHandler.cpp
+    CLSelectPCHandler.cpp
+    CLSelectServerHandler.cpp
+    CLSelectWorldHandler.cpp
+    CLVersionCheckHandler.cpp
     GCDisconnect.cpp GCDisconnectHandler.cpp
 	CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp 
 )

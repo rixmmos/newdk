@@ -16,9 +16,9 @@
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "UserInformation.h"
-	#include "Cpackets/CLCreatePC.h"
-	#include "Cpackets/CLDeletePC.h"
-	#include "Cpackets/CLSelectPC.h"
+	#include "../../../shared/Packets/CLCreatePC.h"
+	#include "../../../shared/Packets/CLDeletePC.h"
+	#include "../../../shared/Packets/CLSelectPC.h"
 #endif
 
 //----------------------------------------------------------------------

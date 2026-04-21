@@ -15,8 +15,8 @@
 
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
-	#include "Cpackets/CLQueryPlayerID.h"
-	#include "Cpackets/CLRegisterPlayer.h"
+	#include "../../../shared/Packets/CLQueryPlayerID.h"
+	#include "../../../shared/Packets/CLRegisterPlayer.h"
 #endif
 
 //--------------------------------------------------------------------------------

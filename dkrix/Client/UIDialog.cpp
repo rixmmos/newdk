@@ -15,8 +15,8 @@
 #include "UIFunction.h"
 //#include <string>
 
-#include "Packet/CPackets/CGSelectQuest.h"
-#include "Packet/CPackets/CGSelectBloodBible.h"
+#include "../../shared/Packets/CGSelectQuest.h"
+#include "../../shared/Packets/CGSelectBloodBible.h"
 
 #ifdef OUTPUT_DEBUG
 	#include "MZone.h"

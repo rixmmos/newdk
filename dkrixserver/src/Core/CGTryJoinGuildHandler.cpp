@@ -27,7 +27,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer)
+void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

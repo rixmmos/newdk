@@ -9,15 +9,15 @@
 //-----------------------------------------------------------------------------
 // Login
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CLVersionCheck.h"
-#include "Packet/Cpackets/CLLogout.h"
-#include "Packet/Cpackets/CLLogin.h"
-#include "Packet/Cpackets/CLRegisterPlayer.h"
-#include "Packet/Cpackets/CLGetPCList.h"
-#include "Packet/Cpackets/CLCreatePC.h"
-#include "Packet/Cpackets/CLDeletePC.h"
-#include "Packet/Cpackets/CLSelectPC.h"
-#include "Packet/Cpackets/CLQueryPlayerID.h"
+#include "../../shared/Packets/CLVersionCheck.h"
+#include "../../shared/Packets/CLLogout.h"
+#include "../../shared/Packets/CLLogin.h"
+#include "../../shared/Packets/CLRegisterPlayer.h"
+#include "../../shared/Packets/CLGetPCList.h"
+#include "../../shared/Packets/CLCreatePC.h"
+#include "../../shared/Packets/CLDeletePC.h"
+#include "../../shared/Packets/CLSelectPC.h"
+#include "../../shared/Packets/CLQueryPlayerID.h"
 
 //-----------------------------------------------------------------------------
 // core
@@ -31,24 +31,24 @@
 //-----------------------------------------------------------------------------
 // connect
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGConnect.h"
-#include "Packet/Cpackets/CGReady.h"
+#include "../../shared/Packets/CGConnect.h"
+#include "../../shared/Packets/CGReady.h"
 #include "Packet/Cpackets/CGMove.h"
-#include "Packet/Cpackets/CGLogout.h"
+#include "../../shared/Packets/CGLogout.h"
 
 //-----------------------------------------------------------------------------
 // Phone / Whisper
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGDialUp.h"
-#include "Packet/Cpackets/CGPhoneDisconnect.h"
-#include "Packet/Cpackets/CGPhoneSay.h"
+#include "../../shared/Packets/CGDialUp.h"
+#include "../../shared/Packets/CGPhoneDisconnect.h"
+#include "../../shared/Packets/CGPhoneSay.h"
 #include "Packet/Cpackets/CGWhisper.h"
 
 //-----------------------------------------------------------------------------
 // 채팅
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGSay.h"
-#include "Packet/Cpackets/CGGlobalChat.h"
+#include "../../shared/Packets/CGGlobalChat.h"
 
 
 //-----------------------------------------------------------------------------
@@ -56,40 +56,40 @@
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGAttack.h"
 #include "Packet/Cpackets/CGCastingSkill.h"
-#include "Packet/Cpackets/CGSkillToInventory.h"
-#include "Packet/Cpackets/CGSkillToSelf.h"
-#include "Packet/Cpackets/CGSkillToTile.h"
-#include "Packet/Cpackets/CGSkillToObject.h"
-#include "Packet/Cpackets/CGUnburrow.h"
-#include "Packet/Cpackets/CGBloodDrain.h"
+#include "../../shared/Packets/CGSkillToInventory.h"
+#include "../../shared/Packets/CGSkillToSelf.h"
+#include "../../shared/Packets/CGSkillToTile.h"
+#include "../../shared/Packets/CGSkillToObject.h"
+#include "../../shared/Packets/CGUnburrow.h"
+#include "../../shared/Packets/CGBloodDrain.h"
 // 2001.4.23에 추가
 #include "Packet/Cpackets/CGThrowBomb.h"
-#include "Packet/Cpackets/CGUntransform.h"
-#include "Packet/Cpackets/CGVisible.h"
+#include "../../shared/Packets/CGUntransform.h"
+#include "../../shared/Packets/CGVisible.h"
 #include "Packet/Cpackets/CGAbsorbSoul.h"
 
 //-----------------------------------------------------------------------------
 // skill 배움 / skill 단축키
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGLearnSkill.h"
-#include "Packet/Cpackets/CGUseBonusPoint.h"		// for vampire lev up
-#include "Packet/Cpackets/CGSetSlayerHotKey.h"
-#include "Packet/Cpackets/CGSetVampireHotKey.h"
+#include "../../shared/Packets/CGUseBonusPoint.h"		// for vampire lev up
+#include "../../shared/Packets/CGSetSlayerHotKey.h"
+#include "../../shared/Packets/CGSetVampireHotKey.h"
 
 
 //-----------------------------------------------------------------------------
 // Item 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGAddGearToMouse.h"
-#include "Packet/Cpackets/CGAddInventoryToMouse.h"
-#include "Packet/Cpackets/CGAddMouseToGear.h"
-#include "Packet/Cpackets/CGAddMouseToInventory.h"
-#include "Packet/Cpackets/CGAddMouseToQuickSlot.h"
-#include "Packet/Cpackets/CGAddMouseToZone.h"
-#include "Packet/Cpackets/CGAddQuickSlotToMouse.h"
-#include "Packet/Cpackets/CGAddZoneToInventory.h"
-#include "Packet/Cpackets/CGAddZoneToMouse.h"
-#include "Packet/Cpackets/CGPickupMoney.h"
+#include "../../shared/Packets/CGAddGearToMouse.h"
+#include "../../shared/Packets/CGAddInventoryToMouse.h"
+#include "../../shared/Packets/CGAddMouseToGear.h"
+#include "../../shared/Packets/CGAddMouseToInventory.h"
+#include "../../shared/Packets/CGAddMouseToQuickSlot.h"
+#include "../../shared/Packets/CGAddMouseToZone.h"
+#include "../../shared/Packets/CGAddQuickSlotToMouse.h"
+#include "../../shared/Packets/CGAddZoneToInventory.h"
+#include "../../shared/Packets/CGAddZoneToMouse.h"
+#include "../../shared/Packets/CGPickupMoney.h"
 #include "Packet/Cpackets/CGDropMoney.h"
 #include "Packet/Cpackets/CGRequestRepair.h"
 #include "Packet/Cpackets/CGMakeItem.h"
@@ -97,30 +97,30 @@
 //-----------------------------------------------------------------------------
 // 시체 click
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGDissectionCorpse.h"
+#include "../../shared/Packets/CGDissectionCorpse.h"
 
 // 탄창
-#include "Packet/Cpackets/CGReloadFromInventory.h"
-#include "Packet/Cpackets/CGReloadFromQuickSlot.h"
+#include "../../shared/Packets/CGReloadFromInventory.h"
+#include "../../shared/Packets/CGReloadFromQuickSlot.h"
 
 // 오토바이
-#include "Packet/Cpackets/CGGetOffMotorCycle.h"
+#include "../../shared/Packets/CGGetOffMotorCycle.h"
 #include "Packet/Cpackets/CGRideMotorCycle.h"
 
 // 던지기
 #include "Packet/Cpackets/CGThrowItem.h"
 
 // potion
-#include "Packet/Cpackets/CGUsePotionFromInventory.h"
-#include "Packet/Cpackets/CGUsePotionFromQuickSlot.h"
+#include "../../shared/Packets/CGUsePotionFromInventory.h"
+#include "../../shared/Packets/CGUsePotionFromQuickSlot.h"
 
-#include "Packet/Cpackets/CGUseItemFromInventory.h"
+#include "../../shared/Packets/CGUseItemFromInventory.h"
 
 //-----------------------------------------------------------------------------
 // NPC
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGNPCTalk.h"
-#include "Packet/Cpackets/CGNPCAskAnswer.h"
+#include "../../shared/Packets/CGNPCAskAnswer.h"
 
 //-----------------------------------------------------------------------------
 // 상점

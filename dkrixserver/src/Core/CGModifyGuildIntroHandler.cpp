@@ -18,7 +18,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGModifyGuildIntroHandler::execute(CGModifyGuildIntro* pPacket, Player* pPlayer)
+void CGModifyGuildIntroHandler::execute(CGModifyGuildIntro* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

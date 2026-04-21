@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSelectBloodBibleHandler::execute(CGSelectBloodBible* pPacket, Player* pPlayer)
+void CGSelectBloodBibleHandler::execute(CGSelectBloodBible* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
