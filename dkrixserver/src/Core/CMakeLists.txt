@@ -120,7 +120,7 @@ set(GC_PACKET_SOURCES
     GCAddOustersCorpse.cpp GCAddOustersCorpseHandler.cpp
     GCAddSlayer.cpp GCAddSlayerHandler.cpp
     GCAddSlayerCorpse.cpp GCAddSlayerCorpseHandler.cpp
-    GCAddStoreItem.cpp GCAddStoreItemHandler.cpp
+    GCAddStoreItemHandler.cpp
     GCAddVampire.cpp GCAddVampireHandler.cpp
     GCAddVampireCorpse.cpp GCAddVampireCorpseHandler.cpp
     GCAddVampireFromBurrowing.cpp GCAddVampireFromBurrowingHandler.cpp
@@ -217,7 +217,7 @@ set(GC_PACKET_SOURCES
     GCMoveOK.cpp GCMoveOKHandler.cpp
     GCMPRecoveryEnd.cpp GCMPRecoveryEndHandler.cpp
     GCMPRecoveryStart.cpp GCMPRecoveryStartHandler.cpp
-    GCMyStoreInfo.cpp GCMyStoreInfoHandler.cpp
+    GCMyStoreInfoHandler.cpp
     GCNicknameList.cpp GCNicknameListHandler.cpp
     GCNicknameVerify.cpp GCNicknameVerifyHandler.cpp
     GCNoticeEvent.cpp GCNoticeEventHandler.cpp
@@ -231,7 +231,7 @@ set(GC_PACKET_SOURCES
     GCNPCSayDynamic.cpp GCNPCSayDynamicHandler.cpp
     GCOtherGuildName.cpp GCOtherGuildNameHandler.cpp
     GCOtherModifyInfo.cpp GCOtherModifyInfoHandler.cpp
-    GCOtherStoreInfo.cpp GCOtherStoreInfoHandler.cpp
+    GCOtherStoreInfoHandler.cpp
     GCPartyError.cpp GCPartyErrorHandler.cpp
     GCPartyInvite.cpp GCPartyInviteHandler.cpp
     GCPartyJoined.cpp GCPartyJoinedHandler.cpp
@@ -257,7 +257,7 @@ set(GC_PACKET_SOURCES
     GCRemoveEffect.cpp GCRemoveEffectHandler.cpp
     GCRemoveFromGear.cpp GCRemoveFromGearHandler.cpp
     GCRemoveInjuriousCreature.cpp GCRemoveInjuriousCreatureHandler.cpp
-    GCRemoveStoreItem.cpp GCRemoveStoreItemHandler.cpp
+    GCRemoveStoreItemHandler.cpp
     GCRequestedIP.cpp GCRequestedIPHandler.cpp
     GCRequestFailed.cpp GCRequestFailedHandler.cpp
     GCRequestPowerPointResult.cpp GCRequestPowerPointResultHandler.cpp
@@ -361,7 +361,7 @@ set(GC_PACKET_SOURCES
 # CG Packets (Client -> Game)
 set(CG_PACKET_SOURCES
     CGAbsorbSoul.cpp CGAbsorbSoulHandler.cpp
-    CGAcceptUnion.cpp CGAcceptUnionHandler.cpp
+    CGAcceptUnionHandler.cpp
     CGAddGearToMouse.cpp CGAddGearToMouseHandler.cpp
 #    CGAddInjuriousCreature.cpp CGAddInjuriousCreatureHandler.cpp
     CGAddInventoryToMouse.cpp CGAddInventoryToMouseHandler.cpp
@@ -372,35 +372,35 @@ set(CG_PACKET_SOURCES
     CGAddMouseToQuickSlot.cpp CGAddMouseToQuickSlotHandler.cpp
     CGAddMouseToZone.cpp CGAddMouseToZoneHandler.cpp
     CGAddQuickSlotToMouse.cpp CGAddQuickSlotToMouseHandler.cpp
-    CGAddSMSAddress.cpp CGAddSMSAddressHandler.cpp
+    CGAddSMSAddressHandler.cpp
     CGAddZoneToInventory.cpp CGAddZoneToInventoryHandler.cpp
     CGAddZoneToMouse.cpp CGAddZoneToMouseHandler.cpp
     CGAppointSubmaster.cpp CGAppointSubmasterHandler.cpp
     CGAttack.cpp CGAttackHandler.cpp
     CGAuthKey.cpp CGAuthKeyHandler.cpp
     CGBloodDrain.cpp CGBloodDrainHandler.cpp
-    CGBuyStoreItem.cpp CGBuyStoreItemHandler.cpp
+    CGBuyStoreItemHandler.cpp
     CGCastingSkill.cpp CGCastingSkillHandler.cpp
     CGConnect.cpp CGConnectHandler.cpp
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
     CGCrashReport.cpp CGCrashReportHandler.cpp
-    CGDeleteSMSAddress.cpp CGDeleteSMSAddressHandler.cpp
-    CGDenyUnion.cpp CGDenyUnionHandler.cpp
+    CGDeleteSMSAddressHandler.cpp
+    CGDenyUnionHandler.cpp
     CGDepositPet.cpp CGDepositPetHandler.cpp
     CGDialUp.cpp CGDialUpHandler.cpp
-    CGDisplayItem.cpp CGDisplayItemHandler.cpp
+    CGDisplayItemHandler.cpp
     CGDissectionCorpse.cpp CGDissectionCorpseHandler.cpp
     CGDonationMoney.cpp CGDonationMoneyHandler.cpp
     CGDownSkill.cpp CGDownSkillHandler.cpp
     CGDropMoney.cpp CGDropMoneyHandler.cpp
-    CGExpelGuild.cpp CGExpelGuildHandler.cpp
+    CGExpelGuildHandler.cpp
     CGExpelGuildMember.cpp CGExpelGuildMemberHandler.cpp
     CGFailQuest.cpp CGFailQuestHandler.cpp
     CGGetEventItem.cpp CGGetEventItemHandler.cpp
     CGGetOffMotorCycle.cpp CGGetOffMotorCycleHandler.cpp
     CGGlobalChat.cpp CGGlobalChatHandler.cpp
     CGGQuestAccept.cpp CGGQuestAcceptHandler.cpp
-    CGGQuestCancel.cpp CGGQuestCancelHandler.cpp
+    CGGQuestCancelHandler.cpp
     CGGuildChat.cpp CGGuildChatHandler.cpp
     CGJoinGuild.cpp CGJoinGuildHandler.cpp
     CGLearnSkill.cpp CGLearnSkillHandler.cpp
@@ -413,7 +413,7 @@ set(CG_PACKET_SOURCES
     CGModifyGuildMemberIntro.cpp CGModifyGuildMemberIntroHandler.cpp
     CGModifyNickname.cpp CGModifyNicknameHandler.cpp
     CGModifyTaxRatio.cpp CGModifyTaxRatioHandler.cpp
-    CGMouseToStash.cpp CGMouseToStashHandler.cpp
+    CGMouseToStashHandler.cpp
     CGMove.cpp CGMoveHandler.cpp
     CGNPCAskAnswer.cpp CGNPCAskAnswerHandler.cpp
     CGNPCTalk.cpp CGNPCTalkHandler.cpp
@@ -427,9 +427,9 @@ set(CG_PACKET_SOURCES
     CGPickupMoney.cpp CGPickupMoneyHandler.cpp
     CGPortCheck.cpp CGPortCheckHandler.cpp
     CGQuitGuild.cpp CGQuitGuildHandler.cpp
-    CGQuitUnion.cpp CGQuitUnionHandler.cpp
-    CGQuitUnionAccept.cpp CGQuitUnionAcceptHandler.cpp
-    CGQuitUnionDeny.cpp CGQuitUnionDenyHandler.cpp
+    CGQuitUnionHandler.cpp
+    CGQuitUnionAcceptHandler.cpp
+    CGQuitUnionDenyHandler.cpp
     CGRangerSay.cpp CGRangerSayHandler.cpp
     CGReady.cpp CGReadyHandler.cpp
     CGRegistGuild.cpp CGRegistGuildHandler.cpp
@@ -443,9 +443,9 @@ set(CG_PACKET_SOURCES
     CGRequestNewbieItem.cpp CGRequestNewbieItemHandler.cpp
     CGRequestPowerPoint.cpp CGRequestPowerPointHandler.cpp
     CGRequestRepair.cpp CGRequestRepairHandler.cpp
-    CGRequestStoreInfo.cpp CGRequestStoreInfoHandler.cpp
-    CGRequestUnion.cpp CGRequestUnionHandler.cpp
-    CGRequestUnionInfo.cpp CGRequestUnionInfoHandler.cpp
+    CGRequestStoreInfoHandler.cpp
+    CGRequestUnionHandler.cpp
+    CGRequestUnionInfoHandler.cpp
     CGResurrect.cpp CGResurrectHandler.cpp
     CGRideMotorCycle.cpp CGRideMotorCycleHandler.cpp
     CGSay.cpp CGSayHandler.cpp
@@ -461,42 +461,44 @@ set(CG_PACKET_SOURCES
     CGSelectWayPoint.cpp CGSelectWayPointHandler.cpp
     CGSetSlayerHotKey.cpp CGSetSlayerHotKeyHandler.cpp
     CGSetVampireHotKey.cpp CGSetVampireHotKeyHandler.cpp
-    CGShopRequestBuy.cpp CGShopRequestBuyHandler.cpp
-    CGShopRequestList.cpp CGShopRequestListHandler.cpp
-    CGShopRequestSell.cpp CGShopRequestSellHandler.cpp
+    CGShopRequestBuyHandler.cpp
+    CGShopRequestListHandler.cpp
+    CGShopRequestSellHandler.cpp
     CGSilverCoating.cpp CGSilverCoatingHandler.cpp
     CGSkillToInventory.cpp CGSkillToInventoryHandler.cpp
     CGSkillToNamed.cpp CGSkillToNamedHandler.cpp
     CGSkillToObject.cpp CGSkillToObjectHandler.cpp
     CGSkillToSelf.cpp CGSkillToSelfHandler.cpp
     CGSkillToTile.cpp CGSkillToTileHandler.cpp
-    CGSMSAddressList.cpp CGSMSAddressListHandler.cpp
+    CGSMSAddressListHandler.cpp
     CGSMSSend.cpp CGSMSSendHandler.cpp
-    CGStashDeposit.cpp CGStashDepositHandler.cpp
-    CGStashList.cpp CGStashListHandler.cpp
-    CGStashRequestBuy.cpp CGStashRequestBuyHandler.cpp
-    CGStashToMouse.cpp CGStashToMouseHandler.cpp
-    CGStashWithdraw.cpp CGStashWithdrawHandler.cpp
-    # CGStoreClose.cpp / CGStoreOpen.cpp moved to shared/Packets/ —
+    CGStashDepositHandler.cpp
+    CGStashListHandler.cpp
+    CGStashRequestBuyHandler.cpp
+    CGStashToMouseHandler.cpp
+    CGStashWithdrawHandler.cpp
+    # CGDisplayItem.cpp / CGGQuestCancel.cpp / CGStoreClose.cpp /
+    # CGStoreOpen.cpp / CGStoreSign.cpp / CGRequestStoreInfo.cpp moved to
+    # shared/Packets/ —
     # Phase 12 migration. Handlers stay here (handler symbols are still
     # game-server-local until the handler layer is tackled separately).
     CGStoreCloseHandler.cpp
     CGStoreOpenHandler.cpp
-    CGStoreSign.cpp CGStoreSignHandler.cpp
+    CGStoreSignHandler.cpp
     CGSubmitScore.cpp CGSubmitScoreHandler.cpp
     CGTakeOutGood.cpp CGTakeOutGoodHandler.cpp
     CGTameMonster.cpp CGTameMonsterHandler.cpp
     CGThrowBomb.cpp CGThrowBombHandler.cpp
     CGThrowItem.cpp CGThrowItemHandler.cpp
-    CGTradeAddItem.cpp CGTradeAddItemHandler.cpp
-    CGTradeFinish.cpp CGTradeFinishHandler.cpp
-    CGTradeMoney.cpp CGTradeMoneyHandler.cpp
-    CGTradePrepare.cpp CGTradePrepareHandler.cpp
-    CGTradeRemoveItem.cpp CGTradeRemoveItemHandler.cpp
+    CGTradeAddItemHandler.cpp
+    CGTradeFinishHandler.cpp
+    CGTradeMoneyHandler.cpp
+    CGTradePrepareHandler.cpp
+    CGTradeRemoveItemHandler.cpp
     CGTryJoinGuild.cpp CGTryJoinGuildHandler.cpp
     CGTypeStringList.cpp CGTypeStringListHandler.cpp
     CGUnburrow.cpp CGUnburrowHandler.cpp
-    CGUndisplayItem.cpp CGUndisplayItemHandler.cpp
+    CGUndisplayItemHandler.cpp
     CGUntransform.cpp CGUntransformHandler.cpp
     CGUseBonusPoint.cpp CGUseBonusPointHandler.cpp
     CGUseItemFromGear.cpp CGUseItemFromGearHandler.cpp
@@ -647,8 +649,11 @@ target_include_directories(GameServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
 )
 # Phase 12 migration: INTERFACE dependency pulls in shared/Packets/
-# sources (e.g. CGStoreOpen.cpp, CGStoreClose.cpp) compiled into this
-# target with the target's own __GAME_SERVER__ / __COMBAT__ defines
+# sources (e.g. CGBuyStoreItem.cpp, GCMyStoreInfo.cpp,
+# GCOtherStoreInfo.cpp, GCRemoveStoreItem.cpp, GCAddStoreItem.cpp,
+# CGDisplayItem.cpp, CGGQuestCancel.cpp, CGStoreOpen.cpp,
+# CGStoreClose.cpp, CGStoreSign.cpp, CGRequestStoreInfo.cpp)
+# compiled into this target with the target's own __GAME_SERVER__ / __COMBAT__ defines
 # applied. See shared/Packets/CMakeLists.txt for the CG/GC/… family
 # breakdown.
 target_link_libraries(GameServerPackets PRIVATE shared_packets)
@@ -672,10 +677,12 @@ target_include_directories(LoginServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/loginserver
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
     # Phase 12: PacketFactoryManager.cpp (in PACKET_COMMON_SOURCES)
-    # unconditionally #includes "CGStoreOpen.h", which now lives in
-    # shared/Packets/. Add the path WITHOUT linking shared_packets so
-    # we don't absorb CGStoreOpen.cpp as a source (its handler symbol
-    # CGStoreOpenHandler::execute lives only in GameServerPackets).
+    # unconditionally #includes CGBuyStoreItem.h, CGDisplayItem.h,
+    # CGGQuestCancel.h, CGStore{Open,Close,Sign}.h, and
+    # CGRequestStoreInfo.h, which now live in shared/Packets/. Add the
+    # path WITHOUT linking shared_packets so we don't absorb those .cpp
+    # sources as login / shared-server sources; their handler symbols
+    # stay game-server-only.
     ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 

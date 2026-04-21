@@ -22,7 +22,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
+void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__

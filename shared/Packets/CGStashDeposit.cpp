@@ -1,0 +1,50 @@
+//////////////////////////////////////////////////////////////////////////////
+// Filename    : CGStashDeposit.cpp
+// Written By  : 김성민
+// Description :
+//////////////////////////////////////////////////////////////////////////////
+
+#include "CGStashDeposit.h"
+
+void CGStashDeposit::read(SocketInputStream& iStream)
+
+{
+    __BEGIN_TRY
+
+    iStream.read(m_Amount);
+
+    __END_CATCH
+}
+
+void CGStashDeposit::write(SocketOutputStream& oStream) const
+
+{
+    __BEGIN_TRY
+
+    oStream.write(m_Amount);
+
+    __END_CATCH
+}
+
+void CGStashDeposit::execute(Player* pPlayer)
+
+{
+    __BEGIN_TRY
+
+#ifndef __GAME_CLIENT__
+    CGStashDepositHandler::execute(this, pPlayer);
+#endif
+
+    __END_CATCH
+}
+
+string CGStashDeposit::toString() const {
+    __BEGIN_TRY
+
+    StringStream msg;
+    msg << "CGStashDeposit("
+        << "Amount : " << (int)m_Amount << ")";
+    return msg.toString();
+
+    __END_CATCH
+}

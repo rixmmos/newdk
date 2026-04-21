@@ -39,8 +39,46 @@ endif()
 # CG Packets (Client → Game) — migrated from
 # dkrixserver/src/Core/CG*.cpp / dkrix/Client/Packet/Cpackets/CG*.cpp
 set(_SHARED_PACKETS_CG_SOURCES
+    CGBuyStoreItem.cpp
+    CGGQuestCancel.cpp
+    CGUndisplayItem.cpp
     CGStoreOpen.cpp
     CGStoreClose.cpp
+    CGStoreSign.cpp
+    CGRequestStoreInfo.cpp
+    CGDisplayItem.cpp
+    CGShopRequestBuy.cpp
+    CGShopRequestList.cpp
+    CGShopRequestSell.cpp
+    CGStashDeposit.cpp
+    CGStashList.cpp
+    CGStashRequestBuy.cpp
+    CGStashToMouse.cpp
+    CGMouseToStash.cpp
+    CGStashWithdraw.cpp
+    CGTradePrepare.cpp
+    CGTradeAddItem.cpp
+    CGTradeRemoveItem.cpp
+    CGTradeMoney.cpp
+    CGTradeFinish.cpp
+    CGAddSMSAddress.cpp
+    CGDeleteSMSAddress.cpp
+    CGSMSAddressList.cpp
+    CGAcceptUnion.cpp
+    CGDenyUnion.cpp
+    CGQuitUnionAccept.cpp
+    CGQuitUnionDeny.cpp
+    CGRequestUnion.cpp
+    CGRequestUnionInfo.cpp
+    CGQuitUnion.cpp
+    CGExpelGuild.cpp
+)
+
+set(_SHARED_PACKETS_GC_SOURCES
+    GCMyStoreInfo.cpp
+    GCOtherStoreInfo.cpp
+    GCRemoveStoreItem.cpp
+    GCAddStoreItem.cpp
 )
 
 # Future families will add their own groups here, parallel to the
@@ -57,6 +95,9 @@ set(_SHARED_PACKETS_CG_SOURCES
 # different parent directories.
 set(_SHARED_PACKETS_SOURCES "")
 foreach(_src IN LISTS _SHARED_PACKETS_CG_SOURCES)
+    list(APPEND _SHARED_PACKETS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
+endforeach()
+foreach(_src IN LISTS _SHARED_PACKETS_GC_SOURCES)
     list(APPEND _SHARED_PACKETS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
 endforeach()
 

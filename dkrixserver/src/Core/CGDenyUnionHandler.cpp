@@ -28,7 +28,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
+void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

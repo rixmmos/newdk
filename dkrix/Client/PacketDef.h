@@ -125,28 +125,28 @@
 //-----------------------------------------------------------------------------
 // 상점
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGShopRequestList.h"
-#include "Packet/Cpackets/CGShopRequestBuy.h"
-#include "Packet/Cpackets/CGShopRequestSell.h"
+#include "../../shared/Packets/CGShopRequestList.h"
+#include "../../shared/Packets/CGShopRequestBuy.h"
+#include "../../shared/Packets/CGShopRequestSell.h"
 
 //-----------------------------------------------------------------------------
 // 보관
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGStashRequestBuy.h"
-#include "Packet/Cpackets/CGStashList.h"
-#include "Packet/Cpackets/CGMouseToStash.h"
-#include "Packet/Cpackets/CGStashToMouse.h"
-#include "Packet/Cpackets/CGStashDeposit.h"
-#include "Packet/Cpackets/CGStashWithdraw.h"
+#include "../../shared/Packets/CGStashRequestBuy.h"
+#include "../../shared/Packets/CGStashList.h"
+#include "../../shared/Packets/CGMouseToStash.h"
+#include "../../shared/Packets/CGStashToMouse.h"
+#include "../../shared/Packets/CGStashDeposit.h"
+#include "../../shared/Packets/CGStashWithdraw.h"
 
 //-----------------------------------------------------------------------------
 // 교환
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGTradePrepare.h"
-#include "Packet/Cpackets/CGTradeAddItem.h"
-#include "Packet/Cpackets/CGTradeRemoveItem.h"
-#include "Packet/Cpackets/CGTradeMoney.h"
-#include "Packet/Cpackets/CGTradeFinish.h"
+#include "../../shared/Packets/CGTradePrepare.h"
+#include "../../shared/Packets/CGTradeAddItem.h"
+#include "../../shared/Packets/CGTradeRemoveItem.h"
+#include "../../shared/Packets/CGTradeMoney.h"
+#include "../../shared/Packets/CGTradeFinish.h"
 
 
 

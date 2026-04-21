@@ -22,7 +22,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlayer)
+void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -122,7 +122,7 @@ void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlay
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeRemoveItemHandler::executeSlayer(CGTradeRemoveItem* pPacket, Player* pPlayer)
+void CGTradeRemoveItemHandler::executeSlayer(CGTradeRemoveItem* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -205,7 +205,7 @@ void CGTradeRemoveItemHandler::executeSlayer(CGTradeRemoveItem* pPacket, Player*
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeRemoveItemHandler::executeVampire(CGTradeRemoveItem* pPacket, Player* pPlayer)
+void CGTradeRemoveItemHandler::executeVampire(CGTradeRemoveItem* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -285,7 +285,7 @@ void CGTradeRemoveItemHandler::executeVampire(CGTradeRemoveItem* pPacket, Player
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeRemoveItemHandler::executeOusters(CGTradeRemoveItem* pPacket, Player* pPlayer)
+void CGTradeRemoveItemHandler::executeOusters(CGTradeRemoveItem* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -363,7 +363,7 @@ void CGTradeRemoveItemHandler::executeOusters(CGTradeRemoveItem* pPacket, Player
 }
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeRemoveItemHandler::executeError(CGTradeRemoveItem* pPacket, Player* pPlayer, BYTE ErrorCode)
+void CGTradeRemoveItemHandler::executeError(CGTradeRemoveItem* pPacket, Player* pPlayer, BYTE ErrorCode) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

@@ -38,7 +38,7 @@
 // 플레이어가 원하는 물건을 파는 NPC와 그 아이템이 있는지
 // 확인하고, 일반 아이템과 모터 사이클 처리부분으로 분기한다.
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestBuyHandler::execute(CGShopRequestBuy* pPacket, Player* pPlayer)
+void CGShopRequestBuyHandler::execute(CGShopRequestBuy* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -178,7 +178,7 @@ void CGShopRequestBuyHandler::execute(CGShopRequestBuy* pPacket, Player* pPlayer
 //////////////////////////////////////////////////////////////////////////////
 // 일반 아이템의 구입을 처리한다.
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestBuyHandler::executeNormal(CGShopRequestBuy* pPacket, Player* pPlayer)
+void CGShopRequestBuyHandler::executeNormal(CGShopRequestBuy* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -451,7 +451,7 @@ void CGShopRequestBuyHandler::executeNormal(CGShopRequestBuy* pPacket, Player* p
 //////////////////////////////////////////////////////////////////////////////
 // 모터 사이클의 구입을 처리한다.
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestBuyHandler::executeMotorcycle(CGShopRequestBuy* pPacket, Player* pPlayer)
+void CGShopRequestBuyHandler::executeMotorcycle(CGShopRequestBuy* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -647,7 +647,7 @@ void CGShopRequestBuyHandler::executeMotorcycle(CGShopRequestBuy* pPacket, Playe
 //////////////////////////////////////////////////////////////////////////////
 // 이벤트 아이템의 구입을 처리한다.
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestBuyHandler::executeEvent(CGShopRequestBuy* pPacket, Player* pPlayer)
+void CGShopRequestBuyHandler::executeEvent(CGShopRequestBuy* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

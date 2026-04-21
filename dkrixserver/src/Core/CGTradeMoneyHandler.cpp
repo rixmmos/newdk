@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer)
+void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -119,7 +119,7 @@ void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeMoneyHandler::executeSlayer(CGTradeMoney* pPacket, Player* pPlayer)
+void CGTradeMoneyHandler::executeSlayer(CGTradeMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -252,7 +252,7 @@ void CGTradeMoneyHandler::executeSlayer(CGTradeMoney* pPacket, Player* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeMoneyHandler::executeVampire(CGTradeMoney* pPacket, Player* pPlayer)
+void CGTradeMoneyHandler::executeVampire(CGTradeMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -386,7 +386,7 @@ void CGTradeMoneyHandler::executeVampire(CGTradeMoney* pPacket, Player* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeMoneyHandler::executeOusters(CGTradeMoney* pPacket, Player* pPlayer)
+void CGTradeMoneyHandler::executeOusters(CGTradeMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -519,7 +519,7 @@ void CGTradeMoneyHandler::executeOusters(CGTradeMoney* pPacket, Player* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeMoneyHandler::executeError(CGTradeMoney* pPacket, Player* pPlayer, BYTE ErrorCode)
+void CGTradeMoneyHandler::executeError(CGTradeMoney* pPacket, Player* pPlayer, BYTE ErrorCode) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

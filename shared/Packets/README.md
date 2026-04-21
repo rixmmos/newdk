@@ -123,21 +123,13 @@ template above):
   types or order, the migration PR needs to stop and flag.
 
 **First-wave candidates** (smallest expected reconciliation
-work): the 7 classes whose .cpp file is at most cosmetic
-(their .h files will still need reconciliation, but the .cpp
-side is a straight `git mv`):
+work): none remain. The original 7-class cosmetic-`.cpp`
+shortlist from Phase 17 has now been fully migrated.
 
-- `CGDisplayItem`
-- `CGGQuestCancel`
-- `CGRequestStoreInfo`
-- `CGStoreClose`
-- `CGStoreOpen`
-- `CGStoreSign`
-- `CGUndisplayItem`
-
-Pick one of these for the first migration PR to minimize
-new-pattern risk; the remaining 156 classes follow the same
-shape once the first migration's CMake wiring is in place.
+The remaining packet pairs still follow the same overall
+shape, but each one now falls outside the original
+"smallest expected reconciliation work" bucket and should be
+picked by whichever subsystem we want to migrate next.
 
 Run
 `dkrixserver/scripts/audit-packet-divergence.sh --by-file`

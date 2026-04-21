@@ -31,7 +31,7 @@
 #ifdef __GAME_CLIENT__
 	#include "ClientPlayer.h"
 	#include "Cpackets/CGConnect.h"
-	#include "Cpackets/CGStashList.h"
+	#include "CGStashList.h"
 	#include "VS_UI.h"
 	#include "VS_UI_filepath.h"
 #endif
@@ -1156,7 +1156,6 @@ throw ( ProtocolException , Error )
 	__END_CATCH
 
 }
-
 
 
 

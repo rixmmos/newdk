@@ -33,7 +33,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) {
+void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -138,7 +138,7 @@ void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) {
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlayer) {
+void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -296,7 +296,7 @@ void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlay
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPlayer) {
+void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -440,7 +440,7 @@ void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPla
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPlayer) {
+void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -584,7 +584,7 @@ void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPla
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void CGTradeAddItemHandler::makeGCTradeAddItemPacket(GCTradeAddItem* pPacket, ObjectID_t Sender, Item* pItem,
-                                                     CoordInven_t X, CoordInven_t Y) {
+                                                     CoordInven_t X, CoordInven_t Y) throw() {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -698,7 +698,7 @@ void CGTradeAddItemHandler::makeGCTradeAddItemPacket(GCTradeAddItem* pPacket, Ob
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTradeAddItemHandler::executeError(CGTradeAddItem* pPacket, Player* pPlayer, BYTE ErrorCode) {
+void CGTradeAddItemHandler::executeError(CGTradeAddItem* pPacket, Player* pPlayer, BYTE ErrorCode) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__

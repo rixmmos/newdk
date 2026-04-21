@@ -10,38 +10,43 @@
 #include "Client_PCH.h"
 
 // Include packet headers to get handler class declarations
-#include "Packet/Cpackets/CGBuyStoreItem.h"
+#include "CGBuyStoreItem.h"
 #include "Packet/Cpackets/CGConnectSetKey.h"
-#include "Packet/Cpackets/CGDisplayItem.h"
+// Phase 12: CGDisplayItem migrated to shared/Packets/.
+#include "CGDisplayItem.h"
 #include "Packet/Cpackets/CGDonationMoney.h"
 #include "Packet/Cpackets/CGLotterySelect.h"
 #include "Packet/Cpackets/CGMixItem.h"
-#include "Packet/Cpackets/CGRequestStoreInfo.h"
+// Phase 12: CGRequestStoreInfo migrated to shared/Packets/.
+#include "CGRequestStoreInfo.h"
 #include "Packet/Cpackets/CGSelectQuest.h"
 #include "Packet/Cpackets/CGSelectRegenZone.h"
 // Phase 12: CGStoreOpen/CGStoreClose migrated to shared/Packets/;
 // resolved via shared_packets INTERFACE include path.
 #include "CGStoreOpen.h"
 #include "CGStoreClose.h"
-#include "Packet/Cpackets/CGStoreSign.h"
-#include "Packet/Cpackets/CGUndisplayItem.h"
+// Phase 12: CGStoreSign migrated to shared/Packets/ too.
+#include "CGStoreSign.h"
+#include "CGUndisplayItem.h"
 #include "Packet/Cpackets/CGWithdrawPet.h"
 
 // Stub implementations for store-related handlers
-void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) {}
 void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) {}
 void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGMixItemHandler::execute(CGMixItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPlayer) {}
 void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGSelectRegenZoneHandler::execute(CGSelectRegenZone* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-// Phase 12: CGStoreOpen/CGStoreClose headers migrated to shared/Packets/,
+// Phase 12: CGBuyStoreItem/CGDisplayItem/CGStoreOpen/CGStoreClose/
+// CGStoreSign/CGRequestStoreInfo/CGUndisplayItem headers migrated to
+// shared/Packets/,
 // which drops the throw() specs (deprecated in C++17). Match the new
 // signatures here.
 void CGStoreOpenHandler::execute(CGStoreOpen* pPacket, Player* pPlayer) {}
 void CGStoreCloseHandler::execute(CGStoreClose* pPacket, Player* pPlayer) {}
-void CGStoreSignHandler::execute(CGStoreSign* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGUndisplayItemHandler::execute(CGUndisplayItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGStoreSignHandler::execute(CGStoreSign* pPacket, Player* pPlayer) {}
+void CGUndisplayItemHandler::execute(CGUndisplayItem* pPacket, Player* pPlayer) {}
 void CGWithdrawPetHandler::execute(CGWithdrawPet* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}

@@ -38,7 +38,7 @@
 // 플레이어가 팔려고 하는 아이템을 가지고 있는지 확인한 다음에,
 // 일반 아이템과 모터 사이클 처리 부분으로 분기한다.
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSellHandler::execute(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::execute(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -105,7 +105,7 @@ void CGShopRequestSellHandler::execute(CGShopRequestSell* pPacket, Player* pPlay
 // 일반 아이템을 처리한다.
 //
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -329,7 +329,7 @@ void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player*
 // 모터 사이클을 처리한다.
 //
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSellHandler::executeMotorcycle(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::executeMotorcycle(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -470,7 +470,7 @@ void CGShopRequestSellHandler::executeMotorcycle(CGShopRequestSell* pPacket, Pla
 // 해골 한꺼번에 팔기를 실행한다.
 //
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSellHandler::executeOpAllSkull(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::executeOpAllSkull(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__
@@ -551,7 +551,7 @@ void CGShopRequestSellHandler::executeOpAllSkull(CGShopRequestSell* pPacket, Pla
     __END_DEBUG_EX __END_CATCH
 }
 
-void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY
 
 #ifdef __GAME_SERVER__
@@ -950,7 +950,7 @@ void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* p
 // 물건 팔기가 실패했다는 정보를 날려준댜.
 //
 //////////////////////////////////////////////////////////////////////////////
-void CGShopRequestSellHandler::sendFailPacket(CGShopRequestSell* pPacket, Player* pPlayer) {
+void CGShopRequestSellHandler::sendFailPacket(CGShopRequestSell* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__

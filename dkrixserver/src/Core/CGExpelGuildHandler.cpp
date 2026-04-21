@@ -27,7 +27,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
+void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
