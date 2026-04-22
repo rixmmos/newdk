@@ -20,6 +20,11 @@ set(GAMESERVER_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/quest/luaScript
     ${CMAKE_CURRENT_SOURCE_DIR}/mofus
     ${CMAKE_CURRENT_SOURCE_DIR}/test
+    # Phase 12: PKZoneInfoManager.h (in this directory) and other
+    # gameserver sources #include "CGSay.h" directly. CGSay lives in
+    # shared/Packets/ — include-only, no link (sources are picked up
+    # by GameServerPackets via its shared_packets INTERFACE link).
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 # ============================================================================

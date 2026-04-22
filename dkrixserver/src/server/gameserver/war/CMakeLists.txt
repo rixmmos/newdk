@@ -28,4 +28,7 @@ target_include_directories(War PUBLIC
 	${CMAKE_SOURCE_DIR}/src/server
 	${CMAKE_SOURCE_DIR}/src/server/database
 	${CMAKE_SOURCE_DIR}/src/server/gameserver
+	# Phase 12: RaceWar.cpp #includes "CGSay.h" which lives in
+	# shared/Packets/ — include-only, no link.
+	${CMAKE_SOURCE_DIR}/../shared/Packets
 )

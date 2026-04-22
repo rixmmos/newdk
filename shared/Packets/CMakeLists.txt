@@ -93,22 +93,6 @@ set(_SHARED_PACKETS_CG_SOURCES
     CGWithdrawPet.cpp
     CGResurrect.cpp
     CGTameMonster.cpp
-    CLChangeServer.cpp
-    CLGetPCList.cpp
-    CLGetServerList.cpp
-    CLGetWorldList.cpp
-    CLLogout.cpp
-    CLSelectServer.cpp
-    CLSelectWorld.cpp
-    CLVersionCheck.cpp
-    CLCreatePC.cpp
-    CLDeletePC.cpp
-    CLLogin.cpp
-    CLQueryCharacterName.cpp
-    CLQueryPlayerID.cpp
-    CLReconnectLogin.cpp
-    CLRegisterPlayer.cpp
-    CLSelectPC.cpp
     CGTryJoinGuild.cpp
     CGJoinGuild.cpp
     CGRegistGuild.cpp
@@ -211,14 +195,49 @@ set(_SHARED_PACKETS_GC_SOURCES
     GCAddStoreItem.cpp
 )
 
+# CL Packets (Client → Login) — migrated from
+# dkrixserver/src/Core/CL*.cpp / dkrix/Client/Packet/Cpackets/CL*.cpp
+# Split out into its own group (and its own INTERFACE target below) so
+# LoginServerPackets absorbs the CL sources with __LOGIN_SERVER__ while
+# GameServerPackets stays CG-only. Previously these sat inside the CG
+# list, which left LoginServerPackets without CL vtables and produced
+# "undefined reference to `vtable for CLLogin'" etc. at link time.
+set(_SHARED_PACKETS_CL_SOURCES
+    CLChangeServer.cpp
+    CLGetPCList.cpp
+    CLGetServerList.cpp
+    CLGetWorldList.cpp
+    CLLogout.cpp
+    CLSelectServer.cpp
+    CLSelectWorld.cpp
+    CLVersionCheck.cpp
+    CLCreatePC.cpp
+    CLDeletePC.cpp
+    CLLogin.cpp
+    CLQueryCharacterName.cpp
+    CLQueryPlayerID.cpp
+    CLReconnectLogin.cpp
+    CLRegisterPlayer.cpp
+    CLSelectPC.cpp
+    # CGConnectSetKey is registered in PacketFactoryManager.cpp under
+    # BOTH __LOGIN_SERVER__ and __GAME_SERVER__ guards — the login
+    # server sees CGConnectSetKey as a pre-auth handshake packet. It
+    # already compiles into GameServerPackets via the CG list; this
+    # duplicate entry makes it ALSO compile into LoginServerPackets so
+    # the vtable is visible when PacketFactoryManager.cpp instantiates
+    # CGConnectSetKeyFactory under __LOGIN_SERVER__. Separate archives,
+    # so no ODR collision at final-link time.
+    CGConnectSetKey.cpp
+)
+
 # Future families will add their own groups here, parallel to the
 # naming in dkrixserver/src/Core/CMakeLists.txt:
-#   set(_SHARED_PACKETS_GC_SOURCES ...)
-#   set(_SHARED_PACKETS_CL_SOURCES ...)
+#   set(_SHARED_PACKETS_LC_SOURCES ...)
+#   set(_SHARED_PACKETS_GS_SOURCES ...)
 # etc. Keep the family breakdown aligned so it is obvious which
 # server variant needs to link which source group.
 
-# Build the absolute-path source list. INTERFACE target_sources under
+# Build the absolute-path source lists. INTERFACE target_sources under
 # CMP0076 NEW accepts absolute paths; relative paths would be
 # interpreted against each caller's CMAKE_CURRENT_SOURCE_DIR, which
 # would break once dkrix and dkrixserver call add_subdirectory from
@@ -231,10 +250,26 @@ foreach(_src IN LISTS _SHARED_PACKETS_GC_SOURCES)
     list(APPEND _SHARED_PACKETS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
 endforeach()
 
+set(_SHARED_PACKETS_CL_SOURCES_ABS "")
+foreach(_src IN LISTS _SHARED_PACKETS_CL_SOURCES)
+    list(APPEND _SHARED_PACKETS_CL_SOURCES_ABS "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
+endforeach()
+
 add_library(shared_packets INTERFACE)
 
 target_sources(shared_packets INTERFACE ${_SHARED_PACKETS_SOURCES})
 
 target_include_directories(shared_packets INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Separate INTERFACE target for the CL family so LoginServerPackets
+# can absorb just those sources (not the whole CG/GC set) and compile
+# them under __LOGIN_SERVER__. See comment above.
+add_library(shared_packets_cl INTERFACE)
+
+target_sources(shared_packets_cl INTERFACE ${_SHARED_PACKETS_CL_SOURCES_ABS})
+
+target_include_directories(shared_packets_cl INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

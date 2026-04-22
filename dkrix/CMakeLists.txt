@@ -688,6 +688,20 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI
 		TextSystem
 		shared_packets
+		# CL family (Client → Login) lives in a separate INTERFACE
+		# target because the server build links it only into
+		# LoginServerPackets (compiled under __LOGIN_SERVER__) while
+		# the main shared_packets target feeds GameServerPackets under
+		# __GAME_SERVER__. The client is the other half of every CL
+		# handshake — it instantiates CLVersionCheck, CLLogin,
+		# CLSelectPC, CLSelectWorld, CLSelectServer, CLQueryPlayerID,
+		# CLQueryCharacterName from UIMessageManager.cpp — so it needs
+		# those vtables compiled in here too. Without this, the link
+		# fails with "undefined reference to `vtable for CLSelectPC'"
+		# and friends. Linking both targets is safe: each CMake
+		# project (dkrix vs. dkrixserver) has its own build tree and
+		# produces its own object files, so there is no ODR collision.
+		shared_packets_cl
 		SDL2::SDL2
 		SDL2::SDL2main
 	)

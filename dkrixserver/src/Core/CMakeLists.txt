@@ -680,12 +680,18 @@ target_include_directories(LoginServerPackets PRIVATE
     # Phase 12: PacketFactoryManager.cpp (in PACKET_COMMON_SOURCES)
     # unconditionally #includes CGBuyStoreItem.h, CGDisplayItem.h,
     # CGGQuestCancel.h, CGStore{Open,Close,Sign}.h, and
-    # CGRequestStoreInfo.h, which now live in shared/Packets/. Add the
-    # path WITHOUT linking shared_packets so we don't absorb those .cpp
-    # sources as login / shared-server sources; their handler symbols
-    # stay game-server-only.
+    # CGRequestStoreInfo.h, which now live in shared/Packets/. The CG
+    # .cpp sources are NOT absorbed here (they compile under __GAME_SERVER__
+    # via shared_packets linked into GameServerPackets); only the headers
+    # matter for login / shared-server PacketFactoryManager symbols.
     ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
+# Phase 12 CL migration: CL*.cpp sources (CLLogin, CLGetPCList, ...)
+# live in shared/Packets/ and need to compile into LoginServerPackets
+# under __LOGIN_SERVER__. shared_packets_cl is a separate INTERFACE
+# target that carries ONLY the CL family so we pick them up without
+# also absorbing the CG sources (which belong to GameServerPackets).
+target_link_libraries(LoginServerPackets PRIVATE shared_packets_cl)
 target_link_libraries(LoginServerPackets PRIVATE LoginServerDatabase)
 
 # ============================================================================

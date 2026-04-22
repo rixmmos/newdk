@@ -167,7 +167,10 @@ target_include_directories(Quest PUBLIC
 	${CMAKE_SOURCE_DIR}/src/server/gameserver
 	${CMAKE_SOURCE_DIR}/src/server/gameserver/war
 	${CMAKE_SOURCE_DIR}/src/server/gameserver/item
-	${CMAKE_SOURCE_DIR}/src/server/gameserver/skill	
+	${CMAKE_SOURCE_DIR}/src/server/gameserver/skill
+	# Phase 12: ActionEnterPKZone.cpp transitively pulls CGSay.h via
+	# PKZoneInfoManager.h. CGSay lives in shared/Packets/.
+	${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 add_subdirectory(luaScript)

@@ -38,8 +38,16 @@ public:
     template <typename T>
     typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value, uint>::type write(T buf);
 
+    // Exclude pointer types from the "misc value" template so callers like
+    // Player::sendPacket(Packet*) fall through to the non-template
+    // write(const Packet*) overload — otherwise the template is an exact
+    // match (no const-conversion) and steals the call, silently sending
+    // sizeof(void*) bytes of a stack address instead of the packet header.
     template <typename T>
-    typename std::enable_if<!std::is_integral<T>::value && !std::is_enum<T>::value, uint>::type write(T buf);
+    typename std::enable_if<!std::is_integral<T>::value && !std::is_enum<T>::value &&
+                                !std::is_pointer<T>::value,
+                            uint>::type
+    write(T buf);
 
     uint write(bool buf) { return writeScalar(buf); }
     uint write(char buf) { return writeScalar(buf); }
@@ -107,8 +115,9 @@ typename std::enable_if<std::is_integral<T>::value || std::is_enum<T>::value, ui
 }
 
 template <typename T>
-typename std::enable_if<!std::is_integral<T>::value && !std::is_enum<T>::value, uint>::type SocketOutputStream::write(
-    T buf) {
+typename std::enable_if<!std::is_integral<T>::value && !std::is_enum<T>::value && !std::is_pointer<T>::value,
+                        uint>::type
+SocketOutputStream::write(T buf) {
     return write(reinterpret_cast<const char*>(&buf), static_cast<uint>(sizeof(T)));
 }
 

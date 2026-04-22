@@ -531,4 +531,7 @@ target_include_directories(Skill PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server
     ${CMAKE_SOURCE_DIR}/src/server/database
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
+    # Phase 12: SkillUtil.cpp transitively pulls CGSay.h via
+    # PKZoneInfoManager.h. CGSay lives in shared/Packets/ — include-only.
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
