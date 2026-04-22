@@ -72,6 +72,26 @@ void CSDLAudio::Release()
 	m_bInit = false;
 }
 
+bool CSDLAudio::IsInit() const
+{
+	return m_bInit;
+}
+
+bool CSDLAudio::IsMute() const
+{
+	return m_bMute;
+}
+
+void CSDLAudio::SetMute()
+{
+	m_bMute = true;
+}
+
+void CSDLAudio::UnSetMute()
+{
+	m_bMute = false;
+}
+
 /* Release all duplicated buffers */
 void CSDLAudio::ReleaseDuplicateBuffer()
 {
@@ -319,6 +339,11 @@ void CSDLAudio::SetVolumeLimit(LONG volume)
 	if (m_MaxVolume < 0) m_MaxVolume = 0;
 }
 
+LONG CSDLAudio::GetVolumeLimit() const
+{
+	return m_MaxVolume;
+}
+
 /* Add frequency (not supported in SDL backend) */
 bool CSDLAudio::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int amount)
 {
@@ -373,6 +398,17 @@ bool CSDLAudio::ChangePan(LPDIRECTSOUNDBUFFER buffer, int pan)
 {
 	// SDL_mixer does not support pan control
 	// Pan range: -10000 to 10000 (DirectX) vs -100 to 100 (our backend)
+	return false;
+}
+
+LPDIRECTSOUND CSDLAudio::GetDS() const
+{
+	return m_pDS;
+}
+
+bool CSDLAudio::DirectSoundFailed(const char* str)
+{
+	(void)str;
 	return false;
 }
 

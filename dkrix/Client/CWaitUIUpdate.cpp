@@ -469,79 +469,9 @@ CWaitUIUpdate::ProcessInput()
 	// UI Input
 	//---------------------------------------------------
 	gC_vs_ui.MouseControl(M_MOVING, g_x, g_y);
-	if (g_pSDLInput->m_lb_down)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("LD");
-		#endif
-
-		gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("LD1");
-		#endif
-	}
-
-	if (g_pSDLInput->m_lb_up)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("LU");
-		#endif
-
-		gC_vs_ui.MouseControl(M_LEFTBUTTON_UP, g_x, g_y);
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("LU1");
-		#endif
-	}
-	if (g_pSDLInput->m_rb_down)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("RD");
-		#endif
-
-		if (gC_vs_ui.MouseControl(M_RIGHTBUTTON_DOWN, g_x, g_y))
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD("RD1");
-			#endif
-
-			return;
-		}
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("RD2");
-		#endif
-	}
-	if (g_pSDLInput->m_rb_up)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("RU");
-		#endif
-
-		if (gC_vs_ui.MouseControl(M_RIGHTBUTTON_UP, g_x, g_y))
-		{
-			#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-				DEBUG_ADD("RU1");
-			#endif
-
-			return;
-		}
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("RU2");
-		#endif
-	}
-	if (g_pSDLInput->m_cb_down)
-	{
-		if (gC_vs_ui.MouseControl(M_CENTERBUTTON_DOWN, g_x, g_y))
-			return;
-	}
-	if (g_pSDLInput->m_rb_up)
-	{
-		if (gC_vs_ui.MouseControl(M_CENTERBUTTON_UP, g_x, g_y))
-			return;
-	}
+	// Mouse button transitions are dispatched by DXMouseEvent().
+	// Re-sending DOWN/UP here once per frame causes duplicate clicks in
+	// SDL mode, which breaks drag/drop flows such as inventory -> gear.
 }
 
 

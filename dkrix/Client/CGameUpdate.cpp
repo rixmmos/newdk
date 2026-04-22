@@ -242,7 +242,6 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 //					}
 //				}				
 //				
-				gC_vs_ui.MouseControl(M_LEFTBUTTON_DOWN, g_x, g_y);
 				last_click_time = GetTickCount();
 				double_click_x = g_x;
 				double_click_y = g_y;

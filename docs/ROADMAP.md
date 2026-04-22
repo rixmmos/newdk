@@ -70,8 +70,16 @@ the right tile.
 
 ### R2 — Localization pass: English-only (was task #138)
 
-- [ ] Strip all Korean (EUC-KR) and Chinese (GB2312) text, file
-      comments, and UI strings. Ship an English-only client.
+- [~] Phase A is in: the central UI/system string table
+      (`dkrix/Client/MGameStringTable.cpp`) now has a
+      functional English-first pass for previously non-latin /
+      mojibake entries, while already-pure Latin strings were
+      left untouched. Ship-ready English-only localization is
+      still **not done**.
+- [ ] Finish the rest of the sweep: item / NPC / monster /
+      quest / tutorial data, source comments, and a copy-polish
+      pass over the Phase A UI/system strings so they read like
+      natural English rather than enum-derived placeholders.
 
 **Background.** The retail DarkEden data files and the legacy
 source both carry large amounts of CJK text. Some is
@@ -92,6 +100,19 @@ developer-facing (comments, log strings, tool output).
   Korean/Chinese system fonts so CJK glyphs render. After
   this pass we can drop those fallbacks in favour of a
   single Latin/Unicode font.
+
+**Current status (2026-04-22).**
+- **Phase A landed as a functional pass only.** The central
+  client UI/system string table now renders readable English
+  labels and messages for the bulk of popup/menu/system text.
+  This was intentionally done as a mechanical readability pass,
+  not as a final copywriting pass, so some strings still read
+  like `Cannot Buy No Space` or `Character Delete Confirm`.
+- **Pure Latin strings were preserved.** The pass did not
+  overwrite entries that were already plain Latin / ASCII.
+- **Still missing:** item/monster/NPC names, tutorial/book/
+  computer/event text, data-table descriptions, source-comment
+  cleanup, and a manual polish sweep of the new English UI text.
 
 **Non-goals.**
 - Translation into additional languages. English-only means

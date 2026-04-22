@@ -1,0 +1,7 @@
+MaxLoginServerAddress : 1
+LoginServerAddress : 90.190.31.134
+LoginServerPortNum : 1
+LoginServerPort : 9999
+LoginServerCheckPort : 9997
+LoginServerBasePort : 9900
+@END

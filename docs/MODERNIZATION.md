@@ -2208,6 +2208,14 @@ links to Endian.h yet — it sits waiting for 13.3.
   path and bound-socket `SO_REUSEADDR` setup, while both old
   local copies are reduced to thin wrappers over the shared
   implementation.
+- `shared/Core/DatagramPacket.h` is now canonical too.
+  The old client/server local headers are reduced to thin
+  wrappers over the shared base class, which now follows the
+  same `Packet.h`-style debug-surface guard
+  (`!defined(__GAME_CLIENT__) || defined(__DEBUG_OUTPUT__)`)
+  for `getPacketName()` / `toString()` while keeping the
+  datagram-only `read(Datagram&)` / `write(Datagram&)`
+  contract in one place.
 
 ### Phase 16 — CI ratchet activation — done 2026-04-19
 Two ratchet scripts currently exist with baseline files pinned
@@ -2557,7 +2565,11 @@ branding scrub, standalone Windows `.exe`, UHD / high-DPI
 rendering — are **not** modernization work and live in
 [`ROADMAP.md`](./ROADMAP.md) as items R1–R5. They share no
 scope with this file; update ROADMAP.md when those progress,
-not this one.
+not this one. As of 2026-04-22, ROADMAP item R2 has a
+functional Phase A pass in the central client UI/system string
+table (`dkrix/Client/MGameStringTable.cpp`), but the broader
+English-only localization effort remains product work and stays
+tracked there rather than in this file.
 
 ## Out of scope for modernization
 
@@ -2612,12 +2624,8 @@ so they stop competing with the current plan at the repo root.
 ## Current next steps (audit 2026-04-22)
 
 - `DatagramPacket.h` is the next low-risk canary for further
-  `shared/Core/` consolidation. It is still duplicated between
-  `dkrix/Client/Packet/` and `dkrixserver/src/Core/`, sits
-  directly on top of the now-shared `Datagram` /
-  `DatagramSocket` layer, and appears to need only a small
-  reconciliation pass.
-- `Packet.h` should follow soon after. It remains duplicated in
+- `Packet.h` is now the next low-risk canary for further
+  `shared/Core/` consolidation. It remains duplicated in
   both trees and is the protocol root that defines packet ID,
   size, and sequence types plus the shared packet enum surface.
   Consolidating it would reduce the risk of future client/server

@@ -1,0 +1,15 @@
+﻿#DK2 ServerInfo File
+@TTDK2
+ServerName : TTDK2
+HomeDir : .
+TempDir : Update
+UpdateServerAddress : http://update.ttdk2.com/update/patch/
+UpdateServerPort : 3000
+PatchInfoFile : PatchInfo.inf
+MaxLoginServerAddress : 1
+LoginServerAddress : 90.190.31.134
+LoginServerPortNum : 1
+LoginServerPort : 9999
+LoginServerCheckPort : 9996
+LoginServerBasePort : 9900
+@END
