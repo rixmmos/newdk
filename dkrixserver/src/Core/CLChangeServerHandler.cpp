@@ -15,11 +15,12 @@
 #include "LCPCList.h"
 #include "LoginPlayer.h"
 #include "OptionInfo.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// 클라이언트가 PC 의 리스트를 달라고 요청해오면, 로그인 서버는 DB로부터
-// PC들의 정보를 로딩해서 LCPCList 패킷에 담아서 전송한다.
+// ķ´ė¯¼ģ¯´ģ–øķøź°€ PC ģ¯ ė¦¬ģ¤ķøė¼ ė‹¬ė¯¼ź³  ģ”ģ²­ķ•´ģ¤ė©´, ėź·øģ¯ø ģ„ė²„ė” DBėė¶€ķ„°
+// PCė“¤ģ¯ ģ •ė³´ė¼ ėė”©ķ•´ģ„ LCPCList ķØķ‚·ģ— ė‹´ģ•„ģ„ ģ „ģ†ķ•ė‹¤.
 //////////////////////////////////////////////////////////////////////////////
 void CLChangeServerHandler::execute(CLChangeServer* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
@@ -36,13 +37,11 @@ void CLChangeServerHandler::execute(CLChangeServer* pPacket, Player* pPlayer) th
     ServerGroupID_t CurrentServerGroupID = pPacket->getServerGroupID();
     pLoginPlayer->setServerGroupID(CurrentServerGroupID);
 
-    Statement* pStmt = NULL;
-
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
 
         //----------------------------------------------------------------------
-        // 이제 LCPCList 패킷을 만들어서 보내자
+        // ģ¯´ģ  LCPCList ķØķ‚·ģ¯„ ė§ė“¤ģ–´ģ„ ė³´ė‚´ģ˛
         //----------------------------------------------------------------------
         LCPCList lcPCList;
 
@@ -50,17 +49,11 @@ void CLChangeServerHandler::execute(CLChangeServer* pPacket, Player* pPlayer) th
         pLoginPlayer->sendPacket(&lcPCList);
         pLoginPlayer->setPlayerStatus(LPS_PC_MANAGEMENT);
 
-        pStmt->executeQuery("UPDATE Player set CurrentServerGroupID = %d WHERE PlayerID = '%s'",
-                            (int)pPacket->getServerGroupID(), pLoginPlayer->getID().c_str());
-
-        // 쿼리 결과 및 쿼리문 객체를 삭제한다.
-        SAFE_DELETE(pStmt);
+        PreparedStatement stmt(pConnection, "UPDATE Player SET CurrentServerGroupID = ? WHERE PlayerID = ?");
+        stmt.bindInt(1, (int)pPacket->getServerGroupID());
+        stmt.bindString(2, pLoginPlayer->getID());
+        stmt.execute();
     } catch (SQLQueryException& sce) {
-        // cout << sce.toString() << endl;
-
-        // 쿼리 결과 및 쿼리문 객체를 삭제한다.
-        SAFE_DELETE(pStmt);
-
         throw DisconnectException(sce.toString());
     }
 

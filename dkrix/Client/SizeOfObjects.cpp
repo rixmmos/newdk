@@ -41,7 +41,7 @@
 #include "MTestDef.h"
 
 #include "Packet\CPackets\CGRequestNewbieItem.h"
-#include "Packet\CPackets\CGSilverCoating.h"
+#include "../../shared/Packets/CGSilverCoating.h"
 #include "../../shared/Packets/CLChangeServer.h"
 #include "../../shared/Packets/CLGetServerList.h"
 #include "../../shared/Packets/CGSelectPortal.h"
@@ -52,7 +52,7 @@
 #include "../../shared/Packets/CLSelectWorld.h"
 #include "../../shared/Packets/CLSelectServer.h"
 #include "../../shared/Packets/CLQueryCharacterName.h"
-#include "packet/CPackets\CGRelicToObject.h"
+#include "../../shared/Packets/CGRelicToObject.h"
 #include "CGSelectGuild.h"
 #include "CGSelectGuildMember.h"
 #include "CGRequestGuildMemberList.h"
@@ -70,11 +70,11 @@
 #include "packet/CPackets\CGTypeStringList.h"
 #include "../../shared/Packets/CGUseItemFromGear.h"
 #include "packet/CPackets\CGLotterySelect.h"
-#include "packet/CPackets\CGTakeOutGood.h"
-#include "packet/CPackets/CGMixItem.h"					// -_- 비줠 어시스트에서 이렇게 하면 나온다고하길래
+#include "../../shared/Packets/CGTakeOutGood.h"
+#include "../../shared/Packets/CGMixItem.h"					// -_- 비줠 어시스트에서 이렇게 하면 나온다고하길래
 #include "../../shared/Packets/CGDownSkill.h"
 #include "packet/GPackets/GCMiniGameScores.h"
-#include "packet/CPackets/CGSubmitScore.h"
+#include "../../shared/Packets/CGSubmitScore.h"
 #include "../../shared/Packets/CGAddItemToCodeSheet.h"
 #include "../../shared/Packets/CGFailQuest.h"
 

@@ -10,6 +10,8 @@
 #define __CL_LOGIN_H__
 
 // include files
+#include <cstring>
+
 #include "Packet.h"
 #include "PacketFactory.h"
 

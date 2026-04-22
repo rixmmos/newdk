@@ -173,9 +173,35 @@ set(_SHARED_PACKETS_CG_SOURCES
     CGSkillToSelf.cpp
     CGSkillToTile.cpp
     CGBloodDrain.cpp
+    CGAttack.cpp
+    CGAbsorbSoul.cpp
+    CGCastingSkill.cpp
+    CGDropMoney.cpp
+    CGLearnSkill.cpp
+    CGSay.cpp
+    CGTypeStringList.cpp
+    CGThrowBomb.cpp
+    CGThrowItem.cpp
+    CGMakeItem.cpp
+    CGConnectSetKey.cpp
+    CGGetEventItem.cpp
+    CGMixItem.cpp
+    CGNPCTalk.cpp
+    CGRequestRepair.cpp
+    CGRelicToObject.cpp
+    CGRideMotorCycle.cpp
+    CGSilverCoating.cpp
+    CGSubmitScore.cpp
+    CGTakeOutGood.cpp
     CGUnburrow.cpp
     CGUntransform.cpp
     CGVisible.cpp
+    CGVerifyTime.cpp
+    CGWhisper.cpp
+    CGExchangeBuy.cpp
+    CGExchangeList.cpp
+    CGMove.cpp
+    CGSMSSend.cpp
 )
 
 set(_SHARED_PACKETS_GC_SOURCES

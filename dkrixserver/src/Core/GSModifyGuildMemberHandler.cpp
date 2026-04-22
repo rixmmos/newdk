@@ -18,6 +18,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SGModifyGuildMemberOK.h"
 #include "StringPool.h"
@@ -64,23 +65,42 @@ void GSModifyGuildMemberHandler::execute(GSModifyGuildMember* pPacket, Player* p
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+            pStmt = pConnection->createStatement();
 
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                pStmt->executeQuery("UPDATE Slayer SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_TEAM_JOIN_ACCEPT));
+                PreparedStatement updateRaceStmt(pConnection, "UPDATE Slayer SET GuildID = ? WHERE Name = ?");
+                updateRaceStmt.bindInt(1, pGuild->getID());
+                updateRaceStmt.bindString(2, pGuildMember->getName());
+                updateRaceStmt.execute();
+
+                PreparedStatement insertMessageStmt(pConnection,
+                                                    "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                insertMessageStmt.bindString(1, pGuildMember->getName());
+                insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_TEAM_JOIN_ACCEPT));
+                insertMessageStmt.execute();
             } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                pStmt->executeQuery("UPDATE Vampire SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                PreparedStatement updateRaceStmt(pConnection, "UPDATE Vampire SET GuildID = ? WHERE Name = ?");
+                updateRaceStmt.bindInt(1, pGuild->getID());
+                updateRaceStmt.bindString(2, pGuildMember->getName());
+                updateRaceStmt.execute();
+
+                PreparedStatement insertMessageStmt(pConnection,
+                                                    "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                insertMessageStmt.bindString(1, pGuildMember->getName());
+                insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                insertMessageStmt.execute();
             } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                pStmt->executeQuery("UPDATE Ousters SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                PreparedStatement updateRaceStmt(pConnection, "UPDATE Ousters SET GuildID = ? WHERE Name = ?");
+                updateRaceStmt.bindInt(1, pGuild->getID());
+                updateRaceStmt.bindString(2, pGuildMember->getName());
+                updateRaceStmt.execute();
+
+                PreparedStatement insertMessageStmt(pConnection,
+                                                    "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                insertMessageStmt.bindString(1, pGuildMember->getName());
+                insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                insertMessageStmt.execute();
             }
 
             SAFE_DELETE(pStmt);

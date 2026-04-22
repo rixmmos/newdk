@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 #include "../../shared/Packets/CGConnect.h"
 #include "../../shared/Packets/CGReady.h"
-#include "Packet/Cpackets/CGMove.h"
+#include "../../shared/Packets/CGMove.h"
 #include "../../shared/Packets/CGLogout.h"
 
 //-----------------------------------------------------------------------------
@@ -42,20 +42,20 @@
 #include "../../shared/Packets/CGDialUp.h"
 #include "../../shared/Packets/CGPhoneDisconnect.h"
 #include "../../shared/Packets/CGPhoneSay.h"
-#include "Packet/Cpackets/CGWhisper.h"
+#include "../../shared/Packets/CGWhisper.h"
 
 //-----------------------------------------------------------------------------
 // 채팅
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGSay.h"
+#include "../../shared/Packets/CGSay.h"
 #include "../../shared/Packets/CGGlobalChat.h"
 
 
 //-----------------------------------------------------------------------------
 // 기술 사용
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGAttack.h"
-#include "Packet/Cpackets/CGCastingSkill.h"
+#include "../../shared/Packets/CGAttack.h"
+#include "../../shared/Packets/CGCastingSkill.h"
 #include "../../shared/Packets/CGSkillToInventory.h"
 #include "../../shared/Packets/CGSkillToSelf.h"
 #include "../../shared/Packets/CGSkillToTile.h"
@@ -63,15 +63,15 @@
 #include "../../shared/Packets/CGUnburrow.h"
 #include "../../shared/Packets/CGBloodDrain.h"
 // 2001.4.23에 추가
-#include "Packet/Cpackets/CGThrowBomb.h"
+#include "../../shared/Packets/CGThrowBomb.h"
 #include "../../shared/Packets/CGUntransform.h"
 #include "../../shared/Packets/CGVisible.h"
-#include "Packet/Cpackets/CGAbsorbSoul.h"
+#include "../../shared/Packets/CGAbsorbSoul.h"
 
 //-----------------------------------------------------------------------------
 // skill 배움 / skill 단축키
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGLearnSkill.h"
+#include "../../shared/Packets/CGLearnSkill.h"
 #include "../../shared/Packets/CGUseBonusPoint.h"		// for vampire lev up
 #include "../../shared/Packets/CGSetSlayerHotKey.h"
 #include "../../shared/Packets/CGSetVampireHotKey.h"
@@ -90,9 +90,9 @@
 #include "../../shared/Packets/CGAddZoneToInventory.h"
 #include "../../shared/Packets/CGAddZoneToMouse.h"
 #include "../../shared/Packets/CGPickupMoney.h"
-#include "Packet/Cpackets/CGDropMoney.h"
-#include "Packet/Cpackets/CGRequestRepair.h"
-#include "Packet/Cpackets/CGMakeItem.h"
+#include "../../shared/Packets/CGDropMoney.h"
+#include "../../shared/Packets/CGRequestRepair.h"
+#include "../../shared/Packets/CGMakeItem.h"
 
 //-----------------------------------------------------------------------------
 // 시체 click
@@ -105,10 +105,10 @@
 
 // 오토바이
 #include "../../shared/Packets/CGGetOffMotorCycle.h"
-#include "Packet/Cpackets/CGRideMotorCycle.h"
+#include "../../shared/Packets/CGRideMotorCycle.h"
 
 // 던지기
-#include "Packet/Cpackets/CGThrowItem.h"
+#include "../../shared/Packets/CGThrowItem.h"
 
 // potion
 #include "../../shared/Packets/CGUsePotionFromInventory.h"
@@ -119,7 +119,7 @@
 //-----------------------------------------------------------------------------
 // NPC
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGNPCTalk.h"
+#include "../../shared/Packets/CGNPCTalk.h"
 #include "../../shared/Packets/CGNPCAskAnswer.h"
 
 //-----------------------------------------------------------------------------

@@ -11,6 +11,7 @@
 #include "DB.h"
 #include "GamePlayer.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "Slayer.h"
 #include "Vampire.h"
@@ -18,7 +19,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGVerifyTimeHandler::execute(CGVerifyTime* pPacket, Player* pPlayer)
+void CGVerifyTimeHandler::execute(CGVerifyTime* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -32,7 +33,7 @@ void CGVerifyTimeHandler::execute(CGVerifyTime* pPacket, Player* pPlayer)
 
     if (!(pGamePlayer->verifySpeed(pPacket))) {
         saveSpeedHackPlayer(pPlayer);
-        throw DisconnectException("스피드핵 딱! 걸려써!!");
+        throw DisconnectException("ģ¤ķ”¼ė“ķ•µ ė”±! ź±øė ¤ģ¨Ø!!");
     }
 
 #endif
@@ -42,7 +43,7 @@ void CGVerifyTimeHandler::execute(CGVerifyTime* pPacket, Player* pPlayer)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
+void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY
 
 #ifdef __GAME_SERVER__
@@ -69,7 +70,7 @@ void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
     filelog("SpeedHack.log", "ID[%s], Name[%s], IP[%s]", ID.c_str(), Name.c_str(), IP.c_str());
 
     /////////////////////////////////////////////////////////
-    // 디비에 관련 정보를 넣는다.
+    // ė””ė¹„ģ— ź´€ė Ø ģ •ė³´ė¼ ė„£ė”ė‹¤.
     /////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
 
@@ -78,16 +79,30 @@ void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
         static ServerGroupID_t ServerGroupID = g_pConfig->getPropertyInt("ServerID");
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            Connection* pConnection = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-            pStmt->executeQuery("UPDATE SpeedHackPlayer SET IP = '%s', NAME = '%s', WorldID = %d, ServerGroupID = %d, "
-                                "Date = now(), Count = Count + 1 WHERE PlayerID = '%s'",
-                                IP.c_str(), Name.c_str(), (int)WorldID, (int)ServerGroupID, ID.c_str());
+            PreparedStatement updateStmt(
+                pConnection,
+                "UPDATE SpeedHackPlayer SET IP = ?, NAME = ?, WorldID = ?, ServerGroupID = ?, Date = now(), Count = "
+                "Count + 1 WHERE PlayerID = ?");
+            updateStmt.bindString(1, IP);
+            updateStmt.bindString(2, Name);
+            updateStmt.bindInt(3, (int)WorldID);
+            updateStmt.bindInt(4, (int)ServerGroupID);
+            updateStmt.bindString(5, ID);
+            updateStmt.execute();
 
-            if (pStmt->getAffectedRowCount() == 0) {
-                pStmt->executeQuery("INSERT IGNORE INTO SpeedHackPlayer( PlayerID, IP, Name, WorldID, ServerGroupID, "
-                                    "Date, Count ) VALUES ( '%s', '%s', '%s', %d, %d, now(), 1 )",
-                                    ID.c_str(), IP.c_str(), Name.c_str(), (int)WorldID, (int)ServerGroupID);
+            if (updateStmt.getAffectedRowCount() == 0) {
+                PreparedStatement insertStmt(
+                    pConnection,
+                    "INSERT IGNORE INTO SpeedHackPlayer (PlayerID, IP, Name, WorldID, ServerGroupID, Date, Count) "
+                    "VALUES (?, ?, ?, ?, ?, now(), 1)");
+                insertStmt.bindString(1, ID);
+                insertStmt.bindString(2, IP);
+                insertStmt.bindString(3, Name);
+                insertStmt.bindInt(4, (int)WorldID);
+                insertStmt.bindInt(5, (int)ServerGroupID);
+                insertStmt.execute();
             }
 
             SAFE_DELETE(pStmt);

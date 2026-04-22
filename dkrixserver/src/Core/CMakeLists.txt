@@ -360,7 +360,7 @@ set(GC_PACKET_SOURCES
 
 # CG Packets (Client -> Game)
 set(CG_PACKET_SOURCES
-    CGAbsorbSoul.cpp CGAbsorbSoulHandler.cpp
+    CGAbsorbSoulHandler.cpp
     CGAcceptUnionHandler.cpp
     CGAddGearToMouseHandler.cpp
 #    CGAddInjuriousCreature.cpp CGAddInjuriousCreatureHandler.cpp
@@ -376,13 +376,13 @@ set(CG_PACKET_SOURCES
     CGAddZoneToInventoryHandler.cpp
     CGAddZoneToMouseHandler.cpp
     CGAppointSubmasterHandler.cpp
-    CGAttack.cpp CGAttackHandler.cpp
+    CGAttackHandler.cpp
     CGAuthKeyHandler.cpp
     CGBloodDrainHandler.cpp
     CGBuyStoreItemHandler.cpp
-    CGCastingSkill.cpp CGCastingSkillHandler.cpp
+    CGCastingSkillHandler.cpp
     CGConnectHandler.cpp
-    CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
+    CGConnectSetKeyHandler.cpp
     CGCrashReportHandler.cpp
     CGDeleteSMSAddressHandler.cpp
     CGDenyUnionHandler.cpp
@@ -392,31 +392,31 @@ set(CG_PACKET_SOURCES
     CGDissectionCorpseHandler.cpp
     CGDonationMoneyHandler.cpp
     CGDownSkillHandler.cpp
-    CGDropMoney.cpp CGDropMoneyHandler.cpp
+    CGDropMoneyHandler.cpp
     CGExpelGuildHandler.cpp
     CGExpelGuildMember.cpp CGExpelGuildMemberHandler.cpp
     CGFailQuestHandler.cpp
-    CGGetEventItem.cpp CGGetEventItemHandler.cpp
+    CGGetEventItemHandler.cpp
     CGGetOffMotorCycleHandler.cpp
     CGGlobalChatHandler.cpp
     CGGQuestAcceptHandler.cpp
     CGGQuestCancelHandler.cpp
     CGGuildChatHandler.cpp
     CGJoinGuildHandler.cpp
-    CGLearnSkill.cpp CGLearnSkillHandler.cpp
+    CGLearnSkillHandler.cpp
     CGLogoutHandler.cpp
     CGLotterySelectHandler.cpp
-    CGMakeItem.cpp CGMakeItemHandler.cpp
-    CGMixItem.cpp CGMixItemHandler.cpp
+    CGMakeItemHandler.cpp
+    CGMixItemHandler.cpp
     CGModifyGuildIntroHandler.cpp
     CGModifyGuildMemberHandler.cpp
     CGModifyGuildMemberIntroHandler.cpp
     CGModifyNicknameHandler.cpp
     CGModifyTaxRatioHandler.cpp
     CGMouseToStashHandler.cpp
-    CGMove.cpp CGMoveHandler.cpp
+    CGMoveHandler.cpp
     CGNPCAskAnswerHandler.cpp
-    CGNPCTalk.cpp CGNPCTalkHandler.cpp
+    CGNPCTalkHandler.cpp
     CGPartyInviteHandler.cpp
     CGPartyLeaveHandler.cpp
     CGPartyPositionHandler.cpp
@@ -433,7 +433,7 @@ set(CG_PACKET_SOURCES
     CGRangerSayHandler.cpp
     CGReadyHandler.cpp
     CGRegistGuildHandler.cpp
-    CGRelicToObject.cpp CGRelicToObjectHandler.cpp
+    CGRelicToObjectHandler.cpp
     CGReloadFromInventoryHandler.cpp
     CGReloadFromQuickSlotHandler.cpp
     CGRequestGuildListHandler.cpp
@@ -442,13 +442,13 @@ set(CG_PACKET_SOURCES
     CGRequestIPHandler.cpp
     CGRequestNewbieItemHandler.cpp
     CGRequestPowerPointHandler.cpp
-    CGRequestRepair.cpp CGRequestRepairHandler.cpp
+    CGRequestRepairHandler.cpp
     CGRequestStoreInfoHandler.cpp
     CGRequestUnionHandler.cpp
     CGRequestUnionInfoHandler.cpp
     CGResurrectHandler.cpp
-    CGRideMotorCycle.cpp CGRideMotorCycleHandler.cpp
-    CGSay.cpp CGSayHandler.cpp
+    CGRideMotorCycleHandler.cpp
+    CGSayHandler.cpp
     CGSelectBloodBibleHandler.cpp
     CGSelectGuildHandler.cpp
     CGSelectGuildMemberHandler.cpp
@@ -464,14 +464,14 @@ set(CG_PACKET_SOURCES
     CGShopRequestBuyHandler.cpp
     CGShopRequestListHandler.cpp
     CGShopRequestSellHandler.cpp
-    CGSilverCoating.cpp CGSilverCoatingHandler.cpp
+    CGSilverCoatingHandler.cpp
     CGSkillToInventoryHandler.cpp
     CGSkillToNamedHandler.cpp
     CGSkillToObjectHandler.cpp
     CGSkillToSelfHandler.cpp
     CGSkillToTileHandler.cpp
     CGSMSAddressListHandler.cpp
-    CGSMSSend.cpp CGSMSSendHandler.cpp
+    CGSMSSendHandler.cpp
     CGStashDepositHandler.cpp
     CGStashListHandler.cpp
     CGStashRequestBuyHandler.cpp
@@ -485,18 +485,18 @@ set(CG_PACKET_SOURCES
     CGStoreCloseHandler.cpp
     CGStoreOpenHandler.cpp
     CGStoreSignHandler.cpp
-    CGSubmitScore.cpp CGSubmitScoreHandler.cpp
-    CGTakeOutGood.cpp CGTakeOutGoodHandler.cpp
+    CGSubmitScoreHandler.cpp
+    CGTakeOutGoodHandler.cpp
     CGTameMonsterHandler.cpp
-    CGThrowBomb.cpp CGThrowBombHandler.cpp
-    CGThrowItem.cpp CGThrowItemHandler.cpp
+    CGThrowBombHandler.cpp
+    CGThrowItemHandler.cpp
     CGTradeAddItemHandler.cpp
     CGTradeFinishHandler.cpp
     CGTradeMoneyHandler.cpp
     CGTradePrepareHandler.cpp
     CGTradeRemoveItemHandler.cpp
     CGTryJoinGuildHandler.cpp
-    CGTypeStringList.cpp CGTypeStringListHandler.cpp
+    CGTypeStringListHandler.cpp
     CGUnburrowHandler.cpp
     CGUndisplayItemHandler.cpp
     CGUntransformHandler.cpp
@@ -508,14 +508,14 @@ set(CG_PACKET_SOURCES
     CGUsePotionFromInventoryHandler.cpp
     CGUsePotionFromQuickSlotHandler.cpp
     CGUsePowerPointHandler.cpp
-    CGVerifyTime.cpp CGVerifyTimeHandler.cpp
+    CGVerifyTimeHandler.cpp
     CGVisibleHandler.cpp
-    CGWhisper.cpp CGWhisperHandler.cpp
+    CGWhisperHandler.cpp
     CGWithdrawPetHandler.cpp
     CGWithdrawTaxHandler.cpp
     # Exchange System Packets
-    CGExchangeList.cpp CGExchangeListHandler.cpp
-    CGExchangeBuy.cpp CGExchangeBuyHandler.cpp
+    CGExchangeListHandler.cpp
+    CGExchangeBuyHandler.cpp
 )
 
 # CL Packets (Client -> Login)
@@ -537,7 +537,7 @@ set(CL_PACKET_SOURCES
     CLSelectWorldHandler.cpp
     CLVersionCheckHandler.cpp
     GCDisconnect.cpp GCDisconnectHandler.cpp
-	CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp 
+	CGConnectSetKeyHandler.cpp 
 )
 
 # LC Packets (Login -> Client)
@@ -657,6 +657,7 @@ target_include_directories(GameServerPackets PRIVATE
 # applied. See shared/Packets/CMakeLists.txt for the CG/GC/… family
 # breakdown.
 target_link_libraries(GameServerPackets PRIVATE shared_packets)
+target_link_libraries(GameServerPackets PRIVATE GameServerDatabase)
 
 # ============================================================================
 # LoginServerPackets 库 - 使用 __LOGIN_SERVER__ 宏编译
@@ -685,6 +686,7 @@ target_include_directories(LoginServerPackets PRIVATE
     # stay game-server-only.
     ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
+target_link_libraries(LoginServerPackets PRIVATE LoginServerDatabase)
 
 # ============================================================================
 # SharedServerPackets 库 - 使用 __SHARED_SERVER__ 宏编译
@@ -705,3 +707,4 @@ target_include_directories(SharedServerPackets PRIVATE
     # Phase 12: see LoginServerPackets note above — include-only, no link.
     ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
+target_link_libraries(SharedServerPackets PRIVATE SharedServerDatabase)

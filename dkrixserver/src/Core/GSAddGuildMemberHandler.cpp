@@ -16,6 +16,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "SGAddGuildMemberOK.h"
 #include "SGModifyGuildOK.h"
 #include "StringPool.h"
@@ -76,48 +77,76 @@ void GSAddGuildMemberHandler::execute(GSAddGuildMember* pPacket, Player* pPlayer
             ///////////////////////////////////////////////////////////////////////////
             Statement* pStmt = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery("UPDATE GuildMember SET RequestDateTime=now() WHERE Name='%s'",
-                                    pGuildMember->getName().c_str());
+                Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+                pStmt = pConnection->createStatement();
+
+                PreparedStatement updateGuildMemberStmt(
+                    pConnection, "UPDATE GuildMember SET RequestDateTime = now() WHERE Name = ?");
+                updateGuildMemberStmt.bindString(1, pGuildMember->getName());
+                updateGuildMemberStmt.execute();
 
                 if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                    pStmt->executeQuery("UPDATE Slayer SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement updateRaceStmt(pConnection, "UPDATE Slayer SET GuildID = ? WHERE Name = ?");
+                    updateRaceStmt.bindInt(1, pGuild->getID());
+                    updateRaceStmt.bindString(2, pGuildMember->getName());
+                    updateRaceStmt.execute();
 
                     if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER)
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_TEAM_REGISTRATION_ACCEPT));
+                    {
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_TEAM_REGISTRATION_ACCEPT));
+                        insertMessageStmt.execute();
+                    }
                     else {
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_TEAM_REGISTRATION_ACCEPT_2));
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_TEAM_REGISTRATION_ACCEPT_2));
+                        insertMessageStmt.execute();
                     }
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                    pStmt->executeQuery("UPDATE Vampire SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement updateRaceStmt(pConnection, "UPDATE Vampire SET GuildID = ? WHERE Name = ?");
+                    updateRaceStmt.bindInt(1, pGuild->getID());
+                    updateRaceStmt.bindString(2, pGuildMember->getName());
+                    updateRaceStmt.execute();
 
                     if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER)
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT));
+                    {
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT));
+                        insertMessageStmt.execute();
+                    }
                     else {
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT_2));
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT_2));
+                        insertMessageStmt.execute();
                     }
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                    pStmt->executeQuery("UPDATE Ousters SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement updateRaceStmt(pConnection, "UPDATE Ousters SET GuildID = ? WHERE Name = ?");
+                    updateRaceStmt.bindInt(1, pGuild->getID());
+                    updateRaceStmt.bindString(2, pGuildMember->getName());
+                    updateRaceStmt.execute();
 
                     if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER)
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT));
+                    {
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT));
+                        insertMessageStmt.execute();
+                    }
                     else {
-                        pStmt->executeQuery("INSERT INTO Messages ( Receiver, Message ) VALUES ( '%s', '%s' )",
-                                            pGuildMember->getName().c_str(),
-                                            g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT_2));
+                        PreparedStatement insertMessageStmt(
+                            pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                        insertMessageStmt.bindString(1, pGuildMember->getName());
+                        insertMessageStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_REGISTRATION_ACCEPT_2));
+                        insertMessageStmt.execute();
                     }
                 }
 

@@ -24,8 +24,7 @@ void CGSkillToSelf::read(SocketInputStream& iStream) throw(ProtocolException, Er
     __BEGIN_TRY
 #ifdef __USE_ENCRYPTER__
     SocketEncryptInputStream* pEIStream = dynamic_cast<SocketEncryptInputStream*>(&iStream);
-    Assert(pEIStream != NULL);
-    if (pEIStream->getEncryptCode() != 0) {
+    if (pEIStream != NULL && pEIStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_2(pEIStream->getEncryptCode(), pEIStream->readEncrypt(m_SkillType),
                             pEIStream->readEncrypt(m_CEffectID));
     } else
@@ -41,8 +40,7 @@ void CGSkillToSelf::write(SocketOutputStream& oStream) const throw(ProtocolExcep
     __BEGIN_TRY
 #ifdef __USE_ENCRYPTER__
     SocketEncryptOutputStream* pEOStream = dynamic_cast<SocketEncryptOutputStream*>(&oStream);
-    Assert(pEOStream != NULL);
-    if (pEOStream->getEncryptCode() != 0) {
+    if (pEOStream != NULL && pEOStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_2(pEOStream->getEncryptCode(), pEOStream->writeEncrypt(m_SkillType),
                             pEOStream->writeEncrypt(m_CEffectID));
     } else

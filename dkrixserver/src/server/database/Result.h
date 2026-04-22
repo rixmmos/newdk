@@ -10,6 +10,8 @@
 #include <mysql/mysql.h>
 #include <sys/time.h>
 
+#include <vector>
+
 #include "Exception.h"
 #include "Types.h"
 
@@ -23,19 +25,29 @@ class Statement;
 
 //////////////////////////////////////////////////////////////////////////////
 // class Result;
-// Result 는 삭제할 필요가 없다. 사용자는 Statement 만 삭제하면 된다.
+// Result ė” ģ‚­ģ ķ•  ķ•„ģ”ź°€ ģ—†ė‹¤. ģ‚¬ģ©ģ˛ė” Statement ė§ ģ‚­ģ ķ•ė©´ ėė‹¤.
 //////////////////////////////////////////////////////////////////////////////
 
 class Result {
 public:
+    struct FieldValue {
+        bool   isNull;
+        string value;
+
+        FieldValue() : isNull(true) {}
+        FieldValue(const string& v) : isNull(false), value(v) {}
+    };
+
+public:
     Result(T_RESULT*, const string& statement);
+    Result(const std::vector<std::vector<FieldValue> >& rows, const string& statement);
     ~Result();
 
 public:
-    // 다음 row로 넘어간다.
+    // ė‹¤ģ¯ rowė ė„ģ–´ź°„ė‹¤.
     bool next();
 
-    // 특정 필드(컬럼) 값을 가지고 온다.
+    // ķ¹ģ • ķ•„ė“(ģ»¬ė¼) ź°’ģ¯„ ź°€ģ§€ź³  ģØė‹¤.
     char* getField(uint index);
     char getChar(uint index) {
         return (getField(index))[0];
@@ -57,7 +69,7 @@ public:
     }
     const char* getString(uint index);
 
-    // 쿼리 결과값이 포함하는 row/column의 숫자를 리턴한다.
+    // ģæ¼ė¦¬ ź²°ź³¼ź°’ģ¯´ ķ¸¬ķ•Øķ•ė” row/columnģ¯ ģ«ģ˛ė¼ ė¦¬ķ„´ķ•ė‹¤.
     uint getRowCount() const {
         return m_RowCount;
     }
@@ -70,11 +82,19 @@ public:
     }
 
 private:
-    T_RESULT* m_pResult; // 결과값을 나타내는 MYSQL structure
-    MYSQL_ROW m_pRow;    // 현재 처리하고 있는 row
-    uint m_RowCount;     // 쿼리 결과로 얻어낸 row의 숫자
+    enum BackendType {
+        BACKEND_MYSQL_RES,
+        BACKEND_MATERIALIZED
+    };
+
+    BackendType m_BackendType;
+    T_RESULT* m_pResult; // ź²°ź³¼ź°’ģ¯„ ė‚ķ€ė‚´ė” MYSQL structure
+    MYSQL_ROW m_pRow;    // ķ„ģ˛¬ ģ²ė¦¬ķ•ź³  ģ˛ė” row
+    uint m_RowCount;     // ģæ¼ė¦¬ ź²°ź³¼ė ģ–»ģ–´ė‚ø rowģ¯ ģ«ģ˛
     uint m_FieldCount;
-    string m_Statement; // 어떤 query문에 의한 결과인가...?
+    string m_Statement; // ģ–´ė–¤ queryė¬øģ— ģ¯ķ• ź²°ź³¼ģ¯øź°€...?
+    std::vector<std::vector<FieldValue> > m_Rows;
+    int m_CurrentRowIndex;
 };
 
 #endif // __RESULT_H__

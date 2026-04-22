@@ -8,7 +8,7 @@
 #include "MGameStringTable.h"
 
 #include "../../shared/Packets/CGRequestIP.h"
-#include "Cpackets/CGWhisper.h"
+#include "../../shared/Packets/CGWhisper.h"
 #include "ClientPlayer.h"
 #include "DebugInfo.h"
 #include "ServerInfo.h"

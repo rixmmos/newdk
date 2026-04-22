@@ -16,6 +16,7 @@
 #include "Guild.h"
 #include "GuildManager.h"
 #include "GuildUnion.h"
+#include "PreparedStatement.h"
 #include "PlayerCreature.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
@@ -84,9 +85,11 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer) 
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')", TargetGuildMaster.c_str(),
-                            g_pStringPool->c_str(376));
+        Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement stmt(pConnection, "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+        stmt.bindString(1, TargetGuildMaster);
+        stmt.bindString(2, g_pStringPool->c_str(376));
+        stmt.execute();
         SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)

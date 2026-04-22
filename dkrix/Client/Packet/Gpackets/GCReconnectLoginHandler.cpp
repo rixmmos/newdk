@@ -16,7 +16,7 @@
 	#include "../../../shared/Packets/CLReconnectLogin.h"
 	#include "UserInformation.h"
 	//add by viva
-	#include "Cpackets/CGConnectSetKey.h"
+#include "../../../shared/Packets/CGConnectSetKey.h"
 	//end
 #endif
 //add by viva

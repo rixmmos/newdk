@@ -1782,6 +1782,34 @@ Implementation notes vs. the 11A sketch:
   ratchet count down. When it hits 0, the gate flips from
   "count didn't grow" to "zero matches" and `Statement` can
   be deprecated.
+- **First 11.2 migration batch landed 2026-04-22.** The
+  baseline moved from `567` to `550` by converting a small
+  write-only set of login/shared-server handlers to
+  `PreparedStatement`: `CLChangeServerHandler`,
+  `CLLoginHandler`, `CLSelectPCHandler`,
+  `GSAddGuildMemberHandler`, `GSExpelGuildMemberHandler`, and
+  `GSModifyGuildMemberHandler`. This establishes the basic
+  pattern for `UPDATE` / `INSERT` paths that do not need
+  `Result*` iteration.
+- **Second 11.2 migration batch landed 2026-04-22.** The
+  baseline moved from `550` to `546` by converting another
+  write-only game/login set to `PreparedStatement`:
+  `CGPortCheckHandler`, `CLAgreementHandler`,
+  `CGCrashReportHandler`, `CGSubmitScoreHandler`, and
+  `CGVerifyTimeHandler`. This batch extends the same pattern
+  to `INSERT IGNORE`, fallback `UPDATE`-after-no-hit, and
+  player-supplied crash/speedhack logging paths without
+  needing stmt-mode `SELECT` support yet.
+- **Third 11.2 migration batch landed 2026-04-22.** The
+  baseline moved from `546` to `545` by converting the
+  low-risk union/guild notification inserts in
+  `CGAcceptUnionHandler`, `CGDenyUnionHandler`,
+  `CGQuitUnionAcceptHandler`, `CGQuitUnionDenyHandler`, and
+  `CGQuitUnionHandler` to `PreparedStatement`. Several of
+  those handlers still keep legacy `Statement` usage for the
+  adjacent `SELECT count(*)` checks and dynamic-table deletes,
+  so the CI ratchet only dropped by one even though the
+  user-controlled message insertions are now parameterized.
 - **Stress test the MYSQL_STMT lifecycle under load.**
   libmysqlclient has historically had resource-cleanup bugs
   around `mysql_stmt_close` on shared connections; real-world
@@ -1990,6 +2018,11 @@ after each migration PR.
 | 2026-04-21 | `CGUseMessageItemFromInventory` + `CGUseItemFromGQuestInventory` |             70 | Remaining use-item mini-cluster migrated as one batch. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating and client-compatible factory/handler `throw()` specs, while client-side `PacketFactoryManager.cpp`, `SizeOfObjects.cpp`, and `UIMessageManager.cpp` were rewired away from deleted local `Cpackets` headers. `CGUseMessageItemFromInventory` preserves the server-side `executeEventFromMessage(...)` hook in the shared canonical handler surface, and its client-side inheritance path now runs directly through the already-shared `CGUseItemFromInventory` base. |
 | 2026-04-21 | `CGSkillToInventory` + `CGSkillToNamed` + `CGSkillToObject` + `CGSkillToSelf` + `CGSkillToTile` |             60 | Skill-cast request cluster migrated as one batch. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating and client-compatible factory/handler `throw()` specs, while client-side `PacketFactoryManager.cpp`, both request-side factory managers, `PacketDef.h`, `SizeOfObjects.cpp`, and `UIMessageManager.cpp` were rewired away from deleted local `Cpackets` headers. `CGSkillToInventory` preserves the client-side `m_InventoryItemObjectID` helper state while keeping the reduced on-wire layout both trees actually serialized, and `CGSkillToNamed` now resolves through the canonical shared header from the UI/sizeof paths instead of the old mixed-case local include. |
 | 2026-04-21 | `CGBloodDrain` + `CGUnburrow` + `CGUntransform` + `CGVisible` |             52 | Burrow/visibility mini-cluster migrated as one batch. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating and client-compatible factory/handler `throw()` specs, while client-side `PacketFactoryManager.cpp`, both request-side factory managers, and `PacketDef.h` were rewired away from deleted local `Cpackets` headers. `CGBloodDrain` also keeps the client-side tighter `getPacketMaxSize()` behavior in the shared canonical factory surface, matching the one-field wire format both old implementations actually serialized. |
+| 2026-04-22 | `CGAttack` + `CGDropMoney` + `CGThrowBomb` + `CGThrowItem` |             44 | Combat/action request cluster migrated as one batch to reduce build churn. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating and client-compatible factory/handler `throw()` specs, while client-side `PacketFactoryManager.cpp`, both request-side factory managers, and `PacketDef.h` were rewired away from deleted local `Cpackets` headers. `CGAttack` and `CGDropMoney` preserve the existing encrypted-stream path already used by both trees, and the server-local handler `.cpp` files remain under `src/Core/`. |
+| 2026-04-22 | `CGAbsorbSoul` + `CGCastingSkill` + `CGLearnSkill` |             38 | Skill/control mini-cluster migrated as one batch. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating and client-compatible factory/handler `throw()` specs, while client-side `PacketFactoryManager.cpp`, both request-side factory managers, [PacketDef.h](C:/newdk/dkrix/Client/PacketDef.h), and [MPlayer.cpp](C:/newdk/dkrix/Client/MPlayer.cpp) were rewired away from deleted local `Cpackets` headers. `CGLearnSkill` keeps the server-side `executeOustersSkill(...)` handler entrypoint in the shared canonical header so the migration preserves the fuller server dispatch surface. |
+| 2026-04-22 | `CGSay` + `CGWhisper` + `CGVerifyTime` + `CGTypeStringList` |             30 | Chat/request cluster migrated as one batch. The shared canonical headers preserve the extra server-only handler surface that was missing from the client copies (`CGSay` operator helpers, `CGVerifyTimeHandler::saveSpeedHackPlayer`, and `CGTypeStringListHandler::executeApartForce`) while still keeping client-safe `__GAME_CLIENT__` execute-gating in the packet `.cpp` files. Client-side [PacketDef.h](C:/newdk/dkrix/Client/PacketDef.h), [PacketFactoryManager.cpp](C:/newdk/dkrix/Client/Packet/PacketFactoryManager.cpp), both request-side factory managers, [PacketFunction.cpp](C:/newdk/dkrix/Client/PacketFunction.cpp), [WhisperManager.cpp](C:/newdk/dkrix/Client/WhisperManager.cpp), [CGameUpdate.cpp](C:/newdk/dkrix/Client/CGameUpdate.cpp), and [UIMessageManager.cpp](C:/newdk/dkrix/Client/UIMessageManager.cpp) were rewired away from deleted local `Cpackets` headers. Server-side `GameServerPackets` now absorbs all four packet `.cpp` files from `shared_packets`, while the handler `.cpp` files remain under `src/Core/`. |
+| 2026-04-22 | `CGMakeItem` + `CGRequestRepair` + `CGTakeOutGood` + `CGRelicToObject` |             22 | Item/request cluster migrated as one batch. The shared packet classes keep client-safe `__GAME_CLIENT__` execute-gating while exposing the fuller server-only helper surface that the client headers lacked: `CGRequestRepairHandler::{executeNormal,executeMotorcycle,executeAll}` and `CGRelicToObjectHandler::{executeRelic,executeBloodBible,executeCastleSymbol,executeFlag,executeSweeper}` remain declared in the canonical shared headers so existing server dispatch continues to compile unchanged. Client-side [PacketDef.h](C:/newdk/dkrix/Client/PacketDef.h), [PacketFactoryManager.cpp](C:/newdk/dkrix/Client/Packet/PacketFactoryManager.cpp), both request-side factory managers, [UIMessageManager.cpp](C:/newdk/dkrix/Client/UIMessageManager.cpp), and [SizeOfObjects.cpp](C:/newdk/dkrix/Client/SizeOfObjects.cpp) were rewired away from deleted local `Cpackets` headers. Server-side `GameServerPackets` now absorbs all four packet `.cpp` files from `shared_packets`, while the handler `.cpp` files remain under `src/Core/`. |
+| 2026-04-22 | `CGConnectSetKey` + `CGGetEventItem` + `CGMixItem` + `CGNPCTalk` + `CGRideMotorCycle` + `CGSilverCoating` + `CGSubmitScore` + `CGExchangeBuy` + `CGExchangeList` + `CGMove` + `CGSMSSend` |              0 | Final Phase 12 batch closed out the remaining semantic outliers and dropped the duplicate ratchet to zero. `CGConnectSetKey` keeps client-side dispatch enabled because the client handshake flow still calls `execute(g_pSocket)`, `CGMixItem` stays stub-friendly by keeping its handler declaration visible to the existing client stub file, `CGSMSSend` preserves the client-side `addString(...)` / `clearString()` helpers while adopting the server's broader 80-byte message cap, and the exchange packets preserve the richer server-side API surface (`idempotencyKey`, `sellerFilter`) while remaining safe for client factory registration. `CGMove` was canonicalized to the client's actual on-wire field order (`X`, `Y`, `Dir`) in the non-encrypted path so both trees now agree on the same plaintext fallback. Client-side [PacketDef.h](C:/newdk/dkrix/Client/PacketDef.h), [PacketFactoryManager.cpp](C:/newdk/dkrix/Client/Packet/PacketFactoryManager.cpp), both request-side factory managers, [UIMessageManager.cpp](C:/newdk/dkrix/Client/UIMessageManager.cpp), [GCMoveHandler.cpp](C:/newdk/dkrix/Client/Packet/Gpackets/GCMoveHandler.cpp), and [VS_UI_PointExchange.cpp](C:/newdk/dkrix/VS_UI/src/VS_UI_PointExchange.cpp) were rewired away from deleted local `Cpackets` headers. Server-side `GameServerPackets` now consumes every remaining packet `.cpp` from `shared_packets`, while the server-only handler `.cpp` files stay under `src/Core/`. |
 - **Post-Phase-12.0 Phase 13.3 unblocked.** Once the first
   few migrations land and `shared/Packets/` has a real
   library target, the Socket stream files
@@ -2063,20 +2096,19 @@ unified tree instead of twice with intermediate fixups.
       same names get `#ifdef` fallbacks built from byte-swap
       intrinsics (`__builtin_bswap*` on GCC/Clang). Header-only
       so nothing gets linked in for LE hosts. Shipped in 13B.
-- [ ] **~~13.3~~ — Migrate the primitive reads/writes.**
-      **Deferred to post-Phase-12.** The client has its own copy
-      of `SocketInputStream.h`/`SocketOutputStream.h`; migrating
-      the templates in both trees simultaneously means writing
-      the same migration twice and then throwing one copy away
-      when Phase 12 unifies the stream files. Once Phase 12
-      lands, 13.3 becomes a single-commit edit of the unified
-      `shared/Core/Socket*Stream.h` instead of a two-tree
-      coordinated patch.
-- [ ] **~~13.4~~ — Audit for remaining raw casts.** **Deferred
-      to post-Phase-12.** A grep-gate pinned at 0 only works
-      once 13.3 has driven the count to 0; pinning it early
-      would either fail CI or require a threshold that drifts
-      each time Phase 12 moves files.
+- [x] **13.3 — Migrate the primitive reads/writes.** Done
+      2026-04-22 after Phase 12 reached baseline 0. The two
+      stream headers now canonicalize through `shared/Core/`
+      and primitive `read` / `write` paths use one shared,
+      little-endian-safe implementation instead of the old
+      host-endian `*(T*)(m_Buffer + ...)` template cast.
+- [x] **13.4 — Audit for remaining raw casts.** Done
+      2026-04-22. Added
+      `dkrixserver/scripts/check-socket-raw-casts.sh` plus
+      `.socket-raw-casts-baseline` pinned at `0`; the gate
+      fails if the old `*(T*)(m_Buffer + ...)` shape reappears
+      under `shared/Core/`, `dkrixserver/src/Core/`, or
+      `dkrix/Client/Packet/`.
 
 **Plan (sub-commits):**
 
@@ -2128,23 +2160,38 @@ tree header) plus **docs-only edits** in MODERNIZATION.md. Zero
 source-code changes; zero runtime-behavior changes. Nothing
 links to Endian.h yet — it sits waiting for 13.3.
 
-**Follow-ups (post-Phase-12):**
+**Post-Phase-12 outcome (2026-04-22):**
 
-- **13.3 — Migrate Socket{Input,Output}Stream<T>::read / write.**
-  Replace the host-endian raw cast `*(T*)(m_Buffer + m_Head)`
-  with `memcpy` + `le*toh` / `htole*`. Compound types continue
-  to use memberwise `read`/`write` as they already do (packet
-  classes never relied on the raw-cast template for anything
-  past primitive fields). Single-commit edit against the
-  unified `shared/Core/Socket*Stream.h` that Phase 12 will
-  produce.
-- **13.4 — CI grep-gate.** Pattern
-  `\*\s*\(\s*\w+\s*\*\s*\)\s*\(\s*m_Buffer\s*\+` at 0; pin
-  count once 13.3 lands. Same ratchet style as Phase 8C's SQL-
-  injection gate.
-
-Both follow-ups are cleanly unblocked by Phase 12; both are
-deliberately *not* scheduled against today's two-tree state.
+- `shared/Core/SocketInputStream.h` and
+  `shared/Core/SocketOutputStream.h` are now the canonical
+  stream headers. The old client/server local headers and
+  `.cpp` files are thin wrappers over the shared
+  implementation, so future stream edits happen once.
+- Primitive stream reads/writes are now little-endian-safe in
+  the unified header path; the old `*(T*)(m_Buffer + ...)`
+  template cast no longer appears in the source tree.
+- `dkrixserver/scripts/check-socket-raw-casts.sh` pins the raw-
+  cast pattern at baseline `0`, turning 13.4 into the same
+  style of structural CI ratchet used by the SQL and packet
+  duplicate gates.
+- `shared/Core/SocketEncryptInputStream.{h,cpp}`,
+  `shared/Core/SocketEncryptOutputStream.{h,cpp}`, and
+  `shared/Core/Encrypter.{h,cpp}` are now canonical too.
+  The old client/server copies are thin wrappers over the
+  shared implementation, and the encrypt-stream helpers now
+  preserve the client-safe 32-bit `long` / `ulong` wire
+  behavior in one place instead of drifting between trees.
+- `shared/Core/Datagram.{h,cpp}` is now canonical as well.
+  The shared version keeps the client-safe explicit boundary
+  checks and 32-bit `long` / `ulong` wire behavior, while the
+  server-only UDP whitelist (`isDatagram(...)`) is preserved
+  behind server compile guards so client-side UDP packet flows
+  remain unchanged.
+- `shared/Core/DatagramSocket.{h,cpp}` is now canonical too.
+  The shared wrapper keeps the client-safe nonblocking receive
+  path and bound-socket `SO_REUSEADDR` setup, while both old
+  local copies are reduced to thin wrappers over the shared
+  implementation.
 
 ### Phase 16 — CI ratchet activation — done 2026-04-19
 Two ratchet scripts currently exist with baseline files pinned
@@ -2255,8 +2302,9 @@ noisy-by-design to prompt the PR author to commit the
 
 **Follow-up work:** none. Phases 11.2, 12.1, 12.2 per-PR
 migrations now have a CI gate that enforces forward
-progress; Phase 13.3/13.4 still blocked on post-Phase-12
-stream-file consolidation as before.
+progress; the old "Phase 13.3/13.4 still blocked" note is
+resolved by the 2026-04-22 shared/Core stream
+consolidation.
 
 ### Phase 17 — Packet divergence audit — done 2026-04-19
 Phase 12's close-out asserted, based on a single spot-check on
@@ -2544,3 +2592,31 @@ file; trust this file.
 
 Phase 0 will move these into `client/docs/archive/2026-migration-notes/`
 so they stop competing with the current plan at the repo root.
+
+## Current next steps (audit 2026-04-22)
+
+- `DatagramPacket.h` is the next low-risk canary for further
+  `shared/Core/` consolidation. It is still duplicated between
+  `dkrix/Client/Packet/` and `dkrixserver/src/Core/`, sits
+  directly on top of the now-shared `Datagram` /
+  `DatagramSocket` layer, and appears to need only a small
+  reconciliation pass.
+- `Packet.h` should follow soon after. It remains duplicated in
+  both trees and is the protocol root that defines packet ID,
+  size, and sequence types plus the shared packet enum surface.
+  Consolidating it would reduce the risk of future client/server
+  drift in the packet base layer.
+- `PacketFactory.h`, `PacketIDSet.{h,cpp}`, and
+  `PacketValidator.{h,cpp}` form the next likely mini-cluster
+  after `Packet.h`. They are central packet-plumbing files and
+  still exist in parallel client/server copies.
+- `SerialDatagram.{h,cpp}` and `SerialDatagramPacket.h` are a
+  separate follow-up, but not another duplicate-consolidation
+  step: they are server-only. That work is better treated as a
+  correctness / wire-I/O modernization pass (bounds, endian, raw
+  read/write cleanup) rather than as `shared/Core/` unification.
+- Beyond packet plumbing, a larger future lane remains for the
+  many duplicated `*Info`, `*SkillInfo`, `*WarInfo`, `PC*Info`,
+  `PetInfo`, and related model-style files. Those likely need a
+  dedicated shared model/types home rather than continuing to
+  widen `shared/Core/`.

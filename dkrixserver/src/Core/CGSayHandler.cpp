@@ -116,7 +116,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGSayHandler::execute(CGSay* pPacket, Player* pPlayer) {
+void CGSayHandler::execute(CGSay* pPacket, Player* pPlayer) throw(ProtocolException, Error) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
 #ifdef __GAME_SERVER__

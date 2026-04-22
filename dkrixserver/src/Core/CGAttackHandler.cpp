@@ -31,7 +31,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGAttackHandler::execute(CGAttack* pPacket, Player* pPlayer)
+void CGAttackHandler::execute(CGAttack* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX __BEGIN_DEBUG

@@ -49,7 +49,7 @@
 #include "MTestDef.h"
 
 #include "CGRequestNewbieItem.h"
-#include "Packet/CPackets/CGSilverCoating.h"
+#include "../../shared/Packets/CGSilverCoating.h"
 #include "../../shared/Packets/CLChangeServer.h"
 #include "../../shared/Packets/CLGetServerList.h"
 #include "../../shared/Packets/CGSelectPortal.h"
@@ -60,7 +60,7 @@
 #include "../../shared/Packets/CLSelectWorld.h"
 #include "../../shared/Packets/CLSelectServer.h"
 #include "../../shared/Packets/CLQueryCharacterName.h"
-#include "packet/CPackets/CGRelicToObject.h"
+#include "../../shared/Packets/CGRelicToObject.h"
 #include "CGSelectGuild.h"
 #include "CGSelectGuildMember.h"
 #include "CGRequestGuildMemberList.h"
@@ -74,13 +74,13 @@
 #include "../../shared/Packets/CGSkillToNamed.h"
 #include "CGSelectRankBonus.h"
 #include "CGWithdrawTax.h"
-#include "packet/CPackets/CGTypeStringList.h"
+#include "../../shared/Packets/CGTypeStringList.h"
 #include "../../shared/Packets/CGLotterySelect.h"
-#include "packet/CPackets/CGTakeOutGood.h"
-#include "packet/CPackets/CGMixItem.h"					// -_- ºñ¢O ¾î½Ã½ºÆ®¿¡¼­ ÀÌ·¸°Ô ÇÏ¸é ³ª¿Â´Ù°íÇÏ±æ·¡
+#include "../../shared/Packets/CGTakeOutGood.h"
+#include "../../shared/Packets/CGMixItem.h"					// -_- ºñ¢O ¾î½Ã½ºÆ®¿¡¼­ ÀÌ·¸°Ô ÇÏ¸é ³ª¿Â´Ù°íÇÏ±æ·¡
 #include "../../shared/Packets/CGDownSkill.h"
 #include "packet/GPackets/GCMiniGameScores.h"
-#include "packet/CPackets/CGSubmitScore.h"
+#include "../../shared/Packets/CGSubmitScore.h"
 #include "../../shared/Packets/CGAddItemToCodeSheet.h"
 #include "../../shared/Packets/CGFailQuest.h"
 #include "../../shared/Packets/CGSelectRegenZone.h"
@@ -90,7 +90,7 @@
 #include "../../shared/Packets/CGPartySay.h"
 #include "../../shared/Packets/CGDepositPet.h"
 #include "../../shared/Packets/CGWithdrawPet.h"
-#include "packet/Cpackets/CGSMSSend.h"
+#include "../../shared/Packets/CGSMSSend.h"
 #include "CGSMSAddressList.h"
 #include "CGDeleteSMSAddress.h"
 #include "CGAddSMSAddress.h"
@@ -165,11 +165,11 @@
 #include "../../shared/Packets/CGUsePowerPoint.h"
 #include "CGRequestPowerPoint.h"
 #include "../../shared/Packets/CGDonationMoney.h"
-#include "Packet/Cpackets/CGGetEventItem.h"
+#include "../../shared/Packets/CGGetEventItem.h"
 #include "../../shared/Packets/CGUseMessageItemFromInventory.h"
 
 //add by viva
-#include "Packet/Cpackets/CGConnectSetKey.h"
+#include "../../shared/Packets/CGConnectSetKey.h"
 #include "Packet/Gpackets/GCFriendChatting.h"
 //end
 

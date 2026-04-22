@@ -12,7 +12,7 @@
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__
-	#include "Cpackets/CGMove.h"
+	#include "../../../shared/Packets/CGMove.h"
 	#include "ClientPlayer.h"
 #endif
 

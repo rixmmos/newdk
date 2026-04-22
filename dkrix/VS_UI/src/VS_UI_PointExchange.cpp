@@ -17,8 +17,8 @@
 #include "ServerInfo.h"
 
 // For packets
-#include "../Client/Packet/Cpackets/CGExchangeList.h"
-#include "../Client/Packet/Cpackets/CGExchangeBuy.h"
+#include "../../../shared/Packets/CGExchangeList.h"
+#include "../../../shared/Packets/CGExchangeBuy.h"
 #include "../Client/Packet/Gpackets/GCExchangeList.h"
 #include "../Client/Packet/SocketInputStream.h"
 #include "../Client/Packet/SocketOutputStream.h"

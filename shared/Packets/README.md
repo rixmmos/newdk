@@ -151,6 +151,11 @@ reappear" CI structural check originally scoped as 12.3 —
 same guarantee, same mechanism, no additional implementation
 work needed.
 
+As of 2026-04-22, that baseline is now `0`: every duplicate
+`CG*` / `CL*` packet-class pair targeted by Phase 12 has
+been moved out of `dkrixserver/src/Core/` and
+`dkrix/Client/Packet/Cpackets/` into this shared tree.
+
 ## What does NOT belong here
 
 - Server-side `*Handler.cpp` files — these are server-only

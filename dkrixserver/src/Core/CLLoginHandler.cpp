@@ -80,6 +80,7 @@
 #include "LCLoginError.h"
 #include "LCLoginOK.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "UserInfoManager.h"
 #include "chinabilling/CBillingInfo.h"
@@ -593,10 +594,15 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer) throw(ProtocolEx
                 //'%s', CurrentLoginServerID=%d, LastLoginDate=now() WHERE PlayerID = '%s' AND
                 // LogOn='LOGOFF'",connectIP.c_str(), connectMAC.c_str(),g_pConfig->getPropertyInt("LoginServerID"),
                 // ID.c_str());
-                pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGON', LoginIP = '%s', CurrentLoginServerID=%d, "
-                                    "LastLoginDate=now() WHERE PlayerID = '%s' AND LogOn='LOGOFF'",
-                                    connectIP.c_str(), g_pConfig->getPropertyInt("LoginServerID"), ID.c_str());
-                int affectedRowCount = pStmt->getAffectedRowCount();
+                PreparedStatement updatePlayerStmt(
+                    pStmt->getConnection(),
+                    "UPDATE Player SET LogOn = 'LOGON', LoginIP = ?, CurrentLoginServerID = ?, "
+                    "LastLoginDate = now() WHERE PlayerID = ? AND LogOn = 'LOGOFF'");
+                updatePlayerStmt.bindString(1, connectIP);
+                updatePlayerStmt.bindInt(2, g_pConfig->getPropertyInt("LoginServerID"));
+                updatePlayerStmt.bindString(3, ID);
+                updatePlayerStmt.execute();
+                int affectedRowCount = updatePlayerStmt.getAffectedRowCount();
 
                 // 최근 접속 IP를 5개까지 남긴다. IP Table은 별도로 기록한다.
                 // LoginPlayerData 에 IP를 남기므로 필요없다. by bezz 2003.04.21

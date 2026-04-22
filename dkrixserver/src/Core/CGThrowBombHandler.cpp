@@ -85,7 +85,7 @@ int BombMask[5][9][9] = {
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
+void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

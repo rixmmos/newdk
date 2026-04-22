@@ -58,7 +58,7 @@
 #include "Packet/InventoryInfo.h"
 #include "Packet/GearInfo.h"
 #include "Packet/ExtraInfo.h"
-#include "Packet/Cpackets/CGSay.h"
+#include "../../shared/Packets/CGSay.h"
 #include "../shared/Packets/CGCrashReport.h"
 #include "EffectInfo.h"
 #include "MScreenEffectManager.h"

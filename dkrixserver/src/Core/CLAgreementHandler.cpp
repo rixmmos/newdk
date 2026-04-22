@@ -10,13 +10,14 @@
 #include "Assert1.h"
 #include "DB.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// 이 패킷은 클라이언트가 아이디와 패스워드를 암호화해서
-// 로그인 서버로 전송한다. 로그인 서버는 이 패킷을 받아서
-// 플레이어의 아이디와 패스워드가 정확한지 DB로부터 읽어서
-// 비교한 후, 로그인의 성공 여부를 전송한다.
+// ģ¯´ ķØķ‚·ģ¯€ ķ´ė¯¼ģ¯´ģ–øķøź°€ ģ•„ģ¯´ė””ģ™€ ķØģ¤ģ›ė“ė¼ ģ•”ķøķ™”ķ•´ģ„
+// ėź·øģ¯ø ģ„ė²„ė ģ „ģ†ķ•ė‹¤. ėź·øģ¯ø ģ„ė²„ė” ģ¯´ ķØķ‚·ģ¯„ ė°›ģ•„ģ„
+// ķ”ė ģ¯´ģ–´ģ¯ ģ•„ģ¯´ė””ģ™€ ķØģ¤ģ›ė“ź°€ ģ •ķ™•ķ•ģ§€ DBėė¶€ķ„° ģ¯½ģ–´ģ„
+// ė¹„źµķ• ķ›„, ėź·øģ¯øģ¯ ģ„±ź³µ ģ—¬ė¶€ė¼ ģ „ģ†ķ•ė‹¤.
 //////////////////////////////////////////////////////////////////////////////
 void CLAgreementHandler::execute(CLAgreement* pPacket, Player* pPlayer)
 
@@ -37,13 +38,14 @@ void CLAgreementHandler::execute(CLAgreement* pPacket, Player* pPlayer)
 
         BEGIN_DB {
             //----------------------------------------------------------------------
-            // 넷마블 약관 미동의 리스트에서 삭제
+            // ė„·ė§ėø” ģ•½ź´€ ėÆøė¸™ģ¯ ė¦¬ģ¤ķøģ—ģ„ ģ‚­ģ 
             //----------------------------------------------------------------------
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("DELETE FROM PrivateAgreementRemain WHERE PlayerID = '%s'",
-                                pLoginPlayer->getID().c_str());
+            Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement stmt(pConnection, "DELETE FROM PrivateAgreementRemain WHERE PlayerID = ?");
+            stmt.bindString(1, pLoginPlayer->getID());
+            stmt.execute();
 
-            // 다음 단계로 진행할 수 있게 설정
+            // ė‹¤ģ¯ ė‹Øź³„ė ģ§„ķ–‰ķ•  ģ ģ˛ź² ģ„¤ģ •
             pLoginPlayer->setAgree(true);
 
             SAFE_DELETE(pStmt);

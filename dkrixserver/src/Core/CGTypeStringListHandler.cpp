@@ -24,7 +24,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGTypeStringListHandler::execute(CGTypeStringList* pPacket, Player* pPlayer)
+void CGTypeStringListHandler::execute(CGTypeStringList* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -60,7 +60,7 @@ void CGTypeStringListHandler::execute(CGTypeStringList* pPacket, Player* pPlayer
     __END_DEBUG_EX __END_CATCH
 }
 
-void CGTypeStringListHandler::executeWaitForMeet(CGTypeStringList* pPacket, Player* pPlayer)
+void CGTypeStringListHandler::executeWaitForMeet(CGTypeStringList* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -109,7 +109,7 @@ void CGTypeStringListHandler::executeWaitForMeet(CGTypeStringList* pPacket, Play
 #endif
     __END_DEBUG_EX __END_CATCH
 }
-void CGTypeStringListHandler::executeWaitForApart(CGTypeStringList* pPacket, Player* pPlayer)
+void CGTypeStringListHandler::executeWaitForApart(CGTypeStringList* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -157,7 +157,7 @@ void CGTypeStringListHandler::executeWaitForApart(CGTypeStringList* pPacket, Pla
     __END_DEBUG_EX __END_CATCH
 }
 
-void CGTypeStringListHandler::executeApartForce(CGTypeStringList* pPacket, Player* pPlayer)
+void CGTypeStringListHandler::executeApartForce(CGTypeStringList* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX

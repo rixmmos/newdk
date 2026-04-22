@@ -26,9 +26,7 @@ void CGSkillToInventory::read(SocketInputStream& iStream) throw(ProtocolExceptio
 
 #ifdef __USE_ENCRYPTER__
     SocketEncryptInputStream* pEIStream = dynamic_cast<SocketEncryptInputStream*>(&iStream);
-    Assert(pEIStream != NULL);
-
-    if (pEIStream->getEncryptCode() != 0) {
+    if (pEIStream != NULL && pEIStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_5(pEIStream->getEncryptCode(), pEIStream->readEncrypt(m_SkillType),
                             pEIStream->readEncrypt(m_ObjectID), pEIStream->readEncrypt(m_X),
                             pEIStream->readEncrypt(m_Y), pEIStream->readEncrypt(m_TargetX));
@@ -52,9 +50,7 @@ void CGSkillToInventory::write(SocketOutputStream& oStream) const throw(Protocol
 
 #ifdef __USE_ENCRYPTER__
     SocketEncryptOutputStream* pEOStream = dynamic_cast<SocketEncryptOutputStream*>(&oStream);
-    Assert(pEOStream != NULL);
-
-    if (pEOStream->getEncryptCode() != 0) {
+    if (pEOStream != NULL && pEOStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_5(pEOStream->getEncryptCode(), pEOStream->writeEncrypt(m_SkillType),
                             pEOStream->writeEncrypt(m_ObjectID), pEOStream->writeEncrypt(m_X),
                             pEOStream->writeEncrypt(m_Y), pEOStream->writeEncrypt(m_TargetX));

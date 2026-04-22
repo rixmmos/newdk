@@ -21,6 +21,7 @@
 #include "GuildUnion.h"
 #include "PCFinder.h"
 #include "PacketUtil.h"
+#include "PreparedStatement.h"
 #include "PlayerCreature.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
@@ -90,8 +91,12 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer) throw(Pr
 
         BEGIN_DB {
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO `Messages` (`Receiver`, `Message`) values ('%s','%s')",
-                                TargetGuildMaster.c_str(), g_pStringPool->c_str(374));
+            PreparedStatement insertMessageStmt(
+                g_pDatabaseManager->getConnection("DARKEDEN"),
+                "INSERT INTO `Messages` (`Receiver`, `Message`) VALUES (?, ?)");
+            insertMessageStmt.bindString(1, TargetGuildMaster);
+            insertMessageStmt.bindString(2, g_pStringPool->c_str(374));
+            insertMessageStmt.execute();
 
             // 거부한뒤에 나 혼자 남아있다면?
             Result* pResult = pStmt->executeQuery("SELECT count(*) FROM `GuildUnionMember` WHERE `UnionID`='%u'",

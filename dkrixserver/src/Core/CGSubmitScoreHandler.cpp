@@ -12,6 +12,7 @@
 #include "GCMiniGameScores.h"
 #include "GamePlayer.h"
 #include "PacketUtil.h"
+#include "PreparedStatement.h"
 #include "PlayerCreature.h"
 #include "mission/QuestManager.h"
 #endif
@@ -42,11 +43,17 @@ void CGSubmitScoreHandler::execute(CGSubmitScore* pPacket, Player* pPlayer)
             Statement* pStmt = NULL;
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery("UPDATE MiniGameScores SET Name='%s', Score=%u, Time=now() WHERE Type=%u AND "
-                                    "Level=%u AND Score>%u LIMIT 1",
-                                    pPC->getName().c_str(), pPacket->getScore(), pPacket->getGameType(),
-                                    pPacket->getLevel(), pPacket->getScore());
+                Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+                PreparedStatement stmt(
+                    pConnection,
+                    "UPDATE MiniGameScores SET Name = ?, Score = ?, Time = now() WHERE Type = ? AND Level = ? AND "
+                    "Score > ? LIMIT 1");
+                stmt.bindString(1, pPC->getName());
+                stmt.bindUInt(2, pPacket->getScore());
+                stmt.bindUInt(3, pPacket->getGameType());
+                stmt.bindUInt(4, pPacket->getLevel());
+                stmt.bindUInt(5, pPacket->getScore());
+                stmt.execute();
                 //						"INSERT INTO MiniGameScores (Name, Type, Level, Score, Time) VALUES
                 //('%s',%u,%u,%u,now())", pPC->getName().c_str(), 						pPacket->getGameType(),
                 // pPacket->getLevel(), pPacket->getScore();

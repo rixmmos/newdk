@@ -50,14 +50,14 @@
 #include "SystemAvailabilities.h"
 #include "MWarManager.H"
 // EXECryptor and ThemidaSDK includes removed (SDL2) - Copy protection no longer needed
-#include "packet/Cpackets/CGVerifyTime.h"
+#include "../../shared/Packets/CGVerifyTime.h"
 
 #ifdef OUTPUT_DEBUG
 	#include "packet/Gpackets/GCSkillFailed2.h"
 	#include "packet/Gpackets/GCSkillToObjectOK5.h"
 	#include "packet/Gpackets/GCSkillToSelfOK2.h"
 	#include "packet/Gpackets/GCSkillToTileOK2.h"
-	#include "packet/Cpackets/CGTypeStringList.h"
+#include "../../shared/Packets/CGTypeStringList.h"
 #endif
 
 //add by viva

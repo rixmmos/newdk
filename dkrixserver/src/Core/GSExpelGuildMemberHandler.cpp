@@ -16,6 +16,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SGDeleteGuildOK.h"
 #include "SGExpelGuildMemberOK.h"
@@ -58,14 +59,21 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
     ///////////////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+        pStmt = pConnection->createStatement();
 
         if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-            pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement stmt(pConnection, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+            stmt.bindString(1, pGuildMember->getName());
+            stmt.execute();
         } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-            pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement stmt(pConnection, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+            stmt.bindString(1, pGuildMember->getName());
+            stmt.execute();
         } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-            pStmt->executeQuery("UPDATE Ousters SET GuildID = 66 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement stmt(pConnection, "UPDATE Ousters SET GuildID = 66 WHERE Name = ?");
+            stmt.bindString(1, pGuildMember->getName());
+            stmt.execute();
         }
 
         SAFE_DELETE(pStmt);
@@ -98,7 +106,8 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
         HashMapGuildMemberItor itr = Members.begin();
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+            pStmt = pConnection->createStatement();
 
             for (; itr != Members.end(); itr++) {
                 GuildMember* pGuildMember = itr->second;
@@ -107,14 +116,17 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
                 //  DB에 Slayer, Vampire, Ousters 테이블의 GuildID 를 바꾼다.
                 ///////////////////////////////////////////////////////////////////
                 if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                    pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement stmt(pConnection, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+                    stmt.bindString(1, pGuildMember->getName());
+                    stmt.execute();
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                    pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement stmt(pConnection, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+                    stmt.bindString(1, pGuildMember->getName());
+                    stmt.execute();
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                    pStmt->executeQuery("UPDATE Ousters SET GuildID = 66 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement stmt(pConnection, "UPDATE Ousters SET GuildID = 66 WHERE Name = ?");
+                    stmt.bindString(1, pGuildMember->getName());
+                    stmt.execute();
                 }
 
                 // 길드 멤버를 expire 시킨다.

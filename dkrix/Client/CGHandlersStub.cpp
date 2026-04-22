@@ -11,12 +11,12 @@
 
 // Include packet headers to get handler class declarations
 #include "CGBuyStoreItem.h"
-#include "Packet/Cpackets/CGConnectSetKey.h"
+#include "../shared/Packets/CGConnectSetKey.h"
 // Phase 12: CGDisplayItem migrated to shared/Packets/.
 #include "CGDisplayItem.h"
 #include "../shared/Packets/CGDonationMoney.h"
 #include "../shared/Packets/CGLotterySelect.h"
-#include "Packet/Cpackets/CGMixItem.h"
+#include "../shared/Packets/CGMixItem.h"
 // Phase 12: CGRequestStoreInfo migrated to shared/Packets/.
 #include "CGRequestStoreInfo.h"
 #include "CGSelectQuest.h"
@@ -32,11 +32,11 @@
 
 // Stub implementations for store-related handlers
 void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) {}
-void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) {}
 void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) {}
 void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) {}
 void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer) {}
-void CGMixItemHandler::execute(CGMixItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGMixItemHandler::execute(CGMixItem* pPacket, Player* pPlayer) {}
 void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPlayer) {}
 void CGSelectQuestHandler::execute(CGSelectQuest* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGSelectRegenZoneHandler::execute(CGSelectRegenZone* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}

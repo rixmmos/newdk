@@ -39,7 +39,7 @@ int getSkillMapID(ElementalDomain domain);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
+void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -506,7 +506,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
 //////////////////////////////////////////////////////////////////////////////
 // ½½·¹ÀÌ¾î ±â¼ú ½ÀµæÀ» Ã³¸®
 //////////////////////////////////////////////////////////////////////////////
-void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPlayer)
+void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -623,7 +623,7 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
 //////////////////////////////////////////////////////////////////////////////
 // ¹ìÆÄÀÌ¾î ±â¼ú ½ÀµæÀ» Ã³¸®
 //////////////////////////////////////////////////////////////////////////////
-void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPlayer)
+void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -695,7 +695,7 @@ void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPl
     __END_DEBUG_EX __END_CATCH
 }
 
-void CGLearnSkillHandler::executeOustersSkill(CGLearnSkill* pPacket, Player* pPlayer)
+void CGLearnSkillHandler::executeOustersSkill(CGLearnSkill* pPacket, Player* pPlayer) throw(ProtocolException, Error)
 
 {
     __BEGIN_DEBUG_EX __BEGIN_TRY

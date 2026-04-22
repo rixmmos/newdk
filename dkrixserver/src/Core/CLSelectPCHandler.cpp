@@ -16,6 +16,7 @@
 #include "LCSelectPCError.h"
 #include "LGIncomingConnection.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "ZoneGroupInfoManager.h"
 #include "ZoneInfoManager.h"
@@ -349,17 +350,31 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer) throw(Prot
         //			g_pGameServerManager->sendPacket(pGameServerInfo->getIP() , 3335 , &lgIncomingConnection);
 
         // ���������� ������ slot ���. by sigi. 2002.5.6
-        pStmt1->executeQuery( // (!)
-                              // pStmt->executeQuery(
-            "UPDATE Player Set CurrentWorldID = %d, CurrentServerGroupID = %d, LastSlot = %d WHERE PlayerID = '%s'",
-            WorldID, pLoginPlayer->getServerGroupID(), slot, pLoginPlayer->getID().c_str());
+        PreparedStatement updatePlayerStmt(
+            pStmt1->getConnection(),
+            "UPDATE Player SET CurrentWorldID = ?, CurrentServerGroupID = ?, LastSlot = ? WHERE PlayerID = ?");
+        updatePlayerStmt.bindInt(1, WorldID);
+        updatePlayerStmt.bindInt(2, pLoginPlayer->getServerGroupID());
+        updatePlayerStmt.bindInt(3, slot);
+        updatePlayerStmt.bindString(4, pLoginPlayer->getID());
+        updatePlayerStmt.execute();
 
-        pStmt->executeQuery("UPDATE Slayer Set ServerGroupID = %d WHERE Name='%s'", pLoginPlayer->getServerGroupID(),
-                            pPacket->getPCName().c_str());
-        pStmt->executeQuery("UPDATE Vampire Set ServerGroupID = %d WHERE Name='%s'", pLoginPlayer->getServerGroupID(),
-                            pPacket->getPCName().c_str());
-        pStmt->executeQuery("UPDATE Ousters Set ServerGroupID = %d WHERE Name='%s'", pLoginPlayer->getServerGroupID(),
-                            pPacket->getPCName().c_str());
+        PreparedStatement updateSlayerStmt(pStmt->getConnection(), "UPDATE Slayer SET ServerGroupID = ? WHERE Name = ?");
+        updateSlayerStmt.bindInt(1, pLoginPlayer->getServerGroupID());
+        updateSlayerStmt.bindString(2, pPacket->getPCName());
+        updateSlayerStmt.execute();
+
+        PreparedStatement updateVampireStmt(pStmt->getConnection(),
+                                            "UPDATE Vampire SET ServerGroupID = ? WHERE Name = ?");
+        updateVampireStmt.bindInt(1, pLoginPlayer->getServerGroupID());
+        updateVampireStmt.bindString(2, pPacket->getPCName());
+        updateVampireStmt.execute();
+
+        PreparedStatement updateOustersStmt(pStmt->getConnection(),
+                                            "UPDATE Ousters SET ServerGroupID = ? WHERE Name = ?");
+        updateOustersStmt.bindInt(1, pLoginPlayer->getServerGroupID());
+        updateOustersStmt.bindString(2, pPacket->getPCName());
+        updateOustersStmt.execute();
 
         SAFE_DELETE(pStmt);
         SAFE_DELETE(pStmt1); //(!)

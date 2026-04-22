@@ -103,7 +103,7 @@ public:
         return HairStyle((m_BitSet.to_ulong() >> 1) & 3);
     }
     void setHairStyle(HairStyle hairStyle) {
-        m_BitSet |= bitset<SLAYER_BIT_MAX>(hairStyle << 1);
+        m_BitSet |= std::bitset<SLAYER_BIT_MAX>(hairStyle << 1);
     }
 
     // get/set race. by sigi. 2002.10.31
@@ -181,7 +181,7 @@ private:
     Slot m_Slot;
 
     // 슬레이어 플래그
-    bitset<SLAYER_BIT_MAX> m_BitSet;
+    std::bitset<SLAYER_BIT_MAX> m_BitSet;
 
     // 슬레이어 색깔 정보
     Color_t m_Colors[SLAYER_COLOR_MAX];

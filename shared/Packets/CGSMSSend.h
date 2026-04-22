@@ -1,0 +1,64 @@
+//////////////////////////////////////////////////////////////////////
+//
+// Filename    : CGSMSSend.h
+// Written By  : reiot@ewestsoft.com
+// Description :
+//
+//////////////////////////////////////////////////////////////////////
+
+#ifndef __CG_SMS_SEND_H__
+#define __CG_SMS_SEND_H__
+
+#include <list>
+#include <string>
+
+#include "Packet.h"
+#include "PacketFactory.h"
+
+#define MAX_NUMBER_LENGTH 11
+#define MAX_RECEVIER_NUM 5
+#define MAX_MESSAGE_LENGTH 80
+
+class CGSMSSend : public Packet {
+public:
+    void read(SocketInputStream& iStream) throw(ProtocolException, Error);
+    void write(SocketOutputStream& oStream) const throw(ProtocolException, Error);
+    void execute(Player* pPlayer) throw(ProtocolException, Error);
+    PacketID_t getPacketID() const throw() { return PACKET_CG_SMS_SEND; }
+    PacketSize_t getPacketSize() const throw();
+    string getPacketName() const throw() { return "CGSMSSend"; }
+    string toString() const throw();
+
+    std::list<string>& getNumbersList() { return m_Numbers; }
+    void addString(string str) { m_Numbers.push_back(str); }
+    void clearString() { m_Numbers.clear(); }
+
+    const string& getCallerNumber() const { return m_CallerNumber; }
+    void setCallerNumber(const string& num) { m_CallerNumber = num; }
+
+    const string& getMessage() const { return m_Message; }
+    void setMessage(const string& msg) { m_Message = msg; }
+
+private:
+    std::list<string> m_Numbers;
+    string m_CallerNumber;
+    string m_Message;
+};
+
+class CGSMSSendFactory : public PacketFactory {
+public:
+    Packet* createPacket() throw() { return new CGSMSSend(); }
+    string getPacketName() const throw() { return "CGSMSSend"; }
+    PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_SMS_SEND; }
+    PacketSize_t getPacketMaxSize() const throw() {
+        return szBYTE + (szBYTE + MAX_NUMBER_LENGTH) * MAX_RECEVIER_NUM + szBYTE + MAX_NUMBER_LENGTH + szBYTE +
+               MAX_MESSAGE_LENGTH;
+    }
+};
+
+class CGSMSSendHandler {
+public:
+    static void execute(CGSMSSend* pPacket, Player* player);
+};
+
+#endif

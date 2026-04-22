@@ -21,7 +21,7 @@
 	#include "Properties.h"
 	#include "ClientCommunicationManager.h"
 	//add by viva
-	#include "Cpackets/CGConnectSetKey.h"
+#include "../../../shared/Packets/CGConnectSetKey.h"
 	//end
 #endif
 

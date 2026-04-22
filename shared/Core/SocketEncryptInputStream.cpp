@@ -1,0 +1,15 @@
+//////////////////////////////////////////////////////////////////////
+//
+// SocketEncryptInputStream.cpp
+//
+// by Reiot
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "SocketEncryptInputStream.h"
+
+SocketEncryptInputStream::SocketEncryptInputStream(Socket* sock, uint BufferLen)
+    : SocketInputStream(sock, BufferLen) {
+    __BEGIN_TRY
+    __END_CATCH
+}

@@ -15,9 +15,7 @@ void CGUsePotionFromInventory::read(SocketInputStream& iStream) throw(ProtocolEx
 
 #ifdef __USE_ENCRYPTER__
     SocketEncryptInputStream* pEIStream = dynamic_cast<SocketEncryptInputStream*>(&iStream);
-    Assert(pEIStream != NULL);
-
-    if (pEIStream->getEncryptCode() != 0) {
+    if (pEIStream != NULL && pEIStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_3(pEIStream->getEncryptCode(), pEIStream->readEncrypt(m_ObjectID),
                             pEIStream->readEncrypt(m_InvenX), pEIStream->readEncrypt(m_InvenY));
     } else
@@ -36,9 +34,7 @@ void CGUsePotionFromInventory::write(SocketOutputStream& oStream) const throw(Pr
 
 #ifdef __USE_ENCRYPTER__
     SocketEncryptOutputStream* pEOStream = dynamic_cast<SocketEncryptOutputStream*>(&oStream);
-    Assert(pEOStream != NULL);
-
-    if (pEOStream->getEncryptCode() != 0) {
+    if (pEOStream != NULL && pEOStream->getEncryptCode() != 0) {
         SHUFFLE_STATEMENT_3(pEOStream->getEncryptCode(), pEOStream->writeEncrypt(m_ObjectID),
                             pEOStream->writeEncrypt(m_InvenX), pEOStream->writeEncrypt(m_InvenY));
     } else

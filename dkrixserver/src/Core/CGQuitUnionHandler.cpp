@@ -19,6 +19,7 @@
 #include "GuildUnion.h"
 #include "PCFinder.h"
 #include "PacketUtil.h"
+#include "PreparedStatement.h"
 #include "PlayerCreature.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
@@ -99,15 +100,25 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer) throw(Pr
             Statement* pStmt = NULL;
             BEGIN_DB {
                 pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+                Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
 
                 string escapeGuildName = g_pGuildManager->getGuildName(pPlayerCreature->getGuildID());
                 string escapeGuildNotice = "[" + escapeGuildName + "] " + g_pStringPool->c_str(378);
 
 
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')",
-                                    TargetGuildMaster.c_str(), escapeGuildNotice.c_str());
-                pStmt->executeQuery("INSERT INTO GuildUnionOffer values('%u','ESCAPE','%u',now())", tempUnionID,
-                                    pPacket->getGuildID());
+                PreparedStatement insertMessageStmt(
+                    pConnection,
+                    "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                insertMessageStmt.bindString(1, TargetGuildMaster);
+                insertMessageStmt.bindString(2, escapeGuildNotice);
+                insertMessageStmt.execute();
+
+                PreparedStatement insertOfferStmt(
+                    pConnection,
+                    "INSERT INTO GuildUnionOffer VALUES (?, 'ESCAPE', ?, now())");
+                insertOfferStmt.bindUInt(1, tempUnionID);
+                insertOfferStmt.bindUInt(2, pPacket->getGuildID());
+                insertOfferStmt.execute();
 
                 // 연합맴버가 있는지 보자..없으면?
                 Result* pResult =
@@ -118,8 +129,12 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer) throw(Pr
                     // cout << "강제적으로 탈퇴를 한다..연합에 멤버가 없으므로 연합을..지워버린다 : unionid " <<
                     // (int)tempUnionID << endl;
                     pStmt->executeQuery("DELETE FROM GuildUnionInfo WHERE UnionID='%u'", tempUnionID);
-                    pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')",
-                                        TargetGuildMaster.c_str(), g_pStringPool->c_str(379));
+                    PreparedStatement insertBrokenMessageStmt(
+                        pConnection,
+                        "INSERT INTO Messages (Receiver, Message) VALUES (?, ?)");
+                    insertBrokenMessageStmt.bindString(1, TargetGuildMaster);
+                    insertBrokenMessageStmt.bindString(2, g_pStringPool->c_str(379));
+                    insertBrokenMessageStmt.execute();
                     GuildUnionManager::Instance().reload();
                 }
 

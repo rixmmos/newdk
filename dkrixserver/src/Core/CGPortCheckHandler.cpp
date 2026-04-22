@@ -14,6 +14,7 @@
 
 #ifdef __GAME_SERVER__
 #include "DB.h"
+#include "PreparedStatement.h"
 
 #endif
 
@@ -21,8 +22,8 @@
 //
 // CGPortCheckHander::execute()
 //
-// 게임 서버가 로그인 서버로부터 CGPortCheck 패킷을 받게 되면,
-// ConnectionInfo를 새로 추가하게 된다.
+// ź²ģ˛„ ģ„ė²„ź°€ ėź·øģ¯ø ģ„ė²„ėė¶€ķ„° CGPortCheck ķØķ‚·ģ¯„ ė°›ź² ėė©´,
+// ConnectionInfoė¼ ģė ģ¶”ź°€ķ•ź² ėė‹¤.
 //
 //----------------------------------------------------------------------
 void CGPortCheckHandler::execute(CGPortCheck* pPacket)
@@ -41,25 +42,31 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
     Statement* pStmt = NULL;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertStmt(
+            pConnection,
+            "INSERT IGNORE INTO UserIPInfo (Name, IP, Port, ServerID) VALUES (?, ?, ?, ?)");
+        insertStmt.bindString(1, pPacket->getPCName());
+        insertStmt.bindULong(2, (unsigned long long)IP);
+        insertStmt.bindUInt(3, port);
+        insertStmt.bindInt(4, g_pConfig->getPropertyInt("ServerID"));
+        insertStmt.execute();
 
-        pStmt->executeQuery("INSERT IGNORE INTO UserIPInfo (Name, IP, Port, ServerID) VALUES ( '%s', %lu, %u, %d )",
-                            pPacket->getPCName().c_str(), IP, port, g_pConfig->getPropertyInt("ServerID"));
-
-        if (pStmt->getAffectedRowCount() == 0) {
-            // 다시 한번 시도
-            pStmt->executeQuery("UPDATE UserIPInfo Set IP=%lu, Port=%u WHERE Name='%s'", IP, port,
-                                pPacket->getPCName().c_str());
+        if (insertStmt.getAffectedRowCount() == 0) {
+            // ė‹¤ģ‹ ķ•ė² ģ‹ė¸„
+            PreparedStatement updateStmt(pConnection, "UPDATE UserIPInfo SET IP = ?, Port = ? WHERE Name = ?");
+            updateStmt.bindULong(1, (unsigned long long)IP);
+            updateStmt.bindUInt(2, port);
+            updateStmt.bindString(3, pPacket->getPCName());
+            updateStmt.execute();
 
             // log(LOG_CGCONNECT, pPacket->getPCName(), "", host);
         }
 
-        SAFE_DELETE(pStmt);
-
     } catch (SQLQueryException&) {
         /*
         try {
-            // 다시 한번 시도
+            // ė‹¤ģ‹ ķ•ė² ģ‹ė¸„
             pStmt->executeQuery( "UPDATE UserIPInfo Set IP=%ld, Port=%d WHERE Name='%s'",
                                     IP,
                                     port,
@@ -72,7 +79,7 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
         } catch (SQLQueryException & sqe) {	//se) {
 
             SAFE_DELETE(pStmt);
-            // 무시한다.
+            // ė¬´ģ‹ķ•ė‹¤.
             //throw ProtocolException("Duplicated IPInfo");
         }
         */

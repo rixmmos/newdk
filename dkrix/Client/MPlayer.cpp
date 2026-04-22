@@ -69,7 +69,7 @@
 #include "RankBonusDef.h"
 #include "MOustersGear.h"
 
-#include "CPackets/CGAbsorbSoul.h"
+#include "../../shared/Packets/CGAbsorbSoul.h"
 
 #include "UIMessageManager.h"
 #include "UIFunction.h"

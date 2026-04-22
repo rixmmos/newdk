@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include "DB.h"
 #include "GamePlayer.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #endif
 
@@ -32,19 +33,25 @@ void CGCrashReportHandler::execute(CGCrashReport* pPacket, Player* pPlayer)
 
     try {
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO CrashReportLog (PlayerID, Name, ReportTime, ExecutableTime, Version, "
-                                "Address, Message, OS, CallStack) VALUES "
-                                "('%s', '%s', now(), '%s', %u, '%s', '%s', '%s', '%s')",
-                                pGamePlayer->getID().c_str(), pCreature->getName().c_str(),
-                                pPacket->getExecutableTime().c_str(), pPacket->getVersion(),
-                                pPacket->getAddress().c_str(), pPacket->getMessage().c_str(), pPacket->getOS().c_str(),
-                                pPacket->getCallStack().c_str());
+            Connection* pConnection = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement stmt(
+                pConnection,
+                "INSERT INTO CrashReportLog (PlayerID, Name, ReportTime, ExecutableTime, Version, Address, Message, "
+                "OS, CallStack) VALUES (?, ?, now(), ?, ?, ?, ?, ?, ?)");
+            stmt.bindString(1, pGamePlayer->getID());
+            stmt.bindString(2, pCreature->getName());
+            stmt.bindString(3, pPacket->getExecutableTime());
+            stmt.bindUInt(4, pPacket->getVersion());
+            stmt.bindString(5, pPacket->getAddress());
+            stmt.bindString(6, pPacket->getMessage());
+            stmt.bindString(7, pPacket->getOS());
+            stmt.bindString(8, pPacket->getCallStack());
+            stmt.execute();
 
             SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
-        // 누가 이상한거 날리면 무시하자
+        // ė„ź°€ ģ¯´ģķ•ź±° ė‚ ė¦¬ė©´ ė¬´ģ‹ķ•ģ˛
     } catch (...) {
         filelog("CrashReport.log", "%s", pPacket->toString().c_str());
     }
