@@ -1810,6 +1810,22 @@ Implementation notes vs. the 11A sketch:
   adjacent `SELECT count(*)` checks and dynamic-table deletes,
   so the CI ratchet only dropped by one even though the
   user-controlled message insertions are now parameterized.
+- **PreparedStatement SELECT support landed 2026-04-22.**
+  `PreparedStatement::execute()` now materializes stmt-mode
+  result sets back into the legacy `Result` API, so migrated
+  call sites can keep using `getRowCount()`, `next()`,
+  `getInt()`, and `getString()` without switching to a second
+  result iteration model. `Result` now supports both classic
+  `MYSQL_RES` ownership and an internal materialized-row mode
+  for statement-backed `SELECT`s.
+- **First post-SELECT mixed batch landed 2026-04-22.** The
+  baseline moved from `545` to `540` by converting five
+  mixed read/write handlers to `PreparedStatement`:
+  `CGRequestIPHandler`, `CGDenyUnionHandler`,
+  `CGQuitUnionAcceptHandler`, `CGQuitUnionHandler`, and
+  `CGExpelGuildHandler`. This is the first batch that uses
+  parameterized `SELECT count(*)` and simple point-lookups,
+  not just write-only `INSERT` / `UPDATE` / `DELETE`.
 - **Stress test the MYSQL_STMT lifecycle under load.**
   libmysqlclient has historically had resource-cleanup bugs
   around `mysql_stmt_close` on shared connections; real-world
