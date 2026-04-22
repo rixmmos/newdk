@@ -24,3 +24,5 @@ DarkEden data/
 dkrixserver/GamePlayer.txt
 dkrixserver/PayPlayDateLog.txt
 loginerror.txt
+build-asan/
+build/
