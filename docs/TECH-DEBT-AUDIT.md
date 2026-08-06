@@ -65,7 +65,7 @@ maintainer.
 
 | # | Item | Type | I | R | E | **Pri** |
 |---|---|---|---|---|---|---|
-| 1 | CI has never executed | Infrastructure | 5 | 5 | 2 | **40** |
+| 1 | ~~CI has never executed~~ → **server GREEN**; client still unbuilt | Infrastructure | 4 | 4 | 2 | **32** |
 | 2 | `SPRITELIB_BACKEND_README.md` claims "Production Ready" falsely | Documentation | 3 | 4 | 1 | **35** |
 | 3 | Branch has no upstream; 106-commit divergence | Infrastructure | 4 | 4 | 2 | **32** |
 | 4 | 34 plaintext DB passwords in 13 tracked conf files | Security | 2 | 5 | 2 | **28** |
@@ -132,27 +132,34 @@ close.
 
 ## Detail on the top items
 
-### 1. CI has never executed — Priority 40 → **partially closed 2026-08-06**
+### 1. CI has never executed — **SERVER GREEN 2026-08-06.** Priority 40 → 20 (client only)
 
-> **It executed.** First real run: the server build reached **86%** on a clean
-> Ubuntu runner, then failed at link — `ld: cannot find -lnsl`, a missing runner
-> package rather than a code defect. Fixed by adding `libnsl-dev` (`b8c24f0`).
-> The `clang-format` job passed, and did so meaningfully now that `60f4c35`
-> fixed its path bug.
+> **The server build is green.** `make debug` completes on a clean Ubuntu
+> runner; `gameserver`, `loginserver` and `sharedserver` are all produced and
+> verified present. The `clang-format` job is green and genuinely inspecting
+> files.
 >
-> This is the first compiler evidence of anything in this repository. What it
-> buys: the server half of the "no automated signal" problem is nearly solved,
-> and the phases this document lists as delegable-once-green (1, 2, 3, 7, 10)
-> become delegable for the server as soon as the next run is clean.
+> Three things got it there:
+> - `60f4c35` — the format job could not fail; it skipped every file.
+> - `b8c24f0` — `ld: cannot find -lnsl`. libnsl left glibc in 2.32 and is not
+>   preinstalled on `ubuntu-latest`. The build had already reached 86%, so the
+>   tree itself was fine.
+> - Nothing else. The failure this document predicted — Windows portability
+>   debt — was measured and disproved beforehand and never appeared.
 >
-> **The client still has zero evidence.** It has never been compiled by CI.
-> Priority stays at 40 until both are green.
+> **What it buys.** This audit was written under "no automated signal exists".
+> For `dkrixserver/` that is over. Items 6, 7, 11, 12, 13, 16 and 20 are now
+> checkable by machine on the server side, and the phases `MODERNIZATION.md`
+> lists as delegable-once-green (1, 2, 3, 7, 10) are delegable there today.
 >
-> Prediction check: this document previously expected the first failure to be
-> Windows portability debt. It was not — that claim was measured and found false
-> (see the Ground-truth note in `MODERNIZATION.md`), and the actual cause was an
-> absent system library. Worth remembering the next time a plausible-sounding
-> cause is written down without being tested.
+> **The client remains at zero evidence** and is now the whole of this item.
+> Run #3 died at *configure* on a stale generator pin without reaching any
+> project code. Fix pushed (`21a9172`), not yet re-run.
+>
+> Rescored on the client alone: **I=4, R=4, E=2 → 32.** Lower than the original
+> 40 because half the original scope is delivered and the remaining half has a
+> fix already in flight — not because the client matters less. It is still the
+> highest-priority item in this document.
 
 `.github/workflows/client.yml` and `server.yml` exist (committed in `53ac594`) but
 have never run, because the branch has never been pushed. Consequence: **not one

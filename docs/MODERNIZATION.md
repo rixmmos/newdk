@@ -39,18 +39,36 @@ Every "done" claim below is either **[measured]** (re-verified against the
 working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 (asserted by a previous pass, not re-checked, and not confirmed by a build).
 
-> **[2026-08-06] This changed today. The server tree compiles.** The first real
-> CI run reached **86%** on a clean Ubuntu runner before failing at link with
-> `ld: cannot find -lnsl` — a missing runner package (`libnsl-dev`; libnsl left
-> glibc in 2.32), not a code defect. Fixed in `b8c24f0`. The `clang-format` job
-> passed, and passed meaningfully — `60f4c35` had just fixed the path bug that
-> made it skip every file.
+> ## [2026-08-06] THE SERVER BUILD IS GREEN
 >
-> So the blanket statement below is no longer true of the **server**. It remains
-> true of the client, which has never been compiled by CI. Treat server claims
-> as provisionally supported and client claims as unverified.
+> First green CI run in this project's history. `make debug` completes on a
+> clean Ubuntu runner and all three binaries — `gameserver`, `loginserver`,
+> `sharedserver` — are produced and verified present. The `clang-format` job is
+> green too, and green *meaningfully*: `60f4c35` fixed the path bug that had
+> made it skip every file and pass regardless.
+>
+> Getting there took two fixes and one correction:
+> - `60f4c35` — the format job inspected nothing and could not fail.
+> - `b8c24f0` — `ld: cannot find -lnsl`. libnsl left glibc in 2.32 and is not
+>   preinstalled on `ubuntu-latest`; added `libnsl-dev`. The build had already
+>   reached 86% before this, so most of the tree was fine.
+> - The predicted cause — Windows portability debt in `Platform.h` — was
+>   measured and found false before the run, and played no part.
+>
+> **What this changes.** Everything in this document was written under
+> "no automated signal exists". For the server, that is over. A change to
+> `dkrixserver/` can now be proposed by anyone and judged by machine. The
+> phases this file lists as delegable-once-green — 1, 2, 3, 7, 10 — are
+> delegable for the server as of now.
+>
+> **The client is still unverified.** It has never compiled under CI; run #3
+> died at configure on a stale generator pin before reaching any project code
+> (`21a9172`). Treat every client claim below as unverified, and every server
+> claim as backed by a build.
 
-**No claim in this document has been confirmed by a compile.** The client
+**No claim in this document has been confirmed by a compile.** ~~The client~~
+*(Superseded for the server — see the box above. Still true of the client.)*
+The client
 requires Windows + Visual Studio 2022 + vcpkg; the server requires Linux with
 libmysqlclient, lua5.1, and xerces-c. Neither toolchain is available to an
 agent session. Until a CI pipeline exists (Phase 10), "the tree still builds"
@@ -213,10 +231,12 @@ per-area status doc, this file wins.
 ### Docs (`docs/`)
 - Mixed-language reference material (mostly Chinese filenames) plus
   `howto/`, `pic/`, `client_source_overview/`.
-- **[measured] `README.md` is no longer empty** (1,681 bytes), but it still
-  describes "three sibling working trees, each a separate repository,
-  checked out side by side." That is wrong: `dkrix/` and `dkrixserver/` are
-  folders inside the single `newdk` repo. Fix in the next docs pass.
+- ~~`README.md` still describes three sibling repositories.~~ **Rewritten
+  2026-08-06.** For the record, that description was *outdated, not wrong*:
+  `rixmmos` does host `dkrix`, `dkrixserver` and `docs` as public forks of
+  `opendarkeden` — they are the original layout, superseded by the private
+  consolidated `newdk`. Only the paths it gave (`client/`, `server/`) were
+  never right.
 - **[measured] The workspace-level spec now lives at `../CLAUDE.md`**,
   not here. `docs/CLAUDE.md` is the engineering-principles document.
 - **[measured] The ten superseded client status docs are archived** at
@@ -234,7 +254,7 @@ interleave once P0 is done.
 > 4 are untouched despite the active branch being named for Phase 4; and
 > Phase 2's target file *grew*. Treat the ordering as intent, not history.
 
-### Phase -1 — Make the work verifiable (blocking, 2 of 4 done)
+### Phase -1 — Make the work verifiable (3.5 of 4 done — server green, client outstanding)
 
 This did not exist in earlier revisions and it should have. Nothing below
 can be trusted without it, and it is the single change that would let
@@ -247,15 +267,19 @@ routine phase work be delegated rather than hand-held.
       never the same branch. Local promoted to `main`, remote parked at
       tag `archive/modernization-phases-1-17`. See `BRANCH-RECONCILIATION.md`.
 - [x] Add a root `.gitignore` (see `../CLAUDE.md` → Repo hygiene). **Done.**
-- [ ] Stand up GitHub Actions on `rixmmos/newdk`:
-      - server: `make debug` on Ubuntu with libmysqlclient / lua5.1 /
-        xerces-c;
-      - client: `cmake --build` on `windows-latest` with vcpkg.
-      Red build = blocked merge. This is Phase 10's first bullet, promoted
-      to blocking because it is the prerequisite for everything else being
-      checkable by anyone other than the person at this workstation.
+- Stand up GitHub Actions on `rixmmos/newdk`:
+  - [x] **server — GREEN 2026-08-06.** `make debug` on Ubuntu with
+        libmysqlclient / lua5.1 / xerces-c / **libnsl**. All three binaries
+        (`gameserver`, `loginserver`, `sharedserver`) produced and verified.
+        `clang-format` job green and genuinely inspecting files.
+  - [ ] **client — still red.** `cmake --build` on `windows-latest` with
+        vcpkg. Run #3 failed at *configure*: the pinned generator
+        `-G "Visual Studio 17 2022"` no longer matches the runner image,
+        though vcpkg had just built SDL2 successfully, so MSVC was present.
+        Pin removed in `21a9172`; not yet re-run. **No client code has been
+        compiled by CI yet.**
 - Success: a change can be proposed, built, and judged without a human
-  manually running two toolchains.
+  manually running two toolchains. **Achieved for `dkrixserver/`.**
 
 ### Phase 0 — Reset the narrative (done 2026-04-17)
 - [x] Create project-wide `docs/CLAUDE.md`.
