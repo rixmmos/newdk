@@ -146,16 +146,37 @@ Schema and content edits are made against a live MySQL instance, so:
 
 ## Repo hygiene
 
-Root currently holds a lot of incidental debris: `Darkeden.rar` (~700 MB),
-`screen_capture*.png`, `gameserver_*.out` / `loginserver_*.out`,
-`release_build.log`, `last_build.log`, and a literally-named
-`char_zone_rescue_20260426_$(Get-Date -Format yyyyMMdd_HHmmss).sql` (a
-PowerShell quoting bug). Do not add more of this. When creating throwaway
-artifacts, put them in `_server_logs_tmp/` or outside the repo, and prefer
-adding a root `.gitignore` entry over committing them.
+**[measured 2026-08-06] The index is clean.** An earlier revision of this
+section listed root debris as an outstanding problem. It is not — none of it is
+tracked, and the `.gitignore` added in Phase -1 is doing its job:
 
-Do not commit build outputs (`build*/`, `bin/`, `lib/`, `publish/`),
-game data blobs, or secrets.
+| On disk at root | Tracked? |
+| --- | --- |
+| `Darkeden.rar` (~700 MB) | no |
+| `screen_capture*.png` (10 files) | no |
+| `gameserver_*.out` / `loginserver_*.out` (9 files) | no |
+| `last_build.log`, `release_build.log`, `publish_release.log` | no |
+
+The literally-named `char_zone_rescue_20260426_$(Get-Date -Format
+yyyyMMdd_HHmmss).sql` — a PowerShell quoting bug — **is gone**; the correctly
+named `char_zone_rescue_20260426_224700.sql` is what remains.
+
+Thirteen files are tracked at root: `.gitattributes`, `.gitignore`,
+`CHANGELOG.md`, `CLAUDE.md`, `README.md`, the three release `.cmd` wrappers, and
+five DB fix/backup `.sql` files from the 2026-04 live-server work. The `.sql`
+files are kept per the DB discipline above (fix and backup travel together);
+moving them under a `db/` folder would be tidier but nothing depends on their
+location, so it is cosmetic.
+
+Still true: do not add more debris. Put throwaway artifacts in
+`_server_logs_tmp/` or outside the repo, and prefer a `.gitignore` entry over
+committing them. Do not commit build outputs (`build*/`, `bin/`, `lib/`,
+`publish/`), game data blobs, or secrets.
+
+`compile_commands.json` was untracked on 2026-08-06 (6.6 MB, both copies); it
+was gitignored but had been committed before that entry existed. Gitignore does
+not untrack — check `git ls-files` when adding an ignore rule for something
+that already exists.
 
 ## Working agreements
 
