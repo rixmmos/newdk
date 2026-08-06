@@ -163,7 +163,17 @@ and that question has to be answered before anything is pushed — which blocks 
 Remote branches present: `main`, `modernize/phase1-dead-code`,
 `modernize/phase2-platform-h`, `modernize/phase4-sprite`.
 
-### 4. Plaintext credentials in tracked config — Priority 28
+### 4. Plaintext credentials in tracked config — Priority 28 — **mechanism landed 2026-08-06**
+
+> **Half done.** `Properties::load()` now expands `${VAR}` against the
+> environment, and `conf/{gameserver,loginserver,sharedserver}.conf.template`
+> exist with 16 `DKRIX_*` placeholders covering every credential and host/IP.
+> Provable no-op on the current deployment — no conf file contains `${`.
+>
+> **Still open:** the plaintext values remain in the tracked conf files and in
+> git history. Removing them means rotating the deployment to the template flow
+> and validating against a running server, which is why it did not land with the
+> mechanism. Priority unchanged until that happens.
 
 34 `PASSWORD` lines across 13 tracked files in `dkrixserver/conf/`, including a
 `conf/backup/` set that duplicates them. Sample: `DB_PASSWORD : elca005` appears in

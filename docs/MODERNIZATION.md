@@ -387,7 +387,31 @@ Option B.
       branches or move to a runtime config flag.
 - [ ] Delete `.old.cpp` files in `server/database/`.
 
-### Phase 8 — Server: SQL and secrets
+### Phase 8 — Server: SQL and secrets (split; secrets half in progress)
+
+> **[measured 2026-08-06] Split this phase.** The two halves have very
+> different costs and should not gate each other:
+>
+> - **Secrets** — 34 plaintext passwords across 13 tracked `conf/` files.
+>   Audit priority 28.
+> - **SQL** — 26 `sprintf(query, …)` sites (not the "~87" this file used to
+>   claim; that figure never reproduced). Audit priority 12, a real refactor.
+>
+> **Secrets, step 1 of 2 — done.** `Properties::load()` now expands `${VAR}`
+> placeholders against the environment, and
+> `conf/{gameserver,loginserver,sharedserver}.conf.template` promote every
+> credential and host/IP to a `DKRIX_*` variable (16 distinct). Ported by hand
+> from the parked line's `4760660`, preserving this tree's `\r` whitespace fix.
+> Verified as far as is possible without a server build: the function compiles
+> clean standalone under `-Wall -Wextra` with 13 passing assertions,
+> `-fsyntax-only` reports zero errors originating in `Properties.cpp`, and **no
+> conf file contains `${`**, so it is a provable no-op on the current
+> deployment.
+>
+> **Secrets, step 2 of 2 — not done.** The plaintext credentials are still in
+> the tracked conf files and in git history. Rotating to the template flow
+> (copy `.template` → `.conf` on the host, export `DKRIX_*` in the service
+> unit) is a deployment change and needs a running server to validate.
 - [ ] Introduce a `PreparedStatement` wrapper over `mysql_stmt_*`.
 - [ ] Migrate the ~87 `sprintf(query, ...)` sites module by module,
       starting with user-string call sites (chat, pet names, custom
