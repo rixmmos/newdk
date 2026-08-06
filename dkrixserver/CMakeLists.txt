@@ -2,28 +2,28 @@ cmake_minimum_required(VERSION 3.16)
 project(DarkEden VERSION 1.0 LANGUAGES CXX)
 
 # ============================================================================
-# 全局设置
+
 # ============================================================================
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# 输出目录
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # ============================================================================
-# 全局编译选项
+
 # ============================================================================
-# 基础宏定义 - 所有目标都需要
+#  - 
 if(APPLE)
     add_compile_definitions(__APPLE__ _REENTRANT)
 elseif(UNIX)
     add_compile_definitions(__LINUX__ _REENTRANT)
 endif()
 
-# 警告设置
+
 set(WARNING_FLAGS 
     -Wall
     -Wno-format 
@@ -31,12 +31,12 @@ set(WARNING_FLAGS
 )
 add_compile_options(${WARNING_FLAGS})
 
-# Debug 模式
+# Debug 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 # ============================================================================
-# 查找依赖
+
 # ============================================================================
 find_package(Threads REQUIRED)
 
@@ -111,7 +111,7 @@ else()
 endif()
 
 # ============================================================================
-# 包含目录（全局）
+
 # ============================================================================
 include_directories(
     ${CMAKE_SOURCE_DIR}/src/Core
@@ -125,13 +125,13 @@ if(XERCES_INCLUDE_DIR)
 endif()
 
 # ============================================================================
-# 子目录
+
 # ============================================================================
 add_subdirectory(src/Core)
 add_subdirectory(src/server)
 
 # ============================================================================
-# 安装规则
+
 # ============================================================================
 install(TARGETS gameserver loginserver sharedserver
     RUNTIME DESTINATION bin

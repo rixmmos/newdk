@@ -124,9 +124,9 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
     CoordInven_t InvenX = pPacket->getX();
     CoordInven_t InvenY = pPacket->getY();
 
-    // cout << "ÆÐÅ¶³¯¶ó¿È : " << pPacket->toString() << endl;
+    
 
-    // ÀÎº¥Åä¸® ÁÂÇ¥¸¦ ³Ñ¾î°¡´Â ¿µ¿ªÀÌ¶ó¸é ¾È µÈ´Ù.
+    
     if (InvenX >= pInventory->getWidth() || InvenY >= pInventory->getHeight()) {
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -134,7 +134,7 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
         return;
     }
 
-    // ÀÎº¥Åä¸®¿¡ ±× ¾ÆÀÌÅÛÀÌ ¾ø´Ù¸é ¿¡·¯´Ù.
+    
     Item* pItem = pInventory->getItem(InvenX, InvenY);
     if (pItem == NULL) {
         GCCannotUse _GCCannotUse;
@@ -143,12 +143,12 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
         return;
     }
 
-    // ÀÎº¥Åä¸®¿¡ ÀÖ´Â ¾ÆÀÌÅÛÀÇ Object¸¦ ¹Þ´Â´Ù.
+    
     ObjectID_t ItemObjectID = pItem->getObjectID();
 
-    // OID°¡ ÀÏÄ¡ÇÏÁö ¾Ê°Å³ª, »ç¿ëÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÌ¶ó¸é ¿¡·¯´Ù.
+    
     if (ItemObjectID != pPacket->getObjectID() || !isUsableItem(pItem, pCreature)) {
-        // cout << "¾ÆÅÛ »ç¿ë ºÒ°¡. ¿ÉÁ§Æ® ¾Æµð°¡ ¾È ¸Â´ø°¡..." << endl;
+        
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
         pGamePlayer->sendPacket(&_GCCannotUse);
@@ -156,8 +156,8 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
     }
 
 
-    // ²éÕÒÎïÆ·ÊÇÔÚÉÌµêÖÐ
-    // ÐÞÕý¼¼ÄÜ¿¨ÔÚÉÌµêÖÐÎÞÏÞÊ¹ÓÃBUG
+    
+    
     if (pItem->getItemType() >= 5 && pItem->getItemType() <= 7) {
         BYTE bIndex = pPC->getStore()->getItemIndex(pItem);
         if (bIndex != 0xff) {
@@ -174,7 +174,7 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
         return;
     }
 
-    // ¾ÆÀÌÅÛÀÇ Á¾·ù¿¡ µû¶ó, Ã³¸® ÇÔ¼ö¸¦ ºÐ±â½ÃÄÑ ÁØ´Ù.
+    
     ////cout << pItem->getItemClass() << endl;
 
     switch (pItem->getItemClass()) {
@@ -245,7 +245,7 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
         sprintf(buffer, "SMSCharge=%u", pPC->getSMSCharge());
         pPC->tinysave(buffer);
 
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -254,7 +254,7 @@ void CGUseItemFromInventoryHandler::execute(CGUseItemFromInventory* pPacket, Pla
     case Item::ITEM_CLASS_TRAP_ITEM:
         executeTrapItem(pPacket, pPlayer);
         break;
-        // add by Coffee 2007-6-9 Ôö¼ÓÐÂ¼¼ÄÜ¿¨¿Û³ý´úÂë
+        
     case Item::ITEM_CLASS_MOON_CARD:
         if (pItem->getItemType() >= 5 && pItem->getItemType() <= 7) {
             GCUseOK _GCUseOK;
@@ -285,8 +285,8 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -301,9 +301,9 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
     Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
-    // ÄÚ¸¶ »óÅÂ¶ó¸é »ç¿ëÇÒ ¼ö ¾ø´Ù.
+    
     if (pSlayer->isFlag(Effect::EFFECT_CLASS_COMA)
-        // ¼ÛÆíÀÎ °æ¿ì´Â À¯·á »ç¿ëÀÚ°¡ ¾Æ´Ï¸é »ç¿ëÇÒ ¼ö ¾ø´Ù.
+        
         || pItem->getItemType() == 11 && !pGamePlayer->isPayPlaying() && !pGamePlayer->isPremiumPlay()) {
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -323,10 +323,10 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
     int HPDelayProvider = pPotion->getHPDelay();
     int MPDelayProvider = pPotion->getMPDelay();
 
-    // Activation Effect°¡ °É·ÁÀÖ´Ù¸é È¸º¹¼Óµµ°¡ 2¹è°¡ µÈ´Ù.
+    
     if (pSlayer->isFlag(Effect::EFFECT_CLASS_ACTIVATION)) {
         if (pPotion->getItemType() >= 14 && pPotion->getItemType() <= 17) {
-            // ¾µ ¼ö´Â ÀÖ´Ù.
+            
         } else {
             HPDelayProvider = (HPDelayProvider >> 1);
             MPDelayProvider = (MPDelayProvider >> 1);
@@ -340,7 +340,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
     int PotionHPAmount = 0, PotionMPAmount = 0;
 
-    // ¸¸¾à ´Ù¸¥ Á¾ÀûÀÇ RelicÀ» ¼ÒÀ¯Çß´Ù¸é, Ç÷Ã»/Æ÷¼ÇÀÇ È¿°ú°¡ 50%·Î ¶³¾îÁø´Ù.
+    
     PotionHPAmount = pPotion->getHPAmount();
     PotionMPAmount = pPotion->getMPAmount();
 
@@ -350,7 +350,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
     bool notRecoverHP = false;
     bool notRecoverMP = false;
 
-    // HP È¸º¹¾çÀÌ Á¸ÀçÇÑ´Ù¸é...
+    
     if (HPAmount != 0 && HPQuantity != 0) {
         if (CurrentHP < MaxHP) {
             EffectManager* pEffectManager = pSlayer->getEffectManager();
@@ -363,27 +363,27 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
                 EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
 
-                // ±âÁ¸ÀÇ ´ÜÀ§¾ç°ú È½¼ö·Î Ã¤¿ì´Â HP¾çÀ» °è»êÇÑ´Ù.
-                // ±×°ÍÀ» ÇöÀç È¸º¹¾ç¿¡ ´õÇÑ´Ù.
+                
+                
                 int PrevHPAmount = pEffectHPRecoveryEffect->getHPQuantity() * pEffectHPRecoveryEffect->getPeriod();
                 HPAmount = min((int)(HPAmount + PrevHPAmount), MaxHP - CurrentHP);
 
-                // µÑ Áß¿¡ Å« ´ÜÀ§È¸º¹¾ç°ú ÀÛÀº µô·¹ÀÌ¸¦ ¾ò¾î³½´Ù.
+                
                 HPQuantity = max(HPQuantity, (int)(pEffectHPRecoveryEffect->getHPQuantity()));
                 HPDelayProvider = min(HPDelayProvider, (int)(pEffectHPRecoveryEffect->getDelay()));
 
-                // ÇöÀç È¸º¹¾çÀ» °¡Áö°í, ¾ó¸¶¾¿ ¸î¹ø¿¡ È¸º¹ÇÒ °ÍÀÎ°¡¸¦ °áÁ¤ÇÑ´Ù.
+                
                 temp = (double)((double)HPAmount / (double)HPQuantity);
                 Period = (uint)ceil(temp);
                 Deadline = Period * HPDelayProvider;
 
-                // HP Recovery effect¸¦ °»½ÅÇÑ´Ù.
+                
                 pEffectHPRecoveryEffect->setDeadline(Deadline);
                 pEffectHPRecoveryEffect->setDelay(HPDelayProvider);
                 pEffectHPRecoveryEffect->setHPQuantity(HPQuantity);
                 pEffectHPRecoveryEffect->setPeriod(Period);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                 gcHPRecoveryStartToSelf.setPeriod(pEffectHPRecoveryEffect->getPeriod());
                 gcHPRecoveryStartToSelf.setDelay(pEffectHPRecoveryEffect->getDelay());
@@ -391,8 +391,8 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
                 pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ´Ù¸¥ÀÌµé¿¡°Ô º¸³½´Ù.
-                // È¸º¹ °»½Å ÆÐÅ¶, ½ÃÀÛ°ú ¶È °°Àº ÆÐÅ¶À» º¸³½´Ù.
+                
+                
                 GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                 gcHPRecoveryStartToOthers.setObjectID(pSlayer->getObjectID());
                 gcHPRecoveryStartToOthers.setPeriod(pEffectHPRecoveryEffect->getPeriod());
@@ -414,7 +414,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
                 pEffectManager->addEffect(pEffectHPRecovery);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                 gcHPRecoveryStartToSelf.setPeriod(Period);
                 gcHPRecoveryStartToSelf.setDelay(HPDelayProvider);
@@ -422,7 +422,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
                 pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» º¸´ÂÀÌµé¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                 gcHPRecoveryStartToOthers.setObjectID(pSlayer->getObjectID());
                 gcHPRecoveryStartToOthers.setPeriod(Period);
@@ -445,7 +445,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
         notRecoverHP = true;
     }
 
-    // MP È¸º¹¾çÀÌ Á¸ÀçÇÑ´Ù¸é...
+    
     if (MPAmount != 0 && MPQuantity != 0) {
         if (CurrentMP < MaxMP) {
             EffectManager* pEffectManager = pSlayer->getEffectManager();
@@ -458,27 +458,27 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
                 EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
 
-                // ±âÁ¸ÀÇ ´ÜÀ§¾ç°ú È½¼ö·Î Ã¤¿ì´Â MP¾çÀ» °è»êÇÑ´Ù.
-                // ±×°ÍÀ» ÇöÀç È¸º¹¾ç¿¡ ´õÇÑ´Ù.
+                
+                
                 int PrevMPAmount = pEffectMPRecoveryEffect->getMPQuantity() * pEffectMPRecoveryEffect->getPeriod();
                 MPAmount = min((int)(MPAmount + PrevMPAmount), MaxMP - CurrentMP);
 
-                // µÑ Áß¿¡ Å« ´ÜÀ§È¸º¹¾ç°ú ÀÛÀº µô·¹ÀÌ¸¦ ¾ò¾î³½´Ù.
+                
                 MPQuantity = max(MPQuantity, (int)(pEffectMPRecoveryEffect->getMPQuantity()));
                 MPDelayProvider = min(MPDelayProvider, (int)(pEffectMPRecoveryEffect->getDelay()));
 
-                // ÇöÀç È¸º¹¾çÀ» °¡Áö°í, ¾ó¸¶¾¿ ¸î¹ø¿¡ È¸º¹ÇÒ °ÍÀÎ°¡¸¦ °áÁ¤ÇÑ´Ù.
+                
                 temp = (double)((double)MPAmount / (double)MPQuantity);
                 Period = (uint)ceil(temp);
                 Deadline = Period * MPDelayProvider;
 
-                // MP Recovery effect¸¦ °»½ÅÇÑ´Ù.
+                
                 pEffectMPRecoveryEffect->setDeadline(Deadline);
                 pEffectMPRecoveryEffect->setDelay(MPDelayProvider);
                 pEffectMPRecoveryEffect->setMPQuantity(MPQuantity);
                 pEffectMPRecoveryEffect->setPeriod(Period);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCMPRecoveryStart gcMPRecoveryStart;
                 gcMPRecoveryStart.setPeriod(pEffectMPRecoveryEffect->getPeriod());
                 gcMPRecoveryStart.setDelay(pEffectMPRecoveryEffect->getDelay());
@@ -500,7 +500,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
                 pEffectManager->addEffect(pEffectMPRecovery);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCMPRecoveryStart gcMPRecoveryStart;
                 gcMPRecoveryStart.setPeriod(Period);
                 gcMPRecoveryStart.setDelay(MPDelayProvider);
@@ -547,8 +547,8 @@ void CGUseItemFromInventoryHandler::executeMagazine(CGUseItemFromInventory* pPac
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -575,7 +575,7 @@ void CGUseItemFromInventoryHandler::executeMagazine(CGUseItemFromInventory* pPac
         }
     }
 
-    // reload delay°¡ ÀÖÀ¸¹Ç·Î effect¿¡ µî·Ï ½ÃÅ²´Ù.
+    
     EffectManager* pEffectManager = pSlayer->getEffectManager();
     if (pEffectManager == NULL)
         return;
@@ -587,11 +587,11 @@ void CGUseItemFromInventoryHandler::executeMagazine(CGUseItemFromInventory* pPac
         pEffect->setObjectID(ItemObjectID);
         pEffect->setInventoryXY(InvenX, InvenY);
 
-        // by sigi. 2002.12.3.  1ÃÊ --> 0.7ÃÊ
+        
         if (pSlayer->hasSkill(SKILL_FAST_RELOAD))
-            pEffect->setDeadline(7); // ºü¸¥ reload(0.7ÃÊ)
+            pEffect->setDeadline(7); 
         else
-            pEffect->setDeadline(2 * 10); // º¸Åë reload(2sec)
+            pEffect->setDeadline(2 * 10); 
 
         pSlayer->setFlag(Effect::EFFECT_CLASS_RELOAD_TIMER);
         pEffectManager->addEffect(pEffect);
@@ -618,8 +618,8 @@ void CGUseItemFromInventoryHandler::executeETC(CGUseItemFromInventory* pPacket, 
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -630,12 +630,12 @@ void CGUseItemFromInventoryHandler::executeETC(CGUseItemFromInventory* pPacket, 
     Item* pItem = pInventory->getItem(InvenX, InvenY);
     // ObjectID_t      ItemObjectID = pItem->getObjectID();
 
-    // ¾ÆÀÌÅÛÀÌ ½×ÀÌ´Â Á¾·ùÀÇ ¾ÆÀÌÅÛÀÌ¶ó¸é,
-    // »ç¿ëÀ» ÇßÀ¸´Ï ±×¸¸Å­ »èÁ¦¸¦ ÇØ ÁØ´Ù.
+    
+    
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -659,8 +659,8 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -675,9 +675,9 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
     Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
 
-    // ÄÚ¸¶ »óÅÂ¶ó¸é »ç¿ëÇÒ ¼ö ¾ø´Ù.
+    
     if (pVampire->isFlag(Effect::EFFECT_CLASS_COMA)
-        // ¼ÛÆíÀÎ °æ¿ì´Â À¯·á »ç¿ëÀÚ°¡ ¾Æ´Ï¸é »ç¿ëÇÒ ¼ö ¾ø´Ù.
+        
         || pItem->getItemType() == 5 && !pGamePlayer->isPayPlaying() && !pGamePlayer->isPremiumPlay()) {
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -692,40 +692,40 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
     RegenHP = pSerum->getHPAmount();
 
-    int RegenPeriod = pSerum->getPeriod() * 10; // ´ÜÀ§ ½Ã°£ÀÇ ÁÖ±â
-    int RegenCount = pSerum->getCount();        // ¸î¹ø ´ÜÀ§ ½Ã°£À» ¹Ýº¹ÇÒ °ÍÀÎ°¡?
+    int RegenPeriod = pSerum->getPeriod() * 10; 
+    int RegenCount = pSerum->getCount();        
 
-    int RegenHPUnit = (int)((float)MaxHP * (float)RegenHP * 0.01); // ÇÑ¹ø¿¡ È¸º¹ÇÏ´Â HPÀÇ ¾ç
+    int RegenHPUnit = (int)((float)MaxHP * (float)RegenHP * 0.01); 
     int HPAmount = min(MaxHP - CurrentHP, RegenHPUnit * RegenCount);
 
-    // HP È¸º¹¾çÀÌ Á¸ÀçÇÑ´Ù¸é...
+    
     if (HPAmount != 0) {
-        // ¾ó¸¶¾¿ ¸î¹ø ¸îÃÊ¸¶´Ù.
+        
         if (CurrentHP < MaxHP) {
             EffectManager* pEffectManager = pVampire->getEffectManager();
-            Turn_t Period = RegenCount;             // ¸î¹ø È¸º¹½ÃÅ°³ª?
-            Turn_t Deadline = RegenPeriod * Period; // ¾ðÁ¦ ³¡³ª³ª?
+            Turn_t Period = RegenCount;             
+            Turn_t Deadline = RegenPeriod * Period; 
 
             if (pVampire->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
                 EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
 
-                // ¸î¹ø ´õ ÇØ¾ß ÇÑ´Ù´Â °ÍÀ» °»½ÅÇØ ÁØ´Ù.
+                
                 Turn_t OldCount = pEffectHPRecoveryEffect->getPeriod();
                 Turn_t NewPeriod = OldCount + Period;
                 pEffectHPRecoveryEffect->setPeriod(NewPeriod);
                 pEffectHPRecoveryEffect->setDeadline(NewPeriod * RegenPeriod);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
-                gcHPRecoveryStartToSelf.setPeriod(NewPeriod);     // ¸î¹ø È¸º¹ÇÏ³ª?
-                gcHPRecoveryStartToSelf.setDelay(RegenPeriod);    // ¸î ÃÊ ´ÜÀ§·Î ÇÏ³ª?
-                gcHPRecoveryStartToSelf.setQuantity(RegenHPUnit); // ÇÑ¹ø¿¡ ¾ó¸¶³ª È¸º¹ÇÏ³ª?
+                gcHPRecoveryStartToSelf.setPeriod(NewPeriod);     
+                gcHPRecoveryStartToSelf.setDelay(RegenPeriod);    
+                gcHPRecoveryStartToSelf.setQuantity(RegenHPUnit); 
 
                 pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ´Ù¸¥ÀÌµé¿¡°Ô º¸³½´Ù.
-                // È¸º¹ °»½Å ÆÐÅ¶, ½ÃÀÛ°ú ¶È °°Àº ÆÐÅ¶À» º¸³½´Ù.
+                
+                
                 GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                 gcHPRecoveryStartToOthers.setObjectID(pVampire->getObjectID());
                 gcHPRecoveryStartToOthers.setPeriod(NewPeriod);
@@ -747,7 +747,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
                 pEffectManager->addEffect(pEffectHPRecovery);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» ÀÚ½Å¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                 gcHPRecoveryStartToSelf.setPeriod(Period);
                 gcHPRecoveryStartToSelf.setDelay(RegenPeriod);
@@ -755,7 +755,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
                 pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                // È¸º¹ ½ÃÀÛÇÏ¶ó´Â ÆÐÅ¶À» º¸´ÂÀÌµé¿¡°Ô º¸³½´Ù.
+                
                 GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                 gcHPRecoveryStartToOthers.setObjectID(pVampire->getObjectID());
                 gcHPRecoveryStartToOthers.setPeriod(Period);
@@ -800,33 +800,7 @@ void CGUseItemFromInventoryHandler::executeVampireETC(CGUseItemFromInventory* pP
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    /*
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
-    GamePlayer*     pGamePlayer  = dynamic_cast<GamePlayer*>(pPlayer);
-    Creature*       pCreature    = pGamePlayer->getCreature();
-    PlayerCreature* pPC          = dynamic_cast<PlayerCreature*>(pCreature);
-    Inventory*      pInventory   = pPC->getInventory();
-    Zone*           pZone        = pPC->getZone();
-    CoordInven_t    InvenX       = pPacket->getX();
-    CoordInven_t    InvenY       = pPacket->getY();
-    Item*           pItem        = pInventory->getItem(InvenX, InvenY);
-    ObjectID_t      ItemObjectID = pItem->getObjectID();
-
-    // ¾ÆÀÌÅÛÀÌ ½×ÀÌ´Â Á¾·ùÀÇ ¾ÆÀÌÅÛÀÌ¶ó¸é,
-    // »ç¿ëÀ» ÇßÀ¸´Ï ±×¸¸Å­ »èÁ¦¸¦ ÇØ ÁØ´Ù.
-    if (isStackable(pItem))
-    {
-        decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
-    }
-    else
-    {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
-        pInventory->deleteItem(InvenX, InvenY);
-        pItem->destroy();
-        SAFE_DELETE(pItem);
-    }
-    */
+     
 
 #endif
 
@@ -845,8 +819,8 @@ void CGUseItemFromInventoryHandler::executeSlayerPortalItem(CGUseItemFromInvento
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -873,14 +847,14 @@ void CGUseItemFromInventoryHandler::executeSlayerPortalItem(CGUseItemFromInvento
         return;
     }
 
-    // ¸¸¾à RelicÀ» ¼ÒÀ¯ÇÏ°í ÀÖ´Ù¸é,Çï±â¸¦ ºÎ¸¦ ¼ö ¾ø´Ù.
+    
     bool bHasRelic = false;
     if (pSlayer->hasRelicItem() || pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_FLAG) ||
         pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER)) {
         bHasRelic = true;
     }
 
-    // ¼®È­µÇ¾î ÀÖ´Ù¸é Çï±â¸¦ ºÎ¸¦ ¼ö ¾ø´Ù.
+    
     bool bParalyze = pSlayer->isFlag(Effect::EFFECT_CLASS_PARALYZE) ? true : false;
 
     bool bZoneTypeCheck = (pZone->getZoneType() == ZONE_NORMAL_FIELD) ? true : false;
@@ -891,23 +865,23 @@ void CGUseItemFromInventoryHandler::executeSlayerPortalItem(CGUseItemFromInvento
 
     // if (bZoneTypeCheck && bCanUseCheck && bChargeCheck && !bMotorcycleCheck)
     if (bZoneTypeCheck && bCanUseCheck && bChargeCheck && !bHasRelic && !bParalyze && !bZoneCheck) {
-        // ¾ÆÀÌÅÛ¿¡ Â÷Áö¸¦ ÁÙÀÌ°í, ½½·¹ÀÌ¾î¿¡°Ô ÀÌÆåÆ®¸¦ °É¾îÁØ´Ù.
+        
         pPortalItem->setCharge(pPortalItem->getCharge() - 1);
-        // pPortalItem->save(pSlayer->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY); // ¾ÆÀÌÅÛ Á¤º¸¸¦ ÀúÀåÇÑ´Ù.
-        //  ¾ÆÀÌÅÛ ÀúÀå ÃÖÀûÈ­. by sigi. 2002.5.13
+        
+        
         char pField[80];
         sprintf(pField, "Charge=%d", pPortalItem->getCharge());
         pPortalItem->tinysave(pField);
 
         pSlayer->setFlag(Effect::EFFECT_CLASS_SLAYER_PORTAL);
 
-        // ÁÖº¯¿¡´Ù°¡ Çï±â ´õÇÏ¶ó´Â ÆÐÅ¶À» »Ñ¸°´Ù.
+        
         GCAddHelicopter gcAddHelicopter;
         gcAddHelicopter.setObjectID(pSlayer->getObjectID());
         gcAddHelicopter.setCode(0);
         pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcAddHelicopter);
 
-        // ÀÎÁõ ÆÐÅ¶À» º¸³»ÁØ´Ù.
+        
         GCUseOK gcUseOK;
         pPlayer->sendPacket(&gcUseOK);
     } else {
@@ -931,8 +905,8 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -958,7 +932,7 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
     Assert(pOusters != NULL);
     Assert(pSummonItem != NULL);
 
-    // ¸¸¾à RelicÀ» ¼ÒÀ¯ÇÏ°í ÀÖ´Ù¸é,Çï±â¸¦ ºÎ¸¦ ¼ö ¾ø´Ù.
+    
     bool bHasRelic = false;
     if (pOusters->hasRelicItem() || pOusters->isFlag(Effect::EFFECT_CLASS_REFINIUM_TICKET) ||
         pOusters->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
@@ -967,7 +941,7 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
         bHasRelic = true;
     }
 
-    // ¼®È­µÇ¾î ÀÖ´Ù¸é Çï±â¸¦ ºÎ¸¦ ¼ö ¾ø´Ù.
+    
     bool bParalyze = pOusters->isFlag(Effect::EFFECT_CLASS_PARALYZE) ? true : false;
 
     bool bCanUseCheck = pOusters->isRealWearing(pSummonItem);
@@ -992,15 +966,15 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
         GCModifyInformation gcMI;
 
         decreaseMana(pOusters, RequireMP, gcMI);
-        // ¾ÆÀÌÅÛ¿¡ Â÷Áö¸¦ ÁÙÀÌ°í, ½½·¹ÀÌ¾î¿¡°Ô ÀÌÆåÆ®¸¦ °É¾îÁØ´Ù.
+        
         pSummonItem->setCharge(pSummonItem->getCharge() - 1);
-        // pSummonItem->save(pOusters->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY); // ¾ÆÀÌÅÛ Á¤º¸¸¦ ÀúÀåÇÑ´Ù.
-        //  ¾ÆÀÌÅÛ ÀúÀå ÃÖÀûÈ­. by sigi. 2002.5.13
+        
+        
         char pField[80];
         sprintf(pField, "Charge=%d", pSummonItem->getCharge());
         pSummonItem->tinysave(pField);
 
-        // ÀÌÆÑÆ® Å¬·¡½º¸¦ ¸¸µé¾î ºÙÀÎ´Ù.
+        
         EffectSummonSylph* pEffect = new EffectSummonSylph(pOusters);
         pEffect->setEClass((Effect::EffectClass)pItemInfo->getEffectID());
         pOusters->addEffect(pEffect);
@@ -1011,7 +985,7 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
         pOusters->initAllStat();
         pOusters->addModifyInfo(prev, gcMI);
 
-        // ÀÎÁõ ÆÐÅ¶À» º¸³»ÁØ´Ù.
+        
         GCUseOK gcUseOK;
         pPlayer->sendPacket(&gcUseOK);
         pPlayer->sendPacket(&gcMI);
@@ -1055,8 +1029,8 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -1074,16 +1048,16 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
         return;
     }
 
-    // SLAYER°¡ ¾Æ´Ï¶ó¸é ¿ÀÅä¹ÙÀÌ¸¦ È£ÃâÇÒ ¼ö ¾ø´Ù.
+    
     Assert(pCreature->isSlayer());
 
     Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
-    // ¼ÒÈ¯ °¡´É »óÅÂ ¼³Á¤ÀÌ µÇ¾îÀÖ¾î¾ß ÇÑ´Ù.
-    // ÄÚ¸¶ »óÅÂ¶ó¸é »ç¿ëÇÒ ¼ö ¾ø´Ù.
-    // ¾ÆÀÌÅÛÀÌ ¿­¼è ¾ÆÀÌÅÛÀÌ ¾Æ´Ï¶ó¸é, ¿ÀÅä¹ÙÀÌ¸¦ È£ÃâÇÒ ¼ö ¾ø´Ù.
-    // ¸¶½ºÅÍ ·¹¾î³ª Æ÷Å» »ç¿ë ºÒ°¡ Áö¿ª¿£ ¿ÀÅä¹ÙÀÌ ¼ÒÈ¯ ºÒ°¡
-    // premium »ç¿ëÀÚ¸¸ È£Ãâ°¡´ÉÇÏ´Ù.
+    
+    
+    
+    
+    
     if (!g_pVariableManager->isSummonMotorcycle() || pSlayer->hasRideMotorcycle() ||
         pItem->getItemClass() != Item::ITEM_CLASS_KEY || pSlayer->isFlag(Effect::EFFECT_CLASS_COMA) ||
         (pZone->getZoneLevel(pCreature->getX(), pCreature->getY()) & SAFE_ZONE) || pZone->isMasterLair() ||
@@ -1096,63 +1070,26 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
         return;
     }
 
-    // ±âÁ¸¿¡ ¾ÆÀÌÅÛÀÌ »ý¼ºµÇ¾î ÀÖ´ÂÁö¸¦ È®ÀÎÇÑ´Ù.
+    
     ItemID_t targetID = dynamic_cast<Key*>(pItem)->getTarget();
 
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
-    // targetID°¡ 0ÀÎ °æ¿ì´Â.. targetID(motorcycleObjectÀÇ ItemID)°¡ ¼³Á¤ÀÌ ¾ÈµÈ °æ¿ì´Ù.
-    // ÀÌ ¶§´Â ÀÓ½Ã·Î targetID¸¦ keyÀÇ ItemID¿Í °°°Ô ÇÏ¸é µÈ´Ù...°í º»´Ù.
-    // targetID°¡ motorcycleÀÇ itemID·Î µé¾î°¡±â ¶§¹®¿¡..
-    // broadcasting µî¿¡¼­.. Assert()¿¡ ÀÇÇØ¼­ ´Ù¿îµÇ¾ú´Ù...°í º¸¿©Áø´Ù.  - -;
+    
+    
+    
+    
     // by sigi. 2002.12.25 x-mas T_T;
     if (targetID == 0) {
         Key* pKey = dynamic_cast<Key*>(pItem);
         Assert(pKey != NULL);
 
         targetID = pKey->setNewMotorcycle(pSlayer);
-        /*		// (!) MotorcycleObject¸¦ »ý¼ºÇÏ°í MotorcycleItemID==Target¸¦ ¹Þ¾Æ¾ß ÇÑ´Ù.
-                // ÀÌ ÄÚµå Á¦¹ß ÇÔ¼ö·Î »©±â¸¦.. -_-; by sigi
-                Key* pKey = dynamic_cast<Key*>(pItem);
-
-                KeyInfo* pKeyInfo = dynamic_cast<KeyInfo*>(g_pItemInfoManager->getItemInfo( pKey->getItemClass(),
-           pKey->getItemType() )); Assert( pKeyInfo != NULL );
-
-                list<OptionType_t> option;
-                ItemType_t motorcycleType = pKeyInfo->getTargetType();
-
-                if ( pKeyInfo->getOptionType() != 0 ) option.push_back( pKeyInfo->getOptionType() );
-
-                Item* pMotorcycle = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_MOTORCYCLE, motorcycleType,
-           option); Assert(pMotorcycle != NULL); (pZone->getObjectRegistry()).registerObject(pMotorcycle);
-
-                pMotorcycle->create(pSlayer->getName(), STORAGE_ZONE, pZone->getZoneID(), pSlayer->getX(),
-           pSlayer->getY()); pKey->setTarget(pMotorcycle->getItemID());
-
-                targetID = pMotorcycle->getItemID();
-
-                // targetID¸¦ DB¿¡µµ update½ÃÄÑ¾ß ÇÑ´Ù.
-                BEGIN_DB
-                {
-                    pStmt   = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                    pResult = pStmt->executeQuery(
-                                "UPDATE KeyObject SET Target=%lu WHERE ItemID=%lu",
-                                            targetID, pKey->getItemID());
-
-                    SAFE_DELETE(pStmt);
-                }
-                END_DB(pStmt)
-
-                // log
-                filelog("motorcycle.txt", "[SetTargetID] Owner = %s, KeyID = %lu, Key's targetID = %lu, MotorcycleID =
-           %lu", pSlayer->getName().c_str(), pKey->getItemID(), pKey->getTarget(), pMotorcycle->getItemID() );
-
-                // ¹Ø¿¡¼­ pMotorcycleÀ» »ç¿ëÇØµµ µÇ°ÚÁö¸¸, ±âÁ¸ ÄÚµå ¾È °Çµå¸±·Á°í ¿©±â¼­ Áö¿î´Ù.
-                SAFE_DELETE(pMotorcycle);*/
+         
     } else {
-        // ÇÑ¹ø ¸ðÅÍ»çÀÌÅ¬ÀÌ¶û Å°¶û ¿¬°áµÆ´Âµ¥ ¸ðÅÍ»çÀÌÅ¬À» ´©°¡ ÀÚ²Ù Áö¿ì³ªº¸´Ù.
-        // Å°¿¡ ¿¬°áµÈ ¸ðÅÍ»çÀÌÅ¬ÀÌ ½ÇÁ¦·Î µðºñ¿¡ ÀÖ´ÂÁö Ã¼Å©ÇÏ°í ¾øÀ¸¸é »õ·Î ¸¸µé¾î¼­ ³Ö¾îÁØ´Ù.
+        
+        
         BEGIN_DB {
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
             pResult = pStmt->executeQuery("SELECT ItemID FROM MotorcycleObject WHERE ItemID=%lu", targetID);
@@ -1170,7 +1107,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
     }
 
 
-    // ÇÊ»ì ¹æ¾î ÄÚµå -_-;
+    
     if (targetID == 0) {
         filelog("errorLog.txt", "[ActionRedeemMotorcycle] itemID=%lu, motorItemID=%lu", (int)pItem->getItemID(),
                 (int)targetID);
@@ -1179,7 +1116,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
 
 
     if (g_pParkingCenter->hasMotorcycleBox(targetID)) {
-        ////cout << "±âÁ¸¿¡ ºÒ·ÁÁø ¿ÀÅä¹ÙÀÌ°¡ ÀÖ½À´Ï´Ù" << endl;
+        
 
         MotorcycleBox* pMotorcycleBox = g_pParkingCenter->getMotorcycleBox(targetID);
 
@@ -1189,24 +1126,24 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
             ZoneCoord_t motorY = pMotorcycleBox->getY();
             Motorcycle* pMotorcycle = pMotorcycleBox->getMotorcycle();
 
-            // °°Àº Á¸¿¡ ÀÖ´Â °æ¿ì
-            // °Å¸®°¡ ³Ê¹« °¡±î¿ì¸é ºÎ¸£Áö ¸»ÀÚ~
+            
+            
             if (pMotorZone != pZone || pSlayer->getDistance(motorX, motorY) > 15) {
-                // ´Ù¸¥ zoneÀ¸·Î ÀÌµ¿ÁßÀÌ¶ó°í Ç¥½ÃÇÑ´Ù.
+                
                 pMotorcycleBox->setTransport();
 
-                // motorcycleÀ» slayerÀÇ zoneÀ¸·Î ¿Å±ä´Ù.
+                
                 pMotorZone->transportItem(motorX, motorY, pMotorcycle, pZone, pSlayer->getX(), pSlayer->getY());
 
-                // Use OK ´ë¿ëÀÌ´Ù.
-                // UseÇÏ¸é ¾ÆÀÌÅÛÀÌ »ç¶óÁö´ø°¡ ±×·¸Áö ½Í´Ù. - -;
+                
+                
                 /*
                 GCCannotUse _GCCannotUse;
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
                 pGamePlayer->sendPacket(&_GCCannotUse);
                 */
 
-                // ÇÑµ¿¾È delay¸¦ Áà¾ßÇÏ´Âµ¥..
+                
             }
         }
 
@@ -1245,7 +1182,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
             durability = 300;
         }
 
-        // »õ·Î¿î ¿ÀÅä¹ÙÀÌ °´Ã¼¸¦ »ý¼ºÇÑ´Ù.
+        
         Motorcycle* pMotorcycle = new Motorcycle(itemType, optionTypes);
 
         Assert(pMotorcycle != NULL);
@@ -1253,22 +1190,22 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
         pMotorcycle->setItemID(itemID);
         pMotorcycle->setDurability(durability);
 
-        // Object ID ÇÒ´ç¹Þ±â
+        
         (pZone->getObjectRegistry()).registerObject(pMotorcycle);
 
 
-        // ¿ÀÅä¹ÙÀÌ¸¦ Á¸¿¡ Ãß°¡ÇÑ´Ù.
-        ////cout << "¿ÀÅä¹ÙÀÌ¸¦ Á¸¿¡ Ãß°¡ÇÕ´Ï´Ù" << pSlayer->getX() << " " << pSlayer->getY() << endl;
+        
+        
         TPOINT pt = pZone->addItem(pMotorcycle, pSlayer->getX(), pSlayer->getY(), false);
 
         if (pt.x == -1) {
             StringStream msg;
-            msg << "¿ÀÅä¹ÙÀÌ¸¦ Á¸¿¡ ³ÖÀ» ¼ö ¾ø½À´Ï´Ù: "
+            msg << "    : "
                 << "ZoneID=" << (int)pZone->getZoneID() << ", X=" << (int)pSlayer->getX()
                 << ", Y=" << (int)pSlayer->getY();
 
             filelog("motorError.txt", "%s", msg.toString().c_str());
-            // throw Error("¿ÀÅä¹ÙÀÌ¸¦ Á¸¿¡ ³ÖÀ» ¼ö ¾ø½À´Ï´Ù");
+            
 
             SAFE_DELETE(pMotorcycle);
         } else {
@@ -1281,14 +1218,14 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
                     durability);
             }
 
-            // ¿ÀÅä¹ÙÀÌ¸¦ Parking Center¿¡ µî·ÏÇÑ´Ù.
+            
             MotorcycleBox* pBox = new MotorcycleBox(pMotorcycle, pZone, pt.x, pt.y);
             Assert(pBox != NULL);
             g_pParkingCenter->addMotorcycleBox(pBox);
         }
 
 
-        // °ËÁõ ÆÐÅ¶ÀÌ´Ù.
+        
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
         pGamePlayer->sendPacket(&_GCCannotUse);
@@ -1345,8 +1282,8 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -1435,8 +1372,8 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
             pPlayer->sendPacket(&gcMI);
         }
     } else {
-        // Å¸ÀÏ¿¡ ½ºÅ³À» ¾²´Â °ÍÀÌ¶ó°í º¸°í ¾µ ¼ö ÀÖ´ÂÁö¸¦ Ã¼Å©ÇÑ´Ù.
-        // ¾ÈÀüÁö´ë¿¡¼­´Â »ç¿ëÇÒ ¼ö ¾ø´Ù.
+        
+        
         if (!isAbleToUseTileSkill(pCreature) ||
             (pZone->getZoneLevel(pCreature->getX(), pCreature->getY()) & COMPLETE_SAFE_ZONE) ||
             ItemObjectID != pPacket->getObjectID()) {
@@ -1474,12 +1411,12 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
                     Assert(false);
                     break;
             }*/
-        // ¿¡ÆåÆ®¸¦ ¸¸µé¾î¼­ ºê·ÎµåÄ³½ºÆÃ ÇÑ´Ù.
+        
         GCAddEffectToTile gcAddEffectToTile;
         gcAddEffectToTile.setObjectID(pCreature->getObjectID());
         gcAddEffectToTile.setEffectID(effectClass);
         gcAddEffectToTile.setXY(pCreature->getX(), pCreature->getY());
-        gcAddEffectToTile.setDuration(10); // º° ÀÇ¹Ì ¾ø´Ù ±×³É 1ÃÊ
+        gcAddEffectToTile.setDuration(10); 
 
         pZone->broadcastPacket(pCreature->getX(), pCreature->getY(), &gcAddEffectToTile);
     }
@@ -1487,13 +1424,13 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
     }
 
-    // ¾ÆÀÌÅÛÀ» »ç¿ëÇß´Ù°í Å¬¶óÀÌ¾ðÆ®¿¡ ¾Ë¸°´Ù.
+    
     GCUseOK gcUseOK;
     pGamePlayer->sendPacket(&gcUseOK);
 
@@ -1511,8 +1448,8 @@ void CGUseItemFromInventoryHandler::executeDyePotion(CGUseItemFromInventory* pPa
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -1560,7 +1497,7 @@ void CGUseItemFromInventoryHandler::executeDyePotion(CGUseItemFromInventory* pPa
     case DyePotionInfo::FUNCTION_SEX: {
         int code = changeSexEx(pPC);
         if (code != 0) {
-            // -_-; ¼ºÀüÈ¯ ¾ÆÀÌÅÛ¸¸ ¿ÀºêÁ§Æ® ¾ÆÀÌµð¿¡´Ù°¡ ¿¡·¯ÄÚµå ³Ö¾îÁØ´Ù. ¤Ì.¤Ð
+            
             GCCannotUse _GCCannotUse;
             _GCCannotUse.setObjectID((ObjectID_t)code);
             pPlayer->sendPacket(&_GCCannotUse);
@@ -1667,7 +1604,7 @@ void CGUseItemFromInventoryHandler::executeDyePotion(CGUseItemFromInventory* pPa
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -1852,8 +1789,8 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -1865,16 +1802,16 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
     ResurrectItemInfo* pItemInfo =
         dynamic_cast<ResurrectItemInfo*>(g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType()));
 
-    // cout << "Resurrection ¾ÆÀÌÅÛÀ» »ç¿ëÇÔ : " << pPC->getName() << " : " << pItem->getItemType() << endl;
+    
 
     if (pItem->getObjectID() != pPacket->getObjectID() || pItemInfo == NULL) {
-        // cout << "¾ÆÅÛ ¿ÀºêÁ§Æ® ¾Æµð°¡ Æ²¸²" << endl;
+        
         sendCannotUse(pPacket, pPlayer);
         return;
     }
 
     if (!pPC->isFlag(Effect::EFFECT_CLASS_COMA)) {
-        // cout << "Á×Àº »óÅÂ°¡ ¾Æ´Ô" << endl;
+        
         sendCannotUse(pPacket, pPlayer);
         return;
     }
@@ -1919,7 +1856,7 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
         }
 
         if (GDRLairManager::Instance().isGDRLairZone(pPC->getZoneID())) {
-            filelog("GDRLair.log", "%s°¡ %dÁ¸¿¡¼­ ºÎÈ° ½ºÅ©·ÑÀ» »ç¿ëÇß½À´Ï´Ù.", pPC->getName().c_str(),
+            filelog("GDRLair.log", "%s %d   .", pPC->getName().c_str(),
                     pPC->getZoneID());
         }
     } break;
@@ -1943,20 +1880,20 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
 
                 gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_BLOOD_DRAIN);
 
-                // ÈíÇ÷ ¾Æ¸£¹ÙÀÌÆ®¸¦ ¹æÁöÇÏ±â À§ÇÑ ÈÄÀ¯Áõ ÀÌÆåÆ®¸¦ ºÙ¿©ÁØ´Ù.
+                
                 if (pSlayer->isFlag(Effect::EFFECT_CLASS_AFTERMATH)) {
                     Effect* pEffect = pSlayer->getEffectManager()->findEffect(Effect::EFFECT_CLASS_AFTERMATH);
                     EffectAftermath* pEffectAftermath = dynamic_cast<EffectAftermath*>(pEffect);
-                    pEffectAftermath->setDeadline(5 * 600); // 5ºÐ µ¿¾È Áö¼ÓµÈ´Ù.
+                    pEffectAftermath->setDeadline(5 * 600); 
                 } else {
                     EffectAftermath* pEffectAftermath = new EffectAftermath(pSlayer);
-                    pEffectAftermath->setDeadline(5 * 600); // 5ºÐ µ¿¾È Áö¼ÓµÈ´Ù.
+                    pEffectAftermath->setDeadline(5 * 600); 
                     pSlayer->getEffectManager()->addEffect(pEffectAftermath);
                     pSlayer->setFlag(Effect::EFFECT_CLASS_AFTERMATH);
                     pEffectAftermath->create(pSlayer->getName());
                 }
 
-                // ÈíÇ÷À» Ä¡·áÇÏ¸é ´É·ÂÄ¡°¡ º¯È­ÇÏ°Ô µÈ´Ù.
+                
                 SLAYER_RECORD prev;
                 pSlayer->getSlayerRecord(prev);
                 pSlayer->initAllStat();
@@ -1982,7 +1919,7 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
         }
 
         if (GDRLairManager::Instance().isGDRLairZone(pPC->getZoneID())) {
-            filelog("GDRLair.log", "%s°¡ %dÁ¸¿¡¼­ ¿¤¸¯¼­ ½ºÅ©·ÑÀ» »ç¿ëÇß½À´Ï´Ù.", pPC->getName().c_str(),
+            filelog("GDRLair.log", "%s %d   .", pPC->getName().c_str(),
                     pPC->getZoneID());
         }
     } break;
@@ -2013,7 +1950,7 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -2033,8 +1970,8 @@ void CGUseItemFromInventoryHandler::executeTranslator(CGUseItemFromInventory* pP
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2047,7 +1984,7 @@ void CGUseItemFromInventoryHandler::executeTranslator(CGUseItemFromInventory* pP
 
     if (pItem->getObjectID() != pPacket->getObjectID() || pItemInfo == NULL ||
         pPC->isFlag(Effect::EFFECT_CLASS_TRANSLATION)) {
-        ////cout << "¾ÆÅÛ ¿ÀºêÁ§Æ® ¾Æµð°¡ Æ²¸²" << endl;
+        
         sendCannotUse(pPacket, pPlayer);
         return;
     }
@@ -2055,7 +1992,7 @@ void CGUseItemFromInventoryHandler::executeTranslator(CGUseItemFromInventory* pP
     EffectTranslation* pEffect = new EffectTranslation(pPC);
     Assert(pEffect != NULL);
 
-    pEffect->setDeadline(6000); // 10ºÐ
+    pEffect->setDeadline(6000); 
     pPC->addEffect(pEffect);
     pPC->setFlag(Effect::EFFECT_CLASS_TRANSLATION);
 
@@ -2071,7 +2008,7 @@ void CGUseItemFromInventoryHandler::executeTranslator(CGUseItemFromInventory* pP
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -2090,8 +2027,8 @@ void CGUseItemFromInventoryHandler::executeEffectItem(CGUseItemFromInventory* pP
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2128,7 +2065,7 @@ void CGUseItemFromInventoryHandler::executeEffectItem(CGUseItemFromInventory* pP
     if (isStackable(pItem)) {
         decreaseItemNum(pItem, pInventory, pCreature->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else {
-        // ½×ÀÌÁö ¾Ê´Â ¾ÆÀÌÅÛÀº ¹Ù·Î¹Ù·Î »èÁ¦ÇØÁØ´Ù.
+        
         pInventory->deleteItem(InvenX, InvenY);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -2148,8 +2085,8 @@ void CGUseItemFromInventoryHandler::executePetItem(CGUseItemFromInventory* pPack
     Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2183,13 +2120,13 @@ void CGUseItemFromInventoryHandler::executePetItem(CGUseItemFromInventory* pPack
     if (pPetItem != NULL) {
         PetInfo* pTargetPetInfo = pPetItem->getPetInfo();
         if (pTargetPetInfo->getPetHP() == 0) {
-            //			cout << pPC->getName() << " Á×Àº Æê ºÎ¸£Áö ¸¶¼À" << endl;
+            
             sendCannotUse(pPacket, pPlayer);
             return;
         }
 
         if (pTargetPetInfo->getPetType() >= PET_CENTAURO && pPC->getQuestLevel() < 40) {
-            filelog("Pet.log", "·¹º§ ¾ÈµÇ´Â ³ÑÀÌ 2Â÷Æê ºÎ¸¦¶ó°í ±×·±´Ù : [%s:%s]", pGamePlayer->getID().c_str(),
+            filelog("Pet.log", "   2   : [%s:%s]", pGamePlayer->getID().c_str(),
                     pPC->getName().c_str());
             sendCannotUse(pPacket, pPlayer);
             return;
@@ -2223,8 +2160,8 @@ void CGUseItemFromInventoryHandler::executePetFood(CGUseItemFromInventory* pPack
     Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2294,8 +2231,8 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2306,9 +2243,9 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
     Item* pItem = pInventory->getItem(InvenX, InvenY);
     // ObjectID_t      ItemObjectID = pItem->getObjectID();
 
-    // °ËÀº»ö ¼±¹° »óÀÚ°¡ ¾Æ´Ï¶ó¸é »ç¿ëÇÒ ¼ö ¾ø´Ù
+    
     if (pItem->getItemType() < 6 || (pItem->getItemType() >= 16 && pItem->getItemType() <= 18)) {
-        filelog("GiftBoxErrorLog.txt", "[Name] : %s , [ItemType] : %d : Àß¸øµÈ ¾ÆÀÌÅÛ Å¸ÀÔ\n",
+        filelog("GiftBoxErrorLog.txt", "[Name] : %s , [ItemType] : %d :   \n",
                 pCreature->getName().c_str(), pItem->getItemType());
         return;
     }
@@ -2360,8 +2297,8 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
             }
         }
     */
-    // °ËÀº»óÀÚ°¡ º¯ÇÏ´Â ¾ÆÀÌÅÛÀÌ 2*2 ¿¡ ´Ù µé¾î°¡´Â Å©±âÀÌ¹Ç·Î Inventory °Ë»ç´Â »ý·«
-    // (¸¸¾à °ËÀº »óÀÚ Áö¿ì°í ³ª¼­ ¾È µé¾î°¡´Â »óÈ² ¹ß»ýÇÏ¸é °ï¶õÇÏ¹Ç·Î)
+    
+    
     Item* pResultItem = NULL;
     bool bFullStack = true;
 
@@ -2450,17 +2387,17 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
         bFullStack = false;
 
         if (value < 70) {
-            // ¿¤¸¯¼­ ½ºÅ©·Ñ
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RESURRECT_ITEM, 1, list<OptionType_t>());
         } else if (value < 95) {
-            // »¡°£ ¶±±¹
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_EVENT_STAR, 8, list<OptionType_t>());
         } else if (value < 99) {
-            // ¿¤¸¯¼­ ½ºÅ©·Ñ ¹­À½
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RESURRECT_ITEM, 1, list<OptionType_t>());
             pResultItem->setNum(9);
         } else {
-            // ¾Ç¼¼»ç¸® ¹Í½ÌÆ÷Áö AÇü
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_MIXING_ITEM, 6, list<OptionType_t>());
         }
     } else if (pItem->getItemType() == 20) {
@@ -2468,17 +2405,17 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
         bFullStack = false;
 
         if (value < 70) {
-            // ºÎÈ° ½ºÅ©·Ñ
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RESURRECT_ITEM, 0, list<OptionType_t>());
         } else if (value < 95) {
-            // ÆÄ¶õ ¶±±¹
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_EVENT_STAR, 10, list<OptionType_t>());
         } else if (value < 99) {
-            // ºí·ç¹öµå 50°³
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_EVENT_STAR, 12, list<OptionType_t>());
             pResultItem->setNum(50);
         } else {
-            // ¾Æ¸Ó ¹Í½ÌÆ÷Áö AÇü
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_MIXING_ITEM, 3, list<OptionType_t>());
         }
     }
@@ -2488,27 +2425,27 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
         bFullStack = false;
 
         if (value < 70) {
-            // ºÎÈ° ½ºÅ©·Ñ
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RESURRECT_ITEM, 0, list<OptionType_t>());
         } else if (value < 95) {
-            // ³ì»ö ¶±±¹
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_EVENT_STAR, 9, list<OptionType_t>());
         } else if (value < 99) {
-            // ¾Ë¸²ÆÇ 3
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_EVENT_TREE, 28, list<OptionType_t>());
         } else {
-            // Çª´õ 4°³
+            
             pResultItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_PET_FOOD, 4, list<OptionType_t>());
             pResultItem->setNum(4);
         }
     }
 
     if (pResultItem == NULL) {
-        filelog("GiftBoxErrorLog.txt", "[Name] : %s : ÁÙ ¼ö ÀÖ´Â ¾ÆÀÌÅÛÀÌ ¾ø´Ù\n", pCreature->getName().c_str());
+        filelog("GiftBoxErrorLog.txt", "[Name] : %s :     \n", pCreature->getName().c_str());
         return;
     }
 
-    // ½×ÀÏ ¼ö ÀÖ´Â ¾ÆÀÌÅÛÀÌ¸é ²Ë Ã¤¿öÁØ´Ù
+    
     if (pResultItem->isStackable() && bFullStack) {
         int MaxStack = ItemMaxStack[pResultItem->getItemClass()];
         pResultItem->setNum(MaxStack);
@@ -2516,7 +2453,7 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
 
     bool isChargingItem = false;
     int chargeNum = 0;
-    // Charging ¾ÆÀÌÅÛµµ ²Ë Ã¤¿öÁØ´Ù
+    
     if (pResultItem->getItemClass() == Item::ITEM_CLASS_SLAYER_PORTAL_ITEM) {
         SlayerPortalItem* pSlayerPortalItem = dynamic_cast<SlayerPortalItem*>(pResultItem);
         pSlayerPortalItem->setCharge(pSlayerPortalItem->getMaxCharge());
@@ -2538,12 +2475,12 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
 
     GCUseOK gcUseOK;
     pGamePlayer->sendPacket(&gcUseOK);
-    // °ËÀº»ö ¼±¹° »óÀÚ¸¦ Áö¿ì°í ±× ÀÚ¸®¿¡ ¾ÆÀÌÅÛÀ» ³Ö´Â´Ù
+    
     pInventory->deleteItem(InvenX, InvenY);
     pItem->destroy();
     SAFE_DELETE(pItem);
 
-    // inventory¿¡ ³Ö´Â´Ù.
+    
     if (pInventory->addItem(InvenX, InvenY, pResultItem)) {
         pResultItem->create(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
 
@@ -2564,13 +2501,13 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
 
         pGamePlayer->sendPacket(&gcCreateItem);
 
-        // ItemTraceLog ¸¦ ³²±ä´Ù
+        
         if (pResultItem != NULL && pResultItem->isTraceItem()) {
             remainTraceLog(pResultItem, "BLACK BOX", pCreature->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
         }
 
     } else {
-        filelog("GiftBoxErrorLog.txt", "[Name] : %s : ÀÎº¥Åä¸®¿¡ ¾ÆÀÌÅÛÀ» ³ÖÀ» ¼ö ¾ø´Ù. Item : %s\n",
+        filelog("GiftBoxErrorLog.txt", "[Name] : %s :     . Item : %s\n",
                 pCreature->getName().c_str(), pResultItem->toString().c_str());
         return;
     }
@@ -2588,8 +2525,8 @@ void CGUseItemFromInventoryHandler::executeTrapItem(CGUseItemFromInventory* pPac
     Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // »óÀ§ ÇÔ¼ö¿¡¼­ ¿¡·¯ Ã¼Å©¸¦ ¸¹ÀÌ Çß±â ¶§¹®¿¡,
-    // ¿¡·¯ Ã¼Å©¸¦ ´ëÆø Ãà¼ÒÇÑ´Ù.
+    
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2611,7 +2548,7 @@ void CGUseItemFromInventoryHandler::executeTrapItem(CGUseItemFromInventory* pPac
 
     if (pTrapItem != NULL && pInfo != NULL) {
         if (pTrapItem->getItemType() <= 3) {
-            // Æ®·¦
+            
             if ((pCreature->getX() < 97 || pCreature->getX() > 121) ||
                 (pCreature->getY() < 135 || pCreature->getY() > 170)) {
                 GCCannotUse _GCCannotUse;
@@ -2620,7 +2557,7 @@ void CGUseItemFromInventoryHandler::executeTrapItem(CGUseItemFromInventory* pPac
                 return;
             }
         } else {
-            // Àå¾Ö¹°
+            
             if ((pCreature->getX() < 132 || pCreature->getX() > 152) ||
                 (pCreature->getY() < 105 || pCreature->getY() > 135)) {
                 GCCannotUse _GCCannotUse;

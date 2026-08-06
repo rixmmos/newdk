@@ -32,7 +32,7 @@ GCAddItemToZone::GCAddItemToZone()
 //--------------------------------------------------------------------
 GCAddItemToZone::~GCAddItemToZone() noexcept {
     try {
-        // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+        
         while (!m_SubItemInfoList.empty()) {
             SubItemInfo* pSubItemInfo = m_SubItemInfoList.front();
             SAFE_DELETE(pSubItemInfo);
@@ -44,7 +44,7 @@ GCAddItemToZone::~GCAddItemToZone() noexcept {
 }
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToZone::read(SocketInputStream& iStream)
 
@@ -83,7 +83,7 @@ void GCAddItemToZone::read(SocketInputStream& iStream)
     iStream.read(m_EnchantLevel);
     iStream.read(m_ItemNum);
 
-    // Sub ������ ������ �о� ���δ�.
+    
     iStream.read(m_ListNum);
     for (int i = 0; i < m_ListNum; i++) {
         SubItemInfo* pSubItemInfo = new SubItemInfo();
@@ -97,7 +97,7 @@ void GCAddItemToZone::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToZone::write(SocketOutputStream& oStream) const
 
@@ -136,7 +136,7 @@ void GCAddItemToZone::write(SocketOutputStream& oStream) const
     oStream.write(m_EnchantLevel);
     oStream.write(m_ItemNum);
 
-    // Sub �������� ������ ����.
+    
     oStream.write(m_ListNum);
 
     for (list<SubItemInfo*>::const_iterator itr = m_SubItemInfoList.begin(); itr != m_SubItemInfoList.end(); itr++) {

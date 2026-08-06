@@ -162,7 +162,7 @@ MGuildInfoMapper::Get(WORD guildID) const
 void			
 MGuildInfoMapper::Set(WORD guildID, GUILD_INFO* pInfo)
 {
-	// 이미 있었다면 지운다.
+	
 	GUILD_INFO* pOldInfo = Get(guildID);
 
 	if (pOldInfo!=NULL)
@@ -170,7 +170,7 @@ MGuildInfoMapper::Set(WORD guildID, GUILD_INFO* pInfo)
 		delete pOldInfo;
 	}
 
-	// 재 설정..
+	
 	(*this)[guildID] = pInfo;
 }
 
@@ -226,7 +226,7 @@ MGuildInfoMapper::LoadFromFile(std::ifstream& file)
 //----------------------------------------------------------------------
 // Change Value To File
 //----------------------------------------------------------------------
-// 화일에서 사바사바.. -_-;
+
 //----------------------------------------------------------------------
 /*
 void	
@@ -254,7 +254,7 @@ MGuildInfoMapper::ChangeValueToFile(const char* pFilename, WORD guildID) const
 //	char str[256];
 //	int emptyGuildMarkCount = 0;
 //
-//	file << "|| '''길드ID''' || '''길드 이름''' || '''마스터 이름''' || '''길드마크 SpriteID''' ||" << endl;
+
 //
 //	while (iID != end())
 //	{
@@ -264,7 +264,7 @@ MGuildInfoMapper::ChangeValueToFile(const char* pFilename, WORD guildID) const
 //		sprintf(str, "|| %3d || %20s || %20s ||", guildID, pInfo->GetGuildName(), pInfo->GetLeaderName());
 //		if(pInfo->GetSpriteID() == 0xffff)
 //		{
-//			sprintf(str, "%s 길드마크 없음 ||", str);
+
 //			emptyGuildMarkCount++;
 //		}
 //		else
@@ -275,7 +275,7 @@ MGuildInfoMapper::ChangeValueToFile(const char* pFilename, WORD guildID) const
 //		iID ++;
 //	}
 //
-//	sprintf(str, "|| %5d 개의 길드중 %5d개의 길드 마크 없음 ||", size(), emptyGuildMarkCount);
+
 //	file << str << endl;
 //
 //	file.close();

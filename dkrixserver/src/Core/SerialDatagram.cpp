@@ -44,7 +44,7 @@ SerialDatagram::~SerialDatagram() noexcept {
 
 
 //////////////////////////////////////////////////////////////////////
-// ���� ���ۿ� ����ִ� ������ �ܺ� ���۷� �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::read(char* buf, uint len) {
     __BEGIN_TRY
@@ -61,7 +61,7 @@ void SerialDatagram::read(char* buf, uint len) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ���� ���ۿ� ����ִ� ������ �ܺ� ��Ʈ������ �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::read(string& str, uint len) {
     __BEGIN_TRY
@@ -80,18 +80,18 @@ void SerialDatagram::read(string& str, uint len) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// SerialDatagram ��ü���� Packet ��ü�� �������.
-// SerialDatagramSocket �� ���� ������ ũ�⸸ �����(?) ũ�ٸ�,
-// peer���� ���� ��Ŷ�� �߷��� ���� ���ɼ��� ����.
+
+
+
 //
-// (Ư�� �츮 ���ӿ����� UDP�� ���� ���󿡼��� ���Ǳ�
-// ������ Ȯ���� �� ����..)
+
+
 //
 // *CAUTION*
 //
-// �Ʒ��� �˰�������, (1) ���� �ּҿ��� ���ƿ� 2���� ���� �ٸ� ��Ŷ��
-// recvfrom()���� ���� ���� ���ϵǾ�� �ϸ�, (2) �ϳ��� ��Ŷ�� �Ѳ�����
-// ��������.. ��� �����Ͽ����� �ǹ̰� �ִ�.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::read(SerialDatagramPacket*& pPacket) {
@@ -110,36 +110,36 @@ void SerialDatagram::read(SerialDatagramPacket*& pPacket) {
 
     cout << "SerialDatagramPacket I  D : " << packetID << endl;
 
-    // ��Ŷ ���̵� �̻��� ���
+    
     if (packetID >= Packet::PACKET_MAX)
         throw InvalidProtocolException("invalid packet id");
 
-    // ��Ŷ ����� �̻��� ���
+    
     if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
         throw InvalidProtocolException("too large packet size");
 
-    // �����ͱ׷��� ũ�Ⱑ ��Ŷ�� ũ�⺸�� ���� ���
+    
     if (m_Length < szPacketHeader + packetSize)
         throw Error(
-            "�����ͱ׷� ��Ŷ�� �ѹ��� �������� �ʾҽ��ϴ�.");
+            "    .");
 
-    // �����ͱ׷��� ũ�Ⱑ ��Ŷ�� ũ�⺸�� Ŭ ���
+    
     if (m_Length > szPacketHeader + packetSize)
-        throw Error("���� ���� �����ͱ׷� ��Ŷ�� �Ѳ����� "
-                    "���������ϴ�.");
+        throw Error("     "
+                    ".");
 
-    // ��Ŷ�� �����Ѵ�.
+    
     pPacket = (SerialDatagramPacket*)g_pPacketFactoryManager->createPacket(packetID);
 
     Assert(pPacket != NULL);
 
-    // �ø����� �ִ´�
+    
     pPacket->setSerial(serial);
 
-    // ��Ŷ�� �ʱ�ȭ�Ѵ�.
+    
     pPacket->read(*this);
 
-    // ��Ŷ�� ���� �ּ�/��Ʈ�� �����Ѵ�.
+    
     pPacket->setHost(getHost());
     pPacket->setPort(getPort());
 
@@ -148,7 +148,7 @@ void SerialDatagram::read(SerialDatagramPacket*& pPacket) {
 
 
 //////////////////////////////////////////////////////////////////////
-// �ܺ� ���ۿ� ����ִ� ������ ���� ���۷� �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::write(const char* buf, uint len) {
     __BEGIN_TRY
@@ -157,7 +157,7 @@ void SerialDatagram::write(const char* buf, uint len) {
     Assert(m_OutputOffset + len <= m_Length);
     //	if (m_OutputOffset + len > m_Length)
     //	{
-    //		throw Error( "SerialDatagram::write(): ������ ������ ������ ũ�⺸�� Ů�ϴ�.");
+    
     //	}
 
     memcpy(&m_Data[m_OutputOffset], buf, len);
@@ -169,12 +169,12 @@ void SerialDatagram::write(const char* buf, uint len) {
 
 
 //////////////////////////////////////////////////////////////////////
-// �ܺ� ��Ʈ���� ����ִ� ������ ���� ���۷� �����Ѵ�.
+
 //
 // *CAUTION*
 //
-// ��� write()���� write(const char*,uint)�� ����ϹǷ�, m_OutputOffset
-// �� �������� �ʿ�� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::write(const string& str) {
@@ -194,11 +194,11 @@ void SerialDatagram::write(const string& str) {
 //
 // write packet
 //
-// ��Ŷ�� ���̳ʸ� �̹����� �����ͱ׷����� ����ִ´�.
-// ��Ŷ�� �����ϴ� �ʿ��� �� �޽�带 ȣ���ϸ�, �� ���¿���
-// �����ͱ׷���
-// ���� ���۴� NULL �̾�� �Ѵ�. �� �� �޽�带 ȣ���� �� ���۰�
-// �Ҵ� �Ǿ�� �Ѵ�.
+
+
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::write(const SerialDatagramPacket* pPacket) {
@@ -210,15 +210,15 @@ void SerialDatagram::write(const SerialDatagramPacket* pPacket) {
     PacketSize_t packetSize = pPacket->getPacketSize();
     uint serial = pPacket->getSerial();
 
-    // ����Ÿ�׷��� ���۸� ������ ũ��� �����Ѵ�.
+    
     setData(szPacketHeader + packetSize);
 
-    // ��Ŷ ����� �����Ѵ�.
+    
     write((char*)&packetID, szPacketID);
     write((char*)&packetSize, szPacketSize);
     write((char*)&serial, szuint);
 
-    // ��Ŷ �ٵ� �����Ѵ�.
+    
     pPacket->write(*this);
 
     __END_CATCH
@@ -229,8 +229,8 @@ void SerialDatagram::write(const SerialDatagramPacket* pPacket) {
 //
 // set data
 //
-// �����ͱ׷����Ͽ��� �о���� �����͸� ���ι��ۿ�
-// �����Ѵ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::setData(char* data, uint len) {

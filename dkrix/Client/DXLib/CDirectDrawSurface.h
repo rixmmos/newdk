@@ -13,30 +13,15 @@
 //----------------------------------------------------------------------
 //
 //
-// 5:6:5 와  5:5:5의 차이는 
-// Bit Mask에 의해 처리되는 부분에서 발생하는데
-// CDirectDraw class의 InitMask()에서 Video Card에 맞는
-// 적절한 Mask를 생성하므로 그냥~ CDirectDraw의 Mask를 사용하면 된다.
+
+
+
+
 //
 //
 //
 //----------------------------------------------------------------------
-/*
-
-  < DDSurface가 생성되는 MEMORY >
-
-	- DDSCAPS_SYSTEMMEMORY는 Lock을 사용할 때 빠르다.
-	- DDSCAPS_VIDEOMEMORY는 Blt를 사용할 때 빠르다.
-	  단, VIDEOMEMORY가 부족하면 Surface를 생성하지 않으므로 error!
-	- 지정을 안 해 주면 VIDEOMEMORY가 사용가능하면 사용하고 
-   	  아니면 SYSTEMMEMORY를 사용한다.
-	
-  < Alpha Blending >
-    - 사용하려면 DDSCAPS_SYSTEMMEMORY를 사용하는게 좋다.
-	- Surface --> Surface로의 Alpha Blending보다
-	  Memory(SpriteFile) --> Surface로의 Alpha Blending이 빠르다.
-
-*/
+ 
 //----------------------------------------------------------------------
 
 #ifndef	__CDIRECTDRAWSURFACE_H__
@@ -58,7 +43,7 @@ public :
 	void	GDI_Text(int x, int y, const char *str, COLORREF fcolor, 
 																 COLORREF bcolor = 0, 
 																 bool option = true);
-	void	ShowFPS(int x, int y, COLORREF bcolor, COLORREF fcolor); // FPS를 출력한다.
+	void	ShowFPS(int x, int y, COLORREF bcolor, COLORREF fcolor); 
 
 
 	//------------------------------------------------------------
@@ -99,7 +84,7 @@ public :
 
 	//------------------------------------------------------------
 	// Set Transparency color
-	// `Blt할 때 반드시 해줘야 한다.
+	
 	//------------------------------------------------------------
 	void	SetTransparency(DWORD dwValue);
 
@@ -110,11 +95,11 @@ public :
 	void	BltNoColorkey(POINT* pPoint, CDirectDrawSurface* SourceSurface, RECT*  pRect);
 	void	Blt(RECT* pDestRect, CDirectDrawSurface* SourceSurface, RECT* pSourceRect);	
 
-	// 현재 surface의 pPoint에 PrimarySurface의 pRect를 blt한다.
+	
 	void	BltPrimarySurface(POINT* pPoint, RECT* pRect);
 
 	//------------------------------------------------------------
-	// DirectDraw 제공 Drawing 함수들...
+	
 	//------------------------------------------------------------
 	void	FillSurface(WORD color);
 	void	FillRect(RECT* rect, WORD Color);
@@ -130,7 +115,7 @@ public :
 	inline int		GetHeight() const	{ return m_Height; } // no const...
 
 	//------------------------------------------------------------
-	// Clip 영역
+	
 	//------------------------------------------------------------
 	///*
 	inline void		SetClipLeft(int Left)				{ if (Left>=0) m_ClipLeft = Left; }
@@ -155,7 +140,7 @@ public :
 	//*/
 
 	//
-	// ! Pitch와 Surface pointer를 얻으려면, CDirectDraw의 GetDDDesc()를 이용한다.
+	
 	//
 
 	//------------------------------------------------------------
@@ -165,7 +150,7 @@ public :
 	bool		Unlock();
 	bool		IsLock() const		{ return m_bLock; }
 
-	// 음... 그냥 cast해서 쓰는게...
+	
 	void	LockW(WORD*& lpSurface, WORD& lPitch);
 	//void	LockDW(DWORD*& lpSurface, WORD& lPitch);
 	//void	LockQW(QWORD*& lpSurface, WORD& lPitch);
@@ -175,24 +160,24 @@ public :
 	//------------------------------------------------------------		
 	operator const LPDIRECTDRAWSURFACE7&()	{ return m_pDDSurface; }
 	
-	// class 내부에서 쓰는 함수
+	
 protected :
 	bool	CopyBitmap(HBITMAP hbm, int x, int y, int dx, int dy);
 
 protected :
 	LPDIRECTDRAWSURFACE7	m_pDDSurface;
 
-	// Surface의 크기, 쓰임새가 많으므로 member로 가지고 있는다.
+	
 	int					m_Width;
 	int					m_Height;
 
-	// surface가 back surface인가를 나타내는 flag.
+	
 	bool					m_bBackSurface;
 
-	// Lock이 된 상태인가?
+	
 	bool					m_bLock;
 
-	// 실제 크기보다 작은.. Clip이 되어서 보여지는 영역을 설정
+	
 	int					m_ClipRight;
 	int					m_ClipBottom;
 	int					m_ClipLeft;

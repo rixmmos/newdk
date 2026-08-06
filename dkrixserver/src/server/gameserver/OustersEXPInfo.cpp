@@ -100,7 +100,7 @@ void OustersEXPInfoManager::load()
             throw Error("There is no data in OustersEXPInfo Table");
         }
 
-        // 전체 갯수를 세팅한다.
+        
         pResult->next();
         m_OustersEXPCount = pResult->getInt(1) + 1;
 
@@ -110,7 +110,7 @@ void OustersEXPInfoManager::load()
 
         Assert(m_OustersEXPInfoList != NULL);
 
-        // 배열을 초기화
+        
         for (uint i = 0; i < m_OustersEXPCount; i++)
             m_OustersEXPInfoList[i] = NULL;
 

@@ -35,10 +35,13 @@ using std::string;
 //////////////////////////////////////////////////////////////////////////////
 // built-in type redefinition
 //////////////////////////////////////////////////////////////////////////////
+#ifndef DKRIX_LEGACY_UINT_TYPES_DEFINED
+#define DKRIX_LEGACY_UINT_TYPES_DEFINED
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
+#endif
 
 #if defined(__LINUX__) || defined(__WIN_CONSOLE__) || defined(PLATFORM_MACOS)
 	typedef unsigned char  BYTE;

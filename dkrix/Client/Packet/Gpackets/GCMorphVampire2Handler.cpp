@@ -22,7 +22,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,7 +31,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -40,7 +40,7 @@ throw ( ProtocolException , Error )
 		MCreature* pCreature = g_pZone->GetCreature(vi.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -67,7 +67,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetCurrentDirection( vi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( vi.getSkinColor() );
 			pCreature->SetBodyColor2( vi.getCoatColor() );
 
@@ -76,7 +76,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -95,8 +95,8 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_ALIGNMENT, vi.getAlignment() );
 
 			//si.getName()
-			// 색상 정보
-			// 임시로
+			
+			
 			pCreature->SetGuildNumber( 2 );
 
 			if (!g_pZone->AddCreature( pCreature ))
@@ -106,13 +106,13 @@ throw ( ProtocolException , Error )
 			}
 		}
 		//--------------------------------------------------
-		// 이미 있던 Creature이면 정보 변경
+		
 		//--------------------------------------------------
 		else
 		{
 			pCreature->SetName( vi.getName().c_str() );
 
-			// 임시로
+			
 			pCreature->SetGuildNumber( 2 );
 
 			//pCreature->SetCreatureType( 0 );
@@ -132,7 +132,7 @@ throw ( ProtocolException , Error )
 			//pCreature->SetCurrentDirection( vi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( vi.getSkinColor() );
 			pCreature->SetBodyColor2( vi.getCoatColor() );
 
@@ -142,7 +142,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())

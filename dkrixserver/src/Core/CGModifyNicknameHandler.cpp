@@ -71,7 +71,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         pItem = dynamic_cast<EventGiftBox*>(pInventory->getItemWithObjectID(itemOID));
 
         if (pItem == NULL) {
-            filelog("Nickname.log", "[%s:%s] 아이템이 없거나 EventGiftBox가 아닙니다.", pPlayer->getID().c_str(),
+            filelog("Nickname.log", "[%s:%s]   EventGiftBox .", pPlayer->getID().c_str(),
                     pPC->getName().c_str());
 
             gcNV.setCode(NICKNAME_MODIFY_FAIL_NO_ITEM);
@@ -96,7 +96,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
     }
 
     switch (pItem->getItemType()) {
-    // 펫 닉네임 바꾸기
+    
     case 23: {
         PetInfo* pPetInfo = pPC->getPetInfo();
         if (pPetInfo == NULL) {
@@ -130,7 +130,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         return;
     }
 
-    // 커스텀 닉네임 바꾸기
+    
     case 22:
     case 25: {
         NicknameInfo* pNickname = pPC->getNicknameBook()->getNicknameInfo(0);
@@ -184,7 +184,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         break;
     }
 
-    // 닉네임 추가하기
+    
     case 24: {
         if (pItem == NULL) {
             gcNV.setCode(NICKNAME_MODIFY_FAIL_NO_ITEM);

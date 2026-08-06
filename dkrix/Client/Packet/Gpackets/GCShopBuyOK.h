@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCShopBuyOK.h 
-// Written By  : 김성민
+
 // Description : 
-// 플레이어가 상점 NPC에게 물건 구입을 요청했을 때, 제대로
-// 인증이 되면 이 패킷이 플레이어에게 날아간다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_SHOP_BUY_OK_H__
 #define __GC_SHOP_BUY_OK_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include <list>
 
 //////////////////////////////////////////////////////////////////////////////
@@ -95,17 +95,17 @@ public:
 
 private:
 	ObjectID_t     		m_ObjectID;     // NPC's object id
-	ShopVersion_t  		m_Version;      // 상점 버젼
-	ObjectID_t     		m_ItemObjectID; // 플레이어가 산 아이템의 OID
-	BYTE           		m_ItemClass;    // 플레이어가 산 아이템의 class
-	ItemType_t     		m_ItemType;     // 플레이어가 산 아이템의 type
-	std::list<OptionType_t>  m_OptionType;   // 플레이어가 산 아이템의 option type
-	Durability_t   		m_Durability;   // 플레이어가 산 아이템의 durability
-	ItemNum_t      		m_ItemNum;      // 플레이어가 산 아이템의 item num
-	Silver_t       		m_Silver;       // 플레이어가 산 아이템의 silver coating amount
-	Grade_t       		m_Grade;        // 플레이어가 산 아이템의 grade
-	EnchantLevel_t 		m_EnchantLevel; // 플레이어가 산 아이템의 enchant level
-	Price_t        		m_Price;        // 플레이어가 현재 돈
+	ShopVersion_t  		m_Version;      
+	ObjectID_t     		m_ItemObjectID; 
+	BYTE           		m_ItemClass;    
+	ItemType_t     		m_ItemType;     
+	std::list<OptionType_t>  m_OptionType;   
+	Durability_t   		m_Durability;   
+	ItemNum_t      		m_ItemNum;      
+	Silver_t       		m_Silver;       
+	Grade_t       		m_Grade;        
+	EnchantLevel_t 		m_EnchantLevel; 
+	Price_t        		m_Price;        
 
 };
 

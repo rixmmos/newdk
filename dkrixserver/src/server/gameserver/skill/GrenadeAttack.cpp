@@ -16,7 +16,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void GrenadeAttack::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -51,30 +51,30 @@ void GrenadeAttack::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
         if (bRangeCheck && bHitRoll && bTileCheck) {
             Tile& tile = pZone->getTile(X, Y);
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             input.SkillLevel = pMonster->getLevel();
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectMeteorStrike* pEffect = new EffectMeteorStrike(pZone, X, Y);
             pEffect->setNextTime(output.Duration);
             pEffect->setUserObjectID(pMonster->getObjectID());
             pEffect->setDamage(output.Damage);
 
-            // 타일에 붙은 이펙트는 OID를 받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // 타일 위에 크리쳐가 있다면 바로 영향을 주도록 한다.
+            
             // Creature* pTargetCreature = NULL;
 
             // if (tile.hasCreature(Creature::MOVE_MODE_WALKING))

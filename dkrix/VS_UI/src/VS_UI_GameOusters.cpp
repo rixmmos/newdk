@@ -70,7 +70,7 @@ C_VS_UI_OUSTERS::C_VS_UI_OUSTERS():C_VS_UI_TRIBE()
 	tab_x += m_pC_sys_button_spk->GetWidth(TAB_EXP);
 	m_pC_common_button_group->Add( new C_VS_UI_EVENT_BUTTON(tab_x, tab_y, m_pC_sys_button_spk->GetWidth(TAB_GUILD), m_pC_sys_button_spk->GetHeight(TAB_GUILD), TAB_GUILD_ID, this, TAB_GUILD) );
 	tab_x += m_pC_sys_button_spk->GetWidth(TAB_GUILD);
-	// 2004, 12, 2, sobeit add start - ���
+	
 	m_pC_common_button_group->Add( new C_VS_UI_EVENT_BUTTON(tab_x, tab_y, m_pC_sys_button_spk->GetWidth(TAB_GUILD), m_pC_sys_button_spk->GetHeight(TAB_UTIL), TAB_UTIL_ID, this, TAB_UTIL) );
 	tab_x += m_pC_sys_button_spk->GetWidth(TAB_UTIL);
 	// 2004, 12, 2, sobeit add end
@@ -96,7 +96,7 @@ C_VS_UI_OUSTERS::C_VS_UI_OUSTERS():C_VS_UI_TRIBE()
 	m_pC_menu_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap, m_pC_sys_button_spk->GetWidth(BUTTON_QUEST), m_pC_sys_button_spk->GetHeight(BUTTON_QUEST), QUEST_ID, this, BUTTON_QUEST) );
 	m_pC_menu_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*2, button_y+button_y_gap, m_pC_sys_button_spk->GetWidth(BUTTON_MAIL), m_pC_sys_button_spk->GetHeight(BUTTON_MAIL), MAIL_ID, this, BUTTON_MAIL) );
 
-	// sms ��ư 
+	
 
 //	if(false == g_pUserInformation->IsNetmarble)
 	//add by zdj 2005.5.17
@@ -108,18 +108,18 @@ C_VS_UI_OUSTERS::C_VS_UI_OUSTERS():C_VS_UI_TRIBE()
 	// guild buttons
 	m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y+button_y_gap*0, m_pC_sys_button_spk->GetWidth(BUTTON_TEAM_INFO), m_pC_sys_button_spk->GetHeight(BUTTON_TEAM_INFO), TEAM_INFO_ID, this, BUTTON_TEAM_INFO) );
 	m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap*0, m_pC_sys_button_spk->GetWidth(BUTTON_TEAM_MEMBER_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_TEAM_MEMBER_LIST), TEAM_MEMBER_LIST_ID, this, BUTTON_TEAM_MEMBER_LIST) );
-	// 2004, 10, 12, sobeit add start - ��� ���� ������
-	//if(false == g_pUserInformation->IsNetmarble) // 2005, 1, 12, sobeit modify - �ݸ��� ��� ���� ��
+	
+	
 	{
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_GUILD_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_GUILD_LIST), TEAM_LIST_ID, this, BUTTON_GUILD_LIST) );
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*1, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_WAIT_GUILD_LIST), m_pC_sys_button_spk->GetHeight(BUTTON_WAIT_GUILD_LIST), TEAM_WAIT_LIST_ID, this, BUTTON_WAIT_GUILD_LIST) );
 		m_pC_guild_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*2, button_y+button_y_gap*1, m_pC_sys_button_spk->GetWidth(BUTTON_UNION), m_pC_sys_button_spk->GetHeight(BUTTON_UNION), TEAM_UNION_ID, this, BUTTON_UNION) );
 	}
-	// 2004, 10, 12, sobeit add end - ��� ���� ������
+	
 
-	// 2004, 12, 2, sobeit add start - ���
+	
 	m_pC_util_button_group->Add( new C_VS_UI_EVENT_BUTTON(button_x+button_x_gap*0, button_y, m_pC_sys_button_spk->GetWidth(BUTTON_STORE), m_pC_sys_button_spk->GetHeight(BUTTON_STORE), UTIL_STORE_ID, this, BUTTON_STORE) );
-	if(false == g_pUserInformation->IsNetmarble && false == g_pUserInformation->IsTestServer) // ������
+	if(false == g_pUserInformation->IsNetmarble && false == g_pUserInformation->IsTestServer) 
 	{
 //add by zdj 2005.5.16
 		// add by Coffee 2006.11.26
@@ -224,7 +224,7 @@ void C_VS_UI_OUSTERS::Start()
 	m_pC_minimap->Start();
 	m_pC_armsband->Start();
 
-	// add by Coffee 2007-3-6 ���������ͼ
+	
 //	m_pC_worldmap->Start();
 	// end 
 
@@ -247,25 +247,24 @@ void C_VS_UI_OUSTERS::Show()
 		m_pC_common_button_group->Show();
 		
 		int sec = 0, min = 0, hour = 0;
-		char sz_temp[20];
-		strcpy(sz_temp, m_time.c_str());
-		sec = atoi(sz_temp+strlen(sz_temp)-2);
-		sz_temp[strlen(sz_temp)-3] = '\0';
-		min = atoi(sz_temp+strlen(sz_temp)-2);
-		sz_temp[strlen(sz_temp)-3] = '\0';
-		hour = atoi(sz_temp);
+		if (sscanf(m_time.c_str(), "%d:%d:%d", &hour, &min, &sec) != 3)
+		{
+			hour = 0;
+			min = 0;
+			sec = 0;
+		}
 		
 		const int icon_x = 106-10, icon_y = 45-15;	//modify by viva : icon point
-		if(hour >= 8 && hour < 16)	// ���̴�
+		if(hour >= 8 && hour < 16)	
 			m_pC_main_spk->BltLocked(x+icon_x, y+icon_y, ICON_SUN);
-		else if(hour >= 20 || hour < 4)	// ���̴�
+		else if(hour >= 20 || hour < 4)	
 			m_pC_main_spk->BltLocked(x+icon_x+3, y+icon_y, ICON_MOON);
-		else	// ���� ��ü�� �ñ�-_- �ñ�-_-?;;
+		else	
 		{
-			if(hour >=4 && hour < 8)	// �ضߴ� �ð�
+			if(hour >=4 && hour < 8)	
 			{
 				int time = (hour-4)*60+min;
-				// �ض� ���̶� ����� �޶� ������-_-;
+				
 				Rect rect(0, 0, m_pC_main_spk->GetWidth(ICON_MOON), m_pC_main_spk->GetHeight(ICON_MOON)*(240-time)/240);
 				rect.y = m_pC_main_spk->GetHeight(ICON_MOON)-rect.h;
 				m_pC_main_spk->BltLockedClip(x+icon_x+3, y+icon_y-rect.y, rect, ICON_MOON);
@@ -274,10 +273,10 @@ void C_VS_UI_OUSTERS::Show()
 				rect.y = 0;
 				m_pC_main_spk->BltLockedClip(x+icon_x, y+icon_y+m_pC_main_spk->GetHeight(ICON_SUN)-rect.h, rect, ICON_SUN);
 			}
-			else						// �ƴϸ� ������ �ð��̰���-_-
+			else						
 			{
 				int time = (hour-16)*60+min;
-				// �ض� ���̶� ����� �޶� ������-_-;
+				
 				Rect rect(0, 0, m_pC_main_spk->GetWidth(ICON_SUN), m_pC_main_spk->GetHeight(ICON_SUN)*(240-time)/240);
 				rect.y = m_pC_main_spk->GetHeight(ICON_SUN)-rect.h;
 				m_pC_main_spk->BltLockedClip(x+icon_x, y+icon_y-rect.y, rect, ICON_SUN);
@@ -320,7 +319,7 @@ void C_VS_UI_OUSTERS::Show()
 			break;
 
 		case TAB_EXP_ID:
-		// EXP �� ��ư�� ����
+		
 		{
 			//modify by viva : exp_bar etc.  num_x is the str's x
 			const int bar_x = 110 - 25, bar_y = 98 - 12, str_x = 27, num_x = 46-15, bar_gap = 14;
@@ -332,8 +331,13 @@ void C_VS_UI_OUSTERS::Show()
 			__int64 goal_exp = g_pExperienceTable->GetOustersInfo( g_char_slot_ingame.level ).GoalExp;
 			int exp_width = m_pC_main_spk->GetWidth(OUSTERS_EXP_BAR);
 			int exp_height = m_pC_main_spk->GetHeight(OUSTERS_EXP_BAR);
-			int exp_bar = /*int((float)exp_width * ((float)exp_remain / (float)goal_exp));*/
-				exp_width * (goal_exp - exp_remain) / goal_exp;
+			int exp_bar = 0;
+			if(goal_exp > 0)
+			{
+				exp_bar = int(exp_width * (goal_exp - exp_remain) / goal_exp);
+				if(exp_bar < 0) exp_bar = 0;
+				if(exp_bar > exp_width) exp_bar = exp_width;
+			}
 			
 			//exp bar
 			rect.Set(0, 0, exp_bar, exp_height);
@@ -504,29 +508,29 @@ C_VS_UI_OUSTERS_GEAR::C_VS_UI_OUSTERS_GEAR()
 {
 	assert(MOustersGear::MAX_GEAR_OUSTERS == SLOT_SIZE);
   
-//	if(g_char_slot_ingame.m_AdvancementLevel > 0)// 2������ bycsm 2004.12.31 
-//	{
-	m_slot_rect[SN_CIRCLET].Set(114, 60, 60, 60);			// ��Ŭ��
-	m_slot_rect[SN_COAT].Set(116, 165, 60, 90);				// ��
-	m_slot_rect[SN_LEFTHAND].Set(201, 165, 60, 90);			// �޼�
-	m_slot_rect[SN_RIGHTHAND].Set(27, 165, 60, 90);			// ������
-	m_slot_rect[SN_BOOTS].Set(114, 261, 60, 90);				// �Ź�
-	m_slot_rect[SN_ARMSBAND1].Set(25, 100, 60, 60);			// �Ͻ����1
-	m_slot_rect[SN_ARMSBAND2].Set(201, 100, 60, 60);			// �Ͻ����2
-	m_slot_rect[SN_RING1].Set(29, 269, 30, 30);				// ��1
-	m_slot_rect[SN_RING2].Set(230, 269, 30, 30);				// ��2
-	m_slot_rect[SN_PENDENT1].Set(94, 129, 30, 30);			// �����1
-	m_slot_rect[SN_PENDENT2].Set(130, 129, 30, 30);			// �����2
-	m_slot_rect[SN_PENDENT3].Set(166, 129, 30, 30);			// �����3
-	m_slot_rect[SN_STONE1].Set(65, 268, 30, 30);			// ���ɼ�1
-	m_slot_rect[SN_STONE2].Set(195, 268, 30, 30);			// ���ɼ�2
-	m_slot_rect[SN_STONE3].Set(65, 304, 30, 30);			// ���ɼ�3
-	m_slot_rect[SN_STONE4].Set(195, 304, 30, 30);			// ���ɼ�4
 
-	m_slot_rect[SN_COREZAP1].Set(62, 270, 30, 30);			// �ھ���1
-	m_slot_rect[SN_COREZAP2].Set(194, 270, 30, 30);			// �ھ���2
-	m_slot_rect[SN_COREZAP3].Set(62, 306, 30, 30);			// �ھ���3
-	m_slot_rect[SN_COREZAP4].Set(194, 306, 30, 30);			// �ھ���4
+//	{
+	m_slot_rect[SN_CIRCLET].Set(114, 60, 60, 60);			
+	m_slot_rect[SN_COAT].Set(116, 165, 60, 90);				
+	m_slot_rect[SN_LEFTHAND].Set(201, 165, 60, 90);			
+	m_slot_rect[SN_RIGHTHAND].Set(27, 165, 60, 90);			
+	m_slot_rect[SN_BOOTS].Set(114, 261, 60, 90);				
+	m_slot_rect[SN_ARMSBAND1].Set(25, 100, 60, 60);			
+	m_slot_rect[SN_ARMSBAND2].Set(201, 100, 60, 60);			
+	m_slot_rect[SN_RING1].Set(29, 269, 30, 30);				
+	m_slot_rect[SN_RING2].Set(230, 269, 30, 30);				
+	m_slot_rect[SN_PENDENT1].Set(94, 129, 30, 30);			
+	m_slot_rect[SN_PENDENT2].Set(130, 129, 30, 30);			
+	m_slot_rect[SN_PENDENT3].Set(166, 129, 30, 30);			
+	m_slot_rect[SN_STONE1].Set(65, 268, 30, 30);			
+	m_slot_rect[SN_STONE2].Set(195, 268, 30, 30);			
+	m_slot_rect[SN_STONE3].Set(65, 304, 30, 30);			
+	m_slot_rect[SN_STONE4].Set(195, 304, 30, 30);			
+
+	m_slot_rect[SN_COREZAP1].Set(62, 270, 30, 30);			
+	m_slot_rect[SN_COREZAP2].Set(194, 270, 30, 30);			
+	m_slot_rect[SN_COREZAP3].Set(62, 306, 30, 30);			
+	m_slot_rect[SN_COREZAP4].Set(194, 306, 30, 30);			
 
 	m_slot_rect[SN_FASCIA].Set(26, 37, 60, 60);	
 	m_slot_rect[SN_MITTEN].Set(203, 37, 60, 60);
@@ -544,27 +548,27 @@ C_VS_UI_OUSTERS_GEAR::C_VS_UI_OUSTERS_GEAR()
 //	else
 //	{
 //
-//		m_slot_rect[SN_CIRCLET].Set(114, 25, 60, 60);			// ��Ŭ��
-//		m_slot_rect[SN_COAT].Set(114, 127, 60, 90);				// ��
-//		m_slot_rect[SN_LEFTHAND].Set(201, 127, 60, 90);			// �޼�
-//		m_slot_rect[SN_RIGHTHAND].Set(27, 127, 60, 90);			// ������
-//		m_slot_rect[SN_BOOTS].Set(114, 223, 60, 90);				// �Ź�
-//		m_slot_rect[SN_ARMSBAND1].Set(27, 61, 60, 60);			// �Ͻ����1
-//		m_slot_rect[SN_ARMSBAND2].Set(201, 61, 60, 60);			// �Ͻ����2
-//		m_slot_rect[SN_RING1].Set(42, 247, 30, 30);				// ��1
-//		m_slot_rect[SN_RING2].Set(218, 247, 30, 30);				// ��2
-//		m_slot_rect[SN_PENDENT1].Set(93, 91, 30, 30);			// �����1
-//		m_slot_rect[SN_PENDENT2].Set(129, 91, 30, 30);			// �����2
-//		m_slot_rect[SN_PENDENT3].Set(165, 91, 30, 30);			// �����3
-//		m_slot_rect[SN_STONE1].Set(77, 246, 30, 30);			// ���ɼ�1
-//		m_slot_rect[SN_STONE2].Set(181, 246, 30, 30);			// ���ɼ�2
-//		m_slot_rect[SN_STONE3].Set(77, 282, 30, 30);			// ���ɼ�3
-//		m_slot_rect[SN_STONE4].Set(181, 282, 30, 30);			// ���ɼ�4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //		
-//		m_slot_rect[SN_COREZAP1].Set(77, 246, 30, 30);			// �ھ���1
-//		m_slot_rect[SN_COREZAP2].Set(181, 246, 30, 30);			// �ھ���2
-//		m_slot_rect[SN_COREZAP3].Set(77, 282, 30, 30);			// �ھ���3
-//		m_slot_rect[SN_COREZAP4].Set(181, 282, 30, 30);			// �ھ���4
+
+
+
+
 //		
 //		m_slot_rect[SN_FASCIA].Set(26, 37, 60, 60);	
 //		m_slot_rect[SN_MITTEN].Set(203, 37, 60, 60);
@@ -607,9 +611,9 @@ C_VS_UI_OUSTERS_QUICKITEM::C_VS_UI_OUSTERS_QUICKITEM()
 
 	m_image_spk.Open(SPK_OUSTERS_QUICKITEM);
 
-	// ���̴� ó�� no belt�� ����̴�. belt�� �����ϸ� �ٲ��.
-	// ���̴� �����ϴ�.
-	Set(0, 434, m_image_spk.GetWidth(END_EDGE), m_image_spk.GetHeight(END_EDGE));
+	
+	
+	Set(0, max(0, g_GameRect.bottom - 166), m_image_spk.GetWidth(END_EDGE), m_image_spk.GetHeight(END_EDGE));
 
 	m_pC_button_group = new ButtonGroup(this);
 
@@ -683,11 +687,11 @@ void	C_VS_UI_OUSTERS_QUICKITEM::Close()
 //-----------------------------------------------------------------------------
 // ResetSize
 //
-// belt�� ��ü�ϰ����� size�� �缳���ؾ� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_OUSTERS_QUICKITEM::ResetSize()
 {
-	// ���ƾƾ� �ϵ��ڵ�!!
+	
 	int slot_size = m_image_spk.GetWidth(SLOT);
 	if(m_bl_width)
 	{
@@ -931,7 +935,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::MouseControl(UINT message, int _x, int _y)
 							m_focus_slot = i;
 						}
 
-						if( g_pArmsBand1 != NULL && m_focus_slot < g_pArmsBand1->GetPocketNumber() )			// armsband 1���� üũ�Ѵ�.	
+						if( g_pArmsBand1 != NULL && m_focus_slot < g_pArmsBand1->GetPocketNumber() )			
 							p_selected_item = g_pArmsBand1->GetItem(m_focus_slot);
 						else
 						{
@@ -959,7 +963,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::MouseControl(UINT message, int _x, int _y)
 			case M_LEFTBUTTON_DOWN:
 			case M_LB_DOUBLECLICK:
 				//
-				// Item�� ������ ���´�.
+				
 				//
 				{
 					ret |= Click();
@@ -971,7 +975,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::MouseControl(UINT message, int _x, int _y)
 
 			case M_RIGHTBUTTON_DOWN:
 				//
-				// Item�� ����Ѵ�.
+				
 				//
 				Use(m_focus_slot);
 				break;
@@ -1095,7 +1099,7 @@ void	C_VS_UI_OUSTERS_QUICKITEM::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_b
 
 void	C_VS_UI_OUSTERS_QUICKITEM::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {	
-	// ���ο�
+	
 	if(m_bl_width)
 	{
 		if(x+w >= g_GameRect.right)
@@ -1153,7 +1157,7 @@ void	C_VS_UI_OUSTERS_QUICKITEM::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button
 			}
 		}
 	}
-	// ���ο�
+	
 	else
 	{
 		if(y > 0)
@@ -1234,7 +1238,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 	RECT rect[8];
 	int num[8];
 
-	// �ƾ� ���� �ϵ��ڵ�-_- ���� �����-_-;;
+	
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		bool bl_statch = false;
@@ -1251,13 +1255,13 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 				if(x+w >= g_GameRect.right)
 				{
 					bl_statch = true;
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	
 						temp_x += (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
 					m_image_spk.BltLocked(temp_x, temp_y, START_EDGE_EXTEND);
 					temp_x += m_image_spk.GetWidth(START_EDGE_EXTEND);
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	
 						x += (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
-					if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+					if(Moving() && m_bl_resize)	
 						x -= (m_image_spk.GetWidth(START_EDGE) - m_image_spk.GetWidth(STATCH_EDGE));
 				}
 				else
@@ -1278,7 +1282,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 			}
 			else
 			{
-				if(Moving() && m_bl_resize)	// �հ� ���� ����� �������ε�-_-;; �̷� �ϵ� �ڵ��� �ϸ� �ȵǴµ�-_-;;
+				if(Moving() && m_bl_resize)	
 				{
 					temp_y += (m_image_spk.GetHeight(START_EDGE+ROTATED_OFFSET) - m_image_spk.GetHeight(STATCH_EDGE+ROTATED_OFFSET));
 					m_image_spk.BltLocked(temp_x, temp_y, START_EDGE_EXTEND+ROTATED_OFFSET);
@@ -1297,7 +1301,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 		MItem * p_selected_item = NULL;
 		if(m_focus_slot != -1)
 		{
-			if( g_pArmsBand1 != NULL && m_focus_slot < g_pArmsBand1->GetPocketNumber() )			// armsband 1���� üũ�Ѵ�.	
+			if( g_pArmsBand1 != NULL && m_focus_slot < g_pArmsBand1->GetPocketNumber() )			
 				p_selected_item = g_pArmsBand1->GetItem(m_focus_slot);
 			else
 			{
@@ -1352,7 +1356,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 			
 			const MItem * p_item = NULL;
 			
-			if( g_pArmsBand1 != NULL && i < g_pArmsBand1->GetPocketNumber() )			// armsband 1���� üũ�Ѵ�.	
+			if( g_pArmsBand1 != NULL && i < g_pArmsBand1->GetPocketNumber() )			
 				p_item = g_pArmsBand1->GetItem(i);
 			else
 			{
@@ -1364,7 +1368,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 			
 			if (p_item != NULL)
 			{
-				// ������ ���
+				
 				TYPE_FRAMEID frame_id = p_item->GetInventoryFrameID();
 				
 				int _x;
@@ -1391,7 +1395,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 					gpC_item->BltLocked(_x, _y, frame_id);
 				}
 				
-				// ����ǥ�� AlphaBox�� ���, ���ڴ� �ڿ��� ��´�
+				
 				if(p_item->IsPileItem())
 				{
 					int depth, number;
@@ -1418,7 +1422,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 				
 			}
 			else
-				// ���� ��ġ �̸� �� �� �ֵ��� �Ѵ�.
+				
 				if (gpC_mouse_pointer->GetPickUpItem() && 
 					m_focus_slot == i)
 				{
@@ -1555,7 +1559,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Show()
 			point.y = y+m_p_slot_x[m_focus_slot];
 		}
 
-		// ������ �ڽ� ���..
+		
 //		if (gpC_base->m_p_DDSurface_back->Lock())
 		{
 			RECT rect;
@@ -1587,7 +1591,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 
 	int item_x, item_y;
 
-	if (gpC_mouse_pointer->GetPickUpItem()) // ��� �ִ°�?
+	if (gpC_mouse_pointer->GetPickUpItem()) 
 	{
 		MItem* p_cur_item = NULL;
 		
@@ -1601,17 +1605,17 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 				p_cur_item = g_pArmsBand2->GetItem( m_focus_slot );
 		}
 
-		// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
+		
 		if (gpC_mouse_pointer->GetPickUpItem()->IsInsertToItem( p_cur_item ))
 		{
-			// ������ �ִ� item�� �߰��� �� �ִ� ���
+			
 
-			// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-			// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+			
+			
 			gpC_base->SendMessage(UI_ITEM_INSERT_FROM_QUICKSLOT,
 																  m_focus_slot,
 																  0,
-																  (void *)p_cur_item); // ��� Item
+																  (void *)p_cur_item); 
 			return true;
 		}
 		else
@@ -1647,7 +1651,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 	}
 	else
 	{
-		// ���´�.
+		
 		//const MItem * p_item = g_pQuickSlot->GetItem(m_focus_slot);
 		MOustersArmsBand * pQuickSlot = NULL;
 		MItem *p_item = NULL;
@@ -1672,7 +1676,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 
 		p_item = pQuickSlot->GetItem( slot );
 
-		if (p_item != NULL) // Item�� �ִ�.
+		if (p_item != NULL) 
 		{
 			if(m_bl_width)
 			{
@@ -1692,7 +1696,7 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 																  m_focus_slot, 
 																  MAKEDWORD(item_x, item_y), 
 																  (MItem *)p_item);
-			// SHIFT������ Ŭ�������� ������ �ڵ� �̵� ó�� -> �κ��丮
+			
 			if(g_pSDLInput->KeyDown(DIK_LSHIFT))
 			{
 				POINT point;
@@ -1700,26 +1704,26 @@ bool C_VS_UI_OUSTERS_QUICKITEM::Click()
 				{
 					const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 					
-					// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-					// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+					
+					
 					if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 					{
-						// ������ �ִ� item�� �߰��� �� �ִ� ���
 						
-						// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-						// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+						
+						
+						
 						gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 							point.x, point.y,
-							(void *)p_cur_item); // ��� Item
+							(void *)p_cur_item); 
 					}
 					else
 					{	
-						// �߰��� �� ���� ���
+						
 						MItem* p_old_item  = NULL;
 						
-						if (g_pInventory->CanReplaceItem((MItem *)p_item,		// �߰��� item
-							point.x, point.y,	// �߰��� ��ġ 
-							p_old_item))								// �����ִ� item
+						if (g_pInventory->CanReplaceItem((MItem *)p_item,		
+							point.x, point.y,	
+							p_old_item))								
 						{
 							
 							gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 
@@ -1761,7 +1765,7 @@ void C_VS_UI_OUSTERS_QUICKITEM::Use(int slot, bool bFunctionKey)
 	{
 		const MItem * p_item = GetItem( slot );
 
-		if (p_item) // Item�� �ִ�.
+		if (p_item) 
 		{
 			gpC_base->SendMessage(UI_ITEM_USE_QUICKSLOT,
 									  slot,
@@ -1794,7 +1798,8 @@ bool	C_VS_UI_OUSTERS::IsRunningQuickItemSlot()
 
 void	C_VS_UI_OUSTERS::ResetOustersQuickItemSize()
 {
-	m_pC_armsband->ResetSize();
+	if (m_pC_armsband != NULL)
+		m_pC_armsband->ResetSize();
 }
 
 void	C_VS_UI_OUSTERS::HotKey_QuickItemSlot()

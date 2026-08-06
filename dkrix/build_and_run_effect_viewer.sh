@@ -38,7 +38,7 @@ if [ ! -d "$DATA_DIR" ]; then
     echo "Creating directory structure..."
     mkdir -p "$DATA_DIR/Data/Image"
     echo ""
-    echo "⚠️  You need to copy game data to: $DATA_DIR"
+    echo "  You need to copy game data to: $DATA_DIR"
     echo "   Required files in Data/Image/:"
     echo "   - Effect.efpk or EffectAlpha.efpk"
     echo "   - Effect.aspk"

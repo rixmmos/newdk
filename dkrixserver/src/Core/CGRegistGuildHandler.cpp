@@ -47,7 +47,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
     string GuildName = pPacket->getGuildName();
 
     if (GuildName.find_first_of("'\\") < GuildName.size()) {
-        // 이미 사용 중인 길드 이름이다
+        
         if (pCreature->isSlayer()) {
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_NAME);
@@ -69,7 +69,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
     Result* pResult;
 
     BEGIN_DB {
-        // 같은 길드 이름이 있는지 체크
+        
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery("SELECT GuildID FROM GuildInfo WHERE GuildName = '%s' AND GuildState IN ( 0, 1 )",
                                       pPacket->getGuildName().c_str());
@@ -77,7 +77,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
         if (pResult->getRowCount() != 0) {
             SAFE_DELETE(pStmt);
 
-            // 이미 사용 중인 길드 이름이다
+            
             if (pCreature->isSlayer()) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_NAME);
@@ -95,7 +95,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
             return;
         }
 
-        // 다른 길드 소속인지 체크
+        
         pResult = pStmt->executeQuery("SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = '%s'",
                                       pCreature->getName().c_str());
 
@@ -103,7 +103,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
             int Rank = pResult->getInt(1);
             string ExpireDate = pResult->getString(2);
 
-            // 다른 길드에서 탈퇴한 경우는 길드를 생성할 수 없다.
+            
             if (ExpireDate.size() == 7 && Rank == GuildMember::GUILDMEMBER_RANK_LEAVE) {
                 time_t daytime = time(0);
                 tm Time;
@@ -111,11 +111,11 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
                 Time.tm_mon = atoi(ExpireDate.substr(3, 2).c_str());
                 Time.tm_mday = atoi(ExpireDate.substr(5, 2).c_str());
 
-                //				if ( difftime( daytime, mktime(&Time) ) < 604800 )	// 실시간 7일이 지났는가?
+                
                 if (difftime(daytime, mktime(&Time)) <
-                    g_pVariableManager->getVariable(QUIT_GUILD_PENALTY_TERM) * 24 * 3600) // 실시간 7일이 지났는가?
+                    g_pVariableManager->getVariable(QUIT_GUILD_PENALTY_TERM) * 24 * 3600) 
                 {
-                    // 길드 생성할 수 없다는 메세지
+                    
                     GCNPCResponse response;
 
                     if (pCreature->isSlayer())
@@ -133,7 +133,7 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
                 }
             }
 
-            // 기존의 길드멤버 정보를 지워준다.
+            
             pStmt->executeQuery("DELETE FROM GuildMember WHERE Name='%s'", pCreature->getName().c_str());
 
             // SAFE_DELETE( pStmt );
@@ -151,10 +151,10 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
 
         SkillDomainType_t highest = pSlayer->getHighestSkillDomain();
 
-        // 등록 가능 여부 체크
-        if ((pSlayer->getGold() >= REQUIRE_SLAYER_MASTER_GOLD) &&                               // 등록비 1억
-            (pSlayer->getFame() >= REQUIRE_SLAYER_MASTER_FAME[highest]) &&                      // 명성치
-            (pSlayer->getSkillDomainLevel(highest) >= REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) // 레벨 50 이상
+        
+        if ((pSlayer->getGold() >= REQUIRE_SLAYER_MASTER_GOLD) &&                               
+            (pSlayer->getFame() >= REQUIRE_SLAYER_MASTER_FAME[highest]) &&                      
+            (pSlayer->getSkillDomainLevel(highest) >= REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) 
         ) {
             GSAddGuild gsAddGuild;
 
@@ -176,8 +176,8 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
         Assert(pVampire != NULL);
 
-        // 등록 가능 여부 체크
-        if ((pVampire->getGold() >= REQUIRE_VAMPIRE_MASTER_GOLD) && // 등록비 1억
+        
+        if ((pVampire->getGold() >= REQUIRE_VAMPIRE_MASTER_GOLD) && 
             (pVampire->getLevel() >= REQUIRE_VAMPIRE_MASTER_LEVEL)) {
             GSAddGuild gsAddGuild;
 
@@ -198,8 +198,8 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
         Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
         Assert(pOusters != NULL);
 
-        // 등록 가능 여부 체크
-        if ((pOusters->getGold() >= REQUIRE_OUSTERS_MASTER_GOLD) && // 등록비 1억
+        
+        if ((pOusters->getGold() >= REQUIRE_OUSTERS_MASTER_GOLD) && 
             (pOusters->getLevel() >= REQUIRE_OUSTERS_MASTER_LEVEL)) {
             GSAddGuild gsAddGuild;
 

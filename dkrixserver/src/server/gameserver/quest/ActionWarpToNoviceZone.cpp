@@ -53,7 +53,7 @@ void ActionWarpToNoviceZone::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionWarpToNoviceZone::execute(Creature* pNPC, Creature* pCreature)
 
@@ -101,15 +101,15 @@ void ActionWarpToNoviceZone::execute(Creature* pNPC, Creature* pCreature)
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(ZoneID);
 
-        // 유료존인데 유료사용자가 아니면...
+        
         if (pZoneInfo == NULL || pZoneInfo->isPayPlay() && !pGamePlayer->isPayPlaying()) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
             } else {
-                // 유료 서비스 사용 불가인 경우
+                
                 GCSystemMessage gcSystemMessage;
 
                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {

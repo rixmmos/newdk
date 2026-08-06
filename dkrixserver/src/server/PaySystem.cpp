@@ -313,7 +313,7 @@ bool PaySystem::updatePayPlayTime(const string& playerID, const VSDateTime& curr
             }
 
             if (m_PayPlayAvailableHours <= 0) {
-                // throw ProtocolException("사용시간이 다됐다.");
+                
                 m_PayPlayStartTime.tv_sec = 0;
                 m_bPremiumPlay = false;
                 return false;
@@ -423,7 +423,7 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                                             m_PCRoomID, playerID.c_str());
                     } catch (SQLQueryException& se) {
                         filelog("paySystem.txt", "%s", se.toString().c_str());
-                        // 그냥 넘어갈까
+                        
                     }
 
                     // Check the user count after insertion.
@@ -445,7 +445,7 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
 
                             return false;
                         } else {
-                            // 정상적인 경우
+                            
                             SAFE_DELETE(pStmt);
 
                             m_bPCRoomPlay = true;
@@ -582,7 +582,7 @@ bool PaySystem::loginPayPlay(PayType payType, const string& payPlayDate, int pay
 
     getCurrentTime(m_PayPlayStartTime);
 
-    // PayType을 설정한다.
+    
     checkPayPlayAvailable();
     m_bPremiumPlay = true;
 
@@ -703,7 +703,7 @@ bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
 
     getCurrentTime(m_PayPlayStartTime);
 
-    // PayType을 설정한다.
+    
     checkPayPlayAvailable();
 
     m_bPremiumPlay = true;

@@ -57,7 +57,7 @@ void C_VS_UI_STORAGE::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 {
-	m_pStorage = NULL; // Ȯ�ο�... by sigi
+	m_pStorage = NULL; 
 
 	g_RegisterWindow(this);
 
@@ -148,7 +148,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	MItem*		pItem;
 
 	//----------------------------------------------------
-	// 3���� shelf�� ���� ����
+	
 	//----------------------------------------------------
 	m_pStorage = new MStorage;
 	pStorage = m_pStorage;
@@ -157,7 +157,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	pStorage->SetCurrent( 0 );
 	
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_POTION );
 	pItem->SetID( 0 );
@@ -171,7 +171,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 1 );
@@ -184,7 +184,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 	
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 2 );
@@ -197,7 +197,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 3 );
@@ -210,7 +210,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		}
 
 	//----------------------------------------------------
-	// Item ���� --> �߰�
+	
 	//----------------------------------------------------
 	pItem = MItem::NewItem( ITEM_CLASS_RING );
 	pItem->SetID( 4 );
@@ -233,7 +233,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		pStorage->SetCurrent( 1 );
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_SWORD );
 		pItem->SetID( 100 );
@@ -246,7 +246,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 			}
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_SWORD );
 		pItem->SetID( 101 );
@@ -268,7 +268,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 		pStorage->SetCurrent( 2 );
 		
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_BLADE );
 		pItem->SetID( 202 );
@@ -282,7 +282,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 			}
 
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_BLADE );
 		pItem->SetID( 205 );
@@ -297,7 +297,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 	}
 
 	//----------------------------------------------------
-	// �� ����
+	
 	//----------------------------------------------------
 	MMoneyManager* pMoneyManager = pStorage->GetMoneyManager();
 
@@ -305,7 +305,7 @@ C_VS_UI_STORAGE::C_VS_UI_STORAGE()
 
 
 	//----------------------------------------------------
-	// global ����
+	
 	//----------------------------------------------------
 	g_pStorage = m_pStorage;
 
@@ -328,7 +328,7 @@ C_VS_UI_STORAGE::~C_VS_UI_STORAGE()
 	g_pStorage = NULL;	// by sigi
 #endif
 
-	m_pStorage = NULL; // ���� check�� ���ؼ�..
+	m_pStorage = NULL; 
 
 	DeleteNew(m_pC_dialog_withdraw_money);// by sigi
 
@@ -349,11 +349,11 @@ void	C_VS_UI_STORAGE::CancelPushState()
 //-----------------------------------------------------------------------------
 // GetSlotItem
 //
-// slot�� item�� �ִ°�?
+
 //-----------------------------------------------------------------------------
 MItem * C_VS_UI_STORAGE::GetSlotItem(int slot) const
 {
-	if (m_pStorage!=NULL)	// Ȯ�ο�... by sigi
+	if (m_pStorage!=NULL)	
 	{
 		return (MItem *)m_pStorage->GetItem( slot );
 	}
@@ -394,7 +394,7 @@ int C_VS_UI_STORAGE::GetSlotY(int slot) const
 //-----------------------------------------------------------------------------
 // GetDialogShowX
 //
-// Dialog box�� ��µ� ���� x��ǥ�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 int C_VS_UI_STORAGE::GetDialogShowX() const
 {
@@ -407,7 +407,7 @@ int C_VS_UI_STORAGE::GetDialogShowX() const
 //-----------------------------------------------------------------------------
 // GetDialogShowY
 //
-// Dialog box�� ��µ� ���� Y��ǥ�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 int C_VS_UI_STORAGE::GetDialogShowY() const
 {
@@ -438,7 +438,7 @@ void C_VS_UI_STORAGE::SetStorage(MStorage * pStorage)
 
 	m_pStorage = pStorage;
 
-	// normal�� default�� ����.. by sigi
+	
 //	m_what_tab = STORAGE_TAB1;
 	
 	m_pStorage->SetCurrent(0);	
@@ -478,13 +478,13 @@ void C_VS_UI_STORAGE::Show()
 				
 				int item_x = x+GetSlotX(i);
 				
-				// �ٴۿ� ���̰� �Ѵ�.
+				
 				int item_y = y+GetSlotY(i)+SLOT_HEIGHT-gpC_item->GetHeight(frame_id)-4;
 				
-				// item�� center�� �����.
+				
 				item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 				
-				// identify�� �������� ���.. by sigi
+				
 				if (p_item->IsIdentified())
 				{
 					if(p_item->IsQuestItem())
@@ -497,7 +497,7 @@ void C_VS_UI_STORAGE::Show()
 				}
 				else
 				{
-					// identify �� �� ���� ������ ���
+					
 					CIndexSprite::SetUsingColorSet(378, 378);
 				}
 				
@@ -552,7 +552,7 @@ void C_VS_UI_STORAGE::Show()
 					}
 				}
 
-				// ������ ����ǥ��
+				
 				if(p_item->IsPileItem() || p_item->IsChargeItem())
 				{
 					RECT rt;
@@ -587,10 +587,10 @@ void C_VS_UI_STORAGE::Show()
 
 						int item_x = x+GetSlotX(i);
 
-						// �ٴۿ� ���̰� �Ѵ�.
+						
 						int item_y = y+GetSlotY(i)+SLOT_HEIGHT-gpC_item->GetHeight(frame_id)-4;
 
-						// item�� center�� �����.
+						
 						item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 						
 						gpC_item->BltLockedOutlineOnly(item_x, item_y, WHITE, frame_id);					
@@ -612,7 +612,7 @@ void C_VS_UI_STORAGE::Show()
 		g_PrintColorStr(rect[i].left, rect[i].top, sz_temp, gpC_base->m_item_desc_pi, markColor);	
 	}
 
-	// ������ �׼��� ����Ѵ�.
+	
 	// 2004, 12, 14, sobeit modify start
 	if(NULL != m_pStorage && NULL != m_pStorage->GetMoneyManager())
 	{
@@ -701,7 +701,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB1_ID:
 // 			m_what_tab = STORAGE_TAB1_ID;
 
-			if (m_pStorage!=NULL)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL)	
 			{
 				m_pStorage->SetCurrent(0);
 			}
@@ -710,7 +710,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB2_ID:
 // 			m_what_tab = STORAGE_TAB2_ID;
 
-			if (m_pStorage!=NULL && m_pStorage->GetSize()>=2)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL && m_pStorage->GetSize()>=2)	
 			{
 				m_pStorage->SetCurrent(1);
 			}
@@ -719,7 +719,7 @@ void C_VS_UI_STORAGE::Run(id_t id)
 		case STORAGE_TAB3_ID:
 // 			m_what_tab = STORAGE_TAB3_ID; 
 
-			if (m_pStorage!=NULL && m_pStorage->GetSize()>=3)	// Ȯ�ο� by sigi
+			if (m_pStorage!=NULL && m_pStorage->GetSize()>=3)	
 			{
 				m_pStorage->SetCurrent(2);
 			}
@@ -849,7 +849,7 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 		case M_LEFTBUTTON_DOWN:
 		case M_LB_DOUBLECLICK:
 			//
-			// Item�� �����Ѵ�.
+			
 			//
 			if (m_focused_slot != NOT_SELECTED && m_pStorage != NULL)
 			{
@@ -868,7 +868,7 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 				else
 				{
 					gpC_base->SendMessage(UI_SELECT_STORAGE_SLOT, m_pStorage->GetCurrent(), m_focused_slot);
-					// SHIFT������ Ŭ�������� ������ �ڵ� �̵� ó�� -> �κ��丮
+					
 					if(g_pSDLInput->KeyDown(DIK_LSHIFT))
 					{
 						MItem* p_item = (MItem *)m_pStorage->GetItem( m_focused_slot );
@@ -877,26 +877,26 @@ bool C_VS_UI_STORAGE::MouseControl(UINT message, int _x, int _y)
 						{
 							const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 							
-							// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-							// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+							
+							
 							if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 							{
-								// ������ �ִ� item�� �߰��� �� �ִ� ���
 								
-								// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-								// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+								
+								
+								
 								gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 									point.x, point.y,
-									(void *)p_cur_item); // ��� Item
+									(void *)p_cur_item); 
 							}
 							else
 							{	
-								// �߰��� �� ���� ���
+								
 								MItem* p_old_item  = NULL;
 								
-								if (g_pInventory->CanReplaceItem(p_item,		// �߰��� item
-									point.x, point.y,	// �߰��� ��ġ 
-									p_old_item))								// �����ִ� item
+								if (g_pInventory->CanReplaceItem(p_item,		
+									point.x, point.y,	
+									p_old_item))								
 								{
 										
 									gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 
@@ -935,7 +935,7 @@ void C_VS_UI_STORAGE::Start()
 	AttrPin(true);
 	gpC_window_manager->AppearWindow(this);
 
-	// ������ g_pStorage���� �д°Ŵ�.
+	
 //	m_what_tab = STORAGE_TAB1_ID;
 
 	m_focused_slot = NOT_SELECTED;

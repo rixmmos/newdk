@@ -5,9 +5,9 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "GCSubInventoryInfo.h"
-#include "RaceWarInfo.h"
-#include "LevelWarInfo.h"
-#include "GuildWarInfo.h"
+#include "../RaceWarInfo.h"
+#include "../LevelWarInfo.h"
+#include "../GuildWarInfo.h"
 #include "Assert.h"
 #include "Client.h"
 #ifdef __GAME_SERVER__
@@ -42,7 +42,7 @@ GCSubInventoryInfo::~GCSubInventoryInfo()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCSubInventoryInfo::read (SocketInputStream & iStream) 
 	 throw (ProtocolException , Error)
@@ -58,7 +58,7 @@ void GCSubInventoryInfo::read (SocketInputStream & iStream)
 
 		    
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCSubInventoryInfo::write (SocketOutputStream & oStream) const 
      throw (ProtocolException , Error)

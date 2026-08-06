@@ -2,42 +2,42 @@
 // MTopView.h
 //----------------------------------------------------------------------
 //
-// 한 Zone의 특정 위치를 출력해주는 class이다.
+
 //
 //----------------------------------------------------------------------
 //
-// DrawTile()     : 현재Surface의 Tile만 그린다.
-//                  m_pTileSurface에 그려둔다.
+
+
 //
-// DrawZone()	  : 이전 Tile을 이용해서 현재Surface에 Tile을 그리고
-//                  Zone의 모든 것들을 표현해준다.
+
+
 //
-// * 현재 Tile이 갑자기 변화할때(Zone이동 시, Teleport시)는 
-//   SetFirstDraw()를 사용해서 m_bFirstTileDraw = true로 설정하면 
-//   Draw()에서 한번은 DrawTile()을 선택하고 
-//                     다음부터는 DrawZone()을 선택한다.
+
+
+
+
 //
 //---------------------------------------------------------------------- 
 //
-// - 이전의 Tile을 저장해두는 Surface는 실제 화면 크기보다 크다.
-//   (800,600)이 실제화면이므로,
-//   상하좌우로 3 Tile씩  (1152,768)으로 Surface를 생성한다.
+
+
+
 //
-// - 이렇게 해두면 이전의 Tile Surface에서 현재 필요한 영역만
-//   읽어올때, 읽어오는 범위가 이전의 Tile Surface에 속하면 
-//   다시 그려줘야 하는 부분이 없을 수 있다.
-//   또한, 이런 경우 Tile Surface를 갱신할 필요도 없다.
+
+
+
+
 // 
-// - 단점이라면, 다시 그려줄 때 그려줘야하는 부분이 조금~ 더 크지만
-//   평균적인 속도가 향상되므로 그리 문제는 없을 것이다.
+
+
 //
-// * 테스트후 크기를 조절해봐야지...
+
 //
 //---------------------------------------------------------------------- 
 //
-// * SpriteSet / FrameSet의 정보를 읽어와야 한다.
+
 //
-// [ MapView : Filename.MV ]   - View에서 Load한다.
+
 //   Tile SpriteSet
 //   Obstacle SpriteSet 
 //   Obstacle FrameSet
@@ -47,8 +47,8 @@
 //
 // ImageObject Map...
 //
-// 최초에... 모두 Tile Scan
-// 그리고.. 이전 Tile과의 변화값 만큼만 Tile Scan
+
+
 //
 //---------------------------------------------------------------------- 
 
@@ -96,37 +96,44 @@ class MEffect;
 #include "MZoneTileProvider.h"
 #include "EffectResourceContainer.h"
 
+#ifdef PLATFORM_WINDOWS
+class CD3DTextureEffect {
+	public:
+		void DrawEffect2D(RECT*) {}
+};
+#endif
+
 
 //class MZoneInfo;
 class TextComparison {
 	public :
-		// 시간이 오래된걸 선택해야 한다.		
-		// true : right를 선택한다.
-		// false : left를 선택한다.
+		
+		
+		
 		bool operator () (DRAWTEXT_NODE * left, DRAWTEXT_NODE * right) const;
 };
 
 typedef void (*DrawCreatureExceptionProc)( MCreature* pCreature, int& action, int& frame, int& direction );
 
 //----------------------------------------------------------------------
-// 한 Surface에 특정한 Zone에 대한 그림을 그려주는 class
+
 //----------------------------------------------------------------------
 class MTopView : public MRequestMode {
 	public :	
-		// 출력에 이용할 ImageObject map
+		
 		typedef std::map<QWORD, MImageObject*>			IMAGEOBJECT_OUTPUT_MAP;
 
-		// 출력에 이용할 Creature map
+		
 		typedef std::map<QWORD, MCreature*>				CREATURE_OUTPUT_MAP;
 
-		// 출력에 이용할 Item map
+		
 		typedef std::map<QWORD, MItem*>					ITEM_OUTPUT_MAP;
 
-		// 출력할 string을 기억해 놓을 곳..
+		
 		//typedef	std::list<DRAWTEXT_NODE*>				DRAWTEXT_LIST;
 		typedef std::priority_queue<DRAWTEXT_NODE*, std::vector<DRAWTEXT_NODE*>, TextComparison>	DRAWTEXT_PQ;
 
-		// item이름 출력
+		
 		typedef	std::list<DRAWITEMNAME_NODE*>			DRAWITEMNAME_LIST;
 
 		// int ordered list
@@ -142,7 +149,7 @@ class MTopView : public MRequestMode {
 		//
 		//------------------------------------------------------
 		bool		Init();
-		bool		InitChanges();	// 2D <--> 3D 바뀔때.. 음냐 - -;
+		bool		InitChanges();	
 		bool		IsInit() const		{ return m_bInit; }
 		void		Release();
 		void		SetSurface(CSpriteSurface*& pSurface);
@@ -154,14 +161,14 @@ class MTopView : public MRequestMode {
 
 		//------------------------------------------------------
 		//
-		// Zone마다 Load해야 하는 것
+		
 		//
 		//------------------------------------------------------		
 		void		LoadMinimap(const char* filename);//, MZoneInfo* pZoneInfo=NULL);
-		bool		LoadFromFileTileSPKLargeZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileImageObjectSPKLargeZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileTileSPKSmallZone(ifstream & file);	// zone관련 spk load
-		bool		LoadFromFileImageObjectSPKSmallZone(ifstream & file);	// zone관련 spk load
+		bool		LoadFromFileTileSPKLargeZone(ifstream & file);	
+		bool		LoadFromFileImageObjectSPKLargeZone(ifstream & file);	
+		bool		LoadFromFileTileSPKSmallZone(ifstream & file);	
+		bool		LoadFromFileImageObjectSPKSmallZone(ifstream & file);	
 		void		LoadFromFileCreatureSPK(int n);			// creature load		
 // 		void		LoadFromFileAddonSPK(int frame, int action);		// addon load		
 //		void		LoadFromFileCreatureActionSPK(int frame, int action);		// addon load		
@@ -180,7 +187,7 @@ class MTopView : public MRequestMode {
 //		void		StopLoadImageObjectSPK()	{ m_ImageObjectSPK.SetLoadingStop(); }
 //		void		StopLoadTileSPK()			{ m_TileSPK.SetLoadingStop(); }
 
-		// Tile을 모두 다시 그려줘야할때
+		
 		void		SetFirstDraw()			{ m_bFirstTileDraw = true; }
 		
 		//------------------------------------------------------
@@ -190,7 +197,7 @@ class MTopView : public MRequestMode {
 		//------------------------------------------------------
 		void		Draw(int firstPointX, int firstPointY);
 
-		// Test용 도움말
+		
 		void		DrawDebugInfo(void* pSurface);
 
 		void		DrawTitleEffect(POINT* pPoint);
@@ -208,7 +215,7 @@ class MTopView : public MRequestMode {
 		
 		//------------------------------------------------------
 		//
-		// 좌표 변환		
+		
 		//
 		//------------------------------------------------------
 		static POINT	PixelToMap(const int& Xp, const int& Yp)	{ POINT p; p.x=Xp/TILE_X; p.y=Yp/TILE_Y; return p; }//{ POINT p; p.x=Xp>>6; p.y=Yp>>5; return p; }
@@ -223,7 +230,7 @@ class MTopView : public MRequestMode {
 		static POINT	GetChangeValueToDirection(int direction);
 
 		//------------------------------------------------------
-		// TileSize가 64*32일 경우.. 최적화된 좌표 계산(Shift이용)
+		
 		//------------------------------------------------------
 		//static POINT	PixelToMap(const int& Xp, const int& Yp)	{ POINT p; p.x=Xp>>6; p.y=Yp>>5; return p; }
 		//static POINT	MapToPixel(const int& Xm, const int& Ym)	{ POINT p; p.x=Xm<<6; p.y=Ym<<5; return p; }
@@ -236,13 +243,13 @@ class MTopView : public MRequestMode {
 
 		//------------------------------------------------------
 		//
-		// View와 화면과의 연관
+		
 		//
 		//------------------------------------------------------
-		// 화면 상의 좌표 (x,y)는 Zone에서의 pixel좌표로는 어느 점인가?
+		
 		POINT			ScreenToPixel(int x, int y);
 
-		// Zone의 pixel좌표는 화면 상의 어느 점인가?
+		
 		POINT			MapToScreen(int sX, int sY);
 		POINT			PixelToScreen(int x, int y);
 		POINT			GetFirstZonePixel()	const		{ return m_FirstZonePixel; }		
@@ -250,7 +257,7 @@ class MTopView : public MRequestMode {
 
 		//------------------------------------------------------
 		//
-		// Mouse로 선택하는 Object
+		
 		//
 		//------------------------------------------------------
 		// Selected Sector
@@ -259,58 +266,58 @@ class MTopView : public MRequestMode {
 		void			SetSelectedSectorNULL()		{ m_SelectSector.x = m_SelectSector.y = SECTORPOSITION_NULL; }
 		POINT			GetSelectedSector(int x, int y);// const;
 
-		// 공격할 때의 선택 모드
+		
 		//void			SetSelectModeAttack()				{ m_bSelectModeAttack = true; }
 		//void			SetSelectModeNormal()				{ m_bSelectModeAttack = false; }
 
 
-		// 화면상의 (x,y)를 선택했을 경우 선택된 Object를 return한다.
+		
 		MObject*		GetSelectedObject(int x, int y);
 		MObject*		GetSelectedObjectSprite(int x, int y);
 
-		// Creature 선택
+		
 //		void			SetSelectedCreature(TYPE_OBJECTID id)	{ m_SelectCreatureID = id; m_SelectItemID = m_SelectInteractionObjectID = m_SelectEffectID = OBJECTID_NULL; }		
 		void			SetSelectedCreature(TYPE_OBJECTID id)	{ m_SelectCreatureID = id; m_SelectItemID = m_SelectEffectID = OBJECTID_NULL; }		
 		TYPE_OBJECTID	GetSelectedCreature() const				{ return m_SelectCreatureID; }
 
-		// Item 선택
+		
 //		void			SetSelectedItem(TYPE_OBJECTID id)	{ m_SelectItemID = id;  m_SelectCreatureID = m_SelectInteractionObjectID = m_SelectEffectID = OBJECTID_NULL; }
 		void			SetSelectedItem(TYPE_OBJECTID id)	{ m_SelectItemID = id;  m_SelectCreatureID = m_SelectEffectID = OBJECTID_NULL; }
 		TYPE_OBJECTID	GetSelectedItemID()					{ return m_SelectItemID; }
 		
-		// InteractionObject 선택
+		
 //		void			SetSelectedInteractionObject(TYPE_OBJECTID id)	{ m_SelectInteractionObjectID = id; m_SelectItemID = m_SelectCreatureID = m_SelectEffectID = OBJECTID_NULL; }
 
-		// Effect 선택
+		
 //		void			SetSelectedEffect(TYPE_OBJECTID id)		{ m_SelectEffectID = id; m_SelectItemID = m_SelectCreatureID = m_SelectInteractionObjectID = OBJECTID_NULL; }
 		void			SetSelectedEffect(TYPE_OBJECTID id)		{ m_SelectEffectID = id; m_SelectItemID = m_SelectCreatureID =  OBJECTID_NULL; }
 		
-		// 선택된 것이 없게 한다.
+		
 //		void			SetSelectedNULL()				{ m_SelectCreatureID = m_SelectItemID = m_SelectInteractionObjectID = m_SelectEffectID = OBJECTID_NULL;}
 		void			SetSelectedNULL()				{ m_SelectCreatureID = m_SelectItemID = m_SelectEffectID = OBJECTID_NULL;}
 
 
 		//------------------------------------------------------
 		//
-		// 시야 관련..
+		
 		//
 		//------------------------------------------------------		
 		BYTE			GetDarkBits() const				{ return m_DarkBits; }
 		void			SetDarkBits(BYTE DarkBits)		{ if (DarkBits<16) m_DarkBits = DarkBits; }
 
-		// 3D 시야관련
+		
 		void			ClearLightBufferFilter3D();
 		void			AddLightFilter3D(int x, int y, BYTE range, bool bMapPixel=true, bool bForceLight=false);
 		void			DrawLightBuffer3D();
 
-		// 2D 시야관련
+		
 		void			ClearLightBufferFilter2D();
 		void			AddLightFilter2D(int x, int y, BYTE range, bool bMapPixel=true, bool bForceLight=false);
 		void			DrawLightBuffer2D();		
 
 		//------------------------------------------------------
 		//
-		// Creature Output에 관련된 것들
+		
 		//
 		//------------------------------------------------------
 		QWORD			GetOutputImageObjectID(const MImageObject* pImageObject) const
@@ -318,35 +325,35 @@ class MTopView : public MRequestMode {
 
 		//------------------------------------------------------
 		//
-		// Creature Output에 관련된 것들
+		
 		//
 		//------------------------------------------------------		
-		// [pixel y좌표][object id] ,  4 bytes  +  4 bytes  = 8 bytes 로 구성되어 있다.
+		
 		QWORD			GetOutputCreatureID(const MCreature* pCreature) const	
 											{ return ((QWORD)pCreature->GetPixelY() << 32) | pCreature->GetID(); }
 
 		QWORD			GetOutputCreatureID(TYPE_OBJECTID id, int y) const	
 											{ return ((QWORD)y << 32) | id; }
 
-		// m_pZone의 Creature map을 통째로~ 추가
+		
 		void			AddOutputCreatureAll();
 
-		// pCreature를 추가한다.
+		
 		bool			AddOutputCreature(MCreature* pCreature);
 
-		// Creature OutputMap을 clear한다.
+		
 		void			ClearOutputCreature()	{ m_mapCreature.clear(); }
 
-		// id와 관련있는 creature를 제거한다.
+		
 		bool			RemoveOutputCreature(MCreature* pCreature);
 
-		// id와 관련있는 creature의 정보(출력좌표관련id)를 Update한다.
+		
 		bool			UpdateOutputCreature(TYPE_OBJECTID id, int y0, int y1);
 
 
 		//------------------------------------------------------		
 		//
-		// 채팅 string 등 출력..
+		
 		//
 		//------------------------------------------------------		
 		void			ClearTextList();
@@ -355,7 +362,7 @@ class MTopView : public MRequestMode {
 
 		//------------------------------------------------------		
 		//
-		// ItemName  출력..
+		
 		//
 		//------------------------------------------------------		
 		bool			IsDrawItemNameList() const		{ return m_bDrawItemNameList; }
@@ -381,35 +388,35 @@ class MTopView : public MRequestMode {
 		int				GetEffectSpriteType(BLT_TYPE bltType, TYPE_FRAMEID frameID) const;
 
 		//------------------------------------------------------		
-		// 기타..
+		
 		//------------------------------------------------------		
 		int				GetRandomMonsterTypeInZone() const;
 
-//		void			InitMinimapTexture(CSpriteSurface *minimap_surface);			// minimap texture초기화
+
 
 	protected :
 		//------------------------------------------------------
 		//
-		// 내부적으로 초기화하는 함수들..
+		
 		//
 		//------------------------------------------------------
-		bool			InitCreatureFrames();		// character 정보 초기화
-		bool			InitImageFrames();			// ImageFrames 정보 초기화
-		bool			InitAnimationFrames();		// AnimationFrames 초기화
-		bool			InitEffectFrames();			// EffectFrames 초기화
-		bool			InitSprites();				// Sprites 초기화
-		bool			InitSurfaces();				// Surfaces 초기화
-		bool			InitFilters();				// Filter초기화
-		//bool	InitSpriteSurfaces();		// SpriteSurfaces 초기화 
-		bool			InitColors();				// 색깔들 초기화
+		bool			InitCreatureFrames();		
+		bool			InitImageFrames();			
+		bool			InitAnimationFrames();		
+		bool			InitEffectFrames();			
+		bool			InitSprites();				
+		bool			InitSurfaces();				
+		bool			InitFilters();				
+		
+		bool			InitColors();				
 // 		bool			Init3DBoxSurface();
-		bool			InitFonts();				// font정보 초기화
+		bool			InitFonts();				
 
-		// box surface의 색깔 설정
+		
 // 		void			Set3DBoxColor(WORD pixel);
 
 		//------------------------------------------------------
-		// 화면에 보이는 ImageObject 변경
+		
 		//------------------------------------------------------
 		void			DetermineImageObject();
 		void			UpdateImageObject(const POINT &newFirstSector);
@@ -422,12 +429,12 @@ class MTopView : public MRequestMode {
 		//void			SurfaceLockRestore( BOOL bOldLock );
 
 		//------------------------------------------------------
-		// Draw 함수들..
+		
 		//------------------------------------------------------
 		void		DrawTileSurface();
 		void		DrawZone(int X,int Y);
 		void		DrawInformation();		
-		void		DrawEventString(int &strX, int &strY);			// 이벤트 메니저에서 스트링으로 찍히는 부분을 가져와 화면에 찍어주는 함수
+		void		DrawEventString(int &strX, int &strY);			
 		int			DrawChatString(POINT* pPoint, MCreature* pCreature, COLORREF color, BYTE flag=0);
 		void		DrawItem(POINT* pPoint, MItem* pItem);
 		void		DrawItemShadow(POINT* pPoint, MItem* pItem);
@@ -446,7 +453,7 @@ class MTopView : public MRequestMode {
 		void		DrawFade();
 
 		//------------------------------------------------------
-		// Character Draw 함수들... by sonee   2003.6
+		
 		//------------------------------------------------------
 		void		DrawCreature(POINT* pPoint, MCreature* pCreature);		
 		void		DrawCreatureShadow(POINT* pPoint, MCreature* pCreature);
@@ -455,20 +462,20 @@ class MTopView : public MRequestMode {
 		void		DrawCreatureHPModify(POINT *point, MCreature* pCreature);
 		void		DrawUndergroundCreature(POINT *pPoint, MCreature *pCreature);
 
-		void		DrawGuildMarkInSiegeWar(MCreature* pCreature, int YPos); // 길드마크 큰놈으로 뿌려주자..ㅋ
+		void		DrawGuildMarkInSiegeWar(MCreature* pCreature, int YPos); 
 
 	protected :		
 		bool				m_bInit;
 
 		//------------------------------------------------------
-		// 출력 대상이 되는 Surface
+		
 		//------------------------------------------------------
 		CSpriteSurface*		m_pSurface;
 		//S_SURFACEINFO		m_SurfaceInfo;
 	
 
 		// SpriteSurfacePack
-		//CSpriteSurfacePack	m_SpriteSurfacePack;	// 그림들		
+		
 		//CSpriteSurface**			m_ppSurface;			// SpriteSurfaces
 
 		//------------------------------------------------------
@@ -490,15 +497,15 @@ class MTopView : public MRequestMode {
 		CCreatureFramePack		m_AdvancementVampireWomanFPK;				// Player addon frames
 		CCreatureFramePack		m_AdvancementOustersFPK;			// Ousters frames
 
-		CImageFramePack			m_ItemTileFPK;			// Tile에 있는 Item에 대한..
-		CAnimationFramePack		m_ItemDropFPK;			// 바닥으로 떨어지는 Item에 대한..
-		CAnimationFramePack		m_ItemBrokenFPK;		// 부서지는 Item에 대한..
-		CAnimationFramePack		m_ImageObjectFPK;		// ImageObject에 대한 frames
-		CAnimationFramePack		m_ImageObjectShadowFPK;		// ImageObject에 대한 frames
-//		CAnimationFramePack		m_InteractionObjectFPK;		// ImageObject에 대한 frames
-		CEffectFramePack		m_EffectAlphaFPK;		// Effect에 대한 frames
-		CEffectFramePack		m_EffectNormalFPK;		// Effect에 대한 frames
-		CEffectFramePack		m_EffectShadowFPK;		// Effect에 대한 frames
+		CImageFramePack			m_ItemTileFPK;			
+		CAnimationFramePack		m_ItemDropFPK;			
+		CAnimationFramePack		m_ItemBrokenFPK;		
+		CAnimationFramePack		m_ImageObjectFPK;		
+		CAnimationFramePack		m_ImageObjectShadowFPK;		
+
+		CEffectFramePack		m_EffectAlphaFPK;		
+		CEffectFramePack		m_EffectNormalFPK;		
+		CEffectFramePack		m_EffectShadowFPK;		
 		CEffectFramePack		m_EffectScreenFPK;
 		
 		CCreatureFramePack		m_CreatureShadowFPK;			// Creature frames
@@ -519,55 +526,55 @@ class MTopView : public MRequestMode {
 		// SpritePack
 		//------------------------------------------------------		
 		CSpritePack				m_TileSPK;				// Tile
-		CSpritePack				m_ImageObjectSPK;		// ImageObject Sprite들
-//		CSpritePack				m_InteractionObjectSPK;		// ImageObject Sprite들
-		CIndexSpritePack		m_CreatureSPK;			// Creature Sprite들
-		CIndexSpritePack		m_AddonSPK;		// Sprite들		
-		CIndexSpritePack		m_OustersSPK;		// Sprite들		
+		CSpritePack				m_ImageObjectSPK;		
 
-		CIndexSpritePack		m_AdvancementSlayerManSPK;			// Creature Sprite들
-		CIndexSpritePack		m_AdvancementSlayerWomanSPK;			// Creature Sprite들
-		CIndexSpritePack		m_AdvancementVampireManSPK;		// Sprite들		
-		CIndexSpritePack		m_AdvancementVampireWomanSPK;		// Sprite들		
-		CIndexSpritePack		m_AdvancementOustersSPK;		// Sprite들	
+		CIndexSpritePack		m_CreatureSPK;			
+		CIndexSpritePack		m_AddonSPK;		
+		CIndexSpritePack		m_OustersSPK;		
+
+		CIndexSpritePack		m_AdvancementSlayerManSPK;			
+		CIndexSpritePack		m_AdvancementSlayerWomanSPK;			
+		CIndexSpritePack		m_AdvancementVampireManSPK;		
+		CIndexSpritePack		m_AdvancementVampireWomanSPK;		
+		CIndexSpritePack		m_AdvancementOustersSPK;		
 		
 		//end
 		
-		//CSpritePack				m_ItemTileSPK;			// Sprite들		
-		CIndexSpritePack		m_ItemTileISPK;			// Sprite들		
+		
+		CIndexSpritePack		m_ItemTileISPK;			
 		CIndexSpritePack		m_ItemDropISPK;			//
-		CSpritePack				m_ItemBrokenSPK;		// 부서지는 아이템
-		CSpritePack				m_ItemRealSPK;			// Sprite들				
-		CAlphaSpritePalPack		m_EffectAlphaSPK;		// AlphaSprite들
+		CSpritePack				m_ItemBrokenSPK;		
+		CSpritePack				m_ItemRealSPK;			
+		CAlphaSpritePalPack		m_EffectAlphaSPK;		
 		CSpritePalPack			m_EffectScreenSPK;		// ScreenEffect
 		MPalettePack			m_EffectAlphaPPK;		// AlphaEffect
 		MPalettePack			m_EffectScreenPPK;		// ScreenEffect
-		CSpritePack				m_EffectNormalSPK;		// NormalSprite들
-		CShadowSpritePack		m_EffectShadowSPK;		// ShadowSprite들
+		CSpritePack				m_EffectNormalSPK;		
+		CShadowSpritePack		m_EffectShadowSPK;		
 
 		// Effect resource container for safe access (refactored)
 		EffectResourceContainer	m_EffectResources;
 
-		CSpritePack				m_WeatherSPK;			// WeatherSprite들
+		CSpritePack				m_WeatherSPK;			
 		CSpritePack				m_GuildSPK;				// GuildMark
 
 		
 
-		CSpritePack				m_EtcSPK;				// 기타...
-		CSpritePack				m_OustersFinSPK;				// 기타...
-		CSpritePack				m_AdvacementQuestEnding;				// 기타...
+		CSpritePack				m_EtcSPK;				
+		CSpritePack				m_OustersFinSPK;				
+		CSpritePack				m_AdvacementQuestEnding;				
 
 
 		//------------------------------------------------------		
 		// Shadow SpritePack
 		//------------------------------------------------------
-		CShadowSpritePack		m_AddonSSPK;			// Sprite들		
+		CShadowSpritePack		m_AddonSSPK;			
 		CShadowSpritePack		m_CreatureSSPK;
 		CShadowSpritePack		m_OustersSSPK;
 		CShadowSpritePack		m_ImageObjectSSPK;
 
-		CShadowSpritePack		m_AdvancementSlayerManSSPK;			// Sprite들		
-		CShadowSpritePack		m_AdvancementSlayerWomanSSPK;			// Sprite들		
+		CShadowSpritePack		m_AdvancementSlayerManSSPK;			
+		CShadowSpritePack		m_AdvancementSlayerWomanSSPK;			
 		CShadowSpritePack		m_AdvancementVampireManSSPK;
 		CShadowSpritePack		m_AdvancementVampireWomanSSPK;
 		CShadowSpritePack		m_AdvancementOustersSSPK;
@@ -632,7 +639,7 @@ class MTopView : public MRequestMode {
 
 
 		//------------------------------------------------------
-		// Zone마다 독립적으로 Load된 것들에 대한 정보
+		
 		//------------------------------------------------------
 		CSpriteFilePositionArray*	m_pTileSFPArrayLargeZone;
 		CSpriteFilePositionArray*	m_pImageObjectSFPArrayLargeZone;
@@ -649,15 +656,15 @@ class MTopView : public MRequestMode {
 		//------------------------------------------------------
 		// Zone
 		//------------------------------------------------------
-		MZone*				m_pZone;				// 현재 출력하려는 Zone
+		MZone*				m_pZone;				
 
-		static int			m_MiddleX;				// zone의 중간(pixel X 좌표)
-		POINT				m_FirstSector;			// 화면 상의 첫 점의 Zone에서의 좌표(sector)
-		POINT				m_PlusPoint;			// FirstSector의 pixel단위의 좌표보정값
-		POINT				m_FirstZonePixel;		// 화면(0,0)이 나타내는 Zone상의 Pixel좌표
+		static int			m_MiddleX;				
+		POINT				m_FirstSector;			
+		POINT				m_PlusPoint;			
+		POINT				m_FirstZonePixel;		
 
 		//------------------------------------------------------
-		// Mouse로 선택된 화면 상의 것들..
+		
 		//------------------------------------------------------
 		POINT				m_SelectSector;		
 		TYPE_OBJECTID		m_SelectCreatureID;
@@ -667,16 +674,16 @@ class MTopView : public MRequestMode {
 		//bool				m_bSelectModeAttack;
 
 		WORD					m_SOMOutlineColor;
-		CSpriteOutlineManager	m_SOM;	// 선택된 것의 외곽선 출력
+		CSpriteOutlineManager	m_SOM;	
 
 		//------------------------------------------------------
-		// 시야 처리
+		
 		//------------------------------------------------------		
-		POINT					m_FilterPosition;	// Player를 가리는 시야 처리		
+		POINT					m_FilterPosition;	
 		BYTE					m_DarkBits;
 		
 
-		// 시야처리 관련 - 빛이 있는 시야부분
+		
 		CFilterPack				m_LightFTP;
 		CFilter					m_LightBufferFilter;
 		CSpriteSurface*			m_pLightBufferTexture;
@@ -684,17 +691,17 @@ class MTopView : public MRequestMode {
 
 
 		//------------------------------------------------------
-		// Fade In/Out 관련
+		
 		//------------------------------------------------------		
-		char				m_FadeValue;	// 현재 fade값
-		char				m_FadeEnd;		// 끝 값
-		char				m_FadeInc;		// 변화값
-		bool				m_bFade;		// fade 중인가?
-		WORD				m_FadeColor;	// fade 색
-		WORD				m_delayFrame;	// 변화값을 바꿀 시점에 대한 프레임
+		char				m_FadeValue;	
+		char				m_FadeEnd;		
+		char				m_FadeInc;		
+		bool				m_bFade;		
+		WORD				m_FadeColor;	
+		WORD				m_delayFrame;	
 		
 		//------------------------------------------------------
-		// 현재 화면의 Tile을 저장해서 다음에 출력할때 이용한다.
+		
 		//------------------------------------------------------
 		CSpriteSurface*				m_pTileSurface;
 		bool						m_bFirstTileDraw;
@@ -710,18 +717,18 @@ class MTopView : public MRequestMode {
 		MZoneTileProvider			m_zoneTileProvider;
 
 		//------------------------------------------------------
-		// 현재 화면에서 존재하는 ImageObject들의 정보
+		
 		//------------------------------------------------------
 		IMAGEOBJECT_OUTPUT_MAP				m_mapImageObject;
 
 		//------------------------------------------------------
-		// Creature OutputMap - 출력 순서에 관계된다.
+		
 		//------------------------------------------------------
 		CREATURE_OUTPUT_MAP					m_mapCreature;
 		bool								m_bTileSearchForCreature;
 
 		//------------------------------------------------------
-		// Mouse로 선택된 Creature의 채팅을 출력하기 위한 정보
+		
 		//------------------------------------------------------
 		POINT						m_pointChatString;
 		MCreature*					m_pSelectedCreature;
@@ -739,12 +746,12 @@ class MTopView : public MRequestMode {
 #endif
 		
 		//------------------------------------------------------
-		// 출력할 String을 기억..
+		
 		//------------------------------------------------------
 		DRAWTEXT_PQ					m_pqDrawText;
 
 		//------------------------------------------------------
-		// ItemName 출력
+		
 		//------------------------------------------------------
 		bool						m_bDrawItemNameList;
 		DRAWITEMNAME_LIST			m_listDrawItemName;
@@ -755,7 +762,7 @@ class MTopView : public MRequestMode {
 		bool						m_bDrawRequest;
 
 		//------------------------------------------------------
-		// 3D 관련..
+		
 		//------------------------------------------------------
 //		CSpriteSurface*				m_p3DBoxSurface;
 //		WORD						m_3DBoxCurrentPixel;
@@ -765,7 +772,7 @@ class MTopView : public MRequestMode {
 		
 
 		//------------------------------------------------------
-		// 색깔들..
+		
 		//------------------------------------------------------
 		// interactionObject
 //		WORD		m_ColorOutlineInteractionObject;
@@ -775,58 +782,58 @@ class MTopView : public MRequestMode {
 		COLORREF	m_ColorNameItemOption;
 		WORD		m_ColorOutlineItem;
 
-		// 종족별
+		
 		COLORREF	m_ColorNameVampire;
 		COLORREF	m_ColorNameSlayer;
 		COLORREF	m_ColorNameNPC;
 
-		COLORREF	m_ColorNameAlignment[5];	// 음냐..
+		COLORREF	m_ColorNameAlignment[5];	
 
-		// 공격 가능?
+		
 		WORD		m_ColorOutlineNPC;
 		WORD		m_ColorOutlineAttackPossible;
 		WORD		m_ColorOutlineAttackImpossible;
 
-		// hp bar의 색깔
+		
 		WORD		m_ColorHPBar;
-		WORD		m_ColorHPBarBg;  // HP bar 배경색 (최대 HP)
+		WORD		m_ColorHPBarBg;  
 
-		// UI 박스 배경색
-		WORD		m_ColorUIBoxBg;  // UI 박스 배경 (아이템 설명 등)
+		
+		WORD		m_ColorUIBoxBg;  
 
-		// 반투명 검정색
+		
 		WORD		m_ColorBlackHalf;
 
 
 		//------------------------------------------------------
-		// 2D light에서 한 점이 차지하는 화면의 pixel크기
+		
 		//------------------------------------------------------
 		int*		m_p2DLightPixelWidth;
 		int*		m_p2DLightPixelHeight;
 
 		//------------------------------------------------------
-		// Load된 것 정보
+		
 		//------------------------------------------------------
 		INT_ORDERED_LIST	m_listLoadedCreatureSprite;
 		INT_ORDERED_LIST	m_listLoadedMonsterSprite;
 		
 	public :
-		// 한Light좌표의 화면에서의 크기
+		
 		static float				s_LightWidth;
 		static float				s_LightHeight;
 		
-		// 2004, 8, 18 sobeit add start - 공성전 성문 타겟팅때문에 여차여차 추가..
+		
 		enum GENERATE_OPTION{
 			GENERATE_ALL = 0,
-			GENERATE_EXCEPT_LEFT,	// 왼쪽 아웃라인은 제외
-			GENERATE_EXCEPT_RIGHT,  // 오른쪽 아웃라인은 제외
-			GENERATE_EXCEPT_SIDE,	// 양 사이드 아웃라인은 제외
-			// -_- 위,아래도 만들어 놔야 하나..-_-;
+			GENERATE_EXCEPT_LEFT,	
+			GENERATE_EXCEPT_RIGHT,  
+			GENERATE_EXCEPT_SIDE,	
+			
 		};
 		// 2004, 8, 18 sobeit add start
 
 	private :
-		// -_- 예외처리 함수 포인터로 뺌.
+		
 		//DrawCreatureExecptionProc*	m_pExceptionProc;
 		void	InitMapingExceptionProc();
 		void	RegistExceptionProcFunction( DWORD objectID, DrawCreatureExceptionProc proc );

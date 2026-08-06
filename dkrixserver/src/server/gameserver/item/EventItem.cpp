@@ -328,12 +328,12 @@ void EventItemLoader::load(Creature* pCreature)
                     pInventory = pOusters->getInventory();
                     pStash = pOusters->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
 
                 if (pEventItem->getItemType() == 27) {
-                    // 깃발은 나오면 안 된다. -_-
+                    
                     processItemBug(pCreature, pEventItem);
                 } else
                     switch (storage) {
@@ -449,7 +449,7 @@ void EventItemLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

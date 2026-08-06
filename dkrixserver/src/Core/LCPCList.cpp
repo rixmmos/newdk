@@ -30,7 +30,7 @@ LCPCList::LCPCList()
 LCPCList::~LCPCList()
 
 {
-    // heap 에 생성된 PC Type 변수들을 삭제해야 한다.
+    
     for (uint i = 0; i < SLOT_MAX; i++) {
         SAFE_DELETE(m_pPCInfos[i]);
     }
@@ -38,7 +38,7 @@ LCPCList::~LCPCList()
 
 
 //----------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //----------------------------------------------------------------------
 void LCPCList::read(SocketInputStream& iStream)
 
@@ -46,11 +46,11 @@ void LCPCList::read(SocketInputStream& iStream)
     __BEGIN_TRY
 
     //--------------------------------------------------
-    // PC 타입 정보를 받아온다.
+    
     //
     // *OPTMIZATION*
     //
-    // 나중에는 이 정보를 1 바이트에 넣어서 비트 연산을 하도록 한다.
+    
     //
     //--------------------------------------------------
     char pcTypes[SLOT_MAX];
@@ -59,7 +59,7 @@ void LCPCList::read(SocketInputStream& iStream)
         iStream.read(pcTypes[i]);
 
     //--------------------------------------------------
-    // PC 정보 본체를 읽는다.
+    
     //--------------------------------------------------
     for (uint j = 0; j < SLOT_MAX; j++) {
         switch (pcTypes[j]) {
@@ -98,7 +98,7 @@ void LCPCList::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void LCPCList::write(SocketOutputStream& oStream) const
 
@@ -106,9 +106,9 @@ void LCPCList::write(SocketOutputStream& oStream) const
     __BEGIN_TRY
 
     //--------------------------------------------------
-    // 일단 PC 타입을 쓴다.
+    
     //
-    // 나중에는 이 정보를 1 바이트에 넣어서 비트 연산을 하도록 한다.
+    
     //
     // ex>
     // 	S0V : Slayer-EMPTY-VAMPIRE
@@ -132,7 +132,7 @@ void LCPCList::write(SocketOutputStream& oStream) const
     }
 
     //--------------------------------------------------
-    // 그다음 PCType 객체 본체를 쓴다.
+    
     //--------------------------------------------------
     for (uint j = 0; j < SLOT_MAX; j++) {
         if (m_pPCInfos[j] != NULL) {
@@ -167,6 +167,12 @@ PacketSize_t LCPCList::getPacketSize() const
 
 {
     PacketSize_t packetSize = 0;
+
+    // write() always emits one slot type byte per character slot before the
+    // variable-size PC payloads. The old size omitted these bytes, which left
+    // the client packet stream misaligned after the character list.
+    packetSize = SLOT_MAX * sizeof(char);
+
     for (uint i = 0; i < SLOT_MAX; i++) {
         if (m_pPCInfos[i]) { // m_pPCInfos[i] != NULL
             packetSize += m_pPCInfos[i]->getSize();

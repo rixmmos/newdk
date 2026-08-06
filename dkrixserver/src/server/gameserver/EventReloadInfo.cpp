@@ -51,7 +51,7 @@ void EventReloadInfo::activate()
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    //(m_pGamePlayer != NULL);//NULL일 수 있다.
+    
 
     switch (m_InfoType) {
     case MASTER_LAIR_INFO:
@@ -59,12 +59,12 @@ void EventReloadInfo::activate()
         break;
 
     case MONSTER_INFO: {
-        // m_InfoValue는 loading할 Monster의 SpriteType이다.
+        
         if (m_InfoValue == 0) {
-            // 전부 다 loading
+            
             g_pMonsterInfoManager->reload(0);
         } else {
-            // SpriteType과 관련된 몬스터들을 알아낸다.
+            
             const vector<MonsterType_t>& monsters = g_pMonsterInfoManager->getMonsterTypeBySprite(m_InfoValue);
 
             vector<MonsterType_t>::const_iterator itr = monsters.begin();
@@ -87,7 +87,7 @@ void EventReloadInfo::activate()
         break;
 
     case ITEM_INFO: {
-        // m_InfoValue는 loading할 ItemInfo의 Class이다
+        
         g_pItemInfoManager->getInfoManager((Item::ItemClass)m_InfoValue)->reload();
     } break;
 
@@ -122,8 +122,8 @@ void EventReloadInfo::activate()
                     pWarScheduler->load();
 
                     //						StringStream msg;
-                    //						msg << "[" << (int)zoneID << "] 성에는 " << pWarScheduler->getSize() << "
-                    // 개의 전쟁이 준비중입니다.";
+                    
+                    
 
                     char msg[100];
                     sprintf(msg, g_pStringPool->c_str(STRID_WAR_SCHEDULE_INFO), (int)zoneID, pWarScheduler->getSize());

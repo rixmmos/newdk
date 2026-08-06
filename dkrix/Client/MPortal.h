@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MPortal.h
 //----------------------------------------------------------------------
-// Zone 이동 정보
+
 //----------------------------------------------------------------------
 
 #ifndef	__MPORTAL_H__
@@ -17,7 +17,7 @@
 
 struct B_RECT
 {
-	BYTE flag;	// 1-slayer, 2-vampire, 4-공통
+	BYTE flag;	
 	BYTE left;
 	BYTE top;
 	BYTE right;
@@ -97,8 +97,8 @@ class MPortal{
 
 	protected :		
 		
-		// Portal의 종류
-		std::vector<WORD>		m_ZoneID;		// 이동하게 되는 Zone ID
+		
+		std::vector<WORD>		m_ZoneID;		
 		P_RECT		m_Rect;
 		BYTE		m_Type;
 };

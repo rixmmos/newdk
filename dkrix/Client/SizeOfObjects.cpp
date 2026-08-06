@@ -33,7 +33,7 @@
 #include "ServerInfo.h"
 #include "MZoneTable.h"
 //#include "MFileDef.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "UserInformation.h"
 #include "TempInformation.h"
 #include "ProfileManager.h"
@@ -71,7 +71,7 @@
 #include "packet/CPackets\CGUseItemFromGear.h"
 #include "packet/CPackets\CGLotterySelect.h"
 #include "packet/CPackets\CGTakeOutGood.h"
-#include "packet/CPackets/CGMixItem.h"					// -_- 비줠 어시스트에서 이렇게 하면 나온다고하길래
+#include "packet/CPackets/CGMixItem.h"					
 #include "packet/CPackets/CGDownSkill.h"
 #include "packet/GPackets/GCMiniGameScores.h"
 #include "packet/CPackets/CGSubmitScore.h"
@@ -212,7 +212,7 @@ void SizeOfObjects()
 	fprintf(fp,"PCTalkBox : %d\n",sizeof(PCTalkBox) );
 	fprintf(fp,"SOUND_NODE : %d\n",sizeof(SOUND_NODE) );
 	fprintf(fp,"ShowTimeChecker : %d\n",sizeof(ShowTimeChecker) );
-	fprintf(fp,"ServerInformation : %d\n",sizeof(ServerInformation) );
+	fprintf(fp,"CServerInformation : %d\n",sizeof(CServerInformation) );
 	fprintf(fp,"ServerGroup : %d\n",sizeof(ServerGroup) );
 	fprintf(fp,"SERVER_INFO : %d\n",sizeof(SERVER_INFO) );
 	fprintf(fp,"SECTORSOUND_INFO : %d\n",sizeof(SECTORSOUND_INFO) );

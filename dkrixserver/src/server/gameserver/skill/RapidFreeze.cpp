@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void RapidFreeze::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                           CEffectID_t CEffectID)
@@ -38,8 +38,8 @@ void RapidFreeze::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersS
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), 0);
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -58,7 +58,7 @@ void RapidFreeze::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void RapidFreeze::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersSkillSlot* pOustersSkillSlot,
                           CEffectID_t CEffectID)
@@ -95,7 +95,7 @@ void RapidFreeze::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouste
         SkillType_t SkillType = pOustersSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // 데미지와 지속 시간을 계산한다.
+        
         SkillInput input(pOusters, pOustersSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -120,7 +120,7 @@ void RapidFreeze::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouste
 
             Tile& tile = pZone->getTile(X, Y);
 
-            // 같은 이펙트가 이미 존재한다면 삭제한다.
+            
             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_Rapid_Freeze);
             if (pOldEffect != NULL) {
                 ObjectID_t effectID = pOldEffect->getObjectID();
@@ -129,7 +129,7 @@ void RapidFreeze::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouste
 
             checkMine(pZone, X, Y);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectRapidFreeze* pEffect = new EffectRapidFreeze(pZone, X, Y);
             pEffect->setUserObjectID(pOusters->getObjectID());
             pEffect->setDeadline(output.Duration);
@@ -138,11 +138,11 @@ void RapidFreeze::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouste
             pEffect->setDamage(output.Damage);
             pEffect->setBroadcastingEffect(false);
 
-            // 타일에 붙은 이펙트는 OID를 받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 

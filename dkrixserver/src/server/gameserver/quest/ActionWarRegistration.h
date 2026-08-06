@@ -2,7 +2,7 @@
 // Filename    : ActionWarRegistration.h
 // Written By  : excel96
 // Description :
-// Creature가 PC에게 질문을 던진다. 이 대사는 NPC 대화창에 출력된다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ACTION_WAR_REGISTRATION_H__
@@ -35,7 +35,7 @@ public:
     }
 
 private:
-    ZoneID_t m_ZoneID; // 전쟁을 신청한 성의 ZoneID
+    ZoneID_t m_ZoneID; 
 };
 
 

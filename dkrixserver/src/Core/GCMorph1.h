@@ -24,7 +24,7 @@
 //
 // class GCMorph1;
 //
-//	slayer등이 vampire로 변신할때, 변신하시는 분에게 보내는 패킷.
+
 //--------------------------------------------------------------------------------
 
 class GCMorph1 : public Packet {
@@ -35,10 +35,10 @@ public:
     // destructor
     ~GCMorph1();
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -110,7 +110,7 @@ private:
     //--------------------------------------------------------------------------------
     // PC Information
     //--------------------------------------------------------------------------------
-    // PCSlayerInfo2 또는 PCVampireInfo2 를 사용한다.
+    
     PCInfo* m_pPCInfo;
 
     //--------------------------------------------------------------------------------
@@ -132,10 +132,10 @@ private:
     // quick item slot
     // gear
 
-    // 저널(PDA)
-    // 수행 퀘스트 정보
-    // 공지사항, 이벤트 정보
-    // 흐흠.. 얘들은 처음 PDS를 켤 때 다운받을까나.. - -;
+    
+    
+    
+    
 };
 
 
@@ -166,7 +166,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCMorph1PacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBYTE + PCSlayerInfo2::getMaxSize() + InventoryInfo::getMaxSize() + GearInfo::getMaxSize() +
                ExtraInfo::getMaxSize();

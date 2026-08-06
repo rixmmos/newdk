@@ -46,15 +46,11 @@ DescriptorManager::~DescriptorManager()
 //-----------------------------------------------------------------------------
 void	DescriptorManager::Set(id_t id, int x, int y, void * void_ptr, long left, long right)
 {
-	if (m_fp_show) // doing?
-		return;
-
 	DESCRIBED_UNIT * data;
 	for (int i=0; i < Size(); i++)
 		if (Data(i, data))
 			if (data->id == id)
 			{
-				assert(!gpC_base->m_p_DDSurface_back->IsLock());
 				data->fp_rect_calculator(data->fp_show, x, y, void_ptr, left, right);
 				return;
 			}
@@ -103,9 +99,10 @@ void	DescriptorManager::Unset(void* pPtr)
 //-----------------------------------------------------------------------------
 void	DescriptorManager::Show()
 {
-	assert(!gpC_base->m_p_DDSurface_back->IsLock());
-	if (m_fp_show)
-		m_fp_show(m_fp_show_param.rect, m_fp_show_param.void_ptr, m_fp_show_param.left, m_fp_show_param.right);
+	if (!m_fp_show)
+		return;
+
+	m_fp_show(m_fp_show_param.rect, m_fp_show_param.void_ptr, m_fp_show_param.left, m_fp_show_param.right);
 }
 
 //-----------------------------------------------------------------------------

@@ -3,10 +3,10 @@
 // Project   : Query.cpp
 // Module    : Database Cache Server
 // File Name : Query.h
-// Description: Cache Server내에 처리되어야 할 Query의 Difinition
+
 //
 // Date      : 2002.2.14
-// Writer    : 장 홍 창 (changaya@metrotech.co.kr)
+
 //
 ///////////////////////////////////////////////////////////////////////////////
 

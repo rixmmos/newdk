@@ -31,7 +31,7 @@ using namespace std;
 #include "SpriteLib/SP.h"
 #include "FR.h"
 #ifdef PLATFORM_WINDOWS
-#include "WinLib.h"
+#include "WinLib/WinLib.h"
 #else
 // Forward declaration for non-Windows platforms
 class CWinUpdate;
@@ -66,7 +66,7 @@ class Player;
 #define PROGRAM_TITLE               "TTDK2"
 #endif
 
-#define	PROGRAM_FILENAME			"fengshen.exe"
+#define	PROGRAM_FILENAME			"DarkEden.exe"
 #define	UPDATER_FILENAME			"Updater.exe"
 #define	UPDATER_NEW_FILENAME		"Updater2.exe"
 
@@ -96,10 +96,10 @@ class Player;
 // 80 --> 12 Frame
 // 100 --> 10 Frame
 // 111 --> 9 Frame
-#define	LIMIT_FPS_FOR_CURSOR	24		// 부드러운(?) 커서 출력을 위한 최소FPS
+#define	LIMIT_FPS_FOR_CURSOR	24		
 #define	DELAY_UPDATE_LOGIN		20
 #define	DELAY_UPDATE_WAITING	50
-#define	DELAY_UPDATE_GAME		62//62  렝岺속醵홍애긴좆
+#define	DELAY_UPDATE_GAME		62
 
 #define SAFE_DELETE(x)		{ if(x!=NULL) delete x; x=NULL; }
 #define SAFE_DELETE_ARRAY(x){ if(x!=NULL) delete []x; x=NULL;}
@@ -128,7 +128,7 @@ extern CAVI					*g_pAvi;
 // Sound PartManager
 extern CSoundPartManager*	g_pSoundManager;
 
-// Cursor 관리
+
 extern CStorageSurface*		g_pCursorSurface;
 
 extern POINT				g_SelectSector;
@@ -161,7 +161,7 @@ extern int					g_ScreenShotNumber;
 // minimize | anotherWnd click--> !ActiveGame
 extern BOOL					g_bActiveApp; // Is application active?
 extern BOOL					g_bActiveGame; // Is Game Active?
-extern BOOL					g_bNeedUpdate; // update해야되나?
+extern BOOL					g_bNeedUpdate; 
 
 
 // FPS
@@ -180,15 +180,15 @@ extern bool				g_bGoodFPS;
 	extern CMessageArray*		g_pDebugMessage;
 #endif
 
-extern bool					g_bPutMessage;		// 화면에 debug메세지를 출력할까?
+extern bool					g_bPutMessage;		
 	
-extern bool					g_bNewDraw;			// 화면을 다시 그렸는가? (커서 제외)
-extern bool					g_bSmoothCursor;	// 부드러운(?) cursor를 출력할 수 있나?
-extern bool					g_bNetStatusGood;	// 네트웍 상태가 좋은가?
+extern bool					g_bNewDraw;			
+extern bool					g_bSmoothCursor;	
+extern bool					g_bNetStatusGood;	
 
 extern CMessageArray*		g_pSystemMessage;
 
-extern CMessageArray*		g_pPlayerMessage;  //鯤소斤口잚
+extern CMessageArray*		g_pPlayerMessage;  
 
 extern CMessageArray*		g_pGameMessage;
 extern CMessageArray*		g_pHelpMessage;
@@ -236,7 +236,7 @@ void		StopLoadingThread();
 
 BOOL		InitGame();
 
-// ALT + TAB 처리
+
 void		CheckActivate(BOOL bActiveGame);
 
 // Init DX..
@@ -261,6 +261,7 @@ BOOL		InitSocket();
 // Utility Func
 BOOL		LoadZone(int n);
 BOOL		LoadZoneInfo(int n);
+BOOL		LoadZoneUIInfo(int n);
 void		MoveZone(int n);
 BOOL		LoadCreature(int spriteType);
 BOOL		LoadCreatureType(int creatureType);
@@ -292,11 +293,11 @@ void		MakeScreenShot();
 // UI
 void		UI_ResultReceiver(DWORD message, int left, int right, void *void_ptr);
 
-// 날씨
+
 void		SetWeather(int weather, int level);
 void		SetLightning(DWORD delay);
 
-// file열기
+
 bool		FileOpenBinary(const char* filename, ifstream& file);
 
 // 2004, 3, 29 sobeit add start

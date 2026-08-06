@@ -48,11 +48,11 @@ void EffectTileStorm::affect()
 
     Assert(m_pZone != NULL);
 
-    // ����ڸ� �����´�.
-    // !! �̹� ���� ������ �� �����Ƿ� NULL�� �� �� �ִ�.
+    
+    
     // by bezz. 2003.1.4
     Creature* pCastCreature = m_pZone->getCreature(m_UserObjectID);
-    // ĳ���Ͱ� ������ �����Ѵ�.
+    
     if (pCastCreature == NULL)
         return;
 
@@ -80,8 +80,8 @@ void EffectTileStorm::affect()
     Level_t maxEnemyLevel = 0;
     uint EnemyNum = 0;
 
-    // ���� ����Ʈ�� �پ��ִ� Ÿ���� �޾ƿ´�.
-    // �߽�Ÿ�� + ���÷��� Ÿ��
+    
+    
     for (int oX = -diff; oX <= diff; oX++)
         for (int oY = -diff; oY <= diff; oY++) {
             int tileX = m_X + oX;
@@ -112,13 +112,13 @@ void EffectTileStorm::affect()
                     bool bHitRoll = HitRoll::isSuccess(pSlayer, pTargetCreature, SkillLevel);
 
                     if (bPK && bZoneLevelCheck && bHitRoll) {
-                        // ���� �������� ��ų ������ ���ʽ��� ���� ���� �������� ���Ѵ�.
+                        
                         bool bCriticalHit = false;
                         Damage_t FinalDamage = 0;
                         FinalDamage += computeDamage(pSlayer, pTargetCreature, SkillLevel / 2, bCriticalHit);
                         FinalDamage += m_Damage;
 
-                        // ��...�� ũ�� �߰� ����...�ʻ� ��� �ڵ�
+                        
                         int DamageModifier = StormDamageModify[oX + 2][oY + 2];
                         Damage_t TileDamage = getPercentValue(FinalDamage, DamageModifier);
 
@@ -140,7 +140,7 @@ void EffectTileStorm::affect()
                                 maxDamage = TileDamage;
 
                             if (pTargetCreature->isPC()) {
-                                // ������ ���� �����̾��
+                                
                                 _GCSkillToObjectOK2.setObjectID(1);
                                 _GCSkillToObjectOK2.setSkillType(SKILL_ATTACK_MELEE);
                                 _GCSkillToObjectOK2.setDuration(0);
@@ -173,7 +173,7 @@ void EffectTileStorm::affect()
         pSlayer->getPlayer()->sendPacket(&gcMI);
     }
 
-    // ������ ����!!
+    
     m_StormTime--;
     if (m_StormTime <= 0)
         setDeadline(0);

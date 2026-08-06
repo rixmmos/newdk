@@ -2,7 +2,7 @@
 // Filename    : ConditionEveryTime.h
 // Written By  :
 // Description :
-// 매 주기마다 특정 액션을 실행하도록 한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EVERY_TIME_H__
@@ -49,9 +49,9 @@ public:
 private:
     Turn_t m_Turn;
 
-    // 다음 실행시간
-    // isSatisfied() 가 const method 이지만, 내부에서 값을 변경해야
-    // 하기 때문에 mutable 로 설정했다.
+    
+    
+    
     mutable Timeval m_NextTurn;
 };
 

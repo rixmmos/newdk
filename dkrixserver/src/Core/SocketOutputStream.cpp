@@ -38,8 +38,8 @@ SocketOutputStream::SocketOutputStream(Socket* sock, uint BufferLen)
 //////////////////////////////////////////////////////////////////////
 SocketOutputStream::~SocketOutputStream() noexcept {
     if (m_Buffer != NULL) {
-        // ������ ���ܼ� ConnectException �� �޾� ����� ���¿���
-        // flush�� �� ��� SIGPIPE �� ����. ����, ��������~
+        
+        
         // flush();
         delete[] m_Buffer;
         m_Buffer = NULL;
@@ -56,23 +56,23 @@ SocketOutputStream::~SocketOutputStream() noexcept {
 // ( ( m_Head = m_Tail + 1 ) ||
 //   ( ( m_Head == 0 ) && ( m_Tail == m_BufferLen - 1 ) )
 //
-// �� �� ���� full �� �����Ѵٴ� ���� ���� ����. ����, ������ ��
-// ������ ũ��� �׻� 1 �� ����� �Ѵٴ� ���!
+
+
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::write(const char* buf, uint len) {
     __BEGIN_TRY
 
-    // ���� ������ �� ������ ����Ѵ�.
-    // (!) m_Head > m_Tail�� ��쿡 m_Head - m_Tail - 1 �� �����ߴ�. by sigi. 2002.9.16
-    // �ٵ� buffer_resize�� �� ���� �Ͼ��. �ٸ��� ������ �ִµ� �ϴ� ��
-    // ã�����Ƿ�.. back. by sigi. 2002.9.23
-    // �׽�Ʈ �غ��ϱ�.. �������̾���. ������ buffer resize�� ����� �Ͼ�� ������ ����?
-    // �ٽ� ����. by sigi. 2002.9.27
+    
+    
+    
+    
+    
+    
     uint nFree = ((m_Head <= m_Tail) ? m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1);
     // m_Tail - m_Head - 1 );
 
-    // ������ �ϴ� ����Ÿ�� ũ�Ⱑ �� ������ ũ�⸦ �ʰ��� ��� ���۸� ������Ų��.
+    
     if (len >= nFree)
         resize(len - nFree + 1);
 
@@ -195,7 +195,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                // NonBlockException����. by sigi.2002.5.17
+                
                 if (nSent == 0)
                     return 0;
 
@@ -220,7 +220,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                // NonBlockException����. by sigi.2002.5.17
+                
                 if (nSent == 0)
                     return 0;
 
@@ -240,7 +240,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                // NonBlockException����. by sigi.2002.5.17
+                
                 if (nSent == 0)
                     return 0;
 
@@ -259,7 +259,7 @@ uint SocketOutputStream::flush() {
         }
 
     } catch (NonBlockingIOException&) {
-        // �Ϻθ� send�ǰ� ���� ���
+        
         // by sigi. 2002.9.27
         if (nSent > 0) {
             m_Head += nSent;
@@ -268,7 +268,7 @@ uint SocketOutputStream::flush() {
         cerr << "SocketOutputStream NonBlockingIOException Check! " << endl;
         throw NonBlockingIOException("SocketOutputStream NonBlockingIOException Check");
     } catch (InvalidProtocolException& t) {
-        // �Ϻθ� send�ǰ� ���� ���
+        
         // by sigi. 2002.9.27
         if (nSent > 0) {
             m_Head += nSent;
@@ -285,7 +285,7 @@ uint SocketOutputStream::flush() {
     file.close();
     */
 
-    // ÷���� �ٽ�.. by sigi. 2002.9.26
+    
     m_Head = m_Tail = 0;
 
     return nFlushed;
@@ -305,22 +305,22 @@ void SocketOutputStream::resize(int size) {
 
     int orgSize = size;
 
-    // ���� resize�� �����ϱ� ���ؼ�.. ���� ������ 1/2��ŭ �÷����� by sigi. 2002.9.26
+    
     size = max(size, (int)(m_BufferLen >> 1));
     uint newBufferLen = m_BufferLen + size;
     uint len = length();
 
     if (size < 0) {
-        // ���� ũ�⸦ ���̷��µ� ���ۿ� ����ִ� ����Ÿ��
-        // �� ����Ƴ� ���
+        
+        
         if (newBufferLen < 0 || newBufferLen < len)
             throw IOException("new buffer is too small!");
     }
 
-    // �� ���۸� �Ҵ�޴´�.
+    
     char* newBuffer = new char[newBufferLen];
 
-    // ���� ������ ������ �����Ѵ�.
+    
     if (m_Head < m_Tail) {
         //
         //    H   T
@@ -341,10 +341,10 @@ void SocketOutputStream::resize(int size) {
         memcpy(&newBuffer[m_BufferLen - m_Head], m_Buffer, m_Tail);
     }
 
-    // ���� ���۸� �����Ѵ�.
+    
     delete[] m_Buffer;
 
-    // ���� �� ���� ũ�⸦ �缳���Ѵ�.
+    
     m_Buffer = newBuffer;
     m_BufferLen = newBufferLen;
     m_Head = 0;
@@ -353,8 +353,8 @@ void SocketOutputStream::resize(int size) {
     VSDateTime current = VSDateTime::currentDateTime();
 
     if (m_Socket == NULL) {
-        // m_Socket �� NULL �̶�� ���� �� ��Ʈ���� ��ε� ĳ��Ʈ�� ��Ʈ���̶�� ���̴�.
-        // resize �� �ҷȴٴ� ���� ��Ŷ�� getPacketSize() �Լ��� �߸��Ǿ� �ִٴ� ���̴�.
+        
+        
         filelog("packetsizeerror.txt", "PacketID = %u", *(PacketID_t*)m_Buffer);
     } else {
         ofstream ofile("buffer_resized.log", ios::app);

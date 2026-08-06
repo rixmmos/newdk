@@ -1,13 +1,4 @@
-/**
- * @file colorset.h
- * @brief ColorSet system for IndexedSprite color mapping
- * 
- * Requirements: 6.1, 6.2, 6.3, 6.4
- * 
- * ColorSet provides color lookup tables for IndexedSprite rendering.
- * Each ColorSet contains 30 gradation levels, and there are 495 ColorSets
- * (33 seeds × 15 modifications).
- */
+ 
 
 #ifndef COLORSET_H
 #define COLORSET_H
@@ -33,9 +24,7 @@ extern "C" {
  */
 #define MAX_COLORSET_SEED_MODIFY    15
 
-/**
- * Total number of ColorSets (33 × 15 = 495)
- */
+ 
 #define MAX_COLORSET                495
 
 /**

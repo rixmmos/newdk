@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddBat;
 //
-// 시야 안에 Bat 가 들어왔을 경우, 이 패킷에 Bat 정보를 담아서 전송받는다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCAddBat : public Packet {
@@ -128,15 +128,11 @@ public:
 
 private:
     ObjectID_t m_ObjectID;
-    string m_Name; // Bat의 이름
+    string m_Name; 
 
-    /*
-    SpriteType_t m_SpriteType; // 스프라이트 타입
-    Color_t      m_MainColor;  // 메인 칼라
-    Color_t      m_SubColor;   // 서브 칼라
-    */
+     
 
-    // 변신 아이템의 종류
+    
     ItemType_t m_ItemType;
 
     Coord_t m_X;         // X

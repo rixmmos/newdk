@@ -23,11 +23,13 @@
 #include "../../basic/timer2.h"
 #include "CDirectInput.h"
 
-#ifdef PLATFORM_WINDOWS
-// On Windows, gpC_Imm is a macro defined in VS_UI_Widget.h
-// that expands to (&gpC_Imm_instance)
-#else
-// On non-Windows platforms, undefine the macro and use a proper variable
+static void TraceVSUIStartup(const char* step)
+{
+	(void)step;
+}
+
+#if defined(USE_SDL_BACKEND) || !defined(PLATFORM_WINDOWS)
+// SDL builds use the no-op CImm shim, so gpC_Imm must be a real variable.
 #undef gpC_Imm
 CImm *gpC_Imm = NULL;
 #endif
@@ -65,6 +67,16 @@ extern HWND	g_hWnd;
 //----------------------------------------------------------------------------
 C_VS_UI	gC_vs_ui;
 
+static void TraceVSUIShow(const char* step)
+{
+	(void)step;
+}
+
+static void TraceVSUIStartGame(const char* step)
+{
+	(void)step;
+}
+
 // Exchange UI
 C_VS_UI_POINT_EXCHANGE*	g_pC_point_exchange = NULL;
 
@@ -73,7 +85,7 @@ bool gbl_global_empty_move = false;
 //
 // g_interface_blink_tid
 //
-// Title/Game���� ���������� ����ϴ� blink timer.
+
 //
 timer_id_t	g_interface_blink_tid = INVALID_TID;
 bool gbl_ask_go_biling_page_running;
@@ -131,8 +143,8 @@ void	ExecF_GoBilingPage(C_VS_UI_DIALOG *p_this_dialog, id_t id)
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// DI�� ������� ���� ���, ctrl+space bar�� ���� message�� �߻����� �ʱ� ������,
-// (�� �׷��� ���� ��) �ܺο��� DI�� message�� �޴´�.
+
+
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -147,7 +159,7 @@ void C_VS_UI::HotKey_Mark()
 //	if (m_pC_game)
 //		m_pC_game->HotKey_WindowToggle();
 //}
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 	void C_VS_UI::HotKey_Inventory(bool IsCheckSubInventory)	
 	{
 		if (m_pC_game)
@@ -379,7 +391,7 @@ void C_VS_UI::HotKey_SummonPet()
 // PickUpItem
 //
 // Client -> UI
-// Item�� ������.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::PickUpItem(MItem * p_item, int item_x, int item_y)
 {
@@ -389,7 +401,7 @@ void C_VS_UI::PickUpItem(MItem * p_item, int item_x, int item_y)
 //-----------------------------------------------------------------------------
 // DropItem
 //
-// Item�� ���������� ����߷ȴ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::DropItem()
 {
@@ -399,7 +411,7 @@ void C_VS_UI::DropItem()
 //-----------------------------------------------------------------------------
 // Lock/Unlock Item
 //
-// Lock�Ǹ� Item ����/����/�ٲٱⰡ �Ұ���������. Unlock�� �װ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::LockItem()
 {
@@ -416,8 +428,8 @@ void C_VS_UI::UnlockItem()
 //-----------------------------------------------------------------------------
 // Lock/Unlock item trade
 //
-// Item sell/buy interface�� ����ǰ��־ lock�Ǹ� ���������� '����'�� �Ұ���
-// ������.
+
+
 //-----------------------------------------------------------------------------
 void	C_VS_UI::LockItemTrade()
 {
@@ -448,10 +460,7 @@ void C_VS_UI::UnlockGear()
 		m_pC_game->UnlockGear();
 }
 
-/*-----------------------------------------------------------------------------
-- AddChatToHistory
-- Chat history�� str�� �߰��Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION condition, DWORD color)
 {
 	if (m_pC_game)
@@ -459,12 +468,7 @@ void C_VS_UI::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITION con
 }
 
 
-/*-----------------------------------------------------------------------------
-- ChangeToSlayerInterface
-- Slayer interface�� �ٲ۴�.
-
-  ���� Interface�� free�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI::ChangeToSlayerInterface()
 {
 	if (m_pC_game)
@@ -475,10 +479,7 @@ void C_VS_UI::ChangeToSlayerInterface()
 	}
 }
 
-/*-----------------------------------------------------------------------------
-- ChangeToVampireInterface
-- Vampire interface�� �ٲ۴�.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI::ChangeToVampireInterface()
 {
 	if (m_pC_game)
@@ -492,7 +493,7 @@ void C_VS_UI::ChangeToVampireInterface()
 //-----------------------------------------------------------------------------
 // DeleteCharacter
 //
-// slot�� �ִ� character�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::DeleteCharacter(int slot)
 {
@@ -548,7 +549,7 @@ int C_VS_UI::GetZoneID()
 //-----------------------------------------------------------------------------
 // SetZoneName
 //
-// ZoneName�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetZone(int zone_id)
 {
@@ -565,7 +566,7 @@ void C_VS_UI::SetBlock(int x, int y)
 //-----------------------------------------------------------------------------
 // SetTime
 //
-// Time�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetTime(const char * str)
 {
@@ -576,7 +577,7 @@ void C_VS_UI::SetTime(const char * str)
 //-----------------------------------------------------------------------------
 // SetDate
 //
-// Date�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetDate(const char * str)
 {
@@ -587,7 +588,7 @@ void C_VS_UI::SetDate(const char * str)
 //-----------------------------------------------------------------------------
 // SetXY
 //
-// ����ǥ�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetXY(int x, int y)
 {
@@ -598,7 +599,7 @@ void C_VS_UI::SetXY(int x, int y)
 //-----------------------------------------------------------------------------
 // SetSize
 //
-// map size�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetSize(SIZE size)
 {
@@ -609,7 +610,7 @@ void C_VS_UI::SetSize(SIZE size)
 //-----------------------------------------------------------------------------
 // SetSafetyZone
 //
-// �̴ϸ� �������븦 �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetSafetyZone(RECT rect, bool my_zone)
 {
@@ -621,7 +622,7 @@ void C_VS_UI::SetSafetyZone(RECT rect, bool my_zone)
 //-----------------------------------------------------------------------------
 // SetNPC
 //
-// �̴ϸ� NPC�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 //struct MINIMAP_NPC
 //{
@@ -644,7 +645,7 @@ void C_VS_UI::ClearNPC()
 //-----------------------------------------------------------------------------
 // SetNPC
 //
-// �̴ϸ� NPC�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetNPC(int x, int y, int id, const char* name)
 {
@@ -661,7 +662,7 @@ void C_VS_UI::SetNPC(int x, int y, int id, const char* name)
 //-----------------------------------------------------------------------------
 // SetPortal
 //
-// �̴ϸ� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::SetPortal(RECT rect, int id)
 {
@@ -673,7 +674,7 @@ void C_VS_UI::SetPortal(RECT rect, int id)
 //-----------------------------------------------------------------------------
 // SetPortal
 //
-// �̴ϸ� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 //void C_VS_UI::SetPortal(int x, int y)
 //{
@@ -731,7 +732,7 @@ bool C_VS_UI::MouseControl(UINT message, int x, int y)
 #endif
 
 	//
-	// pick up�� Item�� ������, Item�� �ٴڿ� ����߸���. - Game �߿���..
+	
 	//
 	if (ret == false && (message == M_LEFTBUTTON_DOWN || message == M_LB_DOUBLECLICK))
 	{
@@ -741,9 +742,9 @@ bool C_VS_UI::MouseControl(UINT message, int x, int y)
 		
 #ifdef _LIB
 			//
-			// Client���� Item�� ����߸��鼭 �̵��ϴ� ���� ���� ���� UI �Է����� return �Ѵ�.
+			
 			//
-			return true; // Item�� ������ ���� ���� ����߸��� �� ���� Client �Է��� ����.
+			return true; 
 #endif
 		}
 	}
@@ -851,7 +852,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 		pressed_key = ACCEL_ADD_CONTROL( pressed_key );
 
-		// Control+ESC�� ����Ű�� ����� �� ����
+		
 		if(scan_code == SCANCODE_ESC)
 		{
 #ifdef OUTPUT_DEBUG
@@ -865,7 +866,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 //		pressed_key = ACCEL_ADD_ALT( pressed_key );
 		
-		// Alt+Tab�� ����Ű�� ����� �� ����
+		
 		if(scan_code == SCANCODE_TAB)
 		{
 #ifdef OUTPUT_DEBUG
@@ -875,7 +876,7 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 		}
 	}
 
-	// function key�� ����Ű�� �� �� ����
+	
 	if(m_bl_accel_mode && (scan_code >= DIK_F1 && scan_code <= DIK_F10 || scan_code >= DIK_F11 && scan_code <= DIK_F12))
 	{
 #ifdef OUTPUT_DEBUG
@@ -924,9 +925,9 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 
 	if(m_bl_accel_mode)
 	{
-		// �̹� ��ϵ� ��Ű�� ��� ����
-		// GetAcceleratorSimilar�� ���� �ȵȴ�
-		// Tab, Control+Tab������ ���� �ƾȵǱ� �����̴�
+		
+		
+		
 		BYTE accel = g_pKeyAccelerator->GetAccelerator( pressed_key );
 		
 		if(accel != ACCEL_NULL)
@@ -946,12 +947,12 @@ void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_co
 	{
 		BYTE accel = g_pKeyAccelerator->GetAcceleratorSimilar( pressed_key );
 
-		// accel�� ������!
-		// ä�ø�尡 �ƴҶ��� ä�� ����Ű �ȸ԰�! 
+		
+		
 		if(accel !=0 && 
 			(
-				(!g_pUserOption->UseEnterChat || g_pUserOption->UseEnterChat && gC_vs_ui.IsInputMode()) || // ä�� ����϶�
-				(accel != ACCEL_UNION_CHAT && accel != ACCEL_CHAT && accel != ACCEL_GUILD_CHAT && accel != ACCEL_ZONE_CHAT && accel != ACCEL_WHISPER && accel != ACCEL_PARTY_CHAT ) // ä�� ����Ű�� �ƴϰ�,
+				(!g_pUserOption->UseEnterChat || g_pUserOption->UseEnterChat && gC_vs_ui.IsInputMode()) || 
+				(accel != ACCEL_UNION_CHAT && accel != ACCEL_CHAT && accel != ACCEL_GUILD_CHAT && accel != ACCEL_ZONE_CHAT && accel != ACCEL_WHISPER && accel != ACCEL_PARTY_CHAT ) 
 			)
 		)
 		{
@@ -1032,300 +1033,7 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 //			gpC_window_manager->KeyboardControl(message, key, extra);
 //		}
 //	}
-/*
-
-	//
-	//---------
-	// !������
-	//---------
-	// ctrl+space�� ������ VK_SPACE�� ���� �ʴ´�. - �˼� ����
-	// ������ scan code�� ������� ��ȿ�ϴ�. �׷��� scan code�� VK_SPACE���
-	// ����Ѵ�. �׷��� �̻��ϰ� ���� ctrl+space �޽����� �� �� �´�.
-	// �ٸ� �� ���θ� �׽�Ʈ�غ����� �ʾ����� ���ݱ����� �׷���.
-	//
-	// �� �� �� �ٸ� ���� ������ long key ���� ó������ 25 �������� 229���
-	// ���̴�. �� �� �ϳ��� ���� ����� OS���� ȣȯ�������� �߻���Ű���� ������
-	// �� �� ����. �׽�Ʈ�� �ٷδ� Windows ME������ Windows 2000����ó�� ����������.
-	// �̰����κ��� Windows98������ �������� ���̴�.
-	//
-	//--------------
-	// hot-key ��å
-	//--------------
-	//
-	// �ϳ��� key�� ���ÿ� �ٸ� �� ���� ������ �ϴ� ���� ���� ���ؼ�, hot-key�� ó���Ǹ�
-	// window�� ���� ���ϰ� �Ѵ�.
-	//
-
-	//
-	// CTRL_GARBAGE
-	//
-	// scan_code�� �̿��ϴ� ���, ctrl�� �Բ� ������ ���δ� �� ���� ���� ������ �� ����
-	// �ٸ����� ���´�. �̰��� �ѱ��� �Է��ϰ� �ִ� ����(ImeRunning() == true)�� �߰ߵǾ���.
-	// �� ���� �ݵ�� �����ؾ� �Ѵ�.
-	//
-	const int CTRL_GARBAGE = 229;
-	if(key != CTRL_GARBAGE)
-	{
-		int a = 0;
-	}
-
-	if (message == WM_KEYDOWN)
-	{
-		switch (key)
-		{
-			case VK_F1:
-				if (!AlreadyPress(message, extra))
-					HotKey_F1();
-				return;
-
-			case VK_F2:
-				if (!AlreadyPress(message, extra))
-					HotKey_F2();
-				return;
-
-			case VK_F3:
-				if (!AlreadyPress(message, extra))
-					HotKey_F3();
-				return;
-
-			case VK_F4:
-				if (!AlreadyPress(message, extra))
-					HotKey_F4();
-				return;
-
-			case VK_F5:
-				if (!AlreadyPress(message, extra))
-					HotKey_F5();
-				return;
-
-			case VK_F6:
-				if (!AlreadyPress(message, extra))
-					HotKey_F6();
-				return;
-
-			case VK_F7:
-				if (!AlreadyPress(message, extra))
-					HotKey_F7();
-				return;
-
-			case VK_F8:
-				if (!AlreadyPress(message, extra))
-					HotKey_F8();
-				return;
-
-			case VK_F9:
-				if (!AlreadyPress(message, extra))
-					HotKey_F9();
-				return;
-
-			case VK_F10:
-				//HotKey_F10();
-				return;
-
-			case VK_F11:
-				if (!AlreadyPress(message, extra))
-					HotKey_F11();
-				return;
-
-			case VK_F12:
-				if (!AlreadyPress(message, extra))
-					HotKey_F12();
-				return;
-
-			case VK_ESCAPE:
-				if (!AlreadyPress(message, extra))
-					HotKey_ESC();
-				return;
-
-			case VK_TAB:
-				if (g_GetCtrlPushState() == true)
-				{
-					if (!AlreadyPress(message, extra))
-						HotKey_Gear();
-				}
-				else
-				{
-					if (!AlreadyPress(message, extra))
-						HotKey_Inventory();
-				}
-				return;
-		}
-
-		unsigned char scan_code = SCAN_CODE(extra);
-		if (key != CTRL_GARBAGE)
-		{
-			int a = 0;
-		}
-
-		switch (scan_code)
-		{
-		case SCANCODE_X:	//ctrl+x
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Mark();
-					break;
-
-		case SCANCODE_M:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Minimap();
-					break; // break!
-					
-		case SCANCODE_I:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_CharInfo();
-					break; // break!
-					
-		case SCANCODE_S:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Skill();
-					break; // break!
-					
-		case SCANCODE_TILDE:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_QuickItemSlot();
-					break; // break!
-					
-		case SCANCODE_E:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_ExtendChat();
-					break;
-					
-		case SCANCODE_C:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Chat();
-					break;
-					
-		case SCANCODE_Z:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_ZoneChat();
-					break;
-					
-		case SCANCODE_G:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_GuildChat();
-					break;
-
-		case SCANCODE_P:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Party();
-					break;
-			
-		case SCANCODE_H:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Help();
-					break;
-			
-		case SCANCODE_K:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_SkillInfo();
-					break;
-			
-		case SCANCODE_W:
-			if (key != CTRL_GARBAGE)
-				if (g_GetCtrlPushState() == true)
-					if (!AlreadyPress(message, extra))
-						HotKey_Whisper();
-					break;
-
-			//
-			// 2000.12.22.
-			// ctrl(��) + space�� WinME/Win98������ �������·� ���´�. Win2000������
-			// ���������� ���´�. ��... �� ������ ���� �ذ��� �� �����Ƿ� Dinput����
-			// ó���Ѵ�.				
-			//---------------------------------------------------------------------------
-			//			case SCANCODE_SPACE:
-			//				if (key != CTRL_GARBAGE)
-			//				{
-			//					if (g_GetCtrlPushState() == true)
-			//					{
-			//						if (!AlreadyPress(message, extra))
-			//							HotKey_WindowToggle();
-			//						return;
-			//					}
-			//				}
-			//				break;
-			//
-			//case SCANCODE_TAB:
-			//	if (g_GetCtrlPushState() == true)
-			//	{
-			//		if (!AlreadyPress(message, extra))
-			//			HotKey_Gear();
-			//	}
-			//	else
-			//	{
-			//		if (!AlreadyPress(message, extra))
-			//			HotKey_Inventory();
-			//	}
-			//	return;
-				
-			//case SCANCODE_ESC:
-			//	if (!AlreadyPress(message, extra))
-			//		HotKey_ESC();
-			//	return;
-		} // 'switch (scan_code)'
-	}
-
-	//
-	// ignore hot-key & all ctrl push
-	//
-	// WM_KEYDOWN/WM_KEYUP
-	//
-	if (g_GetCtrlPushState() == false)
-	{
-		//switch (key)
-		//{
-			// VK_F1 ~ test�ϸ� ��� Ű�� �ȴ�����! Ȳ��...
-			
-//			case VK_F1:
-//				break;
-//			case VK_F2:
-//				break;
-//			case VK_F3:
-//				break;
-//			case VK_F4:
-//				break;
-//			case VK_F5:
-//				break;
-//			case VK_F6:
-//				break;
-//			case VK_F7:
-//				break;
-//			case VK_F8:
-//				break;
-				
-		//	case VK_ESCAPE:
-		//		break;
-		//	case VK_TAB:
-		//		break;
-
-		//	default:
-				gpC_window_manager->KeyboardControl(message, key, extra);
-		//}
-	}
-*/
+ 
 #ifdef OUTPUT_DEBUG
 //	DEBUG_ADD("[C_VS_UI] KeyboardControl OK");
 #endif
@@ -1334,11 +1042,11 @@ void C_VS_UI::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // StartTitle
 //
-//	�ʱ�ȭ���� �����߿��� ��� �Ǵ� ���̹Ƿ� �޸� �Ҵ��� ���⼭ �Ѵ�.
-// �ʱ�ȭ�� ��Ȳ�� ����Ǹ� �޸𸮸� �����Ͽ��� �Ѵ�.
+
+
 //
-// �̹� Title�� �����߿� �־ "Server�� ���� ���" �ٽ� Login �κ����� 
-// �;��ϱ� ������ �� �� �̻� StartTitle() �� �� �ִ�.
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::StartTitle()
 {
@@ -1365,43 +1073,61 @@ void C_VS_UI::StartTitle()
 //-----------------------------------------------------------------------------
 void C_VS_UI::EndTitle()
 {
+	TraceVSUIStartGame("C_VS_UI::EndTitle begin");
 	if(m_pC_title != NULL)
+	{
+		TraceVSUIStartGame("C_VS_UI::EndTitle before delete title");
 		DeleteNew(m_pC_title);
+		TraceVSUIStartGame("C_VS_UI::EndTitle after delete title");
+	}
+	TraceVSUIStartGame("C_VS_UI::EndTitle end");
 }
 
 //-----------------------------------------------------------------------------
 // StartGame
 //
-// �� �� �̻� ������ �� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::StartGame()
 {
+	TraceVSUIStartGame("C_VS_UI::StartGame begin");
+	TraceVSUIStartGame("C_VS_UI::StartGame before EndTitle");
 	EndTitle();
+	TraceVSUIStartGame("C_VS_UI::StartGame after EndTitle");
 
 	if (m_pC_game != NULL)
 	{
 //		m_pC_game->SetSaveSet(true);
+		TraceVSUIStartGame("C_VS_UI::StartGame before delete old game");
 		DeleteNew(m_pC_game);
+		TraceVSUIStartGame("C_VS_UI::StartGame after delete old game");
 		m_pC_game = NULL;
 //		_Error(FAILED_JOB);
 	}
 
+	TraceVSUIStartGame("C_VS_UI::StartGame before new game");
 	m_pC_game = new C_VS_UI_GAME;
+	TraceVSUIStartGame("C_VS_UI::StartGame after new game");
 
 //	if(!bl_load_set)
+	TraceVSUIStartGame("C_VS_UI::StartGame before window SetDefault");
 	gpC_vs_ui_window_manager->SetDefault();
+	TraceVSUIStartGame("C_VS_UI::StartGame after window SetDefault");
 
+	TraceVSUIStartGame("C_VS_UI::StartGame before game Start");
 	m_pC_game->Start();
+	TraceVSUIStartGame("C_VS_UI::StartGame after game Start");
 
 #ifndef _LIB
 	gbl_game_mode = true;
 #endif
+	TraceVSUIStartGame("C_VS_UI::StartGame end");
 }
 
 //-----------------------------------------------------------------------------
 // EndGame
 //
-// StartGame()���� �Ҵ��� memory�� �����Ͽ��� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::EndGame()
 {
@@ -1418,7 +1144,7 @@ void C_VS_UI::EndGame()
 //-----------------------------------------------------------------------------
 // Process
 //
-// UI ó���κ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::Process()
 {
@@ -1475,7 +1201,7 @@ const int				g_item_show_y = 120;
 const int				g_item_show_w = 8;
 const int				g_item_show_h = 4;
 const int				g_item_gap	  = 90;
-int						g_item_page   = 0; // ��� �������� ����ϱ� ���ؼ�.
+int						g_item_page   = 0; 
 int						g_item_select = NOT_SELECTED;
 
 extern bool				gbl_show_item;
@@ -1501,10 +1227,10 @@ void ShowItem()
 			{
 				SPRITE_ID id = pItem->GetInventoryFrameID(); // frame id = data id
 
-				if (gpC_mouse_pointer->GetPickUpItem()) // Item�� �����ٸ�.
+				if (gpC_mouse_pointer->GetPickUpItem()) 
 				{
 					if (gpC_mouse_pointer->GetPickUpItem() == pItem)
-						continue; // ������� �ʴ´�.
+						continue; 
 				}			
 
 				int item_x = g_item_show_x+g_item_gap*i;
@@ -1646,13 +1372,15 @@ void ShowItem_KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // Show
 //
-// UI ��ºκ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::Show()
 {
+	TraceVSUIShow("C_VS_UI::Show begin");
 #ifdef _LIB
 	if(g_pEventManager->GetEventByFlag(EVENTFLAG_NOT_DRAW_UI) != NULL)
 	{
+		TraceVSUIShow("C_VS_UI::Show early return EVENTFLAG_NOT_DRAW_UI");
 		return;
 	}
 #endif
@@ -1662,13 +1390,25 @@ void C_VS_UI::Show()
 #endif
 #ifndef _LIB
 	if (gbl_game_mode)
+	{
+		TraceVSUIShow("C_VS_UI::Show before ShowItem");
 		ShowItem();
+		TraceVSUIShow("C_VS_UI::Show after ShowItem");
+	}
 #endif
 
-	if(IsRunningProgress())			//���α׷��� �鰥�� �ٿ�Ǵ°� �־ ������ ���� ���̳� �ؼ� ��� �ٲ� // �Դٰ� �ӵ��� UP!
+	if(IsRunningProgress())			
+	{
+		TraceVSUIShow("C_VS_UI::Show before progress show");
 		m_pC_progress->Show();
+		TraceVSUIShow("C_VS_UI::Show after progress show");
+	}
 	else
+	{
+		TraceVSUIShow("C_VS_UI::Show before window manager show");
 		gpC_window_manager->Show();
+		TraceVSUIShow("C_VS_UI::Show after window manager show");
+	}
 
 
 #ifndef _LIB
@@ -1716,7 +1456,7 @@ if(gbl_info_show)
 //	g_Print(0, TEXT_LINE(10), win_buf);
 #endif
 
-	//��Ƽ�� ǥ�� ȭ��ǥ
+	
 #define TILE_X 48
 #define TILE_Y 24
 #define WIDTH 1023
@@ -1725,6 +1465,7 @@ if(gbl_info_show)
 #define CENTER_Y 249
 	if(!IsRunningProgress() && g_pParty != NULL && g_pParty->GetSize() > 0)
 	{
+		TraceVSUIShow("C_VS_UI::Show before party marker loop");
 		static C_SPRITE_PACK cursor(SPK_PARTY_CURSOR);
 		static DWORD dw_prev_tickcount = GetTickCount();
 		static int frame = 0;
@@ -1823,14 +1564,20 @@ if(gbl_info_show)
 				}
 			}
 		}
+		TraceVSUIShow("C_VS_UI::Show after party marker loop");
 	}
 
 	if(!IsRunningProgress())
+	{
+		TraceVSUIShow("C_VS_UI::Show before descriptor manager show");
 		g_descriptor_manager.Show();
+		TraceVSUIShow("C_VS_UI::Show after descriptor manager show");
+	}
 
 #ifndef _LIB
 	if (gpC_press_button)
 	{
+		TraceVSUIShow("C_VS_UI::Show before press button overlay");
 		Rect rect(gpC_press_button->x, gpC_press_button->y-20, 80, 20);
 
 		if (gpC_base->m_p_DDSurface_back->Lock())
@@ -1846,18 +1593,20 @@ if(gbl_info_show)
 		char buf[100];
 		sprintf(buf, "%dx%d", gpC_press_button->x, gpC_press_button->y);
 		g_Print(rect.x+7, rect.y+2, buf);
+		TraceVSUIShow("C_VS_UI::Show after press button overlay");
 	}
 #endif
 #ifdef OUTPUT_DEBUG
 //	DEBUG_ADD("[C_VS_UI] Show OK");
 #endif
+	TraceVSUIShow("C_VS_UI::Show end");
 }
 
 //-----------------------------------------------------------------------------
 // DrawMousePointer
 //
-// Client�� Mouse pointer�� �ٽ� �׸��� ���� �� ����ϴ� Method. UI Loop��
-// �Ҹ����״�(Client�� �䱸��).
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::DrawMousePointer()
 {
@@ -1877,7 +1626,7 @@ void C_VS_UI::DrawTargetArrow(int TargetX, int TargetY)
 //-----------------------------------------------------------------------------
 // GetCurrentMousePointerInfo
 //
-// Client���� Mouse pointer buffer�� �����ϱ� ���� ������ ��� Method.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::GetCurrentMousePointerInfo(MOUSEPOINTER_INFO &info)
 {
@@ -2046,42 +1795,7 @@ bool	C_VS_UI::IsRunningComputer() const
 
 	return false;
 }
-/*
-//-----------------------------------------------------------------------------
-// C_VS_UI::IsRunningTutorialExit by larosel
-//
-//
-//-----------------------------------------------------------------------------
-bool	C_VS_UI::IsRunningTutorialExit() const
-{
-	if (m_pC_game)
-		return m_pC_game->IsRunningTutorialExit();
-
-	return false;
-}
-
-//-----------------------------------------------------------------------------
-// RunTutorialExitAsk
-//
-// �װŵ鱸 Ʃ�丮�� ������?�ϰ� ���´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI::RunTutorialExitAsk(const int select, const char* pName)
-{
-	if (m_pC_game)
-		m_pC_game->RunTutorialExitAsk(select, pName);
-}
-
-//-----------------------------------------------------------------------------
-// CloseTutorialExitAsk
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI::CloseTutorialExitAsk()
-{
-	if (m_pC_game)
-		m_pC_game->CloseTutorialExitAsk();
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // C_VS_UI::RestoreWhenActivateGame
 //
@@ -2096,7 +1810,7 @@ void	C_VS_UI::RestoreWhenActivateGame()
 //-----------------------------------------------------------------------------
 // C_VS_UI::BackupPrevId
 //
-// login�� �� ������ �Է��� id�� �ڵ����� �̸� �Է½�Ű�� ���ؼ� file�� backup�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void	C_VS_UI::BackupPrevId(const char * sz_id)
 {
@@ -2119,7 +1833,7 @@ void	C_VS_UI::BackupPrevId(const char * sz_id)
 //-----------------------------------------------------------------------------
 // C_VS_UI::AlreadyPress
 //
-// ������ push�� ���¸� true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool	C_VS_UI::AlreadyPress(UINT message, long extra) const
 {
@@ -2133,7 +1847,7 @@ bool	C_VS_UI::AlreadyPress(UINT message, long extra) const
 //-----------------------------------------------------------------------------
 // C_VS_UI::Release
 //
-// global���Ÿ� Ȯ���� �������� �ϱ� ���ؼ� �߰�..  by sigi
+
 //-----------------------------------------------------------------------------
 void
 C_VS_UI::Release()
@@ -2150,7 +1864,7 @@ C_VS_UI::Release()
 	DeleteNew(m_pC_option);
 	m_pC_progress = NULL;
 
-	g_FreeMessage(); // Window Manager ������ ���ش�.
+	g_FreeMessage(); 
 
 	DeleteNew(gpC_vs_ui_window_manager);
 
@@ -2429,7 +2143,7 @@ void C_VS_UI::CloseGameMenu()
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetInventoryPosition
 //
-// Client���� Inventory�� ��ġ�� ����.
+
 //-----------------------------------------------------------------------------
 Point C_VS_UI::GetInventoryPosition() const
 {
@@ -2443,7 +2157,7 @@ Point C_VS_UI::GetInventoryPosition() const
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetInventoryGridPosition
 //
-// Client���� Inventory�� (x, y) grid�� ��ġ�� ����.
+
 //-----------------------------------------------------------------------------
 Point	C_VS_UI::GetInventoryGridPosition(int grid_x, int grid_y) const
 {
@@ -2483,7 +2197,7 @@ MItem * C_VS_UI::RemoveItemInGear(int slot)
 //-----------------------------------------------------------------------------
 // C_VS_UI::CanReplaceItemInGear
 //
-// slayer/vampire gearâ���� item�� replace�� �� �ִ°�?
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI::CanReplaceItemInGear(MItem* pItem, int slot, MItem*& pOldItem)
 {
@@ -2496,7 +2210,7 @@ bool C_VS_UI::CanReplaceItemInGear(MItem* pItem, int slot, MItem*& pOldItem)
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetGearItem
 //
-// slayer���� vampire���� �� �� ����Ѵ�.
+
 //-----------------------------------------------------------------------------
 const MItem * C_VS_UI::GetGearItem(int slot) const
 {
@@ -2512,14 +2226,14 @@ const MItem * C_VS_UI::GetGearItem_PickUp(int &slot) const
 
 	return NULL;
 }
-const MItem * C_VS_UI::GetGearCoreZapItem(int slot) const // Ư�� ���Կ� �پ� �ִ� �ھ����� ����, slot : �ھ��� ���� ����
+const MItem * C_VS_UI::GetGearCoreZapItem(int slot) const 
 {
 	if (m_pC_game)
 		return m_pC_game->GetGearCoreZapItem(slot);
 
 	return NULL;
 }
-const MItem * C_VS_UI::GetGearCoreZapedItem(int slot) const // �ھ��� �ؿ� �� �������� ����, slot : �ھ��� ����
+const MItem * C_VS_UI::GetGearCoreZapedItem(int slot) const 
 {
 	if (m_pC_game)
 		return m_pC_game->GetGearCoreZapedItem(slot);
@@ -2545,7 +2259,7 @@ const bool C_VS_UI::IsCloseBloodBibleSlot(int slot) const
 //-----------------------------------------------------------------------------
 // C_VS_UI::GetGearSize
 //
-// slayer���� vampire���� �� �� ����Ѵ�.
+
 //-----------------------------------------------------------------------------
 const int C_VS_UI::GetGearSize() const
 {
@@ -2558,8 +2272,8 @@ const int C_VS_UI::GetGearSize() const
 //-----------------------------------------------------------------------------
 // C_VS_UI::CloseAllDialog
 //
-// ��𿡵� ���ӵ����ʴ� dialog�� server disconnect message�� ���� ���� ���� ����
-// ���� �ݾ���� �Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 void	C_VS_UI::CloseAllDialog()
 {
@@ -2699,7 +2413,7 @@ void	C_VS_UI::RunVampireSkillTree()
 //-----------------------------------------------------------------------------
 // RunDescDialog
 //
-// ����â�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunDescDialog(int type, void *ptr, void* ptr2)
 {
@@ -2721,7 +2435,7 @@ void C_VS_UI::CloseDescDialog()
 //-----------------------------------------------------------------------------
 // RunFileDialog
 //
-// ����â�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 {
@@ -2743,7 +2457,7 @@ void C_VS_UI::CloseFileDialog()
 //-----------------------------------------------------------------------------
 // RunElevator
 //
-// ���������� �������̽��� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunElevator()
 {
@@ -2765,7 +2479,7 @@ void C_VS_UI::CloseElevator()
 //-----------------------------------------------------------------------------
 // RunBookcase
 //
-// å���� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunBookcase()
 {
@@ -2784,33 +2498,11 @@ void C_VS_UI::CloseBookcase()
 		m_pC_game->CloseBookcase();
 }
 
-/*
-//-----------------------------------------------------------------------------
-// RunBriefing
-//
-// �긮���� ����.
-//-----------------------------------------------------------------------------
-void C_VS_UI::RunBriefing()
-{
-	if (m_pC_game)
-		m_pC_game->RunBriefing();
-}
-
-//-----------------------------------------------------------------------------
-// CloseBriefing
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI::CloseBriefing()
-{
-	if (m_pC_game)
-		m_pC_game->CloseBriefing();
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // RunComputer
 //
-// ��ǻ�͸� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunComputer()
 {
@@ -2828,43 +2520,11 @@ void C_VS_UI::CloseComputer()
 	if (m_pC_game)
 		m_pC_game->CloseComputer();
 }
-/*
-//-----------------------------------------------------------------------------
-// RunTutorialExit
-//
-// Ʃ�丮�� ������â�� ����.
-//-----------------------------------------------------------------------------
-void C_VS_UI::RunTutorialExit()
-{
-	if (m_pC_game)
-		m_pC_game->RunTutorialExit();
-}
-
-//-----------------------------------------------------------------------------
-// CloseTutorialExit
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI::CloseTutorialExit()
-{
-	if (m_pC_game)
-		m_pC_game->CloseTutorialExit();
-}
-
-//-----------------------------------------------------------------------------
-// RunTutorialExitAccept
-//
-//-----------------------------------------------------------------------------
-void C_VS_UI::RunTutorialExitAccept()
-{
-	if(m_pC_game)
-		m_pC_game->RunTutorialExitAccept();
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // RunSlayerPortal
 //
-// �����̾���Ż �������̽��� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunSlayerPortal()
 {
@@ -3322,7 +2982,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // RunSkillView
 //
-// SkillView�� ����.
+
 //-----------------------------------------------------------------------------
 //void C_VS_UI::RunSkillView()
 //{
@@ -3333,7 +2993,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // GetSkillViewWindow
 //
-// SkillViewâ�� �����͸� ��ȯ�Ѵ�
+
 //-----------------------------------------------------------------------------
 //C_VS_UI_SKILL_VIEW * C_VS_UI::GetSkillViewWindow()
 //{
@@ -3346,7 +3006,7 @@ void C_VS_UI::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // RunShop
 //
-// Shop�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunShop()
 {
@@ -3357,7 +3017,7 @@ void C_VS_UI::RunShop()
 //-----------------------------------------------------------------------------
 // RunStorage
 //
-// Storage�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunStorage()
 {
@@ -3367,7 +3027,7 @@ void C_VS_UI::RunStorage()
 //-----------------------------------------------------------------------------
 // RunPetStorage
 //
-// Storage�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPetStorage()
 {
@@ -3378,7 +3038,7 @@ void C_VS_UI::RunPetStorage()
 //-----------------------------------------------------------------------------
 // RunStorageBuy
 //
-// Storage�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunStorageBuy(int price)
 {
@@ -3389,7 +3049,7 @@ void C_VS_UI::RunStorageBuy(int price)
 //-----------------------------------------------------------------------------
 // RunExchangeCancel
 //
-// ��ȯ����ҷ�?�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchangeCancel(const char* pName)
 {
@@ -3400,7 +3060,7 @@ void C_VS_UI::RunExchangeCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchangeAsk
 //
-// ��ȯ�ҷ�?�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchangeAsk(const char* pName)
 {
@@ -3494,40 +3154,14 @@ void C_VS_UI::RunFriendDeleteAsk(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchange
 //
-// ��ȯâ�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunExchange()
 {
 	if (m_pC_game)
 		m_pC_game->RunExchange();
 }
-/*
-//-----------------------------------------------------------------------------
-// RunOption
-//
-// �ɼ�â�� ����.
-//-----------------------------------------------------------------------------
-void C_VS_UI::RunOption()
-{
-	if (m_pC_game)
-		m_pC_game->RunOption();
-	else if(m_pC_title)
-		m_pC_title->RunOption();
-}
-
-//-----------------------------------------------------------------------------
-// CloseOption
-//
-// ��ȯâ�� ����.
-//-----------------------------------------------------------------------------
-void	C_VS_UI::CloseOption()
-{
-	if (m_pC_game)
-		m_pC_game->CloseOption();
-	else if(m_pC_title)
-		m_pC_title->CloseOption();
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // GetOpenState
 //
@@ -3585,7 +3219,7 @@ void C_VS_UI::ServerDisconnectMessage()
 		gpC_base->FinishEvent();
 
 
-	// Ȯ���� ��� Window�� �ݱ����ؼ�..
+	
 //	if (m_pC_title)
 //	{
 //		DeleteNew(m_pC_title);
@@ -3677,7 +3311,7 @@ void C_VS_UI::SetProgress(WORD cur_val, WORD max_val)
 //-----------------------------------------------------------------------------
 // ToggleESC4UI
 //
-// Game �� GameMenu�� �θ��� ����...
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::ToggleESC4UI()
 {
@@ -3688,7 +3322,7 @@ void C_VS_UI::ToggleESC4UI()
 //-----------------------------------------------------------------------------
 // ResetSlayerQuickItemSize
 //
-// Gear���� belt�� ��ü�� ��쿡 ����ȴ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::ResetSlayerQuickItemSize()
 {
@@ -3706,26 +3340,30 @@ class C_VS_UI_FRIEND_INFO;
 //-----------------------------------------------------------------------------
 // Init
 //
-// �翬�� ���� ���� �����Ͽ��� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 {
+	TraceVSUIStartup("VS_UI Init begin");
 	g_SetNewHandler();
+	TraceVSUIStartup("VS_UI new handler set");
 
 	if( g_pSkinManager == NULL )
 	{
+		TraceVSUIStartup("VS_UI creating skin manager");
 		g_pSkinManager = new SkinManager;
 		std::string filename;
 		
-		if( gC_ci->IsChinese() )
-			filename = CHINESE_INTERFACE_INFO;
-		else if (gC_ci->IsJapanese() )
-			filename = JAPANESE_INTERFACE_INFO;
-		else filename = KOREAN_INTERFACE_INFO;
+		filename = KOREAN_INTERFACE_INFO;
 		
 		//assert( g_pSkinManager->LoadInformation( filename.c_str() ) );
+		TraceVSUIStartup(filename.c_str());
 		if ( g_pSkinManager->LoadInformation( filename.c_str() ) == false )
-			assert( FALSE );			
+		{
+			TraceVSUIStartup("VS_UI skin load FAILED");
+			return;
+		}
+		TraceVSUIStartup("VS_UI skin load OK");
 	}
 
 #ifndef _LIB
@@ -3734,16 +3372,20 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 	if (g_pMoneyManager != NULL)
 	{
 		g_pMoneyManager->SetMoney(2000000000);
+		TraceVSUIStartup("VS_UI money manager OK");
 	}
 	else
 	{
 		// This should never happen if InitGame() follows correct initialization order
-		assert(false && "g_pMoneyManager is NULL! InitGameObject() must be called before InitSurface()");
+		TraceVSUIStartup("VS_UI money manager NULL");
+		return;
 	}
 #endif	
 
 	gpC_base = new Base;
+	TraceVSUIStartup("VS_UI base allocated");
 	gpC_base->Init(surface, fp);
+	TraceVSUIStartup("VS_UI base initialized");
 
 	//-----------------------------------------------
 	// global object allocation
@@ -3753,6 +3395,7 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 	// Process runner
 	//
 	gpC_process_runner = new PI_ProcessRunner;
+	TraceVSUIStartup("VS_UI process runner allocated");
 
 	//
 	// Window manager
@@ -3761,20 +3404,28 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 	gpC_window_manager->SetAcquireMouseFocusHandler(_AcquireMouseFocusHandler);
 	gpC_window_manager->SetAcquireDisappearHandler(_AcquireDisappearHandler);
 	gpC_window_manager->SetUnacquireMouseFocusHandler(_UnacquireMouseFocusHandler);
+	TraceVSUIStartup("VS_UI window manager initialized");
 
 	gpC_vs_ui_window_manager = new C_VS_UI_WINDOW_MANAGER;
+	TraceVSUIStartup("VS_UI ui window manager allocated");
 
 	gpC_global_resource = new C_GLOBAL_RESOURCE;
+	TraceVSUIStartup("VS_UI global resource allocated");
 
 	gpC_mouse_pointer = new C_VS_UI_MOUSE_POINTER;
+	TraceVSUIStartup("VS_UI mouse pointer allocated");
 
 
 	gpC_item = new C_VS_UI_ITEM;
+	TraceVSUIStartup("VS_UI item allocated");
 	
 	g_interface_blink_tid = gC_timer2.Add(INTERFACE_BLINK_MILLISEC, _Timer_InterfaceBlink);
 	gC_timer2.Continue(g_interface_blink_tid);
+	TraceVSUIStartup("VS_UI blink timer initialized");
 	g_InitMessage();
+	TraceVSUIStartup("VS_UI messages initialized");
 	g_InstallDescriptor();
+	TraceVSUIStartup("VS_UI descriptors installed");
 
 #ifndef _LIB
 	g_pUserOption->UseForceFeel = true;
@@ -3788,19 +3439,20 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 	gpC_Imm = new CImm;
 	if(gpC_Imm && g_pUserOption->UseForceFeel)gpC_Imm->Enable(true);
 	else if(gpC_Imm)gpC_Imm->Disable();
+	TraceVSUIStartup("VS_UI CImm initialized");
 
 #ifndef _LIB
 //	InitSound();
 
 	//---------------------------------------------------------------------
 	//
-	// Skill Tree ��ü�� �ʱ�ȭ �ϴ� ���
+	
 	//
 	//---------------------------------------------------------------------
 //	g_pSkillManager->Init();
 
 	//---------------------------------------------------------------------
-	// �⺻ ����κ��� skill tree�� �ʱ�ȭ�Ѵ�.
+	
 	//---------------------------------------------------------------------
 //	(*g_pSkillManager)[SKILLDOMAIN_BLADE].SetRootSkill( SKILL_SINGLE_BLOW );
 //	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetRootSkill( SKILL_DOUBLE_IMPACT );
@@ -3817,6 +3469,7 @@ void C_VS_UI::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 	
 	//m_p_edit_dialog->Start();
 #endif
+	TraceVSUIStartup("VS_UI Init OK");
 }
 
 //-----------------------------------------------------------------------------
@@ -3900,7 +3553,7 @@ bool	C_VS_UI::IsRunningAskParty()	const
 //-----------------------------------------------------------------------------
 // RunPartyAsk
 //
-// ��Ƽ�������ҷ�?�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST_PARTY type)
 {
@@ -3921,9 +3574,9 @@ void C_VS_UI::ClosePartyAsk()
 //-----------------------------------------------------------------------------
 // RunUsePetFood
 //
-// ��Ƽ�������ҷ�?�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 
 	void C_VS_UI::RunUsePetFood(DWORD UsingObjectID, MItem* SubInventory)
 	{
@@ -3954,7 +3607,7 @@ void C_VS_UI::CloseUsePetFood()
 //-----------------------------------------------------------------------------
 // RunKeepPetItemDialog
 //
-// �� �±淡??�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunKeepPetItemDialog()
 {
@@ -3974,7 +3627,7 @@ void C_VS_UI::CloseKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunGetKeepPetItemDialog
 //
-// �� ã����??�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunGetKeepPetItemDialog()
 {
@@ -3994,7 +3647,7 @@ void C_VS_UI::CloseGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunEnchant
 //
-// Enchant�ҷ�?�ϰ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunEnchant(int value)
 {
@@ -4015,7 +3668,7 @@ void C_VS_UI::CloseEnchant()
 //-----------------------------------------------------------------------------
 // RunNoSearchResult
 //
-// �˻���� ���� Ȯ��â
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunNoSearchResult()
 {
@@ -4036,7 +3689,7 @@ void C_VS_UI::CloseNoSearchResult()
 //-----------------------------------------------------------------------------
 // RunDepositLimit
 //
-// �˻���� ���� Ȯ��â
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunDepositLimit()
 {
@@ -4057,7 +3710,7 @@ void C_VS_UI::CloseDepositLimit()
 //-----------------------------------------------------------------------------
 // RunWithdrawLimit
 //
-// �˻���� ���� Ȯ��â
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunWithdrawLimit()
 {
@@ -4084,7 +3737,7 @@ void	C_VS_UI::RunBringFeeLimit()
 //-----------------------------------------------------------------------------
 // RunPartyCancel
 //
-// ��Ƽ��������û��... �ϰ� ���´�
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyCancel(const char* pName)
 {
@@ -4116,7 +3769,7 @@ void C_VS_UI::ClosePartyManager()
 //-----------------------------------------------------------------------------
 // RunPartyManager
 //
-// PartyManager�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunPartyManager()
 {
@@ -4157,7 +3810,7 @@ void C_VS_UI::CloseOption()
 //-----------------------------------------------------------------------------
 // RunOption
 //
-// �ɼ�â ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunOption(bool IsTitle)
 {
@@ -4455,7 +4108,7 @@ bool	C_VS_UI::IsRunningPopupMessage()
 	return false;
 }
 
-// ����Ʈ ����â
+
 void	C_VS_UI::RunQuestStatusWindow()
 {
 	if(m_pC_game != NULL)
@@ -4495,7 +4148,7 @@ DWORD	C_VS_UI::GetQuestStatusID()
 	return 0xffffffff;
 }
 
-// ����â
+
 void	C_VS_UI::RunLotteryCard( int& step )
 {
 	if(m_pC_game != NULL)
@@ -4649,10 +4302,7 @@ bool	C_VS_UI::IsRunningRequestResurrect() const
 	return false;
 }
 
-/*-----------------------------------------------------------------------------
-- ChangeToOustersInterface
-- Ousters interface�� �ٲ۴�.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI::ChangeToOustersInterface()
 {
 	if (m_pC_game)
@@ -4666,7 +4316,7 @@ void C_VS_UI::ChangeToOustersInterface()
 //-----------------------------------------------------------------------------
 // RunMixingForge
 //
-// MixingForge�� ����.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class, C_VS_UI_MIXING_FORGE::FORGE_TYPE forge_type)
 {
@@ -5375,7 +5025,7 @@ void	C_VS_UI::DeleteQuestItem(int nSlot)
 
 }
 
-// 2004, 10, 25, sobeit add start - ���� ����
+
 void	C_VS_UI::RunModifyTax()
 {
 	if (m_pC_game)
@@ -5504,7 +5154,7 @@ bool C_VS_UI::IsRunningSwapAdvancementItem()
 }
 // 2005, 1, 3, sobeit add end
 
-// 2005, 1, 11, sobeit add start - �ҿ��̿����� â
+
 void	C_VS_UI::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 {
 	if (m_pC_game)
@@ -5513,15 +5163,15 @@ void	C_VS_UI::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 }
 // 2005, 1, 11, sobeit add end
 
-// 2005, 1, 17, sobeit add start - ����Ʈ ����
+
 void	C_VS_UI::SetQuestNpcDialog(void* pVoid)
 {
 	if(m_pC_game)
 		m_pC_game->SetQuestNpcDialog(pVoid);
 }
-// 2005, 1, 17, sobeit add end - ����Ʈ ����
+
 	
-// 2005, 1, 24, sobeit add start - ������ �ޱ� �̺�Ʈ
+
 void	C_VS_UI::Run_Confirm_GetItemEvent(int value)
 {
 	if (m_pC_game)
@@ -5563,7 +5213,7 @@ bool C_VS_UI::IsInRectPointWebBrowser(int X, int Y)
 	return false;
 }
 // 2005, 2, 1, sobeit add end
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 // 2005, 2, 24, sobeit add start
 	void	C_VS_UI::RunSubInventory(MItem* pItem)
 	{

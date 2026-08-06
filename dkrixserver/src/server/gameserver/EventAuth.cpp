@@ -22,7 +22,7 @@
 EventAuth::EventAuth(GamePlayer* pGamePlayer)
 
     : Event(pGamePlayer) {
-    // 1분
+    
     setDeadline(600);
 }
 
@@ -46,15 +46,15 @@ void EventAuth::activate()
 
         // if ( !m_pGamePlayer->getCSAuth().IsAuth() )
         if (true) {
-            filelog("CSAuth.log", "[%s] 인증 시간 제한을 초과했습니다.", m_pGamePlayer->getID().c_str());
+            filelog("CSAuth.log", "[%s]    .", m_pGamePlayer->getID().c_str());
 
             GCSystemMessage gcSystemMessage;
-            gcSystemMessage.setMessage("nProtect GameGuard 훰聯呵겨.獵契匡숭댄轎샀GameGuard匡숭愆뻐.");
+            gcSystemMessage.setMessage("nProtect GameGuard .GameGuard.");
             m_pGamePlayer->sendPacket(&gcSystemMessage);
 
             EventKick* pKick = new EventKick(m_pGamePlayer);
             pKick->setDeadline(100);
-            //			pKick->setMessage("GameGuard 인증 제한 시간이 초과했습니다.. 10초 뒤에 접속이 종료됩니다.");
+            
             pKick->sendMessage();
 
             m_pGamePlayer->addEvent(pKick);
@@ -66,7 +66,7 @@ void EventAuth::activate()
         }
     }
 
-    // 5분에 한번
+    
     Timeval delay;
     delay.tv_sec = 300;
     delay.tv_usec = 0;

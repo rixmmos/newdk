@@ -22,7 +22,7 @@ FILEINFO_ZONE_HEADER::SaveToFile(std::ofstream& file)
 	Description.SaveToFile(file);
 }
 void		
-FILEINFO_ZONE_HEADER::LoadFromFile(std::ifstream& file)//뗍혤뒈暠
+FILEINFO_ZONE_HEADER::LoadFromFile(std::ifstream& file)
 {
 	ZoneVersion.LoadFromFile(file);
 	file.read((char*)&ZoneID, 2);

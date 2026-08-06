@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 	int		flag_v = (int)pGCFlagWarStatus->getFlagCount( RACE_VAMPIRE );
 	int		flag_o = (int)pGCFlagWarStatus->getFlagCount( RACE_OUSTERS );
 	
-	// 시간이 3시간 이상이면 무조건 무시!
+	
 	if( ((endTime-timeGetTime())/1000)/60/60 > 3 )
 		return;
 

@@ -15,7 +15,7 @@
 #include "GCStatusCurrentHP.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Liberty::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                       CEffectID_t CEffectID)
@@ -44,7 +44,7 @@ void Liberty::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkill
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !pTargetCreature->isOusters()) {
             executeSkillFailException(pOusters, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -86,10 +86,10 @@ void Liberty::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkill
         bool bHitRoll2 = (rand() % 100) < Ratio;
 
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bHitRoll2 && bSatisfyRequire && bHPCheck) {
-            // 마나를 줄인다.
+            
             decreaseMana(pOusters, RequiredMP, _GCSkillToObjectOK1);
 
-            // 이펙트의 효과와 지속시간을 계산한다.
+            
             SkillInput input(pOusters, pOustersSkillSlot);
             SkillOutput output;
             input.TargetType = SkillInput::TARGET_OTHER;
@@ -97,7 +97,7 @@ void Liberty::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkill
 
             pEffect->setDeadline(0);
 
-            // 패킷을 준비해서 보낸다.
+            
             _GCSkillToObjectOK1.setSkillType(SkillType);
             _GCSkillToObjectOK1.setCEffectID(CEffectID);
             _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);

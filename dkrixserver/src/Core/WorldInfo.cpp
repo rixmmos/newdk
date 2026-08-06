@@ -2,8 +2,8 @@
 //
 // Filename    : WorldInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,13 +32,13 @@ WorldInfo::~WorldInfo() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void WorldInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
     BYTE szName;
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_ID);
     iStream.read(szName);
     iStream.read(m_Name, szName);
@@ -48,13 +48,13 @@ void WorldInfo::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void WorldInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
     BYTE szName = m_Name.size();
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_ID);
     oStream.write(szName);
     oStream.write(m_Name);

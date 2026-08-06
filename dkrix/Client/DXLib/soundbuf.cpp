@@ -90,11 +90,11 @@ int OutputData (LPSOUNDBUF lpsb)
 	LPVOID	audioPtr1, audioPtr2 ;
 	DWORD	audioBytes1, audioBytes2 ;
 
-//	DispDebugMsg("디코딩 정보를 기록하려 합니다.") ;
+
 
 Fill :
 	while ( lpsb->bPlaying && lpsb->readyBufs == 1 ) Sleep(5) ;
-	if ( lpsb->nPushedFrames < lpsb->nFrames )	// 버퍼가 여유가 있을 경우 채운다.
+	if ( lpsb->nPushedFrames < lpsb->nFrames )	
 	{
 		lpsb->dsWriteBuf->Lock( lpsb->offWrite, lpsb->bufSize, 
 			(void**)&audioPtr1, &audioBytes1, (void**)&audioPtr2, &audioBytes2, 0 ) ;
@@ -115,7 +115,7 @@ Fill :
 		lpsb->offWrite += lpsb->bufSize ;
 		lpsb->offWrite %= lpsb->bufSize*lpsb->nPushedFrames ;
 	}
-	else	// 버퍼가 차면 연주를 시작한다.
+	else	
 	{
 		lpsb->readyBufs++ ;
 
@@ -130,7 +130,7 @@ Fill :
 
 		goto Fill ; 
 	}
-//	DispDebugMsg("디코딩 정보를 기록했습니다.") ;
+
 
 	Reset(lpsb) ;
 	return 0 ;

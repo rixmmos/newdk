@@ -7,7 +7,7 @@
 #ifndef __VALUE_LIST_H__
 #define __VALUE_LIST_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "Packet.h"
 
@@ -31,8 +31,8 @@ public:
 #ifdef __GAME_CLIENT__
 	std::string toString () const throw ();
 	std::list<T>&					GetList() { return m_Values; }
-	std::list<T>::const_iterator		Begin() { return m_Values.begin(); }
-	std::list<T>::const_iterator		End() { return m_Values.end(); }
+	typename std::list<T>::const_iterator		Begin() { return m_Values.begin(); }
+	typename std::list<T>::const_iterator		End() { return m_Values.end(); }
 	bool						IsEmpty() { return m_Values.empty(); }
 #endif
 
@@ -55,7 +55,7 @@ private:
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 template <class T>
 void ValueList<T>::read ( SocketInputStream & iStream ) 
@@ -79,7 +79,7 @@ void ValueList<T>::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 template <class T>
 void ValueList<T>::write ( SocketOutputStream & oStream ) 

@@ -674,11 +674,11 @@ VSDateTime VSDateTime::fromString(string text) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // return VSDateTime Object from YYYYMMDDHHMMSS style string
-// ��Ʈ���� ������ �����ѵ� ������ �����Ѵ�.
-// ( �� YYYYMMDD ������ �־�� �Ѵ�. ������ ����ð�. ��. ������.)
-//  YYYYMMDD ������ ��Ʈ���̶�� ��,��,�� ������ ����
-// ������ �κ��� bEndOfDay �� true �� 23�� 59�� 59��
-// false �̸� 0�� 0�� 0��
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 VSDateTime VSDateTime::fromYYYYMMDDHHMMSS(string text, bool bEndOfDay) {
     uint szText = text.size();

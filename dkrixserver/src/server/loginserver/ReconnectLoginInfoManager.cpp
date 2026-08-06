@@ -18,7 +18,7 @@
 ReconnectLoginInfoManager::ReconnectLoginInfoManager() noexcept {
     __BEGIN_TRY
 
-    // ���� heartbeat �ð��� �����Ѵ�.
+    
     getCurrentTime(m_NextHeartbeat);
     m_NextHeartbeat.tv_sec += 5;
 
@@ -31,14 +31,14 @@ ReconnectLoginInfoManager::ReconnectLoginInfoManager() noexcept {
 ReconnectLoginInfoManager::~ReconnectLoginInfoManager() noexcept {
     __BEGIN_TRY
 
-    // ��� ReconnectLoginInfo �� �����ؾ� �Ѵ�.
+    
     for (HashMapReconnectLoginInfo::iterator itr = m_ReconnectLoginInfos.begin(); itr != m_ReconnectLoginInfos.end();
          itr++) {
         delete itr->second;
         itr->second = NULL;
     }
 
-    // �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+    
     m_ReconnectLoginInfos.clear();
 
     __END_CATCH
@@ -56,7 +56,7 @@ void ReconnectLoginInfoManager::addReconnectLoginInfo(ReconnectLoginInfo* pRecon
     HashMapReconnectLoginInfo::iterator itr = m_ReconnectLoginInfos.find(pReconnectLoginInfo->getClientIP());
 
     if (itr != m_ReconnectLoginInfos.end())
-        // �Ȱ��� ���̵� �̹� �����Ѵٴ� �Ҹ���. - -;
+        
         throw DuplicatedException("duplicated connection info id");
 
     m_ReconnectLoginInfos[pReconnectLoginInfo->getClientIP()] = pReconnectLoginInfo;
@@ -74,10 +74,10 @@ void ReconnectLoginInfoManager::deleteReconnectLoginInfo(string clientIP) noexce
     HashMapReconnectLoginInfo::iterator itr = m_ReconnectLoginInfos.find(clientIP);
 
     if (itr != m_ReconnectLoginInfos.end()) {
-        // ReconnectLoginInfo �� �����Ѵ�.
+        
         delete itr->second;
 
-        // pair�� �����Ѵ�.
+        
         m_ReconnectLoginInfos.erase(itr);
 
     } else {
@@ -114,7 +114,7 @@ ReconnectLoginInfo* ReconnectLoginInfoManager::getReconnectLoginInfo(string clie
 
 
 //----------------------------------------------------------------------
-// expire �� ReconnectLogin Info ��ü�� �����Ѵ�.
+
 //----------------------------------------------------------------------
 void ReconnectLoginInfoManager::heartbeat() noexcept(false) {
     __BEGIN_TRY

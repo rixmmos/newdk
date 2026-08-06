@@ -5,10 +5,10 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "CGExchangeList.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
+#include "../SocketInputStream.h"
+#include "../SocketOutputStream.h"
 
-#include "Player.h"
+#include "../Player.h"
 
 CGExchangeList::CGExchangeList()
 {

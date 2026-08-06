@@ -2,7 +2,7 @@
 // Filename    : ActionAskVariable.h
 // Written By  : excel96
 // Description :
-// Creature가 PC에게 질문을 던진다. 이 대사는 NPC 대화창에 출력된다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ACTION_ASK_VARIABLE_H__
@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    ScriptID_t m_ScriptID; // 말할 대사 아이디
+    ScriptID_t m_ScriptID; 
     VariableBuffer* m_pVariableBuffer;
 };
 

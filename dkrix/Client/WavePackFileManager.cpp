@@ -70,7 +70,7 @@ WavePackFileInfo::SaveToFileData(std::ofstream& file)
 	mmioClose(wavefile, 0);
 
 	//--------------------------------------------------------------
-	// file에 저장한다.
+	
 	//--------------------------------------------------------------
 	file.write((const char*)&cksize, 4);
 	file.write((const char*)&wavefmt, wavefmtSize);
@@ -101,7 +101,7 @@ WavePackFileInfo::LoadFromFileData(std::ifstream& file)
 	bufdesc.dwSize			= sizeof(DSBUFFERDESC);
 	bufdesc.dwFlags			= DSBCAPS_CTRLPAN 
 							| DSBCAPS_CTRLVOLUME ;
-							//| DSBCAPS_LOCDEFER;	// 이건 왜 넣어둔거였을까. - -;
+							
 	bufdesc.dwBufferBytes	= cksize;
 	bufdesc.lpwfxFormat		= &wavefmt;
 

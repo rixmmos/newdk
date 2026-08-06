@@ -35,7 +35,6 @@ set(SPRITELIB_SOURCES
 
 	# SDL-specific CSpriteSurface implementation
 	CSpriteSurface_SDL.cpp
-	CSpriteSurface_Adapter.cpp
 	CSpriteSurface_Effects.cpp
 
 	# SDL-specific CSprite implementation

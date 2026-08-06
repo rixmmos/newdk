@@ -10,10 +10,15 @@
 #include "GCLightning.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 #endif
 
 #include "ClientDef.h"
+
+static void TraceLightningFlow(const char* step)
+{
+	(void)step;
+}
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -30,9 +35,12 @@ throw ( ProtocolException , Error )
 	#endif
 
 
-	// server : 10 = 1초
-	// client : 1000 = 1초
-	// 그래서.. *100.. 음하하..
+	
+	
+	
+	TraceLightningFlow("GCLightningHandler skipped for local test");
+	return;
+
 	SetLightning( pPacket->getDelay()*100 );
 
 #endif

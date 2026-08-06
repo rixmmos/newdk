@@ -51,7 +51,7 @@ const string UPDATETYPE2String[] = {
 //
 // class Update;
 //
-// 특정 버전의 Smart Update 명령 하나와 대응되는 클래스이다.
+
 //
 //--------------------------------------------------------------------------------
 class Update {

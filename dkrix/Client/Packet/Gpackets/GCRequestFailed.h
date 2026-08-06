@@ -7,8 +7,8 @@
 #ifndef __GC_REQUEST_FAILED_H__
 #define __GC_REQUEST_FAILED_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 enum 
 {

@@ -2,11 +2,11 @@
 // COrderedList.h
 //----------------------------------------------------------------------
 // 
-// �� �ϳ��� ���� �ִ� class�̴�.
+
 //
-// ������ ������ �ߺ��� ������� �ʴ´�.
+
 //
-// list�� �����Ѵ�.
+
 //
 //----------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ template <class Type>
 class COrderedList {
 	public :
 		//----------------------------------------------------------------------
-		// BUILDING_INFO_LIST�� �����Ѵ�.
+		
 		//----------------------------------------------------------------------
 		typedef	std::list<Type>	DATA_LIST;
 
@@ -46,12 +46,12 @@ class COrderedList {
 		void		Release();
 
 		//--------------------------------------------------------------
-		// Add    : data�� �߰�. �̹� �ִ��� check�غ��� �Ѵ�.
+		
 		//--------------------------------------------------------------
 		bool		Add(Type data);
 
 		//--------------------------------------------------------------
-		// Remove : data�� ����
+		
 		//--------------------------------------------------------------
 		bool		Remove(Type data);
 
@@ -106,8 +106,8 @@ COrderedList<Type>::Release()
 //----------------------------------------------------------------------
 // Add(x,y)
 //----------------------------------------------------------------------
-// (x,y)�� �߰� : �̹� �ִ��� check�غ��� �Ѵ�.
-// ���ǻ�.. X, Y������ Sort�ؼ� �߰��Ѵ�.
+
+
 //----------------------------------------------------------------------
 template <class Type>
 bool
@@ -115,20 +115,20 @@ COrderedList<Type>::Add(Type data)
 {
 	typename DATA_LIST::iterator iData = m_List.begin();
 
-	// �̹� list�� ����ִ� ��� Data�� ���غ���
-	// ������ ���� �� �߰��Ѵ�.
+	
+	
 	while (iData != m_List.end())
 	{
-		// ���� ����ִ°� �߰��ҷ��°ͺ��� Ŭ ���,
-		// ���� ��ġ�� �߰��ϸ� �ȴ�.
+		
+		
 		if (*iData > data)
 		{
 			m_List.insert(iData, data);
 			return true;
 		}
 
-		// �̹� �ִ� ���̸�
-		// �߰����� �ʴ´�.
+		
+		
 		if (*iData==data)
 		{
 			return false;
@@ -137,8 +137,8 @@ COrderedList<Type>::Add(Type data)
 		iData++;
 	}	
 
-	// list�� ��� ���ҵ麸�� ũ�Ƿ� 
-	// list�� ���� �߰��Ѵ�.
+	
+	
 	m_List.push_back( data );
 
 	return true;
@@ -147,7 +147,7 @@ COrderedList<Type>::Add(Type data)
 //----------------------------------------------------------------------
 // Remove
 //----------------------------------------------------------------------
-// (x,y)�� ����
+
 //----------------------------------------------------------------------
 template <class Type>
 bool		
@@ -155,18 +155,18 @@ COrderedList<Type>::Remove(Type data)
 {
 	typename DATA_LIST::iterator iData = m_List.begin();
 
-	// list�� Node���� ������ ������ �����.
+	
 	while (iData != m_List.end())
 	{		
-		// ���� ���̸� �����.
+		
 		if (*iData==data)
 		{
 			m_List.erase(iData);
 			return true;
 		}
 		
-		// ���� ��ġ�� �ִ� ���� Data���� ũ�ٸ�
-		// ��� ū ���� �����Ƿ� Data���� ���� ���̴�.
+		
+		
 		if (*iData > data)
 		{			
 			return false;
@@ -175,14 +175,14 @@ COrderedList<Type>::Remove(Type data)
 		iData++;
 	}	
 
-	// ���� ���
+	
 	return false;
 }
 
 //----------------------------------------------------------------------
 // operator -=
 //----------------------------------------------------------------------
-// ������ list���� listSub�� �ִ°� ���� �����Ѵ�.
+
 //----------------------------------------------------------------------
 template <class Type>
 void		
@@ -192,28 +192,28 @@ COrderedList<Type>::operator -= (const COrderedList<Type>& listSub)
 	typename DATA_LIST::const_iterator iDataSub = listSub.m_List.begin();
 	typename DATA_LIST::iterator iDataTemp;
 
-	// �� �߿� �ϳ��� list�� ���̸�.. �� ����Ұ� ����.
+	
 	while (iDataThis != m_List.end() && iDataSub != listSub.m_List.end())
 	{		
-		// ���� ���̸�.. this���� �����.
+		
 		if (*iDataThis == *iDataSub)
 		{
-			iDataTemp = iDataThis;		// �ӽ÷� ���
+			iDataTemp = iDataThis;		
 
-			// ���� ��
+			
 			iDataThis++;
 			iDataSub++;
 
-			// ����
+			
 			m_List.erase( iDataTemp );
 		}
-		// this�� �� ���� ���..
+		
 		else if (*iDataThis < *iDataSub)
 		{
-			// this�� ���� ������..
+			
 			iDataThis++;
 		}
-		// this�� �� ū ���
+		
 		else
 		{
 			iDataSub++;

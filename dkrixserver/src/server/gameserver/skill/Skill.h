@@ -10,7 +10,7 @@
 #include "Types.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ½ºÅ³ °ü·Ã »ó¼öµé...
+
 //////////////////////////////////////////////////////////////////////////////
 
 const int ATTR_SAVE_DIVIDER = 100;
@@ -31,31 +31,31 @@ const int MONSTER_DUSK_FACTOR = 75;
 const int MONSTER_NIGHT_FACTOR = 100;
 
 const int VampireTimebandFactor[4] = {
-    125, // »õº®
-    100, // ³·
-    125, // Àú³á
-    150  // ¹ã
+    125, 
+    100, 
+    125, 
+    150  
 };
 
 const int MonsterTimebandFactor[4] = {
-    75, // »õº®
-    50, // ³·
-    75, // Àú³á
-    100 // ¹ã
+    75, 
+    50, 
+    75, 
+    100 
 };
 
 const int AttrExpTimebandFactor[4] = {
-    100, // »õº®
-    100, // ³·
-    100, // Àú³á
-    150  // ¹ã
+    100, 
+    100, 
+    100, 
+    150  
 };
 
 const int DomainExpTimebandFactor[4] = {
-    100, // »õº®
-    100, // ³·
-    100, // Àú³á
-    150  // ¹ã
+    100, 
+    100, 
+    100, 
+    150  
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ enum SkillTypes {
     SKILL_BLOODY_STRIKE, // 149
     SKILL_BLOODY_STORM,  // 150
 
-    // ÀÓ½Ã·Î Ãß°¡ 2002.2.22
+    
     SKILL_SUMMON_BAT,  // 151
     SKILL_CHARM,       // 152
     SKILL_POLYMORPH,   // 153
@@ -441,7 +441,7 @@ enum SkillTypes {
     SKILL_FABULOUS_SOUL, // 305
     SKILL_WILL_OF_IRON,  // 306
 
-    // Áúµå·¹ ½ºÅ³
+    
     SKILL_WIDE_ICE_FIELD, // 307
     SKILL_GLACIER_1,      // 308
     SKILL_GLACIER_2,      // 309
@@ -476,10 +476,10 @@ enum SkillTypes {
     SKILL_REACTIVE_ARMOR_MASTERY,    // 335
 
     SKILL_THROWING_AXE,       // 336
-    SKILL_CHOPPING_FIREWOOD,  // 337 ÀåÀÛÆÐ±â
-    SKILL_CHAIN_THROWING_AXE, // 338 µµ³¢ ¼¼°³ ´øÁö±â
-    SKILL_MULTI_THROWING_AXE, // 339 µµ³¢  ""
-    SKILL_PLAYING_WITH_FIRE,  // 340 ºÒÀå³­
+    SKILL_CHOPPING_FIREWOOD,  
+    SKILL_CHAIN_THROWING_AXE, 
+    SKILL_MULTI_THROWING_AXE, 
+    SKILL_PLAYING_WITH_FIRE,  
 
     SKILL_INFINITY_THUNDERBOLT,   // 341
     SKILL_SPIT_STREAM,            // 342
@@ -490,17 +490,17 @@ enum SkillTypes {
     SKILL_NOOSE_OF_WRAITH,        // 347
 
     SKILL_SHARP_HAIL,         // 348
-    SKILL_SUMMON_MIGA,        // 349	// ¾Æ¿ì½ºÅÍÁî°¡ ¾²´Â ½ºÅ³
-    SKILL_SUMMON_MIGA_ATTACK, // 350	// ¼ÒÈ¯µÈ³ðÀÌ ¾²´Â ½ºÅ³
+    SKILL_SUMMON_MIGA,        
+    SKILL_SUMMON_MIGA_ATTACK, 
     SKILL_ICE_HORIZON,        // 351
     SKILL_FURY_OF_GNOME,      // 352
 
-    SKILL_CANNONADE,        // 353	// Æ÷°Ý
-    SKILL_SELF_DESTRUCTION, // 354	// ÀÚÆø°ø°Ý
+    SKILL_CANNONADE,        
+    SKILL_SELF_DESTRUCTION, 
 
-    SKILL_AR_ATTACK,      // 355	// ¸ó½ºÅÍ¿ë
-    SKILL_SMG_ATTACK,     // 356	// ¸ó½ºÅÍ¿ë
-    SKILL_GRENADE_ATTACK, // 357	// ¸ó½ºÅÍ¿ë
+    SKILL_AR_ATTACK,      
+    SKILL_SMG_ATTACK,     
+    SKILL_GRENADE_ATTACK, 
 
     SKILL_DRAGON_TORNADO,  // 358
     SKILL_BIKE_CRASH,      // 359
@@ -513,7 +513,7 @@ enum SkillTypes {
     SKILL_DESTINIES,       // 366
     SKILL_FIERCE_FLAME,    // 367
     SKILL_SHADOW_OF_STORM, // 368
-    SKILL_HEAL_PASS,       // 369 // ¿Å°Ü°¡´Â Èú
+    SKILL_HEAL_PASS,       
 
     SKILL_TRASLA_ATTACK,       // 370
     SKILL_PUSCA_ATTACK,        // 371
@@ -523,26 +523,26 @@ enum SkillTypes {
     SKILL_BLLODY_SCARIFY, // 374
     SKILL_BLOOD_CURSE,    // 375
     //////////////////////////////////////////////////////////////////////////
-    // ÈËÀà¼¼ÄÜ
-    SKILL_SHINE_SWORD,             // 376  ÉÁÒ«Ö®½£
-    SKILL_BOMB_CRASH_WALK,         // 377  ¾ÞÅÚºäÕ¨
-    SKILL_SATELLITE_BOMB,          // 378  ÎÀÐÇºä»÷
-    SKILL_ILLUSION_INVERSION,      // 379  ¿Ö²À»Ã¾õ
-    SKILL_HEAVEN_GROUND,           // 380  ÌìÉñ½µÁÙ
+    
+    SKILL_SHINE_SWORD,             
+    SKILL_BOMB_CRASH_WALK,         
+    SKILL_SATELLITE_BOMB,          
+    SKILL_ILLUSION_INVERSION,      
+    SKILL_HEAVEN_GROUND,           
     TEMP_SKILL_ILLUSION_INVERSION, // 381
     //////////////////////////////////////////////////////////////////////////
-    // Ä§ÁéÐÂ¼¼ÄÜ
+    
     // 2007-2-15 Coffee add end
-    SKILL_DUMMY_DRAKE,       // 382 µÂÀ×¿Ë¿þÀÜ(»ð)
-    SKILL_HYDRO_CONVERGENCE, // 383 ¸´ºÏË®ÁÆ(Ë®)
-    SKILL_SUMMON_CLAY,       // 384 Õ³ÍÁÕÙ»½(ÍÁ)
-    SKILL_HETER_CHAKRAM,     // 385 ÏÄ²¼Àû»ùÒò(Õ½Ê¿)
-    SKILL_Sky_Fire,          // 386 ÌìÀ×»ð»¨ ADD BY RALLSER
+    SKILL_DUMMY_DRAKE,       
+    SKILL_HYDRO_CONVERGENCE, 
+    SKILL_SUMMON_CLAY,       
+    SKILL_HETER_CHAKRAM,     
+    SKILL_Sky_Fire,          
     SKILL_Cut_Storm,         // 387 ADD BY RALLSER
     SKILL_XRL_Missile,       // 388 ADD BY RALLSER
     SKILL_Sacred_Stamp,      // 389 ADD BY RALLSER
     SKILL_Bramble_Halo,      // 390 ADD BY RALLSER
-    SKILL_Deadly_Claw,       // 391ÖÂÉËÁÑ×¦ add by rallser
+    SKILL_Deadly_Claw,       
     SKILL_Voodoo_Ring,       // 392 ADD BY RALLSER
     SKILL_Penetrate_Wheel,   // 393 ADD BY RALLSER
     SKILL_Fire_Meteor,       // 394 ADD BY RALLSER
@@ -960,10 +960,10 @@ const string SkillTypes2String[] = {"SKILL_ATTACK_MELEE", // 0
                                     "SKILL_REACTIVE_ARMOR_MASTERY",    // 335
 
                                     "SKILL_THROWING_AXE",       // 336
-                                    "SKILL_CHOPPING_FIREWOOD",  // 337 ÀåÀÛÆÐ±â
+                                    "SKILL_CHOPPING_FIREWOOD",  
                                     "SKILL_CHAIN_THROWING_AXE", // 338
                                     "SKILL_MULTI_THROWING_AXE", // 339
-                                    "SKILL_PLAYING_WITH_FIRE",  // 340 ºÒÀå³­
+                                    "SKILL_PLAYING_WITH_FIRE",  
 
                                     "SKILL_INFINITY_THUNDERBOLT",   // 341
                                     "SKILL_SPIT_STREAM",            // 342
@@ -974,17 +974,17 @@ const string SkillTypes2String[] = {"SKILL_ATTACK_MELEE", // 0
                                     "SKILL_NOOSE_OF_WRAITH",        // 347
 
                                     "SKILL_SHARP_HAIL",         // 348
-                                    "SKILL_SUMMON_MIGA",        // 349	// ¾Æ¿ì½ºÅÍÁî°¡ ¾²´Â ½ºÅ³
-                                    "SKILL_SUMMON_MIGA_ATTACK", // 350	// ¼ÒÈ¯µÈ³ðÀÌ ¾²´Â ½ºÅ³
+                                    "SKILL_SUMMON_MIGA",        
+                                    "SKILL_SUMMON_MIGA_ATTACK", 
                                     "SKILL_ICE_HORIZON",        // 351
                                     "SKILL_FURY_OF_GNOME",      // 352
 
-                                    "SKILL_CANNONADE",        // 353	// Æ÷°Ý
-                                    "SKILL_SELF_DESTRUCTION", // 354	// ÀÚÆø°ø°Ý
+                                    "SKILL_CANNONADE",        
+                                    "SKILL_SELF_DESTRUCTION", 
 
-                                    "SKILL_AR_ATTACK",      // 355	// ¸ó½ºÅÍ¿ë
-                                    "SKILL_SMG_ATTACK",     // 356	// ¸ó½ºÅÍ¿ë
-                                    "SKILL_GRENADE_ATTACK", // 357	// ¸ó½ºÅÍ¿ë
+                                    "SKILL_AR_ATTACK",      
+                                    "SKILL_SMG_ATTACK",     
+                                    "SKILL_GRENADE_ATTACK", 
 
                                     "SKILL_DRAGON_TORNADO",  // 358
                                     "SKILL_BIKE_CRASH",      // 359
@@ -997,36 +997,36 @@ const string SkillTypes2String[] = {"SKILL_ATTACK_MELEE", // 0
                                     "SKILL_DESTINIES",       // 366
                                     "SKILL_FIERCE_FLAME",    // 367
                                     "SKILL_SHADOW_OF_STORM", // 368
-                                    "SKILL_HEAL_PASS",       // 369 // ¿Å°Ü°¡´Â Èú
+                                    "SKILL_HEAL_PASS",       
 
                                     "SKILL_TRASLA_ATTACK",       // 370
                                     "SKILL_PUSCA_ATTACK",        // 371
                                     "SKILL_NOD_COPILA_ATTACK",   // 372
                                     "SKILL_NOD_COPILA_ATTACK_2", // 373
                                     // add by coffee 2007-2-17  start
-                                    "SKILL_BLLODY_SCARIFY", // 374  ÑªÖ®ÀÓÓ¡
+                                    "SKILL_BLLODY_SCARIFY", 
                                     "SKILL_BLOOD_CURSE",
                                     //////////////////////////////////////////////////////////////////////////
-                                    // ÈËÀà¼¼ÄÜ
-                                    "SKILL_SHINE_SWORD",             // 376  ÉÁÒ«Ö®½£
-                                    "SKILL_BOMB_CRASH_WALK",         // 377  ¾ÞÅÚºäÕ¨
-                                    "SKILL_SATELLITE_BOMB",          // 378  ÎÀÐÇºä»÷
-                                    "SKILL_ILLUSION_INVERSION",      // 379  ¿Ö²À»Ã¾õ
-                                    "SKILL_HEAVEN_GROUND",           // 380  ÌìÉñ½µÁÙ
+                                    
+                                    "SKILL_SHINE_SWORD",             
+                                    "SKILL_BOMB_CRASH_WALK",         
+                                    "SKILL_SATELLITE_BOMB",          
+                                    "SKILL_ILLUSION_INVERSION",      
+                                    "SKILL_HEAVEN_GROUND",           
                                     "TEMP_SKILL_ILLUSION_INVERSION", // 381
                                     //////////////////////////////////////////////////////////////////////////
-                                    // Ä§ÁéÐÂ¼¼ÄÜ
+                                    
 
-                                    "SKILL_DUMMY_DRAKE",       // 382 µÂÀ×¿Ë¿þÀÜ(»ð)
-                                    "SKILL_HYDRO_CONVERGENCE", // 383 ¸´ºÏË®ÁÆ(Ë®)
-                                    "SKILL_SUMMON_CLAY",       // 384 Õ³ÍÁÕÙ»½(ÍÁ)
-                                    "HETER_CHAKRAM",           // 385 ÏÄ²¼Àû»ùÒò(Õ½Ê¿)
-                                    "SKILL_Sky_Fire",          // 386 ÌìÀ×»ð»¨ ADD BY RALLSER
+                                    "SKILL_DUMMY_DRAKE",       
+                                    "SKILL_HYDRO_CONVERGENCE", 
+                                    "SKILL_SUMMON_CLAY",       
+                                    "HETER_CHAKRAM",           
+                                    "SKILL_Sky_Fire",          
                                     "SKILL_Cut_Storm",         // 387 ADD BY RALLSER
                                     "SKILL_XRL_Missile",       // 388 ADD BY RALLSER
                                     "SKILL_Sacred_Stamp",      // 389 ADD BY RALLSER
                                     "SKILL_Bramble_Halo",      // 390 ADD BY RALLSER
-                                    "SKILL_Deadly_Claw",       // 391ÖÂÉËÁÑ×¦ add by rallser
+                                    "SKILL_Deadly_Claw",       
                                     "SKILL_Voodoo_Ring",       // 392 ADD BY RALLSER
                                     "SKILL_Penetrate_Wheel",   // 393 ADD BY RALLSER
                                     "SKILL_Fire_Meteor",       // 394 ADD BY RALLSER

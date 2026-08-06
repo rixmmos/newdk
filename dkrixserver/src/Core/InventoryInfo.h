@@ -2,8 +2,8 @@
 // Filename    : InventoryInfo.h
 // Written By  : elca@ewestsoft.com
 // Description :
-// �κ��丮 �ȿ� �ִ� �����۵��� ���� ����Ʈ�̴�.
-// �κ��丮 ���� ������ �����۵鿡 ���� ������ InventorySlotInfo�� ����.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __INVENTORY_INFO_H__

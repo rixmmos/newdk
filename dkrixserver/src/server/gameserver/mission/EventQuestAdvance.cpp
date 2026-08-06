@@ -94,7 +94,7 @@ bool EventQuestAdvanceManager::advanced(int questLevel) {
 EventQuestAdvance::Status EventQuestAdvanceManager::getStatus(int questLevel) {
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
 
-    // 퀘스트 레벨이 음수값이면 모든 사람이 이미 끝낸 퀘스트다. -_-;
+    
     if (questLevel < 0)
         return EventQuestAdvance::EVENT_QUEST_ADVANCED;
     if (m_Advances[questLevel] == NULL)

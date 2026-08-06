@@ -120,7 +120,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         if (pResult->getRowCount() != 0) {
             lcRegisterPlayerError.setErrorID(ALREADY_REGISTER_ID);
-            throw DuplicatedException("�׷� ���̵� �̹� �����մϴ�.");
+            throw DuplicatedException("   .");
         }
 
 
@@ -136,7 +136,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         if (pResult->getRowCount() != 0) {
             lcRegisterPlayerError.setErrorID(ALREADY_REGISTER_SSN);
-            throw DuplicatedException("�̹� ��ϵ� �ֹε�Ϲ�ȣ�Դϴ�.");
+            throw DuplicatedException("  .");
         }
 
 
@@ -163,14 +163,14 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         if (pResult->getRowCount() == 0) {
             lcRegisterPlayerError.setErrorID(ETC_ERROR);
-            throw SQLQueryException("���������� �����ͺ��̽��� �Է�, ��� ���� �ʾҽ��ϴ�.");
+            throw SQLQueryException("  ,   .");
         }
 
         WorldID_t WorldID = 0;
         ServerGroupID_t ServerGroupID = 0;
 
         if (pResult->next())
-            throw SQLQueryException("�����ͺ��̽��� ġ������ ������ �ֽ��ϴ�.");
+            throw SQLQueryException("   .");
 
         WorldID = pResult->getInt(1);
         ServerGroupID = pResult->getInt(2);
@@ -189,7 +189,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         if (strstr(SSN.c_str(), "-") != NULL) {
             preSSN = SSN.substr(0, 6);
         }
-        // �߱�
+        
         else {
             isChina = true;
             if (SSN.size() == 15) {
@@ -197,7 +197,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
             } else if (SSN.size() == 18) {
                 preSSN = SSN.substr(8, 14);
             } else {
-                // �̷� ���� ���ٰ� ������ -_- �� ��ư
+                
                 preSSN = SSN.substr(0, 6);
             }
         }
@@ -217,17 +217,17 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
             lcRegisterPlayerOK.setAdult(false);
         }
 
-        // �߱��̸� ������ ����
+        
         if (isChina) {
             lcRegisterPlayerOK.setAdult(true);
         }
 
         pLoginPlayer->sendPacket(&lcRegisterPlayerOK);
 
-        // �̸��� ��������� �Ѵ�.
+        
         pLoginPlayer->setID(pPacket->getID());
 
-        // ��Ͽ� �������� ���, CLGetPCList ��Ŷ�� ��ٸ���.
+        
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
         SAFE_DELETE(pStmt);
@@ -237,12 +237,12 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         // cout << de.toString() << endl;
 
         //--------------------------------------------------------------------------------
-        // ��� ���� ��Ŷ�� �����Ѵ�.
+        
         //--------------------------------------------------------------------------------
         pLoginPlayer->sendPacket(&lcRegisterPlayerError);
 
         //--------------------------------------------------------------------------------
-        // ���� ȸ���� ������Ų��. �ʹ� ���� �������� ���, ������ �����Ѵ�.
+        
         //--------------------------------------------------------------------------------
         uint nFailed = pLoginPlayer->getFailureCount();
 
@@ -253,24 +253,24 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         pLoginPlayer->setFailureCount(nFailed);
 
-        // ��Ͽ� ������ ���, �ٽ� CLRegisterPlayer ��Ŷ�� ��ٸ���.
+        
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
 
     } catch (SQLQueryException& sqe) {
         SAFE_DELETE(pStmt);
 
-        // ��. SQL �����̵��� ����� �� �ȵǾ��ٴ� �Ҹ���.
+        
         // cout << sqe.toString() << endl;
 
         //--------------------------------------------------------------------------------
-        // ��� ���� ��Ŷ�� �����Ѵ�.
+        
         //--------------------------------------------------------------------------------
         lcRegisterPlayerError.setErrorID(ETC_ERROR);
 
         pLoginPlayer->sendPacket(&lcRegisterPlayerError);
 
         //--------------------------------------------------------------------------------
-        // ���� ȸ���� ������Ų��. �ʹ� ���� �������� ���, ������ �����Ѵ�.
+        
         //--------------------------------------------------------------------------------
         uint nFailed = pLoginPlayer->getFailureCount();
 
@@ -281,7 +281,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         pLoginPlayer->setFailureCount(nFailed);
 
-        // ��Ͽ� ������ ���, �ٽ� CLRegisterPlayer ��Ŷ�� ��ٸ���.
+        
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
     }
 

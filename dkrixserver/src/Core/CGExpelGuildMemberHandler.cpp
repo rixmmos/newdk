@@ -35,7 +35,7 @@ void CGExpelGuildMemberHandler::execute(CGExpelGuildMember* pPacket, Player* pPl
 
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
-    // 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     try {
         Assert(pGuild != NULL);
@@ -43,9 +43,9 @@ void CGExpelGuildMemberHandler::execute(CGExpelGuildMember* pPacket, Player* pPl
         return;
     }
 
-    // 플레이어가 길드의 마스터인지를 확인한다.
+    
     if (pGuild->getMaster() != pPlayerCreature->getName()) {
-        // 마스터가 아니다. 무시
+        
         return;
     }
 

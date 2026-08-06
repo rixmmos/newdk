@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // MCreatureSpriteTable.h
 //----------------------------------------------------------------------
-// Creature의 Sprite종류를 저장하는 class
+
 //----------------------------------------------------------------------
 //
-// - 동작 FrameID
+
 // - Sprite FilePosition
 // - First SpriteID
 // 
@@ -32,7 +32,7 @@ using namespace std;
 #define FLAG_CREATURESPRITE_NPC					0x20
 #define FLAG_CREATURESPRITE_MONSTER				0x40
 
-// 조합
+
 #define FLAG_CREATURESPRITE_PLAYER_SLAYER		0x11			// 0001 0001
 #define FLAG_CREATURESPRITE_PLAYER_VAMPIRE		0x12			// 0001 0010
 #define FLAG_CREATURESPRITE_PLAYER_OUSTERS		0x14			// 0001 0100
@@ -48,21 +48,21 @@ using namespace std;
 
 //----------------------------------------------------------------------
 //
-// 한 종류의 Creature에 대한 정보
+
 //
 //----------------------------------------------------------------------
 class CREATURESPRITETABLE_INFO {
 	public :		
-		TYPE_FRAMEID			FrameID;				// 동작 FrameID
+		TYPE_FRAMEID			FrameID;				
 		long					SpriteFilePosition;		// Sprite FilePosition
 		long					SpriteShadowFilePosition;		// ShadowSprite FilePosition
 		TYPE_SPRITEID			FirstSpriteID;			// First SpriteID
 		TYPE_SPRITEID			LastSpriteID;			// Last SpriteID		
 		TYPE_SPRITEID			FirstShadowSpriteID;	// First SpriteID
 		TYPE_SPRITEID			LastShadowSpriteID;		// Last SpriteID		
-		BYTE					CreatureType;				// 뭐하는 sprite인가?
+		BYTE					CreatureType;				
 
-		// 이거는 저장할 필요가 없다.
+		
  		BOOL					bLoad;
 		
 	public :

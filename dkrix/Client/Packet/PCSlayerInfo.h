@@ -11,9 +11,9 @@
 #include <bitset>
 
 //////////////////////////////////////////////////////////////////////////////
-// Slayer 정보를 담고 있는 객체.
-// GCPCList 패킷에 담겨서 클라이언트에게 전송된다.
-// 아이템이나 걸려있는 마법 같은 정보는 담겨있지 않다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCSlayerInfo : public PCInfo 
@@ -82,8 +82,8 @@ public:
 			//+ szGold
 			+ szSkillLevel* 6
 			//+ szZoneID
-			+ szDWORD                       // 슬레이어 플래그
-			+ szColor* SLAYER_COLOR_MAX  // 색깔 정보
+			+ szDWORD                       
+			+ szColor* SLAYER_COLOR_MAX  
 			+ szLevel;
 	}
 
@@ -102,8 +102,8 @@ public:
 			//+ szGold
 			+ szSkillLevel* 6
 			//+ szZoneID
-			+ szDWORD                       // 슬레이어 플래그
-			+ szColor* SLAYER_COLOR_MAX  // 색깔 정보
+			+ szDWORD                       
+			+ szColor* SLAYER_COLOR_MAX  
 			+ szLevel;
 	}
 
@@ -146,7 +146,7 @@ public:
 
 	// get/set STR
 	// *CAUTION*
-	// Assert()로 할 경우, NDEBUG 모드에서는 disable 되므로 if 로 체크해야 한다. 
+	
 	Attr_t getSTR () const throw (Error) { if (m_STR > maxSlayerAttr) throw Error("STR out of range"); return m_STR; }
 	void setSTR (Attr_t str) throw (Error) { if (str > maxSlayerAttr) throw Error("STR out of range"); m_STR = str; }
 
@@ -399,20 +399,20 @@ private:
 	Alignment_t m_Alignment;
 
 	// *NOTE
-	// ATTR_BASIC   : 순수 능력치.
+	
 	Attr_t m_STR;
 	Attr_t m_DEX;
 	Attr_t m_INT;
 
-	// 능력치 올리는 현재 경험치
-	// 다음 레벨로 가기 위한 목표 경험치와
-	// 토탈 경험치는 Client에도 Exp Table을 가지므로
-	// 클라이언트에서 연산 하도록 한다.
+	
+	
+	
+	
 	Exp_t m_STRExp;
 	Exp_t m_DEXExp;
 	Exp_t m_INTExp;
 
-	// 계급
+	
 	Rank_t m_Rank;
 
 	// HP/MP
@@ -426,17 +426,10 @@ private:
 	// skill domain levels
 	SkillLevel_t m_DomainLevels[6];
 
-	/*
-	// Gold
-	Gold_t m_Gold;
+	 
 
-
-	// 최종적으로 놀던 존
-	ZoneID_t m_ZoneID;
-	*/
-
-	std::bitset<SLAYER_BIT_MAX> m_Outlook;		// 슬레이어 외모 정보
-	Color_t m_Colors[SLAYER_COLOR_MAX]; 	// 슬레이어 색깔 정보
+	std::bitset<SLAYER_BIT_MAX> m_Outlook;		
+	Color_t m_Colors[SLAYER_COLOR_MAX]; 	
 
 	Level_t m_AdvancementLevel;
 };

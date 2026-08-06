@@ -1,11 +1,4 @@
-/**
- * @file test_color.c
- * @brief Color conversion property-based tests
- * 
- * Property 1: RGB565 颜色转换正确性
- * Property 2: Colorkey 透明度处理
- * Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.5, 5.6
- */
+ 
 
 #include "color.h"
 #include <stdio.h>
@@ -28,15 +21,7 @@ static uint16_t pbt_random_uint16(void) {
     return (uint16_t)(pbt_seed >> 16);
 }
 
-/**
- * Property 1: RGB565 颜色转换正确性
- * 
- * For any RGB565 color value, converting to RGBA32 should correctly extract
- * red (bits 11-15), green (bits 5-10), and blue (bits 0-4), and scale each
- * component to 8-bit range.
- * 
- * Validates: Requirements 5.1, 5.2, 5.3, 5.4
- */
+ 
 static int test_property1_rgb565_conversion_correctness(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -82,14 +67,7 @@ static int test_property1_rgb565_conversion_correctness(void) {
     return passed;
 }
 
-/**
- * Property 2: Colorkey 透明度处理
- * 
- * For any pixel value and colorkey, if the pixel equals colorkey then alpha
- * should be 0, otherwise alpha should be 255.
- * 
- * Validates: Requirements 5.5, 5.6
- */
+ 
 static int test_property2_colorkey_transparency(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;

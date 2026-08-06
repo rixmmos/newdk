@@ -5,9 +5,9 @@
 // 2003.4.21
 // MQuestInfoManager
 //
-// Quest에 대한 정보를 관리하는 매니저 이다. 처음엔 그냥 몬스터 킬 퀘스트에만 쓰여서
-// 이름을 -_- MMonsterKillQuestInfo 로 했으나, 점차 그 쓰임이 확대되어 -_- QuestInfo
-// Manager 로 바뀌었다. 말그대로 퀘스트 정보를 관리하는 클래스 이다.
+
+
+
 //
 // by sonee
 ////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ public :
 	DWORD			GetSpriteType()		{ return m_SpriteType;}
 	DWORD			GetGoal()			{ return m_Goal; }
 	
-	// 아이템 찾기면..
+	
 	DWORD			GetItemClass()		{ return m_CreatureType; }
 	DWORD			GetItemType()		{ return m_SpriteType; }
 	const char*		GetName()			{ return m_Name.GetString(); }
@@ -63,7 +63,7 @@ public :
 	void			SetQuestLevel(BYTE level) { m_QuestLevel = level; }
 	void			SetEventQuest(BYTE event) { m_EventQuest = event; }
 
-	// Goal 은 서버의 Packet 에 의해 바뀔 수 있다.
+	
 	void			SetGoal(DWORD goal) { m_Goal = goal; }	
 	void			SetName(const char* str) { m_Name = str; }
 private :
@@ -89,6 +89,6 @@ public :
 
 };
 
-extern		MQuestInfoManager	*g_pQuestInfoManager;					// 퀘스트 자체 정보
+extern		MQuestInfoManager	*g_pQuestInfoManager;					
 
 #endif

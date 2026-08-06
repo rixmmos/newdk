@@ -31,7 +31,7 @@ void ActionGiveGarbageEventItem::read(PropertyBuffer& propertyBuffer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionGiveGarbageEventItem::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -49,18 +49,18 @@ void ActionGiveGarbageEventItem::execute(Creature* pCreature1, Creature* pCreatu
     Player* pPlayer = pPC->getPlayer();
     Assert(pPlayer != NULL);
 
-    // 먼저 클라이언트를 위해 GCNPCResponse를 보내준다.
+    
     GCNPCResponse okpkt;
     pPlayer->sendPacket(&okpkt);
 
-    // 가비지 리스트에 아이템이 존재한다면...
+    
     if (pPC->getGarbageSize() > 0) {
         TPOINT pt;
 
         Item* pItem = pPC->popItemFromGarbage();
         Assert(pItem != NULL);
 
-        // 인벤토리에 자리가 있다면 인벤토리에다가 더하고 플레이어에게 알려준다.
+        
         if (pInventory->addItem(pItem, pt)) {
             pItem->save(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
 
@@ -77,15 +77,15 @@ void ActionGiveGarbageEventItem::execute(Creature* pCreature1, Creature* pCreatu
 
             pPlayer->sendPacket(&gcCreateItem);
 
-            // ItemTraceLog 를 남긴다
+            
             if (pItem != NULL && pItem->isTraceItem()) {
                 remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
                 remainTraceLogNew(pItem, pCreature2->getName(), ITL_GET, ITLD_EVENTNPC,
                                   pCreature1->getZone()->getZoneID(), pCreature1->getX(), pCreature1->getY());
             }
         }
-        // 인벤토리에 자리가 없다면, 다시 가비지 리스트에다가 더하고
-        // 플레이어에게 그 사실을 알려준다.
+        
+        
         else {
             pPC->addItemToGarbage(pItem);
 

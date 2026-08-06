@@ -42,7 +42,7 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         pStmt = g_pDatabaseManager->getConnection(WorldID)->createStatement();
 
         ////////////////////////////////////////////////////////////
-        // 일단 그런 슬레이어가 존재하는지 체크한다.
+        
         ////////////////////////////////////////////////////////////
         //		printf("SELECT Active FROM Slayer WHERE Name = '%s' AND Active='ACTIVE' AND PlayerID='%s'",
         // pPacket->getName().c_str(), pPlayer->getID().c_str());
@@ -62,65 +62,11 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
             }
         }
 
-        ////////////////////////////////////////////////////////////
-        // 주민등록번호를 확인한다.
-        ////////////////////////////////////////////////////////////
-
-        // add by zdj 2005.5.11
-
-        // 팁귁苟충侶뙈
-
-        /*
-
-        #if !defined(__CHINA_SERVER__) && !defined(__THAILAND_SERVER__)
-                if ( (pLoginPlayer->isFreePass() && !pLoginPlayer->isWebLogin() )
-                    || g_pConfig->getPropertyInt("IsNetMarble")==1)
-                {
-                    // 무조건 지울 수 있다.
-                    pResult = pLoginStmt->executeQuery("SELECT length(Password) FROM Player Where PlayerID = '%s'",
-        pPlayer->getID().c_str());
-
-                    if(!pResult->next())
-                    {
-                        lcDeletePCError.setErrorID(NOT_FOUND_PLAYER);
-                        throw InvalidProtocolException("no such slayer exist.");
-                    }
-
-                    int    PasswordLength = pResult->getInt(1);
-
-                    if (PasswordLength != 12)
-                    {
-                        lcDeletePCError.setErrorID(INVALID_SSN);
-                        throw InvalidProtocolException("invalid SSN");
-                    }
-                }
-                else
-                {
-                    pResult = pLoginStmt->executeQuery("SELECT SSN FROM Player Where PlayerID = '%s'",
-        pPlayer->getID().c_str());
-
-                    if(!pResult->next())
-                    {
-                        lcDeletePCError.setErrorID(NOT_FOUND_PLAYER);
-                        throw InvalidProtocolException("no such slayer exist.");
-                    }
-
-                    string SSN = pResult->getString(1);
-
-                    cout << "DB SSN:" << SSN << endl;
-
-                    if (SSN != pPacket->getSSN())
-                    {
-                        lcDeletePCError.setErrorID(INVALID_SSN);
-                        throw InvalidProtocolException("invalid SSN");
-                    }
-                }
-        #endif
-
-        */ //팁귁
+        // Character deletion is confirmation-only in this build. The old client
+        // asked for an SSN/code, but this server only needs to verify ownership.
 
         ////////////////////////////////////////////////////////////
-        // 일단 슬레이어 테이블에는 확실히 존재한다.
+        
         ////////////////////////////////////////////////////////////
 #if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__) || defined(__NETMARBLE_SERVER__)
         pResult = pStmt->executeQuery("DELETE FROM Slayer WHERE Name = '%s' AND Slot = '%s'",
@@ -142,7 +88,7 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
 #endif
 
         ////////////////////////////////////////////////////////////
-        // 뱀파이어 테이블을 지운다.
+        
         ////////////////////////////////////////////////////////////
 #if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__) || defined(__NETMARBLE_SERVER__)
         pResult = pStmt->executeQuery("DELETE FROM Vampire WHERE Name = '%s' AND Slot = '%s'",
@@ -155,7 +101,7 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         // successfully...." << endl;
 
         ////////////////////////////////////////////////////////////
-        // 아우스터스 테이블을 지운다.
+        
         ////////////////////////////////////////////////////////////
 #if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__) || defined(__NETMARBLE_SERVER__)
         pResult = pStmt->executeQuery("DELETE FROM Ousters WHERE Name = '%s' AND Slot = '%s'",
@@ -167,29 +113,29 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
 
 #if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__) || defined(__NETMARBLE_SERVER__)
         ////////////////////////////////////////////////////////////
-        // 슬레이어 스킬을 지운다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM SkillSave WHERE OwnerID = '%s'", pPacket->getName().c_str());
         // cout << "Slayer(" << pPacket->getName() << ") deleted successfully...." << endl;
 
         ////////////////////////////////////////////////////////////
-        // 뱀파이어 스킬을 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM VampireSkillSave WHERE OwnerID = '%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 아우스터즈 스킬을 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM OustersSkillSave WHERE OwnerID = '%s'", pPacket->getName().c_str());
 #endif
 
         ////////////////////////////////////////////////////////////
-        // 계급 보너스를 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM RankBonusData WHERE OwnerID = '%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 아이템을 깡그리 지운다.
+        
         ////////////////////////////////////////////////////////////
         //		g_pItemDestroyer->destroyAll(pPacket->getName());
         string ownerID = pPacket->getName();
@@ -285,13 +231,13 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         pStmt->executeQueryString("DELETE FROM MittenObject WHERE OwnerID = '" + ownerID + "'");
 
         ////////////////////////////////////////////////////////////
-        // 커플일 경우 커플 목록에서 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM CoupleInfo WHERE FemalePartnerName='%s'", ownerID.c_str());
         pStmt->executeQuery("DELETE FROM CoupleInfo WHERE MalePartnerName='%s'", ownerID.c_str());
 
         ////////////////////////////////////////////////////////////
-        // 남아 있는 이펙트들도 지운다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM EffectAcidTouch where OwnerID='%s'", pPacket->getName().c_str());
         pStmt->executeQuery("DELETE FROM EffectAftermath where OwnerID='%s'", pPacket->getName().c_str());
@@ -310,27 +256,27 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         pStmt->executeQuery("DELETE FROM EnemyErase where OwnerID='%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 플래그 셋도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM FlagSet WHERE OwnerID='%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 시간제한 아이템도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM TimeLimitItems WHERE OwnerID='%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 이벤트 정보도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM EventQuestAdvance WHERE OwnerID='%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 모퍼스 파워 포인트도 삭제.. 잇힝
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM MofusPowerPoint WHERE OwnerID='%s'", pPacket->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 클라이언트에게 PC 삭제 성공 패킷을 날린다.
+        
         ////////////////////////////////////////////////////////////
         LCDeletePCOK lcDeletePCOK;
         pLoginPlayer->sendPacket(&lcDeletePCOK);
@@ -344,7 +290,7 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         SAFE_DELETE(pStmt);
         SAFE_DELETE(pLoginStmt);
 
-        // 클라이언트에게 PC 삭제 실패 패킷을 날린다.
+        
         pLoginPlayer->sendPacket(&lcDeletePCError);
     } catch (SQLQueryException& sqe) {
         cout << "Fail to deletePC : " << sqe.toString() << endl;
@@ -352,7 +298,7 @@ void CLDeletePCHandler::execute(CLDeletePC* pPacket, Player* pPlayer) {
         SAFE_DELETE(pStmt);
         SAFE_DELETE(pLoginStmt);
 
-        // 클라이언트에게 PC 삭제 실패 패킷을 날린다.
+        
         pLoginPlayer->sendPacket(&lcDeletePCError);
     }
 

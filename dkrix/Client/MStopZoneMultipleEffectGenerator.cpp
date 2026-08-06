@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneMultipleEffectGenerator.cpp
 //----------------------------------------------------------------------
-// 4개의 Effect가 공중에서 떨어진다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MStopZoneMultipleEffectGenerator.h"
@@ -39,7 +39,7 @@ MStopZoneMultipleEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	MEffectTarget*	pEffectTarget2;
 	
 	//---------------------------------------------
-	// Effect 생성
+	
 	//---------------------------------------------
 	int numEffectPhase = 4;
 
@@ -65,11 +65,11 @@ MStopZoneMultipleEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	int ex[numEffect];
 	int ey[numEffect];
 
-	const int phaseUpper = 150;	// 한 단계에서 위로 더 올라가는 좌표 보정
+	const int phaseUpper = 150;	
 
 	int effectCount = 0;
 
-	// numEffectPhase * numEffect 개의 effect를 생성한다.
+	
 	for (int i=0; i<numEffectPhase; i++)
 	{
 		int n = 0;
@@ -99,25 +99,25 @@ MStopZoneMultipleEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			
 			pEffect->SetFrameID( frameID, maxFrame );	
 
-			// 발사 위치 Pixel좌표	
+			
 			pEffect->SetPixelPosition( x, y, egInfo.z0 );	
 
-			// 방향 설정
+			
 			pEffect->SetDirection( egInfo.direction );
 							
-//			// 목표 위치 Pixel좌표
+
 //			pEffect->SetTarget( x, y, zt, egInfo.step );
 
-			// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+			
 			pEffect->SetCount( egInfo.count+effectCount, egInfo.linkCount );
 			pEffect->SetMulti( true );
 			
 			effectCount += 2;
 
-			// 위력
+			
 			pEffect->SetPower(egInfo.power);
 
-			// Zone에 추가한다.
+			
 			if (g_pZone->AddEffect( pEffect ))
 			{
 				if (!bOK)
@@ -127,7 +127,7 @@ MStopZoneMultipleEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 				}
 				else
 				{
-					// 다음 Effect 생성 정보
+					
 					if (egInfo.pEffectTarget == NULL)
 					{
 						pEffect->SetLink( egInfo.nActionInfo, NULL );

@@ -18,9 +18,9 @@
 //
 // constructor for UDP Client Socket
 //
-// UDP 클라이언트 소켓은 단지 nonamed 소켓만 생성해 두면 된다.
-// 왜냐하면, 서버로 send할 때마다 Datagram의 주소를 지정해두면
-// 되기 때문이다.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 DatagramSocket::DatagramSocket ()
@@ -41,7 +41,7 @@ DatagramSocket::DatagramSocket ()
 //
 // constructor for UDP Server Socket
 //
-// UDP 서버 소켓은 소켓을 생성하고, port 를 바인딩시키면 준비가 완료된다.
+
 //
 //////////////////////////////////////////////////////////////////////
 DatagramSocket::DatagramSocket ( uint port )
@@ -115,8 +115,8 @@ uint DatagramSocket::send ( Datagram * pDatagram )
 //
 // receive datagram from peer
 //
-// 만약에 이 클래스를 blocking 으로 사용한다면, (즉 select 기반으로)
-// 아마도 nReceived 가 0 이하인 경우는 없으리라고 판단된다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 Datagram * DatagramSocket::receive ()
@@ -129,7 +129,7 @@ Datagram * DatagramSocket::receive ()
 	SOCKADDR_IN SockAddr;
 	uint _szSOCKADDR_IN = szSOCKADDR_IN;
 
-	// 읽을게 있는지 체크한다.
+	
 	ulong available = SocketAPI::availablesocket_ex( m_SocketID );		
 	
 	if (available > 0)
@@ -140,7 +140,7 @@ Datagram * DatagramSocket::receive ()
 
 		DEBUG_ADD_FORMAT("[DatagramSocket] available=%d", available);
 
-		// 내부 버퍼에다가 복사해둔다.
+		
 		int nReceived = SocketAPI::recvfrom_ex( m_SocketID , m_Buffer , DATAGRAM_SOCKET_BUFFER_LEN , 0 , (SOCKADDR*)&SockAddr , &_szSOCKADDR_IN );
 
 		if ( nReceived > 0 ) 

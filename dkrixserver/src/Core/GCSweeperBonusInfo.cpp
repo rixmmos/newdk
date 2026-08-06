@@ -24,14 +24,14 @@ GCSweeperBonusInfo::~GCSweeperBonusInfo()
 {
     __BEGIN_TRY
 
-    // 길드 리스트의 모든 객체를 삭제
+    
     clearSweeperBonusInfoList();
 
     __END_CATCH_NO_RETHROW
 }
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCSweeperBonusInfo::read(SocketInputStream& iStream)
 
@@ -52,7 +52,7 @@ void GCSweeperBonusInfo::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCSweeperBonusInfo::write(SocketOutputStream& oStream) const
 
@@ -79,7 +79,7 @@ void GCSweeperBonusInfo::clearSweeperBonusInfoList()
 {
     __BEGIN_TRY
 
-    // SweeperBonusInfoList 를 삭제한다
+    
     while (!m_SweeperBonusInfoList.empty()) {
         SweeperBonusInfo* pSweeperBonusInfo = m_SweeperBonusInfoList.front();
         m_SweeperBonusInfoList.pop_front();

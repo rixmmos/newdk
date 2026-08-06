@@ -29,7 +29,7 @@ MAttachCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	int direction = egInfo.direction;
 
 	//-----------------------------------------------------------
-	// Sword Wave를 위한 임시(-_-;) 코드..
+	
 	//-----------------------------------------------------------
 	/*
 	if (frameID==EFFECTSPRITETYPE_SWORD_WAVE_1)
@@ -47,7 +47,7 @@ MAttachCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	MCreature* pCreature = g_pZone->GetCreature( egInfo.creatureID );
 
-	// Creature가 사라졌을 경우..
+	
 	if (pCreature == NULL)
 	{	
 		pCreature = g_pZone->GetFakeCreature( egInfo.creatureID );
@@ -101,7 +101,7 @@ MAttachCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		EffectType = EFFECTSPRITETYPE_TRIDENT_BOMB_1 + (rand()%10);
 		break;
 	case EFFECTSPRITETYPE_PIERCING_FRONT :
-		// ToT 방향은..ㅡ.ㅜ 반대~
+		
 		direction = (direction+4)%8;
 		break;
 	case EFFECTSPRITETYPE_QUICK_FIRE_BOMB_1 :
@@ -130,7 +130,7 @@ MAttachCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		EffectType >=EFFECTSPRITETYPE_JABBING_VEIN_REAR_1 && EffectType <= EFFECTSPRITETYPE_JABBING_VEIN_REAR_BAT)
 			EffectType = EFFECTSPRITETYPE_JABBING_VEIN_REAR_BAT;
 	
-	// Creature에게 붙이는 Effect를 생성해서 pointer를 넘겨받는다.
+	
 	MAttachEffect* pEffect = pCreature->CreateAttachEffect( EffectType, egInfo.count, egInfo.linkCount );
 
 	if (pEffect == NULL)
@@ -142,13 +142,13 @@ MAttachCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 	pEffect->SetZ( plusZ );
 
-	// 붙어야 하는 캐릭터
+	
 	//pEffect->SetAttachCreatureID( creatureID );		
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 	pEffect->SetDirection( direction );
 	

@@ -2,16 +2,16 @@
 // Filename    : CGSelectWayPoint.h 
 // Written By  : excel96
 // Description : 
-// 슬레이어가 개인용 포탈을 이용해 다른 곳으로 이동하고자 할 때 보내는 패킷
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_SELECT_WAYPOINT_H__
 #define __CG_SELECT_WAYPOINT_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectWayPoint;
@@ -42,9 +42,9 @@ public:
 	void setY(Coord_t Y) { m_Y = Y; }
 
 private:
-	ZoneID_t   m_ZoneID;       // 가고자 하는 존의 ID
-	Coord_t    m_X;            // 가고자 하는 존의 좌표 X
-	Coord_t    m_Y;            // 가고자 하는 존의 좌표 Y
+	ZoneID_t   m_ZoneID;       
+	Coord_t    m_X;            
+	Coord_t    m_Y;            
 
 };
 

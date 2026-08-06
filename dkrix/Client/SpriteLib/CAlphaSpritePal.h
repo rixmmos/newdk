@@ -25,7 +25,7 @@ public:
 	void		Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal);
 
 	//---------------------------------------------------------
-	// �������� Blt
+	
 	//---------------------------------------------------------
 	void		Blt(WORD *pDest, WORD pitch, MPalette &pal);				
 	void		BltClip(WORD* pDest, WORD pitch, RECT* pRect, MPalette &pal);
@@ -44,7 +44,7 @@ public:
 	void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
 	
 	//---------------------------------------------------------
-	// Blt 4444 NotTrans for Texture (�����κе� �˰� ĥ�Ѵ�)
+	
 	//---------------------------------------------------------
 	void		Blt4444NotTrans(WORD *pDest, WORD pitch, MPalette &pal);				
 	void		Blt4444NotTransClipLeft(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
@@ -53,7 +53,7 @@ public:
 	void		Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect, MPalette &pal);
 	
 	//---------------------------------------------------------
-	// shift��ŭ shift�ؼ� ũ�⸦ �۰� ��½�Ų��.
+	
 	//---------------------------------------------------------
 	void		Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift, MPalette &pal);
 	

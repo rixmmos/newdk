@@ -17,7 +17,7 @@
 #include "ClientDef.h"
 
 // Platform-specific threading includes
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	#include <windows.h>
 	#include <process.h>
 #elif defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
@@ -212,17 +212,17 @@ RequestClientPlayerManager::RemoveTerminatedThread()
 //----------------------------------------------------------------------
 // Connect
 //----------------------------------------------------------------------
-// IP의 컴퓨터에 Name이란 캐릭터에게 접속한다.
+
 //
-// 게임 돌아가는데 지장을 주지 않기 위해서
-// thread를 하나 생성해서 접속을 시도한다.
+
+
 // 
-// 접속이 실패하면? 어떻하면 될까.. - -;;
+
 //----------------------------------------------------------------------
 void		
 RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, REQUEST_CLIENT_MODE requestMode)
 {
-	// 넘 많을 경우는 더 이상 접속을 안하도록 해야한다.
+	
 	if (m_mapRequestClientPlayer.size() >= g_pClientConfig->MAX_REQUEST_SERVICE)
 	{
 		return;
@@ -243,20 +243,17 @@ RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, R
 	//	port = pUserInfo->TCPPort;
 	}
 
-	// 일단 하나 생성해서 thread로 넘겨준다.
+	
 	CONNECTION_INFO* pInfo = new CONNECTION_INFO;
 	pInfo->name			= pRequestName;
 	pInfo->ip			= pIP;
 	pInfo->port			= port;
 	pInfo->requestMode	= requestMode;
 
-	DWORD dwChildThreadID;	// 의미 없당 -- ;
-
-
 	//------------------------------------------------------------
-	// 접속 시도
+	
 	//------------------------------------------------------------
-	Lock();		// 같이 lock쓴다. - -;
+	Lock();		
 
 	m_mapConnectionInfo[pInfo->name] = pInfo;
 	
@@ -269,7 +266,7 @@ RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, R
 									NULL,
 									&dwChildThreadID);
 
-	// priority는 낮게
+	
 	SetThreadPriority(hConnectionThread, THREAD_PRIORITY_LOWEST);	
 #else
 	// Non-Windows: Use platform_thread_create
@@ -280,7 +277,7 @@ RequestClientPlayerManager::Connect(const char* pIP, const char* pRequestName, R
 	(void)dwChildThreadID; // unused on non-Windows
 #endif
 
-	// 나중에 지울 수 있게 추가해둔다.
+	
 	m_listConnectionThread.push_back( hConnectionThread );
 
 	Unlock();
@@ -321,7 +318,7 @@ RequestClientPlayerManager::HasConnection(const char* pRequestName)
 
 	std::string name = pRequestName;
 
-	// 연결된 경우
+	
 	REQUESTCLIENTPLAYER_MAP::const_iterator iPlayer = m_mapRequestClientPlayer.find( name );
 		
 	if (iPlayer != m_mapRequestClientPlayer.end())
@@ -344,7 +341,7 @@ RequestClientPlayerManager::HasTryingConnection(const char* pRequestName)
 
 	std::string name = pRequestName;
 
-	// 접속 시도 중인 경우
+	
 	CONNECTION_INFO_MAP::const_iterator iInfo = m_mapConnectionInfo.find( name );
 		
 	if (iInfo != m_mapConnectionInfo.end())
@@ -393,7 +390,7 @@ RequestClientPlayerManager::Disconnect(const char* pRequestName)
 bool
 RequestClientPlayerManager::AddRequestClientPlayer(RequestClientPlayer* pRequestClientPlayer)
 {
-	Lock();	// 구차나서 같은 락을.. - -;
+	Lock();	
 
 	bool bAdd = false;
 
@@ -401,11 +398,11 @@ RequestClientPlayerManager::AddRequestClientPlayer(RequestClientPlayer* pRequest
 
 	if (g_Mode==MODE_GAME)
 	{		
-		// 넘 많을 경우는 더 이상 접속을 안하도록 해야한다.
+		
 		//if (m_mapRequestClientPlayer.size() < g_pClientConfig->MAX_REQUEST_SERVICE)
 		{
 			//------------------------------------------------------------
-			// 일단 list에 넣어둔다.
+			
 			//------------------------------------------------------------
 			m_mapRequestClientPlayer[pRequestClientPlayer->getRequestServerName()] = pRequestClientPlayer;
 
@@ -498,18 +495,18 @@ RequestClientPlayerManager::RemoveConnectionInfo(const char* pName)
 //--------------------------------------------------------------------------------
 // Process Mode
 //--------------------------------------------------------------------------------
-// RequestMode에 따른 특별한 처리
+
 //--------------------------------------------------------------------------------
 void
 RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlayer)
 {
 	//------------------------------------------------------------
-	// 최초의 접속요구 패킷
+	
 	//------------------------------------------------------------
 	switch (pRequestClientPlayer->getRequestMode())
 	{
 		//------------------------------------------------------------
-		// 계속 접속유지 시켜서 뭔가 할떄..
+		
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_NULL :
 		{
@@ -519,7 +516,7 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 				_CRConnect.setRequestServerName( pRequestClientPlayer->getRequestServerName().c_str() );
 				_CRConnect.setRequestClientName( g_pUserInformation->CharacterID.GetString() );
 
-				// 접속 체크 설정
+				
 				pRequestClientPlayer->setPlayerStatus( CPS_REQUEST_CLIENT_AFTER_SENDING_CONNECT );			
 
 				pRequestClientPlayer->sendPacket( &_CRConnect );
@@ -528,7 +525,7 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 		break;
 
 		//------------------------------------------------------------
-		// 귓속말 보낼 때..
+		
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_WHISPER :
 		{
@@ -536,14 +533,14 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 			{
 				const char* pRequestServerName = pRequestClientPlayer->getRequestServerName().c_str();
 
-				// 귓속말 체크.. 
+				
 				if (g_pWhisperManager->HasWhisperMessage( pRequestServerName ))
 				{
 					const std::list<WHISPER_MESSAGE>* pMessageList = g_pWhisperManager->GetWhisperMessages( pRequestServerName );
 
 					if (pMessageList)
 					{
-						// CRWhisper만들어서 packet보내기
+						
 						CRWhisper _CRWhisper;
 
 						_CRWhisper.setName( g_pUserInformation->CharacterID.GetString() );
@@ -563,7 +560,7 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 
 						std::list<WHISPER_MESSAGE>::const_iterator iMessage = pMessageList->begin();
 
-						// 모든 message 추가
+						
 						while (iMessage != pMessageList->end())
 						{
 							_CRWhisper.addMessage ( *iMessage );
@@ -583,7 +580,7 @@ RequestClientPlayerManager::ProcessMode(RequestClientPlayer* pRequestClientPlaye
 		break;
 
 		//------------------------------------------------------------
-		// Profile을 요청할 때..
+		
 		//------------------------------------------------------------
 		case REQUEST_CLIENT_MODE_PROFILE :
 		{
@@ -647,13 +644,13 @@ RequestClientPlayerManager::Update()
 
 					DEBUG_ADD_ERR( t.toString().c_str() );
 
-					// 나한테서도 짜른다.
+					
 					//if (g_pRequestServerPlayerManager!=NULL)
 					{
 					//	g_pRequestServerPlayerManager->Disconnect( pPlayer->getRequestServerName().c_str() );
 					}
 
-					// exception이 나면 무조건 잘라버린다. --;
+					
 					pPlayer->disconnect(UNDISCONNECTED);
 					delete pPlayer;
 
@@ -733,19 +730,19 @@ RequestConnectionThreadProc(LPVOID lpParameter)
 			}
 
 			//------------------------------------------------------
-			// request mode에 따라서 접속이 안된 경우에 처리..
+			
 			//------------------------------------------------------
 			switch (pInfo->requestMode)
 			{
 				//------------------------------------------------------
-				// 귓속말 보낼려고 했는데 접속이 안 된 경우
+				
 				//------------------------------------------------------
 				case REQUEST_CLIENT_MODE_WHISPER :
 
 					SetThreadPriority(hConnectionThread, THREAD_PRIORITY_NORMAL);
 
-					// 이렇게 하면..
-					// 서버에 다시 한번 IP를 요청해서 귓속말을 보내든지 말든지.. 그케 된다.
+					
+					
 //					UI_AddChatToHistory( (*g_pGameStringTable)[STRING_MESSAGE_WHISPER_FAILED].GetString(), NULL, 5 );
 					g_pRequestUserManager->RemoveRequestUserLater( pInfo->name.c_str() );
 //					g_pWhisperManager->RemoveWhisperMessage( pInfo->name.c_str() );
@@ -755,14 +752,14 @@ RequestConnectionThreadProc(LPVOID lpParameter)
 				break;
 
 				//------------------------------------------------------
-				// profile을 요청할려고 했는데 접속이 안 된 경우
+				
 				//------------------------------------------------------
 				case REQUEST_CLIENT_MODE_PROFILE :
 					g_pProfileManager->RemoveRequire(pInfo->name.c_str());
 				break;
 			}
 
-			// CONNECTION_INFO 제거
+			
 			g_pRequestClientPlayerManager->RemoveConnectionInfo(pInfo->name.c_str());
 		}
 	}

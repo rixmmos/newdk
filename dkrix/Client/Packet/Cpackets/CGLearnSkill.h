@@ -7,10 +7,10 @@
 #ifndef __CG_LEARN_SKILL_H__
 #define __CG_LEARN_SKILL_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGLearnSkill;
@@ -38,8 +38,8 @@ public:
 	void setSkillDomainType( SkillDomainType_t DomainType) throw() { m_DomainType = DomainType;}
 
 private:
-	SkillType_t       m_SkillType;  // 기술의 종류
-	SkillDomainType_t m_DomainType; // 기술의 도메인
+	SkillType_t       m_SkillType;  
+	SkillDomainType_t m_DomainType; 
 };
 
 //////////////////////////////////////////////////////////////////////

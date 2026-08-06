@@ -28,14 +28,14 @@
 const int defaultLoginPlayerInputStreamSize = 1024;
 const int defaultLoginPlayerOutputStreamSize = 4096;
 
-static int maxIdleSec = 60 * 15; // 15 분동안 입력을 하지 않으면 자동 접속 종료된당.
-
-// '이미 접속 중'문제를 해결하기 위한.. 시간 체크
-static uint maxWaitForKickCharacter = 3;      // GameServer의 응답을 5초간 기다린다.
-static uint maxWaitForKickCharacterCount = 3; // GameServer가 반응이 없으면 3회 응답을 시도한다.
+static int maxIdleSec = 60 * 15; 
 
 
-// CLLoginHandler.cpp에 있는 함수다.
+static uint maxWaitForKickCharacter = 3;      
+static uint maxWaitForKickCharacterCount = 3; 
+
+
+
 void addLoginPlayerData(const string& ID, const string& ip, const string& SSN, const string& zipcode);
 void addLogoutPlayerData(Player* pPlayer);
 
@@ -69,7 +69,7 @@ LoginPlayer::LoginPlayer(Socket* pSocket)
 
     Assert(m_PacketHistory.empty());
 
-    // 로그인 플레이어가 생성될 때, 현재 시간을 최종 입력 시간으로 간주한다.
+    
     getCurrentTime(m_ExpireTime);
     m_ExpireTime.tv_sec += maxIdleSec;
 
@@ -96,8 +96,8 @@ LoginPlayer::LoginPlayer(Socket* pSocket)
 LoginPlayer::~LoginPlayer() {
     __BEGIN_TRY
 
-    // 그 어떤 플레이어 객체가 삭제될 때에도, 그 상태는 로그아웃이어야 한다.
-    // 즉 어떤 플레이어를 접속 종료 시키려면, 그 상태를 로그아웃으로 만들어야 한다.
+    
+    
     Assert(m_PlayerStatus == LPS_END_SESSION);
 
     // delete all previous packets
@@ -112,8 +112,8 @@ LoginPlayer::~LoginPlayer() {
 
 //////////////////////////////////////////////////////////////////////
 //
-// '이미 접속 중'인 경우. 캐릭터의 강제 접속 해제를 위해서
-// 대기하는 시간 설정.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void LoginPlayer::setExpireTimeForKickCharacter() {
@@ -132,18 +132,18 @@ void LoginPlayer::processCommand(bool Option) {
 
     //	static Timeval currentTime;
 
-    // '이미 접속 중'인 경우.. 강제 접속 해제를 시킬려고 할 때.
+    
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         Timeval currentTime;
         getCurrentTime(currentTime);
 
-        // timeout 체크
+        
         if (currentTime >= m_ExpireTimeForKickCharacter) {
-            // 다시 KickCharcter를 보내본다.
+            
             sendLGKickCharacter();
 
-            // 반응이 없는 경우 여러번 시도를 해본다.
-            // 한계에 도달하면.. GameServer가 죽었다고 판단하고 LoginOK를 보낸다.
+            
+            
             if (++m_KickCharacterCount >= maxWaitForKickCharacterCount) {
                 sendLCLoginOK();
             }
@@ -153,28 +153,28 @@ void LoginPlayer::processCommand(bool Option) {
     }
 
     try {
-        // 헤더를 임시저장할 버퍼 생성
+        
         char header[szPacketHeader];
         PacketID_t packetID;
         PacketSize_t packetSize;
         Packet* pPacket;
 
-        // 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
+        
         while (true) {
-            // 입력스트림에서 패킷헤더크기만큼 읽어본다.
-            // 만약 지정한 크기만큼 스트림에서 읽을 수 없다면,
-            // Insufficient 예외가 발생하고, 루프를 빠져나간다.
+            
+            
+            
             if (!m_pInputStream->peek(header, szPacketHeader)) {
-                // 입력이 아무 것도 없었다면, 입력제한 시간을 초과했는지 체크한다.
+                
                 Timeval currentTime;
                 getCurrentTime(currentTime);
                 if (currentTime >= m_ExpireTime)
-                    throw DisconnectException("일정 시간동안 입력하지 않으면 접속이 종료됩니다.");
+                    throw DisconnectException("     .");
                 break;
             }
 
-            // 패킷아이디 및 패킷크기를 알아낸다.
-            // 이때 패킷크기는 헤더를 포함한다.
+            
+            
             memcpy(&packetID, &header[0], szPacketID);
             memcpy(&packetSize, &header[szPacketID], szPacketSize);
 
@@ -194,58 +194,58 @@ void LoginPlayer::processCommand(bool Option) {
                 << packetID << ") " << szPacketHeader + packetSize << "/" << m_pInputStream->length() << eos;
             cout << msg.toString() << endl;
 
-            // 패킷 아이디가 이상하면 프로토콜 에러로 간주한다.
+            
             if (packetID >= Packet::PACKET_MAX)
-                // 디버깅을 위해서 에러를 구체적으로 표시해둔다.
+                
                 throw InvalidProtocolException("too large packet id");
 
             try {
-                // 패킷의 순서가 valid 한지 체크한다.
+                
                 if (!g_pPacketValidator->isValidPacketID(getPlayerStatus(), packetID)) {
                     // DEBUG by tiancaiamao
                     cout << "player status: " << getPlayerStatus() << " receive packet: " << packetID << endl;
                     throw InvalidProtocolException("invalid packet order");
                 }
 
-                // 패킷 크기가 너무 크면 프로토콜 에러로 간주한다.
+                
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
                     throw InvalidProtocolException("too large packet size");
 
-                // 입력버퍼내에 패킷크기만큼의 데이타가 들어있는지 확인한다.
-                // 최적화시 break 를 사용하면 된다. (여기서는 일단 exception을 쓸 것이다.)
+                
+                
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     //	throw InsufficientDataException();
                     break;
 
-                // 최종입력시간을 갱신한다.
-                // 최종입력시간은 패킷 하나가 완전하게 도착한 시간을 의미한다.
+                
+                
                 getCurrentTime(m_ExpireTime);
                 m_ExpireTime.tv_sec += maxIdleSec;
 
-                // 여기까지 왔다면 입력버퍼에는 완전한 패킷 하나 이상이 들어있다는 뜻이다.
-                // 패킷팩토리매니저로부터 패킷아이디를 사용해서 패킷 스트럭처를 생성하면 된다.
-                // 패킷아이디가 잘못될 경우는 패킷팩토리매니저에서 처리한다.
+                
+                
+                
                 pPacket = g_pPacketFactoryManager->createPacket(packetID);
 
-                // 이제 이 패킷스트럭처를 초기화한다.
-                // 패킷하위클래스에 정의된 read()가 virtual 메커니즘에 의해서 호출되어
-                // 자동적으로 초기화된다.
+                
+                
+                
                 m_pInputStream->readPacket(pPacket);
 
                 Timeval start, end;
                 getCurrentTime(start);
 
-                // 이제 이 패킷스트럭처를 가지고 패킷핸들러를 수행하면 된다.
-                // 패킷아이디가 잘못될 경우는 패킷핸들러매니저에서 처리한다.
+                
+                
                 pPacket->execute(this);
 
                 getCurrentTime(end);
                 g_PacketProfileManager.addAccuTime(pPacket->getPacketName(), start, end);
 
-                // 현재 패킷을 패킷 히스토리의 맨 뒤에 넣는다.
+                
                 m_PacketHistory.push_back(pPacket);
 
-                // 패킷을 nPacketHistory 개만큼만 저장한다.
+                
                 while (m_PacketHistory.size() > nPacketHistory) {
                     Packet* oldPacket = m_PacketHistory.front();
                     delete oldPacket;
@@ -253,41 +253,41 @@ void LoginPlayer::processCommand(bool Option) {
                 }
 
             } catch (IgnorePacketException&) {
-                // PacketValidator 에서 패킷을 무시하라고 했으니,
-                // 입력스트림에서 모두 지워버리고 실행하지 않도록 한다.
+                
+                
 
-                // 패킷 크기가 너무 크면 프로토콜 에러로 간주한다.
+                
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
                     throw InvalidProtocolException("too large packet size");
 
-                // 입력버퍼내에 패킷크기만큼의 데이타가 들어있는지 확인한다.
-                // 최적화시 break 를 사용하면 된다. (여기서는 일단 exception을 ?것이다.)
+                
+                
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     throw InsufficientDataException();
 
-                // 데이타가 모두 도착했으면, 그 크기만큼 무시하고,
-                // 다른 패킷을 처리하도록 한다....
+                
+                
                 m_pInputStream->skip(szPacketHeader + packetSize);
 
-                // 무시된 패킷은, expire 에 영향을 주지 않게 된다.
-                // 즉 유효한 패킷만이 짤리지 않게 해준다.
-                // 또한 히스토리에도 들어가지 않는다.
+                
+                
+                
             }
         }
 
     } catch (InsufficientDataException& ide) {
-        // 입력이 아무 것도 없었다면, 입력제한 시간을 초과했는지 체크한다.
+        
         Timeval currentTime;
         getCurrentTime(currentTime);
         if (currentTime >= m_ExpireTime)
-            throw DisconnectException("일정 시간동안 입력하지 않으면 접속이 종료됩니다.");
+            throw DisconnectException("     .");
 
     } catch (InvalidProtocolException& ipe) {
-        // 접속을 강제종료시켜야 한다. 무슨 방법으로??
+        
         throw;
 
     } catch (DisconnectException& de) {
-        // 패킷 처리에서 발생한 어떤 문제로 연결을 종료해야 한다.
+        
         throw;
     }
 
@@ -302,52 +302,52 @@ void LoginPlayer::disconnect(bool bDisconnected) {
     __BEGIN_TRY
 
     if (bDisconnected == UNDISCONNECTED) {
-        // 클라이언트에게 GCDisconnect 패킷을 전송한다.
+        
         // GCDisconnect lcDisconnect;
         // sendPacket( lcDisconnect );
 
-        // 출력 버퍼에 남아있는 데이타를 전송한다.
+        
         m_pOutputStream->flush();
     }
 
-    // 소켓 연결을 닫는다.
+    
     m_pSocket->close();
 
-    // '이미 접속 중'인 경우, 캐릭터 강제 접속 해제를 기다리는 상황.
+    
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         m_ID = "NONE";
     }
 
-    // 플레이어의 상태를 로그아웃으로 만든다.
+    
     Assert(m_PlayerStatus != LPS_END_SESSION);
     m_PlayerStatus = LPS_END_SESSION;
 
-    // 아이디가 설정되었다는 뜻은, 로그인이 이루어졌다는 뜻이다.
-    // '이미 접속 중'인 경우에..
-    // 캐릭 접속 해제를 기다리는 경우는 ID가 설정될 수 있으므로 아니다
+    
+    
+    
     if (m_ID != "NONE") {
         Statement* pStmt = NULL;
         // Result*    pResult = NULL;
 
         try {
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            // query해서 안 쓰길래.. 날렸땅.. by sigi. 2002.5.7
+            
             //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
 
-            // 로그온이어야 한다.
+            
             //	pResult->next();
             //	string logon = pResult->getString(1);
             // cout << "logon = " << logon << endl;
             // Assert( logon == "LOGON" );
 
-            // LogOn이 'LOGON'인 경우만 'LOGOFF'로 변경한다. by sigi. 2002.5.15
-            // 로그오프로 변경한다.
+            
+            
             pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID='%s' AND LogOn='LOGON'",
                                 m_ID.c_str());
 
 #if defined(__PAY_SYSTEM_LOGIN__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-            bool bClear = false;        // 유료 정보 완전 제거
-            bool bDecreaseTime = false; // 사용 시간 감소 - loginserver에서는 무시하자.
+            bool bClear = false;        
+            bool bDecreaseTime = false; 
             logoutPayPlay(m_ID, bClear, bDecreaseTime);
 #endif
 
@@ -367,58 +367,58 @@ void LoginPlayer::disconnect(bool bDisconnected) {
 }
 //--------------------------------------------------------------------------------
 // disconnect player no log
-// DB 에 로그를 쌓지 않게 한다.
+
 //--------------------------------------------------------------------------------
 void LoginPlayer::disconnect_nolog(bool bDisconnected) {
     __BEGIN_TRY
 
     if (bDisconnected == UNDISCONNECTED) {
-        // 클라이언트에게 GCDisconnect 패킷을 전송한다.
+        
         // GCDisconnect lcDisconnect;
         // sendPacket( lcDisconnect );
 
-        // 출력 버퍼에 남아있는 데이타를 전송한다.
+        
         m_pOutputStream->flush();
     }
 
-    // 소켓 연결을 닫는다.
+    
     m_pSocket->close();
 
-    // '이미 접속 중'인 경우, 캐릭터 강제 접속 해제를 기다리는 상황.
+    
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         m_ID = "NONE";
     }
 
-    // 플레이어의 상태를 로그아웃으로 만든다.
+    
     Assert(m_PlayerStatus != LPS_END_SESSION);
     m_PlayerStatus = LPS_END_SESSION;
 
-    // 아이디가 설정되었다는 뜻은, 로그인이 이루어졌다는 뜻이다.
-    // '이미 접속 중'인 경우에..
-    // 캐릭 접속 해제를 기다리는 경우는 ID가 설정될 수 있으므로 아니다
+    
+    
+    
     if (m_ID != "NONE") {
         Statement* pStmt = NULL;
         // Result*    pResult = NULL;
 
         try {
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            // query해서 안 쓰길래.. 날렸땅.. by sigi. 2002.5.7
+            
             //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
 
-            // 로그온이어야 한다.
+            
             //	pResult->next();
             //	string logon = pResult->getString(1);
             // cout << "logon = " << logon << endl;
             // Assert( logon == "LOGON" );
 
-            // LogOn이 'LOGON'인 경우만 'LOGOFF'로 변경한다. by sigi. 2002.5.15
-            // 로그오프로 변경한다.
+            
+            
             pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID='%s' AND LogOn='LOGON'",
                                 m_ID.c_str());
 
 #if defined(__PAY_SYSTEM_LOGIN__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-            bool bClear = false;        // 유료 정보 완전 제거
-            bool bDecreaseTime = false; // 사용 시간 감소 - loginserver에서는 무시하자.
+            bool bClear = false;        
+            bool bDecreaseTime = false; 
             logoutPayPlay(m_ID, bClear, bDecreaseTime);
 #endif
 
@@ -438,10 +438,10 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
 
 //--------------------------------------------------------------------------------
 //
-// 원래는 로그인플레이어매니저 외에는 로그인플레이어에 동시에 접속하는
-// 쓰레드는 존재하지 않을 계획이었지만, 게임서버매니저가 동시에 쓰레드로
-// 돌아가면서 로그인 플레이어에 접근할 가능성이 생겨버렸다. - -; 그래서,
-// 아래와 같이 mutex 로 보호되는 버전을 급조했다.
+
+
+
+
 //
 //--------------------------------------------------------------------------------
 void LoginPlayer::sendPacket(Packet* pPacket) {
@@ -461,11 +461,11 @@ void LoginPlayer::sendPacket(Packet* pPacket) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 최근 N 번째의 패킷을 리턴한다.
+
 //
-// N == 0 일 경우, 가장 최근의 패킷을 리턴하게 된다.
+
 //
-// 최대 nPacketHistory - 1 까지 지정할 수 있다.
+
 //
 //////////////////////////////////////////////////////////////////////
 Packet* LoginPlayer::getOldPacket(uint prev) {
@@ -483,7 +483,7 @@ Packet* LoginPlayer::getOldPacket(uint prev) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 특정 패킷아이디를 가진 가장 최근의 패킷을 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 Packet* LoginPlayer::getOldPacket(PacketID_t packetID) {
@@ -512,13 +512,13 @@ Packet* LoginPlayer::getOldPacket(PacketID_t packetID) {
 //
 // send LGKickCharacter
 //
-// GameServer로 '이미 접속중'인 캐릭터를 제거해달라고 메세지를 보낸다.
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void LoginPlayer::sendLGKickCharacter() {
     cout << "send LGKickCharacter" << endl;
 
-    // Game서버로 캐릭터를 제거해달라는 message를 보낸다.
+    
     LGKickCharacter lgKickCharacter;
 
     Statement* pStmt = NULL;
@@ -531,8 +531,8 @@ void LoginPlayer::sendLGKickCharacter() {
     uint gameServerPort;
 
     //----------------------------------------------------------------------
-    // DB에서 이 player가 최근에 접속한
-    // WorldID, ServerID, LastSlot을 얻어내자.
+    
+    
     //----------------------------------------------------------------------
     if (!isSetWorldGroupID()) {
         BEGIN_DB {
@@ -542,7 +542,7 @@ void LoginPlayer::sendLGKickCharacter() {
                 getID().c_str());
 
             if (pResult->next()) {
-                serverID = 1; // 현재는 무조건 1이다.
+                serverID = 1; 
                 worldID = pResult->getInt(1);
                 serverGroupID = pResult->getInt(2);
                 lastSlot = pResult->getInt(3);
@@ -551,23 +551,23 @@ void LoginPlayer::sendLGKickCharacter() {
                 setGroupID(serverGroupID);
                 setLastSlot(lastSlot);
 
-                setWorldGroupID(true); // 값이 설정됐다는 의미.
-                                       // 다음에 다시 Query 안 할려고
+                setWorldGroupID(true); 
+                                       
             }
 
             SAFE_DELETE(pStmt1);
         }
         END_DB(pStmt1)
     } else {
-        // 기존에 저장된 값을 그대로 쓴다.
-        serverID = 1; // 현재는 무조건 1이다.
+        
+        serverID = 1; 
         worldID = getWorldID();
         serverGroupID = getGroupID();
     }
 
 
     //----------------------------------------------------------------------
-    // Slot에 대응되는 캐릭터 이름을 알아낸다.
+    
     //----------------------------------------------------------------------
     if (characterName.size() == 0) {
         BEGIN_DB {
@@ -581,13 +581,13 @@ void LoginPlayer::sendLGKickCharacter() {
                 setLastCharacterName(characterName);
             } else {
                 cout << "No CharacterName" << endl;
-                // LoginError(이미 접속 중)
+                
                 LCLoginError lcLoginError;
                 lcLoginError.setErrorID(ALREADY_CONNECTED);
                 sendPacket(&lcLoginError);
                 setPlayerStatus(LPS_BEGIN_SESSION);
 
-                setID("NONE"); // disconnect에서 LOGOFF로 설정되지 않게 하기 위해서
+                setID("NONE"); 
 
                 SAFE_DELETE(pStmt);
                 return;
@@ -599,9 +599,9 @@ void LoginPlayer::sendLGKickCharacter() {
     }
 
     //----------------------------------------------------------------------
-    // GameServer의 정보를 알아낸다.
+    
     //
-    // 해당 World 에 모든 Server 에 보낸다
+    
     //----------------------------------------------------------------------
     for (int i = 0; i < g_pGameServerInfoManager->getMaxServerGroupID(); i++) {
         serverGroupID = i;
@@ -622,18 +622,18 @@ void LoginPlayer::sendLGKickCharacter() {
             }
         } catch (NoSuchElementException&) {
             cout << "No GameServerInfo" << endl;
-            // LoginError(이미 접속 중)
+            
             //		LCLoginError lcLoginError;
             //		lcLoginError.setErrorID(ALREADY_CONNECTED);
             //		sendPacket(&lcLoginError);
             //		setPlayerStatus(LPS_BEGIN_SESSION);
 
-            setID("NONE"); // disconnect에서 LOGOFF로 설정되지 않게 하기 위해서
+            setID("NONE"); 
 
             return;
         }
 
-        lgKickCharacter.setID(getSocket()->getSOCKET()); // SocketFD. 검색을 위해서
+        lgKickCharacter.setID(getSocket()->getSOCKET()); 
         lgKickCharacter.setPCName(characterName);
 
         cout << "( " << gameServerIP.c_str() << ", " << gameServerPort << " )" << endl;
@@ -649,9 +649,9 @@ void LoginPlayer::sendLGKickCharacter() {
 //
 // send LCLoginOK
 //
-// Player table의 LogOn을 'LOGON'으로 바꾸고
-// client에게 LCLoginOK를 보낸다.
-// PlayerStatus는 LPS_WAITING_FOR_CL_GET_PC_LIST로 설정.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void LoginPlayer::sendLCLoginOK() {
@@ -667,7 +667,7 @@ void LoginPlayer::sendLCLoginOK() {
 
             pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGON' WHERE PlayerID = '%s'", getID().c_str());
             if (pStmt->getAffectedRowCount() == 0) {
-                filelog("MultiLogin.log", "멀티 로그인 접속 시도로 예상됨 : [%s:%s]", getID().c_str(),
+                filelog("MultiLogin.log", "     : [%s:%s]", getID().c_str(),
                         connectIP.c_str());
                 LCLoginError lcLoginError;
                 // lcLoginError.setMessage("already connected");
@@ -688,10 +688,10 @@ void LoginPlayer::sendLCLoginOK() {
         END_DB(pStmt)
 
 
-        // Player table의 Login을 LOGON으로 바꾼다.
+        
         LCLoginOK lcLoginOK;
 
-        // 이 전에 LoginPlayer에 저장해둔다.
+        
         lcLoginOK.setAdult(isAdult());
         lcLoginOK.setLastDays(0xffff);
 
@@ -699,7 +699,7 @@ void LoginPlayer::sendLCLoginOK() {
 
         setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
-        // 사용자 접속했다고 기록
+        
         addLoginPlayerData(m_ID, connectIP, m_SSN, m_Zipcode);
 
     } catch (Throwable& t) {
@@ -719,10 +719,10 @@ bool LoginPlayer::sendBillingLogin() {
         if (currentTime > m_BillingNextLoginRequestTime) {
             g_pBillingPlayerManager->sendPayLogin(this);
 
-            // PayLogin 요청한 회수 기억
+            
             m_BillingLoginRequestCount++;
 
-            // 10초 후 다시 체크한다.
+            
             m_BillingNextLoginRequestTime.tv_sec = currentTime.tv_sec + 10;
         }
 
@@ -754,41 +754,12 @@ string LoginPlayer::toString() const {
 //
 // add LogoutPlayerdata
 //
-// 접속자 통계를 위해서
-// UserInfo DB의 LogoutPlayerData에 Logout한 사용자를 추가한다.
+
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void addLogoutPlayerData(Player* pPlayer) {
-    /*if(pPlayer->getID() != "NONE")
-    {
-
-        Statement* pStmt = NULL;
-
-        pStmt = g_pDatabaseManager->getUserInfoConnection()->createStatement();
-
-        // 유저 통계 관련 정보를 입력한다.
-        BEGIN_DB
-        {
-            string ID = pPlayer->getID();
-            string ip = pPlayer->getSocket()->getHost();
-
-            // 먼저 현재 시간을 얻어낸다.
-            int year, month, day, hour, minute, second;
-            getCurrentTimeEx(year, month, day, hour, minute, second);
-            string currentDT = VSDateTime::currentDateTime().toDateTime();
-
-            StringStream sql;
-            sql << "INSERT INTO USERINFO.LogoutPlayerData (PlayerID,IP,Date,Time) VALUES ('"
-                << ID << "','" << ip << "','"
-                << currentDT.substr( 0, 10 ).c_str() << "','"
-                << currentDT.substr( 11 ).c_str() << "')";
-
-            pStmt->executeQuery(sql.toString());
-
-            SAFE_DELETE(pStmt);
-        }
-        END_DB(pStmt)
-    }*/
+     
 }
 
 void LoginPlayer::makePCList(LCPCList& lcPCList) {
@@ -804,21 +775,21 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
         pStmt2 = g_pDatabaseManager->getConnection(WorldID)->createStatement();
 
         //----------------------------------------------------------------------
-        // 우선 슬레이어 테이블을 검색해서, Active 한 슬레이어 정보를 로딩한다.
-        // 클라이언트로 전송해야 할 정보는 다음과 같다.
+        
+        
         //
-        //    - 이름
-        //    - 슬랏번호
-        //    - 성별
-        //    - 헤어스타일 : 슬레이어 전용
-        //    - 머리색
-        //    - 피부색
-        //    - 입고있는옷정보 : 슬레이어 전용, 머리/상의/하의의 색상정보
-        //    - 능력치 : STR,DEX,CON
-        //    - HP/MP 의 현재 및 최대 : 뱀파이어는 MP 없음
-        //    - 기술과 그 경험치 : 슬레이어전용
-        //    - 갖고 있는 돈
-        //    - 존의 아이디
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         //
         //----------------------------------------------------------------------
         pResult1 = pStmt->executeQuery(
@@ -828,7 +799,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
             "Slayer WHERE PlayerID = '%s' AND Active = 'ACTIVE'",
             getID().c_str());
 
-        // 복장 flag. by sigi. 2002.6.18
+        
         DWORD shape;
         Color_t colors[PCSlayerInfo::SLAYER_COLOR_MAX];
         Color_t colorsVamp[PCVampireInfo::VAMPIRE_COLOR_MAX];
@@ -839,10 +810,10 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
             string name = pResult1->getString(++i);
 
             if (race == "SLAYER") {
-                // 슬레이어 PCInfo 객체를 생성한다.
+                
                 PCSlayerInfo* pPCSlayerInfo = new PCSlayerInfo();
 
-                // 각 필드값을 지정한다.
+                
                 pPCSlayerInfo->setName(name);
                 pPCSlayerInfo->setSlot(pResult1->getString(++i));
                 pPCSlayerInfo->setSex(pResult1->getString(++i));
@@ -866,7 +837,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pPCSlayerInfo->setAlignment(pResult1->getInt(++i));
 
-                // 복장 정보를 flag로 대체한다. by sigi. 2002.6.18
+                
                 shape = pResult1->getDWORD(++i);
 
                 colors[PCSlayerInfo::SLAYER_COLOR_HAIR] = pPCSlayerInfo->getHairColor();
@@ -884,16 +855,16 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 lcPCList.setPCInfo(pPCSlayerInfo->getSlot(), pPCSlayerInfo);
             } else if (race == "VAMPIRE") {
                 //----------------------------------------------------------------------
-                // 이제 뱀파이어 테이블을 검색해서 LCPCList 패킷에 집어넣자..
-                // 클라이언트로 전송해야 할 정보는 다음과 같다.
+                
+                
                 //
                 //    - Name
                 //    - Slot
                 //    - Sex
                 //    - BatColor
                 //    - SkinColor
-                //    - 상의/하의의 색상정보
-                //    - 능력치 : STR,DEX,CON
+                
+                
                 //    - CurrentHP/MaxHP
                 //    - Gold
                 //    - ZoneID
@@ -912,10 +883,10 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pResult2->next();
 
-                // 뱀파이어 PCInfo 객체를 생성한다.
+                
                 PCVampireInfo* pPCVampireInfo = new PCVampireInfo();
 
-                // 각 필드값을 지정한다.
+                
                 uint i = 0;
 
                 pPCVampireInfo->setName(pResult2->getString(++i));
@@ -937,7 +908,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 pPCVampireInfo->setFame(pResult2->getInt(++i));
                 pPCVampireInfo->setAlignment(pResult2->getInt(++i));
 
-                // 복장 정보 읽어오기 최적화. by sigi. 2002.6.19
+                
                 shape = pResult2->getDWORD(++i);
 
                 colorsVamp[0] = pResult2->getInt(++i); // CoatColor
@@ -946,16 +917,16 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 lcPCList.setPCInfo(pPCVampireInfo->getSlot(), pPCVampireInfo);
             } else {
                 //----------------------------------------------------------------------
-                // 이제 아우스터즈 테이블을 검색해서 LCPCList 패킷에 집어넣자..
-                // 클라이언트로 전송해야 할 정보는 다음과 같다.
+                
+                
                 //
                 //    - Name
                 //    - Slot
                 //    - Sex
                 //    - HairColor
                 //    - SkinColor
-                //    - 상의/하의의 색상정보
-                //    - 능력치 : STR,DEX,CON
+                
+                
                 //    - CurrentHP/MaxHP
                 //    - Gold
                 //    - ZoneID
@@ -974,10 +945,10 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pResult2->next();
 
-                // 아우스터즈 PCInfo 객체를 생성한다.
+                
                 PCOustersInfo* pPCOustersInfo = new PCOustersInfo();
 
-                // 각 필드값을 지정한다.
+                
                 uint i = 0;
 
                 pPCOustersInfo->setName(pResult2->getString(++i));
@@ -1008,11 +979,11 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
             }
         }
 
-        // 쿼리 결과 및 쿼리문 객체를 삭제한다.
+        
         SAFE_DELETE(pStmt);
         SAFE_DELETE(pStmt2);
     } catch (SQLQueryException& sce) {
-        // 쿼리 결과 및 쿼리문 객체를 삭제한다.
+        
         SAFE_DELETE(pStmt);
         SAFE_DELETE(pStmt2);
 

@@ -42,17 +42,17 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
 
 #ifdef __GAME_SERVER__
 
-        // 길드 멤버 object 를 만든다.
+        
         GuildMember* pGuildMember = new GuildMember();
     pGuildMember->setGuildID(pPacket->getGuildID());
     pGuildMember->setName(pPacket->getName());
     pGuildMember->setRank(pPacket->getGuildMemberRank());
 
-    // 길드에 추가한다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pGuildMember->getGuildID());
     pGuild->addMember(pGuildMember);
 
-    // 멤버에게 메세지를 보낸다.
+    
     __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
     Creature* pCreature = g_pPCFinder->getCreature_LOCKED(pGuildMember->getName());
@@ -61,7 +61,7 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
         Assert(pPlayer != NULL);
 
         if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER ||
-            pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_SUBMASTER) // 길드마스터나 서브마스터일 경우
+            pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_SUBMASTER) 
         {
             PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
             Assert(pPlayerCreature != NULL);
@@ -76,7 +76,7 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
 
             Gold_t CurMoney = pPlayerCreature->getGold();
             if (CurMoney < Fee) {
-                // 큰일났군
+                
                 CurMoney = 0;
             } else
                 CurMoney -= Fee;
@@ -87,11 +87,11 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
                 GCModifyInformation gcModifyInformation;
                 gcModifyInformation.addLongData(MODIFY_GOLD, CurMoney);
 
-                // 바뀐정보를 클라이언트에 보내준다.
+                
                 pPlayer->sendPacket(&gcModifyInformation);
             }
 
-            // 길드 가입 메시지를 보여준다.
+            
             GCSystemMessage gcSystemMessage;
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER)
                 gcSystemMessage.setMessage(g_pStringPool->getString(STRID_TEAM_JOIN_ACCEPTED));
@@ -102,7 +102,7 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
             pPlayer->sendPacket(&gcSystemMessage);
 
         } else if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_WAIT) {
-            // 길드 가입 신청 메시지를 보낸다.
+            
             GCSystemMessage gcSystemMessage;
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER)
                 gcSystemMessage.setMessage(g_pStringPool->getString(STRID_TEAM_JOIN_TRY));
@@ -114,14 +114,14 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
             pPlayer->sendPacket(&gcSystemMessage);
         }
     } else {
-        // 접속이 안되어 있다.
+        
 
-        // 마스터나 서브마스터일 경우
-        // DB 에서 돈을 까도록 한다.
+        
+        
         if ((pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER ||
-             pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_SUBMASTER) // 길드마스터나 서브마스터일 경우
+             pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_SUBMASTER) 
             &&
-            pPacket->getServerGroupID() == g_pConfig->getPropertyInt("ServerID")) // 이 게임 서버에서 추가한 길드원인가?
+            pPacket->getServerGroupID() == g_pConfig->getPropertyInt("ServerID")) 
         {
             Gold_t Fee;
             if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER)
@@ -153,7 +153,7 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
         }
     }
 
-    // 길드 마스터에게 메시지를 보낸다.
+    
     pCreature = g_pPCFinder->getCreature_LOCKED(pGuild->getMaster());
     if (pCreature != NULL && pCreature->isPC() && pGuildMember->getRank() != GuildMember::GUILDMEMBER_RANK_MASTER) {
         Player* pPlayer = pCreature->getPlayer();

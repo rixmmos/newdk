@@ -1,8 +1,8 @@
 //--------------------------------------------------------------------------------
 // 
 // Filename    : GCSearchMotorcycleFail.cpp 
-// Written By  : 김성민
-// Description : 플레이어에게 서버 측의 상점 버전을 알려줄 때 쓰이는 패킷이다.
+
+
 // 
 //--------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@
 #include "Assert.h"
 
 //--------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //--------------------------------------------------------------------
 void GCSearchMotorcycleFail::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -23,7 +23,7 @@ void GCSearchMotorcycleFail::read ( SocketInputStream & iStream )
 
 		    
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //--------------------------------------------------------------------------------
 void GCSearchMotorcycleFail::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )

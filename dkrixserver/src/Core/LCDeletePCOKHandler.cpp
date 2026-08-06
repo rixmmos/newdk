@@ -16,7 +16,7 @@
 
 //--------------------------------------------------------------------------------
 //
-// PC 를 성공적으로 삭제했다는 뜻이다.
+
 //
 //--------------------------------------------------------------------------------
 void LCDeletePCOKHandler::execute(LCDeletePCOK* pPacket, Player* pPlayer)
@@ -36,7 +36,7 @@ void LCDeletePCOKHandler::execute(LCDeletePCOK* pPacket, Player* pPlayer)
     cout << "+--------------------------+" << endl;
     cout << "                            " << endl;
 
-    // 다시 PC LIST 를 받아와야 한다.
+    
     CLGetPCList clGetPCList;
     pClientPlayer->sendPacket(&clGetPCList);
 

@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void RingOfFlare::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot, CEffectID_t CEffectID)
 
@@ -65,14 +65,14 @@ void RingOfFlare::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected && bSatisfyRequire) {
             decreaseMana(pOusters, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pOusters, pOustersSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // cout << pOusters->getName() << "이 RingOfFlare를 썼고 데미지는 " << output.Damage << "입니다." << endl;
+            
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectRingOfFlare* pEffect = new EffectRingOfFlare(pOusters);
             pEffect->setDeadline(output.Duration);
             pEffect->setDamage(output.Damage);

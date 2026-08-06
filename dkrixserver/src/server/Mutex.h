@@ -41,9 +41,9 @@ public:
     }
 
 private:
-    pthread_mutex_t m_Mutex; // ���ؽ� ��ü
-    string m_Name;           // �� ���ؽ��� ������ Ŭ���� �̸�
-    int m_LockTID;           // ���� ���� �� ���� precoess id
+    pthread_mutex_t m_Mutex; 
+    string m_Name;           
+    int m_LockTID;           
 };
 
 #endif

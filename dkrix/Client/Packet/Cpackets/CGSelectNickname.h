@@ -10,10 +10,10 @@
 #define __CG_SELECT_NICKNAME_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //

@@ -7,7 +7,7 @@
 #include "GCAddItemToItemVerify.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCAddItemToItemVerify::read(SocketInputStream& iStream)
 
@@ -17,7 +17,7 @@ void GCAddItemToItemVerify::read(SocketInputStream& iStream)
     iStream.read(m_Code);
 
     switch (m_Code) {
-    // 파라미터를 써야 하는 코드
+    
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL_DECREASE:
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_OK:
     case ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK:
@@ -30,7 +30,7 @@ void GCAddItemToItemVerify::read(SocketInputStream& iStream)
         iStream.read(m_Parameter);
         iStream.read(m_Parameter2);
         break;
-    // 파라미터를 쓰지 않아도 되는 코드
+    
     default:
         break;
     }
@@ -39,7 +39,7 @@ void GCAddItemToItemVerify::read(SocketInputStream& iStream)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCAddItemToItemVerify::write(SocketOutputStream& oStream) const
 
@@ -49,7 +49,7 @@ void GCAddItemToItemVerify::write(SocketOutputStream& oStream) const
     oStream.write(m_Code);
 
     switch (m_Code) {
-    // 파라미터를 써야 하는 코드
+    
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL_DECREASE:
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_OK:
     case ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK:
@@ -62,7 +62,7 @@ void GCAddItemToItemVerify::write(SocketOutputStream& oStream) const
         oStream.write(m_Parameter);
         oStream.write(m_Parameter2);
         break;
-    // 파라미터를 쓰지 않아도 되는 코드
+    
     default:
         break;
     }
@@ -84,7 +84,7 @@ void GCAddItemToItemVerify::execute(Player* pPlayer)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 패킷 사이즈
+
 //////////////////////////////////////////////////////////////////////////////
 
 PacketSize_t GCAddItemToItemVerify::getPacketSize() const
@@ -95,7 +95,7 @@ PacketSize_t GCAddItemToItemVerify::getPacketSize() const
     PacketSize_t size = szBYTE;
 
     switch (m_Code) {
-    // 파라미터를 써야 하는 코드
+    
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_FAIL_DECREASE:
     case ADD_ITEM_TO_ITEM_VERIFY_ENCHANT_OK:
     case ADD_ITEM_TO_ITEM_VERIFY_MIXING_OK:
@@ -105,7 +105,7 @@ PacketSize_t GCAddItemToItemVerify::getPacketSize() const
         size += szuint;
         break;
 
-    // 파라미터를 쓰지 않아도 되는 코드
+    
     default:
         break;
     }

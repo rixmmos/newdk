@@ -16,7 +16,7 @@
 //
 // Class SkillParentInfo;
 //
-// 이 스킬의 부모가 누구인지 알 수 있는 메소드들을 가지고 있는 클래스이다
+
 //
 //----------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ public:
     // AI specific methods
     //--------------------------------------------------
 public:
-    // SkillParentInfoType 을 사용해서, SkillParentInfoInfo 로부터 초기화하기
+    
     void init();
 
     // enemy specific methods

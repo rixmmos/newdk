@@ -7,8 +7,8 @@
 #ifndef __CG_SKILL_TO_INVENTORY_H__
 #define __CG_SKILL_TO_INVENTORY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSkillToInventory;
@@ -60,7 +60,7 @@ public:
 private :
 	SkillType_t  m_SkillType;	// SkillType
 	ObjectID_t   m_ObjectID;	// ObjectID
-	// 보조 인벤토리 아이템의 오브젝트 아이디. 0이면 메인 인벤토리에서 사용
+	
 
 	ObjectID_t	 m_InventoryItemObjectID;
 	CoordInven_t m_X;			// Coord X

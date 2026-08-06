@@ -85,7 +85,7 @@ void FlagSet::load(const string& owner)
 
             filelog("flagSetError.txt", "%s", msg.toString().c_str());
 
-            // flagSet이 없는 경우에는 일단 default로 넣어서 동작하게 한다.
+            
             pStmt->executeQuery("INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES ('%s','')", owner.c_str());
 
             // cerr << msg.toString() << endl;

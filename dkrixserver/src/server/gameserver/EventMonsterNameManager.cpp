@@ -59,7 +59,7 @@ void MonsterNameManager::init()
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // First Name을 로드한다.
+        
         pResult = pStmt->executeQuery("SELECT * FROM FirstNameInfo");
         nCount = pResult->getRowCount();
         if (nCount == 0) {
@@ -76,7 +76,7 @@ void MonsterNameManager::init()
             nCount++;
         }
 
-        // Middle Name을 로드한다.
+        
         pResult = pStmt->executeQuery("SELECT * FROM MiddleNameInfo");
         nCount = pResult->getRowCount();
         if (nCount == 0) {
@@ -93,7 +93,7 @@ void MonsterNameManager::init()
             nCount++;
         }
 
-        // Last Name을 로드한다.
+        
         pResult = pStmt->executeQuery("SELECT * FROM LastNameInfo");
         nCount = pResult->getRowCount();
         if (nCount == 0) {
@@ -139,50 +139,9 @@ string MonsterNameManager::getRandomName(Monster* pMonster)
 
         nLastNameIndex = rand() % m_nLastNameCount;
 
-        /*
-        if (0 < MonsterLevel && MonsterLevel <= 33)
-        {
-            // 하급 뱀파는 라스트 네임만 붙는다.
-            nFirstNameIndex  = -1;
-            nMiddleNameIndex = -1;
-            nLastNameIndex   = rand()%m_nLastNameCount;
-        }
-        else if (33 < MonsterLevel && MonsterLevel <= 66)
-        {
-            // 중급 뱀파는 퍼스트와 라스트 네임만 붙는다.
-            nFirstNameIndex  = rand()%m_nFirstNameCount;
-            nMiddleNameIndex = -1;
-            nLastNameIndex   = rand()%m_nLastNameCount;
-        }
-        else
-        {
-            // 고급 뱀파는 모든 이름이 다 붙는다.
-            nFirstNameIndex  = rand()%m_nFirstNameCount;
-            nMiddleNameIndex = rand()%m_nMiddleNameCount;
-            nLastNameIndex   = rand()%m_nLastNameCount;
-        }
-        */
+         
 
-        /*
-         * 존마다 유니크한 이름은 나중에다 붙는다네...
-         *
-        ulonglong NameKey = 0;
-
-        NameKey |= nFirstNameIndex  < 32;
-        NameKey |= nMiddleNameIndex < 16;
-        NameKey |= nLastNameIndex       ;
-
-        unordered_map<ulonglong, string>::iterator itr = m_UsedName.find(NameKey);
-
-        if (itr == m_UsedName.end())
-        {
-            if (nFirstNameIndex != -1)  Name += m_pFirstName[nFirstNameIndex] + " ";
-            if (nMiddleNameIndex != -1) Name += m_pMiddleName[nMiddleNameIndex] + " ";
-            if (nLastNameIndex != -1)   Name += m_pLastName[nLastNameIndex];
-
-            bContinue = false;
-        }
-        */
+         
 
         if (nFirstNameIndex != -1)
             Name += m_pFirstName[nFirstNameIndex] + " ";
@@ -194,10 +153,10 @@ string MonsterNameManager::getRandomName(Monster* pMonster)
         return Name;
     }
 
-    // trial이 300번을 초과하면, 제대로 된 이름을 찾지 못했다는
-    // 말이니까, 아무 이름이나 붙여준다.
+    
+    
     if (Name == "")
-        Name == "무명씨";
+        Name == "";
 
     return Name;
 

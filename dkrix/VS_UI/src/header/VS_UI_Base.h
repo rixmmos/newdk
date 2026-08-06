@@ -47,15 +47,15 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 	char *		sz_player;
 };
 
-// �ֹι�ȣ�ڸ���(�ѱ�)
+
 #define SSN_POS_COUNT					13
 #define SSN_PART1_CHAR_COUNT			6
 #define SSN_PART2_CHAR_COUNT			7
 //#define _SHOW_WINDOW_ATTR
 
 //
-// SHOW_WINDOW_ATTR�� �� Window�� Window���¸� ����ϱ� ���� ���̴�. Window�� ������ϱ� ����
-// ���� ���̴�.
+
+
 //
 #if (defined(_SHOW_WINDOW_ATTR) && !defined(_LIB))
 #define SHOW_WINDOW_ATTR { \
@@ -70,8 +70,8 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 //
 // set/unset background mouse focus message
 //
-// client background�� mouse focus�� set/unset�Ѵ�.
-// �̰��� mouse pointer�� UI Window�� acquire/unacquire�� client�� �˸��� ���̴�.
+
+
 //
 #define SET_BACKGROUND_MOUSE_FOCUS	if (gpC_window_manager->GetMouseFocusedWindow() == NULL) \
 													gpC_base->SendMessage(UI_BACKGROUND_MOUSE_FOCUS, gpC_mouse_pointer->GetPointerX(), gpC_mouse_pointer->GetPointerY());
@@ -80,7 +80,7 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 
 #define TEXT_LINE(x)						(x*20) // 20 font height...
 
-// LOWORD, HIWORD�� �˻��Ѵ�.
+
 #define MAKEDWORD(a, b)					(DWORD)((a << 16)|b)
 
 #define INTERFACE_BLINK_VALUE_MAX	4
@@ -88,14 +88,14 @@ struct S_BLOOD_BIBLE_DESCRIPTION
 extern bool gbl_global_empty_move;
 
 //
-// EMPTY_MOVE�� ������ ���콺�Է��� MOVE�� �� �� �߻��Ѵ�.
+
 //
 #define EMPTY_MOVE						gbl_global_empty_move = true;
 
 //-----------------------------------------------------------------------------
 // Global definition.
 //-----------------------------------------------------------------------------
-#define PCS_NUMBER_LIMIT				7 // 7�ڸ�
+#define PCS_NUMBER_LIMIT				7 
 
 // rgb
 #define RGB_WHITE							RGB(255, 255, 255)
@@ -148,14 +148,14 @@ enum
 };
 
 // screen resolution
-enum
-{
-	RESOLUTION_X = 1024,
-	RESOLUTION_Y = 768,
-};
+extern int g_ResolutionX;
+extern int g_ResolutionY;
+
+#define RESOLUTION_X (g_ResolutionX)
+#define RESOLUTION_Y (g_ResolutionY)
 
 // font id
-// ������ �� �ִ� font ����.
+
 enum font_id_t
 {
 	FONT_SLAYER,
@@ -171,13 +171,13 @@ enum font_id_t
 //---------------------------------------
 struct MOUSEPOINTER_INFO
 {
-	int		x; // screen������ (x, y)
+	int		x; 
 	int		y;
 	int		width;
 	int		height;
 };
 
-// Client�� login�� ������ ���� ����ü.
+
 struct DELETE_CHARACTER
 {
 	char *	sz_part1;
@@ -200,7 +200,7 @@ struct NEW_REGISTRATION
 
 	char *	sz_email;
 	char *	sz_address;
-	char *	sz_ssn_number_part1; // �ֹι�ȣ
+	char *	sz_ssn_number_part1; 
 	char *	sz_ssn_number_part2;
 	char *	sz_homepage;
 	char *	sz_woo;
@@ -232,8 +232,8 @@ struct NEW_CHARACTER
 //-----------------------------------------------------------------------------
 // Base
 //
-// ����� �����ϴ� class�̴�.
-// VS_UI System�� ���������� ������ ������ �͵��� ��� ���⿡ ���ǵȴ�.
+
+
 //-----------------------------------------------------------------------------
 class Base
 {
@@ -244,9 +244,9 @@ private:
 	//
 	// m_event_occured
 	//
-	// C_VS_UI_TRIBE class ����.
+	
 	//
-	// event�� �߻��ϸ� set�ȴ�.
+	
 	//
 	bool						m_event_occured;
 
@@ -259,8 +259,8 @@ public:
 	// Video/Font defition.
 	//
 public:
-	CSpriteSurface *		m_p_DDSurface_back; // UI�� ����� surface
-	CSpriteSurface			m_DDSurface_offscreen; // effect�� ���� offscreen
+	CSpriteSurface *		m_p_DDSurface_back; 
+	CSpriteSurface			m_DDSurface_offscreen; 
 
 private:
 	int						m_colorkey_red; // offscreen colorkey
@@ -269,9 +269,9 @@ public:
 	PrintInfo				m_small_pi;
 	PrintInfo				m_chatting_pi;
 	PrintInfo				m_user_id_pi;
-	PrintInfo				m_value_pi; // �������ĵ� ���� ����..
-	PrintInfo				m_value2_pi; // �������ĵ� ���� ����..
-	PrintInfo				m_item_name_pi; // !item description�� ��µ� �� ���� ����� �� �ִ�.
+	PrintInfo				m_value_pi; 
+	PrintInfo				m_value2_pi; 
+	PrintInfo				m_item_name_pi; 
 	PrintInfo				m_item_desc_pi;
 	PrintInfo				m_dialog_menu_pi;
 	PrintInfo				m_dialog_msg_pi;
@@ -295,7 +295,7 @@ public:
 	// xmas
 	PrintInfo				m_xmas_pi;
 	
-	PrintInfo				m_money2_pi; // ���� ���� ��
+	PrintInfo				m_money2_pi; 
 
 private:
 	C_VS_UI_UI_RESULT_RECEIVER		m_C_ui_result_receiver;
@@ -325,16 +325,16 @@ extern Base * gpC_base;
 extern UINT	g_blink_value;
 extern int ga_item_blink_color_table[];
 
-extern bool gbl_sell_running; // ��� ��..
-extern bool gbl_buy_running; // �Ĵ� ��..
-extern bool gbl_repair_running; // ��ġ�� ��...
-extern bool gbl_silvering_running; // ��ġ�� ��...
+extern bool gbl_sell_running; 
+extern bool gbl_buy_running; 
+extern bool gbl_repair_running; 
+extern bool gbl_silvering_running; 
 extern bool gbl_item_lock;
 extern bool gbl_gear_lock;
 extern bool gbl_item_trade_lock;
 //extern bool gbl_vampire_interface;
 extern Race g_eRaceInterface;
-extern bool gbl_swap_advancement_item_running; // ��� ��..
+extern bool gbl_swap_advancement_item_running; 
 
 //-----------------------------------------------------------------------------
 // Cross-platform path conversion utilities

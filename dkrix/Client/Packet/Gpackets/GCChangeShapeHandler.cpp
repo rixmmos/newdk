@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 
 	//--------------------------------------------------------
 	//
-	// 임시로 Item을 생성한다.
+	
 	//
 	//--------------------------------------------------------
 	MItem* pItem = NULL;
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 	pItem = MItem::NewItem( (enum ITEM_CLASS)pPacket->getItemClass() );
 
 	//--------------------------------------------------------
-	// Item이 생성되지 않은 경우...
+	
 	//--------------------------------------------------------
 	if (pItem==NULL)
 	{
@@ -49,11 +49,11 @@ throw ( ProtocolException , Error )
 
 	//------------------------------------------------------
 	//
-	//  Creature에게 적절한 Addon을 착용시킨다.
+	
 	//
 	//------------------------------------------------------
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -61,14 +61,14 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
 		//--------------------------------------------------
-		// Creature가 없는 경우
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -76,14 +76,14 @@ throw ( ProtocolException , Error )
 			DEBUG_ADD_FORMAT("[Error] Not Exist Creature. ID=%d", pPacket->getObjectID());
 		}
 		//--------------------------------------------------
-		// 존재하는 Creature인 경우
-		// 복장이 있는 creature이면 --> Addon착용
+		
+		
 		//--------------------------------------------------
 		else if (pCreature->IsWear())
 		{
 			MCreatureWear* pCreatureWear = (MCreatureWear*)pCreature;
 
-			// 캐릭터를 정지시킨다.
+			
 			pCreatureWear->SetStop();
 			
 			#ifdef	OUTPUT_DEBUG				
@@ -103,7 +103,7 @@ throw ( ProtocolException , Error )
 		}
 			
 		//--------------------------------------------------
-		// 옷을 입을 수 없는 Creature인 경우
+		
 		//--------------------------------------------------
 		else 
 		{

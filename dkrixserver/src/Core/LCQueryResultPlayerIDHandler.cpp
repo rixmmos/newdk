@@ -50,7 +50,7 @@ void LCQueryResultPlayerIDHandler::execute(LCQueryResultPlayerID* pPacket, Playe
 
     if (cmd == "1") {
         //----------------------------------------------------------------------
-        // 특정 아이디가 이미 존재하는지 쿼리한다.
+        
         //----------------------------------------------------------------------
         cout << "+----------+" << endl << "| QUERY ID |" << endl << "+----------+" << endl << endl << "Query> ";
 
@@ -62,12 +62,12 @@ void LCQueryResultPlayerIDHandler::execute(LCQueryResultPlayerID* pPacket, Playe
 
         pClientPlayer->sendPacket(&clQueryPlayerID);
 
-        // 플레이어의 상태를 바꾼다.
+        
         pClientPlayer->setPlayerStatus(CPS_AFTER_SENDING_CL_QUERY_PLAYER_ID);
 
     } else {
         //----------------------------------------------------------------------
-        // 새 사용자 등록 입력을 받는다.
+        
         //----------------------------------------------------------------------
         CLRegisterPlayer clRegisterPlayer;
 
@@ -76,28 +76,28 @@ void LCQueryResultPlayerIDHandler::execute(LCQueryResultPlayerID* pPacket, Playe
              << "+---------------------+" << endl
              << endl;
 
-        cout << "아이디 : ";
+        cout << " : ";
         string id;
         getline(cin, id);
         clRegisterPlayer.setID(id);
 
-        cout << "패스워드 : ";
+        cout << " : ";
         string password;
         getline(cin, password);
         clRegisterPlayer.setPassword(password);
 
-        cout << "이름 : ";
+        cout << " : ";
         string name;
         getline(cin, name);
         clRegisterPlayer.setName(name);
 
-        cout << "성별 (남/여) : ";
+        cout << " (/) : ";
         string _sex;
         getline(cin, _sex);
-        Sex sex = (_sex == "남") ? MALE : FEMALE;
+        Sex sex = (_sex == "") ? MALE : FEMALE;
         clRegisterPlayer.setSex(sex);
 
-        cout << "주민등록번호 : ";
+        cout << " : ";
         string ssn;
         getline(cin, ssn);
         clRegisterPlayer.setSSN(ssn);
@@ -105,19 +105,19 @@ void LCQueryResultPlayerIDHandler::execute(LCQueryResultPlayerID* pPacket, Playe
         clRegisterPlayer.setTelephone("02-222-3333");
         clRegisterPlayer.setCellular("011-222-3333");
         clRegisterPlayer.setZipCode("700-441");
-        clRegisterPlayer.setAddress("서울특별시 영등포구 여의도동 사서함 300번지");
+        clRegisterPlayer.setAddress("    300");
         clRegisterPlayer.setNation(KOREA);
         clRegisterPlayer.setEmail("jhkim@mbc.com");
         clRegisterPlayer.setHomepage("www.jhkim.com");
-        clRegisterPlayer.setProfile("테크노의 여왕 전지현");
+        clRegisterPlayer.setProfile("  ");
         clRegisterPlayer.setPublic(false);
 
         // cout << clRegisterPlayer.toString() << endl;
 
-        // 등록 패킷을 전송한다.
+        
         pClientPlayer->sendPacket(&clRegisterPlayer);
 
-        // 플레이어의 상태를 바꾼다.
+        
         pClientPlayer->setPlayerStatus(CPS_AFTER_SENDING_CL_REGISTER_PLAYER);
     }
 

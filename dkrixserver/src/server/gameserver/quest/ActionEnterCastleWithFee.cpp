@@ -54,7 +54,7 @@ void ActionEnterCastleWithFee::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionEnterCastleWithFee::execute(Creature* pNPC, Creature* pCreature)
 
@@ -75,16 +75,16 @@ void ActionEnterCastleWithFee::execute(Creature* pNPC, Creature* pCreature)
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(m_ZoneID);
 
-        // 유료존인데 유료사용자가 아니면...
+        
         if (pZoneInfo == NULL ||
             pZoneInfo->isPayPlay() && !(pGamePlayer->isPayPlaying() || pGamePlayer->isFamilyFreePass())) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
             } else {
-                // 유료 서비스 사용 불가인 경우
+                
                 GCSystemMessage gcSystemMessage;
 
                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
@@ -110,7 +110,7 @@ void ActionEnterCastleWithFee::execute(Creature* pNPC, Creature* pCreature)
             if (remain < fee) {
                 static char buf[200];
                 sprintf(buf, g_pStringPool->c_str(STRID_NOT_ENOUGH_ENTRANCE_FEE), (int)fee);
-                // 돈이 모자란다.
+                
                 GCSystemMessage message;
                 message.setType(SYSTEM_MESSAGE_HOLY_LAND);
                 message.setMessage(buf);
@@ -119,7 +119,7 @@ void ActionEnterCastleWithFee::execute(Creature* pNPC, Creature* pCreature)
                 bTransport = false;
             } else {
                 if (fee > 0) {
-                    // 입장료를 낸다.
+                    
                     pPC->decreaseGoldEx(fee);
                     g_pCastleInfoManager->increaseTaxBalance(m_ZoneID, fee);
 

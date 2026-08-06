@@ -20,7 +20,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 인벤토리 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordInven_t X, CoordInven_t Y,
                               CoordInven_t TargetX, CoordInven_t TargetY, VampireSkillSlot* pSkillSlot)
@@ -45,8 +45,8 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
         Item* pItem = pInventory->getItem(X, Y);
         Assert(pItem != NULL);
 
-        // 적당한 아이템이 아니라면 당연히 변신할 수 없다.
-        // PK존에서는 변신할 수 없다.
+        
+        
         if (pItem->getItemClass() != Item::ITEM_CLASS_VAMPIRE_ETC || pItem->getItemType() != 0 ||
             pVampire->hasRelicItem() || g_pPKZoneInfoManager->isPKZone(pZone->getZoneID()) ||
             pVampire->isFlag(Effect::EFFECT_CLASS_REFINIUM_TICKET) ||
@@ -64,7 +64,7 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
         ZoneCoord_t x = pVampire->getX();
         ZoneCoord_t y = pVampire->getY();
 
-        // Knowledge of Innate 가 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE);
@@ -82,7 +82,7 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
         bool bEffected = pVampire->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF) ||
                          pVampire->isFlag(Effect::EFFECT_CLASS_HAS_FLAG) ||
                          pVampire->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER)
-                         // add by coffee 2006-12-29 錦攣긴낚鬼의BUG
+                         
                          || pVampire->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF);
         // end 2006-12-29
 
@@ -93,13 +93,13 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectTransformToWolf* pEffectTTW = new EffectTransformToWolf(pVampire);
             pEffectTTW->setDeadline(999999999);
             pVampire->addEffect(pEffectTTW);
             pVampire->setFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF);
 
-            // 이로 인해서 변하는 능력치들을 보내준다.
+            
             VAMPIRE_RECORD prev;
             pVampire->getVampireRecord(prev);
             pVampire->initAllStat();
@@ -111,7 +111,7 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
 
             pPlayer->sendPacket(&_GCSkillToInventoryOK1);
 
-            // 뱀파이어 대신 늑대를 더하라고 알려준다.
+            
             GCAddWolf gcAddWolf;
             gcAddWolf.setObjectID(pVampire->getObjectID());
             gcAddWolf.setName(pVampire->getName());
@@ -143,7 +143,7 @@ void TransformToWolf::execute(Vampire* pVampire, ObjectID_t InvenObjectID, Coord
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void TransformToWolf::execute(Monster* pMonster)
 
@@ -174,16 +174,16 @@ void TransformToWolf::execute(Monster* pMonster)
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectTransformToWolf* pEffectTTW = new EffectTransformToWolf(pMonster);
             pEffectTTW->setDeadline(999999999);
             pMonster->addEffect(pEffectTTW);
             pMonster->setFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF);
 
-            // 이로 인해서 변하는 능력치들을 보내준다.
+            
             pMonster->initAllStat();
 
-            // 뱀파이어 대신 늑대를 더하라고 알려준다.
+            
             GCAddWolf gcAddWolf;
             gcAddWolf.setObjectID(pMonster->getObjectID());
             gcAddWolf.setName(pMonster->getName());

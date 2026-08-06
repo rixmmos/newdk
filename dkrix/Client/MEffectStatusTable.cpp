@@ -22,7 +22,7 @@ EFFECTSTATUS_NODE::EFFECTSTATUS_NODE()
 
 	EffectSpriteType	= EFFECTSPRITETYPE_NULL;
 	EffectColor			= 0xFFFF;
-	EffectColorPart		= ADDON_NULL;	// 없거나.. 전체 --;
+	EffectColorPart		= ADDON_NULL;	
 	
 	ActionInfo			= ACTIONINFO_NULL;
 	OriginalActionInfo	= ACTIONINFO_NULL;

@@ -27,10 +27,10 @@ MAttackCreatureHomingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egIn
 	BLT_TYPE		bltType = (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].BltType;
 	TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].FrameID;
 
-	// creature의 좌표
+	
 	int cx, cy, cz;	
 
-	// 목표 위치 Pixel좌표
+	
 	MCreature* pCreature = g_pZone->GetCreature( egInfo.creatureID );
 
 	if (pCreature == NULL)
@@ -51,10 +51,10 @@ MAttackCreatureHomingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egIn
 		135
 	};
 
-	// 시작 각도
+	
 	currentAngle = angles[egInfo.direction];
 
-	// 꺽는 각도
+	
 	stepAngle = 13;
 
 	int fixZPos = TILE_Y;
@@ -76,7 +76,7 @@ MAttackCreatureHomingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egIn
 		currentAngle = angles[TempDir];
 	}
 
-	// 포물선 Effect생성
+	
 
 	MHomingEffect* pEffect = new MHomingEffect(bltType, currentAngle, stepAngle);	
 	int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
@@ -86,27 +86,27 @@ MAttackCreatureHomingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egIn
 	
 	cx = g_pTopView->MapToPixelX( pCreature->GetX() );
 	cy = g_pTopView->MapToPixelY( pCreature->GetY() );
-	cz = pCreature->GetZ() + fixZPos;	// 한 타일정도 위로 빼준다.
+	cz = pCreature->GetZ() + fixZPos;	
 
 
-	// 발사 위치 Pixel좌표	- 한 타일정도 위로 빼준다.
+	
 	pEffect->SetPixelPosition( egInfo.x0, egInfo.y0, egInfo.z0+fixZPos );	
 					
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 	pEffect->SetTraceCreatureID( egInfo.creatureID );	
 
-	// 목표 위치 Pixel좌표
+	
 	pEffect->SetTarget( cx,cy,cz, egInfo.step );
 
-	// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+	
 	pEffect->SetCount( TempEndFrame, egInfo.linkCount );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 	
 	pEffect->SetMulti(true);
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
 	if (g_pZone->AddEffect( pEffect ))

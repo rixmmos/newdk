@@ -9,7 +9,7 @@
 #include "SkillHandler.h"
 #include "Vampire.h"
 
-// °Ë°è¿­
+
 #include "CrossCounter.h"
 #include "DancingSword.h"
 #include "DoubleImpact.h"
@@ -32,7 +32,7 @@
 #include "WideLightning.h"
 #include "WindDivider.h"
 
-// µµ°è¿­
+
 #include "AirShield.h"
 #include "Berserker.h"
 #include "ChargingPower.h"
@@ -53,7 +53,7 @@
 #include "WildSmash.h"
 #include "WildTyphoon.h"
 
-// ±ºÀÎ °è¿­
+
 #include "DoubleShot.h"
 #include "HeadShot.h"
 #include "MindControl.h"
@@ -74,7 +74,7 @@
 #include "Revealer.h"
 #include "UltimateBlow.h"
 
-// ÀÎÃ¦ °è¿­
+
 #include "AuraBall.h"
 #include "AuraRing.h"
 #include "Bless.h"
@@ -100,7 +100,7 @@
 #include "VigorDrop.h"
 #include "Visible.h"
 
-// Èú¸µ °è¿­
+
 #include "Activation.h"
 #include "CauseCriticalWounds.h"
 #include "CauseLightWounds.h"
@@ -128,7 +128,7 @@
 #include "TurnUndead.h"
 
 
-// ¹ìÇÁ °è¿­
+
 #include "AcidBall.h"
 #include "AcidBolt.h"
 #include "AcidSwamp.h"
@@ -181,7 +181,7 @@
 #include "PoisonStrike.h"
 #include "Transfusion.h"
 
-// ±âÅ¸
+
 #include "CriticalGround.h"
 #include "DuplicateSelf.h"
 #include "GroundAttack.h"
@@ -192,13 +192,13 @@
 #include "SoulChain.h"
 #include "SummonMonsters.h"
 
-// ¼ºÁö½ºÅ³
+
 #include "IllusionOfAvenge.h"
 #include "MagicElusion.h"
 #include "PoisonMesh.h"
 #include "WillOfLife.h"
 
-// ¾Æ¿ì½ºÅÍÁî ½ºÅ³
+
 #include "AcidEruption.h"
 #include "BackStab.h"
 #include "BeatHead.h"
@@ -304,7 +304,7 @@
 #include "WideIceField.h"
 #include "WideIceHail.h"
 
-// ¾Æ¿ì½ºÅÍÁî 140·¹º§ ½ºÅ³
+
 #include "ARAttack.h"
 #include "Aberration.h"
 #include "BikeCrash.h"
@@ -326,27 +326,27 @@
 #include "SummonMigaAttack.h"
 #include "WildWolf.h"
 // add by coffee 2007-2-17
-#include "BloodCurse.h"        //ÑªÖ®?Öä
-#include "BloodyScarify.h"     //ÑªÖ®ÀÓÓ¡
-#include "BombCrashWalk.h"     //¾ÞÅÚºäÕ¨
-#include "HeavenGround.h"      //ÌìÉñ½µÁÙ
-#include "IllusionInversion.h" //¿Ö²À»Ã¾õ(ÈËÀà·¨Ê¦)
-#include "SatelliteBomb.h"     //ÎÀÐÇºä»÷ (ÈËÀàÇ¹ÐÂ¼¼ÄÜ)
-#include "ShineSword.h"        //ÉÁÒ«Ö®½£
-// Ä§Áé
+#include "BloodCurse.h"        
+#include "BloodyScarify.h"     
+#include "BombCrashWalk.h"     
+#include "HeavenGround.h"      
+#include "IllusionInversion.h" 
+#include "SatelliteBomb.h"     
+#include "ShineSword.h"        
+
 #include "BigRockfall.h"      //395 ADD BY RALLSER
 #include "BrambleHalo.h"      //390 ADD BY RALLSER
 #include "CutStorm.h"         //387 ADD BY RALLSER
-#include "DeadlyClaw.h"       //391ÖÂÉËÁÑ×¦ add by rallser
-#include "DummyDrake.h"       // µÂÀ×¿Ë¿þÀÜ(»ð·¨)
+#include "DeadlyClaw.h"       
+#include "DummyDrake.h"       
 #include "FireMeteor.h"       //394 ADD BY RALLSER
-#include "HeterChakram.h"     // ÏÄ²¼Àû»ùÒò(ÃôÕ½)
-#include "HydroConvergence.h" // ¸´ºÏË®ÁÆ(Ë®·¨)
+#include "HeterChakram.h"     
+#include "HydroConvergence.h" 
 #include "PenetrateWheel.h"   //393 ADD BY RALLSER
 #include "RapidFreeze.h"      //396 ADD BY RALLSER
 #include "SacredStamp.h"      //389 ADD BY RALLSER
-#include "SkyFire.h"          //386 ÌìÀ×»ð»¨ ADD BY RALLSER
-#include "SummonClay.h"       // ÍÁ·¨
+#include "SkyFire.h"          
+#include "SummonClay.h"       
 #include "VoodooRing.h"       //392 ADD BY RALLSER
 #include "XRLMissile.h"       //388 ADD BY RALLSER
 
@@ -374,92 +374,92 @@ const int PartyDurationBoost[7] = {
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// °Ë °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void DoubleImpact::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 1 + (input.STR / 20) + input.SkillLevel / 20;
-    output.Delay = 8; // 1ÃÊ
+    output.Delay = 8; 
                       // output.Damage = 2 + input.SkillLevel/33;
-    // output.Delay  = 10; // 1ÃÊ
+    
 }
 
 void TripleSlasher::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 2 + (input.STR/20) + (input.SkillLevel/15);
     output.Damage = 3 + (input.STR / 20) + (input.SkillLevel / 15);
-    output.Delay = 8; // 0.7ÃÊ
+    output.Delay = 8; 
                       // output.Damage = 3 + input.SkillLevel/33;
-    // output.Delay  = 7; // 0.7ÃÊ
+    
 }
 
 void RainbowSlasher::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 4 + input.STR / 15 + input.SkillLevel / 10;
-    output.Delay = 8; // 0.8ÃÊ
+    output.Delay = 8; 
                       // output.Damage = 7 + input.SkillLevel/33;
-    // output.Delay  = 8; // 0.8ÃÊ
+    
 }
 
 void ThunderSpark::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 3 + input.STR / 20 + input.SkillLevel / 10;
-    output.Delay = 7; // 0.7ÃÊ
+    output.Delay = 7; 
                       // output.Damage = 5 + input.SkillLevel/33;
-    // output.Delay  = 7; // 0.7ÃÊ
+    
 }
 
 void DancingSword::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 1 + (input.DEX / 10) + (input.SkillLevel / 10);
     //	output.Duration = (10 + input.STR/10 + input.SkillLevel/2) * 10;
     output.Duration = (30 + input.STR / 10 + input.SkillLevel / 2) * 10;
-    // output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 
     // output.Damage   = 5 + input.SkillLevel/10;
     // output.Duration = (30 + input.SkillLevel/4) * 10;
-    // output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
+    
 }
 
 void CrossCounter::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Duration = (10 + input.SkillLevel / 2) * 10;
-    // output.Delay    = max(5 - input.SkillLevel/20, 2) * 10; // 5->2ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 
     // output.Duration = (30 + input.SkillLevel/4) * 10;
-    // output.Delay    = max(5 - input.SkillLevel/20, 2) * 10; // 5->2ÃÊ
+    
 }
 
 void FlashSliding::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Delay = max(3 - input.SkillLevel / 50, 1) * 10; // 3->1ÃÊ
+    output.Delay = max(3 - input.SkillLevel / 50, 1) * 10; 
     output.Duration = 3 - input.SkillLevel / 50;
-    // output.Delay = (3 - input.SkillLevel/50) * 10; // 3->1ÃÊ
+    
 }
 
 void LightningHand::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 10 + input.SkillLevel / 10;
-    // Å¬¶óÀÌ¾ðÆ®¿ÍÀÇ µ¿±âÈ­ ¹®Á¦·Î µô·¹ÀÌ°¡ ¾ø°Å³ª Á¶±Ý ´õ Âª¾Æ¾ß ÇÑ´Ù.
-    output.Delay = 4; // 0.2ÃÊ
+    
+    output.Delay = 4; 
                       // output.Damage = 7 + input.SkillLevel/20;
-    // output.Delay  = 2; // 0.2ÃÊ
+    
 }
 
 void SwordWave::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 5 + input.SkillLevel/33;
     output.Damage = 15 + input.SkillLevel / 20;
-    output.Delay = 4; // 1ÃÊ
+    output.Delay = 4; 
                       // output.Damage = 5 + input.SkillLevel/33;
-    // output.Delay  = 10; // 1ÃÊ
+    
 }
 
 void SnakeCombo::computeOutput(const SkillInput& input, SkillOutput& output) {
     // by sigi. 2002.12.3
     output.Damage = 5 + input.STR / 12 + input.SkillLevel / 8;
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
                        // output.Damage = 7 + input.SkillLevel/10;
-    // output.Delay  = 10; // 1ÃÊ
+    
 }
 
 void WindDivider::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 14 + input.SkillLevel / 20;
-    output.Delay = 13; // 1ÃÊ
+    output.Delay = 13; 
 }
 
 void ThunderBolt::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -468,69 +468,69 @@ void ThunderBolt::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 void Expansion::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Damage = 10 + input.SkillLevel / 2; // ÀÚ½ÅÀÇ + °ª
-    output.ToHit = 5 + input.SkillLevel / 3;   // ÆÄÆ¼ÀÇ + °ª
+    output.Damage = 10 + input.SkillLevel / 2; 
+    output.ToHit = 5 + input.SkillLevel / 3;   
                                                //	output.Duration = (30 + input.STR/10 + input.SkillLevel*2/3) * 10;
     output.Duration = (45 + input.STR / 10 + input.SkillLevel) * 10;
     // output.Delay    = max(5 - input.SkillLevel/33,2) * 10;
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 
-    // output.Damage   = 30 + input.SkillLevel/2; // ÀÚ½ÅÀÇ + °ª
-    // output.ToHit    = 15 + input.SkillLevel/4; // ÆÄÆ¼ÀÇ + °ª
+    
+    
     // output.Duration = (30 + input.SkillLevel/3) * 10;
     // output.Delay    = (5 - input.SkillLevel/33) * 10;
 }
 
 void MiracleShield::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = (5 + input.SkillLevel / 5);         // 5->25
-    output.Duration = (30 + input.SkillLevel / 5) * 10; // 30~50ÃÊ
-    output.Delay = (5 - input.SkillLevel / 33) * 10;    // 5->2ÃÊ
+    output.Duration = (30 + input.SkillLevel / 5) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;    
 }
 
 void ThunderFlash::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 5 + input.SkillLevel / 10;
-    output.Delay = 20; // 2ÃÊ
+    output.Delay = 20; 
 }
 
 void ThunderStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 10 + input.SkillLevel / 10; // by bezz. 2002.12.10
-    output.Delay = (3 - input.SkillLevel / 50) * 10;        // 1ÃÊ
+    output.Delay = (3 - input.SkillLevel / 50) * 10;        
                                                             // output.Damage = 10 + input.SkillLevel/5;
-    // output.Delay  = (5 - input.SkillLevel/33)*10; // 1ÃÊ
+    
 }
 
 void MentalSword::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 30 + (15 * input.SkillLevel / 50);
     output.Range = 2 + input.SkillLevel / 33;
-    output.Delay = (8 - input.SkillLevel / 20) * 10; // 5~3ÃÊ
+    output.Delay = (8 - input.SkillLevel / 20) * 10; 
                                                      // output.Damage = 30 + ( 15 * input.SkillLev/50 );
     // output.Range = 2 + input.SkillLevel/20;
-    // output.Delay  = (5 - input.SkillLevel / 50)*10; // 5~3ÃÊ
+    
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// µµ °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void SingleBlow::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 1 + input.STR / 20 + input.SkillLevel / 20; // by sigi. 2002.12.3
-    output.Delay = 7;                                           // 1ÃÊ
+    output.Delay = 7;                                           
 }
 
 void SpiralSlay::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 2 + input.STR/20 + input.SkillLevel/15;	// by sigi. 2002.12.3
     output.Damage = 4 + input.STR / 20 + input.SkillLevel / 15;
-    output.Delay = 7; // 0.7ÃÊ
+    output.Delay = 7; 
 }
 
 void TripleBreak::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 3 + input.STR / 20 + input.SkillLevel / 10; // by sigi. 2002.12.3
-    output.Delay = 7;                                           // 0.7ÃÊ
+    output.Delay = 7;                                           
 }
 
 void WildSmash::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 4 + input.STR / 15 + input.SkillLevel / 10; // by sigi. 2002.12.3
-    output.Delay = 8;                                           // 0.8ÃÊ
+    output.Delay = 8;                                           
 }
 
 void GhostBlade::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -538,21 +538,21 @@ void GhostBlade::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Duration = (30 + input.SkillLevel/4) * 10;
     // output.Duration = (10 + input.STR/10 + input.SkillLevel/2) * 10;
     output.Duration = (30 + input.STR / 10 + input.SkillLevel / 2) * 10;
-    // output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 }
 
 void PotentialExplosion::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 1 + input.SkillLevel / 15;
     //	output.Duration = (10 + input.SkillLevel/2) * 10;
     output.Duration = (30 + input.SkillLevel / 2) * 10;
-    // output.Delay    = (7 - input.SkillLevel/20) * 10; // 7->2ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 }
 
 void ShadowWalk::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Range = max(2 + input.SkillLevel / 25, 2);
-    output.Delay = (3 - input.SkillLevel / 50) * 10; // 3->1ÃÊ
+    output.Delay = (3 - input.SkillLevel / 50) * 10; 
 }
 
 void ChargingPower::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -561,70 +561,70 @@ void ChargingPower::computeOutput(const SkillInput& input, SkillOutput& output) 
     //	output.Duration = (30 + input.STR/10 + input.SkillLevel*10/12) * 10;
     // 	output.Damage   = 1 + (input.STR + input.SkillLevel)/20;
     //	output.Duration = (10 + input.SkillLevel/2) * 10;
-    // output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 }
 
 void HurricaneCombo::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 5 + input.STR / 12 + input.SkillLevel / 8;
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
 }
 
 void TornadoSever::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 8 + input.STR/15 + input.SkillLevel/10;
     //	output.Damage = 3 + input.STR/20 + input.SkillLevel/10;
     output.Damage = 10 + input.STR / 20 + input.SkillLevel / 8;
-    //	output.Delay  = 20 - (input.SkillLevel/100); // 2ÃÊ
+    
     output.Delay = 4;
 }
 
 void Earthquake::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 5 + input.STR / 20 + input.SkillLevel / 10; // by sigi. 2002.12.3
     output.Range = 7;                                           // by bezz. 2002.12.10
-    output.Delay = 13;                                          // 1.3ÃÊ by bezz. 2002.12.10
+    output.Delay = 13;                                          
 }
 
 void Berserker::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // penalty°ªÀº Berserker.cpp¿¡ ÀÖ´Ù.
-    // output.Damage    = (input.STR/20) * (1 + input.SkillLevel/20); //  µ¥¹ÌÁö º¸³Ê½º
-    // output.ToHit    = (input.DEX/10) * (1 + input.SkillLevel/10); //  ÅõÈý º¸³Ê½º
+    
+    
+    
 
-    // 2002.12.06 ÀåÈ«Ã¢
-    output.Damage = (input.STR / 20) * (1 + input.SkillLevel / 25); //  µ¥¹ÌÁö º¸³Ê½º
-    //	output.ToHit    = (input.DEX/10) * (1 + input.SkillLevel/12); //  ÅõÈý º¸³Ê½º
-    output.ToHit = 10 + (1 + input.SkillLevel / 12); //  ÅõÈý º¸³Ê½º
+    
+    output.Damage = (input.STR / 20) * (1 + input.SkillLevel / 25); 
+    
+    output.ToHit = 10 + (1 + input.SkillLevel / 12); 
 
     //	output.Duration = (30 + input.SkillLevel/5) * 10;
     output.Duration = (45 + input.SkillLevel / 1.5) * 10;
     // output.Delay    = max(5 - input.SkillLevel/33,2) * 10;
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 }
 
 void MoonlightSever::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage   = 8 + input.STR/10 + input.SkillLevel/10;
     output.Damage = 15 + input.STR / 10 + input.SkillLevel / 8;
-    //	output.Delay    = 8; // 0.8ÃÊ
-    output.Delay = 4; // 0.4ÃÊ
+    
+    output.Delay = 4; 
 }
 
 void ShadowDancing::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 30 + ( 15 * input.SkillLevel/50 );
     output.Damage = 30 + (15 * input.SkillLevel / 25);
-    output.ToHit = 10 + input.SkillLevel / 20; // Å©¸®Æ¼ÄÃ È®·ü Áõ°¡Ä¡
-    // output.Delay    = (5 - input.SkillLevel / 50)*10; // 2ÃÊ¸¦ ¼¼¹øÀ¸·Î ³ª´©¸é 0.66666 = 0.7ÃÊ
+    output.ToHit = 10 + input.SkillLevel / 20; 
+    
     output.Delay = (8 - input.SkillLevel / 20) * 10; // by sigi. 2002.12.3
 }
 
 void Typhoon::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 10 + input.SkillLevel / 5;
-    // output.Duration = 10; // 1ÃÊ (Å¸°ÙÀÌ »æ»æ µ¹¾Æ°¡´Â ½Ã°£) - effect¾ø´Ù -_-;
-    // output.Delay    = 15; // 1.5ÃÊ
-    output.Duration = (1 + input.SkillLevel / 100) * 10; // 1ÃÊ (Å¸°ÙÀÌ »æ»æ µ¹¾Æ°¡´Â ½Ã°£) - effect¾ø´Ù -_-;
+    
+    
+    output.Duration = (1 + input.SkillLevel / 100) * 10; 
     output.Delay = (3 - input.SkillLevel / 50) * 10;     // by bezz. 2002.12.10
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ÃÑ °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void QuickFire::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -664,13 +664,13 @@ void MultiShot::computeOutput(const SkillInput& input, SkillOutput& output) {
     }
 
     output.ToHit = -20 + input.SkillLevel / 5;
-    output.Delay = 8; // 0.8ÃÊ
+    output.Delay = 8; 
 }
 
 void HeadShot::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 0;
 
-    // SkillUtil.cppÀÇ computeArmsWeaponDamageBonus()¿¡¼­ °è»êµÇ¹Ç·Î.. Áßº¹ µ¥¹ÌÁö´Ù. - -; by sigi. 2002.12.3
+    
     if (input.IClass == Item::ITEM_CLASS_SG) {
         switch (input.Range) {
         case 3:
@@ -708,32 +708,32 @@ void HeadShot::computeOutput(const SkillInput& input, SkillOutput& output) {
         Assert(false);
     }
 
-    output.Delay = 8; // 0.8ÃÊ
+    output.Delay = 8; 
 }
 
 void Piercing::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.ToHit = 0;
     output.Damage = 2;
-    output.Delay = 8; // 0.8ÃÊ
+    output.Delay = 8; 
 }
 
 void Sniping::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    output.Delay = (10 - input.SkillLevel / 20) * 10; // 10->5ÃÊ
+    output.Delay = (10 - input.SkillLevel / 20) * 10; 
 }
 
 void MindControl::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.SkillLevel / 10;
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    output.Delay = 30; // 3ÃÊ
+    output.Delay = 30; 
 }
 
 void Revealer::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (30 + input.SkillLevel / 5) * 10; // 30~50ÃÊ
+    output.Duration = (30 + input.SkillLevel / 5) * 10; 
     output.Delay = output.Duration;
-    //	output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
+    
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -741,60 +741,60 @@ void Revealer::computeOutput(const SkillInput& input, SkillOutput& output) {
 void CreateBomb::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.SkillLevel / 10;
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    output.Delay = 30 - input.SkillLevel / 10; // 3ÃÊ ~ 2ÃÊ
+    output.Delay = 30 - input.SkillLevel / 10; 
 }
 
 void CreateMine::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.SkillLevel / 10;
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    output.Delay = 30 - input.SkillLevel / 10; // 3ÃÊ ~ 2ÃÊ
+    output.Delay = 30 - input.SkillLevel / 10; 
 }
 
 void InstallMine::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.SkillLevel / 10;
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    //	output.Delay    = 30 - input.SkillLevel / 10; // 3ÃÊ ~ 2ÃÊ
-    output.Delay = 90 - input.SkillLevel / 2.5; // 9ÃÊ ~ 5ÃÊ
+    
+    output.Delay = 90 - input.SkillLevel / 2.5; 
 }
 
 void DisarmMine::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.SkillLevel / 10;
     output.Duration = (30 + input.SkillLevel / 5) * 10;
-    output.Delay = 30; // 3ÃÊ
+    output.Delay = 30; 
 }
 
 void ObservingEye::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Duration = (10 + input.SkillLevel/5)*10;
     output.Duration = (30 + input.SkillLevel / 3) * 10;
-    // damage°ªÀº visionÀ¸·Î ³Ö°í
-    // ´Ù¸¥ °ªÀ» Àû´çÈ÷ °è»êÇØ¼­ ¾´´Ù. -_-;
+    
+    
     output.Damage = 1 + input.SkillLevel / 50;
-    // output.Delay  = (5 - input.DEX/50) * 10; // 20ÃÊ
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    
+    output.Delay = output.Duration; 
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ÀÎÃ¦Æ® °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void CreateHolyWater::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Delay = (5 - input.SkillLevel / 33) * 10; // 5->2ÃÊ
+    output.Delay = (5 - input.SkillLevel / 33) * 10; 
 }
 
 void Light::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (60 + input.SkillLevel / 20 * 60) * 10; // 60~360ÃÊ
-    output.Delay = (5 - input.SkillLevel / 33) * 10;          // 5->2ÃÊ
+    output.Duration = (60 + input.SkillLevel / 20 * 60) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;          
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void DetectHidden::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (10 + input.SkillLevel / 2) * 10; // 30~50ÃÊ
-    output.Delay = (5 - input.INTE / 50) * 10;          // 5->2ÃÊ
+    output.Duration = (10 + input.SkillLevel / 2) * 10; 
+    output.Delay = (5 - input.INTE / 50) * 10;          
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -803,10 +803,10 @@ void AuraBall::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 5 + (input.INTE/20) + input.SkillLevel/5;
     //	output.Damage = 10 + (input.INTE/10) + input.SkillLevel/5;
     output.Damage = 16 + (input.INTE / 10) + input.SkillLevel / 4;
-    output.Delay = 10; // 1ÃÊ
-    //	output.Range = 2 + (input.SkillLevel/25); // ¾²Áöµµ ¾Ê´Â °ª ¿Ö ³Ö¾î³ùÀ»±î.. 8/18
+    output.Delay = 10; 
+    
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void Bless::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -818,10 +818,10 @@ void Bless::computeOutput(const SkillInput& input, SkillOutput& output) {
         output.Damage = 2 + input.INTE / 40 + input.SkillLevel / 20;
     }
 
-    output.Duration = (30 + input.SkillLevel * 3 / 2) * 10; // 30~50ÃÊ
-    output.Delay = (7 - input.SkillLevel / 20) * 10;        // 6->3ÃÊ
+    output.Duration = (30 + input.SkillLevel * 3 / 2) * 10; 
+    output.Delay = (7 - input.SkillLevel / 20) * 10;        
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -848,22 +848,22 @@ void ContinualLight::computeOutput(const SkillInput& input, SkillOutput& output)
         break;
     }
 
-    output.Delay = (6 - input.SkillLevel / 25) * 10; // 5->2ÃÊ
+    output.Delay = (6 - input.SkillLevel / 25) * 10; 
     output.Duration = (10 + input.SkillLevel / 2) * 10;
 }
 
 void Flare::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (5 + input.SkillLevel / 5) * 10; // 10~20ÃÊ
-    output.Delay = (6 - input.SkillLevel / 33) * 10;   // 6->3ÃÊ
+    output.Duration = (5 + input.SkillLevel / 5) * 10; 
+    output.Delay = (6 - input.SkillLevel / 33) * 10;   
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void Purify::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 10 + input.SkillLevel / 10;
-    output.Delay = (5 - input.SkillLevel / 33) * 10; // 5->2ÃÊ
+    output.Delay = (5 - input.SkillLevel / 33) * 10; 
 
     switch (g_pSkillInfoManager->getGradeByDomainLevel(input.DomainLevel)) {
     case SKILL_GRADE_APPRENTICE:
@@ -886,7 +886,7 @@ void Purify::computeOutput(const SkillInput& input, SkillOutput& output) {
         break;
     }
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void AuraRing::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -894,7 +894,7 @@ void AuraRing::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 15 + input.INTE / 10 + input.SkillLevel / 3; // by bezz. 2002.12.10
     output.Delay = max(1, 2 - (input.SkillLevel / 50)) * 10;     // by bezz. 2002.12.10
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void Striking::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -908,15 +908,15 @@ void Striking::computeOutput(const SkillInput& input, SkillOutput& output) {
 
     output.Duration = (30 + input.SkillLevel * 3 / 2) * 10;
     //	output.Duration = (30 + input.SkillLevel * 2 / 3) * 10;
-    output.Delay = (6 - input.SkillLevel / 33) * 10; // 6->3ÃÊ
+    output.Delay = (6 - input.SkillLevel / 33) * 10; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void DetectInvisibility::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (10 + input.SkillLevel / 2) * 10; // 30~50ÃÊ
-    output.Delay = (6 - input.SkillLevel / 33) * 10;    // 6->3ÃÊ
+    output.Duration = (10 + input.SkillLevel / 2) * 10; 
+    output.Delay = (6 - input.SkillLevel / 33) * 10;    
 
     switch (g_pSkillInfoManager->getGradeByDomainLevel(input.DomainLevel)) {
     case SKILL_GRADE_APPRENTICE:
@@ -939,31 +939,31 @@ void DetectInvisibility::computeOutput(const SkillInput& input, SkillOutput& out
         break;
     }
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void AuraShield::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (10 + input.SkillLevel / 3) * 10; // 15~35ÃÊ
-    // output.Delay    = (5 - input.SkillLevel/33) * 10; // 5->2ÃÊ
+    output.Duration = (10 + input.SkillLevel / 3) * 10; 
+    
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 }
 
 void Visible::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Delay = (5 - input.SkillLevel / 50) * 10; // 5->3ÃÊ
+    output.Delay = (5 - input.SkillLevel / 50) * 10; 
     output.Range = 3 + (input.SkillLevel / 50);
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Èú¸µ °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void CureLightWounds::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -973,9 +973,9 @@ void CureLightWounds::computeOutput(const SkillInput& input, SkillOutput& output
         output.Damage = 10 + input.SkillLevel / 4;
     }
 
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -987,19 +987,19 @@ void CureAll::computeOutput(const SkillInput& input, SkillOutput& output) {
         output.Damage = 35 + input.SkillLevel / 2;
     }
 
-    output.Delay = 40 - input.SkillLevel / 5; // 4ÃÊ~ 2ÃÊ
+    output.Delay = 40 - input.SkillLevel / 5; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void CurePoison::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 
-    output.Delay = (4 - input.SkillLevel / 33) * 10; // 4->1ÃÊ
+    output.Delay = (4 - input.SkillLevel / 33) * 10; 
 }
 
 void ProtectionFromPoison::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1011,12 +1011,12 @@ void ProtectionFromPoison::computeOutput(const SkillInput& input, SkillOutput& o
         output.Damage = min(30, 20 + input.INTE / 20);
     }
 
-    // output.Duration = (30 + input.SkillLevel/2) * 10; // 30~80ÃÊ
-    //	output.Duration = (50 + input.INTE * 2 / 3) * 10; // 30~80ÃÊ// by sigi. 2002.12.3
+    
+    
     output.Duration = (60 + input.INTE / 2 + input.SkillLevel / 2) * 10; //
-    output.Delay = (5 - input.SkillLevel / 33) * 10;                     // 5->2ÃÊ
+    output.Delay = (5 - input.SkillLevel / 33) * 10;                     
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -1025,9 +1025,9 @@ void CauseLightWounds::computeOutput(const SkillInput& input, SkillOutput& outpu
     // output.Damage = 10 + input.SkillLevel/10;
     // output.Damage = 5 + input.INTE/10 + input.SkillLevel/10;	// by sigi. 2002.12.3
     output.Damage = 10 + input.INTE / 10 + input.SkillLevel / 10; // by sigi. 2002.12.3
-    output.Delay = 10;                                            // 1ÃÊ
+    output.Delay = 10;                                            
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void CureSeriousWounds::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1037,17 +1037,17 @@ void CureSeriousWounds::computeOutput(const SkillInput& input, SkillOutput& outp
         output.Damage = 30 + input.SkillLevel / 4;
     }
 
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void RemoveCurse::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Delay = (5 - input.SkillLevel / 33) * 10; // 5->2ÃÊ
+    output.Delay = (5 - input.SkillLevel / 33) * 10; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -1062,18 +1062,18 @@ void ProtectionFromCurse::computeOutput(const SkillInput& input, SkillOutput& ou
         output.Damage = max(30, 20 + input.INTE / 20);
     }
 
-    // output.Duration = (25 + input.SkillLevel/2) * 10; // 25~75ÃÊ
-    // output.Duration = (40 + input.INTE*2/3) * 10; // 25~75ÃÊ	// by sigi. 2002.12.3
-    output.Duration = (60 + input.SkillLevel / 2 + input.INTE / 2) * 10; // 25~75ÃÊ	// by sigi. 2002.12.3
-    output.Delay = (5 - input.SkillLevel / 33) * 10;                     // 5->2ÃÊ
+    
+    
+    output.Duration = (60 + input.SkillLevel / 2 + input.INTE / 2) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;                     
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void Resurrect::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Delay = 20; // 2ÃÊ
+    output.Delay = 20; 
 }
 
 void CauseSeriousWounds::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1081,9 +1081,9 @@ void CauseSeriousWounds::computeOutput(const SkillInput& input, SkillOutput& out
     //  by sigi. 2002.12.3
     // output.Damage = 5 + input.INTE/8 + input.SkillLevel/5;
     output.Damage = 15 + input.INTE / 8 + input.SkillLevel / 5;
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void CureCriticalWounds::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1093,11 +1093,11 @@ void CureCriticalWounds::computeOutput(const SkillInput& input, SkillOutput& out
         output.Damage = 10 + input.SkillLevel / 20;
     }
 
-    output.Delay = (40 - input.SkillLevel / 5) * 10; // 40ÃÊ~20ÃÊ
+    output.Delay = (40 - input.SkillLevel / 5) * 10; 
 
-    output.Duration = (20 + input.SkillLevel / 5) * 10; // 20ÃÊ~40ÃÊ
+    output.Duration = (20 + input.SkillLevel / 5) * 10; 
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -1112,55 +1112,47 @@ void ProtectionFromAcid::computeOutput(const SkillInput& input, SkillOutput& out
         output.Damage = min(30, 20 + input.INTE / 20);
     }
 
-    // output.Duration = (20 + input.SkillLevel/2) * 10; // 20~70ÃÊ
-    // output.Duration = (40 + input.INTE*2/3) * 10; // 20~70ÃÊ
-    output.Duration = (60 + input.SkillLevel / 2 + input.INTE / 2) * 10; // 20~70ÃÊ
-    output.Delay = (5 - input.SkillLevel / 33) * 10;                     // 5->2ÃÊ
+    
+    
+    output.Duration = (60 + input.SkillLevel / 2 + input.INTE / 2) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;                     
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void Sacrifice::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Duration = (30 + input.SkillLevel / 5) * 10; // 30~50ÃÊ
-    output.Delay = (5 - input.SkillLevel / 33) * 10;    // 5->2ÃÊ
+    output.Duration = (30 + input.SkillLevel / 5) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;    
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Damage   = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
 void CauseCriticalWounds::computeOutput(const SkillInput& input, SkillOutput& output) {
-    /*
-    output.Damage = 20 + input.SkillLevel/6;
-    output.Delay  = 10; // 1ÃÊ
-    */
+     
 
     // output.Damage = 3 + input.SkillLevel / 10; // 3-13
     //  by sigi. 2002.12.3
     output.Damage = 5 + input.INTE / 10 + input.SkillLevel / 5; // 3-13
-    output.Delay = (10 - input.SkillLevel / 33) * 10;           // 10-7ÃÊ
-    output.Duration = (3 + input.SkillLevel / 50) * 10;         // 3-5ÃÊ
+    output.Delay = (10 - input.SkillLevel / 33) * 10;           
+    output.Duration = (3 + input.SkillLevel / 50) * 10;         
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
-/*
-void CureAll::computeOutput(const SkillInput& input, SkillOutput& output)
-{
-    output.Delay = (4 - input.SkillLevel/33) * 10; // 4->1ÃÊ
-}
-*/
+ 
 
 void RegenerationSkill::computeOutput(const SkillInput& input, SkillOutput& output) {}
 
 void EnergyDrop::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Damage = 25 + input.SkillLevel/5; // 20 ~ 45
-    // output.Delay = 30; // 3ÃÊ
+    
     // output.Damage = 10 + input.INTE/10 + input.SkillLevel/5; // 20 ~ 45 12.06
 
-    // 2002.12.06 ÀåÈ«Ã¢
+    
     //	output.Damage = 10 + input.INTE/10 + input.SkillLevel/3;
     output.Damage = 18 + input.INTE / 10 + input.SkillLevel / 2.5;
     //	output.Delay = (8 - input.SkillLevel/20)*10;
@@ -1170,10 +1162,10 @@ void EnergyDrop::computeOutput(const SkillInput& input, SkillOutput& output) {
 void VigorDrop::computeOutput(const SkillInput& input, SkillOutput& output) {
     // by sigi. 2002.12.3
     // output.Damage = 25 + input.SkillLevel/5; // 20 ~ 45
-    // output.Delay = 30; // 3ÃÊ
+    
     // output.Damage = 10 + input.INTE/10 + input.SkillLevel/5; // 20 ~ 45 2002.12.06
 
-    // 2002.12.06 ÀåÈ«Ã¢
+    
     //	output.Damage = 10 + input.INTE/10 + input.SkillLevel/3;
     output.Damage = 18 + input.INTE / 10 + input.SkillLevel / 3;
     //	output.Delay = (8 - input.SkillLevel/20)*10;
@@ -1186,7 +1178,7 @@ void Activation::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Duration = (40 + input.SkillLevel / 5) * 10;
     output.Delay = (6 - input.SkillLevel / 50) * 10;
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = 0;
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -1207,7 +1199,7 @@ void Reflection::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 0;
     // output.Delay = 5 - input.SkillLevel/33;
     output.Duration = (20 + input.SkillLevel / 5) * 10;
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 }
 
 void Hymn::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1217,23 +1209,23 @@ void Hymn::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ¹ìÆÄÀÌ¾î °è¿­
+
 //////////////////////////////////////////////////////////////////////////////
 
 void PoisonousHands::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(20, 3 + (input.INTE - 20) / 3);
-    output.Delay = 6; // 0.6ÃÊ
+    output.Delay = 6; 
 }
 
 void AcidTouch::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 6 + input.INTE / 15;
-    output.Delay = 6; // 0.6ÃÊ
+    output.Delay = 6; 
 }
 
 void GreenPoison::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(15, 5 + (input.INTE - 20) / 10);
     output.Duration = min(20, 10 + (input.INTE - 20) / 10) * 10;
-    output.Delay = max(2, 5 - (input.INTE - 20) / 50) * 10; // 5->2ÃÊ
+    output.Delay = max(2, 5 - (input.INTE - 20) / 50) * 10; 
 }
 
 void Darkness::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1327,7 +1319,7 @@ void Seduction::computeOutput(const SkillInput& input, SkillOutput& output) {
 
 void BloodyNail::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 8 + input.DEX / 10 + input.INTE / 30;
-    output.Delay = 6; // 0.6ÃÊ
+    output.Delay = 6; 
 }
 
 void BloodyKnife::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1343,21 +1335,21 @@ void BloodyBall::computeOutput(const SkillInput& input, SkillOutput& output) {
 void BloodyWave::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.INTE / 6 + input.STR / 7 + input.DEX / 7;
     output.Delay = max(1, 3 - input.DEX / 50) * 10;
-    // ToHit´Â bKnockbackÀ¸·Î ¾²ÀÎ´Ù.
+    
     output.ToHit = 50; // min(35, 10 + (int)(input.INTE/10));
 }
 
 void BloodyMasterWave::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(80, 40 + (input.INTE - 20) / 4);
     output.Delay = 30;
-    // ToHit´Â bKnockbackÀ¸·Î ¾²ÀÎ´Ù.
+    
     output.ToHit = min(55, 30 + (int)(input.INTE / 10));
 }
 
 void BloodyWarp::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(70, 30 + (input.INTE - 20) / 4);
     output.Delay = 30;
-    // ToHit´Â bKnockbackÀ¸·Î ¾²ÀÎ´Ù.
+    
     output.ToHit = min(35, 10 + (int)(input.INTE / 10));
 }
 
@@ -1399,10 +1391,10 @@ void BloodyStrike::computeOutput(const SkillInput& input, SkillOutput& output) {
 void PoisonStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Damage = input.STR/30 + input.INTE/9; 12.6
 
-    // 2002.12.06 ÀåÈ«Ã¢
+    
     output.Damage = input.STR / 30 + input.INTE / 4;
 
-    // 2003.3.20 Sequoia µô·¹ÀÌ ¹Ì´Ï¸Ø ³Ö¾ú´Ù.
+    
     output.Delay = max((8 - input.DEX / 50) * 10, 20);
     output.Range = min(6, 3 + (input.SkillLevel - 40) / 8);
 }
@@ -1410,10 +1402,10 @@ void PoisonStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
 void AcidStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Damage = input.STR/28 + input.INTE/8;  12.6
 
-    // 2002.12.06 ÀåÈ«Ã¢
+    
     output.Damage = input.STR / 25 + input.INTE * 2 / 7;
 
-    // 2003.3.20 Sequoia µô·¹ÀÌ ¹Ì´Ï¸Ø ³Ö¾ú´Ù.
+    
     output.Delay = max((9 - input.DEX / 50) * 10, 20);
 }
 
@@ -1421,13 +1413,13 @@ void BloodyStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 25 + input.INTE / 6;
     output.Duration = (input.DEX / 100 + input.INTE / 100) * 10;
 
-    // 2003.3.20 Sequoia µô·¹ÀÌ ¹Ì´Ï¸Ø ³Ö¾ú´Ù.
+    
     output.Delay = max((9 - input.DEX / 50) * 10, 20);
 }
 
 void Extreme::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // µ¥¹ÌÁö º¸³Ê½º´Â ¿©±â¼­ °è»êÇÏÁö ¾Ê°í,
-    // Vampire::initAllStat()¿¡¼­ °è»êÇÑ´Ù.
+    
+    
     output.Damage = 0;
     //	output.Duration = (30 + (input.INTE-20)/6) * 10;  // 30 -> 80
     output.Duration = (60 + input.STR / 15 + input.DEX / 6 + input.INTE / 20) * 10; // 30 -> 80
@@ -1435,13 +1427,13 @@ void Extreme::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 void CriticalGround::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // acid bolt¶û ¶È°°´ç - -;
+    
     // output.Damage = min(40, 20 + (input.INTE-20)/6);
-    // output.Delay  = 10; // 1ÃÊ
+    
 
     // 20
     // 145 --> 145~290 --> 22~46
-    // 500 --> 500~1000 --> 125~250 (±âÈ¹140~280)
+    
 
     int divider = 1;
     if (input.STR < 200) {
@@ -1451,9 +1443,9 @@ void CriticalGround::computeOutput(const SkillInput& input, SkillOutput& output)
     }
 
     output.Damage = max(20, (input.STR + rand() % input.STR) / divider);
-    output.Delay = 10; // 0.6ÃÊ
+    output.Delay = 10; 
 
-    // °ø°Ý°è ±â¼ú¿¡´Â ÆÄÆ¼ º¸³Ê½º°¡ Á¸ÀçÇÏÁö ¾Ê´Â´Ù.
+    
 }
 
 void Peace::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1463,7 +1455,7 @@ void Peace::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 void Death::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // 2003.3.20 by Sequoia ÃÖ´ë°ªÀÌ Ãß°¡µÇ¾ú´Ù.
+    
     //	output.Damage   = min( input.INTE*10/25 + input.STR/6, 150 );
     output.Damage = min(input.INTE / 5 + input.STR / 12, 80);
     output.Duration = (input.INTE / 5) * 10;
@@ -1471,7 +1463,7 @@ void Death::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 void Mephisto::computeOutput(const SkillInput& input, SkillOutput& output) {
-    // ÀÌ ±â¼ú¸¸ Æ¯º°È÷.. parameter¸¦ ´ÙÀ½°ú °°ÀÌ ³Ñ°ÜÁØ´Ù.
+    
     // input.SkillLevel = pVampire->getSTR()+pVampire->getDEX()+pVampire->getINT();
     // input.DomainLevel = pVampire->getLevel();
 
@@ -1493,12 +1485,12 @@ void Transfusion::computeOutput(const SkillInput& input, SkillOutput& output) {
 
 void SummonMonsters::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 0;
-    output.Delay = 20; // 2ÃÊ
+    output.Delay = 20; 
 }
 
 void GroundAttack::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(100, 30 + (input.INTE - 20) / 5); // % damage
-    output.Duration = 20;                                 // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 20;                                 
     output.Tick = 15;
     output.Delay = max(3, 6 - (input.INTE - 20) / 50) * 10;
 }
@@ -1506,7 +1498,7 @@ void GroundAttack::computeOutput(const SkillInput& input, SkillOutput& output) {
 void MeteorStrike::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage =
         (int)(input.SkillLevel * 0.8 + (rand() % (int)(input.SkillLevel * 0.4 + 1))) + (input.STR + input.DEX) / 6;
-    output.Duration = 10; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 10; 
     output.Delay = 10;
 }
 
@@ -1520,7 +1512,7 @@ void Hallucination::computeOutput(const SkillInput& input, SkillOutput& output) 
 }
 
 void DuplicateSelf::computeOutput(const SkillInput& input, SkillOutput& output) {
-    output.Damage = min((3 + rand() % 5), input.INTE / 100); // ºÐ½Å °³¼ö
+    output.Damage = min((3 + rand() % 5), input.INTE / 100); 
     output.Duration = min(80, 30 + (input.INTE - 20) / 3) * 10;
     output.Delay = max(3, 5 - (input.INTE - 20) / 10) * 10;
 }
@@ -1534,14 +1526,14 @@ void SharpShield::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Duration = (10 + (input.SkillLevel / 2)) * 10;
     output.Damage = (input.STR / 20) + (input.SkillLevel / 20);
     // output.Delay    = ( 5 - ( input.SkillLevel / 25 ) ) * 10;
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 }
 
 void WideLightning::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Delay = 10;
     output.Damage = (input.STR / 8) + (input.SkillLevel / 3);
-    output.Duration = 6; // 0.6ÃÊ
-    output.Tick = 6;     // 0.6ÃÊ
+    output.Duration = 6; 
+    output.Tick = 6;     
 }
 
 void GunShotGuidance::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1554,9 +1546,9 @@ void GunShotGuidance::computeOutput(const SkillInput& input, SkillOutput& output
 void AirShield::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage	= 50 + ( input.SkillLevel >> 1 ); 			// 50 + SkillLevel / 2
     output.Damage = 50 + (input.SkillLevel / 5);           // 50 + SkillLevel / 2
-    output.Duration = (10 + (input.SkillLevel >> 1)) * 10; // 10 + SkillLevel / 2 (ÃÊ)
+    output.Duration = (10 + (input.SkillLevel >> 1)) * 10; 
     // output.Delay	= ( 5 - ( input.SkillLevel / 25 ) ) * 10;
-    output.Delay = output.Duration; // Delay ¿Í Duration ÀÌ °°´Ù. by bezz 2003.3.5
+    output.Delay = output.Duration; 
 }
 
 void BulletOfLight::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1580,25 +1572,25 @@ void BulletOfLight::computeOutput(const SkillInput& input, SkillOutput& output) 
         }*/
     output.Damage = -20 + (input.SkillLevel * 2 / 3); // / 1.5 );
     output.ToHit = -10 + (input.SkillLevel / 2);      // / 1.5 );
-    output.Delay = 2;                                 // 0.2ÃÊ
+    output.Delay = 2;                                 
 }
 
 void HandsOfWisdom::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.STR / 15 + input.INTE / 8;
-    output.Delay = 6; // 0.6ÃÊ
+    output.Delay = 6; 
 }
 
 void LightBall::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 2 + (input.INTE/20) + (input.SkillLevel/10);
     output.Damage = 9 + (input.INTE / 20) + (input.SkillLevel / 10);
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
     output.Range = 2 + (input.SkillLevel / 25);
 }
 
 void HolyArrow::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Damage = 2 + (input.INTE/20) + (input.SkillLevel/10);
     output.Damage = 8 + (input.INTE / 20) + (input.SkillLevel / 10);
-    output.Delay = 10; // 1ÃÊ
+    output.Delay = 10; 
     output.Range = 2 + (input.SkillLevel / 25);
 }
 
@@ -1629,8 +1621,8 @@ void Regeneration::computeOutput(const SkillInput& input, SkillOutput& output) {
 void PowerOfLand::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Delay = 10;
     output.Damage = (input.STR / 8) + (input.SkillLevel / 3);
-    output.Duration = 10; // 1ÃÊ
-    output.Tick = 10;     // 1ÃÊ
+    output.Duration = 10; 
+    output.Tick = 10;     
 }
 
 void TurnUndead::computeOutput(const SkillInput& input, SkillOutput& output) {
@@ -1649,7 +1641,7 @@ void Armageddon::computeOutput(const SkillInput& input, SkillOutput& output) {
 void BloodyBreaker::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = input.INTE / 4 + input.STR / 5 + input.DEX / 5;
     output.Delay = max(1, 3 - input.DEX / 50) * 10;
-    // ToHit Àº knockback È®·ü
+    
     output.ToHit = 50;
 }
 
@@ -2134,7 +2126,7 @@ void GreatHeal::computeOutput(const SkillInput& input, SkillOutput& output) {
 
     output.Delay = (5 - input.SkillLevel / 33) * 10;
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     // output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
 
@@ -2202,11 +2194,11 @@ void ProtectionFromBlood::computeOutput(const SkillInput& input, SkillOutput& ou
         output.Damage = min(30, 20 + input.INTE / 20);
     }
 
-    // output.Duration = (20 + input.SkillLevel/2) * 10; // 20~70ÃÊ
-    output.Duration = (60 + input.INTE / 2 + input.SkillLevel / 2) * 10; // 20~70ÃÊ
-    output.Delay = (5 - input.SkillLevel / 33) * 10;                     // 5->2ÃÊ
+    
+    output.Duration = (60 + input.INTE / 2 + input.SkillLevel / 2) * 10; 
+    output.Delay = (5 - input.SkillLevel / 33) * 10;                     
 
-    // ÆÄÆ¼ º¸³Ê½º¸¦ °è»êÇÑ´Ù.
+    
     output.Damage = getPercentValue(output.Damage, PartyEffectBoost[input.PartySize]);
     output.Duration = getPercentValue(output.Duration, PartyDurationBoost[input.PartySize]);
 }
@@ -2401,7 +2393,7 @@ void HellFire::computeOutput(const SkillInput& input, SkillOutput& output) {
             max(20, min(150, (int)(((input.INTE / 30.0) * (1.0 + ((float)(input.SkillLevel) / 45.0)) + 5.0) * 10)));
     }
 
-    // ToHit À» Speed Damage ·Î »ç¿ë
+    
     output.ToHit = (int)(5.0 + (input.INTE / 50.0) * (1.0 + (input.SkillLevel / 15.0)));
     output.Delay = (int)max(40.0, (output.Duration * 1.2 - (input.SkillLevel * 10)));
     output.Tick = 5;
@@ -2698,30 +2690,30 @@ void GoreGlandFire::computeOutput(const SkillInput& input, SkillOutput& output) 
 
 void ThrowingAxe::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = Random(870, 1000);
-    output.Duration = 20; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 20; 
     output.Delay = 10;
 }
 
 void ChoppingFirewood::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = Random(870, 1000);
-    output.Duration = 10; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 10; 
     output.Delay = 10;
 }
 
 void ChainThrowingAxe::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = Random(500, 650);
-    output.Duration = 20; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 20; 
     output.Delay = 10;
 }
 
 void MultiThrowingAxe::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = Random(870, 1000);
-    output.Duration = 20; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 20; 
     output.Delay = 10;
 }
 void PlayingWithFire::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 400;
-    output.Duration = 20; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 20; 
     output.Delay = 0;
 }
 
@@ -2734,7 +2726,7 @@ void InfinityThunderbolt::computeOutput(const SkillInput& input, SkillOutput& ou
 
 void SpitStream::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 30 + (input.STR / 10) + (input.SkillLevel / 5);
-    output.Duration = 4; // ¸î ÃÊÈÄ Æø¹ß
+    output.Duration = 4; 
     output.Delay = 0;
 }
 
@@ -2875,7 +2867,7 @@ void ShadowOfStorm::computeOutput(const SkillInput& input, SkillOutput& output) 
     output.Duration = 50 + (min(input.Range, 10) * 5);
     output.Delay = 50;
 }
-// Ò°ÀÇ
+
 void WildWolf::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = (input.DEX / 8) + (input.STR / 30) + min(input.Range, 10) * 2;
     output.Delay = max(5, (10 - (input.DEX / 200))) * 10;
@@ -2920,92 +2912,83 @@ void RottenApple::computeOutput(const SkillInput& input, SkillOutput& output) {
 }
 
 // add by coffee 2007-2-17
-// ÑªÖ®ÀÓÓ¡
+
 void BloodyScarify::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = (input.DEX / 5) + (input.STR / 25) + min(input.Range, 10) * 2;
     output.Delay = max(5, (10 - (input.DEX / 200))) * 10;
 }
-// ÑªÖ®?Öä
+
 
 void BloodCurse::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage =
         (int)(input.SkillLevel * 0.8 + (rand() % (int)(input.SkillLevel * 0.4 + 1))) + (input.INTE + input.DEX) / 4;
-    output.Duration = 28; // ÑÓÊ±ÏÔÊ¾Ð§¹û
+    output.Duration = 28; 
     output.Delay = max(5, (10 - (input.DEX / 200))) * 10;
     ;
 }
 
-// ÉÁÒ«Ö®½£
+
 void ShineSword::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = (20 + (input.STR / 15) + (min(input.Range, 10) * 2)) * 3;
     output.Delay = (4 - min(input.Range, 10) / 5) * 10;
-    output.Duration = 20; // ÑÓÊ±ÏÔÊ¾Ð§¹û
+    output.Duration = 20; 
 }
 
-// ¾ÞÅÚºäÕ¨
+
 void BombCrashWalk::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Delay = 10;
     output.Damage = (input.STR / 8) + (input.SkillLevel / 3);
-    output.Duration = 7; // 1ÃÊ
-    output.Tick = 1;     // 1ÃÊ
-                         /*
-                         output.Damage = (20 + (input.STR/15) + (min(input.Range,10)*2))*3;
-                         output.Delay = (4 - min(input.Range,10)/5)*10;
-                         output.Duration = 20;//ÑÓÊ±ÏÔÊ¾Ð§¹û
-                         */
+    output.Duration = 7; 
+    output.Tick = 1;     
+                          
 }
-// ÎÀÐÇºä»÷ (ÈËÀàÇ¹ÐÂ¼¼ÄÜ)
+
 void SatelliteBomb::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 150 + input.SkillLevel / 2;
-    output.Duration = 6; // 0.6 Ãë
+    output.Duration = 6; 
     output.Delay = 35 - input.SkillLevel * 10 / 33;
     output.Range = 8;
 }
 
-// ¿Ö²À»Ã¾õ (ÈËÀàÒ½ÉúÐÂ¼¼ÄÜ)
+
 void IllusionInversion::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = max(200, ((input.INTE / 8) * (1 + (input.SkillLevel / 33))));
     // output.Damage = (( input.INTE / 5 )* 0.7) * ( 1 + ( input.SkillLevel / 33 ) );
     output.Delay = 170 - input.SkillLevel * 10 / 33;
     output.Range = 5;
-    /*
-    output.Damage	=  + input.SkillLevel / 2;
-    output.Duration	= 6; //0.6 Ãë
-    output.Delay	= 10;
-    output.Range	= 8;
-    */
+     
 }
-// ÌìÉñ½µÁÙ (ÈËÀà×£¸£ÐÂ¼¼ÄÜ)
+
 void HeavenGround::computeOutput(const SkillInput& input, SkillOutput& output) {
     //	output.Duration = (10 + input.INTE/20 + input.SkillLevel/10)*10;
     output.Duration = (10 + input.INTE / 20 + input.SkillLevel / 6) * 9;
-    // cout << "ÌìÉñ½µÁÙÑÓÊ±:" << (int)output.Duration << endl;
+    
 
     output.Delay = output.Duration; //(10 - input.SkillLevel/33) * 10;
     // edit by Coffee 2007-5-8
     output.Damage = min(80, (input.INTE / 18) * (1 + (input.SkillLevel / 33)));
     output.Tick = 20;
 }
-// µÂÀ×¿Ë¿þÀÜ(Ä§Áé »ð·¨)
+
 void DummyDrake::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 250 + (input.INTE / 50) + min(input.Range, 10);
     output.Duration = (10 + (min(input.Range, 10) / 2)) * 5;
     output.Delay = output.Duration;
 }
-// ¸´ºÏË®ÁÆ (Ë®·¨)
+
 void HydroConvergence::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 20 + (input.INTE / 50) + min(input.Range, 10);
     output.Duration = (10 + (min(input.Range, 10) / 2)) * 5;
     output.Delay = output.Duration;
 }
-// Õ³ÍÁÕÙ»½ (ÍÁ·¨)
+
 void SummonClay::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Damage = 20 + (input.INTE/50) + min(input.Range,10);
     output.Duration = ((input.INTE / 30) + (min(input.Range, 10) / 2)) * 13;
-    // cout << "Õ³ÍÁÕÙ»½:" << (int)output.Duration << endl;
+    
     output.Delay = output.Duration;
 }
-// ÏÄ²¼Àû»ùÒò (Ä§Õ½)
+
 void HeterChakram::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = min(200, 140 + (input.STR / 5) + (min(input.Range, 10) * 5));
     output.Range = 60 + (min(input.Range, 10) * 3);
@@ -3022,11 +3005,11 @@ void SkyFire::computeOutput(const SkillInput& input, SkillOutput& output) {
 void CutStorm::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = (20 + (input.STR / 15) + (min(input.Range, 10) * 2)) * 3;
     output.Delay = (4 - min(input.Range, 10) / 5) * 10;
-    output.Duration = 20; // ÑÓÊ±ÏÔÊ¾Ð§¹û
+    output.Duration = 20; 
 }
 void XRLMissile::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage = 150 + input.SkillLevel / 2;
-    output.Duration = 6; // 0.6 Ãë
+    output.Duration = 6; 
     output.Delay = 35 - input.SkillLevel * 10 / 33;
     output.Range = 8;
 }
@@ -3035,12 +3018,7 @@ void SacredStamp::computeOutput(const SkillInput& input, SkillOutput& output) {
     // output.Damage = (( input.INTE / 5 )* 0.7) * ( 1 + ( input.SkillLevel / 33 ) );
     output.Delay = 170 - input.SkillLevel * 10 / 33;
     output.Range = 5;
-    /*
-    output.Damage	=  + input.SkillLevel / 2;
-    output.Duration	= 6; //0.6 Ãë
-    output.Delay	= 10;
-    output.Range	= 8;
-    */
+     
 }
 void BrambleHalo::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Duration = (10 + input.INTE / 20 + input.SkillLevel / 6) * 9;
@@ -3055,7 +3033,7 @@ void DeadlyClaw::computeOutput(const SkillInput& input, SkillOutput& output) {
 void VoodooRing::computeOutput(const SkillInput& input, SkillOutput& output) {
     output.Damage =
         (int)(input.SkillLevel * 0.8 + (rand() % (int)(input.SkillLevel * 0.4 + 1))) + (input.INTE + input.DEX) / 4;
-    output.Duration = 28; // ÑÓÊ±ÏÔÊ¾Ð§¹û
+    output.Duration = 28; 
     output.Delay = max(5, (10 - (input.DEX / 200))) * 10;
     ;
 }

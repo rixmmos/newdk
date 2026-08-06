@@ -44,7 +44,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
 
         Assert(pPacket != NULL);
 
-    // 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     try {
         Assert(pGuild != NULL);
@@ -52,7 +52,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
         return;
     }
 
-    // 길드 멤버인지 확인한다.
+    
     GuildMember* pGuildMember = pGuild->getMember(pPacket->getName());
     try {
         Assert(pGuildMember != NULL);
@@ -63,13 +63,13 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
     if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_WAIT &&
         pPacket->getGuildMemberRank() == GuildMember::GUILDMEMBER_RANK_NORMAL) {
         ////////////////////////////////////////////////////////////////////////////
-        // 길드 가입 신청을 승인한 경우이다.
+        
         ////////////////////////////////////////////////////////////////////////////
 
-        // 길드멤버 정보를 변경한다.
+        
         pGuild->modifyMemberRank(pGuildMember->getName(), pPacket->getGuildMemberRank());
 
-        // 접속해 있다면 메시지를 보낸다.
+        
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
         Creature* pCreature = g_pPCFinder->getCreature_LOCKED(pGuildMember->getName());
@@ -77,7 +77,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
             Assert(pPlayerCreature != NULL);
 
-            // 실제 길드 ID를 등록한다.
+            
             pPlayerCreature->setGuildID(pGuildMember->getGuildID());
 
             Player* pPlayer = pCreature->getPlayer();
@@ -86,14 +86,14 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             Zone* pZone = pCreature->getZone();
             Assert(pZone != NULL);
 
-            // 바뀐 길드 ID 정보를 보내준다.
+            
             GCModifyGuildMemberInfo gcModifyGuildMemberInfo;
             gcModifyGuildMemberInfo.setGuildID(pGuild->getID());
             gcModifyGuildMemberInfo.setGuildName(pGuild->getName());
             gcModifyGuildMemberInfo.setGuildMemberRank(pGuildMember->getRank());
             pPlayer->sendPacket(&gcModifyGuildMemberInfo);
 
-            // 길드 가입 승인 메시지를 보낸다.
+            
             Statement* pStmt = NULL;
             Result* pResult = NULL;
 
@@ -114,21 +114,21 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             }
             END_DB(pStmt)
 
-            // 주위에 길드 가입을 알린다.
+            
             GCOtherModifyInfo gcOtherModifyInfo;
             gcOtherModifyInfo.setObjectID(pCreature->getObjectID());
             gcOtherModifyInfo.addShortData(MODIFY_GUILDID, pGuildMember->getGuildID());
 
             pZone->broadcastPacket(pCreature->getX(), pCreature->getY(), &gcOtherModifyInfo);
         }
-        // 승인한 사람에게 메시지를 보낸다.
+        
         pCreature = g_pPCFinder->getCreature_LOCKED(pPacket->getSender());
         if (pCreature != NULL && pCreature->isPC()) {
             Player* pPlayer = pCreature->getPlayer();
             Assert(pPlayer != NULL);
 
             //			StringStream msg;
-            //			msg << pGuildMember->getName() << "님의 길드 가입을 승인하였습니다.";
+            
 
             char msg[100];
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER)
@@ -147,22 +147,22 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
     } else if (pGuildMember->getRank() != GuildMember::GUILDMEMBER_RANK_MASTER &&
                pPacket->getGuildMemberRank() == GuildMember::GUILDMEMBER_RANK_MASTER) {
         ///////////////////////////////////////////////////////////
-        // 길드 마스터를 변경한다.
+        
         ///////////////////////////////////////////////////////////
 
         string sMaster = pGuild->getMaster();
 
-        // 길드마스터의 랭크를 새로 길드마스터가 되는 멤버의 원래 랭크로 바꿔준다.
+        
         pGuild->modifyMemberRank(sMaster, pGuildMember->getRank());
-        // 새 길드마스터의 랭크를 세팅한다.
+        
         pGuild->modifyMemberRank(pGuildMember->getName(), pPacket->getGuildMemberRank());
-        // 길드 오브젝트에 새 길드 마스트로 세팅한다.
+        
         pGuild->setMaster(pGuildMember->getName());
 
-        // 접속해 있다면 메시지를 보낸다.
+        
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
-        // 새 길드마스터가 게임서버에 있다면 새 정보를 보내준다.
+        
         Creature* pCreature = g_pPCFinder->getCreature_LOCKED(pGuildMember->getName());
         if (pCreature != NULL && pCreature->isPC()) {
             PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
@@ -171,7 +171,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             Player* pPlayer = pCreature->getPlayer();
             Assert(pPlayer != NULL);
 
-            // 바뀐 길드 ID 정보를 보내준다.
+            
             GCModifyGuildMemberInfo gcModifyGuildMemberInfo;
             gcModifyGuildMemberInfo.setGuildID(pGuild->getID());
             gcModifyGuildMemberInfo.setGuildName(pGuild->getName());
@@ -179,7 +179,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             pPlayer->sendPacket(&gcModifyGuildMemberInfo);
         }
 
-        // 원래의 길드마스터가 게임서버에 있다면 새 정보를 보내준다.
+        
         pCreature = g_pPCFinder->getCreature_LOCKED(sMaster);
         if (pCreature != NULL && pCreature->isPC()) {
             PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
@@ -188,7 +188,7 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             Player* pPlayer = pCreature->getPlayer();
             Assert(pPlayer != NULL);
 
-            // 바뀐 길드 ID 정보를 보내준다.
+            
             GCModifyGuildMemberInfo gcModifyGuildMemberInfo;
             gcModifyGuildMemberInfo.setGuildID(pGuild->getID());
             gcModifyGuildMemberInfo.setGuildName(pGuild->getName());
@@ -196,15 +196,15 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             pPlayer->sendPacket(&gcModifyGuildMemberInfo);
         }
 
-        // 길마를 바꾼 사람에게 메시지를 보낸다.
+        
         pCreature = g_pPCFinder->getCreature_LOCKED(pPacket->getSender());
         if (pCreature != NULL && pCreature->isPC()) {
             Player* pPlayer = pCreature->getPlayer();
             Assert(pPlayer != NULL);
 
             //			StringStream msg;
-            //			msg << pGuild->getName() << "의 마스터를 " << sMaster << " 에서 "
-            //				<< pGuildMember->getName() << " 으로 변경하였습니다.";
+            
+            
 
             char msg[200];
             sprintf(msg, g_pStringPool->c_str(STRID_MODIFY_GUILD_MASTER), pGuild->getName().c_str(), sMaster.c_str(),
@@ -218,11 +218,11 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
         __LEAVE_CRITICAL_SECTION((*g_pPCFinder))
     } else {
         ///////////////////////////////////////////////////////////
-        // 길드멤버 정보를 변경한다.
+        
         ///////////////////////////////////////////////////////////
         pGuild->modifyMemberRank(pGuildMember->getName(), pPacket->getGuildMemberRank());
 
-        // 접속해 있다면 메시지를 보낸다.
+        
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
         Creature* pCreature = g_pPCFinder->getCreature_LOCKED(pGuildMember->getName());
@@ -241,14 +241,14 @@ void SGModifyGuildMemberOKHandler::execute(SGModifyGuildMemberOK* pPacket)
             pPlayer->sendPacket(&gcSystemMessage);
         }
 
-        // 변경시킨 사람에게 메시지를 보낸다.
+        
         pCreature = g_pPCFinder->getCreature_LOCKED(pPacket->getSender());
         if (pCreature != NULL && pCreature->isPC()) {
             Player* pPlayer = pCreature->getPlayer();
             Assert(pPlayer != NULL);
 
             //			StringStream msg;
-            //			msg << pGuildMember->getName() << "님의 길드 권한이 변경되었습니다.";
+            
 
             char msg[100];
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER)

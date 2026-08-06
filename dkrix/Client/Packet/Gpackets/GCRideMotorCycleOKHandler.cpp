@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,33 +33,33 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MItem* pItem = g_pZone->GetItem( pPacket->getObjectID() );
 
 		//------------------------------------------					
-		// pItem은 오토바이여야 한다.
-		// player에 장비 시킨다.
+		
+		
 		//------------------------------------------					
 		if (pItem != NULL)
 		{
 			if (pItem->GetItemClass()==ITEM_CLASS_MOTORCYCLE)
 			{
 				//------------------------------------------					
-				// 오토바이 addon 붙임.
+				
 				//------------------------------------------					
 				g_pPlayer->SetAddonItem( pItem );
 				
 				//------------------------------------------
-				// 움직이는 방법 바꿈
+				
 				//------------------------------------------					
 				//g_pPlayer->SetMoveDevice( MCreature::MOVE_DEVICE_RIDE );
 
 				//------------------------------------------
-				// Server에 접속된 경우가 아니면..
-				// 바로 mouse에 item이 붙는다.
+				
+				
 				//------------------------------------------
 				//PlaySound( pItem->GetTileSoundID(),
 				//			false,
@@ -78,11 +78,11 @@ throw ( ProtocolException , Error )
 	}
 	
 	//------------------------------------------
-	// 어쨋든 간에.. 검증이 되었다고 본다.
+	
 	//------------------------------------------
 	g_pPlayer->SetWaitVerifyNULL();
 
-	// [도움말] 오토바이 탄 경우
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_ITEM_RIDE_MOTORCYCLE );
 //	__END_HELP_EVENT

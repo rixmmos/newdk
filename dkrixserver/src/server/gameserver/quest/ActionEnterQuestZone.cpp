@@ -44,7 +44,7 @@ void ActionEnterQuestZone::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionEnterQuestZone::execute(Creature* pNPC, Creature* pCreature)
 
@@ -65,16 +65,16 @@ void ActionEnterQuestZone::execute(Creature* pNPC, Creature* pCreature)
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(m_ZoneID);
 
-        // 유료존인데 유료사용자가 아니면...
+        
         if (pZoneInfo == NULL ||
             pZoneInfo->isPayPlay() && !(pGamePlayer->isPayPlaying() || pGamePlayer->isFamilyFreePass())) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
             } else {
-                // 유료 서비스 사용 불가인 경우
+                
                 GCSystemMessage gcSystemMessage;
 
                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
@@ -93,11 +93,11 @@ void ActionEnterQuestZone::execute(Creature* pNPC, Creature* pCreature)
 #endif
 
     if (bTransport) {
-        // Dynamic 존인지 확인.
+        
         int targetDynamicZoneType = g_pDynamicZoneInfoManager->getDynamicZoneTypeByZoneID(m_ZoneID);
 
         if (targetDynamicZoneType != DYNAMIC_ZONE_MAX) {
-            // Dynamic 존일 경우
+            
             DynamicZoneGroup* pDynamicZoneGroup = g_pDynamicZoneManager->getDynamicZoneGroup(targetDynamicZoneType);
             Assert(pDynamicZoneGroup != NULL);
 
@@ -112,7 +112,7 @@ void ActionEnterQuestZone::execute(Creature* pNPC, Creature* pCreature)
                 pAlterOfBlood->setRace(pPC->getRace());
             }
         } else {
-            // Dynamic 존이 아닐 경우
+            
             transportCreature(pCreature, m_ZoneID, m_X, m_Y, true);
         }
     } else {

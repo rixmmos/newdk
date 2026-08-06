@@ -7,10 +7,10 @@
 #ifndef __CG_SELECT_TILE_EFFECT_H__
 #define __CG_SELECT_TILE_EFFECT_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectTileEffect
@@ -35,7 +35,7 @@ public:
 	void setEffectObjectID(ObjectID_t id) { m_EffectObjectID = id; }
 
 private:
-	ObjectID_t m_EffectObjectID; // 선택한 이펙트의 오브젝트 ID
+	ObjectID_t m_EffectObjectID; 
 };
 
 

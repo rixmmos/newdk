@@ -22,7 +22,7 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,14 +31,14 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		//AfxMessageBox( pPacket->toString().c_str() );
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
-		// 2004, 9, 1, sobeit add start - 공성전시 트랩일 경우 공격측에서는 보이지 않는다.
+		
 		WORD wMonsterType = pPacket->getMonsterType();
 		if( wMonsterType == 738 ||
 			wMonsterType == 739 ||
@@ -79,9 +79,9 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 
 			}
 		}
-		// 2004, 9, 1, sobeit add end - 공성전시 트랩일 경우 공격측에서는 보이지 않는다.
+		
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -104,19 +104,19 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			// [ TEST CODE ]
-			// 이름 설정
+			
 			//char str[20];
 			//sprintf(str, "ID=%d", pCreature->GetID());
 			//pCreature->SetName( (*g_pCreatureTable)[pPacket->getMonsterType()].Name.GetString() );
 			pCreature->SetName( pPacket->getMonsterName().c_str() );
 
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );
 
-			// 이름
+			
 			//pCreature->SetName( pPacket->getName().toString().c_str() );
 
-			// 색깔 정보
+			
 			
 
 			if (!g_pZone->AddCreature( pCreature ))
@@ -127,13 +127,13 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 			else
 			{				
 				//------------------------------------------------------------
-				// Load되지 않았으면 load한다.
+				
 				//------------------------------------------------------------
 //				LoadCreatureType( pPacket->getMonsterType() );			
 			}
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
@@ -152,66 +152,66 @@ void GCAddMonsterFromBurrowingHandler::execute ( GCAddMonsterFromBurrowing * pPa
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			// [ TEST CODE ]
-			// 이름 설정
+			
 			//char str[20];
 			//sprintf(str, "ID=%d", pCreature->GetID());
 			//pCreature->SetName( (*g_pCreatureTable)[pPacket->getMonsterType()].Name.GetString() );
 			pCreature->SetName( pPacket->getMonsterName().c_str() );
 
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );
 
-			// 이름
+			
 			//pCreature->SetName( pPacket->getName().toString().c_str() );
 
-			// 색깔 정보
+			
 
 			//------------------------------------------------------------
-			// Load되지 않았으면 load한다.
+			
 			//------------------------------------------------------------
 //			LoadCreatureType( pPacket->getMonsterType() );			
 		}
 
 		//--------------------------------------------------
-		// Effect 붙이기..
+		
 		//--------------------------------------------------
 		if (pCreature!=NULL)
 		{
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );		
-			// 2004, 8, 31, sobeit add start - 트랩에 이펙트 붙임
+			
 			switch(pCreature->GetCreatureType())
 			{
-				case 739: // 트랩 - 랜드 마인
+				case 739: 
 					ExecuteActionInfoFromMainNode(SKILL_CLIENT_LAND_MINE_LIGHT,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	pCreature->GetID(),	
 								pCreature->GetX(), pCreature->GetY(), 0, 0xffff, NULL, false);			
 					break;
-				case 738: // 트랩 - 플레져 스테이션
+				case 738: 
 					ExecuteActionInfoFromMainNode(SKILL_CLIENT_PLEASUER_STATION_LIGHT,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	pCreature->GetID(),	
 								pCreature->GetX(), pCreature->GetY(), 0, 0xffff, NULL, false);			
 					break;
 			}
 			// 2004, 8, 31, sobeit add end -
 			//--------------------------------------------------
-			// Burrow에서 빠져나오는 Effect == Burrowing하는 Effect
+			
 			//--------------------------------------------------		
 			ExecuteActionInfoFromMainNode(
-				RESULT_MAGIC_HIDE,										// 사용 기술 번호
+				RESULT_MAGIC_HIDE,										
 			
 				pCreature->GetX(), pCreature->GetY(), 0,
-				pCreature->GetDirection(),														// 사용 방향
+				pCreature->GetDirection(),														
 				
-				OBJECTID_NULL,												// 목표에 대한 정보
+				OBJECTID_NULL,												
 				pCreature->GetX(), pCreature->GetY(), 0, 
 				
-				0,													// 기술의 (남은) 지속 시간		
+				0,													
 				
 				NULL,
 				
-				false);			// 기술 첨부터 시작한다.
+				false);			
 		}
 	}
 
-	// [도움말] 몹이 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_MONSTER );
 //	__END_HELP_EVENT

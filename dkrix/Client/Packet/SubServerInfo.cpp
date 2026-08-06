@@ -19,17 +19,17 @@ void SubServerInfo::read ( SocketInputStream & iStream )
 	__BEGIN_TRY
 	try {
 
-	// 이름 크기
+	
 	BYTE szServerName;
 	iStream.read( m_ServerID );
 
-	// 이름 크기를 읽는다.
+	
 	iStream.read( szServerName );
 
-	// 실제 이름을 읽는다.
+	
 	iStream.read( m_ServerName, szServerName );
 
-	// 서버 상태를 읽는다.
+	
 	iStream.read( m_ServerStat );
 
 	} catch( Throwable & t ) {
@@ -49,18 +49,18 @@ void SubServerInfo::write ( SocketOutputStream & oStream ) const
 
 	try {
 
-	// 이름 크기
+	
 	BYTE szServerName = m_ServerName.size();
 
 	oStream.write( m_ServerID );
 
-	// 이름 크기를 쓴다
+	
 	oStream.write( szServerName );
 
-	// 실제 이름을 쓴다
+	
 	oStream.write( m_ServerName );
 
-	// 서버 상태를 쓴다
+	
 	oStream.write( m_ServerStat );
 
 	} catch (Throwable & t ) {

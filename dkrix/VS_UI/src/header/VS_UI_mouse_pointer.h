@@ -1,12 +1,4 @@
-/*-----------------------------------------------------------------------------
-
-	VS_UI_mouse_pointer.h
-
-	Mouse pointer ����.
-
-	2000.3.30. KJTINC
-
------------------------------------------------------------------------------*/
+ 
 
 #ifndef __VS_UI_MOUSE_POINTER_H__
 #define __VS_UI_MOUSE_POINTER_H__
@@ -45,7 +37,7 @@ private:
 	bool						Timer();
 
 	//
-	// ���� ����(Mouse pointer�� ����) Item.
+	
 	//
 	MItem *						m_p_current_pickup_item;
 

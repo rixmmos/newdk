@@ -63,7 +63,7 @@ void EffectCanEnterGDRLair::unaffect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트를 삭제하라고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(getSendEffectClass());
@@ -102,7 +102,7 @@ void EffectCanEnterGDRLair::create(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("INSERT INTO CanEnterGDRLair (OwnerID , YearTime, DayTime) VALUES ('%s', %ld, %ld)",
                             ownerID.c_str(), currentYearTime, m_Deadline.tv_sec);
 
@@ -123,7 +123,7 @@ void EffectCanEnterGDRLair::destroy(const string& ownerID)
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("DELETE FROM CanEnterGDRLair WHERE OwnerID = '%s'", ownerID.c_str());
 
         SAFE_DELETE(pStmt);
@@ -193,7 +193,7 @@ void EffectCanEnterGDRLairLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         Result* pResult = pStmt->executeQuery("SELECT DayTime FROM CanEnterGDRLair WHERE OwnerID = '%s'",
                                               pCreature->getName().c_str());
 

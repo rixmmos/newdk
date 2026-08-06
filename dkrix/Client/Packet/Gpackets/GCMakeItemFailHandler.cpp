@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------------------
-	// Temp Mode 체크
+	
 	//------------------------------------------------------------------
 	if (g_pTempInformation->GetMode() == TempInformation::MODE_SKILL_MAKE_ITEM)
 	{
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 		//g_pTempInformation->Value1 = itemClass;
 		//g_pTempInformation->Value2 = itemType;
 
-		// 못 움직이게 했던거 풀기
+		
 		UI_UnlockItem();
 	}
 	else

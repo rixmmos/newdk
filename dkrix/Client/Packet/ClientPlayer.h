@@ -18,11 +18,11 @@
 //
 // class ClientPlayer
 //
-// 클라이언트용 플레이어 클래스
+
 //
 //--------------------------------------------------------------------------------
 
-// 저장해놓을 이전 패킷의 개수
+
 const BYTE nPacketHistory = 10;
 
 class ClientPlayer : public Player {
@@ -50,7 +50,7 @@ public :
 	//virtual void sendPacket ( Packet * packet ) throw ( ProtocolException , Error );
 
 	// disconnect
-	// 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
+	
 	virtual void disconnect ( bool bDisconnected = DISCONNECTED ) throw ( ProtocolException , Error );
 	
 	// get debug std::string
@@ -59,11 +59,11 @@ public :
 public :
 
 	// return recent N-th packet
-	// 최근 전송된 N 번째 패킷을 리턴한다.
+	
 	Packet * getOldPacket ( uint prev = 0 ) throw ( OutOfBoundException , NoSuchElementException );
 
 	// return recent packet which has packetID
-	// 특정 ID를 가진 패킷 중 가장 최근의 패킷을 리턴한다.
+	
 	Packet * getOldPacket ( PacketID_t packetID ) throw ( NoSuchElementException );
 
 	// get player's status
@@ -92,7 +92,7 @@ public :
 
 	void setXY ( Coord_t x , Coord_t y ) throw () { m_X = x; m_Y = y; }
 
-	// 암호화 코드를 설정한다.
+	
 	void setEncryptCode() throw( Error );
 
 private :

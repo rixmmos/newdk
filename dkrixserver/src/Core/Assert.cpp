@@ -17,7 +17,7 @@
 //
 // __assert__
 //
-// �� �Լ������� __BEGIN_TRY , __END_CATCH�� wrapping�� �ʿ䰡 ����.
+
 //
 //--------------------------------------------------------------------------------
 void __assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {
@@ -42,8 +42,8 @@ void __assert__(const char* file, uint line, const char* func, const char* expr)
 
 //--------------------------------------------------------------------------------
 //
-// ���ο� Ư�� ������ BAN �ϰ�, �α׸� ����� �ڵ尡 �� ��
-// ������?
+
+
 //
 //--------------------------------------------------------------------------------
 void __protocol_assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {

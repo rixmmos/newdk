@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename : CreatureUtil.cpp
-// Written by : 김성민
+
 // Description :
-// Vampire와 Vampire 파일의 크기를 될 수 있는 한 줄이기 위해서 둘의 공통되는
-// 부분을 가능한 한 빼놓은 파일이다.
-// 나중에 PlayerCreature 클래스가 나오면, 이 파일의 내용을 그 안에다가
-// 포함시키는 것이 좋을 것이다.
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "CreatureUtil.h"
@@ -68,7 +68,7 @@
 #include "skill/SummonGroundElemental.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// 같은 크리쳐 클래스인가?
+
 ////////////////////////////////////////////////////////////////////////////////
 bool isSameRace(Creature* pCreature1, Creature* pCreature2)
 
@@ -85,7 +85,7 @@ bool isSameRace(Creature* pCreature1, Creature* pCreature2)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// ObjectID로 아이템 찾기
+
 //
 ////////////////////////////////////////////////////////////////////////////////
 Item* findItemOID(Creature* pCreature, ObjectID_t id)
@@ -125,7 +125,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    // 인벤토리 검색
+    
     pItem = pInventory->findItemOID(id, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -134,7 +134,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
         return pItem;
     }
 
-    // 기어창 검색
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -170,14 +170,14 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
         }
     }
 
-    // 마우스 검색
+    
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getObjectID() == id) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    // 보관함 검색
+    
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -210,7 +210,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    // 인벤토리 검색
+    
     pItem = pInventory->findItemOID(id, IClass, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -219,7 +219,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
         return pItem;
     }
 
-    // 기어창 검색
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -255,14 +255,14 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
         }
     }
 
-    // 마우스 검색
+    
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getObjectID() == id && pItem->getItemClass() == IClass) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    // 보관함 검색
+    
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -282,7 +282,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// ItemID로 아이템 찾기
+
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -323,7 +323,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    // 인벤토리 검색
+    
     pItem = pInventory->findItemIID(id, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -332,7 +332,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
         return pItem;
     }
 
-    // 기어창 검색
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -368,14 +368,14 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
         }
     }
 
-    // 마우스 검색
+    
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getItemID() == id) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    // 보관함 검색
+    
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -408,7 +408,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    // 인벤토리 검색
+    
     pItem = pInventory->findItemIID(id, IClass, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -417,7 +417,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
         return pItem;
     }
 
-    // 기어창 검색
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -453,14 +453,14 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
         }
     }
 
-    // 마우스 검색
+    
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getItemID() == id && pItem->getItemClass() == IClass) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    // 보관함 검색
+    
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -479,9 +479,9 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 경험치 계산하기
-// 뱀파이어가 어떤 크리쳐를 흡혈하거나, 죽였을 경우에 올라가는 경험치를
-// 계산하는 함수
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
 
@@ -494,8 +494,8 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
     int exp = 0;
 
     if (pCreature->isSlayer()) {
-        // 만약 KILL_AFTERMATH가 붙은 상태에서 다시 죽는다거나,
-        // AFTERMATH가 붙은 상황에서 다시 흡혈이 되는 경우에는 경험치를 받지 않는다.
+        
+        
         if ((pCreature->isFlag(Effect::EFFECT_CLASS_KILL_AFTERMATH) == true && percent != BLOODDRAIN_EXP) ||
             (pCreature->isFlag(Effect::EFFECT_CLASS_AFTERMATH) == true && percent == BLOODDRAIN_EXP)) {
             exp = 0;
@@ -508,7 +508,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1;
         }
 
-        // 만약 슬레이어를 흡혈한 경우에는 BLOODDRAIN과 KILL의 exp를 교환한다.
+        
         if (g_pCombatInfoManager->isCombat()) {
             if (percent == BLOODDRAIN_EXP)
                 percent = KILL_EXP;
@@ -527,8 +527,8 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1;
         }
     } else if (pCreature->isOusters()) {
-        // 만약 KILL_AFTERMATH가 붙은 상태에서 다시 죽는다거나,
-        // AFTERMATH가 붙은 상황에서 다시 흡혈이 되는 경우에는 경험치를 받지 않는다.
+        
+        
         if ((pCreature->isFlag(Effect::EFFECT_CLASS_KILL_AFTERMATH) == true && percent == KILL_EXP) ||
             (pCreature->isFlag(Effect::EFFECT_CLASS_AFTERMATH) == true && percent == BLOODDRAIN_EXP) ||
             pOusters != NULL) {
@@ -543,7 +543,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
         }
     } else if (pCreature->isMonster()) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-        // 錦맣753沂밗잚謹밍膠槨轟쒔駱 edit by coffee 2007-7-7
+        
         if (pMonster->getMonsterType() == 753) {
             return 0;
         }
@@ -551,7 +551,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             return 0;
         }
 
-        // 아우스터스는 따로 처리해준다. 우하하..ㅡㅡ;
+        
         if (pOusters != NULL) {
             return getPercentValue(getPercentValue((int)(pMonster->getOustersExp(pOusters)),
                                                    g_pVariableManager->getVariable(MONSTER_EXP_RATIO)),
@@ -563,7 +563,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
         exp += pMonster->getINT();
         exp = (int)(exp * (0.75 + (double)(pMonster->getLevel() / 200.0)));
 
-        // 5월 15일 이벤트 몬스터는 흡혈을 당하지 않으므로 죽었을때 전부 보상한다.
+        
         MonsterType_t MonsterType = pMonster->getMonsterType();
         if (MonsterType == 358 || MonsterType == 359)
             exp = 1144;
@@ -571,7 +571,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1076;
 
         // cout << pMonster->getName() << " exp = " << exp << "  percent=" << percent << endl;
-        //  Enhance 필드에 의한 변화 경험치를 계산해 준다.
+        
         /*
         const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(pMonster->getMonsterType());
         int HPBoost = pMonsterInfo->getEnhanceHP();
@@ -585,7 +585,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
     } else
         Assert(false);
 
-    // 능력치 보상을 위한 코드...
+    
     // exp = (int)((float)exp * 1.5);
     exp = getPercentValue(exp, percent);
     exp = getPercentValue(exp, g_pVariableManager->getVariable(MONSTER_EXP_RATIO));
@@ -596,8 +596,8 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// computeCreatureExp와 같은데 AFTERMATH 때문에
-// 흡혈할때 HP 올라가는거만 따로 계산한다. 중복 코드.. -_-; by sigi. 2002.11.19
+
+
 ////////////////////////////////////////////////////////////////////////////////
 int computeBloodDrainHealPoint(Creature* pCreature, int percent)
 
@@ -617,7 +617,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
         exp += pSlayer->getINT(ATTR_BASIC);*/
         exp = 1;
 
-        // 만약 슬레이어를 흡혈한 경우에는 BLOODDRAIN과 KILL의 exp를 교환한다.
+        
         if (g_pCombatInfoManager->isCombat()) {
             if (percent == BLOODDRAIN_EXP)
                 percent = KILL_EXP;
@@ -641,7 +641,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
     } else if (pCreature->isMonster()) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
-        // 錦맣753沂밗잚謹밍膠槨轟쒔駱 edit by coffee 2007-7-7
+        
         if (pMonster->getMonsterType() == 753) {
             return 0;
         }
@@ -651,7 +651,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
         exp += pMonster->getINT();
         exp = (int)(exp * (0.75 + (double)(pMonster->getLevel() / 200.0)));
 
-        // 5월 15일 이벤트 몬스터는 흡혈을 당하지 않으므로 죽었을때 전부 보상한다.
+        
         MonsterType_t MonsterType = pMonster->getMonsterType();
         if (MonsterType == 358 || MonsterType == 359)
             exp = 1144;
@@ -659,7 +659,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
             exp = 1076;
 
         // cout << pMonster->getName() << " exp = " << exp << "  percent=" << percent << endl;
-        //  Enhance 필드에 의한 변화 경험치를 계산해 준다.
+        
         /*
         const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(pMonster->getMonsterType());
         int HPBoost = pMonsterInfo->getEnhanceHP();
@@ -673,7 +673,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
     } else
         Assert(false);
 
-    // 능력치 보상을 위한 코드...
+    
     // exp = (int)((float)exp * 1.5);
     exp = getPercentValue(exp, percent);
 
@@ -683,7 +683,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 이벤트용 몹인지 검사하기...
+
 ////////////////////////////////////////////////////////////////////////////////
 bool isEventMonster(Creature* pCreature)
 
@@ -713,32 +713,32 @@ bool isEventMonster(Creature* pCreature)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 임의의 크리쳐가 현재 움직일 수 있는 상태인가를 검사하는 함수
+
 ////////////////////////////////////////////////////////////////////////////////
 bool isAbleToMove(Creature* pCreature) {
     Assert(pCreature != NULL);
 
-    // 하이드 걸린 상태라면...
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) {
         if (pCreature->isVampire())
             return false;
 
-        // 몬스터는 하이드 상태에서도 움직이는 것이 가능하기 때문에...
+        
         // if (pCreature->isMonster()) return false;
 
         if (pCreature->isSlayer())
             return false;
     }
 
-    // 현재 죽어있는 상태라면...
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA) ||
         pCreature->isDead()
-        // 현재 마비에 걸려있다면...
+        
         || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_ETERNITY_PAUSE)
         //		|| pCreature->isFlag(Effect::EFFECT_CLASS_SANCTUARY)
         || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET)
-        // 현재 Cause Critical Wounds에 걸려있다면
+        
         || pCreature->isFlag(Effect::EFFECT_CLASS_CAUSE_CRITICAL_WOUNDS) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_SOUL_CHAIN) || pCreature->isFlag(Effect::EFFECT_CLASS_LOVE_CHAIN) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_GUN_SHOT_GUIDANCE_AIM) ||
@@ -760,23 +760,23 @@ bool isAbleToMove(Creature* pCreature) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 임의의 크리쳐가 현재 기술을 사용할 수 있는 상태인가를 검사하는 함수
+
 ////////////////////////////////////////////////////////////////////////////////
 bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
     Assert(pCreature != NULL);
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    // 하이드 걸린 상태에서는 기술을 사용할 수 없다.
-    // 죽은 상태에서는 Eternity 외의기술을 사용할 수 없다.
-    // 현재 투명화되고 있는 상태에서는 기술을 사용할 수 없다.
-    // 마비 상태에서는 기술을 사용할 수 없다.
-    // 박쥐 상테애서는 기술을 사용할 수 없다.
-    // Cause Critical Wounds에 걸려있다면 기술을 사용할 수 없다.
+    
+    
+    
+    
+    
+    
     if ((pCreature->isDead() || pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) && SkillType != SKILL_ETERNITY)
         return false;
 
-    // Dragon Eye 상태는 스킬을 쓸 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
@@ -797,9 +797,9 @@ bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
         return false;
     }
 
-    // 늑대 상테애서는 울기나 시체 먹기 외에는 스킬을 사용할 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        // edit by coffee 2006-12-29  錦攣낚의딜窟狂痙
+        
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE || SkillType != SKILL_UN_TRANSFORM)
         // end  edit
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE && SkillType != SKILL_UN_TRANSFORM)
@@ -814,13 +814,13 @@ bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    // 실프 타고 있을땐 언트랜스폼밖에 사용할 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
         if (SkillType != SKILL_UN_TRANSFORM)
             return false;
     }
 
-    // 모터사이클을 탄 상테에서는 기술을 사용할 수 없다.
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle()) {
@@ -846,16 +846,16 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    // Dragon Eye 상태는 스킬을 쓸 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    // 하이드 걸린 상태에서는 기술을 사용할 수 없다.
-    // 죽은 상태에서는 기술을 사용할 수 없다.
-    // 현재 투명화되고 있는 상태에서는 기술을 사용할 수 없다.
-    // 마비 상태에서는 기술을 사용할 수 없다.
-    // 박쥐 상테애서는 기술을 사용할 수 없다.
-    // Cause Critical Wounds에 걸려있다면 기술을 사용할 수 없다
+    
+    
+    
+    
+    
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||
         pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
@@ -870,9 +870,9 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    // 늑대 상테애서는 울기나 시체 먹기 외에는 스킬을 사용할 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        // edit by coffee 2006-12-29  錦攣낚의딜窟狂痙
+        
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE || SkillType != SKILL_ATTACK_MELEE)
         // end  edit
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE && SkillType != SKILL_ATTACK_MELEE)
@@ -888,7 +888,7 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    // 모터사이클을 탄 상테에서는 기술을 사용할 수 없다.
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -908,16 +908,16 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    // Dragon Eye 상태는 스킬을 쓸 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    // 하이드 걸린 상태에서는 기술을 사용할 수 없다.
-    // 죽은 상태에서는 기술을 사용할 수 없다.
-    // 현재 투명화되고 있는 상태에서는 기술을 사용할 수 없다.
-    // 마비 상태에서는 기술을 사용할 수 없다.
-    // 박쥐 상테애서는 기술을 사용할 수 없다.
-    // Cause Critical Wounds에 걸려있다면 기술을 사용할 수 없다
+    
+    
+    
+    
+    
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||
         pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
@@ -932,9 +932,9 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    // 늑대 상테애서는 울기나 시체 먹기 외에는 스킬을 사용할 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        // edit by coffee 2006-12-29  錦攣낚의딜窟狂痙
+        
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE)
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE)
         // end  edit
@@ -950,7 +950,7 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    // 모터사이클을 탄 상테에서는 기술을 사용할 수 없다.
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -970,17 +970,17 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    // Dragon Eye 상태는 스킬을 쓸 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    // 인벤토리 좌표가 넘어가는 경우에는 사용할 수 없다.
-    // 하이드 걸린 상태에서는 기술을 사용할 수 없다.
-    // 죽은 상태에서는 기술을 사용할 수 없다.
-    // 현재 투명화되고 있는 상태에서는 기술을 사용할 수 없다.
-    // 마비 상태에서는 기술을 사용할 수 없다.
-    // 박쥐 상테애서는 기술을 사용할 수 없다.
-    // Cause Critical Wounds에 걸렸다면 기술을 사용할 수 없다
+    
+    
+    
+    
+    
+    
+    
     // if (X >= 10 || Y >= 6 || TX >= 10 || TY >= 6) return false;
     if (X >= 10 || Y >= 6)
         return false;
@@ -998,9 +998,9 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    // 늑대 상테애서는 울기나 시체 먹기 외에는 스킬을 사용할 수 없다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        // edit by coffee 2006-12-29  錦攣낚의딜窟狂痙
+        
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE)
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE)
         // end  edit
@@ -1016,7 +1016,7 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         }
     }
 
-    // 모터사이클을 탄 상테에서는 기술을 사용할 수 없다.
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -1032,16 +1032,16 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 임의의 크리쳐가 아이템을 주을 수 있는 상태인가를 검사하는 함수
+
 ////////////////////////////////////////////////////////////////////////////////
 bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
     Assert(pCreature != NULL);
 
-    // 죽은 상태에서는 아이템을 주을 수 없다.
-    // 박쥐 상태에서는 아이템을 주을 수 없다.
+    
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA)
 
-        // 현재 마비에 걸려있다면.... by sigi. 2002.12.10
+        
         || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_ETERNITY_PAUSE)
         //		|| pCreature->isFlag(Effect::EFFECT_CLASS_SANCTUARY)
@@ -1054,7 +1054,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         pCreature->isFlag(Effect::EFFECT_CLASS_INSTALL_TURRET))
         return false;
 
-    // 생추어리 안에 있으면 못 집는다.
+    
     Zone* pZone = pCreature->getZone();
     if (pZone != NULL) {
         Tile& rTile = pZone->getTile(pCreature->getX(), pCreature->getY());
@@ -1063,15 +1063,15 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         }
     }
 
-    // 모터사이클을 탄 상태에서는 아이템을 주을 수 없다.
+    
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
             return false;
     }
 
-    // QuestItem인 경우는 하나밖에 주울 수 없다.
-    // 나중에 또 바뀌겠지. 으흠. - -; by sigi. 2002.9.4
+    
+    
     Item::ItemClass itemClass = pItem->getItemClass();
     ItemType_t itemtype = pItem->getItemType();
 
@@ -1079,14 +1079,14 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
         Inventory* pInventory = pPC->getInventory();
 
-        // 마우스에 갖고 있거나
+        
         Item* pMouseItem = pPC->getExtraInventorySlotItem();
 
         if (pMouseItem != NULL && pMouseItem->getItemClass() == Item::ITEM_CLASS_QUEST_ITEM &&
             pMouseItem->getItemType() < 4)
             return false;
 
-        // 인벤토리에 있는 경우
+        
         Item* pInvenItem = pInventory->findItem(Item::ITEM_CLASS_QUEST_ITEM);
 
         if (pInvenItem != NULL && pInvenItem->getItemClass() == Item::ITEM_CLASS_QUEST_ITEM &&
@@ -1108,14 +1108,14 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
             return false;
     }
 
-    // 퀘스트 아이템 (시간제한 아이템) 은 주울 수 없다.
+    
     if (pItem->isTimeLimitItem())
         return false;
 
-    // 성물, 피의 성서, 성의 상징..등의 아이템인 경우
+    
     if (isRelicItem(itemClass)) {
-        // Relic을 주울 수 없다는 Effect가 걸려있는 경우이거나
-        // 특정 기술 사용중에는 Relic을 주울 수 없다.
+        
+        
         if (pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK) || pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) ||
             pCreature->isFlag(Effect::EFFECT_CLASS_INVISIBILITY) || pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) ||
             pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF) ||
@@ -1128,7 +1128,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         }
 
         switch (itemClass) {
-        // 아직 없는 Relic만 주울 수 있다.
+        
         case Item::ITEM_CLASS_RELIC: {
             const RelicInfo* pRelicInfo = dynamic_cast<RelicInfo*>(g_pRelicInfoManager->getItemInfo(itemtype));
 
@@ -1153,7 +1153,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
                 return false;
             }
 
-            // 줏는 넘이 안전지대에 있으면 주울 수 없다.
+            
             ZoneLevel_t zoneLevel = pCreature->getZone()->getZoneLevel(pCreature->getX(), pCreature->getY());
             if (zoneLevel & SAFE_ZONE) {
                 return false;
@@ -1179,7 +1179,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         } break;
 
         case Item::ITEM_CLASS_WAR_ITEM: {
-            // 150 레벨 이상만 들 수 있다.
+            
             Level_t level = pCreature->getLevel();
             if (level < 150)
                 return false;
@@ -1209,7 +1209,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
             return false;
     }
 
-    // 깃발갖고 있으면 깃발 못 집는다.
+    
     if (pItem->isFlagItem()) {
         if (!g_pFlagManager->hasFlagWar())
             return false;
@@ -1231,8 +1231,8 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_OUSTERS_ONLY))
             return false;
 
-        // Slayer인 경우는 vampire 아이템만 못 줍는다.
-        // Ousters 아이템도 못 줍는다
+        
+        
         switch (itemClass) {
         case Item::ITEM_CLASS_VAMPIRE_RING:
         case Item::ITEM_CLASS_VAMPIRE_BRACELET:
@@ -1260,7 +1260,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_FASCIA:
         case Item::ITEM_CLASS_MITTEN:
             // case Item::ITEM_CLASS_MONEY :
-            //  vampire 돈이면 못 줍는다.
+            
             //  edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return false;
             return false;
@@ -1279,8 +1279,8 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_OUSTERS_ONLY))
             return false;
 
-        // Vampire인 경우는 Vampire 아이템과
-        // event 아이템만 주울 수 있다.
+        
+        
         switch (pItem->getItemClass()) {
         case Item::ITEM_CLASS_VAMPIRE_RING:
         case Item::ITEM_CLASS_VAMPIRE_BRACELET:
@@ -1320,7 +1320,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_DERMIS:
         case Item::ITEM_CLASS_PERSONA:
         case Item::ITEM_CLASS_MONEY:
-            // vampire 돈이면 줍는다.
+            
             // edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return true;
             return true;
@@ -1340,8 +1340,8 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_VAMPIRE_ONLY))
             return false;
 
-        // Ousters인 경우는 Ousters 아이템과
-        // event 아이템만 주울 수 있다.
+        
+        
         switch (pItem->getItemClass()) {
         case Item::ITEM_CLASS_OUSTERS_ARMSBAND:
         case Item::ITEM_CLASS_OUSTERS_BOOTS:
@@ -1383,7 +1383,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_FASCIA:
         case Item::ITEM_CLASS_MITTEN:
         case Item::ITEM_CLASS_MONEY:
-            // Ousters 돈이면 줍는다.
+            
             // edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return true;
             return true;
@@ -1408,7 +1408,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
 }
 
 bool canDropToZone(Creature* pCreature, Item* pItem) {
-    // 퀘스트 아이템 (시간제한 아이템) 떨굴 수 없다.
+    
     if (pItem->isTimeLimitItem())
         return false;
 
@@ -1430,7 +1430,7 @@ bool canDropToZone(Creature* pCreature, Item* pItem) {
     } break;
 
     case Item::ITEM_CLASS_MOON_CARD:
-        // 반달 카드는 바닥에 버릴 수 없다.
+        
         {
             if (pItem->getItemType() == 0)
                 return false;
@@ -1468,9 +1468,9 @@ bool canDropToZone(Creature* pCreature, Item* pItem) {
     return true;
 }
 
-// 그랜드 마스터인데 그랜드 마스터 이펙트를 클라이언트에게 보내주기 곤란할 경우 불러준다.
+
 // 2002. 1. 13. Sequoia
-// 사용되지 않음. -.-
+
 /*void confirmGrandMaster(Creature* pCreature)
 {
     if( pCreature == NULL ) return;
@@ -1576,34 +1576,34 @@ bool getGuildIDFromDB(const string& Name, Race_t race, GuildID_t& guildID)
 
 bool canSee(const Creature* pSource, Creature* pTarget, EffectObservingEye* pEffectObservingEye,
             EffectGnomesWhisper* pEffectGnomesWhisper) {
-    // Target이 Ghost 이면 무조건 볼 수 없다.
+    
     if (pTarget->isFlag(Effect::EFFECT_CLASS_GHOST))
         return false;
 
     // ZoneCoord_t targetX = pTarget->getX(), targetY = pTarget->getY();
 
-    // ObservingEye 이펙트를 가져온다.
+    
     if (pEffectObservingEye == NULL && pSource->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
         pEffectObservingEye =
             dynamic_cast<EffectObservingEye*>(pSource->findEffect(Effect::EFFECT_CLASS_OBSERVING_EYE));
     }
 
-    // GnomesWhisper 이펙트를 가져온다.
+    
     if (pEffectGnomesWhisper == NULL && pSource->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
         pEffectGnomesWhisper =
             dynamic_cast<EffectGnomesWhisper*>(pSource->findEffect(Effect::EFFECT_CLASS_GNOMES_WHISPER));
     }
 
-    // 일단 시야안에 있어야 보든동 하지.
+    
     // if (pSource->getVisionState(targetX, targetY) >= IN_SIGHT)
     //{
-    // 뱀파이어 끼리는 무조건 본다.
+    
     if (pSource->isVampire() && pTarget->isVampire())
         return true;
 
     if ((!pTarget->isFlag(Effect::EFFECT_CLASS_HIDE) ||
          pSource->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN)
-         // 이제 Revealer도 하이드 한놈 볼 수 있다.
+         
          || pSource->isFlag(Effect::EFFECT_CLASS_REVEALER) ||
          (pEffectGnomesWhisper != NULL && pEffectGnomesWhisper->canSeeHide())) &&
         (!pTarget->isFlag(Effect::EFFECT_CLASS_INVISIBILITY) ||
@@ -1661,8 +1661,8 @@ int changeSexEx(PlayerCreature* pPC) {
     } else
         return 3;
 
-    // 여기까지 왔다는건 성전환 성공이다. DB업데이트
-    // 성전환 성공이면 아우스터즈일리는 절대 없으므로 슬레이어와 뱀파이어 테이블 모두 정보가 있다.
+    
+    
     Statement* pStmt = NULL;
 
     BEGIN_DB {
@@ -1754,10 +1754,10 @@ bool dropFlagToZone(PlayerCreature* pPC, Item* pItem)
     Zone* pZone = pPC->getZone();
     Assert(pZone != NULL);
 
-    // cout << "깃발 찾았다" << endl;
+    
 
-    // 일단 아이템을 바닥에 떨어뜨린다.
-    // 시체와 겹칠 수도 있으므로.. 캐릭터가 없는 곳에 떨어뜨린다.
+    
+    
     //	TPOINT pt = pZone->addItem( pItem, pPC->getX(), pPC->getY(), false );
     pZone->addItemDelayed(pItem, pPC->getX(), pPC->getY(), false);
 
@@ -1767,49 +1767,12 @@ bool dropFlagToZone(PlayerCreature* pPC, Item* pItem)
 
     if (!pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK)) {
         EffectRelicLock* pLock = new EffectRelicLock(pItem);
-        pLock->setDeadline(10 * 10); // 10초
+        pLock->setDeadline(10 * 10); 
         pItem->setFlag(Effect::EFFECT_CLASS_RELIC_LOCK);
         pItem->getEffectManager().addEffect(pLock);
     }
 
-    /*	if ( pt.x != -1 )           // 떨어뜨리는데 성공했다면
-        {
-            char pField[80];
-            sprintf(pField, "OwnerID='', Storage=%d, StorageID=%u, X=%d, Y=%d", STORAGE_ZONE, pZone->getZoneID(), pt.x,
-       pt.y); pItem->tinysave(pField);
-
-            Effect* pEffect = pPC->findEffect( Effect::EFFECT_CLASS_HAS_FLAG );
-            if ( pEffect != NULL ) pEffect->setDeadline(0);
-
-            if (!pItem->isFlag( Effect::EFFECT_CLASS_RELIC_LOCK ))
-            {
-                EffectRelicLock* pLock = new EffectRelicLock(pItem);
-                pLock->setDeadline( 10*10 ); // 10초
-                pItem->setFlag( Effect::EFFECT_CLASS_RELIC_LOCK );
-                pItem->getEffectManager().addEffect( pLock );
-            }
-        }
-        else
-        {
-            VSRect rect(0, 0, pZone->getWidth()-1, pZone->getHeight()-1);
-            do
-            {
-                pt.x = rand()%(pZone->getWidth());
-                pt.y = rand()%(pZone->getHeight());
-            }
-            while ( !rect.ptInRect(pt.x, pt.y)
-                    || pZone->getTile(pt.x, pt.y).hasItem()
-                    || pZone->getTile(pt.x, pt.y).isBlocked(Creature::MOVE_MODE_WALKING)
-                    || ( (pZone->getZoneLevel(pt.x, pt.y))&SAFE_ZONE == 0 ) );
-            pt = pZone->addItem( pItem, pPC->getX(), pPC->getY(), false );
-            if ( pt.x == -1 )
-            {
-                filelog("FlagWar.log", "-_- 그래도 깃발 떨어뜨릴 자리가 없다.... X됐다.");
-                //throw Error("깃발 떨어뜨릴 자리가 없다.");
-                // 대체 왜 못 떨어뜨리는거냐 -_-
-                return false;
-            }
-        }*/
+     
 
     return true;
 }
@@ -1821,16 +1784,16 @@ bool dropFlagToZone(Creature* pCreature, bool bSendPacket) {
 
     bool bDrop = false;
 
-    // mouse에 relic이 있는지 체크
+    
     Item* pSlotItem = pPC->getExtraInventorySlotItem();
 
     if (pSlotItem != NULL && pSlotItem->isFlagItem()) {
         if (dropFlagToZone(pPC, pSlotItem)) {
             pPC->deleteItemFromExtraInventorySlot();
 
-            // player의 mouse에서 제거한다.
-            // client에서 이 패킷을 받으면
-            // mouse에서도 함 체크해주게 했다.
+            
+            
+            
 
             if (bSendPacket) {
                 GCDeleteInventoryItem gcDeleteInventoryItem;
@@ -1849,17 +1812,17 @@ bool dropFlagToZone(Creature* pCreature, bool bSendPacket) {
     Inventory* pInventory = pPC->getInventory();
     Assert(pInventory != NULL);
 
-    // 인벤토리에서 Relic Item을 찾아본다.
+    
     for (CoordInven_t y = 0; y < pInventory->getHeight(); y++) {
         for (CoordInven_t x = 0; x < pInventory->getWidth(); x++) {
             Item* pItem = pInventory->getItem(x, y);
             if (pItem != NULL && pItem->isFlagItem()) {
-                // 일단 아이템을 바닥에 떨어뜨린다.
+                
                 if (dropFlagToZone(pPC, pItem)) {
-                    // 인벤토리에서 뺀다.
+                    
                     pInventory->deleteItem(pItem->getObjectID());
 
-                    // player의 inventory에서 제거한다.
+                    
                     if (bSendPacket) {
                         GCDeleteInventoryItem gcDeleteInventoryItem;
                         gcDeleteInventoryItem.setObjectID(pItem->getObjectID());
@@ -1955,7 +1918,7 @@ void giveUnderworldGift(Creature* pCreature) {
 
     Statement* pStmt = NULL;
 
-    filelog("Underworld.log", "[%s:%s] 언더월드 예매권에 당첨되었습니다.", PlayerID.c_str(), PlayerName.c_str());
+    filelog("Underworld.log", "[%s:%s]   .", PlayerID.c_str(), PlayerName.c_str());
 
     try {
         BEGIN_DB {
@@ -1967,7 +1930,7 @@ void giveUnderworldGift(Creature* pCreature) {
         }
         END_DB(pStmt)
     } catch (Throwable& t) {
-        filelog("Underworld.log", "DB에 업데이트를 실패했습니다. : %s", t.toString().c_str());
+        filelog("Underworld.log", "DB  . : %s", t.toString().c_str());
     }
 
     GCNotifyWin gcNW;
@@ -1997,7 +1960,7 @@ bool dropSweeperToZone(PlayerCreature* pPC, Item* pItem)
 
     if (!pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK)) {
         EffectRelicLock* pLock = new EffectRelicLock(pItem);
-        pLock->setDeadline(10 * 10); // 10초
+        pLock->setDeadline(10 * 10); 
         pItem->setFlag(Effect::EFFECT_CLASS_RELIC_LOCK);
         pItem->getEffectManager().addEffect(pLock);
     }
@@ -2012,16 +1975,16 @@ bool dropSweeperToZone(Creature* pCreature, bool bSendPacket) {
 
     bool bDrop = false;
 
-    // mouse에 relic이 있는지 체크
+    
     Item* pSlotItem = pPC->getExtraInventorySlotItem();
 
     if (pSlotItem != NULL && pSlotItem->getItemClass() == Item::ITEM_CLASS_SWEEPER) {
         if (dropSweeperToZone(pPC, pSlotItem)) {
             pPC->deleteItemFromExtraInventorySlot();
 
-            // player의 mouse에서 제거한다.
-            // client에서 이 패킷을 받으면
-            // mouse에서도 함 체크해주게 했다.
+            
+            
+            
 
             if (bSendPacket) {
                 GCDeleteInventoryItem gcDeleteInventoryItem;
@@ -2040,17 +2003,17 @@ bool dropSweeperToZone(Creature* pCreature, bool bSendPacket) {
     Inventory* pInventory = pPC->getInventory();
     Assert(pInventory != NULL);
 
-    // 인벤토리에서 Relic Item을 찾아본다.
+    
     for (CoordInven_t y = 0; y < pInventory->getHeight(); y++) {
         for (CoordInven_t x = 0; x < pInventory->getWidth(); x++) {
             Item* pItem = pInventory->getItem(x, y);
             if (pItem != NULL && pItem->getItemClass() == Item::ITEM_CLASS_SWEEPER) {
-                // 일단 아이템을 바닥에 떨어뜨린다.
+                
                 if (dropSweeperToZone(pPC, pItem)) {
-                    // 인벤토리에서 뺀다.
+                    
                     pInventory->deleteItem(pItem->getObjectID());
 
-                    // player의 inventory에서 제거한다.
+                    
                     if (bSendPacket) {
                         GCDeleteInventoryItem gcDeleteInventoryItem;
                         gcDeleteInventoryItem.setObjectID(pItem->getObjectID());
@@ -2118,7 +2081,7 @@ void giveGoldMedal(PlayerCreature* pPC) {
         addSimpleCreatureEffect(pPC, Effect::EFFECT_CLASS_GOLD_MEDAL, 10, true);
 
         GCSystemMessage gcSM;
-        gcSM.setMessage("삿돤錤듕쏜탬寧철.");
+        gcSM.setMessage(".");
         pGamePlayer->sendPacket(&gcSM);
         /*		pStmt->executeQuery("UPDATE GoldMedalCount SET GoldMedalCount=GoldMedalCount+1 WHERE PlayerID='%s'",
                         pGamePlayer->getID().c_str());
@@ -2157,13 +2120,7 @@ void giveLotto(PlayerCreature* pPC, BYTE type, uint num) {
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getDistConnection("USERINFO")->createStatement();
-        /*		pStmt->executeQuery("INSERT INTO GoldMedalCount (PlayerID, getTime) VALUES ('%s', now())",
-                        pGamePlayer->getID().c_str());
-                addSimpleCreatureEffect(pPC, Effect::EFFECT_CLASS_GOLD_MEDAL, 10);
-
-                GCSystemMessage gcSM;
-                gcSM.setMessage( "아테네 금메달을 1개 획득했습니다. 넷마블 이벤트 페이지에서 상품을 확인하세요." );
-                pGamePlayer->sendPacket( &gcSM );*/
+         
         pStmt->executeQuery("UPDATE EventLotto SET count=count+%u WHERE PlayerID='%s' AND Type=%u", num,
                             pGamePlayer->getID().c_str(), type);
 
@@ -2177,7 +2134,7 @@ void giveLotto(PlayerCreature* pPC, BYTE type, uint num) {
 
         if (pResult->next()) {
             char buffer[256];
-            sprintf(buffer, "삶땡꽈튿鑒綠댐돕%d몸.圈玖코휭헝꽝옘바렘寮女.", pResult->getInt(1));
+            sprintf(buffer, "%d..", pResult->getInt(1));
             GCSystemMessage gcSM;
             gcSM.setMessage(buffer);
             pGamePlayer->sendPacket(&gcSM);
@@ -2215,18 +2172,7 @@ void addOlympicStat(PlayerCreature* pPC, BYTE type, uint num) {
        num);
             }
     */
-    /*		Result* pResult = pStmt->executeQuery("SELECT count FROM EventLotto WHERE PlayerID='%s' AND Type=%u",
-                    pGamePlayer->getID().c_str(), type);
-
-            if ( pResult->next() )
-            {
-                char buffer[256];
-                sprintf(buffer, "%u단계 복권이 %d개가 되었습니다. 자세한 내용은 홈페이지를 참조하세요.",
-                        type, pResult->getInt(1));
-                GCSystemMessage gcSM;
-                gcSM.setMessage( buffer );
-                pGamePlayer->sendPacket(&gcSM);
-            }*/
+     
     /*
             SAFE_DELETE( pStmt );
         }
@@ -2244,45 +2190,45 @@ void deletePC(PlayerCreature* pPC) {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
         ////////////////////////////////////////////////////////////
-        // 일단 슬레이어 테이블에는 확실히 존재한다.
+        
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Slayer WHERE Name = '%s'", pPC->getName().c_str());
         pStmt->executeQuery("UPDATE Slayer SET Active='INACTIVE' WHERE Name = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 뱀파이어 테이블을 지운다.
+        
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Vampire WHERE Name = '%s'", pPC->getName().c_str());
         pStmt->executeQuery("UPDATE Vampire SET Active='INACTIVE' WHERE Name = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 아우스터스 테이블을 지운다.
+        
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Ousters WHERE Name = '%s'", pPC->getName().c_str());
         pStmt->executeQuery("UPDATE Ousters SET Active='INACTIVE' WHERE Name = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 슬레이어 스킬을 지운다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM SkillSave WHERE OwnerID = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 뱀파이어 스킬을 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM VampireSkillSave WHERE OwnerID = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 아우스터즈 스킬을 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM OustersSkillSave WHERE OwnerID = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 계급 보너스를 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM RankBonusData WHERE OwnerID = '%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 아이템을 깡그리 지운다.
+        
         ////////////////////////////////////////////////////////////
         string ownerID = pPC->getName();
         pStmt->executeQueryString("DELETE FROM ARObject WHERE OwnerID = '" + ownerID + "'");
@@ -2369,13 +2315,13 @@ void deletePC(PlayerCreature* pPC) {
         pStmt->executeQueryString("DELETE FROM TrapItemObject WHERE OwnerID = '" + ownerID + "'");
 
         ////////////////////////////////////////////////////////////
-        // 커플일 경우 커플 목록에서 지워준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM CoupleInfo WHERE FemalePartnerName='%s'", ownerID.c_str());
         pStmt->executeQuery("DELETE FROM CoupleInfo WHERE MalePartnerName='%s'", ownerID.c_str());
 
         ////////////////////////////////////////////////////////////
-        // 남아 있는 이펙트들도 지운다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM EffectAcidTouch where OwnerID='%s'", pPC->getName().c_str());
         pStmt->executeQuery("DELETE FROM EffectAftermath where OwnerID='%s'", pPC->getName().c_str());
@@ -2394,17 +2340,17 @@ void deletePC(PlayerCreature* pPC) {
         pStmt->executeQuery("DELETE FROM EnemyErase where OwnerID='%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 플래그 셋도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM FlagSet WHERE OwnerID='%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 시간제한 아이템도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM TimeLimitItems WHERE OwnerID='%s'", pPC->getName().c_str());
 
         ////////////////////////////////////////////////////////////
-        // 이벤트 정보도 삭제해 준다.
+        
         ////////////////////////////////////////////////////////////
         pStmt->executeQuery("DELETE FROM EventQuestAdvance WHERE OwnerID='%s'", pPC->getName().c_str());
     }

@@ -68,11 +68,11 @@ public:
     }
 
 private:
-    ItemType_t m_ItemType; // 아이템 타입
-    ItemNum_t m_Num;       // 겹쳐있는 해골의 갯수
+    ItemType_t m_ItemType; 
+    ItemNum_t m_Num;       
 
-    static Mutex m_Mutex;             // 아이템 ID 관련 락
-    static ItemID_t m_ItemIDRegistry; // 클래스별 고유 아이템 아이디 발급기
+    static Mutex m_Mutex;             
+    static ItemID_t m_ItemIDRegistry; 
 };
 
 

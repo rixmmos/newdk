@@ -7,11 +7,11 @@
 #ifndef __GC_PARTY_INVITE_H__
 #define __GC_PARTY_INVITE_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 파티 가입 관련 코드
+
 //////////////////////////////////////////////////////////////////////////////
 enum
 {
@@ -53,7 +53,7 @@ public:
 
 private :
 	ObjectID_t m_TargetObjectID;
-	BYTE       m_Code; // 코드
+	BYTE       m_Code; 
 };
 
 

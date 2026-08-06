@@ -2,17 +2,17 @@
 // 
 // Filename    : GCSkillToTileOK6.h 
 // Written By  : elca@ewestsoft.com
-// Description : 기술에 당했는데 사용자는 볼 수 없는 자가 받는 packet 
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_SKILL_TO_TILE_OK_6_H__
 #define __GC_SKILL_TO_TILE_OK_6_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "ModifyInfo.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../ModifyInfo.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -35,10 +35,10 @@ public :
 public :
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -48,7 +48,7 @@ public :
 	PacketID_t getPacketID() const throw() { return PACKET_GC_SKILL_TO_TILE_OK_6; }
 	
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getPacketSize() const throw() { return szCoord*2 + szSkillType + szCoord*2 + szRange + szDuration + 
 			szBYTE + szObjectID* m_CListNum + szBYTE + ModifyInfo::getPacketSize(); }
          //CListNum, SListNum, ListEle* CListNum, ListEle* SListNum* 2 
@@ -109,7 +109,7 @@ public :
 private :
 	
 	// ObjectID
-	Coord_t m_OrgX, m_OrgY;	// 기술 사용자의 위치.
+	Coord_t m_OrgX, m_OrgY;	
 
 	// SkillType
 	SkillType_t m_SkillType;

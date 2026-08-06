@@ -16,7 +16,7 @@
 #include "Zone.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프
+
 //////////////////////////////////////////////////////////////////////////////
 void InstallTrap::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -35,7 +35,7 @@ void InstallTrap::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, 검이 아니라면 기술을 쓸 수 없다.
+        
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || !isArmsWeapon(pWeapon)) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -71,7 +71,7 @@ void InstallTrap::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectTrapInstalled* pEffect = new EffectTrapInstalled(pZone, X, Y);
             pEffect->setDeadline(output.Duration);
             pEffect->setUserOID(pSlayer->getObjectID());
@@ -81,7 +81,7 @@ void InstallTrap::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             pZone->addEffect(pEffect);
             rTile.addEffect(pEffect);
 
-            // 경험치를 올린다.
+            
             /*			SkillGrade Grade =
                g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType)); Exp_t ExpUp =
                10*(Grade+1); if ( bIncreaseDomainExp )
@@ -91,7 +91,7 @@ void InstallTrap::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
                             increaseSkillExp(pSlayer, DomainType,  pSkillSlot, pSkillInfo, _GCSkillToSelfOK1);
                         }*/
 
-            // 패킷을 만들어 보낸다.
+            
             _GCSkillToSelfOK1.setSkillType(SkillType);
             _GCSkillToSelfOK1.setCEffectID(CEffectID);
             _GCSkillToSelfOK1.setDuration(output.Duration);

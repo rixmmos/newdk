@@ -9,12 +9,12 @@
 // include files
 #include "Client_PCH.h"
 #include "CRRequest.h"
-#include "RequestServerPlayer.h"
+#include "../RequestServerPlayer.h"
 #include "UserInformation.h"
 #include "ProfileManager.h"
 #include "RequestFileManager.h"
 #include "RequestUserManager.h"
-#include "Rpackets/RCRequestVerify.h"
+#include "RCRequestVerify.h"
 #include "DebugInfo.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ throw ( ProtocolException , Error )
 
 	RequestServerPlayer* pRequestServerPlayer = dynamic_cast<RequestServerPlayer*>( pPlayer );
 
-	// 이름이 없다면 .. IP로 설정한다.
+	
 	if (pRequestServerPlayer->getName().c_str()==NULL
 		|| pRequestServerPlayer->getName().size()==0)
 	{
@@ -51,7 +51,7 @@ throw ( ProtocolException , Error )
 	{			
 		DEBUG_ADD("Not NULL");
 
-		// 사용자 정보 다시 설정
+		
 		//RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo( otherName.c_str() );
 
 		//if (pUserInfo!=NULL)
@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 		{
 			//------------------------------------------------------------------
 			//
-			//			Profile을 요청했을 때,
+			
 			//
 			//------------------------------------------------------------------
 			case CR_REQUEST_FILE_PROFILE :
@@ -79,13 +79,13 @@ throw ( ProtocolException , Error )
 					const char* pFilename = g_pProfileManager->GetFilename( pMyName );
 
 					//-------------------------------------------------------------
-					// profile이 있는 경우
+					
 					//-------------------------------------------------------------
 					if (pFilename != NULL)
 					{
 						DEBUG_ADD("profile not NULL");
 
-						// 이미 요청한 내용이 없는 경우에.. 
+						
 						if (!g_pRequestFileManager->HasOtherRequest(otherName))
 						{
 							DEBUG_ADD("no Request");
@@ -120,7 +120,7 @@ throw ( ProtocolException , Error )
 						}					
 					}
 					//-------------------------------------------------------------
-					// profile이 아예 없는 경우
+					
 					//-------------------------------------------------------------
 					else
 					{
@@ -139,7 +139,7 @@ throw ( ProtocolException , Error )
 					}
 				}
 				//-------------------------------------------------------------
-				// 다른 사람의 profile을 요청하는 경우
+				
 				//-------------------------------------------------------------
 				else
 				{
@@ -159,7 +159,7 @@ throw ( ProtocolException , Error )
 		
 			//------------------------------------------------------------------
 			//
-			//			길드 마크를 요청했을 때,
+			
 			//
 			//------------------------------------------------------------------
 			case CR_REQUEST_FILE_GUILD_MARK :

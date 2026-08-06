@@ -66,6 +66,9 @@ void CSDLInput::Clear()
 	m_lb_up = FALSE;
 	m_rb_up = FALSE;
 	m_cb_up = FALSE;
+	m_lb_held = FALSE;
+	m_rb_held = FALSE;
+	m_cb_held = FALSE;
 }
 
 /* Initialize using SDL backend */
@@ -100,12 +103,13 @@ void CSDLInput::UpdateInput()
 	// Update backend
 	dxlib_input_update();
 
-	// Reset UP events (they should only be true for one frame)
+	// Legacy game code treats DOWN/UP as edge events, not held states.
+	m_lb_down = FALSE;
+	m_rb_down = FALSE;
+	m_cb_down = FALSE;
 	m_lb_up = FALSE;
 	m_rb_up = FALSE;
 	m_cb_up = FALSE;
-
-	// NOTE: Don't reset DOWN states here - they should persist until button is released
 
 	// Update keyboard state
 	for (int i = 0; i < 256; i++) {
@@ -157,43 +161,46 @@ void CSDLInput::UpdateInput()
 	dxlib_input_get_mouse_buttons(&left, &right, &center);
 
 	// Check for button state changes
-	if (left && !m_lb_down) {
+	if (left && !m_lb_held) {
 		m_lb_down = TRUE;
+		m_lb_held = TRUE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(LEFTDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
 		}
 	}
-	if (!left && m_lb_down) {
+	if (!left && m_lb_held) {
 		m_lb_up = TRUE;
-		m_lb_down = FALSE;
+		m_lb_held = FALSE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(LEFTUP, m_mouse_x, m_mouse_y, m_mouse_z);
 		}
 	}
 
-	if (right && !m_rb_down) {
+	if (right && !m_rb_held) {
 		m_rb_down = TRUE;
+		m_rb_held = TRUE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(RIGHTDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
 		}
 	}
-	if (!right && m_rb_down) {
+	if (!right && m_rb_held) {
 		m_rb_up = TRUE;
-		m_rb_down = FALSE;
+		m_rb_held = FALSE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(RIGHTUP, m_mouse_x, m_mouse_y, m_mouse_z);
 		}
 	}
 
-	if (center && !m_cb_down) {
+	if (center && !m_cb_held) {
 		m_cb_down = TRUE;
+		m_cb_held = TRUE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(CENTERDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
 		}
 	}
-	if (!center && m_cb_down) {
+	if (!center && m_cb_held) {
 		m_cb_up = TRUE;
-		m_cb_down = FALSE;
+		m_cb_held = FALSE;
 		if (m_fp_mouse_event_receiver) {
 			m_fp_mouse_event_receiver(CENTERUP, m_mouse_x, m_mouse_y, m_mouse_z);
 		}

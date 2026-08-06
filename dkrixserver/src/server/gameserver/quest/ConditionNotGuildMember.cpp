@@ -19,7 +19,7 @@ bool ConditionNotGuildMember::isSatisfied(Creature* pCreature1, Creature* pCreat
 
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature2);
 
-    // 길드 이름을 가져와서 없으면 길드원이 아니다
+    
     if (pPC->getGuildName().size() == 0)
         return true;
 

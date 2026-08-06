@@ -2,8 +2,8 @@
 // Filename    : PacketUtil.cpp
 // Written by  : excel96
 // Description :
-// 자주 보내고, 만들기가 복잡한 패킷은 만드는 곳을 여기 하나로 통일함으로써
-// 유지보수가 쉬워진다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "PacketUtil.h"
@@ -94,7 +94,7 @@ void sendGCOtherModifyInfoGuildUnionByGuildID(uint gID)
 {
     __BEGIN_TRY
 
-    // 가입한놈에게에 보낸다.
+    
     list<Creature*> cList = g_pPCFinder->getGuildCreatures(gID, 300);
     for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
         Creature* pOtherCreature = *itr;
@@ -119,7 +119,7 @@ void sendGCOtherModifyInfoGuildUnionByGuildID(uint gID)
 
     __END_CATCH
 }
-// 해당크리쳐가 소속된 길드의 모든 놈에게 GCOtherModifyInfo 를 날린다.
+
 void sendGCOtherModifyInfoGuildUnion(Creature* pTargetCreature)
 
 {
@@ -131,7 +131,7 @@ void sendGCOtherModifyInfoGuildUnion(Creature* pTargetCreature)
     PlayerCreature* pTargetPlayerCreature = dynamic_cast<PlayerCreature*>(pTargetGamePlayer->getCreature());
     Assert(pTargetPlayerCreature != NULL);
 
-    // 가입한놈에게에 보낸다.
+    
     list<Creature*> cList = g_pPCFinder->getGuildCreatures(pTargetPlayerCreature->getGuildID(), 300);
     for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
         Creature* pOtherCreature = *itr;
@@ -179,14 +179,14 @@ void makeGCOtherModifyInfoGuildUnion(GCOtherModifyInfo* pModifyInformation, Crea
     GuildUnion* pUnion = NULL;
     pUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());
 
-    // 소속된 연합이 없으면
+    
     if (pUnion == NULL) {
         pModifyInformation->addShortData(MODIFY_UNIONID, 0);
         pModifyInformation->addShortData(MODIFY_UNIONGRADE, GCUpdateInfo::UNION_NOTHING);
 
         // cout << "GCModifyInfo->GuildInformation - NOT FOUND UNION / UNION_NOTHING" << endl;
     } else {
-        // 소속된 연합이 있다.
+        
         bool isGuildMaster = false;
         bool isGuildUnionMaster = false;
 
@@ -221,7 +221,7 @@ void makeGCOtherModifyInfoGuildUnion(GCOtherModifyInfo* pModifyInformation, Crea
 //////////////////////////////////////////////////////////////////////////////
 // void makeGCModifyInformation for GuildUnion Info()
 //
-// 길드 Union 정보를 GCModifyInformation 에 심는다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -239,14 +239,14 @@ void makeGCModifyInfoGuildUnion(GCModifyInformation* pModifyInformation, Creatur
     GuildUnion* pUnion = NULL;
     pUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());
 
-    // 소속된 연합이 없으면
+    
     if (pUnion == NULL) {
         pModifyInformation->addShortData(MODIFY_UNIONID, 0);
         pModifyInformation->addShortData(MODIFY_UNIONGRADE, GCUpdateInfo::UNION_NOTHING);
 
         //		cout << "GCModifyInfo->GuildInformation - NOT FOUND UNION / UNION_NOTHING" << endl;
     } else {
-        // 소속된 연합이 있다.
+        
         bool isGuildMaster = false;
         bool isGuildUnionMaster = false;
 
@@ -283,7 +283,7 @@ void makeGCModifyInfoGuildUnion(GCModifyInformation* pModifyInformation, Creatur
 //////////////////////////////////////////////////////////////////////////////
 // void makeGCUpdateInfo()
 //
-// 포탈이나, 죽어서 맵 사이를 이동할 때 쓰는, GCUpdateInfo 정보를 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
@@ -291,7 +291,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     __BEGIN_TRY
 
     ////////////////////////////////////////////////////////////
-    // 존 위치 정보 구성
+    
     ////////////////////////////////////////////////////////////
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
@@ -308,7 +308,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     pUpdateInfo->setZoneX(x);
     pUpdateInfo->setZoneY(y);
 
-    // DynamicZone 처리
+    
     if (pZone->isDynamicZone()) {
         DynamicZone* pDynamicZone = pZone->getDynamicZone();
         Assert(pDynamicZone != NULL);
@@ -317,7 +317,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     }
 
     ////////////////////////////////////////////////////////////
-    // 인벤토리 및 기어 정보 구성
+    
     ////////////////////////////////////////////////////////////
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -325,7 +325,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
         pUpdateInfo->setPCInfo(pSlayer->getSlayerInfo2());
 
-        // Inventory, Gear 정보 구성
+        
         pUpdateInfo->setInventoryInfo(pSlayer->getInventoryInfo());
         pUpdateInfo->setGearInfo(pSlayer->getGearInfo());
         pUpdateInfo->setExtraInfo(pSlayer->getExtraInfo());
@@ -341,7 +341,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
         pUpdateInfo->setPCInfo(pVampire->getVampireInfo2());
 
-        // Inventory, Gear 정보 구성
+        
         pUpdateInfo->setInventoryInfo(pVampire->getInventoryInfo());
         pUpdateInfo->setGearInfo(pVampire->getGearInfo());
         pUpdateInfo->setExtraInfo(pVampire->getExtraInfo());
@@ -354,7 +354,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
         pUpdateInfo->setPCInfo(pOusters->getOustersInfo2());
 
-        // Inventory, Gear 정보 구성
+        
         pUpdateInfo->setInventoryInfo(pOusters->getInventoryInfo());
         pUpdateInfo->setGearInfo(pOusters->getGearInfo());
         pUpdateInfo->setExtraInfo(pOusters->getExtraInfo());
@@ -364,12 +364,12 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     }
 
     ////////////////////////////////////////////////////////////
-    // 이펙트 인포 구성
+    
     ////////////////////////////////////////////////////////////
     pUpdateInfo->setEffectInfo(pCreature->getEffectInfo());
 
     ////////////////////////////////////////////////////////////
-    // 시야 정보 구성
+    
     ////////////////////////////////////////////////////////////
     if (pZone->getZoneType() == ZONE_CASTLE) {
         pUpdateInfo->setDarkLevel(pZone->getDarkLevel());
@@ -408,51 +408,51 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     }
 
     ////////////////////////////////////////////////////////////
-    // 날씨 정보 구성
+    
     ////////////////////////////////////////////////////////////
     pUpdateInfo->setWeather(pZone->getWeatherManager()->getCurrentWeather());
     pUpdateInfo->setWeatherLevel(pZone->getWeatherManager()->getWeatherLevel());
 
     ////////////////////////////////////////////////////////////
-    // NPC 스프라이트 정보 구성
+    
     ////////////////////////////////////////////////////////////
     pUpdateInfo->setNPCCount(pZone->getNPCCount());
     for (uint i = 0; i < pZone->getNPCCount(); i++)
         pUpdateInfo->setNPCType(i, pZone->getNPCType(i));
 
     ////////////////////////////////////////////////////////////
-    // 몬스터 스프라이트 정보 구성
+    
     ////////////////////////////////////////////////////////////
-    // 마스터 레어에서 소환되는 몬스터를 미리 로딩한다.
+    
     if (pZone->isMasterLair()) {
-        // 사실은 SpriteType이다. -_-; by sigi. 2002.10.8
+        
         const int num = 25;
         const MonsterType_t mtypes[num] = {
-            27,  // 블러드워록
-            40,  // 골레머
-            41,  // 더티스트라이더
-            47,  // 카오스가디언
-            48,  // 호블
-            57,  // 쉐도우윙
-            61,  // 위도우즈
-            62,  // 에스트로이더
-            64,  // 모데라스
-            68,  // 빅팽
-            70,  // 다크스크리머
-            71,  // 카오스나이트
-            72,  // 크림슨슬로터
-            73,  // 로드다크니스
-            74,  // 리퍼
-            75,  // 헬가디언
-            76,  // 헬위자드
-            88,  // 다크가디언
-            89,  // 로드카오스
-            90,  // 카오스그리드
-            91,  // 헬핀드
-            92,  // 다크헤이즈
-            101, // 던울프아크
-            102, // 멈린몬
-            103  // 샤먼오프
+            27,  
+            40,  
+            41,  
+            47,  
+            48,  
+            57,  
+            61,  
+            62,  
+            64,  
+            68,  
+            70,  
+            71,  
+            72,  
+            73,  
+            74,  
+            75,  
+            76,  
+            88,  
+            89,  
+            90,  
+            91,  
+            92,  
+            101, 
+            102, 
+            103  
 
             // 27, 48, 40, 41, 57,
             // 61, 62, 64, 68, 71,
@@ -470,7 +470,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     }
 
     ////////////////////////////////////////////////////////////
-    // NPC 좌표 정보 구성
+    
     ////////////////////////////////////////////////////////////
     list<NPCInfo*>* pNPCInfos = pZone->getNPCInfos();
     list<NPCInfo*>::const_iterator itr = pNPCInfos->begin();
@@ -479,7 +479,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
         pUpdateInfo->addNPCInfo(pInfo);
     }
     ////////////////////////////////////////////////////////////
-    // 서버의 상태 정보
+    
     ////////////////////////////////////////////////////////////
     ServerGroupID_t ZoneGroupCount = g_pZoneGroupManager->size();
     UserNum_t ZoneUserNum = 0;
@@ -490,7 +490,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
         try {
             pZoneGroup = g_pZoneGroupManager->getZoneGroup(i);
         } catch (NoSuchElementException&) {
-            throw Error("Critical Error : ZoneInfoManager에 해당 존그룹이 존재하지 않습니다.");
+            throw Error("Critical Error : ZoneInfoManager    .");
         }
 
         ZonePlayerManager* pZonePlayerManager = pZoneGroup->getZonePlayerManager();
@@ -525,7 +525,7 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
         pUpdateInfo->setServerStat(SERVER_DOWN);
     }
 
-    // 프리미엄 정보 설정
+    
     if (pZone->isPremiumZone())
         pUpdateInfo->setPremiumZone();
 
@@ -542,10 +542,10 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
     if (bNonPK) {
         pUpdateInfo->setNonPK(1);
-        //		cout << "PK불가능" << endl;
+        
     } else {
         pUpdateInfo->setNonPK(0);
-        //		cout << "PK가능" << endl;
+        
     }
 
     // GuildUnion Information
@@ -555,13 +555,13 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
     GuildUnion* pUnion = NULL;
     pUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());
 
-    // 소속된 연합이 없으면
+    
     if (pUnion == NULL) {
         pUpdateInfo->setGuildUnionID(0);
         pUpdateInfo->setGuildUnionUserType(GCUpdateInfo::UNION_NOTHING);
         //		cout << "GCUpdateInfo->getGuildUnionUserType() : UNION_NOTHING (NOT UNION)" << endl;
     } else {
-        // 소속된 연합이 있다.
+        
         bool isGuildMaster = false;
         bool isGuildUnionMaster = false;
 
@@ -589,14 +589,14 @@ void makeGCUpdateInfo(GCUpdateInfo* pUpdateInfo, Creature* pCreature)
 
     pUpdateInfo->setBloodBibleSignInfo(pPlayerCreature->getBloodBibleSign());
 
-    // 파워 포인트
+    
     pUpdateInfo->setPowerPoint(pPlayerCreature->getPowerPoint());
 
     __END_CATCH
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 추가 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddSlayer(GCAddSlayer* pAddSlayer, Slayer* pSlayer)
 
@@ -613,7 +613,7 @@ void makeGCAddSlayer(GCAddSlayer* pAddSlayer, Slayer* pSlayer)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 추가 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddVampire(GCAddVampire* pAddVampire, Vampire* pVampire)
 
@@ -628,7 +628,7 @@ void makeGCAddVampire(GCAddVampire* pAddVampire, Vampire* pVampire)
 
     // cout << "makeGCAddVampire: CoatType=" << (int)(pAddVampire->getVampireInfo().getCoatType()) << endl;
 
-    // 개인용 포탈을 이용해서 이동한 것이라면...
+    
     if (pVampire->isFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL))
         pAddVampire->setFromFlag(1);
 
@@ -636,7 +636,7 @@ void makeGCAddVampire(GCAddVampire* pAddVampire, Vampire* pVampire)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터스 추가 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddOusters(GCAddOusters* pAddOusters, Ousters* pOusters)
 
@@ -653,7 +653,7 @@ void makeGCAddOusters(GCAddOusters* pAddOusters, Ousters* pOusters)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 추가 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddMonster(GCAddMonster* pAddMonster, Monster* pMonster)
 
@@ -670,7 +670,7 @@ void makeGCAddMonster(GCAddMonster* pAddMonster, Monster* pMonster)
     pAddMonster->setCurrentHP(pMonster->getHP());
     pAddMonster->setMaxHP(pMonster->getHP(ATTR_MAX));
 
-    // 개인용 포탈을 이용해서 이동한 것이라면...
+    
     if (pMonster->isFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL))
         pAddMonster->setFromFlag(1);
 
@@ -678,7 +678,7 @@ void makeGCAddMonster(GCAddMonster* pAddMonster, Monster* pMonster)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// NPC 추가 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddNPC(GCAddNPC* pAddNPC, NPC* pNPC)
 
@@ -699,7 +699,7 @@ void makeGCAddNPC(GCAddNPC* pAddNPC, NPC* pNPC)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 새로운 아이템을 존에다 추가할 때 보내는 GCAddNewItemToZone을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddNewItemToZone(GCAddNewItemToZone* pAddNewItemToZone, Item* pItem, int X, int Y)
 
@@ -720,7 +720,7 @@ void makeGCAddNewItemToZone(GCAddNewItemToZone* pAddNewItemToZone, Item* pItem, 
     pAddNewItemToZone->setEnchantLevel(pItem->getEnchantLevel());
     pAddNewItemToZone->setItemNum(pItem->getNum());
 
-    // 총 계열의 무기는 총알 숫자를 아이템 숫자에 실어서 보낸다.
+    
     if (IClass == Item::ITEM_CLASS_AR) {
         AR* pAR = dynamic_cast<AR*>(pItem);
         pAddNewItemToZone->setItemNum(pAR->getBulletCount());
@@ -734,13 +734,13 @@ void makeGCAddNewItemToZone(GCAddNewItemToZone* pAddNewItemToZone, Item* pItem, 
         SR* pSR = dynamic_cast<SR*>(pItem);
         pAddNewItemToZone->setItemNum(pSR->getBulletCount());
     }
-    // 벨트라면 안에 들어있는 포션이나 탄창에 대한 정보도 날려줘야 한다.
+    
     else if (IClass == Item::ITEM_CLASS_BELT) {
         Belt* pBelt = dynamic_cast<Belt*>(pItem);
         Inventory* pBeltInventory = pBelt->getInventory();
         BYTE SubItemCount = 0;
 
-        // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
+        
         for (int i = 0; i < pBelt->getPocketCount(); i++) {
             Item* pBeltItem = pBeltInventory->getItem(i, 0);
             if (pBeltItem != NULL) {
@@ -759,13 +759,13 @@ void makeGCAddNewItemToZone(GCAddNewItemToZone* pAddNewItemToZone, Item* pItem, 
 
         pAddNewItemToZone->setListNum(SubItemCount);
     }
-    // 암스밴드라면 안에 들어있는 포션이나 탄창에 대한 정보도 날려줘야 한다.
+    
     else if (IClass == Item::ITEM_CLASS_OUSTERS_ARMSBAND) {
         OustersArmsband* pOustersArmsband = dynamic_cast<OustersArmsband*>(pItem);
         Inventory* pOustersArmsbandInventory = pOustersArmsband->getInventory();
         BYTE SubItemCount = 0;
 
-        // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
+        
         for (int i = 0; i < pOustersArmsband->getPocketCount(); i++) {
             Item* pOustersArmsbandItem = pOustersArmsbandInventory->getItem(i, 0);
             if (pOustersArmsbandItem != NULL) {
@@ -789,7 +789,7 @@ void makeGCAddNewItemToZone(GCAddNewItemToZone* pAddNewItemToZone, Item* pItem, 
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 새로운 아이템을 존에다 추가할 때 보내는 GCDropItemToZone을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCDropItemToZone(GCDropItemToZone* pDropItemToZone, Item* pItem, int X, int Y)
 
@@ -810,7 +810,7 @@ void makeGCDropItemToZone(GCDropItemToZone* pDropItemToZone, Item* pItem, int X,
     pDropItemToZone->setEnchantLevel(pItem->getEnchantLevel());
     pDropItemToZone->setItemNum(pItem->getNum());
 
-    // 총 계열의 무기는 총알 숫자를 아이템 숫자에 실어서 보낸다.
+    
     if (IClass == Item::ITEM_CLASS_AR) {
         AR* pAR = dynamic_cast<AR*>(pItem);
         pDropItemToZone->setItemNum(pAR->getBulletCount());
@@ -824,13 +824,13 @@ void makeGCDropItemToZone(GCDropItemToZone* pDropItemToZone, Item* pItem, int X,
         SR* pSR = dynamic_cast<SR*>(pItem);
         pDropItemToZone->setItemNum(pSR->getBulletCount());
     }
-    // 벨트라면 안에 들어있는 포션이나 탄창에 대한 정보도 날려줘야 한다.
+    
     else if (IClass == Item::ITEM_CLASS_BELT) {
         Belt* pBelt = dynamic_cast<Belt*>(pItem);
         Inventory* pBeltInventory = pBelt->getInventory();
         BYTE SubItemCount = 0;
 
-        // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
+        
         for (int i = 0; i < pBelt->getPocketCount(); i++) {
             Item* pBeltItem = pBeltInventory->getItem(i, 0);
             if (pBeltItem != NULL) {
@@ -849,13 +849,13 @@ void makeGCDropItemToZone(GCDropItemToZone* pDropItemToZone, Item* pItem, int X,
 
         pDropItemToZone->setListNum(SubItemCount);
     }
-    // 암스밴드라면 안에 들어있는 포션이나 탄창에 대한 정보도 날려줘야 한다.
+    
     else if (IClass == Item::ITEM_CLASS_OUSTERS_ARMSBAND) {
         OustersArmsband* pOustersArmsband = dynamic_cast<OustersArmsband*>(pItem);
         Inventory* pOustersArmsbandInventory = pOustersArmsband->getInventory();
         BYTE SubItemCount = 0;
 
-        // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
+        
         for (int i = 0; i < pOustersArmsband->getPocketCount(); i++) {
             Item* pOustersArmsbandItem = pOustersArmsbandInventory->getItem(i, 0);
             if (pOustersArmsbandItem != NULL) {
@@ -879,7 +879,7 @@ void makeGCDropItemToZone(GCDropItemToZone* pDropItemToZone, Item* pItem, int X,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존에다 슬레이어 시체를 추가할 때 보내는 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddSlayerCorpse(GCAddSlayerCorpse* pAddSlayerCorpse, SlayerCorpse* pSlayerCorpse)
 
@@ -893,7 +893,7 @@ void makeGCAddSlayerCorpse(GCAddSlayerCorpse* pAddSlayerCorpse, SlayerCorpse* pS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존에다 뱀파이어 시체를 추가할 때 보내는 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddVampireCorpse(GCAddVampireCorpse* pAddVampireCorpse, VampireCorpse* pVampireCorpse)
 
@@ -907,7 +907,7 @@ void makeGCAddVampireCorpse(GCAddVampireCorpse* pAddVampireCorpse, VampireCorpse
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존에다 몬스터 시체를 추가할 때 보내는 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddMonsterCorpse(GCAddMonsterCorpse* pAddMonsterCorpse, MonsterCorpse* pMonsterCorpse, int X, int Y)
 
@@ -928,7 +928,7 @@ void makeGCAddMonsterCorpse(GCAddMonsterCorpse* pAddMonsterCorpse, MonsterCorpse
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존에다 아우스터즈 시체를 추가할 때 보내는 패킷을 구성한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCAddOustersCorpse(GCAddOustersCorpse* pAddOustersCorpse, OustersCorpse* pOustersCorpse)
 
@@ -941,8 +941,8 @@ void makeGCAddOustersCorpse(GCAddOustersCorpse* pAddOustersCorpse, OustersCorpse
     __END_CATCH
 }
 //////////////////////////////////////////////////////////////////////////////
-// 다른 사람의 최대 체력 같은 것이 변경되었을 경우에 날아가는
-// GCOtherModifyInfo를 구성한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 void makeGCOtherModifyInfo(GCOtherModifyInfo* pInfo, Slayer* pSlayer, const SLAYER_RECORD* prev) {
     SLAYER_RECORD cur;
@@ -1018,51 +1018,12 @@ void sendPayInfo(GamePlayer* pGamePlayer)
 {
     __BEGIN_TRY
 
-    /*
-    char str[80];
-    if (pGamePlayer->isPayPlaying())
-    {
-        Timeval currentTime;
-        getCurrentTime(currentTime);
-        Timeval payTime = pGamePlayer->getPayPlayTime(currentTime);
-
-        if (pGamePlayer->getPayPlayType()==PAY_PLAY_TYPE_PERSON)
-        {
-            strcpy(str, "[개인] ");
-        }
-        else
-        {
-            strcpy(str, "[PC방] ");
-        }
-
-        if (pGamePlayer->getPayType()==PAY_TYPE_FREE)
-        {
-            strcat(str, "유료서비스지만 무료 계정입니다.");
-        }
-        else if (pGamePlayer->getPayType()==PAY_TYPE_PERIOD)
-        {
-            sprintf(str, "%s%s 까지 사용가능합니다.", str,
-    pGamePlayer->getPayPlayAvailableDateTime().toString().c_str());
-        }
-        else
-        {
-            sprintf(str, "%s사용시간 : %d / %d 분", str, (payTime.tv_sec/60), pGamePlayer->getPayPlayAvailableHours());
-        }
-    }
-    else
-    {
-        strcpy(str, "무료 게임 중입니다.");
-    }
-
-    GCSystemMessage gcSystemMessage;
-    gcSystemMessage.setMessage(str);
-    pGamePlayer->sendPacket (&gcSystemMessage);
-    */
+     
 
     __END_CATCH
 }
 
-// 주위에 LevelUp effect를 뿌려준다.
+
 void sendEffectLevelUp(Creature* pCreature)
 
 {
@@ -1071,10 +1032,10 @@ void sendEffectLevelUp(Creature* pCreature)
     Assert(pCreature != NULL);
     // Assert(pCreature->isPC());
 
-    // 주위에 뿌려준다.
+    
     GCAddEffect gcAddEffect;
     gcAddEffect.setObjectID(pCreature->getObjectID());
-    gcAddEffect.setDuration(10); // 별로 의미없지만 1초로 설정
+    gcAddEffect.setDuration(10); 
 
     if (pCreature->isSlayer()) {
         gcAddEffect.setEffectID(Effect::EFFECT_CLASS_LEVELUP_SLAYER);
@@ -1098,7 +1059,7 @@ void sendSystemMessage(GamePlayer* pGamePlayer, const string& msg)
 
     Assert(pGamePlayer != NULL);
 
-    // 존에 있다면 바로 보내준다.
+    
     if (pGamePlayer->getPlayerStatus() == GPS_NORMAL) {
         GCSystemMessage gcSystemMessage;
 
@@ -1106,14 +1067,14 @@ void sendSystemMessage(GamePlayer* pGamePlayer, const string& msg)
 
         pGamePlayer->sendPacket(&gcSystemMessage);
     }
-    // 존에 없다면.. GamePlayer에 추가해두고 나중에 보내준다.
+    
     else {
         Event* pEvent = pGamePlayer->getEvent(Event::EVENT_CLASS_SYSTEM_MESSAGE);
         EventSystemMessage* pEventSystemMessage = NULL;
 
         if (pEvent == NULL) {
             pEvent = pEventSystemMessage = new EventSystemMessage(pGamePlayer);
-            // 존에 들어가자 마자 처리된다.
+            
             pEvent->setDeadline(0);
             pGamePlayer->addEvent(pEvent);
         } else {
@@ -1176,7 +1137,7 @@ void sendGCMiniGameScores(PlayerCreature* pPC, BYTE gameType, BYTE Level) {
         Result* pResult = pStmt->executeQuery(
             "SELECT Name, Score FROM MiniGameScores WHERE Type=%u AND Level=%u LIMIT 1", gameType, Level);
 
-        // UPDATE인 경우는 Result* 대신에.. pStmt->getAffectedRowCount()
+        
         if (pResult->next()) {
             gcMGS.addScore(pResult->getString(1), pResult->getInt(2));
         }

@@ -18,7 +18,7 @@
 //
 // class WarInfo;
 //
-// 하나의 전쟁에 대한 정보
+
 //
 //--------------------------------------------------------------------------------
 
@@ -31,10 +31,10 @@ public :
 	GuildWarInfo() {}
 	~GuildWarInfo() {}
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	PacketSize_t getSize() const throw() 
@@ -74,10 +74,10 @@ public :
 	void 				addJoinGuild(GuildID_t gid)	{ m_GuildIDs.addValue(gid); }
 
 private :
-	ZoneID_t				m_CastleID;				// 전쟁중인 성
-	std::string					m_DefenseGuildName;		// 방어 길드
-	std::string					m_AttackGuildName;		// 공격 길드
-	GuildIDList				m_GuildIDs;				// 참여길드들
+	ZoneID_t				m_CastleID;				
+	std::string					m_DefenseGuildName;		
+	std::string					m_AttackGuildName;		
+	GuildIDList				m_GuildIDs;				
 };
 
 #endif

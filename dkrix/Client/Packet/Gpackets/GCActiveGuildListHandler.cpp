@@ -22,7 +22,7 @@ void GCActiveGuildListHandler::execute ( GCActiveGuildList * pPacket , Player * 
 #ifdef __GAME_CLIENT__
 	//cout << pPacket->toString() << endl; 
 	//------------------------------------------------------
-	// 검증
+	
 	//------------------------------------------------------
 	if ( g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_NPC_ASK )
 	{

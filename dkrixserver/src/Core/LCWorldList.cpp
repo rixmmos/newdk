@@ -28,7 +28,7 @@ LCWorldList::LCWorldList()
 LCWorldList::~LCWorldList() noexcept
 
 {
-    // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+    
     while (!m_WorldInfoList.empty()) {
         WorldInfo* pWorldInfo = m_WorldInfoList.front();
         SAFE_DELETE(pWorldInfo);
@@ -38,7 +38,7 @@ LCWorldList::~LCWorldList() noexcept
 
 
 //----------------------------------------------------------------------
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //----------------------------------------------------------------------
 void LCWorldList::read(SocketInputStream& iStream)
 
@@ -49,7 +49,7 @@ void LCWorldList::read(SocketInputStream& iStream)
 
     BYTE ListNum;
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(ListNum);
     for (int i = 0; i < ListNum; i++) {
         WorldInfo* pWorldInfo = new WorldInfo();
@@ -62,7 +62,7 @@ void LCWorldList::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void LCWorldList::write(SocketOutputStream& oStream) const
 
@@ -72,7 +72,7 @@ void LCWorldList::write(SocketOutputStream& oStream) const
     oStream.write(m_CurrentWorldID);
 
     BYTE ListNum = m_WorldInfoList.size();
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(ListNum);
 
     for (list<WorldInfo*>::const_iterator itr = m_WorldInfoList.begin(); itr != m_WorldInfoList.end(); itr++) {
@@ -103,7 +103,7 @@ PacketSize_t LCWorldList::getPacketSize() const
 {
     __BEGIN_TRY
 
-    // ����Ʈ ������ ����
+    
     PacketSize_t PacketSize = szWorldID + szBYTE;
 
     for (list<WorldInfo*>::const_iterator itr = m_WorldInfoList.begin(); itr != m_WorldInfoList.end(); itr++) {

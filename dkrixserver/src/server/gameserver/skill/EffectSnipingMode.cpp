@@ -52,12 +52,12 @@ void EffectSnipingMode::unaffect(Creature* pCreature)
     // cout << "EffectSnipingMode " << "unaffect BEGIN" << endl;
 
     Assert(pCreature != NULL);
-    Assert(pCreature->isSlayer()); // 슬레이어말고는 걸리지 않는다.
+    Assert(pCreature->isSlayer()); 
 
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // addUnSnipingModeCreature() 내부에서 플래그를 끄므로...
+    
     // pCreature->removeFlag(Effect::EFFECT_CLASS_SNIPING_MODE);
     addUnSnipingModeCreature(pZone, pCreature, false);
 

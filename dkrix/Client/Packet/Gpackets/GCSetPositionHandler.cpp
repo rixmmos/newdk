@@ -12,8 +12,14 @@
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
+	#include "UIFunction.h"
 #endif
+
+static void TraceGameEntryFlow(const char* step)
+{
+	(void)step;
+}
 
 //----------------------------------------------------------------------
 // 
@@ -27,6 +33,7 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 		
 #ifdef __GAME_CLIENT__
+	TraceGameEntryFlow("GCSetPositionHandler begin");
 
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
@@ -35,19 +42,23 @@ throw ( ProtocolException , Error )
 	pClientPlayer->setXY( pPacket->getX() , pPacket->getY() );
 
 	pClientPlayer->setPlayerStatus( CPS_NORMAL ); 
+	TraceGameEntryFlow("GCSetPositionHandler set CPS_NORMAL");
 
 
 	//--------------------------------------------------------
-	// Player의 위치 지정
+	
 	//--------------------------------------------------------
 	InitPlayer(	pPacket->getX(), 
 				pPacket->getY(),
 				pPacket->getDir());
 
 	//--------------------------------------------------------
-	// 게임 시작..
+	
 	//--------------------------------------------------------
 	SetMode( MODE_GAME );
+	TraceGameEntryFlow("GCSetPositionHandler set MODE_GAME");
+	UI_SyncLoadedGameState();
+	TraceGameEntryFlow("GCSetPositionHandler after UI_SyncLoadedGameState");
 
 #endif
 	

@@ -1,23 +1,12 @@
-/********************************************************************
-	created:	2003/12/01
-	created:	1:12:2003   12:15
-	filename: 	D:\study\smodulelib\CrashReport.cpp
-	file path:	D:\study\smodulelib
-	file base:	CrashReport
-	file ext:	cpp
-	author:		쑥갓
-	
-	purpose:	치명적인 오류가 발생했을때 로그를 남긴다.
-*********************************************************************/
+ 
 #include "Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
-#include <imagehlp.h>
 #else
 #include "../../basic/Platform.h"
 #endif
 #include "CrashReport.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "MCrashReportManager.h"
 #include "ServerInfo.h"
 
@@ -104,6 +93,7 @@ static const TCHAR *GetExceptionDescription(DWORD ExceptionCode)
 	return "an Unknown exception type";
 }
 
+#if defined(PLATFORM_WINDOWS) && !defined(_M_X64)
 typedef struct _tagADDRESS64 {
     DWORD64       Offset;
     WORD          Segment;
@@ -346,6 +336,13 @@ LONG __stdcall RecordExceptionInfo( struct _EXCEPTION_POINTERS* pExp )
     return 0;
 }
 #endif // PLATFORM_WINDOWS
+#else
+LONG __stdcall RecordExceptionInfo( struct _EXCEPTION_POINTERS* pExp )
+{
+	(void)pExp;
+	return 0;
+}
+#endif // PLATFORM_WINDOWS && !_M_X64
 
 //void RecordExceptionInfo( unsigned int u, _EXCEPTION_POINTERS* pExp )
 //{
@@ -377,7 +374,7 @@ LONG __stdcall RecordExceptionInfo( struct _EXCEPTION_POINTERS* pExp )
 //		strcpy(szWinVer, "");
 //		GetWinVersion(szWinVer);
 //
-//		// *CrashLog 2003-12-01 10:50:00 98 0xffffffff 0xffffffff에서 메모리 침범 에러
+
 //		wsprintf(szTemp, "%04d-%02d-%02d %02d:%02d:%02d %d 0x%08x %s (0x%08x), %s", 
 //			st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond,
 //			version,

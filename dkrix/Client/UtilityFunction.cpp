@@ -3,6 +3,10 @@
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "DXLib.h"
+#include "SpriteLib/CSpriteSurface.h"
+#ifdef SPRITELIB_BACKEND_SDL
+#include "SpriteLib/SpriteLibBackendSDL.h"
+#endif
 
 #include "UtilityFunction.h"
 
@@ -19,12 +23,12 @@ bool SaveJPG(LPCTSTR lpszFileName, int &width, int &height, int &bpp, unsigned c
 //-----------------------------------------------------------------------------
 // RemoveStringSpace
 //-----------------------------------------------------------------------------
-// string 앞 뒤의 공백을 제거한다.
+
 //-----------------------------------------------------------------------------
 void
 RemoveStringSpace(char*& str)
 {
-	// 앞쪽 공백 제거
+	
 	int bExistChar = 0;
 	while (*str != '\0')
 	{
@@ -39,7 +43,7 @@ RemoveStringSpace(char*& str)
 		}
 	}
 
-	// 뒤쪽 공백 제거 
+	
 	if (bExistChar)
 	{
 		char* strTemp = str;
@@ -57,11 +61,11 @@ RemoveStringSpace(char*& str)
 //-----------------------------------------------------------------------------
 // SSN Check (strSSN1, strSSN2)
 //-----------------------------------------------------------------------------
-// 주민등록번호 체크..
+
 // strSSN1-strSSN2
 // 
-// 정상적인 주민등록번호이면	return 1
-//					아니면		return 0
+
+
 //-----------------------------------------------------------------------------
 int 
 IsValidSSN(const char* strSSN1, const char* strSSN2)
@@ -72,7 +76,7 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
 	}
 
 	//----------------------------------------------------------
-	// SSN1 의 길이 체크. 6자여야 한다.
+	
 	//----------------------------------------------------------
 	int lenSSN1 = strlen(strSSN1);
 
@@ -82,7 +86,7 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
 	}
 
 	//----------------------------------------------------------
-	// SSN2의 길이 체크. 7자여야 한다.
+	
 	//----------------------------------------------------------
 	int lenSSN2 = strlen(strSSN2);
 
@@ -92,7 +96,7 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
 	}
 
 	//----------------------------------------------------------
-	// 각 자리의 숫자를 읽는다.
+	
 	//----------------------------------------------------------
 	const int chZero = '0';
 
@@ -112,7 +116,7 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
 	int n2_6 = strSSN2[6] - chZero;		// check number
 
 	//----------------------------------------------------------
-	// check할려는 숫자를 계산한다.
+	
 	//----------------------------------------------------------
 	int sum = n1_0*2 + n1_1*3 + n1_2*4 + n1_3*5 + n1_4*6 + n1_5*7 
 			+ n2_0*8 + n2_1*9 + n2_2*2 + n2_3*3 + n2_4*4 + n2_5*5;
@@ -120,7 +124,7 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
     int parity = sum % 11;
 
 	//----------------------------------------------------------
-	// 다른 경우
+	
 	//----------------------------------------------------------
     if ( ((11-n2_6)) % 10 != (parity % 10) ) 
 	{ 
@@ -133,28 +137,10 @@ IsValidSSN(const char* strSSN1, const char* strSSN2)
 //-----------------------------------------------------------------------------
 // Is Valid ID
 //-----------------------------------------------------------------------------
-// 4~10글자 공백이 있으면 안된다.
-// 다 한글이거나
-// 다 영어야 할까??
-/*
-	char temp[3];
-	strncpy(temp, str, 2);
-	temp[2] = NULL;
 
-	if (strcmp(temp, "가") >= 0
-		&& strcmp(temp, "힝") <= 0)
-	{
-		// 제대로된 한글
-		str += 2;					
-		continue;	
-	}
-	else
-	{
-		// 2바이트 문자
-		str += 2;
-		continue;
-	}
-*/
+
+
+ 
 //-----------------------------------------------------------------------------
 int 
 IsValidID(const char* strID, const char* strPermit)
@@ -162,7 +148,7 @@ IsValidID(const char* strID, const char* strPermit)
 	const int minLength = 4;
 	const int maxLength = 10;
 
-	// 어떠한 경우이든 허용되는 문자들
+	
 	//const char* strPermit = "_-";
 
 	int len = 0;
@@ -174,8 +160,8 @@ IsValidID(const char* strID, const char* strPermit)
 	char* str = strtempID;
 
 	//--------------------------------------------------------
-	// 공백이 들어가면 안된다.
-	// 길이도 알아낸다. *_*;
+	
+	
 	//--------------------------------------------------------
 	while (*str != '\0')
 	{
@@ -189,7 +175,7 @@ IsValidID(const char* strID, const char* strPermit)
 	}
 
 	//--------------------------------------------------------
-	// 길이가 잘못된 경우
+	
 	//--------------------------------------------------------
 	if (len<minLength || len>maxLength)
 	{
@@ -197,7 +183,7 @@ IsValidID(const char* strID, const char* strPermit)
 	}
 
 	//--------------------------------------------------------
-	// 첫글자가 숫자이면 안된다.
+	
 	//--------------------------------------------------------
 	if (strtempID[0]>='0' && strtempID[0]<='9')
 	{
@@ -205,7 +191,7 @@ IsValidID(const char* strID, const char* strPermit)
 	}
 
 	//--------------------------------------------------------
-	// 한글을 제외한 특수문자가 들어가면 안된다.
+	
 	//--------------------------------------------------------
 	int bExistHangul = 0;
 	int bExistEnglish = 0;
@@ -215,23 +201,23 @@ IsValidID(const char* strID, const char* strPermit)
 	{
 		char ch = *str;
 		//--------------------------------------------------------
-		// 첫 bit가 '1'이면 한글..일까?
+		
 		//--------------------------------------------------------
 		if (ch & 0x80)
 		{
-			// 한글이므로 두 byte 다음 거 체크
+			
 			str++;
 
 			if (*str=='\0')
 			{
-				// 다음게 없으면 잘못된 ID이다.
+				
 				return 0;				
 			}
 
 			//--------------------------------------------------------
-			// 자음, 모음만 있는 경우라면 잘못된 아이디다.
+			
 			//--------------------------------------------------------
-			const char* badKor = "ㅂㅃㅈㅉㄷㄸㄱㄲㅅㅆㅛㅕㅑㅐㅒㅔㅖㅁㄴㅇㄹㅎㅗㅓㅏㅣㅋㅌㅊㅍㅠㅜㅡㅙㅝㅟㅢ";
+			const char* badKor = "";
 
 			char strKor[3] = { ch, *str };
 
@@ -239,7 +225,7 @@ IsValidID(const char* strID, const char* strPermit)
 
 			if (findPtr!=NULL)
 			{
-				if (!((findPtr - badKor) & 0x01))	// 짝수라면..
+				if (!((findPtr - badKor) & 0x01))	
 				{
 					return 0;
 				}
@@ -250,12 +236,12 @@ IsValidID(const char* strID, const char* strPermit)
 			bExistHangul = 1;
 		}
 		//--------------------------------------------------------
-		// 아니면..
+		
 		//--------------------------------------------------------
 		else
 		{
 			//--------------------------------------------------------
-			// 영어 대소문자..
+			
 			//--------------------------------------------------------
 			if (ch>='a' && ch<='z' 
 				|| ch>='A' && ch<='Z')
@@ -263,15 +249,15 @@ IsValidID(const char* strID, const char* strPermit)
 				bExistEnglish = 1;
 			}
 			//--------------------------------------------------------
-			// 숫자거나
-			// 허용된 문자인 경우는 괜찮다..
+			
+			
 			//--------------------------------------------------------
 			else if (ch>='0' && ch<='9'
 					|| strPermit!=NULL && strchr(strPermit, ch)!=NULL)
 			{
 			}
 			//--------------------------------------------------------
-			// 이상한 문자 쓰면 안된다.				
+			
 			//--------------------------------------------------------
 			else
 			{
@@ -284,7 +270,7 @@ IsValidID(const char* strID, const char* strPermit)
 	}
 
 	//--------------------------------------------------------
-	// 한글을 사용한 경우에는 영어를 사용할 수 없다.
+	
 	//--------------------------------------------------------
 	if (bExistHangul && bExistEnglish)
 	{
@@ -292,7 +278,7 @@ IsValidID(const char* strID, const char* strPermit)
 	}
 
 	//--------------------------------------------------------
-	// 정상적인 ID
+	
 	//--------------------------------------------------------
 	return 1;
 }
@@ -304,7 +290,7 @@ int
 IsValidPassword(const char* strPWD)
 {
 	//--------------------------------------------------
-	// 허용안되는 특수문자를 사용하면 안된다.
+	
 	//--------------------------------------------------
 	if (strchr(strPWD, '\\')!=NULL
 		|| strchr(strPWD, '\'')!=NULL)
@@ -313,30 +299,10 @@ IsValidPassword(const char* strPWD)
 	}
 
 	//--------------------------------------------------
-	// 숫자만 사용하면 안된다.
-	//--------------------------------------------------
-	// 흑흑.. 이미 숫자가 입력된 사람들 때메.. T_T;;
-	/*
-	char* str = strPWD;
 	
-	char ch;
-
-	bool AllNumber = TRUE;
-
-	while (ch=*str++, ch)
-	{
-		if (ch<'0' || ch>'9')
-		{
-			AllNumber = FALSE;
-			break;
-		}
-	}
-
-	if (AllNumber)	// 전부 숫자인 경우..
-	{
-		return 0;
-	}
-	*/
+	//--------------------------------------------------
+	
+	 
 
 	return 1;
 }
@@ -344,7 +310,7 @@ IsValidPassword(const char* strPWD)
 //-----------------------------------------------------------------------------
 // LoadImageToSurface
 //-----------------------------------------------------------------------------
-// *.bmp, *.jpg만 읽는다.
+
 //-----------------------------------------------------------------------------
 bool	
 LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
@@ -356,13 +322,13 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 
 	int fileLen = strlen(pFilename);
 
-	// file이름이 넘 짧은 경우... strlen("이름.bmp")==8
+	
 	if (fileLen < 8)
 	{
 		return false;
 	}
 
-	// file이름이 이상한 경우
+	
 	char checkStr[10];
 	strcpy(checkStr, (pFilename+fileLen-4));
 	// _strlwr is Windows-only, removed - lowercase conversion done below
@@ -370,12 +336,12 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 	bool bBmp = false;
 	bool bJpg = false;
 
-	// 확장자 체크를 위해 lowercase
+	
 	for(int kkk = 0; kkk < strlen(checkStr); kkk++)
 		if(checkStr[kkk] >= 'A' && checkStr[kkk] <= 'Z')
 			checkStr[kkk] += 'a' - 'A';
 
-	// 확장자 체크..
+	
 	if(!strncmp(".bmp", checkStr, 4))
 	{
 		bBmp = true;
@@ -489,7 +455,7 @@ LoadImageToSurface(const char* pFilename, CDirectDrawSurface& surface)
 //-----------------------------------------------------------------------------
 // SaveSurfaceToImage
 //-----------------------------------------------------------------------------
-// *.bmp, *.jpg만 쓴다.
+
 //-----------------------------------------------------------------------------
 bool	
 SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
@@ -501,13 +467,13 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 
 	int fileLen = strlen(pFilename);
 
-	// file이름이 넘 짧은 경우... strlen("이름.bmp")==8
+	
 	if (fileLen < 8)
 	{
 		return false;
 	}
 
-	// file이름이 이상한 경우
+	
 	char checkStr[10];
 	strcpy(checkStr, (pFilename+fileLen-4));
 	// _strlwr is Windows-only, removed - lowercase conversion done below
@@ -515,12 +481,12 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 	bool bBmp = false;
 	bool bJpg = false;
 
-	// 확장자 체크를 위해 lowercase
+	
 	for(int kkk = 0; kkk < strlen(checkStr); kkk++)
 		if(checkStr[kkk] >= 'A' && checkStr[kkk] <= 'Z')
 			checkStr[kkk] += 'a' - 'A';
 
-	// 확장자 체크..
+	
 	if(!strncmp(".bmp", checkStr, 4))
 	{
 		bBmp = true;
@@ -585,6 +551,27 @@ SaveSurfaceToImage(const char* pFilename, CDirectDrawSurface& surface)
 	}
 
 	return bOK;
+}
+
+bool
+SaveSurfaceToImage(const char* pFilename, CSpriteSurface& surface)
+{
+	if (pFilename == NULL)
+	{
+		return false;
+	}
+
+#ifdef SPRITELIB_BACKEND_SDL
+	spritectl_surface_t backendSurface = surface.GetBackendSurface();
+	if (backendSurface == SPRITECTL_INVALID_SURFACE || backendSurface->surface == NULL)
+	{
+		return false;
+	}
+
+	return SDL_SaveBMP(backendSurface->surface, pFilename) == 0;
+#else
+	return false;
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -932,7 +919,7 @@ bool SaveJPG(LPCTSTR lpszFileName, int &width, int &height, int &bpp, unsigned c
 //-----------------------------------------------------------------------------
 // Get DiskFreeSpace
 //-----------------------------------------------------------------------------
-// Drive가 NULL이면 지정을 안하면 현재 드라이브다.
+
 //-----------------------------------------------------------------------------
 unsigned long
 GetDiskFreeSpace(const char* pDrive)

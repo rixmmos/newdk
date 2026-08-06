@@ -2,46 +2,15 @@
 // MActionResult.h
 //----------------------------------------------------------------------
 //
-// 어떤 ActionInfo의 결과로 표현되는 것들에 대한 정보
+
 //
-// ACTIONRESULT_NODE를 생성해서(new) Add해주고
-// 필요할때, GetIterator로.. 읽어야 한다.
+
+
 //
-// delete는 내부에서 한다.
+
 //
 //----------------------------------------------------------------------
-/*
-
-- 순간적인 Effect표시 
-  사용 --> Server검증 --> Effect표시
-
-- 지속적으로 Tile에 존재하는 Effect
-  사용 --> Server검증 --> Tile에 Effect표시
-
-- 효과 마법
-  사용 --> Server검증 --> 대상에 효과 표현
-
-- 타인 공격 마법
-  사용 --> Server검증 --> 대상 데미지
-
-- 사인예
-  사용 --> Server검증 --> 대상 데미지, 캐릭터 이동
-
-
-
-  = 내가 사용한 기술 : 
-    시작ActionInfo를 보여주고 
-	Server에서 결과가 오면 결과를 붙여서 결과ActionInfo를 실행한다.
-
-  = 타인이 사용한 기술 :
-    시작과 결과가 같이 존재하는데...
-	시작ActionInfo에 결과ActionInfo+결과를 붙여야 한다.
-
-  = 시작ActionInfo에는 결과ActionInfo에 대한 pointer
-	결과 ActionInfo에는 결과에 대한 list
-
-
-*/
+ 
 //----------------------------------------------------------------------
 
 
@@ -62,7 +31,7 @@
 #include <list>
 
 //----------------------------------------------------------------------
-// 하나의 결과에 대한 정보를 담고 있는 node의 base class
+
 //----------------------------------------------------------------------
 class MActionResultNode {
 	public :
@@ -70,12 +39,12 @@ class MActionResultNode {
 		virtual ~MActionResultNode()	{}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		virtual TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_NULL; }
 		
 		//------------------------------------------------------
-		// 어떤 종류인가?
+		
 		//------------------------------------------------------
 		virtual bool		IsNodeActionInfo() const		{ return false; }		
 		virtual bool		IsNodeChangePosition() const	{ return false; }
@@ -97,13 +66,13 @@ class MActionResultNode {
 
 
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		virtual void		Execute() = 0;
 };
 
 //----------------------------------------------------------------------
-// 누가(UserID) 누군가(TargetID)에게 ActionInfo를 사용한 결과node
+
 //----------------------------------------------------------------------
 class MActionResultNodeActionInfo : public MActionResultNode {
 	public :
@@ -111,7 +80,7 @@ class MActionResultNodeActionInfo : public MActionResultNode {
 		~MActionResultNodeActionInfo()		{};
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_ACTIONINFO; }
 
@@ -131,7 +100,7 @@ class MActionResultNodeActionInfo : public MActionResultNode {
 		void		SetSY(TYPE_SECTORPOSITION sY)	{ m_sY = sY; }
 	
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 
@@ -149,7 +118,7 @@ class MActionResultNodeActionInfo : public MActionResultNode {
 
 
 //----------------------------------------------------------------------
-// 누군가(ID)의 좌표(sX,sY)를 바꾸게 하는 결과node
+
 //----------------------------------------------------------------------
 class MActionResultNodeChangePosition : public MActionResultNode {
 	public :
@@ -157,7 +126,7 @@ class MActionResultNodeChangePosition : public MActionResultNode {
 		~MActionResultNodeChangePosition()		{};
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CHANGE_POSITION; }
 
@@ -174,7 +143,7 @@ class MActionResultNodeChangePosition : public MActionResultNode {
 		void		SetY(TYPE_SECTORPOSITION y)	{ m_Y = y; }
 	
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -185,7 +154,7 @@ class MActionResultNodeChangePosition : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)의 상태를 바꾸게 하는 결과node
+
 //----------------------------------------------------------------------
 class MActionResultNodeChangeStatus : public MActionResultNode {
 	public :
@@ -193,7 +162,7 @@ class MActionResultNodeChangeStatus : public MActionResultNode {
 		~MActionResultNodeChangeStatus();
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CHANGE_STATUS; }
 
@@ -209,7 +178,7 @@ class MActionResultNodeChangeStatus : public MActionResultNode {
 		void		SetStatus(MStatus* pStatus)		{ m_pStatus = pStatus; }
 
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -219,7 +188,7 @@ class MActionResultNodeChangeStatus : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 죽게 하는 결과
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureDie : public MActionResultNode {
 	public :
@@ -227,7 +196,7 @@ class MActionResultNodeCreatureDie : public MActionResultNode {
 		~MActionResultNodeCreatureDie() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_DIE; }
 
@@ -242,7 +211,7 @@ class MActionResultNodeCreatureDie : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -251,7 +220,7 @@ class MActionResultNodeCreatureDie : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 땅 속에 숨게 하는 결과
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureBurrow : public MActionResultNode {
 	public :
@@ -259,7 +228,7 @@ class MActionResultNodeCreatureBurrow : public MActionResultNode {
 		~MActionResultNodeCreatureBurrow() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_BURROW; }
 
@@ -274,7 +243,7 @@ class MActionResultNodeCreatureBurrow : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -283,7 +252,7 @@ class MActionResultNodeCreatureBurrow : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 사라지게 하는 결과 
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureInvisible : public MActionResultNode {
 	public :
@@ -291,7 +260,7 @@ class MActionResultNodeCreatureInvisible : public MActionResultNode {
 		~MActionResultNodeCreatureInvisible() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_INVISIBLE; }
 
@@ -306,7 +275,7 @@ class MActionResultNodeCreatureInvisible : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -315,7 +284,7 @@ class MActionResultNodeCreatureInvisible : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 보이게 하는 결과 
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureVisible : public MActionResultNode {
 	public :
@@ -323,7 +292,7 @@ class MActionResultNodeCreatureVisible : public MActionResultNode {
 		~MActionResultNodeCreatureVisible() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_VISIBLE; }
 
@@ -338,7 +307,7 @@ class MActionResultNodeCreatureVisible : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -347,7 +316,7 @@ class MActionResultNodeCreatureVisible : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 땅 속에 숨게 하는 결과
+
 //----------------------------------------------------------------------
 class MActionResultNodeAddEffectStatus : public MActionResultNode {
 	public :
@@ -355,7 +324,7 @@ class MActionResultNodeAddEffectStatus : public MActionResultNode {
 		~MActionResultNodeAddEffectStatus() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_ADD_EFFECTSTATUS; }
 
@@ -372,18 +341,18 @@ class MActionResultNodeAddEffectStatus : public MActionResultNode {
 //		void		SetCreatureID(DWORD df)				{ m_DelayFrame = df; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
 	public :
-		TYPE_OBJECTID		m_TargetID;				// 대상
-		EFFECTSTATUS		m_EffectStatus;		// 붙이는 effect
-		DWORD				m_DelayFrame;		// 지속 시간		
+		TYPE_OBJECTID		m_TargetID;				
+		EFFECTSTATUS		m_EffectStatus;		
+		DWORD				m_DelayFrame;		
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 snipping mode로..
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureSnipping : public MActionResultNode {
 	public :
@@ -391,7 +360,7 @@ class MActionResultNodeCreatureSnipping : public MActionResultNode {
 		~MActionResultNodeCreatureSnipping() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_SNIPPING; }
 
@@ -406,7 +375,7 @@ class MActionResultNodeCreatureSnipping : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -415,7 +384,7 @@ class MActionResultNodeCreatureSnipping : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// CreatureType을 바꾸는 Result
+
 //----------------------------------------------------------------------
 class MActionResultNodeChangeCreatureType : public MActionResultNode {
 	public :
@@ -423,7 +392,7 @@ class MActionResultNodeChangeCreatureType : public MActionResultNode {
 		~MActionResultNodeChangeCreatureType();
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CHANGE_CREATURE_TYPE; }
 
@@ -439,7 +408,7 @@ class MActionResultNodeChangeCreatureType : public MActionResultNode {
 		void		SetCreatureType(int ctype)		{ m_CreatureType = ctype; }
 
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -449,7 +418,7 @@ class MActionResultNodeChangeCreatureType : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 관 소환 (tid가 (x,y)에서 관 소환)
+
 //----------------------------------------------------------------------
 class MActionResultNodeSummonCasket : public MActionResultNode {
 	public :
@@ -457,7 +426,7 @@ class MActionResultNodeSummonCasket : public MActionResultNode {
 		~MActionResultNodeSummonCasket();
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_SUMMON_CASKET; }
 
@@ -473,7 +442,7 @@ class MActionResultNodeSummonCasket : public MActionResultNode {
 		void		SetType(int type)				{ m_CasketType = type; }
 
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -483,7 +452,7 @@ class MActionResultNodeSummonCasket : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 관에서 나가기
+
 //----------------------------------------------------------------------
 class MActionResultNodeOpenCasket : public MActionResultNode {
 	public :
@@ -491,7 +460,7 @@ class MActionResultNodeOpenCasket : public MActionResultNode {
 		~MActionResultNodeOpenCasket();
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_OPEN_CASKET; }
 
@@ -506,7 +475,7 @@ class MActionResultNodeOpenCasket : public MActionResultNode {
 		void		SetTargetID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -515,7 +484,7 @@ class MActionResultNodeOpenCasket : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 사라지게 하는 결과 
+
 //----------------------------------------------------------------------
 class MActionResultNodeCreatureTurning : public MActionResultNode {
 	public :
@@ -523,7 +492,7 @@ class MActionResultNodeCreatureTurning : public MActionResultNode {
 		~MActionResultNodeCreatureTurning() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CREATURE_TURNING; }
 
@@ -538,7 +507,7 @@ class MActionResultNodeCreatureTurning : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -548,7 +517,7 @@ class MActionResultNodeCreatureTurning : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 인벤토리 아이템(ID)을 없앰
+
 //----------------------------------------------------------------------
 class MActionResultNodeRemoveItemInInventory : public MActionResultNode {
 	public :
@@ -556,7 +525,7 @@ class MActionResultNodeRemoveItemInInventory : public MActionResultNode {
 		~MActionResultNodeRemoveItemInInventory() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_REMOVE_ITEM_IN_INVENTORY; }
 
@@ -571,7 +540,7 @@ class MActionResultNodeRemoveItemInInventory : public MActionResultNode {
 		void		SetItemID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -580,7 +549,7 @@ class MActionResultNodeRemoveItemInInventory : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 인벤토리 아이템(ID)의 옵션을 바꿈
+
 //----------------------------------------------------------------------
 class MActionResultNodeChangeItemOptionInInventory : public MActionResultNode {
 	public :
@@ -588,7 +557,7 @@ class MActionResultNodeChangeItemOptionInInventory : public MActionResultNode {
 		~MActionResultNodeChangeItemOptionInInventory() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_CHANGE_ITEM_OPTION_IN_INVENTORY; }
 
@@ -604,7 +573,7 @@ class MActionResultNodeChangeItemOptionInInventory : public MActionResultNode {
 		void		SetOption(DWORD type)	{ m_Type = type; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -633,7 +602,7 @@ public :
 };
 
 //----------------------------------------------------------------------
-// 누군가(ID)를 사라지게(가짜 캐릭터 죽을때) 하는 결과
+
 //----------------------------------------------------------------------
 class MActionResultNodeFakeDie : public MActionResultNode {
 	public :
@@ -641,7 +610,7 @@ class MActionResultNodeFakeDie : public MActionResultNode {
 		~MActionResultNodeFakeDie() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_FAKE_DIE; }
 
@@ -656,7 +625,7 @@ class MActionResultNodeFakeDie : public MActionResultNode {
 		void		SetCreatureID(TYPE_OBJECTID tid)	{ m_TargetID = tid; }
 		
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -665,7 +634,7 @@ class MActionResultNodeFakeDie : public MActionResultNode {
 };
 
 //----------------------------------------------------------------------
-// 이벤트를 추가한다
+
 //----------------------------------------------------------------------
 class MActionResultNodeEvent : public MActionResultNode {
 	public :
@@ -673,7 +642,7 @@ class MActionResultNodeEvent : public MActionResultNode {
 		~MActionResultNodeEvent() {}
 
 		//------------------------------------------------------
-		// ActionResult의 종류
+		
 		//------------------------------------------------------
 		TYPE_ACTIONRESULTID		GetType() const		{ return ACTIONRESULTNODE_EVENT; }
 
@@ -683,7 +652,7 @@ class MActionResultNodeEvent : public MActionResultNode {
 		bool		IsNodeEvent() const		{ return true; }
 
 		//------------------------------------------------------
-		// 결과를 적용시킨다.
+		
 		//------------------------------------------------------
 		void		Execute();
 		
@@ -693,17 +662,17 @@ class MActionResultNodeEvent : public MActionResultNode {
 
 
 //----------------------------------------------------------------------
-// ActionInfo에 따른 Server에서 검증받은 결과들의 list
+
 //----------------------------------------------------------------------
 typedef	std::list<MActionResultNode*>	ACTIONRESULTNODE_LIST;
 
 
 //----------------------------------------------------------------------
-// 어떤 ActionInfo에 의해서 발생한 모든 결과를 
-// Server로부터 검증을 받은 후에.. 그것들을 다~ 저장하고 있는 class
+
+
 //
-// destructor에서 Execute해버리기 때문에
-// 실행할 필요가 없다면 Release해야한다.
+
+
 //----------------------------------------------------------------------
 class MActionResult {
 	public :
@@ -716,7 +685,7 @@ class MActionResult {
 		void		Release();
 
 		//--------------------------------------------------------
-		// 결과 하나를 추가한다.
+		
 		//--------------------------------------------------------
 		void		Add(MActionResultNode* pNode);
 
@@ -728,7 +697,7 @@ class MActionResult {
 		ACTIONRESULTNODE_LIST::const_iterator GetIterator() const	{ return m_List.begin(); }
 
 		//--------------------------------------------------------
-		// 결과를 실행한다.
+		
 		//--------------------------------------------------------
 		void		Execute();
 

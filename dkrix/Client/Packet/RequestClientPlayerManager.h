@@ -2,13 +2,13 @@
 // RequestClientPlayerManager.h
 //--------------------------------------------------------------------------------
 //
-// Init( port )하면 Request를 받아들일 준비를 하게 된다.
-//                  내부에서 Thread를 생성해서 
-//                  WaitRequest()를 호출해서 accept를 처리한다.
+
+
+
 //
-// 그냥 WaitRequest()를 호출하면 안된다.. - -;
+
 //
-// Update()는 WaitRequest()에서 받아들인 RequestServerPlayer들을 처리한다.
+
 //
 //
 //--------------------------------------------------------------------------------
@@ -18,7 +18,7 @@
 
 #pragma warning(disable:4786)
 
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	#include <Windows.h>
 #else
 	#include "../../basic/Platform.h"
@@ -92,7 +92,7 @@ class RequestClientPlayerManager {
 		int			GetSize() const			{ return m_mapRequestClientPlayer.size(); }		
 
 		//----------------------------------------------------------------------
-		// RemoveConnectionInfo - 외부에서 함부로 제거하면 안된다. - -;
+		
 		//----------------------------------------------------------------------
 		void		RemoveConnectionInfo(const char* pName);
 
@@ -104,7 +104,7 @@ class RequestClientPlayerManager {
 		void		Unlock()				{ LeaveCriticalSection(&m_Lock); }
 
 		//----------------------------------------------------------------------
-		// Thread 관련
+		
 		//----------------------------------------------------------------------
 		void		RemoveTerminatedThread();
 

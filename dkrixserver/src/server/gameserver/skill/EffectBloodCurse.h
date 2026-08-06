@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectBloodCurse.h
 // Written by  : elca@ewestsoft.com
-// Description : 성직마법 BloodCurse의 Effect를 처리해주기 위한 클래스이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EFFECT_BLOOD_CURSE__
@@ -65,7 +65,7 @@ private:
     Turn_t m_Delay;
     //	string  m_CasterName;
     ObjectID_t m_UserObjectID;
-    bool m_bPlayer; // 유저가 사용한 기술인가?
+    bool m_bPlayer; 
     uint m_SplashRatio[3];
 };
 

@@ -10,8 +10,8 @@
 #include "SimpleTileMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 BloodyBall::BloodyBall() throw() {
     __BEGIN_TRY
@@ -31,7 +31,7 @@ BloodyBall::BloodyBall() throw() {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyBall::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -51,7 +51,7 @@ void BloodyBall::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pVampire, getSkillType());
 
@@ -70,7 +70,7 @@ void BloodyBall::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyBall::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -102,7 +102,7 @@ void BloodyBall::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
         param.addMask(m_pBloodyBallMask[i].x, m_pBloodyBallMask[i].y, 100);
     }
 
-    // Knowledge of Blood 가 있다면 hit bonus 10
+    
     int HitBonus = 0;
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD);
@@ -119,7 +119,7 @@ void BloodyBall::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyBall::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 

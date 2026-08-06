@@ -86,6 +86,30 @@ static std::string ConvertEncoding(const std::string& input, const char* fromEnc
 #endif
 }
 
+static std::string KeepAsciiLatinOnly(const std::string& input)
+{
+	std::string output;
+	output.reserve(input.size());
+
+	for (size_t i = 0; i < input.size(); ++i) {
+		unsigned char c = static_cast<unsigned char>(input[i]);
+		if (c == '\n' || c == '\r' || c == '\t' || (c >= 0x20 && c <= 0x7E)) {
+			output.push_back(static_cast<char>(c));
+			continue;
+		}
+
+		if (c >= 0x80) {
+			while (i + 1 < input.size() &&
+				(static_cast<unsigned char>(input[i + 1]) & 0xC0) == 0x80) {
+				++i;
+			}
+		}
+		output.push_back('?');
+	}
+
+	return output;
+}
+
 // Public static method for encoding normalization
 std::string TextService::NormalizeText(const std::string& text)
 {
@@ -93,17 +117,16 @@ std::string TextService::NormalizeText(const std::string& text)
 		return text;
 
 	if (IsValidUtf8(text.c_str(), text.size()))
-		return text;
+		return KeepAsciiLatinOnly(text);
 
-	// Try common encodings: Korean first, then Chinese, then fallback
-	const char* encodings[] = {"CP949", "EUC-KR", "GBK", "GB2312", "BIG5", NULL};
+	const char* encodings[] = {"WINDOWS-1252", "ISO-8859-1", NULL};
 	for (int i = 0; encodings[i] != NULL; ++i) {
 		std::string converted = ConvertEncoding(text, encodings[i]);
 		if (!converted.empty())
-			return converted;
+			return KeepAsciiLatinOnly(converted);
 	}
 
-	return text;
+	return KeepAsciiLatinOnly(text);
 }
 
 static uint32_t Utf8Decode(const char* s, int maxLen, int* outLen)
@@ -161,6 +184,19 @@ static uint32_t Utf8Decode(const char* s, int maxLen, int* outLen)
 	return 0xFFFD;
 }
 
+static uint32_t SanitizeCodepoint(uint32_t codepoint)
+{
+	if (codepoint == 0)
+		return 0;
+	if (codepoint == 0xFFFD)
+		return static_cast<uint32_t>('?');
+	if (codepoint > 0x10FFFF)
+		return static_cast<uint32_t>('?');
+	if (codepoint >= 0xD800 && codepoint <= 0xDFFF)
+		return static_cast<uint32_t>('?');
+	return codepoint;
+}
+
 TextService::TextService()
 	: m_backend(NULL)
 	, m_initialized(false)
@@ -207,11 +243,17 @@ FontHandle TextService::GetDefaultFont()
 
 FontHandle TextService::GetFont(int size)
 {
+	return GetFont(size, std::string());
+}
+
+FontHandle TextService::GetFont(int size, const std::string& family)
+{
 	if (!EnsureInitialized())
 		return FontHandle();
 
 	FontDesc desc;
 	desc.size = size;
+	desc.family = family;
 	FontHandle handle = m_backend->AcquireFont(desc);
 	if (!handle.IsValid())
 		return m_defaultFont;
@@ -245,7 +287,7 @@ int TextService::MeasureLineWidth(const std::string& text, FontHandle font)
 	int remaining = static_cast<int>(text.size());
 	while (*p && remaining > 0) {
 		int len = 0;
-		uint32_t codepoint = Utf8Decode(p, remaining, &len);
+		uint32_t codepoint = SanitizeCodepoint(Utf8Decode(p, remaining, &len));
 		if (len == 0) break; // Safety: no data left
 		p += len;
 		remaining -= len;
@@ -299,7 +341,7 @@ std::vector<std::string> TextService::WrapText(const std::string& text, const Te
 	int remaining = static_cast<int>(normalized.size());
 	while (*p && remaining > 0) {
 		int len = 0;
-		uint32_t codepoint = Utf8Decode(p, remaining, &len);
+		uint32_t codepoint = SanitizeCodepoint(Utf8Decode(p, remaining, &len));
 		if (len == 0) break; // Safety: no data left
 
 		if (codepoint == '\n') {
@@ -369,14 +411,16 @@ void TextService::DrawLine(RenderTarget& target, const std::string& text,
 		drawX = x + (maxWidth - lineWidth);
 	}
 
+	if (m_backend->DrawTextLine(target, style.font, normalized.c_str(), drawX, y, style.color, style.color.a))
+		return;
+
 	const char* p = normalized.c_str();
 	int remaining = static_cast<int>(normalized.size());
 	int penX = drawX;
-	int ascent = m_backend->GetFontAscent(style.font);
 
 	while (*p && remaining > 0) {
 		int len = 0;
-		uint32_t codepoint = Utf8Decode(p, remaining, &len);
+		uint32_t codepoint = SanitizeCodepoint(Utf8Decode(p, remaining, &len));
 		if (len == 0) break; // Safety: no data left
 		p += len;
 		remaining -= len;
@@ -387,24 +431,9 @@ void TextService::DrawLine(RenderTarget& target, const std::string& text,
 
 		const Glyph* glyph = m_backend->GetGlyph(style.font, codepoint, style.color);
 		if (glyph) {
-			// Calculate draw position
-			// y is the baseline position
-			// bearingY is the distance from baseline to the top of the glyph
-			// The rendered glyph surface starts at (baseline - ascent - miny)
-			// So we need to offset by: y - (ascent + miny - bearingY)
-			// But since bearingY = ascent + miny, this simplifies to: y
-			//
-			// Actually, TTF_RenderUTF8_Blended returns a surface that:
-			// - Has origin (0,0) at the glyph's bounding box top-left
-			// - The baseline is at position (-miny) within the surface
-			//
-			// So if we want to draw at baseline position y:
-			// - We need to offset the surface so the baseline aligns
-			// - drawY = y - (-miny) = y + miny
-			// - But miny is negative, so: drawY = y - ascent + bearingY
-
-			int drawY = y - ascent + metrics.bearingY;
-			m_backend->DrawGlyph(target, *glyph, penX + metrics.bearingX, drawY, style.color.a);
+			int drawX = penX;
+			int drawY = y + metrics.bearingY;
+			m_backend->DrawGlyph(target, *glyph, drawX, drawY, style.color.a);
 		}
 
 		penX += metrics.advance;

@@ -22,7 +22,7 @@ public:
     ExpTable() : m_Records(MaxLevel) {}
     virtual ~ExpTable() {}
 
-    // DB 관련 함수들
+    
     virtual void load();
     virtual const string getDBTableName() const = 0;
     virtual const string getDBGoalExpFieldName() const {
@@ -38,7 +38,7 @@ public:
         return "";
     }
 
-    // 쿼리하기
+    
     GoalExpType getGoalExp(LevelType level) const {
         Assert(level <= MaxLevel && level >= MinLevel);
         return m_Records[level].m_GoalExp;
@@ -65,7 +65,7 @@ void ExpTable<GoalExpType, LevelType, MinLevel, MaxLevel, TotalExpType>::load() 
 
     const string QueryTemplate = "SELECT %s, %s, %s FROM %s %s";
 
-    // 10바이트 정도 오바는 봐주자
+    
     int size = QueryTemplate.size() + getDBTableName().size() + getDBGoalExpFieldName().size() +
                getDBAccumExpFieldName().size() + getDBLevelFieldName().size() + getDBQueryCondition().size();
     char* query = new char[size];
@@ -122,7 +122,7 @@ public:
     bool levelUp();
     bool levelDown();
 
-    // 꼭 필요할때만 씁시다.
+    
     bool SET_LEVEL(LevelType level);
 
 private:

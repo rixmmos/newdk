@@ -8,8 +8,8 @@
 #ifndef __CG_PET_GAMBLE_H__
 #define __CG_PET_GAMBLE_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGPetGamble;

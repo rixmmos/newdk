@@ -19,7 +19,7 @@ EffectHeartCatalyst::EffectHeartCatalyst(Creature* pCreature)
     __BEGIN_TRY
 
     setTarget(pCreature);
-    // 한번 부를때마다 반전되는거. 의미없다.
+    
     m_GiveExp = true;
 
     __END_CATCH
@@ -115,7 +115,7 @@ void EffectHeartCatalyst::unaffect(Creature* pCreature)
     Zone* pZone = pSlayer->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pSlayer->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_HEART_CATALYST);

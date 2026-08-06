@@ -9,9 +9,9 @@
 // include files
 #include "Client_PCH.h"
 #include "LCServerList.h"
-#include "PCSlayerInfo.h"
-#include "PCVampireInfo.h"
-#include "PCOustersInfo.h"
+#include "../PCSlayerInfo.h"
+#include "../PCVampireInfo.h"
+#include "../PCOustersInfo.h"
 
 //----------------------------------------------------------------------
 // constructor
@@ -31,7 +31,7 @@ LCServerList::~LCServerList ()
 {
 	__BEGIN_TRY
 
-	// 소속된 모든 객체들을 삭제한다.
+	
 	while ( !m_ServerGroupInfoList.empty() ) 
 	{
 		ServerGroupInfo * pServerGroupInfo = m_ServerGroupInfoList.front();
@@ -48,7 +48,7 @@ LCServerList::~LCServerList ()
 
 
 //----------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //----------------------------------------------------------------------
 void LCServerList::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -59,7 +59,7 @@ void LCServerList::read ( SocketInputStream & iStream )
 
 	BYTE ListNum;
 
-    // 최적화 작업시 실제 크기를 명시하도록 한다.
+    
 	iStream.read( ListNum );
 	for( int i = 0; i < ListNum; i++ ) {
 		ServerGroupInfo * pServerGroupInfo = new ServerGroupInfo();
@@ -72,7 +72,7 @@ void LCServerList::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void LCServerList::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -82,7 +82,7 @@ void LCServerList::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_CurrentServerGroupID );
 
 	BYTE ListNum = m_ServerGroupInfoList.size();
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	oStream.write( ListNum );
 
 	for ( std::list<ServerGroupInfo*>:: const_iterator itr = m_ServerGroupInfoList.begin(); itr!= m_ServerGroupInfoList.end(); itr++) {
@@ -113,7 +113,7 @@ PacketSize_t LCServerList::getPacketSize () const
 {
 	__BEGIN_TRY
 
-	// 리스트 인자의 갯수
+	
 	PacketSize_t PacketSize = szServerGroupID + szBYTE;
 
 	for ( std::list< ServerGroupInfo* >::const_iterator itr = m_ServerGroupInfoList.begin() ; itr != m_ServerGroupInfoList.end() ; itr ++ ) {

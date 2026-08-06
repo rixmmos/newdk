@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : MonsterInfo.h
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -20,12 +20,12 @@
 #include "Treasure.h"
 #include "Types.h"
 
-// 몬스터 스프라이트 종류 최대 숫자
+
 // add by viva
 const int MAX_SPRITE_TYPE = 1000;
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터가 기억할 수 있는 적의 최대 개수, 또는 적의 리스트에 접근하는 인덱스
+
 //////////////////////////////////////////////////////////////////////////////
 enum EnemyPriority {
     ENEMY_PRIMARY = 1,
@@ -41,18 +41,18 @@ enum EnemyPriority {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 적이 여러명일 때, 누구를 먼저 공격하는가?
+
 //////////////////////////////////////////////////////////////////////////////
 enum AttackOrder {
-    ATTACK_FIRST,     // 제일 먼저 때린 놈부터 공격
-    ATTACK_LAST,      // 제일 나중에 때린 놈 부터 공격
-    ATTACK_WEAKEST,   // 제일 약한 놈부터 공격
-    ATTACK_STRONGEST, // 제일 강한 놈부터 공격
-    ATTACK_CLOSEST,   // 제일 가까운 놈 부터 공격
-    ATTACK_FAREST,    // 제일 먼 놈 부터 공격
-    ATTACK_FIGHTER,   // 전사 먼저 공격
-    ATTACK_PRIEST,    // 성직자 먼저 공격
-    ATTACK_GUNNER,    // 건너 먼저 공격
+    ATTACK_FIRST,     
+    ATTACK_LAST,      
+    ATTACK_WEAKEST,   
+    ATTACK_STRONGEST, 
+    ATTACK_CLOSEST,   
+    ATTACK_FAREST,    
+    ATTACK_FIGHTER,   
+    ATTACK_PRIEST,    
+    ATTACK_GUNNER,    
     ATTACK_MAX
 };
 
@@ -62,7 +62,7 @@ const string AttackOrder2String[] = {"ATTACK_FIRST",   "ATTACK_LAST",   "ATTACK_
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 성향 - 몬스터는 PC를 보고 어떻게 반응하는가?
+
 //////////////////////////////////////////////////////////////////////////////
 enum MAlignment { ALIGNMENT_FRIENDLY, ALIGNMENT_NEUTRAL, ALIGNMENT_AGGRESSIVE };
 
@@ -70,7 +70,7 @@ const string MAlignment2String[] = {"ALIGNMENT_FRIENDLY", "ALIGNMENT_NEUTRAL", "
 
 
 //////////////////////////////////////////////////////////////////////////////
-// AI Level - 몬스터는 얼마나 똑똑한가?
+
 //////////////////////////////////////////////////////////////////////////////
 enum AILevel {
     AI_VERY_LOW, //   1 - 50
@@ -81,7 +81,7 @@ enum AILevel {
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// Body Size - 몬스터의 몸통 크기
+
 //////////////////////////////////////////////////////////////////////////////
 enum BodySize { BODYSIZE_SMALL = 0, BODYSIZE_MEDIUM, BODYSIZE_LARGE };
 
@@ -379,50 +379,50 @@ public:
     string toString() const;
 
 private:
-    MonsterType_t m_MonsterType;                // 몬스터 타입
-    SpriteType_t m_SpriteType;                  // 사용 스프라이트 타입
-    string m_HName;                             // 몬스터 한글 이름
-    string m_EName;                             // 몬스터 영문 이름
-    Level_t m_Level;                            // 몬스터 레벨
-    Attr_t m_STR;                               // 기본 STR
-    Attr_t m_DEX;                               // 기본 DEX
-    Attr_t m_INT;                               // 기본 INT
-    uint m_BodySize;                            // 몬스터의 크기
-    HP_t m_HP;                                  // 생명력
-    Exp_t m_Exp;                                // 죽였을 때 PC 뱀파이어가 받는 경험치 (not used)
+    MonsterType_t m_MonsterType;                
+    SpriteType_t m_SpriteType;                  
+    string m_HName;                             
+    string m_EName;                             
+    Level_t m_Level;                            
+    Attr_t m_STR;                               
+    Attr_t m_DEX;                               
+    Attr_t m_INT;                               
+    uint m_BodySize;                            
+    HP_t m_HP;                                  
+    Exp_t m_Exp;                                
     Color_t m_MainColor;                        // Main Color (not used)
     Color_t m_SubColor;                         // Sub Color (not used)
-    MAlignment m_Alignment;                     // 성향
-    AttackOrder m_AttackOrder;                  // 공격 순서에 관련된 성향
-    Moral_t m_Moral;                            // 사기
-    Turn_t m_Delay;                             // 다음 행위를 하기 까지의 딜레이 시간.
-    Turn_t m_AttackDelay;                       // 다음 공격을 하기 까지의 딜레이 시간.
-    Sight_t m_Sight;                            // 시야
-    int m_MeleeRange;                           // 접근전 사정거리
-    int m_MissileRange;                         // 미사일 사정거리
-    Creature::MoveMode m_MoveMode;              // 이동 모드
-    uint m_AIType;                              // 인공지능 타입
-    int m_EnhanceHP;                            // 체력 강화 배수
-    int m_EnhanceToHit;                         // ToHit 강화 배수
-    int m_EnhanceDefense;                       // 디펜스 강화 배수
-    int m_EnhanceProtection;                    // 프로텍션 강화 배수
-    int m_EnhanceMinDamage;                     // 데미지 강화 배수
-    int m_EnhanceMaxDamage;                     // 데미지 강화 배수
-    TreasureList* m_pSlayerTreasureList;        // 슬레이어를 위한 보물의 리스트
-    TreasureList* m_pVampireTreasureList;       // 뱀파이어를 위한 보물의 리스트
-    TreasureList* m_pOustersTreasureList;       // 아우스터즈를 위한 보물의 리스트
-    int m_RegenType[REGENTYPE_MAX];             // 각 생성방법의 확률
-    int m_UnburrowChance;                       // 생성된 후에 땅위로 나올 확률
-    bool m_bMaster;                             // 뱀파이어 마스터인가?
-    int m_ClanType;                             // 어느 clan에 속하는 몬스터인가?
-    MonsterSummonInfo* m_pMonsterSummonInfo;    // 몬스터 소환 정보
-    list<Effect::EffectClass> m_DefaultEffects; // 몬스터에게 기본적으로 붙어있는 이펙트
-    bool m_bNormalRegen;                        // 리젠 시에 선택되는 몬스터 타잎인가?
-    bool m_bHasTreasure;                        // Treasure.bin 화일이 필요한가?
-    bool m_bChief;                              // 치프 몬스터인가?
+    MAlignment m_Alignment;                     
+    AttackOrder m_AttackOrder;                  
+    Moral_t m_Moral;                            
+    Turn_t m_Delay;                             
+    Turn_t m_AttackDelay;                       
+    Sight_t m_Sight;                            
+    int m_MeleeRange;                           
+    int m_MissileRange;                         
+    Creature::MoveMode m_MoveMode;              
+    uint m_AIType;                              
+    int m_EnhanceHP;                            
+    int m_EnhanceToHit;                         
+    int m_EnhanceDefense;                       
+    int m_EnhanceProtection;                    
+    int m_EnhanceMinDamage;                     
+    int m_EnhanceMaxDamage;                     
+    TreasureList* m_pSlayerTreasureList;        
+    TreasureList* m_pVampireTreasureList;       
+    TreasureList* m_pOustersTreasureList;       
+    int m_RegenType[REGENTYPE_MAX];             
+    int m_UnburrowChance;                       
+    bool m_bMaster;                             
+    int m_ClanType;                             
+    MonsterSummonInfo* m_pMonsterSummonInfo;    
+    list<Effect::EffectClass> m_DefaultEffects; 
+    bool m_bNormalRegen;                        
+    bool m_bHasTreasure;                        
+    bool m_bChief;                              
 
-    int m_MonsterClass;     // 몬스터의 클래스
-    ItemType_t m_SkullType; // 몬스터의 해골 타입
+    int m_MonsterClass;     
+    ItemType_t m_SkullType; 
 };
 
 
@@ -449,8 +449,8 @@ public:
     // get monster info with monster type
     const MonsterInfo* getMonsterInfo(MonsterType_t monsterType) const;
 
-    // 임의의 스프라이트 타입을 가진 몬스터의 타입 리스트를 가져온다.
-    // (여러 몬스터가 하나의 스프라이트 타입을 가질 수 있기 때문에)
+    
+    
     const vector<MonsterType_t>& getMonsterTypeBySprite(SpriteType_t spriteType) const;
     string getNameBySpriteType(SpriteType_t spriteType) const;
 
@@ -475,13 +475,13 @@ private:
     uint m_MaxMonsterType;                                      // size of MonsterInfo* array
     MonsterInfo** m_MonsterInfos;                               // array of monster info
     vector<MonsterType_t> m_MonsterSpriteSet[MAX_SPRITE_TYPE];  // array of MonsterType by SpriteType
-    unordered_map<string, SpriteType_t> m_MonsterSpriteTypes;   // 이름으로 SpriteType_t찾기
-    unordered_map<string, MonsterType_t> m_ChiefMonster;        // Chief 몬스터 정보 가지고 있기
-    unordered_map<int, vector<SpriteType_t>> m_MonsterClassMap; // 몬스터 클래스로 몬스터 타입 찾기
+    unordered_map<string, SpriteType_t> m_MonsterSpriteTypes;   
+    unordered_map<string, MonsterType_t> m_ChiefMonster;        
+    unordered_map<int, vector<SpriteType_t>> m_MonsterClassMap; 
 
-    TreasureLists m_SlayerTreasureLists;  // 슬레이어를 위한 보물의 리스트
-    TreasureLists m_VampireTreasureLists; // 뱀파이어를 위한 보물의 리스트
-    TreasureLists m_OustersTreasureLists; // 아우스터즈를 위한 보물의 리스트
+    TreasureLists m_SlayerTreasureLists;  
+    TreasureLists m_VampireTreasureLists; 
+    TreasureLists m_OustersTreasureLists; 
 };
 
 // global variable declaration

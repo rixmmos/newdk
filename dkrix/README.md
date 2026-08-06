@@ -1,6 +1,6 @@
 # client
 
-If you're a player, rather than a developer, just follow the [单机版教程](./standalone_version.md)
+If you're a player, rather than a developer, just follow the [](./standalone_version.md)
 
 TL;DR
 

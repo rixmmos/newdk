@@ -54,7 +54,7 @@ protected:
 
 private:
     int m_DynamicZoneType;
-    ZoneID_t m_TemplateZoneID; // 틀이 되는 존의 ID
+    ZoneID_t m_TemplateZoneID; 
     HashMapDynamicZone m_DynamicZones;
     uint m_MaxSize;
 };

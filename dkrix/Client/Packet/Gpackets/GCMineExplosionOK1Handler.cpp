@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{		 
@@ -44,7 +44,7 @@ throw ( ProtocolException , Error )
 			//int resultActionInfo = skillID + (*g_pActionInfoTable).GetMinResultActionInfo();
 
 			//------------------------------------------------------
-			// 결과 생성
+			
 			//------------------------------------------------------
 			MActionResult* pResult = new MActionResult;
 		
@@ -55,13 +55,13 @@ throw ( ProtocolException , Error )
 			for (int i=0; i<size; i++)
 			{
 				//pResult->Add( new MActionResultNodeActionInfo( 
-				//					OBJECTID_NULL,		// 사용자 없어도 되는걸까?
+				
 				//					pPacket->popCListElement(), 
 				//					skillType,
 				//					delayFrame ) );
 				//------------------------------------------------------
 				//
-				// skill에 결과가 있으면 적용 시킨다.
+				
 				//
 				//------------------------------------------------------
 				int targetID = pPacket->popCListElement();
@@ -71,7 +71,7 @@ throw ( ProtocolException , Error )
 				if (pTargetCreature!=NULL)
 				{
 					//------------------------------------------------------
-					// EffectStatus가 있다면 붙인다.
+					
 					//------------------------------------------------------
 					EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 								
@@ -82,30 +82,7 @@ throw ( ProtocolException , Error )
 
 					MActionResultNode* pActionResultNode = NULL;
 
-					/*
-					switch ((*g_pActionInfoTable)[skillID].GetActionResultID())
-					{
-						//------------------------------------------------------
-						// 다른 ActionInfo 실행
-						//------------------------------------------------------
-						case ACTIONRESULTNODE_ACTIONINFO :
-							pActionResultNode =  new MActionResultNodeActionInfo( 
-																(*g_pActionInfoTable)[skillID].GetActionResultValue(),
-																OBJECTID_NULL, // 사용자 없다 - -;
-																targetID, 
-																pTargetCreature->GetX(),
-																pTargetCreature->GetY(),
-																delayFrame);
-						break;
-
-						//------------------------------------------------------
-						// Burrow
-						//------------------------------------------------------
-						case ACTIONRESULTNODE_CREATURE_BURROW :
-							pActionResultNode = new MActionResultNodeCreatureBurrow( targetID );
-						break;
-					}
-					*/
+					 
 					pActionResultNode =  new MActionResultNodeActionInfo( 
 																skillID, //resultActionInfo,
 																targetID,
@@ -115,7 +92,7 @@ throw ( ProtocolException , Error )
 																delayFrame);
 
 					//------------------------------------------------------
-					// NULL이 아니면 같이 적용
+					
 					//------------------------------------------------------
 					if (pActionResultNode!=NULL)
 					{
@@ -125,7 +102,7 @@ throw ( ProtocolException , Error )
 			}
 
 			//------------------------------------------------------
-			// Sector에 바로 적용
+			
 			//------------------------------------------------------
 			int direction = pPacket->getDir();
 
@@ -142,9 +119,9 @@ throw ( ProtocolException , Error )
 		}
 
 		//------------------------------------------------------------------
-		// Player가 당한것이므로..
+		
 		//------------------------------------------------------------------
-		// 상태값을 바꾼다.
+		
 		//------------------------------------------------------------------
 		AffectModifyInfo(g_pPlayer, pPacket);
 	}

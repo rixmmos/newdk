@@ -27,10 +27,10 @@ void UniqueItemManager::init()
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // DB에서 현재의 값을 읽어온다.
+        
         Result* pResult = pStmt->executeQuery("SELECT ItemClass, ItemType FROM UniqueItemInfo");
 
-        // 지정된 itemClas, itemType을 Unique Item으로 설정한다.
+        
         while (pResult->next()) {
             Item::ItemClass itemClass = (Item::ItemClass)pResult->getInt(1);
             int itemType = pResult->getInt(2);
@@ -63,7 +63,7 @@ bool UniqueItemManager::isPossibleCreate(Item::ItemClass itemClass, ItemType_t i
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // DB에서 현재의 값을 읽어온다.
+        
         Result* pResult = pStmt->executeQuery(
             "SELECT LimitNumber, CurrentNumber FROM UniqueItemInfo WHERE ItemClass=%d AND ItemType=%d", (int)itemClass,
             (int)itemType);
@@ -88,7 +88,7 @@ bool UniqueItemManager::isPossibleCreate(Item::ItemClass itemClass, ItemType_t i
 //----------------------------------------------------------------------
 // createItem
 //----------------------------------------------------------------------
-// DB에서 개수 증가
+
 //----------------------------------------------------------------------
 void UniqueItemManager::createItem(Item::ItemClass itemClass, ItemType_t itemType)
 
@@ -101,7 +101,7 @@ void UniqueItemManager::createItem(Item::ItemClass itemClass, ItemType_t itemTyp
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // DB에서 현재의 값을 읽어온다.
+        
         pStmt->executeQuery(
             "UPDATE UniqueItemInfo SET CurrentNumber=CurrentNumber+1 WHERE ItemClass=%d AND ItemType=%d",
             (int)itemClass, (int)itemType);
@@ -117,7 +117,7 @@ void UniqueItemManager::createItem(Item::ItemClass itemClass, ItemType_t itemTyp
 //----------------------------------------------------------------------
 // deleteItem
 //----------------------------------------------------------------------
-// DB에서 개수 증가
+
 //----------------------------------------------------------------------
 void UniqueItemManager::deleteItem(Item::ItemClass itemClass, ItemType_t itemType)
 
@@ -130,7 +130,7 @@ void UniqueItemManager::deleteItem(Item::ItemClass itemClass, ItemType_t itemTyp
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // DB에서 현재의 값을 읽어온다.
+        
         pStmt->executeQuery(
             "UPDATE UniqueItemInfo SET CurrentNumber=CurrentNumber-1 WHERE ItemClass=%d AND ItemType=%d",
             (int)itemClass, (int)itemType);

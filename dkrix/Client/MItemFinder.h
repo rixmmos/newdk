@@ -1,11 +1,11 @@
 //----------------------------------------------------------------------
 // MItemFinder.h
 //----------------------------------------------------------------------
-// 특별한 item을 찾기 위해 쓰인다.
-// MItemFinder를 상속받아서 필요한걸 만들면 된다.
+
+
 //
-// 이제서야 필요를 느껴 만들게 되었당.. --;
-// 예전 코드들은 그냥 그케 쓰도록 둬야지.. - -;;
+
+
 //----------------------------------------------------------------------
 
 #ifndef __MITEMFINDER_H__
@@ -24,7 +24,7 @@ class MItemFinder {
 //----------------------------------------------------------------------
 // MItemClassFinder
 //----------------------------------------------------------------------
-// 같은 ItemClass의 item을 찾는다.
+
 //----------------------------------------------------------------------
 class MItemClassFinder : public MItemFinder {
 	public :
@@ -38,13 +38,13 @@ class MItemClassFinder : public MItemFinder {
 		}
 
 	protected :
-		ITEM_CLASS	m_ItemClass;	// 찾을려는 itemClass
+		ITEM_CLASS	m_ItemClass;	
 };
 
 //----------------------------------------------------------------------
 // MItemClassTypeFinder
 //----------------------------------------------------------------------
-// 같은 ItemClass, ItemType의 item을 찾는다.
+
 //----------------------------------------------------------------------
 class MItemClassTypeFinder : public MItemClassFinder {
 	public :
@@ -62,13 +62,13 @@ class MItemClassTypeFinder : public MItemClassFinder {
 		}
 
 	protected :
-		TYPE_ITEMTYPE	m_ItemType;	// 찾을려는 itemType
+		TYPE_ITEMTYPE	m_ItemType;	
 };
 
 //----------------------------------------------------------------------
 // MVampirePortalItemFinder
 //----------------------------------------------------------------------
-// Mark되거나 안된 VampirePortal을 찾기 위해서
+
 //----------------------------------------------------------------------
 class MVampirePortalItemFinder : public MItemFinder {
 	public :
@@ -90,7 +90,7 @@ class MVampirePortalItemFinder : public MItemFinder {
 //----------------------------------------------------------------------
 // MSlayerPortalItemFinder
 //----------------------------------------------------------------------
-// 사용할 수 있는걸 찾는다.
+
 //----------------------------------------------------------------------
 class MSlayerPortalItemFinder : public MItemFinder {
 	public :
@@ -106,7 +106,7 @@ class MSlayerPortalItemFinder : public MItemFinder {
 //----------------------------------------------------------------------
 // MEventStartItemFinder
 //----------------------------------------------------------------------
-// 특정한 class, type의 item이 몇개나 있는가..
+
 class MItemClassTypeNumberFinder : public MItemClassTypeFinder {
 	public :
 		MItemClassTypeNumberFinder(ITEM_CLASS itemClass, TYPE_ITEMTYPE itemType) 
@@ -117,14 +117,14 @@ class MItemClassTypeNumberFinder : public MItemClassTypeFinder {
 	
 		bool	operator () ( const MItem* pItem )
 		{
-			// 같은 class, type이면 개수를 더한다.
+			
 			if (pItem->GetItemClass()==m_ItemClass
 					&& pItem->GetItemType()==m_ItemType)
 			{
 				m_TotalNumber += pItem->GetNumber();
 			}
 
-			// 계속 찾게 할려는 목적이다.
+			
 			return false;
 		}
 
@@ -139,7 +139,7 @@ class MItemClassTypeNumberFinder : public MItemClassTypeFinder {
 //----------------------------------------------------------------------
 // MItemClassRangeTypeFinder
 //----------------------------------------------------------------------
-// 같은 ItemClass, min~max ItemType의 item을 찾는다.
+
 //----------------------------------------------------------------------
 class MItemClassRangeTypeFinder : public MItemClassFinder {
 	public :
@@ -159,8 +159,8 @@ class MItemClassRangeTypeFinder : public MItemClassFinder {
 		}
 
 	protected :
-		TYPE_ITEMTYPE	m_MinItemType;	// 찾을려는 min itemType
-		TYPE_ITEMTYPE	m_MaxItemType;	// 찾을려는 max itemType
+		TYPE_ITEMTYPE	m_MinItemType;	
+		TYPE_ITEMTYPE	m_MaxItemType;	
 };
 
 //----------------------------------------------------------------------

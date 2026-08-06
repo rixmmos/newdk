@@ -9,7 +9,7 @@
 #define __TEXT_INFO_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
@@ -27,7 +27,7 @@ class TextInfo {
 public :
 
 	//----------------------------------------------------------------------
-	// 패킷에 embedding 되려는 객체는 아래와 같은 데이타를 명시해야 한다.
+	
 	//----------------------------------------------------------------------
 
 	// read data from socket input stream

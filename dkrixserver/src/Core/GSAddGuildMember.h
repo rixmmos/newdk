@@ -18,7 +18,7 @@
 //
 // class GSAddGuildMember;
 //
-// 길드 멤버 추가를 쉐어드 서버에 요청한다.
+
 //
 // *CAUTION*
 //
@@ -28,10 +28,10 @@ class GSAddGuildMember : public Packet {
 public:
     GSAddGuildMember() {};
     ~GSAddGuildMember() {};
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -106,7 +106,7 @@ private:
     // Guild ID
     GuildID_t m_GuildID;
 
-    // 멤버 이름
+    
     string m_Name;
 
     // Guild Member Rank
@@ -147,7 +147,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static LGIncomingConnectionPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szGuildID +         // guild id
                szBYTE +            // member name length

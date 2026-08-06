@@ -15,6 +15,10 @@
 /* Include Platform.h for basic type definitions */
 #include "Platform.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <mmsystem.h>
+#endif
+
 /*-----------------------------------------------------------------------------
 	Volume Constants
 
@@ -76,7 +80,11 @@
 -----------------------------------------------------------------------------*/
 
 /* Forward declarations */
+#ifndef FOURCC
 typedef DWORD FOURCC;
+#endif
+
+#ifndef PLATFORM_WINDOWS
 typedef void* HMMIO;
 
 /* Multimedia RIFF chunk information */
@@ -86,13 +94,16 @@ typedef struct _MMCKINFO {
     DWORD   dwDataOffset;
     DWORD   dwSize;
 } MMCKINFO;
+#endif
 
 /* DirectSound buffer position notify structure */
+#ifndef PLATFORM_WINDOWS
 typedef struct _DSBPOSITIONNOTIFY {
     DWORD   dwFlags;
     DWORD   dwOffset;
     DWORD   dwCallback;
 } DSBPOSITIONNOTIFY;
+#endif
 
 /* Multimedia constants */
 #ifndef MMIO_READ

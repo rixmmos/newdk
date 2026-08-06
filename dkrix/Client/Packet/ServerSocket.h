@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////
 // include files
 //////////////////////////////////////////////////
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketImpl.h"
 #include "Socket.h"

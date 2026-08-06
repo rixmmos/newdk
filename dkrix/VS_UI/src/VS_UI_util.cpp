@@ -9,7 +9,43 @@
 #include "../../Client/SpriteLib/CSpriteOutlineManager.h"
 
 extern	BOOL g_MyFull;
+extern RECT g_GameRect;
 //#define TEMP_FILE			"_000_TEMP"
+
+#ifdef SPRITELIB_BACKEND_SDL
+namespace
+{
+class ScopedBackSurfaceLock
+{
+public:
+	ScopedBackSurfaceLock(CSpriteSurface* surface)
+		: m_surface(surface), m_locked_here(false)
+	{
+		if (m_surface && !m_surface->IsLock() && m_surface->Lock())
+		{
+			m_locked_here = true;
+		}
+	}
+
+	~ScopedBackSurfaceLock()
+	{
+		if (m_locked_here)
+		{
+			m_surface->Unlock();
+		}
+	}
+
+	bool IsLocked() const
+	{
+		return m_surface && m_surface->IsLock();
+	}
+
+private:
+	CSpriteSurface* m_surface;
+	bool m_locked_here;
+};
+}
+#endif
 
 //----------------------------------------------------------------------------
 // Operations
@@ -315,8 +351,8 @@ void C_ANIMATION::Timer()
 				{
 					m_play_order = STOP;
 
-					// m_play_order�� next order�� �ٲ� ��, �ð������� �ֱ� ������(�ܺο��� �� ��
-					// �̰��� �߿��� ������) ��ٷ� next order�� �����Ѵ�.
+					
+					
 					RunNextPlayOrder();
 				}
 				break;
@@ -353,10 +389,7 @@ void C_ANIMATION::Timer()
 	}
 }
 
-/*-----------------------------------------------------------------------------
-- Doing
-- Animation ���̶�� true�� ��ȯ�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 C_ANIMATION::PLAY_ORDER C_ANIMATION::GetAnimationState() const
 {
 	return m_play_order;
@@ -392,8 +425,8 @@ C_ANIMATION::~C_ANIMATION()
 //-----------------------------------------------------------------------------
 // RunNextPlayOrder
 //
-// next order�� ������ m_play_order���� ��ü�ϰ�, next order�� �ٽ� ������(STOP)��
-// �ٲ۴�.
+
+
 //-----------------------------------------------------------------------------
 void C_ANIMATION::RunNextPlayOrder()
 {
@@ -419,19 +452,13 @@ void C_ANIMATION::RunNextPlayOrder()
 	m_play_order_next = STOP;
 }
 
-/*-----------------------------------------------------------------------------
-- SetSpeed
-- timer �ӵ��� �����Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_ANIMATION::SetSpeed(DWORD millisec)
 {
 	m_dw_millisec = millisec;
 }
 
-/*-----------------------------------------------------------------------------
-- SetPlayPosition
-- animation�� �ϴ� ������ġ�� �����Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_ANIMATION::SetPlayPosition(int x, int y)
 {
 	m_x = x;
@@ -454,7 +481,7 @@ void C_ANIMATION::PlayLoop()
 //-----------------------------------------------------------------------------
 // PlayLoopBack
 //
-// play -> back -> play (�ݺ�)
+
 //-----------------------------------------------------------------------------
 void C_ANIMATION::PlayLoopBack()
 {
@@ -466,10 +493,7 @@ void C_ANIMATION::PlayLoopBack()
 	m_bl_reverse = false;
 }
 
-/*-----------------------------------------------------------------------------
-- Play
-- �տ��� �ڷ� �� �� animation�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_ANIMATION::Play()
 {
 	// refresh timer
@@ -482,7 +506,7 @@ void C_ANIMATION::Play()
 //-----------------------------------------------------------------------------
 // Stop
 //
-// ���� ��ġ���� �����.
+
 //-----------------------------------------------------------------------------
 void C_ANIMATION::Stop()
 {
@@ -524,10 +548,7 @@ void C_ANIMATION::Refresh()
 	m_current_frame = 0;
 }
 
-/*-----------------------------------------------------------------------------
-- PlayBack
-- �ڿ��� ������ �� �� animation�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_ANIMATION::PlayBack()
 {
 	// refresh timer
@@ -537,10 +558,7 @@ void C_ANIMATION::PlayBack()
 	m_current_frame = m_pC_ani_object->FrrSize()-1;
 }
 
-/*-----------------------------------------------------------------------------
-- Show
-- animation�� ������ ������ frame�� ���δ�.
------------------------------------------------------------------------------*/
+ 
 void C_ANIMATION::Show(bool enable)
 {
 	POINT point = {m_x+m_pC_ani_object->FrrRX(m_current_frame), m_y+m_pC_ani_object->FrrRY(m_current_frame)};
@@ -551,14 +569,11 @@ void C_ANIMATION::Show(bool enable)
 //		gpC_base->m_p_DDSurface_back->BltIndexSpriteDarkness(&point, &m_pC_slayer_woman_ispk[m_pC_slayer_woman_cfpk[p_slot->woman_info.right][0][0][index].GetSpriteID()], DARK_BIT);
 		m_pC_ani_object->BltDarkness(point, m_current_frame, 2);
 
-	// �ӵ��� ���� Show()�� ����...
+	
 	Timer();
 }
 
-/*-----------------------------------------------------------------------------
-- Size
-- frame�� �� ���� ��ȯ�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 int C_FRR::Size() const
 {
 	return m_C_frame_array.GetSize();
@@ -608,17 +623,13 @@ C_FRR::~C_FRR()
 	m_C_frame_array.Release();
 }
 
-/*-----------------------------------------------------------------------------
-- Open
--
-  `�̹� load�Ǿ� �ִٸ�, release�ϰ� sz_filename�� open�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 bool C_FRR::Open(const char *sz_filename)
 {
 	if (!sz_filename)
 		return false;
 
-	// ������ load�ߴٸ� release�Ѵ�.
+	
 	if (m_C_frame_array.GetSize() > 0)
 		m_C_frame_array.Release();
 
@@ -632,13 +643,7 @@ bool C_FRR::Open(const char *sz_filename)
 	return true;
 }
 
-/*-----------------------------------------------------------------------------
-- Open
-- Sprite Pack file�� open�Ѵ�.
-
-  `Sprite pack file�� �ƴҰ���� ����ó���� ����.
-  `�̹� load�Ǿ� �ִٸ�, release�ϰ� sz_filename�� open�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_SPRITE_PACK::Open(const char *sz_filename)
 {
 	//assert(m_pC_spk_list);	// by sigi
@@ -647,7 +652,7 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 //		_ErrorStr((char *)sz_filename);//(FAILED_JOB);
 
 	// by sigi
-	// ������ load�ߴٸ� release�Ѵ�.
+	
 	//if (m_pC_spk_list->GetSize() > 0)
 	//	m_pC_spk_list->Release();
 
@@ -673,8 +678,8 @@ void C_SPRITE_PACK::Open(const char *sz_filename)
 -----------------------------------------------------------------------------*/
 C_SPRITE_PACK::C_SPRITE_PACK(const char *sz_filename)
 {
-	// Sprite�� ������ �� 565���� 555���� �˾ƾߵǴϱ�...
-	// �׷��� �� �˻縦 �ܺο��� �ϰ� �ߴٴ±�...
+	
+	
 	
 	// by sigi
 	//if (CSDLGraphics::Is565())
@@ -682,7 +687,7 @@ C_SPRITE_PACK::C_SPRITE_PACK(const char *sz_filename)
 	//else
 	//	m_pC_spk_list = new CSpritePackList555;
 
-	if (sz_filename) // file���� �����Ͽ��ٸ�...
+	if (sz_filename) 
 		Open(sz_filename);
 }
 
@@ -699,7 +704,7 @@ C_SPRITE_PACK::~C_SPRITE_PACK()
 //-----------------------------------------------------------------------------
 // BltColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 {
@@ -713,6 +718,12 @@ void C_SPRITE_PACK::BltColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 	point.x = x;
 	point.y = y;
 
+	if (gpC_base->m_p_DDSurface_back->IsLock())
+	{
+		gpC_base->m_p_DDSurface_back->BltSpriteColor(&point, &m_SPK[sprite_id], rgb);
+		return;
+	}
+
 	assert(!gpC_base->m_p_DDSurface_back->IsLock());
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
@@ -725,7 +736,7 @@ void C_SPRITE_PACK::BltColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 //-----------------------------------------------------------------------------
 // BltColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltColor(POINT &point, SPRITE_ID sprite_id, int rgb)
 {
@@ -734,6 +745,12 @@ void C_SPRITE_PACK::BltColor(POINT &point, SPRITE_ID sprite_id, int rgb)
 	//CSprite *p_sprite = m_pC_spk_list->GetSprite(sprite_id);
 
 	//assert(p_sprite);
+
+	if (gpC_base->m_p_DDSurface_back->IsLock())
+	{
+		gpC_base->m_p_DDSurface_back->BltSpriteColor(&point, &m_SPK[sprite_id], rgb);
+		return;
+	}
 
 	assert(!gpC_base->m_p_DDSurface_back->IsLock());
 	if (gpC_base->m_p_DDSurface_back->Lock())
@@ -795,8 +812,8 @@ void C_SPRITE_PACK::BltDarkness(POINT &point, SPRITE_ID sprite_id, int dark)
 //-----------------------------------------------------------------------------
 // BltClip
 //
-// sprite�� clipping�Ѵ�.
-// sprite�� ���ϴ� �κи� ����� �� �����ϴ�.
+
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {
@@ -815,18 +832,8 @@ void C_SPRITE_PACK::BltClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 		RECT rt;
 		rt.left = max(-x, rect.x);
 		rt.top = max(-y, rect.y);
-		// add by Sonic 2006.9.26
-		if(g_MyFull)
-		{
-			rt.right = min(rect.x+rect.w, 1024-x);
-			rt.bottom = min(rect.y+rect.h, 768-y);
-		}
-		else
-		{
-			rt.right = min(rect.x+rect.w, 800-x);
-			rt.bottom = min(rect.y+rect.h, 600-y);
-		}
-		// end
+		rt.right = min(rect.x+rect.w, (int)g_GameRect.right-x);
+		rt.bottom = min(rect.y+rect.h, (int)g_GameRect.bottom-y);
 		if(rt.left < rt.right && rt.top < rt.bottom)
 		{
 			
@@ -909,7 +916,7 @@ int C_SPRITE_PACK::GetHeight(SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // IsPixel
 //
-// (x, y)�� �������̸� false�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool C_SPRITE_PACK::IsPixel(int x, int y, SPRITE_ID sprite_id)
 {
@@ -932,10 +939,7 @@ void C_SPRITE_PACK::Blt(int x, int y, SPRITE_ID sprite_id)
 	Blt(point, sprite_id);
 }
 
-/*-----------------------------------------------------------------------------
-- Blt
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_SPRITE_PACK::Blt(POINT &point, SPRITE_ID sprite_id)
 {
 	//assert(sprite_id >= 0);
@@ -944,7 +948,12 @@ void C_SPRITE_PACK::Blt(POINT &point, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
-	assert(!gpC_base->m_p_DDSurface_back->IsLock());
+	if (gpC_base->m_p_DDSurface_back->IsLock())
+	{
+		gpC_base->m_p_DDSurface_back->BltSprite(&point, &m_SPK[sprite_id]);
+		return;
+	}
+
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		gpC_base->m_p_DDSurface_back->BltSprite(&point, &m_SPK[sprite_id]);
@@ -953,10 +962,7 @@ void C_SPRITE_PACK::Blt(POINT &point, SPRITE_ID sprite_id)
 	}
 }
 
-/*-----------------------------------------------------------------------------
-- BltOffscreen
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_SPRITE_PACK::BltOffscreen(POINT &point, SPRITE_ID sprite_id)
 {
 	//assert(sprite_id >= 0);
@@ -983,7 +989,7 @@ void C_SPRITE_PACK::BltOffscreen(int x, int y, SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // BltOutline
 //
-// Sprite�� �ܰ����� �׷��� �Բ� ����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltOutline(int x, int y, int color, SPRITE_ID sprite_id)
 {
@@ -991,10 +997,10 @@ void C_SPRITE_PACK::BltOutline(int x, int y, int color, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	
+	CSpriteOutlineManager	outline_o; 
 
-	// �ܰ������ ��ü �߰�.
+	
 	outline_o.Add(x, y, &m_SPK[sprite_id]);
 	outline_o.Generate();
 
@@ -1020,10 +1026,7 @@ void C_SPRITE_PACK::BltLocked(int x, int y, SPRITE_ID sprite_id)
 	BltLocked(point, sprite_id);
 }
 
-/*-----------------------------------------------------------------------------
-- BltLocked
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_SPRITE_PACK::BltLocked(POINT &point, SPRITE_ID sprite_id)
 {
 	//assert(sprite_id >= 0);
@@ -1032,14 +1035,19 @@ void C_SPRITE_PACK::BltLocked(POINT &point, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSprite(&point, &m_SPK[sprite_id]);
 }
 
-/*-----------------------------------------------------------------------------
-- BltLockedOffscreen
-- Sprite Surface�� BackSurface�� blt�Ѵ�.
------------------------------------------------------------------------------*/
+ 
 void C_SPRITE_PACK::BltLockedOffscreen(POINT &point, SPRITE_ID sprite_id)
 {
 	//assert(sprite_id >= 0);
@@ -1048,7 +1056,15 @@ void C_SPRITE_PACK::BltLockedOffscreen(POINT &point, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_DDSurface_offscreen.BltSprite(&point, &m_SPK[sprite_id]);
 }
 
@@ -1061,7 +1077,7 @@ void C_SPRITE_PACK::BltLockedOffscreen(int x, int y, SPRITE_ID sprite_id)
 //-----------------------------------------------------------------------------
 // BltOutline
 //
-// Sprite�� �ܰ����� �׷��� �Բ� ����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_id)
 {
@@ -1069,14 +1085,22 @@ void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_i
 
 	//assert(p_sprite);
 
-	// focus�� ���� �ܰ����� �׸���.
-	CSpriteOutlineManager	outline_o; // �ܰ������ ��ü.
+	
+	CSpriteOutlineManager	outline_o; 
 
-	// �ܰ������ ��ü �߰�.
+	
 	outline_o.Add(x, y, &m_SPK[sprite_id]);
 	outline_o.Generate();
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSpriteOutline(&outline_o,  color);
 
 	outline_o.Clear();
@@ -1085,7 +1109,7 @@ void C_SPRITE_PACK::BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_i
 //-----------------------------------------------------------------------------
 // BltLockedColor
 //
-// rgb �� �ϳ������� blt�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 {
@@ -1099,7 +1123,15 @@ void C_SPRITE_PACK::BltLockedColor(int x, int y, SPRITE_ID sprite_id, int rgb)
 	point.x = x;
 	point.y = y;
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSpriteColor(&point, &m_SPK[sprite_id], rgb);
 }
 
@@ -1120,15 +1152,23 @@ void C_SPRITE_PACK::BltLockedDarkness(int x, int y, SPRITE_ID sprite_id, int dar
 	point.x = x;
 	point.y = y;
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSpriteDarkness(&point, &m_SPK[sprite_id], dark);
 }
 
 //-----------------------------------------------------------------------------
 // BltLockedClip
 //
-// sprite�� clipping�Ѵ�.
-// sprite�� ���ϴ� �κи� ����� �� �����ϴ�.
+
+
 //-----------------------------------------------------------------------------
 void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 {
@@ -1138,7 +1178,15 @@ void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 
 	//assert(p_sprite);
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 
 	S_SURFACEINFO surface_info;
 	SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
@@ -1146,18 +1194,8 @@ void C_SPRITE_PACK::BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id)
 	RECT rt;
 	rt.left = max(-x, rect.x);
 	rt.top = max(-y, rect.y);
-	// add by Sonic 2006.9.26
-	if(g_MyFull)
-	{
-		rt.right = min(rect.x+rect.w, 1024-x);
-		rt.bottom = min(rect.y+rect.h, 768-y);
-	}
-	else
-	{
-		rt.right = min(rect.x+rect.w, 800-x);
-		rt.bottom = min(rect.y+rect.h, 600-y);
-	}
-	// end
+	rt.right = min(rect.x+rect.w, (int)g_GameRect.right-x);
+	rt.bottom = min(rect.y+rect.h, (int)g_GameRect.bottom-y);
 	
 	if(rt.left >= rt.right || rt.top >= rt.bottom)return;
 
@@ -1191,14 +1229,30 @@ void C_SPRITE_PACK::BltLockedAlpha(POINT &point, SPRITE_ID sprite_id, int alpha)
 
 	//assert(p_sprite);
 
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSpriteAlpha(&point, &m_SPK[sprite_id], alpha);
 
 }
 
 void C_SPRITE_PACK::BltLockedColorSet(POINT &point, SPRITE_ID sprite_id, WORD colorset)
 {
+#ifdef SPRITELIB_BACKEND_SDL
+	ScopedBackSurfaceLock back_surface_lock(gpC_base->m_p_DDSurface_back);
+	if (!back_surface_lock.IsLocked())
+	{
+		return;
+	}
+#else
 	assert(gpC_base->m_p_DDSurface_back->IsLock());
+#endif
 	gpC_base->m_p_DDSurface_back->BltSpriteColorSet(&point, &m_SPK[sprite_id], colorset);
 }
 

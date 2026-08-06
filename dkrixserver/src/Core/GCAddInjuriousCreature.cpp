@@ -11,7 +11,7 @@ void GCAddInjuriousCreature::read(SocketInputStream& iStream)
 {
     __BEGIN_TRY
 
-    // 이름 읽기
+    
     BYTE szName;
 
     iStream.read(szName);
@@ -32,7 +32,7 @@ void GCAddInjuriousCreature::write(SocketOutputStream& oStream) const
 {
     __BEGIN_TRY
 
-    // 이름 쓰기
+    
     BYTE szName = m_Name.size();
 
     if (szName == 0)

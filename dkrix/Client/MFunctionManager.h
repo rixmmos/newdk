@@ -14,13 +14,13 @@ class MFunctionManager {
 		virtual ~MFunctionManager();
 
 		//-----------------------------------------------------------
-		// 초기화 - 필수~~
+		
 		//-----------------------------------------------------------
 		virtual void	Init(int max);
 		virtual void	Release();
 
 		//-----------------------------------------------------------
-		// Function 실행
+		
 		//-----------------------------------------------------------
 		virtual bool	Execute(int id, void* pVoid=NULL) const;
 

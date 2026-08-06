@@ -17,8 +17,8 @@ public:
     virtual ~DynamicZoneOustersMirrorOfAbyss();
 
 public:
-    void init();      // 다이나믹 존 초기화
-    void heartbeat(); // 다이나믹 존 하트비트
+    void init();      
+    void heartbeat(); 
 
 public:
     bool checkPC();

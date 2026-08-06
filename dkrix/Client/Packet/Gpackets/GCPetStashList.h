@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCPetStashList.h 
-// Written By  : 김성민
+
 // Description : 
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_PET_STASH_LIST_H__
 #define __GC_PET_STASH_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PetInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PetInfo.h"
 #include <numeric>
 #include <vector>
 

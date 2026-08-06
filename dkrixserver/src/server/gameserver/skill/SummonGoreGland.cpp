@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonGoreGland::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                               CEffectID_t CEffectID)
@@ -37,8 +37,8 @@ void SummonGoreGland::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vamp
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -57,7 +57,7 @@ void SummonGoreGland::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vamp
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonGoreGland::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                               CEffectID_t CEffectID)
@@ -93,11 +93,7 @@ void SummonGoreGland::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, V
         bool bTileCheck = true;
         VSRect rect(0, 0, pZone->getWidth() - 1, pZone->getHeight() - 1);
         if (!rect.ptInRect(X, Y)) {
-            /*			Tile& tile = pZone->getTile(X, Y);
-                        if (tile.canAddEffect()) bTileCheck = true;
-                        // 머시 그라운드 있음 추가 못한당.
-                        if ( tile.getEffect(Effect::EFFECT_CLASS_MERCY_GROUND) != NULL ) bTileCheck=false;
-                        if ( tile.getEffect(Effect::EFFECT_CLASS_TRYING_POSITION) != NULL ) bTileCheck=false;*/
+             
             bTileCheck = false;
         }
 
@@ -105,9 +101,9 @@ void SummonGoreGland::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, V
             decreaseMana(pVampire, RequiredMP, _GCSkillToTileOK1);
 
             // Tile&   tile  = pZone->getTile(X, Y);
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pVampire);
             SkillOutput output;
             computeOutput(input, output);

@@ -144,7 +144,7 @@ void UpdateManager::write(Socket* pSocket) const {
     WORD nUpdates = m_Updates.size();
 
     // cout << "============================================"<< endl;
-    // cout << "업데이트할 항목의 갯수는 얼마 일까요? : " << (int)nUpdates << endl;
+    
     // cout << "============================================"<< endl;
 
     if (nUpdates > maxUpdates)
@@ -169,18 +169,18 @@ void UpdateManager::write(Socket* pSocket) const {
 ResourceManager* UpdateManager::getResourceManager() {
     __BEGIN_TRY
 
-    // 아직 리소스매니저를 생성하지 않았으며, 업데이트 리스트가 empty 가 아닐 경우
+    
     if (m_pResourceManager == NULL && !m_Updates.empty()) {
-        // 리소스 매니저를 생성하자.
+        
         m_pResourceManager = new ResourceManager();
 
         Resource* pResource;
 
         for (list<Update*>::const_iterator itr = m_Updates.begin(); itr != m_Updates.end(); itr++) {
-            // 어떤 업데이트 명령의 특정 파라미터는 리소스를 나타낸다.
-            // 그런 파라미터를 리소스 객체로 만들어서 리소스 매니저에 등록시키자.
+            
+            
             switch ((*itr)->getUpdateType()) {
-            // 다음 명령들에는 리소스가 존재하지 않는다.
+            
             case UPDATETYPE_CREATE_DIRECTORY:
             case UPDATETYPE_DELETE_DIRECTORY:
             case UPDATETYPE_RENAME_DIRECTORY:

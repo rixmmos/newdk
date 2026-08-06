@@ -2,7 +2,7 @@
 //
 // Filename    : HeartbeatManager.cpp
 // Written by  : reiot@ewestsoft.com
-// Description : 로그인 서버용 클라이언트 매니저
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 //
 // constructor
 //
-// 하위 매니저 객체를 생성하는 곳이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 HeartbeatManager::HeartbeatManager() throw (Error){__BEGIN_TRY
@@ -29,7 +29,7 @@ HeartbeatManager::HeartbeatManager() throw (Error){__BEGIN_TRY
 //
 // destructor
 //
-// 하위 매니저 객체를 삭제하는 곳이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 HeartbeatManager::~HeartbeatManager() throw(Error) {
@@ -41,7 +41,7 @@ HeartbeatManager::~HeartbeatManager() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 하위 매니저 객체를 초기화하고, 자신을 초기화한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void HeartbeatManager::init() throw(Error) {
@@ -53,13 +53,13 @@ void HeartbeatManager::init() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 서비스를 시작한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void HeartbeatManager::start() throw(Error) {
     __BEGIN_TRY
 
-    run(); // 바로 run() 메쏘드를 호출한다. ^^;
+    run(); 
 
     __END_CATCH
 }
@@ -67,7 +67,7 @@ void HeartbeatManager::start() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 자신의 서비스를 중단한 후, 하위 매니저 객체들의 서비스를 중단시킨다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void HeartbeatManager::stop() throw(Error) {
@@ -80,16 +80,16 @@ void HeartbeatManager::stop() throw(Error) {
 
 
 //////////////////////////////////////////////////////////////////////
-// 클라이언트 매니저의 메인 루프이다.
+
 //////////////////////////////////////////////////////////////////////
 void HeartbeatManager::run() throw(Error) {
     __BEGIN_TRY
 
     while (true) {
         // *TODO
-        // 각종 HeartBeat들을 여기서 처리하면 된다.
+        
 
-        usleep(1000); // FIX: 降低 CPU 占用率
+        usleep(1000); 
     }
 
     __END_CATCH

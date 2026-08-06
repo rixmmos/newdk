@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 // CSpritePackList.h
 //----------------------------------------------------------------------
-// 내부적으로 stl의 list를 사용했다.
+
 //----------------------------------------------------------------------
 
 #ifndef	__CSPRITEPACKLIST_H__
@@ -42,7 +42,7 @@ class CSpritePackList {
 		CSprite*	GetSprite(TYPE_SPRITEID n) const;
 
 		//---------------------------------------------------
-		// 첫번째 위치의 List Iterater를 넘겨준다.
+		
 		//---------------------------------------------------
 		SPRITE_LIST::const_iterator	GetIterator() const	{ return m_listSprite.begin(); }
 		SPRITE_LIST* GetListPtr() { return &m_listSprite; }
@@ -59,7 +59,7 @@ class CSpritePackList {
 		virtual void		LoadFromFile(std::ifstream& file) = 0;
 
 	protected :		
-		SPRITE_LIST		m_listSprite;		// CSprite들을 저장해둔다.
+		SPRITE_LIST		m_listSprite;		
 };
 
 class CSpritePalPackList {
@@ -86,7 +86,7 @@ class CSpritePalPackList {
 		CSpritePal*	GetSprite(TYPE_SPRITEID n) const;
 
 		//---------------------------------------------------
-		// 첫번째 위치의 List Iterater를 넘겨준다.
+		
 		//---------------------------------------------------
 		SPRITEPAL_LIST::const_iterator	GetIterator() const	{ return m_listSprite.begin(); }
 		SPRITEPAL_LIST* GetListPtr() { return &m_listSprite; }
@@ -103,7 +103,7 @@ class CSpritePalPackList {
 		void		LoadFromFile(std::ifstream& file);
 
 	protected :		
-		SPRITEPAL_LIST		m_listSprite;		// CSprite들을 저장해둔다.
+		SPRITEPAL_LIST		m_listSprite;		
 };
 #endif
 

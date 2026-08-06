@@ -10,8 +10,8 @@
 #define __GC_MONSTER_KILL_QUEST_INFO_H__
 
 #include <list>
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include "GCSelectQuestID.h"
 
 //////////////////////////////////////////////////////////////////////////////

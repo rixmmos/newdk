@@ -2,7 +2,7 @@
 //
 // Filename    : VampireSkillInfo.h
 // Written By  : elca@ewestsoft.com
-// Description :  ��ų�� ������
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@
 //
 // class VampireSkillInfo;
 //
-// ���Ӽ������� Ŭ���̾�Ʈ�� �ڽ��� ����� ������ �˷��ֱ� ���� Ŭ����
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -33,15 +33,15 @@ public:
     ~VampireSkillInfo() noexcept;
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // ����ȭ��, �̸� ���� ������ ����Ѵ�.
+    
     PacketSize_t getSize();
 
     static uint getMaxSize() {
@@ -86,7 +86,7 @@ public:
     }
 
 private:
-    // New ��ų�� ��� �� �ִ��� ������ ����
+    
     bool m_bLearnNewSkill;
 
     // SubVampireSkillInfo List Total Number

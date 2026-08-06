@@ -15,7 +15,7 @@
 //--------------------------------------------------------------------------------
 const char Properties::Comment = '#';
 const char Properties::Separator = ':';
-const char* Properties::WhiteSpaces = " \t";
+const char* Properties::WhiteSpaces = " \t\r";
 
 
 //--------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ Properties::Properties(const string& filename)
       // destructor
       //--------------------------------------------------------------------------------
       Properties::~Properties() noexcept {
-    // ��� pair �� �����Ѵ�.
+    
     m_Properties.clear();
 }
 
@@ -57,47 +57,47 @@ void Properties::load() {
         if (ifile.eof())
             break;
 
-        // �ڸ�Ʈ �����̰ų� �� �����̹Ƿ� skip �Ѵ�.
+        
         if (line.size() == 0 || line[0] == Comment)
             continue;
 
-        // key �� ���۹���(white space�� �ƴ� ����)�� ã�´�.
+        
         size_t key_begin = line.find_first_not_of(WhiteSpaces);
 
-        // key_begin�� npos ��� ���� �׷� ���ڸ� ã�� ���ߴٴ� ���̴�.
-        // ��, ���� white space �θ� �Ǿ� �ִ� �����̹Ƿ� skip �Ѵ�.
+        
+        
         if (key_begin == string::npos)
             continue;
 
-        // key �� value �� �������� separator �� ã�´�.
-        // key_end ���� sep �� ���� ã�� ������ find_last_not_of()�� �Ἥ
-        // sep �������� ������ key_end �� ã�� ���ؼ��̴�. ^^;
+        
+        
+        
         size_t sep = line.find(Separator, key_begin);
 
-        // Separator �� �߰����� ������ ���� �Ľ� ������ �����Ѵ�.
+        
         if (sep == string::npos)
             throw IOException("missing separator");
 
-        // sep �������� ������ key_end �� ã�Ƴ�����.
+        
         size_t key_end = line.find_last_not_of(WhiteSpaces, sep - 1);
 
-        // sep �������� value_begin �� ã�´�.
+        
         size_t value_begin = line.find_first_not_of(WhiteSpaces, sep + 1);
 
-        // key �� ������ value �� ���� �����̴�.
+        
         if (value_begin == string::npos)
             throw IOException("missing value");
 
-        // �� ���������� ������ value_end �� ã�´�.
-        // ( value_begin �� ������ value_end �� ������ �����Ѵ�.)
+        
+        
         size_t value_end = line.find_last_not_of(WhiteSpaces);
 
-        // key_begin,key_end �� value_begin,value_end �� ����ؼ�
-        // line �� substring �� key �� value �� �����Ѵ�.
+        
+        
         string key = line.substr(key_begin, key_end - key_begin + 1);
         string value = line.substr(value_begin, value_end - value_begin + 1);
 
-        // property �� ����Ѵ�.
+        
         setProperty(key, value);
     }
 
@@ -166,7 +166,7 @@ int Properties::getPropertyInt(string key) const {
 void Properties::setProperty(string key, string value) {
     __BEGIN_TRY
 
-    // �̹� Ű�� ������ ���, value �� �����.
+    
     m_Properties[key] = value;
 
     __END_CATCH

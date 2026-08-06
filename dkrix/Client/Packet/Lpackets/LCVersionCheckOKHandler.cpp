@@ -11,6 +11,11 @@
 #include "LCVersionCheckOK.h"
 #include "ClientDef.h"
 
+static void TraceLoginFlowPacket(const char* step)
+{
+	(void)step;
+}
+
 
 //----------------------------------------------------------------------
 // 
@@ -22,9 +27,10 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 
 #ifdef __GAME_CLIENT__
+	TraceLoginFlowPacket("LCVersionCheckOKHandler");
 
 
-	// 정상적인 경우.. 아무것도 할게 없다.
+	
 
 #endif
 		

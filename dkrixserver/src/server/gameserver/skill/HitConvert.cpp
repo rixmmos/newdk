@@ -12,7 +12,7 @@
 #include "SkillUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void HitConvert::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -52,7 +52,7 @@ void HitConvert::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
     Creature* pTargetCreature = pSlayer->getZone()->getCreature(TargetObjectID);
     bool bRangeCheck = pTargetCreature != NULL && verifyDistance(pSlayer, pTargetCreature, output.Range);
 
-    // 저 안에서는 Max Range 만 체크한다. -_-;
+    
     if (!bRangeCheck) {
         executeSkillFailNormal(pSlayer, param.SkillType, pTargetCreature);
         return;
@@ -68,7 +68,7 @@ void HitConvert::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
 
     // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayer)" << endl;
 
-    // knockback 시킨다.
+    
     if (result.bSuccess) {
         int dist = 1 + pSkillSlot->getExpLevel() / 100;
         for (int i = 0; i < dist; ++i) {

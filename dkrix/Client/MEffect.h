@@ -70,16 +70,16 @@ class MEffect : public MObject, public CAnimationFrame {
 	public :
 		enum EFFECT_TYPE 
 		{
-			EFFECT_SECTOR = 0,		// Sector에 고정 
-			EFFECT_MOVING,			// 움직이는 Effect
-			EFFECT_LINEAR,			// 직선 이동
-			EFFECT_GUIDANCE,		// 추적(유도)하고 끝남
-			EFFECT_HOMING,			// 곡선형의 유도탄
-			EFFECT_PARABOLA,		// 포물선
-			EFFECT_ATTACH,			// (캐릭터에) 붙음
-			EFFECT_SCREEN,			// 화면좌표로 표현
-			EFFECT_CHASE,			// 추적하면서 계속 붙어 다님
-			EFFECT_ATTACH_ORBIT,	// 캐릭터에 붙어서 빙빙~ 돌면서 붙어다님
+			EFFECT_SECTOR = 0,		
+			EFFECT_MOVING,			
+			EFFECT_LINEAR,			
+			EFFECT_GUIDANCE,		
+			EFFECT_HOMING,			
+			EFFECT_PARABOLA,		
+			EFFECT_ATTACH,			
+			EFFECT_SCREEN,			
+			EFFECT_CHASE,			
+			EFFECT_ATTACH_ORBIT,	
 		};
 
 	public :
@@ -118,9 +118,9 @@ class MEffect : public MObject, public CAnimationFrame {
 		virtual bool		IsSelectable() const		{ return false; }		
 
 		//--------------------------------------------------------
-		// 끝나는 시간...
+		
 		//--------------------------------------------------------		
-		// 현재 시간 + last까지 작동		
+		
 		void			SetCount(DWORD last, DWORD linkCount=0xFFFF);
 		DWORD			GetEndFrame() const			{ return m_EndFrame; }
 		DWORD			GetEndLinkFrame() const		{ return m_EndLinkFrame; }
@@ -128,12 +128,12 @@ class MEffect : public MObject, public CAnimationFrame {
 
 		
 		//--------------------------------------------------------
-		// 한 번의 Update에 호출될 함수..
+		
 		//--------------------------------------------------------
 		virtual bool	Update();
 		
 		//--------------------------------------------------------
-		// Sector에서의 좌표
+		
 		//--------------------------------------------------------	
 		void			SetPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y);
 		void			SetX(TYPE_SECTORPOSITION x);
@@ -145,7 +145,7 @@ class MEffect : public MObject, public CAnimationFrame {
 
 	
 		//--------------------------------------------------------
-		// Pixel 좌표 설정
+		
 		//--------------------------------------------------------
 		void			SetPixelPosition(int x, int y, int z);
 
@@ -170,16 +170,16 @@ class MEffect : public MObject, public CAnimationFrame {
 		WORD			GetStepPixel() const	{ return m_StepPixel; }
 
 		//--------------------------------------------------------
-		// Effect 연결을 위한 정보
+		
 		//--------------------------------------------------------
 		void			SetLink(TYPE_ACTIONINFO nActionInfo, MEffectTarget* pEffectTarget);		
 
 		void			SetEffectTargetNULL();
 
-		// 몇 번째 ActionInfo인가?
+		
 		TYPE_ACTIONINFO	GetActionInfo()	const { return m_nActionInfo; }
 
-		// 남은 Effect개수를 return한다.
+		
 		MEffectTarget*	GetEffectTarget()		{ return m_pEffectTarget; }
 		int				GetLinkSize()			{ return (m_pEffectTarget==NULL || m_pEffectTarget->IsEnd())? 0 : m_pEffectTarget->GetCurrentPhase(); }	
 
@@ -189,17 +189,17 @@ class MEffect : public MObject, public CAnimationFrame {
 		void			SetDelayFrame(DWORD frame);
 		bool			IsDelayFrame() const;
 
-		// 2004, 10, 15, sobeit add start - 이펙트 생성을 기다린다.
+		
 		void			SetWaitFrame(DWORD frame);
 		bool			IsWaitFrame() const;
 		// 2004, 10, 15, sobeit add end
 
-		// 2004, 9, 30, sobeit add start - 보여줄지 말지..
+		
 		bool			IsSkipDraw() const			{ return m_bDrawSkip; }
 		void			SetDrawSkip(bool bSkip)		{ m_bDrawSkip = bSkip;}
 		// 2004, 9, 30, sobeit add end
 	protected :
-		// PixelPositon으로서 Sector좌표를 설정한다.
+		
 		void			AffectPosition();
 
 
@@ -209,16 +209,16 @@ class MEffect : public MObject, public CAnimationFrame {
 		
 		int	m_est;
 
-		// 끝나는 시간
-		DWORD					m_EndFrame;
-		DWORD					m_EndLinkFrame;	// 다음 link로 넘어가는 frame
 		
-		BYTE					m_Direction;	// 방향
+		DWORD					m_EndFrame;
+		DWORD					m_EndLinkFrame;	
+		
+		BYTE					m_Direction;	
 
-		// Effect의 밝기 
+		
 		char					m_Light;
 
-		// Effect가 존재하는 Zone에서의 Pixel좌표(현재 위치)
+		
 		float			m_PixelX;
 		float			m_PixelY;
 		float			m_PixelZ;
@@ -226,13 +226,13 @@ class MEffect : public MObject, public CAnimationFrame {
 
 		BYTE			m_Power;
 
-		// 다음 Effect로의 연결을 위한 정보
+		
 		TYPE_ACTIONINFO			m_nActionInfo;
 		MEffectTarget*			m_pEffectTarget;
 
-		static TYPE_OBJECTID	s_ID;			// ID발급을 위한...
+		static TYPE_OBJECTID	s_ID;			
 
-		// 중복 가능한가
+		
 		bool			m_bMulti;
 
 		bool			m_bDrawSkip;
@@ -243,7 +243,7 @@ class MEffect : public MObject, public CAnimationFrame {
 };
 
 //----------------------------------------------------------------------
-// MSelectableEffect - 마우스로 선택되는 effect
+
 //----------------------------------------------------------------------
 class MSelectableEffect : public MEffect {
 	public :

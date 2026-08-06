@@ -5,10 +5,10 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGPickupMoney.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
-#include "SocketEncryptInputStream.h"
-#include "SocketEncryptOutputStream.h"
+#include "../SocketInputStream.h"
+#include "../SocketOutputStream.h"
+#include "../SocketEncryptInputStream.h"
+#include "../SocketEncryptOutputStream.h"
 #include "Assert.h"
 
 

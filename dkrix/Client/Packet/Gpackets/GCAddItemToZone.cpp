@@ -8,8 +8,8 @@
 #include "Client_PCH.h"
 // include files
 #include "GCAddItemToZone.h"
-#include "SocketEncryptInputStream.h"
-#include "SocketEncryptOutputStream.h"
+#include "../SocketEncryptInputStream.h"
+#include "../SocketEncryptOutputStream.h"
 #include "Assert.h"
 
 //--------------------------------------------------------------------
@@ -32,7 +32,7 @@ GCAddItemToZone::~GCAddItemToZone()
 {
 	__BEGIN_TRY
 
-	// 소속된 모든 객체들을 삭제한다.
+	
 	while ( !m_SubItemInfoList.empty() ) {
 		SubItemInfo * pSubItemInfo = m_SubItemInfoList.front();
 		delete pSubItemInfo;
@@ -43,7 +43,7 @@ GCAddItemToZone::~GCAddItemToZone()
 }
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToZone::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -88,7 +88,7 @@ void GCAddItemToZone::read ( SocketInputStream & iStream )
 	iStream.read( m_EnchantLevel );
 	iStream.read( m_ItemNum );
 
-	// Sub 아이템 정보를 읽어 들인다.
+	
     iStream.read( m_ListNum );
 	for( int i = 0; i < m_ListNum; i++ ) {
 		SubItemInfo * pSubItemInfo = new SubItemInfo();
@@ -102,7 +102,7 @@ void GCAddItemToZone::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToZone::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -147,7 +147,7 @@ void GCAddItemToZone::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_EnchantLevel );
 	oStream.write( m_ItemNum );
 
-	// Sub 아이템의 정보를 쓴다.
+	
 	oStream.write( m_ListNum );
 
     for ( std::list<SubItemInfo*>:: const_iterator sitr = m_SubItemInfoList.begin(); sitr!= m_SubItemInfoList.end(); sitr++) {

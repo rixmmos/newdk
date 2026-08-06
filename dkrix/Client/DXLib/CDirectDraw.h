@@ -19,7 +19,12 @@
 #include <cstring>
 #include <cstdint>
 
-/* Windows type compatibility - define for all platforms */
+#ifdef PLATFORM_WINDOWS
+#include <ddraw.h>
+#endif
+
+/* Windows type compatibility */
+#ifndef PLATFORM_WINDOWS
 #ifndef LPVOID_DEFINED
 #define LPVOID_DEFINED
 typedef void* LPVOID;
@@ -73,8 +78,10 @@ typedef struct {
 	WORD green[256];
 	WORD blue[256];
 } DDGAMMARAMP;
+#endif
 
-/* Common Windows types - define if not already defined */
+/* Common Windows types - define only on non-Windows builds */
+#ifndef PLATFORM_WINDOWS
 #ifndef RECT_DEFINED
 #define RECT_DEFINED
 typedef struct tagRECT {
@@ -105,17 +112,30 @@ typedef struct tagSIZE {
 	LONG cy;
 } SIZE, *PSIZE, *LPSIZE;
 #endif
+#endif
 
 /* QWORD type */
+#ifndef PLATFORM_WINDOWS
 typedef uint64_t QWORD;
+#endif
+
+#ifdef PLATFORM_WINDOWS
+typedef IDirectDraw7* LPDIRECTDRAW7;
+typedef IDirectDrawSurface7* LPDIRECTDRAWSURFACE7;
+typedef IDirectDrawGammaControl* LPDIRECTDRAWGAMMACONTROL;
+#endif
 
 /* HWND type stub */
+#ifndef PLATFORM_WINDOWS
 typedef void* HWND;
+#endif
 
 /* GDI types */
+#ifndef PLATFORM_WINDOWS
 #ifndef HBITMAP_DEFINED
 #define HBITMAP_DEFINED
 typedef void* HBITMAP;
+#endif
 #endif
 
 /* Memory utilities */
@@ -124,12 +144,24 @@ typedef void* HBITMAP;
 #endif
 
 /* DirectDraw constants */
+#ifndef DDSD_CAPS
 #define DDSD_CAPS 0x00000001
+#endif
+#ifndef DDSD_HEIGHT
 #define DDSD_HEIGHT 0x00000002
+#endif
+#ifndef DDSD_WIDTH
 #define DDSD_WIDTH 0x00000004
+#endif
+#ifndef DDSD_PITCH
 #define DDSD_PITCH 0x00000008
+#endif
+#ifndef DDSD_PIXELFORMAT
 #define DDSD_PIXELFORMAT 0x00001000
+#endif
+#ifndef DDSD_LPSURFACE
 #define DDSD_LPSURFACE 0x00000800
+#endif
 
 /*-----------------------------------------------------------------------------
   Class CDirectDraw - SDL2 Cross-platform Stub
@@ -192,8 +224,8 @@ public:
 
 	// Property methods (stub implementations)
 	static inline bool		IsFullscreen()			{ return true; }
-	static inline WORD		GetScreenWidth()		{ return 800; }
-	static inline WORD		GetScreenHeight()		{ return 600; }
+	static inline WORD		GetScreenWidth()		{ return m_ScreenWidth; }
+	static inline WORD		GetScreenHeight()		{ return m_ScreenHeight; }
 	static inline bool		IsMMX()	 				{ return false; }
 	static inline bool		IsSupportGammaControl()	{ return false; }
 	static inline bool		Is565()	 				{ return true; }
@@ -201,7 +233,18 @@ public:
 	static inline LPDIRECTDRAW7 GetDD()			{ return nullptr; }
 
 	// Display methods (stub implementations - use SDL2 instead)
-	static inline void		Flip() { }
+	static inline void		Init(HWND hwnd, WORD width, WORD height, SCREENMODE mode, bool bHAL = false, bool bUseIMEWindow = true)
+	{
+		m_hWnd = hwnd;
+		m_ScreenWidth = width;
+		m_ScreenHeight = height;
+		SetRect(&m_rcScreen, 0, 0, width, height);
+		SetRect(&m_rcViewport, 0, 0, width, height);
+		(void)mode;
+		(void)bHAL;
+		(void)bUseIMEWindow;
+	}
+	static void		Flip();
 	static inline void		FlipToGDISurface() { }
 	static inline void		OnMove() { }
 	static inline bool		RestoreAllSurfaces() { return true; }
@@ -210,7 +253,16 @@ public:
 	static inline void		SetGammaRamp(WORD step = (WORD)-1) { }
 	static inline void		RestoreGammaRamp() { }
 	static inline void		SetAddGammaRamp(WORD rStep = 0, WORD gStep = 0, WORD bStep = 0) { }
-	static inline void		SetDisplayMode(WORD width, WORD height, WORD bpp, DWORD flags1, DWORD flags2) { }
+	static inline void		SetDisplayMode(WORD width, WORD height, WORD bpp, DWORD flags1, DWORD flags2)
+	{
+		m_ScreenWidth = width;
+		m_ScreenHeight = height;
+		SetRect(&m_rcScreen, 0, 0, width, height);
+		SetRect(&m_rcViewport, 0, 0, width, height);
+		(void)bpp;
+		(void)flags1;
+		(void)flags2;
+	}
 	static inline void		RestoreDisplayMode() { }
 
 	// InitMask - implemented in .cpp to initialize static arrays

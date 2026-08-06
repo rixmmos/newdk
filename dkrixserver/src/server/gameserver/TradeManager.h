@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : TradeManager.h
-// Written by  : 김성민
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -16,14 +16,14 @@
 #include "Types.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// 교환 상태 플래그
+
 ////////////////////////////////////////////////////////////////////////////////
 
 enum {
-    // 아이템을 옮기고 있는 상태
+    
     TRADE_TRADING,
 
-    // 아이템을 다 옮기고, 교환을 기다리고 있는 상태
+    
     TRADE_FINISH,
 
     TRADE_MAX
@@ -127,7 +127,7 @@ public:
 
 public:
     void initTrade(Creature* pCreature1, Creature* pCreature2);
-    // 트레이드 할 수 없으면 0, 선물 상자 조건 때문에 못하면 2, 할 수 있으면 1
+    
     int canTrade(Creature* pCreature1, Creature* pCreature2);
     void processTrade(Creature* pCreature1, Creature* pCreature2);
     void cancelTrade(Creature* pCreature1, Creature* pCreature2);

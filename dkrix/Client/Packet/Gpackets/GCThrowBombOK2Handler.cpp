@@ -25,15 +25,15 @@ throw ( ProtocolException , Error )
 
 		
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
-	// 의미없다.
+	
 	int delayFrame = 16;//ConvertDurationToFrame( pPacket->getDuration() );
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -41,13 +41,13 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		//------------------------------------------------------
-		// Player가 사용한 기술이라고 packet이 날아온 경우
-		// --> Error다
+		
+		
 		//------------------------------------------------------
 		if (pPacket->getObjectID()==g_pPlayer->GetID())
 		{
@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 		else
 		{
 			//------------------------------------------------------
-			// 사용자
+			
 			//------------------------------------------------------
 			int creatureID = pPacket->getObjectID();
 			MCreature* pCreature = g_pZone->GetCreature( creatureID );
@@ -88,14 +88,14 @@ throw ( ProtocolException , Error )
 			}
 
 			//------------------------------------------------------
-			// BombOK2로 인한 결과 
+			
 			//------------------------------------------------------				
 			int size = pPacket->getCListNum();
 
 			MActionResult* pResult = new MActionResult;
 
 			//------------------------------------------------------------------
-			// effect status를 적용시킨다.
+			
 			//------------------------------------------------------------------
 			if (g_pPlayer->GetEFFECT_STAT()!=EFFECTSTATUS_NULL)
 			{
@@ -130,15 +130,15 @@ throw ( ProtocolException , Error )
 		
 			if (size!=0)
 			{
-				// 결과를 당하는 각각의 creature에 대해서 결과 표현
+				
 				for (int i=0; i<size; i++)
 				{
 					//MCreature* pTargetCreature = g_pZone->GetCreature( pPacket->getCListElement() );
 						
-					// Creature에게 Damage 입힘
+					
 					//if (pTargetCreature != NULL)
 					//{
-						// 내(Player)가 누군가가 사용한 SKill을 맞은 경우..
+						
 						// [ TEST CODE ]
 						
 					//	pResult->Add( new MActionResultNodeActionInfo( 
@@ -159,7 +159,7 @@ throw ( ProtocolException , Error )
 						DEBUG_ADD("TCNotNULL");
 
 						//------------------------------------------------------
-						// EffectStatus가 있다면 붙인다.
+						
 						//------------------------------------------------------
 						EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 						
@@ -170,7 +170,7 @@ throw ( ProtocolException , Error )
 
 						//------------------------------------------------------
 						//
-						// skill에 결과가 있으면 적용 시킨다.
+						
 						//
 						//------------------------------------------------------
 						MActionResultNode* pActionResultNode = NULL;
@@ -178,7 +178,7 @@ throw ( ProtocolException , Error )
 						switch ((*g_pActionInfoTable)[skillID].GetActionResultID())
 						{
 							//------------------------------------------------------
-							// 다른 ActionInfo 실행
+							
 							//------------------------------------------------------
 							case ACTIONRESULTNODE_ACTIONINFO :
 								
@@ -196,7 +196,7 @@ throw ( ProtocolException , Error )
 							break;
 
 							//------------------------------------------------------
-							// Burrow 등등.. 
+							
 							//------------------------------------------------------
 							default :
 								DEBUG_ADD("default");
@@ -204,7 +204,7 @@ throw ( ProtocolException , Error )
 						}
 
 						//------------------------------------------------------
-						// NULL이 아니면 같이 적용
+						
 						//------------------------------------------------------
 						if (pActionResultNode!=NULL)
 						{
@@ -224,7 +224,7 @@ throw ( ProtocolException , Error )
 			DEBUG_ADD("pCreture?");
 
 			//------------------------------------------------------
-			// 사용한 캐릭터가 없는 경우 --> 결과 바로 표현
+			
 			//------------------------------------------------------
 			if (pCreature==NULL)
 			{
@@ -233,39 +233,39 @@ throw ( ProtocolException , Error )
 				int direction = pPacket->getDir();
 				
 				ExecuteActionInfoFromMainNode(
-							skillID,										// 사용 기술 번호
+							skillID,										
 						
 							pPacket->getX(), pPacket->getY(), 0,
-							direction,														// 사용 방향
+							direction,														
 							
-							OBJECTID_NULL,		// 2002.3.6에 바꿈. 원래는 pPacket->getObjectID()였다.
+							OBJECTID_NULL,		
 							pPacket->getX(), pPacket->getY(), 0,
 							
-							delayFrame,													// 기술의 (남은) 지속 시간		
+							delayFrame,													
 							
 							pResult,
 							
-							false);			// 기술 첨부터 시작한다.);
+							false);			
 			}
 			//------------------------------------------------------
-			// 정상
+			
 			//------------------------------------------------------
 			else
 			{				
 				DEBUG_ADD("C-OK");
 
 				//------------------------------------------------------
-				// 방향을 바라보기
+				
 				//------------------------------------------------------
 				pCreature->SetDirectionToPosition(pPacket->getX(), pPacket->getY());		
 
 				//------------------------------------------------------
-				// range를 direction에 적용시키는 경우
+				
 				//------------------------------------------------------
 				pCreature->SetDirection( pPacket->getDir() );				
 
 				//------------------------------------------------------
-				// BombOK2로 인한 결과 추가
+				
 				//------------------------------------------------------
 				//Duration_t	m_Duration;
 				DEBUG_ADD("AtoSector");
@@ -273,7 +273,7 @@ throw ( ProtocolException , Error )
 				pCreature->PacketSpecialActionToSector(
 									skillID, 
 									pPacket->getX(), pPacket->getY(),
-									pResult						// 결과
+									pResult						
 				);
 
 				DEBUG_ADD("AtoSectorOK");
@@ -284,7 +284,7 @@ throw ( ProtocolException , Error )
 
 	
 	//------------------------------------------------------------
-	// Delay Frame 설정
+	
 	//------------------------------------------------------------
 	//g_pPlayer->SetEffectDelayFrame( resultActionInfo, delayFrame );
 
@@ -292,8 +292,8 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );

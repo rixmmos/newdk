@@ -127,8 +127,8 @@ void EffectDragonTornado::affect(Creature* pCreature)
     if (pCastCreature == NULL)
         return;
 
-    // 자신은 맞지 않는다
-    // 무적상태 체크. by sigi. 2002.9.5
+    
+    
     if (pCreature->getObjectID() == m_UserOID || !canAttack(pCastCreature, pCreature) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || !checkZoneLevelToHitTarget(pCreature) ||
         pCreature->isSlayer()) {
@@ -165,7 +165,7 @@ void EffectDragonTornado::affect(Creature* pCreature)
                 pPlayer->sendPacket(&gcMI);*/
 
     } else if (pCreature->isVampire()) {
-        // 뱀파이어가 사용했을 경우 뱀파이어는 중심 타일을 제외하고는 맞지 않는다.
+        
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
 
         ::setDamage(pVampire, m_Damage, pCastCreature, SKILL_DRAGON_TORNADO, &gcSkillToObjectOK6, &gcAttackerMI);
@@ -189,7 +189,7 @@ void EffectDragonTornado::affect(Creature* pCreature)
         if (pCastCreature != NULL)
             pMonster->addEnemy(pCastCreature);
 
-        // delay설정 ( + 1초 )
+        
         if (!pMonster->isMaster() && isStun) {
             Timeval delay;
             delay.tv_sec = 1;
@@ -200,7 +200,7 @@ void EffectDragonTornado::affect(Creature* pCreature)
 
     SkillType_t skillType = (isStun) ? SKILL_DRAGON_TORNADO : SKILL_ATTACK_MELEE;
 
-    // user한테는 맞는 모습을 보여준다.
+    
     if (pCreature->isPC()) {
         gcSkillToObjectOK6.setSkillType(skillType);
         gcSkillToObjectOK6.setDuration(0);

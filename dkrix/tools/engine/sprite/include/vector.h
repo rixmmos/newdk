@@ -76,11 +76,7 @@ _vector_free(Vector *v) {
 #define vecFree(ptr) \
 	_vector_free(&(ptr)->v)
 
-/*
- * Clang 会对 GNU 扩展关键字（如 typeof）给出 -Wlanguage-extension-token 警告。
- * 这些宏为了保持简洁的调用方式使用了 typeof。为避免污染全局编译设置，
- * 在本头文件内局部关闭该警告，仅包裹宏定义区域。
- */
+ 
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wlanguage-extension-token"

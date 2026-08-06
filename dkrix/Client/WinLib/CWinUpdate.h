@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // CWinUpdate.h
 //-----------------------------------------------------------------------------
-// 시간을 비교하면서 일정시간마다 한번씩 Update가 되도록 한다.
+
 //-----------------------------------------------------------------------------
 
 #ifndef	__CWINUPDATE_H__
@@ -48,11 +48,11 @@ class CWinUpdate {
 		
 
 	private :
-		static DWORD	m_CurrentTime;		// 현재 time
+		static DWORD	m_CurrentTime;		
 
 	protected :
-		DWORD			m_LastTime;			// 가장 최근에 Update()한 시간
-		DWORD			m_UpdateDelay;		// update delay시간
+		DWORD			m_LastTime;			
+		DWORD			m_UpdateDelay;		
 };
 
 #endif		

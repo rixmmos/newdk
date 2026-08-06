@@ -21,8 +21,8 @@
 //
 // CGPortCheckHander::execute()
 //
-// 게임 서버가 로그인 서버로부터 CGPortCheck 패킷을 받게 되면,
-// ConnectionInfo를 새로 추가하게 된다.
+
+
 //
 //----------------------------------------------------------------------
 void CGPortCheckHandler::execute(CGPortCheck* pPacket)
@@ -47,7 +47,7 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
                             pPacket->getPCName().c_str(), IP, port, g_pConfig->getPropertyInt("ServerID"));
 
         if (pStmt->getAffectedRowCount() == 0) {
-            // 다시 한번 시도
+            
             pStmt->executeQuery("UPDATE UserIPInfo Set IP=%lu, Port=%u WHERE Name='%s'", IP, port,
                                 pPacket->getPCName().c_str());
 
@@ -57,25 +57,7 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
         SAFE_DELETE(pStmt);
 
     } catch (SQLQueryException&) {
-        /*
-        try {
-            // 다시 한번 시도
-            pStmt->executeQuery( "UPDATE UserIPInfo Set IP=%ld, Port=%d WHERE Name='%s'",
-                                    IP,
-                                    port,
-                                    pPacket->getPCName().c_str());
-
-            //log(LOG_CGCONNECT, pPacket->getPCName(), "", host);
-
-            SAFE_DELETE(pStmt);
-
-        } catch (SQLQueryException & sqe) {	//se) {
-
-            SAFE_DELETE(pStmt);
-            // 무시한다.
-            //throw ProtocolException("Duplicated IPInfo");
-        }
-        */
+         
         SAFE_DELETE(pStmt);
     }
 #else

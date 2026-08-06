@@ -57,7 +57,7 @@ MEventManager::~MEventManager()
 }
 
 //--------------------------------------------------
-// 이벤트를 등록한다
+
 //--------------------------------------------------
 void	MEventManager::AddEvent(MEvent &event)
 {
@@ -72,7 +72,7 @@ void	MEventManager::AddEvent(MEvent &event)
 }
 
 //--------------------------------------------------
-// 이벤트를 가져온다
+
 //--------------------------------------------------
 const MEvent*	MEventManager::GetEvent(EVENT_ID id)
 {
@@ -86,7 +86,7 @@ const MEvent*	MEventManager::GetEvent(EVENT_ID id)
 }
 
 //--------------------------------------------------
-// 이벤트가 있는가 본다
+
 //--------------------------------------------------
 bool	MEventManager::IsEvent(EVENT_ID id)
 {
@@ -94,7 +94,7 @@ bool	MEventManager::IsEvent(EVENT_ID id)
 }
 
 //--------------------------------------------------
-// 이벤트를 지운다
+
 //--------------------------------------------------
 void	MEventManager::RemoveEvent(EVENT_ID id)
 {
@@ -123,7 +123,7 @@ void	MEventManager::RemoveEvent(EVENT_ID id)
 }
 
 //--------------------------------------------------
-// 모든 이벤트를 지운다
+
 //--------------------------------------------------
 void	MEventManager::RemoveAllEvent()
 { 
@@ -141,7 +141,7 @@ void	MEventManager::RemoveAllEvent()
 
 }
 //--------------------------------------------------
-// 타입별 이벤트를 지운다
+
 //--------------------------------------------------
 void	MEventManager::RemoveAllEventByType(EVENT_TYPE type)
 {
@@ -161,7 +161,7 @@ void	MEventManager::RemoveAllEventByType(EVENT_TYPE type)
 }
 
 //--------------------------------------------------
-// Flag별 개수
+
 //--------------------------------------------------
 const int	MEventManager::GetEventCountByFlag(DWORD flag)
 {
@@ -182,7 +182,7 @@ const int	MEventManager::GetEventCountByFlag(DWORD flag)
 }
 
 //--------------------------------------------------
-// Flag로 empty검색
+
 //--------------------------------------------------
 const bool		MEventManager::IsEmptyEventByFlag(DWORD flag)
 {
@@ -202,7 +202,7 @@ const bool		MEventManager::IsEmptyEventByFlag(DWORD flag)
 }
 
 //--------------------------------------------------
-// Flag로 GetEvent해온다
+
 //--------------------------------------------------
 const MEvent*	MEventManager::GetEventByFlag(DWORD flag, int count)
 {
@@ -242,7 +242,7 @@ void	MEventManager::ProcessEvent()
 				itr++;
 				RemoveEvent(delete_id);
 #ifdef __GAME_CLIENT__				
-				// 2004, 6, 21, sobeit add start - 질드레 연출 - 5초간 흔들렸으면 10초간 어두워짐
+				
 				if(delete_id == EVENTID_GDR_PRESENT)
 					SetFadeStart(31, -1, 1, 0,0,0, 4);
 				// 2004, 6, 21, sobeit add end

@@ -16,6 +16,7 @@
 
 #include "MGameStringTABLE.h"
 #include "SystemAvailabilities.h"
+#include "ClientFunction.h"
 
 
 static MShop *		m_pShop;
@@ -590,6 +591,15 @@ void C_VS_UI_SHOP::StartBuyConfirmDialog(int _x, int _y, int num)
 void C_VS_UI_SHOP::Process()
 {
 	m_pC_button_group->Process();
+
+	if (gpC_mouse_pointer != NULL)
+	{
+		const int pointer_x = gpC_mouse_pointer->GetX();
+		const int pointer_y = gpC_mouse_pointer->GetY();
+
+		if (IsInRect(pointer_x, pointer_y))
+			MouseControl(M_MOVING, pointer_x, pointer_y);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -632,6 +642,17 @@ void C_VS_UI_SHOP::Show()
 {
 	assert(m_pShop != NULL);
 
+	if (gpC_mouse_pointer != NULL)
+	{
+		const int pointer_x = gpC_mouse_pointer->GetX();
+		const int pointer_y = gpC_mouse_pointer->GetY();
+
+		if (IsInRect(pointer_x, pointer_y))
+			UpdateFocusedSlot(pointer_x - x, pointer_y - y);
+		else
+			m_focused_slot = NOT_SELECTED;
+	}
+
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
 		gpC_global_resource->DrawDialogLocked(x, y, w, h);
@@ -669,7 +690,7 @@ void C_VS_UI_SHOP::Show()
 					
 
 					item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
-					
+
 					if(m_bl_mysterious_tab)
 					{
 						if (m_focused_slot == i)
@@ -921,15 +942,9 @@ void C_VS_UI_SHOP::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	}
 	else
 	{
-		if(p_button->GetFocusState() || m_what_tab == p_button->GetID())
-		{
-			if(p_button->GetPressState())
-				m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index+6);
-			else
-				m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index+3);
-		}
-		else
-			m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index);
+		// Keep shop tabs functional, but avoid the legacy highlighted/pushed frames
+		// that still contain old dk2th/d2th artwork.
+		m_image_spk.BltLocked(x+p_button->x, y+p_button->y, p_button->m_image_index);
 	}
 
 	/*
@@ -947,6 +962,44 @@ void C_VS_UI_SHOP::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 }
 
 //-----------------------------------------------------------------------------
+// UpdateFocusedSlot
+//-----------------------------------------------------------------------------
+bool C_VS_UI_SHOP::UpdateFocusedSlot(int _x, int _y)
+{
+	for (int i=0; i < SHOP_SHELF_SLOT; i++)
+	{
+		if (_x >= GetSlotX(i) && _x < GetSlotX(i)+SLOT_WIDTH &&
+			 _y >= GetSlotY(i) && _y < GetSlotY(i)+SLOT_HEIGHT)
+		{
+			if(gpC_Imm && m_focused_slot == NOT_SELECTED)
+				gpC_Imm->ForceUI(CImm::FORCE_UI_BUTTON);
+
+			m_focused_slot = i;
+
+			if (m_pC_dialog_multi_buy_confirm==NULL && m_pC_dialog_buy_confirm==NULL
+				|| m_pC_dialog_multi_buy_confirm!=NULL && !m_pC_dialog_multi_buy_confirm->Running()
+				|| m_pC_dialog_buy_confirm!=NULL && !m_pC_dialog_buy_confirm->Running()) 
+			{						
+				MItem * p_item = GetSlotItem(m_focused_slot);
+
+				if (p_item != NULL)
+				{
+					if( p_item->GetItemClass() == ITEM_CLASS_EVENT_STAR &&
+						g_pSystemAvailableManager->IsAvailableEnchantSystem() ||
+						p_item->GetItemClass() != ITEM_CLASS_EVENT_STAR )
+						g_descriptor_manager.Set(DID_ITEM, x+GetSlotX(m_focused_slot), y+GetSlotY(m_focused_slot)+SLOT_HEIGHT-p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y, (void *)p_item);
+				}
+			}
+
+			return true;
+		}
+	}
+
+	m_focused_slot = NOT_SELECTED;
+	return false;
+}
+
+//-----------------------------------------------------------------------------
 // MouseControl
 //
 // 
@@ -958,44 +1011,11 @@ bool C_VS_UI_SHOP::MouseControl(UINT message, int _x, int _y)
 	_x-=x; _y-=y;
 	m_pC_button_group->MouseControl(message, _x, _y);
 
-	int i;
-
 	switch (message)
 	{
 		case M_MOVING:
-			//
-			// search shelf slot...
-			//
-			for (i=0; i < SHOP_SHELF_SLOT; i++)
-			{
-				if (_x >= GetSlotX(i) && _x < GetSlotX(i)+SLOT_WIDTH &&
-					 _y >= GetSlotY(i) && _y < GetSlotY(i)+SLOT_HEIGHT)
-				{
-					if(gpC_Imm && m_focused_slot == NOT_SELECTED)
-						gpC_Imm->ForceUI(CImm::FORCE_UI_BUTTON);
-
-					m_focused_slot = i;
-
-
-					if (m_pC_dialog_multi_buy_confirm==NULL && m_pC_dialog_buy_confirm==NULL
-						|| m_pC_dialog_multi_buy_confirm!=NULL && !m_pC_dialog_multi_buy_confirm->Running()
-						|| m_pC_dialog_buy_confirm!=NULL && !m_pC_dialog_buy_confirm->Running()) 
-					{						
-						MItem * p_item = GetSlotItem(m_focused_slot);
-
-						if (p_item != NULL)
-						{
-							if( p_item->GetItemClass() == ITEM_CLASS_EVENT_STAR &&
-								g_pSystemAvailableManager->IsAvailableEnchantSystem() ||
-								p_item->GetItemClass() != ITEM_CLASS_EVENT_STAR )
-								g_descriptor_manager.Set(DID_ITEM, x+GetSlotX(m_focused_slot), y+GetSlotY(m_focused_slot)+SLOT_HEIGHT-p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y, (void *)p_item, true);
-						}
-					}
-
-					return true;
-				}
-			}
-			m_focused_slot = NOT_SELECTED;
+			if (UpdateFocusedSlot(_x, _y))
+				return true;
 			break;
 
 		case M_LEFTBUTTON_DOWN:

@@ -1,11 +1,4 @@
-/******************************************************************************
-FileName                : md5.h
-Description             : 벗句炬랬，경홈백페鱗諒杰唐
-Version                 :
-Date                    : 1991
-Author                  : RSA Data Security, Inc.
-Other                   : C++/object oriented translation of MD5.
-******************************************************************************/
+ 
 
 #pragma once
 

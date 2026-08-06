@@ -19,7 +19,7 @@ void SimpleQuestLoader::load(Creature* pCreature) throw(Error) {
     Assert(pCreature->isPC());
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
 
-    // 기존의 quest를 다 지우고 다시 load한다.
+    
     pPC->removeAllQuest();
 
     Statement* pStmt = NULL;
@@ -53,14 +53,14 @@ void SimpleQuestLoader::load(Creature* pCreature) throw(Error) {
 
             int DayTime = pResult->getDWORD(++i);
 
-            // deadline 체크
+            
             if (currentTime.tv_sec < DayTime) {
                 pSimpleQuest->setDeadline((DayTime - currentTime.tv_sec) * 10);
             } else {
                 pSimpleQuest->setDeadline(0);
             }
 
-            // Creature의 QuestManager에 추가한다.
+            
             pSimpleQuest->take(pCreature, false);
             pPC->addQuest(pSimpleQuest);
 

@@ -121,7 +121,7 @@ public:
     void removeFlag(Effect::EffectClass EC);
 
 private:
-    // zone 의 해쉬맵
+    
     unordered_map<ZoneGroupID_t, ZoneGroup*> m_ZoneGroups;
 
     mutable Mutex m_Mutex;

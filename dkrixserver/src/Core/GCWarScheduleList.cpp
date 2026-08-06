@@ -40,7 +40,7 @@ GCWarScheduleList::~GCWarScheduleList()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCWarScheduleList::read(SocketInputStream& iStream)
 
@@ -84,7 +84,7 @@ void GCWarScheduleList::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCWarScheduleList::write(SocketOutputStream& oStream) const
 
@@ -181,25 +181,7 @@ string GCWarScheduleList::toString() const
     msg << "GCWarScheduleList("
         << "WarNum : " << m_WarScheduleList.size();
 
-    /*	WarScheduleInfoListItor itr = m_WarScheduleList.begin();
-
-        for(; itr != m_WarScheduleList.end(); itr++ )
-        {
-            msg << ", (WarScheduleInfo : "
-                << (((*itr)->warType)?"WAR_TYPE_DIFFERENT_RACE, ":"WAR_TYPE_SAME_RACE, " )
-                << (*itr)->year << "년 "
-                << (*itr)->month << "월 "
-                << (*itr)->day << "일"
-                << (*itr)->hour << "시";
-
-            if((*itr)->warType == 0 )
-            {
-                msg << ", Challenger GuildID : " << (*itr)->challengerGuildID;
-                msg << ", Challenger GuildName : " << (*itr)->challengerGuildName;
-            }
-
-            msg << ")";
-        }*/
+     
 
     msg << ")";
 

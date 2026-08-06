@@ -45,7 +45,7 @@ extern bool gbl_mine_progress;
 //-----------------------------------------------------------------------------
 // class C_VS_UI_LEVELUP
 //
-// vampire/slayer level up�� ��Ÿ���� button.
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_LEVELUP : public Window
 {
@@ -296,10 +296,10 @@ public:
 	virtual void HotKey_PetInfo() = 0;		// ctrl+CapsLock
 	virtual void HotKey_MailBox() = 0;		// ctrl+b
 	virtual void HotKey_Party() = 0;		// ctrl+p
-	virtual void HotKey_Mark() = 0;			// '����'Ű
+	virtual void HotKey_Mark() = 0;			
 //	virtual void HotKey_WindowToggle()=0;	// ctrl + space
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		virtual void HotKey_Inventory(bool IsCheckSubInventory = false)=0;		// tab
 	#else
 		virtual void HotKey_Inventory()=0;		// tab
@@ -352,8 +352,8 @@ enum CHAT_LINE_CONDITION
 	CLD_PARTY,
 	CLD_GUILD,
 	CLD_UNION,
-	CLD_INFO, // ���� �޽���.
-	CLD_MASTER,	// ��� �޽���
+	CLD_INFO, 
+	CLD_MASTER,	
 
 	CLD_TOTAL = CLD_MASTER,
 };
@@ -467,7 +467,7 @@ public:
 
 	C_VS_UI_CHAT_LINE *	PopBack()
 	{
-		// !data�� delete������ �ʴ´�.
+		
 
 		C_VS_UI_CHAT_LINE * data;
 
@@ -482,7 +482,7 @@ public:
 
 	C_VS_UI_CHAT_LINE *	GetLine(int n) const
 	{
-		// n�� 0�� �������� �ֱٿ� �Էµ� line�̴�.
+		
 
 		if (n < 0)
 			return NULL;
@@ -508,7 +508,7 @@ class PAPERING_HISTORY
 //-----------------------------------------------------------------------------
 // C_VS_UI_CHATTING
 //
-// �Ϲ����� chatting�� �ӼӸ�(slayer = PCS)�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_CHATTING : public Window, public Exec, public ButtonVisual
 {
@@ -662,7 +662,7 @@ private:
 	int							m_history_line;
 	std::vector<PAPERING_HISTORY>	m_history;
 
-//	int							m_string_output_x; // �ּ�ó�� by larosel
+
 
 	void	ScrollHistory();
 
@@ -692,12 +692,12 @@ private:
 	int								m_whisper_index;	// by larosel
 
 	//
-	// Vampire/Slayer �� �� ��Ÿ�� �� �ִ� Window�� ���� 2��(Inventory, Gear)�̴�.
-	// ȭ�� �� ���� ��Ÿ���� ��� click focus�� �ֱ� ������ �װ��� ��������� �Ѵ�.
+	
+	
 	//
 
-//	int								m_slayer_chat_mode;	// �ּ�ó�� by larosel
-//	void	AddChatToHistoryTemp(char * str, char * sz_id, CHAT_LINE_CONDITION condition);	// �ּ�ó�� by laorsel
+
+
 
 	enum
 	{
@@ -989,10 +989,10 @@ public:
 //
 // slayer/vampire inventory base class.
 //
-// - slayer/vampire inventory ������ interface�� �����Ѵ�. 
-// - slayer���� vampire�� �ٲ�ų� �Ǵ� �� �ݴ��� ��, ��ü�� ������Ͽ�
-//   inventory�� �ʱ�ȭ������, inventory�� item�� �״�� �����ȴ�. interface�󿡼���
-//   inventory�� item�� �����ϰ� ���� �ʴ�. �׷��� �� class�� base�� �ϴ� ���̴�.
+
+
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_INVENTORY : public Window, public Exec, public ButtonVisual
 {
@@ -1037,11 +1037,11 @@ protected:
 	bool						m_bl_shift, m_bl_set_load;;
 
 	C_SPRITE_PACK *			m_pC_inventory_spk;
-	Rect							m_grid_rect; // ��ü Grid rect.
+	Rect							m_grid_rect; 
 
 	int							m_focus_grid_x, m_focus_grid_y;
 
-	// ��ӹ޴� class���� �ݵ�� set����� �Ѵ�.
+	
 	int							m_grid_start_offset_x, m_grid_start_offset_y;
 	int							m_money_button_offset_x, m_money_button_offset_y;
 
@@ -1085,15 +1085,15 @@ public:
 	C_VS_UI_INVENTORY();
 	virtual ~C_VS_UI_INVENTORY();
 
-	//���ڼ�ġ
+	
 	bool	StartInstallMineProgress(int focus_grid_x, int focus_grid_y);
 	bool	IsInstallMineProgress()		{ return gbl_mine_progress; }
 	void	EndInstallMineProgress()	{ gbl_mine_progress = false; }
-	//���ڸ����
+	
 	bool	StartCreateMineProgress(int focus_grid_x, int focus_grid_y);
 	bool	IsCreateMineProgress()		{ return gbl_mine_progress; }
 	void	EndCreateMineProgress()	{ gbl_mine_progress = false; }
-	//��ź �����
+	
 	bool	StartCreateBombProgress(int focus_grid_x, int focus_grid_y);
 	bool	IsCreateBombProgress()		{ return gbl_mine_progress; }
 	void	EndCreateBombProgress()	{ gbl_mine_progress = false; }
@@ -1139,7 +1139,7 @@ protected:
 		GEAR_WINDOW,
 		GEAR_WINDOW_ALPHA,
 		GEAR_BLOOD_BIBLE_BLOCK,
-		// ���⼭���� �����̾� ����
+		
 		BUTTON_FIRST,
 		BUTTON_FIRST_HILIGHTED,
 		BUTTON_FIRST_HILIGHTED_PUSHED,
@@ -1153,7 +1153,7 @@ protected:
 		HELP_ID,
 		CLOSE_ID,
 
-		// ���⼭���� �����̾� ����
+		
 		FIRST_ID,
 		SECOND_ID,
 
@@ -1171,7 +1171,7 @@ protected:
 	int							m_focus_slot;
 	bool						m_bl_set_load;
 
-	// ��ӹ޴� class���� �ݵ�� set����� �Ѵ�.
+	
 	int								m_slot_size;
 	Rect *							m_p_slot_rect;
 	int *							m_p_slot_image;
@@ -1234,7 +1234,7 @@ public:
 		HOTKEY3,
 		HOTKEY4,
 
-		//���Ŀ� ��Ű
+		
 		HOTKEY5,
 		HOTKEY6,
 		HOTKEY7,
@@ -1258,14 +1258,14 @@ protected:
 	int							m_current_skill_set, m_current_skill_grade;
 	enum 
 	{ 
-		// �� ĳ���Ͱ� ��� �� �ִ� skill ���� 100�� ���϶��...
-		SPREAD_X_MAX = 10, // �������� ���� ������ �ִ� ����(ù line�� Spread button�� �����Ѵ�).
+		
+		SPREAD_X_MAX = 10, 
 		SPREAD_Y_MAX = 10,
 	};
 
 	C_SPRITE_PACK				m_etc_spk;
 
-	// ��ӹ޴� ��ü���� set���� ��.
+	
 	int							m_skill_guard_x, m_skill_guard_y;
 	int							m_skill_start_x, m_skill_start_y;
 	int							m_skill_guard_extra_offset;
@@ -1273,13 +1273,13 @@ protected:
 
 	enum ETC_SPK_INDEX
 	{
-		SKILL_GUARD, // skill icon �׵θ�
+		SKILL_GUARD, 
 		SKILL_EMPTY_BUTTON,
 		SKILL_PUSHED_BUTTON,
 	};
 
-	int							m_selected_skillid; // NOT_SELECTED�̸� ���õ��� ���� ���̴�. ACTIONINFO�� �ϳ��̴�.
-	int							m_focused_slot; // Spread button�� 0���� �ϰ� �¿��� ��� �����Ѵ�.
+	int							m_selected_skillid; 
+	int							m_focused_slot; 
 	bool							m_bl_pushed;
 	bool							m_bl_open;
 
@@ -1572,6 +1572,8 @@ private:
 	std::vector<MINIMAP_SHRINE>			m_shrine;
 	std::vector<POINT>					m_Block;
 	std::vector<MINIMAP_NPC>				m_Flag;
+	std::vector<RECT>					m_safetyZone;
+	std::vector<bool>					m_safetyZoneMine;
 
 	std::string m_zone_name;
 	int									m_surface_w, m_surface_h;
@@ -1583,6 +1585,7 @@ private:
 	DWORD						m_dw_minimap_millisec;
 
 	bool	TimerMinimap();
+	void	ApplyStoredMapOverlays();
 
 	enum MINIMAP_SPK_INDEX
 	{
@@ -1613,7 +1616,7 @@ public:
 	void	SetSize(SIZE size) { m_map_w = size.cx; m_map_h = size.cy; }
 	void	SetPortal(RECT rect, int id);
 	void	SetNPC(MINIMAP_NPC npc);
-	void	ClearNPC() { m_npc.clear(); }
+	void	ClearNPC() { m_npc.clear(); m_shrine.clear(); m_Flag.clear(); }
 	void	SetSafetyZone(RECT rect, bool my_zone);
 	void	SetFlagArea(POINT pt);
 	void	SetXY(int x, int y)	{ m_map_x = x; m_map_y = y; }
@@ -1647,7 +1650,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////
-// �����ͼ
+
 //////////////////////////////////////////////////////////////////////////
 class C_VS_UI_WORLDMAP : public Window, public Exec, public ButtonVisual
 {
@@ -1665,6 +1668,8 @@ private:
 	std::vector<MINIMAP_SHRINE>			m_shrine;
 	std::vector<POINT>					m_Block;
 	std::vector<MINIMAP_NPC>				m_Flag;
+	std::vector<RECT>					m_safetyZone;
+	std::vector<bool>					m_safetyZoneMine;
 
 	std::string m_zone_name;
 	int									m_surface_w, m_surface_h;
@@ -1676,6 +1681,7 @@ private:
 	DWORD						m_dw_minimap_millisec;
 
 	bool	TimerMinimap();
+	void	ApplyStoredMapOverlays();
 
 	enum MINIMAP_SPK_INDEX
 	{
@@ -1706,7 +1712,7 @@ public:
 	void	SetSize(SIZE size) { m_map_w = size.cx; m_map_h = size.cy; }
 	void	SetPortal(RECT rect, int id);
 	void	SetNPC(MINIMAP_NPC npc);
-	void	ClearNPC() { m_npc.clear(); }
+	void	ClearNPC() { m_npc.clear(); m_shrine.clear(); m_Flag.clear(); }
 	void	SetSafetyZone(RECT rect, bool my_zone);
 	void	SetFlagArea(POINT pt);
 	void	SetXY(int x, int y)	{ m_map_x = x; m_map_y = y; }
@@ -1759,7 +1765,7 @@ public :
 		DWORD			quest_time;
 	};
 	
-	QUEST_STATUS		m_quest_status;					// ���� �������� ����Ʈ ����
+	QUEST_STATUS		m_quest_status;					
 	bool				m_bl_active;
 	bool				m_bl_timeover;
 	bool				m_bl_focus;
@@ -1767,7 +1773,7 @@ public :
 	DWORD				m_timer;
 	DWORD				m_timer2;
 	CSpriteSurface *	m_p_back_surface;
-	std::vector<std::string>					m_hard_cording;		// �� ������!!!
+	std::vector<std::string>					m_hard_cording;		
 
 
 private :
@@ -1846,7 +1852,7 @@ protected:
 	C_VS_UI_HPBAR *				m_pC_hpbar;
 	C_VS_UI_EFFECT_STATUS *		m_pC_effect_status;
 	C_VS_UI_MINIMAP *			m_pC_minimap;
-	// add by Coffee ���������ͼ
+	
 	C_VS_UI_WORLDMAP *          m_pC_worldmap;
 	// end 
 	C_VS_UI_CHATTING *			m_pC_chatting;
@@ -1938,8 +1944,8 @@ protected:
 		BUTTON_TEAM_MEMBER_LIST_HILIGHTED,
 		BUTTON_TEAM_MEMBER_LIST_HILIGHTED_PUSHED,
 
-		// etc-_- ���¹̿� by ����
-		BUTTON_MAIL,					// �޴��ǿ� ����
+		
+		BUTTON_MAIL,					
 		BUTTON_MAIL_HILIGHTED,
 		BUTTON_MAIL_HILIGHTED_PUSHED,
 
@@ -2023,10 +2029,10 @@ protected:
 		// TEAM TAB
 		TEAM_INFO_ID,
 		TEAM_MEMBER_LIST_ID,
-//		TEAM_COMMAND_ID, // ��� ����
-		TEAM_LIST_ID, // ��� ����Ʈ
-		TEAM_WAIT_LIST_ID, // ��� ��� ����Ʈ
-		TEAM_UNION_ID,		// ���� ����
+
+		TEAM_LIST_ID, 
+		TEAM_WAIT_LIST_ID, 
+		TEAM_UNION_ID,		
 
 		// UTIL TAB
 		UTIL_STORE_ID,
@@ -2070,17 +2076,17 @@ public:
 		}
 	}
 
-	//���ڼ�ġ
+	
 	void	StartInstallMineProgress(int focus_grid_x, int focus_grid_y)
 	{ if(m_pC_inventory)m_pC_inventory->StartInstallMineProgress(focus_grid_x, focus_grid_y); }
 	bool	IsInstallMineProgress()		{ return gbl_mine_progress; }
 	void	EndInstallMineProgress()	{ gbl_mine_progress = false; }
-	//���ڸ����
+	
 	void	StartCreateMineProgress(int focus_grid_x, int focus_grid_y)
 	{ if(m_pC_inventory)m_pC_inventory->StartCreateMineProgress(focus_grid_x, focus_grid_y); }
 	bool	IsCreateMineProgress()		{ return gbl_mine_progress; }
 	void	EndCreateMineProgress()	{ gbl_mine_progress = false; }
-	//��ź �����
+	
 	void	StartCreateBombProgress(int focus_grid_x, int focus_grid_y)
 	{ if(m_pC_inventory)m_pC_inventory->StartCreateBombProgress(focus_grid_x, focus_grid_y); }
 	bool	IsCreateBombProgress()		{ return gbl_mine_progress; }
@@ -2131,8 +2137,8 @@ public:
 
 	void	LevelUp()
 	{
-		// �̹� �� ������ �ƹ��͵� ���Ѵ�.
-		// �ݴ� ���� closing interface��...
+		
+		
 
 		if (!m_pC_level_up)
 		{
@@ -2161,8 +2167,8 @@ public:
 		return m_pC_chatting->IsEmpty();
 	}
 
-	virtual void	DoCommonActionBeforeEventOccured(); // �߻��ϱ� ��
-	virtual void	DoCommonActionAfterEventOccured()  // �߻��� ��
+	virtual void	DoCommonActionBeforeEventOccured(); 
+	virtual void	DoCommonActionAfterEventOccured()  
 	{
 		CloseInventory();
 		CloseGear();
@@ -2198,7 +2204,7 @@ public:
 		GetGearWindow()->XY(_x, _y);
 	}
 
-	void	ShopRunningAnnounced(); // Shop�� ���� �ʿ��� Window�� ����.
+	void	ShopRunningAnnounced(); 
 	
 	void	StorageRunningAnnounced();
 	
@@ -2318,7 +2324,7 @@ public:
 	void	HotKey_Minimap();
 	void	HotKey_CharInfo();
 //	void	HotKey_WindowToggle();
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		void	HotKey_Inventory(bool IsCheckSubInventory = false);
 	#else
 		void	HotKey_Inventory();	
@@ -2465,11 +2471,11 @@ private:
 		HERZOG_ID,
 		LANDESHER_ID,
 
-		MALCHUT_ID,					// ������Ʈ
-		YESOD_ID,						// ���ҵ�
-		HOD_ID,						// ȣ��
-		NETRETH_ID,					// ����ũ
-		TIPHRETH_ID,					// Ƽ�ķ�Ʈ
+		MALCHUT_ID,					
+		YESOD_ID,						
+		HOD_ID,						
+		NETRETH_ID,					
+		TIPHRETH_ID,					
 		GEBURAH_ID,
 		CHESED_ID,
 		BINSH_ID,								
@@ -2509,7 +2515,7 @@ private:
 //		GRADE3_BUTTON_TAB_ID8,
 //		GRADE3_BUTTON_TAB_ID9,
 //		GRADE3_BUTTON_TAB_ID10,
-		CHANGE_IMAGE_ID,		// �̹��� ���� ��ư
+		CHANGE_IMAGE_ID,		
 		PET_INFO_ID,
 		
 		// grade 2
@@ -2576,7 +2582,7 @@ public:
 	void	_Show2();	// Character Info
 	void	_Show3();	// Grade1
 	void	_Show4();	// Grade2
-	//by csm 2004.12.30 ���� ���� �������̽� �߰� 
+	
 	void	_Show5();	// Grade2
 	void	Process();
 //	void	Start(bool skill_mode);
@@ -2620,10 +2626,10 @@ public:
 
 		NAMING_WINDOW,
 
-		QUEST_MANAGER_LIST, // ���� â
-		QUEST_MANAGER_DETAIL, // ���λ���
-		QUEST_MANAGER_MISSION, // �ӹ�
-		QUEST_MANAGER_ITEM, // �κ��丮
+		QUEST_MANAGER_LIST, 
+		QUEST_MANAGER_DETAIL, 
+		QUEST_MANAGER_MISSION, 
+		QUEST_MANAGER_ITEM, 
 		INVENTORY_SUB,
 		FRIEND_WINDOW,//add by viva
 		WINDOW_TOTAL,
@@ -2720,9 +2726,9 @@ private:
 		SEARCH_LEADER,
 		SEARCH_LEADER_HILIGHTED,
 		SEARCH_LEADER_HILIGHTED_PUSHED,
-		SEARCH_ALL,
-		SEARCH_ALL_HILIGHTED,
-		SEARCH_ALL_HILIGHTED_PUSHED,
+		SEARCH_ALL_MODE,
+		SEARCH_ALL_MODE_HILIGHTED,
+		SEARCH_ALL_MODE_HILIGHTED_PUSHED,
 		SEARCH_SEARCH,
 		SEARCH_SEARCH_HILIGHTED,
 		SEARCH_SEARCH_HILIGHTED_PUSHED,
@@ -2760,13 +2766,13 @@ private:
 		INDEX_WAR_DATE,
 		INDEX_WAR_DATE_HILIGHTED,
 
-		INDEX_UNITED_JOIN,				// ���հ���
+		INDEX_UNITED_JOIN,				
 		INDEX_UNITED_JOIN_HILIGHTED,	
-		INDEX_UNITED_WITHDRAWAL,		// ����Ż��
+		INDEX_UNITED_WITHDRAWAL,		
 		INDEX_UNITED_WITHDRAWAL_HILIGHTED,
-		INDEX_UNITED_EXPEL,				// �����߹�
+		INDEX_UNITED_EXPEL,				
 		INDEX_UNITED_EXPEL_HILIGHTED,
-		INDEX_GUILD_APPOINT,			// �Ӹ�
+		INDEX_GUILD_APPOINT,			
 		INDEX_GUILD_APPOINT_HILIGHTED,
 
 
@@ -2903,7 +2909,7 @@ private:
 	int		m_print_x[2], m_print_y, m_print_gap;
 	int		m_focus;
 	std::vector<TEAM_MEMBER_LIST>	m_v_member_list;
-	BYTE	m_bAvailableRecall; // Ÿ�Կ� ���� ��� ȣ���ϱ� 
+	BYTE	m_bAvailableRecall; 
 	char	m_SelectedID[16];
 	char	m_AskingMessage[128];
 public:
@@ -2966,9 +2972,9 @@ private:
 		SEARCH_LEADER,
 		SEARCH_LEADER_HILIGHTED,
 		SEARCH_LEADER_HILIGHTED_PUSHED,
-		SEARCH_ALL,
-		SEARCH_ALL_HILIGHTED,
-		SEARCH_ALL_HILIGHTED_PUSHED,
+		SEARCH_ALL_MODE,
+		SEARCH_ALL_MODE_HILIGHTED,
+		SEARCH_ALL_MODE_HILIGHTED_PUSHED,
 		SEARCH_SEARCH,
 		SEARCH_SEARCH_HILIGHTED,
 		SEARCH_SEARCH_HILIGHTED_PUSHED,
@@ -3006,13 +3012,13 @@ private:
 		INDEX_WAR_DATE,
 		INDEX_WAR_DATE_HILIGHTED,
 
-		INDEX_UNITED_JOIN,				// ���հ���
+		INDEX_UNITED_JOIN,				
 		INDEX_UNITED_JOIN_HILIGHTED,	
-		INDEX_UNITED_WITHDRAWAL,		// ����Ż��
+		INDEX_UNITED_WITHDRAWAL,		
 		INDEX_UNITED_WITHDRAWAL_HILIGHTED,
-		INDEX_UNITED_EXPEL,				// �����߹�
+		INDEX_UNITED_EXPEL,				
 		INDEX_UNITED_EXPEL_HILIGHTED,
-		INDEX_GUILD_APPOINT,			// �Ӹ�
+		INDEX_GUILD_APPOINT,			
 		INDEX_GUILD_APPOINT_HILIGHTED,
 
 
@@ -3124,9 +3130,9 @@ private:
 		SEARCH_LEADER,
 		SEARCH_LEADER_HILIGHTED,
 		SEARCH_LEADER_HILIGHTED_PUSHED,
-		SEARCH_ALLL,
-		SEARCH_ALL_HILIGHTED,
-		SEARCH_ALL_HILIGHTED_PUSHED,
+		SEARCH_ALL_MODE,
+		SEARCH_ALL_MODE_HILIGHTED,
+		SEARCH_ALL_MODE_HILIGHTED_PUSHED,
 		SEARCH_SEARCH,
 		SEARCH_SEARCH_HILIGHTED,
 		SEARCH_SEARCH_HILIGHTED_PUSHED,
@@ -3164,13 +3170,13 @@ private:
 		INDEX_WAR_DATE,
 		INDEX_WAR_DATE_HILIGHTED,
 
-		INDEX_UNITED_JOIN,				// ���հ���
+		INDEX_UNITED_JOIN,				
 		INDEX_UNITED_JOIN_HILIGHTED,	
-		INDEX_UNITED_WITHDRAWAL,		// ����Ż��
+		INDEX_UNITED_WITHDRAWAL,		
 		INDEX_UNITED_WITHDRAWAL_HILIGHTED,
-		INDEX_UNITED_EXPEL,				// �����߹�
+		INDEX_UNITED_EXPEL,				
 		INDEX_UNITED_EXPEL_HILIGHTED,
-		INDEX_GUILD_APPOINT,			// �Ӹ�
+		INDEX_GUILD_APPOINT,			
 		INDEX_GUILD_APPOINT_HILIGHTED,
 
 	};
@@ -3267,9 +3273,9 @@ private:
 		SEARCH_LEADER,
 		SEARCH_LEADER_HILIGHTED,
 		SEARCH_LEADER_HILIGHTED_PUSHED,
-		SEARCH_ALL,
-		SEARCH_ALL_HILIGHTED,
-		SEARCH_ALL_HILIGHTED_PUSHED,
+		SEARCH_ALL_MODE,
+		SEARCH_ALL_MODE_HILIGHTED,
+		SEARCH_ALL_MODE_HILIGHTED_PUSHED,
 		SEARCH_SEARCH,
 		SEARCH_SEARCH_HILIGHTED,
 		SEARCH_SEARCH_HILIGHTED_PUSHED,
@@ -3307,13 +3313,13 @@ private:
 		INDEX_WAR_DATE,
 		INDEX_WAR_DATE_HILIGHTED,
 
-		INDEX_UNITED_JOIN,				// ���հ���
+		INDEX_UNITED_JOIN,				
 		INDEX_UNITED_JOIN_HILIGHTED,	
-		INDEX_UNITED_WITHDRAWAL,		// ����Ż��
+		INDEX_UNITED_WITHDRAWAL,		
 		INDEX_UNITED_WITHDRAWAL_HILIGHTED,
-		INDEX_UNITED_EXPEL,				// �����߹�
+		INDEX_UNITED_EXPEL,				
 		INDEX_UNITED_EXPEL_HILIGHTED,
-		INDEX_GUILD_APPOINT,			// �Ӹ�
+		INDEX_GUILD_APPOINT,			
 		INDEX_GUILD_APPOINT_HILIGHTED,
 
 
@@ -3345,7 +3351,7 @@ private:
 	CDirectDrawSurface				*m_guild_mark;
 
 public:
-	C_VS_UI_TEAM_REGIST(bool member, int reg_fee, int rank, char *team_name = NULL, char *date = NULL, int guild_id = -1); // team_name�� member�� ��쿡��
+	C_VS_UI_TEAM_REGIST(bool member, int reg_fee, int rank, char *team_name = NULL, char *date = NULL, int guild_id = -1); 
 	~C_VS_UI_TEAM_REGIST();
 
 	void	Process();
@@ -3578,7 +3584,7 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_BRING_FEE
 //
-// ���� ��������
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_BRING_FEE : public Window, public Exec, public ButtonVisual
@@ -3666,9 +3672,9 @@ class C_VS_UI_WAR_LIST : public Window, public Exec, public ButtonVisual
 		SEARCH_LEADER,
 		SEARCH_LEADER_HILIGHTED,
 		SEARCH_LEADER_HILIGHTED_PUSHED,
-		SEARCH_ALL,
-		SEARCH_ALL_HILIGHTED,
-		SEARCH_ALL_HILIGHTED_PUSHED,
+		SEARCH_ALL_MODE,
+		SEARCH_ALL_MODE_HILIGHTED,
+		SEARCH_ALL_MODE_HILIGHTED_PUSHED,
 		SEARCH_SEARCH,
 		SEARCH_SEARCH_HILIGHTED,
 		SEARCH_SEARCH_HILIGHTED_PUSHED,
@@ -3706,13 +3712,13 @@ class C_VS_UI_WAR_LIST : public Window, public Exec, public ButtonVisual
 		INDEX_WAR_DATE,
 		INDEX_WAR_DATE_HILIGHTED,
 
-		INDEX_UNITED_JOIN,				// ���հ���
+		INDEX_UNITED_JOIN,				
 		INDEX_UNITED_JOIN_HILIGHTED,	
-		INDEX_UNITED_WITHDRAWAL,		// ����Ż��
+		INDEX_UNITED_WITHDRAWAL,		
 		INDEX_UNITED_WITHDRAWAL_HILIGHTED,
-		INDEX_UNITED_EXPEL,				// �����߹�
+		INDEX_UNITED_EXPEL,				
 		INDEX_UNITED_EXPEL_HILIGHTED,
-		INDEX_GUILD_APPOINT,			// �Ӹ�
+		INDEX_GUILD_APPOINT,			
 		INDEX_GUILD_APPOINT_HILIGHTED,
 
 
@@ -3743,7 +3749,7 @@ public:
 			reinforceGuildID = 0;
 		};
 	
-		BYTE warType;		// 0 : ������ 1 : ������
+		BYTE warType;		
 		WORD year;
 		BYTE month;
 		BYTE day;
@@ -3756,7 +3762,7 @@ public:
 	
 	struct _WarList
 	{
-		BYTE warType;		// 0 : ������ 1 : ������
+		BYTE warType;		
 		WORD year;
 		BYTE month;
 		BYTE day;
@@ -3833,7 +3839,7 @@ public :
 		int y;
 		BYTE shrine_race;
 		BLOOD_BIBLE_STATUS_INFO status;
-		//BYTE bonus;										-_- �Ⱦ���. 
+		
 		std::string name;
 	};
 
@@ -3879,16 +3885,16 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_BRING_FEE
 //
-// �̸� �Է��ϱ�
-// -_- �ٿ뵵�� ���ô�.
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_INPUT_NAME : public Window, public Exec, public ButtonVisual
 {
 public :
 	enum INPUT_NAME_MODE_LIST
 	{
-		INPUT_NAME_HOPE_COUPLE = 0,					// Ŀ�� �����
-		INPUT_NAME_BREAK_UP,					// Ŀ�� �Ằ��		
+		INPUT_NAME_HOPE_COUPLE = 0,					
+		INPUT_NAME_BREAK_UP,					
 		INPUT_NAME_FORCE_BREAK_UP,
 
 		INPUT_NAME_MAX,
@@ -3957,8 +3963,8 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_BRING_FEE
 //
-// �̸� �Է��ϱ�
-// -_- �ٿ뵵�� ���ô�.
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_POPUP_MESSAGE : public Window, public Exec, public ButtonVisual
 {
@@ -3970,7 +3976,7 @@ public :
 		POPUP_WELCOME,
 		POPUP_EVENT_QUEST,
 		POPUP_MINI_WINDOW,
-		POPUP_ASK_BEGINNER_ZONE,			// �ʺ��� ������ ����?
+		POPUP_ASK_BEGINNER_ZONE,			
 		
 		POPUP_MAX,
 		POPUP_NULL,
@@ -4184,8 +4190,8 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_ITEM_LIST
 //
-// �̸� �Է��ϱ�
-// -_- �ٿ뵵�� ���ô�.
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_ITEM_LIST : public Window, public Exec, public ButtonVisual
 {
@@ -4255,8 +4261,8 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_IMAGE_NOTICE
 //
-// �̸� �Է��ϱ�
-// -_- �ٿ뵵�� ���ô�.
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_IMAGE_NOTICE : public Window, public Exec, public ButtonVisual
 {
@@ -4763,10 +4769,10 @@ private:
 
 	enum GAME_STATUS
 	{
-		GAMESTATUS_GAME,	// ������
-		GAMESTATUS_DIE,		// ���� ���� ������-��-
-		GAMESTATUS_CLEAR,	// ���� ���� �� ã�Ƽ�
-		GAMESTATUS_READY,	// �� ����
+		GAMESTATUS_GAME,	
+		GAMESTATUS_DIE,		
+		GAMESTATUS_CLEAR,	
+		GAMESTATUS_READY,	
 	};
 
 	enum LEFTMINE
@@ -4853,7 +4859,7 @@ extern C_VS_UI_WINDOW_MANAGER* gpC_vs_ui_window_manager;
 extern S_SLOT	g_char_slot_ingame;
 extern Point g_item_ref_point[];
 
-extern int g_HISTORY_LINE;	// ä��â ����
+extern int g_HISTORY_LINE;	
 
 void g_SetItemRefPoint(int item_rect_w, int item_rect_h);
 

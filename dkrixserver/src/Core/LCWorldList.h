@@ -23,18 +23,18 @@
 class LCWorldList : public Packet {
 public:
     // constructor
-    // PCInfo* �迭�� ���� NULL�� �����Ѵ�.
+    
     LCWorldList();
 
     // destructor
-    // PCInfo* �迭�� �Ҵ�� ��ü�� �����Ѵ�.
+    
     ~LCWorldList() noexcept;
 
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -57,7 +57,7 @@ public:
     string toString() const;
 
 public:
-    // ���� ����
+    
     WorldID_t getCurrentWorldID() const {
         return m_CurrentWorldID;
     }
@@ -87,10 +87,10 @@ public:
     }
 
 private:
-    // ���� WorldID
+    
     WorldID_t m_CurrentWorldID;
 
-    // ĳ���� ����
+    
     list<WorldInfo*> m_WorldInfoList;
 };
 
@@ -121,8 +121,8 @@ public:
 
     // get packet's max body size
     PacketSize_t getPacketMaxSize() const {
-        // �����̾� ������ �����̾� �������� �����
-        // ũ�� ������, �� ��Ŷ�� �ִ� ũ��� �����̾� 3 ���� ����̴�.
+        
+        
         return szWorldID + WorldInfo::getMaxSize();
     }
 };

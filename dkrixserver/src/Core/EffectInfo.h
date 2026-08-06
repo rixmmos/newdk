@@ -2,7 +2,7 @@
 //
 // Filename    : EffectInfo.h
 // Written By  : elca@ewestsoft.com
-// Description : ����� ���������� ������ ��Ŷ�� ���� Ŭ���� ����
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -18,8 +18,8 @@
 //
 // class EffectInfo;
 //
-// ���Ӽ������� Ŭ���̾�Ʈ�� ����Ʈ ������ �˷��ֱ� ���� ��ä
-// GCUpdateInfo, AddSlayer, AddVampire, AddMonster� �Ƿ��� ���ư���.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,15 +32,15 @@ public:
     ~EffectInfo() noexcept;
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // ����ȭ��, �̸� ���� ������ ����Ѵ�.
+    
     PacketSize_t getSize() const {
         return szBYTE + szWORD * m_ListNum * 2;
     }

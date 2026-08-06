@@ -53,9 +53,9 @@ public:
     virtual void sendPacket(Packet* pPacket);
 
     // disconnect
-    // 플레이어의 연결을 종료할 때, 상대편이 적절하게 로그아웃하지 않을 경우 소켓의 연결이
-    // 이미 끊겨 있으므로 disconnect(DISCONNECTED) 를 사용하새 연결을 종료해야 한다.
-    // 반면, 정장하게 로그아웃을 한 경우에는 disconnect(UNDISCONNECTED) 를 사용해야한다.
+    
+    
+    
     virtual void disconnect(bool bDisconnected = DISCONNECTED);
 
     void setSocket(Socket* pSocket);
@@ -75,7 +75,7 @@ public:
 #endif
 
 public:
-    // 패킷 처리용 함수들
+    
     void executeError(CBillingPacketHeader& header, CBillingPacketErrorBody& body);
 #ifdef __LOGIN_SERVER__
     void executeLogin(CBillingPacketHeader& header, CBillingPacketResponseLoginBody& body);
@@ -88,7 +88,7 @@ public:
 #endif
 
 #ifdef __GAME_SERVER__
-    // DB에 packet 로그 남기기
+    
     void logPacket(CBillingPacketHeader* header, CBillingPacketResponseLoginBody* login,
                    CBillingPacketResponseMinusPointBody* point, CBillingPacketResponseLogoutBody* logout,
                    CBillingPacketErrorBody* error);

@@ -11,12 +11,13 @@
 #include <sys/dir.h>
 #endif
 #include "CDirectDraw.h"
+#include "CDirectDrawSurface.h"
 #include "CSpritePack.h"
 #include "UserInformation.h"
 //#include "MFileDef.h"
 
 #ifdef __GAME_CLIENT__
-	#include "Properties.h"
+	#include "Packet/Properties.h"
 #else
 	#include "..\client\packet\Properties.h"
 #endif
@@ -27,10 +28,10 @@
 #ifdef __GAME_CLIENT__
 	#include "RequestUserManager.h"
 
-	#include "packet/Cpackets/CGRequestIP.h"
+	#include "Packet/Cpackets/CGRequestIP.h"
 
 	#include "ServerInfo.h"
-	#include "RequestClientPlayerManager.h"
+	#include "Packet/RequestClientPlayerManager.h"
 #endif
 
 #include "DebugInfo.h"
@@ -114,7 +115,7 @@ ProfileManager::HasProfile(const char* pName) const
 //----------------------------------------------------------------------
 // Add Profile
 //----------------------------------------------------------------------
-// 이미 있거나 말거나 관계없다.
+
 //----------------------------------------------------------------------
 void
 ProfileManager::AddProfile(const char* pName, const char* pFilename)
@@ -125,7 +126,7 @@ ProfileManager::AddProfile(const char* pName, const char* pFilename)
 //----------------------------------------------------------------------
 // Add ProfileNULL
 //----------------------------------------------------------------------
-// 상대방이 아예 Profile이 없는 경우
+
 //----------------------------------------------------------------------
 void
 ProfileManager::AddProfileNULL(const char* pName)
@@ -136,7 +137,7 @@ ProfileManager::AddProfileNULL(const char* pName)
 //----------------------------------------------------------------------
 // Has ProfileNULL
 //----------------------------------------------------------------------
-// 상대방이 아예 Profile이 없는가?
+
 //----------------------------------------------------------------------
 bool			
 ProfileManager::HasProfileNULL(const char* pName) const
@@ -182,7 +183,7 @@ ProfileManager::GetFilename(const char* pName) const
 
 	if (iProfile!=m_Profiles.end())
 	{
-		// NULL로 설정된 거는 아예 Profile이 없는 경우이다.
+		
 		if (iProfile->second==PROFILE_NULL)
 		{
 			return NULL;
@@ -208,54 +209,7 @@ ProfileManager::RequestProfile(const char* pName)
 		AddRequire( pName );
 	}
 
-	/*
-	// Update에서 처리한다.
-#ifdef __GAME_CLIENT__
-	//-------------------------------------------------------
-	// 접속중이거나 접속 시도 중인 경우..
-	//-------------------------------------------------------
-	if (g_pRequestClientPlayerManager->HasConnection(pName)
-		|| g_pRequestClientPlayerManager->HasTryingConnection(pName))
-	{
-	}
-	//-------------------------------------------------------
-	// 접속중이 아닌 경우
-	//-------------------------------------------------------
-	else
-	{
-		RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo(pName);
-
-		//-------------------------------------------------------
-		// 사용자 정보가 있다면 접속 시도를 한다.
-		//-------------------------------------------------------
-		if (pUserInfo!=NULL)
-		{
-			g_pRequestClientPlayerManager->Connect(pUserInfo->IP.c_str(), 
-													pName, 
-													REQUEST_CLIENT_MODE_PROFILE);
-		}
-		//-------------------------------------------------------
-		// 사용자 정보가 없다면 ... 서버에 IP를 요청한다.
-		//-------------------------------------------------------
-		else
-		{
-			if (!g_pRequestUserManager->HasRequestingUser( pName ))
-			{
-				#ifdef CONNECT_SERVER
-					// 서버에 IP를 요청한다.
-					CGRequestIP _CGRequestIP;
-					_CGRequestIP.setName( pName );
-
-					g_pSocket->sendPacket( &_CGRequestIP );			
-				#endif
-	
-				// 요청해두면 IP를 받을 때, ProfileManager를 체크하게 된다.
-				g_pRequestUserManager->AddRequestingUser( pName, RequestUserManager::REQUESTING_FOR_PROFILE );
-			}
-		}
-	}	
-#endif
-	*/
+	 
 }
 
 //----------------------------------------------------------------------
@@ -338,7 +292,7 @@ ProfileManager::Update()
 		const char* pName = iRequire->first.c_str();
 
 		//-------------------------------------------------------
-		// profile을 받은 경우
+		
 		//-------------------------------------------------------
 		if (HasProfile(pName)
 			|| HasProfileNULL(pName))
@@ -352,7 +306,7 @@ ProfileManager::Update()
 
 		#ifdef __GAME_CLIENT__
 			//-------------------------------------------------------
-			// 접속중이거나 접속 시도 중인 경우..
+			
 			//-------------------------------------------------------
 			if (g_pRequestClientPlayerManager->HasConnection(pName)
 				|| g_pRequestClientPlayerManager->HasTryingConnection(pName)
@@ -360,18 +314,18 @@ ProfileManager::Update()
 			{				
 			}
 			//-------------------------------------------------------
-			// 접속중이 아닌 경우
+			
 			//-------------------------------------------------------
 			else
 			{
 				RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo(pName);
 
 				//-------------------------------------------------------
-				// 사용자 정보가 있다면 접속 시도를 한다.
+				
 				//-------------------------------------------------------
 				if (pUserInfo!=NULL)
 				{
-					if( g_pUserInformation->bKorean == true )	// 한국 버전만 p2p
+					if( g_pUserInformation->bKorean == true )	
 					{
 						g_pRequestClientPlayerManager->Connect(pUserInfo->IP.c_str(), 
 																pName, 
@@ -379,7 +333,7 @@ ProfileManager::Update()
 					}
 				}
 				//-------------------------------------------------------
-				// 사용자 정보가 없다면 ... 서버에 IP를 요청한다.
+				
 				//-------------------------------------------------------
 				else
 				{
@@ -387,13 +341,13 @@ ProfileManager::Update()
 					{
 						if( g_pUserInformation->bKorean == true )
 						{
-							// 서버에 IP를 요청한다.
+							
 							CGRequestIP _CGRequestIP;
 							_CGRequestIP.setName( pName );
 
 							g_pSocket->sendPacket( &_CGRequestIP );			
 			
-						// 요청해두면 IP를 받을 때, ProfileManager를 체크하게 된다.
+						
 						g_pRequestUserManager->AddRequestingUser( pName, RequestUserManager::REQUESTING_FOR_PROFILE );
 						}
 					}
@@ -411,15 +365,15 @@ ProfileManager::Update()
 //----------------------------------------------------------------------
 // Init Profiles
 //----------------------------------------------------------------------
-// 프로그램이 실행될 때 한번 실행시켜주면 된다.
+
 //
-// Profile/*.bmp 를 읽어서 Profile/*.spr로 바꿔주면 된다.
+
 //----------------------------------------------------------------------
 void		
 ProfileManager::InitProfiles()
 {
 	//-----------------------------------------------------------------
-	// Profile Directory가 없으면 생성한다.
+	
 	//-----------------------------------------------------------------
 	char CWD[_MAX_PATH];
 
@@ -427,12 +381,12 @@ ProfileManager::InitProfiles()
 	{	
 		if (_chdir( g_pFileDef->getProperty("DIR_PROFILE").c_str()) == 0)
 		{
-			// 있다면.. 다시 원래 DIR로..
+			
 			_chdir( CWD );
 		}
 		else
 		{
-			// DIR_PROFILE이 없다면.. 생성..
+			
 #ifdef PLATFORM_WINDOWS
 			_mkdir( g_pFileDef->getProperty("DIR_PROFILE").c_str() );
 #else
@@ -440,6 +394,12 @@ ProfileManager::InitProfiles()
 #endif
 		}		
 	}
+
+#ifdef SPRITELIB_BACKEND_SDL
+	// Profile portrait conversion still depends on legacy surface assumptions.
+	// The game can run without pre-generated profile sprites; requests are filled later.
+	return;
+#endif
 
 	char profileFiles[256];
 	sprintf(profileFiles, "%s\\*.*", g_pFileDef->getProperty("DIR_PROFILE").c_str());
@@ -450,17 +410,17 @@ ProfileManager::InitProfiles()
 	long				hFile;
 
 	//-----------------------------------------------------------------
-	// *.spr file을 찾는다.
+	
 	//-----------------------------------------------------------------
 	if ( (hFile = _findfirst( profileFiles, &FileData )) != -1L )
 	{
 		CSpritePack SPK;
 
-		// [0]은 작은거 (30, 38)
-		// [1]은 큰거 (110, 139)
+		
+		
 		SPK.Init( 2);
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 		CDirectDrawSurface surface;
 
 		const POINT bigSize = { 55, 70 };
@@ -489,21 +449,21 @@ ProfileManager::InitProfiles()
 			sprintf(bmpFilename, "%s\\%s", g_pFileDef->getProperty("DIR_PROFILE").c_str(), FileData.name);
 	
 			//---------------------------------------------------------
-			// bmp를 읽어서 sprite로 바꾼다.
+			
 			//---------------------------------------------------------
 			char charName[256], spkFilename[256], spkiFilename[256];
 			int lenFilename = strlen(FileData.name);
 
-			// "이름.bmp"
+			
 			if (lenFilename< 8)
 			{
 				continue;
 			}
 
-			strncpy( charName, FileData.name, lenFilename-4 );	// .bmp를 짜른다.
+			strncpy( charName, FileData.name, lenFilename-4 );	
 			charName[lenFilename-4] = '\0';
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 			CDirectDrawSurface bmpSurface;
 
 			if (LoadImageToSurface(bmpFilename, bmpSurface))
@@ -511,8 +471,8 @@ ProfileManager::InitProfiles()
 				WORD* lpSurface;
 				unsigned short pitch;
 
-				// surface의 크기가 default Profile크기와 다르다면
-				// size를 변경시켜줘야 한다..
+				
+				
 				RECT bmpRect = { 0, 0, bmpSurface.GetWidth(), bmpSurface.GetHeight() };
 
 				// SmallSize
@@ -599,9 +559,9 @@ ProfileManager::InitProfiles()
 //----------------------------------------------------------------------
 // Delete Profiles
 //----------------------------------------------------------------------
-// 프로그램이 실행될 때 한번 실행시켜주면 된다.
+
 //
-// Profile/*.spr 화일을 모두 지우면 된다.
+
 //----------------------------------------------------------------------
 void		
 ProfileManager::DeleteProfiles()
@@ -616,7 +576,7 @@ ProfileManager::DeleteProfiles()
 	long				hFile;
 
 	//-----------------------------------------------------------------
-	// *.spk file을 찾는다.
+	
 	//-----------------------------------------------------------------
 	if ( (hFile = _findfirst( profileFiles, &FileData )) != -1L )
 	{
@@ -631,7 +591,7 @@ ProfileManager::DeleteProfiles()
 	}
 
 	//-----------------------------------------------------------------
-	// *.spk.tmp file을 찾는다.
+	
 	//-----------------------------------------------------------------
 	if ( (hFile = _findfirst( tempProfileFiles, &FileData )) != -1L )
 	{

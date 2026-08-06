@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Filename    : GCTradeMoneyHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 	
 	//------------------------------------------------------------------------
-	// TradeManager가 생성되지 않은 경우 --> -_-;;
+	
 	//------------------------------------------------------------------------
 	if (g_pTradeManager==NULL)
 	{
@@ -41,7 +41,7 @@ throw ( ProtocolException , Error )
 	switch (pPacket->getCode())
 	{
 		//---------------------------------------------------------------
-		// 상대방이 교환할 돈의 액수를 늘렸다.
+		
 		//---------------------------------------------------------------
 		case GC_TRADE_MONEY_INCREASE :
 			g_pTradeManager->GetOtherMoneyManager()->AddMoney( money );
@@ -50,7 +50,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		//---------------------------------------------------------------
-		// 상대방이 교환할 돈의 액수를 줄였다.
+		
 		//---------------------------------------------------------------
 		case GC_TRADE_MONEY_DECREASE :
 			g_pTradeManager->GetOtherMoneyManager()->UseMoney( money );
@@ -60,7 +60,7 @@ throw ( ProtocolException , Error )
 		break;
 		
 		//---------------------------------------------------------------
-		// [검증] 교환할 때 추가될 돈 
+		
 		//---------------------------------------------------------------
 		case GC_TRADE_MONEY_INCREASE_RESULT :			
 			g_pMoneyManager->UseMoney( money );
@@ -70,7 +70,7 @@ throw ( ProtocolException , Error )
 		break;
 
 		//---------------------------------------------------------------
-		// [검증] 교환에서 빼낼 돈
+		
 		//---------------------------------------------------------------
 		case GC_TRADE_MONEY_DECREASE_RESULT :			
 			g_pTradeManager->GetMyMoneyManager()->UseMoney( money );
@@ -81,7 +81,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//-----------------------------------------------------------
-	// 뭔가 바뀐다면... OK취소
+	
 	//-----------------------------------------------------------
 	if (bRefuseAccept)
 	{

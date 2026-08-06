@@ -11,11 +11,12 @@
 #include "ClientConfig.h"
 #include "../../basic/timer2.h"
 
-//#include "ExperienceTable.h"	//char_info���ﶧ �����
+
 #include "MGuildMarkManager.h"
 #include "KeyAccelerator.h"
 #include "UserInformation.h"
 #include <time.h>
+#include <stdarg.h>
 
 #include "MItemOptionTable.H"
 #include "mgamestringtable.H"
@@ -33,6 +34,24 @@
 #include "TextSystem/TextService.h"
 #endif
 
+#ifndef WM_TEXTINPUT
+#define WM_TEXTINPUT (WM_USER + 0x500)
+#endif
+
+#ifndef WM_TEXTEDITING
+#define WM_TEXTEDITING (WM_USER + 0x501)
+#endif
+
+static void LogLoginTrace(const char* fmt, ...)
+{
+	(void)fmt;
+}
+
+static void TraceTitleFlow(const char* step)
+{
+	(void)step;
+}
+
 // Helper function to compare char_t* with wchar_t* string
 static inline int char_t_wcscmp(const char_t* s1, const wchar_t* s2) {
     if (!s1 || !s2) return (s1 ? 1 : (s2 ? -1 : 0));
@@ -44,7 +63,7 @@ static inline int char_t_wcscmp(const char_t* s1, const wchar_t* s2) {
     return (*s2) ? -1 : (*s1 ? 1 : 0);
 }
 
-#define LOGIN_ID_X 59 // ��밪
+#define LOGIN_ID_X 59 
 #define LOGIN_ID_Y 49
 #define LOGIN_PASSWORD_X 59
 #define LOGIN_PASSWORD_Y 89
@@ -69,6 +88,26 @@ extern int		g_LeftPremiumDays;
 // add by sonic 2006.9.26
 extern	BOOL	g_MyFull;
 extern RECT g_GameRect;
+
+static int GetTitleLayoutWidth()
+{
+	return g_MyFull ? 1024 : 800;
+}
+
+static int GetTitleLayoutHeight()
+{
+	return g_MyFull ? 768 : 600;
+}
+
+static int GetTitleLayoutX()
+{
+	return max(0, (g_GameRect.right - GetTitleLayoutWidth()) / 2);
+}
+
+static int GetTitleLayoutY()
+{
+	return max(0, (g_GameRect.bottom - GetTitleLayoutHeight()) / 2);
+}
 /*
 //----------------------------------------------------------------------------
 // static
@@ -134,10 +173,10 @@ const int TITLE_X = 400, TITLE_Y = 50;
 #define HEART_Y				180
 int g_heart_rect[] = {250, 430, 610};
 
-namespace					// 2003.9.29		by sonee ������ �Ⱦ��� ���� 
+namespace					
 {
-	int			g_vs_ui_title_only_premium_x = 380;			// �����̾� ���� ������ ��ġ
-};	int			g_vs_ui_title_only_premium_y = 127;			// �����̾� ���� ������ ��ġ
+	int			g_vs_ui_title_only_premium_x = 380;			
+};	int			g_vs_ui_title_only_premium_y = 127;			
 
 int C_VS_UI_NEWCHAR::m_hair_color_array[COLOR_LIST_X][COLOR_LIST_Y] = {
 	/*
@@ -150,7 +189,7 @@ int C_VS_UI_NEWCHAR::m_hair_color_array[COLOR_LIST_X][COLOR_LIST_Y] = {
 	{45, 135, 300}, 
 	{315, 330, 345},
 	*/
-	// ���� �ٲ����.. by sigi
+	
 	{ 57, 70, 86 },
 	{ 101, 115, 130 },
 	{ 145, 159, 174 },
@@ -186,36 +225,8 @@ int ga_blink_color_table[INTERFACE_BLINK_VALUE_MAX] = {
 	LIGHT_BLUE, LIGHT_BLUE, WHITE, WHITE
 };
 
-// ! m_item_search_sequence ������ ���ƾ� �Ѵ�.
-/*
-S_RECT C_VS_UI_NEWUSER::m_item_rect[ISS_COUNT] = {
-	{237, 145, 141, 22}, // ISS_ID
-	{237, 180, 141, 22}, // ISS_PASSWORD
-	{488, 178, 141, 22}, // ISS_REPASSWORD
-	{237, 212, 141, 22}, // ISS_NAME
-	{484, 213, 141, 22}, // ISS_STATE
-	{484, 245, 141, 22}, // ISS_SSN
-	{237, 278, 388, 22}, // ISS_ADDRESS
-	{237, 311, 141, 22}, // ISS_WOO
-	{484, 311, 141, 22}, // ISS_PHONE
-	{258, 342, 367, 22}, // ISS_HOMEPAGE
-	{272, 374, 222, 22}, // ISS_EMAIL
-};
 
-C_VS_UI_NEWUSER::ITEM_SEARCH_SEQUENCE	C_VS_UI_NEWUSER::m_item_search_sequence[ISS_COUNT] = {
-	ISS_ID,
-	ISS_PASSWORD,
-	ISS_REPASSWORD,
-	ISS_NAME,
-	ISS_STATE,
-	ISS_SSN,
-	ISS_ADDRESS,
-	ISS_WOO, // ������ȣ
-	ISS_PHONE,
-	ISS_HOMEPAGE,
-	ISS_EMAIL,
-};
-*/
+ 
 //----------------------------------------------------------------------------
 // Operations
 //----------------------------------------------------------------------------
@@ -280,258 +291,8 @@ bool C_VS_UI_CHAR_APPEARANCE::IsPixel(int _x, int _y)
 	return m_pC_appearance_spk->IsPixel(SCR2WIN_X(_x), SCR2WIN_Y(_y));
 }
 */
-/*-----------------------------------------------------------------------------
-- Show
--
-  `(m_focused_x, m_focused_y)�� focus�� ǥ�ø� �Ѵ�.
------------------------------------------------------------------------------*/
-/*
-void C_VS_UI_CHAR_APPEARANCE::Show()
-{
-	int i, j;
-
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO surface_info;
-		SetSurfaceInfo(&surface_info, gpC_base->m_p_DDSurface_back->GetDDSD());
-
-		for (j = 0; j < COLORSET_Y; j++)
-			for (i = 0; i < COLORSET_X; i++)
-			{
-				S_RECT rect;
-				SetRect(rect, x+COLORSET_OFFSET_X+COLOR_UNIT_W*i, 
-								  y+COLORSET_OFFSET_Y+COLOR_UNIT_H*j, COLOR_UNIT_W, COLOR_UNIT_H);
-				filledRect(&surface_info, &rect, CIndexSprite::ColorSet[j*COLORSET_X+i][15]);
-			}
-
-		// draw focus
-		if (m_focused_x != NOT_SELECTED && m_focused_y != NOT_SELECTED)
-		{
-			int f_x = x+COLORSET_OFFSET_X+COLOR_UNIT_W*m_focused_x;
-			int f_y = y+COLORSET_OFFSET_Y+COLOR_UNIT_W*m_focused_y;
-			rectangle(&surface_info, f_x, f_y, f_x+COLOR_UNIT_W-1, f_y+COLOR_UNIT_H-1, WHITE);
-		}
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}
-
-	// color ǥ ������ ����...-.-
-	m_pC_appearance_spk->Blt(x, y);
-
-	// show face
-	if (m_p_slot->bl_female)
-	{
-		m_pC_face_spk->Blt(388+3, 245+3, W_GUNNER);
-		m_pC_face_spk->Blt(455+3, 245+3, W_FIGHTER);
-		m_pC_face_spk->Blt(517+3, 245+3, W_PRIEST);
-	}
-	else
-	{
-		m_pC_face_spk->Blt(388+3, 245+3, M_GUNNER);
-		m_pC_face_spk->Blt(455+3, 245+3, M_FIGHTER);
-		m_pC_face_spk->Blt(517+3, 245+3, M_PRIEST);
-	}
-
-	// check
-	if (m_bl_colorset1)
-		gpC_global_resource->m_pC_common_spk->Blt(388, 324, C_GLOBAL_RESOURCE::CHECK_MARK);
-	else
-		gpC_global_resource->m_pC_common_spk->Blt(489, 324, C_GLOBAL_RESOURCE::CHECK_MARK);
-
-	// draw ani button
-	for (i = 0; i < MENU_COUNT; i++)
-		m_pC_button[i]->Show();
-}
-
-//-----------------------------------------------------------------------------
-// Run
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI_CHAR_APPEARANCE::Run(id_t id)
-{
-	switch (id)
-	{
-		case FACE1:
-			if (m_p_slot->bl_female)
-				m_p_slot->woman_info.face = W_FACE1;
-			else
-				m_p_slot->man_info.face = M_FACE1;
-			break;
-
-		case FACE2:
-			if (m_p_slot->bl_female)
-				m_p_slot->woman_info.face = W_FACE2;
-			else
-				m_p_slot->man_info.face = M_FACE2;
-			break;
-
-		case FACE3:
-			if (m_p_slot->bl_female)
-				m_p_slot->woman_info.face = W_FACE3;
-			else
-				m_p_slot->man_info.face = M_FACE3;
-			break;
-
-		case COLORSET1:
-			m_bl_colorset1 = true;
-			break;
-
-		case COLORSET2:
-			m_bl_colorset1 = false;
-			break;
-
-		case APPERANCE_OK:
-			Finish();
-			break;
-
-		case APPERANCE_CANCEL:
-			Finish();
-			break;
-	}
-}
-
-//-----------------------------------------------------------------------------
-// MouseControl
-//
-// 
-//-----------------------------------------------------------------------------
-bool C_VS_UI_CHAR_APPEARANCE::MouseControl(UINT message, int _x, int _y)
-{
-	Window::MouseControl(message, _x, _y);
-
-	int i, j;
-
-	for (i = 0; i < MENU_COUNT; i++)
-		m_pC_button[i]->MouseControl(message, _x, _y);
-
-	switch (message)
-	{
-		case M_MOVING:
-			// color set
-			if (m_bl_push_colorset)
-			{
-				for (j = 0; j < COLORSET_Y; j++)
-					for (i = 0; i < COLORSET_X; i++)
-					{
-						S_RECT rect;
-						SetRect(rect, x+COLORSET_OFFSET_X+COLOR_UNIT_W*i,
-										  y+COLORSET_OFFSET_Y+COLOR_UNIT_H*j,
-										  COLOR_UNIT_W, COLOR_UNIT_H);
-						
-						if (_x >= rect.x && _x < rect.x+rect.w &&
-							 _y >= rect.y && _y < rect.y+rect.h)
-						{
-							m_focused_x = i;
-							m_focused_y = j;
-						}
-					}
-
-				BYTE colorset;
-				if (m_focused_x != NOT_SELECTED && m_focused_y != NOT_SELECTED)
-				{
-					colorset = m_b_colorset_array[m_focused_y][m_focused_x];
-
-					if (m_bl_colorset1)
-						m_b_hair_colorset = colorset;
-					else
-						m_b_skin_colorset = colorset;
-				}
-			}
-			break;
-
-		case M_LEFTBUTTON_DOWN:
-		case M_LB_DOUBLECLICK:
-			for (j = 0; j < COLORSET_Y; j++)
-				for (i = 0; i < COLORSET_X; i++)
-				{
-					S_RECT rect;
-					SetRect(rect, x+COLORSET_OFFSET_X+COLOR_UNIT_W*i,
-									  y+COLORSET_OFFSET_Y+COLOR_UNIT_H*j,
-									  COLOR_UNIT_W, COLOR_UNIT_H);
-					
-					if (_x >= rect.x && _x < rect.x+rect.w &&
-						 _y >= rect.y && _y < rect.y+rect.h)
-					{
-						m_focused_x = i;
-						m_focused_y = j;
-						m_bl_push_colorset = true;
-					}
-				}
-
-			BYTE colorset;
-			if (m_focused_x != NOT_SELECTED && m_focused_y != NOT_SELECTED)
-			{
-				colorset = m_b_colorset_array[m_focused_y][m_focused_x];
-
-				if (m_bl_colorset1)
-					m_b_hair_colorset = colorset;
-				else
-					m_b_skin_colorset = colorset;
-			}
-			break;
-
-		case M_LEFTBUTTON_UP:
-			m_bl_push_colorset = false;
-			break;
-	}
-
-	return true;
-}
-
-//-----------------------------------------------------------------------------
-// KeyboardControl
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI_CHAR_APPEARANCE::KeyboardControl(UINT message, UINT key, long extra)
-{
-	if (message == WM_KEYDOWN && key == VK_ESCAPE) // cancel!
-	{
-		Finish();
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Start
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI_CHAR_APPEARANCE::Start()
-{
-	PI_Processor::Start();
-
-	m_bl_push_colorset= false;
-	m_p_slot				= NULL;
-	m_bl_colorset1		= true;
-	m_b_hair_colorset = 0;
-	m_b_skin_colorset = 0;
-	m_focused_x			= NOT_SELECTED;
-	m_focused_y			= NOT_SELECTED;
-
-	for (int i = 0; i < MENU_COUNT; i++)
-		m_pC_button[i]->Refresh();
-
-	gpC_window_manager->AttrSetTopmostWindow(this);
-}
-
-void C_VS_UI_CHAR_APPEARANCE::Finish()
-{
-	PI_Processor::Finish();
-
-	gpC_window_manager->DisappearWindow(this);
-}
-
-//-----------------------------------------------------------------------------
-// Process
-//
-// 
-//-----------------------------------------------------------------------------
-void C_VS_UI_CHAR_APPEARANCE::Process()
-{
-
-}
-*/
+ 
+ 
 //-----------------------------------------------------------------------------
 // SendCharacterDeleteToClient
 //
@@ -539,20 +300,13 @@ void C_VS_UI_CHAR_APPEARANCE::Process()
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHAR_DELETE::SendCharacterDeleteToClient()
 {
-	// static���� �ϰ� �ܺο��� string�� delete���ش�.
-
 	static DELETE_CHARACTER S_delete_char;
 
-	// �ݸ�����
-	if(!g_pUserInformation->IsNetmarble)
-	{
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_ssn_part1.GetStringWide(), m_lev_ssn_part1.Size(), S_delete_char.sz_part1);
-		g_Convert_DBCS_Ascii2SingleByte(m_lev_ssn_part2.GetStringWide(), m_lev_ssn_part2.Size(), S_delete_char.sz_part2);
-	}
+	S_delete_char.sz_part1 = NULL;
+	S_delete_char.sz_part2 = NULL;
 	S_delete_char.slot = m_selected_slot;
 
 	gpC_base->SendMessage(UI_DELETE_CHARACTER, 0, 0, &S_delete_char);
-	
 }
 
 //-----------------------------------------------------------------------------
@@ -567,7 +321,7 @@ C_VS_UI_CHAR_DELETE::C_VS_UI_CHAR_DELETE()
 	AttrTopmost(true);
 	AttrKeyboardControl(true);
 
-	// �ݸ�����
+	
 	int w_h = 207;
 	if(g_pUserInformation->IsNetmarble)
 		w_h = 127;
@@ -685,17 +439,8 @@ void C_VS_UI_CHAR_DELETE::Start()
 {
 	PI_Processor::Start();
 
-	if( gC_ci->IsChinese() )
-	{
-		m_lev_ssn_part1.EraseAll();
-		m_lev_ssn_part1.Acquire();
-	}
-	else
-	{
-		m_lev_ssn_part1.EraseAll();
-		m_lev_ssn_part2.EraseAll();
-		m_lev_ssn_part1.Acquire();
-	}
+	m_lev_ssn_part1.EraseAll();
+	m_lev_ssn_part2.EraseAll();
 
 	m_bl_ssn_ip_part1 = true;
 	m_selected_slot = 0;
@@ -735,12 +480,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 	g_FL2_GetDC();
 	g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
 		y+30, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_DELETE_CONFIRM].GetString(), gpC_base->m_char_name_pi, RGB_WHITE);
-	// �ݸ�����
-	if(!g_pUserInformation->IsNetmarble)
-	{
-		g_PrintColorStr(x+w/2-g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_RE_INPUT_CORRECT_SSN].GetString(), gpC_base->m_char_name_pi.hfont)/2, 
-			y+50,(*g_pGameStringTable)[UI_STRING_MESSAGE_RE_INPUT_CORRECT_SSN].GetString(), gpC_base->m_char_name_pi, RGB_WHITE);
-	}
+
 	m_pC_button_group->ShowDescription();
 	g_FL2_ReleaseDC();
 
@@ -756,7 +496,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
-		// �ݸ�����
+		
 		if(!g_pUserInformation->IsNetmarble)
 		{
 			if( gC_ci->IsChinese() )
@@ -776,10 +516,7 @@ void C_VS_UI_CHAR_DELETE::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
-	// �ݸ�����
-	if(!g_pUserInformation->IsNetmarble)
-		Window::ShowWidget();
-
+	
 	SHOW_WINDOW_ATTR;
 }
 
@@ -793,24 +530,7 @@ void C_VS_UI_CHAR_DELETE::Run(id_t id)
 	switch (id)
 	{
 		case DELETE_OK:
-			// �ݸ�����
-			{
-				// ����� �Է��Ͽ��°�?
-				if (
-					 ( ( gC_ci->IsKorean()&& (	m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT &&
-					 m_lev_ssn_part2.Size() == SSN_PART2_CHAR_COUNT ) ) ||
-					 ( !gC_ci->IsKorean() && ( char_t_wcscmp(m_lev_ssn_part1.GetStringWide(), L"DeletePc") == 0 ) )
-					 )
-					 || g_pUserInformation->IsNetmarble)
-				{
-					SendCharacterDeleteToClient();
-				}
-				else
-				{
-					// error message!
-					g_msg_wrong_ssn->Start();
-				}
-			}
+			SendCharacterDeleteToClient();
 			break;
 
 		case DELETE_CANCEL:
@@ -851,47 +571,13 @@ void C_VS_UI_CHAR_DELETE::KeyboardControl(UINT message, UINT key, long extra)
 				return;
 		}
 
-	// digit only
-	if (message == WM_CHAR && (!gC_ci->IsKorean() || gC_ci->IsKorean() && (key >= '0' && key <= '9')))
-	{
-		Window::KeyboardControl(message, key, extra);
-
-		if( gC_ci->IsKorean() )
-		{
-			if (m_bl_ssn_ip_part1)
-			{
-				if (m_lev_ssn_part1.Size() == SSN_PART1_CHAR_COUNT)
-				{
-					m_bl_ssn_ip_part1 = false;
-					m_lev_ssn_part2.Acquire();
-				}
-			}
-		}
-	}
-
-	if (message == WM_KEYDOWN)
-		if (key == VK_BACK)
-		{
-			if( gC_ci->IsKorean() )
-			{
-				if (!m_bl_ssn_ip_part1)
-				{
-					if (m_lev_ssn_part2.Size() == 0)
-					{
-						m_bl_ssn_ip_part1 = true;
-						m_lev_ssn_part1.Acquire();
-					}
-				}
-			}
-
-			Window::KeyboardControl(message, key, extra);
-		}
+	Window::KeyboardControl(message, key, extra);
 }
 
 //-----------------------------------------------------------------------------
 // RollDice
 //
-// �ֻ����� ������ point�� ���Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_NEWCHAR::RollDice(bool load)
 {
@@ -925,7 +611,7 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 				a = rand()%3;
 				b = rand()%3;
 				
-				c = s[a]; s[a] = s[b]; s[b] = c;//���ҽ���-_-;
+				c = s[a]; s[a] = s[b]; s[b] = c;
 			}
 			
 			m_p_slot->STR_PURE = s[0];
@@ -974,7 +660,7 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 	m_p_slot->HP = m_p_slot->STR_PURE*2;
 	m_p_slot->MP = m_p_slot->INT_PURE*2;
 
-	m_p_slot->HP_MAX = 20*2; // �̰� ... const int�� �ϴϱ� SetEnergy()���� �� ���� ���ߴ�!
+	m_p_slot->HP_MAX = 20*2; 
 	m_p_slot->MP_MAX = 20*2;
 
 //	SetEnergy(m_p_slot->HP, m_p_slot->HP_MAX, m_p_slot->hp_percent, m_p_slot->hp_cur_line);
@@ -989,9 +675,9 @@ void C_VS_UI_NEWCHAR::RollDice(bool load)
 void C_VS_UI_NEWCHAR::SendNewCharacterToClient()
 {
 	//
-	// !�ܺο� sz_name�� delete�ϸ� �ȵȴ�.
+	
 	//
-	static NEW_CHARACTER S_new_character; // �ݵ�� static����..
+	static NEW_CHARACTER S_new_character; 
 
 //	DeleteNew(m_p_slot->sz_name);
 
@@ -1109,14 +795,14 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 		m_common_spk.Open(SPK_COMMON_1024);
 		m_image_spk.Open(SPK_CHAR_CREATE);
 		m_face_spk.Open(SPK_FACE_MAKE);
-		Set(0, 0, 1024, 768);
+		Set(0, 0, g_GameRect.right, g_GameRect.bottom);
 	}
 	else
 	{
 		m_common_spk.Open(SPK_COMMON);
 		m_image_spk.Open(SPK_CHAR_CREATE);
 		m_face_spk.Open(SPK_FACE_MAKE);
-		Set(0, 0, 800, 600);
+		Set(0, 0, g_GameRect.right, g_GameRect.bottom);
 	}
 	// end by sonic
 
@@ -1155,7 +841,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	//check button
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(CHECK_BUTTON), m_image_spk.GetHeight(CHECK_BUTTON), CHECK_ID, this, CHECK_BUTTON));skinnum++;
 
-	//�ƿ콺���� +, - ��ư
+	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(PLUS_BUTTON), m_image_spk.GetHeight(PLUS_BUTTON), STR_PLUS_ID, this, PLUS_BUTTON));skinnum++;
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(MINUS_BUTTON), m_image_spk.GetHeight(MINUS_BUTTON), STR_MINUS_ID, this, MINUS_BUTTON));skinnum++;
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint( skinnum ).x,pSkin->GetPoint( skinnum ).y,m_image_spk.GetWidth(PLUS_BUTTON), m_image_spk.GetHeight(PLUS_BUTTON), DEX_PLUS_ID, this, PLUS_BUTTON));skinnum++;
@@ -1168,6 +854,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 	m_lev_name.SetInputStringColor(RGB_WHITE);
 	m_lev_name.SetPosition(x+NAME_BOARD_X, y+NAME_BOARD_Y);
 	m_lev_name.SetByteLimit(10);
+	m_lev_name.SetAsciiLettersOnlyMode(true);
 	Attach(&m_lev_name);
 
 	// character ISPK & CFPK
@@ -1286,7 +973,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 //	m_p_hp_buf = new WORD[m_hp_width*m_hp_height];
 //	m_p_mp_buf = new WORD[m_mp_width*m_mp_height];
 
-	// energy cylinder�� plain buffer�� blt�Ѵ�.
+	
 //	m_pC_etc.BltOffscreen(0, 0, HP);
 
 	// blt from offscreen
@@ -1304,7 +991,7 @@ C_VS_UI_NEWCHAR::C_VS_UI_NEWCHAR()
 //		gpC_base->m_DDSurface_offscreen.Unlock();
 //	}
 //
-//	// energy cylinder�� plain buffer�� blt�Ѵ�.
+
 //	m_pC_etc.BltOffscreen(0, 0, MP);
 //
 //	// blt from offscreen
@@ -1394,8 +1081,8 @@ void C_VS_UI_NEWCHAR::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 // ChangeColor
 //
-// (x, y) ��ġ�� color table color�� color�� change�Ѵ�.
-// �ٲ����� true�� ��ȯ�Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_NEWCHAR::ChangeColor(int _x, int _y)
 {
@@ -1424,7 +1111,7 @@ bool C_VS_UI_NEWCHAR::ChangeColor(int _x, int _y)
 //-----------------------------------------------------------------------------
 // GetPoint
 //
-// color array���� colorset�� point�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 Point C_VS_UI_NEWCHAR::GetPoint(int colorset, bool bl_skin_color)
 {
@@ -1460,7 +1147,7 @@ Point C_VS_UI_NEWCHAR::GetPoint(int colorset, bool bl_skin_color)
 //-----------------------------------------------------------------------------
 // GetColor
 //
-// color array���� (x, y)�� color set���� color�� ���ؼ� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 int C_VS_UI_NEWCHAR::GetColor(int _x, int _y, bool bl_skin_color)
 {
@@ -1478,7 +1165,7 @@ int C_VS_UI_NEWCHAR::GetColor(int _x, int _y, bool bl_skin_color)
 //-----------------------------------------------------------------------------
 // ResetFaceList
 //
-// selected_face�� �� ������ �Ѵ�.
+
 //-----------------------------------------------------------------------------
 //void C_VS_UI_NEWCHAR::ResetFaceList(int * p_face_list, int selected_face)
 //{
@@ -1623,7 +1310,7 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 { 
 	assert(p_slot->bl_set == false);
 	
-	//assert(p_slot->sz_name == NULL); // 2000.12.15. ; ���� ����. �ߺ��� ID�� ��쿡�� NULL�� �ƴϴ�.
+	
 
 	m_p_slot = p_slot; 
 	m_selected_slot = slot;
@@ -1680,10 +1367,10 @@ void C_VS_UI_NEWCHAR::SetCharacterToThisSlot(int slot, S_SLOT * p_slot)
 	m_p_slot->woman_info.right = W_NO_WEAR;//M_BLADE;
 	m_p_slot->woman_info.left = W_NO_WEAR;//M_DRAGON_SHIELD;
 
-	// default color�� �ٲ����.. by sigi
+	
 	
 
-	// ������ �������� ���õǵ��� ����.		2002.11  by sonee
+	
 //	m_p_slot->hair_color = m_hair_color_array[rand()%COLOR_LIST_X][rand()%COLOR_LIST_Y];
 //	m_p_slot->skin_color = m_skin_color_array[rand()%COLOR_LIST_X][rand()%COLOR_LIST_Y];
 
@@ -1732,102 +1419,23 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 	//
 	// character Name
 	//
-	// Ư������, ����, ù���� ���ڸ� ���´�.
+	
 	//
 	if (message == WM_CHAR)
 	{
-		if (isdigit(key) && m_lev_name.Size() == 0)
+		if (key == '\b')
+		{
+			m_lev_name.KeyboardControl(WM_KEYDOWN, VK_BACK, extra);
 			return;
+		}
 
-		char ignore_char[] = {'~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_',
-									'+', '=', '\\', '|', '[', ']', '{', '}', ';', ':', '\"', '\'', ',', '<', '.', '>',
-									'/', '?', ' '};
-
-		for (int i=0; i<sizeof(ignore_char); i++)
-			if ((char)key == ignore_char[i])
-				return;
+		if (!((key >= 'A' && key <= 'Z') || (key >= 'a' && key <= 'z')))
+			return;
 	}
 
 	Window::KeyboardControl(message, key, extra);
 
-/*
-#ifndef _LIB
-	if (message == WM_KEYDOWN)
-	{
-		static bool bl_old;
-		static int	position;
-
-		switch (key)
-		{
-			case VK_LEFT:
-				bl_old = true;
-				break;
-
-			case VK_RIGHT:
-				bl_old = false;
-				break;
-
-			case VK_UP:
-				if (position > 0)
-					position--;
-				break;
-
-			case VK_DOWN:
-				if (position < 3)
-					position++;
-				break;
-		}
-
-		// part
-		switch (position)
-		{
-			case 0: // ���� ����
-				m_p_slot->man_info.helmet = M_NO_WEAR;
-				m_p_slot->woman_info.helmet = W_NO_WEAR;
-				break;
-
-			case 1: // ����
-				if (bl_old)
-				{
-					m_p_slot->man_info.helmet = M_OLD_HELMET;
-					m_p_slot->woman_info.helmet = W_OLD_HELMET;
-				}
-				else
-				{
-					m_p_slot->man_info.helmet = M_NEW_HELMET;
-					m_p_slot->woman_info.helmet = W_NEW_HELMET;
-				}
-				break;
-
-			case 2: // ���� 
-				if (bl_old)
-				{
-					m_p_slot->man_info.coat = M_OLD_COAT;
-					m_p_slot->woman_info.coat = W_OLD_COAT;
-				}
-				else
-				{
-					m_p_slot->man_info.coat = M_NEW_COAT;
-					m_p_slot->woman_info.coat = W_NEW_COAT;
-				}
-				break;
-
-			case 3: // ����
-				if (bl_old)
-				{
-					m_p_slot->man_info.trouser = M_OLD_TROUSER;
-					m_p_slot->woman_info.trouser = W_OLD_TROUSER;
-				}
-				else
-				{
-					m_p_slot->man_info.trouser = M_NEW_TROUSER;
-					m_p_slot->woman_info.trouser = W_NEW_TROUSER;
-				}
-				break;
-		}
-	}
-#endif
-*/
+ 
 }
 
 //-----------------------------------------------------------------------------
@@ -1840,7 +1448,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 //	switch (m_man_face_list[0])
 //	{
 //		case 0:
-//			// face�� hair�� �� ���̴�.
+
 //			m_p_slot->man_info.face	= M_FACE1;
 //			m_p_slot->man_info.hair = M_HAIR1;
 //			break;
@@ -1859,7 +1467,7 @@ void C_VS_UI_NEWCHAR::KeyboardControl(UINT message, UINT key, long extra)
 //	switch (m_woman_face_list[0])
 //	{
 //		case 0:
-//			// face�� hair�� �� ���̴�.
+
 //			m_p_slot->woman_info.face = W_FACE1;
 //			m_p_slot->woman_info.hair = W_HAIR1;
 //			break;
@@ -2267,7 +1875,7 @@ bool C_VS_UI_NEWCHAR::MouseControl(UINT message, int _x, int _y)
 //		float t = n;
 //		float r = f - t;
 //		if (r > 0.)
-//			n += 1; // �ݿø�.
+
 //
 //		if (percent < 100 && n >= TOTAL_ENERGY_LINE)
 //			n = TOTAL_ENERGY_LINE - 1;
@@ -2344,17 +1952,17 @@ bool C_VS_UI_NEWCHAR::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // ShowCharacter
 //
-// (x, y)�� ��/�� ĳ���� �ϳ��� ����Ѵ�. ���� ��� �ϳ��� null�� �Ǿ� �ϴ�.
+
 //
-// ��κ� : i1
-// �ʺκ� : i2
+
+
 //-----------------------------------------------------------------------------
 void	C_VS_UI_NEWCHAR::ShowCharacter(int _x, int _y, S_SLOT * p_slot, int index, int enable, int dark)
 {
 	//
-	// ��¼���
+	
 	//
-	// ���� -> ���� -> �Ӹ�ī�� -> ���� -> ���������� -> �޼�����
+	
 	//
 	if (gpC_base->m_p_DDSurface_back->Lock())
 	{
@@ -2567,34 +2175,7 @@ void C_VS_UI_NEWCHAR::Show()
 	}
 	
 
-/*
-	// ���ڿ� ��� 
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
-
-		gpC_base->SelectFont(FONT_SLAYER);
-
-		gC_font.Update(&surfaceinfo, 445, 145, WHITE);
-
-		// show point
-		char str[3];
-		sprintf(str, "%2d", m_p_slot->STR);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280, WHITE);
-		sprintf(str, "%2d", m_p_slot->DEX);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280+46, WHITE);
-		sprintf(str, "%2d", m_p_slot->INT);
-		gC_font.PrintString(&surfaceinfo, str, 433, 280+92, WHITE);
-		sprintf(str, "%2d", m_p_slot->DAM);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422, WHITE);
-		sprintf(str, "%2d", m_p_slot->AC);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422+46, WHITE);
-		sprintf(str, "%2d", m_p_slot->TOHIT);
-		gC_font.PrintString(&surfaceinfo, str, 723, 422+92, WHITE);
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}*/
+ 
 
 	// draw Name board & name
 //	m_pC_board_spk->Blt(NAME_BOARD_X, NAME_BOARD_Y, NAME_BOARD);
@@ -2698,7 +2279,7 @@ void C_VS_UI_NEWCHAR::Show()
 //-----------------------------------------------------------------------------
 // NewCharacterCreateOk
 //
-// �̹� slot�� �����Ǿ� �����Ƿ�, ���������� bl_set = true�� ���ش�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_CHAR_MANAGER::NewCharacterCreateOk()
 {
@@ -2773,7 +2354,7 @@ void C_VS_UI_CHAR_MANAGER::SetCharacter(int slot, S_SLOT &S_slot)
 			m_slot[slot].sz_guild_name = S_slot.sz_guild_name;
 		}
 
-		// HP/MP�� ����ϱ� ���� �ʿ��� ������ ���⼭ �����ȴ�.
+		
 //		m_pC_newchar->SetEnergy(m_slot[slot].HP, m_slot[slot].HP_MAX, m_slot[slot].hp_percent, m_slot[slot].hp_cur_line);
 //		m_pC_newchar->SetEnergy(m_slot[slot].MP, m_slot[slot].MP_MAX, m_slot[slot].mp_percent, m_slot[slot].mp_cur_line);
 
@@ -2928,11 +2509,11 @@ C_VS_UI_CHAR_MANAGER::C_VS_UI_CHAR_MANAGER()
 		m_common_spk.Open(SPK_COMMON_1024);
 	else
 		m_common_spk.Open(SPK_COMMON);
-	m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+	m_title1_spk.Open(SPK_TITLE_BACK);
 	// end by sonic
 	m_image_spk.Open(SPK_CHAR_MANAGER);
 
-	// �ݸ����� �ƴѰ��
+	
 	if(g_pUserInformation!=NULL)
 	{
 		if(!g_pUserInformation->bChinese)
@@ -2947,11 +2528,11 @@ C_VS_UI_CHAR_MANAGER::C_VS_UI_CHAR_MANAGER()
 	// add by Sonic 2006.9.26
 	if(g_MyFull)
 	{
-		Set(0, 0, 1024, 768);
+		Set(GetTitleLayoutX(), GetTitleLayoutY(), GetTitleLayoutWidth(), GetTitleLayoutHeight());
 	}
 	else
 	{
-		Set(0, 0, 800, 600);
+		Set(GetTitleLayoutX(), GetTitleLayoutY(), GetTitleLayoutWidth(), GetTitleLayoutHeight());
 	}
 	//end
 //	Set(g_GameRect.right/2 - m_pC_back.GetWidth()/2, g_GameRect.bottom/2 - m_pC_back.GetHeight()/2, m_pC_back.GetWidth(), m_pC_back.GetHeight());
@@ -2964,11 +2545,11 @@ C_VS_UI_CHAR_MANAGER::C_VS_UI_CHAR_MANAGER()
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(555, 542, m_image_spk.GetWidth(CREATE_BUTTON), m_image_spk.GetHeight(CREATE_BUTTON), CREATE_ID, this, CREATE_BUTTON));
 
 	for(int i = 0; i < 3; i++)
-		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+g_heart_rect[i]+119, y+HEART_Y+36, m_image_spk.GetWidth(DELETE_BUTTON), m_image_spk.GetHeight(DELETE_BUTTON), DELETE_1_ID+i, this, DELETE_BUTTON));
+		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(g_heart_rect[i]+119, HEART_Y+36, m_image_spk.GetWidth(DELETE_BUTTON), m_image_spk.GetHeight(DELETE_BUTTON), DELETE_1_ID+i, this, DELETE_BUTTON));
 
 	//
-	// character ani timer�� char manager object�� �����Ǹ� ��� �۵��Ѵ�.
-	// �� character�� ó�� frame index�� �ٸ����ν� �ڿ��������� �����Ѵ�.
+	
+	
 	//
 	g_char_update_tid = gC_timer2.Add(ANI_MILLISEC, _Timer_CharUpdate);
 	gC_timer2.Continue(g_char_update_tid);
@@ -2999,7 +2580,7 @@ C_VS_UI_CHAR_MANAGER::~C_VS_UI_CHAR_MANAGER()
 {
 	g_UnregisterWindow(this);
 
-	// !Window�� ���� delete�ؾ� �Ѵ�.
+	
 	DeleteNew(m_pC_biling);
 	DeleteNew(m_pC_char_delete);
 	DeleteNew(m_pC_newchar);
@@ -3043,7 +2624,7 @@ C_VS_UI_CHAR_MANAGER::~C_VS_UI_CHAR_MANAGER()
 //-----------------------------------------------------------------------------
 // C_VS_UI_CHAR_MANAGER::SelectSlot
 //
-// select�Ǿ����� true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_CHAR_MANAGER::SelectSlot(int n)
 {
@@ -3112,7 +2693,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 	{
 		case CREATE_ID:
 			//
-			// �ڵ����� left���� ������� ����ִ� slot�� ��ĳ���� �����.
+			
 			//
 
 			// search empty slot
@@ -3123,7 +2704,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 					m_select_heart_temp = i;
 					m_pC_newchar->Start();
 					m_pC_newchar->SetCharacterToThisSlot(i, &m_slot[i]);
-					m_pC_newchar->RollDice(); // Start()�� ������ �ȵȴ�. - SetCharacterToThisSlot()�� �� �ڿ� �ϱ� ����.
+					m_pC_newchar->RollDice(); 
 					Finish();
 					return;
 				}
@@ -3135,7 +2716,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 //		case CHARINFO:
 //			if (m_slot[m_select_heart].bl_set == true)
 //			{
-//				//assert(m_pC_char_info == NULL); // ��������. WindowManager���� cancel push state�ϸ� �� �� �����.
+
 //				if (m_pC_char_info != NULL)
 //				{
 //					DeleteNew(m_pC_char_info);
@@ -3158,7 +2739,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 //			break;
 
 		case NEXT_ID:
-			// ��� slot�� ��� �ִ°�?
+			
 			if (m_slot[SLOT_LEFT].bl_set == false &&
 				 m_slot[SLOT_CENTER].bl_set == false &&
 				 m_slot[SLOT_RIGHT].bl_set == false)
@@ -3175,7 +2756,7 @@ void C_VS_UI_CHAR_MANAGER::Run(id_t id)
 
 		case BACK_ID:
 			//Finish();
-			gpC_base->SendMessage(UI_CHARACTER_MANAGER_FINISHED); // Finish()�� ���� ����.
+			gpC_base->SendMessage(UI_CHARACTER_MANAGER_FINISHED); 
 			break;
 
 		case DELETE_1_ID:
@@ -3231,8 +2812,8 @@ bool C_VS_UI_CHAR_MANAGER::MouseControl(UINT message, int _x, int _y)
 			{
 				for(int i = 0; i < 3; i++)
 				{
-					if(_x > x+g_heart_rect[i] && _x < x+g_heart_rect[i] + m_image_spk.GetWidth() &&
-						_y > y+HEART_Y && _y < y+HEART_Y + m_image_spk.GetHeight())
+					if(_x > g_heart_rect[i] && _x < g_heart_rect[i] + m_image_spk.GetWidth() &&
+						_y > HEART_Y && _y < HEART_Y + m_image_spk.GetHeight())
 					{
 						m_focused_help = HELP_MAX+i;
 						break;
@@ -3398,15 +2979,8 @@ void C_VS_UI_CHAR_MANAGER::Show()
 //		m_title1_spk.BltLocked(0,0);
 		m_common_spk.BltLocked(x, y);
 		//	m_image_spk.BltLocked(300, 150);
-		m_image_spk.BltLocked(TITLE_X - m_image_spk.GetWidth(TITLE)/2, TITLE_Y, TITLE);
+		m_image_spk.BltLocked(x+TITLE_X - m_image_spk.GetWidth(TITLE)/2, y+TITLE_Y, TITLE);
 		
-		if(m_pC_use_grade!=NULL && !g_pUserInformation->bChinese )
-		{
-			if(g_pUserInformation->GoreLevel)
-				m_pC_use_grade->BltLocked(g_GameRect.right-m_pC_use_grade->GetWidth(ADULT)-30,50,ADULT);
-			else
-				m_pC_use_grade->BltLocked(g_GameRect.right-m_pC_use_grade->GetWidth(CHILD)-30,50,CHILD);
-		}
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
@@ -3453,6 +3027,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 		m_pC_button_group->Show();	
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
+
 	if(m_focused_help < HELP_MAX)
 		ShowDesc();
 	else
@@ -3537,7 +3112,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 					
 					std::string sstr;
 					
-					// ���ڻ��̿� ,�ֱ�
+					
 					wsprintf(str, "%d", m_p_slot->FAME);
 					sstr = str;
 					for(unsigned int i = 3; i <= 13; i += 4)
@@ -3557,7 +3132,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 							py+=16;
 						}
 						
-						// ��� ����ġ 
+						
 						//px = g_PrintColorStr(29,py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 						//char tempstr[100];
 						//wsprintf(tempstr,"%d",m_p_slot->GRADE_EXP);
@@ -3590,7 +3165,7 @@ void C_VS_UI_CHAR_MANAGER::Show()
 						py+=16;
 					}			
 					
-					// ��� ����ġ 
+					
 					//px = g_PrintColorStr(29,py,(*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_GRADE_EXP].GetString(),gpC_base->m_chatting_pi, RGB(160,160,160));
 					//char tempstr[100];
 					//wsprintf(tempstr,"%d",m_p_slot->GRADE_EXP);
@@ -3729,7 +3304,7 @@ C_VS_UI_SERVER_SELECT::C_VS_UI_SERVER_SELECT()
 	m_server_select = -1;
 	m_scroll = 0;
 
-	//���� ����Ʈ �����ġ
+	
 	m_server_x = 338;
 	m_server_y = 202;
 
@@ -3741,17 +3316,17 @@ C_VS_UI_SERVER_SELECT::C_VS_UI_SERVER_SELECT()
 	//m_title1_spk.BltLocked(0,0);
 	if(g_MyFull)
 	{
-		m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+		m_title1_spk.Open(SPK_TITLE_BACK);
 		m_common_spk.Open(SPK_COMMON_1024);
 		m_image_spk.Open(SPK_SERVER_SELECT);
-		Set(0, 0, 1024, 768);
+		Set(GetTitleLayoutX(), GetTitleLayoutY(), GetTitleLayoutWidth(), GetTitleLayoutHeight());
 	}
 	else
 	{
-		m_title1_spk.Open(SPK_TITLE_BACK);//��ȡ��ͼ
+		m_title1_spk.Open(SPK_TITLE_BACK);
 		m_common_spk.Open(SPK_COMMON);
 		m_image_spk.Open(SPK_SERVER_SELECT);
-		Set(0, 0, 800, 600);
+		Set(GetTitleLayoutX(), GetTitleLayoutY(), GetTitleLayoutWidth(), GetTitleLayoutHeight());
 	}
 	// end by sonic
 	
@@ -3778,7 +3353,7 @@ C_VS_UI_SERVER_SELECT::~C_VS_UI_SERVER_SELECT()
 {
 	g_UnregisterWindow(this);
 
-	// !Window�� ���� delete�ؾ� �Ѵ�.
+	
 	DeleteNew(m_pC_button_group);
 }
 
@@ -3878,7 +3453,7 @@ bool C_VS_UI_SERVER_SELECT::MouseControl(UINT message, int _x, int _y)
 		case M_MOVING:
 			m_focused_help = HELP_DEFAULT;
 			m_focus_server = -1;
-			if(_x > m_server_x && _x < x+m_server_x+328 && _y > y+m_server_y-2 && _y < y+m_server_y+20*12)
+			if(_x > m_server_x && _x < m_server_x+328 && _y > m_server_y-2 && _y < m_server_y+20*12)
 			{
 				m_focus_server = (_y - m_server_y)/20+m_scroll;
 				if(m_focus_server < 0 || m_focus_server >= (int)m_server_name.size())
@@ -4042,26 +3617,26 @@ void C_VS_UI_SERVER_SELECT::Show()
 	{
 //		m_title1_spk.BltLocked(0,0);
 		m_common_spk.BltLocked(x, y);
-		m_image_spk.BltLocked(300, 150);
+		m_image_spk.BltLocked(x+300, y+150);
 		
 		m_pC_button_group->Show();
 		
 		if(m_bl_group)
 		{
-			m_image_spk.BltLocked(TITLE_X - m_image_spk.GetWidth(TITLE_WORLD)/2, TITLE_Y, TITLE_WORLD);
+			m_image_spk.BltLocked(x+TITLE_X - m_image_spk.GetWidth(TITLE_WORLD)/2, y+TITLE_Y, TITLE_WORLD);
 		}
 		else
 		{
-			m_image_spk.BltLocked(TITLE_X - m_image_spk.GetWidth(TITLE_SERVER)/2, TITLE_Y, TITLE_SERVER);
+			m_image_spk.BltLocked(x+TITLE_X - m_image_spk.GetWidth(TITLE_SERVER)/2, y+TITLE_Y, TITLE_SERVER);
 		}
 		//	int i;
 		
-		if(m_server_name.size() > 12)	// scroll tag ǥ��
+		if(m_server_name.size() > 12)	
 		{
 			if(m_bl_scrolling)
-				m_image_spk.BltLocked(SCROLL_X, min(max(gpC_mouse_pointer->GetY(), SCROLL_Y+m_image_spk.GetHeight(SCROLL_TAG)/2), SCROLL_Y+SCROLL_HEIGHT+m_image_spk.GetHeight(SCROLL_TAG)/2)-m_image_spk.GetHeight(SCROLL_TAG)/2, SCROLL_TAG_HILIGHTED);
+				m_image_spk.BltLocked(x+SCROLL_X, y+min(max(gpC_mouse_pointer->GetY()-y, SCROLL_Y+m_image_spk.GetHeight(SCROLL_TAG)/2), SCROLL_Y+SCROLL_HEIGHT+m_image_spk.GetHeight(SCROLL_TAG)/2)-m_image_spk.GetHeight(SCROLL_TAG)/2, SCROLL_TAG_HILIGHTED);
 			else
-				m_image_spk.BltLocked(SCROLL_X, SCROLL_Y+m_scroll*SCROLL_HEIGHT/(m_server_name.size()-12), SCROLL_TAG);
+				m_image_spk.BltLocked(x+SCROLL_X, y+SCROLL_Y+m_scroll*SCROLL_HEIGHT/(m_server_name.size()-12), SCROLL_TAG);
 		}
 		
 		if(m_server_select >= m_scroll && m_server_select < m_scroll+12)
@@ -4078,8 +3653,8 @@ void C_VS_UI_SERVER_SELECT::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 
-	char server_status_string[30];
-	//��������Ʈ ǥ��
+	char server_status_string[30] = "";
+	
 	g_FL2_GetDC();
 	for(int i = 0; i < min(m_server_name.size(), 12); i++)
 	{
@@ -4089,12 +3664,12 @@ void C_VS_UI_SERVER_SELECT::Show()
 			switch(m_server_status[i+m_scroll])
 			{
 			case STATUS_OPENED:
-				strcpy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_OPEN].GetString());
+				strcpy(server_status_string, "Open");
 				break;
 
 			case STATUS_CLOSED:
 				statusColor = RGB_RED;
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
+				strcpy(server_status_string, "Closed");
 				break;
 			}
 		}
@@ -4103,28 +3678,28 @@ void C_VS_UI_SERVER_SELECT::Show()
 			switch(m_server_status[i+m_scroll])
 			{
 			case STATUS_VERY_GOOD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_GOOD].GetString());
+				strcpy(server_status_string, "Very Good");
 				break;
 				
 			case STATUS_GOOD:
-				strcpy(server_status_string,(*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_GOOD].GetString());
+				strcpy(server_status_string, "Good");
 				break;
 				
 			case STATUS_NORMAL:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_NORMAL].GetString());
+				strcpy(server_status_string, "Normal");
 				break;
 				
 			case STATUS_BAD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_BAD].GetString());
+				strcpy(server_status_string, "Bad");
 				break;
 				
 			case STATUS_VERY_BAD:
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_VERY_BAD].GetString());
+				strcpy(server_status_string, "Very Bad");
 				break;
 
 			case STATUS_DOWN:
 				statusColor = RGB_RED;
-				strcpy(server_status_string, (*g_pGameStringTable)[UI_STRING_MESSAGE_SERVER_STATUS_CLOSE].GetString());
+				strcpy(server_status_string, "Closed");
 				break;
 			}
 		}
@@ -4164,7 +3739,7 @@ void C_VS_UI_SERVER_SELECT::Show()
 	}
 
 	if( g_LeftPremiumDays != 0xFFFF )
-		g_PrintColorStr( g_vs_ui_title_only_premium_x, g_vs_ui_title_only_premium_y, szBuffer, gpC_base->m_desc_menu_pi, RGB_WHITE );
+		g_PrintColorStr( x+g_vs_ui_title_only_premium_x, y+g_vs_ui_title_only_premium_y, szBuffer, gpC_base->m_desc_menu_pi, RGB_WHITE );
 			
 	g_FL2_ReleaseDC();
 	std::string help_string[HELP_MAX] = 
@@ -4199,11 +3774,12 @@ void C_VS_UI_SERVER_SELECT::Show()
 - C_VS_UI_LOGIN
 -
 -----------------------------------------------------------------------------*/
-C_VS_UI_LOGIN::C_VS_UI_LOGIN()
+C_VS_UI_LOGIN::C_VS_UI_LOGIN(C_VS_UI_TITLE * pC_title_parent)
 {
 	g_RegisterWindow(this);
 
-	AttrTopmost(true);
+	m_pC_title_parent = pC_title_parent;
+	AttrTopmost(false);
 	AttrKeyboardControl(true);
 	// add by Sonic 2006.9.26
 	if(g_MyFull)
@@ -4215,11 +3791,11 @@ C_VS_UI_LOGIN::C_VS_UI_LOGIN()
 	m_pC_login_menu.Open(SPK_LOGIN_MENU);
 	if(g_MyFull)
 	{
-		Set(/*154, 180*/401, 293, m_pC_login_spk->GetWidth(), m_pC_login_spk->GetHeight());
+		Set(GetTitleLayoutX()+401, GetTitleLayoutY()+293, m_pC_login_spk->GetWidth(), m_pC_login_spk->GetHeight());
 	}
 	else
 	{
-		Set(/*154, 180*/400 - m_pC_login_spk->GetWidth()/2, 300 - m_pC_login_spk->GetHeight()/2-57, m_pC_login_spk->GetWidth(), m_pC_login_spk->GetHeight());
+		Set(GetTitleLayoutX()+400 - m_pC_login_spk->GetWidth()/2, GetTitleLayoutY()+300 - m_pC_login_spk->GetHeight()/2-57, m_pC_login_spk->GetWidth(), m_pC_login_spk->GetHeight());
 	}
 
 	m_pC_button_group = new ButtonGroup(this);
@@ -4230,11 +3806,15 @@ C_VS_UI_LOGIN::C_VS_UI_LOGIN()
 
 
 	// LineEditorVisual setting...
+	m_lev_id.SetPrintInfo(gpC_base->m_info_pi);
+	m_lev_id.SetInputStringColor(RGB_WHITE);
 	m_lev_id.SetPosition(x+LOGIN_ID_X, y+LOGIN_ID_Y);
-	/******** Edit By Sonic 2006.9.25 �޸��������볤��Ϊ13λ********/
+	 
 	//m_lev_id.SetByteLimit(10);
 	m_lev_id.SetByteLimit(13);
 	/******** End By Sonic 2006.9.25 ********/
+	m_lev_password.SetPrintInfo(gpC_base->m_info_pi);
+	m_lev_password.SetInputStringColor(RGB_WHITE);
 	m_lev_password.SetPosition(x+LOGIN_PASSWORD_X, y+LOGIN_PASSWORD_Y);
 	m_lev_password.PasswordMode(true);
 	m_lev_password.SetByteLimit(10);
@@ -4248,10 +3828,11 @@ C_VS_UI_LOGIN::C_VS_UI_LOGIN()
 //-----------------------------------------------------------------------------
 // ReadySend
 //
-// ��������ʰ� �Է��� �� �Ǿ����� true�� ��ȯ�ϰ� �׷��� ������ false�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_LOGIN::ReadySend()
 {
+	LogLoginTrace("ReadySend id=%d pass=%d", m_lev_id.Size(), m_lev_password.Size());
 	if (m_lev_id.Size() > 0 && m_lev_password.Size() > 0)
 		return true;
 	
@@ -4304,6 +3885,8 @@ void C_VS_UI_LOGIN::AcquireFirstSequence()
 void C_VS_UI_LOGIN::ChangeFocus()
 {
 	static int debug_count = 0;
+	LogLoginTrace("ChangeFocus before idAcquire=%d passAcquire=%d idSize=%d passSize=%d",
+		m_lev_id.IsAcquire(), m_lev_password.IsAcquire(), m_lev_id.Size(), m_lev_password.Size());
 
 	if (m_lev_id.IsAcquire())
 	{
@@ -4343,6 +3926,8 @@ void C_VS_UI_LOGIN::ChangeFocus()
 			debug_count++;
 		}
 	}
+	LogLoginTrace("ChangeFocus after idAcquire=%d passAcquire=%d idSize=%d passSize=%d",
+		m_lev_id.IsAcquire(), m_lev_password.IsAcquire(), m_lev_id.Size(), m_lev_password.Size());
 }
 
 void C_VS_UI_LOGIN::UnacquireMouseFocus()
@@ -4402,6 +3987,12 @@ void C_VS_UI_LOGIN::Process()
 //-----------------------------------------------------------------------------
 void C_VS_UI_LOGIN::Start()
 {
+	TraceTitleFlow("C_VS_UI_LOGIN::Start");
+	{
+		char trace[160];
+		sprintf(trace, "C_VS_UI_LOGIN::Start rect=%d,%d size=%d,%d", x, y, w, h);
+		TraceTitleFlow(trace);
+	}
 	PI_Processor::Start();
 
 	AttrKeyboardControl(true);
@@ -4412,6 +4003,8 @@ void C_VS_UI_LOGIN::Start()
 	m_lev_id.Acquire();
 	m_lev_id.EraseAll();
 	m_lev_password.EraseAll();
+	LogLoginTrace("Login::Start idEditor=%p passEditor=%p",
+		(void*)&m_lev_id, (void*)&m_lev_password);
 
 	if(strlen(g_pUserOption->BackupID) > 0)
 	{
@@ -4494,6 +4087,12 @@ void C_VS_UI_LOGIN::Run(id_t id)
 -----------------------------------------------------------------------------*/
 bool C_VS_UI_LOGIN::MouseControl(UINT message, int _x, int _y)
 {
+	if (m_pC_title_parent != NULL && !IsPixel(_x, _y))
+	{
+		if (m_pC_title_parent->HandleLoginOverlayMenuClick(message, _x, _y))
+			return true;
+	}
+
 	Window::MouseControl(message, _x, _y);
 	_x-=x; _y-=y;
 
@@ -4506,6 +4105,9 @@ bool C_VS_UI_LOGIN::MouseControl(UINT message, int _x, int _y)
 			{
 				Rect id_rt(LOGIN_ID_X, LOGIN_ID_Y, 130, 23);
 				Rect pass_rt(LOGIN_PASSWORD_X, LOGIN_PASSWORD_Y, 130, 23);
+				LogLoginTrace("MouseControl msg=%u local=%d,%d idHit=%d passHit=%d idAcquire=%d passAcquire=%d",
+					message, _x, _y, id_rt.IsInRect(_x, _y), pass_rt.IsInRect(_x, _y),
+					m_lev_id.IsAcquire(), m_lev_password.IsAcquire());
 
 				// Debug output
 /*
@@ -4544,49 +4146,21 @@ bool C_VS_UI_LOGIN::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // NextFocus
 //
-// ID or Password �� �� ��� �ϳ��� �Է��� ���� �����ٸ�, ������ �װ����� �̵��Ѵ�.
+
 //
-// `����ִ� ���� ������ true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
-/*
-bool C_VS_UI_LOGIN::NextFocus()
-{
-	// gC_font ���ο��� tab�� �ƹ��͵� �ƴϴ�.
-	gC_font.ForceShowCursor();
-
-	if (m_e_ip == ID)
-	{
-		m_e_ip = PASSWORD;
-		
-		m_string_line_ID.erase();
-		m_string_line_ID = gC_font.GetStringBuffer()->str;
-
-		gC_font.SetInputLine(m_string_line_PASSWORD.c_str());
-	}
-	else
-	{
-		m_e_ip = ID;
-
-		m_string_line_PASSWORD.erase();
-		m_string_line_PASSWORD = gC_font.GetStringBuffer()->str;
-
-		gC_font.SetInputLine(m_string_line_ID.c_str());
-	}
-
-	// no empty? - �������� �˻��Ѵ�.
-	if (m_string_line_ID.length() > 0 && m_string_line_PASSWORD.length() > 0)
-		return true;
-
-	return false;
-}*/
+ 
 
 //-----------------------------------------------------------------------------
 // SendLoginToClient
 //
-// ID/Password�� Client�� ������.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_LOGIN::SendLoginToClient()
 {
+	LogLoginTrace("SendLoginToClient begin idSize=%d passSize=%d", m_lev_id.Size(), m_lev_password.Size());
+	TraceTitleFlow("C_VS_UI_LOGIN::SendLoginToClient begin");
 	// copy from input line.
 /*	if (m_e_ip == ID)
 	{
@@ -4600,7 +4174,7 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 	}
 */
 	//
-	// �ݵ�� static���� �ϰ� member�� login check�� ������ delete ���ش�.
+	
 	//
 	static LOGIN S_login;
 	S_login.sz_id = (char*)malloc(128);
@@ -4612,17 +4186,25 @@ void C_VS_UI_LOGIN::SendLoginToClient()
 
 	// Safety check: ensure conversion succeeded before using the pointers
 	if (S_login.sz_id != NULL && S_login.sz_password != NULL) {
+		char trace[200];
+		sprintf(trace, "C_VS_UI_LOGIN::SendLoginToClient id_len=%d pass_len=%d",
+			(int)strlen(S_login.sz_id), (int)strlen(S_login.sz_password));
+		TraceTitleFlow(trace);
 		strcpy(g_pUserOption->BackupID, S_login.sz_id);
 		gpC_base->SendMessage(UI_LOGIN, 0, 0, &S_login);
+		TraceTitleFlow("C_VS_UI_LOGIN::SendLoginToClient dispatched UI_LOGIN");
+	}
+	else
+	{
+		TraceTitleFlow("C_VS_UI_LOGIN::SendLoginToClient conversion failed");
 	}
 }
 
-/*-----------------------------------------------------------------------------
-- KeyboardControl
-- Log-In ID�� Password�� �Է¹޴´�.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 {
+	LogLoginTrace("Login::KeyboardControl msg=%u key=%u extra=%ld idAcquire=%d passAcquire=%d idSize=%d passSize=%d",
+		message, key, extra, m_lev_id.IsAcquire(), m_lev_password.IsAcquire(), m_lev_id.Size(), m_lev_password.Size());
 
 	//bool focus_end = false;
 	//if (message == WM_KEYDOWN && key == VK_RETURN)
@@ -4641,26 +4223,10 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 
 
 	// On macOS/SDL2, bypass the Windows IME system
-#ifndef PLATFORM_WINDOWS
-	// Route SDL text input events directly to LineEditor
-	if (message == WM_TEXTINPUT) {
-		// SDL_TEXTINPUT event (committed text)
-		const char* text = (const char*)extra;
-		if (m_lev_id.IsAcquire()) {
-			m_lev_id.m_Editor.HandleTextInput(text);
-		} else if (m_lev_password.IsAcquire()) {
-			m_lev_password.m_Editor.HandleTextInput(text);
-		}
-	} else if (message == WM_TEXTEDITING) {
-		// SDL_TEXTEDITING event (IME composition in progress)
-		int start = (int)key;
-		int length = (int)extra;
-		if (m_lev_id.IsAcquire()) {
-			m_lev_id.m_Editor.HandleTextEditing("", start, length);
-		} else if (m_lev_password.IsAcquire()) {
-			m_lev_password.m_Editor.HandleTextEditing("", start, length);
-		}
-	} else if (message == WM_KEYDOWN) {
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)
+	// SDL text input itself is routed through InputFocusManager.
+	// This branch only handles non-text control keys.
+	if (message == WM_KEYDOWN) {
 		// Control keys
 		LineEditor* pEditor = NULL;
 		if (m_lev_id.IsAcquire()) {
@@ -4701,7 +4267,7 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		case WM_KEYDOWN:
 			//
-			// input position ����.
+			
 			//
 			if (key == VK_TAB)
 			{
@@ -4721,7 +4287,7 @@ void C_VS_UI_LOGIN::KeyboardControl(UINT message, UINT key, long extra)
 			}
 			else if (key == VK_RETURN) // ok
 			{
-				//if (focus_end) // ��� �ִ� ���� ������ send!
+				
 				//{
 
 				if (ReadySend() == true)
@@ -4756,37 +4322,15 @@ void C_VS_UI_LOGIN::Show()
 //	m_pC_login_spk->BltAlpha(x, y+20, SHADOW, 22);
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
-		m_pC_login_spk->BltLocked(x, y);		
+		const SPRITE_ID loginSpriteID = (m_pC_login_spk->GetSize() > 1) ? 1 : 0;
+		m_pC_login_spk->BltLocked(x, y, loginSpriteID);
 		m_pC_button_group->Show();
+
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
-/*
-	// login ���ڿ� ���.
-	if (gpC_base->m_p_DDSurface_back->Lock())
-	{
-		S_SURFACEINFO	surfaceinfo;
-		SetSurfaceInfo(&surfaceinfo, gpC_base->m_p_DDSurface_back->GetDDSD());
-
-		gpC_base->SelectFont(FONT_SLAYER);
-
-		// cursor�� ���� �Է� line���� �ְ� �ؾ� �Ѵ�.
-		if (m_e_ip == ID)
-			gC_font.Update(&surfaceinfo, x+LOGIN_ID_X, y+LOGIN_ID_Y, WHITE);
-		else
-			gC_font.PrintStringNoConvert(&surfaceinfo, m_string_line_ID.c_str(), x+LOGIN_ID_X, y+LOGIN_ID_Y, WHITE);
-
-		gC_font.PasswordMode();
-		if (m_e_ip == PASSWORD)
-			gC_font.Update(&surfaceinfo, x+LOGIN_PASSWORD_X, y+LOGIN_PASSWORD_Y, WHITE);
-		else
-			gC_font.PrintStringNoConvert(&surfaceinfo, m_string_line_PASSWORD.c_str(), x+LOGIN_PASSWORD_X, y+LOGIN_PASSWORD_Y, WHITE);
-		gC_font.NoPasswordMode();
-
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}*/
-
-	Window::ShowWidget();
-
+ 
+	m_lev_id.Show();
+	m_lev_password.Show();
 	SHOW_WINDOW_ATTR;
 }
 
@@ -4808,6 +4352,7 @@ void C_VS_UI_TITLE::NewCharacterCreateOk()
 void C_VS_UI_TITLE::StartCharacterManager(bool back)
 {
 	Finish();
+	m_pC_login->Finish();
 	m_pC_server_select->Finish();
 
 	m_pC_char_manager->Start(back);
@@ -4867,39 +4412,7 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 	g_RegisterWindow(this);
 
 #ifndef _LIB
-/*	m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, A);//, DIALOG_OK);//|DIALOG_CANCEL);
-
-	DIALOG_MENU d_menu[] = {
-		{"��� & asldkfsldjald", 0},
-		{"�ȱ� / 26387638127638263", 1},
-		{"������", DIALOG_EXECID_EXIT},
-	};
-	m_pC_dialog->SetMenu(d_menu, 3);
-
-	static char * pp_dmsg[] = {
-		"�ȳ��ϼ���? ���� ���¶���մϴ�.",
-		"��? ��, �� ���� �̸��̱���^^��..",
-		"m_pC_newuser = new C_VS_UI_NEWUSER;",
-		" ",
-		"m_title_spk.Open(SPK_TITLE);",
-		"m_title_menu_default.Open(SPK_TITLE_MENU_DEFAULT);",
-		"m_title_menu_select.Open(SPK_TITLE_MENU_SELECT);",
-		" ",
-		"// set Window size",
-		"Set(0, 0, m_title_spk.GetWidth(), m_title_spk.GetHeight());",
-		" ",
-		"// ani objects",
-		"m_pC_ao_title = new C_ANI_OBJECT(SPK_ANI_TITLE, FRR_ANI_TITLE);",
-		"m_pC_ao_symbol = new C_ANI_OBJECT(SPK_ANI_SYMBOL, FRR_ANI_SYMBOL);",
-		"m_pC_ani_title = new C_ANIMATION(m_pC_ao_title);",
-		"m_pC_ani_symbol = new C_ANIMATION(m_pC_ao_symbol);",
-		" ",
-		"m_pC_ani_title->SetPlayPosition(282, 100);",
-		"m_pC_ani_title->SetSpeed(120);",
-		"m_pC_ani_symbol->SetPlayPosition(282, 186);",
-		"m_pC_ani_symbol->SetSpeed(70);",
-	};
-*/	//m_pC_dialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *));//, SMO_NOFIT);
+ 	//m_pC_dialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *));//, SMO_NOFIT);
 #endif
 
 	AttrKeyboardControl(true);
@@ -4908,13 +4421,13 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 	m_pC_char_manager = new C_VS_UI_CHAR_MANAGER;
 	m_pC_server_select = new C_VS_UI_SERVER_SELECT;
 
-	m_pC_login = new C_VS_UI_LOGIN;
+	m_pC_login = new C_VS_UI_LOGIN(this);
 
 //	m_pC_newuser = new C_VS_UI_NEWUSER;
 
 //	gbl_option_running = false;	
 //	m_pC_option = NULL;
-// add by Sonic 2006.9.26�ж��Ƿ�Ϊ1024ģʽ
+
 	if(g_MyFull)
 		m_title_spk.Open(SPK_TITLE_1024);
 	else
@@ -4926,7 +4439,7 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 	m_pC_title_ani.Open(SPK_ANI_TITLE);
 //	m_pC_symbol_ani.Open(SPK_ANI_SYMBOL);
 	// set Window size
-	Set(0, 0, m_title_spk.GetWidth(), m_title_spk.GetHeight());
+	Set(GetTitleLayoutX(), GetTitleLayoutY(), m_title_spk.GetWidth(), m_title_spk.GetHeight());
 
   	// ani objects
 //	m_pC_ao_title = new C_ANI_OBJECT(SPK_ANI_TITLE, FRR_ANI_TITLE);
@@ -4945,7 +4458,7 @@ C_VS_UI_TITLE::C_VS_UI_TITLE()
 	m_pC_button_group = new ButtonGroup(this);
 	if(g_MyFull)
 	{
-		//��½���水ť��ʾ
+		
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+544, m_title_menu_default.GetWidth(CONNECT_HILIGHT), m_title_menu_default.GetHeight(CONNECT_HILIGHT), CONNECT, this,CONNECT_HILIGHT));
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+592, m_title_menu_default.GetWidth(OPTION_HILIGHT), m_title_menu_default.GetHeight(OPTION_HILIGHT), OPTION, this,OPTION_HILIGHT));
 		m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(x+888, y+640, m_title_menu_default.GetWidth(CREDIT_HILIGHT), m_title_menu_default.GetHeight(CREDIT_HILIGHT), CREDIT, this,CREDIT_HILIGHT));
@@ -4984,10 +4497,10 @@ C_VS_UI_TITLE::~C_VS_UI_TITLE()
 #endif
 
 	//
-	// !���� child Window���� delete�ؾ� �Ѵ�.
+	
 	//
-	// �׷��� ���� ������ child Window�� ���ŵ� ���� �̹� C_VS_UI_TITLE::IsPIxel()��
-	// �� �� ���� ����(m_title_spk�� delete�� ����)�̱� �����̴�.
+	
+	
 	//
 	DeleteNew(m_pC_login);
 	DeleteNew(m_pC_char_manager);
@@ -5023,50 +4536,7 @@ C_VS_UI_TITLE::~C_VS_UI_TITLE()
 //
 //	m_pC_newuser->Start();
 //}
-/*
-//-----------------------------------------------------------------------------
-// RunTitleOption
-//
-// ��ȯ�Ұųİ� ���´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_TITLE::RunOption()
-{
-	//gC_vs_ui.CloseTitle();
-
-	if (m_pC_option!= NULL)
-	{
-		DeleteNew(m_pC_option);
-	}
-
-	// center
-	m_pC_option = new C_VS_UI_OPTION;
-
-	assert(m_pC_option != NULL);
-
-//	gbl_title_option_running = true;
-
-	m_pC_option->Start();	
-}
-
-//-----------------------------------------------------------------------------
-// CloseTitleOption
-//
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_TITLE::CloseOption()
-{
-	if (!m_pC_option)
-		return;
-
-	DeleteNew(m_pC_option);
-	
-	//assert(m_pC_tribe_interface != NULL);
-	//m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
-
-	//gbl_title_option_running = false;
-	//gC_vs_ui.AcquireChatting();
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // C_VS_UI_TITLE::CloseCharInfo
 //
@@ -5146,6 +4616,26 @@ bool C_VS_UI_TITLE::IsPixel(int _x, int _y)
 	return m_title_spk.IsPixel(SCR2WIN_X(_x), SCR2WIN_Y(_y));
 }
 
+bool C_VS_UI_TITLE::HandleLoginOverlayMenuClick(UINT message, int _x, int _y)
+{
+	const int menuX = x + (g_MyFull ? 888 : 673);
+	const int optionY = y + (g_MyFull ? 592 : 419);
+	const int exitY = y + (g_MyFull ? 688 : 515);
+	const int optionW = m_title_menu_default.GetWidth(OPTION_HILIGHT);
+	const int optionH = m_title_menu_default.GetHeight(OPTION_HILIGHT);
+	const int exitW = m_title_menu_default.GetWidth(EXIT_HILIGHT);
+	const int exitH = m_title_menu_default.GetHeight(EXIT_HILIGHT);
+
+	const bool optionHit = (_x >= menuX && _x < menuX + optionW && _y >= optionY && _y < optionY + optionH);
+	const bool exitHit = (_x >= menuX && _x < menuX + exitW && _y >= exitY && _y < exitY + exitH);
+
+	if (!optionHit && !exitHit)
+		return false;
+
+	m_pC_button_group->MouseControl(message, _x, _y);
+	return true;
+}
+
 //-----------------------------------------------------------------------------
 // Process
 //
@@ -5159,10 +4649,11 @@ void C_VS_UI_TITLE::Process()
 //-----------------------------------------------------------------------------
 // Start
 //
-// Title�� ������Ѵ�. �׷��� Title �����޴��� ��� �����ؾ� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Start()
 {
+	TraceTitleFlow("C_VS_UI_TITLE::Start");
 	m_bl_credit = false;
 	gbl_wood_skin = true;
 //	gbl_vampire_interface = false;
@@ -5187,7 +4678,8 @@ void C_VS_UI_TITLE::Start()
 	// Start login window so text boxes are active
 	if (m_pC_login != NULL)
 	{
-//		m_pC_login->Start();
+		m_pC_login->Start();
+		TraceTitleFlow("C_VS_UI_TITLE::Start login started");
 	}
 
 #ifndef _LIB
@@ -5198,8 +4690,8 @@ void C_VS_UI_TITLE::Start()
 //-----------------------------------------------------------------------------
 // Finish
 //
-// Title/Login/Characters ... ��� Window�� ������ ���̹Ƿ� ��� �ϳ��� Finish�Ǿ
-// �ٸ� �͵� Finish�Ǹ� �ȵȴ�.
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Finish()
 {
@@ -5266,11 +4758,17 @@ void C_VS_UI_TITLE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //-----------------------------------------------------------------------------
 // Show
 //
-// [����] ���� descriptor�� Title���� ����Ϸ���, �װ��� Show()�� ���⼭ �����Ѵ�.
-//			 �̰��� Game class���� �ִ�. C_VS_UI::Show()���� ������ �ȵȴ�.
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_TITLE::Show()
 {
+	static DWORD lastTraceTime = 0;
+	if (GetTickCount() - lastTraceTime >= 1000)
+	{
+		TraceTitleFlow("C_VS_UI_TITLE::Show");
+		lastTraceTime = GetTickCount();
+	}
 //	if (gpC_window_manager->GetShowState(m_pC_login))
 //		m_title_spk.Blt(0, 0, 1);
 //	else
@@ -5284,6 +4782,8 @@ void C_VS_UI_TITLE::Show()
 	Timer();
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
+		TraceTitleFlow("C_VS_UI_TITLE::Show lock ok");
+		gpC_base->m_p_DDSurface_back->FillSurface(0);
 		if (m_bl_credit)
 		{
 			assert(m_pC_credit != NULL);
@@ -5307,7 +4807,7 @@ void C_VS_UI_TITLE::Show()
 		}
 		else
 		{
-			m_title_spk.BltLocked();
+			m_title_spk.BltLocked(x, y);
 			
 			//if(!gC_vs_ui.IsRunningOption())
 			//add by zdj				
@@ -5352,12 +4852,19 @@ void C_VS_UI_TITLE::Show()
 			else
 				//add by zdj
 //				sprintf(sz_temp, "%s : %1.2f", (*g_pGameStringTable)[UI_STRING_MESSAGE_CLIENT_VERSION].GetString(),(float)g_pUserInformation->GameVersion/100+3);
-				sprintf(sz_temp,"%s","  ����������Ѫ���顷 V2.20");
+				sprintf(sz_temp,"%s","   V2.20");
 			//modify by viva for Notice
 			//g_PrintColorStr(g_GameRect.right- 50 -g_GetStringWidth(sz_temp, gpC_base->m_info_pi.hfont), g_GameRect.bottom -30, sz_temp, gpC_base->m_info_pi, RGB_WHITE);
 			//end
 		}
 	}
+	else
+	{
+		TraceTitleFlow("C_VS_UI_TITLE::Show lock failed");
+	}
+
+#if defined(PLATFORM_WINDOWS) && (defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL))
+#endif
 
 	SHOW_WINDOW_ATTR;
 }
@@ -5401,8 +4908,8 @@ bool C_VS_UI_TITLE::MouseControl(UINT message, int _x, int _y)
 
 	m_pC_button_group->MouseControl(message, _x, _y);
 
-	// Also forward mouse events to login window for text box handling
-	if (m_pC_login != NULL)
+	// Forward only login-panel hits so title menu buttons remain clickable while login is open.
+	if (m_pC_login != NULL && m_pC_login->Running() && m_pC_login->IsPixel(_x, _y))
 	{
 		m_pC_login->MouseControl(message, _x, _y);
 	}
@@ -5430,7 +4937,20 @@ void C_VS_UI_TITLE::KeyboardControl(UINT message, UINT key, long extra)
 		return;
 	}
 
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	
+
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)
+	if (m_pC_login != NULL && m_pC_login->Running())
+	{
+		m_pC_login->KeyboardControl(message, key, extra);
+
+		if (message == WM_KEYDOWN || message == WM_CHAR
+			|| message == WM_TEXTINPUT || message == WM_TEXTEDITING)
+		{
+			return;
+		}
+	}
+#endif
 
 	id_t id = INVALID_ID;
 	if (message == WM_KEYDOWN) 
@@ -5475,7 +4995,7 @@ void C_VS_UI_TITLE::Run(id_t id)
 	switch (id)
 	{
 		case CONNECT:
-			// �ݸ�����
+			
 //			m_pC_login->Start();
 			gpC_base->SendMessage(UI_RUN_CONNECT);
 			break;
@@ -5682,13 +5202,13 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 	const InterfaceInformation* pSkin = &g_pSkinManager->Get( SkinManager::OPTION );
 	m_pC_button_group = new ButtonGroup(this);
 
-	// �ϴ� ����Ʈ��� ��ư
+	
 //	int default_button_x = 174, default_button_y = 282, load_button_x = 246, save_button_x = 303;
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(default_button_x, default_button_y, m_pC_etc_spk->GetWidth(DEFAULT_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(DEFAULT_BUTTON_HILIGHTED), DEFAULT_ID, this, DEFAULT_BUTTON_HILIGHTED) );
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(load_button_x, default_button_y, m_pC_etc_spk->GetWidth(LOAD_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(LOAD_BUTTON_HILIGHTED), LOAD_ID, this, LOAD_BUTTON_HILIGHTED) );
 //	m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(save_button_x, default_button_y, m_pC_etc_spk->GetWidth(SAVE_BUTTON_HILIGHTED), m_pC_etc_spk->GetHeight(SAVE_BUTTON_HILIGHTED), SAVE_ID, this, SAVE_BUTTON_HILIGHTED) );
 
-	// close��ư
+	
 	//int close_button_x = pSkin->GetPoint(0).x, close_button_y = pSkin->GetPoint(0).y;
 	int i = 0;
 	
@@ -5702,7 +5222,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(0).x,pSkin->GetPoint(0).y, m_pC_etc_spk->GetWidth(BUTTON_CLOSE), m_pC_etc_spk->GetHeight(BUTTON_CLOSE), CLOSE_ID, this, BUTTON_CLOSE) );
 
-		// tab��ư
+		
 		//int tab_control_x = 116, tab_y = 20, tab_graphic_x = 170, tab_sound_x = 224, tab_game_x = 278;
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(1).x, pSkin->GetPoint(1).y, m_pC_main_spk->GetWidth(TAB_CONTROL), m_pC_main_spk->GetHeight(TAB_CONTROL), CONTROL_ID, this, TAB_CONTROL) );
 		m_pC_button_group->Add( new C_VS_UI_EVENT_BUTTON(pSkin->GetPoint(2).x, pSkin->GetPoint(2).y, m_pC_main_spk->GetWidth(TAB_GRAPHIC), m_pC_main_spk->GetHeight(TAB_GRAPHIC), GRAPHIC_ID, this, TAB_GRAPHIC) );
@@ -5712,7 +5232,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		m_check_x = pSkin->GetPoint(5).x, m_check_y = pSkin->GetPoint(5).y, m_check_gap = 20;
 
 		
-		// control_tab ��ư��
+		
 	//	int list_button_x = 341, list_button_y = 54;
 		m_pC_control_button_group = new ButtonGroup(this);
 		m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x+10, m_check_y, m_pC_etc_spk->GetWidth(RADIO_BACK_DISABLE), m_pC_etc_spk->GetHeight(RADIO_BACK_DISABLE), CHECK_NORMAL_CHAT, this, RADIO_BACK_DISABLE) );
@@ -5721,16 +5241,16 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_CONTROL_MAX; i++)
 			m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*(8+i), m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_CONTROL_TAB+i+2, this, CHECK_BACK_DISABLE) );
 
-		// graphic_tab ��ư��
+		
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
 			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GRAPHIC_TAB+i, this, CHECK_BACK_DISABLE) );
-		// sound_tab ��ư��
+		
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
 			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_SOUND_TAB+i, this, CHECK_BACK_DISABLE) );
 
-		// game_tab ��ư��
+		
 		m_pC_game_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_etc_spk->GetWidth(CHECK_BACK_DISABLE), m_pC_etc_spk->GetHeight(CHECK_BACK_DISABLE), CHECK_GAME_TAB+i, this, CHECK_BACK_DISABLE) );
@@ -5758,7 +5278,7 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		m_check_x = 50, m_check_y = 60 , m_check_gap = 20;
 
 		
-	// control_tab ��ư��
+	
 	//	int list_button_x = 341, list_button_y = 54;
 		m_pC_control_button_group = new ButtonGroup(this);
 		m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x+10, m_check_y, m_pC_main_spk->GetWidth(TITLE_RADIO_BACK), m_pC_main_spk->GetHeight(TITLE_RADIO_BACK), CHECK_NORMAL_CHAT, this, TITLE_RADIO_BACK) );
@@ -5767,15 +5287,15 @@ C_VS_UI_OPTION::C_VS_UI_OPTION(bool IsTitle)
 		for(i = 0; i < CHECK_CONTROL_MAX; i++)
 			m_pC_control_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*(8+i), m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_CONTROL_TAB+i+2, this, TITLE_CHECK_BACK) );
 
-		// graphic_tab ��ư��
+		
 		m_pC_graphic_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GRAPHIC_MAX; i++)
 			m_pC_graphic_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GRAPHIC_TAB+i, this, TITLE_CHECK_BACK) );
-		// sound_tab ��ư��
+		
 		m_pC_sound_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_SOUND_MAX; i++)
 			m_pC_sound_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_SOUND_TAB+i, this, TITLE_CHECK_BACK) );
-		// game_tab ��ư��
+		
 		m_pC_game_button_group = new ButtonGroup(this);
 		for(i = 0; i < CHECK_GAME_MAX; i++)
 			m_pC_game_button_group->Add( new C_VS_UI_EVENT_BUTTON(m_check_x, m_check_y+m_check_gap*i, m_pC_main_spk->GetWidth(TITLE_CHECK_BACK), m_pC_main_spk->GetHeight(TITLE_CHECK_BACK), CHECK_GAME_TAB+i, this, TITLE_CHECK_BACK) );
@@ -5832,7 +5352,7 @@ C_VS_UI_OPTION::~C_VS_UI_OPTION()
 void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {
 	
-	//üũ&���� ��ư��
+	
 	if(false == m_IsTitle)
 	{
 		if(p_button->m_image_index == CHECK_BACK_DISABLE || p_button->m_image_index == RADIO_BACK_DISABLE)
@@ -5859,7 +5379,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+radio_plus_x+p_button->x+2, y+m_vampire_plus_y+radio_plus_y+p_button->y+2, p_button->m_image_index+2);
 			}
 		}
-		//tab��ư��
+		
 		else if(p_button->GetID() == CONTROL_ID || p_button->GetID() == GRAPHIC_ID || p_button->GetID() == SOUND_ID || p_button->GetID() == GAME_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5875,7 +5395,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				}
 			}
 		}
-		//Close��ư
+		
 		else if(p_button->GetID() == CLOSE_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5894,7 +5414,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 			}
 
 		}
-		//Hotkey List��ư
+		
 		else if(p_button->GetID() == LIST_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5962,7 +5482,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 //					m_pC_etc_spk->BltLocked(x+m_vampire_plus_x+radio_plus_x+p_button->x+2, y+m_vampire_plus_y+radio_plus_y+p_button->y+2, p_button->m_image_index+2);
 			}
 		}
-		//tab��ư��
+		
 		else if(p_button->GetID() == CONTROL_ID || p_button->GetID() == GRAPHIC_ID || p_button->GetID() == SOUND_ID || p_button->GetID() == GAME_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5977,7 +5497,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				}
 			}
 		}
-		//Close��ư
+		
 		else if(p_button->GetID() == CLOSE_ID)
 		{
 			if(p_button->GetFocusState())
@@ -5988,7 +5508,7 @@ void	C_VS_UI_OPTION::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 					m_pC_main_spk->BltLocked(x+p_button->x+1, y+p_button->y, TITLE_BUTTON_EXIT_HILIGHT);
 			}
 		}
-		//Hotkey List��ư
+		
 		else if(p_button->GetID() == LIST_ID)
 		{
 			if(p_button->GetFocusState())
@@ -6087,22 +5607,22 @@ void C_VS_UI_OPTION::Start()
 //			m_pC_etc_spk = new C_SPRITE_PACK(SPK_OPTION);
 //		}
 //	}
-	// �ݸ����ϰ�쿡�� g_pUserInformation �� bNetmarbleGoreLevel �� �������.
-	// false �� ��찡 teenversion.
+	
+	
 	
 	if(!gC_vs_ui.IsGameMode())
 	{
-		// �޴����� �ݸ��� ƾ�����̸� ���� ������ Disable �׷��� ������ �ɼǿ� ������.
+		
 		if(!g_pUserInformation->bNetmarbleGoreLevel&&g_pUserInformation->IsNetmarble)
 			m_check[CHECK_TEEN_VERSION] = CHECK_CHECK_DISABLE;			
 		else
 			m_check[CHECK_TEEN_VERSION] = g_pUserOption->UseTeenVersion?CHECK_CHECK:CHECK_NOT;
 	} else		
 	{
-		// �ݸ��� ƾ�����̸� ���� ����. �׷��� ������ �ɼǿ� ������.
+		
 		if(!g_pUserInformation->bNetmarbleGoreLevel&&g_pUserInformation->IsNetmarble)
 		{
-			// �����̸�
+			
 			m_check[CHECK_TEEN_VERSION] = g_pUserInformation->bNetmarbleGoreLevel ? CHECK_DISABLE : CHECK_CHECK_DISABLE ;
 
 		} else
@@ -6661,7 +6181,7 @@ bool C_VS_UI_OPTION::MouseControl(UINT message, int _x, int _y)
 -----------------------------------------------------------------------------*/
 void C_VS_UI_OPTION::KeyboardControl(UINT message, UINT key, long extra)
 {
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	
 
 	if (message == WM_KEYUP)
 	{	
@@ -6953,8 +6473,45 @@ void C_VS_UI_OPTION::Show()
 //			m_pC_main_spk->BltLocked(x+tab_x[m_i_selected_tab-TAB_CONTROL]+m_vampire_plus_x, y+tab_y+m_vampire_plus_y, m_i_selected_tab);
 //		else
 			m_pC_main_spk->BltLocked(x+Tab_X[m_i_selected_tab-TAB_CONTROL]+m_vampire_plus_x, y+Tab_Y+m_vampire_plus_y, m_i_selected_tab);
+
+		const int tabSprite[4] = { TAB_CONTROL, TAB_GRAPHIC, TAB_SOUND, TAB_GAME };
+		const char* tabLabel[4] = { "Controls", "Screen", "Sound", "Game" };
+		const WORD tabFill = CSDLGraphics::Color(6, 4, 3);
+		const WORD tabSelectedFill = CSDLGraphics::Color(11, 8, 5);
+		for (int tab = 0; tab < 4; ++tab)
+		{
+			const int tabX = x + m_vampire_plus_x + Tab_X[tab];
+			const int tabY = y + m_vampire_plus_y + Tab_Y;
+			const int tabW = m_pC_main_spk->GetWidth(tabSprite[tab]);
+			const int tabH = m_pC_main_spk->GetHeight(tabSprite[tab]);
+			RECT tabRect = { tabX + 4, tabY + 3, tabX + tabW - 4, tabY + tabH - 3 };
+			gpC_base->m_p_DDSurface_back->FillRect(&tabRect,
+				(m_i_selected_tab == tabSprite[tab]) ? tabSelectedFill : tabFill);
+		}
+
+		if (!m_IsTitle)
+		{
+			RECT titleRect = { x + 34, y + 26, x + 96, y + 64 };
+			gpC_base->m_p_DDSurface_back->FillRect(&titleRect, CSDLGraphics::Color(6, 4, 3));
+		}
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
+
+	PrintInfo optionMenuPI = gpC_base->m_desc_menu_pi;
+	optionMenuPI.text_align = TA_CENTER;
+
+	const int tabSprite[4] = { TAB_CONTROL, TAB_GRAPHIC, TAB_SOUND, TAB_GAME };
+	const char* tabLabel[4] = { "Controls", "Screen", "Sound", "Game" };
+	for (int tab = 0; tab < 4; ++tab)
+	{
+		const int tabX = x + m_vampire_plus_x + Tab_X[tab];
+		const int tabY = y + m_vampire_plus_y + Tab_Y;
+		const int tabW = m_pC_main_spk->GetWidth(tabSprite[tab]);
+		g_PrintColorStr(tabX + tabW / 2, tabY + 5, tabLabel[tab], optionMenuPI, RGB(230, 224, 170));
+	}
+
+	if (!m_IsTitle)
+		g_PrintColorStr(x + 65, y + 36, "Options", optionMenuPI, RGB(230, 224, 170));
 
 	switch(m_i_selected_tab)
 	{
@@ -6972,6 +6529,13 @@ void C_VS_UI_OPTION::Show()
 			if(gpC_base->m_p_DDSurface_back->Lock())
 			{
 				m_pC_main_spk->BltLocked(x+m_vampire_plus_x+125+TitleOffset, y+m_vampire_plus_y+80, HOTKEY_WINDOW);
+				RECT headerRect = {
+					x + m_vampire_plus_x + 127 + TitleOffset,
+					y + m_vampire_plus_y + 82,
+					x + m_vampire_plus_x + 362 + TitleOffset,
+					y + m_vampire_plus_y + 99
+				};
+				gpC_base->m_p_DDSurface_back->FillRect(&headerRect, 0);
 				m_pC_control_button_group->Show();
 				gpC_base->m_p_DDSurface_back->Unlock();
 			}
@@ -6979,16 +6543,19 @@ void C_VS_UI_OPTION::Show()
 			g_FL2_GetDC();
 //			g_PrintColorStr(x+m_vampire_plus_x+130, y+m_vampire_plus_y+56, "Input Style : ", gpC_base->m_user_id_pi, RGB_BLACK);
 			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+30, y+m_vampire_plus_y+m_check_y, 
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_NORMAL_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_BLACK);
+				"Normal chat", gpC_base->m_user_id_pi, RGB_BLACK);
 			
 			g_PrintColorStr(x+m_vampire_plus_x+m_check_x+140, y+m_vampire_plus_y+m_check_y, 
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ENTER_CHATTING].GetString(), gpC_base->m_user_id_pi, RGB_BLACK);
+				"Enter chat", gpC_base->m_user_id_pi, RGB_BLACK);
 
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+230, y+m_vampire_plus_y+53, HOTKEY_BACK);
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+230+m_pC_etc_spk->GetWidth(HOTKEY_BACK), y+m_vampire_plus_y+53, HOTKEY_BACK_RIGHT);
 			
 			for(i = 0; i < CHECK_CONTROL_MAX; i++)
 				g_PrintColorStr(x+m_vampire_plus_x+m_check_x+15, y+m_vampire_plus_y+m_check_y+m_check_gap*(8+i), check_string[i].c_str(), gpC_base->m_user_id_pi, RGB_BLACK);
+
+			g_PrintColorStr(x+m_vampire_plus_x+151+TitleOffset, y+m_vampire_plus_y+84, "Action", gpC_base->m_chatting_pi, RGB_WHITE);
+			g_PrintColorStr(x+m_vampire_plus_x+253+TitleOffset, y+m_vampire_plus_y+84, "Hotkey", gpC_base->m_chatting_pi, RGB_WHITE);
 			
 //			m_pC_etc_spk->Blt(x+m_vampire_plus_x+m_rt_value[RECT_MOUSE_SPEED].x, y+m_vampire_plus_y+m_rt_value[RECT_MOUSE_SPEED].y+5, VOLUME_BAR);
 //			if(m_check[CHECK_MOUSE_SPEED])
@@ -7051,16 +6618,16 @@ void C_VS_UI_OPTION::Show()
 		{
 			const char* check_string[CHECK_GRAPHIC_MAX] =
 			{
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_3D_ACCEL].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ALPHA_HPBAR].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_SHED_BLOOD].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_HIDE_SOFT].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_GAME_BRIGHT].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_CHATTING_TALK].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_PUT_FPS].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_WINDOW_ALPHA].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_DENSITY_ALPHA].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_DO_NOT_SHOW_PERSNALSHOP_MSG].GetString(),				
+				"3D acceleration",
+				"Transparent HP bars",
+				"Show blood",
+				"Smooth auto-hide",
+				"Gamma",
+				"Chat box outline",
+				"Show FPS",
+				"Window transparency",
+				"Transparency strength",
+				"Hide personal shop messages",
 				
 			};
 			
@@ -7101,9 +6668,9 @@ void C_VS_UI_OPTION::Show()
 		{
 			const char* check_string[CHECK_SOUND_MAX] =
 			{
-//				"���� �Ҹ� ���",
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_SOUND_VOLUME].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_MUSIC_VOLUME].GetString(),
+
+				"Sound volume",
+				"Music volume",
 			};
 
 			g_FL2_GetDC();
@@ -7143,27 +6710,19 @@ void C_VS_UI_OPTION::Show()
 		{
 			const char* check_string[CHECK_GAME_MAX] =
 			{
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_SHOW_BASIC_HELP].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_NO_LISTEN_BAD_TALK].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_LOAD_ALL_IMAGE].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_CHATTING_COLOR_WHITE].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_RUN_TEEN_VERSION].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_OPEN_WINDOW_WHEN_WHISPER].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_DO_NOT_WAR_MSG].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_DO_NOT_LAIR_MSG].GetString(),
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_DO_NOT_HOLY_LAND_MSG].GetString(),				
-				(*g_pGameStringTable)[UI_STRING_MESSAGE_GAMEMONEY_WITH_HANGUL].GetString(),				
+				"Show beginner help",
+				"Filter profanity",
+				"Preload images",
+				"White chat text",
+				"Teen version",
+				"Open popup on whisper",
+				"Hide war messages",
+				"Hide lair messages",
+				"Hide holy land messages",
+				"Plain money text",
 				
 //				(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_NOT_SEND_MY_INFO].GetString(),
-/*				"�ʺ��ڿ� ���� ����",
-				"���۸� ���� �ʱ�",
-//				"���� ���ϰ� �ϱ�",
-//				"��Ƽ �ʴ� �ź�",
-//				"��Ƽ ���� ��û �ź�",
-				"���̵��� �� ���� �̹��� �ҷ�����",
-				"ä�� ��� ������� ����",
-				"ƾ�������� ����",
-				"�ӼӸ� ������ ä��â ����",*/
+ 
 			};
 			
 			g_FL2_GetDC();
@@ -7185,7 +6744,64 @@ void C_VS_UI_OPTION::Show()
 //			DrawTitleEffect();
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
-	
+
+	if(gpC_base->m_p_DDSurface_back->Lock())
+	{
+		const int tabSprite[4] = { TAB_CONTROL, TAB_GRAPHIC, TAB_SOUND, TAB_GAME };
+		const WORD tabFill = CSDLGraphics::Color(6, 4, 3);
+		const WORD tabSelectedFill = CSDLGraphics::Color(11, 8, 5);
+		for (int tab = 0; tab < 4; ++tab)
+		{
+			const int tabX = x + m_vampire_plus_x + Tab_X[tab];
+			const int tabY = y + m_vampire_plus_y + Tab_Y;
+			const int tabW = m_pC_main_spk->GetWidth(tabSprite[tab]);
+			const int tabH = m_pC_main_spk->GetHeight(tabSprite[tab]);
+			RECT tabRect = { tabX + 4, tabY + 3, tabX + tabW - 4, tabY + tabH - 3 };
+			gpC_base->m_p_DDSurface_back->FillRect(&tabRect,
+				(m_i_selected_tab == tabSprite[tab]) ? tabSelectedFill : tabFill);
+		}
+
+		if (!m_IsTitle)
+		{
+			RECT titleRect = { x + 34, y + 26, x + 96, y + 64 };
+			gpC_base->m_p_DDSurface_back->FillRect(&titleRect, CSDLGraphics::Color(6, 4, 3));
+		}
+		gpC_base->m_p_DDSurface_back->Unlock();
+	}
+
+	for (int tab = 0; tab < 4; ++tab)
+	{
+		const int tabX = x + m_vampire_plus_x + Tab_X[tab];
+		const int tabY = y + m_vampire_plus_y + Tab_Y;
+		const int tabW = m_pC_main_spk->GetWidth(tabSprite[tab]);
+		g_PrintColorStr(tabX + tabW / 2, tabY + 5, tabLabel[tab], optionMenuPI, RGB(230, 224, 170));
+	}
+
+	if (!m_IsTitle)
+		g_PrintColorStr(x + 65, y + 36, "Options", optionMenuPI, RGB(230, 224, 170));
+
+	if(m_i_selected_tab == TAB_CONTROL)
+	{
+		int TitleOffset = 0;
+		if(m_IsTitle)
+			TitleOffset = -70;
+
+		if(gpC_base->m_p_DDSurface_back->Lock())
+		{
+			RECT headerRect = {
+				x + m_vampire_plus_x + 127 + TitleOffset,
+				y + m_vampire_plus_y + 82,
+				x + m_vampire_plus_x + 362 + TitleOffset,
+				y + m_vampire_plus_y + 99
+			};
+			gpC_base->m_p_DDSurface_back->FillRect(&headerRect, 0);
+			gpC_base->m_p_DDSurface_back->Unlock();
+		}
+
+		g_PrintColorStr(x+m_vampire_plus_x+151+TitleOffset, y+m_vampire_plus_y+84, "Action", gpC_base->m_chatting_pi, RGB_WHITE);
+		g_PrintColorStr(x+m_vampire_plus_x+253+TitleOffset, y+m_vampire_plus_y+84, "Hotkey", gpC_base->m_chatting_pi, RGB_WHITE);
+	}
+
 
 	if(gC_vs_ui.IsAccelMode())
 	{
@@ -7202,11 +6818,11 @@ void C_VS_UI_OPTION::Show()
 		int py = rect.y+30;
 		
 		g_FL2_GetDC();
-		px = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ACCEL_NAME].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
+		px = g_PrintColorStr(px, py, "Action: ", gpC_base->m_chatting_pi, RGB_WHITE);
 		g_PrintColorStr(px, py, pAccelName, gpC_base->m_chatting_pi, RGB_WHITE);
 		WORD key = g_pKeyAccelerator->GetKey(accel);
 		px = rect.x+30+150;
-		px = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_ACCEL_KEY].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
+		px = g_PrintColorStr(px, py, "Key: ", gpC_base->m_chatting_pi, RGB_WHITE);
 		int old_px = px;
 		if(ACCEL_HAS_CONTROL(key))
 			px = g_PrintColorStr(px, py, "Ctrl", gpC_base->m_chatting_pi, RGB_WHITE);
@@ -7238,8 +6854,8 @@ void C_VS_UI_OPTION::Show()
 		else
 			px = g_PrintColorStr(px, py, scancode_name[ACCEL_GET_KEY(key)], gpC_base->m_chatting_pi, RGB_WHITE);
 	
-		g_PrintColorStr(rect.x+30, rect.y+50, (*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_MSG1].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
-		g_PrintColorStr(rect.x+30, rect.y+70,(*g_pGameStringTable)[UI_STRING_MESSAGE_OPTION_MENU_MSG2].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
+		g_PrintColorStr(rect.x+30, rect.y+50, "Press a new shortcut key.", gpC_base->m_chatting_pi, RGB_WHITE);
+		g_PrintColorStr(rect.x+30, rect.y+70, "Press Esc to cancel.", gpC_base->m_chatting_pi, RGB_WHITE);
 		g_FL2_ReleaseDC();
 	}
 	SHOW_WINDOW_ATTR;
@@ -7306,7 +6922,7 @@ C_VS_UI_GO_BILING_PAGE::C_VS_UI_GO_BILING_PAGE(BILING_MSG_LIST msg)
 	AttrKeyboardControl(true);
 	m_biling_mode = msg;
 
-	// �ݸ�����
+	
 	int w_w = 350;
 	int w_h = 200;
 
@@ -7460,7 +7076,7 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 		
 		char *sz_string2 = sz_string;
 		
-		while(*sz_string2 == ' ')		// ���� ��������
+		while(*sz_string2 == ' ')		
 		{
 			sz_string2++;
 			next++;
@@ -7473,7 +7089,7 @@ void C_VS_UI_GO_BILING_PAGE::Show()
 		sz_string2[cut_pos] = NULL;
 		
 		char *return_char = NULL;
-		if((return_char = strchr(sz_string2, '\n')) != NULL)	// return ó��
+		if((return_char = strchr(sz_string2, '\n')) != NULL)	
 		{
 			cut_pos = return_char - sz_string2+1;
 			sz_string2[cut_pos-1] = NULL;

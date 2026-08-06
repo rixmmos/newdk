@@ -19,7 +19,7 @@
 #include "Vampire.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -41,9 +41,9 @@ void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         SkillType_t SkillType = pVampireSkillSlot->getSkillType();
 
-        // NPC는 공격할 수가 없다.
-        // 면역이거나. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -59,7 +59,7 @@ void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // Knowledge of Blood 가 있다면 hit bonus
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD);
@@ -92,12 +92,12 @@ void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성해서 붙인다.
+            
             EffectArmageddon* pEffectArmageddon = new EffectArmageddon(pTargetCreature);
             //			pEffectArmageddon->setCasterName( pVampire->getName() );
             //			pEffectArmageddon->setPartyID( pVampire->getPartyID() );
             pEffectArmageddon->setUserObjectID(pVampire->getObjectID());
-            pEffectArmageddon->setHP(400); // 하드코딩됨 --; by Sequoia
+            pEffectArmageddon->setHP(400); 
             pEffectArmageddon->setDelay(output.Tick);
             pEffectArmageddon->setDamage(output.Damage);
             pEffectArmageddon->setNextTime(output.Tick);
@@ -109,7 +109,7 @@ void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
             pTargetCreature->addEffect(pEffectArmageddon);
             pTargetCreature->setFlag(Effect::EFFECT_CLASS_ARMAGEDDON);
 
-            // 이펙트가 붙었다는 것을 브로드캐스팅해준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pTargetCreature->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_ARMAGEDDON);
@@ -141,10 +141,10 @@ void Armageddon::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
             _GCSkillToObjectOK6.setSkillType(SkillType);
             _GCSkillToObjectOK6.setDuration(output.Duration);
 
-            if (bCanSeeCaster) // 10은 땜빵 수치다.
+            if (bCanSeeCaster) 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
-            } else // 10은 땜빵 수치다.
+            } else 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK6, &_GCSkillToObjectOK1);
             }

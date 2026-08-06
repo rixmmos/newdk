@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // MStopZoneRandomEffectGenerator.h
 //----------------------------------------------------------------------
-// 중심에서 사방으로 적당한(?) 위치에
-// 4개의 Effect를 출력시킨다.
+
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONERANDOMEFFECTGENERATOR_H__
@@ -17,7 +17,7 @@ class MStopZoneRandomEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_RANDOM; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

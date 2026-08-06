@@ -18,7 +18,7 @@ EffectEventQuestReset::EffectEventQuestReset(Creature* pCreature, int type) : m_
 
     setTarget(pCreature);
 
-    // ¼­¹ö Àü¿ë EffectÀÌ´Ù. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -59,7 +59,7 @@ void EffectEventQuestReset::affect(Creature* pCreature)
     int lastMins = (lastSec % 3600) / 60;
 
     char buffer[256];
-    sprintf(buffer, "ÀëÈÎÎñ¹æ¶¨Ê±¼ä»¹Ê£ÏÂ%dÐ¡Ê±%d·Ö.", lastHours, lastMins);
+    sprintf(buffer, "%d%d.", lastHours, lastMins);
     GCSystemMessage gcSM;
     gcSM.setMessage(buffer);
     pPC->getPlayer()->sendPacket(&gcSM);
@@ -104,7 +104,7 @@ void EffectEventQuestReset::unaffect(Creature* pCreature)
     pPC->getGQuestManager()->refreshQuest();
 
     GCSystemMessage gcSM;
-    gcSM.setMessage("ÒÑ¹ý12Ð¡Ê±µÄ¹æ¶¨Ê±¼ä.¿ÉÒÔÖØÐÂÉêÇëAµÈ¼¶ÈÎÎñ.");
+    gcSM.setMessage("12.A.");
     pPC->getPlayer()->sendPacket(&gcSM);
 
     __END_CATCH

@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 
 	if (pCreature!=NULL)
 	{
-		// 일반 creature인 경우는 시작좌표를 일단 설정해준다.
+		
 		if (pCreature->GetID()!=g_pPlayer->GetID())
 		{
 			pCreature->SetStop();		
@@ -41,12 +41,12 @@ throw ( ProtocolException , Error )
 			pCreature->SetServerPosition( ox, oy );
 		}
 
-		// (nx, ny)로 KnockBack된다.
+		
 		pCreature->KnockBackPosition( nx, ny );
 	}
 	else
 	{
-		// 그런 creature가 없을 경우
+		
 		DEBUG_ADD_FORMAT("There's no such creature : ID=%d", pPacket->getObjectID());
 	}
 

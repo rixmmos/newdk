@@ -1,7 +1,7 @@
  //----------------------------------------------------------------------
 // MSkipEffectGenerator.cpp
 //----------------------------------------------------------------------
-// Tile과 맞붙은 깜빡이는 Effect들을 생성한다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MPlayingWithFireEffectGenerator.h"
@@ -239,13 +239,13 @@ MPlayingWithFireEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	TYPE_SECTORPOSITION	sX, sY;
 	sX = g_pTopView->PixelToMapX(egInfo.x0);
 	sY = g_pTopView->PixelToMapY(egInfo.y0);
 
-	// Zone에 추가한다.
+	
 
 	bool bAdd = false;
 	MEffectTarget*	pEffectTarget2;
@@ -260,7 +260,7 @@ MPlayingWithFireEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		
 		MEffect*	pEffect;
 		//---------------------------------------------
-		// Effect 생성
+		
 		//---------------------------------------------
 		pEffect = new MEffect(bltType);
 		
@@ -268,21 +268,21 @@ MPlayingWithFireEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		pEffect->SetFrameID( frameID, maxFrame );	
 		pEffect->SetPixelPosition( x, y, egInfo.z0 );
 //		pEffect->SetZ(egInfo.z0);			
-		pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-		pEffect->SetCount( egInfo.count, egInfo.linkCount );			// 지속되는 Frame
+		pEffect->SetStepPixel(egInfo.step);		
+		pEffect->SetCount( egInfo.count, egInfo.linkCount );			
 		
 //		pEffect->SetDelayFrame( i*8 );
 		
-		// 방향 설정
+		
 		pEffect->SetDirection( direction );
 		
-		// 위력
+		
 		pEffect->SetPower(egInfo.power);
 		
-		// 빛의 밝기
+		
 		//pEffect->SetLight( light );
 		
-		// 중복 가능한가
+		
 		pEffect->SetMulti(true);
 
 		if(g_pZone->AddEffect( pEffect))
@@ -294,7 +294,7 @@ MPlayingWithFireEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			}
 			else
 			{
-				// 다음 Effect 생성 정보
+				
 				if (egInfo.pEffectTarget == NULL)
 				{
 					pEffect->SetLink( egInfo.nActionInfo, NULL );
@@ -309,7 +309,7 @@ MPlayingWithFireEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		}
 //		if (bAdd)
 //		{
-//			// 다음 Effect 생성 정보
+
 //			pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 //		
 //		}

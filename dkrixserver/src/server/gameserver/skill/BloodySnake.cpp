@@ -19,7 +19,7 @@
 #include "GCSkillToTileOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodySnake::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                           CEffectID_t CEffectID)
@@ -39,7 +39,7 @@ void BloodySnake::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature)) {
             executeSkillFailException(pVampire, getSkillType());
             return;
@@ -56,7 +56,7 @@ void BloodySnake::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                           CEffectID_t CEffectID)
@@ -103,7 +103,7 @@ void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampi
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bTileCheck) {
             decreaseMana(pVampire, RequiredMP, _GCSkillToTileOK1);
 
-            // 이펙트의 지속시간을 계산한다.
+            
             SkillInput input(pVampire);
             SkillOutput output;
             computeOutput(input, output);
@@ -120,16 +120,16 @@ void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampi
             if (rect.ptInRect(tileX, tileY)) {
                 Tile& tile = pZone->getTile(tileX, tileY);
 
-                // 현재 타일에다 이펙트를 추가할 수 있다면...
+                
                 if (tile.canAddEffect()) {
-                    // 같은 effect가 있으면 지운다.
+                    
                     Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_BLOODY_SNAKE);
                     if (pOldEffect != NULL) {
                         ObjectID_t effectID = pOldEffect->getObjectID();
                         pZone->deleteEffect(effectID); // fix me
                     }
 
-                    // 이펙트 클래스를 생성한다.
+                    
                     EffectBloodySnake* pEffect = new EffectBloodySnake(pZone, tileX, tileY);
                     pEffect->setCasterName(pVampire->getName());
                     pEffect->setCasterID(pVampire->getObjectID());
@@ -141,7 +141,7 @@ void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampi
                     pEffect->setTick(output.Tick + (output.Tick >> 1));
                     pEffect->setDir(Dir);
 
-                    // Tile에 붙이는 Effect는 ObjectID를 등록받아야 한다.
+                    
                     ObjectRegistry& objectregister = pZone->getObjectRegistry();
                     objectregister.registerObject(pEffect);
                     pZone->addEffect(pEffect);
@@ -230,8 +230,8 @@ void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampi
 
             list<Creature*> watcherList = pZone->getWatcherList(myX, myY, pVampire);
 
-            // watcherList에서 cList에 속하지 않고, caster(pVampire)를 볼 수 없는 경우는
-            // OK4를 보내고.. cList에 추가한다.
+            
+            
             for (list<Creature*>::const_iterator itr = watcherList.begin(); itr != watcherList.end(); itr++) {
                 bool bBelong = false;
                 for (list<Creature*>::const_iterator tItr = cList.begin(); tItr != cList.end(); tItr++)
@@ -240,9 +240,9 @@ void BloodySnake::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampi
 
                 Creature* pWatcher = (*itr);
                 if (bBelong == false && canSee(pWatcher, pVampire) == false) {
-                    // Assert(pWatcher->isPC());	// 당연 PC다.. Zone::getWatcherList는 PC만 return한다
+                    
                     if (!pWatcher->isPC()) {
-                        // cout << "BloodySnake : 왓처 리스트가 PC가 아닙니다." << endl;
+                        
                         GCSkillFailed1 _GCSkillFailed1;
                         _GCSkillFailed1.setSkillType(getSkillType());
                         pVampire->getPlayer()->sendPacket(&_GCSkillFailed1);
@@ -289,7 +289,7 @@ void BloodySnake::execute(Monster* pMonster, Creature* pEnemy)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -317,7 +317,7 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
         ZoneCoord_t myX = pMonster->getX();
         ZoneCoord_t myY = pMonster->getY();
 
-        // 마스터는 무조건~~
+        
         bool bRangeCheck = pMonster->isMaster() || verifyDistance(pMonster, X, Y, pSkillInfo->getRange());
 
         bool bHitRoll = pMonster->isMaster() || HitRoll::isSuccessMagic(pMonster, pSkillInfo);
@@ -328,7 +328,7 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             bTileCheck = true;
 
         if (bRangeCheck && bHitRoll && bTileCheck) {
-            // 이펙트의 지속시간을 계산한다.
+            
             SkillInput input(pMonster);
             SkillOutput output;
             computeOutput(input, output);
@@ -336,7 +336,7 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             // Range_t    Range    = 3;
             Dir_t StartDir, EndDir;
 
-            // 마스터는 8방향
+            
             if (pMonster->isMaster()) {
                 StartDir = LEFT;
                 EndDir = LEFTUP;
@@ -356,16 +356,16 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                 if (rect.ptInRect(tileX, tileY)) {
                     Tile& tile = pZone->getTile(tileX, tileY);
 
-                    // 현재 타일에다 이펙트를 추가할 수 있다면...
+                    
                     if (tile.canAddEffect()) {
-                        // 같은 effect가 있으면 지운다.
+                        
                         Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_BLOODY_SNAKE);
                         if (pOldEffect != NULL) {
                             ObjectID_t effectID = pOldEffect->getObjectID();
                             pZone->deleteEffect(effectID); // fix me
                         }
 
-                        // 이펙트 클래스를 생성한다.
+                        
                         EffectBloodySnake* pEffect = new EffectBloodySnake(pZone, tileX, tileY);
                         pEffect->setCasterName(pMonster->getName());
                         pEffect->setCasterID(pMonster->getObjectID());
@@ -377,7 +377,7 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                         pEffect->setTick(output.Tick + (output.Tick >> 1));
                         pEffect->setDir(Dir);
 
-                        // Tile에 붙이는 Effect는 ObjectID를 등록받아야 한다.
+                        
                         ObjectRegistry& objectregister = pZone->getObjectRegistry();
                         objectregister.registerObject(pEffect);
 
@@ -459,8 +459,8 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
             list<Creature*> watcherList = pZone->getWatcherList(myX, myY, pMonster);
 
-            // watcherList에서 cList에 속하지 않고, caster(pMonster)를 볼 수 없는 경우는
-            // OK4를 보내고.. cList에 추가한다.
+            
+            
             for (list<Creature*>::const_iterator itr = watcherList.begin(); itr != watcherList.end(); itr++) {
                 bool bBelong = false;
                 for (list<Creature*>::const_iterator tItr = cList.begin(); tItr != cList.end(); tItr++)
@@ -469,7 +469,7 @@ void BloodySnake::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
                 Creature* pWatcher = (*itr);
                 if (bBelong == false && canSee(pWatcher, pMonster) == false) {
-                    // Assert(pWatcher->isPC());	// 당연 PC다.. Zone::getWatcherList는 PC만 return한다
+                    
                     if (!pWatcher->isPC()) {
                         // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
                         return;

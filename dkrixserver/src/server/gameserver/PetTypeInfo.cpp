@@ -30,7 +30,7 @@ void PetTypeInfoManager::load() {
         Result* pResult = pStmt->executeQuery("SELECT MAX(PetType) FROM PetTypeInfo");
 
         if (!pResult->next())
-            throw Error("PetTypeInfo 가 없습니다.");
+            throw Error("PetTypeInfo  .");
 
         PetType_t MaxPetType = pResult->getInt(1);
 
@@ -58,7 +58,7 @@ void PetTypeInfoManager::load() {
 
 void PetTypeInfoManager::addPetTypeInfo(PetTypeInfo* pPetTypeInfo) {
     if (pPetTypeInfo->m_PetType >= m_PetTypeInfos.capacity())
-        throw Error("Pet Type이 최대값을 초과했네용");
+        throw Error("Pet Type  ");
 
     m_PetTypeInfos[pPetTypeInfo->m_PetType] = pPetTypeInfo;
 }

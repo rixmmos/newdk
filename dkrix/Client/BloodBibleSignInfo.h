@@ -2,16 +2,18 @@
 // Filename    : BloodBibleSignInfo.h 
 // Written By  : elca@ewestsoft.com
 // Description :
-// 입고 있는 기어 아이템들의 정보 리스트이다.
-// 각각의 기어 아이템에 대한 정보는 BloodBibleSignSlotInfo를 참조하면 된다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __BLOOD_BIBLE_SIGN_INFO_H__
 #define __BLOOD_BIBLE_SIGN_INFO_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
+#include <vector>
+
+#include "Packet/Types.h"
+#include "Packet/Exception.h"
+#include "Packet/Packet.h"
 
 #define BLOOD_BIBLE_SIGN_SLOT_NUM 6
 

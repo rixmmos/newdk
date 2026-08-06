@@ -36,9 +36,9 @@ CWinUpdate::~CWinUpdate()
 void
 CWinUpdate::Update()
 {
-	// 현재 시간
+	
 	SetCurrentTime();
 
-	// 가장 최근에 Update()를 호출한 시간을 기억시켜 둔다.
+	
 	m_LastTime = m_CurrentTime;
 }

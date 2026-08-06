@@ -54,41 +54,7 @@ void EffectShrineHoly::affect(Creature* pCreature)
     // Timeval      nextTime   = getNextTime();
     // Timeval      deadLine   = getDeadline();
     // Turn_t       RemainTime = deadLine.tv_sec - nextTime.tv_sec;
-    /*
-StringStream msg;
-
-if (pCreature->isSlayer())
-{
-    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-
-    msg << pSlayer->getName();
-}
-else
-{
-    Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-
-    msg << pVampire->getName();
-}
-
-msg << " 님이 슬레이어 성물을 가졌습니다.";
-
-GCSystemMessage gcSystemMessage;
-
-gcSystemMessage.setType(SYSTEM_MESSAGE_COMBAT);
-gcSystemMessage.setMessage(msg.toString());
-
-g_pZoneGroupManager->broadcast( &gcSystemMessage );
-
-
-// Effect붙인다.
-GCAddEffect gcAddEffect;
-gcAddEffect.setObjectID( pCreature->getObjectID() );
-gcAddEffect.setEffectID( getEffectClass() );
-gcAddEffect.setDuration( 65000 );
-pCreature->getZone()->broadcastPacket(pCreature->getX(), pCreature->getY(), &gcAddEffect);
-
-setNextTime(m_Tick);
-*/
+     
 
     __END_CATCH
 }
@@ -140,8 +106,8 @@ void EffectShrineHoly::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_SHRINE_HOLY);
 
     Zone* pZone = pCreature->getZone();

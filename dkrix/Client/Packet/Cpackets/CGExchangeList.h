@@ -7,8 +7,8 @@
 #ifndef __CG_EXCHANGE_LIST_H__
 #define __CG_EXCHANGE_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGExchangeList;

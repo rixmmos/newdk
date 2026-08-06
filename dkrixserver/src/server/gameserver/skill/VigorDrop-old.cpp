@@ -2,23 +2,23 @@
 // Project     : DARKEDEN
 // Module      : Skill - Effect
 // File Name   : EffectVigorDrop.h
-// Writer      : 장홍창
+
 // Date        : 2002.3.28
 // Description :
-//               Vigor Drop은 --storm류의 기술과 동일한 방식으로 구현되는
-//               Slayer의 기술이다.
-//               기술을 사용하게 되면, 기술 시전 지역을 중심으로 3x3의 영역에
-//               EffectVigorDrop Effect가 붙게 된다. EffectVigorDrop Effect
-//               는 독자적으로 데미지를 가하는 기술이 아니라.
-//               해당 지역의 Creature에게 EffectVigorDropToCreature Effect를
-//               붙이고 사라진다. EffectVigorDropToCreature는 VigorDrop의
-//               전체 데미지의 1/3에 해당하는 Damage를 3번 연속으로 해당
-//               Creature에게 가하고 사라진다.
+
+
+
+
+
+
+
+
+
 //
 // History
 //     DATE      WRITER         DESCRIPTION
 // =========== =========== =====================================================
-// 2002.3.28    장홍창      header file 작성
+
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@
 #include "VigorDrop.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void VigorDrop::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -55,7 +55,7 @@ void VigorDrop::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
 
@@ -74,8 +74,8 @@ void VigorDrop::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
-//  뱀파이어가 Vigor Drop Skill을 Tile에 사용했을때 사용하는 Handler
+
+
 //////////////////////////////////////////////////////////////////////////////
 void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -98,10 +98,10 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
         GCSkillToTileOK5 _GCSkillToTileOK5;
         GCSkillToTileOK6 _GCSkillToTileOK6;
 
-        // Skillype을 가지고
+        
         //    SkillInfo
-        //    SkillDomainInfo정보를 가져온다.
-        //   SkillDomain정보는 기술이 성공했을 경우 해당 계열의 경험치를 올리기 위한 것이다.
+        
+        
         SkillType_t SkillType = pSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
         SkillDomainType_t DomainType = pSkillInfo->getDomainType();
@@ -136,7 +136,7 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
 
             Range_t Range = 3;
 
-            // 기존에 같은 이펙트가 타일에 있다면 지우고 새로 설정한다.
+            
             Tile& tile = pZone->getTile(X, Y);
             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_VIGOR_DROP);
             if (pOldEffect != NULL) {
@@ -144,11 +144,11 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
                 pZone->deleteEffect(effectID);
             }
 
-            // 이펙트 오브젝트를 생성해서 타일에 붙인다.
+            
             // cout << "make EffectObject to Tile" << X << " " << Y << endl;
             EffectVigorDrop* pEffect = new EffectVigorDrop(pZone, X, Y);
 
-            // 우선권 시스템을 위하여 이름과 파티 아이디를 넣는다.
+            
             pEffect->setCasterName(pSlayer->getName());
             pEffect->setPartyID(pSlayer->getPartyID());
 
@@ -168,9 +168,9 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
             // tile.addEffect(pEffect);
 
 
-            // 이펙트 범위내의 모든 Creature에게 effect를 붙여준다.
-            // Slayer가 기술을 사용한 경우 같은 Slayer에게는
-            // 해당하지 않는다.
+            
+            
+            
             bool bEffected = false;
             bool bHit = false;
             Creature* pTargetCreature;
@@ -203,7 +203,7 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
                                 Player* pTargetPlayer = pTargetCreature->getPlayer();
                                 bEffected = true;
 
-                                // 경험치 상승을 위해서 Hit/Don'tHie를 기록한다.
+                                
                                 bHit = true;
 
                                 bool bCanSee = canSee(pTargetCreature, pSlayer);
@@ -215,7 +215,7 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
                                 cList.push_back(pTargetCreature);
 
                                 if (bCanSee) {
-                                    // 공격을 당한 사람에게
+                                    
                                     _GCSkillToTileOK2.setObjectID(pSlayer->getObjectID());
                                     _GCSkillToTileOK2.setSkillType(SkillType);
                                     _GCSkillToTileOK2.setX(X);
@@ -234,7 +234,7 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
                                 Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                                 pMonster->addEnemy(pSlayer);
 
-                                // 마지막 때린 애가 슬레이어라고 설정한다. by sigi. 2002.6.21
+                                
                                 pMonster->setLastHitCreatureClass(Creature::CREATURE_CLASS_SLAYER);
                             }
                         }
@@ -242,16 +242,16 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
                 }
 
             if (bHit) {
-                // 기술이 타일내에서 한번이라도 성공했을때에는 경험치를 받는다.
-                // 광역기술내에서 여러 Creature한테 데미지를 준 경우에는 어떻게 하는가?
-                // 1. 한 Creature에게 준 데미지를 Point로 계산한다.
-                // 2. 여러 Creature에게 준 데미지의 합을 Point로 계산한다.
+                
+                
+                
+                
                 shareAttrExp(pSlayer, output.Damage, 1, 1, 8, _GCSkillToTileOK1);
                 increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToTileOK1);
                 increaseSkillExp(pSlayer, DomainType, pSkillSlot, pSkillInfo, _GCSkillToTileOK1);
             }
 
-            // 기술을 사용한 사람들에게
+            
             _GCSkillToTileOK1.setSkillType(SkillType);
             _GCSkillToTileOK1.setCEffectID(CEffectID);
             _GCSkillToTileOK1.setX(X);
@@ -259,21 +259,21 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
             _GCSkillToTileOK1.setDuration(output.Duration);
             _GCSkillToTileOK1.setRange(Range);
 
-            // 기술을 쓴 사람만 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK3.setSkillType(SkillType);
             _GCSkillToTileOK3.setX(X);
             _GCSkillToTileOK3.setY(Y);
             //_GCSkillToTileOK3.setDuration(output.Duration);
             //_GCSkillToTileOK3.setRange(Range);
 
-            // 기술을 당한 사람만 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK4.setSkillType(SkillType);
             _GCSkillToTileOK4.setX(X);
             _GCSkillToTileOK4.setY(Y);
             _GCSkillToTileOK4.setDuration(output.Duration);
             _GCSkillToTileOK4.setRange(Range);
 
-            // 기술을 쓴 사람과 당한 사람을 모두 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK5.setObjectID(pSlayer->getObjectID());
             _GCSkillToTileOK5.setSkillType(SkillType);
             _GCSkillToTileOK5.setX(X);
@@ -281,21 +281,21 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
             _GCSkillToTileOK5.setDuration(output.Duration);
             _GCSkillToTileOK5.setRange(Range);
 
-            // 기술을 사용한 사람에게 packet 전달
+            
             pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-            // 기술을 쓸 사람과 당한 사람을 모두 볼 수 있는 사람들에게 broadcasing
-            // broadcasting후 5번OK를 받은 사람을 기록한다.
-            // 여기에 기록된 사람은 차후 broadcasting에서 제외된다.
+            
+            
+            
             cList = pZone->broadcastSkillPacket(myX, myY, X, Y, &_GCSkillToTileOK5, cList);
 
-            // 기술을 쓴 사람을 볼 수 있는 사람들에게 broadcasting
+            
             pZone->broadcastPacket(myX, myY, &_GCSkillToTileOK3, cList);
 
-            // 기술을 당한 사람을 볼 수 있는 사람들에게 broadcasting
+            
             pZone->broadcastPacket(X, Y, &_GCSkillToTileOK4, cList);
 
-            // 기술 delay setting
+            
             pSkillSlot->setRunTime(output.Delay);
         } else {
             executeSkillFailNormal(pSlayer, getSkillType(), NULL);
@@ -310,7 +310,7 @@ void VigorDrop::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -358,7 +358,7 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
             Range_t Range = 3;
 
-            // 기존에 같은 이펙트가 타일에 있다면 지우고 새로 설정한다.
+            
             Tile& tile = pZone->getTile(X, Y);
             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_VIGOR_DROP);
             if (pOldEffect != NULL) {
@@ -366,7 +366,7 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                 pZone->deleteEffect(effectID);
             }
 
-            // 이펙트 오브젝트를 생성해서 타일에 붙인다.
+            
             EffectVigorDrop* pEffect = new EffectVigorDrop(pZone, X, Y);
             pEffect->setDeadline(output.Duration);
             pEffect->setNextTime(0);
@@ -384,9 +384,9 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             tile.addEffect(pEffect);
 
 
-            // 이펙트 범위내의 모든 Creature에게 effect를 붙여준다.
-            // Slayer가 기술을 사용한 경우 같은 Slayer에게는
-            // 해당하지 않는다.
+            
+            
+            
             bool bEffected = false;
             Creature* pTargetCreature;
 
@@ -428,7 +428,7 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                                 cList.push_back(pTargetCreature);
 
                                 if (bCanSee) {
-                                    // 공격을 당한 사람에게
+                                    
                                     _GCSkillToTileOK2.setObjectID(pMonster->getObjectID());
                                     _GCSkillToTileOK2.setSkillType(SkillType);
                                     _GCSkillToTileOK2.setX(X);
@@ -442,21 +442,21 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                     } // if(pTargetCreature!= NULL)
                 }
 
-            // 기술을 쓴 사람만 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK3.setSkillType(SkillType);
             _GCSkillToTileOK3.setX(myX);
             _GCSkillToTileOK3.setY(myY);
             //_GCSkillToTileOK3.setDuration(output.Duration);
             //_GCSkillToTileOK3.setRange(Range);
 
-            // 기술을 당한 사람만 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK4.setSkillType(SkillType);
             _GCSkillToTileOK4.setX(X);
             _GCSkillToTileOK4.setY(Y);
             _GCSkillToTileOK4.setDuration(output.Duration);
             _GCSkillToTileOK4.setRange(Range);
 
-            // 기술을 쓴 사람과 당한 사람을 모두 볼 수 있는 사람들에게
+            
             _GCSkillToTileOK5.setObjectID(pMonster->getObjectID());
             _GCSkillToTileOK5.setSkillType(SkillType);
             _GCSkillToTileOK5.setX(X);
@@ -464,13 +464,13 @@ void VigorDrop::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             _GCSkillToTileOK5.setDuration(output.Duration);
             _GCSkillToTileOK5.setRange(Range);
 
-            // 기술을 쓸 사람과 당한 사람을 모두 볼 수 있는 사람들에게 broadcasing
+            
             cList = pZone->broadcastSkillPacket(myX, myY, X, Y, &_GCSkillToTileOK5, cList);
 
-            // 기술을 쓴 사람을 볼 수 있는 사람들에게 broadcasting
+            
             pZone->broadcastPacket(myX, myY, &_GCSkillToTileOK3, cList);
 
-            // 기술을 당한 사람을 볼 수 있는 사람들에게 broadcasting
+            
             pZone->broadcastPacket(X, Y, &_GCSkillToTileOK4, cList);
 
         } else {

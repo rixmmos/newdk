@@ -28,7 +28,7 @@ void ActionShowTaxBalance::read(PropertyBuffer& propertyBuffer)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionShowTaxBalance::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -52,21 +52,21 @@ void ActionShowTaxBalance::execute(Creature* pCreature1, Creature* pCreature2)
 
     Guild* pGuild = g_pGuildManager->getGuild(guildID);
     if (bSuccess && pGuild == NULL) {
-        // 길드가 없다.
+        
         bSuccess = false;
         deny.setCode(NPC_RESPONSE_NO_GUILD);
     }
 
     if (bSuccess && pGuild->getMaster() != pPC->getName()) {
-        // 길드 마스터가 아니다.
+        
         bSuccess = false;
         deny.setCode(NPC_RESPONSE_NOT_GUILD_MASTER);
     }
 
-    // 길드 마스터이다.
+    
     list<CastleInfo*> pCastleInfoList = g_pCastleInfoManager->getGuildCastleInfos(guildID);
     if (bSuccess && pCastleInfoList.empty()) {
-        // 길드가 소유한 성이 없다.
+        
         bSuccess = false;
         deny.setCode(NPC_RESPONSE_HAS_NO_CASTLE);
     }

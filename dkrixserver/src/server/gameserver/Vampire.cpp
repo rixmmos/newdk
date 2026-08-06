@@ -87,7 +87,7 @@ Vampire::Vampire()
 
     m_Mutex.setName("Vampire");
 
-    // AttackMelee 같은 기본 공격을 집어넣어준다.
+    
     for (int i = 0; i < SKILL_DOUBLE_IMPACT; i++) {
         VampireSkillSlot* pVampireSkillSlot = new VampireSkillSlot;
         // pVampireSkillSlot = new VampireSkillSlot;	// 2002.1.16 by sigi
@@ -102,7 +102,7 @@ Vampire::Vampire()
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++)
         m_pWearItem[i] = NULL;
 
-    // 핫 키를 초기화 한다.
+    
     //	for (int i = 0; i < 8; i++)
     //	{
     //		m_HotKey[i] = 0;
@@ -111,10 +111,10 @@ Vampire::Vampire()
     m_SilverDamage = 0;
     m_ClanType = 0;
 
-    // HP 리젠 시간 초기화
+    
     getCurrentTime(m_HPRegenTime);
 
-    // 경험치 세이브 카운트 초기화
+    
     //	m_RankExpSaveCount       = 0;
     m_ExpSaveCount = 0;
     m_FameSaveCount = 0;
@@ -129,7 +129,7 @@ Vampire::~Vampire()
     __BEGIN_TRY
 
     try {
-        // 복장 정보를 생성해둔다. by sigi. 2002.6.18
+        
         DWORD flag;
         Color_t color[PCVampireInfo::VAMPIRE_COLOR_MAX];
         getShapeInfo(flag, color);
@@ -142,32 +142,32 @@ Vampire::~Vampire()
         tinysave(pField);
 
 
-        // 떨어진 아이템의 내구성과 경험치, 성향 등을 저장한다.
+        
         saveGears();
         saveExps();
         saveSkills();
 
-        // 입고 있는 아이템을 메모리에서 삭제한다.
+        
         destroyGears();
 
-        // 클래스가 삭제될 경우, 해당하는 교환 정보를 삭제해야 함은 물론,
-        // 교환 상대에게도 이 사실을 알려줘야 한다.
+        
+        
         TradeManager* pTradeManager = m_pZone->getTradeManager();
         TradeInfo* pInfo = pTradeManager->getTradeInfo(getName());
         if (pInfo != NULL) {
-            // 교환 정보를 삭제
+            
             pTradeManager->cancelTrade(this);
         }
 
-        // 글로벌 파티 정보를 삭제한다.
-        // 일반적인 로그아웃의 경우에는
-        // CGLogoutHandler에서 Zone::deleteCreature() 함수를 부르게 되고,
-        // 비정상적인 경우라고 해도,
-        // GamePlayer::disconnect()에서 Zone::deleteCreature() 함수를 부르게 되므로,
-        // 로컬 파티 및 파티 초대, 트레이드 정보를 걱정할 필요는 없다.
+        
+        
+        
+        
+        
+        
         deleteAllPartyInfo(this);
 
-        // 기술들을 삭제
+        
         unordered_map<SkillType_t, VampireSkillSlot*>::iterator itr = m_SkillSlot.begin();
         for (; itr != m_SkillSlot.end(); itr++) {
             VampireSkillSlot* pVampireSkillSlot = itr->second;
@@ -187,8 +187,8 @@ Vampire::~Vampire()
 }
 
 // registerObject
-// Zone에 종속된 ObjectRegistry를 사용해서, Vampire 와 소유아이템들의
-// ObjectID를 할당받는다.
+
+
 void Vampire::registerObject()
 
 {
@@ -196,33 +196,33 @@ void Vampire::registerObject()
 
     Assert(getZone() != NULL);
 
-    // zone 의 object registery 에 접근한다.
+    
     ObjectRegistry& OR = getZone()->getObjectRegistry();
 
     __ENTER_CRITICAL_SECTION(OR)
 
-    // 모든 아이템에 OID 가 바뀌므로 시간제한 아이템 매니저에서 OID 맵을 지워줘야 한다.
+    
     if (m_pTimeLimitItemManager != NULL)
         m_pTimeLimitItemManager->clear();
 
-    // 우선 뱀파이어의 OID를 등록받는다.
+    
     OR.registerObject_NOLOCKED(this);
 
-    // 인벤토리의 아이템들의 OID를 등록받는다.
+    
     registerInventory(OR);
 
-    // Goods Inventory의 아이템들의 OID를 등록받는다.
+    
     registerGoodsInventory(OR);
 
-    // 장착하고 있는 아이템들의 OID를 등록받는다.
+    
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
 
         if (pItem != NULL) {
             bool bCheck = true;
 
-            // 양손 무기일 경우, WEAR_LEFTHAND 에서 등록했으므로,
-            // 또 등록할 필요는 없다.
+            
+            
             if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                 bCheck = false;
 
@@ -231,7 +231,7 @@ void Vampire::registerObject()
         }
     }
 
-    // 마우스에 들고 있는 아이템의 OID를 등록 받는다.
+    
     Item* pSlotItem = m_pExtraInventorySlot->getItem();
     if (pSlotItem != NULL)
         registerItem(pSlotItem, OR);
@@ -252,8 +252,8 @@ void Vampire::registerObject()
     __END_CATCH
 }
 
-// Zone에 종속된 ObjectRegistry를 사용해서, Vampire 와 소유아이템들의
-// ObjectID를 할당받는다. ItemTrace 를 남길지 여부 결정을 위해 따로 뺐다
+
+
 void Vampire::registerInitObject()
 
 {
@@ -261,36 +261,36 @@ void Vampire::registerInitObject()
 
     Assert(getZone() != NULL);
 
-    // zone 의 object registery 에 접근한다.
+    
     ObjectRegistry& OR = getZone()->getObjectRegistry();
 
     __ENTER_CRITICAL_SECTION(OR)
 
-    // 모든 아이템에 OID 가 바뀌므로 시간제한 아이템 매니저에서 OID 맵을 지워줘야 한다.
+    
     if (m_pTimeLimitItemManager != NULL)
         m_pTimeLimitItemManager->clear();
 
-    // 우선 뱀파이어의 OID를 등록받는다.
+    
     OR.registerObject_NOLOCKED(this);
 
-    // 인벤토리의 아이템들의 OID를 등록받는다.
+    
     registerInitInventory(OR);
 
-    // Goods Inventory의 아이템들의 OID를 등록받는다.
+    
     registerGoodsInventory(OR);
 
-    // 장착하고 있는 아이템들의 OID를 등록받는다.
+    
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
 
         if (pItem != NULL) {
-            // ItemTrace 를 남길 것인지 결정
+            
             pItem->setTraceItem(bTraceLog(pItem));
 
             bool bCheck = true;
 
-            // 양손 무기일 경우, WEAR_LEFTHAND 에서 등록했으므로,
-            // 또 등록할 필요는 없다.
+            
+            
             if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                 bCheck = false;
 
@@ -299,10 +299,10 @@ void Vampire::registerInitObject()
         }
     }
 
-    // 마우스에 들고 있는 아이템의 OID를 등록 받는다.
+    
     Item* pSlotItem = m_pExtraInventorySlot->getItem();
     if (pSlotItem != NULL) {
-        // ItemTrace 를 남길 것인지 결정
+        
         pSlotItem->setTraceItem(bTraceLog(pSlotItem));
         registerItem(pSlotItem, OR);
     }
@@ -316,12 +316,12 @@ void Vampire::registerInitObject()
     __END_CATCH
 }
 
-// 시간제한 아이템을 체크한다.
-// 모든 아이템이 이미 register 되어있어야 한다.
+
+
 void Vampire::checkItemTimeLimit() {
     __BEGIN_TRY
 
-    // 인벤토리에서 찾는다.
+    
     {
         list<Item*> ItemList;
         int height = m_pInventory->getHeight();
@@ -331,7 +331,7 @@ void Vampire::checkItemTimeLimit() {
             for (int i = 0; i < width; i++) {
                 Item* pItem = m_pInventory->getItem(i, j);
                 if (pItem != NULL) {
-                    // 체크된 아이템의 리스트에서 현재 아이템을 찾는다.
+                    
                     list<Item*>::iterator itr = find(ItemList.begin(), ItemList.end(), pItem);
 
                     if (itr == ItemList.end()) {
@@ -341,9 +341,9 @@ void Vampire::checkItemTimeLimit() {
                             m_pInventory->deleteItem(pItem->getObjectID());
                             SAFE_DELETE(pItem);
                         } else {
-                            // 리스트에 아이템이 없으면
-                            // 같은 아이템을 두번 체크하지 않기 위해서
-                            // 리스트에다가 아이템을 집어넣는다.
+                            
+                            
+                            
                             ItemList.push_back(pItem);
                         }
                     }
@@ -352,7 +352,7 @@ void Vampire::checkItemTimeLimit() {
         }
     }
 
-    // 장착하고 있는 것 중에 찾는다.
+    
     {
         for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
@@ -360,8 +360,8 @@ void Vampire::checkItemTimeLimit() {
             if (pItem != NULL) {
                 bool bCheck = true;
 
-                // 양손 무기일 경우, WEAR_LEFTHAND 에서 등록했으므로,
-                // 또 등록할 필요는 없다.
+                
+                
                 if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                     bCheck = false;
 
@@ -377,7 +377,7 @@ void Vampire::checkItemTimeLimit() {
         }
     }
 
-    // 마우스에 들고 있는 아이템을 체크한다.
+    
     {
         Item* pSlotItem = m_pExtraInventorySlot->getItem();
         if (pSlotItem != NULL && wasteIfTimeLimitExpired(pSlotItem)) {
@@ -392,7 +392,7 @@ void Vampire::checkItemTimeLimit() {
 void Vampire::updateEventItemTime(DWORD time) {
     __BEGIN_TRY
 
-    // 인벤토리에서 찾는다.
+    
     {
         list<Item*> ItemList;
         int height = m_pInventory->getHeight();
@@ -402,7 +402,7 @@ void Vampire::updateEventItemTime(DWORD time) {
             for (int i = 0; i < width; i++) {
                 Item* pItem = m_pInventory->getItem(i, j);
                 if (pItem != NULL) {
-                    // 체크된 아이템의 리스트에서 현재 아이템을 찾는다.
+                    
                     list<Item*>::iterator itr = find(ItemList.begin(), ItemList.end(), pItem);
 
                     if (itr == ItemList.end()) {
@@ -410,9 +410,9 @@ void Vampire::updateEventItemTime(DWORD time) {
 
                         updateItemTimeLimit(pItem, time);
 
-                        // 리스트에 아이템이 없으면
-                        // 같은 아이템을 두번 체크하지 않기 위해서
-                        // 리스트에다가 아이템을 집어넣는다.
+                        
+                        
+                        
                         ItemList.push_back(pItem);
                     }
                 }
@@ -420,7 +420,7 @@ void Vampire::updateEventItemTime(DWORD time) {
         }
     }
 
-    // 장착하고 있는 것 중에 찾는다.
+    
     {
         for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
@@ -428,8 +428,8 @@ void Vampire::updateEventItemTime(DWORD time) {
             if (pItem != NULL) {
                 bool bCheck = true;
 
-                // 양손 무기일 경우, WEAR_LEFTHAND 에서 등록했으므로,
-                // 또 등록할 필요는 없다.
+                
+                
                 if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                     bCheck = false;
 
@@ -440,7 +440,7 @@ void Vampire::updateEventItemTime(DWORD time) {
         }
     }
 
-    // 마우스에 들고 있는 아이템을 체크한다.
+    
     {
         Item* pSlotItem = m_pExtraInventorySlot->getItem();
         if (pSlotItem != NULL) {
@@ -452,8 +452,8 @@ void Vampire::updateEventItemTime(DWORD time) {
 }
 
 ///////////////////////////////////////////
-//	Vampire와 Slayer사이의 변신을 위해서
-//	아템 로딩은 따로 처리한다.
+
+
 //
 void Vampire::loadItem(bool checkTimeLimit)
 
@@ -462,25 +462,25 @@ void Vampire::loadItem(bool checkTimeLimit)
 
     PlayerCreature::loadItem();
 
-    // 인벤토리를 생성한다.
+    
     SAFE_DELETE(m_pInventory);
     m_pInventory = new Inventory(10, 6);
     m_pInventory->setOwner(getName());
 
-    // 아이템을 로드한다.
+    
     g_pItemLoaderManager->load(this);
 
-    // 구매한 아이템을 로드한다.
+    
     PlayerCreature::loadGoods();
 
-    // 로드한 아이템들을 등록시키고
+    
     registerInitObject();
 
     if (checkTimeLimit) {
         checkItemTimeLimit();
     }
 
-    // 입고 있는 옷에 따라 능력치를 계산해준다.
+    
     initAllStat();
 
     __END_CATCH
@@ -517,8 +517,8 @@ bool Vampire::load()
         // end by Sonic
 
         if (pResult->getRowCount() == 0) {
-            // throw Error("Critical Error : data intergrity broken. (로그인 서버에서 게임 서버로 넘어오는 동안에
-            // 캐릭터가 삭제되었습니다.)");
+            
+            
             SAFE_DELETE(pStmt);
             return false;
         }
@@ -610,9 +610,9 @@ bool Vampire::load()
         //		setRankExp( pResult->getInt(++i) );
         //		setRankGoalExp( pResult->getInt(++i) );
 
-        // maxHP를 다시 계산해서 설정해준다.
+        
         // 2002.7.15 by sigi
-        // 공식 바뀌면 AbilityBalance.cpp의 computeHP도 수정해야한다.
+        
         int maxHP = m_STR[ATTR_CURRENT] * 2 + m_INT[ATTR_CURRENT] + m_DEX[ATTR_CURRENT] + m_Level;
         maxHP = min((int)maxHP, VAMPIRE_MAX_HP);
         setHP(maxHP, ATTR_MAX);
@@ -620,9 +620,9 @@ bool Vampire::load()
         try {
             setZoneID(zoneID);
         } catch (Error& e) {
-            // 길드 아지트 문제로 본다.
-            // 길드 아지트가 한 게임 서버에만 존재하므로 다른 게임서버로 접속할 때 그 아지트로 들어가지 못한다.
-            // 길드 아지트 입구로 옮긴다.
+            
+            
+            
             ZONE_COORD ResurrectCoord;
             g_pResurrectLocationManager->getVampirePosition(1003, ResurrectCoord);
             setZoneID(ResurrectCoord.id);
@@ -667,9 +667,9 @@ bool Vampire::load()
         }*/
 
     //----------------------------------------------------------------------
-    // Vampire Outlook Information 을 구성한다.
+    
     //----------------------------------------------------------------------
-    // 뱀파이어는 로딩할때 ObjectID를 세팅 하도록 한다. 근데 접속 할땐? -_-
+    
     m_VampireInfo.setObjectID(m_ObjectID);
     m_VampireInfo.setName(m_Name);
     m_VampireInfo.setSex(m_Sex);
@@ -680,7 +680,7 @@ bool Vampire::load()
     m_VampireInfo.setCompetence(m_CompetenceShape);
 
     //----------------------------------------------------------------------
-    // 스킬을 로딩한다.
+    
     //----------------------------------------------------------------------
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
@@ -711,17 +711,17 @@ bool Vampire::load()
     END_DB(pStmt)
 
     //----------------------------------------------------------------------
-    // Rank Bonus 를  로딩한다.
+    
     //----------------------------------------------------------------------
     loadRankBonus();
 
     //----------------------------------------------------------------------
-    // 이펙트를 로딩한다.
+    
     //----------------------------------------------------------------------
     g_pEffectLoaderManager->load(this);
 
     //----------------------------------------------------------------------
-    // GrandMaster인 경우는 Effect를 붙여준다.
+    
     //----------------------------------------------------------------------
     // by sigi. 2002.11.8
     if (m_Level >= 100 && SystemAvailabilitiesManager::getInstance()->isAvailable(
@@ -735,12 +735,12 @@ bool Vampire::load()
     }
 
     //----------------------------------------------------------------------
-    // 플래그 셋을 로드한다.
+    
     //----------------------------------------------------------------------
     m_pFlagSet->load(getName());
 
     //----------------------------------------------------------------------
-    // Vampire Outlook Information 을 초기화한다.
+    
     //----------------------------------------------------------------------
     /*
     ItemType_t coatType = 0;
@@ -758,7 +758,7 @@ bool Vampire::load()
     // m_VampireInfo.setCoatColor(2 , SUB_COLOR);
 
 
-    // rank가 0이면 초기값이 설정되지 않았다는 의미이다. by sigi. 2002.9.13
+    
     if (getRank() == 0) {
         saveInitialRank();
     }
@@ -766,7 +766,7 @@ bool Vampire::load()
 
     initAllStat();
 
-    // 전쟁 참가 Flag 체크
+    
     if (RaceWarLimiter::isInPCList(this)) {
         setFlag(Effect::EFFECT_CLASS_RACE_WAR_JOIN_TICKET);
     }
@@ -798,7 +798,7 @@ void Vampire::save() const
     Statement* pStmt;
 
     //--------------------------------------------------------------------------------
-    // 뱀파이어 정보를 저장한다.
+    
     //--------------------------------------------------------------------------------
     BEGIN_DB {
         StringStream sql;
@@ -842,19 +842,11 @@ void Vampire::save() const
     }
     END_DB(pStmt)
 
-    /*
-    //----------------------------------------------------------------------
-    // 아이템을 세이브한다.
-    //----------------------------------------------------------------------
-    //--------------------------------------------------
-    // 인벤토리의 아이템들을 세이브 한다.
-    //--------------------------------------------------
-    m_pInventory->save(m_Name);
-    */
+     
 
 
     //--------------------------------------------------
-    // 이펙트를 세이브 한다.
+    
     //--------------------------------------------------
     m_pEffectManager->save(m_Name);
 
@@ -885,12 +877,12 @@ void Vampire::tinysave(const string& field) // by sigi. 2002.5.15
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
-// 스킬 관련 함수
+
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-// 특정 Skill을 리턴한다.
+
 VampireSkillSlot* Vampire::getSkill(SkillType_t SkillType) const
 
 {
@@ -906,7 +898,7 @@ VampireSkillSlot* Vampire::getSkill(SkillType_t SkillType) const
     __END_CATCH
 }
 
-// 특정 Skill을 add 한다
+
 void Vampire::addSkill(SkillType_t SkillType)
 
 {
@@ -946,7 +938,7 @@ void Vampire::addSkill(SkillType_t SkillType)
     __END_CATCH
 }
 
-// 특정 SkillSlot을 자동으로 빈 슬랏을 찾아 넣는다.
+
 void Vampire::addSkill(VampireSkillSlot* pVampireSkillSlot)
 
 {
@@ -980,13 +972,13 @@ void Vampire::addSkill(VampireSkillSlot* pVampireSkillSlot)
     __END_CATCH
 }
 
-// 성지스킬을 지워주는 함수다.
+
 void Vampire::removeCastleSkill(SkillType_t SkillType)
 
 {
     __BEGIN_TRY
 
-    // 성지 스킬만 지울 수 있다.
+    
     if (g_pCastleSkillInfoManager->getZoneID(SkillType) == 0)
         return;
 
@@ -1003,7 +995,7 @@ void Vampire::removeCastleSkill(SkillType_t SkillType)
     __END_CATCH
 }
 
-// 갖고 있는 모든 성지스킬을 지워주는 함수이다.
+
 void Vampire::removeAllCastleSkill()
 
 {
@@ -1015,19 +1007,19 @@ void Vampire::removeAllCastleSkill()
         if (itr->second != NULL) {
             VampireSkillSlot* pSkillSlot = itr->second;
             if (g_pCastleSkillInfoManager->getZoneID(pSkillSlot->getSkillType()) == 0) {
-                // 성지스킬이 아니면 다음껄로 넘어간다.
+                
                 ++itr;
                 continue;
             }
 
-            // 성지스킬이면 지워준다. 반복자 사용에 주의
+            
             SAFE_DELETE(pSkillSlot);
             unordered_map<SkillType_t, VampireSkillSlot*>::iterator prevItr = itr;
 
             ++itr;
             m_SkillSlot.erase(prevItr);
         } else {
-            // 이건 멀까.... Assert 해야 되지 않나 -_-;
+            
             Assert(false);
         }
     }
@@ -1039,7 +1031,7 @@ void Vampire::removeAllCastleSkill()
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
-// 아이템 착/탈 관련 함수
+
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -1048,7 +1040,7 @@ void Vampire::removeAllCastleSkill()
 //
 // Vampire::WearItem()
 //
-// Item을 장착창에 장착시키고 능력치를 계산한다.
+
 //
 //----------------------------------------------------------------------
 void Vampire::wearItem(WearPart Part, Item* pItem)
@@ -1062,95 +1054,95 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
     Item* pLeft = NULL;
     Item* pRight = NULL;
 
-    // 현재 기획에서는...능력치가 모자라더라도 아이템을 무조건 사용할 수는
-    // 있다. 하지만 아이템에 의한 능력치가 적용이 되지 않는다.
-    // 그러므로 일단 아이템을 해당하는 장착창에다 집어넣는다.
+    
+    
+    
 
-    // vampire 무기 추가. 2002.8.16. by sigi
-    // 양손 무기일 경우에는 양손 장착창에다 하나의 아이템 포인터를 할당...
+    
+    
     if (isTwohandWeapon(pItem)) {
-        // 양손에 아이템을 들고 있을 경우
+        
         if (isWear(WEAR_RIGHTHAND) && isWear(WEAR_LEFTHAND)) {
             pLeft = getWearItem(WEAR_RIGHTHAND);
             pRight = getWearItem(WEAR_LEFTHAND);
 
-            // 양손 무기를 들고 있을 경우
+            
             if (pLeft == pRight) {
-                // 요구한 아이템을 장착 포인트에 넣고,
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                char pField[80];
+                char pField[128];
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            // 냥냥
+            
             else {
-                // 양손에 검과 방패를 들고 있었는데...양손 무기를 들려고 하면,
-                // 검은 마우스 포인터에 달아줄 수 있지만, 방패는 어떻게 할 수가 없다.
-                // 인벤토리에 넣어줘야 할 텐데, 지금 당장은 어떻게 할 지를 모르겠네...
-                // 걍 입을 수 없다는 패킷을 보내주자...
-                // cerr << "양손에 칼과 방패를 들고 있어서, 양손 무기를 장착할 수 없습니다." << endl;
+                
+                
+                
+                
+                
                 return;
             }
         }
-        // 양손에 아이템을 들고 있지 않을 경우
+        
         else {
-            char pField[80];
+            char pField[128];
 
-            // 오른쪽에 아이템을 들고 있을 경우
+            
             if (isWear(WEAR_RIGHTHAND)) {
                 pRight = getWearItem(WEAR_RIGHTHAND);
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pRight);
                 // pRight->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
             }
-            // 왼쪽에 아이템을 들고 있을 경우
+            
             else if (isWear(WEAR_LEFTHAND)) {
                 pLeft = getWearItem(WEAR_LEFTHAND);
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            // 아무쪽도 아이템을 들고 있지 않을 경우
+            
             else {
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
             }
         }
@@ -1160,34 +1152,34 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
-            char pField[80];
+            char pField[128];
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
             addItemToExtraInventorySlot(pPrevItem);
             // pPrevItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
-            // 요구한 아이템을 장착 포인트에 넣는다.
+            
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
-            char pField[80];
+            char pField[128];
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
         }
     }
 
-    // 옷이라면 옷에 따른 색깔을 정해준다.
-    // 나중에라도 옷 타입이 여러 가지가 될 수 있으리라 생각하는데,
-    // 현재로서는 옷 타입이 하나이므로, 색깔만 세팅해준다.
+    
+    
+    
     if (pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COAT) {
         m_VampireInfo.setCoatColor(getItemShapeColor(pItem));
 
-        // item type을 설정해준다.
+        
         m_VampireInfo.setCoatType(pItem->getItemType());
     }
 
@@ -1197,14 +1189,14 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
 
 //----------------------------------------------------------------------
 // Vampire::WearItem()
-// Item을 장착창에 장착시키고 능력치를 계산한다.
+
 //----------------------------------------------------------------------
 void Vampire::wearItem(WearPart Part)
 
 {
     __BEGIN_TRY
 
-    // 장착 준비중인 아이템을 받아온다.
+    
     Item* pItem = getExtraInventorySlotItem();
     Assert(pItem != NULL);
 
@@ -1212,112 +1204,112 @@ void Vampire::wearItem(WearPart Part)
     Item* pLeft = NULL;
     Item* pRight = NULL;
 
-    // 먼저 옷을 입히거나, 벗기기 전에 현재의 능력치를 버퍼에다 저장해 둔다.
-    // 이는 나중에 변한 능력치만을 전송하기 위한 것이다.
+    
+    
     VAMPIRE_RECORD prev;
     getVampireRecord(prev);
 
-    // 현재 기획에서는...능력치가 모자라더라도 아이템을 무조건 사용할 수는
-    // 있다. 하지만 아이템에 의한 능력치가 적용이 되지 않는다.
-    // 그러므로 일단 아이템을 해당하는 장착창에다 집어넣는다.
-    char pField[80];
+    
+    
+    
+    char pField[128];
 
-    // vampire 무기 추가. 2002.8.16. by sigi
-    // 양손 무기일 경우에는 양손 장착창에다 하나의 아이템 포인터를 할당...
+    
+    
     if (isTwohandWeapon(pItem)) {
-        // 양손에 아이템을 들고 있을 경우
+        
         if (isWear(WEAR_RIGHTHAND) && isWear(WEAR_LEFTHAND)) {
             pLeft = getWearItem(WEAR_RIGHTHAND);
             pRight = getWearItem(WEAR_LEFTHAND);
 
-            // 양손 무기를 들고 있을 경우
+            
             if (pLeft == pRight) {
                 takeOffItem(WEAR_LEFTHAND, false, false);
 
-                // 요구한 아이템을 장착 포인트에 넣고,
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
                 // by sigi. 2002.5.15
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 요구한 아이템을 마우스 포인터에서 제거한다.
+                
                 deleteItemFromExtraInventorySlot();
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
 
             }
-            // 검과 방패를 들고 있을 경우
+            
             else {
-                // 양손에 검과 방패를 들고 있었는데...양손 무기를 들려고 하면,
-                // 검은 마우스 포인터에 달아줄 수 있지만, 방패는 어떻게 할 수가 없다.
-                // 인벤토리에 넣어줘야 할 텐데, 지금 당장은 어떻게 할 지를 모르겠네...
-                // 걍 입을 수 없다는 패킷을 보내주자...
+                
+                
+                
+                
                 return;
             }
         }
-        // 양손에 아이템을 들고 있지 않을 경우
+        
         else {
             // by sigi. 2002.5.15
-            // 오른쪽에 아이템을 들고 있을 경우
+            
             if (isWear(WEAR_RIGHTHAND)) {
                 pRight = getWearItem(WEAR_RIGHTHAND);
 
                 takeOffItem(WEAR_RIGHTHAND, false, false);
 
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 요구한 아이템을 마우스 포인터에서 제거한다.
+                
                 deleteItemFromExtraInventorySlot();
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pRight);
                 // pRight->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
 
             }
-            // 왼쪽에 아이템을 들고 있을 경우
+            
             else if (isWear(WEAR_LEFTHAND)) {
                 pLeft = getWearItem(WEAR_LEFTHAND);
 
                 takeOffItem(WEAR_LEFTHAND, false, false);
 
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                // 요구한 아이템을 마우스 포인터에서 제거한다.
+                
                 deleteItemFromExtraInventorySlot();
-                // 원래 있던 아이템을 마우스 포인터에 달아 준다.
+                
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            // 아무쪽도 아이템을 들고 있지 않을 경우
+            
             else {
-                // 요구한 아이템을 장착 포인트에 넣는다.
+                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                // 요구한 아이템을 마우스 포인터에서 제거한다.
+                
                 deleteItemFromExtraInventorySlot();
             }
         }
@@ -1329,14 +1321,14 @@ void Vampire::wearItem(WearPart Part)
 
             // by sigi. 2002.5.15
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
             deleteItemFromExtraInventorySlot();
             addItemToExtraInventorySlot(pPrevItem);
 
             // pPrevItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
             m_pWearItem[Part] = pItem;
@@ -1344,7 +1336,7 @@ void Vampire::wearItem(WearPart Part)
 
             // by sigi. 2002.5.15
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
         }
     }
@@ -1353,18 +1345,18 @@ void Vampire::wearItem(WearPart Part)
     sendRealWearingInfo();
     sendModifyInfo(prev);
 
-    // 옷이라면 옷에 따른 색깔을 정해준다.
-    // 나중에라도 옷 타입이 여러 가지가 될 수 있으리라 생각하는데,
-    // 현재로서는 옷 타입이 하나이므로, 색깔만 세팅해준다.
+    
+    
+    
 
-    // 실제 적용되는 아이템만 복장을 바꾼다. by sigi. 2002.10.30
+    
     if (m_pRealWearingCheck[Part]) {
         if (pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COAT) {
             Color_t color = getItemShapeColor(pItem);
             m_VampireInfo.setCoatColor(color);
             m_VampireInfo.setCoatType(pItem->getItemType());
 
-            // 옷을 갈아입었으니, 주위에다가 옷 갈아입었다고 정보를 날린다.
+            
             GCChangeShape pkt;
             pkt.setObjectID(getObjectID());
             pkt.setItemClass(Item::ITEM_CLASS_VAMPIRE_COAT);
@@ -1405,14 +1397,14 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     VAMPIRE_RECORD prev;
 
-    // 장착창에 있는 아이템을 받아온다.
+    
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);
 
     // m_pWearItem[Part] = NULL;
 
-    // vampire 무기 추가. 2002.8.16. by sigi
-    // 장착창에 있는 아이템을 받아온다.
+    
+    
     // Item::ItemClass IClass = pItem->getItemClass();
 
     if (Part == WEAR_LEFTHAND || Part == WEAR_RIGHTHAND) {
@@ -1424,17 +1416,17 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
         }
     }
 
-    // 아이템을 장착포인트에서 제거한다.
+    
     if (isTwohandWeapon(pItem)) {
         m_pWearItem[WEAR_RIGHTHAND] = NULL;
         m_pWearItem[WEAR_LEFTHAND] = NULL;
     } else
         m_pWearItem[Part] = NULL;
 
-    // wearItem에서 지정된 슬랏에 옷을 이미 입고 있는 경우에, 그것을 벗기고
-    // 다시 옷을 입히는데, 그러면 벗길 때 패킷을 한번, 입었을 때 다시 패킷을
-    // 한번, 총 두 번의 패킷을 보내게 된다. 그것을 방지하기 위해서
-    // bool 변수를 하나 집어넣었다. -- 2002.01.24 김성민
+    
+    
+    
+    
     if (bSendModifyInfo) {
         getVampireRecord(prev);
         initAllStat();
@@ -1445,15 +1437,15 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
     }
 
     //---------------------------------------------
-    // 있어선 안될 체크 -_-; 임시 땜빵
-    // 아이템을 마우스 커서에다 달아준당.
+    
+    
     //---------------------------------------------
     if (bAddOnMouse) {
         addItemToExtraInventorySlot(pItem);
         // pItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-        //  item저장 최적화. by sigi. 2002.5.13
-        char pField[80];
-        sprintf(pField, "Storage=%d, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
+        
+        char pField[128];
+        sprintf(pField, "Storage=%d, StorageID=0, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
         pItem->tinysave(pField);
     }
 
@@ -1482,7 +1474,7 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
 //----------------------------------------------------------------------
 // destroyGears
-// 장착 아이템을 Delete 한다.
+
 //----------------------------------------------------------------------
 void Vampire::destroyGears()
 
@@ -1496,7 +1488,7 @@ void Vampire::destroyGears()
             Item::ItemClass IClass = pItem->getItemClass();
 
             //-------------------------------------------------------------
-            // 슬레이어용 아이템을 입고 있는 이상한 자식이 있으면 다 어서트
+            
             //-------------------------------------------------------------
             Assert(IClass != Item::ITEM_CLASS_AR);
             Assert(IClass != Item::ITEM_CLASS_SR);
@@ -1512,8 +1504,8 @@ void Vampire::destroyGears()
             Assert(IClass != Item::ITEM_CLASS_TROUSER);
             Assert(IClass != Item::ITEM_CLASS_COAT);
 
-            // 양손 무기인지를 검사해서 아이템 하나를 지우면서
-            // 양손을 비워준다.
+            
+            
             if (isTwohandWeapon(pItem)) {
                 m_pWearItem[WEAR_RIGHTHAND] = NULL;
                 m_pWearItem[WEAR_LEFTHAND] = NULL;
@@ -1541,7 +1533,7 @@ bool Vampire::isRealWearing(WearPart part) const
     if (m_pWearItem[part] == NULL)
         return false;
     if (part >= WEAR_ZAP1 && part <= WEAR_ZAP4) {
-        // 해당 위치에 반지도 있어야 된다.
+        
         if (m_pWearItem[part - WEAR_ZAP1 + WEAR_FINGER1] == NULL)
             return false;
     }
@@ -1585,8 +1577,8 @@ bool Vampire::isRealWearing(Item* pItem) const
         return true;
     }
 
-    // 프리미엄 존에서는 유료사용자만 유니크/레어 아이템이 적용된다.
-    // 커플링도 유료사용자만 쓸 수 있다. by Sequoia 2003. 3. 5.
+    
+    
     if (getZone()->isPremiumZone() &&
         (pItem->isUnique() || pItem->getOptionTypeSize() > 1 || pItem->getItemClass() == Item::ITEM_CLASS_COUPLE_RING ||
          pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COUPLE_RING)) {
@@ -1603,13 +1595,13 @@ bool Vampire::isRealWearing(Item* pItem) const
     Level_t ReqLevel = pItemInfo->getReqLevel();
     Attr_t ReqGender = pItemInfo->getReqGender();
 
-    // 베이스 아이템의 요구치가 레벨 100을 넘을 경우 옵션을 포함해서 요구치가 150까지 올라갈 수 있다.
-    // 그렇지 않을 경우 요구치가 옵션을 포함해도 100으로 제한된다.
+    
+    
     // 2003.3.21 by Sequoia
     Level_t ReqLevelMax = ((ReqLevel > MAX_VAMPIRE_LEVEL_OLD) ? MAX_VAMPIRE_LEVEL : MAX_VAMPIRE_LEVEL_OLD);
 
-    // 아이템이 옵션을 가지고 있다면,
-    // 옵션의 종류에 따라서 능력치 제한을 올려준다.
+    
+    
     const list<OptionType_t>& optionTypes = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
 
@@ -1619,11 +1611,11 @@ bool Vampire::isRealWearing(Item* pItem) const
     }
 
     // 2003.1.6 by Sequoia, Bezz
-    // 2003.3.21 요구치 제한 변경 by Sequoia
+    
     ReqLevel = min(ReqLevel, ReqLevelMax);
 
-    // 능력치 제한이 하나라도 있다면,
-    // 그 능력을 만족시키는지 검사해야 한다.
+    
+    
     if (ReqLevel > 0 || ReqGender != GENDER_BOTH) {
         if (ReqLevel > 0 && m_Level < ReqLevel)
             return false;
@@ -1672,7 +1664,7 @@ DWORD Vampire::sendRealWearingInfo(void) const
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
-// 인포 관련 함수
+
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -1693,10 +1685,10 @@ PCVampireInfo2* Vampire::getVampireInfo2()
     pInfo->setSkinColor(m_SkinColor);
     pInfo->setMasterEffectColor(m_MasterEffectColor);
 
-    // 성향
+    
     pInfo->setAlignment(m_Alignment);
 
-    // 능력치
+    
     pInfo->setSTR(m_STR[ATTR_CURRENT], ATTR_CURRENT);
     pInfo->setSTR(m_STR[ATTR_MAX], ATTR_MAX);
     pInfo->setSTR(m_STR[ATTR_BASIC], ATTR_BASIC);
@@ -1790,7 +1782,7 @@ PCVampireInfo3 Vampire::getVampireInfo3() const
         m_VampireInfo.setShape(SHAPE_NORMAL);
     }
 
-    // 엽색약용
+    
     m_VampireInfo.setBatColor(m_BatColor);
     m_VampireInfo.setSkinColor(m_SkinColor);
     m_VampireInfo.setMasterEffectColor(m_MasterEffectColor);
@@ -1832,72 +1824,7 @@ ExtraInfo* Vampire::getExtraInfo() const
         ExtraSlotInfo* pExtraSlotInfo = new ExtraSlotInfo();
         pItem->makePCItemInfo(*pExtraSlotInfo);
 
-        /*		pExtraSlotInfo->setObjectID(pItem->getObjectID());
-                pExtraSlotInfo->setItemClass(pItem->getItemClass());
-                pExtraSlotInfo->setItemType(pItem->getItemType());
-                pExtraSlotInfo->setOptionType(pItem->getOptionTypeList());
-                pExtraSlotInfo->setDurability(pItem->getDurability());
-                pExtraSlotInfo->setSilver(pItem->getSilver());
-                pExtraSlotInfo->setSilver(pItem->getEnchantLevel());
-
-                if (IClass == Item::ITEM_CLASS_AR)
-                {
-                    AR* pAR = dynamic_cast<AR*>(pItem);
-                    pExtraSlotInfo->setItemNum(pAR->getBulletCount());
-                }
-                else if (IClass == Item::ITEM_CLASS_SG)
-                {
-                    SG* pSG = dynamic_cast<SG*>(pItem);
-                    pExtraSlotInfo->setItemNum(pSG->getBulletCount());
-                }
-                else if (IClass == Item::ITEM_CLASS_SMG)
-                {
-                    SMG* pSMG = dynamic_cast<SMG*>(pItem);
-                    pExtraSlotInfo->setItemNum(pSMG->getBulletCount());
-                }
-                else if (IClass == Item::ITEM_CLASS_SR)
-                {
-                    SR* pSR = dynamic_cast<SR*>(pItem);
-                    pExtraSlotInfo->setItemNum(pSR->getBulletCount());
-                }
-                else
-                {
-                    pExtraSlotInfo->setItemNum(pItem->getNum());
-                }
-
-                // 벨트라면 Sub 아이템의 추가 정보가 필요하다.
-                if (IClass == Item::ITEM_CLASS_BELT)
-                {
-                    Belt* pBelt = dynamic_cast<Belt*>(pItem);
-                    Inventory* pBeltInventory = ((Belt*)pItem)->getInventory();
-                    BYTE SubItemCount = 0;
-
-                    // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
-                    for (int i = 0; i < pBelt->getPocketCount(); i++)
-                    {
-                        Item* pBeltItem = pBeltInventory->getItem(i, 0);
-
-                        if (pBeltItem != NULL)
-                        {
-                            SubItemInfo* pSubItemInfo = new SubItemInfo();
-                            pSubItemInfo->setObjectID(pBeltItem->getObjectID());
-                            pSubItemInfo->setItemClass(pBeltItem->getItemClass());
-                            pSubItemInfo->setItemType(pBeltItem->getItemType());
-                            pSubItemInfo->setItemNum(pBeltItem->getNum());
-                            pSubItemInfo->setSlotID(i);
-
-                            pExtraSlotInfo->addListElement(pSubItemInfo);
-
-                            SubItemCount++;
-                        }
-                    }
-
-                    pExtraSlotInfo->setListNum(SubItemCount);
-
-                }
-
-                // 상의 하의 Main Color 지금은 그냥 0 으로 셋팅 해둔다.
-                pExtraSlotInfo->setMainColor(0);*/
+         
 
         pExtraInfo->addListElement(pExtraSlotInfo);
 
@@ -1944,48 +1871,11 @@ GearInfo* Vampire::getGearInfo() const
                         pGearSlotInfo->setSilver(pItem->getSilver());
                         pGearSlotInfo->setEnchantLevel(pItem->getEnchantLevel());*/
 
-            /*
-            // 벨트라면 Sub 아이템의 추가 정보가 필요하다.
-            if (IClass == Item::ITEM_CLASS_BELT) {
-
-                // 아이템 인포를 받아온다.
-                ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
-
-                // 포켓의 숫자를 받아온다.
-                BYTE PocketNum = ((BeltInfo*)pItemInfo)->getPocketCount();
-
-                // 벨트의 인벤토리를 받아온다.
-                Inventory* pBeltInventory = ((Belt*)pItem)->getInventory();
-
-                BYTE SubItemCount = 0;
-
-                // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
-                for (int i = 0; i < PocketNum ; i++) {
-
-                    Item* pBeltItem = pBeltInventory->getItem(i, 0);
-
-                    if (pBeltItem != NULL) {
-
-                        SubItemInfo* pSubItemInfo = new SubItemInfo();
-                        pSubItemInfo->setObjectID(pBeltItem->getObjectID());
-                        pSubItemInfo->setItemClass(pBeltItem->getItemClass());
-                        pSubItemInfo->setItemType(pBeltItem->getItemType());
-                        pSubItemInfo->setItemNum(pBeltItem->getNum());
-                        pSubItemInfo->setSlotID(i);
-
-                        pGearSlotInfo->addListElement(pSubItemInfo);
-
-                        SubItemCount++;
-                    }
-                }
-
-                pGearSlotInfo->setListNum(SubItemCount);
-            }
-            */
+             
 
             pGearSlotInfo->setSlotID(i);
 
-            // 상의 하의 Main Color 지금은 그냥 0 으로 셋팅 해둔다.
+            
             //			pGearSlotInfo->setMainColor(0);
 
             pGearInfo->addListElement(pGearSlotInfo);
@@ -2029,89 +1919,13 @@ InventoryInfo* Vampire::getInventoryInfo() const
                 if (itr == ItemList.end()) {
                     ItemList.push_back(pItem);
 
-                    // InventorySlotInfo를 구성
+                    
                     InventorySlotInfo* pInventorySlotInfo = new InventorySlotInfo();
                     pItem->makePCItemInfo(*pInventorySlotInfo);
                     pInventorySlotInfo->setInvenX(i);
                     pInventorySlotInfo->setInvenY(j);
 
-                    /*					pInventorySlotInfo->setObjectID(pItem->getObjectID());
-                                        pInventorySlotInfo->setItemClass(pItem->getItemClass());
-                                        pInventorySlotInfo->setItemType(pItem->getItemType());
-                                        pInventorySlotInfo->setOptionType(pItem->getOptionTypeList());
-                                        pInventorySlotInfo->setSilver(pItem->getSilver());
-                                        pInventorySlotInfo->setDurability(pItem->getDurability());
-                                        pInventorySlotInfo->setEnchantLevel(pItem->getEnchantLevel());
-                                        pInventorySlotInfo->setInvenX(i);
-                                        pInventorySlotInfo->setInvenY(j);
-                                        pInventorySlotInfo->setItemNum(pItem->getNum());
-
-                                        if (IClass == Item::ITEM_CLASS_AR)
-                                        {
-                                            AR* pAR = dynamic_cast<AR*>(pItem);
-                                            pInventorySlotInfo->setItemNum(pAR->getBulletCount());
-                                        }
-                                        else if (IClass == Item::ITEM_CLASS_SG)
-                                        {
-                                            SG* pSG = dynamic_cast<SG*>(pItem);
-                                            pInventorySlotInfo->setItemNum(pSG->getBulletCount());
-                                        }
-                                        else if (IClass == Item::ITEM_CLASS_SMG)
-                                        {
-                                            SMG* pSMG = dynamic_cast<SMG*>(pItem);
-                                            pInventorySlotInfo->setItemNum(pSMG->getBulletCount());
-                                        }
-                                        else if (IClass == Item::ITEM_CLASS_SR)
-                                        {
-                                            SR* pSR = dynamic_cast<SR*>(pItem);
-                                            pInventorySlotInfo->setItemNum(pSR->getBulletCount());
-                                        }
-                                        else if (IClass == Item::ITEM_CLASS_PET_ITEM)
-                                        {
-                                            PetItem* pPetItem = dynamic_cast<PetItem*>(pItem);
-                                            PetInfo* pPetInfo = pPetItem->getPetInfo();
-
-                                            if ( pPetInfo != NULL )
-                                            {
-                                                pInventorySlotInfo->setOptionType(
-                       list<OptionType_t>(pPetInfo->getPetOption()) ); pInventorySlotInfo->setDurability(
-                       pPetInfo->getPetHP() ); pInventorySlotInfo->setEnchantLevel( pPetInfo->getPetAttr() );
-                                                pInventorySlotInfo->setSilver( pPetInfo->getPetAttrLevel() );
-                                                pInventorySlotInfo->setItemNum( pPetInfo->getPetLevel() );
-                                            }
-                                        }
-
-                                        // 벨트라면 Sub 아이템의 추가 정보가 필요하다.
-                                        if (IClass == Item::ITEM_CLASS_BELT)
-                                        {
-                                            Belt* pBelt = dynamic_cast<Belt*>(pItem);
-                                            Inventory* pBeltInventory = ((Belt*)pItem)->getInventory();
-
-                                            BYTE SubItemCount = 0;
-
-                                            // 포켓의 숫자만큼 아이템의 정보를 읽어 들인다.
-                                            for (int i = 0; i < pBelt->getPocketCount() ; i++)
-                                            {
-                                                Item* pBeltItem = pBeltInventory->getItem(i, 0);
-                                                if (pBeltItem != NULL)
-                                                {
-                                                    SubItemInfo* pSubItemInfo = new SubItemInfo();
-                                                    pSubItemInfo->setObjectID(pBeltItem->getObjectID());
-                                                    pSubItemInfo->setItemClass(pBeltItem->getItemClass());
-                                                    pSubItemInfo->setItemType(pBeltItem->getItemType());
-                                                    pSubItemInfo->setItemNum(pBeltItem->getNum());
-                                                    pSubItemInfo->setSlotID(i);
-
-                                                    pInventorySlotInfo->addListElement(pSubItemInfo);
-
-                                                    SubItemCount++;
-                                                }
-                                            }
-
-                                            pInventorySlotInfo->setListNum(SubItemCount);
-                                        }
-
-                                        pInventorySlotInfo->setMainColor(0);*/
+                     
 
                     pInventoryInfo->addListElement(pInventorySlotInfo);
                     ItemCount++;
@@ -2142,7 +1956,7 @@ void Vampire::sendVampireSkillInfo()
 
     BYTE SkillCount = 0;
 
-    // 현재 시간, 남은 캐스팅 타임을 계산하기 위해
+    
     Timeval currentTime;
     getCurrentTime(currentTime);
 
@@ -2151,12 +1965,12 @@ void Vampire::sendVampireSkillInfo()
         VampireSkillSlot* pVampireSkillSlot = itr->second;
         Assert(pVampireSkillSlot != NULL);
 
-        // AttackMelee 등의 기본 공격 기술 정보는 보내주지 않아야 한다.
+        
         if (pVampireSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
             SubVampireSkillInfo* pSubVampireSkillInfo = new SubVampireSkillInfo();
             pSubVampireSkillInfo->setSkillType(pVampireSkillSlot->getSkillType());
             pSubVampireSkillInfo->setSkillTurn(pVampireSkillSlot->getInterval());
-            // casting time 항목을 다음 캐스팅까지 남은 시간으로 한다.
+            
             // pSubVampireSkillInfo->setCastingTime(pVampireSkillSlot->getCastingTime());
             pSubVampireSkillInfo->setCastingTime(pVampireSkillSlot->getRemainTurn(currentTime));
 
@@ -2170,9 +1984,9 @@ void Vampire::sendVampireSkillInfo()
     gcSkillInfo.setPCType(PC_VAMPIRE);
     SkillType_t LearnSkillType = g_pSkillInfoManager->getSkillTypeByLevel(SKILL_DOMAIN_VAMPIRE, m_Level);
 
-    // 현재 레벨에서 배울 수 있는 기술이 있는지 본다.
+    
     if (LearnSkillType != 0) {
-        // 배울 수 있는 기술이 있고 배우지 않은 상태라면 배우라고 알려준다.
+        
         if (hasSkill(LearnSkillType) == NULL) {
             pVampireSkillInfo->setLearnNewSkill(true);
         }
@@ -2192,7 +2006,7 @@ void Vampire::sendVampireSkillInfo()
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
-// 기타 함수
+
 //
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -2201,7 +2015,7 @@ void Vampire::setGold(Gold_t gold)
 {
     __BEGIN_TRY
 
-    // MAX_MONEY 를 넘어가는 걸 막는다
+    
     // 2003.1.8  by bezz.
     m_Gold = min((Gold_t)MAX_MONEY, gold);
 
@@ -2223,7 +2037,7 @@ void Vampire::setGoldEx(Gold_t gold)
     */
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "Gold=%ld", m_Gold);
     tinysave(pField);
 
@@ -2236,7 +2050,7 @@ void Vampire::increaseGoldEx(Gold_t gold)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    // MAX_MONEY 를 넘어가는 걸 막는다
+    
     // 2003.1.8  by bezz.
     if (m_Gold + gold > MAX_MONEY)
         gold = MAX_MONEY - m_Gold;
@@ -2263,7 +2077,7 @@ void Vampire::decreaseGoldEx(Gold_t gold)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    // 0 미만이 되는 걸 막는다. 0 미만이 되면 underflow 되서 난리가 난다.
+    
     // 2003.1.8  by bezz.
     if (m_Gold < gold)
         gold = m_Gold;
@@ -2344,7 +2158,7 @@ void Vampire::saveSilverDamage(Silver_t damage)
     */
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "SilverDamage=%d", m_SilverDamage);
     tinysave(pField);
 
@@ -2352,7 +2166,7 @@ void Vampire::saveSilverDamage(Silver_t damage)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 소유 아이템 hearbeat
+
 //////////////////////////////////////////////////////////////////////////////
 void Vampire::heartbeat(const Timeval& currentTime)
 
@@ -2370,14 +2184,14 @@ void Vampire::heartbeat(const Timeval& currentTime)
 
     PlayerCreature::heartbeat(currentTime);
 
-    // 주기적으로 HP를 회복시켜준다.
+    
     if (m_HPRegenTime < currentTime) {
         Timeval diffTime = timediff(currentTime, m_HPRegenTime);
 
         if (diffTime.tv_sec > 0) {
-            // 1. 살아있는 상태이고 (현재 HP가 0 초과)
-            // 2. 코마 이펙트가 붙어있지 않다면.
-            // 3. Mephisto 이펙트가 붙어있지 않다면.
+            
+            
+            
             if (isAlive() && !isFlag(Effect::EFFECT_CLASS_COMA) &&
                 (!isFlag(Effect::EFFECT_CLASS_MEPHISTO) || isFlag(Effect::EFFECT_CLASS_CASKET))) {
                 // by sigi. 2002.6.19
@@ -2386,8 +2200,8 @@ void Vampire::heartbeat(const Timeval& currentTime)
                 HP_t CurHP = m_HP[ATTR_CURRENT];
                 HP_t NewHP = 0;
 
-                // 관 속에 있는 경우는
-                // SilverDamage를 먼저 치료한다.
+                
+                
                 if (bInCasket && m_SilverDamage > 0) {
                     NewHP = (10 + m_HPRegenBonus) * diffTime.tv_sec;
                     if (isFlag(Effect::EFFECT_CLASS_HAS_BLOOD_BIBLE))
@@ -2395,7 +2209,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
 
                     int remainSilver = (int)m_SilverDamage - (int)NewHP;
 
-                    // SilverDamage를 다 치료하고 HP도 치료하는 경우
+                    
                     if (remainSilver < 0) {
                         m_SilverDamage = 0;
                         NewHP = -remainSilver;
@@ -2403,7 +2217,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
                         HP_t MaxHP = m_HP[ATTR_MAX];
                         m_HP[ATTR_CURRENT] = min((int)MaxHP, (int)(CurHP + NewHP));
                     }
-                    // SilverDamage만 감소시키는 경우
+                    
                     else {
                         m_SilverDamage = remainSilver;
                     }
@@ -2413,7 +2227,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
                     // Normal       : 2
                     // Burrow(Hide) : 4
                     // Casket       : 6
-                    // Wolf         : 2 (일반 상태로 간주)
+                    
                     // Bat          : 0
                     if (isFlag(Effect::EFFECT_CLASS_HIDE)) {
                         NewHP = (4 + m_HPRegenBonus) * diffTime.tv_sec;
@@ -2438,52 +2252,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
         }
     }
 
-    /*
-
-    list<Item*> ItemList;
-    VolumeHeight_t Height = m_pInventory->getHeight();
-    VolumeWidth_t Width = m_pInventory->getWidth();
-
-    for (int j = 0; j < Height; j++)
-    {
-        for (int i = 0 ; i < Width ; i ++)
-        {
-            if (m_pInventory->hasItem(i, j))
-            {
-                Item* pItem = m_pInventory->getItem(i , j);
-                VolumeWidth_t ItemWidth = pItem->getVolumeWidth();
-
-                list<Item*>::iterator itr = find(ItemList.begin() , ItemList.end() , pItem);
-
-                if (itr == ItemList.end())
-                {
-                    ItemList.push_back(pItem);
-                    //아이템 크기의 다음 위치 부터 검색하기 위함.
-                    i = i + ItemWidth - 1;
-                }
-            }
-        }
-    }
-
-    for (int i = 0; i < VAMPIRE_WEAR_MAX; i++)
-    {
-        Item* pItem = m_pWearItem[i];
-        if (pItem != NULL) ItemList.push_back(pItem);
-    }
-
-    Item* pSlotItem = m_pExtraInventorySlot->getItem();
-    if (pSlotItem != NULL)
-    {
-        ItemList.push_back(pSlotItem);
-    }
-
-    for (list<Item*>::iterator itr = ItemList.begin(); itr != ItemList.end(); itr++)
-    {
-        Item* pItem = *itr;
-        pItem->getEffectManager()->heartbeat();
-    }
-
-    */
+     
 
     __END_DEBUG
     __END_CATCH
@@ -2537,7 +2306,7 @@ void Vampire::setResurrectZoneIDEx(ZoneID_t id)
     */
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "ResurrectZone=%d", id);
     tinysave(pField);
 
@@ -2559,7 +2328,7 @@ void Vampire::saveAlignment(Alignment_t alignment)
     tinysave(sql.toString());
     */
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "Alignment=%d", alignment);
     tinysave(pField);
 
@@ -2608,7 +2377,7 @@ void Vampire::saveSkills(void) const
         VampireSkillSlot* pVampireSkillSlot = itr->second;
         Assert(pVampireSkillSlot != NULL);
 
-        // 기본 공격 스킬이 아니라면...
+        
         if (pVampireSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
             pVampireSkillSlot->save(m_Name);
         }
@@ -2629,8 +2398,8 @@ void Vampire::saveGears(void) const
 {
     __BEGIN_TRY
 
-    // 장착하고 있는 아이템들을 저장한다.
-    char pField[80];
+    
+    char pField[128];
 
     for (int i = 0; i < Vampire::VAMPIRE_WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
@@ -2638,7 +2407,7 @@ void Vampire::saveGears(void) const
             Durability_t maxDurability = computeMaxDurability(pItem);
             if (pItem->getDurability() < maxDurability) {
                 // pItem->save(m_Name, STORAGE_GEAR, 0, i, 0);
-                //  item저장 최적화. by sigi. 2002.5.13
+                
                 sprintf(pField, "Durability=%d", pItem->getDurability());
                 pItem->tinysave(pField);
             }
@@ -2654,10 +2423,10 @@ void Vampire::saveExps(void) const
 {
     __BEGIN_TRY
 
-    // 스킬 핸들러에서 쿼리 숫자를 줄이기 위해서 10으로 나누는 부분들은,
-    // 서버 다운이 되지 않고, 정상적으로 로그아웃하는 경우에
-    // 세이브를 명시적으로 해주지 않으면 10 이하 올라간 부분은 날아가 버리게 된다.
-    // 그러므로 여기서 세이브를 해 준다.
+    
+    
+    
+    
     /*
     StringStream sql;
     sql << "UPDATE Vampire SET "
@@ -2700,15 +2469,15 @@ void Vampire::saveExps(void) const
 //----------------------------------------------------------------------
 // getShapeInfo
 //----------------------------------------------------------------------
-// login할때 처리를 빨리하기 위해서다.
+
 //----------------------------------------------------------------------
-// 일단 32bit로 32가지를 표현하는걸로도 충분하다고 본다.
-// 언젠가? over되면 bitset을 써야겠지..
+
+
 //
-// (!) 색깔은 index색값이 아니고 optionType을 넣어서 사용한다.
-//     클라이언트에서 옵션으로 색값을 찾아서 쓴다.
+
+
 //
-// colors[1]은 coatColor만 있기 때문이다.
+
 //----------------------------------------------------------------------
 void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_COLOR_MAX]) const
 //
@@ -2721,11 +2490,11 @@ void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_CO
     int vampireColor;
     WearPart Part;
 
-    // 초기화
+    
     flag = 0;
 
     //-----------------------------------------------------------------
-    // 복장
+    
     //-----------------------------------------------------------------
     Part = WEAR_BODY;
     pItem = m_pWearItem[Part];
@@ -2740,12 +2509,12 @@ void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_CO
         // colors[vampireColor] = pItem->getOptionType();
         // flag |= (getVampireCoatType(IType) << vampireBit);
 
-        // itemType을 넣어준다.
+        
         flag = IType;
     } else {
         colors[vampireColor] = 377;
         // flag |= (VAMPIRE_COAT_BASIC << vampireBit);
-        //  기본 옷 :  남자는 0, 여자는 1
+        
         flag = (m_Sex ? 0 : 1);
     }
 
@@ -2756,7 +2525,7 @@ void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_CO
 //----------------------------------------------------------------------
 // save InitialRank
 //----------------------------------------------------------------------
-// Rank, RankExp, RankGoalExp의 초기값을 저장한다.
+
 //----------------------------------------------------------------------
 void Vampire::saveInitialRank(void)
 
@@ -2781,7 +2550,7 @@ void Vampire::saveInitialRank(void)
         setRankGoalExp(NextGoalExp);
     */
 
-    char pField[80];
+    char pField[128];
     sprintf(pField, "`Rank`=%d, RankExp=%lu, RankGoalExp=%lu", getRank(), getRankExp(), getRankGoalExp());
     tinysave(pField);
     setRankExpSaveCount(0);
@@ -2846,22 +2615,22 @@ Color_t Vampire::getItemShapeColor(Item* pItem, OptionInfo* pOptionInfo) const {
     Color_t color;
 
     if (pItem->isTimeLimitItem()) {
-        // 퀘스트는 특정한 색깔로 대체해서 처리한다.
+        
         color = QUEST_COLOR;
     } else if (pItem->isUnique()) {
-        // 유니크는 특정한 색깔로 대체해서 처리한다.
+        
         color = UNIQUE_COLOR;
     }
-    // 외부에서 이미 OptionInfo를 찾은 경우
+    
     else if (pOptionInfo != NULL) {
         color = pOptionInfo->getColor();
     }
-    // 아니면.. 첫번째 옵션의 색깔을 지정한다.
+    
     else if (pItem->getFirstOptionType() != 0) {
         OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getFirstOptionType());
         color = pOptionInfo->getColor();
     } else {
-        // default 색
+        
         color = 377;
     }
 
@@ -2891,11 +2660,11 @@ bool Vampire::isPayPlayAvaiable()
 
 #ifdef __CONNECT_BILLING_SYSTEM__
     if (pGamePlayer->isPayPlaying()) {
-        // 완전 무료 사용자. ㅋㅋ
+        
         if (pGamePlayer->getPayType() == PAY_TYPE_FREE)
             return true;
 
-        // 제한된 레벨까지 play가능
+        
         if (m_Level <= g_pVariableManager->getVariable(FREE_PLAY_VAMPIRE_LEVEL)) {
             return true;
         }
@@ -2903,11 +2672,11 @@ bool Vampire::isPayPlayAvaiable()
 
     return false;
 
-// 애드빌 빌링을 사용하지 않고 사용자 제한을 하는 경우
+
 #elif defined(__PAY_SYSTEM_FREE_LIMIT__)
 
     if (!pGamePlayer->isPayPlaying()) {
-        // 제한된 레벨까지 play가능
+        
         if (m_Level <= g_pVariableManager->getVariable(FREE_PLAY_VAMPIRE_LEVEL)) {
             return true;
         }

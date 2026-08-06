@@ -18,7 +18,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ReactiveArmor::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot, CEffectID_t CEffectID)
 
@@ -63,7 +63,7 @@ void ReactiveArmor::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSl
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected && bSatisfyRequire) {
             decreaseMana(pOusters, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pOusters, pOustersSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
@@ -78,7 +78,7 @@ void ReactiveArmor::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSl
                 grade = 4;
             }
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectReactiveArmor* pEffect = new EffectReactiveArmor(pOusters);
             pEffect->setDeadline(output.Duration);
             pEffect->setBonus(output.Damage);
@@ -145,9 +145,9 @@ void ReactiveArmor::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouster
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        // 저주 면역. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || !pTargetCreature->isOusters()) {
             executeSkillFailException(pOusters, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -193,7 +193,7 @@ void ReactiveArmor::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouster
                 damageReduce = 20 + pMastery->getExpLevel();
             }
 
-            // 이펙트 오브젝트를 생성해 붙인다.
+            
             EffectReactiveArmor* pEffect = new EffectReactiveArmor(pTargetCreature);
             pEffect->setDeadline(output.Duration);
             pEffect->setBonus(output.Damage);

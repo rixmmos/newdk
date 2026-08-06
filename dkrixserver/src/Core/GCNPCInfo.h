@@ -23,16 +23,16 @@
 #include "PacketFactory.h"
 #include "RideMotorcycleInfo.h"
 
-#define FLAG_PREMIUM_ZONE 0x10 // premium으로 설정된 존이다.
-#define FLAG_PREMIUM_PLAY 0x01 // premium play를 하는 중인가?
+#define FLAG_PREMIUM_ZONE 0x10 
+#define FLAG_PREMIUM_PLAY 0x01 
 
 //--------------------------------------------------------------------------------
 //
 // class GCNPCInfo;
 //
-// 클라이언트가 게임 서버에 접속해서 CGConnect 패킷을 보내면, 게임 서버는 크리처와
-// 소유 아이템을 로딩해서 존에 들어갈 준비를 하게 된다. 그다음 PC와 아이템 정보,
-// 그리고 존 정보를 GCNPCInfo에 담아서 클라이언트로 전송하게 된다.
+
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -44,10 +44,10 @@ public:
     // destructor
     ~GCNPCInfo();
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -101,7 +101,7 @@ public:
     // data members
     //--------------------------------------------------
 private:
-    // 현재 존에 존재하는 NPC들에 대한 정보
+    
     list<NPCInfo*> m_NPCInfos;
 };
 
@@ -133,7 +133,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCNPCInfoPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         PacketSize_t size = 0;
 

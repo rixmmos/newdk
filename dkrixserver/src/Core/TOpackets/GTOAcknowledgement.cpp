@@ -11,7 +11,7 @@
 
 
 //////////////////////////////////////////////////////////////////////
-// Datagram 객체로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GTOAcknowledgement::read(Datagram& iDatagram) throw(ProtocolException, Error) {
     __BEGIN_TRY
@@ -26,7 +26,7 @@ void GTOAcknowledgement::read(Datagram& iDatagram) throw(ProtocolException, Erro
     iDatagram.read(m_Message, szMessage);
 
     if (m_Message != Message) {
-        filelog("TheOneServer.log", "잘못된 메시지가 도착했습니다. [%s:%d] : %s", getHost().c_str(), getPort(),
+        filelog("TheOneServer.log", "  . [%s:%d] : %s", getHost().c_str(), getPort(),
                 m_Message.c_str());
     }
 
@@ -40,7 +40,7 @@ void GTOAcknowledgement::read(Datagram& iDatagram) throw(ProtocolException, Erro
 
 
 //////////////////////////////////////////////////////////////////////
-// Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GTOAcknowledgement::write(Datagram& oDatagram) const throw(ProtocolException, Error) {
     __BEGIN_TRY

@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    int m_TrySendLoginCount; // Login 패킷을 보내기 시도 회수
+    int m_TrySendLoginCount; 
 };
 
 #endif

@@ -24,7 +24,7 @@ void GCAddEffectToTileHandler::execute ( GCAddEffectToTile * pPacket , Player * 
 		
 #ifdef __GAME_CLIENT__
 		
-	// 예외 처리
+	
 	if( pPacket->getEffectID() == EFFECTSTATUS_TRAP_INSTALLED && !g_pPlayer->IsSlayer() )
 		return;
 
@@ -32,7 +32,7 @@ void GCAddEffectToTileHandler::execute ( GCAddEffectToTile * pPacket , Player * 
 	int skillType	= (*g_pEffectStatusTable)[ EffectStatusType ].ActionInfo;
 	
 	// 2004, 9, 3, sobeit add start
-	if(EffectStatusType == EFFECTSTATUS_TURRET_LASER && g_pPlayer) // 공성전 트랩중..공격측에 안보이는 광선
+	if(EffectStatusType == EFFECTSTATUS_TURRET_LASER && g_pPlayer) 
 	{
 		if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_SIEGE_ATTACKER_1) || 
 			g_pPlayer->HasEffectStatus(EFFECTSTATUS_SIEGE_ATTACKER_2) || 
@@ -41,7 +41,7 @@ void GCAddEffectToTileHandler::execute ( GCAddEffectToTile * pPacket , Player * 
 			g_pPlayer->HasEffectStatus(EFFECTSTATUS_SIEGE_ATTACKER_5) )
 			return;
 	}
-	// 2006.10.29  sonic add 錦攣독랗瘻세콘轟槻벎
+	
 	if(EffectStatusType == EFFECTSTATUS_DRAGON_TORNADO || EffectStatusType == EFFECTSTATUS_DRAGON_TORNADO_CHILD)
 	{
 		SetDragonTorando(EffectStatusType, pPacket->getObjectID(), pPacket->getX(), pPacket->getY());
@@ -49,7 +49,7 @@ void GCAddEffectToTileHandler::execute ( GCAddEffectToTile * pPacket , Player * 
 	}
 	// 2004, 9, 3, sobeit add end
 	//------------------------------------------------------------
-	// Effect와 관련된 기술이 있을때..
+	
 	//------------------------------------------------------------
 	if (skillType!=ACTIONINFO_NULL)
 	{
@@ -70,7 +70,7 @@ void GCAddEffectToTileHandler::execute ( GCAddEffectToTile * pPacket , Player * 
 //			break;
 //		}
 		ExecuteActionInfoFromMainNode(
-				skillType,		// 값 자체가 RESULT_ACTIONINFO이다.
+				skillType,		
 			
 				x, y, 0,
 				DIRECTION_DOWN,

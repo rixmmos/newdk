@@ -18,12 +18,25 @@
 #ifdef DXLIB_BACKEND_SDL
 
 #include <SDL.h>
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 /* Include input focus manager */
 #include "../../VS_UI/src/InputFocusManager.h"
+
+#ifdef PLATFORM_WINDOWS
+extern HWND g_hWnd;
+#endif
+
+static void LogSDLInput(const char* fmt, ...)
+{
+	(void)fmt;
+}
 
 /* For MP3/OGG support */
 #ifdef SDL_MIXER_MAJOR_VERSION
@@ -362,12 +375,24 @@ void dxlib_input_update(void) {
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 			case SDL_QUIT:
+#ifdef PLATFORM_WINDOWS
+				if (g_hWnd != NULL) {
+					PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+				}
+#endif
 				g_bRunning = false;
 				break;
 
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
 					g_bActiveApp = TRUE;
+				} else if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+#ifdef PLATFORM_WINDOWS
+					if (g_hWnd != NULL) {
+						PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+					}
+#endif
+					g_bRunning = false;
 				} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
 					// Don't deactivate - keep game running in background
 					// g_bActiveApp = FALSE;
@@ -378,6 +403,8 @@ void dxlib_input_update(void) {
 				/* Handle control keys for text input */
 				if (g_GetInputFocusManager().HasFocus()) {
 					SDL_Keycode key = event.key.keysym.sym;
+					const SDL_Keymod mods = (SDL_Keymod)event.key.keysym.mod;
+					LogSDLInput("SDL_KEYDOWN key=%d mod=%d focus=1", (int)key, (int)mods);
 					unsigned int vk_code = 0;
 
 					// Map SDL key codes to Windows virtual key codes
@@ -396,10 +423,42 @@ void dxlib_input_update(void) {
 					}
 
 					if (vk_code != 0) {
+						LogSDLInput("SDL_KEYDOWN control vk=%u", vk_code);
 						g_GetInputFocusManager().HandleKeyDown(vk_code);
 						// Don't break here - let keyboard state update below
 						// This ensures dxlib_input_key_down() works correctly
 					}
+
+#ifndef PLATFORM_WINDOWS
+					if ((mods & (KMOD_CTRL | KMOD_ALT | KMOD_GUI)) == 0) {
+						char text[2] = { 0, 0 };
+
+						if (key >= SDLK_a && key <= SDLK_z) {
+							const int upper = (mods & KMOD_SHIFT) != 0;
+							text[0] = (char)((upper ? 'A' : 'a') + (key - SDLK_a));
+						} else if (key >= SDLK_0 && key <= SDLK_9) {
+							text[0] = (char)('0' + (key - SDLK_0));
+						} else if (key >= SDLK_KP_0 && key <= SDLK_KP_9) {
+							text[0] = (char)('0' + (key - SDLK_KP_0));
+						} else {
+							switch (key) {
+							case SDLK_MINUS: text[0] = '-'; break;
+							case SDLK_UNDERSCORE: text[0] = '_'; break;
+							case SDLK_PERIOD: text[0] = '.'; break;
+							case SDLK_AT: text[0] = '@'; break;
+							default: break;
+							}
+						}
+
+						if (text[0] != '\0') {
+							LogSDLInput("SDL_KEYDOWN fallback text='%s'", text);
+							g_GetInputFocusManager().HandleTextInput(text);
+						}
+					}
+#endif
+				}
+				else {
+					LogSDLInput("SDL_KEYDOWN key=%d focus=0", (int)event.key.keysym.sym);
 				}
 				/* Fall through to update keyboard state */
 				/* IMPORTANT: Keyboard state MUST be updated even when InputFocusManager has focus */
@@ -441,6 +500,7 @@ void dxlib_input_update(void) {
 				{
 					// Route to InputFocusManager instead of callback
 					if (event.text.text[0] != '\0') {
+						LogSDLInput("SDL_TEXTINPUT text='%s'", event.text.text);
 						g_GetInputFocusManager().HandleTextInput(event.text.text);
 					}
 				}

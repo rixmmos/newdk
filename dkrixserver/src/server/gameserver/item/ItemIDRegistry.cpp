@@ -2,8 +2,8 @@
 // Filename    : ItemIDRegistry.cpp
 // Written by  : excel96
 // Description :
-// 각 아이템 구현 파일에서 initItemIDRegistry 멤버 함수만을 빼서
-// 구현해놓은 파일이다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AR.h"

@@ -2,7 +2,7 @@
 // Filename    : ActionDestroyGuild.cpp
 // Written By  :
 // Description :
-// NPC를 통해 클라이언트로 하여금 길드 해체 창을 띄우게 한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "ActionDestroyGuild.h"
@@ -20,14 +20,14 @@ void ActionDestroyGuild::read(PropertyBuffer& propertyBuffer)
 {
     __BEGIN_TRY
 
-    // 길드 해체 창을 띄우는 것뿐이므로 특별히 읽어들일 인수는 없다.
+    
 
     __END_CATCH
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionDestroyGuild::execute(Creature* pCreature1, Creature* pCreature2)
 

@@ -14,26 +14,26 @@ int main(int argc, char* argv[]) {
     cout << cbp.toString().c_str() << endl;
 
 
-    // command-line parameter¸¦ string À¸·Î º¯È¯ÇÑ´Ù. ^^;
+    
     string* Argv;
 
     Argv = new string[argc];
     for (int i = 0; i < argc; i++)
         Argv[i] = argv[i];
 
-    // È¯°æ ÆÄÀÏÀ» ÀÐ¾îµéÀÎ´Ù.
-    // ´Ü ½ÇÇà ÆÄÀÏÀº $VSHOME/bin¿¡, È¯°æ ÆÄÀÏÀº $VSHOME/conf ¿¡ Á¸ÀçÇØ¾ß ÇÑ´Ù.½
-    // command line ¿¡¼­ È¯°æ ÆÄÀÏÀ» ÁöÁ¤ÇÒ ¼ö ÀÖµµ·Ï ÇÑ´Ù.
+    
+    
+    
 
     //-------------------------------------------------------------------
     // Load config file
     //-------------------------------------------------------------------
     try {
         if (Argv[1] != "-f") {
-            throw Error("Usage : gameserver -f È¯°æÆÄÀÏ");
+            throw Error("Usage : gameserver -f ");
         }
 
-        // Ã¹¹øÂ° ÆÄ¶ó¹ÌÅÍ°¡ -f ÀÏ °æ¿ì, µÎ¹øÂ° ÆÄ¶ó¹ÌÅÍ´Â È¯°æÆÄÀÏÀÇ À§Ä¡°¡ µÈ´Ù.
+        
         g_pConfig = new Properties();
         g_pConfig->load(Argv[2]);
 

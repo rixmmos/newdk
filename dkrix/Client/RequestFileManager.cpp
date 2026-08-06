@@ -3,12 +3,12 @@
 //---------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "RequestFileManager.h"
-#include "RequestClientPlayer.h"
-#include "RequestServerPlayer.h"
+#include "Packet/RequestClientPlayer.h"
+#include "Packet/RequestServerPlayer.h"
 #include "ProfileManager.h"
 
-#include "packet/Rpackets/RCRequestedFile.h"
-#include "packet/Rpackets/RCRequestVerify.h"
+#include "Packet/Rpackets/RCRequestedFile.h"
+#include "Packet/Rpackets/RCRequestVerify.h"
 
 #include "ServerInfo.h"
 #include "DebugInfo.h"
@@ -55,7 +55,7 @@ ReceiveFileInfo::ReceiveFileInfo(const char* pFilename,
 
 ReceiveFileInfo::~ReceiveFileInfo()
 {
-	// 화일 닫기
+	
 	if (m_FileStream.is_open())
 	{
 		m_FileStream.close();
@@ -65,15 +65,15 @@ ReceiveFileInfo::~ReceiveFileInfo()
 //---------------------------------------------------------------------------
 // Start Receive
 //---------------------------------------------------------------------------
-// 누가 나에게 file을 보내기 시작할려는 순간이다.
-// 화일을 열고 받을 준비를 하면 된다.
+
+
 //---------------------------------------------------------------------------
 void
 ReceiveFileInfo::StartReceive(DWORD filesize)
 {
 	m_Mode = REQUEST_FILE_MODE_RECEIVE;
 
-	// 임시 파일 이름
+	
 	m_FilenameTemp = m_Filename;
 
 	int dot = m_FilenameTemp.rfind(".");
@@ -82,7 +82,7 @@ ReceiveFileInfo::StartReceive(DWORD filesize)
 
 	m_FilenameTemp += ".tmp";
 
-	// 화일 열어두기
+	
 	if (m_FileStream.is_open())
 	{
 		m_FileStream.close();
@@ -90,14 +90,14 @@ ReceiveFileInfo::StartReceive(DWORD filesize)
 
 	m_FileStream.open( m_FilenameTemp.c_str() , std::ios::out | std::ios::binary | std::ios::trunc );
 
-	// 받아야할 byte수
+	
 	m_FileSizeLeft = filesize;
 }
 
 //---------------------------------------------------------------------------
 // Receive
 //---------------------------------------------------------------------------
-// 받은 data를 화일에 쓰면 된다.
+
 //---------------------------------------------------------------------------
 void		
 ReceiveFileInfo::Receive(const char* pBuffer, DWORD nReceived)
@@ -110,8 +110,8 @@ ReceiveFileInfo::Receive(const char* pBuffer, DWORD nReceived)
 //---------------------------------------------------------------------------
 // End Receive
 //---------------------------------------------------------------------------
-// 화일을 닫고..
-// FilenameTemp화일을 실제 data에 update시킨다.
+
+
 //---------------------------------------------------------------------------
 void		
 ReceiveFileInfo::EndReceive(const std::string& requestUser)
@@ -123,7 +123,7 @@ ReceiveFileInfo::EndReceive(const std::string& requestUser)
 	switch (m_FileType)
 	{
 		//--------------------------------------------------------------------
-		// 요청한 profile을 다 받은 경우
+		
 		//--------------------------------------------------------------------
 		case REQUEST_FILE_PROFILE :
 			if (rename( m_FilenameTemp.c_str(), m_Filename.c_str() )==0)
@@ -147,7 +147,7 @@ ReceiveFileInfo::EndReceive(const std::string& requestUser)
 		break;
 
 		//--------------------------------------------------------------------
-		// 요청한 profile index를 다 받은 경우
+		
 		//--------------------------------------------------------------------
 		case REQUEST_FILE_PROFILE_INDEX :
 			if (rename( m_FilenameTemp.c_str(), m_Filename.c_str() )==0)
@@ -196,7 +196,7 @@ RequestSendInfo::MakeRCRequestedFilePacket(RCRequestedFile& packet) const
 {
 	std::list<SendFileInfo*>::const_iterator iInfo = m_FileInfos.begin();
 
-	// 하나만 넣어둔다.
+	
 	//while (iInfo != m_FileInfos.end())
 	if (iInfo != m_FileInfos.end())
 	{
@@ -229,7 +229,7 @@ SendFileInfo::SendFileInfo(const char* pFilename,
 
 SendFileInfo::~SendFileInfo()
 {
-	// 화일 닫기
+	
 	if (m_FileStream.is_open())
 	{
 		m_FileStream.close();
@@ -250,7 +250,7 @@ SendFileInfo::StartSend()
 	{
 		m_FileStream.seekg( 0, std::ios::end );
 
-		m_FileSizeLeft = m_FileStream.tellg();	// filesize를 알아오기 위해서
+		m_FileSizeLeft = m_FileStream.tellg();	
 
 		m_FileStream.seekg( 0, std::ios::beg );
 	}
@@ -412,7 +412,7 @@ RequestFileManager::HasMyRequest(const std::string& name) const
 //---------------------------------------------------------------------------
 // Receive MyRequest
 //---------------------------------------------------------------------------
-// pRequestClientPlayer에서 data를 읽어들여서 pInfo의 정보를 이용해 저장한다.
+
 //---------------------------------------------------------------------------
 bool
 RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlayer* pRequestClientPlayer)
@@ -434,7 +434,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 		switch (pFileInfo->GetMode())
 		{
 			//------------------------------------------------------------------
-			// 화일 받기 전에
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_BEFORE :
 			{
@@ -443,7 +443,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 			return false;
 
 			//------------------------------------------------------------------
-			// 화일 받는 중에..
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_RECEIVE :
 			{
@@ -452,14 +452,14 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 				char buf[MAX_BUFFER+1];	// 10k
 				
 				//------------------------------------------------------------------
-				// 먼저 InputStream에걸 읽어야 한다.
+				
 				//------------------------------------------------------------------
 				DWORD length = pRequestClientPlayer->getInputStreamLength();
 				
 				while ( length > 0 ) 
 				{	
-					// 남은 size만큼만 읽는다.
-					// buffer만큼만 읽고					
+					
+					
 					int nReceive = min(length, pFileInfo->GetFileSizeLeft());
 					nReceive = min(MAX_BUFFER, nReceive);					
 
@@ -469,7 +469,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 
 					length -= nReceived;
 
-					// 다 받은 경우
+					
 					if (pFileInfo->GetFileSizeLeft()==0)
 					{
 						break;
@@ -477,7 +477,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 				}
 
 				//------------------------------------------------------------------
-				// socket에 있는 만큼 읽는다.
+				
 				//------------------------------------------------------------------
 				/*
 				DWORD available = pSocket->available();
@@ -494,23 +494,23 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 				*/
 
 				//------------------------------------------------------------------
-				// 다 받은 경우
+				
 				//------------------------------------------------------------------
 				if (pFileInfo->GetFileSizeLeft()==0)
 				{
 					pFileInfo->EndReceive( pInfo->GetRequestUser() );
 
-					// 화일 정보 제거
+					
 					pInfo->DeleteFront();
 					
-					// 모든 화일을 다 받았나?
+					
 					if (pInfo->IsEnd())
 					{
 						delete pInfo;
 
 						m_MyRequests.erase( iMy );
 						
-						// 다 받았으니까 끊어버린다.
+						
 						//throw ConnectException("Receive Done");
 					}					
 				}
@@ -518,7 +518,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 			return true;
 
 			//------------------------------------------------------------------
-			// 화일 받고 나서
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_AFTER :
 			return false;
@@ -526,7 +526,7 @@ RequestFileManager::ReceiveMyRequest(const std::string& name, RequestClientPlaye
 	}
 	else
 	{
-		// 받을게 없는데..
+		
 		delete pInfo;
 
 		m_MyRequests.erase( iMy );
@@ -598,8 +598,8 @@ RequestFileManager::HasOtherRequest(const std::string& name) const
 //---------------------------------------------------------------------------
 // Send OtherRequest
 //---------------------------------------------------------------------------
-// return값이 true이면 화일을 보내는 중이라는 의미이다.
-// RequestServerPlayer의 processCommand를 처리할 필요가 없다.
+
+
 //---------------------------------------------------------------------------
 bool			
 RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlayer* pRequestServerPlayer)
@@ -620,7 +620,7 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 		switch (pFileInfo->GetMode())
 		{
 			//------------------------------------------------------------------
-			// 화일 보내기 전에
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_BEFORE :
 			{
@@ -642,7 +642,7 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 			return false;
 
 			//------------------------------------------------------------------
-			// 화일 보내는 중
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_SEND :
 			{
@@ -656,13 +656,13 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 
 					if (nSent!=nRead)
 					{
-						// 엽기일까.. - -;
+						
 						// socketInputStream
 						pFileInfo->SendBack( nRead - nSent );
 					}
 				}
 
-				if (nRead < MAX_BUFFER)	// 다 읽은 경우
+				if (nRead < MAX_BUFFER)	
 				{
 					if (pFileInfo->GetFileSizeLeft()==0)
 					{
@@ -672,13 +672,13 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 
 						if (pInfo->IsEnd())
 						{
-							// 다 보냈다~..
+							
 							RCRequestVerify rcRequestVerify;
 							rcRequestVerify.setCode( REQUEST_VERIFY_PROFILE_DONE );
 
 							pRequestServerPlayer->sendPacket( &rcRequestVerify );
 
-							// 정보 제거
+							
 							delete pInfo;
 							m_OtherRequests.erase( iOther );
 						}
@@ -686,7 +686,7 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 						{
 							//pFileInfo = pInfo->GetFront();
 
-							// 덜 보냈으면 다음꺼 또 보낸다.							
+							
 						}
 					}
 					else
@@ -698,7 +698,7 @@ RequestFileManager::SendOtherRequest(const std::string& name, RequestServerPlaye
 			return true;
 			
 			//------------------------------------------------------------------
-			// 화일 보내고 나서
+			
 			//------------------------------------------------------------------
 			case REQUEST_FILE_MODE_AFTER :
 			return false;

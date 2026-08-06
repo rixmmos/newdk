@@ -31,13 +31,13 @@ void SimpleCreatureEffect::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 플래그를 끈다.
+    
     pCreature->removeFlag(getEffectClass());
 
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트를 삭제하라고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(getSendEffectClass());

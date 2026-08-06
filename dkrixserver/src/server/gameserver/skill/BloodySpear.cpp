@@ -10,7 +10,7 @@
 #include "SimpleMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodySpear::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                           CEffectID_t CEffectID)
@@ -38,7 +38,7 @@ void BloodySpear::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Knowledge of Blood 가 있다면 hit bonus 10
+    
     int HitBonus = 0;
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD);
@@ -55,7 +55,7 @@ void BloodySpear::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodySpear::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -111,9 +111,9 @@ void BloodySpear::execute(Monster* pMonster, Creature* pEnemy)
                     pTargetCreature = tile.getCreature(Creature::MOVE_MODE_WALKING);
 
                 if (pTargetCreature != NULL
-                    // NPC도 아니어야 한다.
+                    
                     && !pTargetCreature->isNPC()
-                    // 공격 대상이 맞는지 확인
+                    
                     && pMonster->isEnemyToAttack(pTargetCreature)) {
                     g_SimpleMissileSkill.execute(pMonster, pTargetCreature, param, result);
                 }

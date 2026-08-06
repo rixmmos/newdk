@@ -1,0 +1,30 @@
+# Normalize line endings.
+#
+# Why this file exists: the working tree was rewritten from LF to CRLF by
+# Windows tooling, which produced ~610,000 lines of phantom diff across 2,382
+# files and buried the real changes. `text=auto eol=lf` stores LF in the repo
+# regardless of what the checkout looks like locally, so it cannot recur.
+
+* text=auto eol=lf
+
+# Windows-only scripts that genuinely need CRLF
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary — never touch, never diff
+*.png  binary
+*.bmp  binary
+*.jpg  binary
+*.gif  binary
+*.exe  binary
+*.dll  binary
+*.lib  binary
+*.exp  binary
+*.rar  binary
+*.zip  binary
+*.spk  binary
+*.ttf  binary
+*.wav  binary
+*.mp3  binary
+*.avi  binary

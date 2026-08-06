@@ -242,14 +242,11 @@ NULL, // 0xda
 	"APPS",		//0xDD//AppMenukey
 };
 
-/*-----------------------------------------------------------------------------
-- GetMouseAcceleration
-- SystemParametersInfo()로 얻은 Mouse 정보를 가지고 Mouse 가속값을 얻는다.
------------------------------------------------------------------------------*/
+ 
 int CSDLInput::GetMouseAcceleration(int value)
 {
 	//
-	// 제어판에서 변경할 수 있는 Mouse 속도 설정은 7단계이다.
+	
 	//
 	// level: (1st threshold, 2nd threshold, acceleration level) -> int m_mouse_info[3]
 	//
@@ -261,8 +258,8 @@ int CSDLInput::GetMouseAcceleration(int value)
 	// 5: (4,  9, 2)
 	// 6: (4,  6, 2)
 	//
-	// accel level이 0이 아닐 때, value가 첫번째 한계값보다 크면 value를 2배 한다.
-	// accel level이 2일 때는 두번째 한계값보다 크면 value를 2배한 값을 또 2배 한다.
+	
+	
 	//
 
 	int result = value;
@@ -279,14 +276,11 @@ int CSDLInput::GetMouseAcceleration(int value)
 	return result;
 }
 
-/*-----------------------------------------------------------------------------
-- SetMouseSpeed
-- 제어판에 설정된 Mouse 속도를 반영한다.
------------------------------------------------------------------------------*/
+ 
 void CSDLInput::SetMouseSpeed()
 {
 	//
-	// m_mouse_info는 three integer array이다.
+	
 	//
 	// m_mouse_info[0] = first test value
 	// m_mouse_info[1] = second test value
@@ -297,12 +291,7 @@ void CSDLInput::SetMouseSpeed()
 	//DWORD error = GetLastError();
 }
 
-/*-----------------------------------------------------------------------------
-- SetMouseMoveLimit
-- Mouse 이동 입력제한 값 설정.
-
-  `일반적으로 이 값은 screen size이다.
------------------------------------------------------------------------------*/
+ 
 void CSDLInput::SetMouseMoveLimit(int x, int y)
 {
 	// init
@@ -314,9 +303,7 @@ void CSDLInput::SetMouseMoveLimit(int x, int y)
 	m_limit_y = y;
 }
 
-/*-----------------------------------------------------------------------------
-Mouse 위치를 강제로 설정
------------------------------------------------------------------------------*/
+ 
 void		
 CSDLInput::SetMousePosition(int x, int y)
 {
@@ -448,7 +435,7 @@ void CSDLInput::OnMouseInput()
 	 if (!m_pMouse)
 		 return;
 
-	// 값 초기화
+	
 	m_lb_down	= FALSE;	// left button - down
 	m_rb_down	= FALSE;	// right button - down
 	m_cb_down	= FALSE;	// center button - down
@@ -621,10 +608,10 @@ void CSDLInput::OnMouseInput()
                 break;
 
             case DIMOFS_Z:       // Mouse vertical motion 
-					m_mouse_z += od.dwData; // 일반적으로 wheel의 입도는 120이다.
+					m_mouse_z += od.dwData; 
 					if (m_fp_mouse_event_receiver)
 					{
-						// m_mouse_z을 변환해서 넘겨줄까?
+						
 						if ((int)od.dwData < 0)
 							m_fp_mouse_event_receiver(CSDLInput::WHEELDOWN, m_mouse_x, m_mouse_y, m_mouse_z);
 						else
@@ -785,7 +772,7 @@ HRESULT CSDLInput::SetAcquire(bool active_app)
 		 }
 
 		 //
-		 // 제어판에서 Mouse Speed를 조절할 때 Acquire를 다시 하므로 지금 해준다.
+		 
 		 //
 		 SetMouseSpeed();
 	 }
@@ -814,7 +801,7 @@ HRESULT CSDLInput::SetAcquire(bool active_app)
 //------------------------------------------------------------------------
 // Clear
 //------------------------------------------------------------------------
-// Input값을 초기화 시킨다.
+
 //------------------------------------------------------------------------
 void
 CSDLInput::Clear()
@@ -830,15 +817,12 @@ CSDLInput::Clear()
 	m_lb_up = FALSE;	// left button - up
 	m_rb_up = FALSE;	// right button - up
 	m_cb_up = FALSE;
+	m_lb_held = FALSE;
+	m_rb_held = FALSE;
+	m_cb_held = FALSE;
 }
 
-/*-----------------------------------------------------------------------------
-- InitDI
-- Direct Input을 초기화한다.
-
-  `DirectDraw를 사용하지 않고 DirectInput만 사용할 수 있으므로 Window handle을 
-   인자로 받는다. 곧, hWnd에 독점 DirectInput를 사용한다.
------------------------------------------------------------------------------*/
+ 
 HRESULT CSDLInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 {
     HRESULT hr;
@@ -898,9 +882,9 @@ HRESULT CSDLInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
     // this device should interact with the system and with other
     // DirectInput applications.
 	 //
-	 // Keyboard에 대해서는 Windows가 항상 Exclusive로 사용하므로 Application에서는
-	 // None-Exclusive로 밖에 할 수 없다. 이것은 언제든지 alt+tab, ctrl+alt+del과 
-	 // 같은 키입력을 유효하게 하기 위함이다.
+	 
+	 
+	 
 	 //
     hr = m_pKeyboard->SetCooperativeLevel( hWnd, 
                                         DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);

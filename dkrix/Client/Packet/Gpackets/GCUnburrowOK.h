@@ -9,15 +9,15 @@
 #define __GC_UNBURROW_OK_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
 // class  GCUnburrowOK;
 //
-// 게임 서버에서 특정 사용자가 움직였다는 정보를 클라이언트로 보내줄 
-// 때 사용하는 패킷 객체이다. (CreatureID,X,Y,DIR) 을 포함한다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,10 +32,10 @@ public :
 
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -46,7 +46,7 @@ public :
 	
 	// get packet body size
 	// *OPTIMIZATION HINT*
-	// const static GCUnburrowOKPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketSize () const throw () { return szCoord + szCoord + szDir; }
 	
 	#ifdef __DEBUG_OUTPUT__
@@ -75,9 +75,9 @@ public :
 
 private : 
 
-	Coord_t m_X;   // 목표 X 좌표
-	Coord_t m_Y;   // 목표 Y 좌표
-	Dir_t m_Dir;   // 목표 방향
+	Coord_t m_X;   
+	Coord_t m_Y;   
+	Dir_t m_Dir;   
 
 };
 
@@ -107,7 +107,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCUnburrowOKPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return szCoord + szCoord + szDir; }
 	
 };

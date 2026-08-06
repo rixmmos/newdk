@@ -12,7 +12,7 @@
 #include "GCStatusCurrentHP.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Teleport::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersSkillSlot* pOustersSkillSlot,
                        CEffectID_t CEffectID)
@@ -40,8 +40,8 @@ void Teleport::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersS
         SkillType_t SkillType = pOustersSkillSlot->getSkillType();
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
-        // NPC는 공격할 수가 없다.
+        
+        
         //		bool bIncreaseDomainExp = pOusters->isRealWearingEx(Ousters::WEAR_RIGHTHAND);
 
         GCSkillToTileOK1 _GCSkillToTileOK1;
@@ -66,7 +66,7 @@ void Teleport::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersS
                          pOusters->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER);
 
         if (bManaCheck && bTimeCheck && bRangeCheck && !bEffected) {
-            // 빠르게 PC를 움직여준다.
+            
             if (pZone->moveFastPC(pOusters, pOusters->getX(), pOusters->getY(), X, Y, getSkillType())) {
                 decreaseMana(pOusters, RequiredMP, _GCSkillToTileOK1);
 
@@ -84,7 +84,7 @@ void Teleport::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersS
                 _GCSkillToTileOK5.setRange(0);
                 _GCSkillToTileOK5.setDuration(0);
 
-                // 자신에게 바뀐 MP를 알려준다.
+                
                 pPlayer->sendPacket(&_GCSkillToTileOK1);
                 pZone->broadcastPacket(pOusters->getX(), pOusters->getY(), &_GCSkillToTileOK5, pOusters);
 
@@ -105,7 +105,7 @@ void Teleport::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersS
     __END_CATCH
 }
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Teleport::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                        CEffectID_t CEffectID)
@@ -128,8 +128,8 @@ void Teleport::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkil
         // SkillType_t       SkillType  = pOustersSkillSlot->getSkillType();
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
-        // NPC는 공격할 수가 없다.
+        
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pOusters, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
@@ -139,51 +139,7 @@ void Teleport::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkil
         //		bool bIncreaseDomainExp = pOusters->isRealWearingEx(Ousters::WEAR_RIGHTHAND);
 
         execute(pOusters, pTargetCreature->getX(), pTargetCreature->getY(), pOustersSkillSlot, CEffectID);
-        /*
-                SkillInput input(pOusters);
-                SkillOutput output;
-                computeOutput(input, output);
-
-                SkillInfo*        pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
-
-                int  RequiredMP  = (int)pSkillInfo->getConsumeMP();
-                bool bManaCheck  = hasEnoughMana(pOusters, RequiredMP);
-                bool bTimeCheck  = verifyRunTime(pOustersSkillSlot);
-                bool bRangeCheck = verifyDistance(pOusters, pTargetCreature, output.Range);
-                bool bEffected	 = pOusters->hasRelicItem();
-
-                if (bManaCheck && bTimeCheck && bRangeCheck && !bEffected )
-                {
-
-                    // 빠르게 PC를 움직여준다.
-                    if (pZone->moveFastPC(pOusters, pOusters->getX(), pOusters->getY(), pTargetCreature->getX(),
-           pTargetCreature->getY()))
-                    {
-                        GCModifyInformation	gcMI;
-
-                        decreaseMana(pOusters, RequiredMP, gcMI);
-
-                        // 자신에게 바뀐 HP를 알려준다.
-                        pPlayer->sendPacket( &gcMI );
-
-                        // 주위에 HP가 바꼈다고 알린다.
-                        GCStatusCurrentHP gcStatusCurrentHP;
-                        gcStatusCurrentHP.setObjectID(pOusters->getObjectID());
-                        gcStatusCurrentHP.setCurrentHP(pOusters->getHP());
-                        pZone->broadcastPacket(pOusters->getX(), pOusters->getY(), &gcStatusCurrentHP, pOusters);
-
-                        pOustersSkillSlot->setRunTime(output.Delay);
-                    }
-                    else
-                    {
-                        executeSkillFailNormal(pOusters, getSkillType(), pTargetCreature);
-                    }
-                }
-                else
-                {
-                    executeSkillFailNormal(pOusters, getSkillType(), pTargetCreature);
-                }
-                */
+         
     } catch (Throwable& t) {
         executeSkillFailException(pOusters, getSkillType());
     }

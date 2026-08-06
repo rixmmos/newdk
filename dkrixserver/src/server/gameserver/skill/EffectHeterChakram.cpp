@@ -27,7 +27,7 @@ EffectHeterChakram::EffectHeterChakram(Creature* pCreature)
     m_UserOID = 0;
     m_Damage = 0;
     m_Duration = 0;
-    // m_AttackNum = 0; // ÊÜµ½¹¥»÷´ÎÊý
+    
     // m_TrageSaveHP =0;
 
     __END_CATCH
@@ -67,11 +67,11 @@ void EffectHeterChakram::affect()
     // 		}
     // 		if ( CurrentHP < m_TrageSaveHP)
     // 		{
-    // 			// Ôö¼ÓÆäËü¹¥»÷´ÎÊý
+    
     // 			m_AttackNum++;
     // 			//m_TrageSaveHP = CurrentHP;
     // 		}
-    // ´´½¨ÉËº¦
+    
     affect(pCreature);
     // 		if (pCreature->isDead())
     // 		{
@@ -80,7 +80,7 @@ void EffectHeterChakram::affect()
     // 		if (pCreature->isSlayer())  CurrentHP = pSlayer->getHP();
     // 		if (pCreature->isVampire())	CurrentHP = pVampire->getHP();
     // 		if (pCreature->isMonster())	CurrentHP = pMonsterAttacker->getHP();
-    // 		// ¼ÇÂ¼µ±Ç°HP
+    
     // 		m_TrageSaveHP = CurrentHP;
     // 		if (m_AttackNum >=5)
     // 		{
@@ -224,11 +224,11 @@ void EffectHeterChakram::unaffect()
     //
     // 	}
 
-    // ´´½¨Ä¿±êÉËº¦
+    
     affect(pCreature);
 
     // Creature* pCreature = m_pZone->getCreature(m_pTarget);
-    //  ¶ÁÈ¡5*5·¶Î§ÄÚ¶ÔÏó,²¢´´½¨ÉËº¦
+    
     //  	Creature* pCreature = dynamic_cast<Creature*>(m_pTarget);
 
 
@@ -257,7 +257,7 @@ void EffectHeterChakram::unaffect()
                 if (pTargetCreature == NULL || pTargetCreature->isOusters() || pTargetCreature == pCreature)
                     continue;
                 // if ( pTargetCreature->isFlag( getEffectClass() ) ) continue;
-                //  ´´½¨ÉËº¦
+                
                 affect(pTargetCreature);
                 // 	 			EffectHeterChakram* pEffect = new EffectHeterChakram( pTargetCreature );
                 // 	 			pEffect->setUserOID( m_UserOID );

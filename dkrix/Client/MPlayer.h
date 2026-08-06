@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // MPlayer.h
 //----------------------------------------------------------------------
-// 특별히 Player만 다루는 class
-// 길찾기 algorithm 구현
+
+
 //----------------------------------------------------------------------
 
 #ifndef	__MPLAYER_H__
@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------
 // define
 //----------------------------------------------------------------------
-// 추적하는 것에 대한 flag
+
 #define	FLAG_TRACE_NULL					0
 #define	FLAG_TRACE_CREATURE_BASIC		0x0001
 #define	FLAG_TRACE_CREATURE_SPECIAL		0x0002
@@ -30,7 +30,7 @@
 
 
 //----------------------------------------------------------------------
-// class 선언
+
 //----------------------------------------------------------------------
 class MCreature;
 class MItem;
@@ -55,7 +55,7 @@ extern DWORD	g_CurrentTime;
 
 //----------------------------------------------------------------------
 //
-// 길찾기에 이용할 Direction Node
+
 //
 //----------------------------------------------------------------------
 class DNode {
@@ -83,39 +83,39 @@ class DNode {
 
 //----------------------------------------------------------------------
 //
-// 길찾기할 때 더 나은 Node를 선택하는 비교 연산
+
 //
 //----------------------------------------------------------------------
-// [1] 거리가 가까운 것
-// [2] 움직인 회수가 적은 것
-// [3] 이전 방향과 같은 것
+
+
+
 class Comparison {
 	public :
-		// distance가 적을 걸 선택해야 한다.		
-		// true : right를 선택한다.
-		// false : left를 선택한다.
+		
+		
+		
 		bool operator () (DNode * left, DNode * right) const
 		{ 
 			int diff = left->distance - right->distance;			
 			int s = left->step - right->step;
 
-			// 거리가(diff) 같은 경우..
+			
 			if (diff==0)
 			{			
-				// 움직인 회수가 같은 경우
+				
 				if (s==0)
 				{
 					if (left->pParent!=NULL && right->pParent!=NULL)
 					{
 						if (right->pParent->direction == right->direction)
 						{
-							return true;	// right선택
+							return true;	
 						}
 						
-						return false;	// left선택						
+						return false;	
 					}
 				}
-				// 움직인 회수가 적은 것
+				
 				else if (s>0) 
 				{
 					return true;
@@ -123,7 +123,7 @@ class Comparison {
 				
 				return false;				
 			}			
-			// 거리가 적은 것
+			
 			else if (diff>0) return true; 
 
 			return false;
@@ -149,27 +149,27 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 
 		enum ATTACK_MODE 
 		{
-			ATTACK_MODE_PEACE,		// 아무도 공격 안 함
-			ATTACK_MODE_NORMAL,		// 적(!)만 공격함
-			ATTACK_MODE_AGGRESS,	// 아무나 공격함
-			ATTACK_MODE_GUILD,		// 우리 길드만 우리편
+			ATTACK_MODE_PEACE,		
+			ATTACK_MODE_NORMAL,		
+			ATTACK_MODE_AGGRESS,	
+			ATTACK_MODE_GUILD,		
 		};
 
 		enum ITEM_CHECK_BUFFER
 		{
 			ITEM_CHECK_BUFFER_NULL = 0,
 
-			// item줍기
+			
 			ITEM_CHECK_BUFFER_PICKUP_TO_INVENTORY,
 			ITEM_CHECK_BUFFER_PICKUP_TO_MOUSE,
 			ITEM_CHECK_BUFFER_PICKUP_TO_QUICKSLOT,
 			ITEM_CHECK_BUFFER_PICKUP_MONEY,
 
-			// item 사용 
+			
 			ITEM_CHECK_BUFFER_USE_FROM_INVENTORY,
 			ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT,
 			
-			// item을 다른 item에 추가
+			
 			ITEM_CHECK_BUFFER_INSERT_FROM_INVENTORY,	
 			ITEM_CHECK_BUFFER_INSERT_FROM_GEAR,	
 			ITEM_CHECK_BUFFER_INSERT_FROM_QUICKSLOT,			
@@ -177,27 +177,27 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 			ITEM_CHECK_BUFFER_DROP_TO_INVENTORY,
 			ITEM_CHECK_BUFFER_PICKUP_FROM_INVENTORY,
 
-			ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY,	// 아이템 몇개만 들기
+			ITEM_CHECK_BUFFER_PICKUP_SOME_FROM_INVENTORY,	
 
-			// trade할 때
+			
 			ITEM_CHECK_BUFFER_TRADE_ADD,
 			ITEM_CHECK_BUFFER_TRADE_REMOVE,
 
-			// item에 기술 사용
+			
 			ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY,
 
-			// item으로 기술 사용
+			
 			ITEM_CHECK_BUFFER_SKILL_FROM_ITEM,
 
-			// mouse에서 zone으로 버린다.
+			
 			ITEM_CHECK_BUFFER_DROP_TO_ZONE,			
 
 			ITEM_CHECK_BUFFER_DROP_TO_RELICTABLE,			
 
-			// item을 다른 아이템에 더하기
+			
 			ITEM_CHECK_BUFFER_ITEM_TO_ITEM,
 
-			// 트리 합체
+			
 			ITEM_CHECK_BUFFER_TREE_MERGE,
 			ITEM_CHECK_BUFFER_USE_FROM_GEAR,
 			
@@ -207,7 +207,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 			ITEM_CHECK_BUFFER_USE_FROM_GQUEST_INVENTORY,
 		};
 
-		// server에서 검증받기..
+		
 		enum WAIT_VERIFY
 		{
 			WAIT_VERIFY_NULL,
@@ -258,7 +258,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 			return NULL;
 		}
 
-		// Zone을 set한다.
+		
 		void	SetZone(MZone* pZone);
 
 		virtual void	SetCreatureType(TYPE_CREATURETYPE type);		
@@ -266,7 +266,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		// 
 		virtual void		SetServerPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 
-		// 시야 관련
+		
 		void	CalculateLightSight();
 		const int	GetLightSight() const			{ return m_LightSight; }
 		char	GetTimeLightSight()	const		{ return m_TimeLightSight; }
@@ -276,19 +276,19 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void	SetSight(char s)				{ m_Sight = s; }
 		char	GetSight()	const			{ return m_Sight; }
 		
-		// 한 행동~
+		
 		void	Action();
 
-		// 다음에 할 행동 설정.. 
+		
 		void	SetNextAction(BYTE action);	
 		void	SetNextActionToMove();
 
 		// 
 		void	SetAction(BYTE action);
 
-		// 흡혈 delay를 없애기 위해서 임시로..
+		
 		void	StopBloodDrain();
-		void	StopAbsorbSoul();	// 흡영
+		void	StopAbsorbSoul();	
 
 		//----------------------------------------------------------
 		// EffectStatus
@@ -297,7 +297,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		bool	RemoveEffectStatus(EFFECTSTATUS status);		
 
 		//----------------------------------------------------------
-		// 상태 값 바꾸기
+		
 		//----------------------------------------------------------
 		void	SetStatus(DWORD n, DWORD value);
 		void	CalculateStatus();
@@ -305,46 +305,46 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void	CalculateSight();
 		
 		//----------------------------------------------------------
-		// 변신
+		
 		//----------------------------------------------------------
 		bool	ChangeToSlayer();
 		bool	ChangeToVampire();
 
 //		//----------------------------------------------------------
-//		// 시야
+
 //		//----------------------------------------------------------
 //		void	SetLightSight(char LightSight);
 //		void	UnSetLightSight();	
 		
 		//----------------------------------------------------------
-		// 안전지대에 있나?
+		
 		//----------------------------------------------------------
 		BOOL	IsInSafeSector() const;
 		
 		//----------------------------------------------------------
-		// 살기/죽기
+		
 		//----------------------------------------------------------
-		void	SetAlive();		// 살아난다? - -;
-		void	SetDead();		// 죽는다.
+		void	SetAlive();		
+		void	SetDead();		
 
 		//----------------------------------------------------------
-		// 복장 바꾸기
+		
 		//----------------------------------------------------------
 		bool	SetAddonItem( MItem* pItem );
 		bool	RemoveAddonItem( MItem* pItem );
 
 		//----------------------------------------------------------
-		// SoulChain 실패
+		
 		//----------------------------------------------------------
 		void	SetCannotTrace();
 		
 
 		//----------------------------------------------------------
 		//
-		//			 Item 처리
+		
 		//
 		//----------------------------------------------------------
-		void	PickupItem(MItem* pItem);	// item 줍기 처리
+		void	PickupItem(MItem* pItem);	
 		void	PickupItemToInventory(MItem* pItem);
 		void	PickupItemToMouse(MItem* pItem);
 		bool	PickupItemToQuickslot(MItem* pItem);
@@ -353,15 +353,15 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 
 		//----------------------------------------------------------
 		//
-		//            Server Packet과 관련
+		
 		//
 		//----------------------------------------------------------
-		// 기다리는 Move Packet은 없다.
+		
 		BYTE	GetSendMove() const		{ return m_SendMove; }
 		void	ResetSendMove();
 		
 		//----------------------------------------------------------
-		// server로부터 검증을 기다리는 상태
+		
 		//----------------------------------------------------------
 		BOOL	IsWaitVerifyNULL() const	{ return m_WaitVerify==WAIT_VERIFY_NULL; }
 		BOOL	IsWaitVerify() const		{ return m_WaitVerify!=WAIT_VERIFY_NULL; }
@@ -371,25 +371,25 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void	SetWaitVerify(WAIT_VERIFY wv, TYPE_ACTIONINFO ai=ACTIONINFO_NULL)	{ m_WaitVerify=wv; m_WaitVerifyActionInfo=ai; }
 
 		//----------------------------------------------------------
-		// packet처리
+		
 		//----------------------------------------------------------
 		//void	PacketBack();
 		void	PacketMoveOK(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BYTE direction);
 		void	PacketMoveNO();
 		void	PacketSpecialActionResult(TYPE_ACTIONINFO nResultActionInfo, TYPE_OBJECTID id, TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY, BYTE temp=0);
-		bool	PacketAddActionResult(WORD effectID, MActionResult* pResult);	// 결과 설정
+		bool	PacketAddActionResult(WORD effectID, MActionResult* pResult);	
 
-		bool	FastMovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, bool server = false);	// Zone의 Sector에서도 빨리(-_-;) 이동한다.
+		bool	FastMovePosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y, bool server = false);	
 
 		bool	KnockBackPosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 
 		//----------------------------------------------------------
 		//
-		//           추적 
+		
 		//
 		//----------------------------------------------------------
 		bool	SelfSpecialAction();
-		// 다른 Creature를 추적해서 Action을 취한다.
+		
 		bool	TraceCreatureToBasicAction(TYPE_OBJECTID id, bool bForceAttack=false, bool	bClick = false);
 		bool	TraceCreatureToSpecialAction(TYPE_OBJECTID id, bool bForceAttack=false);
 		bool	TraceSectorToBasicAction(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
@@ -399,22 +399,22 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		bool	TraceEffect(TYPE_OBJECTID id);
 		bool	TraceInventoryItem(TYPE_OBJECTID id);
 
-		// creature계속 추적
+		
 		void	KeepTraceCreature();
 
-		// 모든 추적 중지
+		
 		void	TraceNULL()				{ m_fTrace=FLAG_TRACE_NULL; m_fNextTrace=FLAG_TRACE_NULL; }
 		void	TraceNextNULL()			{ m_fNextTrace=FLAG_TRACE_NULL; } 
 
-		// nActionInfo의 사용 가능 거리는?
+		
 		int		GetActionInfoRange(TYPE_ACTIONINFO nActionInfo);
 		
 		//----------------------------------------------------------
 		//
-		//         길찾기
+		
 		//
 		//----------------------------------------------------------
-		// Zone상에서의 목표위치를 설정
+		
 		bool	SetMovePosition(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 		bool	SetNextDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 		bool	SetDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);		
@@ -428,7 +428,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		BYTE	GetNextDirection()	const			{ return m_listDirection.front(); }
 
 		//----------------------------------------------------------
-		// 추적
+		
 		//----------------------------------------------------------
 		BYTE			GetBasicAttackDistance() const	{ return m_BasicAttackDistance; }
 		void			SetBasicAttackDistance(BYTE bad) { m_BasicAttackDistance = (bad==0)?1:bad; }
@@ -441,27 +441,27 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		BOOL			IsTraceEffect() const			{ return m_fTrace & FLAG_TRACE_EFFECT; }
 
 		//----------------------------------------------------------
-		// 계속 Creature를 추적하는가?
+		
 		//----------------------------------------------------------
 		bool			IsKeepTraceCreature() const		{ return m_bKeepTraceCreature; }
 		void			SetKeepTraceCreature()			{ m_bKeepTraceCreature = true; }
 		void			UnSetKeepTraceCreature()		{ m_bKeepTraceCreature = false; }
 
 		//----------------------------------------------------------
-		// 행동 반복하기
+		
 		//----------------------------------------------------------
 		BOOL			IsRepeatAction() const			{ return m_bRepeatAction; }
 		void			SetRepeatAction()				{ m_bRepeatAction = TRUE; m_RepeatCount = 0; m_RepeatTimer = GetTickCount(); }		
 		void			UnSetRepeatAction();
 
-		// 기술 변경
+		
 		void			SetSpecialActionInfo( TYPE_ACTIONINFO n );
 
-		// 공격 중인가?
+		
 		bool			OnAttacking() const;
 				
 		//----------------------------------------------------------
-		// Delay시간을 지나서 delay가 끝났는가?
+		
 		//----------------------------------------------------------
 		bool			IsNotDelay() const		{ return m_DelayTime==0 || m_DelayTime <= g_CurrentTime; }
 		bool			IsNotDeadDelay() const	{ return m_DeadDelayTime <= g_CurrentTime; }
@@ -469,7 +469,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		DWORD			GetDeadDelayLast() const;
 
 		//----------------------------------------------------------
-		// 뱀파이어로 변하는데 남은 시간
+		
 		//----------------------------------------------------------
 		void			SetConversionDelay(DWORD last)		{ m_ConversionDelayTime = g_CurrentTime + last; }
 		DWORD			GetConversionDelayTime() const		{ return m_ConversionDelayTime; }
@@ -477,13 +477,13 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void			UpdateConversionTime();
 
 		//----------------------------------------------------------
-		// 진행중인 기술..
+		
 		//----------------------------------------------------------
 		void			RemoveEffectTarget(BYTE id);
 		void			AddEffectTarget(MEffectTarget* pEffectTarget);
 		
 		//----------------------------------------------------------
-		// Player의 Attack Mode
+		
 		//----------------------------------------------------------
 		ATTACK_MODE	GetAttackMode() const	{ return m_AttackMode; }
 		bool	IsAttackModePeace() const	{ return m_AttackMode == ATTACK_MODE_PEACE; }
@@ -495,7 +495,7 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		void	SetAttackModeAggress()		{ m_AttackMode = ATTACK_MODE_AGGRESS; }
 		void	SetAttackModeGuild()		{ m_AttackMode = ATTACK_MODE_GUILD; }
 
-		// to종족을 공격할 수 있는 AttackMode인가?
+		
 		bool	CanAttackTribe( enum CREATURETRIBE to ) const;
 		bool	CanAttackTribe( const MCreature* pCreature ) const	{ return CanAttackTribe( pCreature->GetCreatureTribe() ); }
 		bool	CanAttackGuild( const MCreature* pCreature ) const;
@@ -505,20 +505,20 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		//----------------------------------------------------------
 		bool	IsItemCheckBufferNULL()				{ return m_pItemCheckBuffer==NULL; }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void	SetItemCheckBuffer(MItem* pItem, enum ITEM_CHECK_BUFFER status, TYPE_OBJECTID SubItem = OBJECTID_NULL);
 	#else
 		void	SetItemCheckBuffer(MItem* pItem, enum ITEM_CHECK_BUFFER status);
 	#endif
 		
-		void	ClearItemCheckBuffer();		// 제거
+		void	ClearItemCheckBuffer();		
 		MItem*	GetItemCheckBuffer() const				{ return m_pItemCheckBuffer; }
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		TYPE_OBJECTID	GetItemIDCheckBufferSubInventory() const	{ return m_dwSubItemIDCheckBuffer; }
 	#endif
 		enum ITEM_CHECK_BUFFER	GetItemCheckBufferStatus() const	{ return m_ItemCheckBufferStatus; }
 
-		// 괜히 만들어본 함수들 - -;
+		
 		bool	IsItemCheckBufferPickupToInventory() const		{ return m_ItemCheckBufferStatus==ITEM_CHECK_BUFFER_PICKUP_TO_INVENTORY; }
 		bool	IsItemCheckBufferPickupToMouse() const			{ return m_ItemCheckBufferStatus==ITEM_CHECK_BUFFER_PICKUP_TO_MOUSE; }
 		bool	IsItemCheckBufferPickupToQuickslot() const		{ return m_ItemCheckBufferStatus==ITEM_CHECK_BUFFER_PICKUP_TO_QUICKSLOT; }
@@ -548,8 +548,8 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		int		FindEnemy();
 
 		//----------------------------------------------------------
-		// player가 Darkness안에 있는가?
-		// DarknessCount는 몇타일이 보이는가?이다.
+		
+		
 		//----------------------------------------------------------
 		void	CheckInDarkness();
 
@@ -582,24 +582,24 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 	protected :				
 		void	ActionMove();			// move
 		void	ActionEffect();			// effect
-		void	ActionToSendPacket();		// packet을 보낸다..
-		bool	ActionInTraceDistance();	// 행동 가능 거리에 있을 때
-		void	AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo);		// m_nUsedActionInfo를 적용시킨다.
+		void	ActionToSendPacket();		
+		bool	ActionInTraceDistance();	
+		void	AffectUsedActionInfo(TYPE_ACTIONINFO nUsedActionInfo);		
 		void	AttachCastingEffect(TYPE_ACTIONINFO nUsedActionInfo, BOOL bForceAttach=FALSE);
 
-		// 추적한 creature에게 기본 action 적용
+		
 		void	BasicActionToCreature();
 
-		// 다음 행동을 결정
+		
 		bool	CheckBufferAction();
 
-		// 반복 행동 결정
+		
 		bool	CheckRepeatAction();
 
-		// list node를 지운다.
+		
 		void	RemoveNodes();
 
-		// 목표위치까지의 거리 계산
+		
 		int		CalculateDistance(int x, int y);
 		
 		// sweep vice update
@@ -608,34 +608,34 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		bool	UpDateInstallTurret();
 
 	protected :		
-		DWORD						m_RepeatTimer;				// Repeat모드 제한시간
-		DWORD						m_LockTimer;				// Lock모드 제한시간		
+		DWORD						m_RepeatTimer;				
+		DWORD						m_LockTimer;				
 
 		TYPE_SECTORPOSITION			m_DestX;
-		TYPE_SECTORPOSITION			m_DestY;					// 목표위치(Sector)
+		TYPE_SECTORPOSITION			m_DestY;					
 
 		TYPE_SECTORPOSITION			m_NextDestX; 
-		TYPE_SECTORPOSITION			m_NextDestY;				// 다음 목표위치(Sector)
+		TYPE_SECTORPOSITION			m_NextDestY;				
 
-		TYPE_SECTORPOSITION			m_BlockDestX;				// 못 갔던 곳.. 
+		TYPE_SECTORPOSITION			m_BlockDestX;				
 		TYPE_SECTORPOSITION			m_BlockDestY;				// 
 
-		// 기다리는 move packet수
+		
 		BYTE					m_SendMove;
 
-		// Basic공격의 공격 가능 거리 : 0이 되어서는 안된다. 최소 1이다.
+		
 		BYTE					m_BasicAttackDistance;	
 
-		// 추적하기
-		WORD					m_fTrace;				// 추적의 종류		
-		WORD					m_fTraceBuffer;			// 추적의 종류(잠시 기억해두는 것)
+		
+		WORD					m_fTrace;				
+		WORD					m_fTraceBuffer;			
 		TYPE_OBJECTID			m_TraceIDBuffer;		//
-		BYTE					m_TraceDistance;		// 사정 거리		
-		BYTE					m_TraceObjectAction;	// 추적하는 Object의 상태
+		BYTE					m_TraceDistance;		
+		BYTE					m_TraceObjectAction;	
 		bool					m_bTraceCreatureToForceAttack;
 		bool					m_bNextForceAttack;
 
-		// 다음 추적 - Buffering
+		
 		WORD					m_fNextTrace;
 		TYPE_OBJECTID			m_NextTraceID;
 		TYPE_SECTORPOSITION		m_NextTraceX;
@@ -643,13 +643,13 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		short					m_NextTraceZ;
 		BYTE					m_NextTraceObjectAction;
 
-		// 행동을 반복하는가?
+		
 		BOOL					m_bRepeatAction;
 		
-		// 어떤 Creature를 계속 추적하는가?
+		
 		bool					m_bKeepTraceCreature;
 
-		// 움직이는데 필요한 것들..
+		
 		typedef std::priority_queue<DNode*, std::vector<DNode*>, Comparison>	DNODE_PQ;
 		typedef	std::list<DNode*>												DNODE_LIST;
 
@@ -659,63 +659,64 @@ class MPlayer : public MCreatureWear, public MRequestMode {
 		DIRECTION_LIST	m_listDirection;
 		DIRECTION_LIST	m_listSendDirection;
 
-		// 기술 사용 후의 delay
+		
 		DWORD						m_DelayTime;
 
-		// 펫 루팅 사용후의 delay
+		
 		DWORD						m_PetDelayTime;
 
-		// 현재 진행 중인 사용 기술
+		
 		EFFECTTARGET_LIST			m_listEffectTarget;
 
-		// 현재 전투 Mode
+		
 		ATTACK_MODE					m_AttackMode;
 
-		// 죽고 나서의 delay시간 - 언제까지..
+		
 		DWORD						m_DeadDelayTime;
 
-		// Item을 기억하고 있자..
+		
 		ITEM_CHECK_BUFFER			m_ItemCheckBufferStatus;
 		MItem*						m_pItemCheckBuffer;
+		DWORD						m_ItemCheckBufferTick;
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
-		DWORD						m_dwSubItemIDCheckBuffer; // add 2005, 3, 2, sobeit added  - 어떤 subinventory 에서 사용 했는지
+	#ifdef __TEST_SUB_INVENTORY__   
+		DWORD						m_dwSubItemIDCheckBuffer; 
 	#endif
 
-		// 기술 사용의 목표 : effect target
+		
 		MEffectTarget*				m_pEffectTarget;
 
-		// server에서 검증을 기다리는 상태
+		
 		WAIT_VERIFY					m_WaitVerify;
 		TYPE_ACTIONINFO				m_WaitVerifyActionInfo;
 
-		// 뱀파이어로 변하는데 남은 delay frame - 언제까지
+		
 		DWORD						m_ConversionDelayTime;
 
-		// packet을 보내지 않는 actioninfo 
-		// flash sliding때문에 추가됐다. - -;;
+		
+		
 		TYPE_ACTIONINFO					m_nNoPacketUsedActionInfo;
 
 		//----------------------------------------------------
 		// Lock Mode
 		//----------------------------------------------------
-		// 제자리에 정지해서 근처에 있는 적을 공격한다.
+		
 		bool						m_bLockMode;
 
-		// 빛의 크기 
+		
 		char					m_TimeLightSight;
-//		TYPE_SECTORPOSITION		m_TimeLightSightX;	// 최근에 시야를 Set한 위치
+
 //		TYPE_SECTORPOSITION		m_TimeLightSightY;		
 		int						m_ItemLightSight;
 		int						m_LightSight;
 
-		// 시야의 크기
+		
 		char					m_Sight;		
 
 		// 2004, 8, 21, sobeit add start
-		// 인챈 130 스킬 관련
+		
 		BYTE					m_SweepVice_Value;
-		TYPE_SECTORPOSITION		m_TempSelectPosX; // Temporary 하게 쓰려고..-_-
+		TYPE_SECTORPOSITION		m_TempSelectPosX; 
 		TYPE_SECTORPOSITION		m_TempSelectPosY;
 		TYPE_SECTORPOSITION		m_SweepViceX;
 		TYPE_SECTORPOSITION		m_SweepViceY;

@@ -33,7 +33,7 @@ MHelpMessage::~MHelpMessage()
 MHelpMessageManager::MHelpMessageManager()
 {
 	m_KeyCnt = -1;
-	m_SenderCnt = -1; // 갯수
+	m_SenderCnt = -1; 
 	LoadHelpMessageRpk("helpmessage.txt");
 }
 
@@ -65,7 +65,7 @@ void MHelpMessageManager::SaveToFile(const char * filename)
 		file.close();
 	}
 }
-// HelpMessageRpk 파일 로드 
+
 bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 {
 	m_pack_file.SetRAR(RPK_HELP, RPK_PASSWORD);
@@ -86,13 +86,13 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 	Sendercnt = atoi(sztemp);
 	m_pack_file.GetString(sztemp, dSTRING_LEN);
 
-	for(i = 0; i<Sendercnt; i++)		// 보내는 사람 숫자를 센다
+	for(i = 0; i<Sendercnt; i++)		
 	{
 		m_pack_file.GetString(sztemp, dSTRING_LEN);
 		temp = sztemp;		
 		int nCharToDel2 = 0;
 		int len2 = temp.length();
-		for (std::string::reverse_iterator itor = temp.rbegin(); itor != temp.rend(); itor++) // 보내는 사람뒤에 공백이나 개행처리
+		for (std::string::reverse_iterator itor = temp.rbegin(); itor != temp.rend(); itor++) 
 		{
 			char c = *itor;
 			if (c=='\r')
@@ -119,7 +119,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 		}
 		else
 		{
-			for (std::string::iterator itr = temp.begin(); itr != temp.end(); itr++) // 앞에 공백이나 탭이있을경우
+			for (std::string::iterator itr = temp.begin(); itr != temp.end(); itr++) 
 			{
 				c = *itr;
 				if (c == ' ' || c == '\t')
@@ -127,7 +127,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 				else break;
 			}
 			
-			temp.erase(0, nCharToDel);			//공백이나 탭만큼 삭제해준다
+			temp.erase(0, nCharToDel);			
 		}
 
 		nCharToDel = 0;
@@ -139,48 +139,48 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 				nCharToDel++;
 			else break;
 		} 
-		// 뒤쪽 개행처리공백처리
+		
 		if(isTitle)
 			temp.erase(len - nCharToDel, len);
 		else
 			temp.replace( temp.begin()+len-nCharToDel, temp.begin() + len, "\r\n");
 		
-		if(iskeyword)		// 키워드를 읽었을떄
+		if(iskeyword)		
 		{	
 			temp.erase(temp.length()-2 ,2);
 			message.m_strKeyword  = temp.c_str();
 			iskeyword = NULL;
 			temp  = "";
 		}
-		if(isMessagetype) // 메세지 타입
+		if(isMessagetype) 
 		{
 			message.m_messageType = atoi(sztemp);
 			isMessagetype = NULL;
 		}
-		if(isEvent)  // 이벤트 
+		if(isEvent)  
 		{
 			temp.erase(temp.length()-2 ,2);
 			message.m_strEvent  = temp.c_str();
 			isEvent = NULL;
 			temp = "";
 		}
-		if(isTitle) // 타이틀일 경우
+		if(isTitle) 
 		{
 			message.m_strTitle[current_race]  = temp.c_str();
 			isTitle = NULL; 
 			temp = "";
 		}
-		if(isSender) // 보내는 사람일 경우
+		if(isSender) 
 		{
 			message.m_iSender[current_race]  = atoi(sztemp);	
 			isSender = NULL;
 		}	
-		if(isLevel) // 레벨
+		if(isLevel) 
 		{
 			char levline[dSTRING_LEN];
 			memset(levline,0,dSTRING_LEN);
 			memcpy(levline, temp.c_str(), temp.length());
-			token = strtok(levline, seps);							// 레벨
+			token = strtok(levline, seps);							
 			int cnt = 0;
 			while(token!=NULL)
 			{
@@ -200,7 +200,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 		if(isDetail)
 		{
 			detail_flag = true;
-			if(isDetailEnd) // 내용의 마지막일경우 처리
+			if(isDetailEnd) 
 			{
 				if(temp2.length() > 0)
 					temp2.erase(temp2.length()-2 ,2);
@@ -211,7 +211,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 				isDetailEnd = NULL;
 				detail_flag = false;
 			}
-			else // 내용이 태그가 들어오면 End 가 들어올떄까지 계속 detail 에 저장한다
+			else 
 			{
 				temp2 += temp.c_str();
 			}
@@ -222,7 +222,7 @@ bool MHelpMessageManager::LoadHelpMessageRpk(const char *helprpkfilename)
 		isEvent   = strstr(temp.c_str(),"[===Event===]");
 		isTitle  = strstr(temp.c_str(),"[==Title==]");
 		isSender = strstr(temp.c_str(),"[==Sender==]");
-		isLevel  = strstr(temp.c_str(),"[==Level 조건표==]");
+		isLevel  = strstr(temp.c_str(),"[==Level ==]");
 		if(detail_flag == false) 
 		{
 			isDetail = strstr(temp.c_str(),"[==Detail==]");
@@ -256,14 +256,14 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 
 	file.getline(sztemp, dSTRING_LEN);			
 	m_SenderCnt = atoi(sztemp);
-	file.getline(sztemp, dSTRING_LEN);			// 한줄 건너서 읽기// 
-	for(i = 0; i<m_SenderCnt; i++)		// 보내는 사람 숫자를 센다
+	file.getline(sztemp, dSTRING_LEN);			
+	for(i = 0; i<m_SenderCnt; i++)		
 	{
 		file.getline(sztemp,dSTRING_LEN);		
 		temp = sztemp;		
 		int nCharToDel2 = 0;
 		int len2 = temp.length();
-		for (std::string::reverse_iterator itor = temp.rbegin(); itor != temp.rend(); itor++) // 보내는 사람뒤에 공백이나 개행처리
+		for (std::string::reverse_iterator itor = temp.rbegin(); itor != temp.rend(); itor++) 
 		{
 			char c = *itor;
 			if (c=='\r')
@@ -284,14 +284,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 		temp = sztemp;
 		char c;
 		int nCharToDel = 0;
-	/*	for (std::string::iterator itr = temp.begin(); itr != temp.end(); itr++) // 앞에 공백이나 탭이있을경우
-		{
-			c = *itr;
-			if (c == ' ' || c == '\t')
-				nCharToDel++;
-			else break;
-		}
-		temp.erase(0, nCharToDel);			//공백이나 탭만큼 삭제해준다*/
+	 
 
 		if(isDetail)
 		{
@@ -299,7 +292,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 		}
 		else
 		{
-			for (std::string::iterator itr = temp.begin(); itr != temp.end(); itr++) // 앞에 공백이나 탭이있을경우
+			for (std::string::iterator itr = temp.begin(); itr != temp.end(); itr++) 
 			{
 				c = *itr;
 				if (c == ' ' || c == '\t')
@@ -307,7 +300,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 				else break;
 			}
 			
-			temp.erase(0, nCharToDel);			//공백이나 탭만큼 삭제해준다
+			temp.erase(0, nCharToDel);			
 		}
 
 		nCharToDel = 0;
@@ -320,48 +313,48 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 				nCharToDel++;
 			else break;
 		} 
-		// 뒤쪽 개행처리공백처리
+		
 		if(isTitle)
 			temp.erase(len - nCharToDel, len);
 		else
 			temp.replace( temp.begin()+len-nCharToDel, temp.begin() + len, "\r\n");
 		
-		if(iskeyword)		// 키워드를 읽었을떄
+		if(iskeyword)		
 		{	
 			temp.erase(temp.length()-2 ,2);
 			message.m_strKeyword  = temp.c_str();
 			iskeyword = NULL;
 			temp  = "";
 		}
-		if(isMessagetype) // 메세지 타입
+		if(isMessagetype) 
 		{
 			message.m_messageType = atoi(sztemp);
 			isMessagetype = NULL;
 		}
-		if(isEvent)  // 이벤트 
+		if(isEvent)  
 		{
 			temp.erase(temp.length()-2 ,2);
 			message.m_strEvent  = temp.c_str();
 			isEvent = NULL;
 			temp = "";
 		}
-		if(isTitle) // 타이틀일 경우	
+		if(isTitle) 
 		{
 			message.m_strTitle[current_race]  = temp.c_str();
 			isTitle = NULL; 
 			temp = "";
 		}
-		if(isSender) // 보내는 사람일 경우
+		if(isSender) 
 		{
 			message.m_iSender[current_race]  = atoi(sztemp);	
 			isSender = NULL;
 		}	
-		if(isLevel) // 레벨
+		if(isLevel) 
 		{
 			char levline[100];
 			memset(levline,0,100);
 			memcpy(levline, temp.c_str(), 100);
-			token = strtok(levline, seps);							// 레벨
+			token = strtok(levline, seps);							
 			int cnt = 0;
 			while(token!=NULL)
 			{
@@ -381,7 +374,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 		if(isDetail)
 		{
 			detail_flag = true;
-			if(isDetailEnd) // 내용의 마지막일경우 처리
+			if(isDetailEnd) 
 			{
 				if(temp2.length() > 0)
 					temp2.erase(temp2.length()-2 ,2);
@@ -392,7 +385,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 				isDetailEnd = NULL;
 				detail_flag = false;
 			}
-			else // 내용이 태그가 들어오면 End 가 들어올떄까지 계속 detail 에 저장한다
+			else 
 			{
 				temp2 += temp.c_str();
 			}
@@ -403,7 +396,7 @@ void MHelpMessageManager::LoadFromFile(std::ifstream &file)
 		isEvent   = strstr(temp.c_str(),"[===Event===]");
 		isTitle  = strstr(temp.c_str(),"[==Title==]");
 		isSender = strstr(temp.c_str(),"[==Sender==]");
-		isLevel  = strstr(temp.c_str(),"[==Level 조건표==]");
+		isLevel  = strstr(temp.c_str(),"[==Level ==]");
 		if(detail_flag == false) 
 		{
 			isDetail = strstr(temp.c_str(),"[==Detail==]");
@@ -449,7 +442,7 @@ void MHelpMessageManager::SaveToFile(std::ofstream &file)
 		{
 		file <<  "\r\n" ;
 		}
-		// 메세지 타입 넣어야함
+		
 		for(int j = 0; j<3; j++)
 		{
 
@@ -471,7 +464,7 @@ void MHelpMessageManager::SaveToFile(std::ofstream &file)
 			}
 			file << "		[==Sender==]" << "\r\n";
 			file << "		   " << message.m_iSender[j] << "\r\n";
-			file << "		[==Level 조건표==]" << "\r\n" ;
+			file << "		[==Level ==]" << "\r\n" ;
 			file << "		   " << message.m_iLevelLow[j] << " " << message.m_iLevelMax[j] << " " <<
 				message.m_iDomainLow[j]<< " " << message.m_iDomainMax[j] << " " <<
 				message.m_iAttrLow[j] << " "  << message.m_iAttrLow[j] << "\r\n";

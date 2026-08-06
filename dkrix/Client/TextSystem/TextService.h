@@ -14,6 +14,7 @@ public:
 
 	FontHandle GetDefaultFont();
 	FontHandle GetFont(int size);
+	FontHandle GetFont(int size, const std::string& family);
 	TextStyle GetDefaultStyle();
 
 	Metrics MeasureText(const std::string& text, const TextStyle& style, int maxWidth = 0);

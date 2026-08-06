@@ -1,11 +1,4 @@
-/**
- * @file zone_parser.cpp
- * @brief Zone Parser - 解析并打印 .map zone 文件信息
- *
- * 功能：
- * - 直接解析 .map 二进制文件
- * - 显示 zone 信息（header、sector 统计、objects）
- */
+ 
 
 #include <iostream>
 #include <fstream>

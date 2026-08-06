@@ -133,7 +133,7 @@ Profiler::Begin(const char* pName)
 	}
 	else
 	{
-		// 없으면 생성해서 추가해준다.
+		
 		ProfilerInfo* pInfo = new ProfilerInfo;
 
 		m_mapProfile[name] = pInfo;

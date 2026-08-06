@@ -38,9 +38,9 @@ struct OFFERING_TEMPLATE {
     string Name[5];
 };
 
-const OFFERING_TEMPLATE OfferingTemplate[3] = {{793, {"Ô¼º²Ñ·", "±ÈÁ¦", "Àí²éµÂ", "°£Ë¹¿¨Ì¹", "Â·Ò×Ë¹"}},
-                                               {794, {"Õ²Ä·Ë¹", "¿­Éª", "ÅÂÒ×", "ÄáÄÇÂ¬Ë¹", "Â¬"}},
-                                               {795, {"ÅåË¹ÌØ", "Ð¤", "°¢Â¬Ë¹", "Õ²ç÷", "¸ñÅ¬"}}};
+const OFFERING_TEMPLATE OfferingTemplate[3] = {{793, {"", "", "", "", ""}},
+                                               {794, {"", "", "", "", ""}},
+                                               {795, {"", "", "", "", ""}}};
 
 struct OFFERING_COORDINATE {
     ZoneCoord_t X;
@@ -125,7 +125,7 @@ void DynamicZoneAlterOfBlood::heartbeat() {
 bool DynamicZoneAlterOfBlood::checkPC() {
     Assert(m_pZone != NULL);
 
-    // PC ¼ö Ã¼Å©
+    
     uint size = m_pZone->getPCManager()->getSize();
 
     return size != 0;
@@ -135,7 +135,7 @@ bool DynamicZoneAlterOfBlood::addOffering() {
     Assert(m_pZone != NULL);
 
     for (int i = 0; i < 5; ++i) {
-        // Á¦¹°À» »ý¼ºÇÏ¿© Ãß°¡ÇÑ´Ù. Á¦¹°Àº ³ú°¡ ¾ø´Â ¸ó½ºÅÍ´Ù
+        
         Monster* pMonster = new Monster(OfferingTemplate[m_Race].MonsterType);
         Assert(pMonster != NULL);
 
@@ -203,7 +203,7 @@ bool DynamicZoneAlterOfBlood::clearOffering() {
 }
 
 bool DynamicZoneAlterOfBlood::openGateToOut() {
-    // Äù½ºÆ®¸¦ ÁøÇà½ÃÅ²´Ù.
+    
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = m_pZone->getPCManager()->getCreatures().begin();
     unordered_map<ObjectID_t, Creature*>::const_iterator endItr = m_pZone->getPCManager()->getCreatures().end();
 
@@ -219,7 +219,7 @@ bool DynamicZoneAlterOfBlood::openGateToOut() {
         }
     }
 
-    // Æ÷Å» À§Ä¡¸¦ Ã£¾Æ¼­ ±× À§¿¡´Ù EffectTilePortal À» º¸³½´Ù.
+    
     int tx = -1;
     int ty = -1;
     for (int x = 0; x < m_pZone->getWidth(); x++) {
@@ -246,7 +246,7 @@ bool DynamicZoneAlterOfBlood::openGateToOut() {
 }
 
 void DynamicZoneAlterOfBlood::processEntering() {
-    // Äù½ºÆ® Á¸¿¡ µé¾î¿ÔÀ½À» ¾Ë¸°´Ù
+    
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = m_pZone->getPCManager()->getCreatures().begin();
     unordered_map<ObjectID_t, Creature*>::const_iterator endItr = m_pZone->getPCManager()->getCreatures().end();
 

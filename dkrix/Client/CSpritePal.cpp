@@ -35,7 +35,7 @@ void MPalette::Init(BYTE size)
 
 void MPalette::operator = (const MPalette& pal)
 {
-	// 메모리 해제
+	
 	Release();
 	
 	m_Size = pal.m_Size;
@@ -46,7 +46,7 @@ void MPalette::operator = (const MPalette& pal)
 }
 
 
-// file save는 565를 기준으로 한다.
+
 bool MPalette555::LoadFromFile(std::ifstream &file)
 {
 	Release();
@@ -64,7 +64,7 @@ bool MPalette555::LoadFromFile(std::ifstream &file)
 	return true;
 }
 
-// file save는 565를 기준으로 한다.
+
 bool MPalette555::SaveToFile(std::ofstream &file)
 {
 	file.write((const char *)&m_Size, 1);
@@ -199,15 +199,15 @@ BYTE CSpritePal::s_Colorkey = 0xFF;
 
 CSpritePal::CSpritePal()
 {
-	m_Width = 0;		// 가로 pixel수
-	m_Height = 0;		// 세로 pixel수		
-	m_Size = 0;			// 스프라이트의 size
+	m_Width = 0;		
+	m_Height = 0;		
+	m_Size = 0;			
 	
 	m_pPixels = NULL;		// pixels point array
 	m_pData = NULL;			// data
 	
-	m_bInit = false;		// data가 있는가?
-	m_bLoading = false;		// Loading중인가?
+	m_bInit = false;		
+	m_bLoading = false;		
 }
 
 CSpritePal::~CSpritePal()
@@ -217,9 +217,9 @@ CSpritePal::~CSpritePal()
 
 void CSpritePal::Release()
 {
-	m_Width = 0;		// 가로 pixel수
-	m_Height = 0;		// 세로 pixel수		
-	m_Size = 0;			// 스프라이트의 size
+	m_Width = 0;		
+	m_Height = 0;		
+	m_Size = 0;			
 
 	if(m_pData != NULL)
 	{
@@ -228,8 +228,8 @@ void CSpritePal::Release()
 		m_pPixels = NULL;
 	}
 	
-	m_bInit = false;		// data가 있는가?
-	m_bLoading = false;		// Loading중인가?
+	m_bInit = false;		
+	m_bLoading = false;		
 }
 
 void CSpritePal::SetEmptySprite()
@@ -240,27 +240,27 @@ void CSpritePal::SetEmptySprite()
 
 void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 {
-	// memory해제
+	
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// 일단 memory를 적당히 잡아둔다.	
+	
 	BYTE*	data = new BYTE[m_Width*2+10];
 
-	int		index,				// data의 index로 사용
-			lastColorIndex;		// 투명이 아닌색 개수의 최근 index
-	int		count;				// 반복수
-	int		trans,				// 투명색 개수
-			color;				// 투명이 아닌색 개수
+	int		index,				
+			lastColorIndex;		
+	int		count;				
+	int		trans,				
+			color;				
 
-	BOOL	bCheckTrans;		// 최근에 검사한게 투명색인가?
+	BOOL	bCheckTrans;		
 
 	BYTE	*pSourceTemp;
 
 
-	// height줄 만큼 memory잡기
+	
 	m_pPixels = new BYTE* [height];
 	BYTE **Pixels = new BYTE* [height];
 	std::vector<int> PixelSize;
@@ -278,16 +278,16 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 
 		pSourceTemp = pSource;
 
-		// 각 line에 대해서 압축~
+		
 		for (j=0; j<width; j++)
 		{
-			// 0번 color에 대해서 압축
+			
 			if (*pSourceTemp==s_Colorkey)
 			{
-				// 최근에 검사한게 투명색이 아니었다면
+				
 				if (!bCheckTrans)
 				{
-					// ' (투명,색깔수,색깔들) '의 한 set가 끝났음을 의미하므로
+					
 					count++;
 					
 					data[lastColorIndex] = color;
@@ -300,18 +300,18 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 			}
 			else
 			{
-				// 최근에 검사한게 투명색이었다면..
+				
 				if (bCheckTrans)
 				{						
-					data[index++] = trans;		// 상위 byte에 투명수를 넣는다.
+					data[index++] = trans;		
 					trans = 0;
 
-					lastColorIndex=index++;			// 색깔수를 넣을 위치를 기억					
+					lastColorIndex=index++;			
 
 					bCheckTrans = FALSE;
 				}
 
-				data[index++] = *pSourceTemp;	// 실제 색깔을 저장한다.
+				data[index++] = *pSourceTemp;	
 
 				color++;								
 			}
@@ -319,24 +319,24 @@ void CSpritePal::SetPixel(BYTE *pSource, WORD pitch, WORD width, WORD height)
 			pSourceTemp++;
 		}
 		
-		// 한 줄의 마지막 점이 투명색인가?
+		
 		if (bCheckTrans)
 		{
-			// 투명색이면 별다른 처리를 안해줘도 될거 같다.
+			
 		}	
-		// 투명색이 아닌 경우, 점의 개수를 저장시켜줘야 한다.
+		
 		else
 		{			
 			count++;
 			data[lastColorIndex] = color;
 		}
 		
-		// memory를 다시 잡는다.
+		
 		Pixels[i] = new BYTE [index+1];
 		m_Size += index+1;
 
-		// m_pPixels[i]를 압축했으므로 data로 대체한다.
-		// m_pPixels[i][0]에는 count를 넣어야 한다.
+		
+		
 		Pixels[i][0] = count;
 		memcpy(Pixels[i]+1, data, index);
 		PixelSize.push_back(index+1);
@@ -386,17 +386,17 @@ void CSpritePal::Blt(int x, int y, WORD* pDest, int pitch, MPalette &pal)
 			pPixels		= m_pPixels[i];
 			pDestTemp = (WORD*)((BYTE*)pDest + i*pitch);
 			
-			// (투명수,색깔수,색깔들)의 반복 수		
+			
 			count	= *pPixels++;		
-			// 한 줄 출력
+			
 			if (count > 0)
 			{	
 				j = count;
 				do {
-					pDestTemp += *pPixels++;			// 투명색만큼 건너 뛴다.
-					colorCount = *pPixels++;		// 투명 아닌 색 수				
+					pDestTemp += *pPixels++;			
+					colorCount = *pPixels++;		
 					
-					// 투명이 아닌 색들을 Surface에 출력한다.
+					
 					for(k = 0; k < colorCount; k++)
 					{
 						memcpy((void*)(pDestTemp+k), (void*)(&pal[*(pPixels+k)]), 2);
@@ -417,7 +417,7 @@ bool CSpritePal::LoadFromFile(std::ifstream &file)
 	
 	file.read((char *)&m_Size, 4);
 
-//	// size 가 없으면 리턴하쟈
+
 //	if(m_Size == 0)
 //		return true;
 
@@ -454,7 +454,7 @@ bool CSpritePal::SaveToFile(std::ofstream &file)
 {
 	if(IsNotInit())
 	{
-		MessageBox(NULL, "아무것도 없는데 멀 저장해-_-", "CSpritePal", MB_OK);
+		MessageBox(NULL, "   -_-", "CSpritePal", MB_OK);
 		return false;
 	}
 
@@ -465,7 +465,7 @@ bool CSpritePal::SaveToFile(std::ofstream &file)
 
 	file.write((const char *)&m_Size, 4);
 
-//	// size가 0이면 리턴하쟈
+
 //	if(m_Size == 0)
 //		return true;
 
@@ -485,7 +485,7 @@ bool CSpritePal::SaveToFile(std::ofstream &file)
 		}
 		else
 			index = m_pPixels[i+1] - m_pPixels[i];
-		// byte수와 실제 data를 저장한다.
+		
 		file.write((const char*)&index, 2);
 	}
 
@@ -494,7 +494,7 @@ bool CSpritePal::SaveToFile(std::ofstream &file)
 
 void CSpritePal::operator = (const CSpritePal& sprite)
 {
-	// 메모리 해제
+	
 	Release();
 
 	m_Size = sprite.m_Size;

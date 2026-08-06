@@ -31,5 +31,5 @@ public :
 private :
 };
 
-// Singleton pattern 인터페이스는 어디있는거야~~
+
 extern RegenTowerInfoManager *g_pRegenTowerInfoManager;

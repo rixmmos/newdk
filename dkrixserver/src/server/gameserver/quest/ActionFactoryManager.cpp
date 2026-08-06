@@ -128,10 +128,10 @@ ActionFactoryManager::ActionFactoryManager()
 
     Assert(m_Size > 0);
 
-    // 액션팩토리배열을 생성한다.
+    
     m_Factories = new ActionFactory*[m_Size];
 
-    // 팩토리에 대한 포인터들을 NULL 로 초기화한다.
+    
     for (int i = 0; i < m_Size; i++)
         m_Factories[i] = NULL;
 
@@ -149,7 +149,7 @@ ActionFactoryManager::~ActionFactoryManager()
 
     Assert(m_Factories != NULL);
 
-    // 각각의 액션팩토리들을 삭제한다.
+    
     for (int i = 0; i < m_Size; i++) {
         if (m_Factories[i] != NULL) {
             delete m_Factories[i];
@@ -157,7 +157,7 @@ ActionFactoryManager::~ActionFactoryManager()
         }
     }
 
-    // 액션팩토리배열을 삭제한다.
+    
     delete[] m_Factories;
     m_Factories = NULL;
 
@@ -166,7 +166,7 @@ ActionFactoryManager::~ActionFactoryManager()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 정의된 모든 액션팩토리들을 여기에 추가한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionFactoryManager::init()
 
@@ -267,8 +267,8 @@ void ActionFactoryManager::init()
     addFactory(new ActionStartPetQuestFactory());
 
     addFactory(new ActionPetDepositFactory());
-    /* 펫 보관함 : 액션통합 PetDeposit만 쓰기로 한다. Withdraw는 쓰지 않는다. */
-    /* 2004년 5월 13일 - 승명, 용근 */
+     
+     
     /* addFactory(new ActionPetWithdrawFactory());	*/
 
     addFactory(new ActionEnterEventZoneFactory());
@@ -308,7 +308,7 @@ void ActionFactoryManager::addFactory(ActionFactory* pFactory)
         throw Error(msg.toString());
     }
 
-    // 액션팩토리를 등록한다.
+    
     m_Factories[pFactory->getActionType()] = pFactory;
 
     __END_CATCH
@@ -323,8 +323,8 @@ Action* ActionFactoryManager::createAction(ActionType_t actionType) const
 {
     __BEGIN_TRY
 
-    // 액션 타입이 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-    // 이런 사용자는 당장 짤라야 한다.
+    
+    
     if (actionType >= m_Size || m_Factories[actionType] == NULL) {
         StringStream msg;
         msg << "action factory [" << actionType << "] not exist.";
@@ -346,8 +346,8 @@ string ActionFactoryManager::getActionName(ActionType_t actionType) const
 {
     __BEGIN_TRY
 
-    // 액션 타입이 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-    // 이런 사용자는 당장 짤라야 한다.
+    
+    
     if (actionType >= m_Size || m_Factories[actionType] == NULL) {
         StringStream msg;
         msg << "invalid action type (" << actionType << ")";

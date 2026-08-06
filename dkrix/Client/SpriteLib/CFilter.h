@@ -3,9 +3,9 @@
 // CFilter.h
 //----------------------------------------------------------------------
 //
-// Sprite를 출력할때 효과를 주기위해 사용하는 Filter class
+
 //
-// 한 pixel에 대한 어떠한 변화를 나타내는 값들의 2D array
+
 //
 //----------------------------------------------------------------------
 
@@ -38,16 +38,16 @@ class CFilter {
 		//---------------------------------------------------------
 		// Set Filter Value
 		//---------------------------------------------------------
-		// CDirectDrawSurface에서 값을 읽어온다.
+		
 		void		SetFilter(WORD* pSurface, WORD pitch, WORD width, WORD height);
 		
-		// 다른 Filter를 대입한다.
+		
 		void		SetFilter(const CFilter& filter);
 
-		// 다른 Filter를 어둡게 해서.. 대입한다.
+		
 		void		SetFilterDarkness(const CFilter& filter, BYTE DarkBits);
 
-		// 직접 Filter의 (x,y)좌표에 값을 대입한다.
+		
 		void		SetFilter(WORD x, WORD y, BYTE value)	{ m_ppFilter[y][x]=value; }
 
 		//---------------------------------------------------------

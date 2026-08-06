@@ -51,7 +51,7 @@ void ActionActivatePortal::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionActivatePortal::execute(Creature* pNPC, Creature* pCreature)
 
@@ -72,16 +72,16 @@ void ActionActivatePortal::execute(Creature* pNPC, Creature* pCreature)
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(m_ZoneID);
 
-        // 유료존인데 유료사용자가 아니면...
+        
         if (pZoneInfo == NULL || pZoneInfo->isPayPlay() && !pGamePlayer->isPayPlaying()) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
-            } else if (!pGamePlayer->isFamilyFreePass()) // 패밀리 프리 패스는 유료존으로 갈 수 있다.
+            } else if (!pGamePlayer->isFamilyFreePass()) 
             {
-                // 유료 서비스 사용 불가인 경우
+                
                 GCSystemMessage gcSystemMessage;
 
                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
@@ -111,7 +111,7 @@ void ActionActivatePortal::execute(Creature* pNPC, Creature* pCreature)
                 Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
                 Assert(pSlayer != NULL);
 
-                // 오토바이를 타고 있으면 오토바이에서 내린다.
+                
                 if (pSlayer->hasRideMotorcycle()) {
                     pSlayer->getOffMotorcycle();
                 }
@@ -121,7 +121,7 @@ void ActionActivatePortal::execute(Creature* pNPC, Creature* pCreature)
                 Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
                 Assert(pOusters != NULL);
 
-                // 실프 타고 있으면 내려준다
+                
                 if (pOusters->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
                     Effect* pEffect = pOusters->findEffect(Effect::EFFECT_CLASS_SUMMON_SYLPH);
                     if (pEffect != NULL)

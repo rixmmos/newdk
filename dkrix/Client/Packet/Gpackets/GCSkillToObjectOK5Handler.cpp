@@ -12,7 +12,7 @@
 #include "ClientDef.h"
 #include "PacketFunction2.h"
 
-// [새기술2]
+
 #include "SkillDef.h"	
 void	SkillShadowDancing(MCreature* pUserCreature, MCreature* pTargetCreature, int skillID);
 extern void Add_RocketRuncher(MCreature* UserCreature, MCreature* TargetCreature);
@@ -29,7 +29,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -37,7 +37,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -81,7 +81,7 @@ throw ( ProtocolException , Error )
 		}
 		// 2005, 1, 3, sobeit add end
 	
-		// Creature에게 Damage 입힘
+		
 		if (pUserCreature != NULL && pTargetCreature != NULL)
 		{
 			// 2004, 11, 13, sobeit add start 
@@ -105,8 +105,8 @@ throw ( ProtocolException , Error )
 			if( (*g_pActionInfoTable)[skillID].IsUseActionStep() && pPacket->getGrade() > 0)
 				skillID = (*g_pActionInfoTable)[skillID].GetActionStep(pPacket->getGrade() - 1);
 
-			// [새기술2]
-			// ShadowDancing인지 체크하고 임시로(-_-;) DoubleImpacet를 쓴다.
+			
+			
 			switch( skillID )
 			{
 			case SKILL_SHADOW_DANCING :
@@ -118,7 +118,7 @@ throw ( ProtocolException , Error )
 				break;
 			// end by Coffee
 			case SKILL_ILLENDUE :
-				// 2004, 12, 15, sobeit modify start - 힐직이 인챈 라이트볼 쓰는게 버그.
+				
 				//SkillIllendue( pUserCreature, pTargetCreature, SKILL_LIGHT_BALL );
 				SkillIllendue( pUserCreature, pTargetCreature, MAGIC_CAUSE_SERIOUS_WOUNDS );
 				// 2004, 12, 15, sobeit modify end
@@ -134,9 +134,9 @@ throw ( ProtocolException , Error )
 
 			// [ TEST CODE ]
 			//
-			// 결과를 생성&저장해서 보내야 한다.
+			
 			//
-			// 누군가(target)가 누군가가 사용한 SKill을 맞은 경우..
+			
 			// [ TEST CODE ]
 			MActionResult* pResult = new MActionResult;
 
@@ -152,13 +152,13 @@ throw ( ProtocolException , Error )
 
 			//------------------------------------------------------
 			//
-			// skill에 결과가 있으면 적용 시킨다.
+			
 			//
 			//------------------------------------------------------
 			MActionResultNode* pActionResultNode = CreateActionResultNode(pTargetCreature, skillID, pPacket->getGrade() );
 
 			//------------------------------------------------------
-			// NULL이 아니면 실행
+			
 			//------------------------------------------------------
 			if (pActionResultNode!=NULL)
 			{
@@ -166,7 +166,7 @@ throw ( ProtocolException , Error )
 			}
 
 			//------------------------------------------------------
-			// EffectStatus가 있다면 붙인다.
+			
 			//------------------------------------------------------
 			EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 			
@@ -178,7 +178,7 @@ throw ( ProtocolException , Error )
 			}
 
 
-			// 서로 바라보기
+			
 			pUserCreature->SetDirectionToPosition(pTargetCreature->GetX(), pTargetCreature->GetY());
 			//pTargetCreature->SetDirectionToPosition(pUserCreature->GetX(), pUserCreature->GetY());
 
@@ -186,7 +186,7 @@ throw ( ProtocolException , Error )
 			pUserCreature->PacketSpecialActionToOther(
 								skillID, /*pPacket->getSkillType(), */
 								pPacket->getTargetObjectID(),
-								pResult			// 결과
+								pResult			
 			);		
 
 			if( skillID == SKILL_BITE_OF_DEATH )

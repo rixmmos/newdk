@@ -250,7 +250,7 @@ void SkillHandler::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, CoordInve
     }
 }
 
-// Create Holy Water 용 execute
+
 void SkillHandler::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, ObjectID_t ItemObjectID, CoordInven_t X,
                            CoordInven_t Y)
 
@@ -349,11 +349,11 @@ void SkillHandler::execute(Monster* pMonster, Creature* pEnemy)
 
 void SkillHandler::execute(Monster* pMonster, ZoneCoord_t x, ZoneCoord_t y) {}
 
-// Mine & Bomb 관련
-const int ETypeCount = 5;                             // 폭발의 종류
-const int tilesByEType[ETypeCount] = {3, 3, 5, 5, 9}; // 폭발 타입에 따른 피해 타일의 수.
 
-// 방향 왼쪽 부터 밑으로 돈다.
+const int ETypeCount = 5;                             
+const int tilesByEType[ETypeCount] = {3, 3, 5, 5, 9}; 
+
+
 const int xOffsetByEType0[DIR_MAX][3] = {{-1, 0, 1}, {-1, 0, 1}, {0, 0, 0}, {-1, 0, 1},
                                          {-1, 0, 1}, {-1, 0, 1}, {0, 0, 0}, {-1, 0, 1}};
 
@@ -379,63 +379,7 @@ const int yOffsetByEType3[5] = {0, -1, 1, 0, 0};
 const int xOffsetByEType4[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
 const int yOffsetByEType4[9] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
 
-/*
-// 폭발 종류에 따른 피해 타일의 위치
-const int xOffsetByEType0[ 1 ] = { 0};
-const int yOffsetByEType0[ 1 ] = { 0};
-
-const int xOffsetByEType1[ 5 ] = { 0, -1, 0, 1, 0};
-const int yOffsetByEType1[ 5 ] = { -1, 0, 0, 0, 1};
-
-const int xOffsetByEType2[ 5 ] = { -1, 1, 0, -1, 1};
-const int yOffsetByEType2[ 5 ] = { -1, -1, 0, 1, 1};
-
-const int xOffsetByEType3[ 9 ] = { -1, 0, 1, -1, 0, 1, -1, 0, 1};
-const int yOffsetByEType3[ 9 ] = { -1, -1, -1, 0, 0, 0, 1, 1, 1};
-
-const int xOffsetByEType4[DIR_MAX][ 9 ] = {
-    {  0, -1,  0, -2, -1,  0, -1,  0,  0},
-    { -2, -1, -1,  0, -1,  0,  1, -2,  2},
-    { -2, -1,  0,  1,  2, -1,  0,  1,  0},
-    {  2,  1,  0,  1, -1,  0,  1, -2,  2},
-    {  0,  0,  1,  0,  1,  2,  0,  1,  0},
-    { -2,  2, -1,  0,  1,  0,  1,  1,  2},
-    {  0, -1,  0,  1, -2, -1,  0,  1,  2},
-    { -2,  2, -1,  0,  1, -1,  0, -1, -2}
-};
-
-const int yOffsetByEType4[DIR_MAX][ 9 ] = {
-    { -2, -1, -1,  0, 0, 0, 1, 1, 2},
-    { -2, -1,  0,  0, 1, 1, 1, 2, 2},
-    {  0,  0,  0,  0, 0, 1, 1, 1, 2},
-    { -2, -1,  0,  0, 1, 1, 1, 2, 2},
-    { -2, -1, -1,  0, 0, 0, 1, 1, 2},
-    { -2, -2, -1, -1, -1, 0, 0, 1, 2},
-    { -2, -1, -1, -1, 0, 0, 0, 0, 0},
-    { -2, -2, -1, -1, -1, 0, 0, 1, 2}
-};
-
-const int xOffsetByEType5[DIR_MAX][ 5 ] = {
-    { 0, 0, 0, 0, 0},
-    { -2, -1, 0, 1, 2},
-    { -2, -1, 0, 1, 2},
-    { 2, 1, 0, -1, -2},
-    { 0, 0, 0, 0, 0},
-    { -2, -1, 0, 1, 2},
-    { -2, -1, 0, 1, 2},
-    { 2, 1, 0, -1, -2}
-};
-const int yOffsetByEType5[DIR_MAX][ 5 ] = {
-    { -2, -1, 0, 1, 2},
-    { -2, -1, 0, 1, 2},
-    { 0, 0, 0, 0, 0},
-    { -2, -1, 0, 1, 2},
-    { -2, -1, 0, 1, 2},
-    { -2, -1, 0, 1, 2},
-    { 0, 0, 0, 0, 0},
-    { -2, -1, 0, 1, 2}
-};
-*/
+ 
 
 void getExplosionTypeXYOffset(int explodeType, int dir, const int*& xOffset, const int*& yOffset, int& tiles) {
     switch (explodeType) {

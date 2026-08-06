@@ -44,24 +44,24 @@ void LCRegisterPlayerErrorHandler::execute(LCRegisterPlayerError* pPacket, Playe
     CLRegisterPlayer clRegisterPlayer;
     char cmd[80];
 
-    cout << "아이디 : ";
+    cout << " : ";
     cin.getline(cmd, 80);
     clRegisterPlayer.setID(cmd);
 
-    cout << "패스워드 : ";
+    cout << " : ";
     cin.getline(cmd, 80);
     clRegisterPlayer.setPassword(cmd);
 
-    cout << "이름 : ";
+    cout << " : ";
     cin.getline(cmd, 80);
     clRegisterPlayer.setName(cmd);
 
-    cout << "성별 (남/여) : ";
+    cout << " (/) : ";
     cin.getline(cmd, 80);
     Sex sex;
-    if (strcmp(cmd, "남") == 0)
+    if (strcmp(cmd, "") == 0)
         sex = MALE;
-    if (strcmp(cmd, "여") == 0)
+    if (strcmp(cmd, "") == 0)
         sex = FEMALE;
     else
         sex = MALE;
@@ -72,19 +72,19 @@ void LCRegisterPlayerErrorHandler::execute(LCRegisterPlayerError* pPacket, Playe
     clRegisterPlayer.setTelephone("02-222-3333");
     clRegisterPlayer.setCellular("011-222-3333");
     clRegisterPlayer.setZipCode("700-441");
-    clRegisterPlayer.setAddress("서울특별시 영등포구 여의도동 사서함 300번지");
+    clRegisterPlayer.setAddress("    300");
     clRegisterPlayer.setNation(KOREA);
     clRegisterPlayer.setEmail("jhkim@mbc.com");
     clRegisterPlayer.setHomepage("www.jhkim.com");
-    clRegisterPlayer.setProfile("테크노의 여왕 전지현");
+    clRegisterPlayer.setProfile("  ");
     clRegisterPlayer.setPublic(false);
 
     cout << clRegisterPlayer.toString() << endl;
 
-    // 등록 패킷을 전송한다.
+    
     pClientPlayer->sendPacket(&clRegisterPlayer);
 
-    // 플레이어의 상태를 바꾼다.
+    
     pClientPlayer->setPlayerStatus(CPS_AFTER_SENDING_CL_REGISTER_PLAYER);
 
 #endif

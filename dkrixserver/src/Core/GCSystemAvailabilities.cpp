@@ -2,8 +2,8 @@
 //
 // Filename    : GCSystemAvailabilities.cpp
 // Written By  : elca@ewestsoft.com
-// Description : 자신에게 쓰는 기술의 성공을 알리기 위한 패킷 클래스의
-//               멤버 정의.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ GCSystemAvailabilities::~GCSystemAvailabilities()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCSystemAvailabilities::read(SocketInputStream& iStream)
 
@@ -49,7 +49,7 @@ void GCSystemAvailabilities::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCSystemAvailabilities::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY

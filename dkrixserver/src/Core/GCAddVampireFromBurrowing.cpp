@@ -18,7 +18,7 @@ GCAddVampireFromBurrowing::~GCAddVampireFromBurrowing() noexcept
 }
 
 //----------------------------------------------------------------------
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //----------------------------------------------------------------------
 void GCAddVampireFromBurrowing::read(SocketInputStream& iStream)
 
@@ -35,7 +35,7 @@ void GCAddVampireFromBurrowing::read(SocketInputStream& iStream)
 
 
 //--------------------------------------------------------------------------------
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //--------------------------------------------------------------------------------
 void GCAddVampireFromBurrowing::write(SocketOutputStream& oStream) const
 

@@ -2,8 +2,8 @@
 //
 // Filename    : ServerGroupInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,13 +32,13 @@ ServerGroupInfo::~ServerGroupInfo() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void ServerGroupInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
     BYTE szGroupName;
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_GroupID);
     iStream.read(szGroupName);
     iStream.read(m_GroupName, szGroupName);
@@ -48,13 +48,13 @@ void ServerGroupInfo::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void ServerGroupInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
     BYTE szGroupName = m_GroupName.size();
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_GroupID);
     oStream.write(szGroupName);
     oStream.write(m_GroupName);

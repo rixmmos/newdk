@@ -102,73 +102,7 @@ void Player::processInput() {
 void Player::processCommand(bool Option) {
     __BEGIN_TRY
 
-    /*
-        try {
-
-            // ����� �ӽ������� ���� ����
-            char header[szPacketHeader];
-            PacketID_t packetID;
-            PacketSize_t packetSize;
-            Packet * pPacket;
-
-            // �Է¹��ۿ� ����ִ� ������ ��Ŷ���� ������ ó���Ѵ�.
-            while ( true ) {
-
-                // �Է½�Ʈ������ ��Ŷ���ũ�⸸ŭ �о��.
-                // ���� ������ ũ�⸸ŭ ��Ʈ������ ���� �� ���ٸ�,
-                // Insufficient ���ܰ� �߻��ϰ�, ������ ����������.
-                m_pInputStream->peek( header , szPacketHeader );
-
-                // ��Ŷ���̵� �� ��Ŷũ�⸦ �˾Ƴ���.
-                // �̶� ��Ŷũ��� ����� �����Ѵ�.
-                memcpy( &packetID   , &header[0] , szPacketID );
-                memcpy( &packetSize , &header[szPacketID] , szPacketSize );
-
-                // ��Ŷ ���̵� �̻��ϸ� �������� ������ �����Ѵ�.
-                if ( packetID >= Packet::PACKET_MAX )
-                    throw InvalidProtocolException("invalid packet id");
-
-                // ��Ŷ ũ�Ⱑ �ʹ� ũ�� �������� ������ �����Ѵ�.
-                if ( packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID) )
-                    throw InvalidProtocolException("too large packet size");
-
-                // �Է¹��۳��� ��Ŷũ�⸸ŭ�� ����Ÿ�� ����ִ��� Ȯ���Ѵ�.
-                // ����ȭ�� break �� ����ϸ� �ȴ�. (���⼭�� �ϴ� exception�� �� ���̴�.)
-                if ( m_pInputStream->length() < szPacketHeader + packetSize )
-                    throw InsufficientDataException();
-
-                // ������� �Դٸ� �Է¹��ۿ��� ������ ��Ŷ �ϳ� �̻��� ����ִٴ� ���̴�.
-                // ��Ŷ���丮�Ŵ����κ��� ��Ŷ���̵� ����ؼ� ��Ŷ ��Ʈ��ó�� �����ϸ� �ȴ�.
-                // ��Ŷ���̵� �߸��� ���� ��Ŷ���丮�Ŵ������� ó���Ѵ�.
-                pPacket = g_pPacketFactoryManager->createPacket( packetID );
-
-                // ���� �� ��Ŷ��Ʈ��ó�� �ʱ�ȭ�Ѵ�.
-                // ��Ŷ����Ŭ������ ���ǵ� read()�� virtual ��Ŀ���� ���ؼ� ȣ��Ǿ�
-                // �ڵ������� �ʱ�ȭ�ȴ�.
-                m_pInputStream->read( pPacket );
-
-                // ���� �� ��Ŷ��Ʈ��ó�� ������ ��Ŷ�ڵ鷯�� �����ϸ� �ȴ�.
-                // ��Ŷ���̵� �߸��� ���� ��Ŷ�ڵ鷯�Ŵ������� ó���Ѵ�.
-                pPacket->execute( this );
-
-                // ��Ŷ�� �����Ѵ�
-                delete pPacket;
-
-            }
-
-        } catch ( NoSuchElementException & nsee ) {
-
-            // PacketFactoryManager::createPacket(PacketID_t)
-            // PacketFactoryManager::getPacketMaxSize(PacketID_t)
-            // ���� ���� ���ɼ��� �ִ�.
-            throw Error( nsee.toString() );
-
-        } catch ( InsufficientDataException ) {
-
-            // do nothing
-
-        }
-    */
+     
     __END_CATCH
 }
 
@@ -186,7 +120,7 @@ void Player::processOutput() {
     } catch (InvalidProtocolException& t) {
         cerr << t.toString() << endl;
         throw InvalidProtocolException(
-            "Player::processOutput���� ������ ������ ���� �޳�?");
+            "Player::processOutput    ?");
     }
 
     __END_CATCH
@@ -238,9 +172,9 @@ void Player::disconnect(bool bDisconnected) {
     __BEGIN_TRY
 
     try {
-        // �����ϰ� �α׾ƿ��� ��쿡�� ��� ���۸� �÷����� ��
-        // �ִ�. �׷���, �ҹ����� �𽺸� �ɾ��ٸ� ������
-        // �ݰ����Ƿ� �÷����� ��� SIG_PIPE �� �ް� �ȴ�.
+        
+        
+        
         if (bDisconnected == UNDISCONNECTED) {
             m_pOutputStream->flush();
         }
@@ -250,7 +184,7 @@ void Player::disconnect(bool bDisconnected) {
         cerr << "Player::disconnect Exception Check!!" << endl;
         cerr << t.toString() << endl;
         m_pSocket->close();
-        // throw Error("����...");
+        
     }
 
     __END_CATCH

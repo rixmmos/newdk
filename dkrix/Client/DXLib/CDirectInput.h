@@ -34,9 +34,12 @@ private:
 	IDirectInputDevice *    m_pMouse;
 	IDirectInputDevice *		m_pKeyboard;
 	BOOL                    m_bSwapMouseButtons;
-	int							m_mouse_info[3]; // Mouse 정보를 얻기 위한 integer array.
+	int							m_mouse_info[3]; 
+	BOOL						m_lb_held;
+	BOOL						m_rb_held;
+	BOOL						m_cb_held;
 
-	BOOL					m_key[256];				// 키가 눌려있는가?
+	BOOL					m_key[256];				
 	static const char*		s_KeyName[256];
 
 public:
@@ -50,13 +53,13 @@ public:
 	BOOL						m_rb_up;	// right button - up
 	BOOL						m_cb_up;	// center button - up
 
-	enum E_EXCLUSIVE // debugging 할 때를 위해서...
+	enum E_EXCLUSIVE 
 	{
 		EXCLUSIVE,
 		NONEXCLUSIVE,
 	};
 
-	enum E_MOUSE_EVENT // MOUSE_EVENT는 wincon.h에 정의 되어 있음! ~.~
+	enum E_MOUSE_EVENT 
 	{
 		MOVE = 0,
 		LEFTDOWN,
@@ -83,8 +86,8 @@ private:
 		ACCEL_LEVEL,
 	};
 
-	int							m_limit_x; // mouse 이동 제한
-	int							m_limit_y; // mouse 이동 제한
+	int							m_limit_x; 
+	int							m_limit_y; 
 
 	HRESULT	InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex);
 	void		FreeDirectInput();
@@ -109,7 +112,7 @@ public:
 	void		SetMousePosition(int x, int y);
 	void		UpdateInput();
 
-	// dik key가 눌려졌는가?
+	
 	BOOL		KeyDown(DWORD dik)		{ return m_key[dik]; }
 
 	//int 		GetMouseInfo1() const { return m_mouse_info[0]; }

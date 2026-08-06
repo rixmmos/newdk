@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // UIDialog.h
 //-----------------------------------------------------------------------------
-// Client에서 사용하는 UI Dilaog 모음..
+
 //-----------------------------------------------------------------------------
 
 #ifndef __UIDIALOG_H__
@@ -59,7 +59,7 @@ class UIDialog {
 		//---------------------------------------------------------
 		// PC Talk Dlg
 		//---------------------------------------------------------
-		void			PopupPCTalkDlg(int x=-1, int y=-1);		// -1은 center를 의미한다.(default)
+		void			PopupPCTalkDlg(int x=-1, int y=-1);		
 		void			HidePCTalkDlg();
 		void			ShowPCTalkDlg();
 		static void		ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id);
@@ -68,22 +68,22 @@ class UIDialog {
 		//---------------------------------------------------------
 		// Message Dlg
 		//---------------------------------------------------------
-		//void			PopupMessageDlg(UIDIALOG_MESSAGE msg, int x=-1, int y=-1);		// -1은 center를 의미한다.(default)		
-		void			PopupFreeMessageDlg(const char* msg, int x=-1, int y=-1, WORD fButton = UI_DIALOG_OK, bool IsAfterExit = false);		// -1은 center를 의미한다.(default)				
+		
+		void			PopupFreeMessageDlg(const char* msg, int x=-1, int y=-1, WORD fButton = UI_DIALOG_OK, bool IsAfterExit = false);		
 		static void		ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id);
 		void			CloseMessageDlg();
 
 		//---------------------------------------------------------
 		// Message Dlg
 		//---------------------------------------------------------
-		//void			PopupHelpDlg(int x=-1, int y=-1);		// -1은 center를 의미한다.(default)		
+		
 		//static void		ProcessHelpDlg(C_VS_UI_DIALOG * pDlg, unsigned long id);
 		//void			CloseHelpDlg();
 
 	protected :
-		static DWORD	s_LockGameInput;	// client로의 입력을 막는다.
+		static DWORD	s_LockGameInput;	
 
-		// PC TalkBox에 있는 말들 중에서 하나를 선택하게 하는 것..
+		
 		C_VS_UI_NPC_DIALOG*			m_pPCTalkDlg;
 		//C_VS_UI_DIALOG*			m_pHelpDlg;
 		C_VS_UI_DIALOG*			m_pMessageDlg;
@@ -96,17 +96,17 @@ class UIDialog {
 
 #ifdef OUTPUT_DEBUG
 		//---------------------------------------------------------
-		// Test Client용
+		
 		//---------------------------------------------------------
 	public :
 
-		void				PopupAddonSelectDlg(int x=-1, int y=-1);		// -1은 center를 의미한다.(default)
+		void				PopupAddonSelectDlg(int x=-1, int y=-1);		
 		static void			ProcessAddonSelectDlg(C_VS_UI_DIALOG * pDlg, unsigned long id);
 
-		void				PopupActionSelectDlg(int x=-1, int y=-1);		// -1은 center를 의미한다.(default)
+		void				PopupActionSelectDlg(int x=-1, int y=-1);		
 		static void			ProcessActionSelectDlg(C_VS_UI_DIALOG * pDlg, unsigned long id);
 
-		void				PopupDirectionSelectDlg(int x=-1, int y=-1);		// -1은 center를 의미한다.(default)
+		void				PopupDirectionSelectDlg(int x=-1, int y=-1);		
 		static void			ProcessDirectionSelectDlg(C_VS_UI_DIALOG * pDlg, unsigned long id);
 
 	protected :

@@ -27,7 +27,7 @@ ScriptParameter::~ScriptParameter() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void ScriptParameter::read(SocketInputStream& iStream) {
     __BEGIN_TRY
@@ -50,7 +50,7 @@ void ScriptParameter::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void ScriptParameter::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY

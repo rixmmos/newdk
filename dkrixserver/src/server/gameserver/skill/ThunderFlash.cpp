@@ -15,8 +15,8 @@
 #include "ZoneUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 ThunderFlash::ThunderFlash() throw() {
     __BEGIN_TRY
@@ -30,7 +30,7 @@ ThunderFlash::ThunderFlash() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ThunderFlash::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -49,7 +49,7 @@ void ThunderFlash::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -87,7 +87,7 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, SWORD가 아니라면 사용할 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_SWORD) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -111,12 +111,12 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
         bool bTimeCheck = verifyRunTime(pSkillSlot);
         bool bRangeCheck = verifyDistance(pSlayer, X, Y, pSkillInfo->getRange());
 
-        // 마나가 있어야 하고, 시간과 거리 체크에 성공하고,
+        
         if (bManaCheck && bTimeCheck && bRangeCheck) {
-            // MP를 떨어뜨린다.
+            
             decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
-            // 좌표와 방향을 구한다.
+            
             ZoneCoord_t myX = pSlayer->getX();
             ZoneCoord_t myY = pSlayer->getY();
             Dir_t dir = calcDirection(myX, myY, X, Y);
@@ -140,9 +140,9 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                 int tileX = X + m_pThunderFlashMask[count].x;
                 int tileY = Y + m_pThunderFlashMask[count].y;
 
-                // 현재 타일이 존 내부이고, 안전지대가 아니라면, 맞을 확률이 있다.
+                
                 if (rect.ptInRect(tileX, tileY)) {
-                    // 타일을 받아온다.
+                    
                     Tile& tile = pZone->getTile(tileX, tileY);
 
                     list<Creature*> targetList;
@@ -180,17 +180,17 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                             _GCSkillToTileOK2.addCListElement(targetObjectID);
                             _GCSkillToTileOK5.addCListElement(targetObjectID);
 
-                            // 일단 맞는 놈이 받을 패킷은 널 상태로 한 채로, 데미지를 준다.
+                            
                             setDamage(pTargetCreature, Damage, pSlayer, SkillType, NULL, &_GCSkillToTileOK1);
                             computeAlignmentChange(pTargetCreature, Damage, pSlayer, NULL, &_GCSkillToTileOK1);
                             increaseAlignment(pSlayer, pTargetCreature, _GCSkillToTileOK1);
 
-                            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                            
                             if (bCriticalHit) {
                                 knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
                             }
 
-                            // 슬레이어가 아닐 경우에만 맞은 것으로 간주한다.
+                            
                             if (!pTargetCreature->isSlayer()) {
                                 bHit = true;
                                 if (maxEnemyLevel < pTargetCreature->getLevel())
@@ -211,7 +211,7 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                 }
             }
 
-            // 공격자 아이템 내구성 떨어트림.
+            
             decreaseDurability(pSlayer, NULL, pSkillInfo, &_GCSkillToTileOK1, NULL);
 
             _GCSkillToTileOK1.setSkillType(SkillType);
@@ -237,7 +237,7 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
 
             pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-            // 이 기술에 의해 영향을 받는 놈들에게 패킷을 보내줘야 한다.
+            
             for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
                 Creature* pTargetCreature = *itr;
                 Assert(pTargetCreature != NULL);
@@ -245,7 +245,7 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                 if (pTargetCreature->isPC()) {
                     _GCSkillToTileOK2.clearList();
 
-                    // HP의 변경사항을 패킷에다 기록한다.
+                    
                     HP_t targetHP = 0;
                     if (pTargetCreature->isSlayer())
                         targetHP = (dynamic_cast<Slayer*>(pTargetCreature))->getHP(ATTR_CURRENT);
@@ -253,13 +253,13 @@ void ThunderFlash::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                         targetHP = (dynamic_cast<Vampire*>(pTargetCreature))->getHP(ATTR_CURRENT);
                     _GCSkillToTileOK2.addShortData(MODIFY_CURRENT_HP, targetHP);
 
-                    // 아이템의 내구력을 떨어뜨린다.
+                    
                     decreaseDurability(NULL, pTargetCreature, pSkillInfo, NULL, &_GCSkillToTileOK2);
 
-                    // 패킷을 보내준다.
+                    
                     pTargetCreature->getPlayer()->sendPacket(&_GCSkillToTileOK2);
                 } else if (pTargetCreature->isMonster()) {
-                    // 당근 적으로 인식한다.
+                    
                     Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                     pMonster->addEnemy(pSlayer);
                 }

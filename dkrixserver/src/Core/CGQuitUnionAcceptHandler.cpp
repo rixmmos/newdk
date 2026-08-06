@@ -46,7 +46,7 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("뻘청唐역렴늪묘콘.");
+    gcSM.setMessage(".");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -63,11 +63,11 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
         return;
     }
 
-    // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -89,7 +89,7 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
         }
         string TargetGuildMaster = pGuild->getMaster();
 
-        // cout << "연합탈퇴가 수락되었다. 통보받을 유저는 : " << TargetGuildMaster.c_str() << endl;
+        
 
 
         Statement* pStmt = NULL;
@@ -99,13 +99,13 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
             pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')", TargetGuildMaster.c_str(),
                                 g_pStringPool->c_str(375));
 
-            // 탈퇴수락한뒤에 나 혼자 남아있다면?
+            
             Result* pResult =
                 pStmt->executeQuery("SELECT count(*) FROM GuildUnionMember WHERE UnionID='%u'", pUnion->getUnionID());
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                // cout << "연합탈퇴가 수락된후..남아있는 멤버가 없으면..연합장이면 안되니까..지워버린다" << endl;
+                
                 pStmt->executeQuery("DELETE FROM GuildUnionInfo WHERE UnionID='%u'", pUnion->getUnionID());
                 GuildUnionManager::Instance().reload();
             }
@@ -115,7 +115,7 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
         }
         END_DB(pStmt)
 
-        // 연합탈퇴하면 연합정보가 바뀌었을 수도 있다. 갱신된 정보를 다시 보내준다.
+        
         Creature* pCreature = NULL;
         pCreature = pGamePlayer->getCreature();
 
@@ -127,7 +127,7 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
 
         pPlayer->sendPacket(&gcModifyInformation);
 
-        // 통보받을 유저에게 길드Union정보를 다시 보낸다
+        
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
@@ -145,7 +145,7 @@ void CGQuitUnionAcceptHandler::execute(CGQuitUnionAccept* pPacket, Player* pPlay
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
-        // 다른 서버에 있는 놈들에게 변경사항을 알린다.
+        
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
     }

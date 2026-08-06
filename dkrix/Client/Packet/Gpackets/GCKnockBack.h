@@ -7,10 +7,10 @@
 #ifndef __GC_KNOCK_BACK_H__
 #define __GC_KNOCK_BACK_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCKnockBack;

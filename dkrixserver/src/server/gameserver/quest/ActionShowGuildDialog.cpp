@@ -32,7 +32,7 @@ void ActionShowGuildDialog::read(PropertyBuffer& propertyBuffer)
     __BEGIN_TRY
 
     try {
-        // 다이얼로그의 종류
+        
         m_Type = (GuildDialog_t)propertyBuffer.getPropertyInt("Type");
     } catch (NoSuchElementException& nsee) {
         throw Error(nsee.toString());
@@ -43,7 +43,7 @@ void ActionShowGuildDialog::read(PropertyBuffer& propertyBuffer)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -67,39 +67,39 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
     Assert(pCreature != NULL);
 
     if (m_Type == GUILD_DIALOG_REGIST) {
-        // cout << "길드 등록" << endl;
+        
         ////////////////////////////////////////////////////////////////////////////////
-        // 길드 등록을 선택했을 경우
+        
         ////////////////////////////////////////////////////////////////////////////////
         Statement* pStmt;
         Result* pResult;
 
         BEGIN_DB {
-            // 다른 길드 소속인지 체크
+            
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
             pResult = pStmt->executeQuery("SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = '%s'",
                                           pCreature->getName().c_str());
 
             if (pResult->next()) {
-                // 길드 등록 정보가 있다. expire date를 보고 결정한다.
+                
                 int Rank = pResult->getInt(1);
                 string ExpireDate = pResult->getString(2);
 
                 if (ExpireDate.size() == 7) {
-                    // 다른 길드에서 탈퇴한 경우에는 일주일 동안 길드를 만들 수 없다.
+                    
                     if (Rank == GuildMember::GUILDMEMBER_RANK_LEAVE) {
-                        // 현재는 길드 소속 상태가 아니다. 하지만 expire date 에서 7일이 지나야 한다.
+                        
                         time_t daytime = time(0);
                         tm Time;
                         Time.tm_year = atoi(ExpireDate.substr(0, 3).c_str());
                         Time.tm_mon = atoi(ExpireDate.substr(3, 2).c_str());
                         Time.tm_mday = atoi(ExpireDate.substr(5, 2).c_str());
 
-                        if (difftime(daytime, mktime(&Time)) < 604800) // 실시간 7일이 지났는가?
+                        if (difftime(daytime, mktime(&Time)) < 604800) 
                         {
                             SAFE_DELETE(pStmt);
 
-                            // 시간이 일주일 ...어쩌고
+                            
                             if (pCreature->isSlayer()) {
                                 GCNPCResponse response;
                                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_QUIT_TIMEOUT);
@@ -120,7 +120,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
                 } else {
                     SAFE_DELETE(pStmt);
 
-                    // 다른 길드에 가입되어있는 경우
+                    
                     if (pCreature->isSlayer()) {
                         GCNPCResponse response;
                         response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_ALREADY_JOIN);
@@ -148,34 +148,34 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
             SkillDomainType_t highest = pSlayer->getHighestSkillDomain();
 
-            if (pSlayer->getSkillDomainLevel(highest) < REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) // 레벨 50 이상
+            if (pSlayer->getSkillDomainLevel(highest) < REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) 
             {
-                // 레벨이 낮음
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pSlayer->getGold() < REQUIRE_SLAYER_MASTER_GOLD) // 등록비 1억
+            if (pSlayer->getGold() < REQUIRE_SLAYER_MASTER_GOLD) 
             {
-                // 등록비가 모자람
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pSlayer->getFame() < REQUIRE_SLAYER_MASTER_FAME[highest]) // 명성
+            if (pSlayer->getFame() < REQUIRE_SLAYER_MASTER_FAME[highest]) 
             {
-                // 명성이 모자람
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_FAME);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            // 길드 등록 창을 띄우도록 메시지를 보낸다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
             response.setParameter(REQUIRE_SLAYER_MASTER_GOLD);
@@ -184,59 +184,59 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
             Assert(pVampire != NULL);
 
-            // 등록 가능 여부 체크
-            if (pVampire->getLevel() < REQUIRE_VAMPIRE_MASTER_LEVEL) // 레벨 50이상
+            
+            if (pVampire->getLevel() < REQUIRE_VAMPIRE_MASTER_LEVEL) 
             {
-                // 레벨이 낮음
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_CLAN_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pVampire->getGold() < REQUIRE_VAMPIRE_MASTER_GOLD) // 등록비 1억
+            if (pVampire->getGold() < REQUIRE_VAMPIRE_MASTER_GOLD) 
             {
-                // 등록비가 모자람
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_CLAN_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            //			if ( pVampire->getFame() < 500000 )				// 명성 50만
+            
             //			{
-            //				// 명성이 모자람
+            
             //				GCNPCResponse response;
             //				response.setCode( NPC_RESPONSE_CLAN_REGIST_FAIL_FAME );
             //				pPlayer->sendPacket( &response );
             //
             //				return;
             //			}
-            // 길드 등록 창을 띄우도록 메시지를 보낸다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
 
-            // cout << "길드가입비 : " << REQUIRE_VAMPIRE_MASTER_GOLD << endl;
+            
             response.setParameter(REQUIRE_VAMPIRE_MASTER_GOLD);
-            // cout << "길드가입비(param) : " << response.getParameter() << endl;
+            
             pPlayer->sendPacket(&response);
         } else if (pCreature->isOusters()) {
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
             Assert(pOusters != NULL);
 
-            // 등록 가능 여부 체크
-            if (pOusters->getLevel() < REQUIRE_OUSTERS_MASTER_LEVEL) // 레벨 50이상
+            
+            if (pOusters->getLevel() < REQUIRE_OUSTERS_MASTER_LEVEL) 
             {
-                // 레벨이 낮음
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_GUILD_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pOusters->getGold() < REQUIRE_OUSTERS_MASTER_GOLD) // 등록비 1억
+            if (pOusters->getGold() < REQUIRE_OUSTERS_MASTER_GOLD) 
             {
-                // 등록비가 모자람
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_GUILD_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
@@ -244,17 +244,17 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
                 return;
             }
 
-            // 길드 등록 창을 띄우도록 메시지를 보낸다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
 
-            // cout << "길드가입비 : " << REQUIRE_VAMPIRE_MASTER_GOLD << endl;
+            
             response.setParameter(REQUIRE_OUSTERS_MASTER_GOLD);
-            // cout << "길드가입비(param) : " << response.getParameter() << endl;
+            
             pPlayer->sendPacket(&response);
         }
     } else if (m_Type == GUILD_DIALOG_WAIT_LIST) {
-        // cout << "길드 대기 리스트" << endl;
+        
         GCWaitGuildList gcWaitGuildList;
 
         //		const HashMapGuild& Guilds = g_pGuildManager->getGuilds_const();
@@ -274,7 +274,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
         pPlayer->sendPacket(&gcWaitGuildList);
     } else if (m_Type == GUILD_DIALOG_LIST) {
-        // cout << "길드 리스트" << endl;
+        
         GCActiveGuildList gcActiveGuildList;
 
         GuildRace_t race;
@@ -291,7 +291,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
         pPlayer->sendPacket(&gcActiveGuildList);
     } else if (m_Type == GUILD_DIALOG_QUIT) {
-        // 길드 탈퇴 창을 띄우지 않고 길드 탈퇴를 확정한 것으로 간주한다.
+        
         Guild* pGuild = NULL;
 
         Statement* pStmt = NULL;
@@ -310,7 +310,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
         }
         END_DB(pStmt)
 
-        // 길드 상태가 활동중이거나 대기중이어야 한다.
+        
         if (pGuild == NULL ||
             (pGuild->getState() != Guild::GUILD_STATE_ACTIVE && pGuild->getState() != Guild::GUILD_STATE_WAIT)) {
             GCNPCResponse response;
@@ -320,7 +320,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             return;
         }
 
-        // 플레이어가 길드의 멤버인지 확인한다.
+        
         GuildMember* pGuildMember = pGuild->getMember(pCreature->getName());
         if (pGuildMember == NULL) {
             GCNPCResponse response;
@@ -330,7 +330,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             return;
         }
 
-        // 활동 중인 길드의 마스터라면 탈퇴를 무시한다.
+        
         if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER &&
             pGuild->getState() == Guild::GUILD_STATE_ACTIVE) {
             GCNPCResponse response;

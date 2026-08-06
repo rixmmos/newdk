@@ -13,6 +13,11 @@
 
 extern void SetPetInfo(PetInfo* pPetInfo, TYPE_OBJECTID objectID);
 
+static void TraceGameEntryFlow(const char* step)
+{
+	(void)step;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////
@@ -23,7 +28,9 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 	
 #ifdef __GAME_CLIENT__
+	TraceGameEntryFlow("GCPetInfoHandler begin");
 	SetPetInfo(pPacket->getPetInfo(), pPacket->getObjectID());
+	TraceGameEntryFlow("GCPetInfoHandler end");
 #endif
 
 	__END_CATCH

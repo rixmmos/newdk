@@ -8,9 +8,9 @@
 #ifndef __GC_ADD_STORE_ITEM_H__
 #define __GC_ADD_STORE_ITEM_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "StoreInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../StoreInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddStoreItem;

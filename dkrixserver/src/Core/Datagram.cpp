@@ -70,7 +70,7 @@ bool Datagram::isDatagram(PacketID_t packetID) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ���� ���ۿ� ����ִ� ������ �ܺ� ���۷� �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void Datagram::read(char* buf, uint len) {
     __BEGIN_TRY
@@ -87,7 +87,7 @@ void Datagram::read(char* buf, uint len) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ���� ���ۿ� ����ִ� ������ �ܺ� ��Ʈ������ �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void Datagram::read(string& str, uint len) {
     __BEGIN_TRY
@@ -106,18 +106,18 @@ void Datagram::read(string& str, uint len) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// Datagram ��ü���� Packet ��ü�� �������.
-// DatagramSocket �� ���� ������ ũ�⸸ �����(?) ũ�ٸ�,
-// peer���� ���� ��Ŷ�� �߷��� ���� ���ɼ��� ����.
+
+
+
 //
-// (Ư�� �츮 ���ӿ����� UDP�� ���� ���󿡼��� ���Ǳ�
-// ������ Ȯ���� �� ����..)
+
+
 //
 // *CAUTION*
 //
-// �Ʒ��� �˰�������, (1) ���� �ּҿ��� ���ƿ� 2���� ���� �ٸ� ��Ŷ��
-// recvfrom()���� ���� ���� ���ϵǾ�� �ϸ�, (2) �ϳ��� ��Ŷ�� �Ѳ�����
-// ��������.. ��� �����Ͽ����� �ǹ̰� �ִ�.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::read(DatagramPacket*& pPacket) {
@@ -134,25 +134,25 @@ void Datagram::read(DatagramPacket*& pPacket) {
 
     // cout << "DatagramPacket I  D : " << packetID << endl;
 
-    // ��Ŷ ���̵� �̻��� ���
+    
     if (packetID >= Packet::PACKET_MAX)
         throw InvalidProtocolException("invalid packet id");
 
-    // ��Ŷ ����� �̻��� ���
+    
     if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
         throw InvalidProtocolException("too large packet size");
 
-    // �����ͱ׷��� ũ�Ⱑ ��Ŷ�� ũ�⺸�� ���� ���
+    
     if (m_Length < szPacketHeader + packetSize)
         throw Error(
-            "�����ͱ׷� ��Ŷ�� �ѹ��� �������� �ʾҽ��ϴ�.");
+            "    .");
 
-    // �����ͱ׷��� ũ�Ⱑ ��Ŷ�� ũ�⺸�� Ŭ ���
+    
     if (m_Length > szPacketHeader + packetSize)
-        throw Error("���� ���� �����ͱ׷� ��Ŷ�� �Ѳ����� "
-                    "���������ϴ�.");
+        throw Error("     "
+                    ".");
 
-    // �ж��Ƿ��ǺϷ���udp ����
+    
     if (!isDatagram(packetID)) {
         filelog("datagram.txt", "id:%u host:%s", packetID, getHost().c_str());
         throw InvalidProtocolException("packet is not UDP");
@@ -162,11 +162,11 @@ void Datagram::read(DatagramPacket*& pPacket) {
 
     Assert(pPacket != NULL);
 
-    // ��Ŷ�� �ʱ�ȭ�Ѵ�.
+    
     // filelog("datagram.txt","id:%u host:%s",packetID,getHost().c_str());
     pPacket->read(*this);
 
-    // ��Ŷ�� ���� �ּ�/��Ʈ�� �����Ѵ�.
+    
     pPacket->setHost(getHost());
     pPacket->setPort(getPort());
 
@@ -175,7 +175,7 @@ void Datagram::read(DatagramPacket*& pPacket) {
 
 
 //////////////////////////////////////////////////////////////////////
-// �ܺ� ���ۿ� ����ִ� ������ ���� ���۷� �����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void Datagram::write(const char* buf, uint len) {
     __BEGIN_TRY
@@ -184,7 +184,7 @@ void Datagram::write(const char* buf, uint len) {
     Assert(m_OutputOffset + len <= m_Length);
     //	if (m_OutputOffset + len > m_Length)
     //	{
-    //		throw Error( "Datagram::write(): ������ ������ ������ ũ�⺸�� Ů�ϴ�.");
+    
     //	}
 
     memcpy(&m_Data[m_OutputOffset], buf, len);
@@ -196,12 +196,12 @@ void Datagram::write(const char* buf, uint len) {
 
 
 //////////////////////////////////////////////////////////////////////
-// �ܺ� ��Ʈ���� ����ִ� ������ ���� ���۷� �����Ѵ�.
+
 //
 // *CAUTION*
 //
-// ��� write()���� write(const char*,uint)�� ����ϹǷ�, m_OutputOffset
-// �� �������� �ʿ�� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::write(const string& str) {
@@ -221,11 +221,11 @@ void Datagram::write(const string& str) {
 //
 // write packet
 //
-// ��Ŷ�� ���̳ʸ� �̹����� �����ͱ׷����� ����ִ´�.
-// ��Ŷ�� �����ϴ� �ʿ��� �� �޽�带 ȣ���ϸ�, �� ���¿���
-// �����ͱ׷���
-// ���� ���۴� NULL �̾�� �Ѵ�. �� �� �޽�带 ȣ���� �� ���۰�
-// �Ҵ� �Ǿ�� �Ѵ�.
+
+
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::write(const DatagramPacket* pPacket) {
@@ -236,14 +236,14 @@ void Datagram::write(const DatagramPacket* pPacket) {
     PacketID_t packetID = pPacket->getPacketID();
     PacketSize_t packetSize = pPacket->getPacketSize();
 
-    // ����Ÿ�׷��� ���۸� ������ ũ��� �����Ѵ�.
+    
     setData(szPacketHeader + packetSize);
 
-    // ��Ŷ ����� �����Ѵ�.
+    
     write((char*)&packetID, szPacketID);
     write((char*)&packetSize, szPacketSize);
 
-    // ��Ŷ �ٵ� �����Ѵ�.
+    
     pPacket->write(*this);
 
     __END_CATCH
@@ -254,8 +254,8 @@ void Datagram::write(const DatagramPacket* pPacket) {
 //
 // set data
 //
-// �����ͱ׷����Ͽ��� �о���� �����͸� ���ι��ۿ�
-// �����Ѵ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void Datagram::setData(char* data, uint len) {

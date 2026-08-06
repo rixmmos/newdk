@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
 // MShopShelf.h
 //----------------------------------------------------------------------
-// 상점의 선반 하나.. - -;
+
 //
-// 선반 하나마다 run-time version이 있다.
+
 //----------------------------------------------------------------------
 
 #ifndef __MSHOPSHELF_H__
@@ -16,11 +16,11 @@ class MShopShelf {
 	public :
 		enum SHELF_TYPE
 		{			
-			SHELF_FIXED,			// 고정된 item list를 가진 shelf
+			SHELF_FIXED,			
 			SHELF_SPECIAL,			// special item
 			SHELF_UNKNOWN,			// unknown item
-			MAX_SHELF,				// max값
-			SHELF_BASE				// 사용 안 함
+			MAX_SHELF,				
+			SHELF_BASE				
 			
 		};
 
@@ -64,22 +64,22 @@ class MShopShelf {
 		// Set
 		//----------------------------------------------------------
 		void		SetVersion(int version)		{ m_Version = version; }
-		bool		AddItem(MItem* pItem);		// 빈 곳에 추가한다.
-		bool		SetItem(unsigned int  slot, MItem* pItem);	// 기존에 있던건 지워준다.
+		bool		AddItem(MItem* pItem);		
+		bool		SetItem(unsigned int  slot, MItem* pItem);	
 
 	
 		//----------------------------------------------------------
-		// Remove - Shelf에서 제거해서 return해준다.(외부에서 delete해야한다.)
+		
 		//----------------------------------------------------------
 		MItem*		RemoveItem(unsigned int slot);
 
 		//----------------------------------------------------------
-		// Delete - Shelf 내부에 있는걸 지워준다.
+		
 		//----------------------------------------------------------
 		void		DeleteItem(unsigned int slot);
 
 	protected :
-		bool		m_bShelfEnable;				// 현재 사용가능한 Shelf인가?
+		bool		m_bShelfEnable;				
 
 		MString		m_Name;						// Shelf Name
 
@@ -89,15 +89,15 @@ class MShopShelf {
 
 
 	public :
-		// NewItem()에 대한 functions pointer
+		
 		typedef MShopShelf* (*FUNCTION_NEWSHELFCLASS)();
 
 		//-------------------------------------------------------
-		// 원하는 class의 Item의 객체를 생성한다.
+		
 		//-------------------------------------------------------
 		static MShopShelf*		NewShelf(MShopShelf::SHELF_TYPE shelfType);
 
-		// 각 class별로 NewItem()에 대한 function pointer
+		
 		static FUNCTION_NEWSHELFCLASS		s_NewShelfClassTable[MAX_SHELF];
 };
 
@@ -105,7 +105,7 @@ class MShopShelf {
 //----------------------------------------------------------------------
 // MShopFixedShelf.h
 //----------------------------------------------------------------------
-// 고정된 Item List를 가진 상점 선반
+
 //----------------------------------------------------------------------
 class MShopFixedShelf : public MShopShelf {
 	public :
@@ -134,7 +134,7 @@ class MShopFixedShelf : public MShopShelf {
 //----------------------------------------------------------------------
 // MShopSpecialShelf.h
 //----------------------------------------------------------------------
-// 고정된 Item List를 가진 상점 선반
+
 //----------------------------------------------------------------------
 class MShopSpecialShelf : public MShopShelf {
 	public :
@@ -159,7 +159,7 @@ class MShopSpecialShelf : public MShopShelf {
 //----------------------------------------------------------------------
 // MShopUnknownShelf.h
 //----------------------------------------------------------------------
-// 고정된 Item List를 가진 상점 선반
+
 //----------------------------------------------------------------------
 class MShopUnknownShelf : public MShopShelf {
 	public :

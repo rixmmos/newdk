@@ -16,7 +16,7 @@
 #include "ItemUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -37,7 +37,7 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC() ||
             pTargetCreature->isDead()) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -51,9 +51,9 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         GCAttackArmsOK4 _GCAttackArmsOK4;
         GCAttackArmsOK5 _GCAttackArmsOK5;
 
-        // 들고 있는 무기가 없거나, 총 계열 무기가 아니라면 기술을 쓸 수 없다.
-        // 총 계열 무기 중에서도 SG나 SR은 HarpoonBomb를 쓸 수가 없다.
-        // SG, SR 도 이제 쓸 수 있다.
+        
+        
+        
         // 2003. 1. 14  by bezz
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || isArmsWeapon(pWeapon) == false)
@@ -76,7 +76,7 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         SkillOutput output;
         computeOutput(input, output);
 
-        // 페널티 값을 계산한다.
+        
         int RequiredMP = (int)pSkillInfo->getConsumeMP();
         bool bManaCheck = hasEnoughMana(pSlayer, RequiredMP);
         bool bTimeCheck = verifyRunTime(pSkillSlot);
@@ -85,12 +85,12 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         bool bHitRoll = HitRoll::isSuccess(pSlayer, pTargetCreature);
         bool bPK = verifyPK(pSlayer, pTargetCreature);
 
-        // 총알 숫자는 무조건 떨어뜨린다.
+        
         Bullet_t RemainBullet = 0;
         if (bBulletCheck) {
-            // 총알 숫자를 떨어뜨리고, 저장하고, 남은 총알 숫자를 받아온다.
+            
             decreaseBullet(pWeapon);
-            // 한발쓸때마다 저장할 필요 없다. by sigi. 2002.5.9
+            
             // pWeapon->save(pSlayer->getName(), STORAGE_GEAR, 0, Slayer::WEAR_RIGHTHAND, 0);
             RemainBullet = getRemainBullet(pWeapon);
         }
@@ -104,19 +104,19 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
 
             bool bCriticalHit = false;
 
-            // 데미지를 계산하고, quickfire 페널티를 가한다.
-            // output.Damage가 음수이기 때문에, %값을 구해 더하면 결국 빼는 것이 된다.
+            
+            
             int Damage = computeDamage(pSlayer, pTargetCreature, SkillLevel / 5, bCriticalHit);
             Damage += getPercentValue(Damage, output.Damage);
             Damage = max(0, Damage);
 
             // cout << "HarpoonBombDamage:" << Damage << endl;
 
-            // 데미지를 세팅한다.
+            
             setDamage(pTargetCreature, Damage, pSlayer, SkillType, &_GCAttackArmsOK2, &_GCAttackArmsOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCAttackArmsOK2, &_GCAttackArmsOK1);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
             }
@@ -145,12 +145,7 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
                 }
             }
 
-            /*
-            // 80% 확률로만 능력치가 상승한다.
-            // 상대방이 슬레이어가 아닐 경우에만 경험치가 상승한다.
-            if (Random(1, 100) < 80 && !pTargetCreature->isSlayer())
-            {
-            */
+             
             if (!pTargetCreature->isSlayer()) {
                 if (bIncreaseExp) {
                     shareAttrExp(pSlayer, Damage, 1, 8, 1, _GCAttackArmsOK1);
@@ -175,7 +170,7 @@ void HarpoonBomb::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
                 pMonster->addEnemy(pSlayer);
             }
 
-            // 공격자와 상대의 아이템 내구성 떨어트림.
+            
             decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCAttackArmsOK1, &_GCAttackArmsOK2);
 
             ZoneCoord_t targetX = pTargetCreature->getX();

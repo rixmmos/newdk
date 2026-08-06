@@ -2,7 +2,7 @@
 // CFileIndexTable.h
 //----------------------------------------------------------------------
 //
-// Index File을 Load한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ class CFileIndexTable {
 		
 
 	protected :
-		WORD			m_Size;				// 개수
+		WORD			m_Size;				
 		long*			m_pIndex;			// File position
 };
 

@@ -165,9 +165,9 @@ void EffectDummyDrake::unaffect()
     // cout << "EffectDummyDrake" << "unaffect BEGIN" << endl;
 
     Creature* pCreature = dynamic_cast<Creature*>(m_pTarget);
-    // ¶ÁÈ¡5*5·¶Î§ÄÚ¶ÔÏó,²¢´´½¨ÉËº¦
+    
     // 	Creature* pCreature = dynamic_cast<Creature*>(m_pTarget);
-    // ´´½¨Ä¿±êÉËº¦
+    
     affect(pCreature);
 
     int cx = pCreature->getX();
@@ -196,7 +196,7 @@ void EffectDummyDrake::unaffect()
                     continue;
                 if (pTargetCreature->isFlag(getEffectClass()))
                     continue;
-                // ´´½¨ÉËº¦
+                
                 affect(pTargetCreature);
                 // 	 			EffectDummyDrake* pEffect = new EffectDummyDrake( pTargetCreature );
                 // 	 			pEffect->setUserOID( m_UserOID );

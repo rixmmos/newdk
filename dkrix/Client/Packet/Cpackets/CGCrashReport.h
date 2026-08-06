@@ -10,8 +10,8 @@
 #define __CG_CRASH_REPORT_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ public:
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static CGCrashReportPacketSize 를 정의해서 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() {
 		return
 			19 + szWORD + 10 + szWORD + 100 + szWORD + 1024 + szWORD + 1024;

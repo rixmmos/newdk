@@ -7,9 +7,9 @@
 #ifndef __GC_ADD_MONSTER_FROM_BURROWING_H__
 #define __GC_ADD_MONSTER_FROM_BURROWING_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "EffectInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../EffectInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddMonsterFromBurrowing;

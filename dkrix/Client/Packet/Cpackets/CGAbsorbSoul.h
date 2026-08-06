@@ -10,10 +10,10 @@
 #define __CG_ABSORB_SOUL_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -36,10 +36,10 @@ public:
 public:
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -88,13 +88,13 @@ private :
 	
 	ObjectID_t m_ObjectID;  // ObjectID
 	
-	ObjectID_t m_InvenObjectID; // 라바의 ObjectID
-	CoordInven_t m_InvenX;			// X 좌표
-	CoordInven_t m_InvenY;			// Y 좌표
-	CoordInven_t m_TargetInvenX;	// Target X 좌표
-	CoordInven_t m_TargetInvenY;	// Target Y 좌표
-	ZoneCoord_t m_TargetZoneX;	// Target X 좌표
-	ZoneCoord_t m_TargetZoneY;	// Target Y 좌표
+	ObjectID_t m_InvenObjectID; 
+	CoordInven_t m_InvenX;			
+	CoordInven_t m_InvenY;			
+	CoordInven_t m_TargetInvenX;	
+	CoordInven_t m_TargetInvenY;	
+	ZoneCoord_t m_TargetZoneX;	
+	ZoneCoord_t m_TargetZoneY;	
 };
 
 

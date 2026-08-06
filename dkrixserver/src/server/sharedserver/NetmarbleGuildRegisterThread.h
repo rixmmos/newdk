@@ -36,10 +36,10 @@ public:
     void run() throw(Error);
 
 public:
-    // 넷마블에 등록할 길드 아이디를 쌓는다.
+    
     void pushGuildID(GuildID_t guildID);
 
-    // 길드 정보를 넷마블쪽으로 등록한다.
+    
     void registerGuild();
 
 private:

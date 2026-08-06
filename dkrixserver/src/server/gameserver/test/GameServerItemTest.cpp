@@ -13,44 +13,14 @@
 void GameServerItemTest::testLuckPercent() {
     __BEGIN_TEST_CASE
 
-    /*	int luckLevel = 10;
-        const LuckInfo& luckInfo = g_pLuckInfoManager->getLuckInfo(luckLevel);
-
-        // 100% --> 100000
-        g_pVariableManager->setVariable(ITEM_LUCK_PERCENT, 100);
-        int variableLuckRatio = g_pVariableManager->getVariable(ITEM_LUCK_PERCENT);
-
-        CPPUNIT_ASSERT( variableLuckRatio==100 );
-        CPPUNIT_ASSERT( luckInfo.getMaxRatio()==100000 );
-
-        // 200% --> 50000
-        g_pVariableManager->setVariable(ITEM_LUCK_PERCENT, 200);
-        variableLuckRatio = g_pVariableManager->getVariable(ITEM_LUCK_PERCENT);
-
-        CPPUNIT_ASSERT( variableLuckRatio==200 );
-        CPPUNIT_ASSERT( luckInfo.getMaxRatio()==50000 );
-
-        // 0% : min이 10%이기 때문에.. 10% --> 10000
-        g_pVariableManager->setVariable(ITEM_LUCK_PERCENT, 0);
-        variableLuckRatio = g_pVariableManager->getVariable(ITEM_LUCK_PERCENT);
-
-        CPPUNIT_ASSERT( variableLuckRatio==0 );
-        CPPUNIT_ASSERT( luckInfo.getMaxRatio()==1000000 );
-
-        // 500% --> 20000
-        g_pVariableManager->setVariable(ITEM_LUCK_PERCENT, 500);
-        variableLuckRatio = g_pVariableManager->getVariable(ITEM_LUCK_PERCENT);
-
-        CPPUNIT_ASSERT( variableLuckRatio==500 );
-        CPPUNIT_ASSERT( luckInfo.getMaxRatio()==20000 );
-    */
+     
 
     __END_TEST_CASE
 }
 
 
-// 아이템 착용 요구능력치가 최대값(ex> 뱀파이어 레벨100)을 넘어가는 거때메
-// 요구능력치의 최대값을 제한해버린 것에 대한 테스트 -_-; 2003.1.6
+
+
 void GameServerItemTest::testRequireMaxVampire() {
     __BEGIN_TEST_CASE
 
@@ -133,8 +103,8 @@ void GameServerItemTest::testGiveNewbieItem() {
 
     Item* pItem;
 
-    // 능력치에 따라서 하나를 입기 때문에 NULL체크하는 부분에서
-    // Fail이 하나는 뜨게 된다 -_-;
+    
+    
 
     pItem = pInventory->getItem(2, 3);
     CPPUNIT_ASSERT(pItem != NULL);
@@ -209,7 +179,7 @@ void GameServerItemTest::testUpgradeItemType() {
 
     Item::ItemClass IClass;
 
-    // Sword: 0~11. 10이 unique
+    
     IClass = Item::ITEM_CLASS_SWORD;
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 0, 1) == 1);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 1, 1) == 2);
@@ -224,7 +194,7 @@ void GameServerItemTest::testUpgradeItemType() {
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 10, 1) == 10);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 11, 1) == 11);
 
-    // 2단 업글
+    
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 0, 2) == 2);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 1, 2) == 3);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 2, 2) == 4);
@@ -238,7 +208,7 @@ void GameServerItemTest::testUpgradeItemType() {
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 10, 2) == 10);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 11, 2) == 11);
 
-    // 3단 업글
+    
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 0, 3) == 3);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 1, 3) == 4);
     CPPUNIT_ASSERT(getUpgradeItemType(IClass, 2, 3) == 5);

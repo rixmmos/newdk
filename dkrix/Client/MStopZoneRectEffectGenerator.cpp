@@ -33,8 +33,8 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	BYTE			power = egInfo.power;
 
 	//-----------------------------------------------------------
-	// 다크니스의 경우 다양하게 찍어주기...
-	// 임시 땜빵 코드.. 케케~
+	
+	
 	//-----------------------------------------------------------
 	BOOL bDarkness = FALSE, bGrayDarkness = FALSE, bSharpHail = FALSE;
 	if (frameID>=EFFECTSPRITETYPE_DARKNESS_1_1
@@ -92,7 +92,7 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	}
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	TYPE_SECTORPOSITION	sX, sY;
 	sX = g_pTopView->PixelToMapX(egInfo.x0);
@@ -102,30 +102,30 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	MEffect*	pEffect;
 	//---------------------------------------------
-	// Effect 생성
+	
 	//---------------------------------------------
 	pEffect = new MEffect(bltType);
 
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(sX, sY);		// Sector 좌표		
+	pEffect->SetPosition(sX, sY);		
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-	pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
-	// 위력
+	
 	pEffect->SetPower(power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 	bAdd = g_pZone->AddEffect( pEffect );
 
-	// 다음 Effect 생성 정보
+	
 	if (bAdd)
 	{
 		pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
@@ -162,7 +162,7 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	int sY2 = sY+power;
 
 	//------------------------------------------------------
-	// Zone의 영역이 아닌 경우에 Skip...
+	
 	//------------------------------------------------------
 	if (sX1 < 0) 
 	{					
@@ -185,7 +185,7 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	}
 
 
-	// Tile마다 하나씩 생성
+	
 	MEffectTarget*	pEffectTarget2;
 	
 	DWORD TempDelay = 0;
@@ -199,7 +199,7 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 			TempDelay = 0;
 			//--------------------------------------------------------------
-			// Darkness인 경우 - 임시 코드.. - -;;
+			
 			//--------------------------------------------------------------
 			if (bDarkness)
 			{
@@ -218,33 +218,33 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	
 			pEffect->SetFrameID( frameID, maxFrame );	
 
-			pEffect->SetPosition(x, y);		// Sector 좌표	
+			pEffect->SetPosition(x, y);		
 			pEffect->SetZ(egInfo.z0);			
-			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.	
-			pEffect->SetCount( egInfo.count, egInfo.linkCount );			// 지속되는 Frame
+			pEffect->SetStepPixel(egInfo.step);		
+			pEffect->SetCount( egInfo.count, egInfo.linkCount );			
 
-			// 방향 설정
+			
 			pEffect->SetDirection( egInfo.direction );
 
-			// 위력
+			
 			pEffect->SetPower(power);
 
-			// 빛의 밝기
+			
 			//pEffect->SetLight( light );
 
 			 if(egInfo.nActionInfo == SKILL_LAND_MINE_EXPLOSION || bSharpHail )
 			 {
 				TempDelay = rand()%16;
 				pEffect->SetWaitFrame(TempDelay);
-				pEffect->SetCount( egInfo.count + TempDelay, egInfo.linkCount );			// 지속되는 Frame
+				pEffect->SetCount( egInfo.count + TempDelay, egInfo.linkCount );			
 
 			 }
-			// Zone에 추가한다.
+			
 			bAdd = g_pZone->AddEffect( pEffect, TempDelay);
 
 			if (bAdd)
 			{
-				// parameter로 받은 effectTarget을 설정해야 하는 경우
+				
 				if (!bOK)
 				{
 					pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
@@ -253,7 +253,7 @@ MStopZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 				}
 				else
 				{
-					// 다음 Effect 생성 정보
+					
 					if (egInfo.pEffectTarget == NULL)
 					{
 						pEffect->SetLink( egInfo.nActionInfo, NULL );

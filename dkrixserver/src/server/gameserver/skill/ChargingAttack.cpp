@@ -11,7 +11,7 @@
 #include "GCStatusCurrentHP.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ChargingAttack::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                              CEffectID_t CEffectID)
@@ -33,15 +33,15 @@ void ChargingAttack::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouste
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
-        // NPC는 공격할 수가 없다.
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
             return;
         }
 
-        // 무장하고 있는 무기가 널이거나, 검이 아니라면 기술을 사용할 수 없다.
+        
         Item* pItem = pOusters->getWearItem(Ousters::WEAR_RIGHTHAND);
         if (pItem == NULL) {
             executeSkillFailException(pOusters, getSkillType());
@@ -71,20 +71,20 @@ void ChargingAttack::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouste
                          pOusters->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER);
 
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bCanHit && bPK && !bEffected) {
-            // 빠르게 PC를 움직여준다.
+            
             if (pZone->moveFastPC(pOusters, pOusters->getX(), pOusters->getY(), pTargetCreature->getX(),
                                   pTargetCreature->getY(), getSkillType())) {
                 decreaseMana(pOusters, RequiredMP, _GCSkillToObjectOK1);
 
                 bool bCriticalHit = false;
 
-                // 데미지를 준다.
+                
                 Damage_t Damage = computeDamage(pOusters, pTargetCreature, 0, bCriticalHit) + output.Damage;
                 setDamage(pTargetCreature, Damage, pOusters, SkillType, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
                 computeAlignmentChange(pTargetCreature, Damage, pOusters, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
                 decreaseDurability(pOusters, pTargetCreature, pSkillInfo, &_GCSkillToObjectOK1, &_GCSkillToObjectOK2);
 
-                // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                
                 if (bCriticalHit) {
                     knockbackCreature(pZone, pTargetCreature, pOusters->getX(), pOusters->getY());
                 }
@@ -94,7 +94,7 @@ void ChargingAttack::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouste
                     shareOustersExp(pOusters, exp, _GCSkillToObjectOK1);
                 }
 
-                // 패킷을 준비하고 보낸다.
+                
                 _GCSkillToObjectOK1.setSkillType(SkillType);
                 _GCSkillToObjectOK1.setCEffectID(CEffectID);
                 _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);

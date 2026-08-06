@@ -14,7 +14,7 @@
 #include "ItemUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -35,7 +35,7 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -47,7 +47,7 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         GCAttackArmsOK4 _GCAttackArmsOK4;
         GCAttackArmsOK5 _GCAttackArmsOK5;
 
-        // 들고 있는 무기가 없거나, 총 계열 무기가 아니라면 기술을 쓸 수 없다.
+        
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || isArmsWeapon(pWeapon) == false) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -65,7 +65,7 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         SkillOutput output;
         computeOutput(input, output);
 
-        // ToHit 페널티 값을 계산한다.
+        
         //		int ToHitPenalty = getPercentValue( pSlayer->getToHit(), output.ToHit );
 
         int RequiredMP = (int)pSkillInfo->getConsumeMP();
@@ -76,12 +76,12 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         bool bHitRoll = HitRoll::isSuccess(pSlayer, pTargetCreature, output.ToHit); // ToHitPenalty);
         bool bPK = verifyPK(pSlayer, pTargetCreature);
 
-        // 총알 숫자는 무조건 떨어뜨린다.
+        
         Bullet_t RemainBullet = 0;
         if (bBulletCheck) {
-            // 총알 숫자를 떨어뜨리고, 저장하고, 남은 총알 숫자를 받아온다.
+            
             decreaseBullet(pWeapon);
-            // 한발쓸때마다 저장할 필요 없다. by sigi. 2002.5.9
+            
             // pWeapon->save(pSlayer->getName(), STORAGE_GEAR, 0, Slayer::WEAR_RIGHTHAND, 0);
             RemainBullet = getRemainBullet(pWeapon);
         }
@@ -95,18 +95,18 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
 
             bool bCriticalHit = false;
 
-            // 데미지 보너스를 계산한다.
+            
             int Damage = computeDamage(pSlayer, pTargetCreature, SkillLevel / 5, bCriticalHit);
             Damage += getPercentValue(Damage, output.Damage);
             Damage = max(0, Damage);
 
             // cout << "BulletOfLightDamage:" << Damage << endl;
 
-            // 데미지를 세팅한다.
+            
             setDamage(pTargetCreature, Damage, pSlayer, SkillType, &_GCAttackArmsOK2, &_GCAttackArmsOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCAttackArmsOK2, &_GCAttackArmsOK1);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
             }
@@ -133,7 +133,7 @@ void BulletOfLight::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
                 pMonster->addEnemy(pSlayer);
             }
 
-            // 공격자와 상대의 아이템 내구성 떨어트림.
+            
             decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCAttackArmsOK1, &_GCAttackArmsOK2);
 
             ZoneCoord_t targetX = pTargetCreature->getX();

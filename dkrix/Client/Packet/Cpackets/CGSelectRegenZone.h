@@ -2,16 +2,16 @@
 // Filename    : CGSelectRegenZone.h 
 // Written By  : excel96
 // Description : 
-// 슬레이어가 개인용 포탈을 이용해 다른 곳으로 이동하고자 할 때 보내는 패킷
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_SELECT_REGEN_ZONE_H__
 #define __CG_SELECT_REGEN_ZONE_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGSelectRegenZone;

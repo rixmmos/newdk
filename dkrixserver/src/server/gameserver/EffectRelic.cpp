@@ -51,7 +51,7 @@ void EffectRelic::affect(Creature* pCreature)
                 HP_t PlusHP = min(500, CurrentHP + m_Point);
 
                 if (PlusHP < 500) {
-                    cout << "에너지를 회복합니다: " << PlusHP << endl;
+                    cout << " : " << PlusHP << endl;
                 }
 
                 pMonster->setHP(PlusHP, ATTR_CURRENT);
@@ -62,11 +62,11 @@ void EffectRelic::affect(Creature* pCreature)
                 pZone->broadcastPacket(pMonster->getX(), pMonster->getY(), &pkt);
             }
         } else {
-            cout << "성물 보관함이 아니라면 이 이펙트가 붙지 못함" << endl;
+            cout << "      " << endl;
             return;
         }
     } else {
-        cout << "몬스터가 아니라면 이펙트가 붙지 못함" << endl;
+        cout << "    " << endl;
         return;
     }
 
@@ -98,8 +98,8 @@ void EffectRelic::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_RELIC);
 
     Zone* pZone = pCreature->getZone();

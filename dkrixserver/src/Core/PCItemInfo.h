@@ -2,9 +2,9 @@
 // Filename    : PCItemInfo.h
 // Written By  : elca
 // Description :
-// ������ �ϳ��� ���� ������ ������ �ִ� ��Ŷ�̴�.
-// ��ǥ�����, ����Ʈ�� ���� ������ ������ ���� �ʴ�.
-// �κ��丮�� ���õ� ���� �������� ��ӵǾ� ���ȴ�.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SLAYER_ITEM_INFO_H__
@@ -158,7 +158,7 @@ protected:
     list<OptionType_t> m_OptionType;      // item option type
     Durability_t m_Durability;            // item durability
     Silver_t m_Silver;                    // silver coating amount
-    Grade_t m_Grade;                      // ������ ���
+    Grade_t m_Grade;                      
     EnchantLevel_t m_EnchantLevel;        // item enchant level
     ItemNum_t m_ItemNum;                  // number of item
     WORD m_MainColor;                     // item color

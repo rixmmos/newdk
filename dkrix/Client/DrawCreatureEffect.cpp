@@ -3,8 +3,8 @@
 // MTopViewDraw.cpp
 //----------------------------------------------------------------------
 //
-// 복잡한 Draw 함수 부분만 따로 빼놓는다.
-// 작업하기가 영 불편해서 
+
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #pragma warning(disable:4786)
@@ -53,7 +53,7 @@
 #include "MEffectSpriteTypeTable.h"
 #include "Profiler.h"
 //#include "MFileDef.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "MEventManager.h"
 #include "DebugInfo.h"
 #include "MItemOptionTable.h"
@@ -88,15 +88,15 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 	MCreatureWear*	pCreatureWear = (MCreatureWear*)pCreature;
 
 	//-----------------------------------------------------------
-	// 좌우 잔상
+	
 	//-----------------------------------------------------------
 	for (int i=0; i<ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_AddonOrder[pCreature->GetDirection()][i];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -105,7 +105,7 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 			
 			FRAME_ARRAY &FA = m_AddonFPK[clothes][action][direction];
 			
-			// 있는 동작인 경우
+			
 			if (FA.GetSize() > frame)
 			{
 				CFrame &Frame = FA[frame];					
@@ -116,7 +116,7 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 				
 				CIndexSprite* pSprite = &m_AddonSPK[ sprite ];					
 				
-				// 복장Sprite가 초기화 되지 않은 경우
+				
 				//							if (pSprite->IsNotInit())
 				//							{								
 				//								LoadFromFileAddonSPK( clothes, action );
@@ -127,7 +127,7 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 				pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 				
 				//---------------------------------------- 
-				// 캐릭터 선택 사각형 영역 설정
+				
 				//---------------------------------------- 	
 				rect.left	= pointTemp.x;
 				rect.top	= pointTemp.y;
@@ -138,7 +138,7 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 				int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 				if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 				{
-					// 유니크 아이템이거나 퀘스트 아이템이면
+					
 					//								
 					//								if(colorSet2 == QUEST_ITEM_COLOR)
 					//									colorSet2 = MItem::GetQuestItemColorset();
@@ -153,24 +153,24 @@ void	MTopView::DrawFadeOut( POINT *pPoint, MCreature* pCreature, int action, int
 				CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 				
 				//-----------------------------------------------------------
-				// 좌우 잔상
+				
 				//-----------------------------------------------------------
 				POINT pointTemp2;
 				
 				//CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_NET );
 				//CIndexSprite::SetEffect( CIndexSprite::EFFECT_NET );
 				
-				// 왼쪽
+				
 				pointTemp2.x = pointTemp.x - 25;
 				pointTemp2.y = pointTemp.y;
 				m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 				
-				// 오른쪽
+				
 				pointTemp2.x = pointTemp.x + 25;
 				pointTemp2.y = pointTemp.y;
 				m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 				
-				// 가운데							
+				
 				//m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);	
 				//m_pSurface->BltIndexSprite(&pointTemp, pSprite);	
 			}
@@ -203,15 +203,15 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 
 
 	//-----------------------------------------------------------
-	// 좌우 잔상
+	
 	//-----------------------------------------------------------
 	for (int i=0; i<AC_ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_ACAddonOrder[ direction ][ i ];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetACAddonInfo(clothesType);
 
 		if (addonInfo.bAddon )
@@ -238,7 +238,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 					if(action_viva > slayerFPK[clothes].GetSize() -1) continue;
 					try{
 					FRAME_ARRAY& FA = slayerFPK[ clothes ][ action_viva ][ direction ];
-					// 있는 동작인 경우
+					
 					if (FA.GetSize() > frame)
 					{
 						CFrame &Frame = FA[frame];					
@@ -249,7 +249,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 						
 						CIndexSprite* pSprite = &addonISPK[ sprite ];					
 						
-						// 복장Sprite가 초기화 되지 않은 경우
+						
 						//							if (pSprite->IsNotInit())
 						//							{								
 						//								LoadFromFileAddonSPK( clothes, action );
@@ -260,7 +260,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 						pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 						
 						//---------------------------------------- 
-						// 캐릭터 선택 사각형 영역 설정
+						
 						//---------------------------------------- 	
 						rect.left	= pointTemp.x;
 						rect.top	= pointTemp.y;
@@ -271,7 +271,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 						int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 						if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 						{
-							// 유니크 아이템이거나 퀘스트 아이템이면
+							
 							//								
 							//								if(colorSet2 == QUEST_ITEM_COLOR)
 							//									colorSet2 = MItem::GetQuestItemColorset();
@@ -286,24 +286,24 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 						CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 						
 						//-----------------------------------------------------------
-						// 좌우 잔상
+						
 						//-----------------------------------------------------------
 						POINT pointTemp2;
 						
 						//CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_NET );
 						//CIndexSprite::SetEffect( CIndexSprite::EFFECT_NET );
 						
-						// 왼쪽
+						
 						pointTemp2.x = pointTemp.x - 25;
 						pointTemp2.y = pointTemp.y;
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 						
-						// 오른쪽
+						
 						pointTemp2.x = pointTemp.x + 25;
 						pointTemp2.y = pointTemp.y;
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 						
-						// 가운데							
+						
 						//m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);	
 						//m_pSurface->BltIndexSprite(&pointTemp, pSprite);	
 					}
@@ -319,7 +319,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 				try{
 				FRAME_ARRAY &FA = slayerFPK[clothes][action][direction];
 				
-				// 있는 동작인 경우
+				
 				if (FA.GetSize() > frame)
 				{
 					CFrame &Frame = FA[frame];					
@@ -330,7 +330,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 					
 					CIndexSprite* pSprite = &addonISPK[ sprite ];					
 					
-					// 복장Sprite가 초기화 되지 않은 경우
+					
 					//							if (pSprite->IsNotInit())
 					//							{								
 					//								LoadFromFileAddonSPK( clothes, action );
@@ -341,7 +341,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 					pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 					
 					//---------------------------------------- 
-					// 캐릭터 선택 사각형 영역 설정
+					
 					//---------------------------------------- 	
 					rect.left	= pointTemp.x;
 					rect.top	= pointTemp.y;
@@ -352,7 +352,7 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 					int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 					if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 					{
-						// 유니크 아이템이거나 퀘스트 아이템이면
+						
 						//								
 						//								if(colorSet2 == QUEST_ITEM_COLOR)
 						//									colorSet2 = MItem::GetQuestItemColorset();
@@ -367,24 +367,24 @@ void	MTopView::DrawFadeOutForACSlayer( POINT *pPoint, MCreature* pCreature, int 
 					CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 					
 					//-----------------------------------------------------------
-					// 좌우 잔상
+					
 					//-----------------------------------------------------------
 					POINT pointTemp2;
 					
 					//CSpriteSurface::SetEffect( CSpriteSurface::EFFECT_NET );
 					//CIndexSprite::SetEffect( CIndexSprite::EFFECT_NET );
 					
-					// 왼쪽
+					
 					pointTemp2.x = pointTemp.x - 25;
 					pointTemp2.y = pointTemp.y;
 					m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 					
-					// 오른쪽
+					
 					pointTemp2.x = pointTemp.x + 25;
 					pointTemp2.y = pointTemp.y;
 					m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 2);
 					
-					// 가운데							
+					
 					//m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);	
 					//m_pSurface->BltIndexSprite(&pointTemp, pSprite);	
 				}
@@ -402,11 +402,11 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 	
 	for (int i=0; i<ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_AddonOrder[pCreature->GetDirection()][i];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -415,7 +415,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 			
 			FRAME_ARRAY &FA = m_AddonFPK[clothes][action][direction];
 			
-			// 있는 동작인 경우
+			
 			if (FA.GetSize() > frame)
 			{
 				CFrame &Frame = FA[frame];					
@@ -431,7 +431,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 				pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 				
 				//---------------------------------------- 
-				// 캐릭터 선택 사각형 영역 설정
+				
 				//---------------------------------------- 	
 				rect.left	= pointTemp.x;
 				rect.top	= pointTemp.y;
@@ -442,7 +442,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 				int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 				if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 				{
-					//								// 유니크 아이템이면
+					
 					//								if(colorSet2 == QUEST_ITEM_COLOR)
 					//									colorSet2 = MItem::GetQuestItemColorset();
 					//								else
@@ -455,7 +455,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 				CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 				
 				//-----------------------------------------------------------
-				// 빠르게 움직이는 중
+				
 				//-----------------------------------------------------------
 				POINT pointTemp2;
 				
@@ -479,7 +479,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 				m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 1);
 				
 				//---------------------------------------- 
-				// 캐릭터 부분 색깔이 바뀌는 경우
+				
 				//---------------------------------------- 
 				//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 				//{
@@ -487,11 +487,11 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 				//									addonInfo.EffectColorSet);
 				//}
 				//---------------------------------------- 
-				// 정상적인 캐릭터 출력
+				
 				//---------------------------------------- 
 				//else
 				{								
-					// [새기술] - fake는 fast move일때 무조건 어둡게..
+					
 					if (pCreature->IsFakeCreature())
 					{
 						MFakeCreature *pFakeCreature = dynamic_cast<MFakeCreature*>(pCreature);
@@ -505,7 +505,7 @@ void	MTopView::DrawFastMove(POINT* pPoint, MCreature* pCreature, int action, int
 						m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
 					}						
 					
-					// 정상적인 출력
+					
 					//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 					//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 				}
@@ -537,15 +537,15 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 	
 	
 	//-----------------------------------------------------------
-	// 좌우 잔상
+	
 	//-----------------------------------------------------------
 	for (int i=0; i<AC_ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_ACAddonOrder[ direction ][ i ];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetACAddonInfo(clothesType);
 				
 		if (addonInfo.bAddon)
@@ -572,7 +572,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					try{
 					FRAME_ARRAY& FA = slayerFPK[ clothes ][ action_viva ][ direction ];
 					
-					// 있는 동작인 경우
+					
 					if (FA.GetSize() > frame)
 					{
 						CFrame &Frame = FA[frame];					
@@ -588,7 +588,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 						pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 						
 						//---------------------------------------- 
-						// 캐릭터 선택 사각형 영역 설정
+						
 						//---------------------------------------- 	
 						rect.left	= pointTemp.x;
 						rect.top	= pointTemp.y;
@@ -599,7 +599,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 						int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 						if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 						{
-							//								// 유니크 아이템이면
+							
 							//								if(colorSet2 == QUEST_ITEM_COLOR)
 							//									colorSet2 = MItem::GetQuestItemColorset();
 							//								else
@@ -612,7 +612,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 						CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 						
 						//-----------------------------------------------------------
-						// 빠르게 움직이는 중
+						
 						//-----------------------------------------------------------
 						POINT pointTemp2;
 						
@@ -636,7 +636,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 1);
 						
 						//---------------------------------------- 
-						// 캐릭터 부분 색깔이 바뀌는 경우
+						
 						//---------------------------------------- 
 						//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 						//{
@@ -644,11 +644,11 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 						//									addonInfo.EffectColorSet);
 						//}
 						//---------------------------------------- 
-						// 정상적인 캐릭터 출력
+						
 						//---------------------------------------- 
 						//else
 						{								
-							// [새기술] - fake는 fast move일때 무조건 어둡게..
+							
 							if (pCreature->IsFakeCreature())
 							{
 								MFakeCreature *pFakeCreature = dynamic_cast<MFakeCreature*>(pCreature);
@@ -662,7 +662,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 								m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
 							}						
 							
-							// 정상적인 출력
+							
 							//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 							//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 						}
@@ -679,7 +679,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 				try{
 				FRAME_ARRAY &FA = slayerFPK[clothes][action][direction];
 				
-				// 있는 동작인 경우
+				
 				if (FA.GetSize() > frame)
 				{
 					CFrame &Frame = FA[frame];					
@@ -695,7 +695,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 					
 					//---------------------------------------- 
-					// 캐릭터 선택 사각형 영역 설정
+					
 					//---------------------------------------- 	
 					rect.left	= pointTemp.x;
 					rect.top	= pointTemp.y;
@@ -706,7 +706,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 					if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 					{
-						//								// 유니크 아이템이면
+						
 						//								if(colorSet2 == QUEST_ITEM_COLOR)
 						//									colorSet2 = MItem::GetQuestItemColorset();
 						//								else
@@ -719,7 +719,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 					
 					//-----------------------------------------------------------
-					// 빠르게 움직이는 중
+					
 					//-----------------------------------------------------------
 					POINT pointTemp2;
 					
@@ -743,7 +743,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, 1);
 					
 					//---------------------------------------- 
-					// 캐릭터 부분 색깔이 바뀌는 경우
+					
 					//---------------------------------------- 
 					//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 					//{
@@ -751,11 +751,11 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 					//									addonInfo.EffectColorSet);
 					//}
 					//---------------------------------------- 
-					// 정상적인 캐릭터 출력
+					
 					//---------------------------------------- 
 					//else
 					{								
-						// [새기술] - fake는 fast move일때 무조건 어둡게..
+						
 						if (pCreature->IsFakeCreature())
 						{
 							MFakeCreature *pFakeCreature = dynamic_cast<MFakeCreature*>(pCreature);
@@ -769,7 +769,7 @@ void	MTopView::DrawFastMoveForACSlayer(POINT* pPoint, MCreature* pCreature, int 
 							m_pSurface->BltIndexSprite(&pointTemp, pSprite);							
 						}						
 						
-						// 정상적인 출력
+						
 						//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 						//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 					}
@@ -788,11 +788,11 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 		
 	for (int i=0; i<ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_AddonOrder[pCreature->GetDirection()][i];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -801,7 +801,7 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 	
 			FRAME_ARRAY &FA = m_AddonFPK[clothes][action][direction];
 			
-			// 있는 동작인 경우
+			
 			if (FA.GetSize() > frame)
 			{
 				CFrame &Frame = FA[frame];					
@@ -817,7 +817,7 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 				pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 				
 				//---------------------------------------- 
-				// 캐릭터 선택 사각형 영역 설정
+				
 				//---------------------------------------- 	
 				rect.left	= pointTemp.x;
 				rect.top	= pointTemp.y;
@@ -826,7 +826,7 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 				pCreature->AddScreenRect( &rect );
 				
 				//---------------------------------------- 
-				// 캐릭터 부분 색깔이 바뀌는 경우
+				
 				//---------------------------------------- 
 				//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 				//{
@@ -834,14 +834,14 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 				//									addonInfo.EffectColorSet);
 				//}
 				//---------------------------------------- 
-				// 정상적인 캐릭터 출력
+				
 				//---------------------------------------- 
 				//else
 				{
 					int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 					if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 					{
-						// 유니크 아이템이면
+						
 						//									if(colorSet2 == QUEST_ITEM_COLOR)
 						//										colorSet2 = MItem::GetQuestItemColorset();
 						//									else
@@ -868,13 +868,13 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 						
 						//m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
 						
-						// slayer의 invisible인 snipping
+						
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, SHIFT_SNIPPING);
 					}
 					else
 					{
 						POINT pointTemp2 = pointTemp;
-						// slayer의 invisible인 snipping
+						
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, SHIFT_SNIPPING);
 						
 						CSpriteSurface::s_Value1 = wipeValue;
@@ -893,7 +893,7 @@ void	MTopView::DrawInvisible(POINT* pPoint, MCreature* pCreature, int action, in
 					}
 				}						
 				
-				// 정상적인 출력
+				
 				//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 				//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 				
@@ -925,15 +925,15 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 	
 	
 	//-----------------------------------------------------------
-	// 좌우 잔상
+	
 	//-----------------------------------------------------------
 	for (int i=0; i<AC_ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_ACAddonOrder[ direction ][ i ];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetACAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -960,7 +960,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 					try{
 					FRAME_ARRAY& FA = slayerFPK[ clothes ][ action_viva ][ direction ];
 					
-					// 있는 동작인 경우
+					
 					if (FA.GetSize() > frame)
 					{
 						CFrame &Frame = FA[frame];					
@@ -976,7 +976,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 						pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 						
 						//---------------------------------------- 
-						// 캐릭터 선택 사각형 영역 설정
+						
 						//---------------------------------------- 	
 						rect.left	= pointTemp.x;
 						rect.top	= pointTemp.y;
@@ -985,7 +985,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 						pCreature->AddScreenRect( &rect );
 						
 						//---------------------------------------- 
-						// 캐릭터 부분 색깔이 바뀌는 경우
+						
 						//---------------------------------------- 
 						//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 						//{
@@ -993,14 +993,14 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 						//									addonInfo.EffectColorSet);
 						//}
 						//---------------------------------------- 
-						// 정상적인 캐릭터 출력
+						
 						//---------------------------------------- 
 						//else
 						{
 							int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 							if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 							{
-								// 유니크 아이템이면
+								
 								//									if(colorSet2 == QUEST_ITEM_COLOR)
 								//										colorSet2 = MItem::GetQuestItemColorset();
 								//									else
@@ -1027,13 +1027,13 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 								
 								//m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
 								
-								// slayer의 invisible인 snipping
+								
 								m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, SHIFT_SNIPPING);
 							}
 							else
 							{
 								POINT pointTemp2 = pointTemp;
-								// slayer의 invisible인 snipping
+								
 								m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, SHIFT_SNIPPING);
 								
 								CSpriteSurface::s_Value1 = wipeValue;
@@ -1052,7 +1052,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 							}
 						}						
 						
-						// 정상적인 출력
+						
 						//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 						//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 						
@@ -1069,7 +1069,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 				try{
 				FRAME_ARRAY &FA = slayerFPK[clothes][action][direction];
 				
-				// 있는 동작인 경우
+				
 				if (FA.GetSize() > frame)
 				{
 					CFrame &Frame = FA[frame];					
@@ -1085,7 +1085,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 					pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 					
 					//---------------------------------------- 
-					// 캐릭터 선택 사각형 영역 설정
+					
 					//---------------------------------------- 	
 					rect.left	= pointTemp.x;
 					rect.top	= pointTemp.y;
@@ -1094,7 +1094,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 					pCreature->AddScreenRect( &rect );
 					
 					//---------------------------------------- 
-					// 캐릭터 부분 색깔이 바뀌는 경우
+					
 					//---------------------------------------- 
 					//if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 					//{
@@ -1102,14 +1102,14 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 					//									addonInfo.EffectColorSet);
 					//}
 					//---------------------------------------- 
-					// 정상적인 캐릭터 출력
+					
 					//---------------------------------------- 
 					//else
 					{
 						int colorSet1 = addonInfo.ColorSet1, colorSet2 = addonInfo.ColorSet2;
 						if(colorSet2 == UNIQUE_ITEM_COLOR || colorSet2 == QUEST_ITEM_COLOR)
 						{
-							// 유니크 아이템이면
+							
 							//									if(colorSet2 == QUEST_ITEM_COLOR)
 							//										colorSet2 = MItem::GetQuestItemColorset();
 							//									else
@@ -1136,13 +1136,13 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 							
 							//m_pSurface->BltIndexSpriteEffect(&pointTemp, pSprite);
 							
-							// slayer의 invisible인 snipping
+							
 							m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, SHIFT_SNIPPING);
 						}
 						else
 						{
 							POINT pointTemp2 = pointTemp;
-							// slayer의 invisible인 snipping
+							
 							m_pSurface->BltIndexSpriteDarkness(&pointTemp2, pSprite, SHIFT_SNIPPING);
 							
 							CSpriteSurface::s_Value1 = wipeValue;
@@ -1161,7 +1161,7 @@ void	MTopView::DrawInvisibleForACSlayer(POINT* pPoint, MCreature* pCreature, int
 						}
 					}						
 					
-					// 정상적인 출력
+					
 					//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 					//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 					
@@ -1180,11 +1180,11 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 	
 	for (int i=0; i<ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_AddonOrder[pCreature->GetDirection()][i];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -1193,7 +1193,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 			
 			FRAME_ARRAY &FA = m_AddonFPK[clothes][action][direction];
 			
-			// 있는 동작인 경우
+			
 			if (FA.GetSize() > frame)
 			{
 				CFrame &Frame = FA[frame];					
@@ -1209,7 +1209,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 				pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 				
 				//---------------------------------------- 
-				// 캐릭터 선택 사각형 영역 설정
+				
 				//---------------------------------------- 	
 				rect.left	= pointTemp.x;
 				rect.top	= pointTemp.y;
@@ -1219,7 +1219,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 				
 				
 				//------------------------------------------------------
-				// 잔상 추가
+				
 				//------------------------------------------------------
 				if (clothesType==ADDON_RIGHTHAND)
 				{			
@@ -1248,7 +1248,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 						CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 						
 						//---------------------------------------- 
-						// f frame 전
+						
 						//---------------------------------------- 
 						CFrame &Frame_f = FA[frame-f];					
 						int sprite_f	= Frame_f.GetSpriteID();	//m_AddonFPK[clothes][action][direction][frame].GetSpriteID();
@@ -1270,7 +1270,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 				}
 				
 				//---------------------------------------- 
-				// 캐릭터 부분 색깔이 바뀌는 경우
+				
 				//---------------------------------------- 
 				if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 				{
@@ -1278,7 +1278,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 						addonInfo.EffectColorSet);
 				}
 				//---------------------------------------- 
-				// 정상적인 캐릭터 출력
+				
 				//---------------------------------------- 
 				else
 				{
@@ -1293,7 +1293,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 					
 					CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 					
-					// 어둡게 찍기
+					
 					if (pCreature->IsFade())
 					{
 						m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);
@@ -1304,7 +1304,7 @@ void	MTopView::DrawWeaponFadeOut(POINT* pPoint, MCreature* pCreature, int action
 					}
 				}						
 				
-				// 정상적인 출력
+				
 				//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 				//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 				
@@ -1344,15 +1344,15 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 	
 	
 	//-----------------------------------------------------------
-	// 좌우 잔상
+	
 	//-----------------------------------------------------------
 	for (int i=0; i<AC_ADDON_MAX; i++)
 	{
-		// Creature의 현재 방향에 따라서...
-		// 옷을 출력해주는 순서가 다를 수 있다.
+		
+		
 		clothesType = MCreatureWear::s_ACAddonOrder[ direction ][ i ];
 		
-		// i번째 종류의 옷을 입고 있다면 출력해 준다.
+		
 		const MCreatureWear::ADDON_INFO& addonInfo = pCreatureWear->GetACAddonInfo(clothesType);
 		
 		if (addonInfo.bAddon)
@@ -1379,7 +1379,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 					try{
 					FRAME_ARRAY& FA = slayerFPK[ clothes ][ action_viva ][ direction ];
 					
-					// 있는 동작인 경우
+					
 					if (FA.GetSize() > frame)
 					{
 						CFrame &Frame = FA[frame];					
@@ -1395,7 +1395,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 						pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 						
 						//---------------------------------------- 
-						// 캐릭터 선택 사각형 영역 설정
+						
 						//---------------------------------------- 	
 						rect.left	= pointTemp.x;
 						rect.top	= pointTemp.y;
@@ -1405,7 +1405,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 						
 						
 						//------------------------------------------------------
-						// 잔상 추가
+						
 						//------------------------------------------------------
 						if (clothesType==ADDON_RIGHTHAND)
 						{			
@@ -1434,7 +1434,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 								CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 								
 								//---------------------------------------- 
-								// f frame 전
+								
 								//---------------------------------------- 
 								CFrame &Frame_f = FA[frame-f];					
 								int sprite_f	= Frame_f.GetSpriteID();	//m_AddonFPK[clothes][action][direction][frame].GetSpriteID();
@@ -1456,7 +1456,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 						}
 						
 						//---------------------------------------- 
-						// 캐릭터 부분 색깔이 바뀌는 경우
+						
 						//---------------------------------------- 
 						if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 						{
@@ -1464,7 +1464,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 								addonInfo.EffectColorSet);
 						}
 						//---------------------------------------- 
-						// 정상적인 캐릭터 출력
+						
 						//---------------------------------------- 
 						else
 						{
@@ -1479,7 +1479,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 							
 							CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 							
-							// 어둡게 찍기
+							
 							if (pCreature->IsFade())
 							{
 								m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);
@@ -1490,7 +1490,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 							}
 						}						
 						
-						// 정상적인 출력
+						
 						//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 						//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 					}
@@ -1507,7 +1507,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 				try{
 				FRAME_ARRAY &FA = slayerFPK[clothes][action][direction];
 				
-				// 있는 동작인 경우
+				
 				if (FA.GetSize() > frame)
 				{
 					CFrame &Frame = FA[frame];					
@@ -1523,7 +1523,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 					pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 					
 					//---------------------------------------- 
-					// 캐릭터 선택 사각형 영역 설정
+					
 					//---------------------------------------- 	
 					rect.left	= pointTemp.x;
 					rect.top	= pointTemp.y;
@@ -1533,7 +1533,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 					
 					
 					//------------------------------------------------------
-					// 잔상 추가
+					
 					//------------------------------------------------------
 					if (clothesType==ADDON_RIGHTHAND)
 					{			
@@ -1562,7 +1562,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 							CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 							
 							//---------------------------------------- 
-							// f frame 전
+							
 							//---------------------------------------- 
 							CFrame &Frame_f = FA[frame-f];					
 							int sprite_f	= Frame_f.GetSpriteID();	//m_AddonFPK[clothes][action][direction][frame].GetSpriteID();
@@ -1584,7 +1584,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 					}
 					
 					//---------------------------------------- 
-					// 캐릭터 부분 색깔이 바뀌는 경우
+					
 					//---------------------------------------- 
 					if (addonInfo.bEffectColor)	//colorSet < MAX_COLORSET)
 					{
@@ -1592,7 +1592,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 							addonInfo.EffectColorSet);
 					}
 					//---------------------------------------- 
-					// 정상적인 캐릭터 출력
+					
 					//---------------------------------------- 
 					else
 					{
@@ -1607,7 +1607,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 						
 						CIndexSprite::SetUsingColorSet( colorSet1, colorSet2 );
 						
-						// 어둡게 찍기
+						
 						if (pCreature->IsFade())
 						{
 							m_pSurface->BltIndexSpriteDarkness(&pointTemp, pSprite, 1);
@@ -1618,7 +1618,7 @@ void	MTopView::DrawWeaponFadeOutForACSlayer(POINT* pPoint, MCreature* pCreature,
 						}
 					}						
 					
-					// 정상적인 출력
+					
 					//CIndexSprite::SetUsingColorSet( addonInfo.ColorSet1, addonInfo.ColorSet2 );
 					//m_pSurface->BltIndexSprite(&pointTemp, pSprite);
 					
@@ -1645,14 +1645,14 @@ void	MTopView::DrawCentauroTurret( POINT* pPoint, MCreature* pCreature, int acti
 	{
 		POINT pointGap[8] = 
 		{
-			{ 11, 6 },	// 좌
-			{ 8, 2 },	// 좌하
-			{ 0, 0 },	// 하
-			{ -7, 2 },	// 우하
-			{ -10, 6 },	// 우
-			{ -7, 10 },	// 우상
-			{ 0, 12 },	// 상
-			{ 8, 10 },	// 좌상
+			{ 11, 6 },	
+			{ 8, 2 },	
+			{ 0, 0 },	
+			{ -7, 2 },	
+			{ -10, 6 },	
+			{ -7, 10 },	
+			{ 0, 12 },	
+			{ 8, 10 },	
 		};
 		cx += pointGap[pFakeCreature->GetDirection()].x;
 		cy += pointGap[pFakeCreature->GetDirection()].y;
@@ -1666,7 +1666,7 @@ void	MTopView::DrawCentauroTurret( POINT* pPoint, MCreature* pCreature, int acti
 		cy -= g_DirectionValue[direct].y*pFakeCreature->GetTurretDelay()*2;
 	}
 	
-	// 좌표 보정
+	
 	pointTemp.x = pPoint->x + cx;// + pCreature->GetSX();
 	pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();
 	
@@ -1714,7 +1714,7 @@ void	MTopView::DrawInstallTurret( POINT *pPoint, MCreature* pCreature, int actio
 		pointTemp.y = pPoint->y + cy;// + pCreature->GetSY();			
 		
 		//---------------------------------------- 		
-		// 캐릭터 선택 사각형 영역 설정
+		
 		//---------------------------------------- 	
 		rect.left	= pointTemp.x;
 		rect.top	= pointTemp.y;

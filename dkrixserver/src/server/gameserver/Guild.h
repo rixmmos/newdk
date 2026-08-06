@@ -26,7 +26,7 @@ class GCGuildMemberList;
 
 //////////////////////////////////////////////////////////////////////////////
 // class GuildMember
-// 길드멤버에 관한 정보를 가진다.
+
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -152,12 +152,12 @@ public:
 
 public:
     enum GuildRank {
-        GUILDMEMBER_RANK_NORMAL = 0, // 일반 멤버
-        GUILDMEMBER_RANK_MASTER,     // 길드 마스터
-        GUILDMEMBER_RANK_SUBMASTER,  // 길드 서브 마스터
-        GUILDMEMBER_RANK_WAIT,       // 길드 가입 대기
-        GUILDMEMBER_RANK_DENY,       // 추방/거부 당함
-        GUILDMEMBER_RANK_LEAVE,      // 길드 탈퇴(스스로)
+        GUILDMEMBER_RANK_NORMAL = 0, 
+        GUILDMEMBER_RANK_MASTER,     
+        GUILDMEMBER_RANK_SUBMASTER,  
+        GUILDMEMBER_RANK_WAIT,       
+        GUILDMEMBER_RANK_DENY,       
+        GUILDMEMBER_RANK_LEAVE,      
 
         GUILDMEMBER_RANK_MAX
     };
@@ -193,7 +193,7 @@ public: // identity methods
     GuildMemberRank_t getRank() const {
         return m_Rank;
     }
-    void setRank(GuildMemberRank_t rank); // Guild class 에서 처리한다.
+    void setRank(GuildMemberRank_t rank); 
 
     bool getLogOn() const {
         return m_bLogOn;
@@ -229,20 +229,20 @@ public:
     ///// Member data /////
 
 protected:
-    GuildID_t m_GuildID;          // 길드 ID
-    string m_Name;                // 멤버 이름
-    GuildMemberRank_t m_Rank;     // 멤버의 계급
-    VSDateTime m_RequestDateTime; // 가입 신청 시간
-    bool m_bLogOn;                // 접속 여부
-    ServerID_t m_ServerID;        // 서버 위치
+    GuildID_t m_GuildID;          
+    string m_Name;                
+    GuildMemberRank_t m_Rank;     
+    VSDateTime m_RequestDateTime; 
+    bool m_bLogOn;                
+    ServerID_t m_ServerID;        
 };
 
 
 //////////////////////////////////////////////////////////////////////////////
 // class Guild
-// 길드에 관한 정보를 가진다.
+
 //
-// GuildInfo 테이블의 구조
+
 // ----------------------------------------
 // GuildID            INT
 // GuildName          VARCHAR(20)
@@ -269,26 +269,26 @@ class Guild {
 
 public:
     enum GuildTypes {
-        GUILD_TYPE_NORMAL = 0, // 일반 길드
-        GUILD_TYPE_JUDGE,      // 판관 길드
-        GUILD_TYPE_ASSASSIN,   // 암살자 길드
+        GUILD_TYPE_NORMAL = 0, 
+        GUILD_TYPE_JUDGE,      
+        GUILD_TYPE_ASSASSIN,   
 
         GUILD_TYPE_MAX
     };
 
     enum GuildState {
-        GUILD_STATE_ACTIVE = 0, // 활동 중인 길드
-        GUILD_STATE_WAIT,       // 등록 대기 중인 길드
-        GUILD_STATE_CANCEL,     // 취소된 길드
-        GUILD_STATE_BROKEN,     // 해체된 길드
+        GUILD_STATE_ACTIVE = 0, 
+        GUILD_STATE_WAIT,       
+        GUILD_STATE_CANCEL,     
+        GUILD_STATE_BROKEN,     
 
         GUILD_STATE_MAX
     };
 
     enum GuildRace {
-        GUILD_RACE_SLAYER = 0, // 슬레이어 길드
-        GUILD_RACE_VAMPIRE,    // 뱀파이어 길드
-        GUILD_RACE_OUSTERS,    // 아우스터즈 길드
+        GUILD_RACE_SLAYER = 0, 
+        GUILD_RACE_VAMPIRE,    
+        GUILD_RACE_OUSTERS,    
 
         GUILD_RACE_MAX
     };
@@ -458,30 +458,30 @@ public: // debug
     ///// Member data /////
 
 protected:
-    GuildID_t m_ID;                  // 길드 ID
-    string m_Name;                   // 길드 이름
-    GuildType_t m_Type;              // 길드 타입
-    GuildRace_t m_Race;              // 길드 종족
-    GuildState_t m_State;            // 길드 상태
-    ServerGroupID_t m_ServerGroupID; // 길드 존이 있는 서버 그룹 ID
-    ZoneID_t m_ZoneID;               // 길드 ZoneID
-    string m_Master;                 // 길드 마스터
-    string m_Date;                   // 길드 Expire, Regist Date
-    string m_Intro;                  // 길드 소개
+    GuildID_t m_ID;                  
+    string m_Name;                   
+    GuildType_t m_Type;              
+    GuildRace_t m_Race;              
+    GuildState_t m_State;            
+    ServerGroupID_t m_ServerGroupID; 
+    ZoneID_t m_ZoneID;               
+    string m_Master;                 
+    string m_Date;                   
+    string m_Intro;                  
 
-    HashMapGuildMember m_Members; // 길드 멤버 포인터 맵
+    HashMapGuildMember m_Members; 
     int m_ActiveMemberCount;      // Active Member Count
     int m_WaitMemberCount;        // Wait Member Count
 
-    static GuildID_t m_MaxGuildID;      // 길드 아이디 최대값
-    static ZoneID_t m_MaxSlayerZoneID;  // 슬레이어 길드 존 ID 최대값
-    static ZoneID_t m_MaxVampireZoneID; // 뱀파이어 길드 존 ID 최대값
-    static ZoneID_t m_MaxOustersZoneID; // 아우스터즈 길드 존 ID 최대값
+    static GuildID_t m_MaxGuildID;      
+    static ZoneID_t m_MaxSlayerZoneID;  
+    static ZoneID_t m_MaxVampireZoneID; 
+    static ZoneID_t m_MaxOustersZoneID; 
 
     mutable Mutex m_Mutex; // Mutex for Guild
 
 #ifdef __GAME_SERVER__
-    list<string> m_CurrentMembers; // 현재 접속 중인 멤버
+    list<string> m_CurrentMembers; 
 #endif
 };
 

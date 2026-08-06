@@ -88,7 +88,7 @@ bool ResurrectLocationManager::getSlayerPosition(ZoneID_t id, ZONE_COORD& zoneCo
         cerr << "ResurrectLocationManager::getPosition() : No Such ZoneID" << endl;
         // throw NoSuchElementException("ResurrectLocationManager::getPosition() : No Such ZoneID");
 
-        // NoSuch제거. by sigi. 2002.5.9
+        
         return false;
     }
 
@@ -126,7 +126,7 @@ bool ResurrectLocationManager::getVampirePosition(ZoneID_t id, ZONE_COORD& zoneC
 
     if (itr == m_VampirePosition.end()) {
         cerr << "ResurrectLocationManager::getPosition() : No Such ZoneID" << endl;
-        // NoSuch제거. by sigi. 2002.5.9
+        
         // throw NoSuchElementException("ResurrectLocationManager::getPosition() : No Such ZoneID");
         return false;
     }

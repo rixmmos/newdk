@@ -27,14 +27,14 @@ GuildInfo::~GuildInfo() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GuildInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
     BYTE szGuildName, szGuildMaster, szGuildExpireDate;
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_GuildID);
     iStream.read(szGuildName);
 
@@ -67,7 +67,7 @@ void GuildInfo::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GuildInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
@@ -89,7 +89,7 @@ void GuildInfo::write(SocketOutputStream& oStream) const {
     if (szGuildExpireDate > 11)
         throw InvalidProtocolException("too long szGuildExpireDate size");
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_GuildID);
     oStream.write(szGuildName);
     oStream.write(m_GuildName);

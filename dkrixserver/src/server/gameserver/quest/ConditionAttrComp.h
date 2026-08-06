@@ -48,17 +48,17 @@ public:
     bool satisfy(uint op, uint current, uint restriction) const;
 
 private:
-    uint m_ReqSTR;   // 필요 STR
-    uint m_ReqDEX;   // 필요 DEX
-    uint m_ReqINT;   // 필요 INT
-    uint m_ReqSum;   // 필요 능력치의 합
-    uint m_ReqLevel; // 필요 LEVEL
+    uint m_ReqSTR;   
+    uint m_ReqDEX;   
+    uint m_ReqINT;   
+    uint m_ReqSum;   
+    uint m_ReqLevel; 
 
-    uint m_STROperator;   // STR 연산자
-    uint m_DEXOperator;   // DEX 연산자
-    uint m_INTOperator;   // INT 연산자
-    uint m_SumOperator;   // SUM 연산자
-    uint m_LevelOperator; // LEVEL 연산자
+    uint m_STROperator;   
+    uint m_DEXOperator;   
+    uint m_INTOperator;   
+    uint m_SumOperator;   
+    uint m_LevelOperator; 
 };
 
 //////////////////////////////////////////////////////////////////////////////

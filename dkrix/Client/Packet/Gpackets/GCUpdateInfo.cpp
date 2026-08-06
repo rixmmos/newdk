@@ -8,10 +8,17 @@
 // include files
 #include "Client_PCH.h"
 #include "GCUpdateInfo.h"
-#include "PCSlayerInfo2.h"
-#include "PCVampireInfo2.h"
-#include "PCOustersInfo2.h"
+#include "../PCSlayerInfo2.h"
+#include "../PCVampireInfo2.h"
+#include "../PCOustersInfo2.h"
 #include "Assert.h"
+
+#ifdef __GAME_CLIENT__
+static void TraceGCUpdateInfoRead(const char* step)
+{
+	(void)step;
+}
+#endif
 
 // for client.. by sigi
 #ifndef SAFE_DELETE
@@ -40,13 +47,13 @@ GCUpdateInfo::~GCUpdateInfo ()
 	SAFE_DELETE(m_pEffectInfo);
 	SAFE_DELETE(m_pRideMotorcycleInfo);
 
-	// 서버 쪽에서는 존 내부에서 NPCInfo의 리스트가 존재한다.
-	// 이 리스트는 현재로서는 불변이다. 그러므로 매번 NPCInfo를
-	// new로 생성하여, GCUpdateInfo에다 넣어주고, 다시 delete하는 것은
-	// 속도 면에서 봤을 때 상당히 손해다. 그래서 GCUpdateInfo 안에
-	// 있는 NPCInfoList에는 Zone의 NPCInfoList의 포인터를 그냥
-	// 전달해 준다. 그러므로 서버 측에서는 이를 삭제하면 안 된다.
-	// 그러나 클라이언트에서는 이를 삭제해 줘야 한다.
+	
+	
+	
+	
+	
+	
+	
 
 #ifdef __GAME_CLIENT__
 	std::list<NPCInfo*>::iterator itr = m_NPCInfos.begin();
@@ -64,7 +71,7 @@ GCUpdateInfo::~GCUpdateInfo ()
 }
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //--------------------------------------------------------------------------------
 void GCUpdateInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -76,6 +83,13 @@ void GCUpdateInfo::read ( SocketInputStream & iStream )
 	//--------------------------------------------------
 	char pcType;
 	iStream.read( pcType );
+#ifdef __GAME_CLIENT__
+	{
+		char traceBuffer[128];
+		sprintf(traceBuffer, "GCUpdateInfo::read pcTypeChar=%c pcTypeCode=%d", pcType, (int)pcType);
+		TraceGCUpdateInfoRead(traceBuffer);
+	}
+#endif
 
 	switch ( pcType ) {
 
@@ -174,10 +188,10 @@ void GCUpdateInfo::read ( SocketInputStream & iStream )
 		addNPCInfo(pInfo);
 	}
 		
-	// 서버 상태
+	
 	iStream.read( m_ServerStat );
 
-	// 프리미엄
+	
 	iStream.read( m_fPremium );
 
 	// sms charge
@@ -202,7 +216,7 @@ void GCUpdateInfo::read ( SocketInputStream & iStream )
 
 		    
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //--------------------------------------------------------------------------------
 void GCUpdateInfo::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -303,10 +317,10 @@ void GCUpdateInfo::write ( SocketOutputStream & oStream ) const
 		pInfo->write(oStream);
 	}
 		
-	// 서버 상태
+	
 	oStream.write(m_ServerStat);
 
-	// 프리미엄
+	
 	oStream.write( m_fPremium );
 
 	// sms charge
@@ -332,7 +346,7 @@ void GCUpdateInfo::write ( SocketOutputStream & oStream ) const
 
 	m_pBloodBibleSign->write( oStream );
 
-//	oStream.write( m_PowerjjangPoint );
+	oStream.write( m_PowerjjangPoint );
 	
 	__END_CATCH
 }

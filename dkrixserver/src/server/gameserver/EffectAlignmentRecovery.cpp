@@ -26,7 +26,7 @@ EffectAlignmentRecovery::EffectAlignmentRecovery()
 {
     __BEGIN_TRY
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -44,7 +44,7 @@ EffectAlignmentRecovery::EffectAlignmentRecovery(Zone* pZone, ZoneCoord_t x, Zon
     Assert(getZone() != NULL);
     Assert(getTarget() != NULL);
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -93,10 +93,10 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
         Assert(pSlayer != NULL);
 
         if (m_Period != 0) {
-            // 플레그 걸귀
+            
             pSlayer->setFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
 
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             CurrentAlignment = pSlayer->getAlignment();
             NewAlignment = min(10000, (int)(CurrentAlignment + m_AlignmentQuantity));
 
@@ -115,7 +115,7 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
                 AlignmentSaveCount++;
             pSlayer->setAlignmentSaveCount(AlignmentSaveCount);
         } else {
-            // unaffect하면서 패킷이 날아갈 테니까....
+            
             setDeadline(0);
         }
 
@@ -125,10 +125,10 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
         Assert(pVampire != NULL);
 
         if (m_Period != 0) {
-            // 플레그 걸귀
+            
             pVampire->setFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
 
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             CurrentAlignment = pVampire->getAlignment();
             NewAlignment = min(10000, CurrentAlignment + m_AlignmentQuantity);
 
@@ -147,7 +147,7 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
                 AlignmentSaveCount++;
             pVampire->setAlignmentSaveCount(AlignmentSaveCount);
         } else {
-            // unaffect하면서 패킷이 날아갈 테니까....
+            
             setDeadline(0);
         }
 
@@ -157,10 +157,10 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
         Assert(pOusters != NULL);
 
         if (m_Period != 0) {
-            // 플레그 걸귀
+            
             pOusters->setFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
 
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             CurrentAlignment = pOusters->getAlignment();
             NewAlignment = min(10000, CurrentAlignment + m_AlignmentQuantity);
 
@@ -179,16 +179,16 @@ void EffectAlignmentRecovery::affect(Creature* pCreature)
                 AlignmentSaveCount++;
             pOusters->setAlignmentSaveCount(AlignmentSaveCount);
         } else {
-            // unaffect하면서 패킷이 날아갈 테니까....
+            
             setDeadline(0);
         }
 
         m_Period--;
     } else {
-        return; // 큰 의미는 없지만..
+        return; 
     }
 
-    // 성향 단계가 바뀌면 다른 사람들에게도 알려줘야 한다.  by sigi. 2002.12.28
+    
 
     Alignment beforeAlignment = g_pAlignmentManager->getAlignmentType(CurrentAlignment);
     Alignment afterAlignment = g_pAlignmentManager->getAlignmentType(NewAlignment);
@@ -244,7 +244,7 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
         Assert(pZone != NULL);
 
         if (m_Period != 0) {
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             Alignment_t CurrentAlignment = pSlayer->getAlignment();
             Alignment_t NewAlignment = min(10000, (int)(CurrentAlignment + m_AlignmentQuantity * m_Period));
 
@@ -262,15 +262,15 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
             pSlayer->setAlignmentSaveCount(AlignmentSaveCount);
         }
 
-        // 현재 Alignment를 브로드캐스팅한다.
-        // 이제 회복이 끝났나는 것을 알리도록 한다.
-        // 자신에게 먼저
+        
+        
+        
         GCModifyInformation gcModifyInformation;
         gcModifyInformation.addLongData(MODIFY_ALIGNMENT, pSlayer->getAlignment());
         pSlayer->getPlayer()->sendPacket(&gcModifyInformation);
 
-        // 주변사람에게도 무언가를 날려줘야 한다.
-        // 패킷을 새로 만들어야겠지..
+        
+        
         pSlayer->removeFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
     } else if (pCreature->isVampire()) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
@@ -278,7 +278,7 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
         // Zone* pZone = pVampire->getZone();
 
         if (m_Period != 0) {
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             Alignment_t CurrentAlignment = pVampire->getAlignment();
             Alignment_t NewAlignment = min(10000, (int)(CurrentAlignment + m_AlignmentQuantity * m_Period));
 
@@ -294,14 +294,14 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
             pVampire->setAlignmentSaveCount(AlignmentSaveCount);
         }
 
-        // 현재 Alignment를 브로드캐스팅한다.
-        // 이제 회복이 끝났나는 것을 알리도록 한다.
-        // 자신에게 먼저
+        
+        
+        
         GCModifyInformation gcModifyInformation;
         gcModifyInformation.addLongData(MODIFY_ALIGNMENT, pVampire->getAlignment());
         pVampire->getPlayer()->sendPacket(&gcModifyInformation);
 
-        // 주변사람에게도..
+        
         pVampire->removeFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
     } else if (pCreature->isOusters()) {
         Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
@@ -309,7 +309,7 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
         // Zone* pZone = pOusters->getZone();
 
         if (m_Period != 0) {
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             Alignment_t CurrentAlignment = pOusters->getAlignment();
             Alignment_t NewAlignment = min(10000, (int)(CurrentAlignment + m_AlignmentQuantity * m_Period));
 
@@ -325,14 +325,14 @@ void EffectAlignmentRecovery::unaffect(Creature* pCreature)
             pOusters->setAlignmentSaveCount(AlignmentSaveCount);
         }
 
-        // 현재 Alignment를 브로드캐스팅한다.
-        // 이제 회복이 끝났나는 것을 알리도록 한다.
-        // 자신에게 먼저
+        
+        
+        
         GCModifyInformation gcModifyInformation;
         gcModifyInformation.addLongData(MODIFY_ALIGNMENT, pOusters->getAlignment());
         pOusters->getPlayer()->sendPacket(&gcModifyInformation);
 
-        // 주변사람에게도..
+        
         pOusters->removeFlag(Effect::EFFECT_CLASS_ALIGNMENT_RECOVERY);
     }
 

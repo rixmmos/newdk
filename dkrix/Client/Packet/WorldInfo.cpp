@@ -2,8 +2,8 @@
 // 
 // Filename    : WorldInfo.cpp 
 // Written By  : elca@ewestsoft.com
-// Description : 자신에게 쓰는 기술의 성공을 알리기 위한 패킷 클래스의
-//               멤버 정의.
+
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ WorldInfo::~WorldInfo ()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void WorldInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -48,7 +48,7 @@ void WorldInfo::read ( SocketInputStream & iStream )
 	__BEGIN_TRY
 		
 	BYTE szName;
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	iStream.read( m_ID );
 	iStream.read( szName );
 	iStream.read( m_Name, szName );
@@ -58,7 +58,7 @@ void WorldInfo::read ( SocketInputStream & iStream )
 }
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void WorldInfo::write ( SocketOutputStream & oStream ) 
      const throw ( ProtocolException , Error )
@@ -66,7 +66,7 @@ void WorldInfo::write ( SocketOutputStream & oStream )
 	__BEGIN_TRY
 		
 	BYTE szName = m_Name.size();
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	oStream.write( m_ID );
 	oStream.write( szName );
 	oStream.write( m_Name );

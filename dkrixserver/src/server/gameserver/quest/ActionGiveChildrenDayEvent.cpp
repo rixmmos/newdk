@@ -33,12 +33,12 @@ void ActionGiveChildrenItem::read(PropertyBuffer& propertyBuffer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
-// 5월 5일 이벤트로
-// 연변루돌프, 연변산타 몬스터를 죽였을대 나오는 아이템을 모아오면
-// 그에 해당하는 아이템을 주도록 한다.
-// 몬스터 아이템은 별로 정해질 예정이고..
-// 나오는 아이템은 아직은 미정이다.
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -56,7 +56,7 @@ void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
     Player* pPlayer = pPC->getPlayer();
     Assert(pPlayer != NULL);
 
-    // 먼저 클라이언트를 위해 GCNPCResponse를 보내준다.
+    
     GCNPCResponse okpkt;
     pPlayer->sendPacket(&okpkt);
 
@@ -75,17 +75,17 @@ void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
     msg << "PlayerID[" << pPlayer->getID() << "], " << "CreatureName[" << pPC->getName() << "]\n";
 
     if (pPC->isSlayer()) {
-        // 아이템을 생성한다.
+        
         Item* pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 3, 50);
 
-        // OID를 등록받는다.
+        
         OR.registerObject(pItem);
 
         if (pInventory->addItem(pItem, pt)) {
-            // 아이템을 인벤토리에 만든다.
+            
             pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
 
-            // 아이템을 받았다는 것을 알려준다.
+            
             gcCreateItem.setObjectID(pItem->getObjectID());
             gcCreateItem.setItemClass(pItem->getItemClass());
             gcCreateItem.setItemType(pItem->getItemType());
@@ -100,14 +100,14 @@ void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
 
             msg << "Inventory Adding Success : " << pItem->toString() << "\n";
 
-            // ItemTraceLog 를 남긴다
+            
             if (pItem != NULL && pItem->isTraceItem()) {
                 remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
                 remainTraceLogNew(pItem, pCreature2->getName(), ITL_GET, ITLD_EVENTNPC,
                                   pCreature1->getZone()->getZoneID(), pCreature1->getX(), pCreature1->getY());
             }
         } else {
-            // 인벤토리에 자리가 없다면 메시지를 보내고 그만둔다.
+            
             StringStream buf;
             buf << pPlayer->getID() << g_pStringPool->getString(STRID_NOT_ENOUGH_INVENTORY_SPACE);
 
@@ -121,7 +121,7 @@ void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
     } else {
         Item* pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_BRACELET, 3, 50);
 
-        // OID를 등록받는다.
+        
         OR.registerObject(pItem);
 
         if (pInventory->addItem(pItem, pt)) {
@@ -142,14 +142,14 @@ void ActionGiveChildrenItem::execute(Creature* pCreature1, Creature* pCreature2)
 
             msg << "Inventory Adding Succeeded : " << pItem->toString() << "\n";
 
-            // ItemTraceLog 를 남긴다
+            
             if (pItem != NULL && pItem->isTraceItem()) {
                 remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
                 remainTraceLogNew(pItem, pCreature2->getName(), ITL_GET, ITLD_EVENTNPC,
                                   pCreature1->getZone()->getZoneID(), pCreature1->getX(), pCreature1->getY());
             }
         } else {
-            // 인벤토리에 자리가 없다면 메시지를 보내고 그만둔다.
+            
             StringStream buf;
             buf << pPlayer->getID() << g_pStringPool->getString(STRID_NOT_ENOUGH_INVENTORY_SPACE);
 

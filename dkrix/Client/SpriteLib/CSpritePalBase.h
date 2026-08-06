@@ -28,7 +28,7 @@ public:
 	bool		IsLoading() const	{ return m_bLoading; }
 	
 	//---------------------------------------------------------
-	// m_pData�� memory�� Release�Ѵ�.		
+	
 	//---------------------------------------------------------
 	void		Release();
 	
@@ -64,15 +64,15 @@ public:
 	virtual WORD	GetPixel(short x, short y, MPalette &pal) = 0;
 	
 protected:
-	WORD			m_Width;		// ���� pixel��
-	WORD			m_Height;		// ���� pixel��		
-	DWORD			m_Size;			// ��������Ʈ�� size
+	WORD			m_Width;		
+	WORD			m_Height;		
+	DWORD			m_Size;			
 	
 	BYTE**			m_pPixels;		// pixels point array
 	BYTE*			m_pData;			// data
 	
-	bool			m_bInit;		// data�� �ִ°�?
-	bool			m_bLoading;		// Loading���ΰ�?
+	bool			m_bInit;		
+	bool			m_bLoading;		
 	
 	static BYTE		s_Colorkey;
 	

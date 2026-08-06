@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachCreatureOrbitEffectGenerator.h
 //----------------------------------------------------------------------
-// Creature추적
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACHCREATUREORBITEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttachCreatureOrbitEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACH_CREATURE_ORBIT; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

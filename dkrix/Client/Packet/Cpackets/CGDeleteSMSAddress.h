@@ -7,8 +7,8 @@
 #ifndef __CG_DELETE_SMS_ADDRESS_H__
 #define __CG_DELETE_SMS_ADDRESS_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGDeleteSMSAddress;

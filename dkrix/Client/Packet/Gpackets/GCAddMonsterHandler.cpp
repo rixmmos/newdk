@@ -15,6 +15,7 @@
 extern void Add_GDR_Effect(int nEffect, bool bAppearBossMonster);
 extern void Add_Race_SlayerMonster(GCAddMonster * pPacket);
 extern void Add_Race_OustersMonster(GCAddMonster * pPacket);
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
@@ -29,7 +30,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 
 	//AfxMessageBox( pPacket->toString().c_str() );
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -38,7 +39,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -52,7 +53,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 
 		//AfxMessageBox( pPacket->toString().c_str() );
 		WORD wMonsterType = pPacket->getMonsterType();
-		// 각종족모습의 몬스터(뱀파이어 모습 몬스터는 따로 처리 안해도 되네..ㅎㅎ)
+		
 
 		if(wMonsterType == 735 || wMonsterType == 793 || wMonsterType == 796 || wMonsterType == 797)
 		{
@@ -65,7 +66,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 			Add_Race_OustersMonster(pPacket);
 			return;
 		}
-		// 2004, 9, 1, sobeit add start - 공성전시 트랩일 경우 공격측에서는 보이지 않는다.
+		
 		else if( wMonsterType == 738 ||
 			wMonsterType == 739 ||
 			wMonsterType == 740 ||
@@ -105,10 +106,10 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 
 			}
 		}
-		// 2004, 9, 1, sobeit add end - 공성전시 트랩일 경우 공격측에서는 보이지 않는다.
+		
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -131,19 +132,19 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			// [ TEST CODE ]
-			// 이름 설정
+			
 			//char str[20];
 			//sprintf(str, "ID=%d", pCreature->GetID());
 			//pCreature->SetName( (*g_pCreatureTable)[pPacket->getMonsterType()].Name.GetString() );
 			pCreature->SetName( pPacket->getMonsterName().c_str() );
 	
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );
 
-			// 이름
+			
 			//pCreature->SetName( pPacket->getName().toString().c_str() );
 
-			// 색깔 정보			
+			
 
 			if (!g_pZone->AddCreature( pCreature ))
 			{
@@ -153,7 +154,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 			else
 			{			
 				//------------------------------------------------------------
-				// Load되지 않았으면 load한다.
+				
 				//------------------------------------------------------------
 //				LoadCreatureType( pPacket->getMonsterType() );			
 			}
@@ -177,31 +178,31 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 			pCreature->SetStatus( MODIFY_MAX_HP, pPacket->getMaxHP() );
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );
 		}
 
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			bool bShowComeFromPotal = true;
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
-			// 2004, 6, 25, sobeit add start - 질드레 관련 맵 효과 
+			
 			switch(pCreature->GetCreatureType())
 			{
-				case 724: // 뱀파이어 소환체 1
+				case 724: 
 					Add_GDR_Effect(1, true);
 					break;
-				case 725: // // 뱀파이어 소환체 2
+				case 725: 
 					Add_GDR_Effect(2, true);
 					break;
-				case 739: // 트랩 - 랜드 마인
+				case 739: 
 					ExecuteActionInfoFromMainNode(SKILL_CLIENT_LAND_MINE_LIGHT,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	pCreature->GetID(),	
 								pCreature->GetX(), pCreature->GetY(), 0, 0xffff, NULL, false);			
 					break;
-				case 738: // 트랩 - 플레져 스테이션
+				case 738: 
 					ExecuteActionInfoFromMainNode(SKILL_CLIENT_PLEASUER_STATION_LIGHT,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	pCreature->GetID(),	
 								pCreature->GetX(), pCreature->GetY(), 0, 0xffff, NULL, false);			
 					break;
@@ -209,7 +210,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 					bShowComeFromPotal = false;
 					pCreature->SetAction(ACTION_VAMPIRE_DRAIN);  
 					break;
-				case 765: // 그레이트 러피언 몸에 붙는 이펙트
+				case 765: 
 					ExecuteActionInfoFromMainNode(SKILL_CLIENT_GREAT_RUFFIAN_BODY,pCreature->GetX(), pCreature->GetY(), 0,pCreature->GetDirection(),	pCreature->GetID(),	
 								pCreature->GetX(), pCreature->GetY(), 0, 0xffff, NULL, false);			
 					break;
@@ -217,7 +218,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 					bShowComeFromPotal = false;
 					pCreature->AddEffectStatus((EFFECTSTATUS)(EFFECTSTATUS_SUMMON_MIGA_FIRE), 0xFFFF);
 					break;
-				case 786: // 장교
+				case 786: 
 					pCreature->AddEffectStatus((EFFECTSTATUS)(EFFECTSTATUS_GRAND_MASTER_VAMPIRE), 0xFFFF);
 					break;
 				case 788: // 
@@ -230,7 +231,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 					break;
 				case 793:
 				case 794:
-				case 795: // 제물들
+				case 795: 
 					bShowComeFromPotal = false;
 					pCreature->AddEffectStatus(EFFECTSTATUS_CAUSE_CRITICAL_WOUNDS, 0xffff);
 					ExecuteActionInfoFromMainNode(RESULT_MAGIC_CAUSE_CRITICAL_WOUNDS,pCreature->GetX(), pCreature->GetY(), 0,2,	pCreature->GetID(),	
@@ -238,9 +239,9 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 					break;
 			
 			}
-			// 2004, 6, 25, sobeit add end - 질드레 관련 
+			
 			//--------------------------------------------------
-			// 정상일 경우에는 0, 포탈을 통했을 경우에는 1
+			
 			//--------------------------------------------------
 			if (pPacket->getFromFlag()==1 && bShowComeFromPotal)
 			{
@@ -252,13 +253,13 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 //				{
 					ComeFromPortal( pCreature );
 					
-					// 바닥 이펙트 붙이기
+					
 					int x			= pCreature->GetX();
 					int y			= pCreature->GetY();
 					int delayFrame	= ConvertDurationToFrame( 18 );
 					
 					ExecuteActionInfoFromMainNode(
-						RESULT_MAGIC_BLOODY_TUNNEL,		// 값 자체가 RESULT_ACTIONINFO이다.
+						RESULT_MAGIC_BLOODY_TUNNEL,		
 						
 						x, y, 0,
 						DIRECTION_DOWN,
@@ -277,7 +278,7 @@ void GCAddMonsterHandler::execute ( GCAddMonster * pPacket , Player * pPlayer )
 		}
 	}
 	
-	// [도움말] 몹이 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_MONSTER );
 //	__END_HELP_EVENT

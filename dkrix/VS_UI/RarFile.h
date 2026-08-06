@@ -18,15 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * CRarFile - Cross-platform file reader that works with extracted RAR content
- *
- * RAR files are mapped to directories with the same name:
- * - Data/Info/infodata.rpk  → Data/Info/infodata/
- * - Data/Ui/txt/Item.rpk    → Data/Ui/txt/Item/
- *
- * This avoids dependency on unrar library and improves cross-platform compatibility
- */
+ 
 
 class CRarFile
 {

@@ -55,7 +55,7 @@ void WarSchedule::makeWarInfo(WarInfo* pWarInfo) const
     Assert(pWar != NULL);
 
     //---------------------------------------------------
-    // 남은 전쟁 시간 구하기.. -_-; 따로 빼야돼...
+    
     //---------------------------------------------------
     VSDateTime dt(VSDateTime::currentDateTime());
     int endHour = m_ScheduledTime.time().hour();
@@ -80,7 +80,7 @@ void WarSchedule::makeWarInfo(WarInfo* pWarInfo) const
     //	cout << "startTime : " << startTime << endl;
 
     //---------------------------------------------------
-    // WarInfo 값 설정
+    
     //---------------------------------------------------
     pWar->makeWarInfo(pWarInfo);
     pWarInfo->setRemainTime(remainSec);
@@ -123,7 +123,7 @@ void WarSchedule::create()
             pSiegeWar->getState2DBString().c_str());
 
         if (pStmt->getAffectedRowCount() == 0) {
-            filelog("WarError.log", "WarSchedule::create() : 이미 테이블에 War 정보가 있거나 테이블이 잘못되었습니다.");
+            filelog("WarError.log", "WarSchedule::create() :   War    .");
             SAFE_DELETE(pStmt);
             return;
         }
@@ -166,7 +166,7 @@ void WarSchedule::save()
             m_ScheduledTime.toDateTime().c_str(), pSiegeWar->getState2DBString().c_str());
 
         if (pStmt->getAffectedRowCount() == 0) {
-            filelog("WarError.log", "WarSchedule::create() : 이미 테이블에 War 정보가 있거나 테이블이 잘못되었습니다.");
+            filelog("WarError.log", "WarSchedule::create() :   War    .");
             SAFE_DELETE(pStmt);
             return;
         }
@@ -195,13 +195,7 @@ void WarSchedule::tinysave(const string& query)
         pStmt->executeQuery("UPDATE WarScheduleInfo SET %s WHERE WarID = %d AND ServerID = %d", query.c_str(),
                             pWar->getWarID(), g_pConfig->getPropertyInt("ServerID"));
 
-        /*		if( pStmt->getAffectedRowCount() == 0 )
-                {
-                    filelog( "WarError.log", "WarSchedule::tinySave() DB에 WarSchedule이 없거나 정보가 잘못되었습니다.
-           ZoneID:%d, WarID:%d, Query:%s", pWarScheduler->getZone()->getZoneID(), pWar->getWarID(), query.c_str() );
-                    SAFE_DELETE(pStmt);
-                    return;
-                }*/
+         
     }
     END_DB(pStmt)
 
@@ -216,7 +210,7 @@ bool WarSchedule::heartbeat()
     __BEGIN_TRY
 
     if (Schedule::heartbeat()) {
-        // pSchedule가 실행되었다.
+        
         if (m_pWork != NULL) {
             War* pWar = dynamic_cast<War*>(m_pWork);
             Assert(pWar != NULL);

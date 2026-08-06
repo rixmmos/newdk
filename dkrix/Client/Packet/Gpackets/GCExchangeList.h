@@ -7,8 +7,8 @@
 #ifndef __GC_EXCHANGE_LIST_H__
 #define __GC_EXCHANGE_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 // Forward declarations
 struct ExchangeListing;

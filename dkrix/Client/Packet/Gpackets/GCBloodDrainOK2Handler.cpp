@@ -23,7 +23,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,19 +31,19 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
-		// 내가 Creature에게 흡혈당하구 있다구 알려준다
+		
 		g_pPlayer->SetDrainCreatureID( pPacket->getObjectID() );
 		
-		// Creature에게 Damage 입힘
+		
 		if (pCreature == NULL)
 		{
-			// 바로 당하는 모습
+			
 			g_pPlayer->PacketSpecialActionResult( 
 										RESULT_SKILL_BLOOD_DRAIN,
 										g_pPlayer->GetID(),	
@@ -55,7 +55,7 @@ throw ( ProtocolException , Error )
 		{
 			pCreature->ClearStopBloodDrain();
 
-			// 내(Player)가 누군가가 사용한 SKill을 맞은 경우..
+			
 			// [ TEST CODE ]
 			MActionResult* pResult = new MActionResult;
 			pResult->Add( new MActionResultNodeActionInfo( 
@@ -68,22 +68,22 @@ throw ( ProtocolException , Error )
 
 			// [ TEST CODE ]
 			//
-			// 결과를 생성&저장해서 보내야 한다.
+			
 			//
-			// 방향을 바라보기
+			
 			pCreature->SetDirectionToPosition(g_pPlayer->GetX(), g_pPlayer->GetY());
 
 			//Duration_t	m_Duration;
 			pCreature->PacketSpecialActionToOther(
 								SKILL_BLOOD_DRAIN,
 								g_pPlayer->GetID(),
-								pResult						// 결과
+								pResult						
 			);
 		}
 	}	
 	
 	//------------------------------------------------------
-	// Player가 기술을 당했을 때의 모습..
+	
 	//------------------------------------------------------
 	/*
 	int resultActionInfo =  SKILL_BLOOD_DRAIN + g_ActionInfoTable.GetMinResultActionInfo();
@@ -95,17 +95,17 @@ throw ( ProtocolException , Error )
 				);
 	*/
 	//------------------------------------------------------------
-	// Delay Frame 설정
+	
 	//------------------------------------------------------------
 	//g_pPlayer->SetEffectDelayFrame( resultActionInfo, delayFrame );
 
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 	
 	//------------------------------------------------------------------
-	// 물린 상태..
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetEFFECT_STAT()!=EFFECTSTATUS_NULL)
 	{
@@ -117,8 +117,8 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );

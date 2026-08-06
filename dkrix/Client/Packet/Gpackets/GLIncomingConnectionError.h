@@ -10,8 +10,8 @@
 #define __GL_INCOMING_CONNECTION_ERROR_H__
 
 // include files
-#include "DatagramPacket.h"
-#include "PacketFactory.h"
+#include "../DatagramPacket.h"
+#include "../PacketFactory.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -24,10 +24,10 @@ class GLIncomingConnectionError : public DatagramPacket {
 
 public :
 	
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
 		    
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -91,7 +91,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GLIncomingConnectionErrorPacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE + 80; }
 
 };

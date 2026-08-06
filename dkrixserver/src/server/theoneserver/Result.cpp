@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // File Name 	: Result.cc
 // Written By	: Gday29@ewestsoft.com
-// Description	: Result class 구현
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Result.h"
@@ -21,7 +21,7 @@ Result::Result(T_RESULT* pResult, const string& statement) throw(Error) {
 
     Assert(m_pResult != NULL);
 
-    // #rows 값을 지정한다.
+    
     m_RowCount = mysql_num_rows(m_pResult);
     m_FieldCount = mysql_num_fields(m_pResult);
 
@@ -60,7 +60,7 @@ Result::~Result() throw() {
 
 //////////////////////////////////////////////////////////////////////////////
 // next()
-// 다음 row 가 존재할 경우 true 를, 없을 경우 false 를 리턴한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 bool Result::next() throw(Error) {
@@ -75,8 +75,8 @@ bool Result::next() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////////////
 // getField
-// 파라미터로 인덱스를 지정해서 그 컬럼을 리턴한다.
-// 1 이 최초의 컬럼이 된다. (0 이 아니당..)
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 char* Result::getField(uint index) throw(OutOfBoundException, Error) {

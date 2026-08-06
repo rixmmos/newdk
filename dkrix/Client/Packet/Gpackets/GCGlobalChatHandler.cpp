@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void GCGlobalChatHandler::execute ( GCGlobalChat * pPacket , Player * pPlayer )
@@ -34,7 +34,7 @@ throw ( ProtocolException , Error )
 	// Debug Message
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -42,7 +42,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -50,7 +50,7 @@ throw ( ProtocolException , Error )
 		char strName[256];
 
 		//---------------------------------------------------------------
-		// 완성형 --> 조합형
+		
 		//---------------------------------------------------------------
 		//UI_WansungToJohap( pPacket->getMessage().c_str(), str );
 		strcpy( str, pPacket->getMessage().c_str() );
@@ -62,7 +62,7 @@ throw ( ProtocolException , Error )
 		{
 			if (*(pLB+1)!=NULL)
 			{
-				// ' '를 NULL로
+				
 				*pLB = NULL;
 
 				strcpy(strName, str);
@@ -71,15 +71,15 @@ throw ( ProtocolException , Error )
 				bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0 ;
 
 				//--------------------------------------------------
-				// 나에게 보이는 글인가? (운영자의 말은 무조건 보인다)
+				
 				//--------------------------------------------------
 				if (bMasterWords 
 					|| g_pChatManager->IsAcceptID( strName ))
 				{
 					//--------------------------------------------------
-					// 욕 제거
-					// 운영자가 한 말도 아니고 나도 운영자가 아니면 filter한다.
-					// --> 운영자의 말은 다 보이고 운영자는 다 본다.
+					
+					
+					
 					//--------------------------------------------------			
 
 					if (!bMasterWords && 
@@ -91,7 +91,7 @@ throw ( ProtocolException , Error )
 					)
 					{
 						//--------------------------------------------------
-						// 욕 제거
+						
 						//--------------------------------------------------
 						g_pChatManager->RemoveCurse( pLB+1 );
 
@@ -103,12 +103,12 @@ throw ( ProtocolException , Error )
 							!g_pPlayer->HasEffectStatus( EFFECTSTATUS_TRANSLATION ))
 						{
 							//--------------------------------------------------
-							// 종족이 다른 경우
+							
 							//--------------------------------------------------
 							Race race = (Race)pPacket->getRace();
 							if (g_pPlayer->GetRace() != race)
 							{
-								// INT는 150까지이므로..  
+								
 								int percent = min(75, 25+g_pPlayer->GetINT()*100/(min(2, g_pPlayer->GetRace()+1)*150));
 //								if(g_pPlayer->GetRace() == RACE_OUSTERS || race == RACE_OUSTERS)
 //									percent = 70;
@@ -117,7 +117,7 @@ throw ( ProtocolException , Error )
 							}
 //							if (g_pPlayer->IsSlayer() && race != RACE_SLAYER)
 //							{
-//								// INT는 150까지이므로..  
+
 //								int percent = min(75, 25+g_pPlayer->GetINT()*100/150);
 //								if(race == RACE_OUSTERS)
 //									percent = 70;
@@ -125,7 +125,7 @@ throw ( ProtocolException , Error )
 //							}
 //							else if (g_pPlayer->IsVampire() && race != RACE_VAMPIRE)
 //							{
-//								// INT는 300까지이므로..  
+
 //								int percent = min(75, 25+g_pPlayer->GetINT()*100/300);
 //								if(race == RACE_OUSTERS)
 //									percent = 70;
@@ -133,7 +133,7 @@ throw ( ProtocolException , Error )
 //							}
 //							else if (g_pPlayer->IsOusters() && race != RACE_OUSTERS)
 //							{
-//								// INT는 300까지이므로..  
+
 //								//int percent = min(75, 25+g_pPlayer->GetINT()*100/300);
 //								int percent = 70;
 //								g_pChatManager->AddMask(pLB+1, percent);
@@ -146,7 +146,7 @@ throw ( ProtocolException , Error )
 					// ZONECHAT = 1
 					UI_AddChatToHistory( pLB+1, strName, 1, pPacket->getColor() );
 
-					// [도움말] 외치기 할 때
+					
 //					__BEGIN_HELP_EVENT
 ////						ExecuteHelpEvent( HE_CHAT_SHOUTED );	
 //					__END_HELP_EVENT

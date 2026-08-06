@@ -29,7 +29,7 @@ GCNPCAskDynamic::~GCNPCAskDynamic()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCNPCAskDynamic::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -50,10 +50,10 @@ void GCNPCAskDynamic::read ( SocketInputStream & iStream )
 
 	for (int i=0; i<m_ContentsCount; i++)
 	{
-		// 문자열 길이를 읽어들인다.
+		
 		iStream.read(size);
 
-		// 내용이 있는 문자열이라면 내용 자체를 읽어들인다.
+		
 		if (size > 0)
 		{
 			std::string msg = "";
@@ -66,7 +66,7 @@ void GCNPCAskDynamic::read ( SocketInputStream & iStream )
 }
 		    
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCNPCAskDynamic::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -89,11 +89,11 @@ void GCNPCAskDynamic::write ( SocketOutputStream & oStream ) const
 
 	for (; itr != m_Contents.end(); itr++)
 	{
-		// 문자열의 길이를 전송한다.
+		
 		size = (*itr).size();
 		oStream.write(size);
 
-		// 내용이 있는 문자열이라면 문자열 자체를 전송한다.
+		
 		if (size > 0) oStream.write(*itr);
 	}
 		

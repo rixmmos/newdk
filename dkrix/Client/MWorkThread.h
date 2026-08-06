@@ -6,11 +6,11 @@
 //
 //   = Init(LPTHREAD_START_ROUTINE FileThreadProc, int priority);
 //
-//     FileThreadProc부분을 MWorkThread.Execute로 해야된다. -_-; 
-//     (callback function인 관계로 static으로 해야하는데.. 문제가 많아서 - -;)
+
+
 //
-//		- 외부에 이렇게 함수를 하나 만들어서 
-//      - MWorkThread.Init( LoadingThreadProc ); 로 해야한다.
+
+
 //
 //		long
 //		LoadingThreadProc(void* pParam)
@@ -23,23 +23,23 @@
 //
 // [ Remove ]
 //
-//   = 특정 type의 MWorkNode들을 '일'에서 제외시킨다.
-//     처리할 필요가 없어진 경우... 제거시키면 된다.
+
+
 //
 //
 // [ AddFirst / AddLast ]
 //
-//	  MWorkNode를 처리해야할 '일'에 추가시킨다.
-//	  추가시킴과 동시에 'Execute'에서 바로 일이 처리된다.
-//    (Init에서 MWorkThread.Execute를 잘~ 설정해 둔 경우.. *_*;)
-//    AddFirst()는 추가시킨 일이 바로(!!) 처리된다.
-//    AddLast()는 젤 나중에~ 처리된다.
+
+
+
+
+
 //
 //
 // [ SetPriority ]
 //
-//	  Priority를 조정해서 Thread의 처리 속도?를 바꿀 수 있다.
-//	  음. Init할때도 이걸 설정해야 된다. 
+
+
 //
 //		THREAD_PRIORITY_HIGHEST
 //		THREAD_PRIORITY_ABOVE_NORMAL
@@ -140,45 +140,31 @@ class MWorkThread {
 		//---------------------------------------------------
 		// Lock Deque
 		//---------------------------------------------------
-		/*
-		BOOL				IsLockDeque() const			{ return WaitForSingleObject(m_hDequeLock, 0) == WAIT_OBJECT_0; }
-		void				WaitUnlockDeque() const		{ while (IsLockDeque()); }
-		void				LockDeque()					{ SetEvent( m_hDequeLock ); }
-		void				UnlockDeque()				{ ResetEvent( m_hDequeLock ); }
-
-		HANDLE				m_hDequeLock;		// deque접근에 대한 Lock
-		*/
+		 
 		void				LockDeque()					{ EnterCriticalSection(&m_csDeque); }
 		void				UnlockDeque()				{ LeaveCriticalSection(&m_csDeque); }
 
-		CRITICAL_SECTION	m_csDeque;					// deque접근에 대한 Lock
+		CRITICAL_SECTION	m_csDeque;					
 
 
 		//---------------------------------------------------
 		// Lock Current
 		//---------------------------------------------------
-		/*
-		BOOL				IsLockCurrent() const			{ return WaitForSingleObject(m_hCurrentLock, 0) == WAIT_OBJECT_0; }
-		void				WaitUnlockCurrent() const		{ while (IsLockCurrent()); }
-		void				LockCurrent()					{ SetEvent( m_hCurrentLock ); }
-		void				UnlockCurrent()				{ ResetEvent( m_hCurrentLock ); }
-
-		HANDLE				m_hCurrentLock;		// m_pCurrent접근에 대한 Lock
-		*/
+		 
 		void				LockCurrent()					{ EnterCriticalSection(&m_csCurrent); }
 		void				UnlockCurrent()					{ LeaveCriticalSection(&m_csCurrent); }
 
-		CRITICAL_SECTION	m_csCurrent;					// current접근에 대한 Lock
+		CRITICAL_SECTION	m_csCurrent;					
 
 	protected :
 		HANDLE				m_hWorkThread;
-		HANDLE				m_hHasWorkEvent;	// 할 일이 있다는 event
-		HANDLE				m_hEndWorkEvent;	// 할 일을 끝냈다는 event
-		HANDLE				m_hStopWorkEvent;	// 할 일을 중지하라는 event
+		HANDLE				m_hHasWorkEvent;	
+		HANDLE				m_hEndWorkEvent;	
+		HANDLE				m_hStopWorkEvent;	
 		
 		WORKNODE_DEQUE		m_dequeWorkNode;
 
-		// 현재 처리하고 있는 WorkNode
+		
 		MWorkNode*			m_pCurrentWork;
 };
 

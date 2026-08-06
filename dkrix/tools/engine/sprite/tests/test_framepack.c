@@ -1,14 +1,4 @@
-/**
- * @file test_framepack.c
- * @brief CreatureFramePack tests
- * 
- * Property 3: CFPK 加载正确性
- * For any valid .cfpk file, after loading, the CreatureFramePack
- * should contain the correct number of CreatureTypes, and each
- * ActionArray should have the correct structure.
- * 
- * Validates: Requirements 3.1, 3.2, 3.3
- */
+ 
 
 #include "framepack.h"
 #include <stdio.h>
@@ -180,15 +170,7 @@ static void test_framepack_get_frame(void) {
     creature_framepack_free(&pack);
 }
 
-/* ============================================================================
- * Property 3: CFPK 加载正确性
- * 
- * For any valid .cfpk file, after loading, the CreatureFramePack
- * should contain the correct number of CreatureTypes, and each
- * ActionArray should have the correct structure.
- * 
- * Validates: Requirements 3.1, 3.2, 3.3
- * ============================================================================ */
+ 
 
 static int test_property3_cfpk_loading(void) {
     int passed = 1;

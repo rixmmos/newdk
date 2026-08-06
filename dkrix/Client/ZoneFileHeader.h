@@ -34,15 +34,15 @@ public:
 	};
 
 public :
-	MString		ZoneVersion;	// 최종 업데이트된 날짜
-	WORD		ZoneID;			//	존 아이디
-	WORD		ZoneGroupID;	//	존 그룹 아이디
-	MString		ZoneName;		// 존 이름
+	MString		ZoneVersion;	
+	WORD		ZoneID;			
+	WORD		ZoneGroupID;	
+	MString		ZoneName;		
 
 
-	BYTE		ZoneType;		//	존의 타입
-	BYTE		ZoneLevel;		//	존에 나오는 몬스터의 레벨. 1-10 사이.
-	MString		Description;	//	존에 대한 설명
+	BYTE		ZoneType;		
+	BYTE		ZoneLevel;		
+	MString		Description;	
 
 public :
 	FILEINFO_ZONE_HEADER()

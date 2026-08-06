@@ -50,7 +50,7 @@ void ActionActivateMazeEnter::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionActivateMazeEnter::execute(Creature* pNPC, Creature* pCreature)
 
@@ -70,16 +70,16 @@ void ActionActivateMazeEnter::execute(Creature* pNPC, Creature* pCreature)
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(m_ZoneID);
 
-        // 유료존인데 유료사용자가 아니면...
+        
         if (pZoneInfo == NULL || pZoneInfo->isPayPlay() && !pGamePlayer->isPayPlaying()) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
-            } else if (!pGamePlayer->isFamilyFreePass()) // 패밀리 프리 패스는 유료존으로 갈 수 있다.
+            } else if (!pGamePlayer->isFamilyFreePass()) 
             {
-                // 유료 서비스 사용 불가인 경우
+                
                 GCSystemMessage gcSystemMessage;
 
                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {

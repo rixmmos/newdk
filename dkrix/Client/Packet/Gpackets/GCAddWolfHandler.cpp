@@ -25,11 +25,11 @@ throw ( ProtocolException , Error )
 	
 	int wolfCreatureType = 186;
 
-	if( pPacket->getItemType() == 39 )			// Were Wolf로 변신
+	if( pPacket->getItemType() == 39 )			
 		wolfCreatureType = CREATURETYPE_WER_WOLF;
 	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -38,14 +38,14 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -74,8 +74,8 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			//pPacket->getName()
-			// 색상 정보
-			// 임시로
+			
+			
 			pCreature->SetGuildNumber( pPacket->getGuildID() );
 
 			if (!g_pZone->AddCreature( pCreature ))
@@ -85,13 +85,13 @@ throw ( ProtocolException , Error )
 			}
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
 			pCreature->SetCreatureType( wolfCreatureType );
 
-			// 임시로
+			
 			pCreature->SetGuildNumber( pPacket->getGuildID() );
 
 			pCreature->SetGroundCreature();
@@ -107,29 +107,29 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			//--------------------------------------------------
-			// 늑대로 변신하는 결과
+			
 			//--------------------------------------------------
 			MActionResult* pResult = new MActionResult;
 
 			pResult->Add( new MActionResultNodeChangeCreatureType( pCreature->GetID(), wolfCreatureType ) );
 
 			//--------------------------------------------------
-			// 늑대 변신 
+			
 			//--------------------------------------------------								
 			ExecuteActionInfoFromMainNode(
-				RESULT_MAGIC_TRANSFORM_TO_WOLF,										// 사용 기술 번호
+				RESULT_MAGIC_TRANSFORM_TO_WOLF,										
 			
 				pCreature->GetX(), pCreature->GetY(), 0,
-				pCreature->GetDirection(),														// 사용 방향
+				pCreature->GetDirection(),														
 				
-				OBJECTID_NULL,												// 목표에 대한 정보
+				OBJECTID_NULL,												
 				pCreature->GetX(), pCreature->GetY(), 0, 
 				
-				0,													// 기술의 (남은) 지속 시간		
+				0,													
 				
 				pResult, //NULL,
 				
-				false);			// 기술 첨부터 시작한다.
+				false);			
 
 			//pCreature->SetDelay( 1000 );
 		}	
@@ -138,7 +138,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetBodyColor1( pPacket->getColor() );
 	}
 
-	// [도움말] Vampire가 나타날때
+	
 //	__BEGIN_HELP_EVENT
 //		//ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT

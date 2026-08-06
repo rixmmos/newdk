@@ -51,7 +51,7 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -66,11 +66,11 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         return;
     }
 
-    // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -94,7 +94,7 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         }
         string TargetGuildMaster = pGuild->getMaster();
 
-        // cout << "가입이 수락되었다. 통보받을 유저는 : " << TargetGuildMaster.c_str() << endl;
+        
 
 
         Statement* pStmt = NULL;
@@ -108,7 +108,7 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         END_DB(pStmt)
 
 
-        // 연합마스터가 된 아한테 연합아이디와 UNION_MASTER를 보내줘야 하고..
+        
         Creature* pCreature = NULL;
         pCreature = pGamePlayer->getCreature();
 
@@ -121,9 +121,9 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         pPlayer->sendPacket(&gcModifyInformation);
 
 
-        // 연합에 가입된 길드 마스터 한테는 연합아이디와 UNION_GUILD_MASTER를 보내줘야 한돠..
+        
         //
-        // 통보받을 유저에게 길드Union정보를 다시 보낸다
+        
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -142,20 +142,20 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         //////////////////////////////
 
 
-        // 내 서버에 있는 놈들에게 변경사항을 알린다.
+        
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
 
-        // 다른 서버에 있는 놈들에게 변경사항을 알린다.
+        
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
 
 
-        // GCModifyInformation / GCOtherModifyInfo 를 조립해서 날린다.
-        // GCModifyInformation 은 pPlayerCreature 에게
-        // GCOtherModifyInfo 는 broadcast 한다.
-        // 넣어 보낼 정보는 GuildUnionID 와 GuildUnionGrade다?
+        
+        
+        
+        
     }
 
 #endif // __GAME_SERVER__

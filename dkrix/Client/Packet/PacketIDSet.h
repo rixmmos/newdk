@@ -25,7 +25,7 @@
 //
 // class PacketValidator;
 //
-// 패킷의 순서를 인증한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -68,10 +68,10 @@ private :
 	// Packet ID Set Type 
 	PacketIDSetType m_PacketIDSetType;
 
-	// 플레이어 상태
+	
 	PlayerStatus m_PlayerStatus;
 
-	// 허용되는 패킷의 해쉬맵
+	
 	PACKET_ID_SET m_PacketIDSet;
 
 };

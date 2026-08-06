@@ -12,10 +12,10 @@
 void GearSlotInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
-    // 먼저 하위 클래스에서 읽어들이고...
+    
     PCItemInfo::read(iStream);
 
-    // 이 클래스의 데이터를 읽어들인다.
+    
     iStream.read(m_SlotID);
 
     __END_CATCH
@@ -27,10 +27,10 @@ void GearSlotInfo::read(SocketInputStream& iStream) {
 void GearSlotInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // 먼저 하위 클래스에서 읽어들이고...
+    
     PCItemInfo::write(oStream);
 
-    // 이 클래스의 데이터를 읽어들인다.
+    
     oStream.write(m_SlotID);
 
     __END_CATCH

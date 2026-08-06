@@ -30,7 +30,7 @@ MAttackCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	BLT_TYPE		bltType = (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].BltType;
 	TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].FrameID;
 
-	// creature의 좌표
+	
 	int cx, cy, cz, effectCount = 0;	
 
 	if( egInfo.nActionInfo == STEP_SKILL_KASAS_ARROW_2 || egInfo.nActionInfo == STEP_SKILL_BLAZE_BOLT_2 ||
@@ -41,7 +41,7 @@ MAttackCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		egInfo.nActionInfo == STEP_SKILL_EARTHS_TEETH_3 )
 		effectCount = 2;
 
-	// 목표 위치 Pixel좌표
+	
 	MCreature* pCreature = g_pZone->GetCreature( egInfo.creatureID );
 
 	if (pCreature == NULL)
@@ -57,7 +57,7 @@ MAttackCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	//	pCreature->PacketSpecialAction( nActionInfo, g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetZ(), g_pPlayer->GetID());
 	//}
 	
-	// Creture의 좌표로 목표좌표를 설정한다.
+	
 	cx = g_pTopView->MapToPixelX( pCreature->GetX() );
 	cy = g_pTopView->MapToPixelY( pCreature->GetY() );
 	cz = pCreature->GetZ();
@@ -66,24 +66,24 @@ MAttackCreatureEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	
 	int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
 	
-	pEffect->SetFrameID( frameID, maxFrame );		// 0번 Effect, Max 3 Frame					
+	pEffect->SetFrameID( frameID, maxFrame );		
 
-	// 발사 위치 Pixel좌표	
+	
 	pEffect->SetPixelPosition( egInfo.x0, egInfo.y0, egInfo.z0 );
 
 	pEffect->SetDirection( egInfo.direction );
 	
-	// 목표 Creature
+	
 	pEffect->SetTraceCreatureID( egInfo.creatureID );
 	pEffect->SetStepPixel( egInfo.step );
 	
 
-	// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+	
 	pEffect->SetCount( egInfo.count, egInfo.linkCount );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 	if (g_pZone->AddEffect( pEffect ))
 	{

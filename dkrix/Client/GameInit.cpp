@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // GameInit.cpp
 //---------------------------------------------------------------------------
-// 게임 관련 부분(주로 시스템 쪽)의 초기화 / Release
+
 //---------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -10,6 +10,8 @@
 #include "Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
 #include <MMSystem.h>
+#include <WinSock.h>
+#include <SDL.h>
 #else
 // macOS: BSD sockets headers for network functions
 #include <sys/types.h>
@@ -55,9 +57,9 @@
 #include "SpriteIDDef.h"
 #include "MathTable.h"
 #include "ModifyStatusManager.h"
-#include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
-#include "ClientCommunicationManager.h"
+#include "Packet/RequestServerPlayerManager.h"
+#include "Packet/RequestClientPlayerManager.h"
+#include "Packet/ClientCommunicationManager.h"
 #include "KeyAccelerator.h"
 #include "AcceleratorManager.h"
 #include "WhisperManager.h"
@@ -78,12 +80,17 @@
 #include "CMP3.h"
 #include "RankBonusTable.h"
 #include "MMonsterKillQuestInfo.h"
+
+static void TraceGameStartup(const char* step)
+{
+	(void)step;
+}
 #include "MTimeItemManager.h"
 #include "FameInfo.h"
 #include "MWarManager.H"
 #include "CSprite555.h"
 #include "CSprite565.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "UIFunction.h"
 #include "SoundSetting.h"
 #include "SystemAvailabilities.h"
@@ -102,7 +109,7 @@ extern RECT g_GameRect;
 //#include "CJpeg.h"
 //#define	new			DEBUG_NEW
 
-// ToT SafeDelete 도 없고..ToT 2003.5.11 by sonee
+
 
 extern int					g_Dimension ;
 // g_bEnable3DHAL was originally defined in VS_UI_Title.cpp when _LIB is not defined
@@ -110,7 +117,7 @@ extern int					g_Dimension ;
 BOOL g_bEnable3DHAL = FALSE;
 
 //----------------------------------------------------------------------
-// Title Loading - 2001.8.20 우헤헤 자꾸 늘어나는 global - -;;
+
 //----------------------------------------------------------------------
 //CSpritePack		g_TitleSPK;
 //CSpritePack		g_TitleAniSPK;
@@ -118,11 +125,145 @@ BOOL g_bEnable3DHAL = FALSE;
 //int				g_TitleSpriteDarkness = 4;
 bool			g_bTitleLoading = false;
 CSprite*		g_pTitleLoadingSprite = NULL;
+CSpriteSurface*	g_pTitleLoadingSurface = NULL;
 int				g_TitleSpriteAlpha = 32;
+DWORD			g_TitleLoadingStartTime = 0;
 //CDirectDrawSurface	g_TitleSurface;
 
+static bool LoadStartupSplashSurface()
+{
+	const char* filename = "data\\image\\StartupSplash.bmp";
+	SDL_Surface* loaded = SDL_LoadBMP(filename);
+	if (loaded == NULL)
+	{
+		return false;
+	}
 
-// [Futec수정]
+	SDL_Surface* converted = SDL_ConvertSurfaceFormat(loaded, SDL_PIXELFORMAT_RGB565, 0);
+	SDL_FreeSurface(loaded);
+	if (converted == NULL)
+	{
+		return false;
+	}
+
+	SDL_Surface* scaled = SDL_CreateRGBSurfaceWithFormat(0, g_GameRect.right, g_GameRect.bottom, 16, SDL_PIXELFORMAT_RGB565);
+	if (scaled == NULL)
+	{
+		SDL_FreeSurface(converted);
+		return false;
+	}
+
+	SDL_FillRect(scaled, NULL, 0);
+	SDL_Rect splashRect = { 0, 0, g_GameRect.right, g_GameRect.bottom };
+	if (SDL_BlitScaled(converted, NULL, scaled, &splashRect) != 0)
+	{
+		SDL_FreeSurface(scaled);
+		SDL_FreeSurface(converted);
+		return false;
+	}
+	SDL_FreeSurface(converted);
+
+	CSpriteSurface* surface = new CSpriteSurface;
+	if (!surface->InitOffsurface(g_GameRect.right, g_GameRect.bottom))
+	{
+		SDL_FreeSurface(scaled);
+		delete surface;
+		return false;
+	}
+
+	surface->FillSurface(CSDLGraphics::Color(0, 0, 0));
+
+	S_SURFACEINFO info;
+	surface->GetSurfaceInfo(&info);
+	if (info.p_surface == NULL)
+	{
+		SDL_FreeSurface(scaled);
+		delete surface;
+		return false;
+	}
+
+	const int copyWidth = (scaled->w < info.width) ? scaled->w : info.width;
+	const int copyHeight = (scaled->h < info.height) ? scaled->h : info.height;
+	const int destX = (info.width - copyWidth) / 2;
+	const int destY = (info.height - copyHeight) / 2;
+
+	WORD* dest = (WORD*)info.p_surface;
+	for (int y = 0; y < copyHeight; ++y)
+	{
+		const WORD* srcRow = (const WORD*)((const BYTE*)scaled->pixels + y * scaled->pitch);
+		WORD* destRow = (WORD*)((BYTE*)dest + (destY + y) * info.pitch) + destX;
+		memcpy(destRow, srcRow, copyWidth * sizeof(WORD));
+	}
+
+	SDL_FreeSurface(scaled);
+
+	if (g_pTitleLoadingSurface != NULL)
+	{
+		delete g_pTitleLoadingSurface;
+	}
+	g_pTitleLoadingSurface = surface;
+	return true;
+}
+
+static WORD Blend565(WORD dest, WORD src, int alpha)
+{
+	if (alpha >= 32)
+	{
+		return src;
+	}
+	if (alpha <= 0)
+	{
+		return dest;
+	}
+
+	int srcR = (src >> 11) & 0x1F;
+	int srcG = (src >> 5) & 0x3F;
+	int srcB = src & 0x1F;
+	int destR = (dest >> 11) & 0x1F;
+	int destG = (dest >> 5) & 0x3F;
+	int destB = dest & 0x1F;
+
+	int outR = (srcR * alpha + destR * (32 - alpha)) >> 5;
+	int outG = (srcG * alpha + destG * (32 - alpha)) >> 5;
+	int outB = (srcB * alpha + destB * (32 - alpha)) >> 5;
+
+	return (WORD)((outR << 11) | (outG << 5) | outB);
+}
+
+static void DrawStartupSplashSurface(CSpriteSurface* target, int alpha)
+{
+	if (target == NULL || g_pTitleLoadingSurface == NULL || alpha <= 0)
+	{
+		return;
+	}
+
+	S_SURFACEINFO destInfo;
+	S_SURFACEINFO srcInfo;
+	target->GetSurfaceInfo(&destInfo);
+	g_pTitleLoadingSurface->GetSurfaceInfo(&srcInfo);
+	if (destInfo.p_surface == NULL || srcInfo.p_surface == NULL)
+	{
+		return;
+	}
+
+	const int copyWidth = (srcInfo.width < destInfo.width) ? srcInfo.width : destInfo.width;
+	const int copyHeight = (srcInfo.height < destInfo.height) ? srcInfo.height : destInfo.height;
+	WORD* dest = (WORD*)destInfo.p_surface;
+	WORD* src = (WORD*)srcInfo.p_surface;
+
+	for (int y = 0; y < copyHeight; ++y)
+	{
+		WORD* destRow = (WORD*)((BYTE*)dest + y * destInfo.pitch);
+		WORD* srcRow = (WORD*)((BYTE*)src + y * srcInfo.pitch);
+		for (int x = 0; x < copyWidth; ++x)
+		{
+			destRow[x] = Blend565(destRow[x], srcRow[x], alpha);
+		}
+	}
+}
+
+
+
 extern char g_FutecIP[20];
 extern unsigned int g_FutecPort;
 
@@ -131,10 +272,10 @@ extern unsigned int g_FutecPort;
 #endif
 
 //----------------------------------------------------------------------
-// AddonSPK 분할 로딩 - 2001.8.20
+
 //----------------------------------------------------------------------
 TYPE_SPRITEID		g_AddonSPKNum = 0;
-const int			g_AddonSPKLoadingTimes = 20;	// 20등분으로 나눠서 loading한다.
+const int			g_AddonSPKLoadingTimes = 20;	
 bool				g_AddonSPKLoaded[g_AddonSPKLoadingTimes] = { false, };
 int					g_AddonSPKIndexFirst[g_AddonSPKLoadingTimes] = { 0, };
 int					g_AddonSPKIndexLast[g_AddonSPKLoadingTimes] = { 0, };
@@ -144,6 +285,27 @@ bool				g_AddonSPKAllLoaded = false;
 bool				g_bHALAvailable = false;
 extern bool				g_bHALAvailable;
 extern WORD g_wAuthKeyMap;
+
+#ifdef PLATFORM_WINDOWS
+static bool EnsureWinsockStarted()
+{
+	static bool initialized = false;
+	if (initialized)
+	{
+		return true;
+	}
+
+	WORD versionRequested = MAKEWORD(2, 0);
+	WSADATA wsaData;
+	if (WSAStartup(versionRequested, &wsaData) != 0)
+	{
+		return false;
+	}
+
+	initialized = true;
+	return true;
+}
+#endif
 
 void	StartTitleLoading();
 void	DrawTitleLoading();
@@ -181,6 +343,13 @@ StartTitleLoading()
 //	g_TitleSpriteID = 0;
 //	g_TitleSpriteDarkness = 4;
 	g_bTitleLoading = true;
+	g_TitleLoadingStartTime = timeGetTime();
+	g_TitleSpriteAlpha = 32;
+
+	if (LoadStartupSplashSurface())
+	{
+		return;
+	}
 
 //	CJpeg jpg;
 //	bool bOpen = jpg.Open(g_pFileDef->getProperty("FILE_JPG_SOFTON_CI").c_str());
@@ -325,36 +494,18 @@ DrawTitleLoading()
 
 //		g_pBack->Unlock();
 
-		// Loading 출력
-		/*
-		if (gpC_base!=NULL)
+		
+		 
+		
+		if (g_pTitleLoadingSurface != NULL)
 		{
-			if (!true)
+			CSpriteSurface* pSurface = g_pBack;
+			if (pSurface != NULL)
 			{
-				g_SetFL2Surface( g_pBack );
-			}
-
-			PrintInfo* pPrintInfo = &gpC_base->m_info_pi;
-			const COLORREF txColor = RGB(100,250,100);				
-			const COLORREF txColor2 = RGB(20,50,20);
-
-			pPrintInfo->text_color	= txColor2;
-			g_Print(331, 451, "잠시 기다려주세요.", pPrintInfo);
-			pPrintInfo->text_color	= txColor;
-			g_Print(330, 450, "잠시 기다려주세요.", pPrintInfo);
-			
-			//char str[80];
-			//sprintf(str, "[%d]", g_TitleSpriteID);
-			//g_Print(330, 480, str, pPrintInfo);	
-			
-			if (!true)
-			{
-				g_SetFL2Surface( g_pLast );
+				DrawStartupSplashSurface(pSurface, g_TitleSpriteAlpha);
 			}
 		}
-		*/
-		
-		if (g_pTitleLoadingSprite!=NULL)
+		else if (g_pTitleLoadingSprite!=NULL)
 		{
 //			point.x = 400 - (g_pTitleLoadingSprite->GetWidth()>>1);
 //			point.y = 460 - (g_pTitleLoadingSprite->GetHeight()>>1);
@@ -382,17 +533,12 @@ DrawTitleLoading()
 			pSurface->Unlock();
 		}
 
-		if(g_TitleSpriteAlpha == 32)
-			CSDLGraphics::Flip();
-
-		
-		// frame 바꿈
 //		if (++g_TitleSpriteID>=g_TitleAniSPK.GetSize())
 //		{
 //			g_TitleSpriteID = 0;			
 //		}
 //			
-//		// 밝기 조절
+
 //		if (g_TitleSpriteID%3==2)
 //		{
 //			if (--g_TitleSpriteDarkness < 0)
@@ -409,6 +555,7 @@ DrawTitleLoading()
 void
 EndTitleLoading(bool SendLogin)
 {
+	TraceGameStartup("EndTitleLoading begin");
 //	g_TitleAniSPK.Release();
 //	g_TitleSPK.Release();
 //	g_TitleSpriteID = 0;
@@ -420,10 +567,16 @@ EndTitleLoading(bool SendLogin)
 		delete g_pTitleLoadingSprite;
 		g_pTitleLoadingSprite = NULL;
 	}
+	if (g_pTitleLoadingSurface!=NULL)
+	{
+		delete g_pTitleLoadingSurface;
+		g_pTitleLoadingSurface = NULL;
+	}
+	TraceGameStartup("EndTitleLoading sprite released");
 	// 2004, 7, 15, sobeit modify start
-	// 2006.11.07  Coffee Edit 혼뇜踏狗폘땡빈菱땡되쩍
 	
-	if(SendLogin && true == g_pUserInformation->IsAutoLogIn) // 자동 로그인
+	
+	if(SendLogin && true == g_pUserInformation->IsAutoLogIn) 
 	{
 		static LOGIN	login;
 		login.sz_id = new char[  g_pUserInformation->UserID.GetLength() + 1 ];
@@ -433,6 +586,11 @@ EndTitleLoading(bool SendLogin)
 		strcpy( login.sz_password, g_pUserInformation->AutoLogInKeyValue.GetString() );
 		
 		gpC_base->SendMessage(UI_LOGIN, 0, 0, (void *)&login);
+		TraceGameStartup("EndTitleLoading auto login sent");
+	}
+	else
+	{
+		TraceGameStartup("EndTitleLoading no auto login");
 	}
 	
 	// 2006.11.07  Coffee Edit
@@ -469,7 +627,7 @@ PrepareLoadingAddonSPK()
 	}
 
 	//------------------------------------------------------------
-	// 나눠서 로딩하기 위한 준비.. 2001.8.20 추가
+	
 	//------------------------------------------------------------
 	if (g_AddonSPKNum==0)
 	{
@@ -479,40 +637,40 @@ PrepareLoadingAddonSPK()
 
 		AddonFileIndex2.read((char*)&g_AddonSPKNum, SIZE_SPRITEID);
 
-		// 개수를 잡아둔다.
+		
 		g_pTopView->m_AddonSPK.Init( g_AddonSPKNum);		
 
 		bool				g_AddonSPKLoaded[g_AddonSPKLoadingTimes] = { false, };
 		bool				g_AddonSPKIndex[g_AddonSPKLoadingTimes] = { 0 };
 
-		// loading하는 회수에 맞게 file index를 구한다.
+		
 		int first = 0;
 		for (int i=0; i<g_AddonSPKLoadingTimes; i++)
 		{
 			// 1/3
 			int last = (int)g_AddonSPKNum * (i+1) / g_AddonSPKLoadingTimes;
 			
-			// 더 클 일은 없겠지만.. 혹시.. - -;;
+			
 			if (last >= g_AddonSPKNum)
 			{
 				last = g_AddonSPKNum - 1;
 			}
 
 			long fp;
-			// 개수(2 bytes) + ID * (4 bytes)
+			
 			AddonFileIndex2.seekg( 2 + first*4 , ios::beg );
 			AddonFileIndex2.read((char*)&fp, 4);
 
-			// loading해야된다고 표시
+			
 			g_AddonSPKLoaded[i] = false;
 
-			// file index설정			
+			
 			g_AddonSPKIndexFirst[i] = first;
 			g_AddonSPKIndexLast[i] = last;
 			g_AddonSPKIndexFP[i] = fp;
 			
 
-			// 다음 꺼.
+			
 			first = last+1;
 		}
 
@@ -558,7 +716,7 @@ LoadingAddonSPK(bool bLoadingAll)
 
 	for (int i=0; i<g_AddonSPKLoadingTimes; i++)
 	{
-		// loading 안 된 부분이 있으면 loading한다.
+		
 		if (!g_AddonSPKLoaded[i])
 		{
 //			std::ifstream	addonFile;
@@ -581,7 +739,7 @@ LoadingAddonSPK(bool bLoadingAll)
 		
 			g_AddonSPKLoaded[i] = true;
 
-			// 전부 loading해야하는 경우가 아니면 한부분만 loading한다.
+			
 			if (!bLoadingAll)
 			{
 				#ifdef OUTPUT_DEBUG
@@ -660,11 +818,12 @@ InitInput()
 
 
 //---------------------------------------------------------------------------
-// Surface의 정보를 생성한다.
+
 //---------------------------------------------------------------------------
 BOOL
 InitSurface()
 {
+	TraceGameStartup("InitSurface begin");
 	DEBUG_ADD("[ InitGame ]  Surface");
 
 	//--------------------------------------------------------
@@ -676,22 +835,26 @@ InitSurface()
 	}
 	g_pBack = new CSpriteSurface;
 	// SDL2: Unified surface initialization
-	g_pBack->Init(800, 600);
+	g_pBack->Init(g_GameRect.right, g_GameRect.bottom);
+	TraceGameStartup("back surface initialized");
 
 	//--------------------------------------------------------
-	// 임시로 로딩화면 구성..
+	
 	// 2001.8.20
 	//--------------------------------------------------------
 
 	StartTitleLoading();
+	TraceGameStartup("title loading started");
 	DrawTitleLoading();
+	TraceGameStartup("title loading drawn first");
 
 
 	g_pBack->SetTransparency( 0 );
 	g_pBack->FillSurface( CSDLGraphics::Color(0,0,0) );
+	TraceGameStartup("back surface cleared");
 
 	//--------------------------------------------------------
-	// Buffer로 사용할 Surface
+	
 	//--------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Surface - new g_pTopView");
 
@@ -699,21 +862,23 @@ InitSurface()
 	if (g_pTopView==NULL)
 	{		
 		g_pTopView = new MTopView;
+		TraceGameStartup("top view allocated");
 
-		// addonSPK 분할 로딩 준비 - 2001.8.20
+		
 		if (!PrepareLoadingAddonSPK())
 		{
 			return FALSE;
 		}
+		TraceGameStartup("addon spk prepared");
 	}
 
 
-	// H/W가속 되는 경우
+	
 //	if (true)
 //	{
 //		g_pTopView->SetSurface( g_pBack );
 //	}
-//	// H/W가속 안 되는 경우
+
 //	else
 	{		
 		if (g_pLast!=NULL) 
@@ -725,12 +890,14 @@ InitSurface()
 		g_pLast->InitOffsurface(g_GameRect.right, g_GameRect.bottom);
 		g_pLast->SetTransparency( 0 );
 		g_pLast->FillSurface( CSDLGraphics::Color(30,30,30) );
+		TraceGameStartup("last surface initialized");
 
 		g_pTopView->SetSurface( g_pLast );
+		TraceGameStartup("top view surface set");
 	}
 
 	//--------------------------------------------------------
-	// 감마값 설정
+	
 	//--------------------------------------------------------
 	if (g_pUserOption->UseGammaControl
 		&& g_pUserOption->GammaValue!=100)
@@ -748,17 +915,21 @@ InitSurface()
 					 CSDLGraphics::Get_Count_Rbit(), 
 					 CSDLGraphics::Get_Count_Gbit(), 
 					 CSDLGraphics::Get_Count_Bbit());
+	TraceGameStartup("InitializeGL OK");
 
 	DEBUG_ADD("[ InitGame ]  Surface - Initialize Font");
 	DEBUG_ADD("[ InitGame ]  Surface - UI");
 
-	// 슬레이어 그림 약간 loading
+	
 	LoadingAddonSPK( false );
+	TraceGameStartup("addon spk loaded");
 	DrawTitleLoading();
+	TraceGameStartup("title loading drawn second");
 
 
-	// 일단 제거.. - -;
+	
 	gC_vs_ui.Release();
+	TraceGameStartup("vs ui released");
 
 	DEBUG_ADD("[ InitGame ]  Surface - InitD3D");
 //	if (true)
@@ -769,11 +940,13 @@ InitSurface()
 	{
 		gC_vs_ui.Init(g_pLast, UI_ResultReceiver);
 	}
+	TraceGameStartup("vs ui initialized");
 
 	//--------------------------------------------------------
 	// 2001.8.20
 	//--------------------------------------------------------	
 	DrawTitleLoading();	
+	TraceGameStartup("title loading drawn third");
 
 //	gC_vs_ui.SetVersion(CLIENT_VERSION);
 
@@ -782,11 +955,12 @@ InitSurface()
 
 	///*
 	//--------------------------------------------------------
-	// 새로운 IndexSprite 생성 방법 TEST
+	
 	//--------------------------------------------------------
-	// indexTable은 555와 565가 다르기 때문에...
-	// 잘~~골라서 해야한다. = =;
+	
+	
 	CIndexSprite::SetColorSet();
+	TraceGameStartup("index sprite color set initialized");
 
 	//#ifdef OUTPUT_DEBUG
 	//	std::ofstream indexTable(FILE_INDEXTABLE, ios::binary);
@@ -877,10 +1051,10 @@ InitSurface()
 	*/	
 
 	//--------------------------------------------------------
-	// View의 정보를 초기화 시킨다.
+	
 	//--------------------------------------------------------
 	//g_pTopView->SetSurface(g_pLast);	
-	if (g_Mode==MODE_CHANGE_OPTION	// 옵션 바꿀때는 g_pTopView->Init()는 안 한다.
+	if (g_Mode==MODE_CHANGE_OPTION	
 		&& !g_pTopView->Init())
 	{
 		return FALSE;
@@ -892,13 +1066,13 @@ InitSurface()
 	//g_pTopView->SetDarkBits(5);
 		
 
-	// ColorSet을 초기화시킨다.
+	
 	CIndexSprite::SetColorSet();
 	
 	//--------------------------------------------------------
-	// Cursor Surface 초기화
+	
 	//--------------------------------------------------------
-	// 2개의 Flip Surface, (32*32)
+	
 	if (CSDLGraphics::IsFullscreen())
 	{
 		if (g_pCursorSurface!=NULL)
@@ -911,7 +1085,9 @@ InitSurface()
 	}
 	//g_pCursorSurface.Init(2, CURSOR_SURFACE_WIDTH, CURSOR_SURFACE_HEIGHT);
 	DrawTitleLoading();	
+	TraceGameStartup("title loading drawn fourth");
 
+	TraceGameStartup("InitSurface OK");
 	return TRUE;
 }
 
@@ -949,7 +1125,7 @@ InitSound()
 	{
 		if (g_SDLAudio.Init(g_hWnd))
 		{	
-			// filename에 따라서.. Wav file을 Load한다.
+			
 			//for (int i=0; i<(*g_pSoundTable).GetSize(); i++)
 			//{			
 			//	(*g_pSoundTable)[i].pDSBuffer = g_Sound.LoadWav( (*g_pSoundTable)[i].Filename );
@@ -968,53 +1144,16 @@ InitSound()
 		}
 
 		//-----------------------------------------------------------
-		// RAM 체크해서.. 적당하게 잡아준다.
+		
 		//-----------------------------------------------------------
 		// SDL2: Unified - use default sound part count for all platforms
 		// DirectDraw memory status not available in SDL2
 		g_pClientConfig->MAX_SOUNDPART = 100;
 
-		// ( 전체 개수, 메모리 허용 개수 )
+		
 		g_pSoundManager->Init( g_pSoundTable->GetSize(), g_pClientConfig->MAX_SOUNDPART );
 
-		/*
-		for (int i=0; i<2; i++)
-		for (int soundID=0; soundID<(*g_pClientConfig).MAX_SOUNDPART; soundID++)
-		{
-			//-----------------------------------------------------------
-			// 없으면 --> Load & Play
-			//-----------------------------------------------------------
-			if (g_pSoundManager.IsDataNULL(soundID))
-			{
-				// 다시 load						
- 				LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( (*g_pSoundTable)[soundID].Filename );
-
-				// Load에 성공 했으면...
-				if (pBuffer!=NULL)
-				{
-					// Replace됐으면 원래것을 메모리에서 지운다.
-					LPDIRECTSOUNDBUFFER pOld;
-					if (g_pSoundManager.SetData( soundID, pBuffer, pOld ))
-					{
-						pOld->Release();
-					}				
-				}
-			}
-			//-----------------------------------------------------------
-			// 있는 경우 --> Play
-			//-----------------------------------------------------------
-			else
-			{
-				LPDIRECTSOUNDBUFFER pBuffer;
-				if (g_pSoundManager.GetData(soundID, pBuffer))
-				{
-				
-				}		
-			}
-		}
-
-		return FALSE;
-		*/
+		 
 
 		return TRUE;
 	}
@@ -1096,7 +1235,7 @@ InitMusic()
 		if( g_pOGG == NULL )
 		{
 #ifdef _MT
-			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800);
+			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800, 1);
 #else
 			g_pOGG = new COGGSTREAM(NULL, g_pSoundBufferForOGG, 44100, 11025, 8800,1);
 #endif
@@ -1116,18 +1255,23 @@ InitMusic()
 BOOL
 InitDraw()
 {
+	TraceGameStartup("InitDraw begin");
 	// Debug Message
 	DEBUG_ADD("[ InitGame ]  Draw");
+	TraceGameStartup("InitDraw after DEBUG_ADD");
 
 	//--------------------------------------------------------
-	// 3D가속 여부를 ClientConfig에서 읽어온다.
+	
 	//--------------------------------------------------------
+	TraceGameStartup(g_pUserOption != NULL ? "InitDraw user option present" : "InitDraw user option NULL");
 	g_bHAL = (g_pUserOption->Use3DHAL)? true : false;
+	TraceGameStartup("InitDraw HAL flag read");
 
 //	bool g_bUseIMEWindow = (g_pUserOption->Chinese) ? true : false;
 
 	//bool g_bUseIMEWindow = gC_ci->IsChinese() == true;
 	bool g_bUseIMEWindow = true;
+	TraceGameStartup("InitDraw IME flag set");
 
 	//--------------------------------------------------------
 	//
@@ -1143,30 +1287,30 @@ InitDraw()
 			// add by Sonic 2006.9.26
 			if(g_MyFull)
 			{
-				CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::FULLSCREEN, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, true, g_bUseIMEWindow);
 			}
 			else
 			{
-				CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::FULLSCREEN, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, true, g_bUseIMEWindow);
 			}
 		}
 		else
 		{
 			if(g_MyFull)
 			{
-				CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 			}
 			else
 			{
-				CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 			}
 		}
 	}
 #endif // PLATFORM_WINDOWS
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(USE_SDL_BACKEND)
 		//--------------------------------------------------------
-		// Video Memory 얼마인가?
+		
 		//--------------------------------------------------------
 		DDSCAPS2 ddsCaps2;
 		DWORD dwTotal;
@@ -1179,10 +1323,10 @@ InitDraw()
 
 
 		//--------------------------------------------------------
-		// 이게 진짜다.. - -;
+		
 		//--------------------------------------------------------
-		// 근데 .. 과연 이거라고 될려나..
-		// i740에서 memory 60M쯤 나오는건 뭘까.. - -;;
+		
+		
 		DDCAPS	driverCaps;
 		ZeroMemory( &driverCaps, sizeof(driverCaps) );
 		driverCaps.dwSize = sizeof(driverCaps);
@@ -1215,7 +1359,7 @@ InitDraw()
 		BOOL enoughMemory = TRUE;
 
 		//--------------------------------------------------------
-		// 8M 이상 남아있는 경우만 3D 가속한다.. 흠.. - -;;
+		
 		//--------------------------------------------------------
 		if (dwFree < 8388608)
 		{
@@ -1223,7 +1367,7 @@ InitDraw()
 		}
 
 		//--------------------------------------------------------
-		// 하드웨어 가속 사용 가능
+		
 		//--------------------------------------------------------
 		bool bUse3D = ( enoughMemory && g_bHAL && ( true ));
 
@@ -1253,7 +1397,7 @@ InitDraw()
 		}
 		
 		//--------------------------------------------------------
-		// 하드웨어 가속 사용 불가능
+		
 		//--------------------------------------------------------
 		if (!bUse3D)
 		{
@@ -1266,22 +1410,22 @@ InitDraw()
 				// add by Sonic 2006.9.26
 				if(g_MyFull)
 				{
-					CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
+					CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
 				}
 				else
 				{
-					CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
+					CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
 				}
 			}
 			else
 			{
 				if(g_MyFull)
 				{
-					CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+					CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 				}
 				else
 				{
-					CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+					CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 				}
 			}
 
@@ -1298,10 +1442,10 @@ InitDraw()
 	DEBUG_ADD("[ InitGame ]  SDL backend - no DirectX initialization");
 #endif // PLATFORM_WINDOWS
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(USE_SDL_BACKEND)
 	//--------------------------------------------------------
 	//
-	// 무조건 3D가속 안 할때
+	
 	//
 	//--------------------------------------------------------
 	else
@@ -1312,33 +1456,38 @@ InitDraw()
 		{
 			if(g_MyFull)
 			{
-				CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
 			}
 			else
 			{
-				CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::FULLSCREEN, false, g_bUseIMEWindow);
 			}
 		}
 		else
 		{
 			if(g_MyFull)
 			{
-				CSDLGraphics::Init(g_hWnd, 1024, 768, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 			}
 			else
 			{
-				CSDLGraphics::Init(g_hWnd, 800, 600, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
+				CSDLGraphics::Init(g_hWnd, g_GameRect.right, g_GameRect.bottom, CSDLGraphics::WINDOWMODE, true, g_bUseIMEWindow);
 			}
 		}
 	}
 #endif // PLATFORM_WINDOWS
 
+	TraceGameStartup("before CSpriteSurface::InitEffectTable");
 	CSpriteSurface::InitEffectTable();
+	TraceGameStartup("CSpriteSurface::InitEffectTable OK");
 
 #ifdef PLATFORM_WINDOWS
+	TraceGameStartup("before CDirectDrawSurface::SetGammaFunction");
 	CDirectDrawSurface::SetGammaFunction();
+	TraceGameStartup("CDirectDrawSurface::SetGammaFunction OK");
 #endif
 
+	TraceGameStartup("InitDraw OK");
 	return TRUE;
 }
 
@@ -1403,7 +1552,7 @@ void
 StopLoadingThread()
 {
 	//-------------------------------------------------------------
-	// Loading 중이던것 모두 제거
+	
 	//-------------------------------------------------------------
 	if (g_pLoadingThread!=NULL)
 	{
@@ -1418,7 +1567,7 @@ StopLoadingThread()
 		g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
 
 		//-------------------------------------------------------------
-		// 작업 중지가 끝날때까지 기다림
+		
 		//-------------------------------------------------------------
 		DEBUG_ADD_FORMAT("Thread-WaitingForStop: size=%d, working=%d, finish=%d, stop=%d", 
 									g_pLoadingThread->GetSize(),
@@ -1433,49 +1582,69 @@ StopLoadingThread()
 }
 
 //---------------------------------------------------------------------------
-// update loop의 정보를 설정한다.
+
 //---------------------------------------------------------------------------
 BOOL
 InitGameUpdate()
 {
+	TraceGameStartup("InitGameUpdate begin");
 	if (g_pCOpeningUpdate!=NULL)
 	{
+		TraceGameStartup("InitGameUpdate delete opening");
 		delete	g_pCOpeningUpdate;
+		g_pCOpeningUpdate = NULL;
 	}
+	TraceGameStartup("InitGameUpdate opening clear");
 
 	if (g_pCGameUpdate!=NULL)
 	{
+		TraceGameStartup("InitGameUpdate delete game");
 		delete	g_pCGameUpdate;
+		g_pCGameUpdate = NULL;
 	}
+	TraceGameStartup("InitGameUpdate game clear");
 
 	if (g_pCWaitPacketUpdate!=NULL)
 	{
+		TraceGameStartup("InitGameUpdate delete wait packet");
 		delete	g_pCWaitPacketUpdate;
+		g_pCWaitPacketUpdate = NULL;
 	}
+	TraceGameStartup("InitGameUpdate wait packet clear");
 
 	if (g_pCWaitUIUpdate!=NULL)
 	{
+		TraceGameStartup("InitGameUpdate delete wait ui");
 		delete	g_pCWaitUIUpdate;
+		g_pCWaitUIUpdate = NULL;
 	}
+	TraceGameStartup("InitGameUpdate wait ui clear");
 
 	g_pCOpeningUpdate		= new COpeningUpdate;
+	TraceGameStartup("InitGameUpdate opening allocated");
 	g_pCGameUpdate			= new CGameUpdate;
+	TraceGameStartup("InitGameUpdate game allocated");
 	g_pCWaitPacketUpdate	= new CWaitPacketUpdate;
+	TraceGameStartup("InitGameUpdate wait packet allocated");
 	g_pCWaitUIUpdate		= new CWaitUIUpdate;
+	TraceGameStartup("InitGameUpdate wait ui allocated");
 
+	TraceGameStartup("InitGameUpdate OK");
 	return TRUE;
 }
 
 //---------------------------------------------------------------------------
-// Surface의 정보를 생성한다.
+
 //---------------------------------------------------------------------------
 BOOL
 InitGame()
 {
+	TraceGameStartup("InitGame begin");
 	//---------------------------------------------------------------------
 	// Initialize logging system first (before everything else)
 	//---------------------------------------------------------------------
 	log_init();
+	TraceGameStartup("logging initialized");
 
 	// Always enable console output and INFO level logging
 	// This ensures DEBUG_ADD macros and panic messages are visible
@@ -1490,6 +1659,7 @@ InitGame()
 
 	g_pFileDef = new Properties;
 	g_pFileDef->load("Data/Info/FileDef.inf");
+	TraceGameStartup("InitGame file definitions loaded");
 
 	//---------------------------------------------------------------------
 	// Profiler
@@ -1509,11 +1679,13 @@ InitGame()
 	// MathTable
 	//---------------------------------------------------------------------
 	MathTable::FCreateSines();
+	TraceGameStartup("math table initialized");
 
 	//---------------------------------------------------------------------
 	// Effect Orbit Table
 	//---------------------------------------------------------------------
 	MAttachOrbitEffect::InitOrbitPosition();
+	TraceGameStartup("orbit table initialized");
 
 	//---------------------------------------------------------------------
 	// Init 
@@ -1554,6 +1726,7 @@ InitGame()
 		g_pNickNameStringTable = new MStringArray;
 	}
 	//yckou begin: check invalid *.dll
+#ifndef PLATFORM_WINDOWS
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
 	bool fFinished = false; 
@@ -1606,7 +1779,9 @@ InitGame()
 		// Close the search handle. 
 		FindClose(hSearch);
 	}
+#endif
 	//yckou end
+	TraceGameStartup("message tables allocated");
 	//---------------------------------------------------------------------
 	// nick name string table Loading
 	//---------------------------------------------------------------------
@@ -1615,6 +1790,7 @@ InitGame()
 		return FALSE;
 	(*g_pNickNameStringTable).LoadFromFile_NickNameString(gameStringTableTable);
 	gameStringTableTable.close();
+	TraceGameStartup("nickname table loaded");
 
 
 	// 2004, 6, 18 sobeit add end - nick name table 
@@ -1626,6 +1802,7 @@ InitGame()
 		return FALSE;
 	(*g_pGameStringTable).LoadFromFile(gameStringTableTable2);
 	gameStringTableTable2.close();
+	TraceGameStartup("game string table loaded");
 
 
 	//---------------------------------------------------
@@ -1677,28 +1854,36 @@ InitGame()
 	//                 Init...
 	//
 	//--------------------------------------------------------
-	if (InitClientConfig() &&
-		InitInfomation() &&
-		InitUserOption() &&
+	if ((TraceGameStartup("before InitClientConfig"), InitClientConfig()) &&
+		(TraceGameStartup("before InitInfomation"), InitInfomation()) &&
+		(TraceGameStartup("before InitUserOption"), InitUserOption()) &&
 
-		InitVolume() &&
-		InitInput() &&
+		(TraceGameStartup("before InitVolume"), InitVolume()) &&
+		(TraceGameStartup("before InitInput"), InitInput()) &&
 		//InitSound()  &&
-		InitDraw() &&
+		(TraceGameStartup("before InitDraw"), InitDraw()) &&
 
-		//InitThread() &&		// 2001.8.20 주석처리 - 로딩 Thread사용 안함
-		InitGameObject() &&    // GameObject must be initialized before Surface
+		
+		(TraceGameStartup("before InitGameObject"), InitGameObject()) &&    // GameObject must be initialized before Surface
 		                        // because gC_vs_ui.Init() in InitSurface() depends on g_pMoneyManager
-		InitSurface() &&
+		(TraceGameStartup("before InitSurface"), InitSurface()) &&
 
-		InitGameUpdate()
+		(TraceGameStartup("before InitGameUpdate"), InitGameUpdate())
 		)		
 	{	
 		//yckou
+#ifdef SPRITELIB_BACKEND_SDL
+		TraceGameStartup("CheckInvalidProcess skipped for SDL backend");
+#else
+		TraceGameStartup("before CheckInvalidProcess");
 		CheckInvalidProcess();
+		TraceGameStartup("CheckInvalidProcess OK");
+#endif
+		TraceGameStartup("before UI_AffectUserOption");
 		UI_AffectUserOption();
+		TraceGameStartup("UI_AffectUserOption OK");
 		//----------------------------------------
-		// guild 마크 생성부분
+		
 		//----------------------------------------
 		/*
 		#ifdef _DEBUG
@@ -1712,84 +1897,21 @@ InitGame()
 		#endif
 		*/
 
-		/*
-		#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-			std::ifstream guildInfoFile2(FILE_INFO_GUILD_INFO_MAPPER, ios::binary | );	
-
-			if (!guildInfoFile2.is_open())
-			{
-				struct MAKE_GUILD_INFO
-				{
-					WORD	guildID;
-					char	guildName[80];
-				};
-
-				const int numGuild = 20;
-				MAKE_GUILD_INFO guildInfo[numGuild] =
-				{
-					{ 1, "테페즈" },
-					{ 2, "바토리" },
-					{ 100, "E.V.E" },
-					{ 101, "귀천검" },
-					{ 102, "다덴마스터" },
-					{ 103, "레드블러드" },
-					{ 104, "바이러스" },
-					{ 105, "뱀파이어키퍼즈" },
-					{ 106, "버피즈" },
-					{ 107, "블러드레인" },
-					{ 108, "소년미소녀" },
-					{ 109, "십자군" },
-					{ 110, "엘카" },
-					{ 111, "지존" },
-					{ 112, "키퍼즈" },
-					{ 113, "태극" },
-					{ 114, "특전사" },
-					{ 115, "패밀리" },
-					{ 116, "퍼펙트" },
-					{ 117, "데카" }
-				};
-
-
-				char guildMarkFilename[256];
-
-				for (int g=0; g<numGuild; g++)
-				{
-					WORD		guildID		= guildInfo[g].guildID;
-					const char* guildName	= guildInfo[g].guildName;
-
-					GUILD_INFO* pInfo = new GUILD_INFO;
-					pInfo->SetGuildName( guildName );
-					
-					g_pGuildInfoMapper->Set( guildID, pInfo );
-
-					// 길드 마크 생성. "길드이름.bmp"
-					sprintf(guildMarkFilename, "Data\\Guild\\%s.bmp", guildName);
-					g_pGuildMarkManager->CreateGuildMark( guildID, guildMarkFilename );
-				}
-
-				// g_pGuildInfoMapper 저장
-				std::ofstream guildInfoFile(FILE_INFO_GUILD_INFO_MAPPER, ios::binary);	
-				g_pGuildInfoMapper->SaveToFile(guildInfoFile);
-				guildInfoFile.close();
-				
-				g_pGuildInfoMapper->SaveInfoToFile("GuildList.txt");
-			}
-			else
-			{
-				guildInfoFile2.close();
-			}
-		#endif
-		*/
+		 
 
 		//----------------------------------------
-		// 내 profile 초기화
+		
 		//----------------------------------------
-		ProfileManager::DeleteProfiles();		// 기존에거 모두 제거
-		ProfileManager::InitProfiles();			// profile 생성
+		TraceGameStartup("before ProfileManager::DeleteProfiles");
+		ProfileManager::DeleteProfiles();		
+		TraceGameStartup("ProfileManager::DeleteProfiles OK");
+		TraceGameStartup("before ProfileManager::InitProfiles");
+		ProfileManager::InitProfiles();			
+		TraceGameStartup("ProfileManager::InitProfiles OK");
 
 
 			//----------------------------------------
-			// Player 캐릭터 그림 Load
+			
 			//----------------------------------------
 			//UI_DrawProgress(70);
 
@@ -1807,17 +1929,19 @@ InitGame()
 		
 			//gC_vs_ui.EndProgress();
 
-			// Login Mode로 시작한다.
+			
 			//SetMode( MODE_OPENING );
 
 			// Debug: Check g_Mode before and after SetMode
 			extern enum CLIENT_MODE g_Mode;
+			TraceGameStartup("before SetMode MODE_MAINMENU");
 			printf("DEBUG: Before SetMode, g_Mode = %d\n", g_Mode);
 			SetMode( MODE_MAINMENU );
 			printf("DEBUG: After SetMode, g_Mode = %d\n", g_Mode);
+			TraceGameStartup("SetMode MODE_MAINMENU OK");
 			//SetMode( MODE_WAIT_POSITION );
 		///*
-		// Server에 접속이 안될 때 사용하는 code
+		
 		//*/
 
 		// Debug Message
@@ -1851,10 +1975,11 @@ InitGame()
 			DEBUG_ADD("---------------[  InitGame OK  ]---------------");
 		#endif
 	
+		TraceGameStartup("InitGame OK returning TRUE");
 		return TRUE;
 	}
 
-	// Init가 실패한 경우
+	
 	return FALSE;	
 }
 
@@ -1864,20 +1989,39 @@ InitGame()
 BOOL
 InitSocket()
 {
-	// 일단 release
+	
+	auto TraceInitSocket = [](const char* step)
+	{
+		(void)step;
+	};
+
+	TraceInitSocket("InitSocket begin");
 	ReleaseSocket();
 
 	// Debug Message
 	DEBUG_ADD("[ InitGame ]  Socket");
 
+#ifdef PLATFORM_WINDOWS
+	if (!EnsureWinsockStarted())
+	{
+		TraceInitSocket("InitSocket WSAStartup failed");
+		DEBUG_ADD("[ InitGame ]  Socket - WSAStartup failed");
+		SetMode( MODE_MAINMENU );
+		UpdateDisconnected();
+		return FALSE;
+	}
+	TraceInitSocket("InitSocket WSAStartup OK");
+#endif
+
 
 	//----------------------------------------------------------------------
-	// 환경 파일을 읽어들인다.
-	// 실행 파일은 $VSHOME/bin에, 환경 파일은 $VSHOME/conf 에 존재해야 한다.?	// command line 에서 환경 파일을 지정할 수 있도록 한다.
+	
+	
 	//----------------------------------------------------------------------
 
 	try {
 		DEBUG_ADD("[ InitGame ]  Socket - Before new Properties");
+		TraceInitSocket("InitSocket loading properties");
 
 		std::string configFilename;
 
@@ -1906,9 +2050,12 @@ InitSocket()
 			g_pConfigKorean = new Properties();
 			g_pConfigKorean->load(configFilename);			
 		}
+		TraceInitSocket("InitSocket properties loaded");
 
 	} catch ( Throwable& t ) 	
 	{
+		TraceInitSocket(t.toString().c_str());
+		TraceInitSocket("InitSocket properties failed");
 		//InitFail(t.toString().c_str());				
 
 		DEBUG_ADD_ERR(t.toString().c_str());
@@ -1926,8 +2073,9 @@ InitSocket()
 	Socket * pSocket = NULL;
 	try {		
 		DEBUG_ADD("[ InitGame ]  Socket - Before new PacketFactoryManager");
+		TraceInitSocket("InitSocket creating packet managers");
 
-		// 패킷 팩토리 매니저를 생성, 초기화한다. 
+		
 		g_pPacketFactoryManager = new PacketFactoryManager();
 
 		DEBUG_ADD("[ InitGame ]  Socket - Before new PacketValidator");
@@ -1942,7 +2090,7 @@ InitSocket()
 		DEBUG_ADD("[ InitGame ]  Socket - Before new Socket...");
 
 		//---------------------------------------------------------
-		// Address 골라서 접속하기
+		
 		//---------------------------------------------------------
 		int maxAddress = 1;
 
@@ -1954,22 +2102,23 @@ InitSocket()
 		} catch (NoSuchElementException) {
 			//maxAddress = 1;
 		}
+		TraceInitSocket("InitSocket resolved maxAddress");
 
-		// 최근에 접속시도를 했던 서버 주소 번호..
+		
 		static int previousTryServer = 0;
 		
 			
 		//for (int i=0; i<maxAddress; i++)
 		{
-			// 여러 login 서버 중의 한 군데로 접속한다.
-			// 순서대로..
+			
+			
 			int i = previousTryServer % maxAddress;
 
 			try {				
 				std::string serverAddressString;
 				serverAddressString = "LoginServerAddress";
 				
-				// [Futec수정]
+				
 				uint port;
 				if( g_pUserInformation->bKorean )
 					port = g_pConfigKorean->getPropertyInt("LoginServerPort");
@@ -1977,7 +2126,7 @@ InitSocket()
 					port = g_pConfigForeign->getPropertyInt(g_Dimension, "LoginServerPort");
 
 
-				// 소켓을 생성하고 업데이트 서버에 연결한다.
+				
 				std::string ServerAddress;				
 				if (g_FutecPort==0)
 				{				
@@ -1993,7 +2142,7 @@ InitSocket()
 					else
 						ServerAddress = g_pConfigForeign->getProperty( g_Dimension, serverAddressString);
 
-					// LoginServer의 port를 임의로 선택한다.
+					
 					try {
 						int portNum;
 						if( g_pUserInformation->bKorean )
@@ -2001,7 +2150,7 @@ InitSocket()
 						else
 							portNum = g_pConfigForeign->getPropertyInt( g_Dimension, "LoginServerPortNum");
 						
-						// port 고르기
+						
 						if (portNum>1)
 						{
 							if( g_pUserInformation->bKorean )
@@ -2012,14 +2161,14 @@ InitSocket()
 					} catch (NoSuchElementException&) {
 					}
 				}
-				// Futec으로 접속
+				
 				else
 				{
 					ServerAddress = g_FutecIP;
 					port = g_FutecPort;
 				}
 
-				// domain으로 된 주소인 경우..
+				
 				if (ServerAddress[0] < '0' || ServerAddress[0] > '9')
 				{
 					struct hostent* h;
@@ -2027,7 +2176,7 @@ InitSocket()
 					if ((h=gethostbyname(ServerAddress.c_str()))==NULL)
 					{
 						// -_-;
-						throw ConnectException("LoginServer의 주소를 찾을 수 없습니다.");
+						throw ConnectException("LoginServer    .");
 					}
 
 					char* pIP = (char*)inet_ntoa(*((struct in_addr*)h->h_addr));
@@ -2037,60 +2186,23 @@ InitSocket()
 				
 				//yckou: prohibit user connecting to local machine
 				//--------------------------------------------------------------------
-/*				struct hostent * phost;
-				char szhostname[128];
-				struct in_addr MyInAddr;
-				gethostname(szhostname, 128); 
-				phost = gethostbyname(szhostname);
-				
-				hostent& he = *phost;
-				//in_addr* addr = (in_addr*) *(phost->h_addr_list)
-				//add by sonic 2006.4.10 쇱꿎踏狗젯쌈륩蛟포뒈囹
-				//ServerAddress = cmpServerAddress;//퓻契립令륩蛟포뒈囹,렝岺놔댄
-				//ServerAddress = "59.34.148.238";
-				if ( ServerAddress[0] == 0x31 
-					&& ServerAddress[1] == 0x32
-					&& ServerAddress[2] == 0x37)
-				{
-					ServerAddress = "0.0.0.0";
-				}
-				if(ServerAddress == "127.0.0.1")
-				{
-//					abort();
-					g_bNeedUpdate = TRUE;
-					SetMode(MODE_QUIT);
-					g_ModeNext = MODE_QUIT;
-					return FALSE;
-					//ServerAddress = "211.155.231.173";
-				}
-				else
-				{
-					for(int nAdapter=0; he.h_addr_list[nAdapter]; nAdapter++)
-					{
-						//MyInAddr.s_addr=*((unsigned long *)phost->h_addr_list[nAdapter]);
-						memcpy ( &MyInAddr.s_addr, he.h_addr_list[nAdapter],he.h_length);
-						if(ServerAddress == inet_ntoa(MyInAddr))
-						{
-//							ServerAddress = "211.155.231.173";
-//							break;
-//							abort();
-							g_bNeedUpdate = TRUE;
-							SetMode(MODE_QUIT);
-							g_ModeNext = MODE_QUIT;
-							return FALSE;
-						}	
-//					}
-				}
-*/
+ 
 				//--------------------------------------------------------------------
 				DEBUG_ADD_FORMAT("Conneting( %s : %d )", ServerAddress.c_str() , port);				
+				{
+					char trace[256];
+					sprintf(trace, "InitSocket connecting %s:%u", ServerAddress.c_str(), port);
+					TraceInitSocket(trace);
+				}
 
 				pSocket = new Socket( ServerAddress , port );
 
 				DEBUG_ADD("[ InitGame ]  Socket - Before connect");
+				TraceInitSocket("InitSocket socket allocated");
 
 				// try to connect to server
 				pSocket->connect();
+				TraceInitSocket("InitSocket connect OK");
 /*				if ( ServerAddress[0] == 0x31 
 					&& ServerAddress[1] == 0x32
 					&& ServerAddress[2] == 0x37)
@@ -2102,12 +2214,13 @@ InitSocket()
 //				int lenSA = sizeof(sa);
 //				getsockname( pSocket->getSOCKET(), (sockaddr*)&sa, &lenSA );
 //				char str[128];
-//				sprintf(str, inet_ntoa(sa.sin_addr));	// str : 내IP
 
-				// connect가 된 경우..
+
+				
 				//break;
 
 			} catch ( ConnectException ) {
+				TraceInitSocket("InitSocket connect exception");
 
 				if (pSocket!=NULL)
 				{
@@ -2115,10 +2228,10 @@ InitSocket()
 					pSocket = NULL;
 				}
 
-				// 실패했으니까 다음 주소로..
+				
 				previousTryServer ++;
 
-				// 마지막 주소인 경우에만 끝이다.
+				
 				//if (i==maxAddress-1)
 				throw;
 			}
@@ -2128,17 +2241,22 @@ InitSocket()
 
 		// make nonblocking socket
 	    pSocket->setNonBlocking();
+		TraceInitSocket("InitSocket setNonBlocking OK");
 
 		// make no-linger socket
 		pSocket->setLinger(0);
+		TraceInitSocket("InitSocket setLinger OK");
 
 		DEBUG_ADD("[ InitGame ]  Socket - new ClientPlayer");
 
 	    // create player
 		g_pSocket = new ClientPlayer(pSocket);
+		TraceInitSocket("InitSocket ClientPlayer created");
 		pSocket = NULL;
 	 
 	} catch ( Throwable & t ) {	
+		TraceInitSocket(t.toString().c_str());
+		TraceInitSocket("InitSocket outer create failed");
 		//MessageBox( g_hWnd, t.toString().c_str(), NULL, MB_OK );
 		//InitFail(t.toString().c_str());
 		DEBUG_ADD(t.toString().c_str());
@@ -2198,6 +2316,8 @@ InitSocket()
 		DEBUG_ADD("[ InitGame ]  delete g_pRequestFileManager");
 		delete g_pRequestFileManager;		
 	}
+
+	TraceInitSocket("InitSocket end success");
 	
 
 	DEBUG_ADD("[ InitGame ] new ClientCommunicationManager");
@@ -2288,9 +2408,9 @@ void ReleaseAllObjects()
 	EndTitleLoading();
 	
 	//----------------------------------------------------------------
-	// GameUpdate 제거
+	
 	//
-	// update loop 안에서 이걸 실행하면 안된다.
+	
 	//----------------------------------------------------------------
 	ReleaseGameUpdate();
 
@@ -2343,14 +2463,14 @@ void ReleaseAllObjects()
 	
 	//----------------------------------------------------------------
 	// 
-	//		Global 정보 제거
+	
 	//
 	//----------------------------------------------------------------
 	ReleasePacketItemTable();
 
 	
 	//----------------------------------------------------------------
-	// UI 제거
+	
 	//----------------------------------------------------------------
 	if (g_pUIDialog!=NULL)
 	{
@@ -2364,7 +2484,7 @@ void ReleaseAllObjects()
 
 	//----------------------------------------------------------------
 	//
-	//					Game관련 정보
+	
 	//
 	//----------------------------------------------------------------
 	
@@ -2389,7 +2509,7 @@ void ReleaseAllObjects()
 	}
 	
 	//----------------------------------------------------------------
-	// Player 삭제
+	
 	//----------------------------------------------------------------
 	DEBUG_ADD("[Release] g_pPlayer");
 	if (g_pPlayer!=NULL)
@@ -2484,9 +2604,9 @@ void ReleaseAllObjects()
 	
 	if (g_pTopView!=NULL)
 	{
-		// updater를 실행할때만 지워준다. - -;
-		// release 안 해주는게 더 빨리 제거돼서(-_-;) 안했었는데
-		// updater할때는 확실히 제거해주는게 낫지 싶어서리..
+		
+		
+		
 		//if (g_bNeedUpdate)
 		{
 			g_pTopView->Release();
@@ -2532,7 +2652,7 @@ void ReleaseAllObjects()
 	// Volume control is now handled by SDL_mixer
 
 	//----------------------------------------------------------------
-	// global 제거...
+	
 	//----------------------------------------------------------------
 	//if (g_bNeedUpdate)
 	{
@@ -2812,7 +2932,7 @@ InitGameObject()
 	}
 	if (g_pServerInformation==NULL)
 	{
-		g_pServerInformation = new ServerInformation;
+		g_pServerInformation = new CServerInformation;
 		g_pServerInformation->SetServerGroupName( "ServerGroup" );
 		g_pServerInformation->SetServerName( "Server" );
 	}
@@ -2954,7 +3074,7 @@ InitGameObject()
 	g_pInventoryEffectManager = new MScreenEffectManager;
 
 	//----------------------------------------
-	// Player 생성
+	
 	//----------------------------------------
 	if (g_pPlayer!=NULL)
 	{	
@@ -2966,7 +3086,7 @@ InitGameObject()
 		delete g_pPlayer;
 	}
 
-	// Player 기본값 초기화
+	
 	g_pPlayer = new MPlayer;
 	DEBUG_ADD_FORMAT("[g_pPlayer] %x", g_pPlayer);
 
@@ -2975,7 +3095,7 @@ InitGameObject()
 
 	//--------------------------------------------------
 	//
-	// Skill Tree 초기화
+	
 	//
 	//--------------------------------------------------
 	g_pSkillManager->Init();

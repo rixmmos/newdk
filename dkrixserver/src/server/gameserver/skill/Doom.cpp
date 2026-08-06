@@ -20,7 +20,7 @@
 #include "Reflection.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -41,9 +41,9 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        // 저주 면역. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isFlag(Effect::EFFECT_CLASS_IMMUNE_TO_CURSE) ||
             !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
@@ -61,7 +61,7 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
         SkillType_t SkillType = pSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // Knowledge of Curse 가 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_CURSE)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_CURSE);
@@ -95,13 +95,13 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
             SkillOutput output;
             computeOutput(input, output);
 
-            // pTargetCreature가 저주마법을 반사하는 경우
+            
             if (CheckReflection(pVampire, pTargetCreature, getSkillType())) {
                 pTargetCreature = (Creature*)pVampire;
                 TargetObjectID = pVampire->getObjectID();
             }
 
-            // 이펙트 오브젝트를 생성해 붙인다.
+            
             EffectDoom* pEffect = new EffectDoom(pTargetCreature);
             pEffect->setDeadline(output.Duration);
             pEffect->setLevel(pSkillInfo->getLevel() / 2);
@@ -110,7 +110,7 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
             pTargetCreature->addEffect(pEffect);
             pTargetCreature->setFlag(Effect::EFFECT_CLASS_DOOM);
 
-            // 능력치를 계산해서 보내준다.
+            
             if (pTargetCreature->isSlayer()) {
                 Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
 
@@ -179,10 +179,10 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
             _GCSkillToObjectOK6.setSkillType(SkillType);
             _GCSkillToObjectOK6.setDuration(output.Duration);
 
-            if (bCanSeeCaster) // 10은 땜빵 수치다.
+            if (bCanSeeCaster) 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
-            } else // 10은 땜빵 수치다.
+            } else 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK6, &_GCSkillToObjectOK1);
             }
@@ -235,7 +235,7 @@ void Doom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlo
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Doom::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -262,7 +262,7 @@ void Doom::execute(Monster* pMonster, Creature* pEnemy)
         if (pMonster->isMaster()) {
             int x = pMonster->getX();
             int y = pMonster->getY();
-            int Splash = 3 + rand() % 5; // 3~7 마리
+            int Splash = 3 + rand() % 5; 
             int range = 2;               // 5x5
             list<Creature*> creatureList;
             getSplashVictims(pZone, x, y, Creature::CREATURE_CLASS_MAX, creatureList, Splash, range);
@@ -324,13 +324,13 @@ void Doom::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         SkillOutput output;
         computeOutput(input, output);
 
-        // pTargetCreature가 저주마법을 반사하는 경우
+        
         if (CheckReflection(pMonster, pEnemy, getSkillType())) {
             pEnemy = (Creature*)pMonster;
         }
 
 
-        // 이펙트 오브젝트를 생성해 붙인다.
+        
         EffectDoom* pEffect = new EffectDoom(pEnemy);
         pEffect->setDeadline(output.Duration);
         pEffect->setLevel(pSkillInfo->getLevel() / 2);
@@ -339,7 +339,7 @@ void Doom::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         pEnemy->setFlag(Effect::EFFECT_CLASS_DOOM);
         pEnemy->addEffect(pEffect);
 
-        // 능력치를 계산해서 보내준다.
+        
         if (pEnemy->isSlayer()) {
             Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pEnemy);
 

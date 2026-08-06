@@ -63,9 +63,9 @@ void PCOustersInfo::read(SocketInputStream& iStream) {
     BYTE shapeType;
     iStream.read(shapeType);
 
-    // 1,2,3 bit 은 CoatType 이다
+    
     m_CoatType = (OustersCoatType)(shapeType & 7);
-    // 4 bit 은 ArmType 이다
+    
     m_ArmType = (OustersArmType)((shapeType >> 3) & 1);
 
     //--------------------------------------------------
@@ -156,8 +156,8 @@ void PCOustersInfo::write(SocketOutputStream& oStream) const {
     //--------------------------------------------------
     // write Shape
     //--------------------------------------------------
-    // 1,2,3 bit 은 CoatType 이다
-    // 4 bit 은 ArmType 이다
+    
+    
     BYTE shapeType = 0;
     shapeType = (m_ArmType << 3) | m_CoatType;
     oStream.write(shapeType);

@@ -12,8 +12,8 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 SummonMigaAttack::SummonMigaAttack() throw() {
     __BEGIN_TRY
@@ -22,7 +22,7 @@ SummonMigaAttack::SummonMigaAttack() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonMigaAttack::execute(Monster* pMonster)
 
@@ -46,7 +46,7 @@ void SummonMigaAttack::execute(Monster* pMonster)
 
         if (bRangeCheck) {
             //--------------------------------------------------------
-            // 주위에 knockback되는맞는 애들을 체크해준다.
+            
             //--------------------------------------------------------
             SkillInput input(pMonster);
             SkillOutput output;
@@ -79,7 +79,7 @@ void SummonMigaAttack::execute(Monster* pMonster)
                 pEffect->setDeadline(8);
                 pMonster->addEffect(pEffect);
             } else
-                cout << "미가 자폭 실패" << endl;
+                cout << "  " << endl;
         } else {
             executeSkillFailNormal(pMonster, getSkillType(), NULL);
         }

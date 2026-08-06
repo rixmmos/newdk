@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------
 // Effect Copy - Darker
 //----------------------------------------------------------------------
-// source --> dest 로 pixels만큼 특정효과를 처리한다.
+
 //----------------------------------------------------------------------
 void
 CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -54,7 +54,7 @@ CSpriteSurface::memcpyPalEffectDarker(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - GrayScale
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -84,7 +84,7 @@ CSpriteSurface::memcpyPalEffectGrayScale(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Lighten
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -109,7 +109,7 @@ CSpriteSurface::memcpyPalEffectLighten(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Copy - Darken
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -136,7 +136,7 @@ CSpriteSurface::memcpyPalEffectDarken(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - ColorDodge
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -164,7 +164,7 @@ CSpriteSurface::memcpyPalEffectColorDodge(WORD* pDest, BYTE* pSource, WORD pixel
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -215,7 +215,7 @@ CSpriteSurface::memcpyPalEffectScreen(WORD* pDest, BYTE* pSource, WORD pixels, M
 //----------------------------------------------------------------------
 // Effect Copy - Screen
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -225,7 +225,7 @@ CSpriteSurface::memcpyPalEffectScreenAlpha(WORD* pDest, BYTE* pSource, WORD pixe
 //----------------------------------------------------------------------
 // Effect Copy - DodgeBurn
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -253,7 +253,7 @@ CSpriteSurface::memcpyPalEffectDodgeBurn(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Different
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -292,9 +292,9 @@ CSpriteSurface::memcpyPalEffectDifferent(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect Copy - Gradation
 //----------------------------------------------------------------------
-// source --> dest �� pixels��ŭ Ư��ȿ�� ó���� �Ѵ�.
+
 //
-// s_Value1�� ColorSet��ȣ�̴�.
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
@@ -328,29 +328,29 @@ CSpriteSurface::memcpyPalEffectGradation(WORD* pDest, BYTE* pSource, WORD pixels
 //----------------------------------------------------------------------
 // Effect SimpleOutline
 //----------------------------------------------------------------------
-// �� �������� �ܰ��� ���(������ ������ �� �� ���� ���)
-// pixels�� 1�̻��̶�� �����Ѵ�.
+
+
 //----------------------------------------------------------------------
 void		
 CSpriteSurface::memcpyPalEffectSimpleOutline(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)
 {
-	// ù ��
+	
 	*pDest = pal[*pSource];
 	
 	int pixels_1 = pixels-1;
 
-	// �� �� - pixels�� 1�϶� ���ϴ°ź��� �׳� ��°� �� ������?
+	
 	*(pDest+pixels_1) = *(pSource+pixels_1);	
 }
 
 //----------------------------------------------------------------------
 // Effect WipeOut
 //----------------------------------------------------------------------
-// s_Value1 : �� ����� ����? 
-//				64 - ����
-//				0 - �� ���
+
+
+
 //
-// �߽ɿ������� �������� ����������.
+
 //
 // ***************
 // ******   ******
@@ -364,25 +364,25 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	
+	
+	
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels<<1));
 	pDest += drawPixels;
 	pSource += drawPixels;
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	
 	//------------------------------------------------------------	
 	memcpy(pDest, pSource, (drawPixels2<<1));
 	//pDest += drawPixels2;
@@ -392,9 +392,9 @@ CSpriteSurface::memcpyPalEffectWipeOut(WORD* pDest, BYTE* pSource, WORD pixels, 
 //----------------------------------------------------------------------
 // Effect Net
 //----------------------------------------------------------------------
-// s_Value1 : �ǳʶ�� ��
+
 //
-// �� �� ���.. s_Value1�� �� ����ŭ �ǳʶ��.
+
 //
 // ***************
 // * * * * * * * *	: s_Value1 = 1
@@ -409,7 +409,7 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 	int skipPixels = 1 + s_Value1;
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	
 	//------------------------------------------------------------	
 	do {
 		//memcpy(pDest, pSource, (drawPixels<<1));
@@ -425,10 +425,10 @@ CSpriteSurface::memcpyPalEffectNet(WORD* pDest, BYTE* pSource, WORD pixels, MPal
 //----------------------------------------------------------------------
 // Effect Copy - GrayScaleVarious
 //----------------------------------------------------------------------
-// s_Value1 �� �󸶳� gray�Ǵ°�?(-_-;)�̴�..
-// s_Value1���� 0~31.. 32�ΰ�?.. - -
-// 0�̸� ���� gray
-// 32�̸� ��������
+
+
+
+
 //----------------------------------------------------------------------
 void	
 CSpriteSurface::memcpyPalEffectGrayScaleVarious(WORD* pDest, BYTE* pSource, WORD pixels, MPalette &pal)

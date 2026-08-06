@@ -149,7 +149,7 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
 
     ItemID_t targetID = 0;
 
-    // 타겟이 0이 아니라도 타겟이 없으면 새 모터사이클을 넣어야 된다.
+    
     //	Assert( getTarget() == 0 );
     Assert(pSlayer != NULL);
     Zone* pZone = pSlayer->getZone();
@@ -176,7 +176,7 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
-    // targetID를 DB에도 update시켜야 한다.
+    
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery("UPDATE KeyObject SET Target=%lu WHERE ItemID=%lu", targetID, getItemID());
@@ -189,7 +189,7 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
     filelog("motorcycle.txt", "[SetTargetID] Owner = %s, KeyID = %lu, Key's targetID = %lu, MotorcycleID = %lu",
             pSlayer->getName().c_str(), getItemID(), getTarget(), pMotorcycle->getItemID());
 
-    // 밑에서 pMotorcycle을 사용해도 되겠지만, 기존 코드 안 건드릴려고 여기서 지운다.
+    
     SAFE_DELETE(pMotorcycle);
 
     return targetID;
@@ -398,7 +398,7 @@ void KeyLoader::load(Creature* pCreature)
                     pInventory = pVampire->getInventory();
                     pStash = pVampire->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 switch (storage) {
                 case STORAGE_INVENTORY:
@@ -521,7 +521,7 @@ void KeyLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

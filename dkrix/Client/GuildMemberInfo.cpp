@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "GuildMemberInfo.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
+#include "Packet/SocketInputStream.h"
+#include "Packet/SocketOutputStream.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -37,7 +37,7 @@ GuildMemberInfo::~GuildMemberInfo ()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GuildMemberInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -61,7 +61,7 @@ void GuildMemberInfo::read ( SocketInputStream & iStream )
 }
 
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GuildMemberInfo::write ( SocketOutputStream & oStream ) 
      const throw ( ProtocolException , Error )

@@ -8,12 +8,12 @@
 // include files
 #include "Client_PCH.h"
 #include "GCMove.h"
-#include "Player.h"
+#include "../Player.h"
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__
-	#include "Cpackets/CGMove.h"
-	#include "ClientPlayer.h"
+	#include "../Cpackets/CGMove.h"
+	#include "../ClientPlayer.h"
 #endif
 
 
@@ -27,12 +27,12 @@ throw ( ProtocolException , Error )
 		
 #ifdef __GAME_CLIENT__
 
-		// ID가 getObjectID()인 Creature를 움직여준다.
-		// 없으면 Zone에 새로 추가
-		// 있으면 움직임..
+		
+		
+		
 
 		//------------------------------------------------------
-		// Zone이 아직 생성되지 않은 경우
+		
 		//------------------------------------------------------
 
 		if (g_pZone==NULL)
@@ -41,14 +41,14 @@ throw ( ProtocolException , Error )
 			DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 		}
 		//------------------------------------------------------
-		// 정상.. 
+		
 		//------------------------------------------------------
 		else
 		{
 			MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
 			//--------------------------------------------------
-			// 새로운 Creature이면 추가
+			
 			//--------------------------------------------------
 			if (pCreature==NULL)
 			{
@@ -76,7 +76,7 @@ throw ( ProtocolException , Error )
 //					pPacket->getDir() );
 			}
 			//--------------------------------------------------
-			// 이미 존재하는 Creature이면 이동
+			
 			//--------------------------------------------------
 			else
 			{

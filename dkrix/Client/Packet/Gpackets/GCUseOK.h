@@ -10,9 +10,9 @@
 #define __GC_USE_OK_H__
 
 // include files
-#include "Packet.h"
-#include "ModifyInfo.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../ModifyInfo.h"
+#include "../PacketFactory.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -31,10 +31,10 @@ public :
 	// Desctructor
 	~GCUseOK() throw();
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -45,7 +45,7 @@ public :
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCUseOKPacketSize 를 정의해서 리턴하라.
+	
 	PacketSize_t getPacketSize () const throw () { return ModifyInfo::getPacketSize(); }
 
 	#ifdef __DEBUG_OUTPUT__
@@ -84,7 +84,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCUseOKPacketSize 를 정의해서 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return 255; }
 
 };
@@ -124,10 +124,10 @@ public :
 	// Desctructor
 	~GCUseSkillCardOK() throw();
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -142,7 +142,7 @@ public :
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCUseOKPacketSize 를 정의해서 리턴하라.
+	
 	PacketSize_t getPacketSize () const throw () { return szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__
@@ -184,7 +184,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCUseOKPacketSize 를 정의해서 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return szBYTE; }
 
 };

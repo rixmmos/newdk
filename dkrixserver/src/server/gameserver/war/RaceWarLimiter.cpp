@@ -64,14 +64,14 @@ void PCWarLimiter::load()
 //--------------------------------------------------------------------------------
 // saveCurrent
 //
-// lock걸린 상태에서 불려야 한다.
+
 //--------------------------------------------------------------------------------
 void PCWarLimiter::clearCurrent()
 
 {
     __BEGIN_TRY
 
-    // 참가 인원을 0으로
+    
     int num = m_LimitInfos.size();
     for (int i = 0; i < num; i++) {
         LimitInfo_t* pLI = &(m_LimitInfos[i]);
@@ -79,7 +79,7 @@ void PCWarLimiter::clearCurrent()
         pLI->setCurrent(0);
     }
 
-    // DB에도 0으로 바꿔준다.
+    
     Statement* pStmt = NULL;
 
     BEGIN_DB {
@@ -96,7 +96,7 @@ void PCWarLimiter::clearCurrent()
 //--------------------------------------------------------------------------------
 // saveCurrent
 //
-// lock걸린 상태에서 불려야 한다.
+
 //--------------------------------------------------------------------------------
 void PCWarLimiter::saveCurrent(const LevelLimitInfo* pLI) const
 

@@ -26,7 +26,7 @@ throw ( ProtocolException , Error )
 		
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------	
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
@@ -38,7 +38,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// 실패했으니까 관련된 Skill의 delay를 없앤다.
+	
 	//------------------------------------------------------------------
 	int skillID = pPacket->getSkillType();
 	
@@ -46,7 +46,7 @@ throw ( ProtocolException , Error )
 		return;
 
 	//------------------------------------------------------------------
-	// Item Lock을 푼다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetItemCheckBufferStatus()==MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY)
 	{
@@ -54,7 +54,7 @@ throw ( ProtocolException , Error )
 	}
 	else if(g_pPlayer->IsOusters() && skillID == SKILL_ABSORB_SOUL)
 	{
-//		_MinTrace(" -_-a 실패\n");
+
 		g_pPlayer->SetStopAbsorbSoul();
 	} else if (g_pPlayer->IsSlayer() && skillID == SKILL_ETERNITY )
 	{
@@ -65,9 +65,9 @@ throw ( ProtocolException , Error )
 		
 	if (g_pSkillInfoTable!=NULL)
 	{
-		// 마비 마법이 아닌 경우만 delay를 없애준다.
-		// 이거 ActionInfoTable에 넣어야 한다.
-		// 스킬 실패하면 딜레이 없애주는 스킬만 SetAvailableTime한다.
+		
+		
+		
 		if(false == (*g_pActionInfoTable)[skillID].IsIgnoreSkillFailDelay())
 //		if (skillID != MAGIC_PARALYZE
 //			&& skillID != MAGIC_CAUSE_CRITICAL_WOUNDS
@@ -94,14 +94,14 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// skill 종류에 따라서
+	
 	//------------------------------------------------------------------
 	switch (skillID)
 	{
 		case SKILL_BITE_OF_DEATH :
 		case SKILL_BLOOD_DRAIN :
 			g_pPlayer->SetStopBloodDrain();
-//			DEBUG_ADD("흡혈 실패ㅋㅋ");
+
 //			g_pPlayer->StopBloodDrain();
 			break;
 		case SKILL_SOUL_CHAIN :
@@ -114,13 +114,13 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );

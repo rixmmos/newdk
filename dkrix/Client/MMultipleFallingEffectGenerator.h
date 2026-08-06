@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MMultipleFallingEffectGenerator.h
 //----------------------------------------------------------------------
-// 십자가(+) 모양으로 생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MMULTIPLEFALLINGEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MMultipleFallingEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_MULTIPLE_FALLING; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

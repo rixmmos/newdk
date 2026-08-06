@@ -8,8 +8,8 @@
 #ifndef __GC_REMOVE_STORE_ITEM_H__
 #define __GC_REMOVE_STORE_ITEM_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCRemoveStoreItem;

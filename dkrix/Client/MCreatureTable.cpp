@@ -129,7 +129,7 @@ CREATURETABLE_INFO::CREATURETABLE_INFO()
 	bHeadCut = false;
 	HPBarWidth = 120;
 
-	ChangeColorSet = 0xFFFF;	// default는 사용하지 않는다.
+	ChangeColorSet = 0xFFFF;	
 
 	pItemWearInfo = NULL;
 
@@ -177,7 +177,7 @@ CREATURETABLE_INFO::SetCreatureTribe(enum CREATURETRIBE ct, int nMaxAction)
 //----------------------------------------------------------------------
 // Init ActionSound Type ( m_CreatureTribe )
 //----------------------------------------------------------------------
-// m_CreatureType에 맞게 SoundID의 개수를 적절히 설정한다.
+
 //----------------------------------------------------------------------
 void			
 CREATURETABLE_INFO::InitActionType(int nMaxAction)
@@ -221,18 +221,18 @@ CREATURETABLE_INFO::GetActionMax() const
 
 	switch (m_CreatureTribe)
 	{
-		case CREATURETRIBE_SLAYER :			// 슬레이어
-		case CREATURETRIBE_SLAYER_NPC :		// 슬레이어 NPC
+		case CREATURETRIBE_SLAYER :			
+		case CREATURETRIBE_SLAYER_NPC :		
 			return ACTION_MAX_SLAYER;
 		break;
 
-		case CREATURETRIBE_VAMPIRE :			// 뱀파이어
-			if(204 == SpriteTypes[0]) // 질드레
+		case CREATURETRIBE_VAMPIRE :			
+			if(204 == SpriteTypes[0]) 
 				return ACTION_MAX_OUSTERS;
 			return ACTION_MAX_VAMPIRE;
 		break;
 
-		case CREATURETRIBE_OUSTERS :			// 아우스터즈
+		case CREATURETRIBE_OUSTERS :			
 		case CREATURETRIBE_OUSTERS_NPC:
 			return ACTION_MAX_OUSTERS;
 			break;
@@ -280,7 +280,7 @@ CREATURETABLE_INFO::SaveToFile(std::ofstream& file)
 	file.write((const char*)&ShadowCount, 2);
 	
 	
-	// 각각의 soundID를 저장한다.
+	
 	int max = GetActionMax();
 	int i;
 	for (i=0; i<max; i++)
@@ -288,14 +288,14 @@ CREATURETABLE_INFO::SaveToFile(std::ofstream& file)
 		file.write((const char*)&m_pActionSound[i], SIZE_SOUNDID);
 	}
 
-	// 각각의 CountID를 저장한다.
+	
 	for (i=0; i<max; i++)
 	{
 		file.write((const char*)&m_pActionCount[i], 4);
 	}
 
 	//---------------------------------------------------------------
-	// 슬레이어 NPC 복장 정보
+	
 	//---------------------------------------------------------------
 	bool bExistItemWearInfo = (pItemWearInfo!=NULL);
 	
@@ -343,13 +343,13 @@ CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 
 	BYTE ct;	
 	file.read((char*)&ct, 1);
-	SetCreatureTribe((enum CREATURETRIBE)ct);		// soundID array초기화
+	SetCreatureTribe((enum CREATURETRIBE)ct);		
 
 	file.read((char*)&MoveTimes, 1);
 	file.read((char*)&MoveRatio, 1);
 	file.read((char*)&MoveTimesMotor, 1);
 	file.read((char*)&Height, 4);
-	// add by Coffee 2006.11.3  劤경굶灌列鑒앴
+	
 	//DWORD dwLaJi=0;
 	//file.read((char*)&dwLaJi,4);
 	// end 
@@ -363,7 +363,7 @@ CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 	file.read((char*)&ChangeColorSet, 2);
 	file.read((char*)&ShadowCount, 2);
 
-	// 각각의 SoundID를 load한다.
+	
 	int max = GetActionMax();
 	int i;
 	for (i=0; i<max; i++)
@@ -371,7 +371,7 @@ CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 		file.read((char*)&m_pActionSound[i], SIZE_SOUNDID);
 	}
 
-	// 각각의 SoundID를 load한다.
+	
 	for (i=0; i<max; i++)
 	{
 		file.read((char*)&m_pActionCount[i], 4);
@@ -385,7 +385,7 @@ CREATURETABLE_INFO::LoadFromFile(std::ifstream& file)
 		isread = false;
 	}
 	//---------------------------------------------------------------
-	// 슬레이어 NPC 복장 정보
+	
 	//---------------------------------------------------------------
 	if (pItemWearInfo!=NULL)
 	{
@@ -433,7 +433,7 @@ CREATURETABLE_INFO::operator = (const CREATURETABLE_INFO& creatureInfo)
 	ChangeColorSet = creatureInfo.ChangeColorSet;
 	ShadowCount		= creatureInfo.ShadowCount;
 
-	// 각각의 SoundID를 load한다.
+	
 	int max = GetActionMax();
 	int i;
 	for (i=0; i<max; i++)
@@ -441,7 +441,7 @@ CREATURETABLE_INFO::operator = (const CREATURETABLE_INFO& creatureInfo)
 		m_pActionSound[i] = creatureInfo.m_pActionSound[i];
 	}
 
-	// 각각의 SoundID를 load한다.
+	
 	for (i=0; i<max; i++)
 	{
 		m_pActionCount[i] = creatureInfo.m_pActionCount[i];
@@ -536,7 +536,7 @@ CreatureSpriteTypeMapper::GetRandomCreatureType(TYPE_SPRITEID spriteID) const
 
 	if (spriteID > m_CreatureSpriteTypes.capacity())
 	{
-		// 블러드 워록 default - -;
+		
 		return defaultCreatureType;
 	}
 

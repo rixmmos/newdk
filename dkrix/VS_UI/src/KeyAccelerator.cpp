@@ -57,8 +57,8 @@ KeyAccelerator::Init( int max )
 //----------------------------------------------------------------------
 // Set AcceleratorKey ( accel, key )
 //----------------------------------------------------------------------
-// key�� ������ accel�� ����ȴ�..�� �ǹ�.
-// accel�� key�� ����Ǿ��ִ�..�� �ǹ̵� �ǰ�..
+
+
 //----------------------------------------------------------------------
 void
 KeyAccelerator::SetAcceleratorKey(BYTE accel, WORD key)
@@ -73,7 +73,7 @@ KeyAccelerator::SetAcceleratorKey(BYTE accel, WORD key)
 
 	if (iKey != m_Keys.end())
 	{
-		// 이미 맺어진 key가 있었다면 지운다.
+		
 		m_Keys.erase( iKey );
 	}
 
@@ -85,7 +85,7 @@ KeyAccelerator::SetAcceleratorKey(BYTE accel, WORD key)
 //----------------------------------------------------------------------
 // Get Accelerator ( key )
 //----------------------------------------------------------------------
-// Ȯ���� �� key�� �Էµ� ���
+
 //----------------------------------------------------------------------
 BYTE
 KeyAccelerator::GetAccelerator(WORD key) const
@@ -103,14 +103,14 @@ KeyAccelerator::GetAccelerator(WORD key) const
 //----------------------------------------------------------------------
 // Get AcceleratorSimilar ( key )
 //----------------------------------------------------------------------
-// ctrl+I�� ������ ����Ǵ°�
-// ctrl+shift+I�� ������ ������ �ȵȴ�.
-// �̷� ��쿡�� ����ǰ� �ҷ���.. ����Ű�� �����ؼ� üũ�ؾ� �Ѵ�.
+
+
+
 //----------------------------------------------------------------------
 BYTE				
 KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 {
-	// �Էµ� key
+	
 	KEY_MAP::const_iterator iKey = m_Keys.find( key );
 
 	if (iKey!=m_Keys.end())
@@ -125,7 +125,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	int bHasShift	= ACCEL_HAS_SHIFT(key);
 
 	//------------------------------------------------------------
-	// ���� key�� ���� ���
+	
 	//------------------------------------------------------------
 //	if (!bHasControl && !bHasAlt && !bHasShift)
 //	{
@@ -133,7 +133,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 //	}
 
 	//------------------------------------------------------------
-	// ctrl����
+	
 	//------------------------------------------------------------
 	if (bHasControl)
 	{
@@ -143,7 +143,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// alt����
+	
 	//------------------------------------------------------------
 	if (bHasAlt)
 	{
@@ -153,7 +153,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// shift����
+	
 	//------------------------------------------------------------
 	if (bHasShift)
 	{
@@ -165,26 +165,26 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	WORD keyOnly = ACCEL_GET_KEY( key );
 
 	//------------------------------------------------------------
-	// ctrl + alt + shift �� ���
+	
 	//------------------------------------------------------------
 	if (bHasControl && bHasAlt && bHasShift)
 	{
 		//------------------------------------------------------------
-		// ctrl�� �����.
+		
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_CONTROL( keyOnly );
 		iKey = m_Keys.find( checkKey );
 		if (iKey!=m_Keys.end())	return iKey->second;	
 
 		//------------------------------------------------------------
-		// alt�� �����
+		
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_ALT( keyOnly );
 		iKey = m_Keys.find( checkKey );
 		if (iKey!=m_Keys.end())	return iKey->second;		
 
 		//------------------------------------------------------------
-		// shift�� �����
+		
 		//------------------------------------------------------------
 		checkKey = ACCEL_ADD_SHIFT( keyOnly );
 		iKey = m_Keys.find( checkKey );
@@ -192,7 +192,7 @@ KeyAccelerator::GetAcceleratorSimilar(WORD key) const
 	}
 
 	//------------------------------------------------------------
-	// �� ������ ���
+	
 	//------------------------------------------------------------
 	iKey = m_Keys.find( keyOnly );
 	if (iKey!=m_Keys.end())	return iKey->second;

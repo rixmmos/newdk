@@ -58,7 +58,10 @@ void NicknameInfo::read(SocketInputStream& iStream)
 				break;
 			}
 		default:
-			assert(false);
+			m_NicknameType = NICK_NONE;
+			m_NicknameIndex = 0;
+			m_Nickname.clear();
+			break;
 	}
 
 	__END_CATCH

@@ -27,9 +27,9 @@ public:
 //
 // class Properties;
 //
-// ���Ϸκ��� (key,value) pair �� �о map �� ���·� ������ �ִ´�.
-// �ַ� ȯ���̳� �ɼǵ��� ���� ���Ͽ� ����Ѵ�. ��ü�� �����ؼ� ����
-// �ɼ��� �����ϰ� �����ϸ� �� ������ ���������.
+
+
+
 //
 // *Usage*
 //
@@ -89,7 +89,7 @@ public:
     string toString() const;
 
 private:
-    // key �� string �̰�, value ���� string �� map �̴�.
+    
     map<string, string, StringCompare> m_Properties;
 
     // load/save target file's name

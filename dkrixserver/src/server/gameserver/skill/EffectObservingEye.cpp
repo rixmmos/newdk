@@ -76,7 +76,7 @@ void EffectObservingEye::unaffect(Creature* pCreature)
     // cout << "EffectObservingEye" << "unaffect BEGIN" << endl;
 
     Assert(pCreature != NULL);
-    Assert(pCreature->isSlayer()); // 슬레이어말고는 걸리지 않는다.
+    Assert(pCreature->isSlayer()); 
 
     pCreature->removeFlag(Effect::EFFECT_CLASS_OBSERVING_EYE);
 
@@ -96,7 +96,7 @@ void EffectObservingEye::unaffect(Creature* pCreature)
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_OBSERVING_EYE);
     pZone->broadcastPacket(pCreature->getX(), pCreature->getY(), &gcRemoveEffect);
 
-    // 이 이펙트로 보고 있었던 크리쳐들을 삭제한다.
+    
     pZone->updateInvisibleScan(pCreature);
 
     GCOtherModifyInfo gcOtherModifyInfo;
@@ -138,7 +138,7 @@ bool EffectObservingEye::canSeeInvisibility(Creature* pTarget) const
 
         level = pMonster->getLevel();
     } else {
-        // 뱀파이어나 몬스터가 아니면 못본걸로 한다.
+        
         return false;
     }
 

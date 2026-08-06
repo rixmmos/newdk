@@ -25,7 +25,7 @@ throw ( ProtocolException , Error )
 	// message
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -36,19 +36,19 @@ throw ( ProtocolException , Error )
 	}	
 
 	//------------------------------------------------------
-	// 대상이 되는 creature를 얻는다.
+	
 	//------------------------------------------------------
 	MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 	MCreature* pTargetCreature = g_pZone->GetCreature( pPacket->getTargetObjectID() );
 	
 	//------------------------------------------------------
-	// Creature가 행동을 취하도록 한다.
+	
 	//------------------------------------------------------
 	int skilltype = pPacket->getSkillType();
 	
 //	if(skilltype == SKILL_BLOOD_DRAIN)
 //	{
-//		DEBUG_ADD("흡혈 실패ㅋㅋ");
+
 //	}
 	if( skilltype >= g_pActionInfoTable->GetSize() )
 		return;
@@ -64,14 +64,14 @@ throw ( ProtocolException , Error )
 
 	if (pCreature==NULL)
 	{
-		// 그런 creature가 없을 경우
+		
 		DEBUG_ADD_FORMAT("There's no such creature : ID=%d, Skill=%d", pPacket->getObjectID(), SKILL_ATTACK_MELEE);				
 		
 		return;
 	}
 
 	//------------------------------------------------------
-	// 현재의 무기에 따라서 공격 기술을 결정하는 경우..
+	
 	//------------------------------------------------------
 	if (skilltype==SKILL_ATTACK_MELEE
 		|| skilltype==SKILL_ATTACK_ARMS)
@@ -99,7 +99,7 @@ throw ( ProtocolException , Error )
 		pCreature->SetStopAbsorbSoul();
 	}
 	
-	// 2005, 1, 10, sobeit add start - 784 몬스터 수류탄 던지기 스킬 실패시 어떤 동작도 하지 않게..
+	
 	if(skilltype == SKILL_GRENADE_ATTACK) 
 		return;
 	// 2005, 1, 10, sobeit add end
@@ -112,17 +112,17 @@ throw ( ProtocolException , Error )
 		if (skilltype==SKILL_BLOOD_DRAIN || skilltype == SKILL_BITE_OF_DEATH )
 		{
 			pCreature->SetStopBloodDrain();
-			//DEBUG_ADD("흡혈 테스트ㅋㅋ");
+			
 		}
 		
-		// 맞는 애가 없는 경우..  
+		
 		if (pTargetCreature==NULL)
 		{
-			// 그런 creature가 없을 경우
+			
 			DEBUG_ADD_FORMAT("There's no such creature : TargetID=%d, Skill=%d", pPacket->getTargetObjectID(), SKILL_ATTACK_MELEE);
 
 			//------------------------------------------------------
-			// Creature가 행동을 취하도록 한다.
+			
 			//------------------------------------------------------
 			pCreature->PacketSpecialActionToNobody(
 							skilltype,
@@ -133,7 +133,7 @@ throw ( ProtocolException , Error )
 			return;
 		}
 		
-		// 자신에게 쓰는 경우? - -;
+		
 		if (pCreature==pTargetCreature)
 		{
 			pCreature->PacketSpecialActionToSelf(
@@ -145,7 +145,7 @@ throw ( ProtocolException , Error )
 		}
 		
 		//------------------------------------------------------
-		// 행동하는 Creature가 TargetCreature를 바라보도록 한다.
+		
 		//------------------------------------------------------
 		pCreature->SetDirectionToPosition( pTargetCreature->GetX(), pTargetCreature->GetY() );
 

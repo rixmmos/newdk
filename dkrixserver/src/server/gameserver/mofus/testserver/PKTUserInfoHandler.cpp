@@ -12,7 +12,7 @@
 #include "PKTUserInfo.h"
 
 
-// 실행 함수
+
 void PKTUserInfoHandler::execute(GameServerPlayer* pPlayer, MPacket* pPacket) {
     cout << "--------------------------------------------------" << endl;
     cout << "RECV UserInfo" << endl;
@@ -22,7 +22,7 @@ void PKTUserInfoHandler::execute(GameServerPlayer* pPlayer, MPacket* pPacket) {
     filelog(MOFUS_PACKET_FILE, "RECV : %s", pPacket->toString().c_str());
 
     PKTPowerPoint pkt;
-    strcpy(pkt.sCharName, "슬11");
+    strcpy(pkt.sCharName, "11");
     pkt.nPowerPoint = 300;
     pkt.nContinue = rand() % 2;
     pkt.nOnGameCode = 1;

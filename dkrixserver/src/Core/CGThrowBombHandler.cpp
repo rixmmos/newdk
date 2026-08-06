@@ -26,11 +26,11 @@
 
 #ifdef __GAME_SERVER__
 
-// 타입
-// 방향
-// 마스크
+
+
+
 int BombMask[5][9][9] = {
-    // 0번 타입 폭탄
+    
     {{0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
@@ -40,7 +40,7 @@ int BombMask[5][9][9] = {
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    // 1번 타입 폭탄
+    
     {{0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
@@ -50,7 +50,7 @@ int BombMask[5][9][9] = {
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    // 2번 타입 폭탄
+    
     {{0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
@@ -60,7 +60,7 @@ int BombMask[5][9][9] = {
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 100, 0, 0, 0, 0},
      {0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    // 3번 타입 폭탄
+    
     {{0, 50, 0, 0, 100, 0, 0, 50, 0},
      {50, 0, 0, 0, 100, 0, 0, 0, 50},
      {0, 0, 0, 50, 100, 50, 0, 0, 0},
@@ -70,7 +70,7 @@ int BombMask[5][9][9] = {
      {0, 0, 0, 50, 100, 50, 0, 0, 0},
      {0, 0, 50, 0, 100, 0, 50, 0, 0},
      {0, 0, 0, 0, 0, 0, 0, 0, 0}},
-    // 4번 타입 폭탄
+    
     {{0, 50, 0, 50, 100, 50, 0, 50, 0},
      {50, 0, 50, 0, 100, 0, 50, 0, 50},
      {0, 50, 0, 50, 100, 50, 0, 50, 0},
@@ -95,7 +95,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    // 게임 플레이어의 상태가 정상이 아니라면 걍 리턴한다.
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     if (pGamePlayer->getPlayerStatus() != GPS_NORMAL)
         return;
@@ -103,7 +103,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
     Creature* pCreature = pGamePlayer->getCreature();
     Assert(pCreature != NULL);
 
-    // 플레이어가 슬레이어가 아니라면 걍 리턴한다.
+    
     if (!pCreature->isSlayer())
         return;
 
@@ -121,7 +121,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
     Assert(pInventory != NULL);
 
 
-    // 완전 안전지대라면 기술 사용 불가. by sigi. 2002.11.14
+    
     ZoneLevel_t ZoneLevel = pZone->getZoneLevel(pSlayer->getX(), pSlayer->getY());
     if ((ZoneLevel & COMPLETE_SAFE_ZONE) || (BombX >= pInventory->getWidth() || BombY >= pInventory->getHeight())) {
         GCSkillFailed1 _GCSkillFailed1;
@@ -141,7 +141,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
 
         Item* pItem = pInventory->getItem(BombX, BombY);
 
-        // 아이템이 널이거나 폭탄이 아니라면...
+        
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_BOMB) {
             GCSkillFailed1 _GCSkillFailed1;
             //_GCSkillFailed1.setSkillType(SKILL_THROW_BOMB);
@@ -149,19 +149,9 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
             return;
         }
 
-        /*
-        // 6은 임의의 사정 거리다...
-        // 사정 거리보다 멀리 던지려고 하면, 어떻게 하는 것이 좋을까?
-        if (!verifyDistance(pSlayer, ZoneX, ZoneY, 6))
-        {
-            GCSkillFailed1 _GCSkillFailed1;
-            //_GCSkillFailed1.setSkillType(SKILL_THROW_BOMB);
-            pPlayer->sendPacket(&_GCSkillFailed1);
-            return;
-        }
-        */
+         
 
-        // 폭탄의 각종 정보를 얻어온다.
+        
         Bomb* pBomb = dynamic_cast<Bomb*>(pItem);
         ItemType_t BombType = pBomb->getItemType();
         Damage_t MinDamage = pBomb->getMinDamage();
@@ -171,7 +161,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
         Level_t SkillLevel = pSkillSlot->getExpLevel();
         Damage_t RealDamage = MinDamage + (max(0, ((int)MaxDamage * (int)SkillLevel / 100) - MinDamage));
 
-        // 사용자의 위치와 던질 곳의 위치로 방향을 계산한다.
+        
         ZoneCoord_t myX = pSlayer->getX();
         ZoneCoord_t myY = pSlayer->getY();
         Dir_t dir = calcDirection(myX, myY, ZoneX, ZoneY);
@@ -190,7 +180,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
         bool bTimeCheck = verifyRunTime(pSkillSlot);
         bool bRangeCheck = verifyDistance(pSlayer, ZoneX, ZoneY, 6);
 
-        // 맞든 맞지 않았든 폭탄의 숫자는 줄여주어야 한다.
+        
         decreaseItemNum(pBomb, pInventory, pSlayer->getName(), STORAGE_INVENTORY, 0, BombX, BombY);
 
         if (bManaCheck && bTimeCheck && bRangeCheck) {
@@ -203,14 +193,14 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
 
         decreaseMana(pSlayer, RequiredMP, _GCThrowBombOK1);
 
-        // 각각의 타일을 돌면서 히트 체크를 한다.
+        
         for (int tileY = ZoneY - 1; tileY <= ZoneY + 1; tileY++) {
             for (int tileX = ZoneX - 1; tileX <= ZoneX + 1; tileX++, count++) {
-                // 올바른 존 좌표가 아니라면, continue
+                
                 if (!isValidZoneCoord(pZone, tileX, tileY))
                     continue;
 
-                // mask가 0이라면, 즉 히트롤을 할 필요가 없다면 continue
+                
                 int Mask = BombMask[BombType][dir][count];
                 if (Mask == 0)
                     continue;
@@ -223,14 +213,14 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
                 if (tile.hasCreature(Creature::MOVE_MODE_WALKING)) {
                     Creature* pCreature = tile.getCreature(Creature::MOVE_MODE_WALKING);
 
-                    // NoSuch제거. by sigi. 2002.5.2
+                    
                     if (pCreature != NULL && !pCreature->isFlag(Effect::EFFECT_CLASS_COMA))
                         targetList.push_back(pCreature);
                 }
                 if (tile.hasCreature(Creature::MOVE_MODE_BURROWING)) {
                     Creature* pCreature = tile.getCreature(Creature::MOVE_MODE_BURROWING);
 
-                    // NoSuch제거. by sigi. 2002.5.2
+                    
                     if (pCreature != NULL && !pCreature->isFlag(Effect::EFFECT_CLASS_COMA))
                         targetList.push_back(pCreature);
                 }
@@ -254,8 +244,8 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
                     bool bPK = verifyPK(pSlayer, pTargetCreature);
                     bool bZoneLevelCheck = checkZoneLevelToHitTarget(pTargetCreature);
 
-                    // 사용자가 타겟이라면 경험치를 안올릴려구 노력 한다.
-                    // 몸빵이 생겨날 수 있기 때문이다.
+                    
+                    
                     if (tileX == ZoneX && tileY == ZoneY) {
                         if (pTargetCreature->isSlayer()) {
                             bRaceCheck = false;
@@ -280,18 +270,18 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
             }
         } // for (int tileY = ZoneY-1; tileY <= ZoneY+1; tileY++)
 
-        // 모든 타일 체크가 끝났으니, 경험치를 약간 올리고, 아이템 숫자를 줄여준다.
+        
         if (bHit && bRaceCheck) {
             shareAttrExp(pSlayer, RealDamage, 1, 8, 1, _GCThrowBombOK1);
             increaseDomainExp(pSlayer, SKILL_DOMAIN_GUN, pSkillInfo->getPoint(), _GCThrowBombOK1);
 
-            // 스킬을 사용할 수 있을 때만 스킬 경험치를 올려준다.
+            
             // 2003. 1. 12 by bezz
             if (pSkillSlot->canUse())
                 increaseSkillExp(pSlayer, SKILL_DOMAIN_GUN, pSkillSlot, pSkillInfo, _GCThrowBombOK1);
             //			increaseAlignment(pSlayer, SKILL_DOMAIN_GUN, _GCThrowBombOK1);
             // shareAttrExp(pSlayer, RealDamage, 1, 8, 1, _GCSkillToTileOK1);
-            // 이 부분에서 패킷을 보내줘야 하는데..
+            
         }
 
         _GCThrowBombOK1.setXYDir(ZoneX, ZoneY, dir);
@@ -318,7 +308,7 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
 
             _GCThrowBombOK2.addShortData(MODIFY_CURRENT_HP, targetHP);
 
-            // 아이템의 내구력을 떨어뜨린다.
+            
             decreaseDurability(NULL, pTargetCreature, pSkillInfo, NULL, &_GCThrowBombOK2);
 
 

@@ -49,8 +49,8 @@ bool Item::destroy()
 
         pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %lu", getObjectTableName().c_str(), m_ItemID);
 
-        // DB에서 지우는건데..
-        // DB에 이미 아이템이 없는 경우
+        
+        
         if (pStmt->getAffectedRowCount() == 0) {
             SAFE_DELETE(pStmt);
             return false;
@@ -65,7 +65,7 @@ bool Item::destroy()
     __END_CATCH
 }
 
-// 아이템을 버린다. 기본은 가비지로, 특별한 경우엔 Timeover 나 그외 안 쓰는 storage로..
+
 void Item::waste(Storage storage) const
 
 {
@@ -88,7 +88,7 @@ const list<OptionType_t>& Item::getDefaultOptions(void) const
 
     } catch (NoSuchElementException&) {
         StringStream msg;
-        msg << "그런 아이템 정보가 없습니다.(" << (int)getItemClass() << ", " << (int)getItemType() << ")";
+        msg << "   .(" << (int)getItemClass() << ", " << (int)getItemType() << ")";
 
         filelog("itemError.txt", "%s", msg.toString().c_str());
         // throw Error(msg.toString());
@@ -109,7 +109,7 @@ bool Item::isQuestItem() const {
 
 void Item::makePCItemInfo(PCItemInfo& result) const {
     if (m_ObjectID == 0) {
-        filelog("ItemError.log", "아이템 oid가 0입니다. : %s", toString().c_str());
+        filelog("ItemError.log", " oid 0. : %s", toString().c_str());
         result.setObjectID(0);
     } else {
         result.setObjectID(getObjectID());

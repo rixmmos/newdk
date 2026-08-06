@@ -40,38 +40,38 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------	
 	if (1)//g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
 		g_pPlayer->SetWaitVerifyNULL();
 
 		//------------------------------------------------------------------	
-		// Item Check Buffer를 확인한다.
+		
 		//------------------------------------------------------------------
 		MItem* pItem = g_pPlayer->GetItemCheckBuffer();
 
 		//----------------------------------------------------
-		// Check Buffer에 item이 있는 경우
+		
 		//----------------------------------------------------
 		if (pItem!=NULL)
 		{
 			MPlayer::ITEM_CHECK_BUFFER status =	g_pPlayer->GetItemCheckBufferStatus();
 
 			//----------------------------------------------------
-			// Inventory의 item에 사용
+			
 			//----------------------------------------------------
 			if (status==MPlayer::ITEM_CHECK_BUFFER_SKILL_TO_INVENTORY)			
 			{
-				#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+				#ifdef __TEST_SUB_INVENTORY__   
 					DWORD dwSubInventoryID = g_pPlayer->GetItemIDCheckBufferSubInventory();
 				#endif
 				//--------------------------------------------------
-				// Item Check Buffer를 지운다.
+				
 				//--------------------------------------------------
 				g_pPlayer->ClearItemCheckBuffer();
 		
-				// 지속 시간 변환
+				
 				DWORD delayFrame = 32;//ConvertDurationToFrame( pPacket->getDuration() );
 					
 				//pPacket->getX(),	
@@ -86,7 +86,7 @@ throw ( ProtocolException , Error )
 				switch (skillID)
 				{
 					//----------------------------------------------------
-					// 성수/폭탄/지뢰 만들기
+					
 					//----------------------------------------------------
 					case MAGIC_CREATE_HOLY_WATER :
 					case SKILL_MAKE_BOMB :
@@ -94,7 +94,7 @@ throw ( ProtocolException , Error )
 					case SKILL_CREATE_HOLY_POTION :
 					case SKILL_ABSORB_SOUL:
 					{
-						// pItem을 제거하고 holy water를 추가한다.
+						
 						int x		= pItem->GetGridX();
 						int y		= pItem->GetGridY();
 						int targetX = pPacket->getX();
@@ -128,7 +128,7 @@ throw ( ProtocolException , Error )
 								pResultItem->SetNumber( ItemNum );
 						}
 
-						// 기술 체크..
+						
 						//g_SkillAvailable.CheckMP();					
 					}
 					break;
@@ -137,7 +137,7 @@ throw ( ProtocolException , Error )
 					// Install Mine
 					//----------------------------------------------------
 					case SKILL_INSTALL_MINE :
-						// Inventory에서 사용하게 만든다.
+						
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
 
 						UseItemOK();
@@ -154,8 +154,8 @@ throw ( ProtocolException , Error )
 					// Vampire Portal
 					//----------------------------------------------------
 					case MAGIC_BLOODY_TUNNEL :
-						// Inventory에서 사용하게 만든다.
-					#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+						
+					#ifdef __TEST_SUB_INVENTORY__   
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, dwSubInventoryID);
 
 					#else
@@ -171,7 +171,7 @@ throw ( ProtocolException , Error )
 
 					case MAGIC_BLOODY_MARK :
 						//-------------------------------------------------
-						// VampirePortal인 경우
+						
 						//-------------------------------------------------
 						if (pItem->GetItemClass()==ITEM_CLASS_VAMPIRE_PORTAL_ITEM)
 						{
@@ -193,14 +193,14 @@ throw ( ProtocolException , Error )
 					break;
 
 					//----------------------------------------------------
-					// 늑대 / 박쥐 변신
+					
 					//----------------------------------------------------
 					case MAGIC_TRANSFORM_TO_WOLF :
 					case MAGIC_TRANSFORM_TO_BAT :
 					case SKILL_TRANSFORM_TO_WERWOLF :
 					{
 						//----------------------------------------------------
-						// pItem을 제거한다.
+						
 						//----------------------------------------------------
 						/*
 						int x = pItem->GetGridX();
@@ -217,9 +217,9 @@ throw ( ProtocolException , Error )
 							DEBUG_ADD_FORMAT("[Error] No Removed Item from Inventory=(%d, %d)", x, y);
 						}
 						*/
-						// Inventory에서 사용하게 만든다.
+						
 
-					#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+					#ifdef __TEST_SUB_INVENTORY__   
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY, dwSubInventoryID);
 					#else
 						g_pPlayer->SetItemCheckBuffer( pItem, MPlayer::ITEM_CHECK_BUFFER_USE_FROM_INVENTORY);
@@ -228,7 +228,7 @@ throw ( ProtocolException , Error )
 						UseItemOK();
 
 						//----------------------------------------------------
-						// 변신
+						
 						//----------------------------------------------------
 						MActionResult* pResult = new MActionResult;
 
@@ -263,37 +263,37 @@ throw ( ProtocolException , Error )
 						}							
 
 						//--------------------------------------------------
-						// 변신 이펙트에 결과 추가
+						
 						//--------------------------------------------------
 						ExecuteActionInfoFromMainNode(
-							resultSkillID,										// 사용 기술 번호
+							resultSkillID,										
 						
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0,
-							g_pPlayer->GetDirection(),														// 사용 방향
+							g_pPlayer->GetDirection(),														
 							
-							OBJECTID_NULL,												// 목표에 대한 정보
+							OBJECTID_NULL,												
 							g_pPlayer->GetX(), g_pPlayer->GetY(), 0, 
 							
-							0,													// 기술의 (남은) 지속 시간		
+							0,													
 							
 							pResult, //NULL,
 							
-							false);			// 기술 첨부터 시작한다.
+							false);			
 
 						g_pPlayer->SetDelay( 1000 );
 
 						//--------------------------------------------------
-						// 변신 처리가 제대로 안되고 
-						// 다른 존으로 넘어가는 경우가 있어서
-						// 임시로.. -_-;
-						// 이거는 MActionResultNodeChangeCreatureType나
-						// GCUpdateInfoHandler에서 제거한다.
+						
+						
+						
+						
+						
 						//--------------------------------------------------
 						g_MorphCreatureType = creatureType;
 
 
 						//--------------------------------------------------
-						// 기술 체크..
+						
 						//--------------------------------------------------
 						g_pSkillAvailable->SetAvailableSkills();
 							
@@ -302,7 +302,7 @@ throw ( ProtocolException , Error )
 				}
 
 				
-				// Inventory의 Item에 기술을 사용해야 한다.
+				
 				AddNewInventoryEffect( itemID,
 										skillID + (*g_pActionInfoTable).GetMinResultActionInfo(),
 										delayFrame
@@ -310,7 +310,7 @@ throw ( ProtocolException , Error )
 
 			}
 			//----------------------------------------------------
-			// 다른 상태??
+			
 			//----------------------------------------------------
 			else
 			{
@@ -328,24 +328,24 @@ throw ( ProtocolException , Error )
 	int resultActionInfo = skillID + (*g_pActionInfoTable).GetMinResultActionInfo();
 	
 	//------------------------------------------------------------
-	// Delay Frame 설정
+	
 	//------------------------------------------------------------
 	DWORD delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 	g_pPlayer->SetEffectDelayFrame(resultActionInfo, delayFrame );
 
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
 	//------------------------------------------------------------------
-	// effect status를 적용시킨다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetEFFECT_STAT()!=EFFECTSTATUS_NULL)
 	{
 		//int esDelayFrame = ConvertDurationToFrame( g_pPlayer->GetDURATION() );
 
-		// effect를 붙인다.
+		
 		g_pPlayer->AddEffectStatus((EFFECTSTATUS)g_pPlayer->GetEFFECT_STAT(), delayFrame);	
 		
 		g_pPlayer->SetStatus( MODIFY_EFFECT_STAT, EFFECTSTATUS_NULL );
@@ -353,7 +353,7 @@ throw ( ProtocolException , Error )
 	else
 	{
 		//------------------------------------------------------
-		// EffectStatus가 있다면 붙인다.
+		
 		//------------------------------------------------------
 		EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 
@@ -372,10 +372,10 @@ throw ( ProtocolException , Error )
 //-------------------------------------------------------------------------------
 // Make Item To Inventory
 //-------------------------------------------------------------------------------
-// pItem에 기술을 사용했을때 다른 item이 inventory에 생성되는 걸 처리한다.
+
 //
-// 제대로 됐으면 새로운 아이템
-// (혹은 기존에 있던 아이템에 쌓인 경우는 쌓인 아이템)의 pointer를 넘긴다.
+
+
 //-------------------------------------------------------------------------------
 MItem*
 PacketSkillToMakeItem(MItem* pItem,
@@ -391,8 +391,8 @@ PacketSkillToMakeItem(MItem* pItem,
 	}
 
 	//----------------------------------------------------
-	// 1개 남은 경우이거나
-	// 같은 위치이면.. 완전히 없앤다.
+	
+	
 	//----------------------------------------------------
 	if (pItem->GetNumber()==1 
 		|| x==targetX && y==targetY )
@@ -409,7 +409,7 @@ PacketSkillToMakeItem(MItem* pItem,
 		}
 	}
 	//----------------------------------------------------
-	// 여러개 있는거면 개수만 하나 줄이면 된다.
+	
 	//----------------------------------------------------
 	else
 	{
@@ -420,7 +420,7 @@ PacketSkillToMakeItem(MItem* pItem,
 	MItem* pTargetItem = g_pInventory->GetItem( targetX, targetY );
 
 	//----------------------------------------------------
-	// 쌓일 곳에 아이템이 없는 경우
+	
 	//----------------------------------------------------
 	if (pTargetItem==NULL)
 	{							
@@ -442,16 +442,16 @@ PacketSkillToMakeItem(MItem* pItem,
 		}
 	}
 	//----------------------------------------------------
-	// 쌓일 곳에 아이템이 있는 경우
+	
 	//----------------------------------------------------	
 	else
 	{
-		// 확인.. 별로 필요없을거도 같지만..
+		
 		if (pTargetItem->GetItemClass()==itemClass
 			&& pTargetItem->GetItemType()==itemType
 			&& pTargetItem->GetID()==itemID)
 		{
-			// Max 체크는 무시..
+			
 			pTargetItem->SetNumber( pTargetItem->GetNumber() + 1 );
 
 			return pTargetItem;

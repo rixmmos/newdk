@@ -9,15 +9,15 @@
 #define __GC_ADD_WOLF_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "types/GuildTypes.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../types/GuildTypes.h"
 
 //--------------------------------------------------------------------------------
 //
 // class GCAddWolf;
 //
-// 시야 안에 Wolf 가 들어왔을 경우, 이 패킷에 Wolf 정보를 담아서 전송받는다.
+
 //
 //--------------------------------------------------------------------------------
 class GCAddWolf : public Packet 
@@ -25,10 +25,10 @@ class GCAddWolf : public Packet
 
 public :
 
-	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+	
 	void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 			
-	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+	
 	void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -39,7 +39,7 @@ public :
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddWolfPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketSize() const throw() 
 	{ 
 		return szObjectID 
@@ -117,25 +117,19 @@ public :
 
 private :
 	
-	// 존 레벨에서 유니크한 아이디로 객체 구분을 위해서 사용한다.
+	
 	ObjectID_t m_ObjectID;
 
-	// Wolf의 이름
+	
 	std::string m_Name;
 	
-	// 변신 아이템의 종류
+	
 	ItemType_t m_ItemType;
 
-/*
-	// 스프라이트 타입
-	SpriteType_t m_SpriteType;
-
-	// 색깔 정보
-	Color_t m_SubColor;
-*/
+ 
 	Color_t m_MainColor;
 	
-	// X, Y 및 방향
+	
 	Coord_t m_X;
 	Coord_t m_Y;
 	Dir_t m_Dir;
@@ -172,7 +166,7 @@ public :
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddWolfPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() 
 	{
 		return szObjectID 

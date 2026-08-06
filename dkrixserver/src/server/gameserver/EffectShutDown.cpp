@@ -85,9 +85,7 @@ void EffectShutDown::affect(Creature* pCreature)
     Timeval deadLine = getDeadline();
     Turn_t RemainTime = deadLine.tv_sec - nextTime.tv_sec;
 
-    /*	StringStream msg;
-
-        msg << (int)RemainTime << "초 후에 서버가 종료됩니다. 잠시 후 접속해 주시기 바랍니다. "; */
+     
     char msg[80];
     sprintf(msg, g_pStringPool->c_str(STRID_SERVER_SHUT_DOWN_COUNT_DOWN), (int)RemainTime);
 
@@ -111,7 +109,7 @@ void EffectShutDown::affect(Creature* pCreature)
                 pZoneGroup = g_pZoneGroupManager->getZoneGroup(i);
             } catch (NoSuchElementException&) {
                 SAFE_DELETE(pStmt);
-                throw Error("Critical Error : ZoneInfoManager꼇닸瞳맡契삔.");
+                throw Error("Critical Error : ZoneInfoManager.");
             }
 
             ZonePlayerManager* pZonePlayerManager = pZoneGroup->getZonePlayerManager();
@@ -122,35 +120,7 @@ void EffectShutDown::affect(Creature* pCreature)
     }
     END_DB(pStmt)
 
-    /*
-
-    ZoneInfo* pZoneInfo;
-
-    for (int i = 1; i < 19; i++) {
-
-        try {
-
-            pZoneInfo = g_pZoneInfoManager->getZoneInfo(i);
-
-        } catch (NoSuchElementException) {
-            throw Error("Critical Error : ZoneInfoManager에 해당 존이 존재하지 않습니다.");
-        }
-
-        ZoneGroup* pZoneGroup;
-        try {
-
-            pZoneGroup = g_pZoneGroupManager->getZoneGroup(pZoneInfo->getZoneGroupID());
-
-        } catch (NoSuchElementException) {
-            throw Error("Critical Error : ZoneInfoManager에 해당 존그룹이 존재하지 않습니다.");
-        }
-
-        Zone* pZone = pZoneGroup->getZone(i);
-
-        pZone->broadcastPacket(&gcSystemMessage);
-
-    }
-    */
+     
 
 
     __END_CATCH
@@ -159,8 +129,8 @@ void EffectShutDown::affect(Creature* pCreature)
 
 //----------------------------------------------------------------------
 // affect to target
-// 이 이펙트는 타일에 종속되지 않으므로, affect()는 호출되지 않는다.
-// 왜냐하면, target은 생성자에서 지정되며, 아무런 일도 하지 않기 때문이다.
+
+
 //----------------------------------------------------------------------
 void EffectShutDown::affect(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Object* pTarget)
 
@@ -184,7 +154,7 @@ void EffectShutDown::unaffect()
     Result* pResult = NULL;
     //	StringStream msg;
 
-    //	msg << "서버가 종료됩니다.";
+    
 
     GCSystemMessage gcSystemMessage;
     gcSystemMessage.setMessage(g_pStringPool->getString(STRID_SERVER_SHUT_DOWN));
@@ -203,7 +173,7 @@ void EffectShutDown::unaffect()
                 pZoneGroup = g_pZoneGroupManager->getZoneGroup(i);
             } catch (NoSuchElementException&) {
                 SAFE_DELETE(pStmt);
-                throw Error("Critical Error : ZoneInfoManager꼇닸瞳맡契삔.");
+                throw Error("Critical Error : ZoneInfoManager.");
             }
 
             ZonePlayerManager* pZonePlayerManager = pZoneGroup->getZonePlayerManager();

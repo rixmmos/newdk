@@ -23,16 +23,16 @@ ZoneGroupInfoManager::ZoneGroupInfoManager() noexcept {}
 // destructor
 //----------------------------------------------------------------------
 ZoneGroupInfoManager::~ZoneGroupInfoManager() noexcept {
-    // hashmap ���� �� pair �� second, �� ZoneGroupInfo ��ü���� �����ϰ�
-    // pair ��ü�� �״�� �д�. (ZoneGroupInfo�� ���� �����Ǿ� �ִٴ� �Ϳ�
-    // �����϶�. �� �ʻ������ �ؾ� �Ѵ�. �ϱ�, ZGIM�� destruct �ȴٴ� ����
-    // �α��� ������ �˴ٿ�ȴٴ� ���� �ǹ��ϴϱ�.. - -; )
+    
+    
+    
+    
     for (HashMapZoneGroupInfo::iterator itr = m_ZoneGroupInfos.begin(); itr != m_ZoneGroupInfos.end(); itr++) {
         delete itr->second;
         itr->second = NULL;
     }
 
-    // ���� �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+    
     m_ZoneGroupInfos.clear();
 }
 
@@ -72,13 +72,13 @@ void ZoneGroupInfoManager::load() noexcept(false) {
         }
 
     } catch (SQLQueryException& sqe) {
-        // �ʻ� ����!
+        
         delete pStmt;
 
         throw Error(sqe.toString());
     }
 
-    // �ʻ� ����!
+    
     delete pStmt;
 
     __END_CATCH
@@ -109,10 +109,10 @@ void ZoneGroupInfoManager::deleteZoneGroupInfo(ZoneGroupID_t zoneGroupID) noexce
     HashMapZoneGroupInfo::iterator itr = m_ZoneGroupInfos.find(zoneGroupID);
 
     if (itr != m_ZoneGroupInfos.end()) {
-        // ZoneGroupInfo �� �����Ѵ�.
+        
         delete itr->second;
 
-        // pair�� �����Ѵ�.
+        
         m_ZoneGroupInfos.erase(itr);
 
     } else { // not found
@@ -168,7 +168,7 @@ string ZoneGroupInfoManager::toString() const {
         //--------------------------------------------------
         // *OPTIMIZATION*
         //
-        // for_each()�� ����� ��
+        
         //--------------------------------------------------
         for (HashMapZoneGroupInfo::const_iterator itr = m_ZoneGroupInfos.begin(); itr != m_ZoneGroupInfos.end(); itr++)
             msg << itr->second->toString();

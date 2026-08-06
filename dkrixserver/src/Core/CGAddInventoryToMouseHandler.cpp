@@ -57,7 +57,7 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
     Inventory* pInventory = pPC->getInventory();
     Assert(pInventory != NULL);
 
-    // 인벤토리 좌표를 넘어가면 곤란하다...
+    
     if (InvenX >= pInventory->getWidth() || InvenY >= pInventory->getHeight()) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -75,8 +75,8 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
         return;
     }
 
-    // 더하고자 하는 아이템이 없거나, 이미 마우스에 뭔가가 붙어있다면
-    // 들 수 없다.
+    
+    
     if (pItem == NULL || pExtraSlotItem != NULL) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -84,9 +84,9 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
         return;
     }
 
-    // 일반적인 아이템 마우스 더하기 루틴
+    
     if (ItemOID != 0) {
-        // OID가 일치하지 않으면 곤란하다...
+        
         if (pItem->getObjectID() != ItemOID) {
             GCCannotAdd _GCCannotAdd;
             _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -97,7 +97,7 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
         pInventory->deleteItem(pItem->getObjectID());
         pPC->addItemToExtraInventorySlot(pItem);
         // pItem->save(pPC->getName(), STORAGE_EXTRASLOT, 0, 0, 0);
-        //  item저장 최적화. by sigi. 2002.5.13
+        
         char pField[80];
         sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
         pItem->tinysave(pField);
@@ -110,9 +110,9 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
             pPlayer->sendPacket(&gcTradeVerify);
         }
     }
-    // 겹치는 아이템 분리하기 루틴
+    
     else {
-        // 겹치는 아이템이 아니거나, 현재 숫자가 2 미만이라면 분리할 수 없다.
+        
         if (!isStackable(pItem) || pItem->getNum() < 2 ||
             (pItem->getItemClass() == Item::ITEM_CLASS_MOON_CARD && pItem->getItemType() == 2 &&
              pItem->getNum() == 99) ||
@@ -123,7 +123,7 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
             return;
         }
 
-        // 기존의 아이템을 바탕으로 같은 아이템을 생성한다.
+        
         Item::ItemClass IClass = pItem->getItemClass();
         ItemType_t IType = pItem->getItemType();
         const list<OptionType_t>& OType = pItem->getOptionTypeList();
@@ -131,18 +131,18 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
         Item* pNewItem = g_pItemFactoryManager->createItem(IClass, IType, OType);
         Assert(pNewItem != NULL);
 
-        // 마우스에다 더할 아이템은 기존의 OID를 가져가고,
-        // 인벤토리에 남을 아이템은 새로운 OID를 받아야 한다.
+        
+        
         Zone* pZone = pPC->getZone();
         Assert(pZone != NULL);
 
         ObjectRegistry& OR = pZone->getObjectRegistry();
         OR.registerObject(pNewItem);
 
-        // 인벤토리에 남아있는 아이템의 숫자는 원래 숫자에서 1을 뺀 숫자가 된다.
-        // 기존의 아이템은 마우스로 옮겨졌으므로, 숫자가 1이 된다.
-        // 인벤토리에서 마우스로 옮겨진 아이템을 삭제하고,
-        // 새로 생성된 아이템을 더한다.
+        
+        
+        
+        
         pInventory->deleteItem(pItem->getObjectID());
         pPC->addItemToExtraInventorySlot(pItem);
 
@@ -152,23 +152,23 @@ void CGAddInventoryToMouseHandler::execute(CGAddInventoryToMouse* pPacket, Playe
 
         pInventory->addItem(InvenX, InvenY, pNewItem);
 
-        // 달라진 위치 정보를 세이브한다...
+        
         // pItem->save(pPC->getName(), STORAGE_EXTRASLOT, 0, 0, 0);
-        // item저장 최적화. by sigi. 2002.5.13
+        
         char pField[80];
         sprintf(pField, "Num=%d, Storage=%d, StorageID=0", 1, STORAGE_EXTRASLOT);
         pItem->tinysave(pField);
 
         pNewItem->create(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
-        // pNewItem->setNum(NewNum); // 위에서 했는데 또 하네. -_-;
+        
         // pNewItem->save(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
-        //  item저장 최적화. by sigi. 2002.5.13
+        
         sprintf(pField, "Num=%d, Storage=%d, StorageID=0", NewNum, STORAGE_INVENTORY);
         pNewItem->tinysave(pField);
 
 
-        // 클라이언트에게는 GCCreateItem 패킷을 이용해
-        // 인벤토리에 새로이(?) 생성된 아이템에 대한 정보를 보내준다.
+        
+        
         GCCreateItem gcCreateItem;
         gcCreateItem.setObjectID(pNewItem->getObjectID());
         gcCreateItem.setItemClass((BYTE)pNewItem->getItemClass());

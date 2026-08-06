@@ -1,15 +1,15 @@
 //----------------------------------------------------------------------
 // MHomingEffect.h
 //----------------------------------------------------------------------
-// 곡선을 그리며 목표에 다가가는 effect
+
 //
-//             90도
+
 //              |
 //              |
-//  180도-------+--------0도
+
 //              |
 //              |
-//             270도
+
 //
 //----------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ class MHomingEffect : public MGuidanceEffect {
 		virtual void		SetTarget(int x, int y, int z, WORD stepPixel);
 
 		//--------------------------------------------------------
-		// 한 번의 Update에 호출될 함수..
+		
 		//--------------------------------------------------------
 		virtual bool		Update();
 		void	SetRadStep(int step);
@@ -44,8 +44,8 @@ class MHomingEffect : public MGuidanceEffect {
 		virtual bool	TraceCreature();
 	
 	protected :	
-		int			m_RadCurrent;	// 현재 이동하는 방향각도
-		int			m_RadStep;		// 매 turn마다 달라지는 radian값
+		int			m_RadCurrent;	
+		int			m_RadStep;		
 };
 
 #endif

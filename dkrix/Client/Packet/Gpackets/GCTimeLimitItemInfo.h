@@ -8,8 +8,8 @@
 #ifndef __GC_TIME_LIMIT_ITEM_INFO_H__
 #define __GC_TIME_LIMIT_ITEM_INFO_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include <map>
 
 #define MAX_TIME_LIMIT_ITEM_INFO 100
@@ -18,7 +18,7 @@
 //
 // class GCTimeLimitItemInfo;
 //
-// 클라이언트에 등록 대기중인 길드 리스트를 보낸다.
+
 //
 //////////////////////////////////////////////////////////////////////
 

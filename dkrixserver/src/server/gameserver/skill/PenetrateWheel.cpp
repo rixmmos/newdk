@@ -19,7 +19,7 @@
 #include "SimpleTileMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void PenetrateWheel::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                              CEffectID_t CEffectID)
@@ -40,8 +40,8 @@ void PenetrateWheel::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouste
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), 0);
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;

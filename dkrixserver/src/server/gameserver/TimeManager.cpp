@@ -18,7 +18,7 @@ void TimeManager::init()
     __BEGIN_TRY
 
     try {
-        // ���� ���� �ð�, ���� ���� �ð��� ȯ�� ���Ͽ��� �о�´�.
+        
         string strBaseGameTime = g_pConfig->getProperty("BaseGameTime");
         string strBaseRealTime = g_pConfig->getProperty("BaseRealTime");
 
@@ -44,27 +44,27 @@ void TimeManager::init()
         // cout << yearEnd << ":" << monEnd << ":" << dayEnd << endl;
         // cout << "BaseRealTime : " << year << "/" << month << "/" << day << endl;
 
-        // ���� ���� �ð� : 1999�� 8�� 18��
-        // ���� ���� �ð� : 1990�� 7�� 20��
-        // ��,���� ������ ��� �ð������� 0 ���� �����Ѵٴ� �� ������ ��.
+        
+        
+        
         struct tm baseGameTime;
-        baseGameTime.tm_year = 90; // 1990��
-        baseGameTime.tm_mon = 6;   // 7��
-        baseGameTime.tm_mday = 20; // 20��
-        baseGameTime.tm_hour = 0;  // 0��
-        baseGameTime.tm_min = 0;   // 0��
-        baseGameTime.tm_sec = 0;   // 0��
-        baseGameTime.tm_isdst = 0; // !����Ÿ��
+        baseGameTime.tm_year = 90; 
+        baseGameTime.tm_mon = 6;   
+        baseGameTime.tm_mday = 20; 
+        baseGameTime.tm_hour = 0;  
+        baseGameTime.tm_min = 0;   
+        baseGameTime.tm_sec = 0;   
+        baseGameTime.tm_isdst = 0; 
 
-        // ���� ���� �ð� : 2003�� 1�� 1��
+        
         struct tm baseRealTime;
-        baseRealTime.tm_year = 103; // 2003��
-        baseRealTime.tm_mon = 9;    // 10��
-        baseRealTime.tm_mday = 1;   // 1��
-        baseRealTime.tm_hour = 0;   // 0��
-        baseRealTime.tm_min = 0;    // 0��
-        baseRealTime.tm_sec = 0;    // 0��
-        baseRealTime.tm_isdst = 0;  // !����Ÿ��
+        baseRealTime.tm_year = 103; 
+        baseRealTime.tm_mon = 9;    
+        baseRealTime.tm_mday = 1;   
+        baseRealTime.tm_hour = 0;   
+        baseRealTime.tm_min = 0;    
+        baseRealTime.tm_sec = 0;    
+        baseRealTime.tm_isdst = 0;  
 
         // cout << "asctime(m_BaseGameTime) : " << asctime(&baseGameTime);
         // cout << "asctime(m_BaseRealTime) : " << asctime(&baseRealTime);
@@ -84,29 +84,29 @@ void TimeManager::init()
 
 
 //////////////////////////////////////////////////////////////////////////////
-// ���� ���� �ð��� �˾Ƴ���.
+
 //////////////////////////////////////////////////////////////////////////////
 GameTime TimeManager::getGameTime() const
 
 {
     __BEGIN_TRY
-    // ���� �ð��� �����Ѵ�.
+    
     time_t currentTime = time(0);
 
     //
-    // �ǽð��� ���ӽð��� ���ؼ� 5�� ������ ����ȴٴ� ���� �̿��ؼ�
-    // ���� �ð��� ���Ѵ�.
+    
+    
     //
-    // (���ӽð� = ���ذ��ӽð� + (����ǽð� - ���ؽǽð�)* 5
+    
     //
     // time_t gameTime = m_BaseGameTime + (currentTime - m_BaseRealTime)* 24;
     time_t gameTime = (currentTime - m_BaseRealTime) * 24;
 
-    //	ITV�� ȫ����.
+    
     //	time_t gameTime = m_BaseGameTime + (currentTime - m_BaseRealTime)* 1440;
 
-    // GameTime ��ü�� �ʱ�ȭ�ϱ� ���ؼ���, tm ��Ʈ��ó�� ����
-    // �Ѵ�. tm ��Ʈ��ó���� ��,���� ������ ������ 0���� �����Ѵٴ� ���� ������ ��.
+    
+    
     tm ltm;
     localtime_r(&gameTime, &ltm);
     // struct tm* ptm = localtime(&gameTime);
@@ -126,20 +126,20 @@ GameTime TimeManager::getGameTime() const
 
 
 //////////////////////////////////////////////////////////////////////////////
-// ���� ���� �ð��� time_t ������ �˾Ƴ���.
+
 //////////////////////////////////////////////////////////////////////////////
 time_t TimeManager::getgametime() const
 
 {
     __BEGIN_TRY
     //
-    // �ǽð��� ���ӽð��� ���ؼ� 5�� ������ ����ȴٴ� ���� �̿��ؼ�
-    // ���� �ð��� ���Ѵ�.
+    
+    
     //
-    // (���ӽð� = ���ذ��ӽð� + (����ǽð� - ���ؽǽð�)* 5
+    
     //
     return m_BaseGameTime + (time(0) - m_BaseRealTime) * 24;
-    // ITV ȫ����.
+    
     //	return m_BaseGameTime + (time(0) - m_BaseRealTime)* 1440;
     __END_CATCH
 }

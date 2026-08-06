@@ -18,7 +18,7 @@
 //
 // class WarInfo;
 //
-// 하나의 전쟁에 대한 정보
+
 //
 //--------------------------------------------------------------------------------
 
@@ -31,10 +31,10 @@ public :
 	RaceWarInfo() {}
 	~RaceWarInfo() {}
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 //	// execute packet's handler
@@ -62,7 +62,7 @@ public :
 	void 				addCastleID(ZoneID_t zid) 	{ m_CastleIDs.addValue( zid ); }
 
 private :
-	ZoneIDList			m_CastleIDs;		// 전쟁중인 성
+	ZoneIDList			m_CastleIDs;		
 };
 
 #endif

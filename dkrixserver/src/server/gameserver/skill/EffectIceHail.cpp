@@ -45,7 +45,7 @@ void EffectIceHail::affect()
 
     Assert(m_pZone != NULL);
 
-    // 시전자를 가져온다.
+    
     Creature* pCastCreature = m_pZone->getCreature(m_CasterID);
     if (pCastCreature == NULL)
         return;
@@ -58,7 +58,7 @@ void EffectIceHail::affect()
             forward_list<Object*>::const_iterator itr = rList.begin();
             forward_list<Object*>::const_iterator endItr = rList.end();
 
-            //	cout << "아프냐?" << endl;
+            
 
             for (; itr != endItr; ++itr) {
                 Object* pObject = *itr;
@@ -113,7 +113,7 @@ void EffectIceHail::affect()
                 gcHP.setCurrentHP(finalHP);
                 m_pZone->broadcastPacket(m_X, m_Y, &gcHP);
 
-                //		cout << "아프다" << endl;
+                
             }
         }
     }

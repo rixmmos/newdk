@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttackCreatureHomingEffectGenerator.h
 //----------------------------------------------------------------------
-// 곡선유도로 Creature 추적
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACKCREATUREHOMINGEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttackCreatureHomingEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACK_CREATURE_HOMING; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

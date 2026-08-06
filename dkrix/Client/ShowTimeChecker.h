@@ -19,8 +19,8 @@ class ShowTimeChecker {
 		ShowTimeChecker();
 		~ShowTimeChecker();
 
-		bool			IsShowTime() const;		// 다 고려한 상황에서.. ShowTime인가?
-		bool			IsShowHour() const;		// startHour~EndHour와 관련..
+		bool			IsShowTime() const;		
+		bool			IsShowHour() const;		
 
 		void			SetNextShowTime();
 
@@ -31,18 +31,18 @@ class ShowTimeChecker {
 		void			LoadFromFile(std::ifstream& file);
 
 	public :
-		// 반복적인가?
+		
 		bool			Loop;
 
-		// MinDelay ~ MaxDelay 사이에는 꼭 한 번
+		
 		DWORD			MinDelay;
 		DWORD			MaxDelay;
 		
-		// StartHour부터 EndHour 사이에만 (0~24시면 종일?)
+		
 		BYTE			StartHour;
 		BYTE			EndHour;
 
-		DWORD			NextPlayTime;		// 다음에 show할 시간
+		DWORD			NextPlayTime;		
 };
 
 #endif

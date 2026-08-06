@@ -581,18 +581,7 @@ void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 
 
 //					gC_vs_ui.OpenInventoryToSell();
-/*					{
-						gC_vs_ui.StartProgress();
-						gC_vs_ui.SetCurrentServerName("파라파라월드", "샤마인", C_VS_UI_SERVER_SELECT::STATUS_VERY_GOOD);
-						for (int i=0; i<=200; i++)
-						{
-							gC_vs_ui.SetProgress(i, 200);
-							gC_vs_ui.Show();
-							gC_DD.Flip();
-						}
-						
-						gC_vs_ui.EndProgress();
-					}*/
+ 
 //					//gC_vs_ui.HotKey_F1();
 //					gC_vs_ui.UnselectSkill();
 
@@ -985,7 +974,7 @@ void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 
 				case DIK_3:
 					if(bl_ctrl)
-					gpC_mouse_pointer->SetCursorPickUp("스컬 네크리스", RGB_YELLOW);
+					gpC_mouse_pointer->SetCursorPickUp(" ", RGB_YELLOW);
 					break;
 
 				case DIK_5:
@@ -1005,7 +994,7 @@ void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 
 				case DIK_8:
 					if(bl_ctrl)
-					gpC_mouse_pointer->SetCursorPortal(11, 10, 10, "뱀파테스터");
+					gpC_mouse_pointer->SetCursorPortal(11, 10, 10, "");
 					break;
 
 			}
@@ -1473,14 +1462,7 @@ void ProgramLoop()
 
 }
 
-/*-----------------------------------------------------------------------------
-- UI_ResultReceiver
--
-
-  dw_left와 dw_right는 LOWORD, HIWORD로 검색할 수 있다. WORD이하의 값은 전부
-  그런식으로 들어온다.
-  만약 DWORD의 값이라면 그것을 사용하지 않는다.
------------------------------------------------------------------------------*/
+ 
 void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 {
 	switch (message)
@@ -1587,18 +1569,18 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 		break;
 		
 	case UI_JOIN_READY_TEAM:
-		gC_vs_ui.RunTeamRegist(true, 100000, 1,"2002-01-01", "쑥갓팀이다",100);
+		gC_vs_ui.RunTeamRegist(true, 100000, 1,"2002-01-01", "",100);
 		break;
 
 	case UI_JOIN_REGIST_TEAM:
-		gC_vs_ui.RunTeamRegist(true, 100000, 2,"2002-01-01", "쑥갓팀이다",100);
+		gC_vs_ui.RunTeamRegist(true, 100000, 2,"2002-01-01", "",100);
 		break;
 
 	case UI_MESSAGE_BOX :
 		switch(dw_left)
 		{
 		case STRING_MESSAGE_CANNOT_REPAIR :
-			MessageBox(NULL,"에거... 이거 원래 클라이언트에서밖에 못띄우는 다이알로그라 이렇게 백업!\r\n아이템 리패어 못해염!","-_-; 게임상엔 제대로 나오는 다이알로그박스",MB_OK);
+			MessageBox(NULL,"...       !\r\n  !","-_-;    ",MB_OK);
 		break;
 		}
 		break;	
@@ -1606,8 +1588,8 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 	case UI_REQUEST_GUILD_MEMBER_LIST:
 		{
 		C_VS_UI_TEAM_MEMBER_LIST::TEAM_MEMBER_LIST member_info;
-		member_info.MEMBER_NAME = "가나다라마바";
-		member_info.SERVER_NAME = "아바로스(pk금지)";
+		member_info.MEMBER_NAME = "";
+		member_info.SERVER_NAME = "(pk)";
 		member_info.member_grade = 1;
 		member_info.bLogOn = 1;
 		gC_vs_ui.AddTeamMemberInfo(member_info);
@@ -1673,7 +1655,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			C_VS_UI_TEAM_MEMBER_INFO::MEMBER_INFO info;
 			info.NAME = "asdasfasdfa";
 			info.GRADE = 0;
-			info.INTRODUCTION = "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ";
+			info.INTRODUCTION = "";
 			info.guild_id=102;
 			gC_vs_ui.RunTeamMemberInfo(&info);
 		}
@@ -1684,19 +1666,19 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 	case UI_SELECT_READY_TEAM_LIST:
 		{
 			C_VS_UI_TEAM_INFO::READY_TEAM_INFO info;
-			info.TEAM_NAME = "쑥갓들이야";
-			info.LEADER_NAME = "쑥갓";
+			info.TEAM_NAME = "";
+			info.LEADER_NAME = "";
 //			info.REGISTERD_DATE = "2001-12-31 06:30";
 //			info.MEMBERS = 30;
 			info.REG_FEE = 100000;
 			info.EXPIRE_DATE = "2002-01-05 06:40";
-			info.MEMBERS_NAME.push_back("쑥갓");
-			info.MEMBERS_NAME.push_back("치아푸푸");
-			info.MEMBERS_NAME.push_back("푸리린");
-			info.MEMBERS_NAME.push_back("로봇매니야");
-			info.MEMBERS_NAME.push_back("깐따삐야");
+			info.MEMBERS_NAME.push_back("");
+			info.MEMBERS_NAME.push_back("");
+			info.MEMBERS_NAME.push_back("");
+			info.MEMBERS_NAME.push_back("");
+			info.MEMBERS_NAME.push_back("");
 			info.MEMBERS_MAX = 5;
-			info.INTRODUCTION = "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ";
+			info.INTRODUCTION = "";
 			gC_vs_ui.RunTeamInfo(true, &info);
 		}
 		break;
@@ -1704,14 +1686,14 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 	case UI_SELECT_REGIST_TEAM_LIST:
 		{
 			C_VS_UI_TEAM_INFO::REGIST_TEAM_INFO info;
-			info.TEAM_NAME = "쑥갓들이야";
-			info.LEADER_NAME = "쑥갓";
+			info.TEAM_NAME = "";
+			info.LEADER_NAME = "";
 			info.REGISTERED_DATE = "2001-12-31 06:30";
 			info.MEMBERS = 130;
 			info.REG_FEE = 100000;
 			info.RANKING = 1;
 			info.guild_id= 101;		
-			info.INTRODUCTION = "우리팀은여~ 절라 멋져염 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ\n글구여 언능 와여~\n방가방가~";
+			info.INTRODUCTION = "~   \n  ~\n~";
 			gC_vs_ui.RunTeamInfo(FALSE, &info);
 		}
 		break;
@@ -2052,7 +2034,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 				// set slot
 
 
-				g_char_slot_ingame.sz_name = "쑥갓";
+				g_char_slot_ingame.sz_name = "";
 				g_char_slot_ingame.sz_guild_name = "";
 				g_char_slot_ingame.Race = g_eRaceInterface;
 				g_char_slot_ingame.bl_drained = true;
@@ -2189,7 +2171,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 //			}
 //			else
 			{
-				gC_vs_ui.AddChatToHistory((char *)void_ptr, "다크에덴짱", (CHAT_LINE_CONDITION)dw_left, dw_right);
+				gC_vs_ui.AddChatToHistory((char *)void_ptr, "", (CHAT_LINE_CONDITION)dw_left, dw_right);
 			}
 
 			DeleteNewArray(void_ptr);
@@ -2298,7 +2280,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			gC_vs_ui.StartServerSelect(false);
 			{
 				gC_vs_ui.StartServerSelect(false);
-				LPSTR server_name[20] = {"윤일섭", "이창섭", "백일섭", "광섭", "종섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "빽섭"};
+				LPSTR server_name[20] = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
 				int server_id[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
 				
 				int server_status[20] = {0, 1, 2, 3, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -2625,7 +2607,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 				DeleteNewArray(((LOGIN *)void_ptr)->sz_password);
 
 				gC_vs_ui.StartServerSelect(true);
-				LPSTR group_name[5] = {"그룹1", "그룹2", "그룹3", "그룹4", "그룹5"};
+				LPSTR group_name[5] = {"1", "2", "3", "4", "5"};
 				int server_id[5] = {0,1,2,3,4};
 				
 				int server_status[5] = {0, 1, 1, 1, 1};
@@ -2641,7 +2623,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			else		//server
 			{
 				gC_vs_ui.StartServerSelect(true);
-				LPSTR group_name[5] = {"그룹1", "그룹2", "그룹3", "그룹4", "그룹5"};
+				LPSTR group_name[5] = {"1", "2", "3", "4", "5"};
 				int server_id[5] = {0,1,2,3,4};
 				
 				int server_status[5] = {0, 1, 1, 1, 1};
@@ -2653,7 +2635,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			if(dw_left)	//group
 			{
 				gC_vs_ui.StartServerSelect(false);
-				LPSTR server_name[20] = {"윤일섭", "이창섭", "백일섭", "광섭", "종섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "백섭", "빽섭"};
+				LPSTR server_name[20] = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
 				int server_id[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
 				
 				int server_status[20] = {0, 1, 2, 3, 4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -2675,8 +2657,8 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			gC_vs_ui.ClearAllCharacter();
 			// set character
 			S_SLOT slot;
-			slot.sz_name = "쑥갓";
-			slot.sz_guild_name = "드림마스터";
+			slot.sz_name = "";
+			slot.sz_guild_name = "";
 			slot.GUILD_ID=102;
 			slot.Race = RACE_SLAYER;
 			slot.m_AdvancementLevel = 1;
@@ -2725,8 +2707,8 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			
 			gC_vs_ui.SetCharacter(0, slot);
 			
-			slot.sz_name = "아우소니";
-			slot.sz_guild_name = "소니길드";
+			slot.sz_name = "";
+			slot.sz_guild_name = "";
 			slot.GUILD_ID=102;
 			slot.m_AdvancementLevel = 1;
 			slot.Race = RACE_VAMPIRE;
@@ -2899,7 +2881,7 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			gC_vs_ui.CloseNamingChange();
 			break;
 		case UI_RUN_NAMING_CHANGE:
-			gC_vs_ui.RunNamingChange((MItem*)dw_left, "우헤헤^^");
+			gC_vs_ui.RunNamingChange((MItem*)dw_left, "^^");
 			break;
 
 		case UI_CLOSE_QUEST_MANAGER:
@@ -2918,16 +2900,16 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 			gC_vs_ui.CloseQuestItem();
 			break;
 		case UI_GQUEST_ACCEPT:
-			MessageBox(NULL, "수락 보냄", "^^", MB_OK);
+			MessageBox(NULL, " ", "^^", MB_OK);
 			break;
 		case UI_GQUEST_GIVEUP:
-			MessageBox(NULL, "포기 보냄", "^^", MB_OK);
+			MessageBox(NULL, " ", "^^", MB_OK);
 			break;
 		case UI_CLOSE_QUEST_ICON:
 			gC_vs_ui.CloseQuestIcon(dw_left);
 			break;
 		case UI_REQUEST_UNION:
-			MessageBox(NULL, "연합길드 요청 메시지 보냅 ", "^^", MB_OK);
+			MessageBox(NULL, "    ", "^^", MB_OK);
 			break;
 		case UI_REQUEST_UNION_ACCEPT:
 			break;
@@ -2938,10 +2920,10 @@ void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr)
 		case UI_REQUEST_UNION_REQUEST_INFO:
 			break;
 		case UI_REQUEST_UNION_EXPERGUILD:
-			MessageBox(NULL, "추방   요청 메시지 보냅 ", "^^", MB_OK);
+			MessageBox(NULL, "      ", "^^", MB_OK);
 			break;
 		case UI_REQUEST_UNION_QUIT:
-			MessageBox(NULL, "즉시 탈퇴  ", "^^", MB_OK);
+			MessageBox(NULL, "   ", "^^", MB_OK);
 			break;
 		case UI_REQUEST_UNION_QUIT_ACCEPT:
 			break;
@@ -3395,7 +3377,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 
 	g_pTradeManager = new MTradeManager;
 	g_pTradeManager->Init();
-	g_pTradeManager->SetOtherName( "필살교환맨" );
+	g_pTradeManager->SetOtherName( "" );
 	g_pTradeManager->GetOtherMoneyManager()->SetMoney( 42566 );
 	g_pTradeManager->GetMyMoneyManager()->SetMoney( 13344 );
 	
@@ -3503,8 +3485,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	g_pSDLInput->Init(hwnd, hInst, CSDLInput::EXCLUSIVE);
 #endif
 
-	//gC_ci = new CI_KOREAN;	
-	gC_ci = new CI_CHINESE;	
+	gC_ci = new CI_ENGLISH;
 	
 
 	g_pSDLInput->SetMouseEventReceiver(MouseEventReceiver);
@@ -3533,14 +3514,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	s.left_time = 7200+(timeGetTime()/1000);
 	s.war_type = 0;
 	s.zone_id = 1204;
-	s.zone_name = "쿠아르투스";
+	s.zone_name = "";
 	g_pUserInformation->WarInfo.push_back(s);
 
 	WAR_INFO ss;
 	ss.left_time = 3600+212+(timeGetTime()/1000);
 	ss.war_type = 0;
 	ss.zone_id = 1201;
-	ss.zone_name = "쿠아르투스a";
+	ss.zone_name = "a";
 	g_pUserInformation->WarInfo.push_back(ss);
 
 	g_char_slot_ingame.m_AdvancementLevel = 10;
@@ -3571,8 +3552,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 //	g_pUserInformation->IsNetmarble = false;
 	
 
-	g_char_slot_ingame.sz_name = "쑥갓";
-	g_char_slot_ingame.sz_guild_name = "마스터라니까";
+	g_char_slot_ingame.sz_name = "";
+	g_char_slot_ingame.sz_guild_name = "";
 	g_char_slot_ingame.GUILD_ID=102;
 	g_char_slot_ingame.Race = RACE_SLAYER;
 	g_char_slot_ingame.bl_drained = true;
@@ -3668,42 +3649,42 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 
 	std::vector<C_VS_UI_NicknameInfo*>	TempNickNameList;
 	C_VS_UI_NicknameInfo nik;
-	nik.setNickname("바보0");
+	nik.setNickname("0");
 	nik.setNicknameID(0);
 	nik.setNicknameIndex(0);
 	nik.setNicknameType(0);
 	TempNickNameList.push_back(&nik);
 	//gC_vs_ui.AddNickNameList((void*)&nik);
 	C_VS_UI_NicknameInfo nik1;
-	nik1.setNickname("바보1");
+	nik1.setNickname("1");
 	nik1.setNicknameID(1);
 	nik1.setNicknameIndex(1);
 	nik1.setNicknameType(1);
 	//gC_vs_ui.AddNickNameList((void*)&nik);
 	TempNickNameList.push_back(&nik1);
 	C_VS_UI_NicknameInfo nik2;
-	nik2.setNickname("바보2");
+	nik2.setNickname("2");
 	nik2.setNicknameID(2);
 	nik2.setNicknameIndex(2);
 	nik2.setNicknameType(2);
 	//gC_vs_ui.AddNickNameList((void*)&nik);
 	TempNickNameList.push_back(&nik2);
 	C_VS_UI_NicknameInfo nik3;
-	nik3.setNickname("바보3");
+	nik3.setNickname("3");
 	nik3.setNicknameID(3);
 	nik3.setNicknameIndex(3);
 	nik3.setNicknameType(3);
 	//gC_vs_ui.AddNickNameList((void*)&nik);
 	TempNickNameList.push_back(&nik3);
 	C_VS_UI_NicknameInfo nik4;
-	nik4.setNickname("바보4");
+	nik4.setNickname("4");
 	nik4.setNicknameID(4);
 	nik4.setNicknameIndex(4);
 	nik4.setNicknameType(4);
 	//gC_vs_ui.AddNickNameList((void*)&nik);
 	TempNickNameList.push_back(&nik4);
 	C_VS_UI_NicknameInfo nik5;
-	nik5.setNickname("바보5");
+	nik5.setNickname("5");
 	nik5.setNicknameID(5);
 	nik5.setNicknameIndex(5);
 	nik5.setNicknameType(5);
@@ -3723,9 +3704,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	gC_vs_ui.SetPortal(rect, 1001);
 	SetRect(&rect, 50, 52, 60, 52);
 	gC_vs_ui.SetPortal(rect, 2024);
-	gC_vs_ui.SetNPC(50, 100, 21, "스토야노프");
+	gC_vs_ui.SetNPC(50, 100, 21, "");
 
-	gC_vs_ui.SetNPC(100, 100, 670,"기잇발");
+	gC_vs_ui.SetNPC(100, 100, 670,"");
 	
 	
 	

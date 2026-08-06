@@ -17,7 +17,7 @@
 #include "Reflection.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BiteOfDeath::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pSkillSlot,
                           CEffectID_t CEffectID)
@@ -38,9 +38,9 @@ void BiteOfDeath::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        // 저주 면역. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC() ||
             !pVampire->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF) || pTargetCreature->isDead() ||
             pTargetCreature->isFlag(Effect::EFFECT_CLASS_COMA)) {
@@ -99,12 +99,12 @@ void BiteOfDeath::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
                 HP_t MaxHP = pVampire->getHP(ATTR_MAX);
                 HP_t NewHP = min((int)MaxHP, (int)CurrentHP + (int)HealPoint);
 
-                // 은 데미지 관련 처리를 해 준다.
+                
                 Silver_t newSilverDamage = max(0, (int)pVampire->getSilverDamage() - (int)HealPoint);
                 pVampire->saveSilverDamage(newSilverDamage);
                 _GCSkillToObjectOK1.addShortData(MODIFY_SILVER_DAMAGE, newSilverDamage);
 
-                // 뱀파이어의 HP를 세팅한다.
+                
                 pVampire->setHP(NewHP);
 
                 GCStatusCurrentHP gcStatusCurrentHP;
@@ -116,7 +116,7 @@ void BiteOfDeath::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
             }
 
 
-            // 타겟 쥑여뿐다.
+            
             if (pTargetCreature->isSlayer()) {
                 Slayer* pSlayer = dynamic_cast<Slayer*>(pTargetCreature);
                 pSlayer->setHP(0);
@@ -159,10 +159,10 @@ void BiteOfDeath::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireS
             _GCSkillToObjectOK6.setXY(myX, myY);
             _GCSkillToObjectOK6.setSkillType(SkillType);
 
-            if (bCanSeeCaster) // 10은 땜빵 수치다.
+            if (bCanSeeCaster) 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
-            } else // 10은 땜빵 수치다.
+            } else 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK6, &_GCSkillToObjectOK1);
             }

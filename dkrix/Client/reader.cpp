@@ -58,7 +58,7 @@ int GetFileSize()
 //***************************************************************************
 // Func :	ReadHeaderPart
 //---------------------------------------------------------------------------
-// Desc :	MP3 파일의 헤더부를 읽어들인다.
+
 // Params :
 // Return :
 //===========================================================================
@@ -66,7 +66,7 @@ int ReadHeader(UINT *headerStr)
 {
 	BOOL	result, sync ;
 
-	// 헤더부분을 찾을 때까지 검색한다.
+	
 	do 
 	{
 		if ( fread( headerStr, sizeof(UINT), 1, MP3File) != 1)
@@ -85,7 +85,7 @@ int ReadHeader(UINT *headerStr)
 	return 0 ;
 }
 
-// BYTE 단위로 읽어들인다.
+
 int ReadBytes(BYTE* buf, UINT bytes)
 {
 	if ( fread ( buf, sizeof(BYTE), bytes, MP3File) != bytes )
@@ -93,7 +93,7 @@ int ReadBytes(BYTE* buf, UINT bytes)
 	return 0 ;
 }
 
-// WORD 단위로 읽어들인다.
+
 int ReadWords(WORD* buf, UINT words)
 {
 	if ( fread ( buf, sizeof(WORD), words, MP3File) != words )
@@ -101,7 +101,7 @@ int ReadWords(WORD* buf, UINT words)
 	return 0 ;
 }
 
-// DWORD 단위로 읽어들인다.
+
 int ReadDwords(DWORD* buf, UINT dwords)
 {
 	if ( fread ( buf, sizeof(DWORD), dwords, MP3File) != dwords )
@@ -131,15 +131,15 @@ UINT ReadBitsFromByte (BYTE byte, UINT &spare, UINT bits)
 //***************************************************************************
 // Func :	 ReadBits 
 //---------------------------------------------------------------------------
-// Desc :	 bit 단위로 읽어들여 UINT형으로 리턴시킨다.
-// Params :  읽어들일 비트 수 
-// Return :  결과 값 
+
+
+
 //===========================================================================
 UINT ReadBits(UINT bits)
 {
 	UINT retVal = 0 ;
 
-	if ( bits > 32 ) return -1 ;	// 32 bit를 초과하는 것은 허용하지 않는다.
+	if ( bits > 32 ) return -1 ;	
 
 	if ( nSpare >= bits )
 	{
@@ -157,7 +157,7 @@ UINT ReadBits(UINT bits)
 	else
 	{
 		UINT rest = bits - nSpare ;
-		UINT rBytes = (rest + 7) / 8  ;	// 더 읽어 들여야 하는 바이트 수를 계산한다.
+		UINT rBytes = (rest + 7) / 8  ;	
 		
 		BYTE byte[4] ;
 		ReadBytes( byte, rBytes ) ;

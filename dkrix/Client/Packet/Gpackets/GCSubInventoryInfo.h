@@ -7,11 +7,11 @@
 #ifndef __GC_SUB_INVENTORY_INFO_H__
 #define __GC_SUB_INVENTORY_INFO_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "Types.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../Types.h"
 
-#include "InventoryInfo.h"
+#include "../InventoryInfo.h"
 
 class GCSubInventoryInfo : public Packet
 {

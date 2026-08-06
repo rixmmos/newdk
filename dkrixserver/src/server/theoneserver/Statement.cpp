@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // File Name 	: Statement.cpp
 // Written by	: Gday29@ewestsoft.com
-// Description	: SQL 문을 만든다..
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Statement.h"
@@ -41,14 +41,14 @@ Statement::Statement(char* fmt, ...) throw(Error) {
 
     int nchars = vsnprintf(buffer, 2048, fmt, valist);
 
-    // 만약 버퍼 크기가 부족하게 되면, 에러를 던져서 수동으로 값을 증가시켜야 한다.
+    
     if (nchars == -1 || nchars > 2048)
         throw Error("more buffer size needed for SQL statement buffer...");
 
     va_end(valist);
 
-    // string 이므로 대입해도 안전하다.
-    // 만약 char * 였다면, local variable을 포인팅하는 것은 위험하다.
+    
+    
     m_Statement = buffer;
 
     __END_CATCH
@@ -58,7 +58,7 @@ Statement::Statement(char* fmt, ...) throw(Error) {
 //
 // destructor
 //
-// 쿼리문에서 만든 결과를 메모리에서 해제한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -78,7 +78,7 @@ Statement::~Statement() throw() {
 //
 // executeQuery()
 //
-// Connection, SQL문을 스트링으로 받아서 결과값을 Result *로 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -88,7 +88,7 @@ Result* Statement::executeQuery() throw(SQLQueryException, Error) {
     Assert(m_pConnection != NULL);
 
     if (m_pResult != NULL) {
-        // 어플리케이션에서 Result 를 삭제하지 않은 경우,
+        
         delete m_pResult;
         m_pResult = NULL;
     }
@@ -105,7 +105,7 @@ Result* Statement::executeQuery() throw(SQLQueryException, Error) {
 
     MYSQL_RES* pResult = mysql_store_result(m_pConnection->getMYSQL());
 
-    // 쿼리 결과값이 NULL일 경우는 update문이거나 에러이다.
+    
     if (pResult != NULL) {
         m_pResult = new Result(pResult, m_Statement);
     } else {
@@ -130,7 +130,7 @@ Result* Statement::executeQuery() throw(SQLQueryException, Error) {
 //
 // executeQuery ()
 //
-// Connection, SQL문을 스트링으로 받아서 결과값을 Result *로 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -148,14 +148,14 @@ Result* Statement::executeQuery(const string& sqlStatement) throw(SQLQueryExcept
 //
 // executeQuery ()
 //
-// Connection, SQL문을 스트링으로 받아서 결과값을 Result *로 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
 Result* Statement::executeQuery(char* fmt, ...) throw(SQLQueryException, Error) {
     __BEGIN_TRY
 
-    // SQL Statement 를 만들어낸다.
+    
     va_list valist;
 
     va_start(valist, fmt);
@@ -164,7 +164,7 @@ Result* Statement::executeQuery(char* fmt, ...) throw(SQLQueryException, Error) 
 
     int nchars = vsnprintf(buffer, 2048, fmt, valist);
 
-    // 만약 버퍼 크기가 부족하게 되면, 예외를 던져서 값을 증가시켜야 한다.
+    
     if (nchars == -1 || nchars > 2048)
         throw Error("more buffer size needed for SQL statement buffer...");
 
@@ -181,7 +181,7 @@ Result* Statement::executeQuery(char* fmt, ...) throw(SQLQueryException, Error) 
 //
 //	setStatement()
 //
-//	쿼리문을 다시 만든다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -198,7 +198,7 @@ void Statement::setStatement(char* fmt, ...) throw(Error) {
 
     int nchars = vsnprintf(buffer, 2048, fmt, valist);
 
-    // 만약 버퍼 크기가 부족하게 되면, 예외를 던져서 값을 증가시켜야 한다.
+    
     if (nchars == -1 || nchars > 2048)
         throw Error("more buffer size needed for SQL statement buffer...");
 

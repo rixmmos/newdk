@@ -12,11 +12,11 @@ class PlayerCreature;
 class EventQuestAdvance {
 public:
     enum Status {
-        EVENT_QUEST_INIT,     // 시작도 안했다.
-        EVENT_QUEST_STARTED,  // 시작했었고 끝마치지 못했다.
-        EVENT_QUEST_SUCCESS,  // 끝마쳤으나 보상을 받지 못했다.
-        EVENT_QUEST_REWARDED, // 보상으로 복권을 받았다.
-        EVENT_QUEST_ADVANCED  // 보상으로 다음 퀘스트로의 진행을 선택했다.
+        EVENT_QUEST_INIT,     
+        EVENT_QUEST_STARTED,  
+        EVENT_QUEST_SUCCESS,  
+        EVENT_QUEST_REWARDED, 
+        EVENT_QUEST_ADVANCED  
     };
 
     EventQuestAdvance(const EventQuestAdvance& org) : m_QuestLevel(org.m_QuestLevel), m_Status(org.m_Status) {}

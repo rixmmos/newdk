@@ -175,27 +175,27 @@ public:
     string toString() const;
 
 private:
-    ZoneID_t m_ZoneID;               // 존 아이디
-    ZoneGroupID_t m_ZoneGroupID;     // 존 그룹 아이디
-    ZoneType m_ZoneType;             // 존 타입
-    ZoneLevel_t m_ZoneLevel;         // 존 레벨(0 - 10)
-    ZoneAccessMode m_ZoneAccessMode; // 존 접근 모드
-    bool m_bPayPlay;                 // 유료화 존? = 돈 내야 들어갈 수 있는 곳
-    bool m_bPremiumZone;             // 프리미엄 서비스가 되는 존
-    string m_OwnerID;                // 존 소유자 아이디
-    string m_SMPFilename;            // SMP 파일 이름
-    string m_SSIFilename;            // SSI 파일 이름
-    string m_FullName;               // 존 이름
-    string m_ShortName;              // 짧은 이름
+    ZoneID_t m_ZoneID;               
+    ZoneGroupID_t m_ZoneGroupID;     
+    ZoneType m_ZoneType;             
+    ZoneLevel_t m_ZoneLevel;         
+    ZoneAccessMode m_ZoneAccessMode; 
+    bool m_bPayPlay;                 
+    bool m_bPremiumZone;             
+    string m_OwnerID;                
+    string m_SMPFilename;            
+    string m_SSIFilename;            
+    string m_FullName;               
+    string m_ShortName;              
 
-    bool m_bPKZone;       // 성향 안 떨어지는 존
-    bool m_bNoPortalZone; // portal로 이동이 불가능한 존
-    bool m_bMasterLair;   // 마스터 레어인가?
-    bool m_bCastle;       // Castle인가?
-    bool m_bHolyLand;     // 아담의 성지인가?
-    bool m_bAvailable;    // 나와야 되는 존인가?
+    bool m_bPKZone;       
+    bool m_bNoPortalZone; 
+    bool m_bMasterLair;   
+    bool m_bCastle;       
+    bool m_bHolyLand;     
+    bool m_bAvailable;    
 
-    int m_OpenLevel; // 존의 공개 레벨. OpenDegree가 존의 공개 레벨보다 높아야 나온다.
+    int m_OpenLevel; 
 };
 
 #endif

@@ -16,7 +16,7 @@
 #include "PacketUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î ¿ÀºêÁ§Æ® ÇÚµé·¯
+
 //////////////////////////////////////////////////////////////////////////////
 void RottenApple::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -37,7 +37,7 @@ void RottenApple::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        if (pTargetCreature == NULL || pTargetCreature->isSlayer()) // NoSuch Á¦°Å. by sigi. 2002.5.2
+        if (pTargetCreature == NULL || pTargetCreature->isSlayer()) 
         {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayerobject)" << endl;
@@ -93,7 +93,7 @@ void RottenApple::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bCanUse) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
-            // ±â¼úÀÇ È¿°úÄ¡ ¹× Áö¼Ó½Ã°£À» °è»êÇÑ´Ù.
+            
             SkillInput input(pSlayer, pSkillSlot);
             if (pTargetCreature->getCreatureClass() == Creature::CREATURE_CLASS_SLAYER)
                 input.TargetType = SkillInput::TARGET_SELF;
@@ -102,7 +102,7 @@ void RottenApple::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
             SkillOutput output;
             computeOutput(input, output);
 
-            // °æÇèÄ¡¸¦ ¿Ã·ÁÁØ´Ù.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToTileOK1);
@@ -144,7 +144,7 @@ void RottenApple::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
                             currentHP = pOusters->getHP(ATTR_CURRENT);
                         } else if (pCreature->isMonster()) {
                             Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-                            // edit by sonic 2006.11.1  ÐÞÕýÈËÀà×£¸£ÃëÉ±BOSS¼¼ÄÜ(ÀÃÆ»¹û)
+                            
                             if (pMonster->getMonsterType() == 764 || pMonster->getMonsterType() == 765 ||
                                 pMonster->getMonsterType() == 717 ||
                                 // pMonster->getMonsterType() == 599 ||

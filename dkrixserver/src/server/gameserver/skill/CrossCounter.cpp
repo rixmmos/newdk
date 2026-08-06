@@ -17,7 +17,7 @@
 #include "SkillHandlerManager.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -36,7 +36,7 @@ void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t C
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, 검이 아니라면 기술을 사용할 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_SWORD) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -67,13 +67,13 @@ void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t C
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectCrossCounter* pEffect = new EffectCrossCounter(pSlayer);
             pEffect->setDeadline(output.Duration);
             pSlayer->addEffect(pEffect);
             pSlayer->setFlag(Effect::EFFECT_CLASS_CROSS_COUNTER);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             if (bIncreaseDomainExp) {
@@ -82,7 +82,7 @@ void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t C
                 increaseSkillExp(pSlayer, DomainType, pSkillSlot, pSkillInfo, _GCSkillToSelfOK1);
             }
 
-            // 패킷을 만들어 보낸다.
+            
             _GCSkillToSelfOK1.setSkillType(SkillType);
             _GCSkillToSelfOK1.setCEffectID(CEffectID);
             _GCSkillToSelfOK1.setDuration(output.Duration);
@@ -95,7 +95,7 @@ void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t C
 
             pPlayer->sendPacket(&_GCSkillToSelfOK1);
 
-            // 이펙트가 붙었다고 알려준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pSlayer->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_CROSS_COUNTER);
@@ -116,8 +116,8 @@ void CrossCounter::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t C
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 크로스 카운터 체크 함수
-// 크로스 카운터가 발동되면 true를 리턴한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t damage, Range_t range) {
     __BEGIN_TRY
@@ -127,7 +127,7 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
     Assert(pAttacker != NULL);
     Assert(pTargetCreature != NULL);
 
-    // 슬레이어만이 이 기술을 쓸 수 있고, 그 거리는 1이어야만 한다.
+    
     if (pTargetCreature->isSlayer() == false || range != 1) {
         // cout << "CheckCrossCounter End" << endl;
         return false;
@@ -135,7 +135,7 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
 
     bool bSuccess = false;
 
-    // 기술이 걸려있고, 현재 마비 상태가 아니라면...
+    
     if (pTargetCreature->isFlag(Effect::EFFECT_CLASS_CROSS_COUNTER) &&
         !pTargetCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE)) {
         Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
@@ -152,15 +152,15 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
         Item* pWeapon = pTargetSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
 
         if (!verifyDistance(pAttacker, pTargetCreature, 1) ||
-            // 검을 들고 있지 않으면 발동되지 않는다. by Sequoia 2003.3.25
+            
             pWeapon == NULL || pWeapon->getItemClass() != Item::ITEM_CLASS_SWORD) {
             return false;
         }
 
-        // hitroll이 성공했다면...
+        
         if (HitRoll::isSuccess(pTargetSlayer, pAttacker) && canHit(pTargetSlayer, pAttacker, SKILL_CROSS_COUNTER)) {
-            // counter에서는
-            // pTargetSlayer가 공격자, pAttacker가 공격당하는 자가 된다.
+            
+            
             ObjectID_t targetID = pTargetSlayer->getObjectID();
             ObjectID_t attackerID = pAttacker->getObjectID();
 
@@ -172,7 +172,7 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(SkillLevel);
 
             ////////////////////////////////////////////////////////////
-            // 스킬 그레이드에 따라서 다른 기술이 나간다.
+            
             // SKILL_GRADE_APPRENTICE
             // SKILL_GRADE_ADEPT
             // SKILL_GRADE_EXPERT
@@ -183,7 +183,7 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
 
             bool bCriticalHit;
 
-            // 기본 데미지에 스킬 데미지를 더한다.
+            
             Damage_t Damage = computeDamage(pTargetSlayer, pAttacker, SkillLevel / 5, bCriticalHit);
 
             if (Grade == SKILL_GRADE_APPRENTICE) {
@@ -241,11 +241,11 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
             } else if (pAttacker->isMonster()) {
                 Monster* pMonster = dynamic_cast<Monster*>(pAttacker);
 
-                // 크로스카운터가 발동되었다는 것은 몬스터가 이미 이 슬레이어를 적으로 인식하고
-                // 공격을 했다는 말이므로, addEnemy를 해 줄 필요는 없다.
+                
+                
                 // pMonster->addEnemy(pTargetSlayer);
 
-                // 마스터는 딜레이없다.
+                
                 if (!pMonster->isMaster()
 #ifdef __UNDERWORLD__
                     && !pMonster->isUnderworld() && pMonster->getMonsterType() != 599
@@ -267,7 +267,7 @@ bool CheckCrossCounter(Creature* pAttacker, Creature* pTargetCreature, Damage_t 
 
             bSuccess = true;
         } else {
-            // CrossCounter실패하면 실패패킷 보내나??
+            
         }
     }
 

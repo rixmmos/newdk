@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// InventoryItemPosition 클래스 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "InventoryItemPosition.h"
@@ -118,7 +118,7 @@ Creature* InventoryItemPosition::findCreature()
 
     pTargetCreature = g_pPCFinder->getCreature_LOCKED(m_OwnerName);
     if (pTargetCreature == NULL) {
-        filelog("ItemError.log", "InventoryItemPosition:getItem() : 해당하는 Creature가 없습니다.");
+        filelog("ItemError.log", "InventoryItemPosition:getItem() :  Creature .");
 
         g_pPCFinder->unlock();
         return NULL;
@@ -159,7 +159,7 @@ Item* InventoryItemPosition::popItem_CORE(PlayerCreature* pPC)
     Assert(pInventory != NULL);
 
     if (!pInventory->hasItem(m_InvenX, m_InvenY)) {
-        filelog("ItemError.log", "InventoryItemPosition:getItem() : 해당하는 위치에 아이템이 없습니다.");
+        filelog("ItemError.log", "InventoryItemPosition:getItem() :    .");
 
         return NULL;
     }

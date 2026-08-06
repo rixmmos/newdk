@@ -79,7 +79,7 @@ Item* getCardItem(MoonCard card) {
     }
 
     if (putInDB) {
-        filelog("MoonCard.log", "아이템이 나왔습니다. : %d", (int)card);
+        filelog("MoonCard.log", " . : %d", (int)card);
         Statement* pStmt = NULL;
 
         BEGIN_DB {

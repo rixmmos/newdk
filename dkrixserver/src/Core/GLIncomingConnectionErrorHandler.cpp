@@ -42,16 +42,16 @@ void GLIncomingConnectionErrorHandler::execute(GLIncomingConnectionError* pPacke
 
         Assert(pLoginPlayer->getPlayerStatus() == LPS_AFTER_SENDING_LG_INCOMING_CONNECTION);
 
-        // �� �÷��̾��� �α����� ���������Ƿ� ������ �����Ѵ�.
+        
         // cout << "Fail to join game server...(" << pPacket->getPlayerID() << ")" << endl;
 
-        // ������ �����Ѵ�.
+        
         pLoginPlayer->disconnect(UNDISCONNECTED);
 
-        // LPM���� �����Ѵ�.
+        
         g_pLoginPlayerManager->deletePlayer(pLoginPlayer->getSocket()->getSOCKET());
 
-        // LoginPlayer ��ü�� �����Ѵ�.
+        
         SAFE_DELETE(pLoginPlayer);
     } catch (NoSuchElementException& nsee) {
         // cout << "Player not exist or already disconnected." << endl;

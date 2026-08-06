@@ -16,7 +16,7 @@
 #include "GCSkillToObjectOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DummyDrake::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -36,8 +36,8 @@ void DummyDrake::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
 
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), Grade);
             return;
@@ -68,7 +68,7 @@ void DummyDrake::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(getSkillType());
 
         int RequiredMP = (int)pSkillInfo->getConsumeMP() + pOustersSkillSlot->getExpLevel() / 3;
-        // 헌뇜杰唐MP
+        
         // RequiredMP = pOusters->getMP();
 
         bool bManaCheck = hasEnoughMana(pOusters, RequiredMP);

@@ -2,12 +2,12 @@
 // MEffectTarget.h
 //----------------------------------------------------------------------
 //
-//  = 각각의 Effect마다 필요한 정보들
+
 //
-//  = 먼저 설정된 목표에 먼저 도달해야 한다. (queue로 구현)
+
 //
 //  = EffectTargetNode
-//    - 목표(pX,pY,pZ)
+
 //    - CreatureID
 //
 //----------------------------------------------------------------------
@@ -23,7 +23,7 @@
 #include "MString.h"
 
 //----------------------------------------------------------------------
-// EFFECT_TARGET_NODE의 list (queue로 하면 좋겠지만.. 문제가.. - -;) 
+
 //----------------------------------------------------------------------
 class MEffectTarget {
 	public :
@@ -71,12 +71,12 @@ class MEffectTarget {
 
 
 		//-------------------------------------------------------
-		// 진행중인 단계
+		
 		//-------------------------------------------------------
 		void			NextPhase()				{ m_CurrentPhase++; }
 		bool			IsEnd() const			{ return m_CurrentPhase>=m_MaxPhase; }
 		
-		// 결과를 출력해줘야 하는 시간이 지났다는 의미..
+		
 		bool			IsResultTime()	const	{ return m_bResultTime; }
 		void			SetResultTime()			{ m_bResultTime = true; }
 
@@ -93,7 +93,7 @@ class MEffectTarget {
 		TYPE_OBJECTID	GetServerID() const		{ return m_ServerID; }
 
 		//-------------------------------------------------------		
-		// 연결되는 결과에 대한 정보
+		
 		//-------------------------------------------------------		
 		bool			IsResultEmpty() const					{ return m_pResult==NULL; }
 		bool			IsExistResult() const					{ return m_pResult!=NULL; }
@@ -104,15 +104,15 @@ class MEffectTarget {
 		//void			SetResultActionInfo(TYPE_ACTIONINFO rai)	{ m_nResultActionInfo = rai; }
 		
 	public :
-		BYTE			m_MaxPhase;			// 전체 단계수
-		BYTE			m_CurrentPhase;		// 현재 단계
+		BYTE			m_MaxPhase;			
+		BYTE			m_CurrentPhase;		
 
-		bool			m_bResultTime;		// 결과 시간이 지났는가?
+		bool			m_bResultTime;		
 
-		DWORD			m_DelayFrame;		// 지속 시간
+		DWORD			m_DelayFrame;		
 
 		//-------------------------------------------------------		
-		// 목표에 대한 정보
+		
 		//-------------------------------------------------------		
 		int				m_X;				
 		int				m_Y;
@@ -121,10 +121,10 @@ class MEffectTarget {
 		TYPE_OBJECTID	m_ServerID;
 
 		//-------------------------------------------------------		
-		// 결과에 대한 정보
+		
 		//-------------------------------------------------------		
-		//TYPE_ACTIONINFO	m_nResultActionInfo;	// 결과를 표현하는 ActionInfoTableID
-		MActionResult*	m_pResult;				// 결과들
+		
+		MActionResult*	m_pResult;				
 
 
 		//-------------------------------------------------------		

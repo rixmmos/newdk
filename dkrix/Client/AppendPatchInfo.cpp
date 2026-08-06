@@ -18,25 +18,25 @@ bool
 APPEND_PATCH_NODE::Append(const char* orgFilename) const
 {	
 	//-------------------------------------------------------------
-	// append화일 체크..
+	
 	//-------------------------------------------------------------
 	std::ifstream appendFile(appendFilename.GetString(), std::ios::binary );		
 
 	int n;
 	char buffer[4096];
 
-	// 우훗.. - -;;
+	
 	#ifdef __GAME_CLIENT__
 		UpdateProgressBar();
 	#endif
 
 	//-------------------------------------------------------------
-	// 패치 화일이 있으면 걍 패치..
+	
 	//-------------------------------------------------------------
 	if (appendFile.is_open())
 	{
 		#ifdef __GAME_CLIENT__
-			SetProgressBarText("패치 화일을 적용시키고 있습니다.");
+			SetProgressBarText("   .");
 		#endif
 
 		std::fstream orgFile(orgFilename, std::ios::binary | std::ios::ate | std::ios::in | std::ios::out);
@@ -45,9 +45,9 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 		{
 			WORD orgSpkSize;
 			orgFile.seekg( 0 );
-			orgFile.read((char*)&orgSpkSize, 2);	// Sprite의 개수
+			orgFile.read((char*)&orgSpkSize, 2);	
 
-			appendFile.seekg( 2 );	// size부분 제외
+			appendFile.seekg( 2 );	
 			orgFile.seekp( writePosition );		
 			
 			while (1)
@@ -67,14 +67,14 @@ APPEND_PATCH_NODE::Append(const char* orgFilename) const
 
 			appendFile.close();
 			
-			// 개수 변경
+			
 			orgFile.seekp( 0, std::ios::beg );
-			WORD afterNum = max(afterSpkSize, orgSpkSize);	// 큰 개수로 설정 - -;
+			WORD afterNum = max(afterSpkSize, orgSpkSize);	
 
 			orgFile.write((const char*)&afterSpkSize, 2);
 			orgFile.close();
 
-			// 패치화일을 지운다.
+			
 			remove( appendFilename.GetString() );
 		}
 		else
@@ -183,7 +183,7 @@ AppendPatch::SetFinalInfo(long finalFilesize, WORD finalSpkSize)
 //-----------------------------------------------------------------------------
 // Set FinalInfo
 //-----------------------------------------------------------------------------
-// currentFilename에서 정보를 읽어들인다.
+
 //-----------------------------------------------------------------------------
 bool		
 AppendPatch::SetFinalInfo(const char* currentFilename)
@@ -195,11 +195,11 @@ AppendPatch::SetFinalInfo(const char* currentFilename)
 		return false;
 	}
 
-	// appSpkSize - Pack 개수
+	
 	file.read((char*)&m_finalSpkSize, 2);
 	file.seekg( 0, std::ios::end );
 
-	// appendFilesize - AppendPack 크기
+	
 	m_finalFilesize = file.tellg();	
 	
 	file.close();
@@ -217,7 +217,7 @@ AppendPatch::AddAppendInfo(const char* appendFilename, long appendFilesize, WORD
 	WORD previousSpkSize;
 
 	//------------------------------------------------------------
-	// 바로 전 상태의 정보
+	
 	//------------------------------------------------------------
 	if (m_AppendPatch.size()==0)
 	{
@@ -233,7 +233,7 @@ AppendPatch::AddAppendInfo(const char* appendFilename, long appendFilesize, WORD
 	}
 
 	//------------------------------------------------------------
-	// 현재 정보 설정
+	
 	//------------------------------------------------------------
 	APPEND_PATCH_NODE* pNode = new APPEND_PATCH_NODE;
 
@@ -241,7 +241,7 @@ AppendPatch::AddAppendInfo(const char* appendFilename, long appendFilesize, WORD
 	pNode->appendFilesize	= appendFilesize;
 	pNode->appSpkSize		= appSpkSize;		
 	pNode->writePosition	= previousFilesize;
-	pNode->afterFilesize	= previousFilesize + appendFilesize-2;	// SPK의 개수 부분 2 bytes
+	pNode->afterFilesize	= previousFilesize + appendFilesize-2;	
 	pNode->afterSpkSize		= previousSpkSize + appSpkSize;
 
 	m_AppendPatch.push_back( pNode );
@@ -250,14 +250,14 @@ AppendPatch::AddAppendInfo(const char* appendFilename, long appendFilesize, WORD
 //-----------------------------------------------------------------------------
 // Add AppendInfo
 //-----------------------------------------------------------------------------
-// currentFilename은 현재 화일의 위치이다.
-// appendPatch를 할 위치는 m_orgFilename을 참고해야 한다.
+
+
 //-----------------------------------------------------------------------------
 bool
 AppendPatch::AddAppendInfo(const char* currentFilename)
 {
 	//------------------------------------------------------------
-	// 필요한 정보
+	
 	//------------------------------------------------------------
 	char appendFilename[256];
 	long appendFilesize;
@@ -270,11 +270,11 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 		return false;
 	}
 
-	// appSpkSize - Pack 개수
+	
 	file.read((char*)&appSpkSize, 2);
 	file.seekg( 0, std::ios::end );
 
-	// appendFilesize - AppendPack 크기
+	
 	appendFilesize = file.tellg();
 	
 	file.close();
@@ -289,7 +289,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 	}
 	else
 	{
-		*(pBS+1) = '\0';		// 'Data\\Image\\' 까지
+		*(pBS+1) = '\0';		
 	}
 
 	pBS = (char*)strrchr(currentFilename, '\\');	// '\\NewXX.spk'
@@ -306,7 +306,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 	WORD previousSpkSize;
 
 	//------------------------------------------------------------
-	// 바로 전 상태의 정보
+	
 	//------------------------------------------------------------
 	if (m_AppendPatch.size()==0)
 	{
@@ -322,7 +322,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 	}
 
 	//------------------------------------------------------------
-	// 현재 정보 설정
+	
 	//------------------------------------------------------------
 	APPEND_PATCH_NODE* pNode = new APPEND_PATCH_NODE;
 
@@ -330,7 +330,7 @@ AppendPatch::AddAppendInfo(const char* currentFilename)
 	pNode->appendFilesize	= appendFilesize;
 	pNode->appSpkSize		= appSpkSize;		
 	pNode->writePosition	= previousFilesize;
-	pNode->afterFilesize	= previousFilesize + appendFilesize-2;	// SPK의 개수 부분 2 bytes
+	pNode->afterFilesize	= previousFilesize + appendFilesize-2;	
 	pNode->afterSpkSize		= previousSpkSize + appSpkSize;
 
 	m_AppendPatch.push_back( pNode );
@@ -372,7 +372,7 @@ AppendPatch::CheckFinalInfo() const
 	if (orgFile.is_open())
 	{
 		WORD spkSize;
-		orgFile.read((char*)&spkSize, 2);	// Sprite의 개수
+		orgFile.read((char*)&spkSize, 2);	
 
 		if (spkSize != m_finalSpkSize)
 		{
@@ -396,7 +396,7 @@ AppendPatch::CheckFinalInfo() const
 //-----------------------------------------------------------------------------
 // Calculate FinalInfo 
 //-----------------------------------------------------------------------------
-// 계산상으로 맞는지 체크한다.
+
 //-----------------------------------------------------------------------------
 bool
 AppendPatch::CalculateFinalInfo() const

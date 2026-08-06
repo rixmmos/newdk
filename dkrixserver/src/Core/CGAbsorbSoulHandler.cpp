@@ -38,13 +38,13 @@ void CGAbsorbSoulHandler::execute(CGAbsorbSoul* pPacket, Player* pPlayer)
             Creature* pCreature = pGamePlayer->getCreature();
             Assert(pCreature != NULL);
 
-            // 아우스터즈가 아닌 놈이 흡영을 할 수는 없다.
+            
             if (!pCreature->isOusters())
                 return;
 
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
 
-            // 완전 안전지대라면 기술 사용 불가. by sigi. 2002.11.14
+            
             ZoneLevel_t ZoneLevel = pCreature->getZone()->getZoneLevel(pCreature->getX(), pCreature->getY());
             if ((ZoneLevel & COMPLETE_SAFE_ZONE) || (!isAbleToUseObjectSkill(pOusters, SKILL_ABSORB_SOUL))) {
                 GCSkillFailed1 gcSkillFailed1;

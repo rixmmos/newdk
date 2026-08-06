@@ -37,24 +37,24 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
 
         Assert(pPacket != NULL);
 
-    // 플레이어가 속한 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     // try { Assert(pGuild != NULL); } catch (Throwable& ) { return; }
     if (pGuild == NULL)
         return;
 
-    // 플레이어가 길드의 멤버인지 확인한다.
+    
     GuildMember* pGuildMember = pGuild->getMember(pPacket->getName());
     // try { Assert(pGuildMember != NULL); } catch (Throwable& ) { return; }
     if (pGuildMember == NULL)
         return;
 
-    // 길드 탈퇴 로그를 남긴다.
+    
     filelog("GuildExit.log", "GuildID: %d, GuildName: %s, Expel: %s, By: %s", pGuild->getID(),
             pGuild->getName().c_str(), pPacket->getName().c_str(), pPacket->getSender().c_str());
 
     ///////////////////////////////////////////////////////////////////
-    //  DB에 Slayer, Vampire, Ousters 테이블의 GuildID 를 바꾼다.
+    
     ///////////////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
     BEGIN_DB {
@@ -72,28 +72,28 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
     }
     END_DB(pStmt)
 
-    // Guild Member 를 expire 시킨다.
+    
     pGuildMember->expire();
 
-    // Guild 에서 삭제한다.
+    
     pGuild->deleteMember(pGuildMember->getName());
 
-    // 게임 서버로 보낼 패킷을 만든다.
+    
     SGExpelGuildMemberOK sgExpelGuildMemberOK;
     sgExpelGuildMemberOK.setGuildID(pGuild->getID());
     sgExpelGuildMemberOK.setName(pPacket->getName());
     sgExpelGuildMemberOK.setSender(pPacket->getSender());
 
-    // 게임 서버로 패킷을 보낸다.
+    
     g_pGameServerManager->broadcast(&sgExpelGuildMemberOK);
 
-    // 길드 인원이 5명 미만이 될 경우 길드를 삭제한다.
+    
     if (pGuild->getState() == Guild::GUILD_STATE_ACTIVE && pGuild->getActiveMemberCount() < MIN_GUILDMEMBER_COUNT) {
-        // 길드 삭제 로그를 남긴다.
+        
         filelog("GuildBroken.log", "GuildID: %d, GuildName: %s, MemberCount: %d, Expel: %s", pGuild->getID(),
                 pGuild->getName().c_str(), pGuild->getActiveMemberCount(), pPacket->getName().c_str());
 
-        // 길드 멤버 expire and delete
+        
         HashMapGuildMember& Members = pGuild->getMembers();
         HashMapGuildMemberItor itr = Members.begin();
 
@@ -104,7 +104,7 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
                 GuildMember* pGuildMember = itr->second;
 
                 ///////////////////////////////////////////////////////////////////
-                //  DB에 Slayer, Vampire, Ousters 테이블의 GuildID 를 바꾼다.
+                
                 ///////////////////////////////////////////////////////////////////
                 if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
                     pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'",
@@ -117,12 +117,12 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
                                         pGuildMember->getName().c_str());
                 }
 
-                // 길드 멤버를 expire 시킨다.
+                
                 pGuildMember->expire();
-                // 완전히 DB에서 제거한다.
+                
                 // pGuildMember->destroy();
 
-                // 길드 멤버를 삭제
+                
                 SAFE_DELETE(pGuildMember);
             }
 
@@ -132,14 +132,14 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
 
         Members.clear();
 
-        // 길드를 삭제한다
+        
         pGuild->setState(Guild::GUILD_STATE_BROKEN);
         pGuild->save();
 
         SAFE_DELETE(pGuild);
         g_pGuildManager->deleteGuild(pPacket->getGuildID());
 
-        // 길드를 삭제하도록 패킷을 보낸다.
+        
         SGDeleteGuildOK sgDeleteGuildOK;
         sgDeleteGuildOK.setGuildID(pPacket->getGuildID());
 

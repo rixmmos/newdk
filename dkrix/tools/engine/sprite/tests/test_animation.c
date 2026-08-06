@@ -1,12 +1,4 @@
-/**
- * @file test_animation.c
- * @brief Animation frame and object property-based tests
- * 
- * Property 1: AnimFrame 数据存储一致性
- * Property 2: 帧循环正确性
- * Property 3: 循环模式帧计算
- * Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
- */
+ 
 
 #include "animation.h"
 #include "types.h"
@@ -44,14 +36,7 @@ static uint8_t pbt_random_max_frame(void) {
     return (val == 0) ? 1 : val;
 }
 
-/**
- * Property 1: AnimFrame 数据存储一致性
- * 
- * For any AnimFrame, after initialization and setting values (frame_id, max_frame, blt_type),
- * getting those values should return the same values that were set.
- * 
- * Validates: Requirements 2.1, 2.2, 2.6
- */
+ 
 static int test_property1_animframe_data_consistency(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -118,14 +103,7 @@ static int test_property1_animframe_data_consistency(void) {
     return passed;
 }
 
-/**
- * Property 2: 帧循环正确性
- * 
- * For any AnimFrame with max_frame > 0, calling anim_frame_next() exactly max_frame times
- * should return current_frame to 0, and at any point current_frame should be in range [0, max_frame-1].
- * 
- * Validates: Requirements 2.3, 2.4
- */
+ 
 static int test_property2_frame_cycle_correctness(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -186,14 +164,7 @@ static int test_property2_frame_cycle_correctness(void) {
     return passed;
 }
 
-/**
- * Property 3: 循环模式帧计算
- * 
- * For any AnimFrame in loop mode with max_frame > 0, the current frame should equal
- * (loop_counter % max_frame).
- * 
- * Validates: Requirements 2.5
- */
+ 
 static int test_property3_loop_mode_frame_calculation(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -273,26 +244,13 @@ static void test_animframe_edge_cases(void) {
     }
 }
 
-/* ============================================================================
- * AnimObject Property-Based Tests
- * Property 4: AnimObject 数据存储一致性
- * Property 5: 方向范围有效性
- * Property 6: Sprite ID 计算正确性
- * Validates: Requirements 3.1, 3.2, 3.3, 3.5, 3.6, 6.1, 6.2
- * ============================================================================ */
+ 
 
 static int pbt_random_int(void) {
     return (int)pbt_random_uint32();
 }
 
-/**
- * Property 4: AnimObject 数据存储一致性
- * 
- * For any AnimObject, after setting sprite_id, pixel position, direction, and transparency,
- * getting those values should return the same values that were set.
- * 
- * Validates: Requirements 3.1, 3.2, 3.6
- */
+ 
 static int test_property4_animobject_data_consistency(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -361,14 +319,7 @@ static int test_property4_animobject_data_consistency(void) {
     return passed;
 }
 
-/**
- * Property 5: 方向范围有效性
- * 
- * For any direction value set on AnimObject, the stored direction should always be
- * in range [0, 7] (automatically wrapped if out of range).
- * 
- * Validates: Requirements 3.3, 6.1
- */
+ 
 static int test_property5_direction_range_validity(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -433,14 +384,7 @@ static int test_property5_direction_range_validity(void) {
     return passed;
 }
 
-/**
- * Property 6: Sprite ID 计算正确性
- * 
- * For any AnimObject with base sprite_id S, max_frame M, and current_frame F,
- * anim_object_get_sprite() should return S + F where F is in [0, M-1].
- * 
- * Validates: Requirements 3.5, 6.2
- */
+ 
 static int test_property6_sprite_id_calculation(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;
@@ -558,11 +502,7 @@ static void test_animobject_edge_cases(void) {
     test_assert(anim_object_get_sprite(&obj) == 102, "After 2 advances, sprite is base+2");
 }
 
-/* ============================================================================
- * Animation Rendering Property-Based Tests
- * Property 7: BltType 混合模式映射
- * Validates: Requirements 4.2, 4.3, 4.4, 4.5
- * ============================================================================ */
+ 
 
 /**
  * Expected blend mode mapping structure
@@ -586,16 +526,7 @@ static const BlendModeMapping g_blend_mappings[] = {
 
 static const int g_num_blend_mappings = sizeof(g_blend_mappings) / sizeof(g_blend_mappings[0]);
 
-/**
- * Property 7: BltType 混合模式映射
- * 
- * For any BltType value in [BLT_NORMAL, BLT_EFFECT, BLT_SHADOW, BLT_SCREEN],
- * anim_set_blend_mode() should set a valid SDL blend mode corresponding to that type.
- * 
- * This test requires SDL to be initialized to create textures.
- * 
- * Validates: Requirements 4.2, 4.3, 4.4, 4.5
- */
+ 
 static int test_property7_blttype_blend_mode_mapping(void) {
     const int NUM_ITERATIONS = 100;
     int passed = 1;

@@ -1,17 +1,4 @@
-/**
- * @file test_frame.c
- * @brief Frame and FrameArray unit tests and property-based tests
- * 
- * Property 1: FrameArray 数据一致性
- * For any FrameArray, after adding frames, the size should match
- * and all frames should be retrievable with correct values.
- * 
- * Property 2: Frame 数据存储
- * For any Frame, after setting values, the getters should return
- * the same values.
- * 
- * Validates: Requirements 3.4, 3.5, 4.6
- */
+ 
 
 #include "frame.h"
 #include <stdio.h>
@@ -43,14 +30,7 @@ static int16_t frame_pbt_random_int16(void) {
     return (int16_t)(frame_pbt_random() >> 16);
 }
 
-/* ============================================================================
- * Property 1: FrameArray 数据一致性
- * 
- * For any FrameArray, after adding frames, the size should match
- * and all frames should be retrievable with correct values.
- * 
- * Validates: Requirements 4.6
- * ============================================================================ */
+ 
 
 static int test_property1_framearray_consistency(void) {
     const int NUM_ITERATIONS = 100;
@@ -134,14 +114,7 @@ static int test_property1_framearray_consistency(void) {
     return passed;
 }
 
-/* ============================================================================
- * Property 2: Frame 数据存储
- * 
- * For any Frame, after setting values, the getters should return
- * the same values.
- * 
- * Validates: Requirements 3.4, 3.5
- * ============================================================================ */
+ 
 
 static int test_property2_frame_storage(void) {
     const int NUM_ITERATIONS = 100;

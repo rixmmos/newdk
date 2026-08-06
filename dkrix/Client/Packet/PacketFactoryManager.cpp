@@ -302,7 +302,7 @@
 // added by elca 2001-06-26
 #include "Cpackets/CGSelectPortal.h"
 
-// 2001-01-08 김성민
+
 #include "Cpackets/CGMouseToStash.h"
 #include "Cpackets/CGStashToMouse.h"
 #include "Cpackets/CGStashList.h"
@@ -379,7 +379,7 @@
 	#include "Rpackets/RCCharacterInfo.h"
 #endif
 
-// 길드관련 2002. 05. 31. bezz
+
 //#include "Gpackets/GCShowGuildRegist.h"
 #include "Cpackets/CGRegistGuild.h"
 #include "Gpackets/GCWaitGuildList.h"
@@ -583,10 +583,10 @@ PacketFactoryManager::PacketFactoryManager ()
 
 	Assert(m_Size > 0);
 	
-	// 패킷팩토리배열을 생성한다.
+	
 	m_Factories = new PacketFactory*[ m_Size ];
 	
-	// 팩토리에 대한 포인터들을 NULL 로 초기화한다.
+	
 	for (int i = 0 ; i < m_Size ; i ++) 
 		m_Factories[i] = NULL;
 			
@@ -606,7 +606,7 @@ PacketFactoryManager::~PacketFactoryManager ()
 		
 	Assert(m_Factories != NULL);
 
-	// 각각의 패킷팩토리들을 삭제한다.
+	
 	for (int i = 0 ; i < m_Size ; i ++) 
 	{
 #ifdef __GAME_CLIENT__
@@ -620,7 +620,7 @@ PacketFactoryManager::~PacketFactoryManager ()
 #endif
 	}
 	
-	// 패킷팩토리배열을 삭제한다.
+	
 #ifdef __GAME_CLIENT__
 	if (m_Factories != NULL)
 	{
@@ -637,7 +637,7 @@ PacketFactoryManager::~PacketFactoryManager ()
 
 //////////////////////////////////////////////////////////////////////
 //
-// 정의된 모든 패킷팩토리들을 여기에 추가한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void PacketFactoryManager::init ()
@@ -752,7 +752,7 @@ void PacketFactoryManager::init ()
 
 	addFactory(new CGRequestIPFactory());
 
-	// 전쟁 시스템
+	
 	addFactory( new CGRelicToObjectFactory() );
 
 	addFactory( new CGRegistGuildFactory() );
@@ -766,10 +766,10 @@ void PacketFactoryManager::init ()
 	addFactory( new CGModifyGuildMemberFactory() );
 	addFactory( new CGGuildChatFactory() );
 
-	// 인챈트 아이템 : 별 --> 아이템 넣기
+	
 	addFactory( new CGAddItemToItemFactory() );
 
-	// 정보 요청. 2002.9.2
+	
 	addFactory( new CGRequestInfoFactory() );
 
 	addFactory( new CGModifyGuildIntroFactory() );
@@ -1169,7 +1169,7 @@ void PacketFactoryManager::init ()
 	addFactory( new GCBloodBibleSignInfoFactory() ) ;
 
 
-	// 석민씨 작업
+	
 	addFactory( new CGDisplayItemFactory() );
 	addFactory( new CGUndisplayItemFactory() );
 	addFactory( new CGStoreSignFactory() );
@@ -1181,7 +1181,7 @@ void PacketFactoryManager::init ()
 	addFactory( new GCOtherStoreInfoFactory() );
 	addFactory( new GCRemoveStoreItemFactory() );
 	addFactory( new GCAddStoreItemFactory() );
-	// 끝
+	
 		
 	addFactory( new GCRequestPowerPointResultFactory() );
 	addFactory( new GCUsePowerPointResultFactory() );
@@ -1207,7 +1207,7 @@ void PacketFactoryManager::init ()
 
 //////////////////////////////////////////////////////////////////////
 //
-// 팩토리 객체를 특정 인덱스에 추가한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void PacketFactoryManager::addFactory (PacketFactory * pFactory) 
@@ -1229,7 +1229,7 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 		throw Error(msg.toString());
 	}
 	
-	// 패킷팩토리를 등록한다.
+	
 	m_Factories[ pFactory->getPacketID() ] = pFactory;
 			
 	__END_CATCH
@@ -1238,7 +1238,7 @@ void PacketFactoryManager::addFactory (PacketFactory * pFactory)
 	
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 패킷객체를 생성한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 Packet * PacketFactoryManager::createPacket (PacketID_t packetID) 
@@ -1246,8 +1246,8 @@ Packet * PacketFactoryManager::createPacket (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "packet factory [" << packetID << "] not exist.";
@@ -1262,7 +1262,7 @@ Packet * PacketFactoryManager::createPacket (PacketID_t packetID)
 
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 특정 패킷의 최대 크기를 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID) 
@@ -1270,8 +1270,8 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "invalid packet id (" << packetID << ")";
@@ -1286,7 +1286,7 @@ PacketSize_t PacketFactoryManager::getPacketMaxSize (PacketID_t packetID)
 
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 특정 패킷의 이름을 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 #if !defined(__GAME_CLIENT__) || defined(__GAME_CLIENT__) && defined(__DEBUG_OUTPUT__)
@@ -1295,8 +1295,8 @@ string PacketFactoryManager::getPacketName (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "invalid packet id = (" << packetID << ")";

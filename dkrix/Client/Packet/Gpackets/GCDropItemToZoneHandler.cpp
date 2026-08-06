@@ -36,7 +36,7 @@ throw ( ProtocolException , Error )
 		AddItemToZone( (GCAddItemToZone*) pPacket, TRUE );		
 
 		TYPE_OBJECTID id = pPacket->getDropPetOID();
-		if(id != 0)	// 먼가가 떨궜다-_-
+		if(id != 0)	
 		{
 			MCreature *pCreature = g_pZone->GetCreature(id);
 			if(pCreature != NULL)
@@ -49,12 +49,12 @@ throw ( ProtocolException , Error )
 
 					if(pPet != NULL)
 					{
-						pPet->SetAction(ACTION_DRAINED);		// 펫은 흡혈당하기가 펫 짖기이다.
+						pPet->SetAction(ACTION_DRAINED);		
 
 						MPetItem *pPetItem = pPet->GetPetItem();
 						if(pPetItem != NULL)
 						{
-							if(pPetItem->GetItemType()<3) // 2차 펫이 아닐 때
+							if(pPetItem->GetItemType()<3) 
 							{
 								if(pPetItem->GetNumber() >= 30)
 								{
@@ -65,8 +65,8 @@ throw ( ProtocolException , Error )
 									PlaySound(SOUND_WORLD_DOG_BARK, false, pPacket->getX(), pPacket->getY());
 								}
 							}
-							else if(pPetItem->GetItemType() == 3) // 슬레이어 펫일 때
-							{	// 슬래 펫(탱크)은 루팅할때 사운드가 있다.
+							else if(pPetItem->GetItemType() == 3) 
+							{	
 								TYPE_SOUNDID soundID = (*g_pCreatureTable)[pPet->GetCreatureType()].GetActionSound( ACTION_DRAINED );
 								if (soundID!=SOUNDID_NULL  )
 								{

@@ -26,7 +26,7 @@ class CBillingPlayer;
 /////////////////////////////////////////////////////
 // class CBillingPlayerManager
 //
-// 중국 빌링 서버와 통신을 전담하는 쓰레드
+
 /////////////////////////////////////////////////////
 class CBillingPlayerManager : public Thread {
 public:
@@ -38,7 +38,7 @@ public:
     void stop();
     void run();
 
-    // 빌링 관련 패킷 보내기 함수
+    
 #ifdef __LOGIN_SERVER__
     void sendLogin(LoginPlayer* pLoginPlayer);
 #elif defined(__GAME_SERVER__)

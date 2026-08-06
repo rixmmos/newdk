@@ -2,7 +2,7 @@
 //
 // Filename    : TheOneServer.cpp
 // Written By  : reiot@ewestsoft.com
-// Description : 로그인 서버용 메인 클래스
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -19,7 +19,7 @@
 //
 // constructor
 //
-// 시스템 매니저의 constructor에서는 하위 매니저 객체를 생성한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 TheOneServer::TheOneServer() throw(Error) {
@@ -43,7 +43,7 @@ TheOneServer::TheOneServer() throw(Error) {
 //
 // destructor
 //
-// 시스템 매니저의 destructor에서는 하위 매니저 객체를 삭제해야 한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 TheOneServer::~TheOneServer() throw(Error) {
@@ -66,13 +66,13 @@ void TheOneServer::init() throw(Error) {
     __BEGIN_TRY
 
     cout << "Init DatabaseManager..." << endl;
-    // 데이타베이스매니저를 초기화한다.
+    
     g_pDatabaseManager->init();
     cout << "Init DatabaseManager Complete!" << endl;
 
     g_pPacketFactoryManager->init();
 
-    // 서버간 통신 매니저를 초기화한다.
+    
     g_pGameServerManager->init();
 
     __END_CATCH
@@ -87,7 +87,7 @@ void TheOneServer::init() throw(Error) {
 void TheOneServer::start() throw(Error) {
     __BEGIN_TRY
 
-    // 서버간 통신 매니저를 시작한다.
+    
     g_pGameServerManager->start();
 
     __END_CATCH
@@ -98,9 +98,9 @@ void TheOneServer::start() throw(Error) {
 //
 // stop login server
 //
-// stop 순서에 유의하도록 하자. 가장 영향을 많이 주는 매니저부터
-// stop 시켜야 한다. 만일 반대의 순서로 stop 시킬 경우 null pointer
-// 같은 현상이 발생할 수 있다.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 void TheOneServer::stop() throw(Error) {

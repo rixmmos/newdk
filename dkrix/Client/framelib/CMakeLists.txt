@@ -15,7 +15,6 @@ add_library(framelib STATIC ${FRAMELIB_SOURCES})
 target_include_directories(framelib PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../..
-	${CMAKE_CURRENT_SOURCE_DIR}/../Packet
 	${CMAKE_CURRENT_SOURCE_DIR}/../SpriteLib
 )
 

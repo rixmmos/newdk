@@ -7,8 +7,8 @@
 #ifndef __CG_USE_POWER_POINT_H__
 #define __CG_USE_POWER_POINT_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGUsePowerPoint;

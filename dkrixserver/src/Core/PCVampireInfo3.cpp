@@ -133,7 +133,7 @@ void PCVampireInfo3::write(SocketOutputStream& oStream) const {
     oStream.write(m_Rank);
     oStream.write(m_AdvancementLevel);
 
-    // cout << "승직 레벨 : " << (int)m_AdvancementLevel << endl;
+    
 
     __END_CATCH
 }

@@ -90,7 +90,7 @@ void SBillingPlayer::processOutput() throw(IOException, Error) {
     try {
         m_pOutputStream->flush();
     } catch (InvalidProtocolException&) {
-        throw DisconnectException("이상한 패킷임");
+        throw DisconnectException(" ");
     }
 
     __END_CATCH
@@ -101,13 +101,13 @@ void SBillingPlayer::processCommand() throw(IOException, Error) {
     __BEGIN_TRY
 
     try {
-        // 입력 버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
+        
         while (true) {
-            // 헤더를 저장할 버퍼 생성
+            
             CBillingPacketHeader header;
 
-            // 일단 헤더를 읽는다. peek. 입력버퍼에서 지우지는 않는다.
-            // 헤더가 완전하지 않으면 패스
+            
+            
             if (!m_pInputStream->peek((char*)&header, szCBillingPacketHeaderInfo))
                 return;
 
@@ -118,104 +118,104 @@ void SBillingPlayer::processCommand() throw(IOException, Error) {
             header.Body_Length = ntohl(header.Body_Length);
 
             ////////////////////////////////////////////////////////////////////////////////////
-            // Packet_Type, Method_Code, Return_Code 에 따라 바디가 완전히 존재하는지 확인한다.
+            
             ////////////////////////////////////////////////////////////////////////////////////
             if (header.Packet_Type != CBILLING_PACKET_RESPONSE) {
                 cout << "error" << endl;
                 cout << header.toString().c_str() << endl;
                 return;
-                // 에러다 낭패~
+                
             }
 
-            // 실패일 경우
+            
             if (header.Return_Code != CBILLING_RETURN_CODE_SUCCESS) {
-                // 바디가 완전히 들어있는지 확인한다.
+                
                 if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketErrorBodyInfo)
                     return;
 
-                // 이제 실제로 모조리 읽어 내자.
+                
                 CBillingPacketErrorBody body;
                 header.read(*m_pInputStream);
                 body.read(*m_pInputStream);
 
                 executeError(header, body);
-            } else // 성공일 경우
+            } else 
             {
                 switch (header.Method_Code) {
                 case CBILLING_METHOD_CODE_INTERVAL_VALIDATION: {
-                    // 바디가 완전히 들어있는지 확인한다.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseIntervalValidationBodyInfo)
                         return;
 
-                    // 이제 실제로 모조리 읽어 내자.
+                    
                     CBillingPacketResponseIntervalValidationBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // 실행
+                    
                     executeIntervalValidation(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_LOGIN: {
-                    // 바디가 완전히 들어있는지 확인한다.
+                    
                     if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketResponseLoginBodyInfo)
                         return;
 
-                    // 이제 실제로 모조리 읽어 내자.
+                    
                     CBillingPacketResponseLoginBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // 실행
+                    
                     executeLogin(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_MINUS_POINT: {
-                    // 바디가 완전히 들어있는지 확인한다.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseMinusPointBodyInfo)
                         return;
 
-                    // 이제 실제로 모조리 읽어 내자.
+                    
                     CBillingPacketResponseMinusPointBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // 실행
+                    
                     executeMinusPoint(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_MINUS_MINUTE: {
-                    // 바디가 완전히 들어있는지 확인한다.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseMinusMinuteBodyInfo)
                         return;
 
-                    // 이제 실제로 모조리 읽어 내자.
+                    
                     CBillingPacketResponseMinusMinuteBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // 실행
+                    
                     executeMinusMinute(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_LOGOUT: {
-                    // 바디가 완전히 들어있는지 확인한다.
+                    
                     if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketResponseLogoutBodyInfo)
                         return;
 
-                    // 이제 실제로 모조리 읽어 내자.
+                    
                     CBillingPacketResponseLogoutBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // 실행
+                    
                     executeLogout(header, body);
 
                     break;
@@ -223,7 +223,7 @@ void SBillingPlayer::processCommand() throw(IOException, Error) {
                 default: {
                     throw Error("Invaild Code");
 
-                    // 에러다.
+                    
                     break;
                 }
                 }
@@ -439,7 +439,7 @@ void SBillingPlayer::executeError(CBillingPacketHeader& header, CBillingPacketEr
                                                                                                      Error) {
     __BEGIN_TRY
 
-    // 유료 끝났다 짤려라~
+    
     PayUser* pPayUser = g_pPayUserManager->getUser(body.Login_Name);
     pPayUser->setRecvTime();
     pPayUser->setLeftTime(0);
@@ -463,7 +463,7 @@ void SBillingPlayer::executeIntervalValidation(CBillingPacketHeader& header,
     __BEGIN_TRY
 
     if (atoi(body.Parameter_Value) != g_pSBillingPlayerManager->getMinusIntervalInt()) {
-        // 게임서버와 중국 빌링 서버간에 minus interval 이 맞지 않다. 죽어야 한다.
+        
         cerr << "-------------------------------------------------------------------------------" << endl;
         cerr << "Interval configuration is different between gameserver and china billing server" << endl;
         cerr << "gameserver interval : " << g_pSBillingPlayerManager->getMinusIntervalInt()
@@ -475,7 +475,7 @@ void SBillingPlayer::executeIntervalValidation(CBillingPacketHeader& header,
                 "billing server interval : %s",
                 g_pSBillingPlayerManager->getMinusIntervalInt(), body.Parameter_Value);
 
-        // 죽어라. 흑흑 ㅠㅠ.
+        
         // kill( getpid(), 9 );
     }
 

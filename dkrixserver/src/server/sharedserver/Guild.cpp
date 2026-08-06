@@ -43,8 +43,8 @@ void GuildMember::create() noexcept(false) {
         pResult = pStmt->executeQuery("SELECT GuildID FROM GuildMember WHERE Name = '%s'", m_Name.c_str());
 
         if (pResult->getRowCount() != 0) {
-            // �̹� ��� �����ϹǷ� �����͸� �����ش�.(��, ����
-            // �ٸ� ��忡 ���� ���� �ִ�)
+            
+            
             if (m_Rank == GUILDMEMBER_RANK_WAIT) {
                 pStmt->executeQuery("UPDATE GuildMember SET GuildID = %d, `Rank` = %d, ExpireDate = '', "
                                     "RequestDateTime = '%s' WHERE Name = '%s'",
@@ -150,7 +150,7 @@ void GuildMember::expire() noexcept(false) {
     Statement* pStmt;
 
     BEGIN_DB {
-        // ���� �ǽð� ��¥�� ���Ѵ�.
+        
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
@@ -175,7 +175,7 @@ void GuildMember::leave() noexcept(false) {
     Statement* pStmt;
 
     BEGIN_DB {
-        // ���� �ǽð� ��¥�� ���Ѵ�.
+        
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
@@ -608,10 +608,10 @@ void Guild::addMember(GuildMember* pMember) noexcept(false) {
 
     if (rank == GuildMember::GUILDMEMBER_RANK_NORMAL || rank == GuildMember::GUILDMEMBER_RANK_MASTER ||
         rank == GuildMember::GUILDMEMBER_RANK_SUBMASTER) {
-        // �Ϲ�ȸ���̳� (����)�����Ͱ� �߰��ɶ� ActiverMemberCount�� ������Ų��.
+        
         m_ActiveMemberCount++;
     } else if (rank == GuildMember::GUILDMEMBER_RANK_WAIT) {
-        // ���� ����ڰ� �߰��ɶ� WaitMemberCount �� ���� ��Ų��.
+        
         m_WaitMemberCount++;
     }
 
@@ -645,7 +645,7 @@ void Guild::deleteMember(const string& name) noexcept(false) {
 
     if (rank == GuildMember::GUILDMEMBER_RANK_NORMAL || rank == GuildMember::GUILDMEMBER_RANK_MASTER ||
         rank == GuildMember::GUILDMEMBER_RANK_SUBMASTER) {
-        // Ȱ������ ȸ���� ī���͸� ���� ��Ų��
+        
         m_ActiveMemberCount--;
     } else if (rank == GuildMember::GUILDMEMBER_RANK_WAIT) {
         m_WaitMemberCount--;
@@ -730,7 +730,7 @@ void Guild::modifyMemberRank(const string& name, GuildMemberRank_t rank) noexcep
 void Guild::addCurrentMember(const string& name) noexcept(false) {
     __BEGIN_TRY
 
-    __ENTER_CRITICAL_SECTION(m_Mutex) // �ٸ� ���ؽ� �ᵵ �� ���ѵ�.. ������..
+    __ENTER_CRITICAL_SECTION(m_Mutex) 
 
     if (m_CurrentMembers.end() != find(m_CurrentMembers.begin(), m_CurrentMembers.end(), name)) {
         m_Mutex.unlock();
@@ -739,7 +739,7 @@ void Guild::addCurrentMember(const string& name) noexcept(false) {
 
     m_CurrentMembers.push_back(name);
 
-    // Guild Member ��ü�� �α׿��� �����Ѵ�.
+    
     GuildMember* pGuildMember = getMember_NOLOCKED(name);
     if (pGuildMember == NULL) {
         m_Mutex.unlock();
@@ -767,7 +767,7 @@ void Guild::deleteCurrentMember(const string& name) noexcept(false) {
 
     m_CurrentMembers.erase(itr);
 
-    // Guild Member ��ü�� �α׿����� �����Ѵ�.
+    
     GuildMember* pGuildMember = getMember_NOLOCKED(name);
     if (pGuildMember == NULL) {
         m_Mutex.unlock();
@@ -887,7 +887,7 @@ void Guild::expireTimeOutWaitMember(VSDateTime currentDateTime, list<string>& mL
             pGuildMember->isRequestDateTimeOut(currentDateTime)) {
             mList.push_back(pGuildMember->getName());
 
-            // wait member count �� ���δ�.
+            
             m_WaitMemberCount--;
 
             pGuildMember->expire();

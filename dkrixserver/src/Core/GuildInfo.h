@@ -18,7 +18,7 @@
 //
 // class GuildInfo;
 //
-// Ŭ���̾�Ʈ�� ��� ����Ʈ�� ������.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,15 +31,15 @@ public:
     ~GuildInfo() noexcept;
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // ����ȭ��, �̸� ���� ������ ����Ѵ�.
+    
     PacketSize_t getSize();
 
     static uint getMaxSize() {
@@ -92,19 +92,19 @@ public:
 
 
 private:
-    // ��� ���̵�
+    
     GuildID_t m_GuildID;
 
-    // ��� �̸�
+    
     string m_GuildName;
 
-    // ��� ������
+    
     string m_GuildMaster;
 
-    // ��� ��� ī��Ʈ
+    
     BYTE m_GuildMemberCount;
 
-    // ��� Expire Date
+    
     string m_GuildExpireDate;
 };
 

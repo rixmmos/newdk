@@ -40,7 +40,7 @@ void CGAppointSubmasterHandler::execute(CGAppointSubmaster* pPacket, Player* pPl
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -48,8 +48,8 @@ void CGAppointSubmasterHandler::execute(CGAppointSubmaster* pPacket, Player* pPl
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
     if (!g_pGuildManager->isGuildMaster(pPacket->getGuildID(), pPlayerCreature)) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
         GCGuildResponse gcGR;
         gcGR.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGR);

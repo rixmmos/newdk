@@ -56,17 +56,17 @@ void UDPManager::sendPacket(const string& host, uint port, DatagramPacket* pPack
     __BEGIN_DEBUG
 
     try {
-        // 데이터그램 객체를 하나 두고, 전송할 peer 의 호스트와 포트를 지정한다.
+        
         Datagram datagram;
 
 
         datagram.setHost(host);
         datagram.setPort(port);
 
-        // 데이터그램 패킷을 데이터그램에 집어넣는다.
+        
         datagram.write(pPacket);
 
-        // 데이터그램 소켓을 통해서 데이터그램을 전송한다.
+        
         m_pDatagramSocket->send(&datagram);
     } catch (Throwable& t) {
         // cerr << "====================================================================" << endl;

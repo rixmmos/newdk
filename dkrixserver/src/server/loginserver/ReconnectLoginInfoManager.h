@@ -22,7 +22,7 @@ typedef unordered_map<string, ReconnectLoginInfo*> HashMapReconnectLoginInfo;
 //
 // class ReconnectLoginInfoManager;
 //
-// IP ��Ʈ���� Ű������ �ϴ� unordered_map �� ���ο� ������ �ִ�.
+
 //
 //----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ public:
     ReconnectLoginInfo* getReconnectLoginInfo(string ip) noexcept(false);
 
     // heartbeat method
-    // expire �� ReconnectLoginInfo �� �����Ѵ�.
+    
     void heartbeat() noexcept(false);
 
     // get debug string

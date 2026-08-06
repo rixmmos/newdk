@@ -57,12 +57,12 @@ void EffectYellowPoisonToCreature::unaffect(Creature* pCreature)
         Zone* pZone = pCreature->getZone();
         Player* pPlayer = pCreature->getPlayer();
 
-        // Light등의 마법으로 인하여 시야가 밝아져 있을 수 있으므로..
-        // OldSight가 현재의 Sight보다 어두우면 Setting 하지 않는다.
+        
+        
         Sight_t NewSight = 13;
         pCreature->setSight(NewSight);
 
-        // 클라이언트에 Vision 정보를 전송한다.
+        
         GCModifyInformation _GCModifyInformation;
         _GCModifyInformation.addShortData(MODIFY_VISION, NewSight);
         pPlayer->sendPacket(&_GCModifyInformation);
@@ -72,7 +72,7 @@ void EffectYellowPoisonToCreature::unaffect(Creature* pCreature)
 
         pZone->updateScan(pCreature, YELLOW_POISON_SIGHT, NewSight);
 
-        // Yellow Poison의 효과가 풀릴때 Update Scan은 물론 밝기의 조절까지 해준다.
+        
         //	DarkLightInfo* pDIInfo    = g_pDarkLightInfoManager->getCurrentDarkLightInfo( pZone );
         // DarkLevel_t    darkLevel  = pDIInfo->getDarkLevel();
         // LightLevel_t   lightLevel = pDIInfo->getLightLevel();
@@ -83,28 +83,12 @@ void EffectYellowPoisonToCreature::unaffect(Creature* pCreature)
 
         pPlayer->sendPacket(&gcChangeDarkLight);
 
-        /*
-        if (!pSlayer->isFlag(Effect::EFFECT_CLASS_DARKNESS))
-        {
-            pZone->updateScan(pSlayer, YELLOW_POISON_SIGHT, NewSight);
+         
 
-            // Yellow Poison의 효과가 풀릴때 Update Scan은 물론 밝기의 조절까지 해준다.
-            DarkLightInfo* pDIInfo    = g_pDarkLightInfoManager->getCurrentDarkLightInfo();
-            DarkLevel_t    darkLevel  = pDIInfo->getDarkLevel();
-            LightLevel_t   lightLevel = pDIInfo->getLightLevel();
-
-            GCChangeDarkLight gcChangeDarkLight;
-            gcChangeDarkLight.setDarkLevel(darkLevel);
-            gcChangeDarkLight.setLightLevel(lightLevel);
-
-            pPlayer->sendPacket(&gcChangeDarkLight);
-        }
-        */
-
-        // 풀릴때 Sight를 저장해준다.
+        
         // pSlayer->tinysave("Sight = 13");
 
-        // 이펙트가 사라졌다고 알려준다.
+        
         GCRemoveEffect gcRemoveEffect;
         gcRemoveEffect.setObjectID(pCreature->getObjectID());
         gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_YELLOW_POISON_TO_CREATURE);
@@ -253,7 +237,7 @@ void EffectYellowPoisonToCreatureLoader::load(Creature* pCreature)
 
     // Assert(pCreature != NULL);
     if (pCreature == NULL) {
-        // cout << "EffectYellowPoisonToCreatureLoader : 크리쳐가 널입니다." << endl;
+        
         return;
     }
 

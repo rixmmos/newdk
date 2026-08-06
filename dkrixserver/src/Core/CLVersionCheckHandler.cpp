@@ -15,10 +15,10 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// �� ��Ŷ�� Ŭ���̾�Ʈ�� ���̵�� �н����带 ��ȣȭ�ؼ�
-// �α��� ������ �����Ѵ�. �α��� ������ �� ��Ŷ��
-// �޾Ƽ� �÷��̾��� ���̵�� �н����尡 ��Ȯ���� DB�κ���
-// �о ���� ��, �α����� ���� ���θ� �����Ѵ�.
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void CLVersionCheckHandler::execute(CLVersionCheck* pPacket, Player* pPlayer)
 
@@ -37,16 +37,16 @@ void CLVersionCheckHandler::execute(CLVersionCheck* pPacket, Player* pPlayer)
     BEGIN_DB {
         //----------------------------------------------------------------------
         // *CAUTION*
-        // Server�� �ִ� Version Field�� UpdateServer�� �׻� ���Ͻ� �ؾ��Ѵ�.
+        
         //----------------------------------------------------------------------
 
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery("SELECT Version FROM ClientVersion");
 
-        // ���� ��� ROW �� ������ 0 �̶�� ����
-        // Update���� ���� Ŭ���̾�Ʈ�̴�.
-        // ���� ���α׷��� �簡�� �ϰ� ������Ʈ�� �ϰ� �ؾ�
-        // �Ѵ�.
+        
+        
+        
+        
         Assert(pResult->getRowCount() != 0);
         pResult->next();
 
@@ -54,20 +54,7 @@ void CLVersionCheckHandler::execute(CLVersionCheck* pPacket, Player* pPlayer)
         pResult->getInt(1);
         pPacket->getVersion();
 
-        /*
-        if (Version == ClientVersion)
-        {
-            // �α��� ������ �˷��ش�.
-            LCVersionCheckOK lcVersionCheckOK;
-            pLoginPlayer->sendPacket(&lcVersionCheckOK);
-        }
-        else
-        {
-            LCVersionCheckError lcVersionCheckError;
-            pLoginPlayer->sendPacket(&lcVersionCheckError);
-            //pLoginPlayer->disconnect(DISCONNECTED);
-        }
-        */
+         
 
         LCVersionCheckOK lcVersionCheckOK;
         pLoginPlayer->sendPacket(&lcVersionCheckOK);

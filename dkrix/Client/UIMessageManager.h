@@ -21,18 +21,18 @@ class UIMessageManager {
 		~UIMessageManager();
 
 		//-----------------------------------------------------------
-		// 초기화 - 필수~~
+		
 		//-----------------------------------------------------------
 		void			Init();
 
 		//-----------------------------------------------------------
-		// UI Message 처리
+		
 		//-----------------------------------------------------------
 		void			Execute(DWORD message, int left, int right, void* void_ptr);
 
 	protected :
 		//-----------------------------------------------------------
-		// 실제로 message처리하는 함수들
+		
 		//-----------------------------------------------------------
 		static void	Execute_UI_NEW_CHARACTER(int left, int right, void* void_ptr);
 		static void	Execute_UI_RUN_NEWUSER_REGISTRATION(int left, int right, void* void_ptr);
@@ -173,8 +173,8 @@ class UIMessageManager {
 		static void Execute_UI_JOIN_READY_TEAM(int left, int right, void *void_ptr);				// void_ptr = TEAM_NAME
 		static void Execute_UI_JOIN_REGIST_TEAM(int left, int right, void *void_ptr);			// void_ptr = TEAM_NAME
 
-		static void Execute_UI_REGIST_GUILD_MEMBER(int left, int right, void *void_ptr);			// void_ptr = introduction max:150byte 창 닫아줄것!
-		static void Execute_UI_REGIST_GUILD_TEAM(int left, int right, void *void_ptr);			// left = TEAM_NAME, void_ptr = introduction max:150byte 창 닫아줄것!
+		static void Execute_UI_REGIST_GUILD_MEMBER(int left, int right, void *void_ptr);			
+		static void Execute_UI_REGIST_GUILD_TEAM(int left, int right, void *void_ptr);			
 
 		static void Execute_UI_CLOSE_FILE_DIALOG(int left, int right, void *void_ptr);
 
@@ -190,7 +190,7 @@ class UIMessageManager {
 		static void Execute_UI_SEND_NAME_FOR_SOUL_CHAIN(int left, int right, void* void_ptr);
 		static void Execute_UI_CLOSE_TRACE_WINDOW(int left, int right, void* void_ptr);
 
-	// 넷마블용 수정
+	
 		static void Execute_UI_RUN_CONNECT(int left, int right, void* void_ptr);
 		static void Excute_UI_SELECT_GRADE_SKILL(int left, int right, void* void_ptr);
 
@@ -336,7 +336,7 @@ class UIMessageManager {
 
 		static void	Execute_UI_REQUEST_EVENT_ITEM(int left, int right, void* void_ptr);
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 
 		static void	Execute_UI_CLOSE_INVENTORY_SUB(int left, int right, void* void_ptr);
 		static void	Execute_UI_ITEM_DROP_TO_INVENTORY_SUB(int left, int right, void* void_ptr);

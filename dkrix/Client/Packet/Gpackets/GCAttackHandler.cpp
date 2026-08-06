@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 	// message
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -40,7 +40,7 @@ throw ( ProtocolException , Error )
 
 		if (pCreature != NULL)
 		{
-			// 방향 바라보기
+			
 			pCreature->SetDirectionToPosition(pPacket->getX(), pPacket->getY());
 
 			pCreature->PacketAttackNormal(	pPacket->getX(),

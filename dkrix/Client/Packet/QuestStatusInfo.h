@@ -1,7 +1,7 @@
 #ifndef __QUEST_STATUS_INFO_H__
 #define __QUEST_STATUS_INFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 
 #include "Packet.h"
 #include "SocketInputStream.h"
@@ -11,15 +11,15 @@
 #include <VECTOR>
 #define MAX_MISSION_NUM	100
 
-// ui에서 사용될 구조체 - string이 추가되어 있다.
+
 struct UI_GMissionInfo{
 	std::string		szMissionTitle;
 	std::string		m_StrArg;
 	DWORD			m_NumArg;
 	BYTE			bStatus;
-	BYTE			bCondition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-	WORD			bIndex;		// 해당 조건의 몇번째 element인가
-	DWORD			dwTimeLimit;// 시간 제한 퀘스트일 경우 처음 남음 시간 세팅 
+	BYTE			bCondition;	
+	WORD			bIndex;		
+	DWORD			dwTimeLimit;
 };
 struct UI_GQuestInfo{
 	DWORD			dwQuestID;
@@ -28,23 +28,23 @@ struct UI_GQuestInfo{
 	std::string		szQuestDescription;
 	std::vector<UI_GMissionInfo*> vMissionList;
 };
-// ui에서 사용될 구조체
+
 struct MissionInfo
 {
 	enum Status
 	{
-		HIDE = 0,			// 보여주지 않음
-		CURRENT,			// 지금 해야 되는 미션 (수행중)
-		SUCCESS,			// 이미 성공한 미션
-		FAIL,				// 실패
+		HIDE = 0,			
+		CURRENT,			
+		SUCCESS,			
+		FAIL,				
 	};
 
-	BYTE	m_Condition;	// 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-	WORD	m_Index;		// 해당 조건의 몇번째 element인가
-	BYTE	m_Status;		// 현재 상태
+	BYTE	m_Condition;	
+	WORD	m_Index;		
+	BYTE	m_Status;		
 
-	string	m_StrArg;		// 찍어줄 문자열
-	DWORD	m_NumArg;		// 찍어줄 숫자
+	string	m_StrArg;		
+	DWORD	m_NumArg;		
 
 	void read(SocketInputStream& iStream) throw(ProtocolException, Error)
 	{
@@ -81,13 +81,13 @@ class QuestStatusInfo
 public:
 	enum Status
 	{
-		CANNOT = 0,		// 아직 불가능
-		CAN_ACCEPT,		// 수행가능
-		DOING,			// 수행중
-		SUCCESS,		// 성공 (아직 보상받지 않음)
-		COMPLETE,		// 완료 (보상받음, 재수행 불가능)
-		FAIL,			// 실패 (재수행 불가능)
-		CAN_REPLAY,		// 재수행 가능
+		CANNOT = 0,		
+		CAN_ACCEPT,		
+		DOING,			
+		SUCCESS,		
+		COMPLETE,		
+		FAIL,			
+		CAN_REPLAY,		
 	};
 
 	void read(SocketInputStream& iStream) throw(ProtocolException, Error);
@@ -99,7 +99,7 @@ public:
 	const std::list<MissionInfo>& GetMission() const {return m_Missions;}
 private:
 	DWORD	m_QuestID;
-	BYTE	m_Status;	// 위의 enum 참조
+	BYTE	m_Status;	
 	std::list<MissionInfo>	m_Missions;
 };
 

@@ -346,125 +346,12 @@ void BloodBibleLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        // BloodBible load할게 있다는것은..
-        // 현재로서는 이전에 서버다운이 되었다는 의미이다.
-        // 그래서, 지운다. by sigi
+        
+        
+        
         pStmt->executeQuery("DELETE FROM BloodBibleObject WHERE OwnerID = '%s'", pCreature->getName().c_str());
 
-        /*
-        Result* pResult = pStmt->executeQuery( "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType,
-        Durability, EnchantLevel FROM BloodBibleObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str() );
-
-
-        while (pResult->next())
-        {
-            uint i = 0;
-
-            BloodBible* pBloodBible = new BloodBible();
-
-            pBloodBible->setItemID(pResult->getDWORD(++i));
-            pBloodBible->setObjectID(pResult->getDWORD(++i));
-            pBloodBible->setItemType(pResult->getDWORD(++i));
-
-            Storage storage =(Storage)pResult->getInt(++i);
-            StorageID_t storageID = pResult->getDWORD(++i);
-            BYTE x = pResult->getBYTE(++i);
-            BYTE y = pResult->getBYTE(++i);
-
-            pBloodBible->setOptionType(pResult->getInt(++i));
-            pBloodBible->setDurability(pResult->getInt(++i));
-            pBloodBible->setEnchantLevel(pResult->getInt(++i));
-
-            Inventory*  pInventory      = NULL;
-            Slayer*     pSlayer         = NULL;
-            Vampire*    pVampire        = NULL;
-            Motorcycle* pMotorcycle     = NULL;
-            Inventory*  pMotorInventory = NULL;
-            //Item*       pItem           = NULL;
-            Stash*      pStash          = NULL;
-            //Belt*       pBelt           = NULL;
-            //Inventory*  pBeltInventory  = NULL;
-
-            if (pCreature->isSlayer())
-            {
-                pSlayer     = dynamic_cast<Slayer*>(pCreature);
-                pInventory  = pSlayer->getInventory();
-                pStash      = pSlayer->getStash();
-                pMotorcycle = pSlayer->getMotorcycle();
-
-                if (pMotorcycle) pMotorInventory = pMotorcycle->getInventory();
-            }
-            else if (pCreature->isVampire())
-            {
-                pVampire   = dynamic_cast<Vampire*>(pCreature);
-                pInventory = pVampire->getInventory();
-                pStash     = pVampire->getStash();
-            }
-            else throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
-
-            switch(storage)
-            {
-                case STORAGE_INVENTORY:
-                    if (pInventory->canAddingEx(x, y, pBloodBible))
-                    {
-                        pInventory->addItemEx(x, y, pBloodBible);
-                    }
-                    else
-                    {
-                        processItemBugEx(pCreature, pBloodBible);
-                    }
-                    break;
-
-                case STORAGE_GEAR:
-                    if (pCreature->isSlayer())
-                    {
-                        if (!pSlayer->isWear((Slayer::WearPart)x))
-                        {
-                            pSlayer->wearItem((Slayer::WearPart)x, pBloodBible);
-                        }
-                        else
-                        {
-                            processItemBugEx(pCreature, pBloodBible);
-                        }
-                    }
-                    else if (pCreature->isVampire())
-                    {
-                        processItemBugEx(pCreature, pBloodBible);
-                    }
-                    break;
-
-                case STORAGE_BELT :
-                    processItemBugEx(pCreature, pBloodBible);
-                    break;
-
-                case STORAGE_EXTRASLOT :
-                    if (pCreature->isSlayer())       pSlayer->addItemToExtraInventorySlot(pBloodBible);
-                    else if (pCreature->isVampire()) pVampire->addItemToExtraInventorySlot(pBloodBible);
-                    break;
-
-                case STORAGE_MOTORCYCLE:
-                    processItemBugEx(pCreature, pBloodBible);
-                    break;
-
-                case STORAGE_STASH:
-                    if (pStash->isExist(x, y))
-                    {
-                        processItemBugEx(pCreature, pBloodBible);
-                    }
-                    else pStash->insert(x, y, pBloodBible);
-                    break;
-
-                case STORAGE_GARBAGE:
-                    processItemBug(pCreature, pBloodBible);
-                    break;
-
-                default :
-                    SAFE_DELETE(pStmt);	// by sigi
-                    throw Error("invalid storage or OwnerID must be NULL");
-            }
-        }
-        */
+         
 
         SAFE_DELETE(pStmt);
     }
@@ -523,7 +410,7 @@ void BloodBibleLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

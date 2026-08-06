@@ -44,11 +44,11 @@ void CGFailQuestHandler::execute (CGFailQuest* pPacket , Player* pPlayer)
 	{
 		pPC->sendCurrentQuestInfo();
 
-		//cout << "Quest 시작 " << pPC->getName() << " " << pPacket->getQuestID() << endl;
+		
 	}
 	else
 	{
-		//cout << "Quest 시작 실패 " << pPC->getName() << " " << (int)code << endl;
+		
 	}
 
 #endif	// __GAME_SERVER__

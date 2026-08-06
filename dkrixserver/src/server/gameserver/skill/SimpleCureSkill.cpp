@@ -69,16 +69,16 @@ void SimpleCureSkill::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, const SIMP
 
             uint HealPoint = param.SkillDamage;
 
-            // 흡혈당한 상태라면 흡혈 상태를 날려준다.
+            
             if (pEffectBloodDrain != NULL && pEffectBloodDrain->getLevel() < param.Level) {
-                // 흡혈 아르바이트를 방지하기 위한 후유증 이펙트를 붙여준다.
+                
                 if (pSlayer->isFlag(Effect::EFFECT_CLASS_AFTERMATH)) {
                     Effect* pEffect = pSlayer->findEffect(Effect::EFFECT_CLASS_AFTERMATH);
                     EffectAftermath* pEffectAftermath = dynamic_cast<EffectAftermath*>(pEffect);
-                    pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+                    pEffectAftermath->setDeadline(5 * 600); 
                 } else {
                     EffectAftermath* pEffectAftermath = new EffectAftermath(pSlayer);
-                    pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+                    pEffectAftermath->setDeadline(5 * 600); 
                     pSlayer->addEffect(pEffectAftermath);
                     pSlayer->setFlag(Effect::EFFECT_CLASS_AFTERMATH);
                     pEffectAftermath->create(pSlayer->getName());
@@ -99,11 +99,11 @@ void SimpleCureSkill::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, const SIMP
                 pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcRemoveEffect);
             }
 
-            // HP를 세팅한다.
+            
             HP_t CurrentHP = pSlayer->getHP(ATTR_CURRENT);
             HP_t MaxHP = pSlayer->getHP(ATTR_MAX);
 
-            // 실제 회복 수치를 계산한다.
+            
             int RealHealPoint = 0;
             if (CurrentHP + HealPoint <= MaxHP) {
                 RealHealPoint = max((unsigned int)0, HealPoint);
@@ -111,7 +111,7 @@ void SimpleCureSkill::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, const SIMP
                 RealHealPoint = max(0, MaxHP - CurrentHP);
             }
 
-            // 경험치를 올려준다.
+            
             shareAttrExp(pSlayer, RealHealPoint, param.STRMultiplier, param.DEXMultiplier, param.INTMultiplier,
                          _GCSkillToSelfOK1);
             increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToSelfOK1);
@@ -120,7 +120,7 @@ void SimpleCureSkill::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, const SIMP
             CurrentHP = min((int)MaxHP, (int)(CurrentHP + HealPoint));
             pSlayer->setHP(CurrentHP, ATTR_CURRENT);
 
-            // HP를 브로드캐스팅한다.
+            
             GCStatusCurrentHP gcStatusCurrentHP;
             gcStatusCurrentHP.setObjectID(pSlayer->getObjectID());
             gcStatusCurrentHP.setCurrentHP(CurrentHP);
@@ -173,8 +173,8 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // 슬레이어 외에는 치료할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isSlayer() == false) {
             executeSkillFailException(pSlayer, param.SkillType);
             return;
@@ -191,7 +191,7 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
 
         bool bHPCheck = false;
 
-        // 체력이 닳거나, 흡혈을 당한 상태여야 한다.
+        
         Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
         Assert(pTargetSlayer != NULL);
 
@@ -220,16 +220,16 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
 
             uint HealPoint = param.SkillDamage;
 
-            // 흡혈당한 상태라면 흡혈 상태를 날려준다.
+            
             if (pEffectBloodDrain != NULL && pEffectBloodDrain->getLevel() < param.Level) {
-                // 흡혈 아르바이트를 방지하기 위한 후유증 이펙트를 붙여준다.
+                
                 if (pTargetSlayer->isFlag(Effect::EFFECT_CLASS_AFTERMATH)) {
                     Effect* pEffect = pTargetSlayer->findEffect(Effect::EFFECT_CLASS_AFTERMATH);
                     EffectAftermath* pEffectAftermath = dynamic_cast<EffectAftermath*>(pEffect);
-                    pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+                    pEffectAftermath->setDeadline(5 * 600); 
                 } else {
                     EffectAftermath* pEffectAftermath = new EffectAftermath(pTargetSlayer);
-                    pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+                    pEffectAftermath->setDeadline(5 * 600); 
                     pTargetSlayer->addEffect(pEffectAftermath);
                     pTargetSlayer->setFlag(Effect::EFFECT_CLASS_AFTERMATH);
                     pEffectAftermath->create(pTargetSlayer->getName());
@@ -251,11 +251,11 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
                 pZone->broadcastPacket(pTargetSlayer->getX(), pTargetSlayer->getY(), &gcRemoveEffect);
             }
 
-            // 다른 사람을 치료한다.
+            
             HP_t CurrentHP = pTargetSlayer->getHP(ATTR_CURRENT);
             HP_t MaxHP = pTargetSlayer->getHP(ATTR_MAX);
 
-            // 실제 회복 수치를 계산한다.
+            
             // int RealHealPoint = 0;
             // if( CurrentHP + HealPoint <= MaxHP ) {
             // 	RealHealPoint = max( (unsigned int)0, HealPoint );
@@ -263,7 +263,7 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
             // 	RealHealPoint = max( 0, MaxHP - CurrentHP );
             // }
 
-            // 경험치를 올려준다.
+            
             shareAttrExp(pSlayer, HealPoint, param.STRMultiplier, param.DEXMultiplier, param.INTMultiplier,
                          _GCSkillToObjectOK1);
             increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToObjectOK1);
@@ -272,7 +272,7 @@ void SimpleCureSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillS
             CurrentHP = min((int)(MaxHP), (int)(CurrentHP + HealPoint));
             pTargetSlayer->setHP(CurrentHP, ATTR_CURRENT);
 
-            // 치료가 되었으니 HP를 브로드캐스팅한다.
+            
             GCStatusCurrentHP gcStatusCurrentHP;
             gcStatusCurrentHP.setObjectID(TargetObjectID);
             gcStatusCurrentHP.setCurrentHP(CurrentHP);

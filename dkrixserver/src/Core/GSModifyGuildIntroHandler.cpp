@@ -33,19 +33,19 @@ void GSModifyGuildIntroHandler::execute(GSModifyGuildIntro* pPacket, Player* pPl
 
         Assert(pPacket != NULL);
 
-    // 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     if (pGuild == NULL)
         return;
 
     pGuild->saveIntro(pPacket->getGuildIntro());
 
-    // 게임 서버로 보낼 패킷을 만든다.
+    
     SGModifyGuildIntroOK sgModifyGuildIntroOK;
     sgModifyGuildIntroOK.setGuildID(pGuild->getID());
     sgModifyGuildIntroOK.setGuildIntro(pPacket->getGuildIntro());
 
-    // 게임 서버로 패킷을 보낸다.
+    
     g_pGameServerManager->broadcast(&sgModifyGuildIntroOK);
 
 #endif

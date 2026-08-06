@@ -110,7 +110,7 @@ void GameServerPlayer::processOutput() throw(IOException, Error) {
     try {
         m_pOutputStream->flush();
     } catch (InvalidProtocolException&) {
-        throw DisconnectException("이상한 패킷임");
+        throw DisconnectException(" ");
     }
 
     __END_CATCH
@@ -126,14 +126,14 @@ void GameServerPlayer::processCommand() throw(IOException, Error) {
     __BEGIN_TRY
 
     try {
-        // 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
+        
         while (true) {
-            // 헤더를 저장할 버퍼 생성
+            
             CBillingPacketHeader header;
 
-            // 입력스트림에서 패킷헤더크기만큼 읽어본다.
-            // 만약 지정한 크기만큼 스트림에서 읽을 수 없다면,
-            // Insufficient 예외가 발생하고, 루프를 빠져나간다.
+            
+            
+            
             if (!m_pInputStream->peek((char*)&header, szCBillingPacketHeaderInfo))
                 break;
 
@@ -258,9 +258,9 @@ void GameServerPlayer::disconnect(bool bDisconnected) throw(InvalidProtocolExcep
     __BEGIN_TRY
 
     try {
-        // 정당하게 로그아웃한 경우에는 출력 버퍼를 플러시할 수 있다.
-        // 그러나, 불법적인 디스를 걸었다면 소켓이 닫겼으므로
-        // 플러시할 경우 SIG_PIPE 을 받게 된다.
+        
+        
+        
         if (bDisconnected == UNDISCONNECTED) {
             m_pOutputStream->flush();
         }
@@ -270,7 +270,7 @@ void GameServerPlayer::disconnect(bool bDisconnected) throw(InvalidProtocolExcep
         cerr << "GameServerPlayer::disconnect Exception Check!!" << endl;
         cerr << t.toString() << endl;
         m_pSocket->close();
-        // throw Error("씨바...");
+        
     }
 
     __END_CATCH
@@ -338,7 +338,7 @@ void GameServerPlayer::executeLogin(CBillingPacketHeader& header,
     sHeader.Body_Length = szCBillingPacketResponseLoginBodyInfo;
     // sHeader.Body_Length = szCBillingPacketErrorBodyInfo;
 
-    // strcpy( sBody.Return_Message, "메롱" );
+    
     strcpy(sBody.Login_Name, body.Login_Name);
     sBody.Player_Type = CBILLING_PLAYER_TYPE_UNLIMITED;
     sBody.Pay_Type = CBILLING_PAY_TYPE_PRE_PAID;

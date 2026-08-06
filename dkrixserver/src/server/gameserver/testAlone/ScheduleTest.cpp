@@ -36,8 +36,8 @@ void ScheduleTest::tearDown() {}
 void ScheduleTest::testSchedule() {
     __BEGIN_TEST_CASE
 
-    VSDateTime::setCurrentDateTime(0); // 처음에
-    VSDateTime dt(100);                // 100초 뒤에 실행하도록 예약해둔다.
+    VSDateTime::setCurrentDateTime(0); 
+    VSDateTime dt(100);                
 
     TestWork* pWork = new TestWork();
     Schedule* pSchedule = new Schedule(pWork, dt);
@@ -48,14 +48,14 @@ void ScheduleTest::testSchedule() {
     CPPUNIT_ASSERT(!pSchedule->heartbeat());
     CPPUNIT_ASSERT(!pWork->test);
 
-    VSDateTime::setCurrentDateTime(50); // 50 (50분? 50시간?) 뒤에
+    VSDateTime::setCurrentDateTime(50); 
 
-    CPPUNIT_ASSERT(!pSchedule->heartbeat()); // 아직 실행되어선 안 된다.
+    CPPUNIT_ASSERT(!pSchedule->heartbeat()); 
     CPPUNIT_ASSERT(!pWork->test);
 
-    VSDateTime::setCurrentDateTime(101); // 100초 (100분? 100시간?) 뒤에
+    VSDateTime::setCurrentDateTime(101); 
 
-    CPPUNIT_ASSERT(pSchedule->heartbeat()); // 실행되어야 한다.
+    CPPUNIT_ASSERT(pSchedule->heartbeat()); 
     CPPUNIT_ASSERT(pWork->test);
 
     SAFE_DELETE(pSchedule);
@@ -70,7 +70,7 @@ void ScheduleTest::testScheduler() {
     Scheduler* pScheduler = new Scheduler();
 
     TestWork* pWork1 = new TestWork();
-    Schedule* pSchedule1 = new Schedule(pWork1, VSDateTime(100)); // 100초 뒤에 실행하도록 예약해둔다.
+    Schedule* pSchedule1 = new Schedule(pWork1, VSDateTime(100)); 
 
     pScheduler->addSchedule(pSchedule1);
 
@@ -81,44 +81,44 @@ void ScheduleTest::testScheduler() {
 
     pScheduler->addSchedule(pSchedule2);
 
-    CPPUNIT_ASSERT(pScheduler->getSize() == 2); // 두개 다 잘 들어가야 한다.
+    CPPUNIT_ASSERT(pScheduler->getSize() == 2); 
 
     pScheduler->heartbeat();
 
     CPPUNIT_ASSERT(!pWork1->test);
     CPPUNIT_ASSERT(!pWork2->test);
 
-    VSDateTime::setCurrentDateTime(50); // 50초 뒤에
+    VSDateTime::setCurrentDateTime(50); 
 
     pScheduler->heartbeat();
     CPPUNIT_ASSERT(pScheduler->getSize() == 2);
 
-    CPPUNIT_ASSERT(!pWork1->test); // 아무것도 실행되지 않았어야 한다.
+    CPPUNIT_ASSERT(!pWork1->test); 
     CPPUNIT_ASSERT(!pWork2->test);
 
-    VSDateTime::setCurrentDateTime(101); // 100초 뒤에
+    VSDateTime::setCurrentDateTime(101); 
 
     pWork = dynamic_cast<TestWork*>(pScheduler->heartbeat());
     CPPUNIT_ASSERT(pWork1 == pWork);
-    CPPUNIT_ASSERT(pScheduler->getSize() == 1); // 한개는 지워졌어야 한다.
+    CPPUNIT_ASSERT(pScheduler->getSize() == 1); 
 
-    CPPUNIT_ASSERT(pWork1->test); // 1번 스케줄만 실행되었어야 한다.
+    CPPUNIT_ASSERT(pWork1->test); 
     CPPUNIT_ASSERT(!pWork2->test);
 
-    VSDateTime::setCurrentDateTime(151); // 150초 뒤에
+    VSDateTime::setCurrentDateTime(151); 
 
     pScheduler->heartbeat();
-    CPPUNIT_ASSERT(pScheduler->getSize() == 1); // 한개는 지워졌어야 한다.
+    CPPUNIT_ASSERT(pScheduler->getSize() == 1); 
 
     CPPUNIT_ASSERT(pWork1->test);
     CPPUNIT_ASSERT(!pWork2->test);
 
-    VSDateTime::setCurrentDateTime(201); // 200초 뒤에
+    VSDateTime::setCurrentDateTime(201); 
 
     pWork = dynamic_cast<TestWork*>(pScheduler->heartbeat());
 
     CPPUNIT_ASSERT(pWork2 == pWork);
-    CPPUNIT_ASSERT(pScheduler->getSize() == 0); // 두개 다 지워졌어야 한다.
+    CPPUNIT_ASSERT(pScheduler->getSize() == 0); 
 
     CPPUNIT_ASSERT(pWork1->test);
     CPPUNIT_ASSERT(pWork2->test);

@@ -52,7 +52,7 @@ class GUILD_INFO {
 };
 
 //----------------------------------------------------------------------
-// MGuildInfoMapper <길드마크, SpriteID>
+
 //----------------------------------------------------------------------
 class MGuildInfoMapper : public std::map<WORD, GUILD_INFO*> {
 	public :

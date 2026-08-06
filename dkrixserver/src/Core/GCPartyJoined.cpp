@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCPartyJoined.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -27,16 +27,16 @@ PacketSize_t GCPartyJoined::getPacketSize() const
 
     PacketSize_t value = 0;
 
-    value += szBYTE; // 멤버 카운트
+    value += szBYTE; 
 
     list<PARTY_MEMBER_INFO*>::const_iterator itr = m_MemberInfoList.begin();
     for (; itr != m_MemberInfoList.end(); itr++) {
         PARTY_MEMBER_INFO* pInfo = (*itr);
 
-        value += szBYTE;               // 이름 길이
-        value += (pInfo->name).size(); // 실제 이름
-        value += szBYTE;               // 성별
-        value += szBYTE;               // 헤어 스타일
+        value += szBYTE;               
+        value += (pInfo->name).size(); 
+        value += szBYTE;               
+        value += szBYTE;               
         value += szIP;                 // IP
     }
 
@@ -107,7 +107,7 @@ void GCPartyJoined::read(SocketInputStream& iStream)
 {
     __BEGIN_TRY
 
-    // 먼저 리스트의 사이즈를 읽어들인다.
+    
     iStream.read(m_MemberCount);
 
     for (uint i = 0; i < m_MemberCount; i++) {
@@ -135,7 +135,7 @@ void GCPartyJoined::write(SocketOutputStream& oStream) const
 {
     __BEGIN_TRY
 
-    // 먼저 리스트의 사이즈를 쓴다.
+    
     oStream.write(m_MemberCount);
 
     list<PARTY_MEMBER_INFO*>::const_iterator itr = m_MemberInfoList.begin();

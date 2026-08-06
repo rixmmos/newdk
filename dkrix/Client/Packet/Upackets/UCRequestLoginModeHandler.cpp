@@ -13,7 +13,7 @@
 #ifdef __UPDATE_CLIENT__
 
 	#include "Assert.h"
-	#include "Properties.h"
+	#include "Packet/Properties.h"
 #endif
 
 //--------------------------------------------------------------------------------

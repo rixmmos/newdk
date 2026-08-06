@@ -2,22 +2,22 @@
 // Filename    : GCGQuestStatusModify.h 
 // Written By  : elca@ewestsoft.com
 // Description : 
-// 기술이 성공했을때 보내는 패킷을 위한 클래스 정의
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_GQUEST_STATUS_MODIFY_H__
 #define __GC_GQUEST_STATUS_MODIFY_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
-#include "QuestStatusInfo.h"
+#include "../QuestStatusInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCGQuestStatusModify;
-// 게임서버에서 클라이언트로 자신의 기술이 성공을 알려주기 위한 클래스
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCGQuestStatusModify : public Packet 
@@ -25,10 +25,10 @@ class GCGQuestStatusModify : public Packet
 public:
 	enum ModifyType
 	{
-		NO_MODIFY,		// 상태가 바뀌지 않았음
-		CURRENT,		// 퀘스트가 시작되었음
-		SUCCESS,		// 퀘스트가 성공했음
-		FAIL,			// 퀘스트가 실패했음
+		NO_MODIFY,		
+		CURRENT,		
+		SUCCESS,		
+		FAIL,			
 	};
 
 	GCGQuestStatusModify() throw();

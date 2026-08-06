@@ -56,7 +56,7 @@ void SkillParentInfo::init()
 //
 // SkillParentInfo::hasParent()
 //
-// 특정 타입을 가지는 부모가 있는지 확인한다.
+
 //
 //----------------------------------------------------------------------
 bool SkillParentInfo::hasParent(SkillType_t SkillType) {
@@ -89,7 +89,7 @@ bool SkillParentInfo::hasParent(SkillType_t SkillType) {
 
 
 //----------------------------------------------------------------------
-// 적 리스트의 특정 위치의 크리처의 아이디를 리턴한다.
+
 //----------------------------------------------------------------------
 SkillType_t SkillParentInfo::getParents(SkillType_t SkillType) const {
     __BEGIN_TRY
@@ -150,7 +150,7 @@ SkillParentInfoManager::SkillParentInfoManager()
 {
     __BEGIN_TRY
 
-    // 덜 지웠음둥 -_-; by sigi
+    
 
     SAFE_DELETE_ARRAY(m_SkillParentInfoList);
 

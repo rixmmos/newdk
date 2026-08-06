@@ -12,7 +12,7 @@
 #include "GCSkillToObjectOK5.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -33,15 +33,15 @@ void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
             return;
         }
 
-        // 무장하고 있는 무기가 널이거나, SWORD가 아니라면 쓸 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_SWORD) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -62,7 +62,7 @@ void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
 
         bool bCriticalHit = false;
 
-        // 기본 데미지에 스킬 데미지를 더한다.
+        
         SkillInput input(pSlayer, pSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -78,8 +78,8 @@ void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         bool bCanHit = canHit(pSlayer, pTargetCreature, SkillType) && canAttack(pSlayer, pTargetCreature);
         bool bPK = verifyPK(pSlayer, pTargetCreature);
 
-        // 마나가 있어야 하고, 시간과 거리 체크에 성공하고,
-        // hitroll에 성공하고, 크로스 카운터가 걸려있지 않다면, 성공이다.
+        
+        
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bCanHit && bPK) {
             CheckCrossCounter(pSlayer, pTargetCreature, Damage, pSkillInfo->getRange());
 
@@ -87,17 +87,17 @@ void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
 
             //			Exp_t Point = pSkillInfo->getPoint();
 
-            // 데미지를 주고, 내구도를 떨어뜨린다.
+            
             setDamage(pTargetCreature, Damage, pSlayer, SkillType, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             decreaseDurability(pSlayer, pTargetCreature, pSkillInfo, &_GCSkillToObjectOK1, &_GCSkillToObjectOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
             }
 
-            // 타겟이 슬레이어가 아닌 경우에만 경험치를 올려준다.
+            
             if (!pTargetCreature->isSlayer()) {
                 if (bIncreaseExp) {
                     shareAttrExp(pSlayer, Damage, 8, 1, 1, _GCSkillToObjectOK1);
@@ -108,7 +108,7 @@ void LightningHand::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
                 increaseAlignment(pSlayer, pTargetCreature, _GCSkillToObjectOK1);
             }
 
-            // 패킷을 준비하고, 보낸다.
+            
             _GCSkillToObjectOK1.setSkillType(SkillType);
             _GCSkillToObjectOK1.setCEffectID(CEffectID);
             _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);

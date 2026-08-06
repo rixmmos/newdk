@@ -28,12 +28,12 @@ DatabaseManager::DatabaseManager() throw() {
 DatabaseManager::~DatabaseManager() throw() {
     __BEGIN_TRY
 
-    // 모든 Connection 를 삭제해야 한다.
+    
     unordered_map<int, Connection*>::iterator itr = m_Connections.begin();
     for (; itr != m_Connections.end(); itr++)
         SAFE_DELETE(itr->second);
 
-    // 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+    
     m_Connections.clear();
 
     SAFE_DELETE(m_pDefaultConnection);
@@ -128,7 +128,7 @@ void DatabaseManager::addConnection(int TID, Connection* pConnection)
 
 #ifdef __GAME_SERVER
 
-    // 게임 서버일 경우 각 쓰레드 별로 World DB Connection이 있는 경우가 좋다.
+    
     Statement* pStmt = NULL;
     pStmt = m_pDefaultConnection->createStatement();
     Result* pResult = NULL;

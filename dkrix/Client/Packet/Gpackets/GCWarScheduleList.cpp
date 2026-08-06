@@ -44,7 +44,7 @@ GCWarScheduleList::~GCWarScheduleList()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCWarScheduleList::read (SocketInputStream & iStream) 
 	 throw (ProtocolException , Error)
@@ -89,7 +89,7 @@ void GCWarScheduleList::read (SocketInputStream & iStream)
 
 		    
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCWarScheduleList::write (SocketOutputStream & oStream) const 
      throw (ProtocolException , Error)
@@ -198,10 +198,10 @@ std::string GCWarScheduleList::toString () const
 	{
 		msg << ", (WarScheduleInfo : "
 			<< ( ((*itr)->warType)?"WAR_TYPE_DIFFERENT_RACE, ":"WAR_TYPE_SAME_RACE, " )
-			<< (*itr)->year << "년 "
-			<< (*itr)->month << "월 "
-			<< (*itr)->day << "일"
-			<< (*itr)->hour << "시";
+			<< (*itr)->year << " "
+			<< (*itr)->month << " "
+			<< (*itr)->day << ""
+			<< (*itr)->hour << "";
 
 		if( (*itr)->warType == 0 )
 		{

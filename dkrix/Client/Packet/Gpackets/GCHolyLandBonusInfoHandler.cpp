@@ -38,7 +38,7 @@ throw ( ProtocolException , Error )
 		}
 		else
 		{
-			// 스킬 리스트에서 빼준다?		순서 틀리면 바보 된다
+			
 			g_abHolyLandBonusSkills[i] = false;
 		}
 		
@@ -49,7 +49,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//--------------------------------------------------
-	// 현재 사용 가능한 skill들을 다시 체크한다.
+	
 	//--------------------------------------------------
 	g_pSkillAvailable->SetAvailableSkills();
 

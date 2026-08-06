@@ -45,8 +45,8 @@ SocketOutputStream::~SocketOutputStream ()
 	__BEGIN_TRY
 
 	if ( m_Buffer != NULL ) {
-		// 연결이 끊겨서 ConnectException 을 받아 종료된 상태에서
-		// flush를 할 경우 SIGPIPE 가 난다. 따라서, 무시하자~
+		
+		
 		// flush();
 		delete [] m_Buffer;
 		m_Buffer = NULL;
@@ -65,8 +65,8 @@ SocketOutputStream::~SocketOutputStream ()
 // ( ( m_Head = m_Tail + 1 ) ||  
 //   ( ( m_Head == 0 ) && ( m_Tail == m_BufferLen - 1 ) )
 //
-// 일 때 버퍼 full 로 간주한다는 것을 잊지 말라. 따라서, 버퍼의 빈
-// 공간의 크기는 항상 1 을 빼줘야 한다는 사실!
+
+
 //
 //////////////////////////////////////////////////////////////////////
 uint SocketOutputStream::write ( const char * buf , uint len )
@@ -74,11 +74,11 @@ uint SocketOutputStream::write ( const char * buf , uint len )
 {
 	__BEGIN_TRY
 		
-	// 현재 버퍼의 빈 영역을 계산한다.
+	
 	uint nFree = ( ( m_Head <= m_Tail ) ?  m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1 );
 	//m_Tail - m_Head - 1 );
 
-	// 쓸려고 하는 데이타의 크기가 빈 영역의 크기를 초과할 경우 버퍼를 증가시킨다.
+	
 	if ( len >= nFree )
 		resize( len - nFree + 1 );
 		
@@ -136,14 +136,14 @@ void SocketOutputStream::write ( const Packet * pPacket )
 {
 	__BEGIN_TRY
 		
-	// 우선 패킷아이디와 패킷크기를 출력버퍼로 쓴다.
+	
 	PacketID_t packetID = pPacket->getPacketID();
 	write( (char*)&packetID , szPacketID );
 	
 	PacketSize_t packetSize = pPacket->getPacketSize();
 	write( (char*)&packetSize , szPacketSize );
 	
-	// 속흙룐관埼죗
+	
 	write( (char*)&m_Sequence, szSequenceSize);
 	m_Sequence++;
 
@@ -151,7 +151,7 @@ void SocketOutputStream::write ( const Packet * pPacket )
         __FILE__, __LINE__,
         packetID, packetSize, m_Sequence-1);
 
-	// 이제 패킷바디를 출력버퍼로 쓴다.
+	
 		pPacket->write( *this );
 	
 	
@@ -262,17 +262,17 @@ void SocketOutputStream::resize ( int size )
 	
 	if ( size < 0 ) {
 		
-		// 만약 크기를 줄이려는데 버퍼에 들어있는 데이타를 
-		// 다 못담아낼 경우 
+		
+		
 		if ( newBufferLen < 0 || newBufferLen < len )
 			throw IOException("new buffer is too small!");
 		
 	} 
 	
-	// 새 버퍼를 할당받는다.
+	
 	char * newBuffer = new char[ newBufferLen ];
 		
-	// 원래 버퍼의 내용을 복사한다.
+	
 	if ( m_Head < m_Tail ) {
 
 		//
@@ -296,10 +296,10 @@ void SocketOutputStream::resize ( int size )
 
 	}
 		
-	// 원래 버퍼를 삭제한다.
+	
 	delete [] m_Buffer;
 		
-	// 버퍼 및 버퍼 크기를 재설정한다.
+	
 	m_Buffer = newBuffer;
 	m_BufferLen = newBufferLen;
 	m_Head = 0;

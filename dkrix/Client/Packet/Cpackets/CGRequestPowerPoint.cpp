@@ -2,7 +2,7 @@
 // Filename    : CGRequestPowerPoint.cpp 
 // Written By  :
 // Description :
-// 서버에 원하는 사람의 IP 요청
+
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGRequestPowerPoint.h"

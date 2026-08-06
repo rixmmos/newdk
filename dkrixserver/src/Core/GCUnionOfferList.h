@@ -19,7 +19,7 @@
 //
 // class GCUnionOfferList;
 //
-// 클라이언트에게 연합을 신청한 길드 리스트를 만들어서 보내준다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -115,7 +115,7 @@ public:
         m_GuildID = GuildID;
     }
 
-    // get/set OfferGuild Type (JOIN-신청자 목록, QUIT-탈퇴신청한 길드)
+    
     BYTE getGuildType() const {
         return m_Type;
     }
@@ -161,10 +161,10 @@ public:
     ~GCUnionOfferList();
 
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -226,7 +226,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return SingleGuildUnionOffer::getMaxSize() * 20;
     }

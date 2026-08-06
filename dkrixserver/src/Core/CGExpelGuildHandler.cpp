@@ -47,7 +47,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -62,11 +62,11 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -74,7 +74,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    // 내가 나를 추방하려고 하면? :
+    
     if (pUnion->getMasterGuildID() == pPacket->getGuildID()) {
         gcGuildResponse.setCode(GuildUnionOfferManager::MASTER_CANNOT_QUIT);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -94,7 +94,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         }
         string TargetGuildMaster = pGuild->getMaster();
 
-        // cout << "연합에서 길드를 추방시킨다. 통보받을 유저는 : " << TargetGuildMaster.c_str() << endl;
+        
 
 
         Statement* pStmt = NULL;
@@ -109,7 +109,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                // cout << "추방하고 나서..멤버가 하나도 남지 않으면 연합정보를 없애버린다." << endl;
+                
                 pStmt->executeQuery("DELETE FROM `GuildUnionInfo` WHERE `UnionID`='%u'", pUnion->getUnionID());
                 GuildUnionManager::Instance().reload();
             }
@@ -129,7 +129,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
 
         pPlayer->sendPacket(&gcModifyInformation);
 
-        // 통보받을 유저에게 길드Union정보를 다시 보낸다
+        
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -148,7 +148,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
-        // 다른 서버에 있는 놈들에게 변경사항을 알린다.
+        
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
 

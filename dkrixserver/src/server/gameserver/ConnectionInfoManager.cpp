@@ -19,6 +19,13 @@
 #include "ZoneGroupManager.h"
 #include "ZonePlayerManager.h"
 
+static string normalizeConnectionInfoIP(const string& clientIP) {
+    if (clientIP == "localhost" || clientIP == "::1" || clientIP == "::ffff:127.0.0.1")
+        return "127.0.0.1";
+
+    return clientIP;
+}
+
 // global variable definition
 ConnectionInfoManager* g_pConnectionInfoManager = NULL;
 
@@ -32,11 +39,11 @@ ConnectionInfoManager::ConnectionInfoManager()
 
     m_Mutex.setName("ConnectionInfoManager");
 
-    // 다음 heartbeat 시간을 설정한다.
+    
     getCurrentTime(m_NextHeartbeat);
     m_NextHeartbeat.tv_sec += 10;
 
-    // 30초후 사용자 숫자 들어간다.
+    
     m_UpdateUserStatusTime.tv_sec = m_NextHeartbeat.tv_sec + 20;
 
     __END_CATCH
@@ -50,13 +57,13 @@ ConnectionInfoManager::~ConnectionInfoManager()
 {
     __BEGIN_TRY
 
-    // 모든 ConnectionInfo 를 삭제해야 한다.
+    
     HashMapConnectionInfo::iterator itr = m_ConnectionInfos.begin();
     for (; itr != m_ConnectionInfos.end(); itr++) {
         SAFE_DELETE(itr->second);
     }
 
-    // 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+    
     m_ConnectionInfos.clear();
 
     __END_CATCH_NO_RETHROW
@@ -72,13 +79,16 @@ void ConnectionInfoManager::addConnectionInfo(ConnectionInfo* pConnectionInfo) {
 
     Assert(pConnectionInfo != NULL);
 
-    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(pConnectionInfo->getClientIP());
+    const string normalizedIP = normalizeConnectionInfoIP(pConnectionInfo->getClientIP());
+    pConnectionInfo->setClientIP(normalizedIP);
+
+    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(normalizedIP);
 
     if (itr != m_ConnectionInfos.end()) {
-        // 똑같은 아이디가 이미 존재한다는 소리다. - -;
+        
         // throw DuplicatedException("duplicated connection info id");
 
-        // 기존에 있던 정보를 제거하고 새정보를 설정한다.
+        
         // by sigi. 2002.12.7
         // throw DuplicatedException("duplicated connection info id");
         ConnectionInfo* pOldConnectionInfo = itr->second;
@@ -96,7 +106,7 @@ void ConnectionInfoManager::addConnectionInfo(ConnectionInfo* pConnectionInfo) {
         return;
     }
 
-    m_ConnectionInfos[pConnectionInfo->getClientIP()] = pConnectionInfo;
+    m_ConnectionInfos[normalizedIP] = pConnectionInfo;
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
@@ -111,18 +121,19 @@ void ConnectionInfoManager::deleteConnectionInfo(const string& clientIP) {
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(clientIP);
+    const string normalizedIP = normalizeConnectionInfoIP(clientIP);
+    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(normalizedIP);
 
     if (itr != m_ConnectionInfos.end()) {
         Assert(itr->second != NULL);
 
-        // ConnectionInfo 를 삭제한다.
+        
         SAFE_DELETE(itr->second);
 
-        // pair를 삭제한다.
+        
         m_ConnectionInfos.erase(itr);
     } else {
-        throw NoSuchElementException(clientIP);
+        throw NoSuchElementException(normalizedIP);
     }
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
@@ -141,12 +152,13 @@ ConnectionInfo* ConnectionInfoManager::getConnectionInfo(const string& clientIP)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(clientIP);
+    const string normalizedIP = normalizeConnectionInfoIP(clientIP);
+    HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(normalizedIP);
 
     if (itr != m_ConnectionInfos.end()) {
         pConnectionInfo = itr->second;
     } else {
-        throw NoSuchElementException(clientIP);
+        throw NoSuchElementException(normalizedIP);
     }
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
@@ -157,7 +169,7 @@ ConnectionInfo* ConnectionInfoManager::getConnectionInfo(const string& clientIP)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// expire 된 Connection Info 객체를 삭제한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void ConnectionInfoManager::heartbeat()
 
@@ -204,7 +216,7 @@ void ConnectionInfoManager::heartbeat()
             }
         }
 
-        // 사용자 숫자 정보를 알린다.
+        
         Statement* pStmt = NULL;
         Result* pResult = NULL;
 
@@ -241,7 +253,7 @@ void ConnectionInfoManager::heartbeat()
             try {
                 pZoneGroup = g_pZoneGroupManager->getZoneGroupByGroupID(i);
             } catch (NoSuchElementException& t) {
-                throw Error("Critical Error : ZoneInfoManager에 해당 존그룹이 존재하지 않습니다.");
+                throw Error("Critical Error : ZoneInfoManager    .");
             }
 
             pZoneGroup->makeZoneUserInfo(gmServerInfo);
@@ -249,9 +261,9 @@ void ConnectionInfoManager::heartbeat()
             numPC += pZoneGroup->getZonePlayerManager()->size();
         }
 
-        // 넷마블용이면 DB에 저장.. by sigi. 2002.11.4
+        
         if (currentTime > m_UpdateUserStatusTime) {
-            // 1분 마다
+            
             m_UpdateUserStatusTime.tv_sec = currentTime.tv_sec + 30;
 
             if (g_pConfig->getPropertyInt("IsNetMarble") == 1) {
@@ -262,7 +274,7 @@ void ConnectionInfoManager::heartbeat()
                     pStmt->executeQuery("UPDATE UserStatus SET CurrentUser=%d WHERE WorldID=%d AND ServerID=%d", numPC,
                                         worldID, serverID);
 
-                    // 없다면 추가해야지
+                    
                     if (pStmt->getAffectedRowCount() == 0) {
                         pStmt->executeQuery(
                             "INSERT IGNORE INTO UserStatus (WorldID, ServerID, CurrentUser) Values (%d, %d, %d)",
@@ -275,7 +287,7 @@ void ConnectionInfoManager::heartbeat()
             }
         }
 
-        // 지금은 MonitorClient에서 이 값을 받아서 안쓴다.
+        
         // g_pLoginServerManager->sendPacket(g_pConfig->getProperty("MonitorClientIP1") ,
         // g_pConfig->getPropertyInt("MonitorClient1UDPORT"), &gmServerInfo);
         // g_pLoginServerManager->sendPacket(g_pConfig->getProperty("MonitorClientIP2") ,
@@ -286,10 +298,10 @@ void ConnectionInfoManager::heartbeat()
         static int loginServerUDPPort = g_pConfig->getPropertyInt("LoginServerUDPPort");
         static int loginServerBaseUDPPort = g_pConfig->getPropertyInt("LoginServerBaseUDPPort");
 
-        // 기본
+        
         g_pLoginServerManager->sendPacket(loginServerIP, loginServerUDPPort, &gmServerInfo);
 
-        // 여러가지 -_-;
+        
         if (portNum > 1) {
             for (int j = 0; j < portNum; j++) {
                 g_pLoginServerManager->sendPacket(loginServerIP, loginServerBaseUDPPort + j, &gmServerInfo);

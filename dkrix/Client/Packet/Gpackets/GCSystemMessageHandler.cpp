@@ -14,7 +14,7 @@
 #include "Client.h"
 //////////////////////////////////////////////////////////////////////
 //
-// 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void GCSystemMessageHandler::execute ( GCSystemMessage * pPacket , Player * pPlayer )
@@ -27,7 +27,7 @@ throw ( ProtocolException , Error )
 	static char previous1[128] = { NULL, };
 	switch(pPacket->getType())
 	{ 
-		case SYSTEM_MESSAGE_HOLY_LAND :		// 아담의 성지 관련
+		case SYSTEM_MESSAGE_HOLY_LAND :		
 			if(g_pUserOption->DoNotShowHolyLandMsg)
 				return;
 			break;
@@ -35,20 +35,20 @@ throw ( ProtocolException , Error )
 		case SYSTEM_MESSAGE_NORMAL:
 			break;
 
-		case SYSTEM_MESSAGE_OPERATOR:	// 운영자 말씀
+		case SYSTEM_MESSAGE_OPERATOR:	
 			break;
 	
-		case SYSTEM_MESSAGE_MASTER_LAIR:	// 마스터 레어 관련
+		case SYSTEM_MESSAGE_MASTER_LAIR:	
 			if(g_pUserOption->DoNotShowLairMsg)
 				return;
 			break;
 
-		case SYSTEM_MESSAGE_COMBAT:		// 전쟁 관련
+		case SYSTEM_MESSAGE_COMBAT:		
 			if(g_pUserOption->DoNotShowWarMsg)
 				return;
 			break;
 	
-		case SYSTEM_MESSAGE_INFO: 		// 특정한 정보 관련
+		case SYSTEM_MESSAGE_INFO: 		
 			break;
 			
 		case SYSTEM_MESSAGE_RANGER_CHAT:
@@ -61,7 +61,7 @@ throw ( ProtocolException , Error )
 			}
 			return;
 	
-		case SYSTEM_MESSAGE_PLAYER:	    // add by Coffee 2007-8-2 藤속鯤소랙箇무멩
+		case SYSTEM_MESSAGE_PLAYER:	    
 			char* message = (char*)pPacket->getMessage().c_str();
 
 			if (NULL != message)
@@ -72,7 +72,7 @@ throw ( ProtocolException , Error )
 // 					BOOL bExist = FALSE;
 // 
 // 					//--------------------------------------------------------------------
-// 					// 이미 있는 메세지인지 검사한다.
+
 // 					//--------------------------------------------------------------------
 // 					for (int i=0; i<g_pPlayerMessage->GetSize(); i++)
 // 					{
@@ -83,7 +83,7 @@ throw ( ProtocolException , Error )
 // 					}
 // 
 // 					//--------------------------------------------------------------------
-// 					// 없는거면 추가한다.		
+
 // 					//--------------------------------------------------------------------
 // 					if (!bExist)
 // 					{
@@ -91,7 +91,7 @@ throw ( ProtocolException , Error )
 // 					}
 // 				}
 // 				//--------------------------------------------------------------------
-// 				// 새로운 메세지이면 추가한다.
+
 // 				//--------------------------------------------------------------------
 // 				else
 // 				{
@@ -112,7 +112,7 @@ throw ( ProtocolException , Error )
 	std::string messageStr = pPacket->getMessage();
 	const char* message = messageStr.c_str();
 
-	// add by Coffee 2007-8-2 藤속溝固斤口혐깎
+	
 		char *pMsg = NULL;
 		if (message!=NULL && pPacket->getType() != SYSTEM_MESSAGE_PLAYER )
 		{
@@ -126,14 +126,14 @@ throw ( ProtocolException , Error )
 		message = messageStr.c_str();
 	// add end by Coffee 2007-8-2
 	//--------------------------------------------------------------------
-	// system message에 출력
+	
 	//--------------------------------------------------------------------
 	if (strcmp(previous, message)==0)
 	{
 		BOOL bExist = FALSE;
 
 		//--------------------------------------------------------------------
-		// 이미 있는 메세지인지 검사한다.
+		
 		//--------------------------------------------------------------------
 		for (int i=0; i<g_pSystemMessage->GetSize(); i++)
 		{
@@ -144,7 +144,7 @@ throw ( ProtocolException , Error )
 		}
 
 		//--------------------------------------------------------------------
-		// 없는거면 추가한다.		
+		
 		//--------------------------------------------------------------------
 		if (!bExist)
 		{
@@ -152,7 +152,7 @@ throw ( ProtocolException , Error )
 		}
 	}
 	//--------------------------------------------------------------------
-	// 새로운 메세지이면 추가한다.
+	
 	//--------------------------------------------------------------------
 	else
 	{

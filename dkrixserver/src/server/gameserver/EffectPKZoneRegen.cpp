@@ -106,7 +106,7 @@ void EffectPKZoneRegen::affect(Creature* pCreature)
 
             m_pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcHP, pSlayer);
         }
-        // HP는 다 치료된 상태고 흡혈에 걸려있으면
+        
         if (pSlayer->getHP(ATTR_CURRENT) >= pSlayer->getHP(ATTR_MAX) &&
             pSlayer->isFlag(Effect::EFFECT_CLASS_BLOOD_DRAIN)) {
             EffectBloodDrain* pEffect =
@@ -140,14 +140,14 @@ void EffectPKZoneRegen::affect(Creature* pCreature)
 
             pVampire->setHP(min((int)pVampire->getHP(ATTR_MAX), (int)pVampire->getHP(ATTR_CURRENT) + m_HP));
 
-            // 넘한테 뿌릴꺼
+            
             gcHP.setCurrentHP(pVampire->getHP(ATTR_CURRENT));
 
-            // 자기한테 보여줄꺼
+            
             GCModifyInformation gcMI;
             gcMI.addShortData(MODIFY_CURRENT_HP, pVampire->getHP(ATTR_CURRENT));
 
-            // HP가 실버 데미지를 넘어서게 되면 실버데미지를 날려 준다.
+            
             if (pVampire->getHP(ATTR_CURRENT) > pVampire->getHP(ATTR_MAX) - pVampire->getSilverDamage()) {
                 pVampire->setSilverDamage(pVampire->getHP(ATTR_MAX) - pVampire->getHP(ATTR_CURRENT));
 
@@ -171,7 +171,7 @@ void EffectPKZoneRegen::affect(Creature* pCreature)
 
             GCModifyInformation gcMI;
 
-            // HP가 실버 데미지를 넘어서게 되면 실버데미지를 날려 준다.
+            
             if (pOusters->getHP(ATTR_CURRENT) > pOusters->getHP(ATTR_MAX) - pOusters->getSilverDamage()) {
                 pOusters->setSilverDamage(pOusters->getHP(ATTR_MAX) - pOusters->getHP(ATTR_CURRENT));
 
@@ -202,9 +202,9 @@ void EffectPKZoneRegen::unaffect()
 
     msg << "EffectPKZoneRegen[" << m_pZone->getZoneID() << "|(" << m_Rect.left << "," << m_Rect.top << ","
         << m_Rect.right << "," << m_Rect.bottom << ")]"
-        << " 이펙트가 사라졌다..";
+        << "  ..";
 
-    filelog("PKZone.txt", "EffectPKZoneRegen[%d|(%d,%d,%d,%d)] 이펙트가 사라졌다.", m_pZone->getZoneID(), m_Rect.left,
+    filelog("PKZone.txt", "EffectPKZoneRegen[%d|(%d,%d,%d,%d)]  .", m_pZone->getZoneID(), m_Rect.left,
             m_Rect.top, m_Rect.right, m_Rect.bottom);
 
     __END_CATCH

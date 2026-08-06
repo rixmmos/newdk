@@ -27,8 +27,8 @@ bool ConditionCanEnterPayZone::isSatisfied(Creature* pCreature1, Creature* pCrea
 
     Assert(pGamePlayer != NULL);
 
-    // 이미 유료존에 있는 경우라면... 관계없겠지.
-    // 패밀리 요금 적용중인 경우
+    
+    
     if (pGamePlayer->isPayPlaying() || pGamePlayer->isFamilyFreePass()) {
         return true;
     }

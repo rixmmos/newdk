@@ -17,7 +17,7 @@
 #include "GCSkillToTileOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void MercyGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -36,7 +36,7 @@ void MercyGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -53,7 +53,7 @@ void MercyGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot*
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -97,7 +97,7 @@ void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
             bTileCheck = true;
 
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bTileCheck) {
-            // 이펙트의 지속시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
@@ -133,7 +133,7 @@ void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
                     }
                 }
 
-            // 실패하면 마나가 줄면 안 되므로 여기서 줄여준다.
+            
             decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
             for (oY = -1; oY <= 1; oY++)
@@ -143,14 +143,14 @@ void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
                     if (rect.ptInRect(tileX, tileY)) {
                         Tile& tile = pZone->getTile(tileX, tileY);
 
-                        // 현재 타일에다 이펙트를 추가할 수 있다면...
-                        // if (tile.canAddEffect())	// 위에서 체크했다.
+                        
+                        
                         {
-                            // 이펙트 클래스를 생성한다.
+                            
                             EffectMercyGround* pEffect = new EffectMercyGround(pZone, tileX, tileY);
                             pEffect->setDeadline(output.Duration);
 
-                            // Tile에 붙이는 Effect는 ObjectID를 등록받아야 한다.
+                            
                             pZone->registerObject(pEffect);
                             pZone->addEffect(pEffect);
                             tile.addEffect(pEffect);
@@ -236,8 +236,8 @@ void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
 
             list<Creature*> watcherList = pZone->getWatcherList(myX, myY, pSlayer);
 
-            // watcherList에서 cList에 속하지 않고, caster(pSlayer)를 볼 수 없는 경우는
-            // OK4를 보내고.. cList에 추가한다.
+            
+            
             for (list<Creature*>::const_iterator itr = watcherList.begin(); itr != watcherList.end(); itr++) {
                 bool bBelong = false;
                 for (list<Creature*>::const_iterator tItr = cList.begin(); tItr != cList.end(); tItr++)
@@ -246,9 +246,9 @@ void MercyGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
 
                 Creature* pWatcher = (*itr);
                 if (bBelong == false && canSee(pWatcher, pSlayer) == false) {
-                    // Assert(pWatcher->isPC());	// 당연 PC다.. Zone::getWatcherList는 PC만 return한다
+                    
                     if (!pWatcher->isPC()) {
-                        // cout << "MercyGround : 왓처 리스트가 PC가 아닙니다." << endl;
+                        
                         GCSkillFailed1 _GCSkillFailed1;
                         _GCSkillFailed1.setSkillType(getSkillType());
                         pSlayer->getPlayer()->sendPacket(&_GCSkillFailed1);

@@ -47,7 +47,7 @@ void GuildMember::create()
         pResult = pStmt->executeQuery("SELECT GuildID FROM GuildMember WHERE Name = '%s'", m_Name.c_str());
 
         if (pResult->getRowCount() != 0) {
-            // 이미 디비에 존재하므로 데이터만 고쳐준다.(즉, 전에 다른 길드에 속한 적이 있다)
+            
             if (m_Rank == GUILDMEMBER_RANK_WAIT) {
                 pStmt->executeQuery("UPDATE GuildMember SET GuildID = %d, `Rank` = %d, ExpireDate = '', "
                                     "RequestDateTime = '%s' WHERE Name = '%s'",
@@ -161,7 +161,7 @@ void GuildMember::expire()
     Statement* pStmt;
 
     BEGIN_DB {
-        // 현재 실시간 날짜를 구한다.
+        
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
@@ -188,7 +188,7 @@ void GuildMember::leave()
     Statement* pStmt;
 
     BEGIN_DB {
-        // 현재 실시간 날짜를 구한다.
+        
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
@@ -667,10 +667,10 @@ void Guild::addMember(GuildMember* pMember)
 
     if (rank == GuildMember::GUILDMEMBER_RANK_NORMAL || rank == GuildMember::GUILDMEMBER_RANK_MASTER ||
         rank == GuildMember::GUILDMEMBER_RANK_SUBMASTER) {
-        // 일반회원이나 (서브)마스터가 추가될때 ActiverMemberCount를 증가시킨다.
+        
         m_ActiveMemberCount++;
     } else if (rank == GuildMember::GUILDMEMBER_RANK_WAIT) {
-        // 가입 대기자가 추가될때 WaitMemberCount 를 증가 시킨다.
+        
         m_WaitMemberCount++;
     }
 
@@ -706,7 +706,7 @@ void Guild::deleteMember(const string& name)
 
     if (rank == GuildMember::GUILDMEMBER_RANK_NORMAL || rank == GuildMember::GUILDMEMBER_RANK_MASTER ||
         rank == GuildMember::GUILDMEMBER_RANK_SUBMASTER) {
-        // 활동중인 회원수 카운터를 감소 시킨다
+        
         m_ActiveMemberCount--;
     } else if (rank == GuildMember::GUILDMEMBER_RANK_WAIT) {
         m_WaitMemberCount--;
@@ -795,7 +795,7 @@ void Guild::modifyMemberRank(const string& name, GuildMemberRank_t rank)
 void Guild::addCurrentMember(const string& name) {
     __BEGIN_TRY
 
-    __ENTER_CRITICAL_SECTION(m_Mutex) // 다른 뮤텍스 써도 될 듯한데.. 귀찮아..
+    __ENTER_CRITICAL_SECTION(m_Mutex) 
 
     if (m_CurrentMembers.end() != find(m_CurrentMembers.begin(), m_CurrentMembers.end(), name)) {
         m_Mutex.unlock();
@@ -804,7 +804,7 @@ void Guild::addCurrentMember(const string& name) {
 
     m_CurrentMembers.push_back(name);
 
-    // Guild Member 객체에 로그온을 세팅한다.
+    
     GuildMember* pGuildMember = getMember_NOLOCKED(name);
     if (pGuildMember == NULL) {
         m_Mutex.unlock();
@@ -832,7 +832,7 @@ void Guild::deleteCurrentMember(const string& name) {
 
     m_CurrentMembers.erase(itr);
 
-    // Guild Member 객체에 로그오프를 세팅한다.
+    
     GuildMember* pGuildMember = getMember_NOLOCKED(name);
     if (pGuildMember == NULL) {
         m_Mutex.unlock();
@@ -962,7 +962,7 @@ void Guild::expireTimeOutWaitMember(VSDateTime currentDateTime, list<string>& mL
             pGuildMember->isRequestDateTimeOut(currentDateTime)) {
             mList.push_back(pGuildMember->getName());
 
-            // wait member count 를 줄인다.
+            
             m_WaitMemberCount--;
 
             pGuildMember->expire();

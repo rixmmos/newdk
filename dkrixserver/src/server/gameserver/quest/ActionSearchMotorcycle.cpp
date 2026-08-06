@@ -42,11 +42,11 @@ void ActionSearchMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
     Player* pPlayer = pCreature2->getPlayer();
     Assert(pPlayer != NULL);
 
-    // 일단 클라이언트를 위해 ok패킷을 하나 날려주고...
+    
     GCNPCResponse answerOKpkt;
     pPlayer->sendPacket(&answerOKpkt);
 
-    // 플레이어가 슬레이어인지 검사한다.
+    
     if (pCreature2->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature2);
         Inventory* pInventory = pSlayer->getInventory();
@@ -70,10 +70,10 @@ void ActionSearchMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
             BeltInvenHeight = pBeltInventory->getHeight();
         }
 
-        // 인벤토리를 검색한다.
+        
         for (uint y = 0; y < InvenHeight; y++) {
             for (uint x = 0; x < InvenWidth; x++) {
-                // x, y에 아이템이 있다면...
+                
                 if (pInventory->hasItem(x, y)) {
                     pItem = pInventory->getItem(x, y);
                     if (search(pItem, motorZoneID, motorX, motorY)) {
@@ -89,10 +89,10 @@ void ActionSearchMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
         }
 
         if (pBelt != NULL) {
-            // 인벤토리를 검색한다.
+            
             for (uint y = 0; y < BeltInvenHeight; y++) {
                 for (uint x = 0; x < BeltInvenWidth; x++) {
-                    // x, y에 아이템이 있다면...
+                    
                     if (pBeltInventory->hasItem(x, y)) {
                         pItem = pBeltInventory->getItem(x, y);
                         if (search(pItem, motorZoneID, motorX, motorY)) {
@@ -107,7 +107,7 @@ void ActionSearchMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
                 }
             }
         }
-    } else // 뱀파이어라면...오토바이를 찾아줄 이유가 있을까?
+    } else 
     {
     }
 
@@ -124,14 +124,14 @@ bool ActionSearchMotorcycle::search(Item* pItem, uint& zoneid, uint& x, uint& y)
 
     bool bFound = false;
 
-    // 단서가 되는 아이템이 키가 아니라면 false를 리턴.
+    
     if (pItem->getItemClass() != Item::ITEM_CLASS_KEY)
         return false;
 
-    // 키가 맞다면 키의 타겟이 되는 아이템의 아이템 ID를 얻어낸다.
+    
     DWORD targetID = dynamic_cast<Key*>(pItem)->getTarget();
 
-    // 해당하는 오토바이가 존재하는지 체크를 한다.
+    
     if (g_pParkingCenter->hasMotorcycleBox(targetID)) {
         MotorcycleBox* pBox = g_pParkingCenter->getMotorcycleBox(targetID);
         Assert(pBox != NULL);

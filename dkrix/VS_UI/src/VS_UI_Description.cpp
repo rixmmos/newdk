@@ -24,6 +24,7 @@
 
 // Always include ClientFunction.h for DrawAlphaBox
 #include "ClientFunction.h"
+#include "TextSystem/FontHandleUtil.h"
 
 enum 
 {
@@ -47,6 +48,46 @@ extern RECT g_GameRect;
 #define ITEM_ENAME_RARE_COLOR			RGB(15<<3,15<<3,31<<3)
 #define ITEM_DESC_RGB					RGB(192, 192, 255)
 
+static void DrawDescriptionBox(RECT* pRect)
+{
+	if (pRect == NULL)
+		return;
+
+	RECT rect = *pRect;
+	if (rect.left < 0)
+		rect.left = 0;
+	if (rect.top < 0)
+		rect.top = 0;
+	if (rect.right > g_GameRect.right - 1)
+		rect.right = g_GameRect.right - 1;
+	if (rect.bottom > g_GameRect.bottom - 1)
+		rect.bottom = g_GameRect.bottom - 1;
+	if (rect.left >= rect.right || rect.top >= rect.bottom)
+		return;
+
+	gpC_base->m_p_DDSurface_back->DrawRect(&rect, CSDLGraphics::Color(5, 4, 3));
+	gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right - rect.left, CSDLGraphics::Color(20, 15, 8));
+	gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom - rect.top, CSDLGraphics::Color(20, 15, 8));
+	gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.bottom - 1, rect.right - rect.left, CSDLGraphics::Color(2, 2, 1));
+	gpC_base->m_p_DDSurface_back->VLine(rect.right - 1, rect.top, rect.bottom - rect.top, CSDLGraphics::Color(2, 2, 1));
+}
+
+static PrintInfo& TooltipNamePI()
+{
+	static PrintInfo pi;
+	pi = gpC_base->m_item_name_pi;
+	pi.hfont = (HFONT)TextSystem::EncodeFontHandle(14, TextSystem::FontFamilyCormorantGaramond);
+	return pi;
+}
+
+static PrintInfo& TooltipDescPI()
+{
+	static PrintInfo pi;
+	pi = gpC_base->m_item_desc_pi;
+	pi.hfont = (HFONT)TextSystem::EncodeFontHandle(12, TextSystem::FontFamilyCormorantGaramond);
+	return pi;
+}
+
 //-----------------------------------------------------------------------------
 // _Item_Description_Show
 //
@@ -68,7 +109,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	RECT _rect;
 	
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 
 	// REMOVED: DrawRect with LIGHT_MAGENTA was overwriting the alpha-blended background
 	// gpC_base->m_p_DDSurface_back->DrawRect(&_rect, LIGHT_MAGENTA);
@@ -113,7 +154,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	//
 	int px = rect.x+SIDE_GAP_HALF;
 	int py = rect.y+SIDE_GAP_HALF;
-//	gpC_base->m_item_name_pi.text_color = ITEM_NAME_NORMAL_RGB;
+//	TooltipNamePI().text_color = ITEM_NAME_NORMAL_RGB;
 
 
 	char sz_name[NAME_STRING_LEN];
@@ -240,11 +281,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	g_FL2_GetDC();
 	// name
 
-	g_PrintColorStr(px+1, py+1, sz_name, gpC_base->m_item_name_pi, shadow_color);
-	g_PrintColorStr(px, py, sz_name, gpC_base->m_item_name_pi, name_color);
+	g_PrintColorStr(px+1, py+1, sz_name, TooltipNamePI(), shadow_color);
+	g_PrintColorStr(px, py, sz_name, TooltipNamePI(), name_color);
 	py += NORMAL_FONT_Y_GAP;
-	g_PrintColorStr(px+1, py+1, sz_ename, gpC_base->m_item_desc_pi, shadow_color);
-	g_PrintColorStr(px, py, sz_ename, gpC_base->m_item_desc_pi, ename_color);
+	g_PrintColorStr(px+1, py+1, sz_ename, TooltipDescPI(), shadow_color);
+	g_PrintColorStr(px, py, sz_ename, TooltipDescPI(), ename_color);
 	py += SMALL_FONT_Y_GAP+5;
 
 	int vx;
@@ -255,9 +296,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 //	if (p_item->IsIdentified())
 	{
 		// weight
-//		vx = g_PrintColorStr(px, py, "Weight", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+//		vx = g_PrintColorStr(px, py, "Weight", TooltipDescPI(), ITEM_DESC_RGB);
 //		sprintf(sz_buf, "%d", p_item->GetWeight());
-//		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+//		g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 //		py += SMALL_FONT_Y_GAP;
 
@@ -321,8 +362,8 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			
 			if(strlen(sz_buf) > 0)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CLASS].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CLASS].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 				
 				py += SMALL_FONT_Y_GAP;
 			}
@@ -338,9 +379,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			if(itemClass == ITEM_CLASS_PET_ITEM)
 			{
 
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_LEVEL].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "%d", p_item->GetNumber());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 
 
@@ -353,15 +394,15 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 				if(((MPetItem*)p_item)->IsCanCutHead())
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CAN_CUT_HEAD].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CAN_CUT_HEAD].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					py += SMALL_FONT_Y_GAP;
 				}
 
 				if(p_item->GetSilver() > 0/* && p_item->GetEnchantLevel()!=0xFFFF add by viva */)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[p_item->GetEnchantLevel()].GetString(), p_item->GetSilver());				
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 
@@ -369,13 +410,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if( p_item->GetGrade() != -1 )
 				{
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PET_DEAD_DAY].GetString(), p_item->GetGrade());				
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 				else
 				{
 
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					TYPE_ITEM_DURATION leftTime = p_item->GetCurrentDurability();
 					int timeGap = ((timeGetTime() - ((MPetItem *)p_item)->GetUpdateTime())/1000/60);
 					if(timeGap > leftTime)
@@ -418,15 +459,15 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							time += sz_buf;					
 						}
 					}
-					g_PrintColorStr(vx, py, time.c_str() , gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, time.c_str() , TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 //				MPetItem *pPetItem = (MPetItem *)p_item;
 //				if(pPetItem->GetPetKeepedDay() > 0)
 //				{
-//					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+//					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 //					sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[p_item->GetEnchantLevel()].GetString(), p_item->GetSilver());				
-//					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+//					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 //					py += SMALL_FONT_Y_GAP;
 //				}
 
@@ -444,18 +485,18 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					itemClass!=ITEM_CLASS_BLOOD_BIBLE_SIGN
 					)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d/%d", p_item->GetCurrentDurability(), p_item->GetMaxDurability());				
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 
 				// Silvering
 				if (p_item->GetSilverMax() != -1)
 				{
-					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d/%d", p_item->GetSilver(), p_item->GetSilverMax());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Damage
@@ -465,120 +506,120 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					if(p_item->GetItemClass() == ITEM_CLASS_OUSTERS_WRISTLET)
 						stringID = UI_STRING_MESSAGE_DESC_MAGIC_DAMAGE;
 
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[stringID].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[stringID].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d~%d", p_item->GetMinDamage(), p_item->GetMaxDamage());				
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}			
 
 				if (p_item->GetOriginalSpeed() > 0)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetOriginalSpeed());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB(200, 200, 255));
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB(200, 200, 255));
 					py += SMALL_FONT_Y_GAP;
 				}
 
 				// critical hit
 				if (p_item->GetCriticalHit() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetCriticalHit());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}		
 				// Defense
 				if (p_item->GetDefenseValue() != -1)
 				{
-					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetDefenseValue());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Protection
 				if (p_item->GetProtectionValue() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetProtectionValue());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// TOHIT
 				if (p_item->GetToHit() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetToHit());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Heal point
 				if (p_item->GetHealPoint() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "+%d", p_item->GetHealPoint());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Mana point
 				if (p_item->GetManaPoint() != -1)
 				{
 					if( g_eRaceInterface == RACE_OUSTERS )
-						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					else
-						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "+%d", p_item->GetManaPoint());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 				
 				// Attack range
 				if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d %s", p_item->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Bullet
 				if (p_item->GetMagazineSize() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d %s", p_item->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 					py += SMALL_FONT_Y_GAP;
 				}
 				// Pocket size
 				if (p_item->GetPocketNumber() != -1)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d %s", p_item->GetPocketNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}			
 				// Pile size
 				if (p_item->IsPileItem() == true)
 				{
-					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d %s", p_item->GetNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);			
 					py += SMALL_FONT_Y_GAP;
 				}
 				
 				// Charge size
 				if (p_item->IsChargeItem() == true)
 				{
-					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d/%d", p_item->GetNumber(), p_item->GetMaxNumber());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 					py += SMALL_FONT_Y_GAP;
 				}
 
 				// lucky value
 				if (p_item->GetLucky() != - 9999 && itemClass != ITEM_CLASS_COUPLE_RING && itemClass != ITEM_CLASS_VAMPIRE_COUPLE_RING &&  itemClass != ITEM_CLASS_CORE_ZAP)
 				{
-					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					sprintf(sz_buf, "%d", p_item->GetLucky());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 					py += SMALL_FONT_Y_GAP;
 				}
 				
@@ -592,25 +633,25 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					if(eType != ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY)
 					{
 						sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_OUSTERS_STONE].GetString(), (*g_pGameStringTable)[g_ELEMENTAL_STRING_ID[eType]].GetString());
-						vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, stoneRGB[eType]);
+						vx = g_PrintColorStr(px, py, sz_buf, TooltipDescPI(), stoneRGB[eType]);
 						sprintf(sz_buf, "%d", eNum);
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 						py += SMALL_FONT_Y_GAP;
 					}
 				}
 				if(itemClass == ITEM_CLASS_CORE_ZAP && itemType >= 0 && itemType <= 3)
 				{
-					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+					vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_item->GetItemType()].GetString(), p_item->GetGrade());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_PEARL);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_PEARL);				
 					py += SMALL_FONT_Y_GAP;
 
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_STAT].GetString(), 3);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_DARKGRAY);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_DARKGRAY);				
 					py += SMALL_FONT_Y_GAP;
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_REG].GetString(), 9);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_DARKGRAY);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_DARKGRAY);				
 					py += SMALL_FONT_Y_GAP;
 					
 				}
@@ -620,141 +661,141 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			// Durability
 			if (p_item->GetMaxDurability() != -1&&!p_item->IsUniqueItem()&&p_item->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET && !p_item->IsQuestItem())
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???/???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			// Silvering
 			if (p_item->GetSilverMax() != -1)
 			{
-				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???/???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Damage
 			if (p_item->GetMaxDamage() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???~???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Damage
 			if (p_item->GetOriginalSpeed() > 0)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ATTACK_SPEED].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB(200, 200, 255));
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB(200, 200, 255));
 				py += SMALL_FONT_Y_GAP;
 			}
 
 			// critical hit
 			if (p_item->GetCriticalHit() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Defense
 			if (p_item->GetDefenseValue() != -1)
 			{
-				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Protection
 			if (p_item->GetProtectionValue() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// TOHIT
 			if (p_item->GetToHit() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???", p_item->GetToHit());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Heal point
 			if (p_item->GetHealPoint() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "+???");
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Mana point
 			if (p_item->GetManaPoint() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "+???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Attack range
 			if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Bullet
 			if (p_item->GetMagazineSize() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Pocket size
 			if (p_item->GetPocketNumber() != -1)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "??? %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}			
 			// Pile size
 			if (p_item->IsPileItem() == true)
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);			
 				py += SMALL_FONT_Y_GAP;
 			}
 			
 			// Charge size
 			if (p_item->IsChargeItem() == true)
 			{
-				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???/???");				
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);				
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);				
 				py += SMALL_FONT_Y_GAP;
 			}
 			// lucky value
 			if (p_item->GetLucky() != - 9999)
 			{
-				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LUCKY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				sprintf(sz_buf, "???");
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 				py += SMALL_FONT_Y_GAP;
 			}
 		}
@@ -762,13 +803,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		/*// Durability
 		if (p_item->GetMaxDurability() != -1&&!p_item->IsUniqueItem()&&p_item->GetItemClass()!=ITEM_CLASS_VAMPIRE_AMULET)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DURABILITY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d/%d", p_item->GetCurrentDurability(), p_item->GetMaxDurability());
 			else
 				sprintf(sz_buf, "???/???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -776,13 +817,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Silvering
 		if (p_item->GetSilverMax() != -1)
 		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d/%d", p_item->GetSilver(), p_item->GetSilverMax());
 			else
 				sprintf(sz_buf, "???/???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -790,26 +831,26 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Damage
 		if (p_item->GetMaxDamage() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d~%d", p_item->GetMinDamage(), p_item->GetMaxDamage());
 			else
 				sprintf(sz_buf, "???~???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 			py += SMALL_FONT_Y_GAP;
 		}
 		
 		// critical hit
 		if (p_item->GetCriticalHit() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d", p_item->GetCriticalHit());
 			else
 				sprintf(sz_buf, "???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 			py += SMALL_FONT_Y_GAP;
 		}
 		
@@ -817,13 +858,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Defense
 		if (p_item->GetDefenseValue() != -1)
 		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DEFENSE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d", p_item->GetDefenseValue());
 			else
 				sprintf(sz_buf, "???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -831,13 +872,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Protection
 		if (p_item->GetProtectionValue() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PROTECTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d", p_item->GetProtectionValue());
 			else
 				sprintf(sz_buf, "???");
 			
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -845,13 +886,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// TOHIT
 		if (p_item->GetToHit() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ACCURACY].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d", p_item->GetToHit());
 			else
 				sprintf(sz_buf, "???", p_item->GetToHit());
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -859,12 +900,12 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Heal point
 		if (p_item->GetHealPoint() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_HP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "+%d", p_item->GetHealPoint());
 			else
 				sprintf(sz_buf, "+???");
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -872,13 +913,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Mana point
 		if (p_item->GetManaPoint() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "+%d", p_item->GetManaPoint());
 			else
 				sprintf(sz_buf, "+???");
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -886,13 +927,13 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Attack range
 		if (p_item->GetReach() != -1 && p_item->GetReach() != 1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_RANGE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d %s", p_item->GetReach(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
 			else
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_TILE_PIECE].GetString());
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -900,26 +941,26 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Bullet
 		if (p_item->GetMagazineSize() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d %s", p_item->GetMagazineSize(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
 			else
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_MAGAZINE_COUNT].GetString());
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			py += SMALL_FONT_Y_GAP;
 		}
 
 		// Pocket size
 		if (p_item->GetPocketNumber() != -1)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_POCKET_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d %s", p_item->GetPocketNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
 			else
 				sprintf(sz_buf, "??? %s", (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -927,80 +968,54 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		// Pile size
 		if (p_item->IsPileItem() == true)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ITEM_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d %s", p_item->GetNumber(),(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
 			else				
 				sprintf(sz_buf, "??? %s",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NUMBER].GetString());
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);			
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);			
 			py += SMALL_FONT_Y_GAP;
 		}
 		
 		// Charge size
 		if (p_item->IsChargeItem() == true)
 		{
-			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEFT_NUM].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(p_item->IsIdentified())
 				sprintf(sz_buf, "%d/%d", p_item->GetNumber(), p_item->GetMaxNumber());
 			else
 				sprintf(sz_buf, "???/???");
 
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			
 			py += SMALL_FONT_Y_GAP;
 		}*/
 		if (p_item->IsIdentified() && p_item->GetItemClass() == ITEM_CLASS_VAMPIRE_PORTAL_ITEM)
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ARRIVAL_LOCATION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ARRIVAL_LOCATION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			MVampirePortalItem *temp_item = (MVampirePortalItem *)p_item;
 
 			if(temp_item->IsMarked())
 			{
 				sprintf(sz_buf, "%s", g_pZoneTable->Get(temp_item->GetZoneID())->Name.GetString());
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 				
 				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_ZONEINFO_XY].GetString(), temp_item->GetZoneX(), temp_item->GetZoneY());
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			}
 			else
 			{
 				sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString());
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			}
 			py += SMALL_FONT_Y_GAP;
 		}
 		// Add option
 		if(p_item->IsIdentified())
 		{			
-			/*if (p_item->GetItemOptionListCount() != 0)
-			{
-				int optionCount = p_item->GetItemOptionListCount();
-				ITEMOPTION_INFO& optionInfo = (*g_pItemOptionTable)[option];
-				
-				char pPartName[20];
-				strcpy(pPartName, ITEMOPTION_INFO::ITEMOPTION_PARTNAME[optionInfo.Part]);
-				if(p_item->IsVampireItem() && strstr(pPartName,"MP") != NULL)
-					*strstr(pPartName,"MP") = 'H';
-				
-				BYTE PlusPoint	= optionInfo.PlusPoint;
-				
-				if (pPartName)
-				{
-					fOptionCheck=TRUE;
-					vx = g_PrintColorStr(px, py, "¿É¼Ç : ", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
-					if(optionInfo.Part == ITEMOPTION_INFO::PART_DURABILITY)
-					{
-						sprintf(sz_buf, "%s +%d", pPartName, PlusPoint-100);
-						strcat(sz_buf, "%");
-					}
-					else
-						sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
-				}
-				py += SMALL_FONT_Y_GAP;
-			}*/
+			 
 
 			BOOL fOptionCheck=FALSE;
 			if(!p_item->IsEmptyItemOptionList()&& p_item->GetItemClass() != ITEM_CLASS_CODE_SHEET )
@@ -1027,7 +1042,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						if(!fOptionCheck)
 						{
-							vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+							vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							fOptionCheck=TRUE;
 						}
 								
@@ -1046,7 +1061,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						}
 						else
 							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GOLD);//RGB_YELLOW);
 					}
 					py += SMALL_FONT_Y_GAP;
 					itr++;
@@ -1079,7 +1094,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						if(!fOptionCheck)
 						{
-							vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+							vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							fOptionCheck=TRUE;
 						}
 						if(optionInfo.Part == ITEMOPTION_TABLE::PART_DURABILITY)
@@ -1097,7 +1112,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						}
 						else
 							sprintf(sz_buf, "%s +%d", pPartName, PlusPoint);
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GOLD);//RGB_YELLOW);
 					}
 					py += SMALL_FONT_Y_GAP;
 					itr++;
@@ -1111,20 +1126,20 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						const std::list<TYPE_ITEM_OPTION> &optionList=p_item->GetItemOptionList();
 					const std::list<TYPE_ITEM_OPTION> &DefaultOptionList = p_item->GetItemDefaultOptionList();
 					if(optionList.size() ==0 && DefaultOptionList.size() == 0)
-						vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_BLACK+p_AddItem->GetItemType()].GetString(), p_AddItem->GetGrade());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_PEARL);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_PEARL);				
 					py += SMALL_FONT_Y_GAP;
 					
 					DWORD TempColor = RGB_DARKGRAY;
 					if(gC_vs_ui.IsHasAllCoreZap())
 						TempColor = RGB_GREEN;
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_STAT].GetString(), 3);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, TempColor);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), TempColor);				
 					py += SMALL_FONT_Y_GAP;
 					sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_CORE_ZAP_REWARD_ALL_REG].GetString(), 9);
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, TempColor);				
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), TempColor);				
 					py += SMALL_FONT_Y_GAP;
 					
 				}
@@ -1133,7 +1148,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		else
 		{
 			sprintf(sz_buf,"%s???????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString());
-			vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, sz_buf, TooltipDescPI(), ITEM_DESC_RGB);
 			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -1146,7 +1161,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 //			}
 //		{
 //			sprintf(sz_buf, "%s +%d", g_pItemOptionTable->ITEMOPTION_PARTNAME[21].GetString(), p_item->GetGrade()-4);
-//			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GOLD);//RGB_YELLOW);
+//			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GOLD);//RGB_YELLOW);
 //			py += SMALL_FONT_Y_GAP;
 //		}
 			
@@ -1167,20 +1182,20 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						if (p_item->GetRequireSTR() > 0)
 						{
 							if(!bl_required)
-								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							else
-								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 							bl_required = true;
 							
-							vx = g_PrintColorStr(vx, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_STR].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+							vx = g_PrintColorStr(vx, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_STR].GetString(), TooltipDescPI(), required_rgb);
 							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireSTR());
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 							
 							if (p_item->GetRequireDEX() > 0 ||
 								p_item->GetRequireINT() > 0 ||
 								//					p_item->GetRequireLevel() > 0 ||
 								(p_item->GetRequireSUM() > 0 && p_item->GetRequireSTR() < p_item->GetRequireSUM()))
-								g_PrintColorStr(vx+3, py, sz_and, gpC_base->m_item_desc_pi, required_rgb);
+								g_PrintColorStr(vx+3, py, sz_and, TooltipDescPI(), required_rgb);
 							
 							py += SMALL_FONT_Y_GAP;
 						}
@@ -1188,19 +1203,19 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						if (p_item->GetRequireDEX() > 0)
 						{
 							if(!bl_required)
-								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							else
-								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 							bl_required = true;
 							
-							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_DEX].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_DEX].GetString(), TooltipDescPI(), required_rgb);
 							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireDEX());
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 							
 							if (p_item->GetRequireINT() > 0 ||
 								//					p_item->GetRequireLevel() > 0 ||
 								(p_item->GetRequireSUM() > 0 && p_item->GetRequireDEX() < p_item->GetRequireSUM()))
-								g_PrintColorStr(vx+3, py, sz_and, gpC_base->m_item_desc_pi, required_rgb);
+								g_PrintColorStr(vx+3, py, sz_and, TooltipDescPI(), required_rgb);
 							
 							py += SMALL_FONT_Y_GAP;
 						}
@@ -1208,18 +1223,18 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						if (p_item->GetRequireINT() > 0)
 						{
 							if(!bl_required)
-								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+								vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							else
-								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 							bl_required = true;
 							
-							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_INT].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ENG_INT].GetString(), TooltipDescPI(), required_rgb);
 							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireINT());
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 							
 							if (//p_item->GetRequireLevel() > 0 ||
 								(p_item->GetRequireSUM() > 0 && p_item->GetRequireINT() < p_item->GetRequireSUM()))
-								g_PrintColorStr(vx, py, sz_and, gpC_base->m_item_desc_pi, required_rgb);
+								g_PrintColorStr(vx, py, sz_and, TooltipDescPI(), required_rgb);
 							
 							py += SMALL_FONT_Y_GAP;
 						}
@@ -1230,17 +1245,17 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 							p_item->GetRequireSUM() > p_item->GetRequireINT() )
 						{
 							if(!bl_required)
-								vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+								vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							else
-								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 							bl_required = true;
 							
-							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ALL_STAT_SUM].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ALL_STAT_SUM].GetString(), TooltipDescPI(), required_rgb);
 							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireSUM());
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 							
 							//				if (p_item->GetRequireLevel() > 0)
-							//					g_PrintColorStr(vx+3, py, sz_and, gpC_base->m_item_desc_pi, required_rgb);
+							//					g_PrintColorStr(vx+3, py, sz_and, TooltipDescPI(), required_rgb);
 							
 							py += SMALL_FONT_Y_GAP;
 						}
@@ -1250,14 +1265,14 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						if (p_item->GetRequireLevel() > 0)
 						{
 							if(!bl_required)
-								vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+								vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 							else
-								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+								vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 							bl_required = true;
 							
-							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+							vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString(), TooltipDescPI(), required_rgb);
 							sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE_STAT].GetString(), p_item->GetRequireLevel());
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 							
 							py += SMALL_FONT_Y_GAP;
 						}
@@ -1267,9 +1282,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					if( RequireAdvancementLevel > 0 )
 					{
 						if(!bl_required)
-							vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+							vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 						else
-							vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+							vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 						bl_required = true;
 						
 						int LevelGrade = (RequireAdvancementLevel-1)/10;
@@ -1279,9 +1294,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						sprintf(sz_buf, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_ADVANCEMENT_LEVEL_0+LevelGrade].GetString(), RequireAdvancementLevel);
 						// edit end 
 						if(g_char_slot_ingame.m_AdvancementLevel >= RequireAdvancementLevel)
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_GREEN);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_GREEN);
 						else
-							vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_RED);
+							vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_RED);
 						
 						py += SMALL_FONT_Y_GAP;
 
@@ -1299,42 +1314,42 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				if( bSlayer||bVampire||bOusters)
 				{
 					if(!bl_required)
-						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					else
-						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 					bl_required = true;
 					
-					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OTHER_TRIBE].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OTHER_TRIBE].GetString(), TooltipDescPI(), required_rgb);
 					py += SMALL_FONT_Y_GAP;
 				}	
 				
 				if (p_item->IsGenderForMale())
 				{
 					if(!bl_required)
-						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					else
-						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 					bl_required = true;
 					
-					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_MALE].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_MALE].GetString(), TooltipDescPI(), required_rgb);
 					py += SMALL_FONT_Y_GAP;
 				}
 				else if (p_item->IsGenderForFemale())
 				{
 					if(!bl_required)
-						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 					else
-						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), gpC_base->m_item_desc_pi.hfont);
+						vx = px + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString(), TooltipDescPI().hfont);
 					bl_required = true;
 					
-					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_FEMALE].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+					vx = g_PrintColorStr(vx, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_ONLY_FEMALE].GetString(), TooltipDescPI(), required_rgb);
 					py += SMALL_FONT_Y_GAP;
 				}
 			}
 			else
 			{
 				sprintf(sz_buf,"%s????????",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REQUIRE].GetString());
-				vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, sz_buf, TooltipDescPI(), ITEM_DESC_RGB);
 				py += SMALL_FONT_Y_GAP;
 			}
 		}
@@ -1350,7 +1365,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			
 			std::string sstr;
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			
 			if(p_item->IsPileItem() && p_item->GetNumber() >= 1)
 			{
@@ -1364,10 +1379,10 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 					sstr = "$";
 					sstr += g_GetStringByMoney(TempPrice);
-					vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+					vx = g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 					sstr = TempPrice/p_item->GetNumber();
 					sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 				}
 				else
 				{
@@ -1376,9 +1391,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 					sprintf(sz_buf, "$%s", sstr.c_str());
-					vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+					vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 					sprintf(sz_buf, "(%dx%d)", TempPrice/p_item->GetNumber(),max(0, p_item->GetNumber()));
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 				}
 			}
 			else 
@@ -1389,7 +1404,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 					sstr = "$";
 					sstr += g_GetStringByMoney(TempPrice);
-					g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+					g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 				}
 				else
 				{
@@ -1399,7 +1414,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 					sprintf(sz_buf, "$%s", sstr.c_str());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 				}
 			}
 			
@@ -1411,7 +1426,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			assert(gbl_buy_running == false);
 			
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			
 			if(p_item->IsPileItem() && p_item->GetNumber() >= 1)
 			{
@@ -1425,10 +1440,10 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 					sstr = "$";
 					sstr += g_GetStringByMoney(TempPrice*max(0,p_item->GetNumber()));
-					vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+					vx = g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 					sstr = g_GetStringByMoney(TempPrice);
 					sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(0, p_item->GetNumber()));
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 				}
 				else
 				{
@@ -1437,10 +1452,10 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 					sprintf(sz_buf, "$%s", sstr.c_str());
-					vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+					vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 					
 					sprintf(sz_buf, "(%dx%d)", TempPrice,max(0, p_item->GetNumber()));
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 				}
 			}
 			else 
@@ -1451,7 +1466,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				{
 					sstr = "$";
 					sstr += g_GetStringByMoney(TempPrice);
-					g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+					g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 				}
 				else
 				{
@@ -1460,7 +1475,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					for(int i = 3; i <= 13; i += 4)
 						if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 					sprintf(sz_buf, "$%s", sstr.c_str());
-					g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+					g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 				}
 			}
 			
@@ -1471,7 +1486,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		{
 			assert(gbl_sell_running == false);			
 			// check mysterious
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			if(C_VS_UI_SHOP::m_shop_type == MShop::SHOP_EVENT_STAR && left)
 			{
 				STAR_ITEM_PRICE price;
@@ -1497,10 +1512,10 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						sstr = "$";
 						sstr += g_GetStringByMoney(TempPrice*p_item->GetNumber());
-						vx = g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+						vx = g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 						sstr = g_GetStringByMoney(TempPrice);
 						sprintf(sz_buf, "(%sx%d)", sstr.c_str(), max(p_item->GetNumber(),0) );
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 					}
 					else
 					{
@@ -1509,9 +1524,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						for(int i = 3; i <= 13; i += 4)
 							if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 						sprintf(sz_buf, "$%s", sstr.c_str());
-						vx = g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+						vx = g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 						sprintf(sz_buf, "(%dx%d)", TempPrice, max(p_item->GetNumber(),0) );
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, required_rgb);
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), required_rgb);
 					}
 				}
 				else 
@@ -1522,7 +1537,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 					{
 						sstr = "$";
 						sstr += g_GetStringByMoney(TempPrice);
-						g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+						g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 					}
 					else
 					{
@@ -1531,7 +1546,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 						for(int i = 3; i <= 13; i += 4)
 							if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 						sprintf(sz_buf, "$%s", sstr.c_str());
-						g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+						g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 					}
 				}
 			}
@@ -1544,9 +1559,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			assert(gbl_buy_running == false);
 			assert(gbl_sell_running == false);			
 			if(p_item->IsChargeItem())
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CHARGE_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CHARGE_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			else
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REPAIR_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_REPAIR_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 
 			std::string sstr;
 			int TempPrice = max( 0, g_pPriceManager->GetItemPrice(p_item, MPriceManager::REPAIR) );
@@ -1554,7 +1569,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 				sstr = "$";
 				sstr += g_GetStringByMoney(TempPrice);
-				g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 			}
 			else
 			{
@@ -1563,7 +1578,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				for(int i = 3; i <= 13; i += 4)
 					if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 				sprintf(sz_buf, "$%s", sstr.c_str());
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			}			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -1573,7 +1588,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			assert(gbl_buy_running == false);
 			assert(gbl_sell_running == false);
 			assert(gbl_repair_running == false);			
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING_PRICE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_SILVERING_PRICE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 
 			std::string sstr;
 			int TempPrice = g_pPriceManager->GetItemPrice(p_item, MPriceManager::SILVERING);
@@ -1581,7 +1596,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			{
 				sstr = "$";
 				sstr += g_GetStringByMoney(TempPrice);
-				g_PrintColorStr(vx, py, sstr.c_str(), gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sstr.c_str(), TooltipDescPI(), RGB_WHITE);
 			}	
 			else
 			{
@@ -1590,7 +1605,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				for(int i = 3; i <= 13; i += 4)
 					if(sstr.size() > i)sstr.insert(sstr.size()-i, ",");
 				sprintf(sz_buf, "$%s", sstr.c_str());
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			}			
 			py += SMALL_FONT_Y_GAP;
 		}
@@ -1601,9 +1616,9 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)
 	{
 		if(p_item->GetItemClass() == ITEM_CLASS_BLOOD_BIBLE_SIGN)
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+p_item->GetItemType()].GetString(), gpC_base->m_item_desc_pi, required_rgb);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+p_item->GetItemType()].GetString(), TooltipDescPI(), required_rgb);
 		else
-			g_PrintColorStr(px, py, (*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), gpC_base->m_item_desc_pi, required_rgb);
+			g_PrintColorStr(px, py, (*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), TooltipDescPI(), required_rgb);
 		py += SMALL_FONT_Y_GAP;
 	}
 	
@@ -1740,23 +1755,23 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		if(bCanUpgrade)
 		{
 			if(pMouseItem->GetNumber() != 1)
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ONLY_PICK_UP_ITEM_ONE].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ONLY_PICK_UP_ITEM_ONE].GetString(), TooltipDescPI(), RGB(150, 150, 255));
 			else
 			{
 				if(pMouseItem->GetItemType() == 16 )
-					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_TRANS].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));				
+					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_TRANS].GetString(), TooltipDescPI(), RGB(150, 150, 255));				
 				else
 				{
-					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));
+					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT].GetString(), TooltipDescPI(), RGB(150, 150, 255));
 				}
 			}
 		}
 		else
 		{
 			if( pMouseItem->GetItemType() == 16)
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_CANNOT_USE].GetString(),gpC_base->m_item_desc_pi, RGB(255, 150, 150));
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_CANNOT_USE].GetString(),TooltipDescPI(), RGB(255, 150, 150));
 			else
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_ITEM_TO_ITEM_IMPOSIBLE].GetString(), gpC_base->m_item_desc_pi, RGB(255, 150, 150));
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_ITEM_TO_ITEM_IMPOSIBLE].GetString(), TooltipDescPI(), RGB(255, 150, 150));
 		}
 
 		py += SMALL_FONT_Y_GAP;
@@ -1791,22 +1806,22 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		switch(bCanUpgrade)
 		{
 		case 1:
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));			
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT].GetString(), TooltipDescPI(), RGB(150, 150, 255));			
 			py += SMALL_FONT_Y_GAP;
 			break;
 
 		case 2:
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_PET_REVIVAL].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));			
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_PET_REVIVAL].GetString(), TooltipDescPI(), RGB(150, 150, 255));			
 			py += SMALL_FONT_Y_GAP;
 			break;
 
 		case 3:
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_PET_REVIVAL].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));			
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_PET_REVIVAL].GetString(), TooltipDescPI(), RGB(150, 150, 255));			
 			py += SMALL_FONT_Y_GAP;
 			break;
 
 		default:
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_ITEM_TO_ITEM_IMPOSIBLE].GetString(), gpC_base->m_item_desc_pi, RGB(255, 150, 150));
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_ITEM_TO_ITEM_IMPOSIBLE].GetString(), TooltipDescPI(), RGB(255, 150, 150));
 			py += SMALL_FONT_Y_GAP;
 			break;
 		}
@@ -1818,16 +1833,16 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		p_item != NULL && !p_item->IsEmptyItemOptionList() && !p_item->IsQuestItem() && !p_item->IsUniqueItem())
 	{
 		if(pMouseItem->GetNumber() != 1)
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ONLY_PICK_UP_ITEM_ONE].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_ONLY_PICK_UP_ITEM_ONE].GetString(), TooltipDescPI(), RGB(150, 150, 255));
 		else
 		{
 //			if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)
 //				py += SMALL_FONT_Y_GAP;
 			if( C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas( pMouseItem, p_item ) )
 			{
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_REMOVE_OPTION].GetString(), gpC_base->m_item_desc_pi, RGB(150, 150, 255));			
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_REMOVE_OPTION].GetString(), TooltipDescPI(), RGB(150, 150, 255));			
 			} else
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSGAE_CANNOT_REMOVE_OPTION].GetString(), gpC_base->m_item_desc_pi, RGB(255, 150, 150));
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSGAE_CANNOT_REMOVE_OPTION].GetString(), TooltipDescPI(), RGB(255, 150, 150));
 		}
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -1849,7 +1864,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				strcpy(temp, (*g_pGameStringTable)[UI_STRING_MESSAGE_EXPIRED_ITEM].GetString() );
 			} else
 			{
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB );
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), TooltipDescPI(), ITEM_DESC_RGB );
 				strcat(temp, " ");
 				char tempSecond[10];
 				wsprintf(tempSecond, (*g_pGameStringTable)[UI_STRING_MESSAGE_SECOND].GetString() , g_pTimeItemManager->GetSecond( objectID ) );
@@ -1857,7 +1872,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			}
 		} else
 		{
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB );
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_TIME].GetString(), TooltipDescPI(), ITEM_DESC_RGB );
 			memset( temp, 0, sizeof( temp ) );
 
 			if((tempInt = g_pTimeItemManager->GetDay( objectID ))>0  || bContinue )
@@ -1885,7 +1900,7 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 				bContinue = true;
 			}			
 		}		
-		g_PrintColorStr(vx, py, temp,gpC_base->m_item_desc_pi,RGB(255,255,255));
+		g_PrintColorStr(vx, py, temp,TooltipDescPI(),RGB(255,255,255));
 		py += SMALL_FONT_Y_GAP;
 	}
 
@@ -1894,11 +1909,11 @@ void	_Item_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		PETINFO *pPetInfo = gC_vs_ui.GetMyPetInfo();
 		if(pPetInfo != NULL && pPetInfo->EXIST)
 		{
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_USE_PET_FOOD].GetString(),gpC_base->m_item_desc_pi,RGB(255,255,255));
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_USE_PET_FOOD].GetString(),TooltipDescPI(),RGB(255,255,255));
 		}
 		else
 		{
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DETACH_PET_FOOD].GetString(),gpC_base->m_item_desc_pi,RGB(255,255,255));
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DETACH_PET_FOOD].GetString(),TooltipDescPI(),RGB(255,255,255));
 		}
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -1916,7 +1931,7 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 
 //	S_RECT dest_rect;
@@ -1978,8 +1993,8 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		bEnable = false;
 	}
 	
-	g_PrintColorStr(px+1, py+1, szSkillName, gpC_base->m_item_name_pi, RGB(100,100,0));
-	g_PrintColorStr(px, py, szSkillName, gpC_base->m_item_name_pi, RGB_WHITE);
+	g_PrintColorStr(px+1, py+1, szSkillName, TooltipNamePI(), RGB(100,100,0));
+	g_PrintColorStr(px, py, szSkillName, TooltipNamePI(), RGB_WHITE);
 
 	py += NORMAL_FONT_Y_GAP;
 	std::string SkillEName;
@@ -1990,7 +2005,7 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 		SkillEName += szTemp2;
 	SkillEName += ")";
 
-	g_PrintColorStr(px, py, SkillEName.c_str(), gpC_base->m_item_desc_pi, RGB_GRAY);
+	g_PrintColorStr(px, py, SkillEName.c_str(), TooltipDescPI(), RGB_GRAY);
 	py += NORMAL_FONT_Y_GAP;
 
 	if( !bEnable )
@@ -2003,7 +2018,7 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	if(left == SKILL_LOVE_CHAIN)
 	{
-		vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LOVE_CHAIN].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+		vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_LOVE_CHAIN].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		
 		g_FL2_ReleaseDC();
 		return;
@@ -2013,9 +2028,9 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	{
 		// level
 		sprintf(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
-		vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+		vx = g_PrintColorStr(px, py, sz_buf, TooltipDescPI(), ITEM_DESC_RGB);
 		sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
-		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+		g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -2026,15 +2041,15 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			switch(g_eRaceInterface)
 			{
 			case RACE_SLAYER:
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_MP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				break;
 
 			case RACE_VAMPIRE:
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_HP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				break;
 
 			case RACE_OUSTERS:
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_EP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_EP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				break;
 			}
 
@@ -2042,18 +2057,18 @@ void	_Skill_Description_Show(Rect rect, void * void_ptr, long left, long right)
 			sprintf(sz_buf, "%d",5 + (g_char_slot_ingame.level / 7));
 		else
 			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
-		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+		g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 		py += SMALL_FONT_Y_GAP;
 	}
 	else
 	{
 		if(left >= SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA && left <= SKILL_HOLYLAND_BLOOD_BIBLE_CHASPA)
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+(left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA)].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+(left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA)].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		else
 		if(left >= SKILL_SWEEPER_BONUS_1 && left <= SKILL_SWEEPER_BONUS_12 )
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+(left-SKILL_SWEEPER_BONUS_1)].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+(left-SKILL_SWEEPER_BONUS_1)].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		else
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		py += SMALL_FONT_Y_GAP;
 	}
 
@@ -2090,7 +2105,7 @@ void	_BloodBible_Description_Show(Rect rect, void * void_ptr, long left, long ri
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
 
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 	// REMOVED: DrawRect with LIGHT_MAGENTA was overwriting the alpha-blended background
 	// gpC_base->m_p_DDSurface_back->DrawRect(&_rect, LIGHT_MAGENTA);
 
@@ -2104,50 +2119,50 @@ void	_BloodBible_Description_Show(Rect rect, void * void_ptr, long left, long ri
 	
 	if(desc->sz_name != NULL)
 	{
-		int vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString() , gpC_base->m_item_name_pi, RGB_YELLOW);
-		g_PrintColorStr(vx, py, desc->sz_name , gpC_base->m_item_name_pi, RGB_YELLOW);
+		int vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString() , TooltipNamePI(), RGB_YELLOW);
+		g_PrintColorStr(vx, py, desc->sz_name , TooltipNamePI(), RGB_YELLOW);
 		py += NORMAL_FONT_Y_GAP;
 	}
 
 	if(desc->sz_place != NULL)
 	{		
-		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(),gpC_base->m_item_desc_pi,ITEM_DESC_RGB);
-		g_PrintColorStr(vx, py, desc->sz_place , gpC_base->m_item_desc_pi, RGB_WHITE);
+		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(),TooltipDescPI(),ITEM_DESC_RGB);
+		g_PrintColorStr(vx, py, desc->sz_place , TooltipDescPI(), RGB_WHITE);
 		py += SMALL_FONT_Y_GAP;
 	}
 	
 	if(desc->sz_shrine != NULL)
 	{		
 		int tempColor;
-		int vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_SHRINE_RACE].GetString(), gpC_base->m_item_desc_pi,ITEM_DESC_RGB);
+		int vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_SHRINE_RACE].GetString(), TooltipDescPI(),ITEM_DESC_RGB);
 		if(strcmp(desc->sz_shrine, (*g_pGameStringTable)[STRING_MESSAGE_SLAYER].GetString()) == 0)
 			tempColor = RGB(23,107,255);
 		else if (strcmp( desc->sz_shrine, (*g_pGameStringTable)[STRING_MESSAGE_VAMPIRE].GetString()) == 0 )
 			tempColor = RGB_RED;
 		else tempColor = RGB_GREEN;
 
-		g_PrintColorStr(vx, py, desc->sz_shrine , gpC_base->m_item_desc_pi, tempColor);
+		g_PrintColorStr(vx, py, desc->sz_shrine , TooltipDescPI(), tempColor);
 		py += SMALL_FONT_Y_GAP;
 	}
 	
 	if(desc->sz_player != NULL)
 	{		
-		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_PLAYER].GetString(),gpC_base->m_item_desc_pi,ITEM_DESC_RGB);
-		g_PrintColorStr(vx, py, desc->sz_player , gpC_base->m_item_desc_pi, MAGENTA);
+		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_PLAYER].GetString(),TooltipDescPI(),ITEM_DESC_RGB);
+		g_PrintColorStr(vx, py, desc->sz_player , TooltipDescPI(), MAGENTA);
 		py += SMALL_FONT_Y_GAP;
 	}
 	
 	if(desc->sz_option != NULL)
 	{
-		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(),gpC_base->m_item_desc_pi,ITEM_DESC_RGB);
-		g_PrintColorStr(vx, py, desc->sz_option , gpC_base->m_item_desc_pi, RGB_GOLD);
+		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(),TooltipDescPI(),ITEM_DESC_RGB);
+		g_PrintColorStr(vx, py, desc->sz_option , TooltipDescPI(), RGB_GOLD);
 		py += SMALL_FONT_Y_GAP;		
 	}
 
 	if(desc->sz_status != NULL)
 	{
-		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_STATUS].GetString(),gpC_base->m_item_desc_pi,ITEM_DESC_RGB);
-		g_PrintColorStr(vx, py, desc->sz_status , gpC_base->m_item_desc_pi, color);
+		int vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_STATUS].GetString(),TooltipDescPI(),ITEM_DESC_RGB);
+		g_PrintColorStr(vx, py, desc->sz_status , TooltipDescPI(), color);
 		py += SMALL_FONT_Y_GAP;
 	}
 	
@@ -2167,7 +2182,7 @@ void	_Strings_Description_Show(Rect rect, void * void_ptr, long left, long right
 
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 //
 //	S_RECT dest_rect;
@@ -2216,7 +2231,7 @@ void	_Strings_Description_Show(Rect rect, void * void_ptr, long left, long right
 
 	for(int i = 0; i < left; i++)
 	{
-		g_PrintColorStr(px, py, ptr[i], gpC_base->m_item_name_pi, RGB_WHITE);
+		g_PrintColorStr(px, py, ptr[i], TooltipNamePI(), RGB_WHITE);
 		py += NORMAL_FONT_Y_GAP;
 	}
 
@@ -2233,7 +2248,7 @@ void	_Info_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 //
 //	S_RECT dest_rect;
@@ -2279,7 +2294,7 @@ void	_Info_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	int py = rect.y+SIDE_GAP_HALF;
 
 	if(left == 0)left = RGB_WHITE;
-	g_PrintColorStr(px, py, (LPSTR)void_ptr, gpC_base->m_item_name_pi, left);
+	g_PrintColorStr(px, py, (LPSTR)void_ptr, TooltipNamePI(), left);
 	py += NORMAL_FONT_Y_GAP;
 }
 
@@ -2293,7 +2308,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 //
 //	S_RECT dest_rect;
@@ -2355,8 +2370,8 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 	g_FL2_GetDC();
 	// name
 
-	g_PrintColorStr(px+1, py+1, szSkillName, gpC_base->m_item_name_pi, RGB(100,100,0) );
-	g_PrintColorStr(px, py, szSkillName, gpC_base->m_item_name_pi, RGB_WHITE );
+	g_PrintColorStr(px+1, py+1, szSkillName, TooltipNamePI(), RGB(100,100,0) );
+	g_PrintColorStr(px, py, szSkillName, TooltipNamePI(), RGB_WHITE );
 
 	py += NORMAL_FONT_Y_GAP;
 	std::string SkillEName;
@@ -2366,7 +2381,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 	else
 		SkillEName += szTemp2;
 	SkillEName += ")";
-	g_PrintColorStr(px, py, SkillEName.c_str(), gpC_base->m_item_desc_pi, RGB_GRAY);
+	g_PrintColorStr(px, py, SkillEName.c_str(), TooltipDescPI(), RGB_GRAY);
 	py += NORMAL_FONT_Y_GAP;
 	int vx;
 
@@ -2381,11 +2396,11 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 	// level
 	if(g_eRaceInterface != RACE_OUSTERS)
 	{
-		vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_LEVEL].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+		vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_REQUIRE_LEVEL].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		if((*g_pSkillInfoTable)[left].GetLearnLevel() >= 0)
 		{
 			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetLearnLevel());
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 		}
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -2395,9 +2410,9 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 		if (g_eRaceInterface != RACE_VAMPIRE && !(*g_pSkillInfoTable)[left].IsPassive() || g_eRaceInterface == RACE_OUSTERS)
 		{
 			sprintf(sz_buf,"%s: ",(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LEVEL].GetString());
-			vx = g_PrintColorStr(px, py, sz_buf, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, sz_buf, TooltipDescPI(), ITEM_DESC_RGB);
 			sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetExpLevel());
-			g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+			g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 			py += SMALL_FONT_Y_GAP;
 		}
 	}
@@ -2426,34 +2441,34 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 		switch(g_eRaceInterface)
 		{
 		case RACE_SLAYER:
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_MP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_MP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			break;
 			
 		case RACE_VAMPIRE:
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_HP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_HP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			break;
 			
 		case RACE_OUSTERS:
-			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_EP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_CONSUME_EP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 			break;
 		}
 		
 		sprintf(sz_buf, "%d", (*g_pSkillInfoTable)[left].GetMP());
-		g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+		g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 	}
 	else
 	{
-		//g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+		//g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		if(left >= SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA && left <= SKILL_HOLYLAND_BLOOD_BIBLE_CHASPA)
 		{
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		}
 		else if (left >= SKILL_SWEEPER_BONUS_1 && left <= SKILL_SWEEPER_BONUS_12 )
 		{
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		}
 		else
-			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_HAN_PASSIVE].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 		
 	}
 	py += SMALL_FONT_Y_GAP;
@@ -2485,7 +2500,7 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 		{
 			if((*g_pSkillInfoTable)[(ACTIONINFO)left].IsPassive())
 			{
-//				g_PrintColorStr(px, py, "Passive", gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+//				g_PrintColorStr(px, py, "Passive", TooltipDescPI(), ITEM_DESC_RGB);
 			}
 			else
 			{
@@ -2499,10 +2514,10 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 
 				if(exp == max_exp)exp_percent = 100;
 
-				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EXP].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+				vx = g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_EXP].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 				wsprintf(sz_buf, "%d", exp_percent);
 				strcat(sz_buf, "%");
-				g_PrintColorStr(vx, py, sz_buf, gpC_base->m_item_desc_pi, RGB_WHITE);
+				g_PrintColorStr(vx, py, sz_buf, TooltipDescPI(), RGB_WHITE);
 				py += SMALL_FONT_Y_GAP;
 
 				if(domain >= 0)
@@ -2516,19 +2531,19 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 					
 					if(domain_grade>= 0 && domain_grade< 3)
 					{
-						vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LIMIT_LEVEL].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+						vx = g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_LIMIT_LEVEL].GetString(), TooltipDescPI(), ITEM_DESC_RGB);
 						switch(domain_grade)
 						{
 						case 0:
-							g_PrintColorStr(vx, py, "49", gpC_base->m_item_desc_pi, RGB_YELLOW);
+							g_PrintColorStr(vx, py, "49", TooltipDescPI(), RGB_YELLOW);
 							break;
 							
 						case 1:
-							g_PrintColorStr(vx, py, "74", gpC_base->m_item_desc_pi, RGB_YELLOW);
+							g_PrintColorStr(vx, py, "74", TooltipDescPI(), RGB_YELLOW);
 							break;
 							
 						case 2:
-							g_PrintColorStr(vx, py, "99", gpC_base->m_item_desc_pi, RGB_YELLOW);
+							g_PrintColorStr(vx, py, "99", TooltipDescPI(), RGB_YELLOW);
 							break;
 						}
 					}
@@ -2609,18 +2624,18 @@ void	_SkillTree_Description_Show(Rect rect, void * void_ptr, long left, long rig
 				}
 				
 				if(bCanLearn)
-					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CAN_LEARN_SKILL].GetString(), gpC_base->m_item_desc_pi, RGB_GREEN);
+					g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CAN_LEARN_SKILL].GetString(), TooltipDescPI(), RGB_GREEN);
 				else
-					g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), gpC_base->m_item_desc_pi, RGB_RED);
+					g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), TooltipDescPI(), RGB_RED);
 			} else
-				g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), gpC_base->m_item_desc_pi, RGB_RED);
+				g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), TooltipDescPI(), RGB_RED);
 		}
 		else
 		{
 			if((*g_pSkillInfoTable)[left].GetLearnLevel() <= domain_level && (*g_pSkillInfoTable)[left].GetLearnLevel() >= 0)
-				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CAN_LEARN_SKILL].GetString(), gpC_base->m_item_desc_pi, RGB_GREEN);
+				g_PrintColorStr(px, py, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CAN_LEARN_SKILL].GetString(), TooltipDescPI(), RGB_GREEN);
 			else
-				g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), gpC_base->m_item_desc_pi, RGB_RED);
+				g_PrintColorStr(px, py,(*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CANNOT_LEARN_SKILL].GetString(), TooltipDescPI(), RGB_RED);
 		}
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -2651,7 +2666,7 @@ void	_Help_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 //
 //	S_RECT dest_rect;
@@ -2698,15 +2713,15 @@ void	_Help_Description_Show(Rect rect, void * void_ptr, long left, long right)
 
 	g_FL2_GetDC();
 
-	g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str, gpC_base->m_item_name_pi, RGB_WHITE);
+	g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str, TooltipNamePI(), RGB_WHITE);
 	py += NORMAL_FONT_Y_GAP;
 
 	if (((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2 != NULL)
 	{
 		if(right)
-			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, gpC_base->m_item_desc_pi, right);
+			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, TooltipDescPI(), right);
 		else
-			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, gpC_base->m_item_desc_pi, RGB(200, 200, 200));
+			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, TooltipDescPI(), RGB(200, 200, 200));
 		
 		py += SMALL_FONT_Y_GAP;
 	}
@@ -2714,9 +2729,9 @@ void	_Help_Description_Show(Rect rect, void * void_ptr, long left, long right)
 	if (((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str != NULL)
 	{
 		if(right)
-			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, gpC_base->m_item_desc_pi, right);
+			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, TooltipDescPI(), right);
 		else
-			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
+			g_PrintColorStr(px, py, ((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, TooltipDescPI(), ITEM_DESC_RGB);
 	}
 
 	g_FL2_ReleaseDC();
@@ -2841,7 +2856,7 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 					time += sz_name;					
 				}
 
-				rect.w = max(rect.w, g_GetStringWidth(time.c_str(), gpC_base->m_item_desc_pi.hfont));
+				rect.w = max(rect.w, g_GetStringWidth(time.c_str(), TooltipDescPI().hfont));
 			}
 
 			if(p_item->GetSilver() > 0)
@@ -2983,9 +2998,9 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 			line_count++;
 			if( C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas( pMouseItem, p_item) )
 			{				
-				rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_REMOVE_OPTION].GetString(), gpC_base->m_item_desc_pi.hfont));
+				rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_REMOVE_OPTION].GetString(), TooltipDescPI().hfont));
 			} else
-				rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSGAE_CANNOT_REMOVE_OPTION].GetString(), gpC_base->m_item_desc_pi.hfont));
+				rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSGAE_CANNOT_REMOVE_OPTION].GetString(), TooltipDescPI().hfont));
 		}
 		if((itemClass == ITEM_CLASS_OUSTERS_WRISTLET || itemClass == ITEM_CLASS_OUSTERS_STONE)
 			&& (*g_pItemTable)[itemClass][itemType].ElementalType != ITEMTABLE_INFO::ELEMENTAL_TYPE_ANY)
@@ -3000,11 +3015,11 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 		PETINFO *pPetInfo = gC_vs_ui.GetMyPetInfo();
 		if(pPetInfo != NULL && pPetInfo->EXIST)
 		{
-			rect.w = max(rect.w,g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_USE_PET_FOOD].GetString(), gpC_base->m_item_desc_pi.hfont));
+			rect.w = max(rect.w,g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_USE_PET_FOOD].GetString(), TooltipDescPI().hfont));
 		}
 		else
 		{
-			rect.w = max(rect.w,g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DETACH_PET_FOOD].GetString(), gpC_base->m_item_desc_pi.hfont));
+			rect.w = max(rect.w,g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DETACH_PET_FOOD].GetString(), TooltipDescPI().hfont));
 		}
 	}
 	
@@ -3054,11 +3069,11 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 //	strcat(sz_ename, p_item->GetEName());
 //	strcat(sz_ename, ")");
 //
-//	rect.w = max(g_GetStringWidth(sz_name, gpC_base->m_item_name_pi.hfont), g_GetStringWidth(sz_ename, gpC_base->m_item_desc_pi.hfont));
+//	rect.w = max(g_GetStringWidth(sz_name, TooltipNamePI().hfont), g_GetStringWidth(sz_ename, TooltipDescPI().hfont));
 //	rect.h = NORMAL_FONT_Y_GAP+(line_count-1)*SMALL_FONT_Y_GAP+5;
 //
 //	if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)
-//		rect.w = max(rect.w, g_GetStringWidth((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), gpC_base->m_item_desc_pi.hfont));
+//		rect.w = max(rect.w, g_GetStringWidth((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), TooltipDescPI().hfont));
 
 	
 
@@ -3113,30 +3128,30 @@ void _Item_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 				bContinue = true;
 			}			
 		}
-		rect.w = max (rect.w, g_GetStringWidth( temp, gpC_base->m_item_desc_pi.hfont ) );
+		rect.w = max (rect.w, g_GetStringWidth( temp, TooltipDescPI().hfont ) );
 	}
 
 	if(gpC_mouse_pointer != NULL && pMouseItem != NULL &&
 		pMouseItem->GetItemClass() == ITEM_CLASS_EVENT_STAR )
 	{	
 		rect.w = max (rect.w, g_GetStringWidth( (*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_TRANS].GetString(), 
-			gpC_base->m_item_desc_pi.hfont) );
+			TooltipDescPI().hfont) );
 	}
 
 	strcat(sz_name, p_item->GetName());
 	strcat(sz_ename, p_item->GetEName());
 	strcat(sz_ename, ")");
 
-	rect.w = max(rect.w,max(g_GetStringWidth(sz_name, gpC_base->m_item_name_pi.hfont), g_GetStringWidth(sz_ename, gpC_base->m_item_desc_pi.hfont)));
+	rect.w = max(rect.w,max(g_GetStringWidth(sz_name, TooltipNamePI().hfont), g_GetStringWidth(sz_ename, TooltipDescPI().hfont)));
 	rect.h = NORMAL_FONT_Y_GAP+(line_count-1)*SMALL_FONT_Y_GAP+5;
 
 	if((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetLength() != 0)
 	{
 		int MaxWidth = 0;
 		if(p_item->GetItemClass() == ITEM_CLASS_BLOOD_BIBLE_SIGN)
-			MaxWidth = g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+p_item->GetItemType()].GetString(), gpC_base->m_item_desc_pi.hfont);
+			MaxWidth = g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+p_item->GetItemType()].GetString(), TooltipDescPI().hfont);
 		else
-			MaxWidth = g_GetStringWidth((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), gpC_base->m_item_desc_pi.hfont);
+			MaxWidth = g_GetStringWidth((*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].Description.GetString(), TooltipDescPI().hfont);
 		rect.w = max(rect.w, MaxWidth);
 	}
 
@@ -3208,17 +3223,17 @@ void _Skill_Description_Calculator(void (*fp_show)(Rect, void *, long, long), in
 	}
 
 	if(left >= SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA && left <= SKILL_HOLYLAND_BLOOD_BIBLE_CHASPA)
-		rect.w = g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), gpC_base->m_item_desc_pi.hfont);
+		rect.w = g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), TooltipDescPI().hfont);
 	else if(left >= SKILL_SWEEPER_BONUS_1 && left <= SKILL_SWEEPER_BONUS_12 )
-		rect.w = g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), gpC_base->m_item_desc_pi.hfont);
+		rect.w = g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), TooltipDescPI().hfont);
 	else if(left == SKILL_LOVE_CHAIN)
-		rect.w = g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_LOVE_CHAIN].GetString(), gpC_base->m_item_desc_pi.hfont);
+		rect.w = g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_LOVE_CHAIN].GetString(), TooltipDescPI().hfont);
 	else
 		rect.w = 0;
 
 
-	rect.w = max(rect.w, g_GetStringWidth((*g_pSkillInfoTable)[left].GetHName(), gpC_base->m_item_name_pi.hfont));
-	rect.w = max(rect.w, g_GetStringWidth((*g_pSkillInfoTable)[left].GetName(), gpC_base->m_item_desc_pi.hfont));
+	rect.w = max(rect.w, g_GetStringWidth((*g_pSkillInfoTable)[left].GetHName(), TooltipNamePI().hfont));
+	rect.w = max(rect.w, g_GetStringWidth((*g_pSkillInfoTable)[left].GetName(), TooltipDescPI().hfont));
 	rect.h = NORMAL_FONT_Y_GAP+(line_count)*SMALL_FONT_Y_GAP;
 
 	rect.w += SIDE_GAP;
@@ -3255,7 +3270,7 @@ void _Info_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 	//////////////////////////////// start calculation
 	int line_count = 0;
 
-	rect.w = g_GetStringWidth((const char *)void_ptr, gpC_base->m_item_name_pi.hfont);
+	rect.w = g_GetStringWidth((const char *)void_ptr, TooltipNamePI().hfont);
 	rect.h = NORMAL_FONT_Y_GAP+(line_count)*SMALL_FONT_Y_GAP;
 
 	rect.w += SIDE_GAP;
@@ -3297,7 +3312,7 @@ void _Strings_Description_Calculator(void (*fp_show)(Rect, void *, long, long), 
 	rect.w = 0;
 	for(int i = 0; i < left; i++)
 	{
-		rect.w = max(g_GetStringWidth( (const char *)ptr[i], gpC_base->m_item_name_pi.hfont), rect.w);
+		rect.w = max(g_GetStringWidth( (const char *)ptr[i], TooltipNamePI().hfont), rect.w);
 	}
 
 	rect.h = NORMAL_FONT_Y_GAP+(line_count)*NORMAL_FONT_Y_GAP;
@@ -3396,16 +3411,16 @@ void _SkillTree_Description_Calculator(void (*fp_show)(Rect, void *, long, long)
 		// 2004, 10, 16, sobiet add end
 	}
 
-	rect.w = g_GetStringWidth((*g_pSkillInfoTable)[left].GetHName(), gpC_base->m_item_name_pi.hfont);	
-	rect.w = max( rect.w,g_GetStringWidth((*g_pSkillInfoTable)[left].GetName(), gpC_base->m_item_desc_pi.hfont));
+	rect.w = g_GetStringWidth((*g_pSkillInfoTable)[left].GetHName(), TooltipNamePI().hfont);	
+	rect.w = max( rect.w,g_GetStringWidth((*g_pSkillInfoTable)[left].GetName(), TooltipDescPI().hfont));
 
 	if(left >= SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA && left <= SKILL_HOLYLAND_BLOOD_BIBLE_CHASPA)
 	{
-		rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), gpC_base->m_item_desc_pi.hfont));
+		rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[STRING_MESSAGE_BLOOD_BIBLE_BONUS_ARMEGA+left-SKILL_HOLYLAND_BLOOD_BIBLE_ARMEGA].GetString(), TooltipDescPI().hfont));
 	}
 	else if (left >= SKILL_SWEEPER_BONUS_1 && left <= SKILL_SWEEPER_BONUS_12 )
 	{
-		rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), gpC_base->m_item_desc_pi.hfont));
+		rect.w = max(rect.w, g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_SWEEPER_BONUS_1+left-SKILL_SWEEPER_BONUS_1].GetString(), TooltipDescPI().hfont));
 	}
 
 	rect.h = NORMAL_FONT_Y_GAP+(line_count)*SMALL_FONT_Y_GAP;
@@ -3448,14 +3463,14 @@ void _Help_Description_Calculator(void (*fp_show)(Rect, void *, long, long), int
 	if (((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2 != NULL)
 	{
 		line_count += 1;
-		main_w2 = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, gpC_base->m_item_desc_pi.hfont);
+		main_w2 = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str2, TooltipDescPI().hfont);
 	}
 	if (((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str != NULL)
 	{
 		line_count += 1;
-		sub_w = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, gpC_base->m_item_desc_pi.hfont);
+		sub_w = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_sub_str, TooltipDescPI().hfont);
 	}
-	rect.w = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str, gpC_base->m_item_name_pi.hfont);
+	rect.w = g_GetStringWidth(((S_DEFAULT_HELP_STRING *)void_ptr)->sz_main_str, TooltipNamePI().hfont);
 	rect.h = NORMAL_FONT_Y_GAP+line_count*SMALL_FONT_Y_GAP;
 
 	if (rect.w < main_w2)
@@ -3504,43 +3519,43 @@ void _BloodBible_Description_Calculator(void (*fp_show)(Rect, void *, long, long
 	if(desc->sz_name != NULL)
 	{
 		line_count ++;
-//		height += g_GetStringHeight(desc->sz_name,gpC_base->m_item_name_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_name,gpC_base->m_item_name_pi.hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString(),gpC_base->m_item_name_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_name,TooltipNamePI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_name,TooltipNamePI().hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_CHAR_MANAGER_NAME].GetString(),TooltipNamePI().hfont));
 	}
 	
 	if(desc->sz_place != NULL)
 	{
 		line_count++;
-//		height += g_GetStringHeight(desc->sz_place,gpC_base->m_item_desc_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_place,gpC_base->m_item_desc_pi.hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(), gpC_base->m_item_desc_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_place,TooltipDescPI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_place,TooltipDescPI().hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(), TooltipDescPI().hfont));
 	}
 	
 	if(desc->sz_shrine != NULL)
 	{		
 		line_count++;
-//		height += g_GetStringHeight(desc->sz_shrine,gpC_base->m_item_desc_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_shrine,gpC_base->m_item_desc_pi.hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(), gpC_base->m_item_desc_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_shrine,TooltipDescPI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_shrine,TooltipDescPI().hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_POSITION].GetString(), TooltipDescPI().hfont));
 	}
 
 	if(desc->sz_player != NULL)
 	{
 		line_count++;
-//		height += g_GetStringHeight(desc->sz_player,gpC_base->m_item_desc_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_player,gpC_base->m_item_desc_pi.hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_PLAYER].GetString(), gpC_base->m_item_desc_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_player,TooltipDescPI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_player,TooltipDescPI().hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_PLAYER].GetString(), TooltipDescPI().hfont));
 	}
 	
 	if(desc->sz_option != NULL)
 	{
 		line_count++;
-//		height += g_GetStringHeight(desc->sz_option,gpC_base->m_item_desc_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_option,gpC_base->m_item_desc_pi.hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_item_desc_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_option,TooltipDescPI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_option,TooltipDescPI().hfont) + g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), TooltipDescPI().hfont));
 	}
 
 	if(desc->sz_status != NULL)
 	{
 		line_count++;
-//		height += g_GetStringHeight(desc->sz_status, gpC_base->m_item_desc_pi.hfont);
-		width = max(width, g_GetStringWidth(desc->sz_status, gpC_base->m_item_desc_pi.hfont) +g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_STATUS].GetString(), gpC_base->m_item_desc_pi.hfont));
+//		height += g_GetStringHeight(desc->sz_status, TooltipDescPI().hfont);
+		width = max(width, g_GetStringWidth(desc->sz_status, TooltipDescPI().hfont) +g_GetStringWidth((*g_pGameStringTable)[UI_STRING_MESSAGE_BLOOD_BIBLE_DESC_STATUS].GetString(), TooltipDescPI().hfont));
 	}
 	g_FL2_ReleaseDC();
 	
@@ -3588,13 +3603,13 @@ void _Multiline_Info_Calculator(void (*fp_show)(Rect, void *, long, long), int x
 
 			char szTempBuf[128] = {0,};
 			memcpy(szTempBuf, void_ptr, right);
-			rect.w = g_GetStringWidth((const char *)szTempBuf, gpC_base->m_item_name_pi.hfont);
+			rect.w = g_GetStringWidth((const char *)szTempBuf, TooltipNamePI().hfont);
 		}
 		else
-			rect.w = g_GetStringWidth((const char *)void_ptr, gpC_base->m_item_name_pi.hfont);
+			rect.w = g_GetStringWidth((const char *)void_ptr, TooltipNamePI().hfont);
 	}
 	else
-		rect.w = g_GetStringWidth((const char *)void_ptr, gpC_base->m_item_name_pi.hfont);
+		rect.w = g_GetStringWidth((const char *)void_ptr, TooltipNamePI().hfont);
 
 	rect.h = (line_count)*NORMAL_FONT_Y_GAP;
 
@@ -3628,7 +3643,7 @@ void	_Multiline_Info_Show(Rect rect, void * void_ptr, long left, long right)
 		return;
 	RECT _rect;
 	SetRect(&_rect, rect.x, rect.y, rect.x+rect.w, rect.y+rect.h);
-	DrawAlphaBox(&_rect, 0, 0, 0, g_pUserOption->ALPHA_DEPTH);
+	DrawDescriptionBox(&_rect);
 //#endif
 //
 //	S_RECT dest_rect;
@@ -3696,7 +3711,7 @@ void	_Multiline_Info_Show(Rect rect, void * void_ptr, long left, long right)
 		char_temp = cur[CurrentPos - check];
 		cur[CurrentPos - check] = '\0';
 		
-		g_PrintColorStr(px, py, cur, gpC_base->m_item_name_pi, left);
+		g_PrintColorStr(px, py, cur, TooltipNamePI(), left);
 		py += NORMAL_FONT_Y_GAP;
 		
 		if(strlen(cur) < CurrentPos-check) 

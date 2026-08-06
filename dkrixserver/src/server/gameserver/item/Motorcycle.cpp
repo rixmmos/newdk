@@ -33,7 +33,7 @@ Motorcycle::Motorcycle(ItemType_t itemType, const list<OptionType_t>& optionType
     : m_ItemType(itemType), m_OptionType(optionType), m_Durability(0), m_pInventory(NULL) {
     __BEGIN_TRY
 
-    // 모터사이클은 타입에 따라 인벤토리의 크기가 다르다.
+    
     switch (itemType) {
     case 0:
         m_pInventory = new Inventory(10, 6);
@@ -374,26 +374,7 @@ void MotorcycleLoader::load(Creature* pCreature)
 
                 pMotorcycle->setDurability(pResult->getInt(++i));
 
-                /*
-                switch(storage)
-                {
-                    case STORAGE_INVENTORY:
-                    case STORAGE_GEAR:
-                    case STORAGE_BELT :
-                    case STORAGE_EXTRASLOT :
-                    case STORAGE_MOTORCYCLE:
-                    case STORAGE_STASH:
-                        // 모터 사이클 안에 모터 사이클을 보관할 수가 있나
-                        Assert(false);
-                        pMotorcycle->destroy();
-                        SAFE_DELETE(pMotorcycle);
-                        break;
-
-                    default :
-                        SAFE_DELETE(pStmt);	// by sigi
-                        throw Error("invalid storage or OwnerID must be NULL");
-                }
-                */
+                 
 
             } catch (Error& error) {
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), error.toString().c_str());
@@ -460,7 +441,7 @@ void MotorcycleLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

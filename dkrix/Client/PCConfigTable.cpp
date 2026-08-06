@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "PCConfigTable.h"
+#include <algorithm>
+#include <vector>
 
 const int PLAYER_CONFIG_VERSION	= 2;
 
@@ -50,7 +52,7 @@ PlayerConfig::SetLastSlot(int slot)
 		m_LastSlot = slot; 
 	}
 
-	// 최근에 사용된 것이다.
+	
 	m_RecentCount = 0;
 }
 
@@ -60,9 +62,9 @@ PlayerConfig::SetLastSlot(int slot)
 void		
 PlayerConfig::SaveToFile(std::ofstream& file)
 {
-	// save할때마다 RecentCount를 1씩 증가시킨다.
-	// SetLastSlot(접속할때)을 하지 않고.. save만 하게 되면
-	// 결국 RecentCount가 가장 큰 애가.. 제일~~ 오래전에 접속한애가 된다.
+	
+	
+	
 	m_RecentCount ++;
 
 	file.write((const char*)&m_LastSlot, 1);
@@ -133,7 +135,7 @@ PlayerConfigTable::AddPlayerConfig(PlayerConfig* pConfig)
 
 	iterator iConfig = find( playerID );
 
-	// 이미 있으면 지운다.
+	
 	if (iConfig != end())
 	{
 		PlayerConfig* pConfig = iConfig->second;
@@ -177,20 +179,20 @@ PlayerConfigTable::SaveToFile(std::ofstream& file)
 	int num = size();
 
 	//---------------------------------------------------------------
-	// 개수 제한에 걸리는 경우
+	
 	//---------------------------------------------------------------
 	if (num > LIMIT_PLAYER_CONFIG)
 	{
-		int removeNum = num - LIMIT_PLAYER_CONFIG;	// 제거할것 개수
+		int removeNum = num - LIMIT_PLAYER_CONFIG;	
 		num = LIMIT_PLAYER_CONFIG;
 
-		// 개수
+		
 		file.write((const char*)&num, 4);
 
-		// vector로 만들어서 저장할것만 뽑아야 한다.
+		
 		std::vector<PlayerConfig*> playerConfigs;
 		
-		playerConfigs.reserve( size() );	// 전체 개수만큼
+		playerConfigs.reserve( size() );	
 
 		const_iterator iConfig = begin();
 
@@ -201,12 +203,12 @@ PlayerConfigTable::SaveToFile(std::ofstream& file)
 			iConfig ++;
 		}
 
-		// sort. 최근에것들이 앞으로 온다.
+		
 		std::stable_sort( playerConfigs.begin(), playerConfigs.end(), PlayerConfigSort() );
 
 		BYTE len;
 
-		// num개만 저장한다.
+		
 		for (int i=0; i<num; i++)
 		{
 			PlayerConfig* pConfig = playerConfigs[i];
@@ -225,21 +227,21 @@ PlayerConfigTable::SaveToFile(std::ofstream& file)
 			}
 			else
 			{
-				// NULL인 경우는.. PlayerID 길이 0으로.
+				
 				len = 0;
 				file.write((const char*)&len, 1);
 			}
 		}
 	}
 	//---------------------------------------------------------------
-	// 전부 저장하는 경우
+	
 	//---------------------------------------------------------------
 	else
 	{
-		// 개수
+		
 		file.write((const char*)&num, 4);
 
-		// 다 저장..
+		
 		const_iterator iConfig = begin();
 
 		BYTE len;
@@ -262,7 +264,7 @@ PlayerConfigTable::SaveToFile(std::ofstream& file)
 			}
 			else
 			{
-				// NULL인 경우는.. PlayerID 길이 0으로.
+				
 				len = 0;
 				file.write((const char*)&len, 1);
 			}
@@ -283,7 +285,7 @@ PlayerConfigTable::LoadFromFile(std::ifstream& file)
 
 	int num;
 
-	// 개수
+	
 	file.read((char*)&num, 4);
 
 	BYTE len;
@@ -291,7 +293,7 @@ PlayerConfigTable::LoadFromFile(std::ifstream& file)
 
 	for (int i=0; i<num; i++)
 	{
-		file.read((char*)&len, 1);		// 이름 길이
+		file.read((char*)&len, 1);		
 
 		if (len != 0)
 		{
@@ -300,7 +302,7 @@ PlayerConfigTable::LoadFromFile(std::ifstream& file)
 
 			PlayerConfig* pConfig = new PlayerConfig;
 			pConfig->LoadFromFile( file );
-			pConfig->SetPlayerID( str );		// pConfig 내부에서도 하도록 바꿔야한다.
+			pConfig->SetPlayerID( str );		
 
 			AddPlayerConfig( pConfig );
 		}
@@ -358,7 +360,7 @@ WorldPlayerConfigTable::AddPlayerConfigTable(int worldID, PlayerConfigTable* pTa
 
 	iterator iTable = find( worldID );
 
-	// 이미 있으면 지운다.
+	
 	if (iTable != end())
 	{
 		PlayerConfigTable* pTable = iTable->second;
@@ -402,10 +404,10 @@ WorldPlayerConfigTable::SaveToFile(const char* pFilename)
 
 		int num = size();
 
-		// 개수
+		
 		file.write((const char*)&num, 4);
 
-		// 다 저장..
+		
 		const_iterator iConfig = begin();
 
 		while (iConfig != end())
@@ -456,7 +458,7 @@ WorldPlayerConfigTable::LoadFromFile(const char* pFilename)
 		{
 			int num;
 
-			// 개수
+			
 			file.read((char*)&num, 4);
 
 			int worldID;

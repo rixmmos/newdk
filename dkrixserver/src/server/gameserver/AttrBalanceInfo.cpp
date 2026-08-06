@@ -104,7 +104,7 @@ void STRBalanceInfoManager::load()
             throw Error("There is no data in STRBalanceInfo Table");
         }
 
-        // 전체 갯수를 세팅한다.
+        
         pResult->next();
         m_STRBalanceCount = pResult->getInt(1) + 1;
 
@@ -113,11 +113,11 @@ void STRBalanceInfoManager::load()
         m_STRBalanceInfoList = new STRBalanceInfo*[m_STRBalanceCount];
         Assert(m_STRBalanceInfoList != NULL);
 
-        // 배열을 초기화
+        
         for (uint i = 0; i < m_STRBalanceCount; i++)
             m_STRBalanceInfoList[i] = NULL;
 
-        // 데이터를 집어넣는다.
+        
         pResult = pStmt->executeQuery("Select Level, GoalExp, AccumExp from STRBalanceInfo ");
         while (pResult->next()) {
             STRBalanceInfo* pSTRBalanceInfo = new STRBalanceInfo();
@@ -158,7 +158,7 @@ STRBalanceInfo* STRBalanceInfoManager::getSTRBalanceInfo(uint value) const
     __BEGIN_TRY
 
     if (value >= m_STRBalanceCount || m_STRBalanceInfoList[value] == NULL) {
-        filelog("AttrError.log", "STR 능력치 초과 또는 미만");
+        filelog("AttrError.log", "STR    ");
         throw InvalidProtocolException();
     }
 
@@ -277,7 +277,7 @@ void DEXBalanceInfoManager::load()
             throw Error("There is no data in DEXBalanceInfo Table");
         }
 
-        // 전체 갯수를 세팅한다.
+        
         pResult->next();
         m_DEXBalanceCount = pResult->getInt(1) + 1;
 
@@ -286,11 +286,11 @@ void DEXBalanceInfoManager::load()
         m_DEXBalanceInfoList = new DEXBalanceInfo*[m_DEXBalanceCount];
         Assert(m_DEXBalanceInfoList != NULL);
 
-        // 배열을 초기화
+        
         for (uint i = 0; i < m_DEXBalanceCount; i++)
             m_DEXBalanceInfoList[i] = NULL;
 
-        // 데이터를 집어넣는다.
+        
         pResult = pStmt->executeQuery("Select Level, GoalExp, AccumExp from DEXBalanceInfo ");
         while (pResult->next()) {
             DEXBalanceInfo* pDEXBalanceInfo = new DEXBalanceInfo();
@@ -331,7 +331,7 @@ DEXBalanceInfo* DEXBalanceInfoManager::getDEXBalanceInfo(uint value) const
     __BEGIN_TRY
 
     if (value >= m_DEXBalanceCount || m_DEXBalanceInfoList[value] == NULL) {
-        filelog("AttrError.log", "DEX 능력치 초과 또는 미만");
+        filelog("AttrError.log", "DEX    ");
         throw InvalidProtocolException();
     }
 
@@ -450,7 +450,7 @@ void INTBalanceInfoManager::load()
             throw Error("There is no data in INTBalanceInfo Table");
         }
 
-        // 전체 갯수를 세팅한다.
+        
         pResult->next();
         m_INTBalanceCount = pResult->getInt(1) + 1;
 
@@ -460,11 +460,11 @@ void INTBalanceInfoManager::load()
 
         Assert(m_INTBalanceInfoList != NULL);
 
-        // 배열을 초기화
+        
         for (uint i = 0; i < m_INTBalanceCount; i++)
             m_INTBalanceInfoList[i] = NULL;
 
-        // 데이터를 집어넣는다.
+        
         pResult = pStmt->executeQuery("Select Level, GoalExp, AccumExp from INTBalanceInfo ");
         while (pResult->next()) {
             INTBalanceInfo* pINTBalanceInfo = new INTBalanceInfo();
@@ -507,7 +507,7 @@ INTBalanceInfo* INTBalanceInfoManager::getINTBalanceInfo(uint value) const
     __BEGIN_TRY
 
     if (value >= m_INTBalanceCount || m_INTBalanceInfoList[value] == NULL) {
-        filelog("AttrError.log", "INT 능력치 초과 또는 미만");
+        filelog("AttrError.log", "INT    ");
         throw InvalidProtocolException();
     }
 

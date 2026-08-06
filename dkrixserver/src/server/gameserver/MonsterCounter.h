@@ -47,9 +47,9 @@ public:
     string toString() const;
 
 private:
-    SpriteType_t m_SpriteType; // 스프라이트 타입
-    WORD m_MaxMonsters;        // 몬스터의 최대 마릿수
-    WORD m_CurrentMonsters;    // 몬스터의 현재 마릿수
+    SpriteType_t m_SpriteType; 
+    WORD m_MaxMonsters;        
+    WORD m_CurrentMonsters;    
 
     static DWORD s_MonsterCounter;
 };

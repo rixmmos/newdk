@@ -3,7 +3,7 @@
 //
 // Filename    : GGServerChat.h
 // Written By  : inthesky
-// Description : 서버간 Whisper Chat수행한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -25,10 +25,10 @@ class GGServerChat : public DatagramPacket {
 public:
     GGServerChat() {};
     ~GGServerChat() {};
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(Datagram& iDatagram);
 
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(Datagram& oDatagram) const;
 
     // execute packet's handler
@@ -143,7 +143,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GGServerChatPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBYTE + 10 +  // Sender
                szBYTE + 10 +  // Receiver

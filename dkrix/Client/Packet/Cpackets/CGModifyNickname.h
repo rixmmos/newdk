@@ -7,10 +7,10 @@
 #ifndef __CG_MODIFY_NICKNAME_H__
 #define __CG_MODIFY_NICKNAME_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
-#include "NicknameInfo.h"
+#include "../NicknameInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGModifyNickname;

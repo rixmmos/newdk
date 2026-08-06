@@ -46,15 +46,15 @@ void EffectIceField::affect()
 
     Assert(m_pZone != NULL);
 
-    // 이펙트를 사용한 크리쳐를 가져온다.
-    // !! 이미 존을 나갔을 수도 있으므로 NULL이 될 수 있다.
+    
+    
     // by bezz. 2003.1.4
     Creature* pCastCreature = m_pZone->getCreature(m_CasterID);
 
-    // 현재 이펙트가 붙어있는 타일을 받아온다.
+    
     Tile& tile = m_pZone->getTile(m_X, m_Y);
 
-    // 타일 안에 존재하는 오브젝트들을 검색한다.
+    
     const forward_list<Object*>& oList = tile.getObjectList();
     forward_list<Object*>::const_iterator itr = oList.begin();
     for (; itr != oList.end(); itr++) {
@@ -67,29 +67,29 @@ void EffectIceField::affect()
             Creature* pCreature = dynamic_cast<Creature*>(pObject);
             Assert(pCreature != NULL);
 
-            // 무적상태 체크. by sigi. 2002.9.5
-            // 산 면역. by sigi. 2002.9.13
-            // 자기 자신이면 안 맞는다.
-            // 안전지대 체크
+            
+            
+            
+            
             // 2003.1.10 by bezz, Sequoia
             if (!canAttack(pCastCreature, pCreature) || pCreature->isFlag(Effect::EFFECT_CLASS_COMA) ||
                 pCreature->getObjectID() == m_CasterID || !checkZoneLevelToHitTarget(pCreature)) {
                 continue;
             }
 
-            // 같은 조직(--;)이면 안 맞는다.
+            
             if (pCreature->isOusters() && !isForce()) {
                 continue;
             }
 
-            // 유저가 쓴게 아니면 몬스터가 안 맞는다.
+            
             if (pCreature->isMonster() && isForce()) {
                 continue;
             }
 
             if (pCreature->getMoveMode() != Creature::MOVE_MODE_FLYING &&
                 !pCreature->isFlag(Effect::EFFECT_CLASS_ICE_FIELD_TO_CREATURE)) {
-                // 이팩트 클래스를 만들어 붙인다.
+                
                 EffectIceFieldToCreature* pEffect = new EffectIceFieldToCreature(pCreature);
                 pEffect->setDeadline(m_Duration);
                 pCreature->addEffect(pEffect);
@@ -200,7 +200,7 @@ void EffectIceFieldLoader::load(Zone* pZone)
                             pEffect->setTick(10);
                             pEffect->setForce(true);
 
-                            // 존 및 타일에다가 이펙트를 추가한다.
+                            
                             pZone->registerObject(pEffect);
                             // pZone->addEffect(pEffect);  // REMOVED: Don't add permanent tile effects to Zone
                             tile.addEffect(pEffect);

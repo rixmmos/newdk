@@ -1,5 +1,5 @@
 # ============================================================================
-# SharedServer 可执行文件
+# SharedServer 
 # ============================================================================
 
 set(SHAREDSERVER_SOURCES
@@ -18,10 +18,10 @@ set(SHAREDSERVER_SOURCES
 
 add_executable(sharedserver ${SHAREDSERVER_SOURCES})
 
-# 编译定义
+
 target_compile_definitions(sharedserver PRIVATE __SHARED_SERVER__)
 
-# 包含目录
+
 target_include_directories(sharedserver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src/Core
@@ -29,7 +29,7 @@ target_include_directories(sharedserver PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/database
 )
 
-# 链接库
+
 if(APPLE)
     set(EXTRA_LIBS z)
 elseif(UNIX)

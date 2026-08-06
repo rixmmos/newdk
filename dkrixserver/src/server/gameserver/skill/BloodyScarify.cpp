@@ -24,7 +24,7 @@
 #include "Zone.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyScarify::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                             CEffectID_t CEffectID)
@@ -54,8 +54,8 @@ void BloodyScarify::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
             return;
         }
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (!canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
             return;
@@ -81,7 +81,7 @@ void BloodyScarify::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
         bool bHitRoll = HitRoll::isSuccess(pVampire, pTargetCreature);
         bool bCanHit = canHit(pVampire, pTargetCreature, getSkillType());
         bool bPK = verifyPK(pVampire, pTargetCreature);
-        // add by Coffee 2007-6-9  藤속왱뇜세콘엥
+        
         // bool bUseSkillCrad		= useSkillCrad(pVampire);
         /*
         bool bFastMove			= false;
@@ -104,7 +104,7 @@ void BloodyScarify::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
             bool bCriticalHit = false;
             Damage += computeDamage(pVampire, pTargetCreature, 0, bCriticalHit);
 
-            // 마나를 깍는다.
+            
             decreaseMana(pVampire, RequiredMP, _GCSkillToObjectOK1);
 
             EffectSetAfire* pEffect = new EffectSetAfire(pTargetCreature);
@@ -117,7 +117,7 @@ void BloodyScarify::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
 
             increaseAlignment(pVampire, pTargetCreature, _GCSkillToObjectOK1);
 
-            // 패킷을 보낸다.
+            
             _GCSkillToObjectOK1.setSkillType(getSkillType());
             _GCSkillToObjectOK1.setCEffectID(CEffectID);
             _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);
@@ -216,22 +216,22 @@ void BloodyScarify::eatCorpse(Vampire* pVampire, Item* pCorpse, VampireSkillSlot
             Effect* pEffect = pVampire->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
             EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
 
-            // 몇번 더 해야 한다는 것을 갱신해 준다.
+            
             Turn_t OldCount = pEffectHPRecoveryEffect->getPeriod();
             Turn_t NewPeriod = OldCount + Period;
             pEffectHPRecoveryEffect->setPeriod(NewPeriod);
             pEffectHPRecoveryEffect->setDeadline(NewPeriod * RegenPeriod);
 
-            // 회복 시작하라는 패킷을 자신에게 보낸다.
+            
             GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
-            gcHPRecoveryStartToSelf.setPeriod(NewPeriod);     // 몇번 회복하나?
-            gcHPRecoveryStartToSelf.setDelay(RegenPeriod);    // 몇 초 단위로 하나?
-            gcHPRecoveryStartToSelf.setQuantity(RegenHPUnit); // 한번에 얼마나 회복하나?
+            gcHPRecoveryStartToSelf.setPeriod(NewPeriod);     
+            gcHPRecoveryStartToSelf.setDelay(RegenPeriod);    
+            gcHPRecoveryStartToSelf.setQuantity(RegenHPUnit); 
 
             pVampire->getPlayer()->sendPacket(&gcHPRecoveryStartToSelf);
 
-            // 회복 시작하라는 패킷을 다른이들에게 보낸다.
-            // 회복 갱신 패킷, 시작과 똑 같은 패킷을 보낸다.
+            
+            
             GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
             gcHPRecoveryStartToOthers.setObjectID(pVampire->getObjectID());
             gcHPRecoveryStartToOthers.setPeriod(NewPeriod);
@@ -251,7 +251,7 @@ void BloodyScarify::eatCorpse(Vampire* pVampire, Item* pCorpse, VampireSkillSlot
 
             pVampire->addEffect(pEffectHPRecovery);
 
-            // 회복 시작하라는 패킷을 자신에게 보낸다.
+            
             GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
             gcHPRecoveryStartToSelf.setPeriod(Period);
             gcHPRecoveryStartToSelf.setDelay(RegenPeriod);
@@ -259,7 +259,7 @@ void BloodyScarify::eatCorpse(Vampire* pVampire, Item* pCorpse, VampireSkillSlot
 
             pVampire->getPlayer()->sendPacket(&gcHPRecoveryStartToSelf);
 
-            // 회복 시작하라는 패킷을 보는이들에게 보낸다.
+            
             GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
             gcHPRecoveryStartToOthers.setObjectID(pVampire->getObjectID());
             gcHPRecoveryStartToOthers.setPeriod(Period);
@@ -269,7 +269,7 @@ void BloodyScarify::eatCorpse(Vampire* pVampire, Item* pCorpse, VampireSkillSlot
             pZone->broadcastPacket(pVampire->getX(), pVampire->getY(), &gcHPRecoveryStartToOthers, pVampire);
         }
 
-        // 패킷을 보낸다.
+        
         _GCSkillToObjectOK1.setSkillType(getSkillType());
         _GCSkillToObjectOK1.setCEffectID(0);
         _GCSkillToObjectOK1.setTargetObjectID(pTargetCorpse->getObjectID());
@@ -291,13 +291,13 @@ void BloodyScarify::eatCorpse(Vampire* pVampire, Item* pCorpse, VampireSkillSlot
 
         pVampireSkillSlot->setRunTime(output.Delay);
 
-        // 사라지는 패킷을 날린다.
+        
         GCDeleteObject gcDO;
         gcDO.setObjectID(pTargetCorpse->getObjectID());
         pZone->broadcastPacket(pTargetCorpse->getX(), pTargetCorpse->getY(), &gcDO);
-        // 존에서 지운다.
+        
         pZone->deleteItem(pTargetCorpse, pTargetCorpse->getX(), pTargetCorpse->getY());
-        // 존안에서 실제적으로 포인터를 없애지는 않으므로 포인터를 삭제 시켜 줘야 한다.
+        
         SAFE_DELETE(pTargetCorpse);
     }
 

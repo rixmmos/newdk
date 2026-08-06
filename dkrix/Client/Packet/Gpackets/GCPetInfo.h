@@ -7,11 +7,11 @@
 #ifndef __GC_PET_INFO_H__
 #define __GC_PET_INFO_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "Types.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../Types.h"
 
-#include "PetInfo.h"
+#include "../PetInfo.h"
 
 class GCPetInfo : public Packet
 {

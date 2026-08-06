@@ -10,8 +10,8 @@
 #include "Zone.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 POINT
 BloodyWarp::getWarpPosition(int myX, int myY, int targetX, int targetY) throw() {
@@ -19,7 +19,7 @@ BloodyWarp::getWarpPosition(int myX, int myY, int targetX, int targetY) throw() 
 
     POINT pt;
 
-    // 10%의 확률로 random한 위치로 워프
+    
     /*	if (rand()%10==0)
         {
             pt.x = myX + rand()%9 - 4;
@@ -45,7 +45,7 @@ BloodyWarp::getWarpPosition(int myX, int myY, int targetX, int targetY) throw() 
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWarp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -65,7 +65,7 @@ void BloodyWarp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pVampire, getSkillType());
 
@@ -84,7 +84,7 @@ void BloodyWarp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWarp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -120,7 +120,7 @@ void BloodyWarp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWarp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -140,7 +140,7 @@ void BloodyWarp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
     POINT pt = getWarpPosition(myX, myY, X, Y);
 
-    // BLOODY_WALL를 적의 위치에 사용한다.
+    
     SkillType_t SkillType = SKILL_BLOODY_WALL;
 
     if (pMonster->getMonsterType() >= 717)
@@ -153,7 +153,7 @@ void BloodyWarp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
 
     if (pZone->moveFastMonster(pMonster, myX, myY, pt.x, pt.y, getSkillType())) {
-        // BLOODY_WAVE를 pMonster의 도착지점에 사용한다.
+        
         SkillType = (pMonster->isMaster() ? SKILL_BLOODY_MASTER_WAVE : SKILL_BLOODY_WAVE);
 
         pSkillHandler = g_pSkillHandlerManager->getSkillHandler(SkillType);

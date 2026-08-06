@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : CGStashListHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ void CGStashListHandler::execute(CGStashList* pPacket, Player* pPlayer)
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
 
-    // 패킷에서의 object id와 PC의 object id가 다르면 안 되지.
+    
     if (PlayerOID != pPC->getObjectID())
         return;
 

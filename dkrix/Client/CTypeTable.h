@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // CTypeTable.h
 //----------------------------------------------------------------------
-//���� 326220963
+
 #ifndef	__CTYPETABLE_H__
 #define	__CTYPETABLE_H__
 
@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 //
-// Info�� ���� ���� Table
+
 //
 //----------------------------------------------------------------------
 template <class Type>
@@ -77,8 +77,8 @@ class CTypeTable {
 		void			LoadFromFile(const char *filename);
 		bool			LoadFromFile_NickNameString(std::ifstream& file);
 	protected :		
-		int			m_Size;					// Type ���� ��
-		Type*		m_pTypeInfo;			// Type ����
+		int			m_Size;					
+		Type*		m_pTypeInfo;			
 
 };
 
@@ -114,14 +114,14 @@ template <class Type>
 void
 CTypeTable<Type>::Init(int size)
 {
-	// ������ ���� ��� 
+	
 	if (size==0) 
 		return;
 
-	// �ϴ� ����
+	
 	Release();
 
-	// �޸� ���
+	
 	m_Size = size;
 	
 	m_pTypeInfo = new Type [m_Size];	
@@ -137,7 +137,7 @@ CTypeTable<Type>::Release()
 {
 	if (m_pTypeInfo != NULL)
 	{
-		// ��� CSprite�� �����.
+		
 		delete [] m_pTypeInfo;
 		m_pTypeInfo = NULL;
 		
@@ -152,17 +152,17 @@ template <class Type>
 void			
 CTypeTable<Type>::SaveToFile(std::ofstream& file)
 {
-	// size ����
+	
 	file.write((const char*)&m_Size, 4);
 
-	// �ƹ� �͵� ���� ���
+	
 	if (m_pTypeInfo==NULL)
 		return;
 
-	// ������ ���� ����
+	
 	for (int i=0; i<m_Size; i++)
 	{
-		if (i==557)//ʯͷ����Ч��
+		if (i==557)
 		{
 			i=i;
 		}
@@ -179,20 +179,20 @@ CTypeTable<Type>::LoadFromFile(std::ifstream& file)
 {
 	int numSize=0;
 
-	// size �о����
+	
 	file.read((char*)&numSize, 4);
 
-	// ���� �����ִ� �޸𸮿� �ٸ��� �ٽ� �޸𸮸� ��´�.
+	
 	if (m_Size != numSize)
 	{
-		// �޸� ����
+		
 		Release();
 
-		// �޸� ���
+		
 		Init( numSize );
 	}
 
-	// file���� ������ ������ �о���δ�.
+	
 	for (int i=0; i<m_Size; i++)
 	{
 		if (i==700)
@@ -223,7 +223,7 @@ CTypeTable<Type>::SaveToFile(const char* lpszFilename)
 	SaveToFile(file);
 	file.close();
 }
-// 2004, 6, 18 sobeit add start - nick name - ���� ������ �� Ʋ���� �������� ����..^^:
+
 //----------------------------------------------------------------------
 // Load From File
 //----------------------------------------------------------------------
@@ -233,16 +233,16 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 {
 	int numSize;
 	WORD wIndex;
-	// size �о����
+	
 	file.read((char*)&numSize, 4);
 
-	// ���� �����ִ� �޸𸮿� �ٸ��� �ٽ� �޸𸮸� ��´�.
+	
 	if (m_Size != numSize)
 	{
-		// �޸� ����
+		
 		Release();
 
-		// �޸� ���
+		
 		Init( numSize );
 	}
 	
@@ -256,5 +256,5 @@ CTypeTable<Type>::LoadFromFile_NickNameString(std::ifstream& file)
 	}
 	return true;
 }
-// 2004, 6, 18 sobeit add start - nick name - ���� ������ �� Ʋ���� �������� ����..^^:
+
 #endif

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCPartyLeaveHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -35,15 +35,15 @@ throw ( ProtocolException , Error )
 	}
 
 	
-	const char* pExpeller = pPacket->getExpeller().c_str();	// 추방자
-	const char* pExpellee = pPacket->getExpellee().c_str(); // 추방된 자
+	const char* pExpeller = pPacket->getExpeller().c_str();	
+	const char* pExpellee = pPacket->getExpellee().c_str(); 
 
 	char str[256];
 			
 	bool bRemovePartyCheck = false;
 	
 	//-------------------------------------------------------------------
-	// 검증 확인
+	
 	//-------------------------------------------------------------------
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_PARTY_LEAVE)
 	{
@@ -51,17 +51,17 @@ throw ( ProtocolException , Error )
 	}
 
 	//-------------------------------------------------------------------
-	// 누가 스스로 나간 경우
+	
 	//-------------------------------------------------------------------
 	if (pExpeller==NULL || pExpeller[0]==NULL)
 	{
 		//----------------------------------------------------------
-		// 내가 나간 경우
+		
 		//----------------------------------------------------------
 		if (g_pUserInformation->CharacterID==pExpellee)
 		{
 			g_pParty->UnSetPlayerParty();
-			g_pParty->Release();	// 나의 party가 해체되는 것이당..			
+			g_pParty->Release();	
 
 			g_pGameMessage->Add( (*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY_MYSELF].GetString() );
 			//g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY_MYSELF].GetString() );
@@ -69,7 +69,7 @@ throw ( ProtocolException , Error )
 			UI_CloseParty();
 		}
 		//----------------------------------------------------------
-		// 누가 나간 경우
+		
 		//----------------------------------------------------------
 		else if (g_pParty->RemoveMember( pExpellee ))
 		{
@@ -84,12 +84,12 @@ throw ( ProtocolException , Error )
 		}
 	}
 	//-------------------------------------------------------------------
-	// 누가 누구를 쫓아낸 경우
+	
 	//-------------------------------------------------------------------
 	else
 	{
 		//-------------------------------------------------------------------
-		// 내가 pExpellee를 쫓아냈다.
+		
 		//-------------------------------------------------------------------
 		if (g_pUserInformation->CharacterID==pExpeller)
 		{		
@@ -106,12 +106,12 @@ throw ( ProtocolException , Error )
 			bRemovePartyCheck = true;
 		}
 		//-------------------------------------------------------------------
-		// 내가 pExpeller에게 쫓겨났다.
+		
 		//-------------------------------------------------------------------
 		else if (g_pUserInformation->CharacterID==pExpellee)
 		{
 			g_pParty->UnSetPlayerParty();
-			g_pParty->Release();	// 나의 party가 해체되는 것이당..			
+			g_pParty->Release();	
 
 			sprintf(str, 
 						(*g_pGameStringTable)[STRING_MESSAGE_KICKED_FROM_PARTY].GetString(), 
@@ -123,7 +123,7 @@ throw ( ProtocolException , Error )
 			bRemovePartyCheck = true;
 		}
 		//-------------------------------------------------------------------
-		// pExpeller가 pExpeller를 쫓아냈다.
+		
 		//-------------------------------------------------------------------
 		else if (g_pParty->RemoveMember( pExpellee ))
 		{
@@ -138,13 +138,13 @@ throw ( ProtocolException , Error )
 
 	
 	//--------------------------------------------------
-	// 파티 해체인가?
+	
 	//--------------------------------------------------
 	if (bRemovePartyCheck && g_pParty->GetSize()==0)
 	{		
 		UI_CloseParty();
 
-		// 메시지만 출력해주면 되겠지..
+		
 		//g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY].GetString() );		
 		g_pGameMessage->Add( (*g_pGameStringTable)[STRING_MESSAGE_REMOVE_PARTY].GetString() );
 	}

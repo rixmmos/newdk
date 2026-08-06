@@ -2,7 +2,7 @@
 //
 // Filename    : ModifyItemInfo.h
 // Written By  : elca@ewestsoft.com
-// Description : ����� ���������� ������ ��Ŷ�� ���� Ŭ���� ����
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -19,9 +19,9 @@
 //
 // class ModifyItemInfo;
 //
-// ���Ӽ������� Ŭ���̾�Ʈ�� �ڽ��� ������ �����͸�
-// �˷��ֱ� ���� ��ä ModifyItemInformation, SkillToObjectOK � �Ƿ���
-// ���ư���.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -34,15 +34,15 @@ public:
     ~ModifyItemInfo() noexcept;
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // ����ȭ��, �̸� ���� ������ ����Ѵ�.
+    
     PacketSize_t getSize() const {
         return szDWORD + szDWORD * m_ListNum * 3;
     }

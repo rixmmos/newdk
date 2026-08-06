@@ -30,10 +30,10 @@ throw ( ProtocolException , Error )
 	// 
 //	UI_OnLinePCS(pName, pcsNumber);
 
-	// PCS에 전화가 왔다고 알린다.
+	
 //	UI_PleaseConnectPCS(pName, pcsNumber, slot);
 
-	// 번호 기억
+	
 	g_pUserInformation->OtherPCSNumber[ slot ] = pPacket->getPhoneNumber();
 	g_pUserInformation->PCSUserName[ slot ] = pPacket->getName().c_str();
 

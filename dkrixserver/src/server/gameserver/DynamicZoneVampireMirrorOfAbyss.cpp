@@ -111,7 +111,7 @@ void DynamicZoneVampireMirrorOfAbyss::heartbeat() {
 bool DynamicZoneVampireMirrorOfAbyss::checkPC() {
     Assert(m_pZone != NULL);
 
-    // PC 수 체크
+    
     uint size = m_pZone->getPCManager()->getSize();
 
     return size != 0;
@@ -120,11 +120,11 @@ bool DynamicZoneVampireMirrorOfAbyss::checkPC() {
 bool DynamicZoneVampireMirrorOfAbyss::addMono() {
     Assert(m_pZone != NULL);
 
-    // 이성의 봉인을 생성한다.
+    
     Monster* pMonster = new Monster(792);
     Assert(pMonster != NULL);
 
-    pMonster->setName("잿昑裂룐丹");
+    pMonster->setName("");
     pMonster->setClanType(33);
 
     try {
@@ -161,7 +161,7 @@ bool DynamicZoneVampireMirrorOfAbyss::clearMono() {
 bool DynamicZoneVampireMirrorOfAbyss::openGateToOut() {
     Assert(m_pZone != NULL);
 
-    // 퀘스트를 진행시킨다.
+    
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = m_pZone->getPCManager()->getCreatures().begin();
     unordered_map<ObjectID_t, Creature*>::const_iterator endItr = m_pZone->getPCManager()->getCreatures().end();
 
@@ -192,7 +192,7 @@ bool DynamicZoneVampireMirrorOfAbyss::checkComplete() {
 void DynamicZoneVampireMirrorOfAbyss::processEntering() {
     Assert(m_pZone != NULL);
 
-    // 퀘스트 존에 들어왔음을 알린다.
+    
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = m_pZone->getPCManager()->getCreatures().begin();
     unordered_map<ObjectID_t, Creature*>::const_iterator endItr = m_pZone->getPCManager()->getCreatures().end();
 
@@ -221,7 +221,7 @@ bool DynamicZoneVampireMirrorOfAbyss::checkMono() {
 void DynamicZoneVampireMirrorOfAbyss::killPC() {
     Assert(m_pZone != NULL);
 
-    // PC 를 죽인다.
+    
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = m_pZone->getPCManager()->getCreatures().begin();
     unordered_map<ObjectID_t, Creature*>::const_iterator endItr = m_pZone->getPCManager()->getCreatures().end();
 

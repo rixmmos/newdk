@@ -83,10 +83,10 @@ bool MonsterKillQuest::checkSuccess(const QuestEvent* pQuestEvent) throw(Error) 
                 dynamic_cast<const QuestEventMonsterKill*>(pQuestEvent);
 
             if (*this == *pQuestEventMonsterKill) {
-                // 한 마리 줄인다.
+                
                 decreaseNumber();
 
-                // 다 죽였으면.. 완료
+                
                 if (getNumber() == 0) {
                     setState(STATE_COMPLETE);
                     return true;
@@ -135,7 +135,7 @@ Quest* MonsterKillQuestFactory::create(const QuestCreateInfo* qcInfo) const thro
     Assert(pQuest != NULL);
 
     // deadline
-    int availableMinute = (rand() % 6) * 10 + 10; // 10분~60분
+    int availableMinute = (rand() % 6) * 10 + 10; 
 
     int goldReward = (level + (60 - availableMinute) * 2) * 1000;
     int rankExpReward = (level + (60 - availableMinute) * 2) * 1000;
@@ -148,7 +148,7 @@ Quest* MonsterKillQuestFactory::create(const QuestCreateInfo* qcInfo) const thro
     pQuest->addReward(pReward);
     pQuest->addPenalty(pPenalty);
 
-    pQuest->setAvailableSecond(availableMinute * 60); // 분을 초로
+    pQuest->setAvailableSecond(availableMinute * 60); 
 
     return pQuest;
 
@@ -202,23 +202,23 @@ string MonsterKillQuest::toString() const throw(Error) {
 
     StringStream msg;
 
-    msg << "몬스터 죽이기(" << getObjectiveToString() << "), "
-        << "성공(" << getRewardToString() << ") : "
-        << "실패(" << getPenaltyToString() << ")";
+    msg << " (" << getObjectiveToString() << "), "
+        << "(" << getRewardToString() << ") : "
+        << "(" << getPenaltyToString() << ")";
 
     switch (getState()) {
     case Quest::STATE_NULL:
     case Quest::STATE_WAIT: {
-        msg << ", 수행시간(" << (m_AvailableSecond / 60) << ")분";
+        msg << ", (" << (m_AvailableSecond / 60) << ")";
     } break;
 
     case Quest::STATE_COMPLETE:
     case Quest::STATE_END:
-        msg << ", 완료";
+        msg << ", ";
         break;
 
     default: {
-        msg << ", 남은시간(" << (getRemainDuration() / 600) << ")분";
+        msg << ", (" << (getRemainDuration() / 600) << ")";
     }
     }
 

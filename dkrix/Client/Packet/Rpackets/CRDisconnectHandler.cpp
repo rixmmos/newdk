@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "CRDisconnect.h"
-#include "RequestServerPlayer.h"
+#include "../RequestServerPlayer.h"
 #include "RequestFunction.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ throw ( ProtocolException , Error )
 
 	if (pRequestServerPlayer!=NULL)
 	{
-		// 접속된 사용자를 접속해제 시킨다.
+		
 		RequestDisconnect( pRequestServerPlayer->getName().c_str() );
 	}
 

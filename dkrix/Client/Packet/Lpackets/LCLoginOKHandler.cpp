@@ -12,9 +12,9 @@
 
 #ifdef __GAME_CLIENT__
 
-	#include "ClientPlayer.h"
-	//#include "Cpackets/CLGetPCList.h"
-	#include "Cpackets/CLGetWorldList.h"
+	#include "../ClientPlayer.h"
+	//#include "../Cpackets/CLGetPCList.h"
+	#include "../Cpackets/CLGetWorldList.h"
 	#include "UserInformation.h"
 	#include "MGameStringTable.h"
 	#include "UIDialog.h"
@@ -30,11 +30,16 @@ extern bool		g_bFamily;
 
 bool	ChecknProtectCRC(HINSTANCE dll, char* FilePath);
 
+static void TraceLoginFlowPacket(const char* step)
+{
+	(void)step;
+}
+
 //----------------------------------------------------------------------
 //
-// 로그인 서버로부터 아이디와 패스워드의 인증을 받았다는 소리다.
+
 //
-// 이제 로그인 서버에게 PC 의 리스트를 요청하는 패킷을 전송하면 된다.
+
 //
 //----------------------------------------------------------------------
 void LCLoginOKHandler::execute ( LCLoginOK * pPacket , Player * pPlayer )
@@ -44,6 +49,7 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 
 #ifdef __GAME_CLIENT__
+	TraceLoginFlowPacket("LCLoginOKHandler begin");
 
 	if( g_pUserInformation->UserID.GetLength() >= 15 )
 	{
@@ -55,7 +61,7 @@ throw ( ProtocolException , Error )
 	if (!g_bNeedUpdate)
 	{
 		// 2004, 07, 20 sobeit add start
-		// 블럭 처리 된건 그전 꺼
+		
 //			ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 //
 //			CLGetWorldList clGetWorldList;
@@ -70,8 +76,10 @@ throw ( ProtocolException , Error )
 
 			ClientPlayer * pClientPlayer = (ClientPlayer *)(g_pUserInformation->pLogInClientPlayer);
 			pClientPlayer->sendPacket( &clGetWorldList );
+			TraceLoginFlowPacket("LCLoginOKHandler sent CLGetWorldList");
 
 			SetMode( MODE_WAIT_WORLD_LIST );
+			TraceLoginFlowPacket("LCLoginOKHandler set MODE_WAIT_WORLD_LIST");
 /*
 		if(false == g_pUserInformation->IsAutoLogIn) 
 		{
@@ -90,33 +98,11 @@ throw ( ProtocolException , Error )
 		// 2004, 07, 20 sobeit add end
 
 
-		/*
-		// 예전꺼
-		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
+		 
 
-		CLGetPCList clGetPCList;
-
-		pClientPlayer->sendPacket( &clGetPCList );
 		
-		// 플레이어의 상태를 바꾼다.
-		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
-
 		//------------------------------------------------------------
-		// 현재 Server 정보를 저장해둔다.
-		//------------------------------------------------------------
-		SetServerGroupName( pPacket->getGroupName().c_str() );
-		SetServerGroupStatus( (int)pPacket->getStat() );
-		//SetServerName( pPacket->getServerName().c_str() );
-
-		//------------------------------------------------------------
-		// Client는 PC List를 기다려야 한다.
-		//------------------------------------------------------------	
-		SetMode( MODE_WAIT_PCLIST );
-		*/
-
-		// 넷마블용
-		//------------------------------------------------------------
-		// Gore Level을 바꾼다.
+		
 		//------------------------------------------------------------
 		bool bGoreLevel;
 		
@@ -166,7 +152,7 @@ throw ( ProtocolException , Error )
 		// 2005, 1, 24, sobeit add start
 		if(0xFFFD == pPacket->getLastDays())
 		{
-			g_LeftPremiumDays = 7; // 휴면 계정 아이템 주는 이벤트 시 첫 접속일때 fffd가 날라온다. -> 무료 프리미엄 7일 시작
+			g_LeftPremiumDays = 7; 
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[UI_STRING_MESSAGE_GET_EVENT_ITEM_NOTICE].GetString() );
 		}
 		else
@@ -177,6 +163,7 @@ throw ( ProtocolException , Error )
 		g_LeftPremiumDays = 0xFFFF;
 	
 	DEBUG_ADD_FORMAT("[LCLoginOK] g_LeftPremiumDays : %x pPacket->getLastDays() : %x g_bFamily : %s", g_LeftPremiumDays, pPacket->getLastDays(), g_bFamily?"true":"false");
+	TraceLoginFlowPacket("LCLoginOKHandler end");
 
 #if !defined(__DEBUG_OUTPUT__) && !defined(OUTPUT_DEBUG)
 	// REMOVED: nProtect SendUserIDToGameMon call (SDL migration - no longer needed)

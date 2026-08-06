@@ -14,13 +14,18 @@
 #include "UIFunction.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"	
+	#include "../ClientPlayer.h"	
 #endif
 
+static void TraceLoginFlowPacket(const char* step)
+{
+	(void)step;
+}
+
 //----------------------------------------------------------------------
-// 서버로부터 캐릭터 리스트를 받았다. 
-// 이제 캐릭터 관리 인터페이스의 적절한 곳에 전송받은 값을 집어 넣어서
-// 출력하자.
+
+
+
 //----------------------------------------------------------------------
 void LCServerListHandler::execute ( LCServerList * pPacket , Player * pPlayer )
 	 
@@ -29,10 +34,11 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 
 #ifdef __GAME_CLIENT__
+	TraceLoginFlowPacket("LCServerListHandler begin");
 
 
 	//-----------------------------------------------------------
-	// Server Information 초기화
+	
 	//-----------------------------------------------------------
 	if (g_pServerInformation==NULL)
 	{
@@ -46,7 +52,7 @@ throw ( ProtocolException , Error )
 	bool bExistDefault = false;
 
 	//-----------------------------------------------------------
-	// Server정보 생성
+	
 	//-----------------------------------------------------------
 	int groupID = g_pServerInformation->GetServerGroupID();
 	ServerGroup* pServerGroup = g_pServerInformation->GetData( groupID );
@@ -73,7 +79,7 @@ throw ( ProtocolException , Error )
 				}
 
 				//--------------------------------------------------------------
-				// 새로운 ServerGroup의 정보 생성
+				
 				//--------------------------------------------------------------
 				SERVER_INFO* pNewServer = pServerGroup->GetData( pServerInfo->getGroupID() );
 				
@@ -83,7 +89,7 @@ throw ( ProtocolException , Error )
 					pServerGroup->AddData( pServerInfo->getGroupID(), pNewServer );
 				}
 
-				// Group의 정보 설정
+				
 				pNewServer->ServerName = pServerInfo->getGroupName().c_str();
 				pNewServer->ServerStatus = (int)pServerInfo->getStat();
 			
@@ -95,7 +101,7 @@ throw ( ProtocolException , Error )
 			}	
 		}
 
-		// default 선택		
+		
 		if (currentID==0 || !bExistDefault)
 		{
 			g_pServerInformation->SetServerID( firstID );
@@ -108,6 +114,7 @@ throw ( ProtocolException , Error )
 		UI_SetServerList();
 
 		SetMode( MODE_WAIT_SELECT_SERVER );
+		TraceLoginFlowPacket("LCServerListHandler set MODE_WAIT_SELECT_SERVER");
 	}
 	else
 	{

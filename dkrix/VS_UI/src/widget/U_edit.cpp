@@ -4,24 +4,33 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
+
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)
+#include <SDL2/SDL.h>
+#endif
+
+#ifndef WM_TEXTINPUT
+#define WM_TEXTINPUT (WM_USER + 0x500)
+#endif
+
+#ifndef WM_TEXTEDITING
+#define WM_TEXTEDITING (WM_USER + 0x501)
+#endif
 
 #ifdef PLATFORM_MACOS
-#include <SDL2/SDL.h>
 #include "../../../Client/TextSystem/TextService.h"
 #include "../../../Client/TextSystem/RenderTargetSpriteSurface.h"
 #include "../../../Client/SpriteLib/CSpriteSurface.h"
 #endif
 
-// Forward declare FL2 functions (defined in hangul/FL2.cpp)
-extern void g_Print(int x, int y, const char* sz_str, void* p_print_info);
-extern int g_GetStringWidth(const char* sz_str, void* hfont);
-extern int g_GetStringHeight(const char* sz_str, void* hfont);
-
 // External reference to global CI (for cursor blink state)
 extern CI* gC_ci;
 
 // External reference to SDL renderer
+#ifdef PLATFORM_MACOS
 extern SDL_Renderer* g_pSDLRenderer;
+#endif
 
 // External reference to back buffer surface (for spritectl blt)
 #ifdef PLATFORM_MACOS
@@ -84,6 +93,29 @@ static int utf32_to_utf8(uint32_t c, char out[5]) {
 		out[4] = 0;
 		return 4;
 	}
+}
+
+static void LogLineEditor(const char* fmt, ...)
+{
+	(void)fmt;
+}
+
+static bool IsAsciiLetter(uint32_t c)
+{
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+static bool IsAsciiLettersOnlyText(const char* text)
+{
+	if (text == NULL) return false;
+
+	for (const unsigned char* p = (const unsigned char*)text; *p != '\0'; ++p)
+	{
+		if (!IsAsciiLetter(*p))
+			return false;
+	}
+
+	return true;
 }
 
 // ============================================================================
@@ -200,6 +232,8 @@ void LineEditor::HandleTextInput(const char* text)
 	}
 
 	InsertText(utf32, len);
+	LogLineEditor("LineEditor::HandleTextInput text='%s' len=%d text_len=%d cursor=%d",
+		text, len, m_TextLen, m_CursorPos);
 }
 
 // Handle SDL_TEXTEDITING event (IME composition in progress)
@@ -296,6 +330,7 @@ void LineEditor::KeyboardControl(unsigned int message, unsigned int key, long ex
 		InsertChar((uint32_t)key);
 		break;
 
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL) || defined(PLATFORM_MACOS)
 	case WM_TEXTINPUT:
 		// SDL_TEXTINPUT event (extra is text pointer)
 		{
@@ -310,6 +345,7 @@ void LineEditor::KeyboardControl(unsigned int message, unsigned int key, long ex
 		// For now, we just clear composition state when we get this message
 		m_ComposingLen = 0;
 		break;
+#endif
 
 	case WM_KEYDOWN:
 		// Control keys
@@ -353,6 +389,7 @@ LineEditorVisual::LineEditorVisual()
 	m_AbsWidth = 100;
 	m_MaxWidth = 100;
 	m_bPasswordMode = false;
+	m_bAsciiLettersOnly = false;
 	m_bAcquired = false;
 	m_PrintInfo.hfont = NULL;
 	m_PrintInfo.text_color = 0xFFFFFF;
@@ -387,8 +424,9 @@ void LineEditorVisual::Acquire()
 
 	m_Editor.Acquire();
 	m_bAcquired = true;
+	LogLineEditor("LineEditorVisual::Acquire this=%p", (void*)this);
 
-#ifdef PLATFORM_MACOS
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)
 	// Enable SDL text input on macOS
 	SDL_StartTextInput();
 #endif
@@ -403,8 +441,9 @@ void LineEditorVisual::Unacquire()
 
 	m_Editor.Unacquire();
 	m_bAcquired = false;
+	LogLineEditor("LineEditorVisual::Unacquire this=%p", (void*)this);
 
-#ifdef PLATFORM_MACOS
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)
 	// Disable SDL text input on macOS
 	SDL_StopTextInput();
 #endif
@@ -434,6 +473,27 @@ void LineEditorVisual::SetCursorColor(unsigned long color)
 void LineEditorVisual::PasswordMode(bool bPassword)
 {
 	m_bPasswordMode = bPassword;
+}
+
+void LineEditorVisual::KeyboardControl(unsigned int message, unsigned int key, long extra)
+{
+	if (m_bAsciiLettersOnly)
+	{
+		if (message == WM_CHAR)
+		{
+			if (key >= 0x20 && !IsAsciiLetter(key))
+				return;
+		}
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL) || defined(PLATFORM_MACOS)
+		else if (message == WM_TEXTINPUT)
+		{
+			if (!IsAsciiLettersOnlyText((const char*)extra))
+				return;
+		}
+#endif
+	}
+
+	m_Editor.KeyboardControl(message, key, extra);
 }
 
 int LineEditorVisual::GetLineCount() const
@@ -553,12 +613,14 @@ void LineEditorVisual::Show() const
 			g_Print(cursorX, m_Y + 2, "_", &cursorPI);
 		} else {
 			// Normal block cursor
-			g_Print(cursorX, m_Y - 1, "▊", &cursorPI);
+			g_Print(cursorX, m_Y - 1, "", &cursorPI);
 		}
 	}
 #else
-	// Windows: Use legacy g_Print() for now
-	g_Print(m_X, m_Y, textToDisplay, (void*)NULL);
+	// Windows SDL build still relies on the legacy printer, but we must preserve
+	// the field's configured font/color so login editors render visibly.
+	PrintInfo printInfo = m_PrintInfo;
+	g_Print(m_X, m_Y, textToDisplay, &printInfo);
 
 	// Draw cursor
 	if (m_Editor.m_bAcquired && gC_ci != NULL && gC_ci->GetCursorBlink()) {
@@ -580,7 +642,7 @@ void LineEditorVisual::Show() const
 
 			strncpy(cursorBuffer, fullText, bytePos);
 			cursorBuffer[bytePos] = '\0';
-			cursorX = m_X + g_GetStringWidth(cursorBuffer, NULL);
+			cursorX = m_X + g_GetStringWidth(cursorBuffer, printInfo.hfont);
 		}
 
 		// Draw cursor using text rendering

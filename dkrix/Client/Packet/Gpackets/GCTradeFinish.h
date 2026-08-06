@@ -1,31 +1,31 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : GCTradeFinish.h 
-// Written By  : 김성민
+
 // Description : 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_TRADE_FINISH_H__
 #define __GC_TRADE_FINISH_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// 교환 코드
+
 ////////////////////////////////////////////////////////////////////////////////
 
 enum
 {
-	// 교환을 허락할 때 보내는 코드
+	
 	GC_TRADE_FINISH_ACCEPT = 0,
 
-	// 교환을 거부할 때 보내는 코드
+	
 	GC_TRADE_FINISH_REJECT,
 
-	// 교환을 재고려할 때 보내는 코드
+	
 	GC_TRADE_FINISH_RECONSIDER,
 
-	// 교환 실행
+	
 	GC_TRADE_FINISH_EXECUTE,
 
 	GC_TRADE_FINISH_MAX
@@ -59,8 +59,8 @@ public:
 	void setCode(BYTE code) throw() { m_Code = code; }
 
 private:
-	ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 ObjectID
-	BYTE       m_Code;           // 교환 코드
+	ObjectID_t m_TargetObjectID; 
+	BYTE       m_Code;           
 
 
 };

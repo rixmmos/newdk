@@ -53,7 +53,7 @@ void EffectCarnelianForceScroll::affect(Creature* pCreature)
     ObjectRegistry& objectregister = pZone->getObjectRegistry();
     objectregister.registerObject(this);
 
-    // 모저 9옵션 적용
+    
     pPC->addEffectOption(getObjectID(), 182);
     pPC->initAllStatAndSend();
 
@@ -228,7 +228,7 @@ void EffectCarnelianForceScrollLoader::load(Creature* pCreature)
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 모저 9옵션 적용
+            
             pPC->addEffectOption(pEffect->getObjectID(), 182);
         }
 

@@ -1,13 +1,4 @@
-/**
- * @file creature_viewer.cpp
- * @brief Creature Animation Viewer - 使用 Client/SpriteLib 和 Client/framelib
- *
- * 功能：
- * - 加载并显示生物动画（需要 .ispk + .cfpk 文件）
- * - 支持多动作、多方向、多帧动画
- * - 支持阴影显示
- * - 测试 CIndexSpritePack、CCreatureFramePack、CShadowSpritePack
- */
+ 
 
 #include "Client/SpriteLib/CIndexSpritePack.h"
 #include "Client/SpriteLib/CShadowSprite.h"
@@ -18,14 +9,14 @@
 #include <iostream>
 #include <fstream>
 
-// 动作名称
+
 static const char* ACTION_NAMES[] = {
     "STAND", "WALK", "RUN", "ATTACK", "DAMAGED", "DIE",
     "SKILL1", "SKILL2", "SKILL3", "SKILL4", "SKILL5", "SKILL6", "SKILL7", "SKILL8"
 };
 static const int MAX_ACTION_NAMES = 14;
 
-// 方向名称
+
 static const char* DIR_NAMES[] = {
     "LEFT", "LEFT-DOWN", "DOWN", "RIGHT-DOWN",
     "RIGHT", "RIGHT-UP", "UP", "LEFT-UP"

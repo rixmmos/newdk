@@ -50,8 +50,8 @@ public:
     }
 
 private:
-    SkillType_t m_SkillType;        // 기술의 종류
-    SkillDomainType_t m_DomainType; // 기술의 도메인
+    SkillType_t m_SkillType;        
+    SkillDomainType_t m_DomainType; 
 };
 
 //////////////////////////////////////////////////////////////////////

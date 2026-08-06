@@ -1,87 +1,89 @@
-# CLAUDE.md — Project-wide Instructions
+# CLAUDE.md — Engineering Principles
 
-This file provides top-level guidance that applies across the whole DarkEden-like
-MMORPG project. It complements, and takes precedence over, the per-repo `CLAUDE.md`
-files in the `client/` and `server/` trees when there is any conflict.
+Layout, build commands, release pipeline, and operational workflow live in the
+workspace root file: `C:\newdk\CLAUDE.md`. That file wins on any factual
+conflict. This one covers *how to make changes* — the judgment calls, not the
+paths.
 
-## Project scope
+The running plan lives in `docs/MODERNIZATION.md` and is the single source of
+truth for migration status.
 
-This is a legacy DarkEden-like MMORPG codebase. It spans:
+## What this codebase is
 
-- **server/** — C++11 game, login, and shared servers (MySQL + Lua + xerces-c).
-- **client/** — C++ isometric game client, mid-migration from Win32 + DirectX to SDL2.
-- **docs/** — Mixed-language (English / Korean / Chinese) legacy documentation and notes.
-- **configs/** — Runtime configuration (`*.conf`, `*.inf`, SQL schema, etc.).
-- **tooling/** — Build wrappers (Make → CMake), formatters, scripts.
-
-The code is roughly 2000–2010-era and carries the usual baggage: Hungarian
-notation, mixed-language comments, dead copy-protection / anti-cheat hooks,
-fake platform wrappers, and overlapping abstractions. Treat the codebase with
+Roughly 2000–2010-era C++ with the matching baggage: Hungarian notation,
+mixed Korean/Chinese/English comments, dead copy-protection and anti-cheat
+hooks, fake platform wrappers, and overlapping abstractions. Treat it with
 respect for its history but without sentimentality.
 
-## Priorities (in order)
+## Priorities, in order
 
-1. **Architectural cleanliness.** Prefer designs that make the system
-   easier to reason about over designs that happen to match what's already there.
-2. **Incremental modernization.** Move the codebase forward in small,
-   well-scoped steps rather than big-bang rewrites.
-3. **Build stability.** Every change should leave the tree buildable.
-   `make debug` (server) and `make debug-asan` (client) are the ground truth.
-4. **Platform layer cleanup.** Eliminate fake Win32 / DirectX wrappers
-   where SDL2 or the C++ standard library can do the job directly.
-5. **SDL2-oriented client modernization.** Continue the DirectX → SDL2
-   migration: remove dead D3D code, simplify pixel-format variants, collapse
-   `CDirect3D::IsHAL()`-style always-true branches.
-6. **Long-term maintainability over quick hacks.** If a change would make
-   the code harder to modify next quarter, don't ship it.
+1. **Architectural cleanliness.** Prefer designs that make the system easier to
+   reason about over designs that match what's already there.
+2. **Incremental modernization.** Small well-scoped steps, not big-bang
+   rewrites.
+3. **Build stability.** Every change leaves the tree buildable. The native
+   Windows client build and the server `make debug` are the ground truth.
+4. **Platform layer cleanup.** Remove fake Win32 / DirectX wrappers wherever
+   SDL2, the Win32 SDK, or the C++ standard library can do the job directly.
+5. **SDL2-oriented client modernization.** Continue DirectX → SDL2: delete dead
+   D3D code, collapse pixel-format variants, remove always-true branches like
+   `CDirect3D::IsHAL()`.
+6. **Long-term maintainability over quick hacks.** If a change makes the code
+   harder to modify next quarter, don't ship it.
 
 ## Guidelines
 
 - **No shallow hacks just to compile.** If the build breaks because an
-  abstraction is wrong, fix the abstraction. Do not paper over it with
-  `#ifdef`s, empty stubs, or `reinterpret_cast`s that hide real bugs.
-- **Small, reviewable steps.** Each change should be independently
-  reviewable and revertable. Prefer a series of focused commits over one
-  large sweeping diff.
-- **Explain architectural reasoning before and after edits.** State the
-  motivation and the expected effect before touching code, and summarize
-  what actually changed (and why) after.
-- **Identify and call out:**
-  - Dead code (including legacy copy protection, unreachable `#ifdef`
-    branches, orphaned files).
-  - Duplicate abstractions (e.g. overlapping sprite / surface / text classes).
+  abstraction is wrong, fix the abstraction. No `#ifdef` papering, empty stubs,
+  or `reinterpret_cast`s that hide real bugs.
+- **Small, reviewable steps.** Each change independently reviewable and
+  revertable. A series of focused commits beats one sweeping diff.
+- **Explain architectural reasoning before and after.** State the motivation
+  and expected effect before editing; summarize what actually changed after.
+- **Call out as you find them:**
+  - Dead code — legacy copy protection, unreachable `#ifdef` branches,
+    orphaned files.
+  - Duplicate abstractions — e.g. the two sprite systems (`Client/SpriteLib/`
+    and `tools/engine/sprite/`), overlapping surface/text classes.
   - Fake platform wrappers that only forward to SDL or the standard library.
-  - Unsafe legacy patterns (raw `new`/`delete` pairs without RAII,
-    unchecked `strcpy`, global singletons pretending to be thread-safe, etc.).
-- **Favor real platform APIs over custom typedef chaos.** Use SDL2 types
-  directly where they belong; use `<cstdint>`, `std::string`, and friends
-  instead of homegrown `DWORD` / `BOOL` / `CString` equivalents.
-- **Use compatibility layers only when they enable a cleaner migration
-  path.** A shim that lets the next refactor land is good. A shim that
-  permanently freezes a bad interface is not.
-- **Preserve gameplay logic where possible, but not bad architecture.**
-  Observable game behavior (damage math, skill effects, drop tables, packet
-  semantics) is load-bearing and must be kept unless the user explicitly
-  agrees to change it. The structure *around* that logic is fair game.
-- **Keep a running modernization plan in the repo.** Maintain an ongoing
-  document (e.g. `docs/MODERNIZATION.md`) that tracks what has been done,
-  what is in progress, and what is next. Update it as part of the change
-  that makes the work real, not after the fact.
+  - Unsafe legacy patterns — raw `new`/`delete` without RAII, unchecked
+    `strcpy`, globals pretending to be thread-safe.
+- **Favor real platform APIs over typedef chaos.** Use SDL2 types where they
+  belong; use `<cstdint>`, `std::string`, and friends instead of homegrown
+  `DWORD` / `BOOL` / `CString` clones.
+- **Compatibility layers only when they enable a cleaner migration.** A shim
+  that lets the next refactor land is good. A shim that permanently freezes a
+  bad interface is not.
+- **Preserve gameplay logic, not bad architecture.** Damage math, skill
+  effects, drop tables, and packet semantics are load-bearing and must be kept
+  unless the user explicitly agrees to change them.
+- **Keep the plan current.** Update `docs/MODERNIZATION.md` as part of the
+  change that makes it stale, not afterwards.
 
 ## Working agreements
 
-- Source encoding is **UTF-8**. When touching a file with mixed-language
-  comments, migrate the comments to **English** as you go.
-- Run the project's formatter before committing:
-  - Server: `make fmt` (clang-format).
-  - Client: match the prevailing style of the file until a project-wide
-    format is adopted.
+- Source encoding is UTF-8. Migrate mixed-language comments to English as you
+  touch files.
+- Run the formatter before committing — server: `make fmt` (clang-format);
+  client: match the prevailing style of the file.
 - Do not commit generated binaries, build outputs, or secrets.
-- Prefer creating a new commit over amending, and do not skip hooks.
+- Prefer a new commit over amending, and do not skip hooks.
+- When a legacy compatibility header conflicts with real Windows SDK types, fix
+  the abstraction so the Windows build uses the SDK definitions instead of
+  repo-local typedef clones.
+- Client and server changes that alter the wire protocol must land together;
+  packet semantics are shared between `dkrix` and `dkrixserver`.
+
+## Contents of this folder
+
+`MODERNIZATION.md` is current and maintained. Everything else here —
+`howto/`, `client_source_overview/`, and the Korean/Chinese `.txt` notes
+(GM commands, item codes, monster tables, DB setup walkthroughs) — is inherited
+legacy reference. It is often useful for archaeology and often out of date.
+Verify against the code before acting on it.
 
 ## When in doubt
 
-Ask. If a request conflicts with these priorities — for example, a
-"just make it compile" request that would require a shallow hack — raise
-the tradeoff explicitly and propose the smallest clean alternative before
-falling back to the hack.
+Ask. If a request conflicts with these priorities — for example a "just make it
+compile" request that needs a shallow hack — raise the tradeoff explicitly and
+propose the smallest clean alternative before falling back to the hack.

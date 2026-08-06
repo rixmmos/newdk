@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Filename    : GCShopBoughtHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
@@ -23,9 +23,9 @@ throw ( ProtocolException , Error )
 	
 #ifdef __GAME_CLIENT__
 
-	// shop에 아이템 등장
+	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,21 +33,21 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
 		//------------------------------------------------------
-		// 그런 creature가 없는 경우
+		
 		//------------------------------------------------------
 		if (pCreature==NULL)
 		{
 			DEBUG_ADD_FORMAT("[Error] There is no such Creature id=%d", pPacket->getObjectID());
 		}
 		//------------------------------------------------------
-		// NPC인 경우
+		
 		//------------------------------------------------------
 		else if (pCreature->GetClassType()==MCreature::CLASS_NPC)
 		{
@@ -58,14 +58,14 @@ throw ( ProtocolException , Error )
 			if (pShop==NULL)
 			{
 				//------------------------------------------------------
-				// shop이 없다면..
-				// item을 추가 시킬 필요가 없다.
+				
+				
 				//------------------------------------------------------
 			}
 			else
 			{
 				//------------------------------------------------------
-				// 새로운 아이템을 생성해서 추가해야 한다.
+				
 				//------------------------------------------------------
 				MShopShelf* pShopShelf = pShop->GetShelf( pPacket->getShopType() );
 
@@ -75,10 +75,10 @@ throw ( ProtocolException , Error )
 				}
 				else
 				{
-					// version 수정
+					
 					pShopShelf->SetVersion( pPacket->getShopVersion() );
 
-					// 새로운 item 생성
+					
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)pPacket->getItemClass() );
 
 					pItem->SetID( pPacket->getItemObjectID() );
@@ -89,7 +89,7 @@ throw ( ProtocolException , Error )
 					pItem->SetGrade( pPacket->getGrade() );
 					pItem->SetEnchantLevel( pPacket->getEnchantLevel() );
 
-					// 생성된 item을 shop에 추가
+					
 					if (!pShopShelf->SetItem( pPacket->getShopIndex(), pItem ))
 					{
 						DEBUG_ADD("[Error] Cannot Add Item to ShopShelf");
@@ -101,7 +101,7 @@ throw ( ProtocolException , Error )
 
 		}
 		//------------------------------------------------------
-		// NPC가 아닌 경우
+		
 		//------------------------------------------------------
 		else
 		{

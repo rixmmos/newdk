@@ -18,7 +18,7 @@
 #include "Zone.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SetAfire::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                        CEffectID_t CEffectID)
@@ -38,8 +38,8 @@ void SetAfire::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
             return;
@@ -88,10 +88,10 @@ void SetAfire::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
 
             CheckCrossCounter(pVampire, pTargetCreature, Damage);
 
-            // 마나를 깍는다.
+            
             decreaseMana(pVampire, RequiredMP, _GCSkillToObjectOK1);
 
-            // 데미지를 가하고, 아이템 내구도를 떨어뜨린다.
+            
             //			setDamage(pTargetCreature, Damage, pVampire, getSkillType(), &_GCSkillToObjectOK2,
             //&_GCSkillToObjectOK1); 			computeAlignmentChange(pTargetCreature, Damage, pVampire,
             //&_GCSkillToObjectOK2,
@@ -99,13 +99,13 @@ void SetAfire::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
             //&_GCSkillToObjectOK1,
             //&_GCSkillToObjectOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             //			if (bCriticalHit)
             //			{
             //				knockbackCreature(pZone, pTargetCreature, pVampire->getX(), pVampire->getY());
             //			}
 
-            // 이번 공격으로 상대가 죽었다면 경험치가 올라간다.
+            
             //			if (pTargetCreature->isDead())
             //			{
             //				int exp = computeCreatureExp(pTargetCreature, KILL_EXP);
@@ -124,7 +124,7 @@ void SetAfire::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
 
             increaseAlignment(pVampire, pTargetCreature, _GCSkillToObjectOK1);
 
-            // 패킷을 보낸다.
+            
             _GCSkillToObjectOK1.setSkillType(getSkillType());
             _GCSkillToObjectOK1.setCEffectID(CEffectID);
             _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);

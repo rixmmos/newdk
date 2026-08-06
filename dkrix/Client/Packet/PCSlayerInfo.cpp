@@ -56,10 +56,10 @@ void PCSlayerInfo::read ( SocketInputStream & iStream )
 	//--------------------------------------------------
 	// read slot
 	//
-	// enum 변수들은 실제 크기와 스트림에 쓰여진 크기가
-	// 다른 경우가 대부분이므로, 쓰여진 크기와 같은 변수
-	// 를 사용해서 대신 읽어서 다시 enum 으로 변환해서
-	// 저장하도록 한다.
+	
+	
+	
+	
 	//
 	// ex> Slot, Sex, HairStyle ...
 	//
@@ -174,7 +174,7 @@ void PCSlayerInfo::write ( SocketOutputStream & oStream ) const
 
 	//--------------------------------------------------
 	// write attributes
-	// 순수 능력치만 보낸다.
+	
 	//--------------------------------------------------
 	oStream.write( m_STR );
 	oStream.write( m_DEX );

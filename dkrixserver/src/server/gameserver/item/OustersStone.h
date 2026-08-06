@@ -74,12 +74,12 @@ public:
     virtual Elemental_t getElemental() const;
 
 private:
-    //	ItemType_t			m_ItemType;			// 아이템 타입
-    //	list<OptionType_t>		m_OptionType;		// 옵션 타입
-    //	Durability_t		m_Durability;		// 내구성
+    
+    
+    
 
-    static Mutex m_Mutex;             // 아이템 ID 관련 락
-    static ItemID_t m_ItemIDRegistry; // 클래스별 고유 아이템 아이디 발급기
+    static Mutex m_Mutex;             
+    static ItemID_t m_ItemIDRegistry; 
 };
 
 
@@ -138,7 +138,7 @@ public:
     virtual string toString() const;
 
 private:
-    Durability_t m_Durability; // 내구성
+    Durability_t m_Durability; 
     Defense_t m_DefenseBonus;
     Protection_t m_ProtectionBonus;
     uint m_ItemLevel;

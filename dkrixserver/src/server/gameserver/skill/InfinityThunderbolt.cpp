@@ -24,7 +24,7 @@ void InfinityThunderbolt::execute(Slayer* pSlayer, ObjectID_t targetObjectID, Sk
     Creature* pTargetCreature = pZone->getCreature(targetObjectID);
     // Assert(pTargetCreature != NULL);
 
-    // NoSuch제거. by sigi. 2002.5.2
+    
     if (pTargetCreature == NULL) {
         executeSkillFailException(pSlayer, getSkillType());
         return;
@@ -70,7 +70,7 @@ void InfinityThunderbolt::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y,
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // 목표위치+4방향
+    
     /*	param.addMask( 0 + dir_advance[dir][0],  0 + dir_advance[dir][1], 100);
         param.addMask(-1 + dir_advance[dir][0], -1 + dir_advance[dir][1], 100);
         param.addMask( 0 + dir_advance[dir][0], -1 + dir_advance[dir][1], 100);

@@ -12,10 +12,15 @@
 #include "UserInformation.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 #endif
 
 #include "ClientDef.h"
+
+static void TraceDarkLightFlow(const char* step)
+{
+	(void)step;
+}
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -31,6 +36,9 @@ throw ( ProtocolException , Error )
 		return;
 	#endif
 
+	TraceDarkLightFlow("GCChangeDarkLightHandler skipped for local test");
+	return;
+
 	// message
 
 
@@ -43,10 +51,10 @@ throw ( ProtocolException , Error )
 		lightSight = 13;
 	}
 
-	// 화면의 어둡기
+	
 	g_pTopView->SetDarkBits( darkLevel );		
 	
-	// Player시야 빛의 크기
+	
 	g_pPlayer->SetTimeLightSight( lightSight );		
 
 	

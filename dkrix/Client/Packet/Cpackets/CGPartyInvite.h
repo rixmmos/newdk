@@ -7,11 +7,11 @@
 #ifndef __CG_PARTY_INVITE_H__
 #define __CG_PARTY_INVITE_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 파티 가입 관련 코드
+
 //////////////////////////////////////////////////////////////////////////////
 enum
 {
@@ -50,8 +50,8 @@ public:
 	void setCode(BYTE code) throw() { m_Code = code; }
 
 private:
-	ObjectID_t m_TargetObjectID; // 상대방의 OID
-	BYTE       m_Code;           // 코드
+	ObjectID_t m_TargetObjectID; 
+	BYTE       m_Code;           
 
 };
 

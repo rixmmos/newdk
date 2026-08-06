@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneRhombusEffectGenerator.h
 //----------------------------------------------------------------------
-// 마름모 모양으로 생성 = 십자가 - 가운데 하나
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONERHOMBUSEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopZoneRhombusEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_RHOMBUS; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

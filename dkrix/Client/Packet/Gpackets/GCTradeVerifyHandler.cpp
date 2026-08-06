@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Filename    : GCTradeVerifyHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
@@ -17,10 +17,10 @@
 
 #ifdef __GAME_CLIENT__
 
-	#include "ClientPlayer.h"
-	#include "Cpackets/CGTradeAddItem.h"
-	#include "Cpackets/CGTradeFinish.h"
-	#include "cpackets/CGTradeRemoveItem.h"
+	#include "../ClientPlayer.h"
+	#include "../Cpackets/CGTradeAddItem.h"
+	#include "../Cpackets/CGTradeFinish.h"
+	#include "../Cpackets/CGTradeRemoveItem.h"
 
 #endif
 
@@ -34,7 +34,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------------------------
-	// TradeManager가 생성되지 않은 경우 --> -_-;;
+	
 	//------------------------------------------------------------------------
 	if (g_pTradeManager==NULL)
 	{
@@ -49,13 +49,13 @@ throw ( ProtocolException , Error )
 	{
 		//----------------------------------------------------------------------
 		//
-		// GCTradeAddItem을 검증 받아야 하는 경우에.. OK
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_ADD_ITEM_OK :
 			if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_ADD_ITEM)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 				pItem->SetTrade();
 
 				//-----------------------------------------------------------
-				// 뭔가 바뀐다면... OK취소
+				
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();
@@ -74,7 +74,7 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		// GCTradeAddItem을 검증 받아야 하는 경우에.. Fail
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_ADD_ITEM_FAIL :
@@ -88,14 +88,14 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		//		교환 대상으로 아이템을 추가하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_ADD_ITEM_WHEN_ACCEPT :
 			
 			if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_ADD_ITEM)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -103,12 +103,12 @@ throw ( ProtocolException , Error )
 				MItem* pItem	= (MItem*)g_pTempInformation->pValue;
 				
 				//-----------------------------------------------------------
-				// 추가 확인
+				
 				//-----------------------------------------------------------
 				pItem->SetTrade();
 
 				//-----------------------------------------------------------
-				// 뭔가 바뀐다면... OK취소
+				
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();				
@@ -121,7 +121,7 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		//			교환 대상에서 아이템을 제거하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_REMOVE_ITEM :
@@ -145,7 +145,7 @@ throw ( ProtocolException , Error )
 			//----------------------------------------------------------------------
 			if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_REMOVE_ITEM)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -153,22 +153,22 @@ throw ( ProtocolException , Error )
 				MItem* pItem	= (MItem*)g_pTempInformation->pValue;
 				
 				//-----------------------------------------------------------
-				// 선택되어 있던 아이템 --> 취소
+				
 				//-----------------------------------------------------------
 				pItem->UnSetTrade();
 
 				//-----------------------------------------------------------
-				// 뭔가 바뀐다면... OK취소
+				
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();				
 			}
 			//----------------------------------------------------------------------
-			// inventory --> mouse 의 검증
+			
 			//----------------------------------------------------------------------
 			else if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_PICKUP_FROM_INVENTORY)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -182,14 +182,14 @@ throw ( ProtocolException , Error )
 				g_pTradeManager->GetMyInventory()->RemoveItem( gridX, gridY );
 
 				//----------------------------------------------------------------
-				// OK 취소
+				
 				//----------------------------------------------------------------				
 				g_pTradeManager->RefuseMyTrade();
 				g_pTradeManager->RefuseOtherTrade();
 
 				//----------------------------------------------------------------
-				// 교환에서 선택된 아이템이면 자동으로 OK가 취소되지만
-				// 아닌 아이템은.. 수동으로 OK버튼을 취소하는 packet을 보내야 한다.
+				
+				
 				//----------------------------------------------------------------
 				if (!pItem->IsTrade())
 				{
@@ -202,38 +202,38 @@ throw ( ProtocolException , Error )
 				}			
 			}
 			//----------------------------------------------------------------
-			// 그냥 item 놓을 때
+			
 			//----------------------------------------------------------------
 			else if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_DROP_TO_INVENTORY)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 
-				// pItem은 원래 들고 있던 item
+				
 				MItem* pItem	= (MItem*)g_pTempInformation->pValue;
 				int gridX		= g_pTempInformation->Value2;
 				int gridY		= g_pTempInformation->Value3;
 				MItem* pMouseItem = UI_GetMouseItem();
 
-				// pItem == pMouseItem이다.
+				
 				//----------------------------------------------------------------
-				// mouse에 item이 있을 때
+				
 				//----------------------------------------------------------------
 				if (pMouseItem!=NULL)
 				{			
 					MItem* pOldItem = NULL;
 
 					//----------------------------------------------------------------
-					// inventory에 추가시킨다.
+					
 					//----------------------------------------------------------------
 					if (g_pTradeManager->GetMyInventory()->ReplaceItem(
-															pMouseItem,		// 추가할 item
-															gridX, gridY,	// 추가할 위치 
-															pOldItem))								// 원래있던 item
+															pMouseItem,		
+															gridX, gridY,	
+															pOldItem))								
 					{
-						if (pOldItem != NULL) // replace 되었는가?
+						if (pOldItem != NULL) 
 						{
 							UI_PickUpItem( pOldItem );						
 						}
@@ -244,7 +244,7 @@ throw ( ProtocolException , Error )
 					}
 
 					//---------------------------------------------------
-					// 놓은 아이템이 교환할려고 선택된 것인 경우
+					
 					//---------------------------------------------------
 					if (pMouseItem->IsTrade())
 					{
@@ -258,18 +258,18 @@ throw ( ProtocolException , Error )
 				}
 				else
 				{
-					// 콩가루
+					
 				}
 
 				//----------------------------------------------------------------
-				// OK 취소
+				
 				//----------------------------------------------------------------
 				g_pTradeManager->RefuseMyTrade();
 				g_pTradeManager->RefuseOtherTrade();
 
 				//----------------------------------------------------------------
-				// 교환에서 선택된 아이템이면 자동으로 OK가 취소되지만
-				// 아닌 아이템은.. 수동으로 OK버튼을 취소하는 packet을 보내야 한다.
+				
+				
 				//----------------------------------------------------------------
 				if (pMouseItem!=NULL && !pMouseItem->IsTrade())
 				{
@@ -282,11 +282,11 @@ throw ( ProtocolException , Error )
 				}
 			}
 			//----------------------------------------------------------------
-			// item에 추가될때
+			
 			//----------------------------------------------------------------
 			else if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_INSERT_TO_INVENTORY)				
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -297,18 +297,18 @@ throw ( ProtocolException , Error )
 				MItem* pMouseItem = UI_GetMouseItem();
 
 				//----------------------------------------------------
-				// pMouseItem을 pItem에 추가시킨다.
+				
 				//----------------------------------------------------
 				int total = pMouseItem->GetNumber() + pItem->GetNumber();
 				if ( total > pItem->GetMaxNumber() )
 				{
-					// 한계 수치를 넘어갈 경우
+					
 					pMouseItem->SetNumber( total - pItem->GetMaxNumber() );
 					pItem->SetNumber( pItem->GetMaxNumber() );
 				}
 				else
 				{
-					// 모두 pItem에 추가될 수 있는 경우
+					
 					pItem->SetNumber( total );
 					UI_DropItem();
 
@@ -316,13 +316,13 @@ throw ( ProtocolException , Error )
 				}
 
 				//----------------------------------------------------
-				// 교환중에 선택된 아이템인 경우
+				
 				//----------------------------------------------------
 				// Remove and Add - -;
 				if (pItem->IsTrade())
 				{
 						//----------------------------------------------------
-						// 개수가 바껴서 제거했다가..
+						
 						//----------------------------------------------------
 						CGTradeRemoveItem _CGTradeRemoveItem;
 						_CGTradeRemoveItem.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -335,7 +335,7 @@ throw ( ProtocolException , Error )
 						#endif
 						
 						//----------------------------------------------------
-						// 다시 추가
+						
 						//----------------------------------------------------
 						CGTradeAddItem _CGTradeAddItem;
 						_CGTradeAddItem.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -347,8 +347,8 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//----------------------------------------------------------------
-					// 교환에서 선택된 아이템이면 자동으로 OK가 취소되지만
-					// 아닌 아이템은.. 수동으로 OK버튼을 취소하는 packet을 보내야 한다.
+					
+					
 					//----------------------------------------------------------------					
 					CGTradeFinish _CGTradeFinish;
 					_CGTradeFinish.setTargetObjectID( g_pTradeManager->GetOtherID() );
@@ -361,7 +361,7 @@ throw ( ProtocolException , Error )
 				PlaySound( pItem->GetInventorySoundID() );
 			}
 			//----------------------------------------------------------------
-			// 잘못된 mode
+			
 			//----------------------------------------------------------------
 			else
 			{
@@ -372,7 +372,7 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		//			교환 대상에서 돈을 추가하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_MONEY_INCREASE :
@@ -392,7 +392,7 @@ throw ( ProtocolException , Error )
 				//g_pTradeManager->GetMyMoneyManager()->AddMoney( money );
 
 				//-----------------------------------------------------------
-				// 뭔가 바뀐다면... OK취소
+				
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();
@@ -405,7 +405,7 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		//			교환 대상에서 돈을 제거하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_MONEY_DECREASE:
@@ -420,7 +420,7 @@ throw ( ProtocolException , Error )
 				//g_pMoneyManager->AddMoney( money );	
 
 				//-----------------------------------------------------------
-				// 뭔가 바뀐다면... OK취소
+				
 				//-----------------------------------------------------------
 				g_pTradeManager->RefuseOtherTrade();
 				g_pTradeManager->RefuseMyTrade();				
@@ -432,15 +432,15 @@ throw ( ProtocolException , Error )
 		break;
 
 		//----------------------------------------------------------------------
-		// 교환 성립을 확인하는 것을 인증
+		
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_FINISH_ACCEPT:
-			// 검증이 필요없다.
+			
 		break;
 
 		//----------------------------------------------------------------------
 		//
-		//				교환 성립을 취소하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_FINISH_REJECT:
@@ -450,7 +450,7 @@ throw ( ProtocolException , Error )
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 
 				//----------------------------------------------------------------
-				// 교환창 닫기
+				
 				//----------------------------------------------------------------			
 				if (g_pTradeManager!=NULL)
 				{
@@ -463,7 +463,7 @@ throw ( ProtocolException , Error )
 
 		//----------------------------------------------------------------------
 		//
-		//				교환 성립을 재고려하는 것을 인증
+		
 		//
 		//----------------------------------------------------------------------
 		case GC_TRADE_VERIFY_CODE_FINISH_RECONSIDER:
@@ -473,7 +473,7 @@ throw ( ProtocolException , Error )
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 
 				//----------------------------------------------------------------
-				// OK 취소
+				
 				//----------------------------------------------------------------			
 				g_pTradeManager->RefuseMyTrade();
 			}
@@ -487,7 +487,7 @@ throw ( ProtocolException , Error )
 		case GC_TRADE_VERIFY_CODE_MOUSE_TO_INVENTORY_FAIL:
 			if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_DROP_TO_INVENTORY)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
@@ -507,7 +507,7 @@ throw ( ProtocolException , Error )
 		case GC_TRADE_VERIFY_CODE_INVENTORY_TO_MOUSE_FAIL:
 			if (g_pTempInformation->GetMode()==TempInformation::MODE_TRADE_VERIFY_PICKUP_FROM_INVENTORY)
 			{
-				// g_pPlayer->ItemCheckBuffer도 검증해야되는데..생략.. - -;
+				
 				g_pPlayer->ClearItemCheckBuffer();
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NULL);

@@ -36,7 +36,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		egInfo.nActionInfo <= SKILL_FIRE_CRACKER_WIDE_VOLLEY_4 ||
 		egInfo.nActionInfo ==SKILL_DRAGON_FIRE_CRACKER)
 	{
-		// 3연발
+		
 		int angle = 18;
 		int i;
 		int tx[3],tz[3],step[3];
@@ -49,7 +49,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			step[i] = egInfo.step;
 		}
 
-		// -_- 부하 별로 안크겠지 ㅋ
+		
 
 		float Radian = float( angle ) * ( PI / 180.0f );
 		float sinValue = float(coord_z) * sinf( Radian );
@@ -111,7 +111,7 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			step[i] = egInfo.step;
 		}
 
-		// -_- 부하 별로 안크겠지 ㅋ
+		
 				
 		float Radian = float( angle1 ) * ( PI / 180.0f );
 		float sinValue = float(coord_z) * sinf( Radian );
@@ -173,21 +173,21 @@ MRisingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		MLinearEffect* pEffect = new MLinearEffect(bltType);	
 		
 		
-		pEffect->SetFrameID( frameID, maxFrame );		// 0번 Effect, Max 3 Frame							
-		// 발사 위치 Pixel좌표	
+		pEffect->SetFrameID( frameID, maxFrame );		
+		
 		pEffect->SetPixelPosition( egInfo.x0, egInfo.y0, egInfo.z0 );			
-		// 방향 설정
+		
 		pEffect->SetDirection( egInfo.direction );		
-		// 목표 위치 Pixel좌표
+		
 		pEffect->SetTarget( egInfo.x0, egInfo.y0, egInfo.z0+egInfo.step*egInfo.count, egInfo.step );
 		//pEffect->SetTarget( egInfo.x0, egInfo.y0, egInfo.z1, egInfo.step );		
-		// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+		
 		pEffect->SetCount( egInfo.count, egInfo.linkCount );
 		
-		// 위력
+		
 		pEffect->SetPower(egInfo.power);
 		
-		// 빛의 밝기
+		
 		//pEffect->SetLight( light );
 		
 		if (g_pZone->AddEffect( pEffect ))

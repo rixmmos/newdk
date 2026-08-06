@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* 单个错误帧 */
+ 
 typedef struct {
     const char *func;
     const char *file;

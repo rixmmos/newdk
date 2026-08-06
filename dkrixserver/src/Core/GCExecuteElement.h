@@ -2,7 +2,7 @@
 // Filename    : GCExecuteElement.h
 // Written By  : elca@ewestsoft.com
 // Description :
-// 기술이 성공했을때 보내는 패킷을 위한 클래스 정의
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_EXECUTE_ELEMENT_H__
@@ -15,7 +15,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCExecuteElement;
-// 게임서버에서 클라이언트로 자신의 기술이 성공을 알려주기 위한 클래스
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCExecuteElement : public Packet {
@@ -70,8 +70,8 @@ public:
 
 private:
     DWORD m_QuestID;
-    BYTE m_Condition; // 어느 조건에 있는가 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-    WORD m_Index;     // 해당 조건의 몇번째 element인가
+    BYTE m_Condition; 
+    WORD m_Index;     
 };
 
 

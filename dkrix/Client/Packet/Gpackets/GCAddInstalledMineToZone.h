@@ -7,9 +7,9 @@
 #ifndef __GC_ADD_INSTALLED_MINE_TO_ZONE_H__
 #define __GC_ADD_INSTALLED_MINE_TO_ZONE_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include "GCAddItemToZone.h"
 
 //////////////////////////////////////////////////////////////////////////////

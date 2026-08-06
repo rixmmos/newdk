@@ -43,7 +43,7 @@ void EffectHeavenGround::affect()
 
     Assert(m_pZone != NULL);
     // cout << "UserObejctID:" << (int)m_UserObjectID << endl;
-    //  »ñÈ¡Ê¹ÓÃ¼¼ÄÜµÄÈËÎï
+    
     Creature* pCastCreature = m_pZone->getCreature(m_UserObjectID);
 
     if (pCastCreature == NULL) {
@@ -53,10 +53,10 @@ void EffectHeavenGround::affect()
     }
     // Slayer* pSlayer = dynamic_cast<Slayer*>(pSlayer);
 
-    // È¡³öµØÍ¼
+    
     Tile& tile = m_pZone->getTile(m_X, m_Y);
 
-    // »ñÈ¡µØÍ¼ÎïÆ·Á´±í
+    
     const forward_list<Object*>& oList = tile.getObjectList();
     forward_list<Object*>::const_iterator itr = oList.begin();
     for (; itr != oList.end(); itr++) {
@@ -69,22 +69,22 @@ void EffectHeavenGround::affect()
             Creature* pCreature = dynamic_cast<Creature*>(pObject);
             Assert(pCreature != NULL);
 
-            // ¼ì²âµ±Ç°¶ÔÏóÊÇ·ñ¿É¹¥»÷
+            
             if (!canAttack(pCastCreature, pCreature) || pCreature->isFlag(Effect::EFFECT_CLASS_IMMUNE_TO_ACID) ||
                 pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) {
                 continue;
             }
 
-            // ¼ì²âµØÍ¼µÈ¼¶
+            
             if (!checkZoneLevelToHitTarget(pCreature))
                 continue;
-            // ´´½¨ÉËº¦
+            
             int AcidDamage = computeMagicDamage(pCreature, m_Damage, SKILL_HEAVEN_GROUND, m_bSlayer, pCastCreature);
-            // ¿ÕÖÐµÄ²»¹¥»÷
+            
             if (pCreature->getMoveMode() != Creature::MOVE_MODE_FLYING) {
                 GCModifyInformation gcAttackerMI;
                 GCModifyInformation gcDefenderMI;
-                // Èç¹ûÊÇÈËÀà,Ôò²»»áÔì³ÉÉËº¦
+                
                 if (pCreature->isSlayer()) {
                     continue;
                     // setNextTime(m_Tick);
@@ -115,7 +115,7 @@ void EffectHeavenGround::affect()
 
                 bool modifiedAttacker = false;
 
-                // Á×¾úÀ¸¸é °æÇèÄ¡ÁØ´Ù. À½.....
+                
                 // 				if ( pCastCreature != NULL )
                 // 				{
                 // 					if (pCreature->isDead() && pCastCreature->isVampire())
@@ -124,7 +124,7 @@ void EffectHeavenGround::affect()
                 // &gcAttackerMI);
                 // 						//decreaseDurability(pSlayer, pCreature, NULL, &gcAttackerMI, &gcDefenderMI);
                 //
-                // 						// Å¸°ÙÀÌ ½½·¹ÀÌ¾î°¡ ¾Æ´Ñ °æ¿ì¿¡¸¸ °æÇèÄ¡¸¦ ¿Ã·ÁÁØ´Ù.
+                
                 // 						if (!pCreature->isSlayer())
                 // 						{
                 // // 							//shareAttrExp(pSlayer, AcidDamage , 1, 1, 8, _GCSkillToObjectOK1);
@@ -138,7 +138,7 @@ void EffectHeavenGround::affect()
                 // 					}
                 // 				}
 
-                // ¼ºÇâ °è»êÇÏ±â
+                
                 if (pCastCreature != NULL && pCastCreature->isPC() && pCreature->isPC()) {
                     computeAlignmentChange(pCreature, AcidDamage, pCastCreature, &gcDefenderMI, &gcAttackerMI);
                     modifiedAttacker = true;

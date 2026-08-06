@@ -10,15 +10,15 @@
 #include "PCInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Vampire 정보를 담고 있는 객체.
-// GCPCList 패킷에 담겨서 클라이언트에게 전송된다.
-// 아이템이나 걸려있는 마법 같은 정보는 담겨있지 않다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCVampireInfo : public PCInfo 
 {
 public:
-	// 아직 bitset은 사용하지 않는다.
+	
 	enum VampireBits
 	{
 		VAMPIRE_BIT_COAT1,
@@ -42,21 +42,21 @@ public:
 
 	uint getSize () const throw ()
 	{
-		return szBYTE					// 이름길이
-			+ m_Name.size() 			// 뱀파이어 이름
-			+ szSlot					// 슬롯
-			+ szAlignment				// 성향
-			+ szSex						// 성별
-			+ szColor* 2				// 색상
-			+ szBYTE + szColor		// 옷 타입, 색상
-			+ szAttr* 3 				// 능력치
+		return szBYTE					
+			+ m_Name.size() 			
+			+ szSlot					
+			+ szAlignment				
+			+ szSex						
+			+ szColor* 2				
+			+ szBYTE + szColor		
+			+ szAttr* 3 				
 			+ szHP* 2					// HP
-			+ szRank					// 계급
-			+ szExp						// 경험치
-			+ szLevel					// 경험치
+			+ szRank					
+			+ szExp						
+			+ szLevel					
 			+ szFame
-			//+ szGold					// 돈
-			+ szBonus					// 보너스 포인트
+			
+			+ szBonus					
 			//+ szZoneID;					// ZoneID
 			+ szLevel;
 	}
@@ -64,20 +64,20 @@ public:
 	// get max size of object
 	static uint getMaxSize () throw ()
 	{
-		return szBYTE + 20				// 뱀파이어 이름
-			+ szSlot					// 슬롯
-			+ szAlignment				// 성향
-			+ szSex						// 성별
-			+ szColor* 2				// 색상
-			+ szBYTE + szColor		// 옷 타입, 색상
-			+ szAttr* 3	 			// 능력치
+		return szBYTE + 20				
+			+ szSlot					
+			+ szAlignment				
+			+ szSex						
+			+ szColor* 2				
+			+ szBYTE + szColor		
+			+ szAttr* 3	 			
 			+ szHP* 2					// HP
-			+ szRank					// 계급
-			+ szExp						// 경험치
+			+ szRank					
+			+ szExp						
 			+ szFame
 			+ szLevel
-			//+ szGold					// 돈
-			+ szBonus					// 보너스 포인트
+			
+			+ szBonus					
 			//+ szZoneID;					// ZoneID
 			+ szLevel;
 	}
@@ -176,7 +176,7 @@ private:
 	// PC name
 	std::string m_Name;
 
-	// PC 슬롯
+	
 	Slot m_Slot;
 
 	// Alignment
@@ -193,7 +193,7 @@ private:
 	ItemType_t m_CoatType;
 	Color_t m_CoatColor;
 
-	// 계급
+	
 	Rank_t m_Rank;
 
 	// Exp
@@ -224,7 +224,7 @@ private:
 	Bonus_t m_Bonus;
 
 	Level_t m_AdvancementLevel;
-	// 걸려 있는 마법
+	
 };
 
 #endif

@@ -20,7 +20,7 @@
 //
 // class CommonBillingPacket;
 //
-// GameServer와 BillingServer가 주고 받는 packet이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -30,10 +30,10 @@ class GamePlayer;
 
 class CommonBillingPacket : public Packet, public BillingInfo {
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -91,7 +91,7 @@ public:
     string getExpire_DateToString() const;
 
 private:
-    // 256은 BillingInfo가 196이기 때문에 일단 이렇게 잡아둔거다
+    
     char m_pBuffer[256];
 };
 
@@ -122,7 +122,7 @@ public:
     }
 
     // get packet's max body size
-    // message 의 최대 크기에 대한 설정이 필요하다.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBillingInfo;
     }

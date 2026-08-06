@@ -9,8 +9,8 @@
 #define __GC_ADD_MONSTER_CORPSE_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 
 //--------------------------------------------------------------------------------
@@ -23,10 +23,10 @@ class GCAddMonsterCorpse : public Packet {
 
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -37,7 +37,7 @@ public :
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddMonsterCorpsePacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketSize () const throw () 
 	{ 
 		return szObjectID + 
@@ -99,14 +99,14 @@ private :
 	
     ObjectID_t m_ObjectID;			// OID
 
-	MonsterType_t m_MonsterType; 	// 몬스터 타입
+	MonsterType_t m_MonsterType; 	
 
 	std::string m_MonsterName;
 
-   	Coord_t m_X;					// X 좌표
-	Coord_t m_Y;					// Y 좌표
-	Dir_t m_Dir;					// 방향
-	bool m_bhasHead;				// 머리가 있는가?
+   	Coord_t m_X;					
+	Coord_t m_Y;					
+	Dir_t m_Dir;					
+	bool m_bhasHead;				
 	
 	BYTE m_TreasureCount;
 
@@ -140,7 +140,7 @@ public :
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddMonsterCorpsePacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () 
 	{ 
 		return szObjectID + 

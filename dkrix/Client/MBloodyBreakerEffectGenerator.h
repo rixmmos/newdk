@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MBloodyDelugeEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MBLOODYBREAKEREFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MBloodyBreakerEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_BLOODY_BREAKER; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

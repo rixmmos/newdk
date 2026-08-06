@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectMasterLairPass.cpp
-// Written by  : 쉭
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ EffectMasterLairPass::EffectMasterLairPass(Creature* pCreature, ZoneID_t zoneID)
 
     setTarget(pCreature);
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -76,8 +76,8 @@ void EffectMasterLairPass::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_MASTER_LAIR_PASS);
 
     Zone* pZone = pCreature->getZone();

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectRelic.h
 // Written by  :
-// Description : Doom에 의한 방어력 하강 effect
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EFFECT_RELIC__
@@ -46,7 +46,7 @@ public:
     }
 
 private:
-    HP_t m_Point; // 회복 에너지량
+    HP_t m_Point; 
     Turn_t m_Tick;
 };
 

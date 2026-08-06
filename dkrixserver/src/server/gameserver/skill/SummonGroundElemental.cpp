@@ -79,7 +79,7 @@ SummonGroundElemental::SummonGroundElemental() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonGroundElemental::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                                     CEffectID_t CEffectID)
@@ -110,8 +110,8 @@ void SummonGroundElemental::execute(Ousters* pOusters, ObjectID_t TargetObjectID
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), Grade);
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -130,7 +130,7 @@ void SummonGroundElemental::execute(Ousters* pOusters, ObjectID_t TargetObjectID
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonGroundElemental::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y,
                                     OustersSkillSlot* pOustersSkillSlot, CEffectID_t CEffectID)
@@ -175,7 +175,7 @@ void SummonGroundElemental::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_
         SkillType_t SkillType = pOustersSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // 데미지와 지속 시간을 계산한다.
+        
         SkillInput input(pOusters, pOustersSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -229,7 +229,7 @@ void SummonGroundElemental::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_
             Regen = 1 HP per 1 sec
             */
             Monster* pGroundElemental = new Monster(GROUND_ELEMENTAL_TYPE);
-            pGroundElemental->setName("대지 정령");
+            pGroundElemental->setName(" ");
             pGroundElemental->setHP(1000 + input.SkillLevel * 100);
             pGroundElemental->setHP(1000 + input.SkillLevel * 100, ATTR_MAX);
             pGroundElemental->setDefense(0);
@@ -242,14 +242,14 @@ void SummonGroundElemental::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_
             pGroundElemental->removeFlag(Effect::EFFECT_CLASS_HIDE);
             pGroundElemental->setMoveMode(Creature::MOVE_MODE_WALKING);
 
-            // 무뇌정령
+            
             pGroundElemental->setBrain(NULL);
 
             pZone->addCreature(pGroundElemental, X, Y, 2);
             X = pGroundElemental->getX();
             Y = pGroundElemental->getY();
 
-            cout << pGroundElemental->toString() << " 을 " << X << ", " << Y << " 에 불러냈습니다." << endl;
+            cout << pGroundElemental->toString() << "  " << X << ", " << Y << "  ." << endl;
 
             EffectGroundElemental* pCreatureEffect = new EffectGroundElemental(pGroundElemental);
             pCreatureEffect->setDeadline(output.Duration);
@@ -282,22 +282,22 @@ void SummonGroundElemental::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_
                     if (tile.getEffect(Effect::EFFECT_CLASS_TRYING_POSITION))
                         continue;
 
-                    // 같은 이펙트가 이미 존재한다면 삭제한다.
+                    
                     Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_GROUND_ELEMENTAL_AURA);
                     if (pOldEffect != NULL) {
                         ObjectID_t effectID = pOldEffect->getObjectID();
                         pZone->deleteEffect(effectID);
                     }
 
-                    // 이펙트 오브젝트를 생성한다.
+                    
                     EffectSummonGroundElemental* pEffect = new EffectSummonGroundElemental(pZone, oX, oY);
                     pEffect->setDeadline(output.Duration);
 
-                    // 타일에 붙은 이펙트는 OID를 받아야 한다.
+                    
                     ObjectRegistry& objectregister = pZone->getObjectRegistry();
                     objectregister.registerObject(pEffect);
 
-                    // 존 및 타일에다가 이펙트를 추가한다.
+                    
                     pZone->addEffect(pEffect);
                     tile.addEffect(pEffect);
 

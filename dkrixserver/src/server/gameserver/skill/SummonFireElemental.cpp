@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonFireElemental::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot, CEffectID_t CEffectID)
 
@@ -58,12 +58,12 @@ void SummonFireElemental::execute(Ousters* pOusters, OustersSkillSlot* pOustersS
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected && bSatisfyRequire) {
             decreaseMana(pOusters, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pOusters, pOustersSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // cout << pOusters->getName() << "이 SummonFireElemental를 썼고 데미지는 " << output.Damage << "입니다." <<
+            
             // endl;
 
             Damage_t Damage = output.Damage;
@@ -71,7 +71,7 @@ void SummonFireElemental::execute(Ousters* pOusters, OustersSkillSlot* pOustersS
             bool dummy;
             computeCriticalBonus(pOusters, getSkillType(), Damage, dummy);
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectSummonFireElemental* pEffect = new EffectSummonFireElemental(pOusters);
             pEffect->setDeadline(output.Duration);
             pEffect->setDamage(Damage);

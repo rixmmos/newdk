@@ -2,7 +2,7 @@
 // 
 // Filename    : CGRequestIP.cpp 
 // Written By  : elca@ewestsoft.com
-// Description : 서버에 원하는 사람의 IP 요청
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGRequestIP.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
+#include "../SocketInputStream.h"
+#include "../SocketOutputStream.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -37,7 +37,7 @@ CGRequestIP::~CGRequestIP ()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void CGRequestIP::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -58,14 +58,14 @@ void CGRequestIP::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void CGRequestIP::write ( SocketOutputStream & oStream ) 
      const throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 	
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	BYTE num = m_Name.size();
 	oStream.write( num );
 

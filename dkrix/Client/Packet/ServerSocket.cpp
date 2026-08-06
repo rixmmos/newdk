@@ -28,11 +28,11 @@ ServerSocket::ServerSocket ( uint port , uint backlog )
 	m_Impl->create();
 	
 	// reuse address before Bind()
-	// 바인드 하기 전에 주소 리유즈를 시스템에 알려야 한다.
+	
 	m_Impl->setReuseAddr();
 	
 	// bind address to socket
-	// 이미 port가 m_Impl에 저장되어 있으므로, 파라미터없는 Bind()를 호출해도 된다.
+	
 	m_Impl->bind();
 	
 	// set listening queue size

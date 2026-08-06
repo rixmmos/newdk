@@ -28,7 +28,7 @@ throw ( ProtocolException , Error )
 
 	MItem* pItem = UI_GetMouseItem();
 
-	// mouse에 있는 것도 함 체크해준다. by sigi. 2002.7.8
+	
 	if (pItem!=NULL
 		&& pItem->GetID()==pPacket->getObjectID())
 	{
@@ -52,7 +52,7 @@ throw ( ProtocolException , Error )
 		if (g_pPlayer->IsItemCheckBufferDropToRelicTable() || g_pPlayer->IsItemCheckBufferDropToCreature())
 		{
 			//---------------------------------------------
-			// 떨어뜨릴려는 item
+			
 			//---------------------------------------------
 			MItem* pCheckItem = g_pPlayer->GetItemCheckBuffer();
 

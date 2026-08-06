@@ -10,7 +10,7 @@
 #include "SimpleMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AcidStrike::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -38,7 +38,7 @@ void AcidStrike::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Knowledge of Acid 가 있다면 hit bonus 10
+    
     int HitBonus = 0;
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_ACID)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_ACID);
@@ -55,7 +55,7 @@ void AcidStrike::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AcidStrike::execute(Monster* pMonster, Creature* pEnemy)
 

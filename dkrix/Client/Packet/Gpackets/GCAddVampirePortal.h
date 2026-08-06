@@ -2,17 +2,17 @@
 // Filename    : GCAddVampirePortal.h 
 // Written By  : excel96
 // Description :
-// 뱀파이어 포탈은 현재 이펙트의 일종으로서 구현되는데, 이 패킷은
-// 클라이언트에게 바닥에다 뱀파이어 포탈 이펙트를 붙이라는 패킷이다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_ADD_VAMPIRE_PORTAL_H__
 #define __GC_ADD_VAMPIRE_PORTAL_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddVampirePortal;
@@ -65,15 +65,15 @@ public:
 
 	
 private:
-	ObjectID_t  m_ObjectID;       // 이펙트의 OID
-	std::string      m_OwnerID;        // 포탈 주인
-	Duration_t	m_Duration;       // 포탈의 지속 시간
-	Coord_t     m_X;              // 포탈이 붙어있는 타일의 좌표 x
-	Coord_t     m_Y;              // 포탈이 붙어있는 타일의 좌표 y
-	ZoneID_t    m_TargetZoneID;   // 포탈의 목표 존 ID
-	Coord_t     m_TargetX;        // 포탈의 목표 좌표 x
-	Coord_t     m_TargetY;        // 포탈의 목표 좌표 y
-	BYTE        m_CreateFlag;     // 방금 생성되었는가? (0이면 생성된지 시간이 좀 지난 것...)
+	ObjectID_t  m_ObjectID;       
+	std::string      m_OwnerID;        
+	Duration_t	m_Duration;       
+	Coord_t     m_X;              
+	Coord_t     m_Y;              
+	ZoneID_t    m_TargetZoneID;   
+	Coord_t     m_TargetX;        
+	Coord_t     m_TargetY;        
+	BYTE        m_CreateFlag;     
 };
 
 //////////////////////////////////////////////////////////////////////////////

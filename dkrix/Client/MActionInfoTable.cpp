@@ -19,12 +19,12 @@ MActionInfoTable*			g_pActionInfoTable = NULL;
 //----------------------------------------------------------------------
 
 //-------------------------------------------------------
-// 애들 버전.. -_-;
+
 //-------------------------------------------------------
 void			
 ACTION_INFO_NODE::SetChildMode()
 {
-	// 하...하드코딩-_-;
+	
 	if(EffectSpriteType >= EFFECTSPRITETYPE_BLOOD_DRAIN_1 &&
 		EffectSpriteType <= EFFECTSPRITETYPE_BLOOD_DRAIN_3)
 	{
@@ -115,23 +115,23 @@ MActionInfo::MActionInfo()
 	m_bAdvancementClassSkill = false;
 	m_bNonAdvancementClassSkill = false;
 
-	m_CastingActionInfo = ACTIONINFO_NULL;	// casting Action Info를 없앤다.
-	m_bCastingAction = false;				// casting 동작은 아니라고 설정..
+	m_CastingActionInfo = ACTIONINFO_NULL;	
+	m_bCastingAction = false;				
 
 	m_fUserType = FLAG_ACTIONINFO_USER_ALL;
 	m_fWeaponType = 0;//FLAG_ACTIONINFO_WEAPON_ALL;
-	m_fCurrentWeapon = 0;	// 현재 들고 있는 무기의 적용을 받는가?
+	m_fCurrentWeapon = 0;	
 	m_MainNode = MAIN_NODE_NULL;
-	m_bAttack = TRUE;			// 기본적으로 공격기술로 설정
+	m_bAttack = TRUE;			
 
 	m_bUseRepeatFrame = false;
 
 	for (int i=0; i<3; i++)
 	{
-		m_CastingStartFrame[i] = 0;	// casting effect의 시작 frame
-		m_CastingFrames[i]		= 0;	// casting effect의 지속 frame
+		m_CastingStartFrame[i] = 0;	
+		m_CastingFrames[i]		= 0;	
 		
-		m_StartFrame[i] = 0xFFFF;	// max값은 아니지만. 이 정도면 충분.. 음냐하.
+		m_StartFrame[i] = 0xFFFF;	
 
 		m_RepeatStartFrame[i] = m_RepeatEndFrame[i] = -1;
 	}
@@ -148,7 +148,7 @@ MActionInfo::MActionInfo()
 
 	m_EffectStatus = EFFECTSTATUS_NULL;
 
-	// 결과 id
+	
 	m_ActionResultID	= ACTIONRESULTNODE_NULL;
 	m_ActionResultValue	= 0;
 
@@ -181,12 +181,12 @@ MActionInfo::~MActionInfo()
 
 
 //-------------------------------------------------------
-// 애들 버전.. -_-;
+
 //-------------------------------------------------------
 void			
 MActionInfo::SetChildMode()
 {
-	// 하...하드코딩-_-;
+	
 
 	// male
 	if(m_ActionEffectSpriteType >= EFFECTSPRITETYPE_BLOOD_GUN_1_1 &&
@@ -246,8 +246,8 @@ MActionInfo::SetChildMode()
 void			
 MActionInfo::SaveToFile(std::ofstream& file)
 {
-	// 임시로 계산.. - -;
-	// startframe이 늦은 만큼 delay도 줄어든다
+	
+	
 	/*
 	if (m_StartFrame==0xFFFF)
 	{
@@ -309,7 +309,7 @@ MActionInfo::SaveToFile(std::ofstream& file)
 	file.write((const char*)&m_SoundID, SIZE_SOUNDID);
 	file.write((const char*)&m_MainNode, 4);
 	
-	// 결과 
+	
 	file.write((const char*)&m_ActionResultID, SIZE_ACTIONRESULTID);
 	file.write((const char*)&m_ActionResultValue, 4);
 
@@ -348,7 +348,7 @@ MActionInfo::SaveToFile(std::ofstream& file)
 	if( m_bNonAdvancementClassSkill ) flag |= 0x2;
 	file.write( (const char*)&flag, sizeof( char ) );
 */	
-	// 각 단계에 대한 정보
+	
 	CTypeTable<ACTION_INFO_NODE>::SaveToFile(file);
 }
 
@@ -401,7 +401,7 @@ MActionInfo::LoadFromFile(std::ifstream& file)
 	file.read((char*)&m_SoundID, SIZE_SOUNDID);
 	file.read((char*)&m_MainNode, 4);
 	
-	// 결과 
+	
 	file.read((char*)&m_ActionResultID, SIZE_ACTIONRESULTID);
 	file.read((char*)&m_ActionResultValue, 4);
 
@@ -437,7 +437,7 @@ MActionInfo::LoadFromFile(std::ifstream& file)
 	m_bAdvancementClassSkill = (flag & 0x1 ) != 0;
 	m_bNonAdvancementClassSkill = (flag & 0x2) != 0;
 */
-	// 각 단계에 대한 정보
+	
 	CTypeTable<ACTION_INFO_NODE>::LoadFromFile(file);
 }
 
@@ -491,7 +491,7 @@ MActionInfoTable::~MActionInfoTable()
 //
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
-// 피 없는 모드..
+
 //----------------------------------------------------------------------
 void			
 MActionInfoTable::SetChildMode()

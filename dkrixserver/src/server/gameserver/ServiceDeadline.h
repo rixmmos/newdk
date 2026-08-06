@@ -6,7 +6,7 @@
 #ifdef __ACTIVE_SERVICE_DEADLINE__
 
 const int DEADLINE_YEAR = 2003;
-const int DEADLINE_MONTH = 4 - 1; // 1 빼줘야한다.
+const int DEADLINE_MONTH = 4 - 1; 
 
 #endif
 

@@ -57,7 +57,7 @@ void CGRideMotorCycleHandler::execute(CGRideMotorCycle* pPacket, Player* pPlayer
                 ZoneCoord_t X = pPacket->getX();
                 ZoneCoord_t Y = pPacket->getY();
 
-                // 좌표가 바운드를 넘어가면 안 된다.
+                
                 if (!isValidZoneCoord(pZone, X, Y) || SiegeManager::Instance().isSiegeZone(pZone->getZoneID())) {
                     GCRideMotorCycleFailed _GCRideMotorCycleFailed;
                     pGamePlayer->sendPacket(&_GCRideMotorCycleFailed);
@@ -70,7 +70,7 @@ void CGRideMotorCycleHandler::execute(CGRideMotorCycle* pPacket, Player* pPlayer
                 if (pSlayer->hasRelicItem() || pSlayer->isFlag(Effect::EFFECT_CLASS_REFINIUM_TICKET) ||
                     pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_FLAG) ||
                     pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER)) {
-                    // cout << "성물을 가진 상태에서는 오토바이를 탈 수 없습니다" << endl;
+                    
                     GCRideMotorCycleFailed _GCRideMotorCycleFailed;
                     pGamePlayer->sendPacket(&_GCRideMotorCycleFailed);
                     return;
@@ -120,11 +120,11 @@ void CGRideMotorCycleHandler::execute(CGRideMotorCycle* pPacket, Player* pPlayer
                         _GCRideMotorCycle.setTargetObjectID(pMotorcycle->getObjectID());
                         _GCRideMotorCycleOK.setObjectID(pMotorcycle->getObjectID());
 
-                        // 존에서 아이템을 지우고...
+                        
                         pZone->deleteItem(pItem, X, Y);
-                        // OK 패킷을 플레이어에게 보내주고...
+                        
                         pGamePlayer->sendPacket(&_GCRideMotorCycleOK);
-                        // 모터사이클을 탔다는 정보를 브로드캐스팅
+                        
                         pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &_GCRideMotorCycle);
                         Success = true;
 

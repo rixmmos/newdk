@@ -9,7 +9,7 @@
 #ifndef __DATAGRAM_H__
 #define __DATAGRAM_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketAPI.h"
 
@@ -28,8 +28,8 @@ class DatagramPacket;
 //
 // class Datagram;
 //
-// UDP 소켓으로부터 입력받거나 출력할 데이타의 집합이다.
-// 각 Datagram은 보낼 곳 또는 보낸 곳의 주소를 가지고 있다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 

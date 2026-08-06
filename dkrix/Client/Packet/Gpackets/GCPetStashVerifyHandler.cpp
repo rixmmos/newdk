@@ -12,7 +12,7 @@
 #include "GCPetStashVerify.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 	#include "ClientDef.h"
 	#include "UIFunction.h"
 	#include "TempInformation.h"
@@ -36,7 +36,7 @@ throw ( ProtocolException , Error )
 	{ 
 		case GCPetStashVerify::PET_STASH_OK:
 			if(g_pTempInformation->GetMode() == TempInformation::MODE_PETITEM_MOVETO_INVENTORY)
-			{// 보관함 -> 인벤
+			{
 				MItem* pItem = g_pStorage->RemoveItem(g_pTempInformation->Value1) ;
 				if(pItem)
 				{
@@ -45,7 +45,7 @@ throw ( ProtocolException , Error )
 					{
 						pPetItem->SetPetKeepedDay(0);
 						if(g_pInventory->AddItem( (MItem*)g_pTempInformation->pValue))
-						{ // 잘 됐네
+						{ 
 							DEBUG_ADD("@Stash - Get Keep PetItem Inventory AddItem Success");
 						}
 						else
@@ -60,7 +60,7 @@ throw ( ProtocolException , Error )
 				}
 			}
 			else if(g_pTempInformation->GetMode() == TempInformation::MODE_PETITEM_MOVETO_PETSTORAGE)
-			{// 인벤 -> 보관함
+			{
 				MItem* pItem = g_pInventory->RemoveItem(g_pTempInformation->Value2, g_pTempInformation->Value3) ;
 				if(pItem)
 				{
@@ -91,11 +91,11 @@ throw ( ProtocolException , Error )
 			g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[UI_STRING_MESSAGE_INVENTORY_FULL_MONSTER_KILL_QUEST].GetString() );
 			
 			break;
-		case GCPetStashVerify::PET_STASH_RACK_IS_NOT_EMPTY:	// 해당 위치에 이미 다른 펫 아이템이 있습니다.
+		case GCPetStashVerify::PET_STASH_RACK_IS_NOT_EMPTY:	
 			g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_MESSAGE_EXIST_ITEM_ALREADY].GetString() );
 			
 			break;
-		case GCPetStashVerify::PET_STASH_RACK_IS_EMPTY:// 찾으려고 한 위치에 아이템이 없습니다.
+		case GCPetStashVerify::PET_STASH_RACK_IS_EMPTY:
 			g_pUIDialog->PopupFreeMessageDlg((*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY_NO_ITEM].GetString() );
 			
 			break;

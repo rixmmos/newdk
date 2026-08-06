@@ -20,7 +20,7 @@
 
 //--------------------------------------------------------------------------------
 //
-// 로그인 모드를 확인해서 알려준다
+
 //
 //--------------------------------------------------------------------------------
 void CURequestLoginModeHandler::execute(CURequestLoginMode* pPacket, Player* pPlayer) throw(ProtocolException, Error) {

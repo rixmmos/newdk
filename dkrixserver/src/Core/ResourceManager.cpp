@@ -103,45 +103,12 @@ void ResourceManager::save(const string& filename) const {
 
 
 //--------------------------------------------------------------------------------
-// 다운받는 파일의 중복 여부 등을 체크해서 다운로드 시간과 용량을 최적화하도록 한다.
-// 일단은 실행 파일의 중복 여부만을 체크한다.
+
+
 //--------------------------------------------------------------------------------
 void ResourceManager::optimize(){__BEGIN_TRY
 
-                                     /*
-                                           // 뒤에서부터 체크한다.
-                                           bool exefileFound = false;
-
-                                           list< Resource * >::reverse_iterator before = m_Resources.rend();
-                                           list< Resource * >::reverse_iterator current = m_Resources.rbegin();
-
-                                           while ( current != m_Resources.rend() ) {
-
-                                               // 파일명을 받아온다.
-                                               string filename = (*current)->getFilename();
-
-                                               // 파일 사이즈를 잘라내고 순수하게 파일명만을 저장해둔다.
-                                               size_t i = filename.find_first_of(' ');
-                                               filename = filename.substr(0,i);
-
-                                               // 이 파일명안에 darkeden.exe 가 포함될 경우, 중복 체크에 들어간다.
-                                               if ( filename == "DarkEden.exe" ) {
-                                                   if ( exefileFound == false ) {
-                                                       exefileFound = true;
-                                                   } else {
-                                                       // 노드를 삭제한다.
-                                                       if ( before == m_Resources.rend() ) {
-                                                           m_Resources.erase( current );
-                                                           current = m_Resources.rbegin();
-                                                       } else {
-                                                           m_Resources.erase( current );
-                                                           current = before;
-                                                           current ++;
-                                                       }
-                                                   }
-                                               }
-                                           }
-                                       */
+                                      
 
                                      __END_CATCH}
 

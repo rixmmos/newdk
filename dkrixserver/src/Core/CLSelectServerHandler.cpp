@@ -19,8 +19,8 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// 클라이언트가 PC 의 리스트를 달라고 요청해오면, 로그인 서버는 DB로부터
-// PC들의 정보를 로딩해서 LCPCList 패킷에 담아서 전송한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 void CLSelectServerHandler::execute(CLSelectServer* pPacket, Player* pPlayer)
 
@@ -65,38 +65,20 @@ void CLSelectServerHandler::execute(CLSelectServer* pPacket, Player* pPlayer)
     pLoginPlayer->setServerGroupID(CurrentServerGroupID);
 
     //----------------------------------------------------------------------
-    // 이제 LCPCList 패킷을 만들어 보내자
+    
     //----------------------------------------------------------------------
     LCPCList lcPCList;
     pLoginPlayer->makePCList(lcPCList);
 
 #ifdef __NETMARBLE_SERVER__
-    // 넷마블 사용자 약관 동의 여부 확인
+    
     lcPCList.setAgree(pLoginPlayer->isAgree());
 #endif
 
     pLoginPlayer->sendPacket(&lcPCList);
     pLoginPlayer->setPlayerStatus(LPS_PC_MANAGEMENT);
 
-    /*	try
-        {
-            pStmt    = g_pDatabaseManager->getConnection("DARKEDEN" )->createStatement();
-
-            pStmt->executeQuery("UPDATE Player set CurrentServerGroupID = %d WHERE PlayerID = '%s'",
-       (int)pPacket->getServerGroupID(), pLoginPlayer->getID().c_str());
-
-            // 쿼리 결과 및 쿼리문 객체를 삭제한다.
-            SAFE_DELETE(pStmt);
-        }
-        catch (SQLQueryException & sce)
-        {
-            //cout << sce.toString() << endl;
-
-            // 쿼리 결과 및 쿼리문 객체를 삭제한다.
-            SAFE_DELETE(pStmt);
-
-            throw DisconnectException(sce.toString());
-        }*/
+     
 
 #endif
 

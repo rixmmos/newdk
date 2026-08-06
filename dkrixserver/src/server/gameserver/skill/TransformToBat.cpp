@@ -24,7 +24,7 @@
 #include "ZoneUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 인벤토리 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordInven_t X, CoordInven_t Y,
                              CoordInven_t TargetX, CoordInven_t TargetY, VampireSkillSlot* pSkillSlot)
@@ -47,8 +47,8 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
         Assert(pZone != NULL);
 
         Item* pItem = pInventory->getItem(X, Y);
-        // 적당한 아이템이 아니라면 당연히 변신할 수 없다.
-        // PK존이라면 변신할 수 없다.
+        
+        
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_VAMPIRE_ETC || pItem->getItemType() != 1 ||
             pVampire->hasRelicItem() || g_pPKZoneInfoManager->isPKZone(pZone->getZoneID()) ||
             pVampire->isFlag(Effect::EFFECT_CLASS_REFINIUM_TICKET) ||
@@ -70,7 +70,7 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
         ZoneCoord_t y = pVampire->getY();
         Tile& tile = pZone->getTile(x, y);
 
-        // Knowledge of Innate 가 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE);
@@ -94,7 +94,7 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bMoveModeCheck && bTileCheck && !bEffected) {
             TPOINT pt = findSuitablePosition(pZone, x, y, Creature::MOVE_MODE_FLYING);
 
-            if (pt.x != -1) // 들어갈 좌표 체크. by sigi. 2002.5.2
+            if (pt.x != -1) 
             {
                 decreaseMana(pVampire, RequiredMP, _GCSkillToInventoryOK1);
 
@@ -102,13 +102,13 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
                 SkillOutput output;
                 computeOutput(input, output);
 
-                // 이펙트 클래스를 만들어 붙인다.
+                
                 EffectTransformToBat* pEffectTTW = new EffectTransformToBat(pVampire);
                 pEffectTTW->setDeadline(99999999);
                 pVampire->addEffect(pEffectTTW);
                 pVampire->setFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT);
 
-                // 이로 인해서 변하는 능력치들을 보내준다.
+                
                 VAMPIRE_RECORD prev;
                 pVampire->getVampireRecord(prev);
                 pVampire->initAllStat();
@@ -120,7 +120,7 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
 
                 pPlayer->sendPacket(&_GCSkillToInventoryOK1);
 
-                // 뱀파이어 대신 박쥐를 더하라고 알려준다.
+                
                 GCAddBat gcAddBat;
                 gcAddBat.setObjectID(pVampire->getObjectID());
                 gcAddBat.setName(pVampire->getName());
@@ -132,7 +132,7 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
                 gcAddBat.setColor(pVampire->getBatColor());
                 pZone->broadcastPacket(x, y, &gcAddBat, pVampire);
 
-                // 타일에다 지웠다, 다시 더함으로서 무브모드를 바꿀 수 잇다.
+                
                 tile.deleteCreature(pVampire->getObjectID());
 
                 Tile& newtile = pZone->getTile(pt.x, pt.y);
@@ -165,7 +165,7 @@ void TransformToBat::execute(Vampire* pVampire, ObjectID_t InvenObjectID, CoordI
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void TransformToBat::execute(Monster* pMonster)
 
@@ -199,16 +199,16 @@ void TransformToBat::execute(Monster* pMonster)
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectTransformToBat* pEffectTTW = new EffectTransformToBat(pMonster);
             pEffectTTW->setDeadline(99999999);
             pMonster->addEffect(pEffectTTW);
             pMonster->setFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT);
 
-            // 이로 인해서 변하는 능력치들을 보내준다.
+            
             pMonster->initAllStat();
 
-            // 뱀파이어 대신 박쥐를 더하라고 알려준다.
+            
             GCAddBat gcAddBat;
             gcAddBat.setObjectID(pMonster->getObjectID());
             gcAddBat.setName(pMonster->getName());
@@ -221,7 +221,7 @@ void TransformToBat::execute(Monster* pMonster)
             pZone->broadcastPacket(x, y, &gcAddBat, pMonster);
 
 
-            // 타일에다 지웠다, 다시 더함으로서 무브모드를 바꿀 수 잇다.
+            
             Tile& tile = pZone->getTile(x, y);
             tile.deleteCreature(pMonster->getObjectID());
 

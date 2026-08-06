@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AuraShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -49,19 +49,19 @@ void AuraShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEf
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectAuraShield* pEffect = new EffectAuraShield(pSlayer);
             pEffect->setDeadline(output.Duration);
             pEffect->setLevel(SkillLevel);
             pSlayer->addEffect(pEffect);
             pSlayer->setFlag(Effect::EFFECT_CLASS_AURA_SHIELD);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToSelfOK1);

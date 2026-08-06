@@ -57,26 +57,26 @@ void GameServerManager::run() throw(Error) {
             DatagramPacket* pDatagramPacket = NULL;
 
             try {
-                // 데이터그램 객체를 끄집어낸다.
+                
                 cout << "wait recv.." << endl;
                 pDatagram = m_pDatagramSocket->receive();
 
                 cout << "recved.." << endl;
-                if (pDatagram != NULL) // 일부 exception제거. by sigi. 2002.5.17
+                if (pDatagram != NULL) 
                 {
-                    // 데이터그램 패킷 객체를 끄집어낸다.
+                    
                     pDatagram->read(pDatagramPacket);
 
                     if (pDatagramPacket != NULL) {
-                        // 끄집어낸 데이터그램 패킷 객체를 실행한다.
+                        
                         pDatagramPacket->execute(NULL);
 
-                        // 데이터그램 패킷 객체를 삭제한다.
+                        
                         SAFE_DELETE(pDatagramPacket);
                         pDatagramPacket = NULL;
                     }
 
-                    // 데이터그램 객체를 삭제한다.
+                    
                     SAFE_DELETE(pDatagram);
                     pDatagram = NULL;
                 }
@@ -84,9 +84,9 @@ void GameServerManager::run() throw(Error) {
                 cout << "GameServerManager::run Exception Check(ProtocolException)" << endl;
                 cout << pe.toString() << endl;
 
-                // 서버간 통신에서 프로토콜 에러가 발생하면,
-                // 프로그래밍 오류이거나 해킹 시도이다.
-                // 일단은 전자만이 해당되므로.. 에러로 간주한다.
+                
+                
+                
                 // throw Error( pe.toString() );
                 SAFE_DELETE(pDatagramPacket);
                 SAFE_DELETE(pDatagram);
@@ -94,8 +94,8 @@ void GameServerManager::run() throw(Error) {
                 cout << "GameServerManager::run Exception Check(ConnectException)" << endl;
                 cout << ce.toString() << endl;
 
-                // 으음.. 머지 이건..
-                // 일단 에러당..
+                
+                
                 // throw Error( ce.toString() );
                 SAFE_DELETE(pDatagramPacket);
                 SAFE_DELETE(pDatagram);
@@ -129,7 +129,7 @@ void GameServerManager::sendDatagram(Datagram* pDatagram) throw(ConnectException
     } catch (ConnectException& t) {
         cout << "GameServerManager::sendDatagram Exception Check!!" << endl;
         cout << t.toString() << endl;
-        throw ConnectException("GameServerManager::sendDatagram 상위로 던진다");
+        throw ConnectException("GameServerManager::sendDatagram  ");
     }
 
     __END_CATCH
@@ -146,23 +146,23 @@ void GameServerManager::sendPacket(string host, uint port, DatagramPacket* pPack
     try {
         //	try
         //	{
-        // 데이터그램 객체를 하나 두고, 전송할 peer 의 호스트와 포트를 지정한다.
+        
         Datagram datagram;
 
         datagram.setHost(host);
         datagram.setPort(port);
 
-        // 데이터그램 패킷을 데이터그램에 집어넣는다.
+        
         datagram.write(pPacket);
 
-        // 데이터그램 소켓을 통해서 데이터그램을 전송한다.
+        
         m_pDatagramSocket->send(&datagram);
         //	}
         //	catch ( ConnectException & t )
         //	{
         //		cout << "GameServerManager::sendDatagram Exception Check!!" << endl;
         //		cout << t.toString() << endl;
-        //		throw ConnectException( "GameServerManager::sendDatagram 상위로 던진다");
+        
         //	}
 
     } catch (Throwable& t) {

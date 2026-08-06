@@ -6,7 +6,7 @@
 void GameServerSpeedCheckTest::testSpeedHack() {
     __BEGIN_TEST_CASE
 
-    Socket* pSocket = new Socket(); // gameplayer안에서 delete된다.
+    Socket* pSocket = new Socket(); 
     GamePlayer gameplayer(pSocket);
 
     bool bCheck = false;

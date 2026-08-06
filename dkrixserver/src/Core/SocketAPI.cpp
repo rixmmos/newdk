@@ -137,8 +137,8 @@ void SocketAPI::bind_ex(SOCKET s, const struct sockaddr* addr, uint addrlen) {
 #if defined(__LINUX__) || defined(__APPLE__)
         switch (errno) {
         case EADDRINUSE:
-            throw BindException("The address is already in use. kill another server or use another port. ������ �ּ� Ȥ�� "
-                                "��Ʈ�� �̹� ������Դϴ�. ������ ���� ������ �����ϰų�, �ٸ� ��Ʈ�� ����Ͻñ� �ٶ��ϴ�.");
+            throw BindException("The address is already in use. kill another server or use another port.    "
+                                "  .    ,    .");
         case EINVAL:
             throw BindException("The socket is already bound to an address , or the addr_len was wrong, or the socket "
                                 "was not in the AF_UNIX family.");
@@ -787,7 +787,7 @@ uint SocketAPI::send_ex(SOCKET s, const void* buf, uint len, uint flags) {
     } catch (Throwable& t) {
         cout << "SocketAPI::send_ex Exception Check!" << endl;
         cout << t.toString() << endl;
-        throw InvalidProtocolException("���� ���� �����");
+        throw InvalidProtocolException("  ");
     }
 
     return nSent;
@@ -1250,13 +1250,13 @@ void SocketAPI::shutdown_ex(SOCKET s, uint how) {
 // system call for I/O multiplexing
 //
 // Parameters
-//     maxfdp1   - �׽�Ʈ�� ���� ��ũ������ ���� ū �� + 1
-//     readset   - �Է��� ���Դ��� �׽�Ʈ�� ���� ��ũ������
-//     ����
-//     writeset  - ����� �� �� �ִ��� �׽�Ʈ�� ���� ��ũ������
-//     ����
-//     exceptset - OOB ����Ÿ�� ���Դ��� �׽�Ʈ�� ����
-//     ��ũ������ ���� timeout   - �󸶳� ��ٸ� ���ΰ�?
+
+
+
+
+
+
+
 //
 // Return
 //     positive count of ready descriptors
@@ -1280,27 +1280,11 @@ int SocketAPI::select_ex(int maxfdp1, fd_set* readset, fd_set* writeset, fd_set*
             return 0;
         // throw TimeoutException();
 
-        /*
-        // �ּ�ó�� by sigi. 2002.5.17
-        if ( result < 0 ) {
-            switch ( errno ) {
-            case EINTR :
-                throw InterruptedException("A non blocked signal was caught.");
-            case EBADF :
-                throw Error("An invalid file descriptor was given in one of the sets.");
-            case EINVAL :
-                throw Error("parameter maxfdp1 is negative.");
-            case ENOMEM :
-                throw Error("select was unable to allocate memory for internal tables.");
-            default :
-                throw UnknownError(strerror(errno),errno);
-            }
-        }
-        */
+         
 
     } catch (Throwable& t) {
-        // � ������ ���� �����Ѵ�.
-        //		cout << "����Ʈ���� �̻��� ������ ����.." << endl;
+        
+        
         //		throw TimeoutException();
     }
 

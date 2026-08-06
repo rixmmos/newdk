@@ -30,12 +30,12 @@ DatabaseManager::DatabaseManager() throw() {
 DatabaseManager::~DatabaseManager() throw() {
     __BEGIN_TRY
 
-    // ��� Connection �� �����ؾ� �Ѵ�.
+    
     hash_map<int, Connection*>::iterator itr = m_Connections.begin();
     for (; itr != m_Connections.end(); itr++)
         SAFE_DELETE(itr->second);
 
-    // �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+    
     m_Connections.clear();
 
     SAFE_DELETE(m_pDefaultConnection);
@@ -65,8 +65,8 @@ void DatabaseManager::init() throw(Error) {
         pStmt = m_pDefaultConnection->createStatement();
         Result* pResult = NULL;
 
-        // �ð� üũ
-        // ������ ���̽��� �������� �ð����̰� 1�ð� �̻��̸� �ȶ��.
+        
+        
         pResult = pStmt->executeQuery("SELECT now()");
         if (pResult->next()) {
             // 0123456789012345678
@@ -87,7 +87,7 @@ void DatabaseManager::init() throw(Error) {
             double dbDiff = difftime(tSYSTime, mktime(&tDBTime));
 
             if ((int)dbDiff > 3600) {
-                // ������ ���̽��� �������� �ð����̰� 1�ð� �̻��̴�.
+                
                 cout << "======================================================" << endl;
                 cout << "!!! Time Check Error !!!" << endl;
                 cout << "!!! Please check DB server and service server time !!!" << endl;
@@ -152,7 +152,7 @@ Connection* DatabaseManager::getConnection(const string& connName) throw(NoSuchE
 
     hash_map<int, Connection*>::iterator itr;
 
-    // connName�� ���ؼ� ���� �ٸ� DB Server�� �б��ϵ��� �Ѵ�.
+    
     // if(connName == "DIST_DARKEDEN")
     //{
     //	itr = m_DistConnections.find(Thread::self());

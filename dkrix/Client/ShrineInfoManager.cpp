@@ -3,7 +3,7 @@
 #include "ShrineInfoManager.h"
 #include "RarFile.h"
 #ifdef __GAME_CLIENT__
-#include "Properties.h"
+#include "Packet/Properties.h"
 #endif
 
 RegenTowerInfoManager *g_pRegenTowerInfoManager = NULL;

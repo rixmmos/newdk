@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void HandsOfFire::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot, CEffectID_t CEffectID)
 
@@ -57,12 +57,12 @@ void HandsOfFire::execute(Ousters* pOusters, OustersSkillSlot* pOustersSkillSlot
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected && bSatisfyRequire) {
             decreaseMana(pOusters, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pOusters, pOustersSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectHandsOfFire* pEffect = new EffectHandsOfFire(pOusters);
             pEffect->setDeadline(output.Duration);
             pEffect->setBonus(output.Damage);

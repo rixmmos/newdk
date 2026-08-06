@@ -20,7 +20,7 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 
 
-	// disconnect 출력?
+	
 //	UI_PCSConnectionFailed();
 
 	__END_CATCH

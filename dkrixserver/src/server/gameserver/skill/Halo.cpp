@@ -18,15 +18,15 @@
 static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
     int stepX = destX - originX, stepY = destY - originY;
 
-    // 0일 때 check
-    float k = (stepX == 0) ? 0 : (float)(stepY) / stepX; // 기울기
+    
+    float k = (stepX == 0) ? 0 : (float)(stepY) / stepX; 
 
 
     //--------------------------------------------------
-    // 방향을 정해야 한다.
+    
     //--------------------------------------------------
     if (stepY == 0) {
-        // X축
+        
         // - -;;
         if (stepX == 0)
             return DOWN;
@@ -34,13 +34,13 @@ static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
             return RIGHT;
         else
             return LEFT;
-    } else if (stepY < 0) // UP쪽으로
+    } else if (stepY < 0) 
     {
-        // y축 위
+        
         if (stepX == 0) {
             return UP;
         }
-        // 1사분면
+        
         else if (stepX > 0) {
             if (k < -HALO_BASIS_DIRECTION_HIGH)
                 return UP;
@@ -49,7 +49,7 @@ static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
             else
                 return RIGHT;
         }
-        // 2사분면
+        
         else {
             if (k > HALO_BASIS_DIRECTION_HIGH)
                 return UP;
@@ -59,13 +59,13 @@ static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
                 return LEFT;
         }
     }
-    // 아래쪽
+    
     else {
-        // y축 아래
+        
         if (stepX == 0) {
             return DOWN;
         }
-        // 4사분면
+        
         else if (stepX > 0) {
             if (k > HALO_BASIS_DIRECTION_HIGH)
                 return DOWN;
@@ -74,7 +74,7 @@ static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
             else
                 return RIGHT;
         }
-        // 3사분면
+        
         else {
             if (k < -HALO_BASIS_DIRECTION_HIGH)
                 return DOWN;
@@ -88,7 +88,7 @@ static BYTE getDirection_Halo(int originX, int originY, int destX, int destY) {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Halo::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                    CEffectID_t CEffectID)
@@ -119,7 +119,7 @@ void Halo::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlo
     g_SimpleMissileSkill.execute(pOusters, TargetObjectID, pOustersSkillSlot, param, result, CEffectID);
 
     if (result.bSuccess) {
-        cout << "Halo 성공" << endl;
+        cout << "Halo " << endl;
         Dir_t dir = getDirection_Halo(pOusters->getX(), pOusters->getY(), result.pTargetCreature->getX(),
                                       result.pTargetCreature->getY());
 

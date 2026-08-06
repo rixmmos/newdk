@@ -16,7 +16,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Glacier2::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -45,7 +45,7 @@ void Glacier2::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
         ZoneCoord_t myY = pMonster->getY();
 
         if (bHitRoll) {
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             SkillOutput output;
             computeOutput(input, output);

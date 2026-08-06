@@ -7,9 +7,9 @@
 #ifndef __GC_ADD_ITEM_TO_ZONE_H__
 #define __GC_ADD_ITEM_TO_ZONE_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include <list>
 
 //////////////////////////////////////////////////////////////////////////////
@@ -118,10 +118,10 @@ public :
 
 protected :
 	
-    // Item의 ObjectID
+    
     ObjectID_t m_ObjectID;
 
-	// Zone의 X, Y 좌표
+	
    	Coord_t m_X;
 	Coord_t m_Y;
 

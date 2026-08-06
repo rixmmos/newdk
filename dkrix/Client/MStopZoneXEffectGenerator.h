@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneXEffectGenerator.h
 //----------------------------------------------------------------------
-// X형으로 생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONEXEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopZoneXEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_X; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MWeather.h
 //----------------------------------------------------------------------
-// 날씨 효과를 표현..
+
 //----------------------------------------------------------------------
 
 #ifndef	__MWEATHER_H__
@@ -12,7 +12,7 @@
 
 
 //----------------------------------------------------------------------
-// 하나의 움직이는 효과를 나타낸다.
+
 //----------------------------------------------------------------------
 class MAP_EFFECT {
 	public :		
@@ -32,7 +32,7 @@ class MAP_EFFECT {
 		}
 
 		//------------------------------------------------------------
-		// 한 번 이동하기..
+		
 		//------------------------------------------------------------
 		bool		Move()
 		{	
@@ -92,23 +92,23 @@ class MAP_EFFECT {
 		};
 
 	protected :
-		BYTE			m_Type;		// 종류
+		BYTE			m_Type;		
 
 		TYPE_SPRITEID	m_SpriteID;
 
-		// 화면에서의 좌표
+		
 		short			m_X, m_Y; 
 
-		// 한 번에 움직이는 Pixel수
+		
 		char			m_StepX, m_StepY;
 
-		// 움직이는 회수 남은거..
+		
 		BYTE			m_Count, m_maxCount;
 };
 
 
 //----------------------------------------------------------------------
-// 날씨 효과를 나타낸다.
+
 //----------------------------------------------------------------------
 class MWeather {
 	public :
@@ -116,30 +116,30 @@ class MWeather {
 		~MWeather();
 
 		//-------------------------------
-		// 작동중인가?
+		
 		//-------------------------------
 		bool		IsActive() const		{ return m_WeatherType!=WEATHER_NULL; }
 		BYTE		GetWeatherType() const	{ return m_WeatherType; }		
 
 		//-------------------------------
-		// 완전히 제거
+		
 		//-------------------------------
-		void		Release();			// MapEffec를 메모리에서 제거
+		void		Release();			
 
 		//-------------------------------
-		// 날씨 효과 중단하기.. (바로 중단되는건 아님)
+		
 		//-------------------------------
 		void		Stop()					{ m_WeatherType = WEATHER_STOP; }
 
 		//-------------------------------
-		// 날씨 효과를 생성한다.
+		
 		//-------------------------------
-		void		SetRain(BYTE number);			// 비를 오게 한다.
-		void		SetSnow(BYTE number);			// 눈을 오게 한다.
-		void		SetSpot(BYTE number);			// 눈을 오게 한다.
+		void		SetRain(BYTE number);			
+		void		SetSnow(BYTE number);			
+		void		SetSpot(BYTE number);			
 
 		//-------------------------------
-		// 전체적으로 한 번 움직인다..
+		
 		//-------------------------------
 		void		Action();
 
@@ -152,7 +152,7 @@ class MWeather {
 		const MAP_EFFECT&	operator [] (BYTE n)	{ return m_pMapEffect[n]; }
 
 	protected :
-		void		Init(BYTE n);		// n개의 MapEffect 메모리 잡기
+		void		Init(BYTE n);		
 		
 		void		GenerateRain(const BYTE& n);
 		void		GenerateSnow(const BYTE& n);
@@ -160,11 +160,11 @@ class MWeather {
 	
 
 	public :
-		// 날씨 효과 종류에 따른 정의
+		
 		enum WEATHER_TYPE
 		{
 			WEATHER_NULL = 0,
-			WEATHER_STOP,		// 멈추고 있는 중
+			WEATHER_STOP,		
 			WEATHER_RAIN,
 			WEATHER_SNOW,
 			WEATHER_SPOT,
@@ -173,11 +173,11 @@ class MWeather {
 
 	
 	protected :
-		// 날씨가 시작된때의 캐릭터의 Zone에서의 좌표
+		
 		int				m_StartX;
 		int				m_StartY;
 
-		// 날씨 정보 
+		
 		BYTE			m_WeatherType;
 		BYTE			m_nMapEffect;
 		BYTE			m_nActiveMapEffect;

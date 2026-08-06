@@ -7,8 +7,8 @@
 #ifndef __GC_PARTY_JOINED_H__
 #define __GC_PARTY_JOINED_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include <string>
 
 typedef struct
@@ -19,7 +19,7 @@ typedef struct
 	IP_t   ip;
 } PARTY_MEMBER_INFO;
 
-// 구조체 맥스 크기(14) + 이름 길이 (1)
+
 const uint PARTY_MEMBER_INFO_MAX_SIZE = 17; 
 
 //////////////////////////////////////////////////////////////////////////////

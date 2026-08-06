@@ -10,10 +10,10 @@
 #define __GC_CHANGE_SHAPE_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 #define SHAPE_FLAG_QUEST			0x01
 
@@ -21,8 +21,8 @@
 //
 // class GCChangeShape;
 //
-// 게임 서버에서 특정 사용자가 움직였다는 정보를 클라이언트로 보내줄 
-// 때 사용하는 패킷 객체이다. (CreatureID,X,Y,DIR) 을 포함한다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -40,10 +40,10 @@ public :
 public :
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -53,7 +53,7 @@ public :
 	PacketID_t getPacketID () const throw () { return PACKET_GC_CHANGE_SHAPE; }
 	
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getPacketSize () const throw () { return szObjectID + szBYTE + szItemType + szOptionType + szSpeed + szBYTE ; }
 
 	#ifdef __DEBUG_OUTPUT__
@@ -84,13 +84,13 @@ public :
 	Speed_t getAttackSpeed() const throw() { return m_AttackSpeed; }
 	void setAttackSpeed( Speed_t AttackSpeed ) throw() { m_AttackSpeed = AttackSpeed; }
 
-	// -_- 2003.4.14 퀘스트 아이템 땜빵 코드 
+	
 	BYTE	getFlag()	const throw() { return m_Flag; }
 	void	setFlag(BYTE flag)	throw() { m_Flag = flag; }
 
 private :
 
-	// 크리처 아이디
+	
 	ObjectID_t m_ObjectID;
 	
 	// Item Class

@@ -10,7 +10,7 @@
 #include "GCAddressListVerify.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 #endif
 
 #include "ClientDef.h"

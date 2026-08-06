@@ -54,8 +54,14 @@ CImm::~CImm()
 }
 
 
-void CImm::Enable()
+void CImm::Enable(bool enable)
 {
+	if (!enable)
+	{
+		Disable();
+		return;
+	}
+
 	if(!IsDevice())return;
 	Disable();
 	m_bPlay = true; 

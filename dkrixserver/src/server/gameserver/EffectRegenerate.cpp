@@ -18,7 +18,7 @@ EffectRegenerate::EffectRegenerate(Creature* pCreature)
 {
     __BEGIN_TRY
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     setTarget(pCreature);
@@ -53,7 +53,7 @@ void EffectRegenerate::affect() {
         gcHP.setCurrentHP(pMonster->getHP());
         pMonster->getZone()->broadcastPacket(pMonster->getX(), pMonster->getY(), &gcHP);
 
-        cout << pMonster->getName() << "의 HP가 " << pMonster->getHP() << "가 되었습니다." << endl;
+        cout << pMonster->getName() << " HP " << pMonster->getHP() << " ." << endl;
     }
 
     __END_CATCH

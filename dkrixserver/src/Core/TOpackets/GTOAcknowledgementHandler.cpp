@@ -46,10 +46,7 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                                               strTargetTableName.c_str(), pPacket->getHost().c_str());
 
 
-        /*
-        ServerIP와 ActualIP 키를 가지고 현재 Policy를 본다.
-        존재하지 않는다면 ROW를 추가한다.
-        */
+         
         if (pResult->getRowCount() == 0) {
             if (strNewServerPolicy == "allow" || strNewServerPolicy == "ALLOW" || strNewServerPolicy == "Allow") {
                 pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',%d,'%s',%d, %d ,'%s',now(),'LIVE')",
@@ -58,7 +55,7 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                                     pPacket->getUDPPort(), pPacket->getMessage().c_str());
 
                 pStmt->executeQuery(
-                    "INSERT IGNORE INTO %s VALUES ('%s',now(),'NEW','NEW','[%s] 서버가 추가 되었습니다.')",
+                    "INSERT IGNORE INTO %s VALUES ('%s',now(),'NEW','NEW','[%s]   .')",
                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(), pPacket->getHost().c_str());
             } else {
                 GGCommand ggCommand;
@@ -69,17 +66,15 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                 ggCommand.setCommand("*shutdown 0");
                 g_pGameServerManager->sendPacket(pPacket->getHost(), pPacket->getUDPPort(), &ggCommand);
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'DENY','DENY','[%s] 서버가 허가없이 "
-                                    "접근하여 KILL시켰습니다..')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'DENY','DENY','[%s]   "
+                                    " KILL..')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
             }
 
 
         }
-        /*
-        존재한다면
-        */
+         
         else {
             pResult->next();
             strPolicy = pResult->getString(4);
@@ -92,11 +87,11 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
 
             if (strPolicy == "KILL") {
                 cout << "strPolicy : KILL..." << endl;
-                // 정책이 KILL(죽여라)이다. 패킷을 날려야 하겠다.
-                // 패킷을 쏴버리자.
-                // POLICY FIELD를 "DEATH" 로 변경해놓는다. 죽었으니까.
+                
+                
+                
 
-                // GGCommand 로 kill_daemonctl 을 보낸뒤에.
+                
                 GGCommand ggCommand;
                 ggCommand.setCommand("*set KILL_DAEMONCTL 1");
 
@@ -109,8 +104,8 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                 pStmt->executeQuery("UPDATE %s SET Policy='DEATH' WHERE ActualIP='%s'", strTargetTableName.c_str(),
                                     pPacket->getHost().c_str());
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'KILL','DEATH','[%s] 서버가 KILL정책에 "
-                                    "따라 DEATH상태가 되었습니다')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'KILL','DEATH','[%s]  KILL "
+                                    " DEATH ')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
 
@@ -132,8 +127,8 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                 pStmt->executeQuery("UPDATE %s SET Policy='CLEAR' WHERE ActualIP='%s'", strTargetTableName.c_str(),
                                     pPacket->getHost().c_str());
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'REMOVE','CLEAR','[%s] 서버가 "
-                                    "REMOVE정책에 따라 CLEAR상태가 되었습니다')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'REMOVE','CLEAR','[%s]  "
+                                    "REMOVE  CLEAR ')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
 
@@ -152,24 +147,13 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                 g_pGameServerManager->sendPacket(pPacket->getHost(), pPacket->getUDPPort(), &ggCommand);
 
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'CLEAR','REMOVE','[%s] 서버가 "
-                                    "CLEAR상태인데도 접근하였기 때문에 다음에 다시 REMOVE시킵니다.')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'CLEAR','REMOVE','[%s]  "
+                                    "CLEAR     REMOVE.')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
 
             } else if (strPolicy == "DEATH") {
-                /*
-                    // 죽은상태인데 또 날아왔다.
-                    // LIVE 로 바꿔주자.
-                    pStmt->executeQuery( "UPDATE %s SET Policy='LIVE' WHERE ServerIP='%s'",
-                                        strTargetTableName.c_str(),
-                                        pPacket->getServerIP().c_str() );
-
-                    pStmt->executeQuery( "INSERT IGNORE INTO %s VALUES ('%s',now(),'DEATH','LIVE','[%s] 서버가
-                   DEATH상태인데도 접근하였기 때문에 LIVE상태로 바꿔줍니다.')", strTargetTableName_Log.c_str(),
-                    pPacket->getServerIP().c_str(),
-                    pPacket->getServerIP().c_str());
-                */
+                 
                 GGCommand ggCommand;
                 ggCommand.setCommand("*set KILL_DAEMONCTL 1");
 
@@ -178,21 +162,21 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
                 ggCommand.setCommand("*shutdown 0");
                 g_pGameServerManager->sendPacket(pPacket->getHost(), pPacket->getUDPPort(), &ggCommand);
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'DEATH','LIVE','[%s] 서버가 "
-                                    "DEATH상태인데도 접근하였기 때문에 다시 KILL 시켰습니다..')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'DEATH','LIVE','[%s]  "
+                                    "DEATH    KILL ..')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
 
 
-            } else if (strPolicy == "LIVE") // 'LIVE' 일것이다. 그냥 내비두자.
+            } else if (strPolicy == "LIVE") 
             {
                 // continue..
                 cout << "strPolicy : LIVE..." << endl;
             } else {
                 cout << "strPolicy : BAD! POLICY!" << endl;
 
-                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'UNKNOWN','UNKNOWN','[%s] 서버에서 알 수 "
-                                    "없는 상황이 발생하였습니다.')",
+                pStmt->executeQuery("INSERT IGNORE INTO %s VALUES ('%s',now(),'UNKNOWN','UNKNOWN','[%s]    "
+                                    "  .')",
                                     strTargetTableName_Log.c_str(), pPacket->getHost().c_str(),
                                     pPacket->getHost().c_str());
             }
@@ -216,10 +200,10 @@ void GTOAcknowledgementHandler::execute(GTOAcknowledgement* pPacket) throw(Proto
     }
     END_DB(pStmt)
 
-    filelog("TheOneServer.log", "패킷이 도착했습니다. : [%s:%05d] %s", pPacket->getHost().c_str(), pPacket->getPort(),
+    filelog("TheOneServer.log", " . : [%s:%05d] %s", pPacket->getHost().c_str(), pPacket->getPort(),
             pPacket->toString().c_str());
     cout << "Touch.[" << pPacket->getHost() << ":" << pPacket->getPort() << "].[Policy : " << strPolicy << "]" << endl;
-    //	cout << "패킷이 도착했습니다. : [" << pPacket->getHost() << ":" << pPacket->getPort() <<"] : " <<
+    
     // pPacket->toString() << endl;
 
 #endif

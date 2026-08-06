@@ -2,8 +2,8 @@
 //
 // Filename    : GCAddNickname.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ GCAddNickname::~GCAddNickname() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddNickname::read(SocketInputStream& iStream)
 
@@ -41,7 +41,7 @@ void GCAddNickname::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddNickname::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY

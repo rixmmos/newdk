@@ -7,7 +7,7 @@
 
 class PlayerCreature;
 
-// const 안하면 우예 되는거지?
+
 const string Sex2FieldName[] = {
     "FemalePartnerName",
     "MalePartnerName",

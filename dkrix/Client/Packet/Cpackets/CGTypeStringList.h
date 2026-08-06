@@ -7,8 +7,8 @@
 #ifndef __CG_TYPE_STRING_LIST_H__
 #define __CG_TYPE_STRING_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 #include <list>
 

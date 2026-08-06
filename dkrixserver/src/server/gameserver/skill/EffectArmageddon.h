@@ -68,12 +68,12 @@ public:
     }
 
 private:
-    ObjectID_t m_UserObjectID; // 시전자 Object ID
-                               //	string		m_CasterName;	// 시전자
-                               //	int			m_PartyID;		// 파티ID
+    ObjectID_t m_UserObjectID; 
+                               
+                               
 
-    HP_t m_HP;         // 체력
-    Damage_t m_Damage; // 데미지
+    HP_t m_HP;         
+    Damage_t m_Damage; 
     Turn_t m_Delay;    // Tick
 };
 

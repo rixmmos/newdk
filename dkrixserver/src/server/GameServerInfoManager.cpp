@@ -24,10 +24,10 @@ GameServerInfoManager::~GameServerInfoManager() {
 
 
 void GameServerInfoManager::clear() {
-    // hashmap 안의 각 pair 의 second, 즉 GameServerInfo 객체만을 삭제하고
-    // pair 자체는 그대로 둔다. (GameServerInfo가 힙에 생성되어 있다는 것에
-    // 유의하라. 즉 필살삭제를 해야 한다. 하긴, GSIM이 destruct 된다는 것은
-    // 로그인 서버가 셧다운된다는 것을 의미하니깐.. - -;)
+    
+    
+    
+    
     for (int j = 1; j < m_MaxWorldID; j++) {
         for (int i = 0; i < m_MaxServerGroupID; i++) {
             HashMapGameServerInfo::iterator itr = m_pGameServerInfos[j][i].begin();
@@ -35,7 +35,7 @@ void GameServerInfoManager::clear() {
                 SAFE_DELETE(itr->second);
             }
 
-            // 이제 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+            
             m_pGameServerInfos[j][i].clear();
         }
     }
@@ -68,7 +68,7 @@ void GameServerInfoManager::load() {
 
     Statement* pStmt = NULL;
 
-    // 먼저 MAX SERVER GROUP ID를 읽어들여야 한다.
+    
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         Result* pResult = pStmt->executeQueryString("SELECT MAX(GroupID) FROM GameServerInfo");
@@ -142,12 +142,12 @@ for (uint i = 0 ; i < m_Width ; i++) m_pTiles[i] = new Tile [m_Height];
     END_DB(pStmt)
 
     ///////////////////////////////////////////////////////////////////////////////
-    // PK Server 세팅하기
-    // DB의 PKServerList 테이블에서 읽어서 세팅한다.
-    // PKServerList 는 플레이어(login) DB 에 있다.
+    
+    
+    
     ///////////////////////////////////////////////////////////////////////////////
     BEGIN_DB {
-        // PKServerList 는 플레이어(login) DB 에 있다.
+        
         pStmt = g_pDatabaseManager->getDistConnection("DARKEDEN")->createStatement();
         Result* pResult = pStmt->executeQueryString("SELECT WorldID, ServerGroupID FROM NonPKServerList");
 
@@ -167,11 +167,11 @@ for (uint i = 0 ; i < m_Width ; i++) m_pTiles[i] = new Tile [m_Height];
     END_DB(pStmt)
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Castle Stat 로딩
-    // 이 서버에서 어떤 서버의 전쟁 결과에 따라 바뀌는지
+    
+    
     ///////////////////////////////////////////////////////////////////////////////
     BEGIN_DB {
-        // 플레이어(login) DB 에 있다.
+        
         pStmt = g_pDatabaseManager->getDistConnection("DARKEDEN")->createStatement();
         Result* pResult =
             pStmt->executeQueryString("SELECT WorldID, ServerGroupID, FollowServerID FROM CastleStatInfo");
@@ -234,48 +234,20 @@ void GameServerInfoManager::deleteGameServerInfo(const ServerID_t ServerID, cons
     HashMapGameServerInfo::iterator itr = m_pGameServerInfos[WorldID][ServerGroupID].find(ServerID);
 
     if (itr != m_pGameServerInfos[WorldID][ServerGroupID].end()) {
-        // GameServerInfo 를 삭제한다.
+        
         delete itr->second;
 
-        // pair를 삭제한다.
+        
         m_pGameServerInfos[WorldID][ServerGroupID].erase(itr);
     } else {
-        // 그런 게임서버인포 객체를 찾을 수 없을 때
+        
         throw NoSuchElementException();
     }
 
     __END_CATCH
 }
 
-/*
-//----------------------------------------------------------------------
-// get info
-//----------------------------------------------------------------------
-GameServerInfo * GameServerInfoManager::getGameServerInfo (const string & nickname) const
-    throw (NoSuchElementException)
-{
-    __BEGIN_TRY
-
-    GameServerInfo * pGameServerInfo = NULL;
-
-    HashMapGameServerInfo::const_iterator itr = m_pGameServerInfos.find(nickname);
-
-    if (itr != m_pGameServerInfos.end()) {
-
-        pGameServerInfo = itr->second;
-
-    } else {
-
-        // 그런 게임서버인포 객체를 찾을 수 없었을 때
-        throw NoSuchElementException(nickname);
-
-    }
-
-    return pGameServerInfo;
-
-    __END_CATCH
-}
-*/
+ 
 
 GameServerInfo* GameServerInfoManager::getGameServerInfo(const ServerID_t ServerID, const ServerGroupID_t ServerGroupID,
                                                          WorldID_t WorldID) const {
@@ -284,7 +256,7 @@ GameServerInfo* GameServerInfoManager::getGameServerInfo(const ServerID_t Server
     GameServerInfo* pGameServerInfo = NULL;
 
     if (WorldID >= m_MaxWorldID || ServerGroupID >= m_MaxServerGroupID) {
-        // 그런 게임서버인포 객체를 찾을 수 없었을 때
+        
         throw NoSuchElementException();
     }
 
@@ -293,7 +265,7 @@ GameServerInfo* GameServerInfoManager::getGameServerInfo(const ServerID_t Server
     if (itr != m_pGameServerInfos[WorldID][ServerGroupID].end()) {
         pGameServerInfo = itr->second;
     } else {
-        // 그런 게임서버인포 객체를 찾을 수 없었을 때
+        
         throw NoSuchElementException();
     }
 

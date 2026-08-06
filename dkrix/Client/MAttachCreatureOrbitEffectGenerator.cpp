@@ -30,7 +30,7 @@ MAttachCreatureOrbitEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInf
 
 	MCreature* pCreature = g_pZone->GetCreature( egInfo.creatureID );
 
-	// Creature가 사라졌을 경우..
+	
 	if (pCreature == NULL)
 	{	
 		pCreature = g_pZone->GetFakeCreature( egInfo.creatureID );
@@ -65,7 +65,7 @@ MAttachCreatureOrbitEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInf
 			pCreature->ClearAttachEffect();
 	}
 
-	// Creature에게 붙이는 Effect를 생성해서 pointer를 넘겨받는다.
+	
 	MAttachOrbitEffect* pEffect = (MAttachOrbitEffect*)pCreature->CreateAttachEffect( egInfo.effectSpriteType, 
 															egInfo.count, 
 															egInfo.linkCount,
@@ -83,10 +83,10 @@ MAttachCreatureOrbitEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInf
 
 	pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 
-	// 붙어야 하는 캐릭터
+	
 	//pEffect->SetAttachCreatureID( creatureID );		
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 	pEffect->m_OrbitStep = effectPosition;
 	if(egInfo.effectSpriteType == EFFECTSPRITETYPE_SUMMON_FIRE_ELEMENTAL_ATTACK 
@@ -96,7 +96,7 @@ MAttachCreatureOrbitEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInf
 	}
 
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 	
 	return true;

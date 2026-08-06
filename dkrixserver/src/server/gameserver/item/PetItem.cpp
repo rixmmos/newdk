@@ -224,7 +224,7 @@ void PetItem::whenPCTake(PlayerCreature* pPC) {
     pPC->getPetItems().push_back(this);
 
     if (!pPC->isFlag(Effect::EFFECT_CLASS_HAS_PET)) {
-        // cout << pPC->getName() << " 에게 펫 가졌다는 이펙트 부칩니당" << endl;
+        
         EffectHasPet* pEffect = new EffectHasPet(pPC);
         pEffect->setNextTime(600);
         pPC->setFlag(Effect::EFFECT_CLASS_HAS_PET);
@@ -244,7 +244,7 @@ void PetItem::whenPCLost(PlayerCreature* pPC) {
 
     pPC->getPetItems().remove(this);
     if (pPC->getPetItems().empty()) {
-        // cout << pPC->getName() << " 에게서 펫 가졌다는 이펙트 떼냄니당" << endl;
+        
         Effect* pEffect = pPC->findEffect(Effect::EFFECT_CLASS_HAS_PET);
         if (pEffect != NULL)
             pEffect->setDeadline(0);
@@ -433,7 +433,7 @@ void PetItemLoader::load(Creature* pCreature)
                 pPetInfo->setFeedTime(VSDateTime(pResult->getString(++i)));
                 pPetInfo->setNickname(pResult->getString(++i));
 
-                // 양방향 링크
+                
                 pPetItem->setPetInfo(pPetInfo);
                 pPetInfo->setPetItem(pPetItem);
 
@@ -484,7 +484,7 @@ void PetItemLoader::load(Creature* pCreature)
                     pInventory = pOusters->getInventory();
                     pStash = pOusters->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
                 Assert(pPC != NULL);
@@ -537,7 +537,7 @@ void PetItemLoader::load(Creature* pCreature)
 
 
                 case STORAGE_PET_STASH:
-                    /* 펫을 불러다가 pCreature에 넣어야 되나?...*/
+                     
                     if (pPC->getPetStashItem(storageID) == NULL) {
                         pPC->addPetStashItem(storageID, pPetItem);
                         pPetItem->whenPCTake(pPC);
@@ -609,7 +609,7 @@ void PetItemLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

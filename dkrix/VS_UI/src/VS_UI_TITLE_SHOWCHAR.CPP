@@ -8,7 +8,7 @@
 #include "UserOption.h"
 #include "ClientConfig.h"
 
-//#include "ExperienceTable.h"	//char_info지울때 지울것
+
 #include "MGuildMarkManager.h"
 #include "KeyAccelerator.h"
 #include "UserInformation.h"
@@ -105,16 +105,16 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterOusters( int _x, int _y, S_SLOT* p_slot, int
 	int weapon = p_slot->man_info.right;
 	
 	int action = 0;
-	if(enable)	// 걷기
+	if(enable)	
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 			action = ACTION_OUSTERS_MOVE;
 		else
 			action = ACTION_MOVE;
 	}
 	else
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 			action = ACTION_OUSTERS_STAND;
 		else
 			action = ACTION_STAND;
@@ -161,7 +161,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterOusters( int _x, int _y, S_SLOT* p_slot, int
 	
 	
 	
-	CIndexSprite::SetUsingColorSet(hair_color, coat_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(hair_color, coat_color); 
 	if(weapon)
 		CIndexSprite::SetUsingColorSetOnly(2, 377);
 	else
@@ -178,7 +178,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterOusters( int _x, int _y, S_SLOT* p_slot, int
 	else
 		gpC_base->m_p_DDSurface_back->BltIndexSprite(&point, &m_ousters_ispk[sprite_id]);
 	
-	if(weapon)	// 챠크람 찍기
+	if(weapon)	
 	{
 		index %= m_ousters_cfpk[0][action][2].GetSize();
 		
@@ -187,7 +187,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterOusters( int _x, int _y, S_SLOT* p_slot, int
 		
 		const int sprite_id = m_ousters_cfpk[0][action][2][index].GetSpriteID();
 		
-		CIndexSprite::SetUsingColorSet(weapon_color, weapon_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+		CIndexSprite::SetUsingColorSet(weapon_color, weapon_color); 
 		if(dark)
 			gpC_base->m_p_DDSurface_back->BltIndexSpriteDarkness(&point, &m_ousters_ispk[sprite_id], DARK_BIT);
 		else
@@ -207,7 +207,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 	else
 		info = &p_slot->man_info;
 	
-	// 그냥 편하게 둘다 바지색으로 설정.. - -; by sigi
+	
 	int item_color = p_slot->trouser_color;
 	if(item_color == QUEST_ITEM_COLOR )
 		item_color = MItem::GetQuestItemColorset();
@@ -217,7 +217,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 			item_color = MItem::GetUniqueItemColorset();
 	}
 	
-	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.		
+	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); 
 	
 	const int female_plus = p_slot->bl_female*m_slayer_cfpk.GetSize()/2;
 	
@@ -250,7 +250,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 		if(item_color == UNIQUE_ITEM_COLOR)
 			item_color = MItem::GetUniqueItemColorset();
 	}
-	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); 
 	
 	part_id = info->coat +female_plus;
 	sprite_id = m_slayer_cfpk[part_id][enable][2][index].GetSpriteID();
@@ -265,11 +265,11 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 	else
 		gpC_base->m_p_DDSurface_back->BltIndexSprite(&point, &m_slayer_ispk[sprite_id]);
 	
-	CIndexSprite::SetUsingColorSet(p_slot->skin_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(p_slot->skin_color, 0); 
 	
-	CIndexSprite::SetUsingColorSet(p_slot->hair_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(p_slot->hair_color, 0); 
 	
-	// 투구가 있을 때는 머리카락은 찍지않는다.
+	
 	if (info->helmet == M_NO_WEAR )//|| info->helmet == M_HELMET1)
 	{
 		part_id = info->face +female_plus;
@@ -293,7 +293,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 		else
 			if(item_color == UNIQUE_ITEM_COLOR)
 				item_color = MItem::GetUniqueItemColorset();
-			CIndexSprite::SetUsingColorSet(item_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(item_color, 0); 
 			
 			part_id = info->helmet +female_plus;
 			sprite_id = m_slayer_cfpk[part_id][enable][2][index].GetSpriteID();
@@ -309,7 +309,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 				gpC_base->m_p_DDSurface_back->BltIndexSprite(&point, &m_slayer_ispk[sprite_id]);
 	}
 	
-	// 무기 & 방어구
+	
 	if (info->right != M_NO_WEAR)//p_slot->bl_female && p_slot->woman_info.right != M_NO_WEAR || !p_slot->bl_female && p_slot->man_info.right != M_NO_WEAR)
 	{
 		item_color=p_slot->right_color;
@@ -319,7 +319,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 			if(item_color == UNIQUE_ITEM_COLOR)
 				item_color = MItem::GetUniqueItemColorset();
 			
-			CIndexSprite::SetUsingColorSet(item_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(item_color, 0); 
 			
 			part_id = info->right +female_plus;
 			sprite_id = m_slayer_cfpk[part_id][enable][2][index].GetSpriteID();
@@ -344,7 +344,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterSlayer( int _x, int _y, S_SLOT* p_slot, int 
 			if(item_color == UNIQUE_ITEM_COLOR)
 				item_color = MItem::GetUniqueItemColorset();
 			
-			CIndexSprite::SetUsingColorSet(item_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(item_color, 0); 
 			
 			part_id = info->left +female_plus;
 			sprite_id = m_slayer_cfpk[part_id][enable][2][index].GetSpriteID();
@@ -386,7 +386,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterVampire( int _x, int _y, S_SLOT* p_slot, int
 	}
 	
 	
-	CIndexSprite::SetUsingColorSet(p_slot->skin_color, coat_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(p_slot->skin_color, coat_color); 
 	
 	point.x = _x+m_vampire_cfpk[coat][enable][2][index].GetCX();
 	point.y = _y+m_vampire_cfpk[coat][enable][2][index].GetCY();
@@ -410,9 +410,9 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACOusters( int _x, int _y, S_SLOT* p_slot, i
 	
 	int action = 0;
 
-	if(enable)	// 걷기
+	if(enable)	
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 		{
 			bool bFirstAction = index < m_AdvancementOustersCfpk[coat][ACTION_ADVANCEMENT_OUSTERS_MAGIC-ADVANCEMENT_ACTION_START][2].GetSize();
 	
@@ -433,7 +433,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACOusters( int _x, int _y, S_SLOT* p_slot, i
 	}
 	else
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 		{
 			action = ACTION_ADVANCEMENT_OUSTERS_WRISTLET_STOP;
 		}
@@ -483,7 +483,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACOusters( int _x, int _y, S_SLOT* p_slot, i
 	}
 	
 	
-	CIndexSprite::SetUsingColorSet(hair_color, coat_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(hair_color, coat_color); 
 	if(weapon)
 		CIndexSprite::SetUsingColorSetOnly(2, 377);
 	else
@@ -500,7 +500,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACOusters( int _x, int _y, S_SLOT* p_slot, i
 	else
 		gpC_base->m_p_DDSurface_back->BltIndexSprite(&point, &m_AdvancementOustersIspk[sprite_id]);
 	
-	if(weapon)	// 챠크람 찍기
+	if(weapon)	
 	{
 		index %= m_AdvancementOustersCfpk[0][action][2].GetSize();
 		
@@ -509,7 +509,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACOusters( int _x, int _y, S_SLOT* p_slot, i
 		
 		const int sprite_id = m_AdvancementOustersCfpk[0][action][2][index].GetSpriteID();
 		
-		CIndexSprite::SetUsingColorSet(weapon_color, weapon_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+		CIndexSprite::SetUsingColorSet(weapon_color, weapon_color); 
 		if(dark)
 			gpC_base->m_p_DDSurface_back->BltIndexSpriteDarkness(&point, &m_AdvancementOustersIspk[sprite_id], DARK_BIT);
 		else
@@ -540,9 +540,9 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACVampire( int _x, int _y, S_SLOT* p_slot, i
 	
 	int action = 0;
 
-	if(enable)	// 걷기
+	if(enable)	
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 		{
 			bool bFirstAction = index < (*pCFPK)[coat][ACTION_ADVANCEMENT_SPECIAL-ADVANCEMENT_ACTION_START][2].GetSize();
 	
@@ -563,7 +563,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACVampire( int _x, int _y, S_SLOT* p_slot, i
 	}
 	else
 	{
-		if(weapon == 0)	// 무기 없다
+		if(weapon == 0)	
 		{
 			action = ACTION_ADVANCEMENT_STOP;
 		}
@@ -593,7 +593,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACVampire( int _x, int _y, S_SLOT* p_slot, i
 	else
 		gpC_base->m_p_DDSurface_back->BltIndexSprite(&point, &(*pISPK)[sprite_id]);
 	
-	if(weapon)	// 챠크람 찍기
+	if(weapon)	
 	{
 		index %= (*pCFPK)[1][action][2].GetSize();
 		
@@ -620,7 +620,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACSlayer( int _x, int _y, S_SLOT* p_slot, in
 	else
 		info = &p_slot->man_info;
 	
-	// 그냥 편하게 둘다 바지색으로 설정.. - -; by sigi
+	
 	int item_color = p_slot->trouser_color;
 	if(item_color == QUEST_ITEM_COLOR )
 		item_color = MItem::GetQuestItemColorset();
@@ -629,13 +629,13 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACSlayer( int _x, int _y, S_SLOT* p_slot, in
 		if(item_color == UNIQUE_ITEM_COLOR)
 			item_color = MItem::GetUniqueItemColorset();
 	}	
-	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+	CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); 
 
 	CCreatureFramePack& slayerFPK = !p_slot->bl_female ? m_AdvancementSlayerManCfpk : m_AdvancementSlayerWomanCfpk;
 	CIndexSpritePack& addonISPK = !p_slot->bl_female ? m_AdvancementSlayerManIspk : m_AdvancementSlayerWomanIspk;
 
 	int action = 0;
-	if(enable)	// 걷기
+	if(enable)	
 	{
 		action = GetAdvancementSlayerMoveActionFromType( info->right );
 	}
@@ -663,7 +663,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACSlayer( int _x, int _y, S_SLOT* p_slot, in
 				if(item_color == UNIQUE_ITEM_COLOR)
 					item_color = MItem::GetUniqueItemColorset();
 			}
-			CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(p_slot->skin_color, item_color); 
 			clothes = AC_BODY;
 			break;
 
@@ -677,7 +677,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACSlayer( int _x, int _y, S_SLOT* p_slot, in
 			else
 				if(item_color == UNIQUE_ITEM_COLOR)
 					item_color = MItem::GetUniqueItemColorset();
-			CIndexSprite::SetUsingColorSet(item_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(item_color, 0); 
 			clothes = AC_HELMET;
 			break;
 
@@ -707,7 +707,7 @@ void	C_VS_UI_NEWCHAR::_ShowCharacterACSlayer( int _x, int _y, S_SLOT* p_slot, in
 				if(item_color == UNIQUE_ITEM_COLOR)
 					item_color = MItem::GetUniqueItemColorset();
 				
-			CIndexSprite::SetUsingColorSet(item_color, 0); // blt와 한쌍을 이뤄야 함. 출력직전에 설정.
+			CIndexSprite::SetUsingColorSet(item_color, 0); 
 
 			break;
 

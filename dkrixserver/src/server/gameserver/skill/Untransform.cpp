@@ -38,9 +38,9 @@ void Untransform::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             gcOK1.setSkillType(SKILL_UN_TRANSFORM);
             pSlayer->getPlayer()->sendPacket(&gcOK1);
 
-            // EffectSummonSylph에 unaffect에서 다 해준다.
+            
 
-            // 존에 이펙트 없앴다고 보내주고
+            
             //			GCRemoveEffect removeEffect;
             //			removeEffect.setObjectID(pSlayer->getObjectID());
             //			removeEffect.addEffectList(Effect::EFFECT_CLASS_SUMMON_SYLPH);
@@ -49,7 +49,7 @@ void Untransform::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             //
             //			GCModifyInformation gcMI;
             //
-            //			// 디펜 프텍 다시 계산해서 보내주고
+            
             //			OUSTERS_RECORD prev;
             //			pSlayer->getSlayerRecord(prev);
             //			pSlayer->initAllStat();
@@ -62,7 +62,7 @@ void Untransform::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             pSlayer->getPlayer()->sendPacket(&gcFail);
         }
     } catch (Throwable& t) {
-        //		클라이언트에서 -_- 이런 거 보내지 말란다 흑 ㅠㅠ
+        
         //		executeSkillFailException(pSlayer, getSkillType());
     }
 
@@ -120,9 +120,9 @@ void Untransform::execute(Ousters* pOusters)
             gcOK1.setSkillType(SKILL_UN_TRANSFORM);
             pOusters->getPlayer()->sendPacket(&gcOK1);
 
-            // EffectSummonSylph에 unaffect에서 다 해준다.
+            
 
-            // 존에 이펙트 없앴다고 보내주고
+            
             //			GCRemoveEffect removeEffect;
             //			removeEffect.setObjectID(pOusters->getObjectID());
             //			removeEffect.addEffectList(Effect::EFFECT_CLASS_SUMMON_SYLPH);
@@ -131,7 +131,7 @@ void Untransform::execute(Ousters* pOusters)
             //
             //			GCModifyInformation gcMI;
             //
-            //			// 디펜 프텍 다시 계산해서 보내주고
+            
             //			OUSTERS_RECORD prev;
             //			pOusters->getOustersRecord(prev);
             //			pOusters->initAllStat();
@@ -144,7 +144,7 @@ void Untransform::execute(Ousters* pOusters)
             pOusters->getPlayer()->sendPacket(&gcFail);
         }
     } catch (Throwable& t) {
-        //		클라이언트에서 -_- 이런 거 보내지 말란다 흑 ㅠㅠ
+        
         //		executeSkillFailException(pOusters, getSkillType());
     }
 

@@ -52,21 +52,19 @@ void EffectRelicPosition::affect(Item* pItem)
 {
     __BEGIN_TRY
 
-    // 존 정보를 얻는다.
+    
     ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(m_ZoneID);
     Assert(pZoneInfo != NULL);
 
     if (pItem->getItemClass() == Item::ITEM_CLASS_RELIC) {
-        // 성물의 정보를 얻는다.
+        
         ItemType_t relicIndex = pItem->getItemType();
         const RelicInfo* pRelicInfo = dynamic_cast<RelicInfo*>(g_pRelicInfoManager->getItemInfo(relicIndex));
         Assert(pRelicInfo != NULL);
 
         //		StringStream msg;
 
-        /*		// 위치를 알린다.
-                msg << "성물(" << pRelicInfo->getName() << ")이 "
-                    << pZoneInfo->getFullName() << "(" << (int)m_X << ", " << (int)m_Y << ")에 떨어져 있습니다."; */
+         
 
         char msg[100];
 
@@ -96,19 +94,14 @@ void EffectRelicPosition::affect(Item* pItem)
         //		g_pHolyLandManager->broadcast( pGCBBS );
         g_pZoneGroupManager->broadcast(pGCBBS);
         g_pShrineInfoManager->registerBloodBibleStatus(m_Part, pGCBBS);
-        /*
-        msg << "피의 성서 조각이 "
-            << pZoneInfo->getFullName() << "(" << (int)m_X << ", " << (int)m_Y << ")에 떨어져 있습니다.";
-
-        g_pZoneGroupManager->broadcast( &gcSystemMessage );
-        */
+         
 
         setNextTime(999999);
     } else if (pItem->getItemClass() == Item::ITEM_CLASS_CASTLE_SYMBOL) {
         //		StringStream msg;
 
-        //		msg << "성의 상징이 "
-        //			<< pZoneInfo->getFullName() << "(" << (int)m_X << ", " << (int)m_Y << ")에 떨어져 있습니다.";
+        
+        
 
         char msg[200];
         sprintf(msg, g_pStringPool->c_str(STRID_BROADCAST_CASTLE_SYMBOL_POSITION_3), pZoneInfo->getFullName().c_str(),

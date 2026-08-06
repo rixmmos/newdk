@@ -87,7 +87,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
 
     if (!(pZone->getZoneLevel() & COMPLETE_SAFE_ZONE) && !pCreature->isDead() &&
         !pCreature->isFlag(Effect::EFFECT_CLASS_COMA)
-        // 무적상태 체크. by sigi. 2002.9.5
+        
         && canAttack(NULL, pCreature)) {
         if (pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -103,7 +103,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pSlayer->getPlayer()->sendPacket(&gcMI);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pSlayer->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -123,7 +123,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pVampire->getPlayer()->sendPacket(&gcMI);
 
-                // 공격(흡혈) 당하는 경우에는 공격자의 성향이 바뀜 by sigi. 2002.12.27
+                
                 Creature* pAttacker = pZone->getCreature(m_UserObjectID);
                 if (pAttacker != NULL && pAttacker->isVampire()) {
                     Vampire* pAttackVampire = dynamic_cast<Vampire*>(pAttacker);
@@ -131,13 +131,13 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
                     GCModifyInformation gcAttackerMI;
                     computeAlignmentChange(pVampire, decreaseHP, pAttackVampire, NULL, &gcAttackerMI);
 
-                    // 뭔가 변한 정보가 있다면 보내준다.
+                    
                     if (gcAttackerMI.getShortCount() + gcAttackerMI.getLongCount() > 0) {
                         pAttackVampire->getPlayer()->sendPacket(&gcAttackerMI);
                     }
                 }
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pVampire->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -157,7 +157,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pOusters->getPlayer()->sendPacket(&gcMI);
 
-                // 공격(흡혈) 당하는 경우에는 공격자의 성향이 바뀜 by sigi. 2002.12.27
+                
                 Creature* pAttacker = pZone->getCreature(m_UserObjectID);
                 if (pAttacker != NULL && pAttacker->isOusters()) {
                     Ousters* pAttackOusters = dynamic_cast<Ousters*>(pAttacker);
@@ -165,13 +165,13 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
                     GCModifyInformation gcAttackerMI;
                     computeAlignmentChange(pOusters, decreaseHP, pAttackOusters, NULL, &gcAttackerMI);
 
-                    // 뭔가 변한 정보가 있다면 보내준다.
+                    
                     if (gcAttackerMI.getShortCount() + gcAttackerMI.getLongCount() > 0) {
                         pAttackOusters->getPlayer()->sendPacket(&gcAttackerMI);
                     }
                 }
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pOusters->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -187,7 +187,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
 
                 pMonster->setHP(RemainHP, ATTR_CURRENT);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pMonster->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -209,7 +209,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
         }
 
 
-        // m_CasterName이 pCreature를 죽인 경우의 KillCount 처리
+        
         // by sigi. 2002.9.9
         if (pCreature->isDead()) {
             Creature* pAttacker = pZone->getCreature(m_UserObjectID);
@@ -217,7 +217,7 @@ void EffectDecreaseHP::unaffect(Creature* pCreature)
             if (pAttacker != NULL) {
                 if (pAttacker->isVampire()) {
                     Vampire* pVampire = dynamic_cast<Vampire*>(pAttacker);
-                    // 죽일때 경험치를 준다.
+                    
                     GCModifyInformation mi;
 
                     int exp = computeCreatureExp(pCreature, KILL_EXP);

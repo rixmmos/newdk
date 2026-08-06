@@ -1,56 +1,14 @@
 //----------------------------------------------------------------------
 // MLoadingSPKWorkNode.h
 //----------------------------------------------------------------------
-// class 이름 붙이기가 골치가 아파서 숫자 붙였음. - -;;
+
 //
-// 암튼.. SPK를 Loading하는데.. 그 방법에 따라서 몇개의 Node로 나뉨
+
 //
-// [Remain]의 의미는 Node가 실행중에 중단되었을 경우
-// 남은 작업을 다시 하나의 Node로 만들어야 되는데..
-// 그 때 생성할 Node의 종류이다.
-/*
-
-  [ 공통 ]
-  		CSpritePack*	SPK
-		char			SPKFilename
 
 
-  [Node 1]
-		= FilePosition에서 SFPArray를 읽어서 SPK에 load한다.
-		
-		char			SFPFilename
-		long			FilePosition
 
-		[Remain] --> Node 2
-
-
-  [Node 2]
-		= SFPArray를 이용해서 SPK에다 load한다.
-
-		SFPArray*		SFPA
-
-		[Remain] --> Node 2
-		
-
-  [Node 3]
-		= FilePosition에서 하나의 Sprite를 읽어서 SPK의 ID번째에 저장한다.
-
-		TYPE_SPRITEID	SpriteID
-		long			FilePosition
-
-		[Remain] --> NULL
-
-  [Node 4]
-		= FilePosition에서 SPK의 FirstID ~ LastID까지를 읽어들인다.
-
-		TYPE_SPRITEID	FirstSpriteID
-		TYPE_SPRITEID	LastSpriteID
-		long			FilePosition
-
-		[Remain] --> Node 4
-
-
-*/
+ 
 //----------------------------------------------------------------------
 
 #ifndef __MLOADINSPKWORKNODE_H__
@@ -67,7 +25,7 @@
 //----------------------------------------------------------------------
 // MLoadingSPKWorkNode
 //----------------------------------------------------------------------
-// SPKFile에서 어떻게~해서 SPK를 loading한다.
+
 //----------------------------------------------------------------------
 class MLoadingSPKWorkNode : public MWorkNode {
 	public :
@@ -75,7 +33,7 @@ class MLoadingSPKWorkNode : public MWorkNode {
 		~MLoadingSPKWorkNode() {}
 
 		//---------------------------------------------------
-		// pSPK에 SPKFilename의 뭔가를(?) Loading하는 것이다.
+		
 		//---------------------------------------------------
 		void			SetSPK(CSpritePack* pSPK, const char* filename)
 		{
@@ -106,7 +64,7 @@ class MLoadingSPKWorkNode1 : public MLoadingSPKWorkNode {
 //----------------------------------------------------------------------
 // Node 2
 //----------------------------------------------------------------------
-// m_pSFPA는 내부에서 delete한다.
+
 //----------------------------------------------------------------------
 class MLoadingSPKWorkNode2 : public MLoadingSPKWorkNode {
 	public :

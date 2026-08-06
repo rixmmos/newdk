@@ -1,20 +1,4 @@
-/**
- * @file index_sprite.c
- * @brief IndexedSprite implementation
- * 
- * Requirements: 1.4, 1.5, 1.6
- * 
- * IndexedSprite uses a compressed scanline format:
- * 
- * Per scanline:
- *   [transPairCount] - Number of (trans, index, normal) groups
- *   For each group:
- *     [transCount]   - Number of transparent pixels
- *     [indexCount]   - Number of indexed pixels
- *     [indexData...] - Index data (setNumber<<8 | gradation) × indexCount
- *     [normalCount]  - Number of normal (direct color) pixels
- *     [normalData...] - RGB565 colors × normalCount
- */
+ 
 
 #include "index_sprite.h"
 #include "color.h"

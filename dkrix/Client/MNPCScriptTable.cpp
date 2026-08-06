@@ -6,8 +6,8 @@
 #include "MNPCScriptTable.h"
 
 #include "DebugInfo.h"
-#include "Packet.h"
-//#include "ScriptParameter.h"
+#include "Packet/Packet.h"
+//#include "Packet/ScriptParameter.h"
 
 
 #define		SCRIPT_MARK_START	"%("
@@ -143,21 +143,21 @@ MNPCScriptTable::SaveToFile(std::ofstream& file)
 	TYPE_MAP::iterator iData = begin();
 
 	//-----------------------------------------------------
-	// 개수 저장
+	
 	//-----------------------------------------------------
 	int infoSize = size();
 	file.write((const char*)&infoSize, 4);
 
 	//-----------------------------------------------------
-	// 각 info 저장
+	
 	//-----------------------------------------------------
 	while (iData != end())
 	{
 		unsigned int	id		= (*iData).first;
 		NPC_SCRIPT*		pData	= (*iData).second;		
 
-		file.write((const char*)&id, 4);	// id 저장
-		pData->SaveToFile( file );			// NPC info 저장
+		file.write((const char*)&id, 4);	
+		pData->SaveToFile( file );			
 
 		iData ++;
 	}
@@ -170,7 +170,7 @@ void
 MNPCScriptTable::LoadFromFile(std::ifstream& file)
 {
 	//-----------------------------------------------------
-	// 기존에 있던것 제거
+	
 	//-----------------------------------------------------
 	Release();
 
@@ -181,7 +181,7 @@ MNPCScriptTable::LoadFromFile(std::ifstream& file)
 	file.read((char*)&infoSize, 4);
 
 	//-----------------------------------------------------
-	// 각 info
+	
 	//-----------------------------------------------------
 	unsigned int id;
 	for (int i=0; i<infoSize; i++)
@@ -192,7 +192,7 @@ MNPCScriptTable::LoadFromFile(std::ifstream& file)
 		pData->LoadFromFile( file );
 
 		//-----------------------------------------------------
-		// map에 추가한다.
+		
 		//-----------------------------------------------------
 		if (!AddData( id, pData ))
 		{
@@ -210,29 +210,7 @@ MNPCScriptTable::GetContentParameter(int scriptID, int contentID,HashMapScriptPa
 		return;
 	
 	
-/*	-_- 중복 검색 안되도록 맨든건데..ㅡ.ㅜ
-	while(1)
-	{
-		str_s = str.find(SCRIPT_MARK_START,str_s);
-		if(str_s == -1)
-			break;
-		
-		str_e = str.find(SCRIPT_MARK_END,str_s);
-		if(str_e == -1)
-			break;
-		
-		std::string scriptName;
-		memset(temp,0,sizeof(temp));
-		memcpy(temp,str.c_str()+str_s+2,str_e-(str_s+2));
-		scriptName = temp;
-
-		// ScriptName 과 Parameter 와 비교한다.
-
-		if(para.find(scriptName) != para.end())
-		{
-			str.replace(str.begin()+str_s, str.begin()+str_e,para[scriptName]->getValue().begin(),para[scriptName]->getValue().end());		
-		} 
-	}*/
+ 
 
 	int i=0;
 	HashMapScriptParameter::const_iterator itr = para.begin();
@@ -258,32 +236,7 @@ MNPCScriptTable::GetSubjectParameter(int scriptID, int subjectID,HashMapScriptPa
 	if(str.empty())
 		return;
 	
-	/* 중복검색 안되도록 맨든건데..ㅡ.ㅜ
-	int str_s = 0;
-	int str_e = 0;
-	char temp[512];
-
-	while(1)
-	{
-		str_s = str.find(SCRIPT_MARK_START,str_s);
-		if(str_s == -1)
-			break;
-		
-		str_e = str.find(SCRIPT_MARK_END,str_s);
-		if(str_e == -1)
-			break;
-		
-		std::string scriptName;
-		memset(temp,0,sizeof(temp));
-		memcpy(temp,str.c_str()+str_s+2,str_e-(str_s+2));
-		scriptName = temp;
-
-		// ScriptName 과 Parameter 와 비교한다.
-
-//		if(scriptName == para->getName())
-		if(para.find(scriptName) != para.end())
-			str.replace(str.begin()+str_s, str.begin()+str_e,para[scriptName]->getValue().begin(),para[scriptName]->getValue().end());				
-	}*/
+	 
 
 	int i=0;
 	HashMapScriptParameter::const_iterator itr = para.begin();

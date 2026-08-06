@@ -42,8 +42,8 @@ ZoneGroupThread::ZoneGroupThread(ZoneGroup* pZoneGroup)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 쓰레드 메쏘드들은 최상위로 사용되므로 __BEGIN_TRY와 __END_CATCH
-// 를 할 필요가 없다. 즉 모든 예외를 잡아서 처리해야 한다는 소리.
+
+
 //////////////////////////////////////////////////////////////////////////////
 void ZoneGroupThread::run()
 
@@ -79,34 +79,7 @@ void ZoneGroupThread::run()
     cout << " TID Number = " << (int)(long)Thread::self() << endl;
     cout << "******************************************************" << endl;
 
-    /*
-    // Login DB 의 PCRoomDBInfo Table 읽어서 Connection 만들기
-    Statement * pStmt = NULL;
-    pStmt = pDistConnection->createStatement();
-    Result * pResult = NULL;
-
-    pResult = pStmt->executeQuery("SELECT ID, Host, DB, User, Password FROM PCRoomDBInfo");
-
-    if (pResult->next())
-    {
-        WorldID_t ID = pResult->getInt(1);
-        string host = pResult->getString(2);
-        string db = pResult->getString(3);
-        string user = pResult->getString(4);
-        string password = pResult->getString(5);
-
-        cout << "Connection: "
-             << "  ID=" << (int)ID
-             << ", HOST=" << host.c_str()
-             << ", DB=" << db.c_str()
-             << ", User=" << user.c_str() << endl;
-
-        Connection * pConnection = new Connection(host, db, user, password);
-        Assert(pConnection!=NULL);
-
-        g_pDatabaseManager->addPCRoomConnection((int)(Thread::self()) , pConnection );
-    }
-    */
+     
 
     Timeval NextTime;
     getCurrentTime(NextTime);
@@ -123,7 +96,7 @@ void ZoneGroupThread::run()
             try {
                 beginProfileExNoTry("ZGT_MAIN");
 
-                usleep(1000); // FIX: 原注释说 0.001秒 = 1000微秒，但代码写的是 100 微秒，已修正
+                usleep(1000); 
 
                 __ENTER_CRITICAL_SECTION((*m_pZoneGroup))
 
@@ -150,8 +123,8 @@ void ZoneGroupThread::run()
                 g_pDatabaseManager->executeDummyQuery(pConnection);
                 g_pDatabaseManager->executeDummyQuery(pDistConnection);
 
-                // 1시간 ~ 1시간 30분 사이에서 dummy query 시간을 설정한다.
-                // timeout이 되지 않게 하기 위해서이다.
+                
+                
                 dummyQueryTime.tv_sec += (60 + rand() % 30) * 60;
             }
 
@@ -168,8 +141,8 @@ void ZoneGroupThread::run()
                 NextTime.tv_sec = currentTime.tv_sec + 10;
                 NextTime.tv_usec = currentTime.tv_usec;
 
-                // 매턴마다 프로파일 데이터를 초기화해준다.
-                // 누적 데이터보다는 시간대에 따른 시간을 측정하기 위해서...
+                
+                
                 initProfileEx();
             }
         }

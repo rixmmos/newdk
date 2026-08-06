@@ -180,12 +180,7 @@ void C_VS_UI_MOUSE_POINTER::DropItem()
 	m_half_y = 0;
 }
 
-/*-----------------------------------------------------------------------------
-- Show
-- Mouse pointer image를 그린다.
-
-  `Mouse pointer 좌표는 속도를 위해 내부에서 읽는다.
------------------------------------------------------------------------------*/
+ 
 void	C_VS_UI_MOUSE_POINTER::DrawTargetArrow(int TargetX, int TargetY)
 {
 
@@ -283,7 +278,12 @@ void C_VS_UI_MOUSE_POINTER::Show()
 		{
 			extern Window* g_desc_dialog_window_id;
 			if(m_bl_description && gpC_window_manager->GetMouseFocusedWindow() != g_desc_dialog_window_id)
-				m_pC_mouse_pointer_spk->Blt(m_mouse_x + g_mouse_point_fix[CURSOR_DESCRIPTION].x, m_mouse_y + g_mouse_point_fix[CURSOR_DESCRIPTION].y, CURSOR_DESCRIPTION);
+			{
+				const int press_offset = MousePushed() ? 1 : 0;
+				m_pC_mouse_pointer_spk->Blt(m_mouse_x + g_mouse_point_fix[CURSOR_DESCRIPTION].x + press_offset,
+					m_mouse_y + g_mouse_point_fix[CURSOR_DESCRIPTION].y + press_offset,
+					CURSOR_DESCRIPTION);
+			}
 			else
 			{
 				int temp_cursor;
@@ -301,7 +301,8 @@ void C_VS_UI_MOUSE_POINTER::Show()
 					temp_cursor = CURSOR_OUSTERS_NORMAL;
 					break;
 				}
-				m_pC_mouse_pointer_spk->Blt(m_mouse_x, m_mouse_y, temp_cursor);
+				const int press_offset = MousePushed() ? 1 : 0;
+				m_pC_mouse_pointer_spk->Blt(m_mouse_x + press_offset, m_mouse_y + press_offset, temp_cursor);
 			}
 		}
 		else

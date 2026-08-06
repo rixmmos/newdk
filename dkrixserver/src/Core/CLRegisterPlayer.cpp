@@ -11,7 +11,7 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
 {
     __BEGIN_TRY
 
-    // 플레이어 기본 정보 (ID - Password)
+    
     BYTE szID;
     iStream.read(szID);
     if (szID == 0)
@@ -32,7 +32,7 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
         throw InvalidProtocolException("too long Password length");
     iStream.read(m_Password, szPassword);
 
-    // 플레이어 개인 정보 (Name - Sex - SSN)
+    
     BYTE szName;
     iStream.read(szName);
     if (szName == 0)
@@ -53,7 +53,7 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
         throw InvalidProtocolException("too long SSN length");
     iStream.read(m_SSN, szSSN);
 
-    // 플레이어 연락처 (Telephone - Cellular - ZipCode - Address - Nation)
+    
     BYTE szTelephone;
     iStream.read(szTelephone);
     if (szTelephone == 0)
@@ -90,7 +90,7 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
     iStream.read(nation);
     m_Nation = (Nation)nation;
 
-    // 플레이어 전자 정보 (Email - Homepage)
+    
     BYTE szEmail;
     iStream.read(szEmail);
     if (szEmail == 0)
@@ -107,7 +107,7 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
         throw InvalidProtocolException("too long Homepage length");
     iStream.read(m_Homepage, szHomepage);
 
-    // 기타 (Profile - Public)
+    
     BYTE szProfile;
     iStream.read(szProfile);
     if (szProfile == 0)
@@ -126,7 +126,7 @@ void CLRegisterPlayer::write(SocketOutputStream& oStream) const
 {
     __BEGIN_TRY
 
-    // 플레이어 기본 정보 (ID - Password)
+    
     BYTE szID = m_ID.size();
     if (szID == 0)
         throw InvalidProtocolException("szID == 0");
@@ -147,7 +147,7 @@ void CLRegisterPlayer::write(SocketOutputStream& oStream) const
     oStream.write(szPassword);
     oStream.write(m_Password);
 
-    // 플레이어 개인 정보 (Name - Sex - SSN)
+    
     BYTE szName = m_Name.size();
     if (szName == 0)
         throw InvalidProtocolException("szName == 0");
@@ -166,7 +166,7 @@ void CLRegisterPlayer::write(SocketOutputStream& oStream) const
     oStream.write(szSSN);
     oStream.write(m_SSN);
 
-    // 플레이어 연락처 (Telephone - Cellular - ZipCode - Address - Nation)
+    
     BYTE szTelephone = m_Telephone.size();
     if (szTelephone == 0)
         throw InvalidProtocolException("szTelephone == 0");
@@ -201,7 +201,7 @@ void CLRegisterPlayer::write(SocketOutputStream& oStream) const
 
     oStream.write((BYTE)m_Nation);
 
-    // 플레이어 전자 정보 (Email - Homepage)
+    
     BYTE szEmail = m_Email.size();
     if (szEmail == 0)
         throw InvalidProtocolException("szEmail == 0");
@@ -218,7 +218,7 @@ void CLRegisterPlayer::write(SocketOutputStream& oStream) const
     oStream.write(szHomepage);
     oStream.write(m_Homepage);
 
-    // 기타 (Profile - Public)
+    
     BYTE szProfile = m_Profile.size();
     if (szProfile == 0)
         throw InvalidProtocolException("szProfile == 0");

@@ -67,7 +67,7 @@ public:
 
 class StrX {
 private:
-    char* m_pCSTR; ///< ���� ���ڿ� ����
+    char* m_pCSTR; 
 
 public:
     StrX(const XMLCh* const toTranscode) {
@@ -92,8 +92,8 @@ public:
 
 class XMLTreeGenerator : public DefaultHandler {
 private:
-    XMLTree* m_pRoot;   ///< �ֻ��� ���
-    XMLTree* m_pBuffer; ///< XML �Ľ̿� �ӽ� ���
+    XMLTree* m_pRoot;   
+    XMLTree* m_pBuffer; 
 
 
 public:
@@ -139,10 +139,10 @@ public:
 
 
 public:
-    /// \brief ������ ��ġ�� �ִ� ���� �Ǵ� �� ������ �Ľ��Ѵ�.
+    
     void parseURL(const char* pURL);
 
-    /// \brief �μ��� �Ѱ����� ���ڿ��� XML ������ �����ϰ� �Ľ��Ѵ�.
+    
     void parse(const char* buffer);
 };
 
@@ -189,22 +189,8 @@ string XMLUtil::WideCharToString(const XMLCh* wstr, int wstrlen) {
     //	For the code pages mentioned in dwFlags, lpUsedDefaultChar must be NULL,
     //  otherwise the function fails with ERROR_INVALID_PARAMETER.
 
-    // �ּ����� ���縦 ���̱� ���ؼ� ��Ʈ���� �غ�.
-    /*	string strBuffer;
-        strBuffer.reserve( wstrlen * 2 + 1 );		// capacity �� ����ϰ�..
-        int nCopied = WideCharToMultiByte(
-            CP_OEMCP,
-            WC_COMPOSITECHECK,
-            wstr,									// wide string
-            wstrlen,								// length of wide string
-            const_cast<LPSTR>(strBuffer.data()),	// mbcs string (unicode)
-            (int)strBuffer.capacity(),					// length of mbcs string
-            NULL,									// NULL �� �����ٴµ�?
-            NULL );
-        strBuffer[nCopied] = 0;
-        strBuffer._Mysize = nCopied;				// �������� �����ؾ� �Ѵ�.
-
-        return strBuffer;*/
+    
+     
     return StrX(wstr).toString();
 }
 
@@ -790,7 +776,7 @@ XMLParser::~XMLParser() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// \brief ������ ��ġ�� �ִ� ���� �Ǵ� �� ������ �Ľ��Ѵ�.
+
 ///
 /// \param pURL
 //////////////////////////////////////////////////////////////////////////////
@@ -798,8 +784,8 @@ void XMLParser::parseURL(const char* pURL) {
     // assert(pURL != NULL);
     // assert(m_pHandler != NULL);
 
-    // SAX �ļ� ������Ʈ�� �����Ѵ�. �׸��� feature�� �����Ѵ�.
-    // SAX2���� �����Ǵ� feature�� ������ ����.
+    
+    
     //
     // validation (default: true)
     // namespaces (default: true)
@@ -812,7 +798,7 @@ void XMLParser::parseURL(const char* pURL) {
     // continue-after-fatal-error (default: false)
     // validation-error-as-fatal (default: false)
     //
-    // �ڼ��� ������ ���� �ּҸ� �����ϱ� �ٶ���.
+    
     // http://xml.apache.org/xerces-c/program-sax2.html#SAX2Features
     SAX2XMLReader* pParser = XMLReaderFactory::createXMLReader();
     pParser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);
@@ -837,7 +823,7 @@ void XMLParser::parseURL(const char* pURL) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// \brief �μ��� �Ѱ����� ���ڿ��� XML ������ �����ϰ� �Ľ��Ѵ�.
+
 ///
 /// \param buffer
 //////////////////////////////////////////////////////////////////////////////
@@ -845,8 +831,8 @@ void XMLParser::parse(const char* buffer) {
     // assert(buffer != NULL);
     // assert(m_pHandler != NULL);
 
-    // SAX �ļ� ������Ʈ�� �����Ѵ�. �׸��� feature�� �����Ѵ�.
-    // feature�� ���� ������ XMLParser::parseURL() �Լ��� �����ϱ� �ٶ���.
+    
+    
     SAX2XMLReader* pParser = XMLReaderFactory::createXMLReader();
     pParser->setFeature(XMLUni::fgSAX2CoreNameSpaces, true);
     pParser->setFeature(XMLUni::fgXercesSchema, true);

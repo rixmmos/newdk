@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // GameInitInfo.cpp
 //---------------------------------------------------------------------------
-// Information Table에 대한 초기화를 한다.
+
 //---------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -23,7 +23,7 @@
 #include "DebugLog.h"
 #include <algorithm>
 //#include "MFileDef.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "Client.h"
 //#include "AddonDef.h"
 #include "GameObject.h"
@@ -55,6 +55,11 @@
 #include "MMonsterKillQuestInfo.h"
 #include "ShrineInfoManager.h"
 
+static void TraceInfoStartup(const char* step)
+{
+	(void)step;
+}
+
 #include "md5.h" //add by viva
 
 #ifdef OUTPUT_DEBUG
@@ -75,7 +80,7 @@ InitClientConfig()
 	DEBUG_ADD("[ InitGame ]  ClientConfig");
 	
 	//---------------------------------------------------------------------
-	// 메모리 잡기
+	
 	//---------------------------------------------------------------------
 	if (g_pClientConfig==NULL)
 	{
@@ -84,7 +89,7 @@ InitClientConfig()
 
 	//---------------------------------------------------------------------
 	//
-	//			Client Config 설정
+	
 	//
 	//---------------------------------------------------------------------
 	///*
@@ -99,7 +104,7 @@ InitClientConfig()
 		//return FALSE;
 	}
 
-	// 다시 한 번 저장해둔다.
+	
 	g_pClientConfig->SaveToFile(g_pFileDef->getProperty("FILE_INFO_CLIENTCONFIG").c_str());
 
 	return TRUE;
@@ -115,7 +120,7 @@ InitUserOption()
 	DEBUG_ADD("[ InitGame ]  UserOption");
 	
 	//---------------------------------------------------------------------
-	// 메모리 잡기
+	
 	//---------------------------------------------------------------------
 	if (g_pUserOption==NULL)
 	{
@@ -124,7 +129,7 @@ InitUserOption()
 
 	//---------------------------------------------------------------------
 	//
-	//			User Option 설정
+	
 	//
 	//---------------------------------------------------------------------
 	///*
@@ -152,11 +157,12 @@ InitUserOption()
 BOOL		
 InitInfomation()
 {
+	TraceInfoStartup("InitInfomation begin");
 	// Debug Message
 	DEBUG_ADD("[ InitGame ]  Information");
 	
 	//---------------------------------------------------------------------
-	// 메모리 잡기
+	
 	//---------------------------------------------------------------------
 	SAFE_DELETE( g_pRegenTowerInfoManager );
 	SAFE_DELETE( g_pQuestInfoManager );
@@ -203,13 +209,14 @@ InitInfomation()
 	SAFE_DELETE( g_pHelpDisplayer );
 	SAFE_DELETE( g_pLevelNameTable );
 	SAFE_DELETE( g_pMonsterNameTable );
+	TraceInfoStartup("InitInfomation old managers deleted");
 
 	if (g_pKeyAccelerator==NULL)
 	{
 		g_pKeyAccelerator = new KeyAccelerator;
 		g_pKeyAccelerator->Init( MAX_ACCELERATOR );
-		SetDefaultAccelerator();		// 일단은..
-		//g_pKeyAccelerator->LoadFromFile( ) 이 나을 듯..
+		SetDefaultAccelerator();		
+		
 	}
 
 	if (g_pWarManager == NULL)
@@ -251,7 +258,7 @@ InitInfomation()
 	{
 		g_pGuildInfoMapper = new MGuildInfoMapper;
 
-		// 이 화일은 없을 수도 있다.
+		
 		std::ifstream guildInfoFile(g_pFileDef->getProperty("FILE_INFO_GUILD_INFO_MAPPER").c_str(), std::ios::binary);
 
 		if (guildInfoFile.is_open())
@@ -444,6 +451,7 @@ InitInfomation()
 	{
 		g_pMonsterNameTable = new MonsterNameTable;
 	}
+	TraceInfoStartup("InitInfomation managers allocated");
 
 	if (g_pFameInfoTable == NULL)
 	{
@@ -457,46 +465,52 @@ InitInfomation()
 
 	if( g_pRegenTowerInfoManager == NULL )
 	{
+		TraceInfoStartup("before LoadRegenTowerInfo");
 		g_pRegenTowerInfoManager = new RegenTowerInfoManager();
 		if( g_pRegenTowerInfoManager->LoadRegenTowerInfo() == false )
 		{
 			MessageBox(NULL,"Cannot Open RTI File","Error",MB_OK);
 			return FALSE;			
 		}
+		TraceInfoStartup("LoadRegenTowerInfo OK");
 	}
 
 
 	//int i;
 	//---------------------------------------------------------------------
 	//
-	//			Global 정보 설정
+	
 	//
 	//---------------------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Information - PacketItemTable");
 
 	InitPacketItemTable();
+	TraceInfoStartup("packet item table initialized");
 
 	//---------------------------------------------------------------------
 	//
-	//          class에 있는 정보 설정..
+	
 	//
 	//---------------------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Information - InitMoveTable");
 	
 	MCreature::InitMoveTable();
+	TraceInfoStartup("move table initialized");
 
 	DEBUG_ADD("[ InitGame ]  Information - UIDialog-Init");
 	
 	g_pUIDialog->Init();
+	TraceInfoStartup("ui dialog initialized");
 
 	//---------------------------------------------------------------------
 	//
-	//      EffectGenerator 생성
+	
 	//
 	//---------------------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Information - EffectGenerator");
 	
 	(*g_pEffectGeneratorTable).Init();
+	TraceInfoStartup("effect generator initialized");
 
 	//---------------------------------------------------------------------
 	//
@@ -510,9 +524,10 @@ InitInfomation()
 	std::ifstream chatInfoFile2;//(g_pFileDef->getProperty("FILE_INFO_USINGCOLORSET").c_str(), ios::binary);
 	if (!FileOpenBinary(g_pFileDef->getProperty("FILE_INFO_CHAT").c_str(), chatInfoFile2))
 		return FALSE;
-	chatInfoFile2.close();		// file체크용. - -;
+	chatInfoFile2.close();		
 
 	g_pChatManager->LoadFromFile(g_pFileDef->getProperty("FILE_INFO_CHAT").c_str());
+	TraceInfoStartup("chat manager loaded");
 	
 	//---------------------------------------------------------------------
 	//
@@ -538,6 +553,7 @@ InitInfomation()
 		return FALSE;
 	g_pHelpStringTable->LoadFromFile( helpStringTableFile );
 	helpStringTableFile.close();
+	TraceInfoStartup("help strings loaded");
 	
 	
 	//---------------------------------------------------------------------
@@ -565,11 +581,12 @@ InitInfomation()
 		return FALSE;
 	g_pMonsterNameTable->LoadFromFile( MonsterNameTableFile );
 	MonsterNameTableFile.close();
+	TraceInfoStartup("name tables loaded");
 	
 
 	//---------------------------------------------------------------------
 	//
-	//          UsingColor 정보 생성
+	
 	//
 	//---------------------------------------------------------------------
 	/*
@@ -612,6 +629,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pUsingColorSetTable).LoadFromFile(usingColorSetTable2);
 	usingColorSetTable2.close();
+	TraceInfoStartup("using color set loaded");
 
 
 	//------------------------------------------------
@@ -647,6 +665,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pZoneTable).LoadFromFile(zoneTable2);
 	zoneTable2.close();
+	TraceInfoStartup("sound music zone tables loaded");
 
 	
 	//------------------------------------------------
@@ -658,14 +677,16 @@ InitInfomation()
 		return FALSE;
 	(*g_pItemTable).LoadFromFile(itemTable2);
 	itemTable2.close();
+	TraceInfoStartup("item table loaded");
 
 	DEBUG_ADD("[ InitGame ]  Information - ItemOptionTable");
 
 	std::ifstream itemOptionTable2(g_pFileDef->getProperty("FILE_INFO_ITEMOPTION").c_str(), ios::binary);
 	(*g_pItemOptionTable).LoadFromFile( itemOptionTable2 );
 	itemOptionTable2.close();
+	TraceInfoStartup("item option table loaded");
 
-	// 0을 추가한다.
+	
 	/*
 	ITEMOPTION_TABLE ItemOptionTable;
 	ItemOptionTable.Init( (*g_pItemOptionTable).GetSize()+1 );
@@ -689,7 +710,7 @@ InitInfomation()
 
 	//---------------------------------------------------------------------
 	//
-	//    InteractionObjectTable에 대한 정보 설정
+	
 	//
 	//---------------------------------------------------------------------
 	/*
@@ -723,6 +744,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pInteractionObjectTable).LoadFromFile(interactionObjectTable2);
 	interactionObjectTable2.close();
+	TraceInfoStartup("interaction object table loaded");
 
 
 	//------------------------------------------------
@@ -733,6 +755,7 @@ InitInfomation()
 		return FALSE;
 	g_pCreatureSpriteTable->LoadFromFile(creatureSpriteTable2);
 	creatureSpriteTable2.close();
+	TraceInfoStartup("creature sprite table loaded");
 
 	//------------------------------------------------
 	// Addon SpriteTable
@@ -765,6 +788,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pCreatureTable).LoadFromFile(creatureTable2);
 	creatureTable2.close();
+	TraceInfoStartup("creature table loaded");
 
 
 	//---------------------------------------------------------------------
@@ -782,6 +806,7 @@ InitInfomation()
 		return FALSE;
 	g_pCreatureSpriteTypeMapper->LoadFromFile(CreatureSpriteTypeMapper2);
 	CreatureSpriteTypeMapper2.close();
+	TraceInfoStartup("creature sprite mapper loaded");
 
 
 	//------------------------------------------------
@@ -794,6 +819,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pShopTemplateTable).LoadFromFile(ShopTemplateTable2);
 	ShopTemplateTable2.close();
+	TraceInfoStartup("shop template loaded");
 
 
 	//------------------------------------------------
@@ -806,10 +832,11 @@ InitInfomation()
 		return FALSE;
 	(*g_pNPCTable).LoadFromFile(NPCTable2);
 	NPCTable2.close();
+	TraceInfoStartup("npc table loaded");
 
 	//---------------------------------------------------------------------
 	//
-	//    NPC Script에 대한 정보 설정
+	
 	//
 	//---------------------------------------------------------------------	
 
@@ -823,6 +850,7 @@ InitInfomation()
 		return FALSE;
 	g_pNPCScriptTable->LoadFromFile(NPCScriptTable);
 	NPCScriptTable.close();
+	TraceInfoStartup("npc script table loaded");
 
 
 	//------------------------------------------------
@@ -835,6 +863,7 @@ InitInfomation()
 		return FALSE;
 	(*g_pEffectSpriteTypeTable).LoadFromFile(effectSpriteTypeTable2);
 	effectSpriteTypeTable2.close();
+	TraceInfoStartup("effect sprite type table loaded");
 
 	// DEBUG: Verify table loaded correctly
 	int tableSize = (*g_pEffectSpriteTypeTable).GetSize();
@@ -873,6 +902,7 @@ InitInfomation()
 		return FALSE;
 	g_pActionEffectSpriteTypeTable->LoadFromFile(actionEffectSpriteTypeTable2);
 	actionEffectSpriteTypeTable2.close();
+	TraceInfoStartup("action effect sprite type table loaded");
 
 
 
@@ -886,12 +916,13 @@ InitInfomation()
 		return FALSE;
 	(*g_pEffectStatusTable).LoadFromFile(EffectStatusTable2);
 	EffectStatusTable2.close();
+	TraceInfoStartup("effect status table loaded");
 
 
 
 	//---------------------------------------------------------------------
 	//
-	//    SkillInfoTable에 대한 정보 설정
+	
 	//
 	//---------------------------------------------------------------------
 	//------------------------------------------------
@@ -904,9 +935,10 @@ InitInfomation()
 		return FALSE;
 	g_pSkillInfoTable->LoadFromFile(skillTable2);
 	skillTable2.close();
+	TraceInfoStartup("skill table loaded");
 
 	//------------------------------------------------
-	// Server 정보를 loading한다.
+	
 	//------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Information - ServerSkillInfo");
 
@@ -916,10 +948,11 @@ InitInfomation()
 
 	g_pSkillInfoTable->LoadFromFileServerSkillInfo( serverSkillInfoFile );
 	serverSkillInfoFile.close();
+	TraceInfoStartup("server skill info loaded");
 
 	//---------------------------------------------------------------------
 	//
-	//    RankBonusTable에 대한 정보 설정
+	
 	//
 	//---------------------------------------------------------------------
 	DEBUG_ADD("[ InitGame ]  Information - rankBonusInfoFile");
@@ -938,11 +971,12 @@ InitInfomation()
 
 	g_pFameInfoTable->LoadFromFile( fameInfoFile );
 	fameInfoFile.close();
+	TraceInfoStartup("rank and fame loaded");
 
 
 	//---------------------------------------------------------------------
 	//
-	//    ExperienceTable에 대한 정보 설정
+	
 	//
 	//---------------------------------------------------------------------
 	//------------------------------------------------
@@ -1051,6 +1085,7 @@ InitInfomation()
 	
 	DEBUG_ADD("[ InitGame ]  Information - Ousters Rank");
 	g_pExperienceTable->LoadFromFileAdvanceMent(advancementExp);
+	TraceInfoStartup("experience tables loaded");
 	
 
 	petExpFile.close();
@@ -1075,6 +1110,7 @@ InitInfomation()
 		return FALSE;
 	g_pActionInfoTable->LoadFromFile(actionInfoFile2);
 	actionInfoFile2.close();
+	TraceInfoStartup("action info loaded");
 
 	DEBUG_ADD("[ InitGame ]  Information - MonsterKillQuest");
 	std::ifstream MonsterKillQuestInfoFile;
@@ -1086,6 +1122,7 @@ InitInfomation()
 	g_pQuestInfoManager->LoadFromFile( MonsterKillQuestInfoFile );
 	MonsterKillQuestInfoFile.close();
 	DEBUG_ADD("[ InitGame ]  Information - All Clear");
+	TraceInfoStartup("InitInfomation OK");
 
 	return TRUE;
 }

@@ -345,7 +345,7 @@ void OustersSummonItemLoader::load(Creature* pCreature)
                     pInventory = pOusters->getInventory();
                     pStash = pOusters->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 if (storage == STORAGE_INVENTORY) {
                     if (pInventory->canAddingEx(x, y, pOustersSummonItem)) {

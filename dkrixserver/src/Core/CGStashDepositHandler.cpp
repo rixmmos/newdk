@@ -35,9 +35,9 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
     Gold_t amount = pPacket->getAmount();
 
     if (!pPC->checkGoldIntegrity() || !pPC->checkStashGoldIntegrity()) {
-        filelog("GoldBug.log", "CGStashDeposit : 돈이 DB랑 안 맞는다! [%s:%s]", pGamePlayer->getID().c_str(),
+        filelog("GoldBug.log", "CGStashDeposit :  DB  ! [%s:%s]", pGamePlayer->getID().c_str(),
                 pPC->getName().c_str());
-        throw DisconnectException("CGStashDeposit : 돈이 DB랑 안 맞는다!");
+        throw DisconnectException("CGStashDeposit :  DB  !");
     }
 
 
@@ -50,8 +50,8 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
         if (pSlayer->getGold() < amount)
             return;
 
-        // 보관함에 들어갈 수 있는 돈보다 많은 양의 돈을 넣으려 한다면
-        // 일부만 넣고, 나머지는 걍 플레이어에게 남겨놓아야 한다.
+        
+        
         if (pSlayer->getStashGold() + amount > MAX_MONEY) {
             Gold_t margin = MAX_MONEY - pSlayer->getStashGold();
             // pSlayer->setGoldEx(pSlayer->getGold() - margin);

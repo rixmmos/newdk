@@ -1419,7 +1419,8 @@ bool	C_VS_UI_COMPUTER::LoadTree(const char* szFilename)
 
 //	ZeroMemory(szLine, dSTRING_LEN);
 
-	m_computer_tree_file.Open(szFilename);
+	if( !m_computer_tree_file.Open(szFilename) )
+		return false;
 
 	XMLTree computerTree;
 	XMLParser parser;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : OptionInfo.h
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +17,7 @@
 #include "Types.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 옵션 레벨의 맥스
+
 //////////////////////////////////////////////////////////////////////////////
 const uint OPTION_LEVEL_MAX = 100;
 const uint GAMBLE_OPTION_LEVEL_MAX = 100;
@@ -28,7 +28,7 @@ class Vampire;
 class Ousters;
 
 //////////////////////////////////////////////////////////////////////////////
-// 옵션의 적용 부위 종류
+
 //////////////////////////////////////////////////////////////////////////////
 enum OptionClass {
     OPTION_STR = 0,       // increase STR
@@ -88,12 +88,12 @@ const string OptionClass2String[] = {
     "OPTION_MAX"};
 
 enum OptionGroup {
-    OPTION_GROUP_ATTR = 0, // 능력치 관련 옵션
-    OPTION_GROUP_STAT,     // 보조능력치 관련 옵션
-    OPTION_GROUP_SPECIAL,  // 특수 옵션 (...?)
-    OPTION_GROUP_RESIST,   // 저항 옵션
-    OPTION_GROUP_ETC,      // 기타 옵션
-    OPTION_GROUP_NOT       // 그룹 없음
+    OPTION_GROUP_ATTR = 0, 
+    OPTION_GROUP_STAT,     
+    OPTION_GROUP_SPECIAL,  
+    OPTION_GROUP_RESIST,   
+    OPTION_GROUP_ETC,      
+    OPTION_GROUP_NOT       
 };
 
 class RareOptionUpgradeInfo {
@@ -183,8 +183,8 @@ private:
     OptionClass m_OptionClass;
     string m_Name;
     string m_HName;
-    int m_Level;      // 중요도
-    int m_TotalGrade; // 옵션의 총 단계 수
+    int m_Level;      
+    int m_TotalGrade; 
     OptionGroup m_OptionGroup;
 };
 
@@ -314,7 +314,7 @@ public:
         m_GambleLevel = level;
     }
 
-    // 이전 단계의 옵션으로 downgrade할때 필요한 정보
+    
     OptionType_t getPreviousType(void) const {
         return m_PreviousOptionType;
     }
@@ -322,7 +322,7 @@ public:
         m_PreviousOptionType = type;
     }
 
-    // 다음 단계의 옵션으로 upgrade할때 필요한 정보
+    
     OptionType_t getUpgradeType(void) const {
         return m_UpgradeOptionType;
     }
@@ -351,18 +351,18 @@ public:
         m_UpgradeCrashPercent = per;
     }
 
-    // 다음 단계의 옵션으로 upgrade가 가능한가?
+    
     bool isUpgradePossible() const {
         return m_UpgradeOptionType != 0 && m_UpgradeRatio != 0;
     }
 
-    // 다음 단계의 옵션으로 upgrade가 성공했나?
+    
     bool isUpgradeSucceed() const;
 
-    // 다음 단계의 옵션으로 upgrade가 성공했나?
+    
     bool isUpgradeSecondSucceed() const;
 
-    // 다음 단계의 옵션으로 upgrade 하다가 실패해서 item이 부서졌나?
+    
     bool isUpgradeCrash() const;
 
     Ratio_t getNextOptionRatio(void) const {
@@ -385,38 +385,38 @@ public:
     ///// Member data /////
 
 private:
-    OptionType_t m_OptionType; // 옵션 타입
-    string m_Name;             // 영문 이름
-    string m_HName;            // 한글 이름
+    OptionType_t m_OptionType; 
+    string m_Name;             
+    string m_HName;            
     string m_Nickname;         // Nickname
-    OptionClass m_OptionClass; // 옵션의 종류
-    int m_PlusPoint;           // 상승 수치
-    int m_PriceMultiplier;     // 값 상승 폭
-    int m_ReqSTR;              // 필요한 STR의 상승 폭
-    int m_ReqDEX;              // 필요한 DEX의 상승 폭
-    int m_ReqINT;              // 필요한 INT의 상승 폭
-    int m_ReqSum;              // 필요한 능력치 총합의 상승 폭
-    int m_ReqLevel;            // 필요한 레벨의 상승 폭
-    int m_Level;               // 옵션의 레벨
-    Color_t m_Color;           // 옵션 색깔
-    Ratio_t m_Ratio;           // 옵션 나오는 확률
+    OptionClass m_OptionClass; 
+    int m_PlusPoint;           
+    int m_PriceMultiplier;     
+    int m_ReqSTR;              
+    int m_ReqDEX;              
+    int m_ReqINT;              
+    int m_ReqSum;              
+    int m_ReqLevel;            
+    int m_Level;               
+    Color_t m_Color;           
+    Ratio_t m_Ratio;           
 
-    int m_GambleLevel; // 옵션의 갬블 레벨
+    int m_GambleLevel; 
 
-    // 다음 단계의 옵션으로 upgrade할때 필요한 정보
-    OptionType_t m_PreviousOptionType; // 이전 단계의 옵션 타입
-    OptionType_t m_UpgradeOptionType;  // 다음 단계의 옵션 타입
-    Ratio_t m_UpgradeRatio;            // upgrade가 성공할 확률 = 1/m_UpgradeRatio
-    Ratio_t m_UpgradeSecondRatio;      // 블루 드롭 2로 업그레이드가 성공할 확률
-    int m_UpgradeCrashPercent;         // upgrade가 실패해서 부서질 확률 = m_UpgradeCrashPercent%
-    Ratio_t m_NextOptionRatio;         // 다음 옵션이 붙을 확률
+    
+    OptionType_t m_PreviousOptionType; 
+    OptionType_t m_UpgradeOptionType;  
+    Ratio_t m_UpgradeRatio;            
+    Ratio_t m_UpgradeSecondRatio;      
+    int m_UpgradeCrashPercent;         
+    Ratio_t m_NextOptionRatio;         
 
-    int m_Grade; // 같은 클래스 내에서 옵션의 단수
+    int m_Grade; 
 };
 
 //////////////////////////////////////////////////////////////////////////////
 // class OptionInfoSet
-// 각각의 옵션 클래스마다 레벨 별로 그 옵션 타입을 저장하고 있는 클래스.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class OptionInfoSet {
@@ -496,7 +496,7 @@ public:
 
     void addOptionInfo(OptionInfo* pOptionInfo);
 
-    // gamble 관련
+    
     void addGambleOption(Item::ItemClass itemClass, uint level, OptionType_t optionType);
     const vector<OptionType_t>& getPossibleGambleOptionVector(Item::ItemClass itemClass, uint level) {
         return m_GambleOptions[itemClass][level];
@@ -505,7 +505,7 @@ public:
         return m_TotalGambleRatio[itemClass][level];
     }
 
-    // rare enchant 관련
+    
     int getRareUpgradeRatio(OptionType_t optionType, bool success);
     const OptionClassInfo* getOptionClassInfo(OptionClass oc) {
         return m_OptionClassInfos[oc];

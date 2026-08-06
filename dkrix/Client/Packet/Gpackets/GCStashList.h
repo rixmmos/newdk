@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCStashList.h 
-// Written By  : 김성민
+
 // Description : 
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_STASH_LIST_H__
 #define __GC_STASH_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include <list>
 
 typedef struct _STASHITEM
@@ -114,16 +114,16 @@ public :
 	{ 
 		PacketSize_t size = 0;
 		PacketSize_t unit_size = 
-			szBYTE*2 +                  // rack과 인덱스
-			//sizeof(STASHITEM) +         // 실제 정보
+			szBYTE*2 +                  
+			
 			STASHITEM::getPacketMaxSize() +
-			szBYTE +                    // 벨트에 들어있는 아이템의 숫자
-			SubItemInfo::getSize()* 8; // 벨트 아이템(8개가 맥스)
+			szBYTE +                    
+			SubItemInfo::getSize()* 8; 
 		
-		size += szBYTE; // 보관함의 갯수
-		size += szBYTE; // 총 아이템의 숫자
-		size += unit_size* STASH_RACK_MAX* STASH_INDEX_MAX; // 아이템이 꽉 차 있다면...
-		size += szGold; // 돈
+		size += szBYTE; 
+		size += szBYTE; 
+		size += unit_size* STASH_RACK_MAX* STASH_INDEX_MAX; 
+		size += szGold; 
 
 		return size;
 	}

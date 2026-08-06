@@ -2,9 +2,9 @@
 //
 //	created:	2003/11/05   14:23
 //	filename: 	MHelpMessageManager.h
-//	author:		최석민
+
 //	
-//	purpose:	메일 시스템에서 도움말 메세지를 사용하기 위한 클래스
+
 //
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ public:
 	MString	m_strKeyword;
 	MString	m_strEvent;
 	
-	// 종족별로 내용이 다른 변수들
+	
 	MString			m_strTitle[RACE_MAX];
 	int				m_iLevelMax[RACE_MAX];
 	int				m_iLevelLow[RACE_MAX];
@@ -89,7 +89,7 @@ public:
 
 	virtual ~MHelpMessageManager();
 
-	// TODO : 이미지를 넣어주세요
+	
 
 	// SENDER
 	const MString&	getSender(int senderIndex) const	{ return m_SenderVector[senderIndex]; }
@@ -104,14 +104,14 @@ public:
 	void				updateMessage(int messageIndex, MHelpMessage& message) { m_MessageVector[messageIndex] = message; }
 	size_t				getMessageSize() const				{ return m_MessageVector.size(); }
 
-	int							m_KeyCnt;; // 갯수
-	int							m_SenderCnt;; // 갯수
-	// 파일관련 함수
+	int							m_KeyCnt;; 
+	int							m_SenderCnt;; 
+	
 	void SaveToFile(std::ofstream &file);
 	void LoadFromFile(std::ifstream &file);
 	void SaveToFile(const char * filename);
 	void LoadFromFile(const char * filename);	
-	CRarFile					m_pack_file;  // rpk  파일 
+	CRarFile					m_pack_file;  
 	bool LoadHelpMessageRpk(const char *helprpkfilename);
 };
 

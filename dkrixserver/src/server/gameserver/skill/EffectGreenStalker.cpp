@@ -62,8 +62,8 @@ void EffectGreenStalker::affect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 기술 사용자를 가져온다.
-    // !! 이미 존을 나갔을 수 있으므로 NULL 이 될 수 있다.
+    
+    
     // by bezz. 2003.1.4
     Creature* pCastCreature = pZone->getCreature(m_UserObjectID);
 
@@ -75,9 +75,9 @@ void EffectGreenStalker::affect(Creature* pCreature)
 
     int PoisonDamage = computeMagicDamage(pCreature, m_Damage, SKILL_GREEN_STALKER, m_bVampire, pCastCreature);
 
-    // 무적상태 체크. by sigi. 2002.9.5
+    
     if (canAttack(pCastCreature, pCreature) && !pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) {
-        // 슬레이어일 경우에만 독 데미지가 존재한다.
+        
         if (pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
             Assert(pSlayer != NULL);
@@ -115,7 +115,7 @@ void EffectGreenStalker::affect(Creature* pCreature)
             ::setDamage(pMonster, PoisonDamage, pCastCreature, SKILL_GREEN_STALKER);
         }
 
-        // m_CasterName이 pCreature를 죽인 경우의 KillCount 처리
+        
         // by sigi. 2002.9.9
         /*		if (pCreature->isDead())
                 {
@@ -156,13 +156,13 @@ void EffectGreenStalker::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 크리쳐에게서 플래그를 제거한다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_GREEN_STALKER);
 
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 존에서 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_GREEN_STALKER);

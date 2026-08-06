@@ -11,6 +11,27 @@
 
 #define PROGRESS_MAX 25
 extern	BOOL g_MyFull;
+extern RECT g_GameRect;
+
+static int GetProgressLayoutWidth()
+{
+	return g_MyFull ? 1024 : 800;
+}
+
+static int GetProgressLayoutHeight()
+{
+	return g_MyFull ? 768 : 600;
+}
+
+static int GetProgressLayoutX()
+{
+	return max(0, (g_GameRect.right - GetProgressLayoutWidth()) / 2);
+}
+
+static int GetProgressLayoutY()
+{
+	return max(0, (g_GameRect.bottom - GetProgressLayoutHeight()) / 2);
+}
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_PROGRESS
@@ -87,7 +108,7 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 		}
 
 		m_Event_Num = (rand() % m_pC_event_progress->GetSize())/2;
-		Set(0, 0, m_pC_event_progress->GetWidth(), m_pC_event_progress->GetHeight());
+		Set(GetProgressLayoutX(), GetProgressLayoutY(), m_pC_event_progress->GetWidth(), m_pC_event_progress->GetHeight());
 	}
 	else
 	{
@@ -189,7 +210,7 @@ C_VS_UI_PROGRESS::C_VS_UI_PROGRESS()
 		SetDescTitle(400, 120, title_color, title_pi);
 		SetDescTitle(Monster[num]);
 
-		Set(0, 0, (*m_pC_progress)[BACK].GetWidth(), (*m_pC_progress)[BACK].GetHeight());
+		Set(GetProgressLayoutX(), GetProgressLayoutY(), (*m_pC_progress)[BACK].GetWidth(), (*m_pC_progress)[BACK].GetHeight());
 	}
 	
 
@@ -397,7 +418,7 @@ void C_VS_UI_PROGRESS::Show()
 
 	gpC_base->m_p_DDSurface_back->FillSurface(0);
 
-	POINT p = {0, 0};
+	POINT p = {x, y};
 
 	if(gpC_base->m_p_DDSurface_back->Lock())
 	{
@@ -405,9 +426,9 @@ void C_VS_UI_PROGRESS::Show()
 		{
 
 			Rect rect;
-			m_pC_event_progress->BltLocked(0, 0, (m_Event_Num*2));
+			m_pC_event_progress->BltLocked(x, y, (m_Event_Num*2));
 			rect.Set(0, m_pC_event_progress->GetHeight(m_Event_Num)*(100-m_percent)/100, m_pC_event_progress->GetWidth(m_Event_Num), m_pC_event_progress->GetHeight(m_Event_Num)*(m_percent)/100);
-			m_pC_event_progress->BltLockedClip(0, 0, rect, (m_Event_Num*2)+1);
+			m_pC_event_progress->BltLockedClip(x, y, rect, (m_Event_Num*2)+1);
 		}
 		else
 		{
@@ -415,8 +436,8 @@ void C_VS_UI_PROGRESS::Show()
 			gpC_base->m_p_DDSurface_back->BltSprite(&p, &(*m_pC_progress)[BACK]);
 			
 
-			p.x = 200 - (*m_pC_character)[0].GetWidth()/2;
-			p.y = 300 - (*m_pC_character)[0].GetHeight()/2;
+			p.x = x + 200 - (*m_pC_character)[0].GetWidth()/2;
+			p.y = y + 300 - (*m_pC_character)[0].GetHeight()/2;
 			gpC_base->m_p_DDSurface_back->s_Value1 = m_percent*32/100;
 			
 			gpC_base->m_p_DDSurface_back->SetEffect( CSpriteSurface::EFFECT_GRAY_SCALE );//EFFECT_NET);//
@@ -433,13 +454,13 @@ void C_VS_UI_PROGRESS::Show()
 			// add by Sonic 2006.9.26
 			if(g_MyFull)
 			{
-				rt.right = min(rect.x+rect.w, 1024-p.x);
-				rt.bottom = min(rect.y+rect.h, 768-p.y);
+				rt.right = min(rect.x+rect.w, g_GameRect.right-p.x);
+				rt.bottom = min(rect.y+rect.h, g_GameRect.bottom-p.y);
 			}
 			else
 			{
-				rt.right = min(rect.x+rect.w, 800-p.x);
-				rt.bottom = min(rect.y+rect.h, 600-p.y);
+				rt.right = min(rect.x+rect.w, g_GameRect.right-p.x);
+				rt.bottom = min(rect.y+rect.h, g_GameRect.bottom-p.y);
 			}
 			// end
 			if(rt.left < rt.right && rt.top < rt.bottom)
@@ -456,13 +477,13 @@ void C_VS_UI_PROGRESS::Show()
 			// add by Sonic 2006.9.26
 			if(g_MyFull)
 			{
-				rt.right = min(rect.x+rect.w, 1024-p.x);
-				rt.bottom = min(rect.y+rect.h, 768-p.y);
+				rt.right = min(rect.x+rect.w, g_GameRect.right-p.x);
+				rt.bottom = min(rect.y+rect.h, g_GameRect.bottom-p.y);
 			}
 			else
 			{
-				rt.right = min(rect.x+rect.w, 800-p.x);
-				rt.bottom = min(rect.y+rect.h, 600-p.y);
+				rt.right = min(rect.x+rect.w, g_GameRect.right-p.x);
+				rt.bottom = min(rect.y+rect.h, g_GameRect.bottom-p.y);
 			}
 			// end
 			if(rt.left < rt.right && rt.top < rt.bottom)
@@ -475,7 +496,7 @@ void C_VS_UI_PROGRESS::Show()
 			}
 			
 			
-			p.x = 200 - (*m_pC_progress)[PROGRESS_BAR].GetWidth()/2;
+			p.x = x + 200 - (*m_pC_progress)[PROGRESS_BAR].GetWidth()/2;
 			p.y += (*m_pC_character)[0].GetHeight()*(100-m_percent)/100-(*m_pC_progress)[PROGRESS_BAR].GetHeight()/2;
 			gpC_base->m_p_DDSurface_back->SetEffect( CSpriteSurface::EFFECT_SCREEN );
 			gpC_base->m_p_DDSurface_back->BltSpriteEffect(&p, &(*m_pC_progress)[PROGRESS_BAR]);
@@ -485,24 +506,24 @@ void C_VS_UI_PROGRESS::Show()
 			// add by Sonic 2006.9.26
 			if(g_MyFull)
 			{
-				p.x = 1024 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()-10;
-				p.y = 768 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()-45;
+				p.x = x + 1024 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()-10;
+				p.y = y + 768 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()-45;
 				gpC_base->m_p_DDSurface_back->SetEffect( CSpriteSurface::EFFECT_GRAY_SCALE_VARIOUS );
 				gpC_base->m_p_DDSurface_back->BltSpriteEffect(&p, &(*m_pC_progress)[CHAR_NAME_BACK]);
 				
-				p.x = 1024 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()/2 -(*m_pC_character)[1].GetWidth()/2-10;
-				p.y = 768 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()/2 -(*m_pC_character)[1].GetHeight()/2-25;
+				p.x = x + 1024 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()/2 -(*m_pC_character)[1].GetWidth()/2-10;
+				p.y = y + 768 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()/2 -(*m_pC_character)[1].GetHeight()/2-25;
 				gpC_base->m_p_DDSurface_back->BltSprite(&p, &(*m_pC_character)[1]);
 			}
 			else
 			{
-				p.x = 800 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()-10;
-				p.y = 600 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()-45;
+				p.x = x + 800 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()-10;
+				p.y = y + 600 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()-45;
 				gpC_base->m_p_DDSurface_back->SetEffect( CSpriteSurface::EFFECT_GRAY_SCALE_VARIOUS );
 				gpC_base->m_p_DDSurface_back->BltSpriteEffect(&p, &(*m_pC_progress)[CHAR_NAME_BACK]);
 				
-				p.x = 800 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()/2 -(*m_pC_character)[1].GetWidth()/2-10;
-				p.y = 600 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()/2 -(*m_pC_character)[1].GetHeight()/2-25;
+				p.x = x + 800 - (*m_pC_progress)[CHAR_NAME_BACK].GetWidth()/2 -(*m_pC_character)[1].GetWidth()/2-10;
+				p.y = y + 600 - (*m_pC_progress)[CHAR_NAME_BACK].GetHeight()/2 -(*m_pC_character)[1].GetHeight()/2-25;
 				gpC_base->m_p_DDSurface_back->BltSprite(&p, &(*m_pC_character)[1]);
 
 			}
@@ -552,7 +573,7 @@ void C_VS_UI_PROGRESS::Show()
 	}
 	name += ")";
 
-	g_PrintColorStr(400 - g_GetStringWidth(name.c_str(), gpC_base->m_dialog_menu_pi.hfont)/2, 520, name.c_str(), gpC_base->m_desc_menu_pi, focus_color);//by larosel
+	g_PrintColorStr(x+400 - g_GetStringWidth(name.c_str(), gpC_base->m_dialog_menu_pi.hfont)/2, y+520, name.c_str(), gpC_base->m_desc_menu_pi, focus_color);//by larosel
 
 	if(m_pC_event_progress == NULL)
 	{

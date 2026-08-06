@@ -103,7 +103,7 @@ void FameLimitInfoManager::load()
                 throw Error("There is no data in FameLimitInfo Table");
             }
 
-            // 전체 갯수를 세팅한다.
+            
             pResult->next();
 
             int count = pResult->getInt(1) + 1;

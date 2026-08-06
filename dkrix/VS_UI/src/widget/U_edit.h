@@ -86,6 +86,7 @@ public:
     int m_AbsWidth;
     int m_MaxWidth;
     bool m_bPasswordMode;
+    bool m_bAsciiLettersOnly;
     bool m_bAcquired;
     PrintInfo m_PrintInfo;
     unsigned long m_CursorColor;
@@ -109,9 +110,7 @@ public:
     void EraseAll() { m_Editor.EraseAll(); }
     void EraseCharacterBegin() { m_Editor.EraseCharacterBegin(); }
     void SetByteLimit(int limit) { m_Editor.SetByteLimit(limit); }
-    void KeyboardControl(unsigned int message, unsigned int key, long extra) {
-        m_Editor.KeyboardControl(message, key, extra);
-    }
+    void KeyboardControl(unsigned int message, unsigned int key, long extra);
     const char* GetString() const { return m_Editor.GetString(); }
 
     // Compatibility method: return const char_t* (wide string) for old code
@@ -126,11 +125,12 @@ public:
     void EndCursor() { m_Editor.EndCursor(); }
 
     // Set text color
-    void SetInputStringColor(unsigned long rgb) { m_CursorColor = rgb; }  // Use cursor color for text color
+    void SetInputStringColor(unsigned long rgb) { m_PrintInfo.text_color = rgb; m_CursorColor = rgb; }
 
     // Editor mode (stub for compatibility)
     void SetEditorMode(int gap, int height = 0) { /* Stub: not needed for SDL implementation */ }
     void SetDigitOnlyMode(bool enable) { /* Stub: not needed for SDL implementation */ }
+    void SetAsciiLettersOnlyMode(bool enable) { m_bAsciiLettersOnly = enable; }
 
     void SetPosition(int x, int y);
     void SetAbsWidth(int width);

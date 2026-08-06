@@ -27,11 +27,11 @@ PlayerManager::PlayerManager()
     : m_nPlayers(0) {
     __BEGIN_TRY
 
-    // 플레이어 포인터 배열을 NULL 로 초기화한다.
+    
     for (uint i = 0; i < nMaxPlayers; i++)
         m_pPlayers[i] = NULL;
 
-    // 플레이어 포인터 배열을 NULL 로 초기화한다.
+    
     for (uint i = 0; i < nMaxPlayers; i++)
         m_pCopyPlayers[i] = NULL;
 
@@ -49,7 +49,7 @@ PlayerManager::~PlayerManager()
 
     for (uint i = 0; i < nMaxPlayers; i++) {
         if (m_pPlayers[i] != NULL) {
-            // 플레이어 객체를 삭제하면, destructor에서 연결을 종료한다.
+            
             delete m_pPlayers[i];
             m_pPlayers[i] = NULL;
         }
@@ -81,7 +81,7 @@ void PlayerManager::broadcastPacket(Packet* pPacket)
 
 
 //////////////////////////////////////////////////////////////////////
-// 특정 플레이어를 매니저에 추가한다.
+
 //////////////////////////////////////////////////////////////////////
 void PlayerManager::addPlayer(Player* pPlayer) {
     __BEGIN_TRY
@@ -101,10 +101,10 @@ void PlayerManager::addPlayer(Player* pPlayer) {
         throw DuplicatedException("socket descriptor duplicated");
     }
 
-    // 괜찮으면 포인터를 대입한다.
+    
     m_pPlayers[fd] = pPlayer;
 
-    // 플레이어 숫자를 증가시킨다.
+    
     m_nPlayers++;
 
     __END_CATCH
@@ -112,8 +112,8 @@ void PlayerManager::addPlayer(Player* pPlayer) {
 
 
 //////////////////////////////////////////////////////////////////////
-// 특정 플레이어를 매니저에서 삭제한다.
-// 객체는 삭제하지 않으며, 슬랏만을 NULL로 만든다.
+
+
 //////////////////////////////////////////////////////////////////////
 void PlayerManager::deletePlayer(SOCKET fd) {
     __BEGIN_TRY
@@ -126,10 +126,10 @@ void PlayerManager::deletePlayer(SOCKET fd) {
     if (m_pPlayers[fd] == NULL)
         throw NoSuchElementException();
 
-    // 배열의 fd번째를 클리어한다.
+    
     m_pPlayers[fd] = NULL;
 
-    // 플레이어 숫자를 감소시킨다.
+    
     m_nPlayers--;
 
     __END_CATCH
@@ -137,7 +137,7 @@ void PlayerManager::deletePlayer(SOCKET fd) {
 
 
 //////////////////////////////////////////////////////////////////////
-// 특정 플레이어 객체를 가져온다.
+
 //////////////////////////////////////////////////////////////////////
 Player* PlayerManager::getPlayer(SOCKET fd) {
     __BEGIN_TRY
@@ -156,7 +156,7 @@ Player* PlayerManager::getPlayer(SOCKET fd) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// 플레이어를 복사한다.
+
 //////////////////////////////////////////////////////////////////////
 void PlayerManager::copyPlayers()
 

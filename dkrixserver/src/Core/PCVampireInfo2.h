@@ -28,22 +28,22 @@ public:
                + szBYTE + m_Name.size()      // Character name
                + szLevel                     // Level
                + szSex                       // Sex
-               + szColor * 2                 // ����
-               + szBYTE + szAlignment        // ����
-               + szAttr * 3 * 3              // �ɷ�ġ
+               + szColor * 2                 
+               + szBYTE + szAlignment        
+               + szAttr * 3 * 3              
                + szHP * 2                    // HP
-               + szRank + szRankExp          // ��� ����ġ
-               + szExp                       // ����ġ
+               + szRank + szRankExp          
+               + szExp                       
                + szFame                      // Fame
-               + szGold                      // ��
-               + szSight                     // �þ�
-               + szSkillType * 8             // �� Ű
-               + szSilver                    // �� Ű
-               + szBonus                     // ���ʽ�����Ʈ
-               + szGuildID                   // ��� ���̵�
-               + szBYTE + m_GuildName.size() // ��� �̸�
+               + szGold                      
+               + szSight                     
+               + szSkillType * 8             
+               + szSilver                    
+               + szBonus                     
+               + szGuildID                   
+               + szBYTE + m_GuildName.size() 
                + szGuildMemberRank           // guild member rank
-               + szBYTE                      // ����
+               + szBYTE                      
                + szuint + szLevel + szExp;
     }
 
@@ -52,22 +52,22 @@ public:
                + szBYTE + 20          // Character name
                + szLevel              // Level
                + szSex                // Sex
-               + szColor * 2          // ����
-               + szBYTE + szAlignment // ����
-               + szAttr * 3 * 3       // �ɷ�ġ
+               + szColor * 2          
+               + szBYTE + szAlignment 
+               + szAttr * 3 * 3       
                + szHP * 2             // HP
-               + szRank + szRankExp   // ��� ����ġ
-               + szExp                // ����ġ
+               + szRank + szRankExp   
+               + szExp                
                + szFame               // Fame
-               + szGold               // ��
-               + szSight              // �þ�
-               + szSkillType * 8      // �� Ű
-               + szSilver             // �� Ű
-               + szBonus              // ���ʽ�����Ʈ
-               + szGuildID            // ��� ���̵�
-               + szBYTE + 30          // ��� �̸�
+               + szGold               
+               + szSight              
+               + szSkillType * 8      
+               + szSilver             
+               + szBonus              
+               + szGuildID            
+               + szBYTE + 30          
                + szGuildMemberRank +  // guild member rank
-               +szBYTE                // ����
+               +szBYTE                
                + szuint + szLevel + szExp;
     }
 
@@ -324,7 +324,7 @@ private:
     // HP[0] = current hp, hp[1] == max hp
     HP_t m_HP[2];
 
-    // ���
+    
     Rank_t m_Rank;
     RankExp_t m_RankExp;
 
@@ -340,13 +340,13 @@ private:
     // Sight
     Sight_t m_Sight;
 
-    // ���ʽ� ����Ʈ
+    
     Bonus_t m_Bonus;
 
-    // �� Ű
+    
     SkillType_t m_HotKey[8];
 
-    // �ǹ� ������
+    
     Silver_t m_SilverDamage;
 
     // Competence

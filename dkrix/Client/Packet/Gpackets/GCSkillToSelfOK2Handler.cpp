@@ -22,7 +22,7 @@ throw ( ProtocolException , Error )
 		
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -30,7 +30,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -39,16 +39,16 @@ throw ( ProtocolException , Error )
 
 		//------------------------------------------------------
 		//
-		// Creature가 기술 사용 
+		
 		//
 		//------------------------------------------------------
 		if (pCreature != NULL)
 		{	
 			// [ TEST CODE ]
 			//
-			// 결과를 생성&저장해서 보내야 한다.
+			
 			//
-			// 누가(Player)가 스스로에게 SKill을 사용한 경우..
+			
 			// [ TEST CODE ]
 
 			int skillID = pPacket->getSkillType();
@@ -77,7 +77,7 @@ throw ( ProtocolException , Error )
 									delayFrame ) );
 
 			//------------------------------------------------------
-			// EffectStatus가 있다면 붙인다.
+			
 			//------------------------------------------------------
 			EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 			
@@ -90,13 +90,13 @@ throw ( ProtocolException , Error )
 
 			//------------------------------------------------------
 			//
-			// skill에 결과가 있으면 같이 적용 시킨다.
+			
 			//
 			//------------------------------------------------------
 			MActionResultNode* pActionResultNode = CreateActionResultNode(pCreature, skillID);
 
 			//------------------------------------------------------
-			// NULL이 아니면 같이 적용
+			
 			//------------------------------------------------------
 			if (pActionResultNode!=NULL)
 			{
@@ -106,7 +106,7 @@ throw ( ProtocolException , Error )
 			//Duration_t	m_Duration;
 			pCreature->PacketSpecialActionToSelf( 
 									pPacket->getSkillType(),
-									pResult	// 결과
+									pResult	
 				);
 		}
 	

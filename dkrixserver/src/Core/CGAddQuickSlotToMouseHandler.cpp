@@ -59,7 +59,7 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
 
             Item* pSlotItem = pBeltInventory->getItem(SlotID, 0);
 
-            // 벨트에 아이템이 없거나, 마우스에 뭔가를 들고 있다면 더할 수 없다.
+            
             if (pSlotItem == NULL || pSlayer->getExtraInventorySlotItem() != NULL) {
                 GCCannotAdd _GCCannotAdd;
                 _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -67,13 +67,13 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
                 return;
             }
 
-            // 아이템을 벨트 인벤토리에서 지우고 Mouse로 이동시킨다.
+            
             pBeltInventory->deleteItem(SlotID, 0);
             pSlayer->addItemToExtraInventorySlot(pSlotItem);
             // pSlotItem->save(pSlayer->getName(), STORAGE_EXTRASLOT, 0, 0, 0);
-            //  item저장 최적화. by sigi. 2002.5.13
-            char pField[80];
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            
+            char pField[128];
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pSlotItem->tinysave(pField);
         }
 
@@ -104,7 +104,7 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
 
             Item* pSlotItem = pOustersArmsbandInventory->getItem(SlotID, 0);
 
-            // 벨트에 아이템이 없거나, 마우스에 뭔가를 들고 있다면 더할 수 없다.
+            
             if (pSlotItem == NULL || pOusters->getExtraInventorySlotItem() != NULL) {
                 GCCannotAdd _GCCannotAdd;
                 _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -112,13 +112,13 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
                 return;
             }
 
-            // 아이템을 벨트 인벤토리에서 지우고 Mouse로 이동시킨다.
+            
             pOustersArmsbandInventory->deleteItem(SlotID, 0);
             pOusters->addItemToExtraInventorySlot(pSlotItem);
             // pSlotItem->save(pOusters->getName(), STORAGE_EXTRASLOT, 0, 0, 0);
-            //  item저장 최적화. by sigi. 2002.5.13
-            char pField[80];
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            
+            char pField[128];
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pSlotItem->tinysave(pField);
         }
     } catch (Throwable& t) {

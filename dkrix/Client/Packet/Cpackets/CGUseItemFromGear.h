@@ -7,8 +7,8 @@
 #ifndef __CG_USE_ITEM_FROM_GEAR_H__
 #define __CG_USE_ITEM_FROM_GEAR_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGUseItemFromGear;
@@ -36,8 +36,8 @@ public:
 	void setPart( BYTE part ) throw() { m_Part = part; }
 
 private:
-	ObjectID_t   m_ObjectID; // 아이템의 object id 
-	BYTE		 m_Part;	 // 아이템이 있는 slot 
+	ObjectID_t   m_ObjectID; 
+	BYTE		 m_Part;	 
 };
 
 #ifdef __DEBUG_OUTPUT__

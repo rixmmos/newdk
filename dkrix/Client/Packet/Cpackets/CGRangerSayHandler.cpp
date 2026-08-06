@@ -19,7 +19,7 @@
 //
 //	#include "GameServerInfoManager.h"
 //	#include "LoginServerManager.h"
-//	#include "Properties.h"
+//	#include "Packet/Properties.h"
 
 #endif
 

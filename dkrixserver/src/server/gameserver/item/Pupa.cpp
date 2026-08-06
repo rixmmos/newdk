@@ -81,7 +81,7 @@ void Pupa::create(const string& ownerID, Storage storage, StorageID_t storageID,
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.13
+        
         pStmt->executeQuery("INSERT INTO PupaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
                             "Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
                             m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, x, y,
@@ -505,7 +505,7 @@ void PupaLoader::load(Creature* pCreature)
                     pInventory = pOusters->getInventory();
                     pStash = pOusters->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 switch (storage) {
                 case STORAGE_INVENTORY:
@@ -655,7 +655,7 @@ void PupaLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

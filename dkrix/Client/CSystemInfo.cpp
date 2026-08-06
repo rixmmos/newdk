@@ -1,28 +1,15 @@
-/********************************************************************
-	created:	2003/10/17
-	created:	17:10:2003   13:48
-	filename: 	E:\designed\project\client\CSystemInfo.cpp
-	file path:	E:\designed\project\client
-	file base:	CSystemInfo
-	file ext:	cpp
-	author:		sonee
-
-	purpose:	시스템 정보를 알아낸다.
-				2003-10-17		CPU Clock 얻어오기
-								MMX,SSE2 테크놀러지 Enable 여부
-								Hyper Thread Enable 여부
-*********************************************************************/
+ 
 #include "Client_PCH.h"
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(_M_X64)
 #include <Windows.h>
 #else
 #include "../basic/Platform.h"
 #endif
 #include "CSystemInfo.h"
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(_M_X64)
 
-#pragma warning( disable : 4035 )		// disable 시켜버리자-_-;
+#pragma warning( disable : 4035 )		
 #pragma warning( disable: 4800 ) //'int' : forcing value to bool 'true' or 'false' (performance warning)
 
 inline unsigned __int64 theCycleCount(void)
@@ -31,7 +18,7 @@ inline unsigned __int64 theCycleCount(void)
     _asm    _emit 0x0F
     _asm    _emit 0x31
 
-    // -_- return 은 없지만 _emits 는 __int64를 리턴합니다-_-;
+    
 }
 
 static bool cpuid(unsigned long function, unsigned long& out_eax, unsigned long& out_ebx, unsigned long& out_ecx, unsigned long& out_edx)
@@ -413,4 +400,4 @@ bool CSystemInfo::CheckHyperThreadTechnology()
     return false;
 }
 
-#endif // PLATFORM_WINDOWS
+#endif // PLATFORM_WINDOWS && !_M_X64

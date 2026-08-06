@@ -7,7 +7,7 @@
 #ifndef __NPCINFO_H__
 #define __NPCINFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"

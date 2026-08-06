@@ -8,13 +8,13 @@
 #define __GC_NPC_ASK_VARIABLE_H__
 
 #include <map>
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "ScriptParameter.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "Packet/ScriptParameter.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCNPCAskVariable;
-// NPC 의 대사를 주변의 PC 들에게 전송한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 typedef std::map<std::string,ScriptParameter*>			HashMapScriptParameter;
@@ -57,7 +57,7 @@ public:
 private:
 	ObjectID_t m_ObjectID; // NPC's object id
 	ScriptID_t m_ScriptID; // script id
-	HashMapScriptParameter m_ScriptParameters; // 스크립트의 변수 파라미터들
+	HashMapScriptParameter m_ScriptParameters; 
 };
 
 //////////////////////////////////////////////////////////////////////////////

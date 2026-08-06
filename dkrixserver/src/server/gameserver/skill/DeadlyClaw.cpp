@@ -10,8 +10,8 @@
 #include "SimpleTileMeleeSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 DeadlyClaw::DeadlyClaw() throw() {
     __BEGIN_TRY
@@ -31,7 +31,7 @@ DeadlyClaw::DeadlyClaw() throw() {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DeadlyClaw::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -51,7 +51,7 @@ void DeadlyClaw::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pVampire, getSkillType());
 
@@ -70,7 +70,7 @@ void DeadlyClaw::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DeadlyClaw::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -102,7 +102,7 @@ void DeadlyClaw::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
         param.addMask(m_pDeadlyClawMask[i].x, m_pDeadlyClawMask[i].y, 100);
     }
 
-    // Knowledge of Blood 가 있다면 hit bonus 10
+    
     int HitBonus = 0;
     g_SimpleTileMeleeSkill.execute(pVampire, X, Y, pVampireSkillSlot, param, result, CEffectID);
 
@@ -112,7 +112,7 @@ void DeadlyClaw::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DeadlyClaw::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 

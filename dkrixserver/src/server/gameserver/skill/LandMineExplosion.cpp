@@ -11,8 +11,8 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 LandMineExplosion::LandMineExplosion() throw() {
     __BEGIN_TRY
@@ -26,7 +26,7 @@ LandMineExplosion::LandMineExplosion() throw() {
             m_pLandMineExplosionMask[index++].set(i, j);
         }
 
-    // 주위 8타일
+    
     /*	m_pLandMineExplosionMask[0].set(1,  1);
         m_pLandMineExplosionMask[1].set(-1, -1);
         m_pLandMineExplosionMask[2].set(0, -1);
@@ -40,7 +40,7 @@ LandMineExplosion::LandMineExplosion() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void LandMineExplosion::execute(Monster* pMonster)
 
@@ -64,7 +64,7 @@ void LandMineExplosion::execute(Monster* pMonster)
 
         if (bRangeCheck) {
             //--------------------------------------------------------
-            // 주위에 knockback되는맞는 애들을 체크해준다.
+            
             //--------------------------------------------------------
             SkillInput input(pMonster);
             SkillOutput output;
@@ -88,7 +88,7 @@ void LandMineExplosion::execute(Monster* pMonster)
                 param.addMask(m_pLandMineExplosionMask[i].x, m_pLandMineExplosionMask[i].y, 100);
             }
 
-            // 강제로 맞는 애들을 knockback 시킨다.
+            
             //	bool bForceKnockback = true;
             g_SimpleTileMeleeSkill.execute(pMonster, x, y, param, result, 0, false);
 

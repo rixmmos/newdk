@@ -48,11 +48,11 @@
 ////----------------------------------------------------------------------
 //// Load From File Running
 ////----------------------------------------------------------------------
-//// 실시간 로딩
+
 ////----------------------------------------------------------------------
 //bool CIndexSpritePack::LoadFromFileRunning(LPCTSTR lpszFilename, bool b565)
 //{
-//	//인덱스 파일 로딩
+
 //	std::string filename = lpszFilename;
 //	filename += 'i';
 //	std::ifstream indexFile(filename.c_str(), ios::binary);
@@ -71,7 +71,7 @@
 //	}
 //	indexFile.close();
 //	
-//	// file에서 sprite 개수를 읽어온다.	
+
 //	m_file->open(lpszFilename, ios::binary);
 //	
 //	m_file->read((char*)&m_Size, 2);

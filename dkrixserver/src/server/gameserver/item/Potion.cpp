@@ -86,7 +86,7 @@ void Potion::create(const string& ownerID, Storage storage, StorageID_t storageI
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.13
+        
         pStmt->executeQuery("INSERT INTO PotionObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
                             "Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
                             m_ItemID, m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, x, y,
@@ -110,7 +110,7 @@ bool Potion::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // 만약 포션이라면 다른 Database에 연결해서 지우도록 한다.
+        
         // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
@@ -541,7 +541,7 @@ void PotionLoader::load(Creature* pCreature)
                     pInventory = pVampire->getInventory();
                     pStash = pVampire->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 switch (storage) {
                 case STORAGE_INVENTORY:
@@ -676,7 +676,7 @@ void PotionLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

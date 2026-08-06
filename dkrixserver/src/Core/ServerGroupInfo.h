@@ -2,7 +2,7 @@
 //
 // Filename    : ServerGroupInfo.h
 // Written By  : elca@ewestsoft.com
-// Description : �κ��丮 �������� ������
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -18,7 +18,7 @@
 //
 // class ServerGroupInfo;
 //
-// ���Ӽ������� Ŭ���̾�Ʈ�� �ڽ��� ����� ������ �˷��ֱ� ���� Ŭ����
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,15 +31,15 @@ public:
     ~ServerGroupInfo() noexcept;
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // ����ȭ��, �̸� ���� ������ ����Ѵ�.
+    
     PacketSize_t getSize();
 
     static uint getMaxSize() {
@@ -74,13 +74,13 @@ public:
     }
 
 private:
-    // �׷� ���̵�
+    
     ServerGroupID_t m_GroupID;
 
-    // �׷� �̸�
+    
     string m_GroupName;
 
-    // �׷��� ����
+    
     BYTE m_Stat;
 };
 

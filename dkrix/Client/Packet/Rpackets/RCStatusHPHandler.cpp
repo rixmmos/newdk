@@ -31,14 +31,14 @@ throw ( ProtocolException , Error )
 	//g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
 	
 	if ((g_Mode==MODE_GAME
-			|| g_Mode==MODE_WAIT_UPDATEINFO			// 로딩 중이 아니거나..
-			|| g_Mode==MODE_WAIT_SETPOSITION		// 좌표 기다리는 경우
+			|| g_Mode==MODE_WAIT_UPDATEINFO			
+			|| g_Mode==MODE_WAIT_SETPOSITION		
 			)
 		&& g_pParty!=NULL
 		&& g_pGameMessage!=NULL
 		&& g_pRequestUserManager!=NULL)
 	{
-		// 사용자 정보 다시 설정
+		
 		RequestUserInfo* pUserInfo = g_pRequestUserManager->GetUserInfo( pPacket->getName().c_str() );
 
 		if (pUserInfo!=NULL)
@@ -50,7 +50,7 @@ throw ( ProtocolException , Error )
 
 		PARTY_INFO*	pInfo = NULL;
 		
-		// 이름이 없는 경우엔 IP로 찾아본다.
+		
 		if (pPacket->getName().size()==0)
 		{
 			pInfo = g_pParty->GetMemberInfoByIP( pPacket->getHost().c_str() );
@@ -60,7 +60,7 @@ throw ( ProtocolException , Error )
 			pInfo = g_pParty->GetMemberInfo( pPacket->getName().c_str() );
 		}
 			
-		// 좌표를 수정해준다.
+		
 		if (pInfo!=NULL
 			&& !pInfo->bInSight)
 		{

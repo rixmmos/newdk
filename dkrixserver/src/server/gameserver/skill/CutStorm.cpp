@@ -11,7 +11,7 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void CutStorm::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -27,7 +27,7 @@ void CutStorm::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pS
         Zone* pZone = pSlayer->getZone();
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -44,7 +44,7 @@ void CutStorm::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void CutStorm::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -66,7 +66,7 @@ void CutStorm::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
     param.STRMultiplier = 8;
     param.DEXMultiplier = 1;
     param.INTMultiplier = 1;
-    //	param.Level			= 2;	// 2로 해야 하나?
+    
     param.bMagicHitRoll = false;
     param.bMagicDamage = false;
     param.bAdd = true;

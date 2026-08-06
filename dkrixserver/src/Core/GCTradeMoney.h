@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : GCTradeMoney.h
-// Written By  : 김성민
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -11,20 +11,20 @@
 #include "PacketFactory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// 교환 코드
+
 ////////////////////////////////////////////////////////////////////////////////
 
 enum {
-    // 상대방이 교환할 돈의 액수를 늘렸다.
+    
     GC_TRADE_MONEY_INCREASE = 0,
 
-    // 상대방이 교환할 돈의 액수를 줄였다.
+    
     GC_TRADE_MONEY_DECREASE,
 
-    // 실제로 인벤토리에서 빼낸 금액
+    
     GC_TRADE_MONEY_INCREASE_RESULT,
 
-    // 실제로 인벤토리에다 더한 금액
+    
     GC_TRADE_MONEY_DECREASE_RESULT
 };
 
@@ -75,9 +75,9 @@ public:
     }
 
 private:
-    ObjectID_t m_TargetObjectID; // 교환을 원하는 상대방의 ObjectID
-    Gold_t m_Gold;               // 원하는 액수
-    BYTE m_Code;                 // 코드
+    ObjectID_t m_TargetObjectID; 
+    Gold_t m_Gold;               
+    BYTE m_Code;                 
 };
 
 

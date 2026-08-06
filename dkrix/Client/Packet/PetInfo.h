@@ -1,7 +1,7 @@
 #ifndef __PET_INFO_H__
 #define __PET_INFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "types/PetTypes.h"
 #include "Exception.h"
 
@@ -88,7 +88,7 @@ public:
 	string		getNickname() const { return m_Nickname; }
 	void		setNickname(const string& name) { m_Nickname = name; }
 #ifdef __GAME_SERVER__
-	// -_- 게임서버쪽에 정의해야쥐 PetItem.cpp 에 있음
+	
 	ObjectID_t	getItemObjectID() const;
 #endif
 

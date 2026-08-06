@@ -115,7 +115,7 @@ Update::getFilename(uint i)
 {
 	if ( m_Params[i] != "" ) {
 
-		// 첫번째와 마지막 스페이스의 인덱스를 구한다.
+		
 		uint firstspace = m_Params[i].find_first_of(' ');
 
 		if ( firstspace == std::string::npos )
@@ -141,7 +141,7 @@ Update::getFileSize(uint i)
 {
 	if ( m_Params[i] != "" ) {
 
-		// 첫번째와 마지막 스페이스의 인덱스를 구한다.
+		
 		uint firstspace = m_Params[i].find_first_of(' ');
 
 		if ( firstspace == std::string::npos )

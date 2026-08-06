@@ -36,10 +36,10 @@ public:
 
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -85,11 +85,7 @@ public:
 
 private:
     ObjectID_t m_ObjectID; // ObjectID
-    /*
-        Coord_t m_X;			// X 좌표
-        Coord_t m_Y;			// Y 좌표
-        Dir_t m_Dir;			// 방향
-    */
+     
 };
 
 

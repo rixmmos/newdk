@@ -43,22 +43,22 @@ void EventShutdown::activate()
 
         g_pIncomingPlayerManager->clearPlayers();
     } catch (Throwable& t) {
-        // 무시
+        
     }
 
 #ifdef __CONNECT_BILLING_SYSTEM__
-    // 모든 빌링 정보를 삭제한다.
+    
     g_pBillingPlayerManager->sendPayInit();
 #endif
 
 #if !defined(__THAILAND_SERVER__) && !defined(__CHINA_SERVER__)
-    // 프로세스 종료. 꺄꺄~ 죽어라~~ 꺄꺄~
+    
     if (g_pVariableManager->isKillDaemonCtl() == 1) {
         kill(getppid(), 9);
     }
 
 #else
-    // 프로세스 종료. 꺄꺄~ 죽어라~~ 꺄꺄~
+    
     if (g_pVariableManager->isKillDaemonCtl() == 1 && g_pVariableManager->isRemoveAllGame() == false &&
         g_pVariableManager->isEggDummyDB() == false) {
         kill(getppid(), 9);

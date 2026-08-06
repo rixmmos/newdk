@@ -10,8 +10,8 @@
 #include "SimpleTileMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 BloodyWave::BloodyWave() throw() {
     __BEGIN_TRY
@@ -33,7 +33,7 @@ BloodyWave::BloodyWave() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 셀프
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWave::execute(Vampire* pVampire, VampireSkillSlot* pVampireSkillSlot, CEffectID_t CEffectID)
 
@@ -59,7 +59,7 @@ void BloodyWave::execute(Vampire* pVampire, VampireSkillSlot* pVampireSkillSlot,
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWave::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -79,7 +79,7 @@ void BloodyWave::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
         // Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         /*
         if (pTargetCreature==NULL)
         {
@@ -101,7 +101,7 @@ void BloodyWave::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWave::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                          CEffectID_t CEffectID)
@@ -133,10 +133,10 @@ void BloodyWave::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
         param.addMask(m_pBloodyWaveMask[i].x, m_pBloodyWaveMask[i].y, 100);
     }
 
-    // 강제로 knockback시킬 확률
+    
     bool bForceKnockback = rand() % 100 < output.ToHit;
 
-    // Knowledge of Blood 가 있다면 hit bonus 10
+    
     int HitBonus = 0;
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD);
@@ -154,7 +154,7 @@ void BloodyWave::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BloodyWave::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -187,7 +187,7 @@ void BloodyWave::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
     bool bForceKnockback = false;
 
-    // 마스터는 강제로 knockback시킨다.
+    
     if (pMonster->isMaster()) {
         bForceKnockback = true;
     }

@@ -1,22 +1,22 @@
 //--------------------------------------------------------------------------------
 // 
 // Filename    : CGShopRequestList.cpp 
-// Written By  : 김성민
-// Description : 플레이어가 가지고 있는 상점 버전과 서버가 가지고 잇는 상점의 
-//               버전이 다를 경우, 플레이어는 서버에게 상품의 리스트를 
-//               요청하게 된다. 이 패킷은 그때 보내게 되는 패킷이다.
+
+
+
+
 // 
 //--------------------------------------------------------------------------------
 
 // include files
 #include "Client_PCH.h"
 #include "CGShopRequestList.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
+#include "../SocketInputStream.h"
+#include "../SocketOutputStream.h"
 
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //--------------------------------------------------------------------------------
 void CGShopRequestList::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -31,7 +31,7 @@ void CGShopRequestList::read ( SocketInputStream & iStream )
 
 		    
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //--------------------------------------------------------------------------------
 void CGShopRequestList::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )

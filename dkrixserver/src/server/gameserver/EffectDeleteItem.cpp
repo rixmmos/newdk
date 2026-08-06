@@ -29,7 +29,7 @@ EffectDeleteItem::EffectDeleteItem(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Ob
     // m_ObjectID = pItem->getObjectID();
     m_ObjectID = pObject->getObjectID();
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -52,8 +52,8 @@ EffectDeleteItem::~EffectDeleteItem()
 
 //----------------------------------------------------------------------
 // affect to target
-// 이 이펙트는 타일에 종속되지 않으므로, affect()는 호출되지 않는다.
-// 왜냐하면, target은 생성자에서 지정되며, 아무런 일도 하지 않기 때문이다.
+
+
 //----------------------------------------------------------------------
 void EffectDeleteItem::affect(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Object* pTarget)
 
@@ -74,7 +74,7 @@ void EffectDeleteItem::unaffect(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Objec
 {
     __BEGIN_TRY
 
-    // 올바른 좌표이어야 한다.
+    
     // Assert(pTarget!=NULL);
     Assert(isValidZoneCoord(pZone, x, y));
 

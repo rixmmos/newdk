@@ -19,12 +19,12 @@ SGGuildInfo::SGGuildInfo() {}
 // destructor
 //////////////////////////////////////////////////////////////////////
 SGGuildInfo::~SGGuildInfo() noexcept {
-    // ��� ����Ʈ�� ��� ��ü ����
+    
     clearGuildInfoList();
 }
 
 //////////////////////////////////////////////////////////////////////
-// Datagram ��ü�κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void SGGuildInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
@@ -43,7 +43,7 @@ void SGGuildInfo::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// Datagram ��ü�� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void SGGuildInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
@@ -66,7 +66,7 @@ void SGGuildInfo::write(SocketOutputStream& oStream) const {
 void SGGuildInfo::clearGuildInfoList() {
     __BEGIN_TRY
 
-    // GuildInfoList�� �����Ѵ�.
+    
     while (!m_GuildInfoList.empty()) {
         GuildInfo2* pGuildInfo = m_GuildInfoList.front();
         m_GuildInfoList.pop_front();

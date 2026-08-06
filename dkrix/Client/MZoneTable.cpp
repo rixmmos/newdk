@@ -7,31 +7,7 @@
 //----------------------------------------------------------------------
 // SOUND_SOURCE
 //----------------------------------------------------------------------
-/*
-class SOUND_SOURCE
-{
-	public :
-		SOUND_SOURCE();
-		~SOUND_SOURCE();
-
-	//-------------------------------------------------------
-	// zone의 (x, y)에서 TimeGap
-	//-------------------------------------------------------
-	public :
-		int				x, y;
-		int				MinTimeGap;			// 최소한 MinTimeGap후에 play해야한다.
-		int				MaxTimeGap;			// MaxTime안에는 play해야한다.
-		int				SoundID;
-		int				NextPlayTime;		// 다음에 play해도 되는 시간
-
-	public :
-		//-------------------------------------------------------
-		// File I/O
-		//-------------------------------------------------------
-		void			SaveToFile(std::ofstream& file);		
-		void			LoadFromFile(std::ifstream& file);		
-};
-*/
+ 
 
 //----------------------------------------------------------------------
 // Global
@@ -73,7 +49,7 @@ ZONETABLE_INFO::GetRandomSoundID() const
 	
 	SOUNDID_LIST::const_iterator	iID = SoundIDList.begin();
 
-	// select번째 id를 선택한다.
+	
 	for (int i=0; i<select; i++)
 	{
 		iID++;
@@ -97,7 +73,7 @@ ZONETABLE_INFO::SaveToFile(std::ofstream& file)
 	InfoFilename.SaveToFile( file );
 	TeenFilename.SaveToFile( file );
 	
-	// sound ID들 저장
+	
 	int numSound = SoundIDList.size();
 
 	file.write((const char*)&numSound, 4);
@@ -140,7 +116,7 @@ ZONETABLE_INFO::LoadFromFile(std::ifstream& file)
 	InfoFilename.LoadFromFile( file );
 	TeenFilename.LoadFromFile( file );
 
-	// sound id들 loading
+	
 	SoundIDList.clear();
 
 	int numSound;
@@ -189,7 +165,7 @@ CZoneTable::Release()
 {
 	ZONEINFO_MAP::iterator iInfo = m_mapZoneInfo.begin();
 
-	// 모든 ZoneInfo를 메모리에서 지운다.
+	
 	while (iInfo != m_mapZoneInfo.end())
 	{
 		ZONETABLE_INFO*	pInfo = (*iInfo).second;
@@ -208,7 +184,7 @@ CZoneTable::Release()
 //----------------------------------------------------------------------
 // Add ZoneInfo
 //----------------------------------------------------------------------
-// ZoneInfo를 추가한다.
+
 //----------------------------------------------------------------------
 bool				
 CZoneTable::Add(ZONETABLE_INFO* pZoneInfo)
@@ -220,7 +196,7 @@ CZoneTable::Add(ZONETABLE_INFO* pZoneInfo)
 
 	ZONEINFO_MAP::iterator iInfo = m_mapZoneInfo.find( pZoneInfo->ID );
 
-	// 이미 있으면.. 지운다.
+	
 	if (iInfo!=m_mapZoneInfo.end())
 	{
 		delete pZoneInfo;
@@ -228,7 +204,7 @@ CZoneTable::Add(ZONETABLE_INFO* pZoneInfo)
 		return false;
 	}
 
-	// 추가한다.
+	
 	m_mapZoneInfo.insert( ZONEINFO_MAP::value_type(pZoneInfo->ID, pZoneInfo) );
 
 	return true;
@@ -237,14 +213,14 @@ CZoneTable::Add(ZONETABLE_INFO* pZoneInfo)
 //----------------------------------------------------------------------
 // Get ZoneInfo
 //----------------------------------------------------------------------
-// zoneID가 id인 zoneInfo를 얻는다.
+
 //----------------------------------------------------------------------
 ZONETABLE_INFO*		
 CZoneTable::Get(TYPE_ZONEID id)
 {
 	ZONEINFO_MAP::iterator iInfo = m_mapZoneInfo.find( id );
 
-	// 없으면..
+	
 	if (iInfo == m_mapZoneInfo.end())
 	{
 		return NULL;
@@ -256,20 +232,20 @@ CZoneTable::Get(TYPE_ZONEID id)
 //----------------------------------------------------------------------
 // Save To File
 //----------------------------------------------------------------------
-// size , 각각의 ZoneInfo
+
 //----------------------------------------------------------------------
 void				
 CZoneTable::SaveToFile(std::ofstream& file)
 {
 	//---------------------------------------------
-	// 전체 개수 저장
+	
 	//---------------------------------------------
 	int size = m_mapZoneInfo.size();
 
 	file.write((const char*)&size , 4);
 
 	//---------------------------------------------
-	// 각각의 zoneInfo를 저장한다.
+	
 	//---------------------------------------------
 	ZONEINFO_MAP::iterator iInfo = m_mapZoneInfo.begin();
 
@@ -289,25 +265,25 @@ CZoneTable::SaveToFile(std::ofstream& file)
 //----------------------------------------------------------------------
 // Load From File
 //----------------------------------------------------------------------
-// size , 각각의 ZoneInfo
+
 //----------------------------------------------------------------------
 void				
 CZoneTable::LoadFromFile(std::ifstream& file)
 {
 	//---------------------------------------------
-	// 기존에 있던 메모리 삭제
+	
 	//---------------------------------------------
 	Release();
 
 	//---------------------------------------------
-	// size 읽어오기
+	
 	//---------------------------------------------
 	int size;
 
 	file.read((char*)&size, 4);
 
 	//---------------------------------------------
-	// 각각의 ZoneInfo를 Load한다.
+	
 	//---------------------------------------------
 	for (int i=0; i<size; i++)
 	{

@@ -2,8 +2,8 @@
 // Filename    : GCAddGearToInventory.h
 // Written By  : crazydog
 // Description :
-// Skill ShieldStrike�� ���� �߻�. shield�� ����â���� inventory��
-// ������.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_ADD_GEAR_TO_INVENTORY_H__
@@ -60,7 +60,7 @@ public:
 
 private:
     SlotID_t m_SlotID;     // wear part ID
-    CoordInven_t m_InvenX; // Inventory�� X, Y ��ǥ.
+    CoordInven_t m_InvenX; 
     CoordInven_t m_InvenY;
 };
 

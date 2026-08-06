@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Filename    : GCShopBuyFailHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
@@ -24,10 +24,10 @@ throw ( ProtocolException , Error )
 	
 #ifdef __GAME_CLIENT__
 
-	// mode를 없앤다.
+	
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 
-	// 거래를 다시 활성화한다.
+	
 	UI_UnlockItemTrade();
 
 	switch (pPacket->getCode())
@@ -37,7 +37,7 @@ throw ( ProtocolException , Error )
 		case GC_SHOP_BUY_FAIL_NOT_ENOUGH_BLUE_STAR :
 		case GC_SHOP_BUY_FAIL_NOT_ENOUGH_GREEN_STAR :
 		case GC_SHOP_BUY_FAIL_NOT_ENOUGH_CYAN_STAR :
-			//pPacket->getAmount()	// 부족한 개수
+			
 	
 		default :
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_CANNOT_BUY_NO_ITEM].GetString() );

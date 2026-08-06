@@ -200,12 +200,12 @@ bool CoupleRing::hasPartnerItem()
             "SELECT count(*) from CoupleRingObject where ItemID=%ld and Storage IN(0, 1, 2, 3, 4, 9)",
             getPartnerItemID());
 
-        // UPDATE인 경우는 Result* 대신에.. pStmt->getAffectedRowCount()
+        
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
 
-            // 위험!
+            
             Assert(count >= 0);
             Assert(count <= 1);
 
@@ -349,7 +349,7 @@ void CoupleRingLoader::load(Creature* pCreature)
                 pCoupleRing->setName(pResult->getString(++i));
                 pCoupleRing->setPartnerItemID(pResult->getDWORD(++i));
 
-                // 파트너 아이템이 없거나 더 이상 커플이 아니면 아이템을 지워준다.
+                
                 if (pPC != NULL &&
                     (!g_pCoupleManager->isCouple(pPC, pCoupleRing->getName()) || !pCoupleRing->hasPartnerItem())) {
                     g_pCoupleManager->removeCoupleForce(pPC, pCoupleRing->getName());
@@ -359,7 +359,7 @@ void CoupleRingLoader::load(Creature* pCreature)
                     pCoupleRing->tinysave(sql);
                     SAFE_DELETE(pCoupleRing);
 
-                    // FlagSet 도 날려준다.
+                    
                     pPC->getFlagSet()->turnOff(FLAGSET_IS_COUPLE);
                     pPC->getFlagSet()->save(pPC->getName());
                     continue;
@@ -388,7 +388,7 @@ void CoupleRingLoader::load(Creature* pCreature)
                     pInventory = pVampire->getInventory();
                     pStash = pVampire->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 switch (storage) {
                 case STORAGE_INVENTORY:
@@ -468,7 +468,7 @@ void CoupleRingLoader::load(Zone* pZone)
 {
     __BEGIN_TRY
 
-    cout << "존에 떨어진 아이템 로드는 지원하지 않습니다." << endl;
+    cout << "     ." << endl;
     Assert(false);
 
     Assert(pZone != NULL);
@@ -508,7 +508,7 @@ void CoupleRingLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

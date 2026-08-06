@@ -2,8 +2,8 @@
 // MChatManager.h
 //----------------------------------------------------------------------
 // Is Accept ID?
-//		IgnoreMode : 모두 무시, ID가 있다면 accept이다.
-//		AcceptMode : 모두 허용, ID가 있다면 Ignore이다.
+
+
 //----------------------------------------------------------------------
 
 #ifndef __MCHATMANAGER_H__
@@ -44,7 +44,7 @@ class MChatManager {
 							}
 
 		//-------------------------------------------------------
-		// Remove Curse 욕 제거 ... - -;;
+		
 		//-------------------------------------------------------
 		bool				RemoveCurse(char* str, bool bForce = false) const;
 		void				AddMask(char* str, int percent) const;
@@ -59,14 +59,14 @@ class MChatManager {
 
 	protected :
 		//-------------------------------------------------------
-		// 욕제거하기 위한 함수..
+		
 		//-------------------------------------------------------
 		//bool				RemoveCurseKorean(const char* str, int byteCurse, const MStringMap& mapCurse, bool* isCurse) const;
 		bool				RemoveCurseKorean(const char* str, int byteCurse, const MStringMap& mapCurse, BYTE* isCurse) const;
 
 	protected :
 		//-------------------------------------------------------
-		// 욕들.. - -;;
+		
 		//-------------------------------------------------------
 		MStringMap			m_mapCurseEng;
 		MStringMap			m_mapCurseKor1;
@@ -75,7 +75,7 @@ class MChatManager {
 		MStringMap			m_mapCurseKor4;
 
 		//-------------------------------------------------------
-		// 대화 거부하는 ID들
+		
 		//-------------------------------------------------------
 		bool				m_bIgnoreMode;
 		MStringMap			m_mapID;

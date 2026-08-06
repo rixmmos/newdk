@@ -11,7 +11,7 @@
 #include "GCStatusCurrentHP.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -32,15 +32,15 @@ void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
             return;
         }
 
-        // 무장하고 있는 무기가 널이거나, 도가 아니라면 사용할 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_BLADE) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -68,10 +68,10 @@ void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
         bool bEffected = pSlayer->hasRelicItem() || pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_FLAG) ||
                          pSlayer->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER);
 
-        // if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bCanHit && bPK) // HitRoll 에 실패하더라도 7%의
-        // 데미지를 준다
+        
+        
         if (bManaCheck && bTimeCheck && bRangeCheck && bCanHit && bPK && !bEffected) {
-            // 빠르게 PC를 움직여준다.
+            
             if (pZone->moveFastPC(pSlayer, pSlayer->getX(), pSlayer->getY(), pTargetCreature->getX(),
                                   pTargetCreature->getY(), getSkillType())) {
                 decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
@@ -82,9 +82,9 @@ void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
 
                 bool bCriticalHit = false;
 
-                // 데미지를 준다. (스킬 데미지는 없다.)
+                
                 Damage_t Damage = computeDamage(pSlayer, pTargetCreature, SkillLevel / 5, bCriticalHit);
-                // HitRoll에 실패했다면 7%의 데미지를 준다. - by bezz
+                
                 if (!bHitRoll)
                     Damage = (Damage_t)getPercentValue(Damage, 7);
                 setDamage(pTargetCreature, Damage, pSlayer, SkillType, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
@@ -92,7 +92,7 @@ void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
 
                 //				Exp_t Point = pSkillInfo->getPoint();
                 decreaseDurability(pSlayer, pTargetCreature, pSkillInfo, &_GCSkillToObjectOK1, &_GCSkillToObjectOK2);
-                // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                
                 if (bCriticalHit) {
                     knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
                 }
@@ -107,7 +107,7 @@ void ShadowWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* 
                     increaseAlignment(pSlayer, pTargetCreature, _GCSkillToObjectOK1);
                 }
 
-                // 패킷을 준비하고 보낸다.
+                
                 _GCSkillToObjectOK1.setSkillType(SkillType);
                 _GCSkillToObjectOK1.setCEffectID(CEffectID);
                 _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);

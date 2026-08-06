@@ -25,17 +25,17 @@ bool
 MRippleZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 {
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	TYPE_SECTORPOSITION	sX, sY;
 	sX = g_pTopView->PixelToMapX(egInfo.x0);
 	sY = g_pTopView->PixelToMapY(egInfo.y0);
 
-	// 다음 좌표를 정한다.	
+	
 	TYPE_SECTORPOSITION x=sX, y=sY;
 	MCreature::GetPositionToDirection(x,y, egInfo.direction);
 
-	// Zone의 영역을 벗어나는 경우..
+	
 	if (x<0 || y<0 || x>=g_pZone->GetWidth() || y>=g_pZone->GetHeight())
 			return false;
 
@@ -46,30 +46,30 @@ MRippleZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	MEffect*	pEffect;
 	//---------------------------------------------
-	// Effect 생성
+	
 	//---------------------------------------------
 	pEffect = new MEffect(bltType);
 
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(x, y);		// Sector 좌표		
+	pEffect->SetPosition(x, y);		
 	
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-	pEffect->SetCount( egInfo.count, egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count, egInfo.linkCount );			
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 
-	// 그림에 따라서... 바닥에 추가하기도 한다. 역쉬 하드코딩 ㅋㅋ..
+	
 	if (egInfo.effectSpriteType==EFFECTSPRITETYPE_EARTHQUAKE_1
 		|| egInfo.effectSpriteType==EFFECTSPRITETYPE_EARTHQUAKE_2
 		|| egInfo.effectSpriteType==EFFECTSPRITETYPE_EARTHQUAKE_3
@@ -83,7 +83,7 @@ MRippleZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		
 	if (g_pZone->AddEffect( pEffect ))
 	{
-		// 다음 Effect 생성 정보
+		
 		pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 
 		return true;

@@ -118,12 +118,12 @@ VSDateTime GDRLairManager::getNextOpenTime() const {
     }
 
     if (i == 4) {
-        cout << "�������� �Ѿ�ϴ�." << endl;
+        cout << " ." << endl;
         ret = ret.addDays(1);
         i = 0;
     }
 
-    // ��,�Ͽ��Ͽ� 19��Ÿ�� ����
+    
     if ((ret.date().dayOfWeek() == 7 || ret.date().dayOfWeek() == 3) && i == 2)
         ++i;
 
@@ -135,8 +135,8 @@ VSDateTime GDRLairManager::getNextOpenTime() const {
         else
             ret = ret.addSecs(7200);*/
 
-    cout << ret.toString() << "�� ���巹 ���� �ٽ� ����" << endl;
-    filelog("GDRLair.log", "%s �� ���巹 ���� �ٽ� ����", ret.toString().c_str());
+    cout << ret.toString() << "    " << endl;
+    filelog("GDRLair.log", "%s     ", ret.toString().c_str());
 
     return ret;
 }
@@ -170,15 +170,15 @@ void GDRLairEntrance::start() {
     TimerState::start();
 
     GCSystemMessage gcSM;
-    gcSM.setMessage("�ȴ����й��ѿ���.");
+    gcSM.setMessage(".");
     g_pZoneGroupManager->broadcast(&gcSM);
 
     cout << "Starting GDR Lair Enter State" << endl;
     filelog("GDRLair.log", "Starting GDR Lair Enter State : %d", GDRLairManager::Instance().getTotalPCs());
 
     GDRLairManager::Instance().setCorrectPortal((rand() % 3));
-    cout << "�´� ��Ż : " << (int)GDRLairManager::Instance().getCorrectPortal() << endl;
-    filelog("GDRLair.log", "�´� ��Ż : %d", GDRLairManager::Instance().getCorrectPortal());
+    cout << "  : " << (int)GDRLairManager::Instance().getCorrectPortal() << endl;
+    filelog("GDRLair.log", "  : %d", GDRLairManager::Instance().getCorrectPortal());
 
     Zone* pIllusionsWay1 = getZoneByZoneID(1410);
     Zone* pIllusionsWay2 = getZoneByZoneID(1411);
@@ -200,12 +200,12 @@ void GDRLairEntrance::start() {
     pLair->addEffect_LOCKING(pEffectKickOut1);
     pCore->addEffect_LOCKING(pEffectKickOut2);
 
-    // ��� ����.
-    cout << "���巹 ��� ���ϴ�." << endl;
+    
+    cout << "  ." << endl;
     GDRLairManager::Instance().open();
 
     EffectGDRLairClose* pEffectClose = new EffectGDRLairClose(20);
-    //	// 5��
+    
     //	pEffectClose->setDeadline(3000);
     pIllusionsWay1->addEffect_LOCKING(pEffectClose);
 
@@ -570,7 +570,7 @@ DWORD GDRLairEntrance::heartbeat(Timeval currentTime) {
 
     const PCManager* pPM = pZone->getPCManager();
     int limit = g_pVariableManager->getVariable(GDR_LAIR_PC_LIMIT);
-    // 0�̸� �ο� ������
+    
     if (limit != 0 && pPM->getSize() >= limit) {
         pZone->getZoneGroup()->unlock();
         return GDR_LAIR_ICEPOLE;
@@ -581,12 +581,7 @@ DWORD GDRLairEntrance::heartbeat(Timeval currentTime) {
     return TimerState::heartbeat(currentTime);
 }
 
-/*void GDRLairIllusionsWayOnly::start()
-{
-    TimerState::start();
-    filelog( "GDRLair.log", "Starting Illusions Way State" );
-    cout << "�Ϸ����� ���̸� Ȱ��ȭ�Ǿ��̶�" << endl;
-}*/
+ 
 
 // void GDRLairIllusionsWayOnly::end()
 //{
@@ -621,15 +616,15 @@ DWORD GDRLairEntrance::heartbeat(Timeval currentTime) {
 
 void GDRLairIcepole::start() {
     filelog("GDRLair.log", "Starting Ice Pole State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "������� Ȱ��ȭ���" << endl;
+    cout << " " << endl;
     getCurrentTime(m_BroadcastTime);
 
     Zone* pIllusionsWay1 = getZoneByZoneID(1410);
     Zone* pIllusionsWay2 = getZoneByZoneID(1411);
 
-    // �Ϸ��������̿����� ���� �ѾƳ�������.
+    
     GCSystemMessage gcSM;
-    gcSM.setMessage("û��ͨ���þ�֮·.10����ƶ�������ص�.");
+    gcSM.setMessage(".10.");
 
     pIllusionsWay1->getPCManager()->transportAllCreatures(0xffff);
     pIllusionsWay1->deleteEffect_LOCKING(0);
@@ -653,29 +648,7 @@ DWORD GDRLairIcepole::heartbeat(Timeval currentTime) {
 
     Zone* pZone = GDRLairManager::Instance().getZone(GDRLairManager::GDR_LAIR);
 
-    /*	int illPCNum = pIllusionsWay1->getPCManager()->getSize() + pIllusionsWay2->getPCManager()->getSize();
-        if ( illPCNum > 0 )
-        {
-            if ( currentTime > m_BroadcastTime )
-            {
-                GCSystemMessage gcSM;
-                char buf[255];
-                sprintf(buf, "�Ϸ����� ���̿� %d ���� �ֽ��ϴ�. ��� ����� �Ϸ����� ���̸� ����ؾ� ���巹
-       ��� Ȱ��ȭ�˴ϴ�.", illPCNum); gcSM.setMessage( buf );
-
-                __ENTER_CRITICAL_SECTION( (*pZone) )
-
-                pZone->broadcastPacket( &gcSM );
-
-                __LEAVE_CRITICAL_SECTION( (*pZone) )
-
-                m_BroadcastTime = currentTime;
-                m_BroadcastTime.tv_sec += 60;
-            }
-
-            return 0;
-        }
-    */
+     
 
     __ENTER_CRITICAL_SECTION((*(pZone->getZoneGroup())))
 
@@ -701,9 +674,9 @@ DWORD GDRLairIcepole::heartbeat(Timeval currentTime) {
 
 void GDRLairScene1::start() {
     filelog("GDRLair.log", "Starting Scene 1 State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ���� 1�� ��" << endl;
+    cout << "  1 " << endl;
     Monster* pGDR = new Monster(717);
-    pGDR->setName("���巹");
+    pGDR->setName("");
     pGDR->setFlag(Effect::EFFECT_CLASS_NO_DAMAGE);
     pGDR->setTreasure(false);
 
@@ -741,7 +714,7 @@ void GDRLairScene1::start() {
 }
 
 void GDRLairScene1::end() {
-    cout << "1�� �� ��" << endl;
+    cout << "1  " << endl;
 
     list<Action*>::iterator itr = m_ActionList.begin();
 
@@ -837,7 +810,7 @@ void GDRLairSummonMonster::end() {
 }
 
 void GDRLairScene2::start() {
-    cout << "2�� ��" << endl;
+    cout << "2 " << endl;
     filelog("GDRLair.log", "Starting Scene 2 State : %d", GDRLairManager::Instance().getTotalPCs());
     Monster* pGDR = getGDR();
 
@@ -890,7 +863,7 @@ void GDRLairScene2::start() {
 }
 
 void GDRLairScene2::end() {
-    cout << "2�� �� ��" << endl;
+    cout << "2  " << endl;
 
     list<Action*>::iterator itr = m_ActionList.begin();
 
@@ -912,7 +885,7 @@ void GDRLairSummonGDRDup::start() {
 
     GroupSummonInfo* pGSI = new GroupSummonInfo;
 
-    // 5����
+    
     pGSI->getSummonInfos().push_back(new SummonInfo(721, 5, 38, 43));
     m_GroupSummonInfos.push_back(pGSI);
 
@@ -932,7 +905,7 @@ void GDRLairSummonGDRDup::end() {
 
 void GDRLairScene3::start() {
     filelog("GDRLair.log", "Starting Scene 3 State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "3�� ��" << endl;
+    cout << "3 " << endl;
     Monster* pGDR = getGDR();
 
     m_ActionList.clear();
@@ -948,7 +921,7 @@ void GDRLairScene3::start() {
 }
 
 void GDRLairScene3::end() {
-    cout << "3�� �� ��" << endl;
+    cout << "3  " << endl;
 
     list<Action*>::iterator itr = m_ActionList.begin();
 
@@ -961,7 +934,7 @@ void GDRLairScene3::end() {
 
 void GDRLairGDRFight::start() {
     filelog("GDRLair.log", "Starting GDR Fight State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ����~~" << endl;
+    cout << " ~~" << endl;
 
     Monster* pGDR = GDRLairManager::Instance().getGDR();
     Assert(pGDR != NULL);
@@ -1020,7 +993,7 @@ void GDRLairGDRFight::end() {
 
 void GDRLairScene4::start() {
     filelog("GDRLair.log", "Starting Scene 4 State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ���� 4�� ��" << endl;
+    cout << "  4 " << endl;
     Zone* pGDRLair = GDRLairManager::Instance().getZone(GDRLairManager::GDR_LAIR);
     Zone* pGDRCore = GDRLairManager::Instance().getZone(GDRLairManager::GDR_LAIR_CORE);
 
@@ -1030,10 +1003,10 @@ void GDRLairScene4::start() {
 
     __LEAVE_CRITICAL_SECTION((*(pGDRLair->getZoneGroup())))
 
-    // ���巹 ����
+    
     Monster* pGDR = new Monster(723);
 
-    pGDR->setName("���巹");
+    pGDR->setName("");
     pGDR->setTreasure(false);
     pGDR->setFlag(Effect::EFFECT_CLASS_NO_DAMAGE);
 
@@ -1084,7 +1057,7 @@ void GDRLairScene4::start() {
 
 void GDRLairAwakenedGDRFight::start() {
     filelog("GDRLair.log", "Starting Awakened GDR Fight State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ����ü ����~~" << endl;
+    cout << "  ~~" << endl;
 
     Monster* pGDR = GDRLairManager::Instance().getGDR();
     Assert(pGDR != NULL);
@@ -1112,8 +1085,8 @@ DWORD GDRLairAwakenedGDRFight::heartbeat(Timeval currentTime) {
     int msize;
     int psize;
 
-    // �¸�~ ���⼭ pZone �ȿ� m_pZoneGroup �� NULL �̾ ���� �ھ �ִ�. slayer5
-    // Ȯ���� ����...��~ ���~
+    
+    
     __ENTER_CRITICAL_SECTION((*(pZone->getZoneGroup())))
 
     MonsterManager* pMM = pZone->getMonsterManager();
@@ -1131,7 +1104,7 @@ DWORD GDRLairAwakenedGDRFight::heartbeat(Timeval currentTime) {
 
     if (msize < 1) {
         m_bGDRDamaged = false;
-        // ���� ������
+        
         return GDR_LAIR_ENDING;
     }
 
@@ -1159,7 +1132,7 @@ DWORD GDRLairAwakenedGDRFight::heartbeat(Timeval currentTime) {
 
 void GDRLairScene5::start() {
     filelog("GDRLair.log", "Starting Scene 5 State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ���� 5�� ��" << endl;
+    cout << "  5 " << endl;
 
     Monster* pGDR = getGDR();
     Zone* pZone = pGDR->getZone();
@@ -1238,11 +1211,11 @@ void GDRLairMinionFight::end() {
 
 void GDRLairScene6::start() {
     filelog("GDRLair.log", "Starting Scene 6 State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���巹 ���� 6�� ��" << endl;
+    cout << "  6 " << endl;
     Monster* pGDR = getGDR();
     Zone* pZone = pGDR->getZone();
 
-    // ���� ����
+    
     const PCManager* pPCManager = pZone->getPCManager();
     const unordered_map<ObjectID_t, Creature*>& creatures = pPCManager->getCreatures();
     unordered_map<ObjectID_t, Creature*>::const_iterator itr;
@@ -1256,7 +1229,7 @@ void GDRLairScene6::start() {
             Item* pItem = NULL;
 
             ItemType_t itemType = 8;
-            filelog("GDRLair.log", "%s �� ���긦 �޾ҽ��ϴ�.", pPC->getName().c_str());
+            filelog("GDRLair.log", "%s   .", pPC->getName().c_str());
             //				itemType = ((goodOneIndex[1]==i||goodOneIndex[2]==i)? 9:8);
 
             list<OptionType_t> nullList;
@@ -1264,34 +1237,34 @@ void GDRLairScene6::start() {
 
             (pZone->getObjectRegistry()).registerObject(pItem);
 
-            // �κ��丮�� �� ���� ã�´�.
+            
             _TPOINT p;
             if (pInventory->getEmptySlot(pItem, p)) {
-                // �κ��丮�� �߰��Ѵ�.
+                
                 pInventory->addItem(p.x, p.y, pItem);
 
                 pItem->create(pCreature->getName(), STORAGE_INVENTORY, 0, p.x, p.y);
 
-                // ItemTrace �� Log �� �����
+                
                 if (pItem != NULL && pItem->isTraceItem()) {
                     remainTraceLog(pItem, "GDRLair", pCreature->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
                     remainTraceLogNew(pItem, pCreature->getName(), ITL_GET, ITLD_EVENTNPC, pZone->getZoneID());
                 }
 
-                // �κ��丮�� ������ ���� ��Ŷ�� �����ش�.
+                
                 GCCreateItem gcCreateItem;
 
                 makeGCCreateItem(&gcCreateItem, pItem, p.x, p.y);
 
                 pCreature->getPlayer()->sendPacket(&gcCreateItem);
             } else {
-                filelog("GDRLair.log", "�ٵ� �κ��� �ڸ��� �����ϴ�.");
+                filelog("GDRLair.log", "   .");
                 SAFE_DELETE(pItem);
             }
         }
     }
 
-    // 6���ִٰ� ���󰣴�.
+    
     __ENTER_CRITICAL_SECTION((*(pZone->getZoneGroup())))
 
     pGDR->setBrain(NULL);
@@ -1299,7 +1272,7 @@ void GDRLairScene6::start() {
 
     __LEAVE_CRITICAL_SECTION((*(pZone->getZoneGroup())))
 
-    // �� 15�� ���̿� �� ������ �ȴ�.
+    
     m_ActionList.clear();
     m_ActionList.push_back(new ActionSay(pGDR, 356));
     m_ActionList.push_back(new ActionWait(pGDR, 50));
@@ -1308,7 +1281,7 @@ void GDRLairScene6::start() {
     m_ActionList.push_back(new ActionSay(pGDR, 371));
     m_ActionList.push_back(new ActionWait(pGDR, 50));
     m_ActionList.push_back(new ActionWarp(pGDR, 78, 89));
-    // �ε��ϴµ� 5���� ��ٷ��ش�.
+    
     m_ActionList.push_back(new ActionWait(pGDR, 50));
 
     m_ActionList.push_back(new ActionSay(pGDR, 358));
@@ -1321,7 +1294,7 @@ void GDRLairScene6::start() {
 
 void GDRLairEnding::start() {
     filelog("GDRLair.log", "Starting Ending State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���.. �����̴� -o-" << endl;
+    cout << "..  -o-" << endl;
     TimerState::start();
 
     Zone* pZone = GDRLairManager::Instance().getZone(GDRLairManager::GDR_LAIR_CORE);
@@ -1387,20 +1360,20 @@ void GDRLairEnding::start() {
                 list<OptionType_t> nullList;
                 pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_CORE_ZAP, itemType, nullList);
                 pItem->setGrade(grade);
-                filelog("GDRLair.log", "%s �� �ھ����� �޾ҽ��ϴ�. : %d/%d",
+                filelog("GDRLair.log", "%s   . : %d/%d",
                         pPC->getName().c_str(), itemType, grade);
             } else {
                 if (rewardType[i] == 1) {
                     itemType = 9;
-                    filelog("GDRLair.log", "%s �� ���Ʈ�� �޾ҽ��ϴ�.", pPC->getName().c_str());
+                    filelog("GDRLair.log", "%s   .", pPC->getName().c_str());
                     list<OptionType_t> nullList;
                     pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_QUEST_ITEM, itemType, nullList);
                 } else {
                     //					itemType = 8;
-                    //					filelog( "GDRLair.log", "%s �� ���긦 �޾ҽ��ϴ�.",
+                    
                     // pPC->getName().c_str()
                     //);
-                    // ����� ���ۿ� ���.
+                    
                     continue;
                 }
                 //				itemType = ((goodOneIndex[1]==i||goodOneIndex[2]==i)? 9:8);
@@ -1408,21 +1381,21 @@ void GDRLairEnding::start() {
 
             (pZone->getObjectRegistry()).registerObject(pItem);
 
-            // �κ��丮�� �� ���� ã�´�.
+            
             _TPOINT p;
             if (pInventory->getEmptySlot(pItem, p)) {
-                // �κ��丮�� �߰��Ѵ�.
+                
                 pInventory->addItem(p.x, p.y, pItem);
 
                 pItem->create(pCreature->getName(), STORAGE_INVENTORY, 0, p.x, p.y);
 
-                // ItemTrace �� Log �� �����
+                
                 if (pItem != NULL && pItem->isTraceItem()) {
                     remainTraceLog(pItem, "GDRLair", pCreature->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
                     remainTraceLogNew(pItem, pCreature->getName(), ITL_GET, ITLD_EVENTNPC);
                 }
 
-                // �κ��丮�� ������ ���� ��Ŷ�� �����ش�.
+                
                 GCCreateItem gcCreateItem;
 
                 makeGCCreateItem(&gcCreateItem, pItem, p.x, p.y);
@@ -1436,7 +1409,7 @@ void GDRLairEnding::start() {
 }
 
 void GDRLairEnding::end() {
-    cout << "���⵵ �����̴� ����" << endl;
+    cout << "  " << endl;
 
     //	Monster* pGDR = GDRLairManager::Instance().getGDR();
     //	SAFE_DELETE( pGDR );
@@ -1458,10 +1431,10 @@ void GDRLairEnding::end() {
 
 void GDRLairKillAll::start() {
     filelog("GDRLair.log", "Starting Killall State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���ְŽ�~@!" << endl;
+    cout << "~@!" << endl;
 
     GCSystemMessage gcSM;
-    gcSM.setMessage("���巹 ���� ������ �����߽��ϴ�. 10�� �Ŀ� ��Ȱ ��ġ�� �̵��˴ϴ�.");
+    gcSM.setMessage("   . 10    .");
 
     for (int i = GDRLairManager::ILLUSIONS_WAY_1; i < GDRLairManager::GDR_LAIR_MAX; ++i) {
         Zone* pZone = GDRLairManager::Instance().getZone(i);
@@ -1475,7 +1448,7 @@ void GDRLairKillAll::start() {
 
 void GDRLairKillAll::end() {
     filelog("GDRLair.log", "Ending Killall State : %d", GDRLairManager::Instance().getTotalPCs());
-    cout << "���ְγ�?" << endl;
+    cout << "?" << endl;
 
     Monster* pGDR = GDRLairManager::Instance().getGDR();
     if (pGDR != NULL) {

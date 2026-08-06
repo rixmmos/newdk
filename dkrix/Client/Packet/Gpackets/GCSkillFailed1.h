@@ -1,17 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    :  GCSkillFailed1.h 
 // Written By  :  elca@ewestsoft.com
-// Description :  Å
+
 
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_SKILL_FAILED_1_H__
 #define __GC_SKILL_FAILED_1_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "ModifyInfo.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../ModifyInfo.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class  GCSkillFailed1;

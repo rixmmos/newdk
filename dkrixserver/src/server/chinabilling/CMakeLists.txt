@@ -1,5 +1,5 @@
 # ============================================================================
-# ChinaBilling 库 - 同一份源码编译多个版本
+# ChinaBilling  - 
 # ============================================================================
 
 set(CBILLING_SOURCES
@@ -21,7 +21,7 @@ set(CBILLING_SOURCES
 )
 
 # ============================================================================
-# GameServer 专用 CBilling 库
+# GameServer  CBilling 
 # ============================================================================
 add_library(GameServerCBilling STATIC ${CBILLING_SOURCES})
 target_compile_definitions(GameServerCBilling PRIVATE __GAME_SERVER__)
@@ -35,7 +35,7 @@ target_include_directories(GameServerCBilling PRIVATE
 )
 
 # ============================================================================
-# LoginServer 专用 CBilling 库
+# LoginServer  CBilling 
 # ============================================================================
 add_library(LoginServerCBilling STATIC ${CBILLING_SOURCES})
 target_compile_definitions(LoginServerCBilling PRIVATE __LOGIN_SERVER__)

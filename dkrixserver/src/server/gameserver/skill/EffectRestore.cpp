@@ -18,7 +18,7 @@ EffectRestore::EffectRestore(Creature* pCreature)
 {
     __BEGIN_TRY
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     setTarget(pCreature);

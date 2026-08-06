@@ -112,25 +112,25 @@ void UpdateServer::run() throw() {
         const int exitFlagSize = 1;
         char exitFlag[exitFlagSize];
 
-        // pipe로 child와 통신.. 허접하지만. by sigi. 2002.11.9
+        
         if (pipe(p) < 0) {
             // cout << "cannot create pipe" << endl;
             exit(0);
         }
 
-        // nonblock 설정
+        
         int flags = fcntl(p[0], F_GETFL, 0);
         flags |= O_NONBLOCK;
         fcntl(p[0], F_SETFL, flags);
 
-        // 현재 접속중인 client 숫자
+        
         int nClient = 0;
         int maxClient = g_pConfig->getPropertyInt("MaxClient");
 
         int connectClient = 0;
         int disconnectClient = 0;
 
-        // fork 한계로 exception catch할때 사용 by sigi. 2002.11.9
+        
         bool bBeforeFork = false;
 
         int tick = 0;
@@ -166,12 +166,7 @@ void UpdateServer::run() throw() {
 
                 // cout << "Accept..." << endl;
 
-                /*
-                            pSocket->setNonBlocking(false);
-                            // 소켓의 버퍼를 늘린다.
-                            pSocket->setSendBufferSize(60000000);
-                            pSocket->setReceiveBufferSize(100000000);
-                */
+                 
 
                 // cout << "NEW CONNECTION FROM " << pSocket->getHost().c_str() << ":" << pSocket->getPort() << endl;
 
@@ -197,16 +192,16 @@ void UpdateServer::run() throw() {
                 }
 
 
-                // child가 종료된거를 체크해준다.	 by sigi. 2002.11.9
+                
                 int nExitClient = 0;
                 while (1) {
                     int nRead = read(p[0], exitFlag, exitFlagSize);
 
-                    // 읽을게 없는 경우다.
+                    
                     if (nRead == -1)
                         break;
 
-                    // 하나의 child가 종료됐다는 얘기다.
+                    
                     nExitClient++;
                     disconnectClient++;
                 }
@@ -221,7 +216,7 @@ void UpdateServer::run() throw() {
                 getCurrentTime(currentTime);
 
                 if (nextTime.tv_sec < currentTime.tv_sec) {
-                    // 접속지 기록
+                    
                     unordered_map<string, int>::const_iterator itr = IPs.begin();
                     for (; itr != IPs.end(); itr++) {
                         const string& IP = itr->first;
@@ -247,7 +242,7 @@ void UpdateServer::run() throw() {
                 }
 
 
-                // 사용자 제한을 둔다. by sigi. 2002.11.9
+                
                 if (nClient > maxClient) {
                     // cout << "Not Accept More: " << nClient << "/" << maxClient << endl;
                     delete pSocket;
@@ -257,7 +252,7 @@ void UpdateServer::run() throw() {
                 }
 
                 //--------------------------------------------------------------------------------
-                // 원활한 업데이트를 위해서, select 대신 fork()를 사용해서 1:1 서버를 구현한다.
+                
                 //--------------------------------------------------------------------------------
                 bool bBeforeFork = true;
                 nClient++;
@@ -291,8 +286,8 @@ void UpdateServer::run() throw() {
 
                     // cout << "CHILD PROCESS EXIT" << endl;
 
-                    // 루프를 벗어나서 프로세스를 종료한다.
-                    write(p[1], exitFlag, exitFlagSize); // parent에게 알린다. by sigi. 2002.11.9
+                    
+                    write(p[1], exitFlag, exitFlagSize); 
                     exit(0);
 
                 } else { // case of parent
@@ -307,9 +302,9 @@ void UpdateServer::run() throw() {
 
 
             } catch (Error& e) {
-                // fork가 안된 경우
+                
                 if (bBeforeFork) {
-                    // 무시
+                    
                     filelog("parentExceptionLog.txt", "%s", e.toString().c_str());
                 } else {
                     filelog("parentExceptionLog.txt", "%s", e.toString().c_str());
@@ -334,15 +329,15 @@ void UpdateServer::run() throw() {
 
 //--------------------------------------------------------------------------------
 //
-// 시스템 레벨의 초기화
+
 //
 //--------------------------------------------------------------------------------
 void UpdateServer::sysinit() throw(Error) {
     __BEGIN_TRY
 
-    signal(SIGPIPE, SIG_IGN); // 이거는 종종 발생할 듯
-    signal(SIGALRM, SIG_IGN); // 알람 하는 경우는 엄따, 예의상
-    signal(SIGCHLD, SIG_IGN); // fork 하는 경우는 엄따, 예의상
+    signal(SIGPIPE, SIG_IGN); 
+    signal(SIGALRM, SIG_IGN); 
+    signal(SIGCHLD, SIG_IGN); 
 
     __END_CATCH
 }
@@ -350,8 +345,8 @@ void UpdateServer::sysinit() throw(Error) {
 
 //--------------------------------------------------------------------------------
 //
-// 나중에 콘솔로 출력할 필요가 없어질 만큼 안정적이 되면,
-// 이 함수를 호출하도록 한다.
+
+
 //
 //--------------------------------------------------------------------------------
 void UpdateServer::goBackground() throw(Error) {

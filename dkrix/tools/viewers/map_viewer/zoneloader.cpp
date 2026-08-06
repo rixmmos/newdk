@@ -1,9 +1,6 @@
-/**
- * @file zoneloader.cpp
- * @brief Zone 文件加载器实现 - 基于 engine/sprite/src/zone.c 的 C++ 封装
- */
+ 
 
-// 必须首先包含 zone.h，在包含任何客户端头文件之前
+
 #include "zone.h"
 
 #include "zoneloader.h"
@@ -12,7 +9,7 @@
 #include <map>
 #include <algorithm>
 
-// SectorData 的转换方法
+
 void SectorData::InitFrom(const Sector* s) {
     if (s) {
         spriteID = s->sprite_id;
@@ -21,7 +18,7 @@ void SectorData::InitFrom(const Sector* s) {
     }
 }
 
-// ImageObjectData 的转换方法
+
 void ImageObjectData::InitFrom(const ImageObject* obj) {
     if (obj) {
         type = obj->type;
@@ -36,7 +33,7 @@ void ImageObjectData::InitFrom(const ImageObject* obj) {
         isAnimation = obj->is_animation;
         transFlags = obj->trans_flags;
 
-        // 转换位置列表
+        
         positions.clear();
         for (uint32_t i = 0; i < obj->position_count; i++) {
             positions.push_back({obj->positions[i].x, obj->positions[i].y});
@@ -44,7 +41,7 @@ void ImageObjectData::InitFrom(const ImageObject* obj) {
     }
 }
 
-// PIMPL 实现类
+
 class ZoneLoader::Impl {
 public:
     Impl() {
@@ -67,7 +64,7 @@ private:
     ::Zone m_zone;
 };
 
-// ZoneLoader 实现
+
 ZoneLoader::ZoneLoader()
     : m_impl(new Impl())
 {
@@ -98,10 +95,10 @@ void ZoneLoader::ConvertZoneInfo(const ZoneHeader* header) {
 }
 
 bool ZoneLoader::LoadFromFile(const char* filename) {
-    // 释放旧数据
+    
     Release();
 
-    // 使用 C API 加载 zone 文件
+    
     Error* err = zone_load(filename, m_impl->GetZone());
     if (err != NULL) {
         std::cerr << "Failed to load zone file: " << filename << std::endl;
@@ -113,7 +110,7 @@ bool ZoneLoader::LoadFromFile(const char* filename) {
 
     const Zone* zone = m_impl->GetZone();
 
-    // 转换 zone 信息
+    
     ConvertZoneInfo(&zone->header);
 
     std::cout << "=== Zone loaded successfully ===" << std::endl;
@@ -127,7 +124,7 @@ bool ZoneLoader::LoadFromFile(const char* filename) {
     std::cout << "Size: " << zone->width << "x" << zone->height << std::endl;
     std::cout << "Image Objects: " << zone->image_object_count << std::endl;
 
-    // 转换 sector 数据到 C++ 封装
+    
     if (zone->sectors) {
         uint32_t total = (uint32_t)zone->width * zone->height;
         m_sectors.reserve(total);
@@ -139,7 +136,7 @@ bool ZoneLoader::LoadFromFile(const char* filename) {
         std::cout << "Loaded " << m_sectors.size() << " sectors" << std::endl;
     }
 
-    // 转换 ImageObject 数据到 C++ 封装
+    
     if (zone->image_objects) {
         m_imageObjects.reserve(zone->image_object_count);
         for (uint32_t i = 0; i < zone->image_object_count; i++) {
@@ -149,7 +146,7 @@ bool ZoneLoader::LoadFromFile(const char* filename) {
         }
         std::cout << "Loaded " << m_imageObjects.size() << " image objects" << std::endl;
 
-        // 统计每种类型的对象数量
+        
         std::map<int, int> typeCounts;
         std::map<int, int> validSpritesPerType;
         for (const auto& obj : m_imageObjects) {
@@ -168,12 +165,12 @@ bool ZoneLoader::LoadFromFile(const char* filename) {
                       << " objects (" << valid << " with spriteID>0)" << std::endl;
         }
 
-        // 打印前 10 个对象的详细信息
+        
         std::cout << "\n=== First 10 ImageObjects ===" << std::endl;
         size_t showCount = std::min(size_t(10), m_imageObjects.size());
         for (size_t i = 0; i < showCount; i++) {
             const auto& obj = m_imageObjects[i];
-            // 计算从 sector 坐标应该得到的像素坐标
+            
             int expectedPixelX = obj.sectorX * 48;
             int expectedPixelY = obj.sectorY * 24;
             int diffX = obj.pixelX - expectedPixelX;
@@ -220,7 +217,7 @@ const ImageObjectData* ZoneLoader::GetImageObject(int index) const {
 int ZoneLoader::GetSpriteID(int sectorX, int sectorY) const {
     const SectorData* sector = GetSector(sectorX, sectorY);
     if (!sector) return -1;
-    // spriteID=0 或 0xFFFF 表示没有 tile
+    
     if (sector->spriteID == 0 || sector->spriteID == 0xFFFF)
         return -1;
     return sector->spriteID;

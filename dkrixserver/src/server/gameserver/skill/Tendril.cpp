@@ -20,7 +20,7 @@
 #include "Reflection.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Tendril::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -48,9 +48,9 @@ void Tendril::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkill
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        // 저주 면역. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isFlag(Effect::EFFECT_CLASS_IMMUNE_TO_CURSE) ||
             !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType());
@@ -110,7 +110,7 @@ void Tendril::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkill
 
             bool bCanSeeCaster = canSee(pTargetCreature, pOusters);
 
-            // 이펙트 오브젝트를 생성해 붙인다.
+            
             EffectTendril* pEffect = new EffectTendril(pTargetCreature);
             pEffect->setDeadline(output.Duration);
             // pEffect->setLevel(pSkillSlot->getExpLevel());

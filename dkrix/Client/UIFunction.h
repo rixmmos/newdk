@@ -1,8 +1,8 @@
  //-----------------------------------------------------------------------------
 // UI Function.h
 //-----------------------------------------------------------------------------
-// packet부분에 include하면 warning이 좍~~난다.. 
-// 어쩔 수 없이... 
+
+
 //-----------------------------------------------------------------------------
 
 #include "RaceType.h"
@@ -65,12 +65,13 @@ extern void		UI_SetWorldList();
 extern void		UI_SetCurrentServerName(const char *name, int status);
 
 //-----------------------------------------------------------------------------
-// Interface 변경
+
 //-----------------------------------------------------------------------------
 extern Race		UI_GetInterfaceRace();
 extern void		UI_ChangeInterfaceRace(Race race);
 extern void		UI_SaveUserOption();
 extern void		UI_AffectUserOption();
+extern void		UI_SyncLoadedGameState();
 
 //-----------------------------------------------------------------------------
 // status
@@ -113,7 +114,7 @@ extern void		UI_SetCharInfoFAME(int value);
 //extern void		UI_SetCharInfoNOTERITY(int value);
 
 //-----------------------------------------------------------------------------
-// 좌표 
+
 //-----------------------------------------------------------------------------
 extern POINT	UI_GetInventoryGridPosition(int x, int y);
 extern POINT	UI_GetInventoryPosition();
@@ -160,7 +161,7 @@ extern void		UI_CloseTutorialExit();
 
 
 //-----------------------------------------------------------------------------
-// Shop, 보관, 교환
+
 //-----------------------------------------------------------------------------
 extern BOOL		UI_IsRunningStorage();
 extern BOOL		UI_IsRunningExchange();
@@ -203,7 +204,7 @@ extern void		UI_RunPetStorage();
 extern void		UI_SetPetStorage(MStorage* pStorage);
 
 //-----------------------------------------------------------------------------
-// 포탈 관련
+
 //-----------------------------------------------------------------------------
 extern bool		UI_IsRunningSelectWayPoint();
 extern void		UI_RunSelectWayPoint();
@@ -244,7 +245,7 @@ extern void		UI_SetHotKey(int hotkey, int id);
 extern int		UI_GetHotKey(int hotkey);
 
 //-----------------------------------------------------------------------------
-// ID기억
+
 //-----------------------------------------------------------------------------
 extern void		UI_BackupLoginID(char *);
 
@@ -259,7 +260,7 @@ extern MItem*	UI_GetMouseItem();
 extern void		UI_RemoveDescriptor(void* pPtr=NULL);
 
 //-----------------------------------------------------------------------------
-// 완성형 <--> 조합형
+
 //-----------------------------------------------------------------------------
 //extern void		UI_WansungToJohap(const char* wansung, char* johap);
 //extern void		UI_JohapToWansung(const char* johap, char* wansung);
@@ -301,7 +302,7 @@ extern void		UI_SetGuild(WORD guild_id, BYTE guild_rank, std::string guild_name)
 extern void		UI_RunOtherInfo(MCreature *pCreature = NULL);
 extern const char *UI_GetOtherInfoName();
 
-// 넷마블용
+
 extern void		UI_RunConnect();
 
 extern void		UI_SetCharInfoSilverDamage(int min_damage, int max_damage);
@@ -390,7 +391,7 @@ extern int		UI_GetMouseCursorInfo_WebBrowser();
 extern void		UI_Close_WebBrowser();
 extern void		UI_ShowWindowCursor();
 extern void		UI_HiddenWindowCursor();
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		extern void		UI_RunSubInventory(MItem* pItem);
 		extern void		UI_CloseSubInventory();
 		extern bool		UI_AddItemToSubInventory(MItem *pItem, int X, int Y);

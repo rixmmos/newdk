@@ -31,11 +31,11 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	TYPE_FRAMEID newFrameID = FRAMEID_NULL;
 
 	//-----------------------------------------------------------
-	// 다크니스의 경우 다양하게 찍어주기...
-	// 임시 땜빵 코드.. 케케~
+	
+	
 	//-----------------------------------------------------------
-	// frameID가 아니고 effectSpriteType으로 해야되는데
-	// 일단은 alphaSprite라서 수치가 맞아떨어진다 - -;;
+	
+	
 	if (est>=EFFECTSPRITETYPE_DARKNESS_1_1
 		&& est<=EFFECTSPRITETYPE_DARKNESS_3_5 ||
 		est>=EFFECTSPRITETYPE_GRAY_DARKNESS_1_1 &&
@@ -103,7 +103,7 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 
 	//-----------------------------------------------------------
-	// Sword Wave를 위한 임시(-_-;) 코드..
+	
 	//-----------------------------------------------------------
 	if (est==EFFECTSPRITETYPE_SWORD_WAVE_1)
 	{
@@ -120,7 +120,7 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	
 	//-----------------------------------------------------------
-	// 메테오를 위한 임시(-_-;) 코드..
+	
 	//-----------------------------------------------------------
 	if(est == EFFECTSPRITETYPE_METEOR_ROCK)
 	{
@@ -134,7 +134,7 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	}
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	TYPE_SECTORPOSITION	sX, sY;
 	sX = g_pTopView->PixelToMapX(egInfo.x0);
@@ -142,13 +142,13 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
 
-	// Zone에 추가한다.
+	
 	
 	if( egInfo.nActionInfo == RESULT_SKILL_STONE_AUGER || 
 		egInfo.nActionInfo == RESULT_STEP_SKILL_STONE_AUGER_2 ||
 		egInfo.nActionInfo == RESULT_STEP_SKILL_STONE_AUGER_3 )
 	{
-		// 십자 모양으로.
+		
 		POINT pt[] = 
 		{
 			{ 0, 1 },
@@ -208,7 +208,7 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	{
 			MEffect*	pEffect;
 			//---------------------------------------------
-			// Effect 생성
+			
 			//---------------------------------------------
 			pEffect = new MEffect(bltType);
 
@@ -233,21 +233,21 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 				)
 				pEffect->SetPixelPosition( egInfo.x0, egInfo.y0, egInfo.z0 );
 			else
-				pEffect->SetPosition(sX, sY);		// Sector 좌표		
+				pEffect->SetPosition(sX, sY);		
 			pEffect->SetZ(egInfo.z0);			
-			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-			pEffect->SetCount( egInfo.count, egInfo.linkCount );			// 지속되는 Frame
+			pEffect->SetStepPixel(egInfo.step);		
+			pEffect->SetCount( egInfo.count, egInfo.linkCount );			
 			
-			// 방향 설정
+			
 			pEffect->SetDirection( direction );
 			
-			// 위력
+			
 			pEffect->SetPower(egInfo.power);
 			
-			// 빛의 밝기
+			
 			//pEffect->SetLight( light );
 			
-			// 중복 가능한가
+			
 			if(
 				(est == EFFECTSPRITETYPE_FIRE_CRACKER_1 ||
 				est == EFFECTSPRITETYPE_FIRE_CRACKER_2 ||
@@ -269,12 +269,12 @@ MStopZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 		if (bAdd)
 		{
-			// 다음 Effect 생성 정보
+			
 			pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 		
 			//---------------------------------------------
-			// 반복되는 frame이면..
-			// 시작 frame을 다르게 한다.
+			
+			
 			//---------------------------------------------
 			if (repeatFrame)
 			{

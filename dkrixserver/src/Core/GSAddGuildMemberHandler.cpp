@@ -43,27 +43,27 @@ void GSAddGuildMemberHandler::execute(GSAddGuildMember* pPacket, Player* pPlayer
         pGuildMember->setRequestDateTime(VSDateTime::currentDateTime());
     }
 
-    // DB 에 Guild Member 를 저장한다.
+    
     pGuildMember->create();
 
-    // Guild Member Intro 를 DB에 저장한다.
+    
     pGuildMember->saveIntro(pPacket->getGuildMemberIntro());
 
-    // 길드에 추가한다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     pGuild->addMember(pGuildMember);
 
-    // 게임 서버로 보낼 패킷을 만든다.
+    
     SGAddGuildMemberOK sgAddGuildMemberOK;
     sgAddGuildMemberOK.setGuildID(pGuildMember->getGuildID());
     sgAddGuildMemberOK.setName(pGuildMember->getName());
     sgAddGuildMemberOK.setGuildMemberRank(pGuildMember->getRank());
     sgAddGuildMemberOK.setServerGroupID(pPacket->getServerGroupID());
 
-    // 게임 서버로 패킷을 보낸다.
+    
     g_pGameServerManager->broadcast(&sgAddGuildMemberOK);
 
-    // 등록 대기 길드이고 길드원이 5명 이상이 되면 정식 길드가 된다.
+    
     if (pGuild->getState() == Guild::GUILD_STATE_WAIT && pGuild->getActiveMemberCount() > 4) {
         HashMapGuildMember& Members = pGuild->getMembers();
         HashMapGuildMemberItor itr = Members.begin();
@@ -71,8 +71,8 @@ void GSAddGuildMemberHandler::execute(GSAddGuildMember* pPacket, Player* pPlayer
             pGuildMember = itr->second;
 
             ///////////////////////////////////////////////////////////////////////////
-            // DB에 Slayer, Vampire, Ousters 테이블의 GuildID를 바꾼다.
-            // DB에 Message를 추가한다.
+            
+            
             ///////////////////////////////////////////////////////////////////////////
             Statement* pStmt = NULL;
             BEGIN_DB {

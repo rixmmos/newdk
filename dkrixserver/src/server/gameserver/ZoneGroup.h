@@ -68,7 +68,7 @@ public:
     Zone* getZone(ZoneID_t zoneID) const;
 
     // #ifdef __NO_COMBAT__
-    Zone* getCombatZone(ZoneID_t zoneID) const; // getZone과 같은 일을 수행하나 NULL을 리턴하는 것이 가능, 김경석
+    Zone* getCombatZone(ZoneID_t zoneID) const; 
     // #endif
 
     //--------------------------------------------------
@@ -127,7 +127,7 @@ private:
     // zone group id
     ZoneGroupID_t m_ZoneGroupID;
 
-    // zone 의 해쉬맵
+    
     unordered_map<ZoneID_t, Zone*> m_Zones;
 
     // zone player manager

@@ -19,7 +19,7 @@ void LCLoginOK::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
-	// 서버 그룹 이름을 읽는다.
+	
 	iStream.read( m_isAdult );
 	iStream.read( m_bFamily );
 	iStream.read( m_Stat );
@@ -37,7 +37,7 @@ void LCLoginOK::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 
-	// 그룹 이름을 쓴다.
+	
 	oStream.write( m_isAdult );
 	oStream.write( m_bFamily );
 	oStream.write( m_Stat );

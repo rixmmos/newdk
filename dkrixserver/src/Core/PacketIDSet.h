@@ -25,7 +25,7 @@ typedef set<PacketID_t> PACKET_ID_SET;
 //
 // class PacketValidator;
 //
-// ��Ŷ�� ������ �����Ѵ�.
+
 //
 //----------------------------------------------------------------------
 
@@ -61,10 +61,10 @@ private:
     // Packet ID Set Type
     PacketIDSetType m_PacketIDSetType;
 
-    // �÷��̾� ����
+    
     PlayerStatus m_PlayerStatus;
 
-    // ���Ǵ� ��Ŷ�� �ؽ���
+    
     PACKET_ID_SET m_PacketIDSet;
 };
 

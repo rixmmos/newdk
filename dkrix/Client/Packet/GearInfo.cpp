@@ -2,8 +2,8 @@
 // 
 // Filename    : GearInfo.cpp 
 // Written By  : elca@ewestsoft.com
-// Description : 자신에게 쓰는 기술의 성공을 알리기 위한 패킷 클래스의
-//               멤버 정의.
+
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@ GearInfo::~GearInfo ()
 {
 	__BEGIN_TRY
 
-	// 소속된 모든 객체들을 삭제한다.
+	
 	while ( !m_GearSlotInfoList.empty() ) {
 		GearSlotInfo * pGearSlotInfo = m_GearSlotInfoList.front();
 		delete pGearSlotInfo;
@@ -49,14 +49,14 @@ GearInfo::~GearInfo ()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GearInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	iStream.read( m_ListNum );
 
 	for( int i = 0; i < m_ListNum; i++ ) {
@@ -71,14 +71,14 @@ void GearInfo::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GearInfo::write ( SocketOutputStream & oStream ) 
      const throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 		
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	oStream.write( m_ListNum );
 
     for ( std::list<GearSlotInfo*>:: const_iterator itr = m_GearSlotInfoList.begin(); itr!= m_GearSlotInfoList.end(); itr++) {

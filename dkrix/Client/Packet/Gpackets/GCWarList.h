@@ -7,11 +7,11 @@
 #ifndef __GC_WAR_LIST_H__
 #define __GC_WAR_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "Types.h"
-#include "GuildWarInfo.h"
-#include "RaceWarInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../Types.h"
+#include "../GuildWarInfo.h"
+#include "../RaceWarInfo.h"
 #include <list>
 
 typedef std::list<WarInfo*> 				WarInfoList;

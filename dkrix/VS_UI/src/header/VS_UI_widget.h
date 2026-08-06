@@ -1,56 +1,13 @@
-/*-----------------------------------------------------------------------------
-
-	VS_UI_widget.h
-
-	VS UI ���� Widget.
-
-	2000.6.7. KJTINC
-
------------------------------------------------------------------------------*/
+ 
 
 #ifndef __VS_UI_WIDGET_H__
 #define __VS_UI_WIDGET_H__
 
 #include "VS_UI_Base.h"
 #include "VS_UI_GlobalResource.h"
-#ifdef PLATFORM_WINDOWS
-#include "CImm.h"
-#endif
+#include "../Imm/CImm.h"
 #include "VS_UI_MOUSE_POINTER.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
-
-// Stub definitions for non-Windows platforms (without Immersion library)
-#ifndef PLATFORM_WINDOWS
-#include <sys/time.h>
-
-// Stub for CImm class (from Immersion library)
-class CImm {
-public:
-    enum FORCE_UI_ID {
-        FORCE_UI_DRAG,
-        FORCE_UI_WINDOW,
-        FORCE_UI_BUTTON,
-        FORCE_UI_GRID,
-        FORCE_UI_MAX,
-    };
-    void ForceUI(unsigned int ID) {}
-    bool IsDevice() { return false; }  // Stub: no device on non-Windows platforms
-    void Enable(bool enable) {}  // Stub: enable/disable device
-    void Disable() {}  // Stub: disable device
-};
-
-// Stub for global Immersion device pointer
-static CImm gpC_Imm_instance;
-#define gpC_Imm (&gpC_Imm_instance)
-
-// GetTickCount stub
-inline DWORD GetTickCount() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (DWORD)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-#endif // !PLATFORM_WINDOWS
 /*
 //----------------------------------------------------------------------------
 // Button Class
@@ -129,8 +86,8 @@ public:
 					m_alpha--;
 				}
 
-				// !m_alpha = 0�� ���¿��� �� m_alpha--�� �� �� �ִ�. �̰��� �ð����� ���ؼ�
-				// EventFocuxX�� �ι��̻� ����Ǳ� �����̴�.
+				
+				
 				if (m_alpha <= 0)
 				{
 					m_alpha = 0;
@@ -168,12 +125,12 @@ class ButtonVisual
 {
 public:
 	//
-	// �ϳ��� button�� �����ϱ� ���� id�� button�� ���� flag�� ���ڷ� �Ѵ�.
+	
 	//
 	virtual void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button) = 0;
 
-	// Desciption �� �ִºκп��� ȣ��ȴ�.
-	// ButtonGroup::ShowDescription(); ���� ȣ���� �Ǹ�, �ʿ����� ������� ������� �ʾƵ� ��
+	
+	
 	virtual void	ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button){}
 
 };
@@ -185,7 +142,7 @@ extern Button *	gpC_press_button;
 //-----------------------------------------------------------------------------
 // ButtonGroup
 //
-// C_VS_UI_BUTTON2 object�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 class ButtonGroup : public SimpleDataList<C_VS_UI_EVENT_BUTTON *>
 {
@@ -346,9 +303,9 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// ��ũ�ѹ� Ŭ�����̴�
-// ���������� Show�� ������ ������ �⺻ ��ũ�ѹ� spk�� ����Ѵ�.
-// �ٸ� spk�� ����ϵ��� �����Ҽ� ������, ��������Ʈ�� ������ �⺻ spk�� ���ƾ� �Ѵ�.
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 class C_VS_UI_SCROLL_BAR : public Rect
@@ -842,7 +799,7 @@ public:
 		return m_pos;
 	}
 
-	void	SetPosMax(int max)	//pos_max�� ��ũ�ѵ� �׸��� �����̴�. ���� �� ȭ�鿡 5���� �׸��� ������, �� 10���� �׸��� �ִٸ� ��ũ�Ѱ��� 0~5 ���� �����Ƿ� pos_max == 6 �̴�. 
+	void	SetPosMax(int max)	
 	{
 		m_pos = 0;
 		m_pos_max = max;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : GCStashListHandler.cpp
-// Written By  : 김성민
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,12 +25,12 @@ throw ( ProtocolException , Error )
 	int stashNum = pPacket->getStashNum();
 
 	//------------------------------------------------------------
-	// 보관함이 있는가?
+	
 	//------------------------------------------------------------
 	if (stashNum>0)
 	{
 		//------------------------------------------------------------
-		// 기존에걸 지우고 다시 생성한다.
+		
 		//------------------------------------------------------------
 		if (g_pStorage!=NULL)
 		{
@@ -40,12 +40,12 @@ throw ( ProtocolException , Error )
 		g_pStorage = new MStorage;
 
 		
-		g_pStorage->Init( stashNum ); //STASH_RACK_MAX );	// 쩝.. 3개일까??
+		g_pStorage->Init( stashNum ); 
 
 		for (int rack=0; rack<stashNum; rack++)
 		{
 			//------------------------------------------------------------
-			// 접근하는 Storage를 지정한다.
+			
 			//------------------------------------------------------------
 			g_pStorage->SetCurrent( rack );
 
@@ -56,7 +56,7 @@ throw ( ProtocolException , Error )
 					const STASHITEM&	item = pPacket->getStashItem(rack, index);
 
 					//------------------------------------------------------------
-					// item을 생성한다.
+					
 					//------------------------------------------------------------
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.itemClass );
 
@@ -67,18 +67,18 @@ throw ( ProtocolException , Error )
 					pItem->SetCurrentDurability( item.durability );
 
 					//------------------------------------------
-					// 개수
+					
 					//------------------------------------------
-					// 총인 경우
+					
 					//------------------------------------------
 					if (pItem->IsGunItem())
 					{
 						MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
 
-						// 의미 없음 - -;
+						
 						pMagazine->SetID( 0 );
 
-						// 이거는 총에 맞춰서 해줘야된다.
+						
 						for (int j=0; j<(*g_pItemTable)[ITEM_CLASS_MAGAZINE].GetSize(); j++)			
 						{
 							pMagazine->SetItemType(	j );
@@ -89,20 +89,20 @@ throw ( ProtocolException , Error )
 							}
 						}
 
-						// 의미 없음
+						
 						pMagazine->ClearItemOption();
 					
-						// 탄창 개수
+						
 						pMagazine->SetNumber( item.num );
 
 						//------------------------------------
-						// 탄창 설정
+						
 						//------------------------------------
 						MGunItem* pGunItem = (MGunItem*)pItem;
 						pGunItem->SetMagazine( pMagazine );
 					}		
 					//------------------------------------------
-					// 총이 아닌 경우
+					
 					//------------------------------------------
 					else
 					{
@@ -114,13 +114,13 @@ throw ( ProtocolException , Error )
 					pItem->SetEnchantLevel( item.enchantLevel );
 
 					//------------------------------------------------------------
-					// Sub Item이 있으면 생성한다.
+					
 					//------------------------------------------------------------
 					int subNum = pPacket->getSubItemCount(rack, index);
 					if (subNum!=0)
 					{
 						//------------------------------------------------------------
-						// Belt인 경우
+						
 						//------------------------------------------------------------
 						if (pItem->GetItemClass()==ITEM_CLASS_BELT)
 						{
@@ -131,7 +131,7 @@ throw ( ProtocolException , Error )
 							std::list<SubItemInfo*>::const_iterator iItem = listSubItem.begin();
 
 							//------------------------------------------------------------
-							// 각각의 sub item을 설정한다.
+							
 							//------------------------------------------------------------
 							while (iItem != listSubItem.end())
 							{
@@ -140,7 +140,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -170,7 +170,7 @@ throw ( ProtocolException , Error )
 							std::list<SubItemInfo*>::const_iterator iItem = listSubItem.begin();
 
 							//------------------------------------------------------------
-							// 각각의 sub item을 설정한다.
+							
 							//------------------------------------------------------------
 							while (iItem != listSubItem.end())
 							{
@@ -179,7 +179,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -208,11 +208,11 @@ throw ( ProtocolException , Error )
 					}
 
 					//------------------------------------------------------------
-					// Storage에 item 설정
+					
 					//------------------------------------------------------------
 					if (!g_pStorage->SetItem( index, pItem ))
 					{
-						// 뭐지..
+						
 						delete pItem;
 
 						DEBUG_ADD_FORMAT("[Error] Can't Add Item to Storage. rack=%d, slot=%d", rack, index);
@@ -222,18 +222,18 @@ throw ( ProtocolException , Error )
 		}
 		
 		//------------------------------------------------------------
-		// 돈 설정
+		
 		//------------------------------------------------------------
 		g_pStorage->GetMoneyManager()->SetMoney( pPacket->getStashGold() );
 
 		//------------------------------------------------------------
-		// 보관함을 띄운다.
+		
 		//------------------------------------------------------------
 		UI_RunStorage();
 		UI_SetStorage(g_pStorage);
 	}
 	//------------------------------------------------------------
-	// 보관함이 없는 경우
+	
 	//------------------------------------------------------------
 	else
 	{

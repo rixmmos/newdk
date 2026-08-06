@@ -24,7 +24,7 @@ void GCMoveOKHandler::execute(GCMoveOK* pPacket, Player* pPlayer)
 
         ClientPlayer* pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
-    // 다음 좌표를 플레이어에 지정해 놓는다.
+    
     pClientPlayer->setX(pPacket->getX());
     pClientPlayer->setY(pPacket->getY());
     pClientPlayer->setDir(pPacket->getDir());

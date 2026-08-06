@@ -60,7 +60,7 @@ void CBillingPlayerManager::run() {
     __BEGIN_TRY
 
     try {
-        // Player DB �� Connection �� �ϳ� ������� �д�.
+        
         string host = g_pConfig->getProperty("UI_DB_HOST");
         string db = "DARKEDEN";
         string user = g_pConfig->getProperty("UI_DB_USER");
@@ -74,7 +74,7 @@ void CBillingPlayerManager::run() {
         cout << "***************************************************************" << endl;
 
 #ifdef __GAME_SERVER__
-        // CBilling Log DB�� Connection �� �ϳ� ������� �д�.
+        
         string cbhost = g_pConfig->getProperty("CBILLING_DB_HOST");
         string cbdb = g_pConfig->getProperty("CBILLING_DB_DB");
         string cbuser = g_pConfig->getProperty("CBILLING_DB_USER");
@@ -97,7 +97,7 @@ void CBillingPlayerManager::run() {
         while (true) {
             usleep(100);
 
-            // ���� �Ǿ� ���� �ʴٸ� ������ �õ��Ѵ�.
+            
             if (m_pCBillingPlayer == NULL) {
                 Socket* pSocket = NULL;
 
@@ -126,7 +126,7 @@ void CBillingPlayerManager::run() {
                             CBillingServerIP.c_str(), CBillingServerPort);
 
 #ifdef __GAME_SERVER__
-                    // interval validation packet �� ������.
+                    
                     sendIntervalValidation();
 #endif
                 } catch (Throwable& t) {
@@ -149,12 +149,12 @@ void CBillingPlayerManager::run() {
                     }
                     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
-                    // ���� ���� �õ� �ð�
-                    usleep(1000000); // 1��
+                    
+                    usleep(1000000); 
                 }
             }
 
-            // ������ ����Ǿ� �ִٸ� ������� ó���Ѵ�.
+            
             __ENTER_CRITICAL_SECTION(m_Mutex)
 
 
@@ -207,8 +207,8 @@ void CBillingPlayerManager::run() {
                 g_pDatabaseManager->executeDummyQuery(pCBillingConnection);
 #endif
 
-                // 1�ð� ~ 1�ð� 30�� ���̿��� dummy query �ð��� �����Ѵ�.
-                // timeout �� ���� �ʰ� �ϱ� ���ؼ��̴�.
+                
+                
                 dummyQueryTime.tv_sec += (60 + rand() % 30) * 60;
             }
 
@@ -259,7 +259,7 @@ void CBillingPlayerManager::sendIntervalValidation() {
     if (m_pCBillingPlayer != NULL) {
         m_pCBillingPlayer->sendIntervalValidation();
 
-        // �ٷ� ����������.
+        
         m_pCBillingPlayer->processOutput();
     }
 

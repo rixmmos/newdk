@@ -18,8 +18,8 @@
 //
 // class GCMove;
 //
-// 게임 서버에서 특정 사용자가 움직였다는 정보를 클라이언트로 보내줄
-// 때 사용하는 패킷 객체이다.(ObjectID,X,Y,DIR) 을 포함한다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,10 +32,10 @@ public:
 
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -48,7 +48,7 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static GCMovePacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketSize() const {
         return szObjectID + szCoord + szCoord + szDir;
     }
@@ -97,10 +97,10 @@ public:
 
 
 private:
-    ObjectID_t m_ObjectID; // 크리처 아이디
-    Coord_t m_X;           // X 좌표
-    Coord_t m_Y;           // Y 좌표
-    Dir_t m_Dir;           // 방향
+    ObjectID_t m_ObjectID; 
+    Coord_t m_X;           
+    Coord_t m_Y;           
+    Dir_t m_Dir;           
 };
 
 
@@ -131,7 +131,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCMovePacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szObjectID + szCoord + szCoord + szDir;
     }

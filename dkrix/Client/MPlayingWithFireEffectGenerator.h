@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachZoneEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MPLAYINGWITHFIREEFFECTGENERATOR_H__
@@ -17,7 +17,7 @@ class MPlayingWithFireEffectGenerator : public MEffectGenerator {
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_PLAYING_WITH_FIRE; }
 
 		int m_EffectCount;
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

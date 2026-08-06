@@ -64,18 +64,7 @@ void NicknameBook::load() {
     }
     END_DB(pStmt)
 
-    /*	if ( m_pOwner->getLevel() >= 10 )
-        {
-            Level_t level = m_pOwner->getLevel();
-            if ( level > 150 ) level=150;
-            NicknameInfo* pLevelNickname = new NicknameInfo;
-            pLevelNickname->setNicknameID( 1 );
-            pLevelNickname->setNicknameType( NicknameInfo::NICK_BUILT_IN );
-            pLevelNickname->setNicknameIndex( level/10 );
-            setNicknameInfo( 1, pLevelNickname );
-
-            cout << "닉네임 번호 : " << level/10 << endl;
-        }*/
+     
 
     if (m_pOwner->getLevel() >= 10) {
         Level_t level = m_pOwner->getLevel();
@@ -97,10 +86,10 @@ void NicknameBook::load() {
     }
 
     if (m_pOwner->getGuildID() != m_pOwner->getCommonGuildID()) {
-        // 길드를 가져온다.
+        
         Guild* pGuild = g_pGuildManager->getGuild(m_pOwner->getGuildID());
 
-        // 플레이어가 길드의 마스터인지를 확인한다.
+        
         if (pGuild != NULL && pGuild->getMaster() == m_pOwner->getName()) {
             NicknameInfo* pLevelNickname = new NicknameInfo;
             pLevelNickname->setNicknameID(GUILD_MASTER_NICKNAME_ID);

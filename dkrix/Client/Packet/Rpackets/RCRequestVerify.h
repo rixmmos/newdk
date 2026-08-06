@@ -10,18 +10,18 @@
 #define __RC_REQUEST_VERIFY_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 enum REQUEST_VERIFY
 {
 	REQUEST_VERIFY_NULL,
 	REQUEST_VERIFY_WHISPER_FAILED,
-	REQUEST_VERIFY_PROFILE_NOT_EXIST,		// profile이 아예 없는 경우
-	REQUEST_VERIFY_PROFILE_WRONG_USER,		// 잘못된 사용자에게 요청한 경우
-	REQUEST_VERIFY_PROFILE_DONE,			// profile 다 보냈다.
+	REQUEST_VERIFY_PROFILE_NOT_EXIST,		
+	REQUEST_VERIFY_PROFILE_WRONG_USER,		
+	REQUEST_VERIFY_PROFILE_DONE,			
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -43,10 +43,10 @@ public :
 	
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -56,7 +56,7 @@ public :
 	PacketID_t getPacketID () const throw () { return PACKET_RC_REQUEST_VERIFY; }
 	
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getPacketSize () const throw () { return szBYTE; }
 
 	#ifdef __DEBUG_OUTPUT__

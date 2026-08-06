@@ -49,37 +49,15 @@ void EffectHasVampireRelic::affect(Creature* pCreature)
     // Timeval      nextTime   = getNextTime();
     // Timeval      deadLine   = getDeadline();
     // Turn_t       RemainTime = deadLine.tv_sec - nextTime.tv_sec;
-    /*
-    StringStream msg;
-
-    if (pCreature->isSlayer())
-    {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-
-        msg << pSlayer->getName();
-    }
-    else
-    {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-
-        msg << pVampire->getName();
-    }
-
-    msg << " 님이 뱀파이어 성물을 가졌습니다.";
-
-    GCSystemMessage gcSystemMessage;
-    gcSystemMessage.setMessage(msg.toString());
-
-    g_pZoneGroupManager->broadcast( &gcSystemMessage );
-    */
-    // 존 정보를 얻는다.
+     
+    
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
     ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(pZone->getZoneID());
     Assert(pZoneInfo != NULL);
 
-    // 위치를 알린다.
+    
     char msg[100];
 
     const char* race;
@@ -96,11 +74,7 @@ void EffectHasVampireRelic::affect(Creature* pCreature)
             //                STRID_VAMPIRE ) ),
             (int)pCreature->getX(), (int)pCreature->getY());
 
-    /*	// 위치를 알린다.
-        StringStream msg;
-        msg << pCreature->getName() << " 님(" << ( pCreature->isSlayer() ? "슬레이어" : "뱀파이어" ) << ")이 "
-            << pZoneInfo->getFullName() << "(" << (int)pCreature->getX() << ", " << (int)pCreature->getY()
-            << ")에서 뱀파이어 성물을 가지고 있습니다."; */
+     
 
     GCSystemMessage gcSystemMessage;
     gcSystemMessage.setMessage(msg);
@@ -117,34 +91,7 @@ void EffectHasVampireRelic::affect(Item* pItem)
 
     {__BEGIN_TRY
 
-         /*
-      //Timeval      nextTime   = getNextTime();
-      //Timeval      deadLine   = getDeadline();
-      //Turn_t       RemainTime = deadLine.tv_sec - nextTime.tv_sec;
-      StringStream msg;
-
-      if (pCreature->isSlayer())
-      {
-          Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-
-          msg << pSlayer->getName() << " 님이 ";
-      }
-      else
-      {
-          Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-
-          msg << pVampire->getName() << " 님이 ";
-      }
-
-      msg << " 뱀파이어 성물을 가지고 있습니다." << endl;
-
-      GCSystemMessage gcSystemMessage;
-      gcSystemMessage.setMessage(msg.toString());
-
-      g_pZoneGroupManager->broadcast( &gcSystemMessage );
-
-      setNextTime(m_Tick);
-      */
+          
 
          __END_CATCH}
 

@@ -2,7 +2,7 @@
 // MTimeItemManager.H									- by sonee
 //-----------------------------------------------------------------------------
 // MTimeItemManager
-//  - 시간이 필요한 아이템의 정보를 기록한다.
+
 //  - 2003.04.04
 //-----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
 #include "MTypeDef.h"
 #include <map>
 
-// DWORD 는 ms 가 아니라 초단위-_-a
+
 
 class MTimeItemManager : public std::map<TYPE_OBJECTID, DWORD>
 {
@@ -27,7 +27,7 @@ public :
 	bool	IsExist( TYPE_OBJECTID objectID );	
 	bool	IsExpired( TYPE_OBJECTID objectID );
 
-	bool	AddTimeItem( TYPE_OBJECTID objectID, DWORD time );			// time 은 second 단위
+	bool	AddTimeItem( TYPE_OBJECTID objectID, DWORD time );			
 	bool	RemoveTimeItem( TYPE_OBJECTID objectID );
 	
 	

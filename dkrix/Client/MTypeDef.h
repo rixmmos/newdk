@@ -8,10 +8,10 @@
 #pragma warning(disable:4786)
 
 //------------------------------------------------------------------
-// NULL값
+
 //------------------------------------------------------------------
 #define	ZONEID_NULL						0xFFFF
-#define	OBJECTID_NULL					0xFFFFFFFF		// 아무것도 없다는 의미..
+#define	OBJECTID_NULL					0xFFFFFFFF		
 #define	INTERACTIONOBJECTTYPE_NULL		0xFFFF
 #define	SECTORPOSITION_NULL				0xFFFF
 
@@ -60,7 +60,7 @@ typedef	unsigned short	TYPE_ITEM_WEIGHT;
 
 //----------------------------------------------------------------------
 //
-//                 Creature 관련
+
 //
 //----------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ typedef	unsigned short	TYPE_ITEM_WEIGHT;
 typedef	unsigned short	TYPE_CREATURETYPE;
 
 //----------------------------------------------------------------------
-// 방향에 대한 값
+
 //----------------------------------------------------------------------
 enum DIRECTIONS
 {			
@@ -90,10 +90,10 @@ enum DIRECTIONS
 #define	MAX_DIRECTION	DIRECTION_MAX
 
 //----------------------------------------------------------------------
-// 행동에 대한 값
+
 //----------------------------------------------------------------------
-// VAMPIRE와 SLAYER가 같은 값을 가지는 이유는
-// FramePack에서의 Action번호 때문이다..
+
+
 //
 #define	ACTION_STAND					0
 #define	ACTION_MOVE						1
@@ -102,52 +102,52 @@ enum DIRECTIONS
 #define	ACTION_DAMAGED					4
 #define	ACTION_DRAINED					5
 #define	ACTION_DIE						6
-#define	ACTION_VAMPIRE_DRAIN		7			// 같은 값이다.
-#define	ACTION_SLAYER_GUN_SR			7			// 저격용(TR)
-#define	ACTION_SLAYER_GUN_AR			8			// 소총(AG)
-#define	ACTION_SLAYER_SWORD				9			// 칼
-#define	ACTION_SLAYER_BLADE				10			// 도
+#define	ACTION_VAMPIRE_DRAIN		7			
+#define	ACTION_SLAYER_GUN_SR			7			
+#define	ACTION_SLAYER_GUN_AR			8			
+#define	ACTION_SLAYER_SWORD				9			
+#define	ACTION_SLAYER_BLADE				10			
 #define	ACTION_SLAYER_THROW_WEAPON		11	
 #define	ACTION_SLAYER_MOTOR_MOVE		12
-#define	ACTION_SLAYER_GUN_SG			13			// 샷건(SG)
-#define	ACTION_SLAYER_GUN_SMG			14			// 자동소총(SMG)
-#define	ACTION_SLAYER_SWORD_2			15			// 칼 특수동작
-#define	ACTION_SLAYER_BLADE_2			16			// 도 특수동작
+#define	ACTION_SLAYER_GUN_SG			13			
+#define	ACTION_SLAYER_GUN_SMG			14			
+#define	ACTION_SLAYER_SWORD_2			15			
+#define	ACTION_SLAYER_BLADE_2			16			
 #define	ACTION_SLAYER_THROW_POTION		17
 #define	ACTION_SLAYER_MOTOR_STAND		18
-#define	ACTION_VAMPIRE_ATTACK_SLOW		8			// vampire전용
-#define	ACTION_VAMPIRE_ATTACK_FAST		9			// vampire전용
+#define	ACTION_VAMPIRE_ATTACK_SLOW		8			
+#define	ACTION_VAMPIRE_ATTACK_FAST		9			
 
 // 2001.7.6
-#define	ACTION_VAMPIRE_DIE_BODY			10			// vampire전용 - 머리없고 목만 있는 것
-#define	ACTION_SLAYER_GUN_SR_SLOW		19			// 저격용(TR)
-#define	ACTION_SLAYER_GUN_SR_FAST		20			// 저격용(TR)
-#define	ACTION_SLAYER_GUN_AR_SLOW		21			// 소총(AG)
-#define	ACTION_SLAYER_GUN_AR_FAST		22	 		// 소총(AG)
-#define	ACTION_SLAYER_GUN_SG_SLOW		23			// 샷건(SG)
-#define	ACTION_SLAYER_GUN_SG_FAST		24			// 샷건(SG)
-#define	ACTION_SLAYER_GUN_SMG_SLOW		25			// 자동소총(SMG)
-#define	ACTION_SLAYER_GUN_SMG_FAST		26			// 자동소총(SMG)
-#define	ACTION_SLAYER_SWORD_SLOW		27			// 칼
-#define	ACTION_SLAYER_SWORD_FAST		28			// 칼
-#define	ACTION_SLAYER_BLADE_SLOW		29			// 도
-#define	ACTION_SLAYER_BLADE_FAST		30			// 도
-#define	ACTION_SLAYER_SWORD_2_SLOW		31			// 칼 특수동작
-#define	ACTION_SLAYER_SWORD_2_FAST		32			// 칼 특수동작
-#define	ACTION_SLAYER_BLADE_2_SLOW		33			// 도 특수동작
-#define	ACTION_SLAYER_BLADE_2_FAST		34			// 도 특수동작
+#define	ACTION_VAMPIRE_DIE_BODY			10			
+#define	ACTION_SLAYER_GUN_SR_SLOW		19			
+#define	ACTION_SLAYER_GUN_SR_FAST		20			
+#define	ACTION_SLAYER_GUN_AR_SLOW		21			
+#define	ACTION_SLAYER_GUN_AR_FAST		22	 		
+#define	ACTION_SLAYER_GUN_SG_SLOW		23			
+#define	ACTION_SLAYER_GUN_SG_FAST		24			
+#define	ACTION_SLAYER_GUN_SMG_SLOW		25			
+#define	ACTION_SLAYER_GUN_SMG_FAST		26			
+#define	ACTION_SLAYER_SWORD_SLOW		27			
+#define	ACTION_SLAYER_SWORD_FAST		28			
+#define	ACTION_SLAYER_BLADE_SLOW		29			
+#define	ACTION_SLAYER_BLADE_FAST		30			
+#define	ACTION_SLAYER_SWORD_2_SLOW		31			
+#define	ACTION_SLAYER_SWORD_2_FAST		32			
+#define	ACTION_SLAYER_BLADE_2_SLOW		33			
+#define	ACTION_SLAYER_BLADE_2_FAST		34			
 
-#define ACTION_OUSTERS_STAND			7			// 서있기
-#define ACTION_OUSTERS_MOVE				8			// 걷기
-#define ACTION_OUSTERS_CHAKRAM			9			// 차크람 공격
-#define ACTION_OUSTERS_MAGIC_ATTACK		10			// 마법 공격
-#define ACTION_OUSTERS_DRAIN			11			// 흡영
-#define ACTION_OUSTERS_FAST_MOVE_STAND	12			// 공중 정지
-#define ACTION_OUSTERS_FAST_MOVE_MOVE	13			// 공중 움직임
-#define ACTION_OUSTERS_ATTACK_SLOW		14			// 일반 공격 느림
-#define ACTION_OUSTERS_ATTACK_FAST		15			// 일반 공격 빠름
-#define ACTION_OUSTERS_CHAKRAM_SLOW		16			// 차크람 공격 느림
-#define ACTION_OUSTERS_CHAKRAM_FAST		17			// 차크람 공격 빠름
+#define ACTION_OUSTERS_STAND			7			
+#define ACTION_OUSTERS_MOVE				8			
+#define ACTION_OUSTERS_CHAKRAM			9			
+#define ACTION_OUSTERS_MAGIC_ATTACK		10			
+#define ACTION_OUSTERS_DRAIN			11			
+#define ACTION_OUSTERS_FAST_MOVE_STAND	12			
+#define ACTION_OUSTERS_FAST_MOVE_MOVE	13			
+#define ACTION_OUSTERS_ATTACK_SLOW		14			
+#define ACTION_OUSTERS_ATTACK_FAST		15			
+#define ACTION_OUSTERS_CHAKRAM_SLOW		16			
+#define ACTION_OUSTERS_CHAKRAM_FAST		17			
 
 #define	ACTION_MAX_VAMPIRE			11
 #define	ACTION_MAX_SLAYER			35 //by viva
@@ -157,21 +157,21 @@ enum DIRECTIONS
 
 
 //----------------------------------------------------------------------
-// Addon위치
+
 //----------------------------------------------------------------------
 enum ADDON
 {
-	ADDON_HAIR,			// 머리
-	ADDON_HELM,			// 모자
-	ADDON_COAT,			// 상의
-	ADDON_TROUSER,		// 하의
-	//ADDON_SHOES,		// 신발
-	//ADDON_LEFTGLOVE,		// 왼손 장갑
-	//ADDON_RIGHTGLOVE,		// 오른손 장갑
-	ADDON_LEFTHAND,		// 왼손			
-	ADDON_RIGHTHAND,	// 오른손
-	//ADDON_CLOAK,		// 외투
-	ADDON_MOTOR,		// 오토바이
+	ADDON_HAIR,			
+	ADDON_HELM,			
+	ADDON_COAT,			
+	ADDON_TROUSER,		
+	
+	
+	
+	ADDON_LEFTHAND,		
+	ADDON_RIGHTHAND,	
+	
+	ADDON_MOTOR,		
 	ADDON_MAX,
 	ADDON_NULL	= 0xFFFF,
 };
@@ -180,7 +180,7 @@ enum ADDON
 
 //----------------------------------------------------------------------
 //
-//                          Effect 관련
+
 //
 //----------------------------------------------------------------------
 #define	ACTIONINFO_NULL					0xFFFF
@@ -190,7 +190,7 @@ typedef	unsigned short	TYPE_ACTIONINFO;
 
 //----------------------------------------------------------------------
 //
-//                       EffectGenerator 관련
+
 //
 //----------------------------------------------------------------------
 typedef	unsigned short TYPE_EFFECTGENERATORID;
@@ -201,7 +201,7 @@ typedef	unsigned short TYPE_EFFECTGENERATORID;
 
 //----------------------------------------------------------------------
 //
-//                       Sound / Music 관련
+
 //
 //----------------------------------------------------------------------
 
@@ -215,7 +215,7 @@ typedef unsigned short TYPE_MUSICID;
 
 
 //----------------------------------------------------------------------
-// EffectSpriteType 정의
+
 //----------------------------------------------------------------------
 typedef	unsigned short				TYPE_EFFECTSPRITETYPE;
 #define	SIZE_EFFECTSPRITETYPE		2
@@ -402,14 +402,14 @@ enum AC_SLAYER_PART
 
 enum AC_ADDON
 {
-	AC_ADDON_BODY,		// 몸통
-	AC_ADDON_HELM,		// 헬멧
+	AC_ADDON_BODY,		
+	AC_ADDON_HELM,		
 //	AC_ADDON_COAT,			// add by viva
 //	AC_ADDON_TROUSER,		//add by viva
-	AC_ADDON_LEFTHAND,	// 왼손
-	AC_ADDON_RIGHTHAND,	// 오른손
-	AC_ADDON_MOTOR,		// 오토바이
-	AC_ADDON_SHOULDER,	// 견장
+	AC_ADDON_LEFTHAND,	
+	AC_ADDON_RIGHTHAND,	
+	AC_ADDON_MOTOR,		
+	AC_ADDON_SHOULDER,	
 	AC_ADDON_MAX,
 	AC_ADDON_NULL	= 0xFFFF,
 };

@@ -1,14 +1,4 @@
-/**
- * @file test_spritepack.c
- * @brief SpritePack parsing property-based tests
- * 
- * Property 4: SpritePack 解析完整性
- * For any valid SpritePack file, loading should correctly read the sprite count,
- * and for each sprite index from 0 to count-1, the sprite should be loadable
- * and have valid dimensions.
- * 
- * Validates: Requirements 4.1, 4.2, 4.4
- */
+ 
 
 #include "spritepack.h"
 #include "sprite.h"
@@ -186,15 +176,7 @@ static void cleanup_temp_files(const char* filename) {
     }
 }
 
-/**
- * Property 4: SpritePack 解析完整性
- * 
- * For any valid SpritePack file, loading should correctly read the sprite count,
- * and for each sprite index from 0 to count-1, the sprite should be loadable
- * and have valid dimensions.
- * 
- * Validates: Requirements 4.1, 4.2, 4.4
- */
+ 
 static int test_property4_spritepack_completeness(void) {
     const int NUM_ITERATIONS = 100;
     const int MAX_SPRITES = 10;

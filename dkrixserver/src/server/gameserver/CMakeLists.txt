@@ -1,8 +1,8 @@
 # ============================================================================
-# GameServer 模块
+# GameServer 
 # ============================================================================
 
-# 通用编译定义和包含目录
+
 set(GAMESERVER_COMPILE_DEFS __GAME_SERVER__ __COMBAT__)
 set(GAMESERVER_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -23,7 +23,7 @@ set(GAMESERVER_INCLUDE_DIRS
 )
 
 # ============================================================================
-# 子目录库
+
 # ============================================================================
 add_subdirectory(skill)
 add_subdirectory(item)
@@ -36,7 +36,7 @@ add_subdirectory(quest)
 add_subdirectory(mofus)
 
 # ============================================================================
-# Monster 相关源文件
+# Monster 
 # ============================================================================
 set(MONSTER_SOURCES
     Monster.cpp
@@ -49,7 +49,7 @@ set(MONSTER_SOURCES
 )
 
 # ============================================================================
-# Item 相关源文件（gameserver 目录下的）
+# Item gameserver 
 # ============================================================================
 set(ITEM_SOURCES
     Item.cpp
@@ -65,7 +65,7 @@ set(ITEM_SOURCES
 )
 
 # ============================================================================
-# Guild 相关源文件
+# Guild 
 # ============================================================================
 set(GUILD_SOURCES
     Party.cpp
@@ -75,7 +75,7 @@ set(GUILD_SOURCES
 )
 
 # ============================================================================
-# Event 相关源文件
+# Event 
 # ============================================================================
 set(EVENT_SOURCES
     Event.cpp
@@ -96,7 +96,7 @@ set(EVENT_SOURCES
 )
 
 # ============================================================================
-# Effect 相关源文件
+# Effect 
 # ============================================================================
 set(EFFECT_SOURCES
     Effect.cpp
@@ -179,7 +179,7 @@ set(EFFECT_SOURCES
 )
 
 # ============================================================================
-# GQuest 相关源文件
+# GQuest 
 # ============================================================================
 set(GQUEST_SOURCES
     GQuestInfo.cpp
@@ -233,7 +233,7 @@ set(GQUEST_SOURCES
 
 
 # ============================================================================
-# 主要源文件
+
 # ============================================================================
 set(GAMESERVER_MAIN_SOURCES
     main.cpp
@@ -382,7 +382,7 @@ set(GAMESERVER_MAIN_SOURCES
 )
 
 # ============================================================================
-# Exchange System 相关源文件
+# Exchange System 
 # ============================================================================
 set(EXCHANGE_SOURCES
     exchange/ExchangeService.cpp
@@ -390,7 +390,7 @@ set(EXCHANGE_SOURCES
 )
 
 # ============================================================================
-# GameServer 可执行文件
+# GameServer 
 # ============================================================================
 add_executable(gameserver
     ${GAMESERVER_MAIN_SOURCES}
@@ -403,13 +403,13 @@ add_executable(gameserver
     ${EXCHANGE_SOURCES}
 )
 
-# 编译定义
+
 target_compile_definitions(gameserver PRIVATE ${GAMESERVER_COMPILE_DEFS})
 
-# 包含目录
+
 target_include_directories(gameserver PRIVATE ${GAMESERVER_INCLUDE_DIRS})
 
-# 链接库（注意顺序，被依赖的库放后面）
+
 if(APPLE)
     set(EXTRA_LIBS util z)
 elseif(UNIX)
@@ -439,7 +439,7 @@ target_link_libraries(gameserver PRIVATE
     ${EXTRA_LIBS}
 )
 
-# 导出符号（用于动态加载）
+
 set_target_properties(gameserver PROPERTIES ENABLE_EXPORTS ON)
 
 # ============================================================================

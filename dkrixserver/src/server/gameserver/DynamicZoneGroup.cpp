@@ -45,7 +45,7 @@ void DynamicZoneGroup::addDynamicZone(DynamicZone* pDynamicZone) {
 }
 
 bool DynamicZoneGroup::canEnter() {
-    // 현재 있는 DynamicZone 중에서 가능한 넘을 찾는다.
+    
     HashMapDynamicZoneItor itr = m_DynamicZones.begin();
     HashMapDynamicZoneItor endItr = m_DynamicZones.end();
 
@@ -59,7 +59,7 @@ bool DynamicZoneGroup::canEnter() {
 }
 
 DynamicZone* DynamicZoneGroup::getAvailableDynamicZone() {
-    // 현재 있는 DynamicZone 중에서 가능한 넘을 찾는다.
+    
     HashMapDynamicZoneItor itr = m_DynamicZones.begin();
     HashMapDynamicZoneItor endItr = m_DynamicZones.end();
 
@@ -71,8 +71,8 @@ DynamicZone* DynamicZoneGroup::getAvailableDynamicZone() {
         }
     }
 
-    // 현재 있는 DynamicZone 중에는 가능한 넘이 없다.
-    // 새로 DynamicZone 을 만든다.
+    
+    
     DynamicZone* pDynamicZone = NULL;
 
     pDynamicZone = g_pDynamicZoneFactoryManager->createDynamicZone(m_DynamicZoneType);

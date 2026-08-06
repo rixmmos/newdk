@@ -62,7 +62,7 @@ class CSDLMusic {
 		//void		SubVolume(long hdec);
 
 		//-----------------------------------------------------------
-		// 상태
+		
 		//-----------------------------------------------------------
 		bool		IsInit() const		{ return m_bInit; }
 		bool		IsLoad() const		{ return m_bInit && m_bLoad; }
@@ -96,12 +96,12 @@ class CSDLMusic {
 
 		bool						m_bSoftwareSynth;
 
-		bool						m_bInit;	// 초기화 되었는가?
-		bool						m_bLoad;	// 화일이 Load되었는가?
-		bool						m_bPlay;	// 연주 중인가?
+		bool						m_bInit;	
+		bool						m_bLoad;	
+		bool						m_bPlay;	
 
-		int							m_OriginalTempo;	// original 템포
-		int							m_CurrentTempo;		// 현재 템포
+		int							m_OriginalTempo;	
+		int							m_CurrentTempo;		
 		//long						m_MasterVolume;
 };
 

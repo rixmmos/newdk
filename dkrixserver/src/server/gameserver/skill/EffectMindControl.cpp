@@ -75,7 +75,7 @@ void EffectMindControl::unaffect(Creature* pCreature)
     // cout << "EffectMindControl" << "unaffect BEGIN" << endl;
 
     Assert(pCreature != NULL);
-    Assert(pCreature->isSlayer()); // 슬레이어말고는 걸리지 않는다.
+    Assert(pCreature->isSlayer()); 
 
     pCreature->removeFlag(Effect::EFFECT_CLASS_MIND_CONTROL);
 

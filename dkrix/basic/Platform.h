@@ -17,12 +17,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Define assert macro for non-Windows platforms */
-#ifndef PLATFORM_WINDOWS
+#if !defined(_WIN32) && !defined(_WIN64)
 #ifndef assert
 #define assert(e) ((void)(e))
 #endif
@@ -34,7 +30,9 @@ extern "C" {
 
 /* Detect platform */
 #if defined(_WIN32) || defined(_WIN64)
-	#define PLATFORM_WINDOWS
+	#ifndef PLATFORM_WINDOWS
+		#define PLATFORM_WINDOWS
+	#endif
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 #elif defined(__APPLE__)
@@ -46,6 +44,26 @@ extern "C" {
 	#endif
 #else
 	#define PLATFORM_UNKNOWN
+#endif
+
+#ifdef PLATFORM_WINDOWS
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN
+	#endif
+	#ifndef _WINDOWS_
+		#include <windows.h>
+	#endif
+	#include <mmsystem.h>
+	#ifdef PlaySound
+		#undef PlaySound
+	#endif
+	#ifndef __builtin_expect
+		#define __builtin_expect(expr, expected) (expr)
+	#endif
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* ============================================================================
@@ -107,6 +125,7 @@ extern "C" {
 #define NOT_SELECTED						-1
 
 /* Type definitions (same as original Typedef.h) */
+#ifndef PLATFORM_WINDOWS
 typedef uint8_t			BYTE;
 typedef uint16_t		WORD;
 typedef uint32_t		UINT;
@@ -123,11 +142,20 @@ typedef intptr_t		LONG_PTR;
 typedef uintptr_t		DWORD_PTR;
 typedef int32_t			LONG;
 typedef int				BOOL;
+#else
+typedef uint64_t		QWORD;
+typedef void*			ADDRESS_MODE;
+#endif
 
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
+	/* Define id_t for cross-platform compatibility */
+	#ifndef PLATFORM_ID_T_DEFINED
+	#define PLATFORM_ID_T_DEFINED
+	#ifdef PLATFORM_WINDOWS
+	typedef DWORD			id_t;
+	#else
+	typedef unsigned int	id_t;
+	#endif
+	#endif
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -189,6 +217,7 @@ typedef struct IDirectSoundNotify* LPDIRECTSOUNDNOTIFY;
 /* CRITICAL_SECTION for thread synchronization */
 #ifndef _CRITICAL_SECTION_DEFINED
 #define _CRITICAL_SECTION_DEFINED
+#if !defined(_WIN32) && !defined(_WIN64)
 #include <pthread.h>
 
 typedef struct _CRITICAL_SECTION {
@@ -202,7 +231,7 @@ static inline void InitializeCriticalSection(CRITICAL_SECTION* cs) {
 	if (cs != NULL) {
 		pthread_mutexattr_t attr;
 		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  // 递归锁
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  
 		pthread_mutex_init(&cs->mutex, &attr);
 		pthread_mutexattr_destroy(&attr);
 		cs->initialized = 1;
@@ -227,8 +256,10 @@ static inline void DeleteCriticalSection(CRITICAL_SECTION* cs) {
 		cs->initialized = 0;
 	}
 }
+#endif
 
 /* GDI object management functions - stub implementations */
+#ifndef PLATFORM_WINDOWS
 static inline int DeleteObject(void* hObject) {
 	(void)hObject;
 	/* Stub - Windows GDI object deletion */
@@ -338,6 +369,7 @@ static inline void* CreateFontIndirect(LOGFONT* lplf) {
 	return (void*)1; /* Return a non-null handle */
 }
 #endif
+#endif
 
 /* Windows path constants */
 #ifndef _MAX_PATH
@@ -350,12 +382,11 @@ static inline void* CreateFontIndirect(LOGFONT* lplf) {
 #endif
 
 /* Color type definitions */
+#ifndef PLATFORM_WINDOWS
 typedef DWORD			COLORREF;
+#endif
+#ifndef RGB
 #define RGB(r,g,b)		((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
-
-/* id_t conflicts with POSIX on macOS/Linux, only define on Windows */
-#ifdef PLATFORM_WINDOWS
-typedef DWORD			id_t;
 #endif
 
 typedef WORD			char_t;
@@ -849,11 +880,6 @@ typedef WORD			char_t;
 
 #ifdef PLATFORM_WINDOWS
 	/* Windows types */
-	#ifndef _WINDOWS_
-		#define WIN32_LEAN_AND_MEAN
-		#include <windows.h>
-	#endif
-
 	typedef HANDLE	platform_thread_t;
 	typedef HANDLE	platform_mutex_t;
 	typedef HANDLE	platform_event_t;
@@ -1163,6 +1189,7 @@ void platform_shutdown(void);
  * Rectangle Structure (Windows RECT equivalent)
  * ============================================================================ */
 
+#ifndef PLATFORM_WINDOWS
 #ifndef RECT_DEFINED
 #define RECT_DEFINED
 
@@ -1776,6 +1803,7 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
         lprc->bottom = yBottom;
     }
 }
+#endif
 
 /* max and min macros for compatibility with Windows code */
 #ifndef PLATFORM_WINDOWS

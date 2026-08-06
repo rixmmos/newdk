@@ -696,7 +696,8 @@ XMLParser::~XMLParser()
 //////////////////////////////////////////////////////////////////////////////
 char* XMLParser::parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector)
 {
-	assert(buffer != NULL && pTree != NULL);
+	if (buffer == NULL || pTree == NULL)
+		return NULL;
 //	assert(m_pHandler != NULL);
 	char name[1024];
 	char name2[1024];
@@ -706,7 +707,11 @@ char* XMLParser::parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector)
 		return NULL;
 
 	if( memcmp( pXml, "<?xml", 5 ) == 0 )
+	{
 		pXml = strchr( pXml+1, chXMLTagOpen );
+		if( pXml == NULL )
+			return NULL;
+	}
 		
 //	// Close Tag
 //	if( *(pXml+1) == chXMLTagPre ) // </Close
@@ -722,6 +727,8 @@ char* XMLParser::parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector)
 
 	// attr load
 	char *pCloseTag = strchr( pXml, chXMLTagClose );
+	if( pCloseTag == NULL )
+		return NULL;
 	while( 1 )
 	{
 		pXml = pXml + strspn( pXml, chXMLTrimToken );

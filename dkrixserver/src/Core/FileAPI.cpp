@@ -596,10 +596,10 @@ uint FileAPI::availablefile_ex(int fd) {
     __BEGIN_TRY
 
 #if defined(__LINUX__) || defined(__APPLE__)
-    // �Ǽ��� FIONBIO �Ķ���͸� �ִ� �ٶ��� ���α׷��� ����
-    // �Ǿ���.
-    // ���� �޾ƿ��Ƿ� 0 ���� �ʱ�ȭ�����ָ� �ξ� ������ ��
-    // ����.
+    
+    
+    
+    
     uint arg = 0;
     ioctl_ex(fd, FIONREAD, &arg);
     return arg;

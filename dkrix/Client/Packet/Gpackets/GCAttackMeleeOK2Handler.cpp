@@ -12,6 +12,7 @@
 #include "ClientDef.h"
 #include "MActionInfoTable.h"
 #include "SkillDef.h"
+#include "PacketFunction.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -24,9 +25,11 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	// message
+	WriteCombatCrashMarker("GCAttackMeleeOK2 attacker=%d short=%d long=%d",
+		pPacket->getObjectID(), pPacket->getShortCount(), pPacket->getLongCount());
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -37,17 +40,19 @@ throw ( ProtocolException , Error )
 	}	
 
 	//------------------------------------------------------
-	// 대상이 되는 creature를 얻는다.
+	
 	//------------------------------------------------------
 	MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
+	WriteCombatCrashMarker("GCAttackMeleeOK2 creature lookup attacker=%d creature=%p",
+		pPacket->getObjectID(), pCreature);
 
 	if (pCreature==NULL)
 	{
-		// 그런 creature가 없을 경우
+		
 		DEBUG_ADD_FORMAT("There's no such creature : ID=%d", pPacket->getObjectID());				
 		
 		//------------------------------------------------------------------
-		// 바로 맞는 모습
+		
 		//------------------------------------------------------------------
 		g_pPlayer->PacketSpecialActionResult( 
 								RESULT_SKILL_ATTACK_MELEE,//pCreature->GetBasicActionInfo(),
@@ -58,43 +63,34 @@ throw ( ProtocolException , Error )
 	}
 	else
 	{
+		WriteCombatCrashMarker("GCAttackMeleeOK2 before action attacker=%d basicAI=%d player=%d,%d",
+			pPacket->getObjectID(), pCreature->GetBasicActionInfo(), g_pPlayer->GetX(), g_pPlayer->GetY());
 		//------------------------------------------------------
-		// 행동하는 Creature가 TargetCreature를 바라보도록 한다.
+		
 		//------------------------------------------------------
 		pCreature->SetDirectionToPosition( g_pPlayer->GetX(), g_pPlayer->GetY() );
 
 		//------------------------------------------------------
-		// Creature가 Player를 공격하는 모습
+		
 		//------------------------------------------------------
 		//g_pPlayer->PacketSpecialActionResult( SKILL_ATTACK_MELEE + g_ActionInfoTable.GetMinResultActionInfo() );
-		MActionResult* pResult = new MActionResult;
-		pResult->Add( new MActionResultNodeActionInfo( 
-									pCreature->GetBasicActionInfo(),
-									pPacket->getObjectID(), 
-									g_pPlayer->GetID(), 
-									g_pPlayer->GetX(),
-									g_pPlayer->GetY()
-						)	 
-					);
-
-		//------------------------------------------------------
-		// Creature가 행동을 취하도록 한다.
-		//------------------------------------------------------
-		pCreature->PacketSpecialActionToOther(
-						pCreature->GetBasicActionInfo(), 
-						g_pPlayer->GetID(), 
-						pResult
-		);
+		 
+		WriteCombatCrashMarker("GCAttackMeleeOK2 skipped monster action attacker=%d basicAI=%d",
+			pPacket->getObjectID(), pCreature->GetBasicActionInfo());
 	}
 
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
+	WriteCombatCrashMarker("GCAttackMeleeOK2 before modify attacker=%d short=%d long=%d",
+		pPacket->getObjectID(), pPacket->getShortCount(), pPacket->getLongCount());
 	AffectModifyInfo(g_pPlayer, pPacket);
+	WriteCombatCrashMarker("GCAttackMeleeOK2 after modify attacker=%d hp=%d/%d",
+		pPacket->getObjectID(), g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP());
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );

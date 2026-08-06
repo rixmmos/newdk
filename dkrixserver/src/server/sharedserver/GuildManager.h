@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GuildManager.h
-// Written By  : �輺��
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -17,8 +17,8 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // class GuildManager
-// ���� Ȱ������ ���� ��� ������� ��带 �޸𸮿� map
-// ���·� ������ �ְ�, ���ο� ����� ���/������ ����Ѵ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -96,14 +96,14 @@ public:
 
     string getGuildName(GuildID_t guildID) noexcept(false);
 
-    // ��尡 ���� ������?
+    
     bool hasCastle(GuildID_t guildID) noexcept(false);
     bool hasCastle(GuildID_t guildID, ServerID_t& serverID, ZoneID_t& zoneID) noexcept(false);
 
-    // ��尡 �����û�� �߳�?
+    
     bool hasWarSchedule(GuildID_t guildID) noexcept(false);
 
-    // ���� �������� ������ �ִ°�?
+    
     bool hasActiveWar(GuildID_t guidlID) noexcept(false);
 
 public: // debug
@@ -113,9 +113,9 @@ public: // debug
     ///// Member data /////
 
 protected:
-    unordered_map<GuildID_t, Guild*> m_Guilds; // ��� ������ ��
+    unordered_map<GuildID_t, Guild*> m_Guilds; 
 
-    Timeval m_WaitMemberClearTime; // heartbeat ���� Wait ���� ����� ���� �ð�
+    Timeval m_WaitMemberClearTime; 
 
     // mutex
     mutable Mutex m_Mutex;

@@ -48,7 +48,7 @@ void ActionRecallSiege::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// ¾×¼ÇÀ» ½ÇÇàÇÑ´Ù.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionRecallSiege::execute(Creature* pNPC, Creature* pCreature)
 
@@ -98,12 +98,12 @@ void ActionRecallSiege::execute(Creature* pNPC, Creature* pCreature)
 
     if (!g_pGuildManager->isGuildMaster(pPC->getGuildID(), pPC)) {
         GCSystemMessage gcSM;
-        gcSM.setMessage("Ö»ÓÐÐÐ»á»á³¤,²Å¿ÉÒÔ½øÐÐÉêÇë.");
+        gcSM.setMessage(",.");
         pGamePlayer->sendPacket(&gcSM);
         return;
     }
 
-    // ¼±ÅÃÇÑ ±æµå¸¦ °¡Á®¿Â´Ù.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPC->getGuildID());
     // try { Assert( pGuild != NULL ); } catch ( Throwable& ) { return; }
     if (pGuild == NULL)

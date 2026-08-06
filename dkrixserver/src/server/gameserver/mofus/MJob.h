@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // filename	: MJob.h
-// desc		: 모퍼스에 연결해서 파워포인트를 가져오는 하나의 작업 단위
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __MJOB_H__
@@ -12,7 +12,7 @@ public:
         : m_UserID(userID), m_Name(name), m_CellNum(cellnum), m_PowerPoint(0), m_ErrorCode(0), m_bEnd(false) {}
 
 public:
-    // 포인트 누적
+    
     void addPowerPoint(int point) {
         m_PowerPoint += point;
     }
@@ -48,22 +48,22 @@ public:
     }
 
 private:
-    // 사용자 ID
+    
     string m_UserID;
 
-    // 캐릭터 명
+    
     string m_Name;
 
-    // 핸드폰 번호
+    
     string m_CellNum;
 
-    // 가져온 포인트
+    
     int m_PowerPoint;
 
-    // 에러 코드
+    
     int m_ErrorCode;
 
-    // 작업이 끝났나?
+    
     bool m_bEnd;
 };
 

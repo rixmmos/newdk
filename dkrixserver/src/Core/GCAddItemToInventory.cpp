@@ -2,8 +2,8 @@
 //
 // Filename    : GCAddItemToInventory.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -41,7 +41,7 @@ GCAddItemToInventory::~GCAddItemToInventory() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToInventory::read(SocketInputStream& iStream)
 
@@ -79,7 +79,7 @@ void GCAddItemToInventory::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddItemToInventory::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY

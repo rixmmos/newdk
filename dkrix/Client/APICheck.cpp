@@ -95,7 +95,8 @@ BOOL APICheck::CheckApi()
 	BYTE	bReadCode[37];
 	if (m_hsend!=NULL)	{
 		memcpy(&bReadCode[0],m_hsend,37);
-		for (int i=0;i<checklen;i++)
+		int i = 0;
+		for (;i<checklen;i++)
 		{
 			if (bReadCode[i]!=bCheck[i])
 			{
@@ -122,7 +123,7 @@ BOOL APICheck::CheckApi()
 	{
 		g_ppProceAddress[i]= (DWORD)GetProcAddress(LoadLibrary(g_szCheckDLL[i*2]),g_szCheckDLL[i*2+1]);
 		memcpy(&code,&g_ppProceAddress[i],1);
-		if (code == 0xB9 || code == 0xE9)   // 해킹检测
+		if (code == 0xB9 || code == 0xE9)   
 		{
 			::ExitProcess(0);
 		}

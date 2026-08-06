@@ -99,14 +99,22 @@ void CI::SetEngInput(bool bHangul)
 //----------------------------------------------------------------------------
 // CI_KOREAN implementations
 //----------------------------------------------------------------------------
+CI_KOREAN::CI_KOREAN()
+{
+}
+
+CI_KOREAN::~CI_KOREAN()
+{
+}
+
 void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// On macOS/SDL2, we bypass the Windows IME system entirely.
 	// Keyboard events are already routed through the normal event flow:
-	// DXKeyboardEvent → gC_vs_ui.KeyboardControl → WindowManager → Window
+	
 	//
 	// We should NOT forward messages here as it would cause infinite loops:
-	// KeyboardControl → IME_MessageProcessor → KeyboardControl → ...
+	
 	//
 	// This function is kept as a stub for compatibility.
 	(void)message;
@@ -127,14 +135,22 @@ void CI_KOREAN::IME_Composition()
 //----------------------------------------------------------------------------
 // CI_CHINESE implementations
 //----------------------------------------------------------------------------
+CI_CHINESE::CI_CHINESE()
+{
+}
+
+CI_CHINESE::~CI_CHINESE()
+{
+}
+
 void CI_CHINESE::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// On macOS/SDL2, we bypass the Windows IME system entirely.
 	// Keyboard events are already routed through the normal event flow:
-	// DXKeyboardEvent → gC_vs_ui.KeyboardControl → WindowManager → Window
+	
 	//
 	// We should NOT forward messages here as it would cause infinite loops:
-	// KeyboardControl → IME_MessageProcessor → KeyboardControl → ...
+	
 	//
 	// This function is kept as a stub for compatibility.
 	(void)message;
@@ -150,6 +166,25 @@ void CI_CHINESE::IME_NextComposition()
 void CI_CHINESE::IME_Composition()
 {
 	/* Stub: Chinese IME not implemented on macOS */
+}
+
+//----------------------------------------------------------------------------
+// CI_ENGLISH implementations
+//----------------------------------------------------------------------------
+CI_ENGLISH::CI_ENGLISH()
+{
+}
+
+CI_ENGLISH::~CI_ENGLISH()
+{
+}
+
+void CI_ENGLISH::IME_NextComposition()
+{
+}
+
+void CI_ENGLISH::IME_Composition()
+{
 }
 
 // g_GetStringByMoney is provided by RenderingFunctions.cpp for SDL builds.

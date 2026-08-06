@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-// ServerInformation.cpp
+// CServerInformation.cpp
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "ServerInformation.h"
@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------
 // Global
 //----------------------------------------------------------------------
-ServerInformation*	g_pServerInformation = NULL;
+CServerInformation*	g_pServerInformation = NULL;
 
 //----------------------------------------------------------------------
 //
@@ -21,14 +21,14 @@ ServerGroup::ServerGroup()
 
 //----------------------------------------------------------------------
 //
-// ServerInformation
+// CServerInformation
 //
 //----------------------------------------------------------------------
-ServerInformation::ServerInformation()
+CServerInformation::CServerInformation()
 {
 }
 
-ServerInformation::~ServerInformation()
+CServerInformation::~CServerInformation()
 {
 	Release();
 }
@@ -37,7 +37,7 @@ ServerInformation::~ServerInformation()
 // Release
 //----------------------------------------------------------------------
 void			
-ServerInformation::Release()
+CServerInformation::Release()
 {
 	SERVER_GROUP_MAP::Release();
 
@@ -45,7 +45,7 @@ ServerInformation::Release()
 	m_ServerGroupStatus = 0;
 	m_ServerID = 0;
 
-	// 이름을 지워준다.
+	
 	m_ServerGroupName.Release();
 	m_ServerName.Release();
 }
@@ -54,10 +54,10 @@ ServerInformation::Release()
 // Set Server GroupID
 //----------------------------------------------------------------------
 bool			
-ServerInformation::SetServerGroupID(unsigned int id)	
+CServerInformation::SetServerGroupID(unsigned int id)	
 { 
 	//-----------------------------------------------------------
-	// Group의 이름을 기억해둔다.
+	
 	//-----------------------------------------------------------
 	ServerGroup* pGroup = GetData( id );
 
@@ -79,10 +79,10 @@ ServerInformation::SetServerGroupID(unsigned int id)
 // Set ServerID
 //----------------------------------------------------------------------
 bool			
-ServerInformation::SetServerID(unsigned int id)		
+CServerInformation::SetServerID(unsigned int id)		
 { 
 	//-----------------------------------------------------------
-	// Group찾기
+	
 	//-----------------------------------------------------------
 	ServerGroup* pGroup = GetData( m_ServerGroupID );
 
@@ -92,7 +92,7 @@ ServerInformation::SetServerID(unsigned int id)
 	}
 
 	//-----------------------------------------------------------
-	// Server 이름 찾기
+	
 	//-----------------------------------------------------------
 	SERVER_INFO* pInfo = pGroup->GetData( id );
 

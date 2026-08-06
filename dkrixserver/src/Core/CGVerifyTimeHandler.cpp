@@ -32,7 +32,7 @@ void CGVerifyTimeHandler::execute(CGVerifyTime* pPacket, Player* pPlayer)
 
     if (!(pGamePlayer->verifySpeed(pPacket))) {
         saveSpeedHackPlayer(pPlayer);
-        throw DisconnectException("스피드핵 딱! 걸려써!!");
+        throw DisconnectException(" ! !!");
     }
 
 #endif
@@ -69,7 +69,7 @@ void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
     filelog("SpeedHack.log", "ID[%s], Name[%s], IP[%s]", ID.c_str(), Name.c_str(), IP.c_str());
 
     /////////////////////////////////////////////////////////
-    // 디비에 관련 정보를 넣는다.
+    
     /////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
 

@@ -21,7 +21,7 @@
 
 typedef WORD SPRITE_ID;
 
-// sprite id�� �ƴϴ�.
+
 #define NO_SPRITE_ID						ULONG_MAX
 
 // data id <-> spk index
@@ -45,12 +45,8 @@ typedef WORD SPRITE_ID;
 //	SPRITE_ID	Index(data_id_t id) const;
 //};
 
-/*-----------------------------------------------------------------------------
-  Class Sprite Pack
-  `DX�� �ʱ�ȭ�Ǿ 555, 565 ���θ� �Ǻ��ϹǷ� �ٵ�� DX�� �ʱ�ȭ��Ų �Ŀ� 
-   ����(����)�ؾ� �Ѵ�.
------------------------------------------------------------------------------*/
-// RGB �� ��� �ϳ�.
+ 
+
 #define rgb_RED							0
 #define rgb_GREEN							1
 #define rgb_BLUE							2
@@ -58,7 +54,7 @@ typedef WORD SPRITE_ID;
 class C_SPRITE_PACK
 {
 private:
-	//CSpritePackList *	m_pC_spk_list; // 565, 555�� �����ؾ��ϱ� ������ pointer��.
+	
 	CSpritePack			m_SPK;	// by sigi
 
 	// Disable copy constructor and copy assignment to prevent issues with m_file pointer
@@ -90,7 +86,7 @@ public:
 	void	BltOffscreen(POINT &point, SPRITE_ID sprite_id = 0);
 	void	BltOffscreen(int x=0, int y=0, SPRITE_ID sprite_id = 0);
 
-	// �̹� Surface�� Lock�� ���¿��� �θ��� �Լ�..
+	
 	void	BltLockedClip(int x, int y, Rect &rect, SPRITE_ID sprite_id=0);
 	void	BltLockedOutline(int x, int y, int color, SPRITE_ID sprite_id = 0);
 	void	BltLocked(POINT &point, SPRITE_ID sprite_id=0);
@@ -110,10 +106,7 @@ public:
 	CSprite &GetSprite(SPRITE_ID id) { return m_SPK[id]; }
 };
 
-/*-----------------------------------------------------------------------------
-  Class FRR
-  `��ü�� Animation�����ֱ� ���� Frame array object.
------------------------------------------------------------------------------*/
+ 
 class C_FRR
 {
 private:
@@ -129,23 +122,18 @@ public:
 	int	GetRY(int frame) const;
 };
 
-/*-----------------------------------------------------------------------------
-  Class animation object
-  `animation�� object. �̰��� �� ���� SPK, FRR �̴�. ���� SPK, FRR�� �����ġ��
-   �ٸ��� �� ���, �׸��� ������ Timer�� ����� ��찡 �ֱ� ������ �������. 
-	�̰��� C_ANIMATION�� ������ animation�ȴ�.
------------------------------------------------------------------------------*/
+ 
 class C_ANI_OBJECT
 {
 private:
 	//
 	// m_pC_spk
 	//
-	// m_pC_frr�� �����ϴ� SPK�̴�. �ϳ��� Animation object�� �ϳ����� SPK, FRR��
-	// ���´�. �ϳ��� SPK�� �ټ��� FRR�� ������ �� ����. �̷��� �ϴ� ������, �׷���
-	// ���ӻ��� Animation object�� �� ��� ��ɰų� ����, ���� ȥ��(?)�� �����ϸ�,
-	// �ܼ��� Interface�� �����ϱ� �����̴�. ���� �׷� �ʿ䰡 ���Ŀ� ����ٸ�,
-	// �Ǵٸ� Class�� ����� �׸��̴�.
+	
+	
+	
+	
+	
 	//
 	C_SPRITE_PACK *		m_pC_spk;
 	C_FRR *					m_pC_frr;
@@ -164,33 +152,26 @@ public:
 	int	GetHeight(SPRITE_ID sprite_id) const;
 };
 
-/*-----------------------------------------------------------------------------
-  Class animation object
-  `Object�� Animation��Ű�� object.
-
-  `SPK file�� Frr file�� animation�� �ϱ� ���� �ʿ������̴�. Animation Object��
-   �� �ΰ��� ������ �����Ͽ�, ���� ��ġ�� play, �� animation�����ش�. ����
-	Timer�� �����ϰ� Timer�� ������ �� �ִ�. ���� ������ animation�� ���� �ִ�.
------------------------------------------------------------------------------*/
+ 
 class C_ANIMATION
 {
 private:
 	//
 	// m_pC_ani_object
 	//
-	// 1. Animation�� object pointer�̴�. �� object�� �ٸ� Animation object������
-	//    ����� �� �ֱ� ������ pointer�� �ؾ� ȿ�����̴�.
+	
+	
 	//
-	// 2. �ϳ��� Animation object������ �ϳ��� ani object�� ���´�. �׷��� �� ����
-	//    �ݵ�� �׷����� �ʾƵ� �ȴ�.
+	
+	
 	//
 	C_ANI_OBJECT *			m_pC_ani_object;
 
 	//
 	// Timer
 	// 
-	// �ϳ��� Animation object�� play�Ǳ� ���� �ϳ��� timer�� ���´�. ���ο� timer��
-	// �����ȴ�. Timer library�� ���� �Լ��� ����������ϱ� ������ ����� �� ����.
+	
+	
 	//
 	DWORD						m_dw_prev_tickcount;
 	DWORD						m_dw_millisec;
@@ -204,16 +185,16 @@ public:
 	enum PLAY_ORDER
 	{
 		STOP,					// stop
-		PLAY,					// 0�� frame���� ������ �� ����.
-		PLAY_LOOP,			// play�� ��� �ݺ�.
-		PLAY_BACK,			// �� frame���� 0������ �� ����.
-		PLAY_BACKLOOP,		// play back ��� �ݺ�.
-		PLAY_LOOPBACK,		// play -> back -> play (�ݺ�)
+		PLAY,					
+		PLAY_LOOP,			
+		PLAY_BACK,			
+		PLAY_BACKLOOP,		
+		PLAY_LOOPBACK,		
 	};
 
 private:
 	PLAY_ORDER				m_play_order;
-	PLAY_ORDER				m_play_order_next; // play order�� ������ ���ִ� ��.
+	PLAY_ORDER				m_play_order_next; 
 
 public:
 	C_ANIMATION(C_ANI_OBJECT *p_object);

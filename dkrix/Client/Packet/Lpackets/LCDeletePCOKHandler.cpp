@@ -11,8 +11,8 @@
 #include "LCDeletePCOK.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
-	#include "Cpackets/CLGetPCList.h"
+	#include "../ClientPlayer.h"
+	#include "../Cpackets/CLGetPCList.h"
 #endif
 
 #include "ClientDef.h"
@@ -20,7 +20,7 @@
 
 //--------------------------------------------------------------------------------
 //
-// PC 를 성공적으로 삭제했다는 뜻이다.
+
 //
 //--------------------------------------------------------------------------------
 void LCDeletePCOKHandler::execute ( LCDeletePCOK * pPacket , Player * pPlayer )
@@ -41,7 +41,7 @@ throw ( ProtocolException , Error )
 		cout << "+--------------------------+" << endl;
 		cout << "                            " << endl;
 
-		// 다시 PC LIST 를 받아와야 한다.
+		
 		CLGetPCList clGetPCList;
 		pClientPlayer->sendPacket( &clGetPCList );	
 
@@ -51,16 +51,16 @@ throw ( ProtocolException , Error )
 
 		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
-		// delete성공
+		
 		UI_DeleteCharacterOK();
 
-		// 다시 PC LIST를 받아야 한다.
+		
 		CLGetPCList clGetPCList;
 		pClientPlayer->sendPacket( &clGetPCList );	
 
 		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
 
-		// PC List를 기다리는 mode
+		
 		g_ModeNext = MODE_WAIT_PCLIST;
 
 	#endif

@@ -9,15 +9,15 @@
 #define __GC_ADD_SLAYER_CORPSE_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PCSlayerInfo3.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PCSlayerInfo3.h"
 
 //----------------------------------------------------------------------
 //
 // class GCAddSlayerCorpse;
 //
-// 슬레이어의 시체 정보를 담아서 클라이언트에 전송한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -32,10 +32,10 @@ public :
 
 public :
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -69,10 +69,10 @@ public :
 
 private :
 	
-	// 슬레이어의 외모 정보
+	
 	PCSlayerInfo3 m_SlayerInfo;
 
-	// 보물 숫자
+	
 	BYTE m_TreasureCount;
 
 };
@@ -103,7 +103,7 @@ public :
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddSlayerCorpsePacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw ()
 	{ 
 		return PCSlayerInfo3::getMaxSize() + szBYTE;

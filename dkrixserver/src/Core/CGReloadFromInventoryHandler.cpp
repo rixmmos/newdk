@@ -61,7 +61,7 @@ void CGReloadFromInventoryHandler::execute(CGReloadFromInventory* pPacket, Playe
                     return;
                 }
 
-                // 인벤토리 슬랏에 있는 아이템의 Object를 받는다.
+                
                 ItemObjectID = pItem->getObjectID();
 
                 if (ItemObjectID != pPacket->getObjectID()) {
@@ -79,7 +79,7 @@ void CGReloadFromInventoryHandler::execute(CGReloadFromInventory* pPacket, Playe
             }
         }
 
-        // reload delay가 있으므로 effect에 등록 시킨다.
+        
         EffectManager* pEffectManager = pSlayer->getEffectManager();
         if (pEffectManager == NULL)
             return;
@@ -92,9 +92,9 @@ void CGReloadFromInventoryHandler::execute(CGReloadFromInventory* pPacket, Playe
             pEffect->setInventoryXY(x, y);
 
             if (pSlayer->hasSkill(SKILL_FAST_RELOAD))
-                pEffect->setDeadline(7); // 빠른 reload(0.7초)
+                pEffect->setDeadline(7); 
             else
-                pEffect->setDeadline(2 * 10); // 보통 reload(2sec)
+                pEffect->setDeadline(2 * 10); 
 
             pSlayer->setFlag(Effect::EFFECT_CLASS_RELOAD_TIMER);
             pEffectManager->addEffect(pEffect);

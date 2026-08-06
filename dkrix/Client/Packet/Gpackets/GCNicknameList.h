@@ -7,12 +7,12 @@
 #ifndef __GC_NICKNAME_LIST_H__
 #define __GC_NICKNAME_LIST_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
-#include "NicknameInfo.h"
+#include "../NicknameInfo.h"
 
 #include <string>
 #include <vector>

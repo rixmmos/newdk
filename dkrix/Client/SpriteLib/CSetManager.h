@@ -2,11 +2,11 @@
 // CSetManager.h
 //----------------------------------------------------------------------
 // Template Sorted List
-// ���������� stl�� list�� ����ߴ�.
+
 //----------------------------------------------------------------------
 //
-// ���� DataType���� �����Ѵ�.
-// Ascending Sort�̴�.
+
+
 //
 //----------------------------------------------------------------------
 
@@ -56,13 +56,13 @@ class CSetManager {
 		//--------------------------------------------------------
 		SizeType	GetSize() const	{ return m_List.size(); }
 
-		// ù��° ��ġ�� List Iterater�� �Ѱ��ش�.
+		
 		typename DATA_LIST::const_iterator	GetIterator() const	{ return m_List.begin(); }
 
 	protected :			
-		DATA_LIST			m_List;		// Data pointer���� �����صд�.
+		DATA_LIST			m_List;		
 
-		// sizeof(SizeType) �� ��
+		
 		static BYTE			s_SIZEOF_SizeType;
 };
 
@@ -113,10 +113,10 @@ CSetManager<DataType, SizeType>::Release()
 //----------------------------------------------------------------------
 // Add
 //----------------------------------------------------------------------
-// list�� data�� �߰��Ѵ�.
-// Sort�Ǿ� �߰��ǰ� �ߺ��� ������� �ʴ´�.
+
+
 // 
-// �̹� �����ϴ� ���̸� false�� return�Ѵ�.
+
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool	
@@ -126,16 +126,16 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 
 	while (iData != m_List.end())
 	{		
-		// ���� ����ִ°� �߰��ҷ��°ͺ��� Ŭ ���,
-		// ���� ��ġ�� �߰��ϸ� �ȴ�.
+		
+		
 		if (*iData > data)
 		{
 			m_List.insert(iData, data);
 			return true;
 		}
 
-		// �̹� �ִ� ���̸�
-		// �߰����� �ʴ´�.
+		
+		
 		if (*iData==data)
 		{
 			return false;
@@ -144,8 +144,8 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 		iData++;
 	}	
 
-	// list�� ��� ���ҵ麸�� ũ�Ƿ� 
-	// list�� ���� �߰��Ѵ�.
+	
+	
 	m_List.push_back( data );
 
 	return true;
@@ -154,9 +154,9 @@ CSetManager<DataType, SizeType>::Add(const DataType data)
 //----------------------------------------------------------------------
 // Remove
 //----------------------------------------------------------------------
-// list���� data�� �����.
+
 //
-// ���� ���̸� return false
+
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 bool
@@ -166,15 +166,15 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 
 	while (iData != m_List.end())
 	{		
-		// ���� ���̸� �����.
+		
 		if (*iData==data)
 		{
 			m_List.erase(iData);
 			return true;
 		}
 		
-		// ���� ��ġ�� �ִ� ���� data���� ũ�ٸ�
-		// ��� ū ���� �����Ƿ� data���� ���� ���̴�.
+		
+		
 		if (*iData > data)
 		{			
 			return false;
@@ -183,7 +183,7 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 		iData++;
 	}	
 
-	// ���� ���
+	
 	return false;
 }
 
@@ -192,8 +192,8 @@ CSetManager<DataType, SizeType>::Remove(const DataType data)
 // Save To File
 //----------------------------------------------------------------------
 //
-// size�� �����ϰ�
-// ��� list�� node���� �����Ѵ�.
+
+
 //
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
@@ -203,10 +203,10 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 	// size
 	SizeType size = m_List.size();
 
-	// size����
+	
 	file.write((const char *)&size, s_SIZEOF_SizeType);
 
-	// �ƹ� �͵� ������
+	
 	if (size==0)
 	{
 		return false;
@@ -214,7 +214,7 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 
 	DataType data;
 
-	// ��� Data���� save�Ѵ�.
+	
 	typename DATA_LIST::iterator iData = m_List.begin();
 
 	int dataSize = sizeof(DataType);
@@ -223,7 +223,7 @@ CSetManager<DataType, SizeType>::SaveToFile(std::ofstream& file)
 	{
 		data = *iData;
 
-		// file�� ����
+		
 		file.write((const char *)&data, dataSize);		
 
 		iData++;
@@ -239,15 +239,15 @@ template <class DataType, class SizeType>
 bool
 CSetManager<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// ������ �ִ� list�� �����.
+	
 	Release();
 
 	SizeType size;
 
-	// file���� size�� �о�´�.
+	
 	file.read((char*)&size, s_SIZEOF_SizeType);
 
-	// �ƹ��͵� ����Ȱ� ���� ���
+	
 	if (size==0)
 	{
 		return false;
@@ -257,13 +257,13 @@ CSetManager<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 
 	int dataSize = sizeof(DataType);
 
-	// size�� ��ŭ�� load�Ѵ�.
+	
 	for (SizeType i=0; i<size; i++)
 	{
-		// file���� load�Ѵ�.
+		
 		file.read((char*)&data, dataSize);
 
-		// list�� �߰��Ѵ�.
+		
 		Add( data );
 	}
 	

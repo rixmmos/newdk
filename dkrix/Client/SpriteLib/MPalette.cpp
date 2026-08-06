@@ -34,7 +34,7 @@ void MPalette::Init(BYTE size)
 
 void MPalette::operator = (const MPalette& pal)
 {
-	// 메모리 해제
+	
 	Release();
 	
 	m_Size = pal.m_Size;
@@ -45,7 +45,7 @@ void MPalette::operator = (const MPalette& pal)
 }
 
 
-// file save는 565를 기준으로 한다.
+
 bool MPalette555::LoadFromFile(std::ifstream &file)
 {
 	Release();
@@ -63,7 +63,7 @@ bool MPalette555::LoadFromFile(std::ifstream &file)
 	return true;
 }
 
-// file save는 565를 기준으로 한다.
+
 bool MPalette555::SaveToFile(std::ofstream &file)
 {
 	file.write((const char *)&m_Size, 1);

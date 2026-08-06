@@ -35,7 +35,7 @@ public:
 //-----------------------------------------------------------------------------
 // C_VS_UI_BOOK
 //
-// Ʃ�丮�� ����� å �������̽��̴�. å�忡�� å�� ������ ���´�.
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_BOOK : public Window, public Exec, public ButtonVisual, public C_VS_UI_DESC
 {
@@ -50,9 +50,9 @@ private:
 
 	enum EXEC_ID
 	{
-		BOOK_CLOSE_ID,			// â�ݱ�
-		BOOK_PREV_ID,			// ������ ����
-		BOOK_NEXT_ID,			// ������ ����
+		BOOK_CLOSE_ID,			
+		BOOK_PREV_ID,			
+		BOOK_NEXT_ID,			
 	};
 
 	C_SPRITE_PACK *			m_pC_book_spk;
@@ -93,9 +93,9 @@ public:
 //-----------------------------------------------------------------------------
 // C_VS_UI_BOOKCASE
 //
-// Ʃ�丮�� ����� å�� �������̽��̴�. ���������� å���� Ŭ���ϸ� ���´�.
-// å�� �����ϰ� Ŭ���ϸ�, å�� ������ ���´�.
-// 68,55,67,67 �� : 257��
+
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_BOOKCASE : public Window, public Exec, public ButtonVisual
 {
@@ -108,7 +108,7 @@ private:
 
 	enum EXEC_ID
 	{
-		BOOKCASE_CLOSE_ID,			// â�ݱ�
+		BOOKCASE_CLOSE_ID,			
 	};
 
 	C_SPRITE_PACK *			m_pC_bookcase_spk;
@@ -147,72 +147,12 @@ public:
 	void	Show();
 
 };
-/*
-//-----------------------------------------------------------------------------
-// C_VS_UI_BRIEFING
-//
-// Ʃ�丮�� ����� �긮��ȭ�� �������̽��̴�.
-// �������� ���� �ɰų�, ����⸦ ���� Ŭ���ϸ� 
-// �ݴ��� ��ũ���� ��ƿ�׸��� �������鼭 �ؽ�Ʈ�� ȭ�鿡 ��ũ�ѵȴ�.
-// ������ �����̾���� � �������� ���ӿ� ���� ���� ���� ���̴�.
-//-----------------------------------------------------------------------------
-class C_VS_UI_BRIEFING : public Window, public Exec, public ButtonVisual
-{
-private:
-	enum IMAGE_SPK_INDEX
-	{
-		SCREEN_WINDOW,
-		CLOSE_BUTTON,
-	};
-
-	enum EXEC_ID
-	{
-		SCREEN_CLOSE_ID,			// â�ݱ�
-	};
-
-	C_SPRITE_PACK *				m_pC_screen_spk;
-
-	ButtonGroup *				m_pC_button_group;
-
-	int							m_scroll, m_scroll_detail, m_scroll_max;
-	int							m_char_x, m_char_y, m_char_y_distance;
-
-	std::vector<std::string>	m_txt_briefing;
-	
-	CRarFile					m_briefing_file;
-
-	//timer
-	DWORD						m_dw_prev_tickcount;
-	DWORD						m_dw_millisec;
-
-	bool	Timer();
-
-	bool	Load(const char *szFilename);
-
-public:
-	C_VS_UI_BRIEFING();
-	~C_VS_UI_BRIEFING();
-
-	void	Process();
-	void	UnacquireMouseFocus();
-	bool	IsPixel(int _x, int _y);
-	void	Run(id_t id);
-	void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button);
-	bool	MouseControl(UINT message, int _x, int _y);
-	void	KeyboardControl(UINT message, UINT key, long extra);
-
-	void	Start();
-	void	Finish();
-
-	void	Show();
-
-};
-*/
+ 
 //-----------------------------------------------------------------------------
 // C_VS_UI_COMPUTER
-// Ʃ�丮�� ����� ��ǻ�� �������̽��̴�.
-// ��ǻ�͸� ���� Ŭ���ϸ� ��ǻ�� ����� ȭ���� �߰�
-// �ַ� �����̾���� ����� ����� ���� �����̴�
+
+
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_COMPUTER : public Window, public Exec, public ButtonVisual, public C_VS_UI_DESC
@@ -231,7 +171,7 @@ private:
 
 	enum EXEC_ID
 	{
-		MONITOR_CLOSE_ID,			// â�ݱ�
+		MONITOR_CLOSE_ID,			
 		SCROLL_UP_ID,
 		SCROLL_DOWN_ID,
 		SCROLL_TREE_UP_ID,
@@ -248,7 +188,7 @@ private:
 
 	int m_row, m_col;
 	int							m_index_x, m_index_y, m_index_distance, m_index_max;
-	bool						m_isclose; //Ʈ���� �����ų� ������ ����
+	bool						m_isclose; 
 	int							m_scroll_x, m_scroll_y, m_scroll_h;
 	int							m_tree_limit_h;
 	int							m_tree_scroll, m_tree_scroll_x;
@@ -285,73 +225,6 @@ public:
 	void	Show();
 
 };
-/*
-//-----------------------------------------------------------------------------
-// C_VS_UI_TUTORIAL_EXIT
-//
-// Ʃ�丮�� ����� ������ȭ�� �������̽��̴�.
-// ������ �������� ���� �ɸ� ����ȴ�.
-// ������ ���� ���⼱���� �ϰ� �ȴ�.
-//-----------------------------------------------------------------------------
-class C_VS_UI_TUTORIAL_EXIT : public Window, public Exec, public ButtonVisual
-{
-private:
-	enum IMAGE_SPK_INDEX
-	{
-		EXIT_WINDOW,
-		OK_BUTTON,
-		CANCEL_BUTTON,
-		BLADE_BUTTON,
-		SWORD_BUTTON,
-		MACE_BUTTON,
-		CROSS_BUTTON,
-		AR_BUTTON,
-		TR_BUTTON,
-		SMG_BUTTON,
-		SG_BUTTON,
-	};
-
-	enum EXEC_ID
-	{
-		OK_ID,
-		CANCEL_ID,
-		SELECT_BLADE_ID,
-		SELECT_SWORD_ID,
-		SELECT_MACE_ID,
-		SELECT_CROSS_ID,
-		SELECT_AR_ID,
-		SELECT_TR_ID,
-		SELECT_SMG_ID,
-		SELECT_SG_ID,
-	};
-
-	C_SPRITE_PACK *				m_pC_exit_spk;
-	C_SPRITE_PACK *				m_pC_item_spk;
-
-	ButtonGroup *				m_pC_button_group;
-
-	id_t m_select;
-
-public:
-	C_VS_UI_TUTORIAL_EXIT();
-	~C_VS_UI_TUTORIAL_EXIT();
-
-	void	Process();
-	void	UnacquireMouseFocus();
-	bool	IsPixel(int _x, int _y);
-	void	Run(id_t id);
-	void	ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button);
-	bool	MouseControl(UINT message, int _x, int _y);
-	void	KeyboardControl(UINT message, UINT key, long extra);
-
-	void	Start();
-	void	Finish();
-
-	void	Show();
-
-	void	Accept();
-
-};
-*/
+ 
 
 #endif

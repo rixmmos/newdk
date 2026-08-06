@@ -1,15 +1,15 @@
 //--------------------------------------------------------------------------
 // PackFileManager.h
 //--------------------------------------------------------------------------
-// 화일들을 묶어서 관리한다.
-// 추가, 수정이 쉬워야 한다.
+
+
 //
-// [ 화일형식 ]
+
 // 
 //  DataFile  : [Data0]....[DataX][DataY][DataZ]
 //	IndexFile : [ID, DataFP]....[ID, DataFP][ID, DataFP][ID, DataFP]
 //
-// Merge는 AppendPatch를 이용하면 된다.
+
 //--------------------------------------------------------------------------
 
 #ifndef __PACK_FILE_MANAGER_H__
@@ -29,7 +29,7 @@
 //--------------------------------------------------------------------------
 // Pack FileInfo
 //--------------------------------------------------------------------------
-// Data화일을 먼저 저장하고 Index를 저장해야 한다.
+
 //--------------------------------------------------------------------------
 class PackFileInfo {
 	public :
@@ -56,7 +56,7 @@ class PackFileInfo {
 
 	protected :
 		DWORD				m_ID;			// ID
-		std::string			m_Filename;		// 화일이름
+		std::string			m_Filename;		
 		long				m_FP;			// File Position
 };
 
@@ -145,7 +145,7 @@ PackFileManager<FileInfoType>::Release()
 {
 	//----------------------------------------------------------
 	// ID map
-	// 같은 pointer를 사용하므로...
+	
 	//----------------------------------------------------------
 	typename FILEINFO_ID_MAP::iterator iInfo = m_IDInfos.begin();
 
@@ -354,11 +354,11 @@ PackFileManager<FileInfoType>::SaveToFileInfo(const char* pFilename)
 {
 	std::ofstream file(pFilename, std::ios::binary | std::ios::trunc);
 
-	// 개수
+	
 	WORD num = m_IDInfos.size();
 	file.write((const char*)&num, 2);
 
-	// Header 저장
+	
 	typename FILEINFO_ID_MAP::iterator iInfo = m_IDInfos.begin();
 
 	while (iInfo != m_IDInfos.end())
@@ -386,7 +386,7 @@ PackFileManager<FileInfoType>::LoadFromFileInfo(const char* pFilename)
 
 	std::ifstream file(pFilename, std::ios::binary);
 
-	// 개수
+	
 	if (file.is_open())
 	{
 		WORD num;
@@ -394,7 +394,7 @@ PackFileManager<FileInfoType>::LoadFromFileInfo(const char* pFilename)
 
 		for (int i=0; i<num; i++)
 		{
-			// Header 읽기
+			
 			FileInfoType* pInfo = new FileInfoType;
 
 			pInfo->LoadFromFile( file );
@@ -419,7 +419,7 @@ PackFileManager<FileInfoType>::SaveToFileData(const char* pFilename)
 {
 	std::ofstream file(pFilename, std::ios::binary | std::ios::trunc);
 
-	// 개수
+	
 	WORD num = m_IDInfos.size();
 	file.write((const char*)&num, 2);	
 
@@ -505,26 +505,5 @@ PackFileManager<FileInfoType>::GetInputFileStream(DWORD id, std::ifstream& file)
 //--------------------------------------------------------------------------
 // Merge
 //--------------------------------------------------------------------------
-/*
-template <class FileInfoType>
-bool
-PackFileManager<FileInfoType>::Merge(const char* pInfoFilenameOrg,
-						const char* pDataFilenameOrg,
-						const char* pInfoFilenameApp,
-						const char* pDataFilenameApp)
-{
-	//class fstream fileInfoOrg(pInfoFilenameOrg, ios::in | ios::out | std::ios::binary | ios::ate);	
-	//class fstream fileDataOrg(pDataFilenameOrg, ios::in | ios::out | std::ios::binary | ios::ate);
-	//std::ifstream fileInfoApp(pInfoFilenameApp, std::ios::binary);
-	//std::ifstream fileDataApp(pDataFilenameApp, std::ios::binary);
-
-	// pInfoFilenameOrg의 개수 변경
-	// pInfoFilenameOrg의 끝에 pInfoFilenameApp를 붙인다.
-
-	// pDataFilenameOrg의 개수 변경
-	// pDataFilenameOrg의 끝에 pDataFilenameApp를 붙인다.
-
-	return true;
-}
-*/
+ 
 #endif

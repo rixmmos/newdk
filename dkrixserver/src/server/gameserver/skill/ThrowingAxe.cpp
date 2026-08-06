@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -60,15 +60,15 @@ void ThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             }
 
             Tile& tile = pZone->getTile(X, Y);
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             input.SkillLevel = pMonster->getLevel();
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectMeteorStrike* pEffect = new EffectMeteorStrike(pZone, X, Y);
             pEffect->setNextTime(output.Duration);
             pEffect->setUserObjectID(pMonster->getObjectID());
@@ -80,11 +80,11 @@ void ThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             pEffect->setSplashRatio(2, 50);
             // pEffect->setLevel(pSkillInfo->getLevel()/2);
 
-            // 타일에 붙은 이펙트는 OID를 받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 

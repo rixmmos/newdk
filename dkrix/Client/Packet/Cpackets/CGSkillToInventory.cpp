@@ -5,8 +5,8 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGSkillToInventory.h"
-#include "SocketEncryptInputStream.h"
-#include "SocketEncryptOutputStream.h"
+#include "../SocketEncryptInputStream.h"
+#include "../SocketEncryptOutputStream.h"
 #include "Assert.h"
 CGSkillToInventory::CGSkillToInventory () 
      throw ()

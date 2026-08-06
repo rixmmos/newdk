@@ -6,7 +6,7 @@
 #include "Client_PCH.h"
 #include "CGConnectSetKey.h"
 
-//#include "Properties.h"
+//#include "Packet/Properties.h"
 
 void CGConnectSetKey::read (SocketInputStream & iStream) 
 	 throw (ProtocolException , Error)

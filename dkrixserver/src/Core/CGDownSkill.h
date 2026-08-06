@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    SkillType_t m_SkillType; // 기술의 종류
+    SkillType_t m_SkillType; 
 };
 
 //////////////////////////////////////////////////////////////////////

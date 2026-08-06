@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : MonsterInfo.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -24,11 +24,11 @@
 #include "Treasure.h"
 
 int DefaultClanID[CLAN_MAX] = {
-    0, // CLAN_NONE,							// 어디에도 속하지 않는 애덜.. 0
-    1, // CLAN_VAMPIRE_MONSTER,				// 떠돌이 뱀파 몬스터 -_-;     1
-    2, // CLAN_VAMPIRE_BATHORY_MONSTER,		// 바토리 소속 몬스터          2
-    3, // CLAN_VAMPIRE_TEPEZ_MONSTER,			// 테페즈 소속 몬스터          3
-    4, // CLAN_SLAYER_MONSTER,				// 슬레이어 몬스터 - -;;       4
+    0, 
+    1, 
+    2, 
+    3, 
+    4, 
 };
 
 extern int DefaultClanID[CLAN_MAX];
@@ -172,7 +172,7 @@ MonsterInfo::~MonsterInfo()
 {
     __BEGIN_TRY
 
-    // 이거는 MonsterInfo에서 관리한다.
+    
     // SAFE_DELETE(m_pSlayerTreasureList);
     // SAFE_DELETE(m_pVampireTreasureList);
 
@@ -188,24 +188,24 @@ MonsterInfo::~MonsterInfo()
 void MonsterInfo::setRegenType(RegenType rt, int percent) {
     m_RegenType[rt] = percent;
 
-    // REGENTYPE_NORMAL의 확률을 바꿔서 100%로 맞출려고 했지만
-    // 별 의미가 없을 듯 하여.. - -;  by sigi
+    
+    
 }
 
 //---------------------------------------------------------------------------
 // select RegenType
 //---------------------------------------------------------------------------
-// Hide와 Portal의 확률을 먼저 체크해본후 둘 다 아니면.. Normal이다. by sigi
+
 //---------------------------------------------------------------------------
 RegenType MonsterInfo::selectRegenType() const {
-    // 속도 약간 높힐려고
-    // 100분률이 아니고 128분률이다 - -;
+    
+    
     int dice = rand() & 0x0000007F; // rand()%100;
 
     int acc = 0;
     const int REGENTYPE_MAX_1 = REGENTYPE_MAX - 1;
     for (int i = 0; i < REGENTYPE_MAX_1; i++) {
-        // 각 확률별로 누적시켜서 잘~ 체크
+        
         acc += m_RegenType[i];
         if (dice < acc) {
             return (RegenType)i;
@@ -447,9 +447,9 @@ void MonsterInfo::addDefaultEffects(Creature* pCreature) const {
 
         pCreature->setFlag(effectClass);
 
-        // 실제로 effect를 붙여준다.
-        // 다른 곳에서 effect를 참조하기 때문이다. by sigi. 2002.10.25
-        // 근데.. 다른 곳에서 assert(isSlayer())해놓은게 좀 있어서 일단 제거. by sigi. 2002.10.28
+        
+        
+        
         /*
         switch (effectClass)
         {
@@ -559,17 +559,17 @@ void MonsterInfoManager::load()
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQueryString("SELECT MAX(MType) FROM MonsterInfo");
 
-        // MonsterInfo 테이블에서 최대 MonsterType 값을 가져온다.
-        // 이 값은 MonsterInfoManager의 내부 MonsterInfo* 배열의 크기가 된다.
+        
+        
         if (pResult->getRowCount() == 0) {
-            // 테이블이 없다면 당연히 에러다...
+            
             SAFE_DELETE(pStmt);
             throw Error("MonsterInfo table is empty.. insert any row.");
         }
 
-        // 클라이언트에서는 슬레이어-뱀파이어-몬스터-NPC 를 구분하지 않고,
-        // 단지 캐릭터로서 인덱싱을 하기 때문에, 도량이 넓은 우리가 이해해서
-        // 맞춰줘야 하겠다. -_-; 실제 맥스보다 4를 더해서 배열을 생성한다.
+        
+        
+        
         // 0:Male Slayer, 1:Female Slayer, 2:Male Vampire, 3:Female Vampire
         pResult->next();
         m_MaxMonsterType = pResult->getInt(1) + 4 + 1;
@@ -578,7 +578,7 @@ void MonsterInfoManager::load()
         for (uint i = 0; i < m_MaxMonsterType; i++)
             m_MonsterInfos[i] = NULL;
 
-        // MonsterInfo 테이블로부터 몬스터 정보를 읽어서 MonsterInfo 객체에 저장, add 한다.
+        
         // RegenInvisible, RegenBat,
         /*
         StringStream sql;
@@ -653,8 +653,8 @@ void MonsterInfoManager::load()
             addMonsterInfo(pMonsterInfo->getMonsterType(), pMonsterInfo);
         }
 
-        // MonsterSummonInfo는 따로 설정한다.
-        // 일단 몬스터 정보가 load된 상태여야 하기 때문이다. (이름 비교 때문에)
+        
+        
         pResult = pStmt->executeQuery("SELECT MType, MonsterSummonInfo FROM MonsterInfo");
 
         while (pResult->next()) {
@@ -730,66 +730,7 @@ void MonsterInfoManager::load()
             }
         }
 
-        /*
-
-        pResult = pStmt->executeQuery("SELECT SType, SlayerTreasure, VampireTreasure, HName FROM MonsterInfo GROUP BY
-        SType");
-
-        while (pResult->next())
-        {
-            int    SType            = 0;
-            string slayer_treasure  = "";
-            string vampire_treasure = "";
-            string hname            = "";
-
-            //slayer_treasure.reserve(100000);
-            //vampire_treasure.reserve(50000);
-
-            SType            = pResult->getInt(1);
-            slayer_treasure  = pResult->getString(2);
-            vampire_treasure = pResult->getString(3);
-            hname            = pResult->getString(4);
-
-            TreasureList* pSlayerTreasureList = new TreasureList;
-            TreasureList* pVampireTreasureList = new TreasureList;
-
-            const vector<MonsterType_t>& MTypeVector = getMonsterTypeBySprite(SType);
-            for (uint i=0; i<MTypeVector.size(); i++)
-            {
-                int MType = MTypeVector[i];
-
-                MonsterInfo* pMonsterInfo = (MonsterInfo*)getMonsterInfo(MType);
-
-                if (i == 0)
-                {
-                    pMonsterInfo->setSlayerTreasureList(pSlayerTreasureList);
-                    pMonsterInfo->setVampireTreasureList(pVampireTreasureList);
-                    pMonsterInfo->parseSlayerTreasureString(slayer_treasure);
-                    pMonsterInfo->parseVampireTreasureString(vampire_treasure);
-
-                    // 파일에다 쓴다.
-                    //saveTreasure((string)(hname + ".slayer"), pSlayerTreasureList);
-                    //saveTreasure((string)(hname + ".vampire"), pVampireTreasureList);
-                }
-                else
-                {
-                    pMonsterInfo->setSlayerTreasureList(pSlayerTreasureList);
-                    pMonsterInfo->setVampireTreasureList(pVampireTreasureList);
-                }
-
-                // 검증한다.
-                cout << "MonsterType:" << pMonsterInfo->getMonsterType()
-                    << ",MonsterName:" << pMonsterInfo->getEName()
-                    << ",SlayerTreasure:" << pMonsterInfo->getSlayerTreasureList()->getTreasures().size()
-                    << ",VampireTreasure:" << pMonsterInfo->getVampireTreasureList()->getTreasures().size()
-                    << endl;
-            }
-
-            slayer_treasure.clear();
-            vampire_treasure.clear();
-        }
-
-        */
+         
 
         SAFE_DELETE(pStmt);
     }
@@ -830,7 +771,7 @@ void MonsterInfoManager::reload(MonsterType_t monsterType)
                "AIType, Enhance, UnburrowChance, Master, ClanType, MonsterSummonInfo, DefaultEffects, NormalRegen "
             << " FROM MonsterInfo";
 
-        // 전부 다 loading하는게 아니라면 특정 MonsterType을 설정한다.
+        
         if (!bLoadAll) {
             sql << " WHERE MType=" << monsterType;
         }
@@ -888,68 +829,13 @@ void MonsterInfoManager::reload(MonsterType_t monsterType)
         int startType = 0;
         int endType = m_MaxMonsterType;
 
-        // 전부 다 loading하는게 아니라면 특정 MonsterType을 설정한다.
+        
         if (!bLoadAll) {
             startType = monsterType;
             endType = monsterType + 1;
         }
 
-        /*		clearTreasures();
-
-                for (int i=startType; i<endType; i++)
-                {
-                    MonsterInfo* pInfo = m_MonsterInfos[i];
-                    if (pInfo != NULL)
-                    {
-                        if (pInfo->hasTreasure())
-                        {
-                            string slayer_filename  = g_pConfig->getProperty("HomePath") + "/data/" + pInfo->getHName()
-        + ".slayer.bin"; string vampire_filename = g_pConfig->getProperty("HomePath") + "/data/" + pInfo->getHName() +
-        ".vampire.bin"; string ousters_filename = g_pConfig->getProperty("HomePath") + "/data/" + pInfo->getHName() +
-        ".ousters.bin";
-
-                            TreasureList* pSlayerTreasureList = m_SlayerTreasureLists.getTreasure( slayer_filename );
-                            TreasureList* pVampireTreasureList = m_VampireTreasureLists.getTreasure( vampire_filename );
-                            TreasureList* pOustersTreasureList = m_OustersTreasureLists.getTreasure( ousters_filename );
-
-                            if (pSlayerTreasureList==NULL)
-                            {
-                                printf("Load - slayer_filename:%s\n", slayer_filename.c_str());
-
-                                pSlayerTreasureList = m_SlayerTreasureLists.loadTreasure( slayer_filename );
-                                Assert(pSlayerTreasureList!=NULL);
-                            }
-
-                            if (pVampireTreasureList==NULL)
-                            {
-                                printf("Load - vampire_filename:%s\n", vampire_filename.c_str());
-
-                                pVampireTreasureList = m_VampireTreasureLists.loadTreasure( vampire_filename );
-                                Assert(pVampireTreasureList!=NULL);
-                            }
-
-                            if (pOustersTreasureList==NULL)
-                            {
-                                printf("Load - ousters_filename:%s\n", ousters_filename.c_str());
-
-                                pOustersTreasureList = m_OustersTreasureLists.loadTreasure( ousters_filename );
-                                Assert(pOustersTreasureList!=NULL);
-                            }
-
-                            pInfo->setSlayerTreasureList(pSlayerTreasureList);
-                            pInfo->setVampireTreasureList(pVampireTreasureList);
-                            pInfo->setOustersTreasureList(pOustersTreasureList);
-
-                            // 검증한다.
-        //					cout << "MonsterType:" << pInfo->getMonsterType()
-        //						<< ",MonsterName:" << pInfo->getEName()
-        //						<< ",SlayerTreasure:" << pInfo->getSlayerTreasureList()->getTreasures().size()
-        //						<< ",VampireTreasure:" << pInfo->getVampireTreasureList()->getTreasures().size()
-        //						<< endl;
-                        }
-                    }
-                }
-        */
+         
         SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
@@ -1007,7 +893,7 @@ const MonsterInfo* MonsterInfoManager::getMonsterInfo(MonsterType_t monsterType)
         throw NoSuchElementException();
     }
 
-    // 일단 위에서 한번 체크가 되면 [] 를 써도 된다.
+    
     return m_MonsterInfos[monsterType];
 
     __END_CATCH

@@ -1,14 +1,4 @@
-/**
- * @file test_sprite.c
- * @brief Sprite parsing property-based tests
- * 
- * Property 3: Sprite 解析往返一致性
- * For any valid sprite data, decoding the RLE data should produce correct
- * pixel output where the decoded pixel count equals sprite width * height,
- * and transparent/color runs are correctly reconstructed.
- * 
- * Validates: Requirements 3.1, 3.2, 3.4, 3.5, 3.6, 3.7
- */
+ 
 
 #include "sprite.h"
 #include "color.h"
@@ -168,18 +158,7 @@ static uint32_t* manual_decode_sprite(const Sprite* sprite, uint16_t colorkey) {
     return pixels;
 }
 
-/**
- * Property 3: Sprite 解析往返一致性
- * 
- * For any valid sprite data, decoding the RLE data should produce correct
- * pixel output. We verify this by:
- * 1. Generating random valid RLE sprite data
- * 2. Decoding with sprite_decode
- * 3. Manually decoding the same data
- * 4. Comparing the results
- * 
- * Validates: Requirements 3.1, 3.2, 3.4, 3.5, 3.6, 3.7
- */
+ 
 static int test_property3_sprite_decode_consistency(void) {
     const int NUM_ITERATIONS = 100;
     const int MAX_WIDTH = 64;

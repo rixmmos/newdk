@@ -255,7 +255,7 @@ public:
 	// Action
 	//-----------------------------------------------------------------------
 	void	ActionMove();
-	void	ActionRotation(BYTE Direction);					// 0�� ���� 1�� ������
+	void	ActionRotation(BYTE Direction);					
 
 	//-----------------------------------------------------------------------
 	// Process
@@ -824,7 +824,7 @@ struct PETINFO
 	std::string NAME;
 	bool ATTACK;
 	std::string NICK_NAME;
-	bool ChangeAbleNickName; // �������� �ƴ���..
+	bool ChangeAbleNickName; 
 };
 
 //-----------------------------------------------------------------------------
@@ -902,13 +902,13 @@ public :
 //-----------------------------------------------------------------------------
 // C_VS_UI_HELPDESC
 //
-// Desc : ���� �޼��� Ŭ���� 
+
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_HELPDESC
 //
-// Desc : ���� �޼��� Ŭ���� 
+
 //-----------------------------------------------------------------------------
 
 class C_VS_UI_HELPDESC: public Window, public Exec , public ButtonVisual 
@@ -1051,7 +1051,7 @@ private:
 	std::string			m_szMyNum, m_szSMSMessage;
 	std::list<std::string>	m_szOtherNum;
 public:
-	C_VS_UI_SMS_MESSAGE(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_MESSAGE(); 
 	~C_VS_UI_SMS_MESSAGE();
 
 	void	Process();
@@ -1133,7 +1133,7 @@ public:
 		std::string	CustomName;
 		std::string	Number;
 	};
-	C_VS_UI_SMS_LIST(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_LIST(); 
 	~C_VS_UI_SMS_LIST();
 
 	void	Process();
@@ -1208,7 +1208,7 @@ private:
 
 	std::string			m_szNum, m_szName, m_szID;
 public:
-	C_VS_UI_SMS_RECORD(); // team_name�� member�� ��쿡��
+	C_VS_UI_SMS_RECORD(); 
 	~C_VS_UI_SMS_RECORD();
 
 	void	Process();
@@ -1232,12 +1232,12 @@ class C_VS_UI_NicknameInfo
 public:
 	enum
 	{
-		NICK_NONE = 0,		// �г��� ����
-		NICK_BUILT_IN,		// �Ϲ������� �ڵ����� �־����� �г��� (�ε���)
-		NICK_QUEST,			// ����Ʈ Ŭ������ �� �޴� �г��� (�ε���)
-		NICK_FORCED,		// ������ �ٿ��� �г��� (�ε���)
-		NICK_CUSTOM_FORCED,	// ������ �ٿ��� �г��� (��Ʈ��)
-		NICK_CUSTOM,		// ������ �����Ӱ� ���� �г��� (��Ʈ��)
+		NICK_NONE = 0,		
+		NICK_BUILT_IN,		
+		NICK_QUEST,			
+		NICK_FORCED,		
+		NICK_CUSTOM_FORCED,	
+		NICK_CUSTOM,		
 	};
 
 	WORD	getNicknameID() const { return m_NicknameID; }
@@ -1255,7 +1255,7 @@ private:
 	WORD	m_NicknameID;
 	BYTE	m_NicknameType;
 	std::string	m_Nickname;
-	WORD	m_NicknameIndex;	// ��Ʈ�� �Ǵ� �ε��� �ϳ��� ���ȴ�.
+	WORD	m_NicknameIndex;	
 };
 class C_VS_UI_NAMING : public Window, public Exec, public ButtonVisual
 {
@@ -1269,10 +1269,10 @@ private :
 
 	enum INFO_SPK
 	{
-		NICKNAME_STR = 0,	// �г���
-		NICKNAME_LIST_STR,	// �г��� ����Ʈ
-		PETNAME_STR,		// ���̸�
-		ADD_NICKNAME_STR,	// �߰� �г���
+		NICKNAME_STR = 0,	
+		NICKNAME_LIST_STR,	
+		PETNAME_STR,		
+		ADD_NICKNAME_STR,	
 	};
 	enum EXEC_ID
 	{
@@ -1332,10 +1332,10 @@ private :
 	C_SPRITE_PACK		m_pC_spk;
 	enum INFO_SPK
 	{
-		NICKNAME_STR = 0,	// �г���
-		NICKNAME_LIST_STR,	// �г��� ����Ʈ
-		PETNAME_STR,		// ���̸�
-		ADD_NICKNAME_STR,	// �߰� �г���
+		NICKNAME_STR = 0,	
+		NICKNAME_LIST_STR,	
+		PETNAME_STR,		
+		ADD_NICKNAME_STR,	
 	};
 	enum EXEC_ID
 	{
@@ -1371,7 +1371,7 @@ public :
 //-----------------------------------------------------------------------------
 // class C_VS_UI_QUEST_MANAGER
 //
-// ����Ʈ ui ���� �̹����� ����Ʈ ������ ó�� ����..
+
 //-----------------------------------------------------------------------------
 class	C_VS_UI_QUEST_LIST;
 class	C_VS_UI_QUEST_DETAIL;
@@ -1379,9 +1379,7 @@ class	C_VS_UI_QUEST_MISSION;
 class	C_VS_UI_QUEST_ITEM;
 class	C_VS_UI_QUEST_ICON;
 
-/* 
-����Ʈ ���� npcâ�� ����..
-*/
+ 
 class C_VS_UI_QUEST_NPC_DIALOG 
 {
 private :
@@ -1401,9 +1399,9 @@ public:
 		std::string		m_StrArg;
 		DWORD			m_NumArg;
 		BYTE			bStatus;
-		BYTE			bCondition;	// ��� ���ǿ� �ִ°� 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-		WORD			bIndex;		// �ش� ������ ���° element�ΰ�
-		DWORD			dwTimeLimit;// �ð� ���� ����Ʈ�� ��� ó�� ���� �ð� ���� 
+		BYTE			bCondition;	
+		WORD			bIndex;		
+		DWORD			dwTimeLimit;
 	};
 	struct _GQuestInfo{
 		DWORD			dwQuestID;
@@ -1432,9 +1430,9 @@ private:
 	XMLTree						m_Quest_XML_Tree;
 
 	DWORD						m_SelectedQuestID;
-	std::vector<_GQuestInfo*>	m_QuestListInfo; // ����Ʈ ���� ����Ʈ
-	std::vector<MItem*>			m_QuestItemInfo; // ����Ʈ ������ ����Ʈ
-	std::vector<_GQuestExcuteElement*>	m_QuestExcutElement; // ����Ʈ ExcuteElement ����Ʈ
+	std::vector<_GQuestInfo*>	m_QuestListInfo; 
+	std::vector<MItem*>			m_QuestItemInfo; 
+	std::vector<_GQuestExcuteElement*>	m_QuestExcutElement; 
 	
 	bool						UpdateQuestInfo(_GQuestInfo *QInfo, int nType = -1);
 	char*						GetQuestTitle(const XMLTree *pElement);
@@ -1444,25 +1442,25 @@ private:
 public:
 	enum INFO_SPK
 	{
-		INVENTORY_SLOT,			// �κ��丮 ���� �޹��
-		TAB_BUTTON_PROCESS,		// �ǹ�ư - ����
-		TAB_BUTTON_COMPLETE,	// �ǹ�ư - �Ϸ�
-		BUTTON_ACCEPT,			// ���� ��ư
-		BUTTON_ACCEPT_HILIGHT,	// ���� ��ư ���̶���Ʈ
-		BUTTON_ACCEPT_PUSH,		// ���� ��ư Ǫ��
-		BUTTON_GIVEUP,			// ���� ��ư
-		BUTTON_GIVEUP_HILIGHT,	// ���� ��ư ���̶���Ʈ
-		BUTTON_GIVEUP_PUSH,		// ���� ��ư Ǫ��
-		QUEST_LIST_SUBJECT,		// ����,����
-		QUEST_MISSION_SUBJECT,	// �ӹ�,����
-		QUEST_TITLE_BG,			// ����Ʈ ��� �� ���
-		QUEST_TABLE_BG,			// ����Ʈ ��� �� ���
-		QUEST_DETAIL_BG,		// ����Ʈ �� �� ���
+		INVENTORY_SLOT,			
+		TAB_BUTTON_PROCESS,		
+		TAB_BUTTON_COMPLETE,	
+		BUTTON_ACCEPT,			
+		BUTTON_ACCEPT_HILIGHT,	
+		BUTTON_ACCEPT_PUSH,		
+		BUTTON_GIVEUP,			
+		BUTTON_GIVEUP_HILIGHT,	
+		BUTTON_GIVEUP_PUSH,		
+		QUEST_LIST_SUBJECT,		
+		QUEST_MISSION_SUBJECT,	
+		QUEST_TITLE_BG,			
+		QUEST_TABLE_BG,			
+		QUEST_DETAIL_BG,		
 
-		QUEST_LIST_TITLE,		// ����Ʈ ��� Ÿ��Ʋ
-		QUEST_DETAIL_TITLE,		// ����Ʈ ���� Ÿ��Ʋ
-		QUEST_MISSION_TITLE,	// ����Ʈ �ӹ� Ÿ��Ʋ
-		QUEST_ITEM_TITLE,		// ����Ʈ ������ Ÿ��Ʋ
+		QUEST_LIST_TITLE,		
+		QUEST_DETAIL_TITLE,		
+		QUEST_MISSION_TITLE,	
+		QUEST_ITEM_TITLE,		
 
 	};
 	
@@ -1535,13 +1533,13 @@ class C_VS_UI_QUEST_LIST : public Window, public Exec, public ButtonVisual/*, pu
 public:
 	enum QUEST_LIST_STATUS
 	{
-		CANNOT = 0,		// ���� �Ұ���
-		CAN_ACCEPT,		// ���డ��
-		DOING,			// ������
-		SUCCESS,		// ���� (���� ������� ����)
-		COMPLETE,		// �Ϸ� (�������, ����� �Ұ���)
-		FAIL,			// ���� (����� �Ұ���)
-		CAN_REPLAY,		// ����� ����
+		CANNOT = 0,		
+		CAN_ACCEPT,		
+		DOING,			
+		SUCCESS,		
+		COMPLETE,		
+		FAIL,			
+		CAN_REPLAY,		
 	};
 
 private:
@@ -1559,13 +1557,13 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	int							m_SelectContents;
-	BYTE						m_TabID; // ���/�Ϸ� �� ����
+	BYTE						m_TabID; 
 	bool						m_bl_focus;
 
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;
 
-	std::vector<C_VS_UI_QUEST_MANAGER::_GQuestInfo*>		m_QuestListInfo[2];		// 0 : ���డ��, ������,���� �϶� ����Ʈ ����Ʈ
-															// 1 : �Ϸ�, ����, ����� ���� �϶� ����Ʈ ����Ʈ
+	std::vector<C_VS_UI_QUEST_MANAGER::_GQuestInfo*>		m_QuestListInfo[2];		
+															
 
 public:
 
@@ -1607,9 +1605,9 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;
 
-	int							m_IsAbleRunQuest ; // 0 : disable 1 : ���� 2 : ����
+	int							m_IsAbleRunQuest ; 
 	std::string					m_szTitle;
 public:
 	C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK*	spr);
@@ -1639,10 +1637,10 @@ class C_VS_UI_QUEST_MISSION :  public Window, public Exec, public ButtonVisual/*
 public:
 	enum QUEST_MISSION_STATUS
 	{
-		HIDE = 0,			// �������� ����
-		CURRENT,			// ���� �ؾ� �Ǵ� �̼� (������)
-		SUCCESS,			// �̹� ������ �̼�
-		FAIL,				// ����
+		HIDE = 0,			
+		CURRENT,			
+		SUCCESS,			
+		FAIL,				
 	};
 
 private:
@@ -1659,7 +1657,7 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;
 
 	std::vector<C_VS_UI_QUEST_MANAGER::_GMissionInfo*> m_QuestMissionInfo;
 public:
@@ -1708,7 +1706,7 @@ private:
 	C_VS_UI_SCROLL_BAR			*m_pC_scroll_bar;	
 	int							m_SelectPos;
 	bool						m_bl_focus;
-	int							m_OustersOffset;// �ƿ콺���� �ȼ� ����
+	int							m_OustersOffset;
 
 	std::vector<MItem*>			m_QuestItemInfo;
 
@@ -1861,19 +1859,19 @@ private :
 	enum INFO_SPK
 	{
 		JJANG_MAIN,
-		JJANG_BUTTON_EXCHANGE,			// ��ȯ ��ư
-		JJANG_BUTTON_EXCHANGE_HILIGHT,	// ��ȯ ��ư ���̶���Ʈ
-		JJANG_BUTTON_EXCHANGE_PUSH,		// ��ȯ ��ư Ǫ��
+		JJANG_BUTTON_EXCHANGE,			
+		JJANG_BUTTON_EXCHANGE_HILIGHT,	
+		JJANG_BUTTON_EXCHANGE_PUSH,		
 	};
 	enum ITEM_CODE
 	{
-		CANDY = 0,				// ���� 1�� 
-		RESURRECTION_SCROLL,	// ��Ȱ ��ũ�� 1��
-		ELIXIR_SCROLL,			// ������ ��ũ�� 1��
-		MEGAPHONE,				// Ȯ���� 30��
-		NAMING_PEN,				// ���̹� �� 1��
-		SIGNPOST,				// �˸��� 6�ð�
-		BLACK_RICE_CAKE_SOUP	// ���� ���� 1��
+		CANDY = 0,				
+		RESURRECTION_SCROLL,	
+		ELIXIR_SCROLL,			
+		MEGAPHONE,				
+		NAMING_PEN,				
+		SIGNPOST,				
+		BLACK_RICE_CAKE_SOUP	
 	};
 	enum EXEC_ID
 	{
@@ -1899,7 +1897,7 @@ private :
 	int					m_SelectPos;
 	LineEditorVisual	m_EditPhoneNumber;
 	std::string			m_szMyPhoneNumber;
-	WORD				m_AvailablePoint; // �׺� ���� ����Ʈ
+	WORD				m_AvailablePoint; 
 
 	int					m_GambleMode;
 	DWORD				m_dwSpeed;
@@ -1934,7 +1932,7 @@ public :
 	void	PowerjjangGambleResult(BYTE bItemCode);
 };
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 
 
 //-----------------------------------------------------------------------------
@@ -1942,10 +1940,10 @@ public :
 //
 // slayer/vampire inventory base class.
 //
-// - slayer/vampire inventory ������ interface�� �����Ѵ�. 
-// - slayer���� vampire�� �ٲ�ų� �Ǵ� �� �ݴ��� ��, ��ü�� ������Ͽ�
-//   inventory�� �ʱ�ȭ������, inventory�� item�� �״�� �����ȴ�. interface�󿡼���
-//   inventory�� item�� �����ϰ� ���� �ʴ�. �׷��� �� class�� base�� �ϴ� ���̴�.
+
+
+
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_INVENTORY_SUB : public Window, public Exec, public ButtonVisual
 {
@@ -1968,7 +1966,7 @@ protected:
 		INVENTORY_ITEMBACK_ALPHA,
 		INVENTORY_WINDOW_2X4,
 		INVENTORY_WINDOW_2X4_ALPHA,
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		INVENTORY_WINDOW_4X6,
 		INVENTORY_WINDOW_4X6_ALPHA,
 	#endif
@@ -1984,7 +1982,7 @@ protected:
 	enum 
 	{ 
 		TYPE_2X4 = 0,
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		TYPE_4X6 = 1,
 	#endif
 		
@@ -1997,18 +1995,18 @@ protected:
 
 	BYTE					m_SubInventoryType;
 	
-	Rect					m_grid_rect; // ��ü Grid rect.
+	Rect					m_grid_rect; 
 
 	int						m_focus_grid_x, m_focus_grid_y;
 
-	// ��ӹ޴� class���� �ݵ�� set����� �Ѵ�.
+	
 	int							m_grid_start_offset_x, m_grid_start_offset_y;
 
 	int						m_MainWindowSpk;
 	int						n_nType;
 
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		MSubInventory*			m_MultiPackItem;
 	#endif
 
@@ -2034,7 +2032,7 @@ public:
 	C_VS_UI_INVENTORY_SUB(MItem* pItem);
 	virtual ~C_VS_UI_INVENTORY_SUB();
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		MItem*	GetSubInventoryItem() { return m_MultiPackItem; }
 	#endif
 

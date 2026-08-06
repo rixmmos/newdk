@@ -2,10 +2,10 @@
 // Filename    : RideMotorcycleInfo.h
 // Written By  : elca@ewestsoft.com
 // Description :
-// Ÿ�� �ִ� ���ͻ���Ŭ�� ���� ������ ������ �ִ� ��Ŷ�̴�.
-// ���� ����Ŭ ��ü�� ���� ���� �ܿ���, ���� ����Ŭ ���ο� �ִ�
-// �κ��丮�� ���� ������ ���� ������ �ִ�. �κ��丮 ������ ���� ����
-// RideMotorcycleSlotInfo�� InventorySlotInfo�� �����϶�.
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __RIDE_MOTORCYCLE_INFO_H__

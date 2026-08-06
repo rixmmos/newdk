@@ -19,7 +19,7 @@ EffectMPRecovery::EffectMPRecovery()
 {
     __BEGIN_TRY
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -33,7 +33,7 @@ EffectMPRecovery::EffectMPRecovery(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Cr
     Assert(getZone() != NULL);
     Assert(getTarget() != NULL);
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -51,7 +51,7 @@ void EffectMPRecovery::affect()
 {
     __BEGIN_TRY
 
-    // Delay에 따른 체력 회복.
+    
     setNextTime(m_Delay);
 
     Creature* pCreature = dynamic_cast<Creature*>(m_pTarget);
@@ -67,7 +67,7 @@ void EffectMPRecovery::affect(Creature* pCreature)
     __BEGIN_TRY
 
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION)) {
-        cout << "Pleasure Explosion 땜에 안 찬다." << endl;
+        cout << "Pleasure Explosion   ." << endl;
         return;
     }
 
@@ -86,10 +86,10 @@ void EffectMPRecovery::affect(Creature* pCreature)
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
         if (pSlayer->getMP(ATTR_CURRENT) != pSlayer->getMP(ATTR_MAX) && m_Period != 0) {
-            // 플레그 걸귀
+            
             pSlayer->setFlag(Effect::EFFECT_CLASS_MP_RECOVERY);
 
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             MP_t CurrentMP = pSlayer->getMP(ATTR_CURRENT);
             MP_t NewMP =
                 min((int)(pSlayer->getMP(ATTR_MAX)), (int)(CurrentMP + m_MPQuantity * (m_Period - RecoveryPeriod)));
@@ -111,10 +111,10 @@ void EffectMPRecovery::affect(Creature* pCreature)
         Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
 
         if (pOusters->getMP(ATTR_CURRENT) <= pOusters->getMP(ATTR_MAX) && m_Period != 0) {
-            // 플레그 걸귀
+            
             pOusters->setFlag(Effect::EFFECT_CLASS_MP_RECOVERY);
 
-            // 한 턴에 얼마나 회복 시킬 것인가.
+            
             MP_t CurrentMP = pOusters->getMP(ATTR_CURRENT);
             MP_t NewMP =
                 min((int)(pOusters->getMP(ATTR_MAX)), (int)(CurrentMP + m_MPQuantity * (m_Period - RecoveryPeriod)));
@@ -167,9 +167,9 @@ void EffectMPRecovery::unaffect(Creature* pCreature)
             pSlayer->setMP(NewMP, ATTR_CURRENT);
         }
 
-        // 현재 MP를 브로드캐스팅한다.
-        // 이제 회복이 끝났나는 것을 알리도록 한다.
-        // 자신에게 먼저
+        
+        
+        
         GCMPRecoveryEnd gcEffectMPRecoveryEnd;
         gcEffectMPRecoveryEnd.setCurrentMP(pSlayer->getMP(ATTR_CURRENT));
         pSlayer->getPlayer()->sendPacket(&gcEffectMPRecoveryEnd);
@@ -185,9 +185,9 @@ void EffectMPRecovery::unaffect(Creature* pCreature)
             pOusters->setMP(NewMP, ATTR_CURRENT);
         }
 
-        // 현재 MP를 브로드캐스팅한다.
-        // 이제 회복이 끝났나는 것을 알리도록 한다.
-        // 자신에게 먼저
+        
+        
+        
         GCMPRecoveryEnd gcEffectMPRecoveryEnd;
         gcEffectMPRecoveryEnd.setCurrentMP(pOusters->getMP(ATTR_CURRENT));
         pOusters->getPlayer()->sendPacket(&gcEffectMPRecoveryEnd);

@@ -36,6 +36,7 @@ struct spritectl_surface_s {
 	int height;
 	int format;                 /* SPRITECTL_FORMAT_* */
 	int locked;                 /* Lock count */
+	int texture_dirty;          /* Surface pixels changed since last upload */
 	int ref_count;              /* Reference count */
 };
 
@@ -51,6 +52,7 @@ struct spritectl_sprite_s {
 	uint16_t** scanline_rle;    /* RLE data per scanline - preserved for correct transparency */
 	uint16_t* scanline_lens;    /* Length of each scanline's RLE data */
 	uint32_t* rgba_pixels;      /* Decoded RGBA32 pixels (cached) */
+	SDL_Surface* blit_surface;  /* Cached SDL surface built from rgba_pixels */
 	size_t data_size;           /* Size of pixel data */
 	int ref_count;              /* Reference count */
 	int has_rle;                /* Whether RLE data is available */
@@ -157,10 +159,7 @@ static inline void spritectl_565_to_rgb(uint16_t pixel, uint8_t* r, uint8_t* g, 
 	uint8_t g6 = (pixel >> 5) & 0x3F;   /* 6 bits */
 	uint8_t b5 = pixel & 0x1F;          /* 5 bits */
 
-	/* Convert to 8-bit using optimized shift algorithm
-	 * 5-bit to 8-bit: (value << 3) | (value >> 2) ≈ (value * 255) / 31
-	 * 6-bit to 8-bit: (value << 2) | (value >> 4) ≈ (value * 255) / 63
-	 */
+	 
 	*r = (r5 << 3) | (r5 >> 2);
 	*g = (g6 << 2) | (g6 >> 4);
 	*b = (b5 << 3) | (b5 >> 2);
@@ -176,9 +175,7 @@ static inline void spritectl_555_to_rgb(uint16_t pixel, uint8_t* r, uint8_t* g, 
 	uint8_t g5 = (pixel >> 5) & 0x1F;   /* 5 bits */
 	uint8_t b5 = pixel & 0x1F;          /* 5 bits */
 
-	/* Convert to 8-bit using optimized shift algorithm
-	 * 5-bit to 8-bit: (value << 3) | (value >> 2) ≈ (value * 255) / 31
-	 */
+	 
 	*r = (r5 << 3) | (r5 >> 2);
 	*g = (g5 << 3) | (g5 >> 2);
 	*b = (b5 << 3) | (b5 >> 2);

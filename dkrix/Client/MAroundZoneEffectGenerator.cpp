@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAroundZoneEffectGenerator.cpp
 //----------------------------------------------------------------------
-// Tile과 맞붙은 Effect들을 생성한다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MAroundZoneEffectGenerator.h"
@@ -30,19 +30,9 @@ MAroundZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	int est = egInfo.effectSpriteType;
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
-	/*
-	int	sX, sY;
-	sX = g_pTopView->PixelToMapX(egInfo.x0);
-	sY = g_pTopView->PixelToMapY(egInfo.y0);
-
-	//---------------------------------------------
-	// Map좌표를 다시 pixel좌표로 바꾼다.
-	//---------------------------------------------
-	POINT pixelPoint;
-	pixelPoint = g_pTopView->MapToPixel(sX, sY);
-	*/
+	 
 	// 2001.10.6
 
 	int num = 0;
@@ -94,7 +84,7 @@ MAroundZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		}
 		
 		//----------------------------------------------------------------
-		// 바닥에 튀는 먼지..
+		
 		//----------------------------------------------------------------
 		///*
 		else if (est==EFFECTSPRITETYPE_GUN_DUST_1)
@@ -165,26 +155,26 @@ MAroundZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[est].FrameID;
 
 		//---------------------------------------------
-		// MaxFrame의 값을 알아온다.
+		
 		//---------------------------------------------
 		int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
 		
 
 		MEffect*	pEffect;
 		//---------------------------------------------
-		// Effect 생성
+		
 		//---------------------------------------------
 		pEffect = new MEffect(bltType);
 
 		pEffect->SetFrameID( frameID, maxFrame );	
 
-		pEffect->SetPixelPosition(pixelPoint.x, pixelPoint.y, egInfo.z0);		// pixel좌표		
+		pEffect->SetPixelPosition(pixelPoint.x, pixelPoint.y, egInfo.z0);		
 
-		pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
+		pEffect->SetStepPixel(egInfo.step);		
 
-		pEffect->SetCount( maxFrame, egInfo.linkCount );			// 지속되는 Frame
+		pEffect->SetCount( maxFrame, egInfo.linkCount );			
 
-		// 방향 설정
+		
 		if(est == EFFECTSPRITETYPE_GREAT_RUFFIAN_2_AXE_THROW) 
 		{
 			pEffect->SetMulti(true);
@@ -193,10 +183,10 @@ MAroundZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		else
 			pEffect->SetDirection( egInfo.direction );
 
-		// 위력
+		
 		pEffect->SetPower(egInfo.power);
 		
-		// 빛의 밝기
+		
 		//pEffect->SetLight( light );
 		
 		if(dwWaitCount)
@@ -205,12 +195,12 @@ MAroundZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			pEffect->SetCount( dwWaitCount+maxFrame, egInfo.linkCount );
 			pEffect->SetMulti(true);
 		}
-		// Zone에 추가한다.
+		
 		if (g_pZone->AddEffect( pEffect, dwWaitCount))
 		{
 			if (!bOK)
 			{
-				// 다음 Effect 생성 정보
+				
 				pEffect->SetLink( egInfo.nActionInfo, pTarget );
 
 				bOK = true;

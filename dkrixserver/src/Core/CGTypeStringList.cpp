@@ -37,9 +37,9 @@ void CGTypeStringList::read(SocketInputStream& iStream)
         iStream.read(szString);
 
         if (szString == 0)
-            throw InvalidProtocolException("String 길이가 0입니다.");
+            throw InvalidProtocolException("String  0.");
         if (szString > MAX_STRING_LENGTH)
-            throw InvalidProtocolException("String 길이가 너무 깁니다.");
+            throw InvalidProtocolException("String   .");
 
         iStream.read(temp, szString);
 

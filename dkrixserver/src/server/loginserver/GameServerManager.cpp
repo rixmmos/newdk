@@ -84,10 +84,10 @@ void GameServerManager::run() {
             DatagramPacket* pDatagramPacket = NULL;
 
             try {
-                // �����ͱ׷� ��ü�� �������.
+                
                 pDatagram = m_pDatagramSocket->receive();
 
-                if (pDatagram != NULL) // �Ϻ� exception����. by sigi. 2002.5.17
+                if (pDatagram != NULL) 
                 {
                     // cout << pDatagramPacket->toString() << endl;
 
@@ -106,19 +106,19 @@ void GameServerManager::run() {
                     }
                     */
 
-                    // �����ͱ׷� ��Ŷ ��ü�� �������.
+                    
                     pDatagram->read(pDatagramPacket);
 
                     if (pDatagramPacket != NULL) {
-                        // ����� �����ͱ׷� ��Ŷ ��ü�� �����Ѵ�.
+                        
                         pDatagramPacket->execute(NULL);
 
-                        // �����ͱ׷� ��Ŷ ��ü�� �����Ѵ�.
+                        
                         delete pDatagramPacket;
                         pDatagramPacket = NULL;
                     }
 
-                    // �����ͱ׷� ��ü�� �����Ѵ�.
+                    
                     delete pDatagram;
                     pDatagram = NULL;
                 }
@@ -126,9 +126,9 @@ void GameServerManager::run() {
                 cout << "GameServerManager::run Exception Check(ProtocolException)" << endl;
                 cout << pe.toString() << endl;
 
-                // ������ ��ſ��� �������� ������ �߻��ϸ�,
-                // ���α׷��� �����̰ų� ��ŷ �õ��̴�.
-                // �ϴ��� ���ڸ��� �ش�ǹǷ�.. ������ �����Ѵ�.
+                
+                
+                
                 // throw Error( pe.toString() );
                 delete pDatagramPacket;
                 delete pDatagram;
@@ -136,8 +136,8 @@ void GameServerManager::run() {
                 cout << "GameServerManager::run Exception Check(ConnectException)" << endl;
                 cout << ce.toString() << endl;
 
-                // ����.. ���� �̰�..
-                // �ϴ� ������..
+                
+                
                 // throw Error( ce.toString() );
                 delete pDatagramPacket;
                 delete pDatagram;
@@ -147,7 +147,7 @@ void GameServerManager::run() {
                 delete pDatagramPacket;
                 delete pDatagram;
             }
-            usleep(1000); // FIX: 降低 CPU 占用率
+            usleep(1000); 
         }
 
         cout << "GameServerManager thread exiting... " << endl;
@@ -170,7 +170,7 @@ void GameServerManager::sendDatagram(Datagram* pDatagram) {
     } catch (ConnectException& t) {
         cout << "GameServerManager::sendDatagram Exception Check!!" << endl;
         cout << t.toString() << endl;
-        throw ConnectException("GameServerManager::sendDatagram ������ ������");
+        throw ConnectException("GameServerManager::sendDatagram  ");
     }
 
     __END_CATCH
@@ -187,24 +187,24 @@ void GameServerManager::sendPacket(string host, uint port, DatagramPacket* pPack
     try {
         //	try
         //	{
-        // �����ͱ׷� ��ü�� �ϳ� �ΰ�, ������ peer �� ȣ��Ʈ��
-        // ��Ʈ�� �����Ѵ�.
+        
+        
         Datagram datagram;
 
         datagram.setHost(host);
         datagram.setPort(port);
 
-        // �����ͱ׷� ��Ŷ�� �����ͱ׷��� ����ִ´�.
+        
         datagram.write(pPacket);
 
-        // �����ͱ׷� ������ ���ؼ� �����ͱ׷��� �����Ѵ�.
+        
         m_pDatagramSocket->send(&datagram);
         //	}
         //	catch ( ConnectException & t )
         //	{
         //		cout << "GameServerManager::sendDatagram Exception Check!!" << endl;
         //		cout << t.toString() << endl;
-        //		throw ConnectException( "GameServerManager::sendDatagram ������ ������");
+        
         //	}
 
     } catch (Throwable& t) {

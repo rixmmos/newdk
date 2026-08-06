@@ -104,14 +104,14 @@ public:
 
 
 private:
-    // 트리거 타입
+    
     TriggerType m_TriggerType;
 
-    // 트리거 아이디
+    
     TriggerID_t m_TriggerID;
 
-    // 연관되는 퀘스트 아이디
-    // m_TriggerType == QUEST_TRIGGER 일 경우에만 의미가 있다.
+    
+    
     QuestID_t m_QuestID;
 
     // bitset of conditions for fastest reference

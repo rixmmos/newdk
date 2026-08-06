@@ -7,11 +7,11 @@
 #ifndef __GC_MODIFY_NICKNAME_H__
 #define __GC_MODIFY_NICKNAME_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "Types.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../Types.h"
 
-#include "NicknameInfo.h"
+#include "../NicknameInfo.h"
 
 class GCModifyNickname : public Packet
 {

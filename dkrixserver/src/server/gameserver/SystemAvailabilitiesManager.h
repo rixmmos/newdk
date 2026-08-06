@@ -12,12 +12,12 @@
     SystemAvailabilitiesManager::AssertAvailable( \
         SystemAvailabilitiesManager::KIND,        \
         string() + __PRETTY_FUNCTION__ +          \
-            " : 잘못된 클라이언트를 사용했거나 클라이언트와 서버의 정보가 맞지 않습니다.")
+            " :        .")
 #define SYSTEM_RETURN_IF_NOT(KIND)                                                                     \
     if (!SystemAvailabilitiesManager::getInstance()->isAvailable(SystemAvailabilitiesManager::KIND)) { \
         filelog("SystemAvailabilities.log",                                                            \
                 (string() + __PRETTY_FUNCTION__ +                                                      \
-                 " : 잘못된 클라이언트를 사용했거나 클라이언트와 서버의 정보가 맞지 않습니다.")        \
+                 " :        .")        \
                     .c_str());                                                                         \
         return;                                                                                        \
     }
@@ -79,7 +79,7 @@ public:
         return m_pAvailabilitiesPacket;
     }
 
-    // 싱글톤이당
+    
     static SystemAvailabilitiesManager* getInstance() {
         static SystemAvailabilitiesManager theInstance;
         return &theInstance;

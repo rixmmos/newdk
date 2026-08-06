@@ -23,9 +23,9 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 
-	// 내가 objectID한테 맞는다.
+	
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 	//int delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -41,7 +41,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{

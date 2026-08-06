@@ -28,7 +28,7 @@ void CGRequestIPHandler::execute(CGRequestIP* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     try {
-        // UserIPInfo 테이블에서 사용자 IP를 쿼리 한다.
+        
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -38,7 +38,7 @@ void CGRequestIPHandler::execute(CGRequestIP* pPacket, Player* pPlayer)
 
             if (pResult->getRowCount() == 0) {
                 SAFE_DELETE(pStmt);
-                throw NoSuchElementException("요청한 ID의 IP정보가 없음다.");
+                throw NoSuchElementException(" ID IP .");
             } else {
                 pResult->next();
                 IP_t IP = pResult->getDWORD(1);
@@ -58,7 +58,7 @@ void CGRequestIPHandler::execute(CGRequestIP* pPacket, Player* pPlayer)
     }
     // catch (NoSuchElementException & nsee)
     catch (Throwable& t) {
-        // no such인 경우..
+        
         GCRequestFailed gcRequestFailed;
         gcRequestFailed.setCode(REQUEST_FAILED_IP);
         gcRequestFailed.setName(pPacket->getName());

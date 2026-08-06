@@ -59,10 +59,10 @@ void EffectStriking::unaffect(Creature* pCreature)
     Assert(pCreature != NULL);
     Assert(pCreature->isSlayer());
 
-    // 먼저 플래그를 날린다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_STRIKING);
 
-    // 능력치를 새로 계산해서 보내준다.
+    
     Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
     SLAYER_RECORD prev;
     pSlayer->getSlayerRecord(prev);
@@ -70,7 +70,7 @@ void EffectStriking::unaffect(Creature* pCreature)
     pSlayer->sendRealWearingInfo();
     pSlayer->sendModifyInfo(prev);
 
-    // 이펙트가 사라졌다고 주위에 알린다.
+    
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
     GCRemoveEffect gcRemoveEffect;

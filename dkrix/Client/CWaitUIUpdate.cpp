@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // CWaitUIUpdate.cpp
 //---------------------------------------------------------------------------
-// UI에서 메시지가 오기를 기다리는 loop
+
 //---------------------------------------------------------------------------
 #include "Client_PCH.h"
 #pragma warning(disable:4786)
@@ -29,6 +29,19 @@
 #include "MTestDef.h"
 #include "DXLibBackend.h"  // For SDL text input functions
 
+#ifndef WM_TEXTINPUT
+#define WM_TEXTINPUT (WM_USER + 0x500)
+#endif
+
+#ifndef WM_TEXTEDITING
+#define WM_TEXTEDITING (WM_USER + 0x501)
+#endif
+
+static void TraceWaitUI(const char* message)
+{
+	(void)message;
+}
+
 extern bool	LoadingAddonSPK(bool bLoadingAll);
 extern bool	g_AddonSPKAllLoaded;
 
@@ -38,6 +51,7 @@ extern bool 	CheckInvalidProcess();
 extern BOOL g_MyFull;
 extern RECT g_GameRect;
 extern int	g_TitleSpriteAlpha;
+extern DWORD g_TitleLoadingStartTime;
 
 // Global
 CWaitUIUpdate*	g_pCWaitUIUpdate = NULL;
@@ -58,13 +72,13 @@ extern DWORD g_double_click_time;
 void
 CWaitUIUpdate::Init()
 {
-	// mouse event 처리
+	
 	g_pSDLInput->SetMouseEventReceiver( DXMouseEvent );
 
-	// keyboard event 처리
+	
 	g_pSDLInput->SetKeyboardEventReceiver( DXKeyboardEvent );
 
-	// text input 처리 (SDL2 only)
+	
 	dxlib_input_set_textinput_callback(SDLTextInputEvent);
 	dxlib_input_set_textediting_callback(SDLTextEditingEvent);
 	dxlib_input_start_text();  // Enable SDL text input
@@ -113,7 +127,9 @@ CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 					printf("  DXKeyboardEvent: Sending WM_KEYDOWN, vk_key=%u (DIK=%lu)\n", vk_key, (unsigned long)key);
 					keydown_debug_count++;
 				}
+#if !(defined(PLATFORM_WINDOWS) && (defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL)))
 				gC_vs_ui.KeyboardControl(WM_KEYDOWN, vk_key, 0);
+#endif
 			}
 
 			gC_vs_ui.DIKeyboardControl(event, key);
@@ -142,7 +158,7 @@ CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				break;
 
 				//-----------------------------------------------------
-				// Server List 받기
+				
 				//-----------------------------------------------------
 				case DIK_SPACE :
 				{
@@ -150,7 +166,7 @@ CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 				break;
 
 				//-----------------------------------------------------
-				// Server 선택하기
+				
 				//-----------------------------------------------------
 				case DIK_C :
 				{
@@ -259,13 +275,23 @@ CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 //-----------------------------------------------------------------------------
 // Update
 //-----------------------------------------------------------------------------
-// 접속 전..
+
 //-----------------------------------------------------------------------------
 void		
 CWaitUIUpdate::Update()
 {
 	static DWORD lastTime = g_CurrentTime;
+	static DWORD lastTraceTime = 0;
 	bool bChanged = false;
+
+	if (g_CurrentTime - lastTraceTime >= 1000)
+	{
+		char trace[160];
+		sprintf(trace, "CWaitUIUpdate::Update mode=%d activeApp=%d activeGame=%d",
+			(int)g_Mode, (int)g_bActiveApp, (int)g_bActiveGame);
+		TraceWaitUI(trace);
+		lastTraceTime = g_CurrentTime;
+	}
 
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		DEBUG_ADD("UM");
@@ -277,9 +303,11 @@ CWaitUIUpdate::Update()
 		DEBUG_ADD("UM2");
 	#endif
 
+#ifndef SPRITELIB_BACKEND_SDL
 	CheckInvalidProcess();
+#endif
 	//------------------------------------------
-	// 일정시간마다 한번씩 update
+	
 	//------------------------------------------
 	if (g_CurrentTime - lastTime >= g_UpdateDelay)
 	{
@@ -292,7 +320,7 @@ CWaitUIUpdate::Update()
 //		}
 
 		//------------------------------------------
-		// Socket 입력 처리
+		
 		//------------------------------------------
 		if (!UpdateSocketInput())
 		{
@@ -321,7 +349,7 @@ CWaitUIUpdate::Update()
 			return;
 
 		//------------------------------------------
-		// Socket Output부분 처리
+		
 		//------------------------------------------
 		if (!UpdateSocketOutput())
 		{
@@ -331,7 +359,7 @@ CWaitUIUpdate::Update()
 		//------------------------------------------
 		// [ TEST CODE]
 		//------------------------------------------
-		// UI 기다리는 모드가 아닐 경우...
+		
 		//------------------------------------------
 		if (g_Mode!=MODE_MAINMENU &&
 			g_Mode!=MODE_NEWUSER &&
@@ -371,76 +399,15 @@ CWaitUIUpdate::Update()
 
 		lastTime = g_CurrentTime;
 
-		// Frame증가
+		
 		g_FrameCount++;
 	}
 
 	//------------------------------------------------------------
 	// Test 2001.8.20
 	//------------------------------------------------------------
-	// 실행 중에 loading하는 걸로 바꿔서 뺀다..
-	/*
-	bool bLoad = false;
-	if (g_Mode==MODE_MAINMENU)
-	{		
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo1");
-		#endif
-
-		// main menu에서
-		// 남자 뱀파이어 로딩
-		if (!(*g_pCreatureSpriteTable)[2].bLoad)
-		{
-			LoadCreature( 2 );
-			bLoad = true;
-		}
-		
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo2");
-		#endif
-	}
-	else if (g_Mode==MODE_WAIT_SELECTPC)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo3");
-		#endif
-
-		// main menu에서
-		// 여자 뱀파이어 로딩
-		if (!(*g_pCreatureSpriteTable)[3].bLoad)
-		{
-			LoadCreature( 3 );	
-			bLoad = true;
-		}
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo4");
-		#endif
-	}
-
-	//-------------------------------------------------------------
-	// 틈틈히(-_-;) 슬레이어 그림 loading하기
-	//-------------------------------------------------------------
-	static DWORD lastLoadingTime = 0;
-		
-	if (!bLoad && !g_AddonSPKAllLoaded
-		// 5초에 한번씩 로딩한다.
-		&& g_CurrentTime - lastLoadingTime > 5000)
-	{
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo5");
-		#endif
-
-		// 슬레이어 그림 일부 로딩 - 2001.8.20
-		LoadingAddonSPK( false );
-
-		lastLoadingTime = timeGetTime();
-
-		#ifdef OUTPUT_DEBUG_UPDATE_LOOP
-			DEBUG_ADD("Lo6");
-		#endif
-	}
-	*/
+	
+	 
 
 	#ifdef OUTPUT_DEBUG_UPDATE_LOOP
 		DEBUG_ADD("UOK");
@@ -549,9 +516,19 @@ CWaitUIUpdate::ProcessInput()
 //---------------------------------------------------------------------------
 // Update Draw
 //---------------------------------------------------------------------------
-void 
+void		
 CWaitUIUpdate::UpdateDraw()
 {
+	static DWORD lastDrawTraceTime = 0;
+	if (g_CurrentTime - lastDrawTraceTime >= 1000)
+	{
+		char trace[160];
+		sprintf(trace, "CWaitUIUpdate::UpdateDraw mode=%d titleAlpha=%d",
+			(int)g_Mode, g_TitleSpriteAlpha);
+		TraceWaitUI(trace);
+		lastDrawTraceTime = g_CurrentTime;
+	}
+
 	//char	str[128];
 	UpdateMouse();
 
@@ -697,7 +674,7 @@ CWaitUIUpdate::UpdateDraw()
 //		}
 //		*/
 //		//-----------------------------------------------------------------
-//		// 서버 이름 출력
+
 //		//-----------------------------------------------------------------
 //		/*
 //		#ifdef OUTPUT_DEBUG
@@ -716,7 +693,7 @@ CWaitUIUpdate::UpdateDraw()
 //				//g_pBack->GDI_Text(401,11, str, RGB(0,0,0));
 //				//g_pBack->GDI_Text(400,10, str, RGB(240,240,240));
 //
-//				ServerInformation::const_iterator iGroup = g_pServerInformation->begin();
+//				CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
 //
 //				int y = 30;
 //				
@@ -755,7 +732,7 @@ CWaitUIUpdate::UpdateDraw()
 //		*/
 //
 //		//-----------------------------------------------------------------
-//		// Mouse 그리기
+
 //		//-----------------------------------------------------------------
 //		gC_vs_ui.DrawMousePointer();
 //
@@ -778,24 +755,10 @@ CWaitUIUpdate::UpdateDraw()
 	{
 		POINT point;
 
-		static DWORD oldTime = timeGetTime();
-
 		gC_vs_ui.Show();
-
-		if(g_TitleSpriteAlpha > 0)
-		{
-			int alpha = (int)(31-(timeGetTime()-oldTime)*16/1000);
-			g_TitleSpriteAlpha = (alpha > 0) ? alpha : 0;
-			DrawTitleLoading();
-
-			if(g_TitleSpriteAlpha <= 0)
-			{
-				EndTitleLoading(true);
-			}
-		}
 				
 		//-----------------------------------------------------------------
-		// 서버 이름 출력
+		
 		//-----------------------------------------------------------------
 		/*
 		#ifdef OUTPUT_DEBUG
@@ -816,7 +779,7 @@ CWaitUIUpdate::UpdateDraw()
 				//g_pLast->GDI_Text(401,11, str, RGB(0,0,0));
 				//g_pLast->GDI_Text(400,10, str, RGB(240,240,240));
 
-				ServerInformation::const_iterator iGroup = g_pServerInformation->begin();
+				CServerInformation::const_iterator iGroup = g_pServerInformation->begin();
 
 				int y = 30;
 				
@@ -856,86 +819,9 @@ CWaitUIUpdate::UpdateDraw()
 		#endif
 		*/
 
-		/*
-		static float anim = 0.0f;
-
-		static CSpriteSurface* pWaveSurface;
-		static bool first = true;
-
-		if (first)
-		{
-			pWaveSurface = new CSpriteSurface;
-			pWaveSurface ->InitOffsurface(SURFACE_WIDTH, SURFACE_HEIGHT, DDSCAPS_SYSTEMMEMORY);
-			pWaveSurface->SetTransparency( 0 );
-			pWaveSurface->FillSurface( CSDLGraphics::Color(0,0,0) );
-			first = false;
-		}
-
-		g_pLast->Lock();
-
-		WORD* lpSurface = (WORD*)g_pLast->GetSurfacePointer();
-		long	pitch	= (long)g_pLast->GetSurfacePitch();
-
-		pWaveSurface->Lock();		
+		 
+		//-----------------------------------------------------------------
 		
-		WORD* lpWaveSurface = (WORD*)pWaveSurface->GetSurfacePointer();
-		long	wavePitch	= (long)pWaveSurface->GetSurfacePitch();
-
-		WORD* lpSrcSurfaceTemp, * lpSrcSurfaceTemp2;
-		WORD* lpDestSurfaceTemp, * lpDestSurfaceTemp2;
-
-		const int xStep = 20;
-		const int yStep = 20;
-
-		anim += 0.05f;
-		RECT rectWave = { 100, 100, 700, 500 };
-
-        for (int x=rectWave.left; x<rectWave.right; x+=xStep)
-		{
-            for (int y=rectWave.top; y<rectWave.bottom; y+=yStep)
-			{
-                int xpos = x+(sin(anim+x*0.01f)*15);
-                int ypos = y+(sin(anim+y*0.01f)*15);
-
-				// (x,y)
-				lpSrcSurfaceTemp = (WORD*)((BYTE*)lpSurface + y*pitch + (x<<1));
-
-				// (xpos, ypos) 
-				lpDestSurfaceTemp = (WORD*)((BYTE*)lpWaveSurface + ypos*wavePitch + (xpos<<1));
-				
-				for (int dy=0; dy<yStep; dy++)
-				{
-					lpSrcSurfaceTemp2 = lpSrcSurfaceTemp;
-					lpDestSurfaceTemp2 = lpDestSurfaceTemp;
-
-					for (int dx=0; dx<xStep; dx++)
-					{
-						*lpDestSurfaceTemp2 = *lpSrcSurfaceTemp2;
-
-						lpSrcSurfaceTemp2++;
-						lpDestSurfaceTemp2++;
-					}
-
-					lpSrcSurfaceTemp += pitch;		// 다음줄
-					lpDestSurfaceTemp += wavePitch;		// 다음줄
-				}
-                
-			}
-        }
-
-		g_pLast->Unlock();
-		pWaveSurface->Unlock();
-
-		point.x = rectWave.left;
-		point.y = rectWave.top;
-		
-		//-----------------------------------------------------------------
-		// WaveSurface --> Back
-		//-----------------------------------------------------------------
-		g_pLast->BltNoColorkey( &point, pWaveSurface, &rectWave );	
-		*/
-		//-----------------------------------------------------------------
-		// Mouse 그리기
 		//-----------------------------------------------------------------
 		gC_vs_ui.DrawMousePointer();
 
@@ -954,52 +840,47 @@ CWaitUIUpdate::UpdateDraw()
 		#endif
 
 		//-----------------------------------------------------------------
-		// Last를 Back으로 copy - 3D HAL이 아닌 경우만..
+		
 		//-----------------------------------------------------------------		
 		point.x = 0;
 		point.y = 0;
 		RECT rect = { 0, 0, g_GameRect.right, g_GameRect.bottom };
 		g_pBack->BltNoColorkey( &point, g_pLast, &rect );	
 
-		// 창모드에서 3D가속 안한 경우에..
-		// 왜 이거 하니까 빨라지지? - -;
+		if(g_TitleSpriteAlpha > 0)
+		{
+			DWORD elapsed = timeGetTime() - g_TitleLoadingStartTime;
+			if (elapsed < 2000)
+			{
+				g_TitleSpriteAlpha = 32;
+				DrawTitleLoading();
+			}
+			else
+			{
+				DWORD fadeElapsed = elapsed - 2000;
+				if (fadeElapsed < 500)
+				{
+					int alpha = 32 - (int)(fadeElapsed * 32 / 500);
+					g_TitleSpriteAlpha = (alpha > 0) ? alpha : 0;
+					DrawTitleLoading();
+				}
+				else
+				{
+					g_TitleSpriteAlpha = 0;
+					EndTitleLoading(true);
+				}
+			}
+		}
+
+		
+		
 		//HDC hdc;
 		//g_pBack->GetSurface()->GetDC(&hdc);
 		//g_pBack->GetSurface()->ReleaseDC(hdc);
 	}	
 
-	/*
-#ifdef OUTPUT_DEBUG
-	if (g_pUserOption->DrawFPS)
-	{
-		char str[256];
-		//-----------------------------------------------------------------
-		// FPS 찍기	
-		//-----------------------------------------------------------------
-		if (true)
-		{
-			sprintf(str, "%d FPS(HAL)", g_FrameRate);	
-		}
-		else
-		{
-			sprintf(str, "%d FPS", g_FrameRate);	
-		}
-		// g_pBack->GDI_Text(11,11, str, RGB(20,20,20));
-		TextSystem::TextService::RenderText(11, 11, str);
-		// g_pBack->GDI_Text(10,10, str, 0xFFFFFF);
-		TextSystem::TextService::RenderText(10, 10, str);
-
-		//RECT rect = { 0, 0, 50, 50 };
-		//g_pBack->DrawRect(&rect, 0xFFFF);
-
-		//DDSURFACEDESC2    ddsd;
-		//ZeroMemory(&ddsd, sizeof(ddsd));
-		//ddsd.dwSize = sizeof(ddsd);
-		//g_pBack->GetSurface()->GetSurfaceDesc(&ddsd);		
-	}
-#endif
-	*/
-	// FPS 찍기	
+	 
+	
 //	sprintf(str, "%d Updates", g_FrameRate);	
 	//g_pBack->GDI_Text(11,11, str, RGB(20,20,20));
 //	g_pBack->GDI_Text(1,1, str, 0xFFFFFF);
@@ -1015,5 +896,9 @@ CWaitUIUpdate::UpdateDraw()
 
 	// flip
 	CSDLGraphics::Flip();
+	if (g_CurrentTime - lastDrawTraceTime < 50)
+	{
+		TraceWaitUI("CWaitUIUpdate::UpdateDraw flip");
+	}
 }
 

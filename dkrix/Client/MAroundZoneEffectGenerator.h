@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAroundZoneEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MAROUNDZONEEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAroundZoneEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_AROUND_ZONE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

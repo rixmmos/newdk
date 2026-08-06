@@ -37,7 +37,7 @@ public:
 
     string toString() const throw();
 
-    // 볼 수 있는 레벨 계산
+    
 public:
     void setSkillLevel(ExpLevel_t level) throw() {
         m_SkillLevel = level;

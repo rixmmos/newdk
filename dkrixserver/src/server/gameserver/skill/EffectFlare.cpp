@@ -46,8 +46,8 @@ void EffectFlare::affect(Creature* pCreature)
     __BEGIN_TRY
 
     Assert(pCreature != NULL);
-    Assert(!pCreature->isSlayer()); // 슬레이어는 걸리지 않는다.
-    Assert(!pCreature->isNPC());    // NPC도 걸리지 않는다.
+    Assert(!pCreature->isSlayer()); 
+    Assert(!pCreature->isNPC());    
 
     Sight_t OldSight = pCreature->getSight();
     pCreature->setSight(pCreature->getEffectedSight());
@@ -111,14 +111,14 @@ void EffectFlare::unaffect(Creature* pCreature)
     } else if (pCreature->isMonster()) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
-        // 시야를 새로 세팅해준다.
+        
         const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(pMonster->getMonsterType());
         pMonster->setSight(pMonsterInfo->getSight());
 
-        // 시야를 새로 세팅했으니 주위의 적을 검색해야 하는데...
+        
     }
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_FLARE);

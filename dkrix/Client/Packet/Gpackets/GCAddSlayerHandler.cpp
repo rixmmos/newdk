@@ -29,7 +29,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 
 	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -38,7 +38,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -49,8 +49,8 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 		MCreature* pCreature = g_pZone->GetCreature(si.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
-		// 복장이 있는 Creature이다.
+		
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -84,7 +84,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 			pCreatureWear->SetCurrentDirection( si.getDir() );
 			pCreatureWear->SetAction( ACTION_STAND );
 
-			// 피부색
+			
 			pCreatureWear->SetBodyColor1( si.getSkinColor() );
 
 			pCreature->SetMasterEffectType(si.getMasterEffectColor());
@@ -94,14 +94,14 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 			pCreatureWear->SetStatus( MODIFY_ALIGNMENT, si.getAlignment() );
 			pCreatureWear->SetStatus( MODIFY_RANK, si.getRank() );
 
-			// 이름
+			
 			pCreatureWear->SetName( si.getName().c_str() );
 
-			// 색깔 정보
+			
 
-			// 복장 정보 --> 일단 기본 옷을 입고 있게 한다.
+			
 			//----------------------------------------	
-			// 복장을 착용한다.
+			
 			//----------------------------------------	
 			SetAddonToSlayer( pCreatureWear, &si );
 			if(pCreature->IsNPC() == false)
@@ -124,7 +124,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 			}
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
@@ -141,7 +141,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 			pCreature->SetCurrentDirection( si.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 피부색
+			
 			pCreature->SetBodyColor1( si.getSkinColor() );
 			pCreature->SetMasterEffectType(si.getMasterEffectColor());
 
@@ -167,26 +167,31 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
 			
-			// 펫 처리
+			
 			if(pPacket->getPetInfo() != NULL)
 				SetPetInfo(pPacket->getPetInfo(), pCreature->GetID());
 			NicknameInfo* _tempNick = pPacket->getNicknameInfo();
 			if(_tempNick != NULL)
 			{
-				// 커스텀 닉네임 일때
+				
 				if(_tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM_FORCED ||
 				   _tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM)
 				{
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)_tempNick->getNickname().c_str());
 					
 				}
-				else // 닉네임 인덱스가 있을 때
+				else 
 				{
 					int TempIndex = _tempNick->getNicknameIndex();
+					if(g_pNickNameStringTable == NULL || g_pNickNameStringTable->GetSize() == 0)
+					{
+						pCreature->SetNickName(_tempNick->getNicknameType(), (char*)"No Title");
+						return;
+					}
 					if(TempIndex >= g_pNickNameStringTable->GetSize())
 						TempIndex = 0;
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)(*g_pNickNameStringTable)[TempIndex].GetString());
@@ -195,7 +200,7 @@ void GCAddSlayerHandler::execute ( GCAddSlayer * pPacket , Player * pPlayer )
 		}
 	}
 
-	// [도움말] Slayer가 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_SLAYER );
 //	__END_HELP_EVENT

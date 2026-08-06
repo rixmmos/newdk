@@ -38,8 +38,8 @@ void SimpleMissileSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Ski
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, param.SkillType);
             return;
@@ -60,15 +60,15 @@ void SimpleMissileSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Ski
         Damage_t Damage = 0;
 
         if (param.bAdd) {
-            // 파라미터로 전달된 데미지 값이 더해지는 데미지라면,
-            // 일반 데미지를 계산 후, 데미지를 더해야 한다.
-            // 파라미터로 전달된 데미지 값이 직접적으로 쓰이는 데미지라면,
-            // 이 부분까지 들어오지 않으므로, 밑의 부분까지 0으로 전달된다.
+            
+            
+            
+            
             Damage += computeDamage(pSlayer, pTargetCreature, SkillLevel / 5, bCriticalHit);
         }
 
         if (param.bMagicDamage) {
-            // 만일 스킬 데미지가 마법 데미지라면, 마법 데미지 계산 함수를 이용해 계산을 해준다.
+            
             Damage += computeMagicDamage(pTargetCreature, param.SkillDamage, param.SkillType);
         } else {
             Damage += param.SkillDamage;
@@ -95,12 +95,12 @@ void SimpleMissileSkill::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Ski
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bPK) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
 
-            // 데미지를 가하고, 내구도를 떨어뜨린다.
+            
             setDamage(pTargetCreature, Damage, pSlayer, param.SkillType, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCSkillToObjectOK1, &_GCSkillToObjectOK2);
 
-            // 타겟이 슬레이어가 아닌 경우에만 경험치를 올려준다.
+            
             if (!pTargetCreature->isSlayer()) {
                 shareAttrExp(pSlayer, Damage, param.STRMultiplier, param.DEXMultiplier, param.INTMultiplier,
                              _GCSkillToObjectOK1);
@@ -184,8 +184,8 @@ void SimpleMissileSkill::execute(Vampire* pVampire, ObjectID_t TargetObjectID, V
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, param.SkillType);
             return;
@@ -205,15 +205,15 @@ void SimpleMissileSkill::execute(Vampire* pVampire, ObjectID_t TargetObjectID, V
         Damage_t Damage = 0;
 
         if (param.bAdd) {
-            // 파라미터로 전달된 데미지 값이 더해지는 데미지라면,
-            // 일반 데미지를 계산 후, 데미지를 더해야 한다.
-            // 파라미터로 전달된 데미지 값이 직접적으로 쓰이는 데미지라면,
-            // 이 부분까지 들어오지 않으므로, 밑의 부분까지 0으로 전달된다.
+            
+            
+            
+            
             Damage += computeDamage(pVampire, pTargetCreature, 0, bCriticalHit);
         }
 
         if (param.bMagicDamage) {
-            // 만일 스킬 데미지가 마법 데미지라면, 마법 데미지 계산 함수를 이용해 계산을 해준다.
+            
             Damage += computeMagicDamage(pTargetCreature, param.SkillDamage, param.SkillType, true, pVampire);
         } else {
             Damage += param.SkillDamage;
@@ -243,7 +243,7 @@ void SimpleMissileSkill::execute(Vampire* pVampire, ObjectID_t TargetObjectID, V
 
             bool bCanSeeCaster = canSee(pTargetCreature, pVampire);
 
-            // 데미지를 가하고, 아이템 내구도를 떨어뜨린다.
+            
             if (bCanSeeCaster) {
                 setDamage(pTargetCreature, Damage, pVampire, param.SkillType, &_GCSkillToObjectOK2,
                           &_GCSkillToObjectOK1);
@@ -256,7 +256,7 @@ void SimpleMissileSkill::execute(Vampire* pVampire, ObjectID_t TargetObjectID, V
                 decreaseDurability(pVampire, pTargetCreature, pSkillInfo, &_GCSkillToObjectOK1, &_GCSkillToObjectOK6);
             }
 
-            // 상대가 죽었다면 경험치를 좀 올려준다.
+            
             if (pTargetCreature->isDead()) {
                 int exp = computeCreatureExp(pTargetCreature, KILL_EXP);
                 shareVampExp(pVampire, exp, _GCSkillToObjectOK1);
@@ -343,8 +343,8 @@ void SimpleMissileSkill::execute(Ousters* pOusters, ObjectID_t TargetObjectID, O
 
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, param.SkillType, param.Grade);
             return;
@@ -373,15 +373,15 @@ void SimpleMissileSkill::execute(Ousters* pOusters, ObjectID_t TargetObjectID, O
         Damage_t Damage = 0;
 
         if (param.bAdd) {
-            // 파라미터로 전달된 데미지 값이 더해지는 데미지라면,
-            // 일반 데미지를 계산 후, 데미지를 더해야 한다.
-            // 파라미터로 전달된 데미지 값이 직접적으로 쓰이는 데미지라면,
-            // 이 부분까지 들어오지 않으므로, 밑의 부분까지 0으로 전달된다.
+            
+            
+            
+            
             Damage += computeDamage(pOusters, pTargetCreature, 0, bCriticalHit);
         }
 
         if (param.bMagicDamage) {
-            // 만일 스킬 데미지가 마법 데미지라면, 마법 데미지 계산 함수를 이용해 계산을 해준다.
+            
             //			Damage += computeMagicDamage(pTargetCreature, param.SkillDamage, param.SkillType, true);
             Damage += computeOustersMagicDamage(pOusters, pTargetCreature, param.SkillDamage, param.SkillType);
         } else {
@@ -534,15 +534,15 @@ void SimpleMissileSkill::execute(Monster* pMonster, Creature* pEnemy, const SIMP
         Damage_t Damage = 0;
 
         if (param.bAdd) {
-            // 파라미터로 전달된 데미지 값이 더해지는 데미지라면,
-            // 일반 데미지를 계산 후, 데미지를 더해야 한다.
-            // 파라미터로 전달된 데미지 값이 직접적으로 쓰이는 데미지라면,
-            // 이 부분까지 들어오지 않으므로, 밑의 부분까지 0으로 전달된다.
+            
+            
+            
+            
             Damage += computeDamage(pMonster, pEnemy, 0, bCriticalHit);
         }
 
         if (param.bMagicDamage) {
-            // 만일 스킬 데미지가 마법 데미지라면, 마법 데미지 계산 함수를 이용해 계산을 해준다.
+            
             Damage += computeMagicDamage(pEnemy, param.SkillDamage, param.SkillType);
         } else {
             Damage += param.SkillDamage;
@@ -563,11 +563,11 @@ void SimpleMissileSkill::execute(Monster* pMonster, Creature* pEnemy, const SIMP
         Coord_t targetX = pEnemy->getX();
         Coord_t targetY = pEnemy->getY();
 
-        // 공격성공률 검증.
+        
         if (bRangeCheck && bHitRoll && bCanHit) {
             bool bCanSeeCaster = canSee(pEnemy, pMonster);
 
-            // 데미지를 가하고, 아이템 내구도를 떨어뜨린다.
+            
             if (bCanSeeCaster) {
                 setDamage(pEnemy, Damage, pMonster, param.SkillType, &_GCSkillToObjectOK2);
                 decreaseDurability(pMonster, pEnemy, pSkillInfo, NULL, &_GCSkillToObjectOK2);

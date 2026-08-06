@@ -105,8 +105,8 @@ void C_VS_UI_DIALOG::UnacquireMouseFocus()
 //-----------------------------------------------------------------------------
 C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button)
 {
-	if(width < 10)width = (width+2)*81;		//���� �ڵ�� ȣȯ
-	if(height < 10 && height!=-1)height = (height+2)*81;	//���� �ڵ�� ȣȯ
+	if(width < 10)width = (width+2)*81;		
+	if(height < 10 && height!=-1)height = (height+2)*81;	
 
 	m_bOkOnly = false;
 	m_TempValue1 = 0;
@@ -165,8 +165,8 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	else
 		y = _y;
 
-	// x��ǥ ����
-	// ȭ������� �Ѿ�� ����...
+	
+	
 	if (Right() >= g_GameRect.right)
 		x = g_GameRect.right - w;
 	if (x < 0)
@@ -190,7 +190,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	}
 
 	// set Client rect
-	// Window�� Move���� ���� ������ �����Ѵ�.
+	
 	const int _EXTRA = 30;//2;
 	m_client_rect.x = x+DECORATE_GAP+_EXTRA;
 	m_client_rect.w = w-DECORATE_GAP*2-_EXTRA*2;
@@ -207,7 +207,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	{
 		m_pC_button_group->Add(	new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_OK), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_OK, this, C_GLOBAL_RESOURCE::AB_BUTTON_OK));
 		//m_pC_button_group->Add(	new C_VS_UI_EVENT_BUTTON(150, DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_OK, this, C_GLOBAL_RESOURCE::AB_BUTTON_OK));
-		// �� ��ư �� �ִ� ���
+		
 		if (m_ddb & DIALOG_CANCEL)
 		{
 			m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_CANCEL), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_CANCEL, this, C_GLOBAL_RESOURCE::AB_BUTTON_CANCEL));
@@ -216,7 +216,7 @@ C_VS_UI_DIALOG::C_VS_UI_DIALOG(int _x, int _y, int width, int height, void (*exe
 	}
 	else
 	{
-		// cancel�� �ִ� ���
+		
 		if (m_ddb & DIALOG_CANCEL && h != -1)
 		{
 			m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(DIALOG_BUTTON_POS(BS_OK), DIALOG_BUTTON_Y, DIALOG_BUTTON_WIDTH, DIALOG_BUTTON_HEIGHT, DIALOG_EXECID_CANCEL, this, C_GLOBAL_RESOURCE::AB_BUTTON_CANCEL));
@@ -275,7 +275,7 @@ void	C_VS_UI_DIALOG::CancelPushState()
 //-----------------------------------------------------------------------------
 // GetButtonGap
 //
-// button�� �ֳľ��ĸ� �����Ͽ� button height gap�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 int C_VS_UI_DIALOG::GetButtonGap() const
 {
@@ -309,8 +309,8 @@ void C_VS_UI_DIALOG::Run(id_t id)
 
 		case DIALOG_EXECID_OK:
 #ifdef _LIB
-			if(true == g_pUserInformation->IsAutoLogIn) // �� �ڵ� �α� �� ��� 
-				gpC_base->SendMessage(UI_TERMINATION, 0, 0); // ��尡 ���� �޴� �� ��
+			if(true == g_pUserInformation->IsAutoLogIn) 
+				gpC_base->SendMessage(UI_TERMINATION, 0, 0); 
 #endif
 			Finish();
 			break;
@@ -328,7 +328,7 @@ void C_VS_UI_DIALOG::Run(id_t id)
 //		// change scroll tag position
 //		double proportion = Proportion(m_scrollbar.GetPercentToScroll(), PERCENTAGE, m_remained_track);
 //
-//		// �Ҽ� ù°�ڸ� �ݿø�.
+
 //		proportion += 0.5;
 //		m_tag_rect.y = m_tag_up_limit+(int)floor(proportion);
 //	}
@@ -357,12 +357,12 @@ void C_VS_UI_DIALOG::KeyboardControl(UINT message, UINT key, long extra)
 	{
 		switch (key)
 		{
-			case VK_RETURN: // ok�� ����. !cancel�� �ݵ�� ok�� �Բ� �ִ�.
+			case VK_RETURN: 
 				if (m_ddb & DIALOG_OK)
 					Run(DIALOG_EXECID_OK);
 				break;
 
-			case VK_ESCAPE: // �ƹ��͵� ����.
+			case VK_ESCAPE: 
 				if(true == m_bOkOnly)
 					Run(DIALOG_EXECID_OK);
 				else
@@ -489,7 +489,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 {
 	int i;
 
-	// Menu button�� �׳� Button�� �ٸ��� ó��. 
+	
 	if (p_button->GetID() == DIALOG_EXECID_OK ||
 		 p_button->GetID() == DIALOG_EXECID_CANCEL ||
 		 p_button->GetID() == DIALOG_EXECID_FRIEND_BLACK
@@ -529,7 +529,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 			TextSystem::TextStyle menuStyle = textService.GetDefaultStyle();
 			menuStyle.align = TextSystem::TextAlign::Left;
 			
-			// �޴� �̵��� ���� ��ư ��ǥ ���� ��
+			
 			int y_skip_line=0;
 			if(m_pC_menu_scroll_bar!=NULL)
 			{
@@ -537,7 +537,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				if(p_button->m_image_index>0&&m_button_y_list!=NULL&&GetScrollPos()>0)
 					y_skip_line=m_button_y_list[GetScrollPos()]-m_temp_menu_rect_y;
 			}
-			y_skip_line+=m_menu_y_size;			// m_menu_y_size �� �޴�Rect ũ�Ⱑ ����Ǿ����� ������ ���̴�.
+			y_skip_line+=m_menu_y_size;			
 
 
 			if (p_button->GetFocusState())
@@ -598,7 +598,7 @@ void C_VS_UI_DIALOG::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				{
 					for(i=0; i < m_p_menu[p_button->m_image_index].sz_menu_str.size(); i++)
 					{
-						// ������ �����ش�.
+						
 						if(p_button->y-i*TEXT_EXTRA_HGAP-y_skip_line+m_menu_str_height*i<m_menu_rect.y+m_menu_rect.h)
 						{
 							//m_p_menu[p_button->m_image_index].sz_menu_str[i].c_str()
@@ -637,7 +637,7 @@ void C_VS_UI_DIALOG::Show()
 //	Rect rect;
 //	rect.Set(0, 0, w-2, h-2);
 //
-//	// alpha�� ���õǾ� ������ ������â���� ��� :)
+
 //	if(GetAttributes()->alpha)
 //	{
 //		RECT alpha_rect;
@@ -671,7 +671,7 @@ void C_VS_UI_DIALOG::Show()
 //	gpC_global_resource->m_pC_assemble_box_spk->BltLocked(_x, _y, C_GLOBAL_RESOURCE::AB_RIGHTDOWN);
 //
 //	// center
-//	// !�� block�� ũ�Ⱑ �ٸ� �� �ִ�.
+
 //	_y = y+gpC_global_resource->m_pC_assemble_box_spk->GetHeight(C_GLOBAL_RESOURCE::AB_LEFTUP);
 //	for (j=0; j < m_center_y; j++)
 //	{
@@ -841,7 +841,7 @@ void C_VS_UI_DIALOG::Start()
 //-----------------------------------------------------------------------------
 // StartByPinMode
 //
-// pin mode�� Start�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::StartByPinMode()
 {
@@ -867,18 +867,18 @@ void C_VS_UI_DIALOG::Finish()
 // SetMessage
 //
 // - Message rect = (Client rect - Menu rect - Button rect)
-// - height�� ������ ���ϸ� ��µ��� ���� ���̴�. => ������������.
+
 //
 // parameter format>
 //							char * pp_msg[] = {"line1", "line2", ...} // global or local static
 //							SetMessage(pp_msg, line_x);
 //
-// 2002�� 7�� 23�� �߰����� -by sonee
-// ������ SetMessage �� �״�� �����ϵ�, m_flag_menu �� �ξ�, �޴��� �����ÿ��� ��ũ�� �ڵ�ó���� �ǵ���
-// �����Ͽ���.
-// �ݵ�� SetMenu �� �̷������ SetMessage �� �ؾ� �޴��� ��ũ���� ����� ���� �� �� �ִ�.
-// ���� �Ϲ� ���̾˷α׿��� ������ ����� �ּ�ó���� ----[Fix] �κ��� �ּ�ó���� �������ֵ��� �Ѵ�.
-// �������׿����� �̺κи� ����Ǿ���.
+
+
+
+
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE_OPTION mode)
 {
@@ -890,6 +890,67 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 
 	m_message_mode = mode;
 	m_vs_msg.clear();
+
+#if defined(PLATFORM_WINDOWS) && defined(USE_SDL_BACKEND)
+	// Windows SDL build still has unstable text precomputation during early startup.
+	// Keep dialog messages simple here so VS_UI init can complete; wrapping/rendering
+	// can still happen later in the normal draw path.
+	for (UINT i = 0; i < line_count; ++i)
+	{
+		if (sz_msg[i] == NULL)
+			continue;
+		m_vs_msg.push_back(sz_msg[i]);
+	}
+
+	m_line_count = static_cast<int>(m_vs_msg.size());
+	if (m_line_count < 0)
+		m_line_count = 0;
+
+	const int fallback_message_str_height = 16 + MSG_EXTRA_HGAP;
+	const int fallback_extra = 30;
+
+	if(h == -1)
+	{
+		h = m_line_count * fallback_message_str_height;
+		if(m_menu_count > 0)
+			h += 14 + m_menu_rect.h;
+
+		m_client_rect.h = h-DECORATE_GAP*2-fallback_extra;
+
+		if (y == -1)
+			y = (g_GameRect.bottom-102*2)/2-h/2+90;
+
+		m_client_rect.y = y+DECORATE_GAP+fallback_extra;
+		m_menu_rect.y = (m_client_rect.y+m_client_rect.h-GetButtonGap()) - m_menu_rect.h;
+	}
+
+	m_msg_rect.x = m_client_rect.x;
+	m_msg_rect.w = m_client_rect.w;
+	m_msg_rect.y = m_client_rect.y;
+
+	if(m_flag_menu)
+	{
+		m_msg_rect.h = m_client_rect.h/2;
+	}
+	else
+	{
+		m_msg_rect.h = m_client_rect.h-m_menu_rect.h-GetButtonGap();
+		if (m_menu_count > 0)
+			m_msg_rect.h -= 14;
+	}
+
+	m_print_line_count = (m_msg_rect.h) / fallback_message_str_height;
+	if (m_print_line_count < 1)
+		m_print_line_count = 1;
+
+	if (mode == SMO_NOFIT)
+	{
+		m_nofit_mode_msg_y = m_msg_rect.y+m_msg_rect.h/2-(fallback_message_str_height*m_line_count)/2;
+	}
+
+	return;
+#endif
+
 	TextSystem::TextService& textService = TextSystem::TextService::Get();
 	TextSystem::TextStyle msgStyle = textService.GetDefaultStyle();
 	msgStyle.color = TextSystem::ColorFromCOLORREF(gpC_base->m_dialog_msg_pi.text_color);
@@ -916,7 +977,7 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	const int _EXTRA = 30;//2;
 	if(h == -1)
 	{
-		h = m_line_count*m_message_str_height;		// Rect �� ���̴� �޽���â�� ���̷� ���Ѵ�. 
+		h = m_line_count*m_message_str_height;		
 		if(m_menu_count > 0)
 			h += 14 + m_menu_rect.h;
 
@@ -957,7 +1018,7 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 				(m_menu_str_height-TEXT_EXTRA_HGAP)*height,
 				m_p_menu[i].exec_id, 
 				this, 
-				i)); // m_p_menu�� string�� �����ϱ� ���ؼ� index�� �ִ´�.
+				i)); 
 		}
 	}
 
@@ -965,9 +1026,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	m_msg_rect.w = m_client_rect.w;
 	m_msg_rect.y = m_client_rect.y;	
 	
-	// 2002�� 7�� 23�� ���� �κ�.
-	// �޴��� ������ ���� ���̾˷α��� ������ ���� ������ ��´�.
-	// �׷��� �������� ������ �� �״�� ���.
+	
+	
+	
 	
 	if(m_flag_menu)
 	{
@@ -983,9 +1044,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	// set print line count
 	m_print_line_count = (m_msg_rect.h)/m_message_str_height;//+MSG_EXTRA_HGAP
 	
-	if(m_pC_menu_scroll_bar==NULL&&m_flag_menu)		// �Ʒ��� �޴��ǿ� ��ũ�ѹٰ� ������ �ʾ������
+	if(m_pC_menu_scroll_bar==NULL&&m_flag_menu)		
 	{
-		// ���̸� �÷��ش�.
+		
 		m_msg_rect.h=m_client_rect.h-m_menu_rect.h-28;
 		m_print_line_count = (m_msg_rect.h)/m_message_str_height;
 	}
@@ -993,9 +1054,9 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 	{		
 		m_nofit_mode_msg_y = m_msg_rect.y+m_msg_rect.h/2-(m_message_str_height*line_count)/2; // sort in center
 	}
-	else if (m_line_count > m_print_line_count)				// ��¹����� �����Ƿ� ScrollBar �� �����Ѵ�.
+	else if (m_line_count > m_print_line_count)				
 	{
-		// ��ũ�ѹٶ����� �ٽ� �۾��� �ڸ���.
+		
 		m_vs_msg.clear();
 		for(int i = 0; i < line_count; i++)
 		{
@@ -1018,13 +1079,13 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 		m_pC_msg_scroll_bar = new C_VS_UI_SCROLL_BAR(m_line_count-m_print_line_count+1, 
 			Rect(m_msg_rect.w, m_msg_rect.y-m_client_rect.y+10, -1, m_msg_rect.h-30));
 	} else
-	if(m_flag_menu)				// �޴��� ���� ���
+	if(m_flag_menu)				
 	{
-		// ������ ���� ������ ��ũ�ѹٰ� ���� ��� �޴�rect �� ���� �����ش�.
+		
 		if(m_pC_menu_scroll_bar!=NULL)
 		{
-			// linelen �� ������ �����ؼ� �޽����� h ũ���̴�.
-			// m_client.h/2-linelen �� �󿵿��̸�, �޴��� ���� �ø� �� �ִ� �����̴�.
+			
+			
 			int linelen=(m_line_count+1)*m_message_str_height;
 			
 			m_msg_rect.y=m_client_rect.y;
@@ -1039,8 +1100,8 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 			
 			int len_menu=m_button_y_list[m_menu_count]-m_temp_menu_rect_y;
 			
-			// ���̸� �ø�������, ��ư���� ��� ����� �� ����������, â�� �°� ���ġ�ϰ�,
-			// ��ũ���� �������� �ʴ´�. 
+			
+			
 			if(len_menu<m_menu_rect.h)
 			{
 				len_menu=m_menu_rect.h-len_menu;
@@ -1057,14 +1118,14 @@ void C_VS_UI_DIALOG::SetMessage(char ** sz_msg, UINT line_count, SETMESSAGE_MODE
 //-----------------------------------------------------------------------------
 // SetMenu
 //
-// - Client rect���� Menu rect������ Ȯ������ ���ϸ� ��µ��� ���� ���̴�.
-// - �� �� �̻� ������ �� ����.
-// - menu_only�� true�̸� dialog center�� ���߰� false�̸� message ������ ����
-//   rect �ϴܿ� ��ġ��Ų��.
+
+
+
+
 // 
-// 2002�� 7�� 23�� ��������				-by sonee
-// - Menu Rect ������ Ȯ������ ���Ͽ������ �ڵ� ��ũ�ѹٰ� ������, �޽��� rect
-//  �� ���Ͽ� �ڵ����� ������ Ȯ���Ѵ�.
+
+
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count, bool menu_only)
 {
@@ -1093,7 +1154,7 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 	menuStyle.color = TextSystem::ColorFromCOLORREF(gpC_base->m_dialog_menu_pi.text_color);
 	const int menuWrapWidth = m_client_rect.w - 20;
 
-	// Menu ���� �Ѿ�°� �ڸ���.
+	
 	for (i=0; i < m_menu_count; i++)
 	{
 		m_p_menu[i].exec_id = p_dialog_menu[i].exec_id;
@@ -1104,10 +1165,10 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 	}
 
 	//
-	// ! SetMessage()�� ���ؼ� Message�� ���� ������ �� ������, �װ��� �������� �ʴ´�.
-	// �׷��ϱ� VS_UI_Dialog class�� �ùٸ� �����, SetMenu()�� ���� ���� �� SetMessage()��
-	// ���ִ� ���̴�. Menu rect�� ������ Client rect�� �ϴܿ��� ��� Menu�� ��ġ�� �� �ִ�
-	// rect�� �����ȴ�. �׷��� ���� Client rect�� Message �������� �Ǵ� ���̴�.
+	
+	
+	
+	
 	//
 	//	m_menu_str_height;
 
@@ -1176,7 +1237,7 @@ void C_VS_UI_DIALOG::SetMenu(const DIALOG_MENU * p_dialog_menu, UINT menu_count,
 				(m_menu_str_height-TEXT_EXTRA_HGAP)*height,
 				m_p_menu[i].exec_id, 
 				this, 
-				i)); // m_p_menu�� string�� �����ϱ� ���ؼ� index�� �ִ´�. �̰��� imageindex �� ����ȴ�.			
+				i)); 
 		}
 		m_button_y_list[i]=m_menu_rect.y+plus;		
 	
@@ -1202,7 +1263,7 @@ int C_VS_UI_DIALOG::GetScrollPos()
 	{
 		now_len=m_button_y_list[i]-m_temp_menu_rect_y;
 		// |-----+-----|
-		//    +- �̰�� 
+		
 		if(NowPos>=now_len&&NowPos<now_len+(m_button_y_list[i+1]-m_button_y_list[i])/2)
 		{
 			m_pC_menu_scroll_bar->SetScrollPos(m_button_y_list[i]-m_temp_menu_rect_y);
@@ -1221,7 +1282,7 @@ int C_VS_UI_DIALOG::GetScrollPos()
 // --------------------------------------------------------------------------------------
 //  C_VS_UI_DIALOG::ProcessMenuScrollBar();
 //  
-//  Pixel ���� ��ũ���� �ϱ� ������, ������ ��ũ�ѹٸ� ����ϸ鼭 ������ ����.
+
 
 void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 {
@@ -1244,12 +1305,12 @@ void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 		{
 			half=(m_button_y_list[i+1]-m_button_y_list[i])>>1;
 
-			// ��ũ���� �Ʒ��� �ϴ°��
+			
 			if(NowPos>m_button_y_list[i]-m_temp_menu_rect_y&&NowPos<m_button_y_list[i+1]-m_temp_menu_rect_y-half)
 			{				
 				NowPos=m_button_y_list[i+1]-m_temp_menu_rect_y;
 
-				// �� ȭ�鿡 ����� �Ǵ°�� PosMax �� �ٽ� �������ش�.
+				
 				if(!(m_button_y_list[m_menu_count]-m_temp_menu_rect_y<NowPos+m_menu_rect.h))
 					m_pC_menu_scroll_bar->SetScrollPos(NowPos);
 				else
@@ -1261,7 +1322,7 @@ void C_VS_UI_DIALOG::ProcessMenuScrollBar()
 		if(i>0)
 		{
 			half=(m_button_y_list[i]-m_button_y_list[i-1])>>1;
-			// ��ũ���� ���� �ϴ� ���
+			
 			if(NowPos<m_button_y_list[i]-m_temp_menu_rect_y&&NowPos>m_button_y_list[i-1]-m_temp_menu_rect_y+half)
 			{
 				NowPos=m_button_y_list[i-1]-m_temp_menu_rect_y;

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// 전쟁에 대한 전반적인 정보 및 전쟁 시작 및 종료시 처리루틴 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "War.h"
@@ -129,7 +129,7 @@ void War::execute()
         Assert(false);
     }
 
-    // execute()후에는 WarSchedule의 heartbeat()에서 DB의 Status를 설정하게 된다.
+    
 
     __END_CATCH
 }
@@ -139,7 +139,7 @@ void War::execute()
 // send Message
 //
 //--------------------------------------------------------------------------------
-// 전쟁 시작할 때
+
 //--------------------------------------------------------------------------------
 void War::sendWarStartMessage() const
 
@@ -148,7 +148,7 @@ void War::sendWarStartMessage() const
 
     GCSystemMessage gcSystemMessage;
     char str[80];
-    // sprintf(str, "%s이 시작되었습니다.", getWarName().c_str());
+    
     sprintf(str, g_pStringPool->c_str(STRID_WAR_START), getWarName().c_str());
 
     gcSystemMessage.setMessage(str);
@@ -160,7 +160,7 @@ void War::sendWarStartMessage() const
 }
 
 //--------------------------------------------------------------------------------
-// 전쟁 끝날 때
+
 //--------------------------------------------------------------------------------
 void War::sendWarEndMessage() const
 
@@ -169,7 +169,7 @@ void War::sendWarEndMessage() const
 
     GCSystemMessage gcSystemMessage;
     char str[80];
-    //	sprintf(str, "%s이 끝났습니다.", getWarName().c_str());
+    
     sprintf(str, g_pStringPool->c_str(STRID_WAR_END), getWarName().c_str());
 
     gcSystemMessage.setMessage(str);

@@ -12,9 +12,15 @@ RUN apt update && apt install -y \
 RUN mkdir /home/darkeden
 RUN mkdir /home/darkeden/vs
 RUN mkdir /home/darkeden/vs/src
+RUN mkdir /home/darkeden/vs/log
+RUN mkdir /home/darkeden/vs/pid
+RUN mkdir /home/darkeden/vs/output
 
 COPY bin /home/darkeden/vs/bin/
 COPY data /home/darkeden/vs/data/
 COPY docker/conf /home/darkeden/vs/conf/
+COPY docker/start-servers.sh /home/darkeden/vs/start-servers.sh
+
+RUN chmod +x /home/darkeden/vs/start-servers.sh
 
 WORKDIR /home/darkeden/vs/bin

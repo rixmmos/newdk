@@ -2,8 +2,8 @@
 //
 // Filename    : GCAddEffect.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ GCAddEffect::~GCAddEffect() noexcept {}
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddEffect::read(SocketInputStream& iStream)
 
@@ -36,7 +36,7 @@ void GCAddEffect::read(SocketInputStream& iStream)
     __BEGIN_TRY
     BYTE flag;
     iStream.read(flag);
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_ObjectID);
     iStream.read(m_EffectID);
     iStream.read(m_Duration);
@@ -46,12 +46,12 @@ void GCAddEffect::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddEffect::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
     //	oStream.write((BYTE)48);
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_ObjectID);
     oStream.write(m_EffectID);
     oStream.write(m_Duration);

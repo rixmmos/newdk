@@ -278,7 +278,7 @@
 // added by elca 2001-06-26
 #include "Cpackets/CGSelectPortal.h"
 
-// 2001-01-08 김성민
+
 #include "Cpackets/CGMouseToStash.h"
 #include "Cpackets/CGStashToMouse.h"
 #include "Cpackets/CGStashList.h"
@@ -342,10 +342,10 @@ RequestServerPacketFactoryManager::RequestServerPacketFactoryManager ()
 
 	Assert(m_Size > 0);
 	
-	// 패킷팩토리배열을 생성한다.
+	
 	m_Factories = new PacketFactory*[ m_Size ];
 	
-	// 팩토리에 대한 포인터들을 NULL 로 초기화한다.
+	
 	for (int i = 0 ; i < m_Size ; i ++) 
 		m_Factories[i] = NULL;
 			
@@ -365,7 +365,7 @@ RequestServerPacketFactoryManager::~RequestServerPacketFactoryManager ()
 		
 	Assert(m_Factories != NULL);
 
-	// 각각의 패킷팩토리들을 삭제한다.
+	
 	for (int i = 0 ; i < m_Size ; i ++) 
 	{
 #ifdef __GAME_CLIENT__
@@ -379,7 +379,7 @@ RequestServerPacketFactoryManager::~RequestServerPacketFactoryManager ()
 #endif
 	}
 	
-	// 패킷팩토리배열을 삭제한다.
+	
 #ifdef __GAME_CLIENT__
 	if (m_Factories != NULL)
 	{
@@ -396,7 +396,7 @@ RequestServerPacketFactoryManager::~RequestServerPacketFactoryManager ()
 
 //////////////////////////////////////////////////////////////////////
 //
-// 정의된 모든 패킷팩토리들을 여기에 추가한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void RequestServerPacketFactoryManager::init ()
@@ -730,7 +730,7 @@ void RequestServerPacketFactoryManager::init ()
 
 //////////////////////////////////////////////////////////////////////
 //
-// 팩토리 객체를 특정 인덱스에 추가한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void RequestServerPacketFactoryManager::addFactory (PacketFactory * pFactory) 
@@ -752,7 +752,7 @@ void RequestServerPacketFactoryManager::addFactory (PacketFactory * pFactory)
 		throw Error(msg.toString());
 	}
 	
-	// 패킷팩토리를 등록한다.
+	
 	m_Factories[ pFactory->getPacketID() ] = pFactory;
 			
 	__END_CATCH
@@ -761,7 +761,7 @@ void RequestServerPacketFactoryManager::addFactory (PacketFactory * pFactory)
 	
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 패킷객체를 생성한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 Packet * RequestServerPacketFactoryManager::createPacket (PacketID_t packetID) 
@@ -769,8 +769,8 @@ Packet * RequestServerPacketFactoryManager::createPacket (PacketID_t packetID)
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "packet factory [" << packetID << "] not exist.";
@@ -785,7 +785,7 @@ Packet * RequestServerPacketFactoryManager::createPacket (PacketID_t packetID)
 
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 특정 패킷의 최대 크기를 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 PacketSize_t RequestServerPacketFactoryManager::getPacketMaxSize (PacketID_t packetID) 
@@ -793,8 +793,8 @@ PacketSize_t RequestServerPacketFactoryManager::getPacketMaxSize (PacketID_t pac
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "invalid packet id(" << (int)packetID << ")";
@@ -809,7 +809,7 @@ PacketSize_t RequestServerPacketFactoryManager::getPacketMaxSize (PacketID_t pac
 
 //////////////////////////////////////////////////////////////////////
 //
-// 패킷아이디로 특정 패킷의 이름을 리턴한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 #if !defined(__GAME_CLIENT__) || defined(__GAME_CLIENT__) && defined(__DEBUG_OUTPUT__)
@@ -818,8 +818,8 @@ std::string RequestServerPacketFactoryManager::getPacketName (PacketID_t packetI
 {
 	__BEGIN_TRY
 
-	// 패킷 아이디가 범위를 넘어섬으로 인해서 Seg.Fault 가 발생하지 않도록.
-	// 이런 사용자는 당장 짤라야 한다.
+	
+	
 	if (packetID >= m_Size || m_Factories[packetID] == NULL) {
 		StringStream msg;
 		msg << "invalid packet id(" << (int)packetID << ")";

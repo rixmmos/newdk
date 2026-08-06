@@ -105,7 +105,7 @@ void SweeperSetManager::load(int level, Zone* pZone) {
             //			SweeperSet::SweeperIndex Owner = (SweeperSet::SweeperIndex)OwnerID;
 
             //			StringStream name;
-            //			name << "보관대" << (int)ItemType;
+            
 
             string name = pResult->getString(14);
 
@@ -215,7 +215,7 @@ bool SweeperSetManager::putSweeper(Item* pSweeper, MonsterCorpse* pSafe) {
     Assert(pSweeper != NULL);
     Assert(pSafe != NULL);
 
-    // Sweepr 를 넣는 사용자와 pSafe 의 종족이 같음은 위에서 확인했다고 가정한다
+    
     if (pSweeper->getItemClass() != Item::ITEM_CLASS_SWEEPER)
         return false;
     if (pSafe->getItemClass() != Item::ITEM_CLASS_CORPSE)
@@ -312,33 +312,7 @@ bool SweeperSetManager::returnSweeper(ItemType_t sweeperID, bool bLock) {
     return false;
 }
 
-/*
-bool SweeperSetManager::returnSweeper( Zone* pZone, Sweeper* pSweeper ) const
-{
-    Assert( pZone != NULL );
-    Assert( pSweeper != NULL );
-
-    MonsterCorpse* pDefaultSafe = getSweeperSet( 3 )->getSweeperSafes( pSweeper->getItemType() );
-    if ( pDefaultSafe == NULL ) return false;
-
-    Zone* pTargetZone = pDefaultSafe->getZone();
-    if ( pTargetZone == NULL ) return false;
-
-    ObjectID_t CorpseObjectID = pDefaultSafe->getObjectID();
-
-    // Default Safe 로 옮기고 소유한 종족에 대한 것도 저장해야 한다
-//	pZone->transportItemToCorpse( pSweeper, pTargetZone, CorpseObjectID );
-
-    SweeperSet* pSweeperSet = getSweeperSet( 3 );
-    Assert(pSweeperSet != NULL );
-
-    MonsterCorpse* pSafe = pSweeperSet->getSweeperSafes( pSweeperSet->getItemType() );
-
-    putSweeper( pSweeper, pSafe );
-
-    return true;
-}
-*/
+ 
 
 void SweeperSetManager::saveSweeperOwner(uint itemType, int safeType, int ownerRace) {
     Statement* pStmt = NULL;

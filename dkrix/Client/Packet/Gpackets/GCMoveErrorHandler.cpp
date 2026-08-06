@@ -12,7 +12,7 @@
 #include "ClientDef.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -35,11 +35,11 @@ throw ( ProtocolException , Error )
 #elif __WINDOWS__
 */
 
-	// 서버 좌표 설정
-	// 2001.10.8 제거
+	
+	
 	g_pPlayer->SetServerPosition( pPacket->getX(), pPacket->getY() );
 
-	// MoveOK message가 하나 안 날아온다는걸 알 수 있다.
+	
 	g_pPlayer->PacketMoveNO();
 	
 

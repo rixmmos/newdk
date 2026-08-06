@@ -10,31 +10,31 @@
 #define __GC_UPDATE_INFO_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "GameTime.h"
-#include "PCSlayerInfo2.h"
-#include "PCVampireInfo2.h"
-#include "InventoryInfo.h"
-#include "GearInfo.h"
-#include "ExtraInfo.h"
-#include "EffectInfo.h"
-#include "Assert.h"
-#include "RideMotorcycleInfo.h"
-#include "NPCInfo.h"
-#include "NicknameInfo.h"
-#include "BloodBibleSignInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../GameTime.h"
+#include "../PCSlayerInfo2.h"
+#include "../PCVampireInfo2.h"
+#include "../InventoryInfo.h"
+#include "../GearInfo.h"
+#include "../ExtraInfo.h"
+#include "../EffectInfo.h"
+#include "../Assert.h"
+#include "../RideMotorcycleInfo.h"
+#include "../NPCInfo.h"
+#include "../NicknameInfo.h"
+#include "../BloodBibleSignInfo.h"
 
-#define FLAG_PREMIUM_ZONE			0x10	// premium으로 설정된 존이다.
-#define FLAG_PREMIUM_PLAY			0x01	// premium play를 하는 중인가?
+#define FLAG_PREMIUM_ZONE			0x10	
+#define FLAG_PREMIUM_PLAY			0x01	
 
 //--------------------------------------------------------------------------------
 //
 // class GCUpdateInfo;
 //
-// 클라이언트가 게임 서버에 접속해서 CGConnect 패킷을 보내면, 게임 서버는 크리처와
-// 소유 아이템을 로딩해서 존에 들어갈 준비를 하게 된다. 그다음 PC와 아이템 정보,
-// 그리고 존 정보를 GCUpdateInfo에 담아서 클라이언트로 전송하게 된다.
+
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -48,10 +48,10 @@ public :
 	// destructor
 	~GCUpdateInfo() throw();
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -103,22 +103,22 @@ public :
 			NPCInfo* pInfo = *itr;
 			size += pInfo->getSize();
 		}
-		// 서버 상태
+		
 		size += szBYTE;
-		// 프리미엄
+		
 		size += szBYTE;
 			// SMS
 		size += szDWORD;
-		// 닉네임
+		
 		size += m_pNicknameInfo->getSize();
 
-		size += szBYTE; // non pk 관련
+		size += szBYTE; 
 		
 		// GuildUnion
 		size += sizeof(uint);
 		size += szBYTE;
 
-		// blood bible 관련
+		
 		size += m_pBloodBibleSign->getSize();
 
 		// power jjang point
@@ -226,7 +226,7 @@ public :
 	void setServerStat( BYTE ServerStat ) throw() { m_ServerStat = ServerStat; }
 	BYTE getServerStat() const throw() { return m_ServerStat; }
 
-	// premium play 관련
+	
 	BYTE isPremiumZone() const { return m_fPremium & FLAG_PREMIUM_ZONE; }
 	BYTE isPremiumPlay() const { return m_fPremium & FLAG_PREMIUM_PLAY; }
 
@@ -254,7 +254,7 @@ private :
 	//--------------------------------------------------------------------------------
 	// PC Information
 	//--------------------------------------------------------------------------------
-	// PCSlayerInfo2 또는 PCVampireInfo2 를 사용한다.
+	
 	PCInfo* m_pPCInfo;
 
 	//--------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ private :
 	EffectInfo* m_pEffectInfo;
 
 	//--------------------------------------------------------------------------------
-	// 모토사이클이 있나 없나.
+	
 	//--------------------------------------------------------------------------------
 	bool m_hasMotorcycle;
 
@@ -291,25 +291,25 @@ private :
 	// quick item slot
 	// gear
 
-	// 저널(PDA)
-	// 수행 퀘스트 정보
-	// 공지사항, 이벤트 정보
-	// 흐흠.. 얘들은 처음 PDS를 켤 때 다운받을까나.. - -;
+	
+	
+	
+	
 
 	//--------------------------------------------------------------------------------
 	// Zone Information
 	//--------------------------------------------------------------------------------
-	// 존 아이디
+	
 	ZoneID_t m_ZoneID;	
 
-	// 나타날 좌표의 대강의 위치
+	
 	Coord_t m_ZoneX;
 	Coord_t m_ZoneY;
 
 	// Game Time
 	GameTime m_GameTime;
 	
-	// Weather(날씨 정보)
+	
 	Weather m_Weather;
 	WeatherLevel_t m_WeatherLevel;
 
@@ -317,21 +317,21 @@ private :
 	DarkLevel_t m_DarkLevel;
 	LightLevel_t m_LightLevel;
 
-	// 존에 출현하는 NPC 스프라이트 타입의 개수, 스프라이트 타입 배열
+	
 	BYTE m_nNPCs;
 	NPCType_t m_NPCTypes[ maxNPCPerZone ];
 
-	// 존에 출현하는 몬스터 스프라이트 타입의 개수, 스프라이트 타입 배열
+	
 	BYTE m_nMonsters;
 	MonsterType_t m_MonsterTypes[ maxMonsterPerZone ];
 
-	// 현재 존에 존재하는 NPC들에 대한 정보
+	
 	std::list<NPCInfo*> m_NPCInfos;
 
-	// 서버 상태
+	
 	BYTE m_ServerStat;
 
-	// 프리미엄 관련
+	
 	BYTE m_fPremium;
 	
 	DWORD m_SMS_Charge;
@@ -339,7 +339,7 @@ private :
 	NicknameInfo*	m_pNicknameInfo;
 
 	BYTE    m_NonPK;
-	// 연합길드 정보
+	
 	uint	m_GuildUnionID;
 	BYTE	m_GuildUnionUserType;
 
@@ -372,7 +372,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCUpdateInfoPacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() 
 	{ 
 		PacketSize_t size = 0;
@@ -400,21 +400,21 @@ public :
 
 		size += szBYTE;
 		size += NPCInfo::getMaxSize()* 255;
-		// 서버 상태
+		
 		size += szBYTE;
-		// 프리미엄
+		
 		size += szBYTE;
 
 		size += szDWORD;
 		size += NicknameInfo::getMaxSize();
 
-		size += szBYTE; // non pk 관련
+		size += szBYTE; 
 
 		// GuildUnion
 		size += sizeof(uint);
 		size += szBYTE;
 
-		// blood bible 관련
+		
 		size += BloodBibleSignInfo::getMaxSize();
 
 		// power jjang point

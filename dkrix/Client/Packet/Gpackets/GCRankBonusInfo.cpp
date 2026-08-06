@@ -28,7 +28,7 @@ GCRankBonusInfo::~GCRankBonusInfo ()
 }
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //--------------------------------------------------------------------------------
 void GCRankBonusInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -49,7 +49,7 @@ void GCRankBonusInfo::read ( SocketInputStream & iStream )
 }
 
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //--------------------------------------------------------------------------------
 void GCRankBonusInfo::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -59,7 +59,7 @@ void GCRankBonusInfo::write ( SocketOutputStream & oStream ) const
 	//--------------------------------------------------
 	// write pc type
 	//--------------------------------------------------
-	oStream.write( m_RankBonusInfoList.size() );
+	oStream.write( static_cast<DWORD>(m_RankBonusInfoList.size()) );
 
 	for (std::list<DWORD>::const_iterator itr = m_RankBonusInfoList.begin(); itr!= m_RankBonusInfoList.end(); itr++) 
 	{

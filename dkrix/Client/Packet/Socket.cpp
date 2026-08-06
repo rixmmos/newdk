@@ -112,7 +112,7 @@ std::string Socket::toString () const
 		
 	StringStream msg;
 
-	msg << "Socket(FD:" << getSOCKET() << ",HOST:" << getHost() << ",PORT:" << getPort() << ")" ;
+	msg << "Socket(FD:" << (int)getSOCKET() << ",HOST:" << getHost() << ",PORT:" << getPort() << ")" ;
 	
 	return msg.toString();
 

@@ -2,8 +2,8 @@
 // 
 // Filename    : GCUseOK.cc 
 // Written By  : elca@ewestsoft.com
-// Description : CGMove가 날아 왓을때 자기 자신에게 OK 사인을 날리기
-//               위한 패킷 클래스 함수 정의
+
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ GCUseOK::~GCUseOK()
 }
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCUseOK::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -48,7 +48,7 @@ void GCUseOK::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCUseOK::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -117,7 +117,7 @@ GCUseSkillCardOK::~GCUseSkillCardOK()
 }
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCUseSkillCardOK::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -131,7 +131,7 @@ void GCUseSkillCardOK::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCUseSkillCardOK::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )

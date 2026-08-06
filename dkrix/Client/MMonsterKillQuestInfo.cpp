@@ -110,7 +110,7 @@ MQuestInfoManager::LoadFromFile(std::ifstream& file)
 	file.read((char*)&infoSize, 4);
 
 	//-----------------------------------------------------
-	// 각 info
+	
 	//-----------------------------------------------------
 	for (int i=0; i<infoSize; i++)
 	{		
@@ -119,7 +119,7 @@ MQuestInfoManager::LoadFromFile(std::ifstream& file)
 		pData->LoadFromFile( file );
 
 		//-----------------------------------------------------
-		// map에 추가한다.
+		
 		//-----------------------------------------------------
 		if (!AddData( pData->GetID(), pData ))
 		{

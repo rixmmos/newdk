@@ -2,8 +2,8 @@
 //
 // Filename    : Player.h
 // Written by  : reiot@ewestsoft.com
-// Description : ���Ӽ���/�α��μ���/�׽�Ʈ Ŭ���̾�Ʈ�� �÷��̾�
-// Ŭ����
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -24,16 +24,16 @@ class Packet;
 //
 // class Player
 //
-// �÷��̾�� �ý��� ��ü��, ����� �ϳ��� Ŭ���̾�Ʈ�� �����ȴ�.
-// TCP ���ϰ� ��������½�Ʈ���� ���ο� ������, ��Ŷ �����/ó��
-// �޽�带
-// ���� �ִ�. ���Ӽ���/�α��μ���/�׽�ƮŬ���̾�Ʈ������
-// �� Ŭ������ ��ӹ޾Ƽ� ����ϰ� �ȴ�.?
+
+
+
+
+
 //
 // *CAUTION*
 //
-// Ư�� ���Ӽ����� �α��μ����� ���, �� Ŭ������ ��ӹ��� Ŭ��������
-// ����ȭ(Mutex Lock/Unlock)�� ����� �Ѵ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -65,10 +65,10 @@ public:
     virtual void sendStream(SocketOutputStream* pOutputStream);
 
     // disconnect
-    // �÷��̾��� ������ ������ ��, ������� �����ϰ�
-    // �α׾ƿ����� ���� ��� ������ ������ �̹� ���� �����Ƿ� disconnect(DISCONNECTED) �� ����ؼ� ������ �����ؾ�
-    // �Ѵ�. �ݸ�, �����ϰ� �α׾ƿ��� �� ��쿡�� disconnect(UNDISCONNECTED) �� ����ؾ�
-    // �Ѵ�.
+    
+    
+    
+    
     virtual void disconnect(bool bDisconnected = DISCONNECTED);
 
     // get/set socket
@@ -120,7 +120,7 @@ protected:
     // buffered socket output stream
     SocketOutputStream* m_pOutputStream;
 
-    // �� �÷��̾ ���� �����ϴ� ������ ��ġ
+    
     ServerGroupID_t m_ServerGroupID;
 
     // MAC Address

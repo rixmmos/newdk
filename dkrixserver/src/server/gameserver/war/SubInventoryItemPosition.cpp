@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// SubInventoryItemPosition 클래스 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "SubInventoryItemPosition.h"
@@ -119,7 +119,7 @@ Creature* SubInventoryItemPosition::findCreature()
 
     pTargetCreature = g_pPCFinder->getCreature_LOCKED(m_OwnerName);
     if (pTargetCreature == NULL) {
-        filelog("ItemError.log", "SubInventoryItemPosition:getItem() : 해당하는 Creature가 없습니다.");
+        filelog("ItemError.log", "SubInventoryItemPosition:getItem() :  Creature .");
 
         g_pPCFinder->unlock();
         return NULL;
@@ -159,14 +159,14 @@ Item* SubInventoryItemPosition::popItem_CORE(PlayerCreature* pPC)
     Item* pSubInventoryItem = pPC->findItemIID(m_SubInventoryID);
     if (pSubInventoryItem == NULL) {
         filelog("ItemError.log",
-                "SubInventoryItemPosition:getItem() : 해당하는 위치에 SubInventory 아이템이 없습니다.");
+                "SubInventoryItemPosition:getItem() :   SubInventory  .");
         return NULL;
     }
 
     SubInventory* pSubInventory = dynamic_cast<SubInventory*>(pSubInventoryItem);
     if (pSubInventoryItem == NULL) {
         filelog("ItemError.log",
-                "SubInventoryItemPosition:getItem() : 해당하는 위치의 아이템이 SubInventory 가 아닙니다..");
+                "SubInventoryItemPosition:getItem() :    SubInventory  ..");
         return NULL;
     }
 
@@ -174,7 +174,7 @@ Item* SubInventoryItemPosition::popItem_CORE(PlayerCreature* pPC)
     Assert(pInventory != NULL);
 
     if (!pInventory->hasItem(m_InvenX, m_InvenY)) {
-        filelog("ItemError.log", "SubInventoryItemPosition:getItem() : 해당하는 위치에 아이템이 없습니다.");
+        filelog("ItemError.log", "SubInventoryItemPosition:getItem() :    .");
         return NULL;
     }
 

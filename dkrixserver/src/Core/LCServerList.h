@@ -23,18 +23,18 @@
 class LCServerList : public Packet {
 public:
     // constructor
-    // PCInfo* �迭�� ���� NULL�� �����Ѵ�.
+    
     LCServerList();
 
     // destructor
-    // PCInfo* �迭�� �Ҵ�� ��ü�� �����Ѵ�.
+    
     ~LCServerList() noexcept;
 
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -57,7 +57,7 @@ public:
     string toString() const;
 
 public:
-    // ���� ���� �׷�
+    
     ServerGroupID_t getCurrentServerGroupID() const {
         return m_CurrentServerGroupID;
     }
@@ -87,10 +87,10 @@ public:
     }
 
 private:
-    // ���� ���� �׷�
+    
     ServerGroupID_t m_CurrentServerGroupID;
 
-    // ĳ���� ����
+    
     list<ServerGroupInfo*> m_ServerGroupInfoList;
 };
 
@@ -121,8 +121,8 @@ public:
 
     // get packet's max body size
     PacketSize_t getPacketMaxSize() const {
-        // �����̾� ������ �����̾� �������� �����
-        // ũ�� ������, �� ��Ŷ�� �ִ� ũ��� �����̾� 3 ���� ����̴�.
+        
+        
         return szServerGroupID + ServerGroupInfo::getMaxSize();
     }
 };

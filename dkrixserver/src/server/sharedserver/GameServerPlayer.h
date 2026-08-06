@@ -40,10 +40,10 @@ public:
     virtual void sendPacket(Packet* pPacket) noexcept(false);
 
     // disconnect
-    // �÷��̾��� ������ ������ ��, ������� �����ϰ�
-    // �α׾ƿ����� ���� ��� ������ ������ �̹� ���� �����Ƿ� disconnect(DISCONNECTED) �� ����ؼ� ������ �����ؾ�
-    // �Ѵ�. �ݸ�, �����ϰ� �α׾ƿ��� �� ��쿡�� disconnect(UNDISCONNECTED) �� ����ؾ�
-    // �Ѵ�.
+    
+    
+    
+    
     virtual void disconnect(bool bDisconnected = DISCONNECTED) noexcept(false);
 
     // get/set socket

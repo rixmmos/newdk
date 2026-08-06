@@ -23,7 +23,7 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 	
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,7 +32,7 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -48,7 +48,7 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -71,19 +71,19 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
 			// [ TEST CODE ]
-			// 이름 설정
+			
 			//char str[20];
 			//sprintf(str, "ID=%d", pCreature->GetID());
 			//pCreature->SetName( (*g_pCreatureTable)[pPacket->getMonsterType()].Name.GetString() );
 			pCreature->SetName( pPacket->getMonsterName().c_str() );
 
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );
 
-			// 이름
+			
 			//pCreature->SetName( pPacket->getName().toString().c_str() );
 
-			// 색깔 정보
+			
 			
 
 			if (!g_pZone->AddCreature( pCreature ))
@@ -94,14 +94,14 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 			else
 			{
 				//------------------------------------------------------------
-				// Load되지 않았으면 load한다.
+				
 				//------------------------------------------------------------
 //				LoadCreatureType( pPacket->getMonsterType() );			
 			}
 		}
 		else
 		{
-			// creature가 아니면 지운다.
+			
 			bool reAdd = false;
 
 			if (pCreature->GetClassType()!=MCreature::CLASS_CREATURE)
@@ -137,7 +137,7 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 			pCreature->SetStatus( MODIFY_MAX_HP, pPacket->getMaxHP() );
 			pCreature->SetStatus( MODIFY_CURRENT_HP, pPacket->getCurrentHP() );
 
-			// 임시로..
+			
 			pCreature->SetGuildNumber( 1 );	
 			
 			if (reAdd)
@@ -150,7 +150,7 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 				else
 				{
 					//------------------------------------------------------------
-					// Load되지 않았으면 load한다.
+					
 					//------------------------------------------------------------
 //					LoadCreatureType( pPacket->getMonsterType() );			
 				}
@@ -160,31 +160,31 @@ void GCAddMonsterFromTransformationHandler::execute ( GCAddMonsterFromTransforma
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
 
 			//--------------------------------------------------
-			// Burrow에서 빠져나오는 Effect == Burrowing하는 Effect
+			
 			//--------------------------------------------------		
 			ExecuteActionInfoFromMainNode(
-				RESULT_MAGIC_HIDE,										// 사용 기술 번호
+				RESULT_MAGIC_HIDE,										
 			
 				pCreature->GetX(), pCreature->GetY(), 0,
-				pCreature->GetDirection(),														// 사용 방향
+				pCreature->GetDirection(),														
 				
-				OBJECTID_NULL,												// 목표에 대한 정보
+				OBJECTID_NULL,												
 				pCreature->GetX(), pCreature->GetY(), 0, 
 				
-				0,													// 기술의 (남은) 지속 시간		
+				0,													
 				
 				NULL,
 				
-				false);			// 기술 첨부터 시작한다.
+				false);			
 		}
 	}
 
-	// [도움말] 몹이 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_MONSTER );
 //	__END_HELP_EVENT

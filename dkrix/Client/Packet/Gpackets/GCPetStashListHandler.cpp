@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : GCPetStashListHandler.cpp
-// Written By  : 김성민
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ throw ( ProtocolException , Error )
 	
 #ifdef __GAME_CLIENT__
 		//------------------------------------------------------------
-		// 기존에걸 지우고 다시 생성한다.
+		
 		//------------------------------------------------------------
 		if (g_pStorage!=NULL) 
 		{
@@ -33,10 +33,10 @@ throw ( ProtocolException , Error )
 		g_pStorage = new MStorage;
 
 		
-		g_pStorage->Init( 1 ); //STASH_RACK_MAX );	// 쩝.. 3개일까??
+		g_pStorage->Init( 1 ); 
 
 		//------------------------------------------------------------
-		// 접근하는 Storage를 지정한다.
+		
 		//------------------------------------------------------------
 		g_pStorage->SetCurrent( 0 );
 
@@ -90,11 +90,11 @@ throw ( ProtocolException , Error )
 			
 			pItem->SetPetKeepedDay(petStashItemInfo->KeepDays);
 			//------------------------------------------------------------
-			// Storage에 item 설정
+			
 			//------------------------------------------------------------
 			if (!g_pStorage->SetItem( index, pItem ))
 			{
-				// 뭐지..
+				
 				delete pItem;
 
 				DEBUG_ADD_FORMAT("[Error] Can't Add Item to Storage. slot=%d", index);
@@ -105,7 +105,7 @@ throw ( ProtocolException , Error )
 		}
 
 		//------------------------------------------------------------
-		// 보관함을 띄운다.
+		
 		//------------------------------------------------------------
 		UI_RunPetStorage();
 		UI_SetPetStorage(g_pStorage);

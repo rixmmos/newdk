@@ -16,7 +16,7 @@
 #include "ItemUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Piercing::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -32,7 +32,7 @@ void Piercing::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pS
         Zone* pZone = pSlayer->getZone();
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -49,7 +49,7 @@ void Piercing::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pS
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -68,8 +68,8 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 NULL이거나, 총 계열이 아니라면 사용할 수 없다.
-        // 총 계열 중에서도 SG는 이 기술을 사용할 수 없다.
+        
+        
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || !isArmsWeapon(pWeapon) || pWeapon->getItemClass() == Item::ITEM_CLASS_SG) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -90,11 +90,11 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
         SkillDomainType_t DomainType = pSkillInfo->getDomainType();
         Level_t SkillLevel = pSkillSlot->getExpLevel();
 
-        // 총에 총알이 남아있다면...
+        
         if (getRemainBullet(pWeapon) > 0) {
-            // 제일 먼저 총알 숫자를 떨어뜨린다.
+            
             decreaseBullet(pWeapon);
-            // 한발쓸때마다 저장할 필요 없다. by sigi. 2002.5.9
+            
             // pWeapon->save(pSlayer->getName(), STORAGE_GEAR, 0, Slayer::WEAR_RIGHTHAND, 0);
             Bullet_t RemainBullet = getRemainBullet(pWeapon);
 
@@ -104,10 +104,10 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
             bool bRangeCheck = verifyDistance(pSlayer, X, Y, pWeapon->getRange());
 
             if (bManaCheck && bTimeCheck && bRangeCheck) {
-                // MP를 떨어뜨린다.
+                
                 decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
-                // 좌표와 방향을 구한다.
+                
                 ZoneCoord_t myX = pSlayer->getX();
                 ZoneCoord_t myY = pSlayer->getY();
                 Dir_t dir = calcDirection(myX, myY, X, Y);
@@ -115,7 +115,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                 list<POINT> ptList;
                 getPointsFromLineEx(myX, myY, X, Y, pWeapon->getRange(), ptList);
 
-                // 데미지, 지속시간 등을 계산한다.
+                
                 SkillInput input(pSlayer, pSkillSlot);
                 SkillOutput output;
                 computeOutput(input, output);
@@ -138,9 +138,9 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                     int tileX = (*ptitr).x;
                     int tileY = (*ptitr).y;
 
-                    // 존 내부이고, 안전지대가 아니라면 맞을 확률이 있다.
+                    
                     if (rect.ptInRect(tileX, tileY)) {
-                        // 타일을 받아온다.
+                        
                         Tile& tile = pZone->getTile(tileX, tileY);
 
                         list<Creature*> targetList;
@@ -162,7 +162,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                             Creature* pTargetCreature = (*itr);
                             Assert(pTargetCreature != NULL);
 
-                            // 총 계열 기술은 땅 속을 제외한 나머지를 공격할 수가 있다.
+                            
                             bool bMoveModeCheck =
                                 (pTargetCreature->getMoveMode() == Creature::MOVE_MODE_BURROWING) ? false : true;
                             bool bRaceCheck = pTargetCreature->isNPC() || pTargetCreature->isSlayer();
@@ -174,7 +174,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
 
                             if (bMoveModeCheck && !bRaceCheck && bHitRoll && bCanHit && bPK && bZoneLevelCheck &&
                                 !pTargetCreature->isFlag(
-                                    Effect::EFFECT_CLASS_COMA)) // 죽은 애한테 걸리면 안 맞아야 된다. -_-; 2003.3.14
+                                    Effect::EFFECT_CLASS_COMA)) 
                             {
                                 bool bCriticalHit = false;
 
@@ -189,18 +189,18 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                                 _GCSkillToTileOK4.addCListElement(targetObjectID);
                                 _GCSkillToTileOK5.addCListElement(targetObjectID);
 
-                                // 일단 맞는 놈이 받을 패킷은 널 상태로 한 채로, 데미지를 준다.
+                                
                                 setDamage(pTargetCreature, Damage, pSlayer, SkillType, NULL, &_GCSkillToTileOK1);
                                 computeAlignmentChange(pTargetCreature, Damage, pSlayer, NULL, &_GCSkillToTileOK1);
 
                                 increaseAlignment(pSlayer, pTargetCreature, _GCSkillToTileOK1);
 
-                                // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                                
                                 if (bCriticalHit) {
                                     knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
                                 }
 
-                                // 슬레이어가 아닐 경우에만 맞춘 걸로 간주한다.
+                                
                                 if (!pTargetCreature->isSlayer()) {
                                     bHit = true;
                                     if (maxEnemyLevel < pTargetCreature->getLevel())
@@ -221,7 +221,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                     }
                 }
 
-                // 공격자의 아이템 내구도를 떨어뜨린다.
+                
                 decreaseDurability(pSlayer, NULL, pSkillInfo, &_GCSkillToTileOK1, NULL);
 
                 _GCSkillToTileOK1.setSkillType(SkillType);
@@ -259,7 +259,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
 
                 pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-                // 이 기술에 의해 영향을 받는 놈들에게 패킷을 보내줘야 한다.
+                
                 for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
                     Creature* pTargetCreature = *itr;
                     Assert(pTargetCreature != NULL);
@@ -267,7 +267,7 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                     if (pTargetCreature->isPC()) {
                         _GCSkillToTileOK2.clearList();
 
-                        // HP의 변경사항을 패킷에다 기록한다.
+                        
                         HP_t targetHP = 0;
                         if (pTargetCreature->isSlayer())
                             targetHP = (dynamic_cast<Slayer*>(pTargetCreature))->getHP(ATTR_CURRENT);
@@ -277,13 +277,13 @@ void Piercing::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot*
                             targetHP = (dynamic_cast<Ousters*>(pTargetCreature))->getHP(ATTR_CURRENT);
                         _GCSkillToTileOK2.addShortData(MODIFY_CURRENT_HP, targetHP);
 
-                        // 아이템의 내구력을 떨어뜨린다.
+                        
                         decreaseDurability(NULL, pTargetCreature, pSkillInfo, NULL, &_GCSkillToTileOK2);
 
-                        // 패킷을 보내준다.
+                        
                         pTargetCreature->getPlayer()->sendPacket(&_GCSkillToTileOK2);
                     } else if (pTargetCreature->isMonster()) {
-                        // 당근 적으로 인식한다.
+                        
                         Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                         pMonster->addEnemy(pSlayer);
                     }

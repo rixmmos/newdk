@@ -7,7 +7,7 @@
 #ifndef __GAMEHELPERS_H__
 #define __GAMEHELPERS_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "PacketInfo.h"
 #include "ModifyInfo.h"
 #include "EffectInfo.h"

@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 
 	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,9 +32,9 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//
-	// Creature가 오토바이를 장착해제 한다.
+	
 	//------------------------------------------------------
 	else
 	{
@@ -42,23 +42,23 @@ throw ( ProtocolException , Error )
 
 		if (pCreature!=NULL)
 		{
-			// 장착가능한 creature인 경우
+			
 			if (pCreature->IsWear())
 			{
 				MCreatureWear* pCreatureWear = (MCreatureWear*)pCreature;
 			
 				//------------------------------------------
-				// 오토바이 그림을 없애준다.
+				
 				//------------------------------------------
 				pCreatureWear->RemoveAddon( ADDON_MOTOR );
 
 				//------------------------------------------
-				// 움직이는 방법 바꿈
+				
 				//------------------------------------------
 				pCreatureWear->SetMoveDevice( MCreature::MOVE_DEVICE_WALK );
 
 				//------------------------------------------
-				// 내리는 소리 출력
+				
 				//------------------------------------------
 				PlaySound( SOUND_WORLD_BIKE_STOP,
 							false,

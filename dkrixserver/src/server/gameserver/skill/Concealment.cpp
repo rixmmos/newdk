@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Concealment::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -49,12 +49,12 @@ void Concealment::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectConcealment* pEffect = new EffectConcealment(pSlayer);
             pEffect->setDeadline(output.Duration);
             pEffect->setLevel(SkillLevel);
@@ -66,7 +66,7 @@ void Concealment::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             pSlayer->initAllStat();
             pSlayer->addModifyInfo(prev, _GCSkillToSelfOK1);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 8, 1, _GCSkillToSelfOK1);

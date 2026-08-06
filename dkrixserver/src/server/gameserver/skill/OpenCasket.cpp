@@ -16,7 +16,7 @@
 #include "HitRoll.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void OpenCasket::execute(Vampire* pVampire, VampireSkillSlot* pVampireSkillSlot, CEffectID_t CEffectID)
 
@@ -42,13 +42,13 @@ void OpenCasket::execute(Vampire* pVampire, VampireSkillSlot* pVampireSkillSlot,
         SkillType_t SkillType = getSkillType();
         // SkillInfo*        pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // 관 속에 들어있는 경우만 사용 가능하다.
+        
         bool bEffected = pVampire->isFlag(Effect::EFFECT_CLASS_CASKET);
 
         if (bEffected) {
             // cout << "Open Casket Succeed" << endl;
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectManager* pEffectManager = pVampire->getEffectManager();
             Assert(pEffectManager != NULL);
 
@@ -61,7 +61,7 @@ void OpenCasket::execute(Vampire* pVampire, VampireSkillSlot* pVampireSkillSlot,
                 //				pVampire->removeFlag( Effect::EFFECT_CLASS_CASKET );
             }
 
-            // 패킷을 만들어 보낸다.
+            
             _GCSkillToSelfOK1.setSkillType(SkillType);
             _GCSkillToSelfOK1.setCEffectID(CEffectID);
             _GCSkillToSelfOK1.setDuration(0);

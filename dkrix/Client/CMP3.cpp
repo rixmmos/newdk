@@ -106,7 +106,7 @@
 //	DEBUG_ADD("[CMP3] MP3_CreateDSBuffer");
 //	mp3Buf= MP3_CreateDSBuffer(mp3) ;
 //	DEBUG_ADD("[CMP3] MP3_CreateDSBuffer OK");
-////	if ( mp3Buf == NULL ) DispDebugMsg("MP3 Direct Sound Buffer 생성에 실패했습니다." ) ;
+
 ////	mp3 = NULL ;
 ////	SendMessage(BaseWnd, UM_MP3LOADED, 0, 0) ;
 //	if(mp3Buf == NULL)
@@ -122,7 +122,7 @@
 //
 //	if(m_status == STATUS_PLAYING)
 //	{
-//		// 로딩 끝나면 무조건 play
+
 //		g_pMP3->Play(false);
 //	}
 //	ExitThread(0) ;
@@ -130,10 +130,10 @@
 //}
 //
 //
-//// DSBUFFER에 놓인 MP3 음악을 재생한다. 끝나면 메시지를 보낸다.
+
 //DWORD WINAPI CMP3::PlayMP3Buf (LPVOID param)
 //{
-////	DispDebugMsg("현재 로드된 MP3파일을 연주합니다.") ;
+
 //	DEBUG_ADD("[CMP3] PlayMP3Buf");
 ////	while(mp3Buf == NULL)
 ////	{
@@ -177,7 +177,7 @@
 ////	mp3Buf = NULL ;
 //
 ////	SendMessage(BaseWnd, UM_MP3PLAYEND, 0, 0) ;
-////	DispDebugMsg("MP3연주가 끝나서 메시지를 보냅니다.") ;
+
 //	m_status = STATUS_NULL;
 ////	m_szFilename = "";
 //
@@ -226,13 +226,13 @@
 //	DEBUG_ADD("[CMP3] Open");
 //	if ( mp3Buf != NULL )
 //	{
-////		DispDebugMsg("MP3 파일 %s을 로드하려 할 때 mp3Buf가 NULL값이 아닙니다.", filename ) ;
+
 //		return -1 ;
 ////		Release();
 //	}
 //	else
 //	{
-////		DispDebugMsg("MP3 파일 %s을 로드합니다.", filename ) ;
+
 //		DWORD threadID ;
 //
 //		g_hLoadThread = CreateThread ( NULL, 0, PrepareMP3Buf, (void *)filename, 0, &threadID) ;
@@ -263,7 +263,7 @@
 //		g_SDLAudio.SetVolumeLimit( volume );
 //		g_SDLAudio.AddVolume( mp3Buf, 0 );
 //		
-//		// 원래의 max volume으로 돌린다.
+
 //		g_SDLAudio.SetVolumeLimit( maxVolume );
 //		mp3Buf->SetVolume(volume);
 //	}
@@ -333,7 +333,7 @@ DWORD CMP3::Open(LPCSTR lpcszFileName)
 	
 
 
-	// 장치오픈
+	
 	mciOpenParms.lpstrDeviceType = "MPEGVideo";
 	mciOpenParms.lpstrElementName = lpcszFileName;
 
@@ -342,7 +342,7 @@ DWORD CMP3::Open(LPCSTR lpcszFileName)
 							  MCI_OPEN_ELEMENT|MCI_OPEN_TYPE,
 							  (DWORD)(LPVOID)&mciOpenParms);
 
-	// 정상적으로 오픈되었으면 ID 발급
+	
 	if (dwResult == 0) {
 
 		muiDeviceID = mciOpenParms.wDeviceID;
@@ -440,7 +440,7 @@ void CMP3::SetPosition(DWORD dwPos)
 }
 
 
-// 전체 길이를 밀리초단위로 반환
+
 DWORD CMP3::TotalLength()
 {
   DWORD dwResult;
@@ -450,7 +450,7 @@ DWORD CMP3::TotalLength()
 }
 
 
-// 전체 길이를 mm:ss 형식의 문자열과 함께 밀리초단위로 반환
+
 DWORD CMP3::TotalLength(LPSTR lpszReturn)
 {
   DWORD dwResult;
@@ -461,7 +461,7 @@ DWORD CMP3::TotalLength(LPSTR lpszReturn)
 }
 
 	
-// 재생 위치를 밀리초단위로 반환
+
 DWORD CMP3::CurrentLength()
 {
   DWORD dwResult;
@@ -471,7 +471,7 @@ DWORD CMP3::CurrentLength()
 }
 
 
-// 재생 위치를 mm:ss 형식의 문자열과 함께 밀리초단위로 반환
+
 DWORD CMP3::CurrentLength(LPSTR lpszReturn)
 {
   DWORD dwResult;
@@ -482,7 +482,7 @@ DWORD CMP3::CurrentLength(LPSTR lpszReturn)
 }
 
 
-// 전달받은 Flag에 따른 Player의 상태 값을 반환
+
 DWORD CMP3::GetStatus(DWORD dwFlag)
 {
   MCI_STATUS_PARMS mciStatusParms;
@@ -495,7 +495,7 @@ DWORD CMP3::GetStatus(DWORD dwFlag)
 }
 
 
-// 전달 받은 밀리초를 mm:ss 형식의 문자열로 변환해서 반환
+
 void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
 {
   double dMilliSeconds;
@@ -511,7 +511,7 @@ void CMP3::MinsFromSecs(DWORD dwLength, LPSTR lpszReturn)
 }
 
 
-// 전달 받은 코드에 해당하는 에러 메시지를 반환
+
 void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString)
 {
 	mciGetErrorString(dwErrCode, lpszErrString, sizeof(lpszErrString));
@@ -519,7 +519,7 @@ void CMP3::GetErrorString(DWORD dwErrCode, LPSTR lpszErrString)
 }
 
 
-// 준비가 되었으면 true
+
 bool CMP3::IsReady()
 {
   bool bReturn;
@@ -530,7 +530,7 @@ bool CMP3::IsReady()
 }
 
 
-// 일시정지 상태이면 true
+
 bool CMP3::IsPause()
 {
   bool bReturn;
@@ -540,7 +540,7 @@ bool CMP3::IsPause()
 	return bReturn;
 }
 
-// 플레이 상태이면 true
+
 bool CMP3::IsPlay()
 {
   bool bReturn;
@@ -550,7 +550,7 @@ bool CMP3::IsPlay()
 	return bReturn;
 }
 
-// 정지 상태이면 true
+
 bool CMP3::IsStop()
 {
   bool bReturn;
@@ -561,7 +561,7 @@ bool CMP3::IsStop()
 }
 
 
-// 레코딩 상태이면 true
+
 bool CMP3::IsRecord()
 {
   bool bReturn;
@@ -571,14 +571,7 @@ bool CMP3::IsRecord()
 	return bReturn;
 }
 
-/* Player의 진행 상태를 반환
-		MCI_MODE_NOT_READY
-		MCI_MODE_PAUSE
-		MCI_MODE_PLAY
-		MCI_MODE_STOP
-		MCI_MODE_OPEN
-		MCI_MODE_RECORD
-		MCI_MODE_SEEK		*/
+ 
 DWORD CMP3::StatusMode()
 {
   DWORD dwResult;

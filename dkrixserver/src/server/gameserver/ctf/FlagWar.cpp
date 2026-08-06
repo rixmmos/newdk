@@ -37,7 +37,7 @@ void FlagWar::execute() {
         setState(STATE_WAIT);
         break;
     default:
-        filelog("FlagWar.log", "이상한 FlagWar 상태..");
+        filelog("FlagWar.log", " FlagWar ..");
         break;
     }
 
@@ -58,7 +58,7 @@ void FlagWar::executeReady() {
 
     g_pZoneGroupManager->broadcast(&gcNE);
 
-    // 5분있다가 시작하자
+    
     g_pFlagManager->addSchedule(new Schedule(this, VSDateTime::currentDateTime().addSecs(300)));
 
     __END_CATCH
@@ -90,7 +90,7 @@ void FlagWar::addFlagsRandom(ZoneID_t zoneID, uint no) {
         TPOINT ptInZone = pZone->addItem(pItem, pt.x, pt.y, true, 36000);
         pItem->create("", STORAGE_ZONE, pZone->getZoneID(), ptInZone.x, ptInZone.y);
 
-        filelog("FlagWar.log", "%d : (%d,%d) 에 깃발이 만들어졌습니다.", pZone->getZoneID(), ptInZone.x, ptInZone.y);
+        filelog("FlagWar.log", "%d : (%d,%d)   .", pZone->getZoneID(), ptInZone.x, ptInZone.y);
 
         m_Flags.push_back(pItem->getItemID());
     }
@@ -119,8 +119,8 @@ void FlagWar::executeStart() {
     addFlags();
     //	addFlagsRandom( 1122, 20 );
 
-    // 랜덤하게 존을 선택해서 100개의 깃발을 생성한다.
-    // 2시간 하자
+    
+    
     g_pFlagManager->addSchedule(new Schedule(this, VSDateTime::currentDateTime().addSecs(getWarTime())));
     g_pFlagManager->startFlagWar();
 
@@ -138,7 +138,7 @@ void FlagWar::executeFinish() {
 
     g_pZoneGroupManager->broadcast(&gcNE);
 
-    // 3분있다가 아템 터친다.
+    
     g_pFlagManager->addSchedule(new Schedule(this, VSDateTime::currentDateTime().addSecs(180)));
     g_pFlagManager->endFlagWar();
 
@@ -148,7 +148,7 @@ void FlagWar::executeFinish() {
 void FlagWar::executeEnd() {
     __BEGIN_TRY
 
-    // 생성했던 깃발들을 쫓아가서 다 지워뿐다.
+    
     vector<ItemID_t>::iterator itr = m_Flags.begin();
     vector<ItemID_t>::iterator endItr = m_Flags.end();
 
@@ -158,21 +158,21 @@ void FlagWar::executeEnd() {
         if (pItemPosition == NULL)
             continue;
 
-        // popItem은 아템을 해당 위치에서 뽑아내므로 지워버려도 된다.
-        // 이건 FlagManager 가 도는 스레드에서 불러지므로 안에서 락걸어줘야 된다.
+        
+        
         Item* pItem = pItemPosition->popItem(true);
         if (pItem != NULL) {
             pItem->destroy();
             SAFE_DELETE(pItem);
         } else {
-            filelog("FlagWar.log", "깃발 아이템 추적 실패... ㅜ.ㅠ");
+            filelog("FlagWar.log", "   ... .");
         }
     }
 
     g_pFlagManager->resetFlagCounts();
     m_Flags.clear();
 
-    // 다음을 기약하자
+    
     g_pFlagManager->addSchedule(new Schedule(this, getNextFlagWarTime()));
 
     /*	ZoneCoord_t	ZoneX, ZoneY;
@@ -240,8 +240,8 @@ VSDateTime FlagWar::getNextFlagWarTime() {
         }
     }
 
-    // cout << nextWarDateTime.toString() << "에 깃발 전쟁 시작함당~" << endl;
-    filelog("FlagWar.log", "%s에 깃발 뺏기 이벤트 시작", nextWarDateTime.toString().c_str());
+    
+    filelog("FlagWar.log", "%s    ", nextWarDateTime.toString().c_str());
 
     return nextWarDateTime;
 }

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Set Default
 //----------------------------------------------------------------------
-// default file�� �����صΰ� load�ϴ� �͵� �������� ����.
+
 //----------------------------------------------------------------------
 /*
 void				
@@ -63,7 +63,7 @@ SetDefault()
 //----------------------------------------------------------------------
 // KeyAccelerator
 //----------------------------------------------------------------------
-// key�� WORD, accel�� BYTE.. ����.. 
+
 //----------------------------------------------------------------------
 class KeyAccelerator {
 	public :
@@ -87,9 +87,9 @@ class KeyAccelerator {
 		//------------------------------------------------------------
 		// Get Accelerator / Key
 		//------------------------------------------------------------
-		BYTE				GetAccelerator(WORD key) const;			// key�� ����� accelerator�� ã�´�.
-		BYTE				GetAcceleratorSimilar(WORD key) const;	// key�� ����� accelerator�� ã�´�. key������ ������ ��쵵 üũ�Ѵ�.
-		WORD				GetKey(BYTE accel) const;				// accelerator�� ����� key�� ã�´�.
+		BYTE				GetAccelerator(WORD key) const;			
+		BYTE				GetAcceleratorSimilar(WORD key) const;	
+		WORD				GetKey(BYTE accel) const;				
 		const char *		GetName(BYTE accel) const
 		{
 			if(accel >= MAX_ACCELERATOR)
@@ -105,8 +105,8 @@ class KeyAccelerator {
 
 
 	protected :
-		KEY_MAP				m_Keys;					// key�� accelerator�� ����
-		ACCELERATOR_VECTOR	m_Accelerators;			// accelerator�� key�� ����			
+		KEY_MAP				m_Keys;					
+		ACCELERATOR_VECTOR	m_Accelerators;			
 };
 
 extern KeyAccelerator*	g_pKeyAccelerator;

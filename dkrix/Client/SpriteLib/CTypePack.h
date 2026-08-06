@@ -3,14 +3,13 @@
 
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
-	#include <fstream.h>
 #else
 	#include "../basic/Platform.h"
-	#include <fstream>
-	#include <cstring>
-	#include <cstdio>
-	using namespace std;
 #endif
+#include <fstream>
+#include <cstring>
+#include <cstdio>
+using namespace std;
 #include "CSpriteSetManager.h"
 #include "COrderedList.h"
 #ifdef PLATFORM_WINDOWS
@@ -70,7 +69,7 @@ protected:
 	bool			m_bRunningLoad;
 
 	// runtime loading
-	WORD			m_nLoadData;	// Loading �� CSprite�� ����
+	WORD			m_nLoadData;	
 	std::ifstream *m_file;
 	int*			m_file_index;
 };
@@ -142,8 +141,8 @@ Type &CTypePack<Type>::Get(WORD n)
 	if(m_bRunningLoad && !m_pData[n].IsInit())
 	{
 		m_file->seekg(m_file_index[n]);
-		// file�� �ִ� Sprite���� Load	
-		m_pData[n].LoadFromFile(*m_file);	// Sprite �о����
+		
+		m_pData[n].LoadFromFile(*m_file);	
 		if(++m_nLoadData >= m_Size)
 		{
 			m_bRunningLoad = false;
@@ -208,12 +207,12 @@ bool CTypePack<Type>::LoadFromFile(std::ifstream&file)
 //----------------------------------------------------------------------
 // Load From File Running
 //----------------------------------------------------------------------
-// �ǽð� �ε�
+
 //----------------------------------------------------------------------
 template <class Type>
 bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//�ε��� ���� �ε�
+	
 	std::string filename = lpszFilename;
 	filename += 'i';
 	std::ifstream indexFile(filename.c_str(), ios::binary);
@@ -232,7 +231,7 @@ bool CTypePack<Type>::LoadFromFileRunning(LPCTSTR lpszFilename)
 	}
 	indexFile.close();
 	
-	// file���� sprite ������ �о�´�.	
+	
 	m_file->open(lpszFilename, ios::binary);
 	
 	m_file->read((char*)&m_Size, 2);
@@ -247,13 +246,13 @@ template <class Type>
 bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile)
 {
 	//--------------------------------------------------
-	// index file�� �����ϱ� ���� ����
+	
 	//--------------------------------------------------
 //	long*	pIndex = new long [m_Size];
 	std::vector<DWORD> vIndex;
 
 	//--------------------------------------------------
-	// Size ����
+	
 	//--------------------------------------------------
 	dataFile.write((const char *)&m_Size, 2);
 	indexFile.write((const char *)&m_Size, 2);
@@ -287,7 +286,7 @@ bool CTypePack<Type>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile
 	}
 
 	//--------------------------------------------------
-	// index ����
+	
 	//--------------------------------------------------
 	for (i=0; i<vIndex.size(); i++)
 	{
@@ -381,7 +380,7 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 	}
 	
 	//-------------------------------------------------------------------
-	// index�� ������ üũ�Ѵ�. fileID�� �ִ���..?
+	
 	//-------------------------------------------------------------------
 	TYPE_SPRITEID num;
 	indexFile.read((char*)&num, sizeof(WORD));
@@ -392,7 +391,7 @@ bool CTypePack<Type>::LoadFromFileData(int dataID, int fileID, LPCTSTR packFilen
 	}
 	
 	//-------------------------------------------------------------------
-	// load�� data�� file pointer�� �д´�.
+	
 	//-------------------------------------------------------------------
 int32_t fp = 0;	
 	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)
@@ -464,7 +463,7 @@ protected:
 	bool			m_bRunningLoad;
 
 	// runtime loading
-	WORD			m_nLoadData;	// Loading �� CSprite�� ����
+	WORD			m_nLoadData;	
 	std::ifstream *m_file;
 	int*			m_file_index;
 	bool			m_bSecond;
@@ -578,7 +577,7 @@ TypeBase &CTypePack2<TypeBase, Type1, Type2>::Get(WORD n)
 				return m_pData[n];
 			}
 			m_file->seekg(m_file_index[n]);
-			m_pData[n].LoadFromFile(*m_file);	// Sprite �о����
+			m_pData[n].LoadFromFile(*m_file);	
 		}
 		catch (...)
 		{
@@ -652,12 +651,12 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFile(std::ifstream&file)
 //----------------------------------------------------------------------
 // Load From File Running
 //----------------------------------------------------------------------
-// �ǽð� �ε�
+
 //----------------------------------------------------------------------
 template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilename)
 {
-	//�ε��� ���� �ε�
+	
 	std::string filename = lpszFilename;
 	filename += 'i';
 	std::ifstream indexFile(filename.c_str(), ios::binary);
@@ -697,7 +696,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileRunning(LPCTSTR lpszFilenam
 	}
 	indexFile.close();
 
-	// file���� sprite ������ �о�´�.
+	
 	m_file->open(lpszFilename, ios::binary);
 
 	// Check if data file opened successfully
@@ -736,13 +735,13 @@ template <class TypeBase, class Type1, class Type2>
 bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std::ofstream&indexFile)
 {
 	//--------------------------------------------------
-	// index file�� �����ϱ� ���� ����
+	
 	//--------------------------------------------------
 //	long*	pIndex = new long [m_Size];
 	std::vector<DWORD> vIndex;
 
 	//--------------------------------------------------
-	// Size ����
+	
 	//--------------------------------------------------
 	dataFile.write((const char *)&m_Size, 2);
 	indexFile.write((const char *)&m_Size, 2);
@@ -776,7 +775,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::SaveToFile(std::ofstream&dataFile, std:
 	}
 
 	//--------------------------------------------------
-	// index ����
+	
 	//--------------------------------------------------
 	for (i=0; i<vIndex.size(); i++)
 	{
@@ -870,7 +869,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 	}
 	
 	//-------------------------------------------------------------------
-	// index�� ������ üũ�Ѵ�. fileID�� �ִ���..?
+	
 	//-------------------------------------------------------------------
 	TYPE_SPRITEID num;
 	indexFile.read((char*)&num, sizeof(WORD));
@@ -881,7 +880,7 @@ bool CTypePack2<TypeBase, Type1, Type2>::LoadFromFileData(int dataID, int fileID
 	}
 	
 	//-------------------------------------------------------------------
-	// load�� data�� file pointer�� �д´�.
+	
 	//-------------------------------------------------------------------
 int32_t fp = 0;	
 	indexFile.seekg( 2 + fileID*4 );		// 2(num) + spriteID * (4 bytes)

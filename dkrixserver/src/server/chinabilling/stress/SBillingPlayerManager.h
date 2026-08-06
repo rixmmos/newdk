@@ -21,7 +21,7 @@ class SBillingPlayer;
 /////////////////////////////////////////////////////
 // class SBillingPlayerManager
 //
-// 중국 빌링 서버와 통신을 전담하는 쓰레드
+
 /////////////////////////////////////////////////////
 class SBillingPlayerManager : public Thread {
 public:
@@ -33,7 +33,7 @@ public:
     void stop() throw(Error);
     void run() throw();
 
-    // 빌링 관련 패킷 보내기 함수
+    
     bool sendLogin(PayUser* pPayUser, int i) throw(ProtocolException, Error);
     void sendIntervalValidation(int i) throw(ProtocolException, Error);
     bool sendMinusPoint(PayUser* pPayUser, int i) throw(ProtocolException, Error);

@@ -18,7 +18,7 @@ GCAddVampireFromTransformation::~GCAddVampireFromTransformation() noexcept
 }
 
 //----------------------------------------------------------------------
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //----------------------------------------------------------------------
 void GCAddVampireFromTransformation::read(SocketInputStream& iStream)
 
@@ -35,7 +35,7 @@ void GCAddVampireFromTransformation::read(SocketInputStream& iStream)
 
 
 //--------------------------------------------------------------------------------
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //--------------------------------------------------------------------------------
 void GCAddVampireFromTransformation::write(SocketOutputStream& oStream) const
 

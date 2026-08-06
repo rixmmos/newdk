@@ -155,7 +155,72 @@ enum ALIGNMENT
 // character creation slot
 struct S_SLOT
 {
-	S_SLOT() { m_AdvancementLevel = 0; }
+	S_SLOT()
+		: bl_set(false),
+		  bl_female(false),
+		  bl_drained(false),
+		  man_info(),
+		  woman_info(),
+		  helmet_color(0),
+		  trouser_color(0),
+		  coat_color(0),
+		  skin_color(0),
+		  hair_color(0),
+		  left_color(0),
+		  right_color(0),
+		  alignment((ALIGNMENT)0),
+		  alignment_num(0),
+		  level(0),
+		  STR_PURE(0),
+		  STR_CUR(0),
+		  STR_MAX(0),
+		  DEX_PURE(0),
+		  DEX_CUR(0),
+		  DEX_MAX(0),
+		  INT_PURE(0),
+		  INT_CUR(0),
+		  INT_MAXX(0),
+		  STR_EXP_REMAIN(0),
+		  DEX_EXP_REMAIN(0),
+		  INT_EXP_REMAIN(0),
+		  EXP_REMAIN(0),
+		  DAM(0),
+		  DAM2(0),
+		  SILVER_DAM(0),
+		  SILVER_DAM2(0),
+		  CHANGE_VAMPIRE(0),
+		  DEFENSE(0),
+		  PROTECTION(0),
+		  TOHIT(0),
+		  HP(0),
+		  MP(0),
+		  HP_MAX(0),
+		  MP_MAX(0),
+		  SILVER_HP(0),
+		  DOMAIN_SWORD(0),
+		  DOMAIN_BLADE(0),
+		  DOMAIN_GUN(0),
+		  DOMAIN_HEAL(0),
+		  DOMAIN_ENCHANT(0),
+		  FAME(0),
+		  bonus_point(0),
+		  skill_point(0),
+		  GUILD_ID(0),
+		  GUILD_GRADE(0),
+		  WS(0),
+		  WeaponSpeed(0),
+		  GRADE(0),
+		  GRADE_EXP_REMAIN(0),
+		  Race((::Race)0),
+		  ElementalFire(0),
+		  ElementalWater(0),
+		  ElementalEarth(0),
+		  ElementalWind(0),
+		  m_SMS_Charge(0),
+		  m_Powerjjang_Point(0),
+		  m_AdvancementLevel(0)
+	{
+	}
 	bool								bl_set;
 //	bool								bl_vampire;
 	bool								bl_female;
@@ -252,6 +317,8 @@ struct S_SLOT
 //	std::string							m_NickName;
 };	
 
+class C_VS_UI_TITLE;
+
 //-----------------------------------------------------------------------------
 // C_VS_UI_LOGIN
 //
@@ -293,6 +360,7 @@ private:
 	LineEditorVisual			m_lev_id;
 	LineEditorVisual			m_lev_password;
 	std::string					m_lev_id_backup;
+	C_VS_UI_TITLE *				m_pC_title_parent;
 
 	//INPUT_POSITION	m_e_ip; // input position
 
@@ -302,7 +370,7 @@ private:
 	void	ChangeFocus();
 
 public:
-	C_VS_UI_LOGIN();
+	C_VS_UI_LOGIN(C_VS_UI_TITLE * pC_title_parent = NULL);
 	~C_VS_UI_LOGIN();
 
 	void	AcquireDisappear() {}
@@ -323,6 +391,8 @@ public:
 	void	ExecuteObject();
 	void	Start();
 	void	Finish();
+	const char* GetIDText() const { return m_lev_id.GetString(); }
+	const char* GetPasswordText() const { return m_lev_password.GetString(); }
 };
 /*
 //-----------------------------------------------------------------------------
@@ -1402,6 +1472,7 @@ public:
 	void	Run(id_t id);
 	void	Show();
 	void	Process();
+	bool	HandleLoginOverlayMenuClick(UINT message, int _x, int _y);
 	bool	MouseControl(UINT message, int _x, int _y);
 	void	KeyboardControl(UINT message, UINT key, long extra);
 	void	Start();

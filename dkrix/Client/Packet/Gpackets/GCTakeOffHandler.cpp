@@ -23,11 +23,11 @@ throw ( ProtocolException , Error )
 
 	//------------------------------------------------------
 	//
-	//  Creature의 Addon을 제거한다.
+	
 	//
 	//------------------------------------------------------
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -35,28 +35,28 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
 		//--------------------------------------------------
-		// Creature가 없는 경우
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
 			DEBUG_ADD_FORMAT("[Error] Not Exist Creature. ID=%d", pPacket->getObjectID());
 		}
 		//--------------------------------------------------
-		// 존재하는 Creature인 경우
-		// 복장이 있는 creature이면 --> Addon제거
+		
+		
 		//--------------------------------------------------
 		else if (pCreature->IsWear())
 		{
 			MCreatureWear* pCreatureWear = (MCreatureWear*)pCreature;
 			
-			// 캐릭터를 정지시킨다.
+			
 			pCreatureWear->SetStop();
 
 			#ifdef	OUTPUT_DEBUG				
@@ -75,7 +75,7 @@ throw ( ProtocolException , Error )
 		}
 			
 		//--------------------------------------------------
-		// 옷을 입을 수 없는 Creature인 경우
+		
 		//--------------------------------------------------
 		else 
 		{

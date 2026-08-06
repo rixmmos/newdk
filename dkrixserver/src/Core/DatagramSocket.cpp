@@ -18,9 +18,9 @@
 //
 // constructor for UDP Client Socket
 //
-// UDP Ŭ���̾�Ʈ ������ ���� nonamed ���ϸ� ������ �θ� �ȴ�.
-// �ֳ��ϸ�, ������ send�� ������ Datagram�� �ּҸ� �����صθ�
-// �Ǳ� �����̴�.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 DatagramSocket::DatagramSocket() : m_SocketID(INVALID_SOCKET) {
@@ -38,7 +38,7 @@ DatagramSocket::DatagramSocket() : m_SocketID(INVALID_SOCKET) {
 //
 // constructor for UDP Server Socket
 //
-// UDP ���� ������ ������ �����ϰ�, port �� ���ε���Ű�� �غ� �Ϸ�ȴ�.
+
 //
 //////////////////////////////////////////////////////////////////////
 DatagramSocket::DatagramSocket(uint port) : m_SocketID(INVALID_SOCKET) {
@@ -89,7 +89,7 @@ uint DatagramSocket::send(Datagram* pDatagram) {
     } catch (ConnectException& t) {
         cout << "DatagramSocket::send Exception Check!" << endl;
         cout << t.toString() << endl;
-        throw ConnectException("DatagramSocket�� ������ ������");
+        throw ConnectException("DatagramSocket  ");
     }
 
     __END_CATCH
@@ -100,8 +100,8 @@ uint DatagramSocket::send(Datagram* pDatagram) {
 //
 // receive datagram from peer
 //
-// ���࿡ �� Ŭ������ blocking ���� ����Ѵٸ�, (�� select
-// �������) �Ƹ��� nReceived �� 0 ������ ���� ��������� �Ǵܵȴ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 Datagram* DatagramSocket::receive() {
@@ -112,7 +112,7 @@ Datagram* DatagramSocket::receive() {
     SOCKADDR_IN SockAddr;
     uint _szSOCKADDR_IN = szSOCKADDR_IN;
 
-    // ���� ���ۿ��ٰ� �����صд�.
+    
     int nReceived = SocketAPI::recvfrom_ex(m_SocketID, m_Buffer, DATAGRAM_SOCKET_BUFFER_LEN, 0, (SOCKADDR*)&SockAddr,
                                            &_szSOCKADDR_IN);
 

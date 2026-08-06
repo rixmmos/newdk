@@ -24,10 +24,10 @@ class LGIncomingConnectionOK : public DatagramPacket {
 public:
     LGIncomingConnectionOK() {};
     ~LGIncomingConnectionOK() {};
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(Datagram& iDatagram);
 
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(Datagram& oDatagram) const;
 
     // execute packet's handler
@@ -77,14 +77,14 @@ public:
     }
 
 private:
-    // 어떤 플레이어에게 LCReconnect 패킷을 보내야 하는지는 알아야 한다.
+    
     string m_PlayerID;
 
-    // 게임 서버가 자신의 TCP 포트를 알려줌으로써
-    // 로그인 서버는 게임 서버의 TCP 포트를 몰라도 무방하다.
+    
+    
     uint m_TCPPort;
 
-    // 게임 서버에서 생성한 인증 키
+    
     DWORD m_Key;
 };
 
@@ -116,7 +116,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static LGIncomingConnectionOKPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBYTE + 20 + szuint + szDWORD;
     }

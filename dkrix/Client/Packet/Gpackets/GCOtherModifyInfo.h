@@ -7,8 +7,8 @@
 #ifndef __GC_OTHER_MODIFY_INFO_H__
 #define __GC_OTHER_MODIFY_INFO_H__
 
-#include "ModifyInfo.h"
-#include "PacketFactory.h"
+#include "../ModifyInfo.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCOtherModifyInfo;

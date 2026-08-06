@@ -64,13 +64,13 @@ Turn_t GDRScene::ActionSay::execute() {
     gcSay.setMessage(g_pStringPool->getString(m_strID));
     gcSay.setColor(0x00ffffff);
 
-    cout << "질드레가 말합니다 : " << gcSay.getMessage() << endl;
+    cout << "  : " << gcSay.getMessage() << endl;
 
     getTarget()->getZone()->broadcastPacket(getTarget()->getX(), getTarget()->getY(), &gcSay);
 
     GCGlobalChat gcGC;
     gcGC.setColor(0x00ffffff);
-    gcGC.setMessage("질드레 " + g_pStringPool->getString(m_strID));
+    gcGC.setMessage(" " + g_pStringPool->getString(m_strID));
     gcGC.setRace(RACE_VAMPIRE);
 
     getTarget()->getZone()->broadcastPacket(&gcGC);
@@ -216,7 +216,7 @@ void MonsterSummonState::GroupSummonInfo::executeSummon(Zone* pZone) {
 
     for (; itr != endItr; ++itr) {
         for (int i = 0; i < (*itr)->m_MonsterNum; ++i) {
-            cout << "몬스터 소환 " << (*itr)->m_MonsterType << endl;
+            cout << "  " << (*itr)->m_MonsterType << endl;
             Monster* pMonster = new Monster((*itr)->m_MonsterType);
             pMonster->setTreasure(false);
             try {

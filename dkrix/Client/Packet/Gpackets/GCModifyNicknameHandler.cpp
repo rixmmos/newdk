@@ -42,12 +42,19 @@ throw ( ProtocolException , Error )
 			{
 				szNickName = (TempNick.getNickname()).c_str();
 			}
-			else // 닉네임 인덱스가 있을 때
+			else 
 			{
 				DWORD TempIndex = TempNick.getNicknameIndex();
-				if(TempIndex >= g_pNickNameStringTable->GetSize())
-					TempIndex = 0;
-				szNickName = (*g_pNickNameStringTable)[TempIndex].GetString();
+				if(g_pNickNameStringTable == NULL || g_pNickNameStringTable->GetSize() == 0)
+				{
+					szNickName = "No Title";
+				}
+				else
+				{
+					if(TempIndex >= g_pNickNameStringTable->GetSize())
+						TempIndex = 0;
+					szNickName = (*g_pNickNameStringTable)[TempIndex].GetString();
+				}
 			}
 
 			pCreature->SetNickName(TempNick.getNicknameType(), (char*)szNickName);

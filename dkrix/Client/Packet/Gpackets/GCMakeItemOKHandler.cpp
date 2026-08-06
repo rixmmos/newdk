@@ -26,7 +26,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------------------
-	// Temp Mode 체크
+	
 	//------------------------------------------------------------------
 	if (g_pTempInformation->GetMode() == TempInformation::MODE_SKILL_MAKE_ITEM)
 	{
@@ -34,14 +34,14 @@ throw ( ProtocolException , Error )
 		//g_pTempInformation->Value1 = itemClass;
 		//g_pTempInformation->Value2 = itemType;
 
-		// 못 움직이게 했던거 풀기
+		
 		UI_UnlockItem();
 	}
 	else
 	{
 		DEBUG_ADD( "[Error] Temp Mode is Not MODE_SKILL_MAKE_ITEM" );
 		
-		// 어쨋든... 날아온 packet은 처리하게 한다.
+		
 	}
 		
 
@@ -92,7 +92,7 @@ throw ( ProtocolException , Error )
 	// ModifyInfo
 	//
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 

@@ -13,11 +13,12 @@
 #include "TalkBox.h"
 #include "UIDialog.h"
 #include "SystemAvailabilities.h"
+#include "TextSystem/TextSanitizer.h"
 
 
 //////////////////////////////////////////////////////////////////////
 //
-// 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void GCNPCAskDynamicHandler::execute ( GCNPCAskDynamic * pPacket , Player * pPlayer )
@@ -29,7 +30,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -37,7 +38,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -58,14 +59,14 @@ throw ( ProtocolException , Error )
 
 				if (pCreature==NULL)
 				{
-					// 그런 캐릭터가 없으면 무시한다.
+					
 				}
 				else
 				{
 					//---------------------------------------------------
-					// g_PCTalkBox에 추가하면 된다.
+					
 					//---------------------------------------------------
-					// 기존에 있던것 제거
+					
 					g_pPCTalkBox->Release();
 
 					//---------------------------------------------------
@@ -74,25 +75,40 @@ throw ( ProtocolException , Error )
 					g_pPCTalkBox->SetType( PCTalkBox::NORMAL );
 
 					//---------------------------------------------------
-					// PC Talk Box의 정보 설정
+					
 					//---------------------------------------------------
-					g_pPCTalkBox->SetContent( pPacket->getSubject().c_str() );
+					std::string subject = TextSystem::NormalizeNpcSubjectOrFallback(
+						pPacket->getScriptID(),
+						pPacket->getSubject().c_str(),
+						"What can I help you with?");
+					g_pPCTalkBox->SetContent( subject.c_str() );
 					g_pPCTalkBox->SetNPCID( pPacket->getObjectID() );
 					g_pPCTalkBox->SetCreatureType( pCreature->GetCreatureType() );
 					g_pPCTalkBox->SetScriptID( pPacket->getScriptID() );
 
 					//---------------------------------------------------
-					// 각 std::string 추가
+					
 					//---------------------------------------------------
 
 					g_pPCTalkBox->m_AnswerIDMap.clear();
+					int visibleAnswer = 0;
 					for (int i=0; i<size; i++)
 					{
-						// g_PCTalkBox에 추가
+						std::string rawContent = pPacket->popContent();
+
+						
 						if( g_pSystemAvailableManager->ScriptFiltering( pPacket->getScriptID(), i ) )
 						{
-							g_pPCTalkBox->AddString( pPacket->popContent().c_str() );
+							char fallback[32];
+							sprintf(fallback, "Option %d", visibleAnswer + 1);
+							std::string content = TextSystem::NormalizeNpcContentOrFallback(
+								pPacket->getScriptID(),
+								i,
+								rawContent.c_str(),
+								fallback);
+							g_pPCTalkBox->AddString( content.c_str() );
 							g_pPCTalkBox->m_AnswerIDMap.push_back( i );
+							visibleAnswer++;
 						}
 					}
 					
@@ -100,7 +116,7 @@ throw ( ProtocolException , Error )
 				}
 
 				//---------------------------------------------------
-				// Dialog를 띄운다.
+				
 				//---------------------------------------------------
 				//POINT point = ConvertPositionMapToScreen(pCreature->GetX(), pCreature->GetY());
 

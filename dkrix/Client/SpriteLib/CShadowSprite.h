@@ -22,29 +22,29 @@
 
 
 //----------------------------------------------------------------------
-// width * height��ŭ�� pixel�� �����صд�.
+
 //----------------------------------------------------------------------
-// �� pixel�� �����ϴ� ����� ������ ����.
+
 //
 //    [1] 5:5:5 --> 2 bytes
 //    [2] 5:6:5 --> 2 bytes
 //    [3] R,G,B --> 3 bytes
 //
-// [3]�� �뷮�� Ŀ�� �������Ƿ� [2]�� ����� ����ؼ�
-// 5:5:5�� ���� ������� ����ǵ��� �Ѵ�.
+
+
 //
-// Memory�� 5:5:5�� 5:6:5�� ���������
-// disk���� 5:6:5�� ����ȴ�.
+
+
 //
-// ��, 5:5:5�� ����ϴ� system������ 
-//    File(5:6:5) ---(5:5:5�� ��ȯ)--> Memory(5:5:5)
-//    File(5:6:5) <--(5:6:5�� ��ȯ)--- Memory(5:5:5)  �̷��� �ؾߵȴ�.
+
+
+
 //
 //----------------------------------------------------------------------
 //
-// = �� ���� ����
+
 //
-// (�ݺ�ȸ��) (������, shadow��) (������, shadow��) (������, shadow��) ......
+
 //
 //
 //----------------------------------------------------------------------
@@ -61,24 +61,24 @@ class CShadowSprite
 		void		operator = (const CShadowSprite& Sprite);
 
 		//---------------------------------------------------------
-		// m_Pixels�� memory�� Release�Ѵ�.		
+		
 		//---------------------------------------------------------
 		void		Release();
 
 		//---------------------------------------------------------
-		// ���� Color 
+		
 		//---------------------------------------------------------
 		static void	SetColorkey(WORD color)			{ s_Colorkey = color; }
 		static WORD	GetColorkey() 					{ return s_Colorkey; }
 
 		//---------------------------------------------------------
-		// fstream���� save/load�� �Ѵ�.
+		
 		//---------------------------------------------------------
 		bool		SaveToFile(std::ofstream& file);
 		bool		LoadFromFile(std::ifstream& file);
 	
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 							 
 							 WORD width, WORD height);
@@ -90,7 +90,7 @@ class CShadowSprite
 		void		SetPixel(CSprite& spr);
 
 		//---------------------------------------------------------
-		// (x,y)�� sprite�� ���� �κ��ΰ�?
+		
 		//---------------------------------------------------------
 		bool		IsColorPixel(short x, short y);
 
@@ -117,7 +117,7 @@ class CShadowSprite
 		//---------------------------------------------------------
 
 		//---------------------------------------------------------
-		// �������� Blt
+		
 		//---------------------------------------------------------
 		void		Blt(WORD *pDest, WORD pitch);				
 		void		BltClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -126,7 +126,7 @@ class CShadowSprite
 		void		BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// ���� ũ�⺸�� �۰� ����ϱ�
+		
 		// Test Code~~
 		//---------------------------------------------------------
 		void		BltSmall(WORD *pDest, WORD pitch, BYTE shift);
@@ -136,7 +136,7 @@ class CShadowSprite
 		void		BltSmallClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE shift);
 
 		//---------------------------------------------------------
-		// �������� Blt
+		
 		//---------------------------------------------------------
 		//void		BltRotate(WORD *pDest, WORD pitch, short deg);
 		//void		BltRotateClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -146,12 +146,12 @@ class CShadowSprite
 		
 
 		//---------------------------------------------------------
-		// �¿� �ٲ�
+		
 		//---------------------------------------------------------
 	
 
 		//---------------------------------------------------------
-		// ������
+		
 		//---------------------------------------------------------
 		//void		BltHalf(WORD *pDest, WORD pitch);		
 		//void		BltHalfClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -167,7 +167,7 @@ class CShadowSprite
 		//void		BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// RGB�� �ٲ�
+		
 		//---------------------------------------------------------
 		//void		BltColor(WORD *pDest, WORD pitch, BYTE rgb);		
 		//void		BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
@@ -175,7 +175,7 @@ class CShadowSprite
 		//void		BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
 
 		//---------------------------------------------------------
-		// ��Ӱ� �ϱ�
+		
 		//---------------------------------------------------------
 		void		BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		void		BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -184,7 +184,7 @@ class CShadowSprite
 		void		BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
 
 		//---------------------------------------------------------
-		// Texture������ 4444 Blt
+		
 		//---------------------------------------------------------
 		void		Blt4444(WORD *pDest, WORD pitch, WORD pixel);				
 		void		Blt4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
@@ -193,7 +193,7 @@ class CShadowSprite
 		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel);
 
 		//---------------------------------------------------------
-		// Texture������ �۰� ����ϴ� 4444 Blt
+		
 		//---------------------------------------------------------
 		void		BltSmall4444(WORD *pDest, WORD pitch, WORD pixel, BYTE shift);				
 		void		BltSmall4444ClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD pixel, BYTE shift);
@@ -211,7 +211,7 @@ class CShadowSprite
 		//void		BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// ShadowChannel Filter�� �̿��� ���
+		
 		//---------------------------------------------------------
 		//void		BltShadowFilter(WORD *pDest, WORD pitch, CFilter* pFilter);		
 
@@ -229,10 +229,10 @@ class CShadowSprite
 		//void		memcpyDarknessFilter(WORD* pDest, WORD* pSource, WORD* pFilter, WORD pixels);
 
 	protected :
-		WORD			m_Width;		// ���� pixel��
-		WORD			m_Height;		// ���� pixel��
+		WORD			m_Width;		
+		WORD			m_Height;		
 		WORD**			m_Pixels;		// pixels
-		bool			m_bInit;		// data�� �ִ°�?
+		bool			m_bInit;		
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle

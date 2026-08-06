@@ -85,7 +85,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 공통
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void PlayerCreature::applyBloodBibleSign() {
@@ -102,7 +102,7 @@ void PlayerCreature::applyBloodBibleSign() {
         if (pBonus != NULL) {
             OptionTypeList optionTypes = pBonus->getOptionTypeList();
             OptionTypeListConstItor optionItr;
-            //			cout << getName() << "에게 " << pBonus->getName() << " 을 적용합니다." << endl;
+            
             ++applyCount;
 
             for (optionItr = optionTypes.begin(); optionItr != optionTypes.end(); optionItr++) {
@@ -114,7 +114,7 @@ void PlayerCreature::applyBloodBibleSign() {
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 슬레이어
+
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +169,7 @@ void Slayer::initAllStat(int numPartyMember) {
     m_Resist[MAGIC_DOMAIN_CURSE] = 0;
     m_Resist[MAGIC_DOMAIN_BLOOD] = 0;
 
-    // BloodBible 관련 보너스 수치들 초기화
+    
     m_ConsumeMPRatio = 0;
     m_GamblePriceRatio = 0;
     m_PotionPriceRatio = 0;
@@ -179,8 +179,8 @@ void Slayer::initAllStat(int numPartyMember) {
     m_PhysicDamageReduce = 0;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 제일 먼저 기본 능력치를 초기화시키고,
-    // 기본 능력치에 영향을 주는 이펙트를 검사한다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     m_STR[ATTR_CURRENT] = m_STR[ATTR_MAX] = m_STR[ATTR_BASIC] = m_pAttrs[ATTR_KIND_STR]->getLevel();
     m_DEX[ATTR_CURRENT] = m_DEX[ATTR_MAX] = m_DEX[ATTR_BASIC] = m_pAttrs[ATTR_KIND_DEX]->getLevel();
@@ -193,7 +193,7 @@ void Slayer::initAllStat(int numPartyMember) {
     if (isFlag(Effect::EFFECT_CLASS_BLESS)) {
         EffectBless* pBless = dynamic_cast<EffectBless*>(findEffect(Effect::EFFECT_CLASS_BLESS));
         if (pBless != NULL) {
-            // STR, DEX를 올린다.
+            
             //			m_STR[ATTR_CURRENT] += pBless->getSTRBonus();
             //			m_DEX[ATTR_CURRENT] += pBless->getDEXBonus();
             m_STR[ATTR_CURRENT] += getPercentValue(m_STR[ATTR_CURRENT], pBless->getSTRBonus());
@@ -204,7 +204,7 @@ void Slayer::initAllStat(int numPartyMember) {
         EffectPotentialExplosion* pPotentialExplosion =
             dynamic_cast<EffectPotentialExplosion*>(findEffect(Effect::EFFECT_CLASS_POTENTIAL_EXPLOSION));
         if (pPotentialExplosion != NULL) {
-            // STR, DEX를 올린다.
+            
             m_STR[ATTR_CURRENT] += pPotentialExplosion->getDiffSTR();
             m_DEX[ATTR_CURRENT] += pPotentialExplosion->getDiffDEX();
         }
@@ -223,7 +223,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 능력치 계산을 위한 파라미터들을 초기화한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     attr.nSTR = m_STR[ATTR_CURRENT];
     attr.nDEX = m_DEX[ATTR_CURRENT];
@@ -237,13 +237,13 @@ void Slayer::initAllStat(int numPartyMember) {
     m_HPRegen = 0;
     m_MPRegen = 0;
     m_Luck = m_BaseLuck;
-    //	cout << getName() << "의 기본 행운 : " << m_Luck << endl;
+    
 
     for (int i = 0; i < SKILL_DOMAIN_MAX; i++)
         attr.pDomainLevel[i] = m_SkillDomainLevels[i];
 
     //////////////////////////////////////////////////////////////////////////////
-    // 부가적인 능력치들을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     m_HP[ATTR_MAX] = computeHP(CClass, &attr);
     m_HP[ATTR_BASIC] = 0;
@@ -264,7 +264,7 @@ void Slayer::initAllStat(int numPartyMember) {
     m_CriticalRatio[ATTR_MAX] = 0;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 능력치에 의한 Damage 를 저장해 둔다. BERSER 기술의 보너스 계산을 위해서.
+    
     //////////////////////////////////////////////////////////////////////////////
     Damage_t AttrMinDamage = m_Damage[ATTR_CURRENT];
     Damage_t AttrMaxDamage = m_Damage[ATTR_MAX];
@@ -292,11 +292,11 @@ void Slayer::initAllStat(int numPartyMember) {
 
     int DragonEyeHPBonus = 0;
     if (isFlag(Effect::EFFECT_CLASS_DRAGON_EYE)) {
-        // HP 보너스는 두배
+        
         DragonEyeHPBonus = m_HP[ATTR_MAX];
     }
 
-    // Passive Skill : Will of Iron (순수 HP * 1.15)
+    
     SkillSlot* pFabulousSoul = getSkill(SKILL_FABULOUS_SOUL);
     SkillSlot* pWillOfIron = getSkill(SKILL_WILL_OF_IRON);
 
@@ -374,8 +374,8 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
 
-    ////	// 전쟁 보너스
-    // 지금은 전쟁 승패에 관계없이 어느쪽이든 보너스가 적용될 수 있다. by sigi
+    
+    
     // if ( g_pCombatInfoManager->isSlayerBonus() )
     int HPBonus = 0;
     {
@@ -388,7 +388,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    // 일단 기어 체크 변수를 초기화해서 모든 기어를 안 입은 것으로 간주하고 시작한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     bool pOldRealWearingCheck[WEAR_MAX]; // by sigi. 2002.10.31
     for (int i = 0; i < WEAR_MAX; i++) {
@@ -397,9 +397,9 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 성을 소유한 종족은 보너스 옵션을 받게 된다
+    
     //////////////////////////////////////////////////////////////////////////////
-    // Blood Bible 각각의 보너스 옵션을 받는 걸로 고쳤다.
+    
     /*	if (m_pZone->isHolyLand() )
         {
             const list<OptionType_t>& optionType = g_pHolyLandRaceBonus->getSlayerOptionTypeList();
@@ -411,7 +411,7 @@ void Slayer::initAllStat(int numPartyMember) {
         }*/
 
     //////////////////////////////////////////////////////////////////////////////
-    // Blood Bible 각각의 보너스 옵션을 받는다.
+    
     //////////////////////////////////////////////////////////////////////////////
     /*	if ( m_pZone->isHolyLand() && !g_pWarSystem->hasActiveRaceWar() )
         {
@@ -453,7 +453,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 기본적으로 가지고 있는 옵션들을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     forward_list<DefaultOptionSetType_t>::iterator itr = m_DefaultOptionSet.begin();
     for (; itr != m_DefaultOptionSet.end(); itr++) {
@@ -468,7 +468,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 펫이 주는 보너스를 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (m_pPetInfo != NULL) {
         if (m_pPetInfo->getPetAttr() != 0xff)
@@ -506,9 +506,9 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 입고 있는 아이템을 체크한다.
-    // for 가 두번인 이유는 아이템으로 올라간 능력치에 의해서
-    // 입을 수 있게 되는 아이템을 체크하기 위해서이다.
+    
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     for (int j = 0; j < WEAR_MAX; j++) {
         int wearCount = 0;
@@ -516,15 +516,15 @@ void Slayer::initAllStat(int numPartyMember) {
         for (int i = 0; i < WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
 
-            // 현재 포인트에 아이템이 있고
-            // 그것에 대한 체크를 아직 하지 않았다면...
+            
+            
             if (pItem != NULL && m_pRealWearingCheck[i] == false) {
-                // 만일 진짜루 입을 수 있는 아이템이라면 능력치를 올려준다.
+                
                 if (isRealWearing(pItem)) {
                     computeItemStat(pItem);
 
-                    // 양손 무기라면, 체크를 두번 하지 않도록
-                    // 왼쪽, 오른쪽 모두 체크 변수를 세팅
+                    
+                    
                     if (isTwohandWeapon(pItem)) {
                         m_pRealWearingCheck[WEAR_LEFTHAND] = true;
                         m_pRealWearingCheck[WEAR_RIGHTHAND] = true;
@@ -549,8 +549,8 @@ void Slayer::initAllStat(int numPartyMember) {
         }
     }
     if (zaps[0] && zaps[1] && zaps[2] && zaps[3]) {
-        computeOptionStat(182); // 모저 9
-        computeOptionStat(185); // 모능 3
+        computeOptionStat(182); 
+        computeOptionStat(185); 
     }
 
     applyBloodBibleSign();
@@ -562,9 +562,9 @@ void Slayer::initAllStat(int numPartyMember) {
         bSendPacket = (dynamic_cast<GamePlayer*>(m_pPlayer)->getPlayerStatus() == GPS_NORMAL);
     }
 
-    // 일단 위에서 다 입었는데..
-    // 능력치에 따라서 복장이 적용이 안되는 아이템은 복장 정보를 없앤다.
-    // 이전에는 못 입었는데 이제는 입을 수 있다면 입히는 패킷을 보낸다.
+    
+    
+    
     // by sigi. 2002.10.30
     for (int i = 0; i < WEAR_MAX; i++) {
         if (m_pRealWearingCheck[i]) {
@@ -598,9 +598,9 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // 계급 보너스를 계산한다.
+    
     ///////////////////////////////////////////////////////////////////////////////
-    // 스틸 확률을 계산하기 전에 미리 계산한다.
+    
     ///////////////////////////////////////////////////////////////////////////////
     if (hasRankBonus(RankBonus::RANK_BONUS_WIGHT_HAND)) {
         RankBonus* pRankBonus = getRankBonus(RankBonus::RANK_BONUS_WIGHT_HAND);
@@ -620,7 +620,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // HP, MP 스틸 확률을 계산해 둔다.
+    
     //////////////////////////////////////////////////////////////////////////////
     m_HPStealRatio = computeStealRatio(CClass, m_HPStealAmount, &attr);
     m_MPStealRatio = computeStealRatio(CClass, m_MPStealAmount, &attr);
@@ -629,7 +629,7 @@ void Slayer::initAllStat(int numPartyMember) {
     Item* pShield = m_pWearItem[Slayer::WEAR_LEFTHAND];
 
     //////////////////////////////////////////////////////////////////////////////
-    // 부가적인 능력치를 직접 수정하는 이펙트를 검사한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (isFlag(Effect::EFFECT_CLASS_STRIKING)) {
         EffectStriking* pStriking = dynamic_cast<EffectStriking*>(findEffect(Effect::EFFECT_CLASS_STRIKING));
@@ -640,18 +640,18 @@ void Slayer::initAllStat(int numPartyMember) {
                 m_Damage[ATTR_CURRENT] = min(SLAYER_MAX_DAMAGE, m_Damage[ATTR_CURRENT] + DamageBonus);
                 m_Damage[ATTR_MAX] = min(SLAYER_MAX_DAMAGE, m_Damage[ATTR_MAX] + DamageBonus);
 
-                // ItemOID가 일치한다는 말은 방금 스트라이킹이 걸렸거나,
-                // 다른 무기를 들었다가, 다시 스트라이킹이 걸린 무기를
-                // 들었다는 말이다. 그러므로 이펙트를 붙이라고 날려줘야 한다.
+                
+                
+                
                 GCAddEffect gcAddEffect;
                 gcAddEffect.setObjectID(m_ObjectID);
                 gcAddEffect.setEffectID(Effect::EFFECT_CLASS_STRIKING);
                 gcAddEffect.setDuration(pStriking->getRemainDuration());
                 m_pZone->broadcastPacket(m_X, m_Y, &gcAddEffect);
             } else {
-                // ItemOID가 일치하지 않는다는 말은 스트라이킹이 걸린 상태에서
-                // 다른 무기를 들었다는 말이다. 그러므로 현재의 슬레이어에게는
-                // 스트라이킹이 걸려있다. 이 이펙트를 제거해줘야 하므로...
+                
+                
+                
                 GCRemoveEffect gcRemoveEffect;
                 gcRemoveEffect.setObjectID(m_ObjectID);
                 gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_STRIKING);
@@ -775,7 +775,7 @@ void Slayer::initAllStat(int numPartyMember) {
         EffectExpansion* pExpansion = dynamic_cast<EffectExpansion*>(findEffect(Effect::EFFECT_CLASS_EXPANSION));
         if (pExpansion != NULL) {
             int Bonus = pExpansion->getHPBonus();
-            // 체력을 뻥튀기 해준다...
+            
             m_HP[ATTR_MAX] = m_HP[ATTR_MAX] + Bonus;
         }
     }
@@ -790,9 +790,9 @@ void Slayer::initAllStat(int numPartyMember) {
                 BladeMaxDamage = attr.pWeapon->getMaxDamage();
             }
 
-            // 데미지 및 투힛 보너스, 디펜스 및 프로텍션 페널티는 퍼센트 값이다.
-            // 데미지는 능력치에 의한 데미지와 무기(도) 데미지의 합에 대한 비율이다.
-            // 다른 이펙트에 의한 추가 데미지는 이 계산에서 제외한다.
+            
+            
+            
             int ToHitBonus = getPercentValue(m_ToHit[ATTR_CURRENT], pBerserker->getToHitBonus());
             int MinDamageBonus = getPercentValue(AttrMinDamage + BladeMinDamage, pBerserker->getDamageBonus());
             int MaxDamageBonus = getPercentValue(AttrMaxDamage + BladeMaxDamage, pBerserker->getDamageBonus());
@@ -856,7 +856,7 @@ void Slayer::initAllStat(int numPartyMember) {
             dynamic_cast<EffectIntimateGrail*>(findEffect(Effect::EFFECT_CLASS_INTIMATE_GRAIL));
 
         if (pIntimateGrail != NULL) {
-            // 슬레이어는 축복
+            
             int hpratio = 15 + (int)(pIntimateGrail->getSkillLevel() / 6.6);
             m_HP[ATTR_MAX] += getPercentValue(m_HP[ATTR_MAX], hpratio);
             m_MP[ATTR_MAX] += getPercentValue(m_MP[ATTR_MAX], hpratio);
@@ -867,14 +867,14 @@ void Slayer::initAllStat(int numPartyMember) {
         }
     }
 
-    // 패시브 기술에 의해 올라가는 능력치를 계산한다.
+    
     if (pWeapon != NULL) {
         Item::ItemClass IClass = pWeapon->getItemClass();
         int DamageBonus = 0;
         int ToHitBonus = 0;
         int CriticalRatioBonus = 0;
 
-        // 총인 경우.. ObservingEye체크. by sigi. 2002.6.19
+        
         if (pWeapon->isGun() && isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
             EffectObservingEye* pObservingEye =
                 dynamic_cast<EffectObservingEye*>(findEffect(Effect::EFFECT_CLASS_OBSERVING_EYE));
@@ -890,17 +890,17 @@ void Slayer::initAllStat(int numPartyMember) {
                 //				m_CriticalRatio[ATTR_MAX]     = m_CriticalRatio[ATTR_MAX] + CriticalRatioBonus;
 
                 // int VisionBonus = pObservingEye->getVisionBonus();
-                //  이거는 client에서 처리하도록 한다.
+                
             }
         }
 
-        // Liveness 보너스 더해주기
+        
         if (pLiveness != NULL && pWeapon->isGun()) {
             m_HP[ATTR_MAX] = m_HP[ATTR_MAX] + LivenessHPBonus;
             m_Defense[ATTR_CURRENT] = min(SLAYER_MAX_DEFENSE, m_Defense[ATTR_CURRENT] + LivenessDefenseBonus);
         }
 
-        // Passive Skill : Will of Iron 더해주기 : SWORD or BLADE 일때
+        
         if ((pFabulousSoul != NULL && pWeapon->getItemClass() == Item::ITEM_CLASS_SWORD) ||
             (pWillOfIron != NULL && pWeapon->getItemClass() == Item::ITEM_CLASS_BLADE)) {
             m_HP[ATTR_MAX] += HPBonus_WillOfIron;
@@ -1066,7 +1066,7 @@ void Slayer::initAllStat(int numPartyMember) {
                 }
                 */
 
-                // 일단 Evasion만 defense를 바꾸므로 여기서만 계산.. by sigi
+                
                 m_Defense[ATTR_CURRENT] = min(SLAYER_MAX_DEFENSE, m_Defense[ATTR_CURRENT] + DefenseBonus);
                 m_Defense[ATTR_MAX] = min(SLAYER_MAX_DEFENSE, m_Defense[ATTR_MAX] + DefenseBonus);
             }
@@ -1075,7 +1075,7 @@ void Slayer::initAllStat(int numPartyMember) {
         // cout << "ToHitBonus = " << ToHitBonus << endl;
 
         if (pWeapon->isGun()) {
-            // Concealment 보너스 더해주기
+            
             m_Defense[ATTR_CURRENT] += DefBonus;
             m_Protection[ATTR_CURRENT] += ProBonus;
             m_Defense[ATTR_MAX] += DefBonus;
@@ -1090,7 +1090,7 @@ void Slayer::initAllStat(int numPartyMember) {
         m_CriticalRatio[ATTR_MAX] = m_CriticalRatio[ATTR_MAX] + CriticalRatioBonus;
     }
 
-    // 방패 체크. by sigi. 2002.6.7
+    
     if (pShield != NULL && pShield->getItemClass() == Item::ITEM_CLASS_SHIELD) {
         int ProtectionBonus = 0;
         SkillSlot* pMastery = getSkill(SKILL_SHIELD_MASTERY);
@@ -1117,7 +1117,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // 계급 보너스를 계산한다.
+    
     ///////////////////////////////////////////////////////////////////////////////
     if (hasRankBonus(RankBonus::RANK_BONUS_DEADLY_SPEAR)) {
         RankBonus* pRankBonus = getRankBonus(RankBonus::RANK_BONUS_DEADLY_SPEAR);
@@ -1266,7 +1266,7 @@ void Slayer::initAllStat(int numPartyMember) {
     }
 
 
-    // 전쟁 보너스 적용
+    
     if (HPBonus > 0) {
         m_HP[ATTR_MAX] = min(SLAYER_MAX_HP, m_HP[ATTR_MAX] + HPBonus);
     }
@@ -1279,11 +1279,11 @@ void Slayer::initAllStat(int numPartyMember) {
         m_HP[ATTR_MAX] = min(SLAYER_MAX_HP, m_HP[ATTR_MAX] + DragonEyeHPBonus);
     }
 
-    // 성지스킬 초기화
+    
     initCastleSkill();
-    //	cout << getName() << "의 Luck : " << m_Luck << endl;
+    
 
-    // 현재 HP가 MAX HP보다 많으면
+    
     /*
     if ( m_HP[ATTR_CURRENT] > m_HP[ATTR_MAX] )
     {
@@ -1291,46 +1291,9 @@ void Slayer::initAllStat(int numPartyMember) {
     }
     */
 
-    // 파티의 크기에 따라서 능력치가 변할 수 있다.
+    
 
-    /*
-    // 파티 인원수가 넘어오지 않은 경우는 다시 계산한다.
-    if (numPartyMember == -1)
-    {
-        if (m_PartyID != 0)
-        {
-            LocalPartyManager* pLPM = getLocalPartyManager();
-            Assert(pLPM != NULL);
-
-            numPartyMember = pLPM->getAdjacentMemberSize(m_PartyID, this);
-        }
-    }
-
-    if (numPartyMember > 1)
-    {
-
-        uint ToHitBonus      = 0;
-        uint DefenseBonus    = 0;
-        uint ProtectionBonus = 0;
-        uint DamageBonus     = 0;
-
-        switch (numPartyMember)
-        {
-            case 2: ToHitBonus +=  2; DefenseBonus += 1; ProtectionBonus += 1; DamageBonus += 1; break;
-            case 3: ToHitBonus +=  4; DefenseBonus += 2; ProtectionBonus += 2; DamageBonus += 1; break;
-            case 4: ToHitBonus +=  6; DefenseBonus += 3; ProtectionBonus += 3; DamageBonus += 2; break;
-            case 5: ToHitBonus +=  8; DefenseBonus += 4; ProtectionBonus += 4; DamageBonus += 2; break;
-            case 6: ToHitBonus += 10; DefenseBonus += 5; ProtectionBonus += 5; DamageBonus += 3; break;
-            default: break;
-        }
-
-        m_ToHit[ATTR_CURRENT]      += ToHitBonus;
-        m_Defense[ATTR_CURRENT]    += DefenseBonus;
-        m_Protection[ATTR_CURRENT] += ProtectionBonus;
-        m_Damage[ATTR_CURRENT]     += DamageBonus;
-        m_Damage[ATTR_MAX]         += DamageBonus;
-    }
-    */
+     
 
     /*
     printf("BareMINDamage:%d\n", m_Damage[ATTR_CURRENT]);
@@ -1342,16 +1305,9 @@ void Slayer::initAllStat(int numPartyMember) {
     }
     */
 
-    /*	cout << getName() << ":" << endl;
-        for ( int i=0; i<MAGIC_DOMAIN_MAX; ++i )
-        {
-            cout << "저항 " << i << " : " << m_Resist[i] << endl;
-        }*/
+     
 
-    /*	cout << "물리공격력 " << m_PhysicBonusDamage << endl;
-        cout << "물리방어력 " << m_PhysicDamageReduce << endl;
-        cout << "마법공격력 " << m_MagicBonusDamage << endl;
-        cout << "마법방어력 " << m_MagicDamageReduce << endl;*/
+     
 
     __END_CATCH
 }
@@ -1414,24 +1370,24 @@ int Slayer::getBloodBibleSignOpenNum() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// STR, DEX, INT의 경우
-// CURRENT = 기본 수치 + 아이템 수치 + 마법 수치
-// MAX     = 기본 수치 + 아이템 수치
-// BASIC   = 기본 수치
+
+
+
+
 //
-// HP, MP의 경우
-// CURRENT = 현재 수치
-// MAX     = 현재 맥스
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //
-// Defense, Protection, ToHit의 경우
-// CURRENT = 현재 수치
-// MAX     = 아이템에 의한 변화 수치
+
+
+
 //
-// Damage의 경우
-// CURRENT = Min 데미지
-// MAX     = Max 데미지
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Slayer::computeStatOffset(void) {
     __BEGIN_TRY
@@ -1447,8 +1403,8 @@ void Slayer::computeStatOffset(void) {
     for (int i = 0; i < SKILL_DOMAIN_MAX; i++)
         cur_attr.pDomainLevel[i] = m_SkillDomainLevels[i];
 
-    // 세로워진 STR, DEX, INT로 새로 계산을 한 다음
-    // 아이템 또는 마법 수치를 더한다.
+    
+    
     m_HP[ATTR_MAX] = computeHP(CClass, &cur_attr);
     m_HP[ATTR_MAX] += m_HP[ATTR_BASIC];
 
@@ -1483,7 +1439,7 @@ void Slayer::computeItemStat(Item* pItem) {
     __BEGIN_TRY
 
     if (isSlayerWeapon(pItem->getItemClass())) {
-        // 무기라면 무기가 가지는 속도 파라미터를 더한다.
+        
         ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
         m_AttackSpeed[ATTR_CURRENT] += pItemInfo->getSpeed();
         m_AttackSpeed[ATTR_MAX] += pItemInfo->getSpeed();
@@ -1511,14 +1467,14 @@ void Slayer::computeItemStat(Item* pItem) {
 
     m_Luck += pItem->getLuck();
 
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 
@@ -1533,18 +1489,18 @@ void Slayer::computeItemStat(Item* pItem) {
 void Slayer::computeOptionStat(Item* pItem) {
     __BEGIN_TRY
 
-    // Option Type을 받아온다.
+    
     //	OptionType_t  OptionType    = pItem->getOptionType();
     //	computeOptionStat( OptionType );
 
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 
@@ -2054,7 +2010,7 @@ void Slayer::initAllStatAndSend() {
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 뱀파이어
+
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2115,7 +2071,7 @@ void Vampire::initAllStat(int numPartyMember)
     m_Mastery[MAGIC_DOMAIN_CURSE] = 0;
     m_Mastery[MAGIC_DOMAIN_BLOOD] = 0;
 
-    // BloodBible 관련 보너스 수치들 초기화
+    
     m_ConsumeMPRatio = 0;
     m_GamblePriceRatio = 0;
     m_PotionPriceRatio = 0;
@@ -2125,15 +2081,15 @@ void Vampire::initAllStat(int numPartyMember)
     m_PhysicDamageReduce = 0;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 제일 먼저 기본 능력치를 초기화시키고,
-    // 기본 능력치에 영향을 주는 이펙트를 검사한다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     m_STR[ATTR_CURRENT] = m_STR[ATTR_MAX] = m_STR[ATTR_BASIC];
     m_DEX[ATTR_CURRENT] = m_DEX[ATTR_MAX] = m_DEX[ATTR_BASIC];
     m_INT[ATTR_CURRENT] = m_INT[ATTR_MAX] = m_INT[ATTR_BASIC];
 
     //////////////////////////////////////////////////////////////////////////////
-    // 능력치 계산을 위한 파라미터들을 초기화한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     attr.nSTR = m_STR[ATTR_CURRENT];
     attr.nDEX = m_DEX[ATTR_CURRENT];
@@ -2145,11 +2101,11 @@ void Vampire::initAllStat(int numPartyMember)
     m_HPStealAmount = 0;
     m_HPRegen = 0;
     m_Luck = m_BaseLuck;
-    //	cout << getName() << "의 기본 행운 : " << m_Luck << endl;
+    
     m_HPRegenBonus = 0;
 
     ////////////////////////////////////////////////////////////
-    // 부가적인 능력치들을 다시 계산한다.
+    
     ////////////////////////////////////////////////////////////
     m_HP[ATTR_MAX] = computeHP(CClass, &attr);
     m_HP[ATTR_BASIC] = 0;
@@ -2175,12 +2131,12 @@ void Vampire::initAllStat(int numPartyMember)
 
     int DragonEyeHPBonus = 0;
     if (isFlag(Effect::EFFECT_CLASS_DRAGON_EYE)) {
-        // HP 보너스는 두배
+        
         DragonEyeHPBonus = m_HP[ATTR_MAX];
     }
 
-    // 전쟁 보너스
-    // 지금은 전쟁 승패에 관계없이 어느쪽이든 보너스가 적용될 수 있다. by sigi
+    
+    
     // if ( g_pCombatInfoManager->isVampireBonus() )
     int HPBonus = 0;
     {
@@ -2193,7 +2149,7 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 일단 기어 체크 변수를 초기화해서 모든 기어를 안 입은 것으로 간주하고 시작한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     bool pOldRealWearingCheck[VAMPIRE_WEAR_MAX]; // by sigi. 2002.10.31
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
@@ -2202,9 +2158,9 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 성을 소유한 종족은 보너스 옵션을 받게 된다
+    
     //////////////////////////////////////////////////////////////////////////////
-    // Blood Bible 각각의 보너스 옵션을 받는 걸로 고쳤다.
+    
     /*	if (m_pZone->isHolyLand() )
         {
             const list<OptionType_t>& optionType = g_pHolyLandRaceBonus->getVampireOptionTypeList();
@@ -2216,7 +2172,7 @@ void Vampire::initAllStat(int numPartyMember)
         }
     */
     //////////////////////////////////////////////////////////////////////////////
-    // Blood Bilbe 각각의 보너스 옵션을 받는다.
+    
     //////////////////////////////////////////////////////////////////////////////
     /*	if ( m_pZone->isHolyLand() && !g_pWarSystem->hasActiveRaceWar() )
         {
@@ -2258,7 +2214,7 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 기본적으로 가지고 있는 옵션들을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     forward_list<DefaultOptionSetType_t>::iterator itr = m_DefaultOptionSet.begin();
     for (; itr != m_DefaultOptionSet.end(); itr++) {
@@ -2273,7 +2229,7 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 펫이 주는 보너스를 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (m_pPetInfo != NULL) {
         if (m_pPetInfo->getPetAttr() != 0xff)
@@ -2283,22 +2239,22 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // for 가 두번인 이유는 아이템으로 올라간 능력치에 의해서
-    // 입을 수 있게 되는 아이템을 체크하기 위해서이다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     for (int j = 0; j < VAMPIRE_WEAR_MAX; j++) {
         int wearCount = 0;
         for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
-            // 현재 포인트에 아이템이 있고
-            // 그것에 대한 체크를 아직 하지 않았다면...
+            
+            
             if (pItem != NULL && m_pRealWearingCheck[i] == false) {
-                // 만일 진짜루 입을 수 있는 아이템이라면 능력치를 올려준다.
+                
                 if (isRealWearing(pItem)) {
                     computeItemStat(pItem);
 
-                    // 양손 무기라면, 체크를 두번 하지 않도록
-                    // 왼쪽, 오른쪽 모두 체크 변수를 세팅
+                    
+                    
                     if (isTwohandWeapon(pItem)) {
                         m_pRealWearingCheck[WEAR_LEFTHAND] = true;
                         m_pRealWearingCheck[WEAR_RIGHTHAND] = true;
@@ -2323,8 +2279,8 @@ void Vampire::initAllStat(int numPartyMember)
         }
     }
     if (zaps[0] && zaps[1] && zaps[2] && zaps[3]) {
-        computeOptionStat(182); // 모저 9
-        computeOptionStat(185); // 모능 3
+        computeOptionStat(182); 
+        computeOptionStat(185); 
     }
 
     applyBloodBibleSign();
@@ -2336,8 +2292,8 @@ void Vampire::initAllStat(int numPartyMember)
         bSendPacket = (dynamic_cast<GamePlayer*>(m_pPlayer)->getPlayerStatus() == GPS_NORMAL);
     }
 
-    // 일단 위에서 다 입었는데..
-    // 능력치에 따라서 복장이 적용이 안되는 아이템은 복장 정보를 없앤다.
+    
+    
     // by sigi. 2002.10.30
     // for (int i=0; i<VAMPIRE_WEAR_MAX; i++)
     int i = WEAR_BODY;
@@ -2374,12 +2330,12 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // HP, MP 스틸 확률을 계산해 둔다.
+    
     //////////////////////////////////////////////////////////////////////////////
     m_HPStealRatio = computeStealRatio(CClass, m_HPStealAmount, &attr);
 
     //////////////////////////////////////////////////////////////////////////////
-    // 부가적인 능력치를 직접 수정하는 이펙트를 검사한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (isFlag(Effect::EFFECT_CLASS_DOOM)) {
         EffectDoom* pDoom = dynamic_cast<EffectDoom*>(findEffect(Effect::EFFECT_CLASS_DOOM));
@@ -2504,11 +2460,11 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     // by sigi. 2002.6.19
-    // isEffect를 isFlag로 바꿈. 2003.3.27 by Sequoia
+    
     if (isFlag(Effect::EFFECT_CLASS_CASKET)) {
         EffectSummonCasket* pCasket = dynamic_cast<EffectSummonCasket*>(findEffect(Effect::EFFECT_CLASS_CASKET));
         if (pCasket != NULL) {
-            // pCasket->getType()에 따라서 다를 수도 있지..
+            
             // by sigi. 2002.12.3. 20 --> 30
             int DefenseBonus = getPercentValue(m_Defense[ATTR_CURRENT], 30);
             int ProtectionBonus = getPercentValue(m_Protection[ATTR_CURRENT], 30);
@@ -2538,7 +2494,7 @@ void Vampire::initAllStat(int numPartyMember)
 
 
     ///////////////////////////////////////////////////////////////////////////////
-    // 계급 보너스를 계산한다.
+    
     ///////////////////////////////////////////////////////////////////////////////
     if (hasRankBonus(RankBonus::RANK_BONUS_IMMORTAL_BLOOD)) {
         RankBonus* pRankBonus = getRankBonus(RankBonus::RANK_BONUS_IMMORTAL_BLOOD);
@@ -2653,7 +2609,7 @@ void Vampire::initAllStat(int numPartyMember)
         }
     }
 
-    // DEX 에 따른 HPRegenBonus 포인트
+    
     if (m_DEX[ATTR_BASIC] > 450) {
         m_HPRegenBonus += 7;
     } else if (m_DEX[ATTR_BASIC] > 390) {
@@ -2670,9 +2626,9 @@ void Vampire::initAllStat(int numPartyMember)
         m_HPRegenBonus += 1;
     }
 
-    // 파티의 크기에 따라서 능력치가 변할 수 있다.
+    
 
-    // 전쟁 보너스 적용
+    
     if (HPBonus > 0) {
         m_HP[ATTR_MAX] = min(VAMPIRE_MAX_HP, m_HP[ATTR_MAX] + HPBonus);
     }
@@ -2685,8 +2641,8 @@ void Vampire::initAllStat(int numPartyMember)
         m_HP[ATTR_MAX] = min(VAMPIRE_MAX_HP, m_HP[ATTR_MAX] + DragonEyeHPBonus);
     }
 
-    // HP의 현재치를 HP의 최고치를 넘는 경우
-    // 현재치를 최고치값으로 set
+    
+    
     if (m_HP[ATTR_CURRENT] > m_HP[ATTR_MAX]) {
         m_HP[ATTR_CURRENT] = m_HP[ATTR_MAX];
         /*
@@ -2701,7 +2657,7 @@ void Vampire::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 패시브 기술을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     VampireSkillSlot* pNailMastery = getSkill(SKILL_NAIL_MASTERY);
     if (pNailMastery != NULL) {
@@ -2722,56 +2678,11 @@ void Vampire::initAllStat(int numPartyMember)
         m_Resist[MAGIC_DOMAIN_BLOOD] = 0;
     }
 
-    //	cout << getName() << "의 Luck : " << m_Luck << endl;
+    
 
-    /*
-    // 파티 인원수가 넘어오지 않은 경우는 다시 계산한다.
-    if (numPartyMember == -1)
-    {
-        if (m_PartyID != 0)
-        {
-            LocalPartyManager* pLPM = getLocalPartyManager();
-            Assert(pLPM != NULL);
+     
 
-            numPartyMember = pLPM->getAdjacentMemberSize(m_PartyID, this);
-        }
-    }
-
-    if (numPartyMember > 1)
-    {
-        uint ToHitBonus      = 0;
-        uint DefenseBonus    = 0;
-        uint ProtectionBonus = 0;
-        uint DamageBonus     = 0;
-
-        switch (numPartyMember)
-        {
-            case 2: ToHitBonus +=  2; DefenseBonus += 1; ProtectionBonus += 1; DamageBonus += 1; break;
-            case 3: ToHitBonus +=  4; DefenseBonus += 2; ProtectionBonus += 2; DamageBonus += 1; break;
-            case 4: ToHitBonus +=  6; DefenseBonus += 3; ProtectionBonus += 3; DamageBonus += 2; break;
-            case 5: ToHitBonus +=  8; DefenseBonus += 4; ProtectionBonus += 4; DamageBonus += 2; break;
-            case 6: ToHitBonus += 10; DefenseBonus += 5; ProtectionBonus += 5; DamageBonus += 3; break;
-            default: break;
-        }
-
-        m_ToHit[ATTR_CURRENT]      += ToHitBonus;
-        m_Defense[ATTR_CURRENT]    += DefenseBonus;
-        m_Protection[ATTR_CURRENT] += ProtectionBonus;
-        m_Damage[ATTR_CURRENT]     += DamageBonus;
-        m_Damage[ATTR_MAX]         += DamageBonus;
-    }
-    */
-
-    /*	cout << getName() << ":" << endl;
-        for ( int i=0; i<MAGIC_DOMAIN_MAX; ++i )
-        {
-            cout << "저항 " << i << " : " << m_Resist[i] << endl;
-        }
-
-        cout << "물리공격력 " << m_PhysicBonusDamage << endl;
-        cout << "물리방어력 " << m_PhysicDamageReduce << endl;
-        cout << "마법공격력 " << m_MagicBonusDamage << endl;
-        cout << "마법방어력 " << m_MagicDamageReduce << endl;*/
+     
 
     __END_CATCH
 }
@@ -2814,24 +2725,24 @@ int Vampire::getBloodBibleSignOpenNum() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// STR, DEX, INT의 경우
-// CURRENT = 기본 수치 + 아이템 수치 + 마법 수치
-// MAX     = 기본 수치 + 아이템 수치
-// BASIC   = 기본 수치
+
+
+
+
 //
-// HP, MP의 경우
-// CURRENT = 현재 수치
-// MAX     = 현재 맥스
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //
-// Defense, Protection, ToHit의 경우
-// CURRENT = 현재 수치
-// MAX     = 아이템에 의한 변화 수치
+
+
+
 //
-// Damage의 경우
-// CURRENT = Min 데미지
-// MAX     = Max 데미지
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Vampire::computeStatOffset()
 
@@ -2846,8 +2757,8 @@ void Vampire::computeStatOffset()
     cur_attr.nINT = m_INT[ATTR_CURRENT];
     cur_attr.nLevel = m_Level;
 
-    // 세로워진 STR, DEX, INT로 새로 계산을 한 다음
-    // 아이템 또는 마법 수치를 더한다.
+    
+    
     m_HP[ATTR_MAX] = computeHP(CClass, &cur_attr);
     m_HP[ATTR_MAX] += m_HP[ATTR_BASIC];
 
@@ -2881,7 +2792,7 @@ void Vampire::computeItemStat(Item* pItem)
     __BEGIN_TRY
 
     if (isVampireWeapon(pItem->getItemClass())) {
-        // 무기라면 무기가 가지는 속도 파라미터를 더한다.
+        
         ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
         m_AttackSpeed[ATTR_CURRENT] += pItemInfo->getSpeed();
         m_AttackSpeed[ATTR_MAX] += pItemInfo->getSpeed();
@@ -2907,14 +2818,14 @@ void Vampire::computeItemStat(Item* pItem)
     m_Luck += pItem->getLuck();
 
     //	if (pItem->getOptionType()) computeOptionStat(pItem);
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 
@@ -2930,18 +2841,18 @@ void Vampire::computeOptionStat(Item* pItem)
 {
     __BEGIN_TRY
 
-    // Option Type을 받아온다.
+    
     // OptionType_t  OptionType    = pItem->getOptionType();
     // computeOptionStat( OptionType );
 
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 
@@ -2977,7 +2888,7 @@ void Vampire::computeOptionClassStat(OptionClass OClass, int PlusPoint) {
         m_HP[ATTR_MAX] += PlusPoint;
         m_HP[ATTR_BASIC] += PlusPoint;
         break;
-    // 뱀파이어는 MP흡수옵션이 붙은 아이템도 HP흡수로 처리해준다.
+    
     // 2003. 1. 17. Sequoia
     case OPTION_HP_STEAL:
     case OPTION_MP_STEAL:
@@ -3090,131 +3001,7 @@ void Vampire::computeOptionStat(OptionType_t OptionType)
     OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(OptionType);
     computeOptionClassStat(pOptionInfo->getClass(), pOptionInfo->getPlusPoint());
 
-    /*	OptionClass   OClass        = pOptionInfo->getClass();
-
-        switch (OClass)
-        {
-            case OPTION_STR:
-                m_STR[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_STR[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                computeStatOffset();
-                break;
-            case OPTION_DEX:
-                m_DEX[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_DEX[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                computeStatOffset();
-                break;
-            case OPTION_INT:
-                m_INT[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_INT[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                computeStatOffset();
-                break;
-            case OPTION_HP:
-                m_HP[ATTR_MAX]   += pOptionInfo->getPlusPoint();
-                m_HP[ATTR_BASIC] += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_MP:
-                m_HP[ATTR_MAX]   += pOptionInfo->getPlusPoint();
-                m_HP[ATTR_BASIC] += pOptionInfo->getPlusPoint();
-                break;
-            // 뱀파이어는 MP흡수옵션이 붙은 아이템도 HP흡수로 처리해준다.
-            // 2003. 1. 17. Sequoia
-            case OPTION_HP_STEAL:
-            case OPTION_MP_STEAL:
-                m_HPStealAmount += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_HP_REGEN:
-            case OPTION_MP_REGEN:
-                m_HPRegen += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_TOHIT:
-                m_ToHit[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_ToHit[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_DEFENSE:
-                m_Defense[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_Defense[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_DAMAGE:
-                m_Damage[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_Damage[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                m_Damage[ATTR_BASIC]   += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_PROTECTION:
-                m_Protection[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_Protection[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_POISON:
-                m_Resist[MAGIC_DOMAIN_POISON] += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_ACID:
-                m_Resist[MAGIC_DOMAIN_ACID] += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_CURSE:
-                m_Resist[MAGIC_DOMAIN_CURSE] += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_BLOOD:
-                m_Resist[MAGIC_DOMAIN_BLOOD] += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_VISION:
-                break;
-            case OPTION_ATTACK_SPEED:
-                m_AttackSpeed[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_AttackSpeed[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                break;
-            case OPTION_CRITICAL_HIT:
-                m_CriticalRatio[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_CriticalRatio[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_ALL_ATTR:
-                m_STR[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_STR[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-
-                m_DEX[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_DEX[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-
-                m_INT[ATTR_CURRENT] += pOptionInfo->getPlusPoint();
-                m_INT[ATTR_MAX]     += pOptionInfo->getPlusPoint();
-
-                computeStatOffset();
-                break;
-
-            case OPTION_ALL_RES:
-                m_Resist[MAGIC_DOMAIN_POISON] += pOptionInfo->getPlusPoint();
-                m_Resist[MAGIC_DOMAIN_ACID] += pOptionInfo->getPlusPoint();
-                m_Resist[MAGIC_DOMAIN_CURSE] += pOptionInfo->getPlusPoint();
-                m_Resist[MAGIC_DOMAIN_BLOOD] += pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_LUCK:
-                m_Luck += pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_CONSUME_MP:
-                m_ConsumeMPRatio = pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_MAGIC_DAMAGE:
-                m_MagicBonusDamage = pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_PHYSIC_DAMAGE:
-                m_PhysicBonusDamage = pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_GAMBLE_PRICE:
-                m_GamblePriceRatio = pOptionInfo->getPlusPoint();
-                break;
-
-            case OPTION_POTION_PRICE:
-                m_PotionPriceRatio = pOptionInfo->getPlusPoint();
-                break;
-
-            default:
-                break;
-        }
-    */
+     
     __END_CATCH
 }
 
@@ -3299,7 +3086,7 @@ void Vampire::initAllStatAndSend() {
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 몬스터
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void Monster::initAllStat(void)
@@ -3319,14 +3106,14 @@ void Monster::initAllStat(void)
     m_Resist[MAGIC_DOMAIN_BLOOD] = 0;
 
     ////////////////////////////////////////////////////////////
-    // 제일 먼저 기본 능력치를 초기화시키고...
+    
     ////////////////////////////////////////////////////////////
     m_STR = pMonsterInfo->getSTR();
     m_DEX = pMonsterInfo->getDEX();
     m_INT = pMonsterInfo->getINT();
 
     ////////////////////////////////////////////////////////////
-    // 기본 능력에 영향을 주는 이펙트를 검사한다.
+    
     ////////////////////////////////////////////////////////////
     attr.nSTR = m_STR;
     attr.nDEX = m_DEX;
@@ -3334,7 +3121,7 @@ void Monster::initAllStat(void)
     attr.nLevel = pMonsterInfo->getLevel();
 
     ////////////////////////////////////////////////////////////
-    // 부가적인 능력치들을 다시 계산한다.
+    
     ////////////////////////////////////////////////////////////
     m_HP[ATTR_MAX] = computeHP(CClass, &attr, pMonsterInfo->getEnhanceHP());
     m_ToHit = computeToHit(CClass, &attr, pMonsterInfo->getEnhanceToHit());
@@ -3345,14 +3132,14 @@ void Monster::initAllStat(void)
 
 
     // #ifdef __XMAS_EVENT_CODE__
-    //  원래 크리스마스 이벤트로 기획된 것이지만, 앞으로 계속 사용될 것으로
-    //  예정된다.
+    
+    
     if (m_MonsterType == 358 || m_MonsterType == 359 || m_MonsterType == 360 || m_MonsterType == 361)
         m_HP[ATTR_MAX] = m_HP[ATTR_MAX] * 10;
     // #endif
 
     ////////////////////////////////////////////////////////////
-    // 부가적인 능력치들을 직접 수정하는 이펙트를 검사한다.
+    
     ////////////////////////////////////////////////////////////
     if (isFlag(Effect::EFFECT_CLASS_DOOM)) {
         EffectDoom* pDoom = dynamic_cast<EffectDoom*>(findEffect(Effect::EFFECT_CLASS_DOOM));
@@ -3428,7 +3215,7 @@ void Monster::initAllStat(void)
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 아우스터스
+
 //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -3484,7 +3271,7 @@ void Ousters::initAllStat(int numPartyMember)
     m_Resist[MAGIC_DOMAIN_CURSE] = 0;
     m_Resist[MAGIC_DOMAIN_BLOOD] = 0;
 
-    // BloodBible 관련 보너스 수치들 초기화
+    
     m_ConsumeMPRatio = 0;
     m_GamblePriceRatio = 0;
     m_PotionPriceRatio = 0;
@@ -3494,15 +3281,15 @@ void Ousters::initAllStat(int numPartyMember)
     m_PhysicDamageReduce = 0;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 제일 먼저 기본 능력치를 초기화시키고,
-    // 기본 능력치에 영향을 주는 이펙트를 검사한다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     m_STR[ATTR_CURRENT] = m_STR[ATTR_MAX] = m_STR[ATTR_BASIC];
     m_DEX[ATTR_CURRENT] = m_DEX[ATTR_MAX] = m_DEX[ATTR_BASIC];
     m_INT[ATTR_CURRENT] = m_INT[ATTR_MAX] = m_INT[ATTR_BASIC];
 
     //////////////////////////////////////////////////////////////////////////////
-    // 능력치 계산을 위한 파라미터들을 초기화한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     attr.nSTR = m_STR[ATTR_CURRENT];
     attr.nDEX = m_DEX[ATTR_CURRENT];
@@ -3519,7 +3306,7 @@ void Ousters::initAllStat(int numPartyMember)
     m_HPRegen = 0;
     m_MPRegen = 0;
     m_Luck = m_BaseLuck;
-    //	cout << getName() << "의 기본 행운 : " << m_Luck << endl;
+    
 
     m_FireDamage = 0;
     m_WaterDamage = 0;
@@ -3535,7 +3322,7 @@ void Ousters::initAllStat(int numPartyMember)
     m_PassiveRatio = 0;
 
     ////////////////////////////////////////////////////////////
-    // 부가적인 능력치들을 다시 계산한다.
+    
     ////////////////////////////////////////////////////////////
     m_HP[ATTR_MAX] = computeHP(CClass, &attr);
     m_HP[ATTR_BASIC] = 0;
@@ -3563,12 +3350,12 @@ void Ousters::initAllStat(int numPartyMember)
 
     int DragonEyeHPBonus = 0;
     if (isFlag(Effect::EFFECT_CLASS_DRAGON_EYE)) {
-        // HP 보너스는 두배
+        
         DragonEyeHPBonus = m_HP[ATTR_MAX];
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 일단 기어 체크 변수를 초기화해서 모든 기어를 안 입은 것으로 간주하고 시작한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     bool pOldRealWearingCheck[OUSTERS_WEAR_MAX]; // by sigi. 2002.10.31
     for (int i = 0; i < OUSTERS_WEAR_MAX; i++) {
@@ -3577,7 +3364,7 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // Blood Bible 각각의 보너스 옵션을 받는다.
+    
     //////////////////////////////////////////////////////////////////////////////
     /*	if ( m_pZone->isHolyLand() && !g_pWarSystem->hasActiveRaceWar() )
         {
@@ -3619,7 +3406,7 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 기본적으로 가지고 있는 옵션들을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     forward_list<DefaultOptionSetType_t>::iterator itr = m_DefaultOptionSet.begin();
     for (; itr != m_DefaultOptionSet.end(); itr++) {
@@ -3634,7 +3421,7 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 펫이 주는 보너스를 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (m_pPetInfo != NULL) {
         if (m_pPetInfo->getPetAttr() != 0xff)
@@ -3660,22 +3447,22 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // for 가 두번인 이유는 아이템으로 올라간 능력치에 의해서
-    // 입을 수 있게 되는 아이템을 체크하기 위해서이다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     for (int j = 0; j < OUSTERS_WEAR_MAX; j++) {
         int wearCount = 0;
         for (int i = 0; i < OUSTERS_WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
-            // 현재 포인트에 아이템이 있고
-            // 그것에 대한 체크를 아직 하지 않았다면...
+            
+            
             if (pItem != NULL && m_pRealWearingCheck[i] == false) {
-                // 만일 진짜루 입을 수 있는 아이템이라면 능력치를 올려준다.
+                
                 if (isRealWearing(pItem)) {
                     computeItemStat(pItem);
 
-                    // 양손 무기라면, 체크를 두번 하지 않도록
-                    // 왼쪽, 오른쪽 모두 체크 변수를 세팅
+                    
+                    
                     if (isTwohandWeapon(pItem)) {
                         m_pRealWearingCheck[WEAR_LEFTHAND] = true;
                         m_pRealWearingCheck[WEAR_RIGHTHAND] = true;
@@ -3700,8 +3487,8 @@ void Ousters::initAllStat(int numPartyMember)
         }
     }
     if (zaps[0] && zaps[1] && zaps[2] && zaps[3]) {
-        computeOptionStat(182); // 모저 9
-        computeOptionStat(185); // 모능 3
+        computeOptionStat(182); 
+        computeOptionStat(185); 
     }
 
     applyBloodBibleSign();
@@ -3713,8 +3500,8 @@ void Ousters::initAllStat(int numPartyMember)
         bSendPacket = (dynamic_cast<GamePlayer*>(m_pPlayer)->getPlayerStatus() == GPS_NORMAL);
     }
 
-    // 일단 위에서 다 입었는데..
-    // 능력치에 따라서 복장이 적용이 안되는 아이템은 복장 정보를 없앤다.
+    
+    
     // by sigi. 2002.10.30
     for (int i = 0; i < OUSTERS_WEAR_MAX; i++)
     // int i=WEAR_COAT;
@@ -3751,7 +3538,7 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // HP, MP 스틸 확률을 계산해 둔다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (hasRankBonus(RankBonus::RANK_BONUS_LIFE_ABSORB)) {
         RankBonus* pRankBonus = getRankBonus(RankBonus::RANK_BONUS_LIFE_ABSORB);
@@ -3776,7 +3563,7 @@ void Ousters::initAllStat(int numPartyMember)
     // cout << getName() << " HPSteal : " << (int)m_HPStealAmount << endl;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 부가적인 능력치를 직접 수정하는 이펙트를 검사한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     if (isFlag(Effect::EFFECT_CLASS_DOOM)) {
         EffectDoom* pDoom = dynamic_cast<EffectDoom*>(findEffect(Effect::EFFECT_CLASS_DOOM));
@@ -3842,23 +3629,7 @@ void Ousters::initAllStat(int numPartyMember)
         }
     }
 
-    /*	if ( isFlag( Effect::EFFECT_CLASS_HANDS_OF_FIRE ) )
-        {
-            //cout << getName() << " 핸즈오브파이어 붙었당" << endl;
-            EffectHandsOfFire* pEffect =
-       dynamic_cast<EffectHandsOfFire*>(findEffect(Effect::EFFECT_CLASS_HANDS_OF_FIRE));
-
-            if ( pEffect != NULL )
-            {
-                if ( attr.pWeapon == NULL || attr.pWeapon->getItemClass() != Item::ITEM_CLASS_OUSTERS_WRISTLET )
-                    pEffect->setDeadline(0);
-                else
-                {
-                    m_FireDamage += pEffect->getBonus();
-                    //cout << getName() << " FireDamage : " << m_FireDamage << endl;
-                }
-            }
-        }*/
+     
 
     if (isFlag(Effect::EFFECT_CLASS_RING_OF_FLARE)) {
         EffectRingOfFlare* pEffect = dynamic_cast<EffectRingOfFlare*>(findEffect(Effect::EFFECT_CLASS_RING_OF_FLARE));
@@ -3915,7 +3686,7 @@ void Ousters::initAllStat(int numPartyMember)
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // 패시브 기술을 계산한다.
+    
     //////////////////////////////////////////////////////////////////////////////
     OustersSkillSlot* pHideSight = getSkill(SKILL_HIDE_SIGHT);
     if (pHideSight != NULL && attr.pWeapon != NULL &&
@@ -3937,7 +3708,7 @@ void Ousters::initAllStat(int numPartyMember)
 
 
     ///////////////////////////////////////////////////////////////////////////////
-    // 계급 보너스를 계산한다.
+    
     ///////////////////////////////////////////////////////////////////////////////
     if (hasRankBonus(RankBonus::RANK_BONUS_WOOD_SKIN)) {
         RankBonus* pRankBonus = getRankBonus(RankBonus::RANK_BONUS_WOOD_SKIN);
@@ -4132,7 +3903,7 @@ void Ousters::initAllStat(int numPartyMember)
         Assert(pRankBonus != NULL);
 
         int MPBonus = getPercentValue(m_MP[ATTR_CURRENT], pRankBonus->getPoint());
-        // edit by Coffee 2007-5-20 錦攣침쥣轟掘MP BUG
+        
         m_MPStealAmount += MPBonus;
         m_MPStealRatio = computeStealRatio(CClass, m_MPStealAmount, &attr);
         // m_MP[ATTR_CURRENT]  = min(OUSTERS_MAX_MP, m_MP[ATTR_CURRENT] + MPBonus);
@@ -4169,7 +3940,7 @@ void Ousters::initAllStat(int numPartyMember)
         m_ElementalEarth += pRankBonus->getPoint();
     }
 
-    // -_- %로 적용되는 스킬은 마지막에 적용시킨다.
+    
     if (isFlag(Effect::EFFECT_CLASS_SHARP_CHAKRAM)) {
         EffectSharpChakram* pEffect = dynamic_cast<EffectSharpChakram*>(findEffect(Effect::EFFECT_CLASS_SHARP_CHAKRAM));
 
@@ -4201,8 +3972,8 @@ void Ousters::initAllStat(int numPartyMember)
         }
     }
 
-    // HP,MP의 현재치를 HP,MP의 최고치를 넘는 경우
-    // 현재치를 최고치값으로 set
+    
+    
     /*    if (m_HP[ATTR_CURRENT] > m_HP[ATTR_MAX])
         {
             m_HP[ATTR_CURRENT] = m_HP[ATTR_MAX];
@@ -4212,7 +3983,7 @@ void Ousters::initAllStat(int numPartyMember)
             m_MP[ATTR_CURRENT] = m_MP[ATTR_MAX];
         }
     */
-    // 패시브 스킬 초기화
+    
     bool bCanUsePassive = false;
     if (hasSkill(SKILL_FIRE_OF_SOUL_STONE) != NULL) {
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SKILL_FIRE_OF_SOUL_STONE);
@@ -4362,22 +4133,13 @@ void Ousters::initAllStat(int numPartyMember)
 
     initCastleSkill();
 
-    //	cout << "불 : " << m_ElementalFire << endl;
-    //	cout << "물 : " << m_ElementalWater << endl;
-    //	cout << "대지 : " << m_ElementalEarth << endl;
+    
+    
+    
 
-    //	cout << getName() << "의 Luck : " << m_Luck << endl;
+    
 
-    /*	cout << getName() << ":" << endl;
-        for ( int i=0; i<MAGIC_DOMAIN_MAX; ++i )
-        {
-            cout << "저항 " << i << " : " << m_Resist[i] << endl;
-        }
-
-        cout << "물리공격력 " << m_PhysicBonusDamage << endl;
-        cout << "물리방어력 " << m_PhysicDamageReduce << endl;
-        cout << "마법공격력 " << m_MagicBonusDamage << endl;
-        cout << "마법방어력 " << m_MagicDamageReduce << endl;*/
+     
 
     __END_CATCH
 }
@@ -4420,24 +4182,24 @@ int Ousters::getBloodBibleSignOpenNum() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// STR, DEX, INT의 경우
-// CURRENT = 기본 수치 + 아이템 수치 + 마법 수치
-// MAX     = 기본 수치 + 아이템 수치
-// BASIC   = 기본 수치
+
+
+
+
 //
-// HP, MP의 경우
-// CURRENT = 현재 수치
-// MAX     = 현재 맥스
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //
-// Defense, Protection, ToHit의 경우
-// CURRENT = 현재 수치
-// MAX     = 아이템에 의한 변화 수치
+
+
+
 //
-// Damage의 경우
-// CURRENT = Min 데미지
-// MAX     = Max 데미지
-// BASIC   = 아이템에 의한 변화 수치
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Ousters::computeStatOffset()
 
@@ -4452,8 +4214,8 @@ void Ousters::computeStatOffset()
     cur_attr.nINT = m_INT[ATTR_CURRENT];
     cur_attr.nLevel = m_Level;
 
-    // 세로워진 STR, DEX, INT로 새로 계산을 한 다음
-    // 아이템 또는 마법 수치를 더한다.
+    
+    
     m_HP[ATTR_MAX] = computeHP(CClass, &cur_attr);
     m_HP[ATTR_MAX] += m_HP[ATTR_BASIC];
 
@@ -4491,7 +4253,7 @@ void Ousters::computeItemStat(Item* pItem)
 
     //	if (isOustersWeapon(pItem->getItemClass()))
     if (pItem->getItemClass() == Item::ITEM_CLASS_OUSTERS_CHAKRAM) {
-        // 무기라면 무기가 가지는 속도 파라미터를 더한다.
+        
         ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
         m_AttackSpeed[ATTR_CURRENT] += pItemInfo->getSpeed();
         m_AttackSpeed[ATTR_MAX] += pItemInfo->getSpeed();
@@ -4553,14 +4315,14 @@ void Ousters::computeItemStat(Item* pItem)
     m_Luck += pItem->getLuck();
 
     //	if (pItem->getOptionType()) computeOptionStat(pItem);
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 
@@ -4576,14 +4338,14 @@ void Ousters::computeOptionStat(Item* pItem)
 {
     __BEGIN_TRY
 
-    // 부가적인 옵션들
+    
     const list<OptionType_t>& optionType = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
     for (itr = optionType.begin(); itr != optionType.end(); itr++) {
         computeOptionStat(*itr);
     }
 
-    // Item 자체의 defaultOption을 적용시킨다.
+    
     const list<OptionType_t>& defaultOptions = pItem->getDefaultOptions();
     list<OptionType_t>::const_iterator iOptions;
 

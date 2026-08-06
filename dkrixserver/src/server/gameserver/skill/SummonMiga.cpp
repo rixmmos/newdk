@@ -21,7 +21,7 @@
 SummonMiga::SummonMiga() throw() {}
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonMiga::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -52,8 +52,8 @@ void SummonMiga::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), Grade);
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -72,7 +72,7 @@ void SummonMiga::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SummonMiga::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -117,7 +117,7 @@ void SummonMiga::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
         SkillType_t SkillType = pOustersSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // 데미지와 지속 시간을 계산한다.
+        
         SkillInput input(pOusters, pOustersSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -140,7 +140,7 @@ void SummonMiga::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
             decreaseMana(pOusters, RequiredMP, _GCSkillToTileOK1);
 
             Monster* pMiga = new Monster(MIGA_TYPE);
-            pMiga->setName("미가");
+            pMiga->setName("");
             pMiga->setClanType(33);
             pMiga->setTreasure(false);
             pMiga->setScanEnemy(true);
@@ -155,7 +155,7 @@ void SummonMiga::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
             X = pMiga->getX();
             Y = pMiga->getY();
 
-            cout << pMiga->toString() << " 을 " << X << ", " << Y << " 에 불러냈습니다." << endl;
+            cout << pMiga->toString() << "  " << X << ", " << Y << "  ." << endl;
 
             EffectKillTimer* pCreatureEffect = new EffectKillTimer(pMiga);
             pCreatureEffect->setDeadline(output.Duration);

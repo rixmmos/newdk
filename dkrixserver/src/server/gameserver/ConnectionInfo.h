@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // class ConnectionInfo;
-// ¼­¹ö°£ ÀÌµ¿¿¡¼­ Á¤´çÇÑ ¿¬°á¿¡ ´ëÇÑ Á¤º¸¸¦ ³ªÅ¸³»´Â °´Ã¼
+
 //////////////////////////////////////////////////////////////////////////////
 
 class ConnectionInfo {
@@ -63,20 +63,20 @@ private:
     string m_ClientIP;    // valid client's ip
     string m_PlayerID;    // PlayerID
     string m_PCName;      // PC name
-    Timeval m_ExpireTime; // expire time : ¾ðÁ¦±îÁö ÀÌ Á¤º¸¸¦ À¯ÁöÇÏ°í ÀÖ¾î¾ß ÇÏ´ÂÁö..
+    Timeval m_ExpireTime; 
     DWORD m_Key;          // validation key
 };
 
 //////////////////////////////////////////////////////////////////////////////
 // CompareConnectionInfo
 //
-// priority_queue ¿¡¼­ ConnectionInfo ³¢¸® ºñ±³ÇÒ ¶§ »ç¿ëÇÏ´Â Å¬·¡½º¸
+
 //
 // *CAUTION*
 //
-// ½Ã°£ÀûÀ¸·Î ÀÌ¸¥(½Ã°£°ªÀÌ ÀÛÀº) ÂÊÀÌ PQ ÀÇ top ¿¡ À§Ä¡ÇØ¾ß ÇÑ´Ù.
-// Áï PQ ´Â ascending order ¸¦ ÀÌ·ï¾ß ÇÑ´Ù. ¿Ö ±×·±Áö´Â Àß »ìÆìº¸±â¸¦..
-// ½Ã°£ÀÌ ¾ø´Â °ü°è·Î.. - -;
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class CompareConnectionInfo {

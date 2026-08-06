@@ -70,14 +70,14 @@ void WarSystem::prepareRaceWar() throw(Error) {
 
     SAFE_DELETE(m_pRaceWarSchedule);
 
-    // 종족 전쟁을 준비해둔다.
+    
     VSDateTime warStartTime = WarScheduler::getNextWarDateTime(WAR_RACE, VSDateTime::currentDateTime());
 
     War* pRaceWar = new RaceWar(War::WAR_STATE_WAIT);
     pRaceWar->setWarStartTime(warStartTime);
     m_pRaceWarSchedule = new Schedule(pRaceWar, warStartTime);
 
-    filelog("WarLog.txt", "[WarID=%d,Time=%s] 종족 전쟁을 추가합니다.", (int)pRaceWar->getWarID(),
+    filelog("WarLog.txt", "[WarID=%d,Time=%s]   .", (int)pRaceWar->getWarID(),
             warStartTime.toString().c_str());
 
     __END_CATCH
@@ -86,21 +86,21 @@ void WarSystem::prepareRaceWar() throw(Error) {
 
 void WarSystem::load() throw (Error){__BEGIN_TRY
 
-                                         // load할거 없다.
+                                         
 
-                                         // 진행중인 전쟁을 load해야 한다.
+                                         
 
                                          __END_CATCH}
 
 VSDateTime WarSystem::getWarEndTime(WarType_t warType) const {
     int seconds = 0;
     switch (warType) {
-    // 길드전은 1시간
+    
     case WAR_GUILD:
         seconds = g_pVariableManager->getVariable(GUILD_WAR_TIME);
         break;
 
-    // 종족전은 2시간
+    
     case WAR_RACE:
         seconds = g_pVariableManager->getVariable(RACE_WAR_TIME);
         break;
@@ -117,7 +117,7 @@ bool WarSystem::addWarDelayed(War* pWar) throw(Error) {
     Assert(pWar != NULL);
 
     if (hasActiveRaceWar() && pWar->getWarType() == WAR_RACE) {
-        throw Error("이미 종족 전쟁이 진행중입니다.");
+        throw Error("   .");
     }
 
     __ENTER_CRITICAL_SECTION(m_MutexWarQueue);
@@ -152,7 +152,7 @@ bool WarSystem::addQueuedWar() throw(Error) {
     __END_CATCH
 }
 
-// WarSystem 안에서만 호출되는 함수이므로 LOCK필요없다.
+
 bool WarSystem::addWar(War* pWar) throw(Error) {
     __BEGIN_TRY
 
@@ -170,7 +170,7 @@ bool WarSystem::addWar(War* pWar) throw(Error) {
 
     addSchedule(pWarSchedule);
 
-    // 일단 모든 존에 뿌린다.
+    
     if (makeGCWarList_LOCKED()) {
         GCWarList gcWarList;
 
@@ -183,16 +183,16 @@ bool WarSystem::addWar(War* pWar) throw(Error) {
         g_pZoneGroupManager->broadcast(&gcWarList);
     }
 
-    // 이미 만들어졌다. WarScheduler의 execute에서 tinysave했기 때메 Status바꿀 필요도 없다.
+    
     // pWarSchedule->create();
 
-    // 진행 중인 전쟁 리스트에 추가시켜준다.
-    // heartbeat()에서 제거시켜준다.
+    
+    
     if (pWar->getWarType() == WAR_GUILD) {
         SuildWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
         Assert(pSiegeWar != NULL);
 
-        // 성지에 있는 유저의 상태를 Refresh 해준다.
+        
         EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
         pEvent->setDeadline(0);
         g_pClientManager->addEvent(pEvent);
@@ -205,15 +205,15 @@ bool WarSystem::addWar(War* pWar) throw(Error) {
     } else if (pWar->getWarType() == WAR_RACE) {
         m_bHasRaceWar = true;
 
-        // 성지에 있는 유저의 상태를 Refresh 해준다.
+        
         EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
         pEvent->setDeadline(0);
         g_pClientManager->addEvent(pEvent);
 
-        // 아담의 성지 전역에 피의 성서 위치를 보내준다.
+        
         g_pShrineInfoManager->broadcastBloodBibleStatus();
 
-        // 종족 전쟁에 참가하지 않는 사람들을 내보낸다.
+        
         g_pHolyLandManager->remainRaceWarPlayers();
     }
 
@@ -257,7 +257,7 @@ bool WarSystem::makeGCWarList_LOCKED() throw(Error) {
             pWarInfo = new RaceWarInfo;
             break;
         default:
-            throw Error("WarType이 잘못됐다.");
+            throw Error("WarType .");
         }
 
         pWarSchedule->makeWarInfo(pWarInfo);
@@ -317,16 +317,16 @@ Work* WarSystem::heartbeat() throw(Error) {
     pWork = Scheduler::heartbeat();
 
     if (pWork != NULL) {
-        // 시간이 다 돼서 끝난 전쟁에 대한 처리
+        
         War* pWar = dynamic_cast<War*>(pWork);
         Assert(pWar != NULL);
 
-        // 대체로는 War::executeEnd()에서 할 것이다.
+        
         if (pWar->getWarType() == WAR_GUILD) {
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
             Assert(pSiegeWar != NULL);
 
-            // 진행 중인 전쟁 리스트에서 제거시켜준다.
+            
             __ENTER_CRITICAL_SECTION(m_MutexActiveWars)
 
             list<ActiveWarInfo>::iterator itr =
@@ -339,7 +339,7 @@ Work* WarSystem::heartbeat() throw(Error) {
         } else if (pWar->getWarType() == WAR_RACE) {
             m_bHasRaceWar = false;
 
-            // 성지에 있는 유저의 상태를 Refresh 해준다.
+            
             EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
             pEvent->setDeadline(0);
             g_pClientManager->addEvent(pEvent);
@@ -348,12 +348,12 @@ Work* WarSystem::heartbeat() throw(Error) {
         SAFE_DELETE(pWork);
     }
 
-    // 종족 전쟁을 자동으로 시작 시킨다.
+    
     if (m_pRaceWarSchedule != NULL && !m_bHasRaceWar && g_pVariableManager->isAutoStartRaceWar()) {
         checkStartRaceWar();
     }
 
-    // WarList를 갱신해준다.
+    
     static Timeval nextTime = {0, 0};
     Timeval currentTime;
     getCurrentTime(currentTime);
@@ -426,28 +426,7 @@ bool WarSystem::hasCastleActiveWar(ZoneID_t zoneID) const throw(Error) {
 
     __LEAVE_CRITICAL_SECTION(m_MutexActiveWars)
 
-    /*
-    // deadlock(Zone의 EffectHasBloodBible::affect(Item)에서, 딴데도 있겠지만 -_-;) 문제로 인하여
-    // 실행중인 전쟁에 대한 리스트를 따로 갖고 처리한다.
-    __ENTER_CRITICAL_SECTION(m_Mutex)
-
-    const RecentSchedules::container_type& schedules = m_RecentSchedules.getSchedules();
-    RecentSchedules::const_iterator itr = schedules.begin();
-
-    for( ; itr != schedules.end(); itr++ )
-    {
-        War* pWar = dynamic_cast<War*>( (*itr)->getWork() );
-        if( pWar == NULL ) continue;
-
-        if( pWar->getCastleZoneID() == zoneID )
-        {
-            m_Mutex.unlock();
-            return true;
-        }
-    }
-
-    __LEAVE_CRITICAL_SECTION(m_Mutex)
-    */
+     
 
     return bHasCastleActiveWar;
 
@@ -483,7 +462,7 @@ WarSchedule* WarSystem::getActiveWarSchedule_LOCKED(ZoneID_t zoneID) throw(Error
 
         War* pWar = dynamic_cast<War*>(pWarSchedule->getWork());
         if (pWar == NULL) {
-            cout << "WarSystem에 들어있는 Schedule의 Work객체가 War가 아니거나 NULL입니다. 삽질삽질~~~~" << endl;
+            cout << "WarSystem  Schedule Work War  NULL. ~~~~" << endl;
             continue;
         }
 
@@ -539,7 +518,7 @@ bool WarSystem::isEndCondition(Item* pItem, MonsterCorpse* pMonsterCorpse) throw
     Assert(pItem != NULL);
     Assert(pMonsterCorpse != NULL);
 
-    // pItem과 pMonsterCorpse의 짝이 맞는가?
+    
     // return pBloodBibleItem->getBibleMonsterType()==pMonsterCorpse->getMonter()->getMonsterType()
 
     return true;
@@ -558,7 +537,7 @@ bool WarSystem::isModifyCastleOwner(ZoneID_t castleZoneID, PlayerCreature* pPC) 
     __END_CATCH
 }
 
-// pPC가 castleZoneID와 관련된 전쟁에 승리했다.
+
 bool WarSystem::endWar(PlayerCreature* pPC, ZoneID_t castleZoneID) throw(Error) {
     __BEGIN_TRY
 
@@ -578,10 +557,10 @@ bool WarSystem::endWar(PlayerCreature* pPC, ZoneID_t castleZoneID) throw(Error) 
         Assert(pWar != NULL);
 
         if (pWar->endWar(pPC)) {
-            // 전쟁 제거( 시간 수정으로 자동으로 빠지도록 하자)
+            
             pWarSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-            // heap을 다시 구성해야 한다.
+            
             m_RecentSchedules.arrange();
 
             bEndWar = true;
@@ -595,7 +574,7 @@ bool WarSystem::endWar(PlayerCreature* pPC, ZoneID_t castleZoneID) throw(Error) 
     __END_CATCH
 }
 
-// castleZoneID의 진행중인 전쟁을 제거한다.
+
 bool WarSystem::removeWar(ZoneID_t castleZoneID) throw(Error) {
     __BEGIN_TRY
 
@@ -606,10 +585,10 @@ bool WarSystem::removeWar(ZoneID_t castleZoneID) throw(Error) {
     WarSchedule* pWarSchedule = getActiveWarSchedule_LOCKED(castleZoneID);
 
     if (pWarSchedule != NULL) {
-        // 전쟁 제거( 시간 수정으로 자동으로 빠지도록 하자)
+        
         pWarSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-        // heap을 다시 구성해야 한다.
+        
         m_RecentSchedules.arrange();
 
         bRemoved = true;
@@ -622,7 +601,7 @@ bool WarSystem::removeWar(ZoneID_t castleZoneID) throw(Error) {
     __END_CATCH
 }
 
-// castleZoneID의 진행중인 전쟁을 제거한다.
+
 bool WarSystem::removeRaceWar() throw(Error) {
     __BEGIN_TRY
 
@@ -640,10 +619,10 @@ bool WarSystem::removeRaceWar() throw(Error) {
             continue;
 
         if (pWar->getWarType() == WAR_RACE) {
-            // 전쟁 제거( 시간 수정으로 자동으로 빠지도록 하자)
+            
             pSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-            // heap을 다시 구성해야 한다.
+            
             m_RecentSchedules.arrange();
 
             bRemoved = true;
@@ -657,7 +636,7 @@ bool WarSystem::removeRaceWar() throw(Error) {
     __END_CATCH
 }
 
-// 특정한 플레이어에게 현재 진행중인 전쟁의 리스트를 보내준다.
+
 void WarSystem::broadcastWarList(GamePlayer* pGamePlayer) const throw(Error) {
     __BEGIN_TRY
 
@@ -688,10 +667,7 @@ void WarSystem::broadcastWarList(GamePlayer* pGamePlayer) const throw(Error) {
 
         warExist = true;
 
-        /*		StringStream msg;
-                msg << pWar->getWarName() << "이 "
-                    << ( pSchedule->getScheduledTime() ).toString() << " 까지 진행됩니다.";
-        */
+         
 
         char msg[100];
         sprintf(msg, g_pStringPool->c_str(STRID_WAR_STATUS), pWar->getWarName().c_str(),

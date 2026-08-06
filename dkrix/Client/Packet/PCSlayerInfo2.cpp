@@ -174,7 +174,7 @@ void PCSlayerInfo2::write ( SocketOutputStream & oStream ) const
 		oStream.write( m_Alignment );
 		
 		// write attributes
-		// 넣는 순서는 ATTR_CURRENT, ATTR_MAX, ATTR_BASIC
+		
 		oStream.write( m_STR[ATTR_CURRENT] );
 		oStream.write( m_STR[ATTR_MAX] );
 		oStream.write( m_STR[ATTR_BASIC] );

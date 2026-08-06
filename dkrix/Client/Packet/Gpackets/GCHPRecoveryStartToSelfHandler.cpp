@@ -20,7 +20,7 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 		
 
-	// item 사용 검증
+	
 	//UseItemOK();
 
 	if (g_pPlayer!=NULL)

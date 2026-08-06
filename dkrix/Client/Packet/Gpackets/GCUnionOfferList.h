@@ -10,15 +10,15 @@
 #define __GC_UNION_OFFER_LIST_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include <list>
 
 //////////////////////////////////////////////////////////////////////
 //
 // class GCUnionOfferList;
 //
-// 클라이언트에게 연합을 신청한 길드 리스트를 만들어서 보내준다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -117,7 +117,7 @@ public:
 	GuildID_t getGuildID() const throw() { return m_GuildID; }
 	void setGuildID( GuildID_t GuildID ) throw() { m_GuildID = GuildID; }
 
-	// get/set OfferGuild Type (JOIN-신청자 목록, QUIT-탈퇴신청한 길드)
+	
 	BYTE	getGuildType()	const throw() { return m_Type-1; }
 	void	setGuildType( BYTE Type ) throw() { m_Type = Type; }
 
@@ -151,10 +151,10 @@ public :
     ~GCUnionOfferList() throw();
 
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -208,7 +208,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCSystemMessagePacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() { return SingleGuildUnionOffer::getMaxSize() * 20; }
 
 };

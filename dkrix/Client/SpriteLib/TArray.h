@@ -6,11 +6,11 @@
 //
 //----------------------------------------------------------------------
 //
-// Data Type��  Size Type�� Template�̴�.
+
 //
-// File I/O�� �Ϸ���  Data�� �Ǵ� class�� 
+
 //      bool		SaveToFile(std::ofstream& file);
-//		bool		LoadFromFile(std::ifstream& file);  �� �����Ǿ�� �Ѵ�.
+
 //
 //----------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ class TArray {
 		const DataType&	operator [] (SizeType n) const	{ return m_pData[n]; }
 		void		operator = (const TArray<DataType, SizeType>& array);
 		
-		// ���� Array�� �ٸ� array�� ���Ѵ�.
+		
 		void		operator += (const TArray<DataType, SizeType>& array);
 
 
@@ -66,7 +66,7 @@ class TArray {
 		SizeType		m_Size;
 		DataType*		m_pData;
 
-		// sizeof(SizeType) �� ��
+		
 		static BYTE		s_SIZEOF_SizeType;
 };
 
@@ -115,7 +115,7 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::Init(SizeType size)
 {
-	// �ϴ� ����
+	
 	Release();
 
 	if (size==0) return;
@@ -143,8 +143,8 @@ TArray<DataType, SizeType>::Release()
 //----------------------------------------------------------------------
 // Add Array to *this
 //----------------------------------------------------------------------
-// �� Array�� �����ϴ� data�� ������ ���Ѹ�ŭ�� 
-// memory�� *this�� �ٽ� ��� copy~~
+
+
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 void
@@ -153,12 +153,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	SizeType newSize = m_Size + array.m_Size;
 
 	//------------------------------------------------
-	// �� Array�� ���� ������ŭ�� memory�� ��´�.
+	
 	//------------------------------------------------
 	DataType*	pTempData = new DataType [newSize];
 
 	//------------------------------------------------
-	// temp�� *this�� copy
+	
 	//------------------------------------------------
 	SizeType k=0;
 	SizeType i;  // Declare at function scope for both loops
@@ -171,7 +171,7 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// temp�� FramePack�� copy
+	
 	//------------------------------------------------
 	for (i=0; i<array.m_Size; i++)
 	{
@@ -181,12 +181,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// memory�����Ѵ�.
+	
 	//------------------------------------------------
 	Release();
 
 	//------------------------------------------------
-	// *this�� temp�� ����Ű���� �Ѵ�.
+	
 	//------------------------------------------------
 	m_Size		= newSize;
 	m_pData		= pTempData;	
@@ -200,10 +200,10 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::SaveToFile(std::ofstream& file)
 {
-	// 0�̶� ������ �����Ѵ�.
+	
 	file.write((const char*)&m_Size, s_SIZEOF_SizeType);
 
-	// �ƹ��͵� ������..
+	
 	if (m_pData==NULL || m_Size==0) 
 		return false;
 
@@ -220,12 +220,12 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// frame ����
+	
 	file.read((char*)&m_Size, s_SIZEOF_SizeType);
 
 	if (m_Size==0) return false;
 	
-	// memory���
+	
 	Init(m_Size);
 
 	for (SizeType i=0; i<m_Size; i++)
@@ -241,10 +241,10 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::operator = (const TArray<DataType, SizeType>& array)
 {
-	// frameArray�� �Ȱ��� �ؾ� �Ѵ�.
+	
 	Init( array.m_Size );
 
-	// ��� element�� copy�ؾ� �Ѵ�.
+	
 	for (SizeType i=0; i<m_Size; i++)
 	{
 		m_pData[i] = array.m_pData[i];

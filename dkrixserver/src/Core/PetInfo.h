@@ -138,7 +138,7 @@ public:
         m_IsSummonInfo = isSummon;
     }
 
-    // -_- 게임서버쪽에 정의해야쥐 PetItem.cpp 에 있음
+    
     ObjectID_t getItemObjectID() const;
 
     VSDateTime& getLastFeedTime() {

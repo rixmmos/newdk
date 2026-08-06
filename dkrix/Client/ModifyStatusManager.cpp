@@ -53,7 +53,7 @@ CanLearnDomainSkill(int domain)
 	int domainLevel = skillDomain.GetDomainLevel();
 	
 	//--------------------------------------------------
-	// 새 기술을 배울 수 있는지 체크
+	
 	//--------------------------------------------------
 	skillDomain.SetBegin();
 
@@ -76,8 +76,8 @@ CanLearnDomainSkill(int domain)
 		{
 			DEBUG_ADD_FORMAT("[CanLearnNewSkill] skill=%s. learnLev=%d. domainLev=%d", (*g_pSkillInfoTable)[ai].GetName(), learnLevel, domainLevel);
 			
-			// 새로운 기술을 배울 수 있는 경우
-			// 그냥 배울 수 있는지만 알면 된다.
+			
+			
 			return true;
 		}
 
@@ -90,7 +90,7 @@ CanLearnDomainSkill(int domain)
 //----------------------------------------------------------------------
 // Set Domain Level
 //----------------------------------------------------------------------
-// 이 domain의 새로운 기술을 배울 수 있는가?
+
 //----------------------------------------------------------------------
 void
 SetDomainLevel( int domain, int domainLevel )
@@ -101,7 +101,7 @@ SetDomainLevel( int domain, int domainLevel )
 	if (g_Mode==MODE_GAME)
 	{
 		//--------------------------------------------------
-		// 도메인 레벨이 얼마가 되었다고 표시
+		
 		//--------------------------------------------------
 		int num1 = domainLevel % 10;
 		if (num1==2 || num1==4 || num1==5 || num1==9)
@@ -114,7 +114,7 @@ SetDomainLevel( int domain, int domainLevel )
 		}
 
 		//--------------------------------------------------
-		// 새 기술을 배울 수 있는지 체크
+		
 		//--------------------------------------------------
 		if (CanLearnDomainSkill(domain))
 		{
@@ -232,7 +232,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_HP(void* pVoid)
 	UI_SetHP( value, g_pPlayer->GetMAX_HP() );
 	UI_SetCharInfoHP( value );		
 	
-	// skill마다 MP가 충분한지 체크
+	
 	if (g_pPlayer->IsVampire())
 	{
 		g_pSkillAvailable->CheckMP();
@@ -254,7 +254,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_MP(void* pVoid)
 	UI_SetMP( value, g_pPlayer->GetMAX_MP() );	
 	UI_SetCharInfoMP( value );
 
-	// skill마다 MP가 충분한지 체크
+	
 	if (!g_pPlayer->IsVampire())
 	{
 		g_pSkillAvailable->CheckMP();
@@ -297,7 +297,7 @@ ModifyStatusManager::Function_MODIFY_MAX_MP(void* pVoid)
 	UI_SetMP( g_pPlayer->GetMP(), value );	
 	UI_SetCharInfoMP_max( value );
 
-	// skill마다 MP가 충분한지 체크
+	
 	//(*g_pSkillAvailable).CheckMP();
 
 	if (g_Mode==MODE_GAME)
@@ -330,11 +330,11 @@ ModifyStatusManager::Function_MODIFY_DURABILITY(void* pVoid)
 	EXTRACT_MODIFY_VALUE( pVoid )
 
 
-	// 2005, 2, 23, sobeit modify start - 1BYTE | 3BYTE 로 수정
+	
 	int slotID		= (value & 0xFF000000) >> 24;
-	int	durability	= value & 0x00FFFFFF;	// 빼준다.
+	int	durability	= value & 0x00FFFFFF;	
 //	int slotID		= (value & 0xFFFF0000) >> 16;
-//	int	durability	= value & 0x0000FFFF;	// 빼준다.
+
 	// 2005, 2, 23, sobeit modify end
 
 	#ifdef	OUTPUT_DEBUG
@@ -349,14 +349,14 @@ ModifyStatusManager::Function_MODIFY_DURABILITY(void* pVoid)
 	case RACE_SLAYER:
 	{
 		//-------------------------------------------------
-		// 오른손에 무기 들고 있는데.
-		// 서버에서는 왼손이라고 날아오기도 한다. - -;
+		
+		
 		//-------------------------------------------------
 		const MItem* pItem = g_pSlayerGear->GetItem( (MSlayerGear::GEAR_SLAYER)slotID );
 
 		if (pItem!=NULL)
 		{
-			// 양손 무기 이면.. 무조건 오른손으로 slot 고정
+			
 			if (pItem->GetGearSlot()==MItem::SLOT_TWOHAND)
 			{
 				slotID = (BYTE)MSlayerGear::GEAR_SLAYER_RIGHTHAND;
@@ -376,14 +376,14 @@ ModifyStatusManager::Function_MODIFY_DURABILITY(void* pVoid)
 	case RACE_VAMPIRE:
 	{
 		//-------------------------------------------------
-		// 오른손에 무기 들고 있는데.
-		// 서버에서는 왼손이라고 날아오기도 한다. - -;
+		
+		
 		//-------------------------------------------------
 		const MItem* pItem = g_pVampireGear->GetItem( (MVampireGear::GEAR_VAMPIRE)slotID );
 
 		if (pItem!=NULL)
 		{
-			// 양손 무기 이면.. 무조건 오른손으로 slot 고정
+			
 			if (pItem->GetGearSlot()==MItem::SLOT_VAMPIRE_TWOHAND)
 			{
 				slotID = (BYTE)MVampireGear::GEAR_VAMPIRE_RIGHTHAND;
@@ -403,14 +403,14 @@ ModifyStatusManager::Function_MODIFY_DURABILITY(void* pVoid)
 	case RACE_OUSTERS:
 		{
 			//-------------------------------------------------
-			// 오른손에 무기 들고 있는데.
-			// 서버에서는 왼손이라고 날아오기도 한다. - -;
+			
+			
 			//-------------------------------------------------
 			const MItem* pItem = g_pOustersGear->GetItem( (MOustersGear::GEAR_OUSTERS)slotID );
 			
 			if (pItem!=NULL)
 			{
-				// 양손 무기 이면.. 무조건 오른손으로 slot 고정
+				
 				if (pItem->GetGearSlot()==MItem::SLOT_OUSTERS_TWOHAND)
 				{
 					slotID = (BYTE)MOustersGear::GEAR_OUSTERS_RIGHTHAND;
@@ -487,7 +487,7 @@ void
 ModifyStatusManager::Function_MODIFY_BULLET(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
-//	g_pSystemMessage->Add("총알 받다.");
+
 
 	if (g_pCurrentMagazine!=NULL)
 	{
@@ -528,8 +528,8 @@ ModifyStatusManager::Function_MODIFY_VISION(void* pVoid)
 	EXTRACT_MODIFY_VALUE( pVoid )
 
 	//--------------------------------------------------------
-	// (m_ServerX, m_ServerY)에서부터 
-	// Player의 시야에 포함되지 않는 Creature를 Zone에서 제거시킨다.
+	
+	
 	//--------------------------------------------------------
 	g_pPlayer->SetSight( value );
 	g_pZone->KeepObjectInSight(g_pPlayer->GetServerX(), 
@@ -577,7 +577,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_STR(void* pVoid)
 	UI_SetCharInfoSTR( value );
 	
 	//------------------------------------------
-	// 다른 값 바뀌는 것 계산
+	
 	//------------------------------------------
 	MPlayerGear *pGear = g_pPlayer->GetGear();
 
@@ -585,7 +585,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_STR(void* pVoid)
 	pGear->CheckAffectStatusAll();				
 
 	//------------------------------------------
-	// 바뀌는 수치 계산
+	
 	//------------------------------------------
 	g_pPlayer->CalculateStatus();
 }
@@ -615,7 +615,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_DEX(void* pVoid)
 	UI_SetCharInfoDEX( value );
 
 	//------------------------------------------
-	// 다른 값 바뀌는 것 계산
+	
 	//------------------------------------------
 	MPlayerGear *pGear = g_pPlayer->GetGear();
 	
@@ -623,7 +623,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_DEX(void* pVoid)
 	pGear->CheckAffectStatusAll();				
 		
 	//------------------------------------------
-	// 바뀌는 수치 계산
+	
 	//------------------------------------------
 	g_pPlayer->CalculateStatus();					
 }
@@ -653,13 +653,13 @@ ModifyStatusManager::Function_MODIFY_CURRENT_INT(void* pVoid)
 	UI_SetCharInfoINT( value );
 
 	//------------------------------------------
-	// 다른 값 바뀌는 것 계산
+	
 	//------------------------------------------
 	switch(g_pPlayer->GetRace())
 	{
 		case RACE_SLAYER:
 			//------------------------------------------
-			// 사용가능한지 체크한다.
+			
 			//------------------------------------------
 			g_pInventory->CheckAffectStatusAll();
 			g_pSlayerGear->CheckAffectStatusAll();
@@ -677,7 +677,7 @@ ModifyStatusManager::Function_MODIFY_CURRENT_INT(void* pVoid)
 	}
 
 	//------------------------------------------
-	// 바뀌는 수치 계산
+	
 	//------------------------------------------
 	g_pPlayer->CalculateStatus();		
 }
@@ -741,7 +741,7 @@ ModifyStatusManager::Function_MODIFY_BONUS_POINT(void* pVoid)
 
 	UI_SetBonusPoint( value );
 
-	// [도움말] bonus point
+	
 //	__BEGIN_HELP_EVENT
 //		ExecuteHelpEvent( HE_STATUS_BONUS_POINT );	
 //	__END_HELP_EVENT
@@ -854,7 +854,7 @@ ModifyStatusManager::Function_MODIFY_LEVEL(void* pVoid)
 	}
 
 	//------------------------------------------
-	// 사용가능한지 체크한다.
+	
 	//------------------------------------------
 	MPlayerGear *pGear = g_pPlayer->GetGear();
 	
@@ -880,7 +880,7 @@ ModifyStatusManager::Function_MODIFY_ALIGNMENT(void* pVoid)
 	//#endif		
 
 	//--------------------------------------------------
-	// UI에 설정
+	
 	//--------------------------------------------------
 	short uiAlignment = value;
 	if (uiAlignment > 10000)
@@ -890,7 +890,7 @@ ModifyStatusManager::Function_MODIFY_ALIGNMENT(void* pVoid)
 	g_char_slot_ingame.alignment_num = uiAlignment;
 
 	//--------------------------------------------------
-	// -10000 ~ 10000을 0~4로 바꾼다.
+	
 	//--------------------------------------------------
 	int alignment;
 	int oldAlignment;
@@ -909,7 +909,7 @@ ModifyStatusManager::Function_MODIFY_ALIGNMENT(void* pVoid)
 	oldAlignment = ConvertAlignment( oldValue );
 
 	//--------------------------------------------------
-	// 성향이 조금 바꼈다는 메세지
+	
 	//--------------------------------------------------
 	if (g_Mode==MODE_GAME)
 	{
@@ -934,7 +934,7 @@ ModifyStatusManager::Function_MODIFY_ALIGNMENT(void* pVoid)
 	//#endif
 
 	//--------------------------------------------------
-	// 성향의 단계가 바뀐 경우..
+	
 	//--------------------------------------------------
 	if (oldAlignment != alignment)
 	{	
@@ -1111,8 +1111,8 @@ ModifyStatusManager::Function_MODIFY_MIN_DAMAGE(void* pVoid)
 {
 	EXTRACT_MODIFY_VALUE( pVoid )
 			
-	// 이거 말고 그냥 damage만 계산하도록 바꿔야 한다.. 
-	// 일단 잊을까봐 임시로.. - -;;
+	
+	
 	g_pPlayer->CalculateStatus();
 }
 
@@ -1208,7 +1208,7 @@ ModifyStatusManager::Function_MODIFY_SKILL_POINT(void* pVoid)
 		
 		UI_SetSkillPoint( value );
 		
-		// [도움말] bonus point
+		
 //		__BEGIN_HELP_EVENT
 //			ExecuteHelpEvent( HE_STATUS_BONUS_POINT );	
 //		__END_HELP_EVENT
@@ -1304,7 +1304,7 @@ ModifyStatusManager::Function_MODIFY_PET_HP(void *pVoid)
 	{
 		pPetItem->SetCurrentDurability(value);
 
-		// 펫 죽기
+		
 		if(value == 60)
 		{
 			std::string petName = pPetItem->GetPetName().c_str();

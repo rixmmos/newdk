@@ -1,7 +1,7 @@
 #include "Client_PCH.h"
 #define __NPROTECT__
 // EXECryptor include removed (SDL2) - Copy protection no longer needed
-/* add by sonic 2006.9.14 start Ôö¼Ó¶ÔWPEÆÁ±Î*/
+ 
 #include "APICheck.h"
 APICheck _APICheck;
 /* ***************************************** */
@@ -78,8 +78,64 @@ APICheck _APICheck;
 #include "MTestDef.h"
 #include "Resource.h"
 #include "UserInformation.h"
+#ifdef SPRITELIB_BACKEND_SDL
+#include <SDL.h>
+#include "SpriteLib/SpriteLibBackend.h"
+SDL_Window* g_pSDLWindow = NULL;
+SDL_Renderer* g_pSDLRenderer = NULL;
+#endif
 #include "MFileDef.h"
 #include "SoundSetting.h"
+
+static void ResetStartupTrace()
+{
+}
+
+static void ResetLoginFlowTrace()
+{
+}
+
+static void TraceStartup(const char* step)
+{
+	(void)step;
+}
+
+void CSDLGraphics::Flip()
+{
+#ifdef SPRITELIB_BACKEND_SDL
+	static const DWORD kTargetFrameMs = 1000 / 60;
+	static DWORD s_lastPresentTime = 0;
+
+	DWORD now = timeGetTime();
+	if (s_lastPresentTime != 0)
+	{
+		DWORD elapsed = now - s_lastPresentTime;
+		if (elapsed < kTargetFrameMs)
+		{
+			Sleep(kTargetFrameMs - elapsed);
+			now = timeGetTime();
+		}
+	}
+
+	if (g_pSDLRenderer == NULL || g_pBack == NULL)
+	{
+		return;
+	}
+
+	spritectl_surface_t backend_surface = g_pBack->GetBackendSurface();
+	if (backend_surface == SPRITECTL_INVALID_SURFACE)
+	{
+		return;
+	}
+
+	SDL_RenderClear(g_pSDLRenderer);
+	if (spritectl_present_surface(backend_surface, g_pSDLRenderer) == 0)
+	{
+		SDL_RenderPresent(g_pSDLRenderer);
+		s_lastPresentTime = timeGetTime();
+	}
+#endif
+}
 
 #ifdef OUTPUT_DEBUG
 #include "Packet/Gpackets/GCSystemMessage.h"
@@ -126,8 +182,16 @@ CMessageStringTable g_MessageStringTable;
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
 HWND				g_hWnd;
 HINSTANCE			g_hInstance;
-int					g_x=400;
-int					g_y=300;
+static const int kDefaultGameWidth = 1920;
+static const int kDefaultGameHeight = 1080;
+static const int kQhdGameWidth = 2560;
+static const int kQhdGameHeight = 1440;
+
+int					g_ResolutionX = kDefaultGameWidth;
+int					g_ResolutionY = kDefaultGameHeight;
+
+int					g_x=kDefaultGameWidth / 2;
+int					g_y=kDefaultGameHeight / 2;
 //bool				g_bHALAvailable = false;
 DWORD				g_dwVideoMemory = 0;
 
@@ -137,8 +201,8 @@ int					g_Dimension = 0;
 DWORD				g_TimerNPMON = 0;
 
 // FPS
-DWORD				g_CurrentTime		= 0;		// ½Ã°£
-DWORD				g_CurrentFrame		= 0;		// frame¼ö
+DWORD				g_CurrentTime		= 0;		
+DWORD				g_CurrentFrame		= 0;		
 
 int					g_FrameCount		= 0;
 int					g_StartFrameCount	= 0;
@@ -152,7 +216,7 @@ const int			g_FrameGood			= 15;
 // minimize | anotherWnd click--> !ActiveGame
 BOOL				g_bActiveApp			= FALSE; // Is application active?
 BOOL				g_bActiveGame			= FALSE; // Is Game Active?
-BOOL				g_bNeedUpdate			= FALSE; // updateÇØ¾ßµÇ³ª?
+BOOL				g_bNeedUpdate			= FALSE; 
 
 DWORD				g_double_click_time = 0;
 
@@ -177,8 +241,10 @@ WORD g_wAuthKeyMap = 0x5154;
 
 //void SizeOfObjects();
 //#define				__WEB_BROWSER__
-IWebBrowser2*			g_pWebBrowser = NULL; 
-// [Futec¼öÁ¤]
+#ifdef __WEB_BROWSER__
+IWebBrowser2*			g_pWebBrowser = NULL;
+#endif
+
 char g_FutecIP[20] = { 0, };
 unsigned int g_FutecPort = 0;
 BYTE g_AdvanceVampireActionMaxCount[ ACTION_ADVANCEMENT_MAX - ACTION_ADVANCEMENT_STOP ];
@@ -209,8 +275,8 @@ struct NETMARBLE_INFO
 struct REALSERVER_INFO
 {
 	REALSERVER_INFO() { bMode = false;WorldID = 0;}
-	bool bMode;		// 0: ¼öµ¿Á¢¼Ó, 1:Á¤»óÁ¢¼Ó
-	int WorldID;	// 0: ºê¶õ, 1: Æç·¹½º
+	bool bMode;		
+	int WorldID;	
 	MString ID;		// id
 	MString Key;	// Key
 };
@@ -220,32 +286,188 @@ BYTE g_macAddress[6];
 extern void CheckMacScreenMode();
 extern BOOL GetMacAddressFromSock();
 extern BOOL InitDebugInfo();
-// add by Sonic 2006.9.26 ¼ì²â1024 * 768°æ±¾È«¾Ö±äÁ¿
-BOOL g_MyFull=TRUE;
-RECT g_GameRect={799,599,800,600};
-LONG	g_SECTOR_WIDTH           =16 ;
-LONG	g_SECTOR_HEIGHT          =25 ;
-LONG	g_SECTOR_WIDTH_HALF      =9 ;
-LONG	g_SECTOR_HEIGHT_HALF     =13 ;
-LONG	g_SECTOR_SKIP_PLAYER_LEFT=-8 ;
-LONG	g_SECTOR_SKIP_PLAYER_UP  =-12 ;
 
-LONG	g_TILESURFACE_SECTOR_WIDTH         =22;
-LONG	g_TILESURFACE_SECTOR_HEIGHT        =31;
-LONG	g_TILESURFACE_SECTOR_OUTLINE_RIGHT =19;
-LONG	g_TILESURFACE_SECTOR_OUTLINE_DOWN  =28;
-LONG	g_TILESURFACE_WIDTH                =1056;
-LONG	g_TILESURFACE_HEIGHT               =744;
-LONG	g_TILESURFACE_OUTLINE_RIGHT        =912;
-LONG	g_TILESURFACE_OUTLINE_DOWN         =672;
+BOOL g_MyFull=TRUE;
+RECT g_GameRect={kDefaultGameWidth - 1,kDefaultGameHeight - 1,kDefaultGameWidth,kDefaultGameHeight};
+LONG	g_SECTOR_WIDTH           =40 ;
+LONG	g_SECTOR_HEIGHT          =45 ;
+LONG	g_SECTOR_WIDTH_HALF      =21 ;
+LONG	g_SECTOR_HEIGHT_HALF     =23 ;
+LONG	g_SECTOR_SKIP_PLAYER_LEFT=-20 ;
+LONG	g_SECTOR_SKIP_PLAYER_UP  =-22 ;
+
+LONG	g_TILESURFACE_SECTOR_WIDTH         =46;
+LONG	g_TILESURFACE_SECTOR_HEIGHT        =51;
+LONG	g_TILESURFACE_SECTOR_OUTLINE_RIGHT =43;
+LONG	g_TILESURFACE_SECTOR_OUTLINE_DOWN  =48;
+LONG	g_TILESURFACE_WIDTH                =2208;
+LONG	g_TILESURFACE_HEIGHT               =1224;
+LONG	g_TILESURFACE_OUTLINE_RIGHT        =2064;
+LONG	g_TILESURFACE_OUTLINE_DOWN         =1152;
 LONG	g_TILE_X_HALF = 24;
 LONG	g_TILE_Y_HALF = 12;
 // end
+
+static void EnableDpiAwareProcess()
+{
+#ifdef PLATFORM_WINDOWS
+	HMODULE user32 = GetModuleHandleA("user32.dll");
+	if (user32 == NULL)
+	{
+		user32 = LoadLibraryA("user32.dll");
+	}
+
+	if (user32 != NULL)
+	{
+		typedef BOOL (WINAPI *SetProcessDPIAwareProc)();
+		SetProcessDPIAwareProc setProcessDPIAware =
+			(SetProcessDPIAwareProc)GetProcAddress(user32, "SetProcessDPIAware");
+		if (setProcessDPIAware != NULL)
+		{
+			setProcessDPIAware();
+		}
+	}
+#endif
+}
+
+static void GetDesktopResolution(int& width, int& height)
+{
+	width = GetSystemMetrics(SM_CXSCREEN);
+	height = GetSystemMetrics(SM_CYSCREEN);
+
+	if (width <= 0 || height <= 0)
+	{
+		width = kDefaultGameWidth;
+		height = kDefaultGameHeight;
+	}
+}
+
+static bool CanUseResolution(int width, int height)
+{
+	int desktopWidth = 0;
+	int desktopHeight = 0;
+	GetDesktopResolution(desktopWidth, desktopHeight);
+
+	return desktopWidth >= width && desktopHeight >= height;
+}
+
+static bool ReadConfiguredGameResolution(int& width, int& height)
+{
+	std::ifstream file("DarkEdenResolution.cfg");
+	if (!file.is_open())
+	{
+		return false;
+	}
+
+	std::string content;
+	std::string line;
+	while (std::getline(file, line))
+	{
+		content += line;
+		content += '\n';
+	}
+
+	for (size_t i = 0; i < content.size(); ++i)
+	{
+		if (content[i] >= 'a' && content[i] <= 'z')
+		{
+			content[i] = (char)(content[i] - 'a' + 'A');
+		}
+	}
+
+	if (content.find("AUTO") != std::string::npos)
+	{
+		if (CanUseResolution(kQhdGameWidth, kQhdGameHeight))
+		{
+			width = kQhdGameWidth;
+			height = kQhdGameHeight;
+		}
+		else
+		{
+			width = kDefaultGameWidth;
+			height = kDefaultGameHeight;
+		}
+		return true;
+	}
+
+	if (content.find("QHD") != std::string::npos ||
+		content.find("2560") != std::string::npos ||
+		content.find("1440") != std::string::npos)
+	{
+		width = kQhdGameWidth;
+		height = kQhdGameHeight;
+		return true;
+	}
+
+	if (content.find("FHD") != std::string::npos ||
+		content.find("1920") != std::string::npos ||
+		content.find("1080") != std::string::npos)
+	{
+		width = kDefaultGameWidth;
+		height = kDefaultGameHeight;
+		return true;
+	}
+
+	return false;
+}
+
+void ApplyGameResolution(int width, int height)
+{
+	if (!((width == kDefaultGameWidth && height == kDefaultGameHeight) ||
+		(width == kQhdGameWidth && height == kQhdGameHeight)))
+	{
+		width = kDefaultGameWidth;
+		height = kDefaultGameHeight;
+	}
+
+	g_ResolutionX = width;
+	g_ResolutionY = height;
+	g_GameRect.left = width - 1;
+	g_GameRect.top = height - 1;
+	g_GameRect.right = width;
+	g_GameRect.bottom = height;
+	g_x = width / 2;
+	g_y = height / 2;
+
+	g_SECTOR_WIDTH = max(1, width / (g_TILE_X_HALF * 2));
+	g_SECTOR_HEIGHT = max(1, height / (g_TILE_Y_HALF * 2));
+	g_SECTOR_WIDTH_HALF = g_SECTOR_WIDTH / 2 + 1;
+	g_SECTOR_HEIGHT_HALF = g_SECTOR_HEIGHT / 2 + 1;
+	g_SECTOR_SKIP_PLAYER_LEFT = -max(1, g_SECTOR_WIDTH_HALF - 1);
+	g_SECTOR_SKIP_PLAYER_UP = -max(1, g_SECTOR_HEIGHT_HALF - 1);
+
+	const LONG kTileSurfaceSectorMargin = 3;
+	g_TILESURFACE_SECTOR_WIDTH = g_SECTOR_WIDTH + kTileSurfaceSectorMargin * 2;
+	g_TILESURFACE_SECTOR_HEIGHT = g_SECTOR_HEIGHT + kTileSurfaceSectorMargin * 2;
+	g_TILESURFACE_SECTOR_OUTLINE_RIGHT = g_TILESURFACE_SECTOR_WIDTH - kTileSurfaceSectorMargin;
+	g_TILESURFACE_SECTOR_OUTLINE_DOWN = g_TILESURFACE_SECTOR_HEIGHT - kTileSurfaceSectorMargin;
+	g_TILESURFACE_WIDTH = g_TILESURFACE_SECTOR_WIDTH * (g_TILE_X_HALF * 2);
+	g_TILESURFACE_HEIGHT = g_TILESURFACE_SECTOR_HEIGHT * (g_TILE_Y_HALF * 2);
+	g_TILESURFACE_OUTLINE_RIGHT = g_TILESURFACE_SECTOR_OUTLINE_RIGHT * (g_TILE_X_HALF * 2);
+	g_TILESURFACE_OUTLINE_DOWN = g_TILESURFACE_SECTOR_OUTLINE_DOWN * (g_TILE_Y_HALF * 2);
+}
+
+void ApplyConfiguredGameResolution()
+{
+	int width = kDefaultGameWidth;
+	int height = kDefaultGameHeight;
+	ReadConfiguredGameResolution(width, height);
+
+	if (width == kQhdGameWidth && height == kQhdGameHeight &&
+		!CanUseResolution(kQhdGameWidth, kQhdGameHeight))
+	{
+		width = kDefaultGameWidth;
+		height = kDefaultGameHeight;
+	}
+
+	ApplyGameResolution(width, height);
+}
+
 //-----------------------------------------------------------------------------
 // define function
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// addFileÀ» ÀÐ¾î¼­ originalFileÀÇ ³¡¿¡ ºÙÀÎ´Ù.
+
 //-----------------------------------------------------------------------------			
 #define WRITE_FROM_FILE(originalFile, patchFile)		\
 		{												\
@@ -267,7 +489,7 @@ LONG	g_TILE_Y_HALF = 12;
 				}										\
 			}											\
 		}
-//Ëæ»ú×Ö·û´®
+
 void get_rand_str(char s[],int number);
 void get_rand_str(char s[],int number)
 {
@@ -283,7 +505,7 @@ void get_rand_str(char s[],int number)
         }
 }
 //-----------------------------------------------------------------------
-// Get Futec Address [Futec¼öÁ¤]
+
 //-----------------------------------------------------------------------
 // DarkEden.exe Futec(IP:Port)
 //              01234567890123
@@ -365,7 +587,7 @@ ParsingRealServer(const char* pCommandLine, int Dimention, REALSERVER_INFO &info
 //-----------------------------------------------------------------------------
 HRESULT InitFail(LPCTSTR szError,...)
 {
-	// ÇÁ·Î±×·¥ Áß´Ü..
+	
 	g_bActiveApp = FALSE;
 
 	ShowCursor( TRUE );
@@ -397,7 +619,7 @@ bool g_bUseProgressBar = true;
 HWND g_hWndProgress = NULL;
 const int progressBarWidth = 300;
 const int progressBarHeight = 40;
-const int g_numAppendFiles = 16;		// AppendPatch.infÀÇ fileµé °³¼ö
+const int g_numAppendFiles = 16;		
 
 std::map<DWORD,std::string> g_nProtectMessage;
 
@@ -415,6 +637,8 @@ RemoveProgressBar()
 
 DARKEDEN_LANGUAGE CheckDarkEdenLanguage()
 {
+	return DARKEDEN_ENGLISH;
+
 	if( g_pFileDef == NULL )
 		return DARKEDEN_KOREAN;
 
@@ -590,7 +814,7 @@ UpdateProgressBar()
 //-----------------------------------------------------------------------------
 HWND		g_hPatchLogWnd = NULL;
 HWND		g_hPatchLogEdit = NULL;
-char*		g_pPatchLogBuffer = NULL;	// ¾ó¸¶³ª Å¬Áö ¸ô¶ó¼­¸® global¿¡ µ×´Ù.
+char*		g_pPatchLogBuffer = NULL;	
 
 long FAR PASCAL PatchLogWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -608,7 +832,7 @@ ReadPatchLogFromFile()
 {
 	char strBuffer[256];
 
-	ifstream file("PatchLog.txt");	// text fileÀÌ´Ù.
+	ifstream file("PatchLog.txt");	
 
 	if (!file.is_open())
 	{
@@ -643,7 +867,7 @@ ReadPatchLogFromFile()
 			n -= 1;
 		}
 
-		// \r\nÀ» ºÙ¿©Áà¾ß ´ÙÀ½ÁÙÀÌ µÈ´Ù.		
+		
 		strBuffer[n] = '\r';
 		strBuffer[n+1] = '\n';
 		
@@ -672,140 +896,15 @@ void OutPutClassSize()
 void
 ShowPatchLogWindow()
 {
-/*	int width = 600;
-	int height = 350;
-
-	WNDCLASS               wc;
-
-	wc.style			= CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc		= (WNDPROC)PatchLogWindowProc;
-	wc.cbClsExtra		= 0;
-	wc.cbWndExtra		= 0;
-	wc.hInstance		= g_hInstance;
-	wc.hIcon			= LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_DARKEDEN));
-	wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground	= (HBRUSH )GetStockObject(BLACK_BRUSH);
-	wc.lpszMenuName		= NULL;
-	wc.lpszClassName	= "PatchLog";
-	RegisterClass(&wc);
-
-	DWORD style = WS_OVERLAPPEDWINDOW;
-	style &= ~WS_MINIMIZEBOX;
-	style &= ~WS_MAXIMIZEBOX;
-	style &= ~WS_THICKFRAME;
-	g_hPatchLogWnd = CreateWindow("PatchLog", "´ÙÅ©¿¡µ§ ÆÐÄ¡³»¿ë", 
-							style,
-							GetSystemMetrics(SM_CXSCREEN)/2 - width/2, 
-							GetSystemMetrics(SM_CYSCREEN)/2 - height/2, 
-							width,	height, 
-							NULL, NULL, g_hInstance, NULL);   
-   
-	if (!g_hPatchLogWnd)
-	{
-		return;
-	}
-
-	RECT rect;
-	GetClientRect(g_hPatchLogWnd, &rect);
-	g_hPatchLogEdit = CreateWindow(TEXT("edit"), NULL,
-						   WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER | ES_LEFT | ES_MULTILINE  | 
-
-ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY,
-						   0,0, 
-						   rect.right-rect.left, rect.bottom-rect.top,
-						   g_hPatchLogWnd, NULL, g_hInstance, NULL);
-
-	if (!ReadPatchLogFromFile())
-	{
-		DestroyWindow( g_hPatchLogWnd );		
-		
-		// ¹Ù·Î returnÇÏ¸é main window°¡ Á×´Â´Ù. - -;		
-	}
-	else
-	{
-		ShowWindow(g_hPatchLogWnd, SW_SHOW);
-		UpdateWindow(g_hPatchLogWnd);  
-		SetFocus(g_hPatchLogWnd);
-	}
-	
-	MSG		msg;
-	while (1)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
-		{	
-			if (!GetMessage(&msg, NULL, 0, 0))
-				break;
-				//return msg.wParam;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			WaitMessage();
-		}
-	}
-*/
+ 
 }
 
 //-----------------------------------------------------------------------------
 // Check DX Version
 //-----------------------------------------------------------------------------
-// DirectX VersionÀ» checkÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
-/*
-bool
-CheckDXVersion()
-{
-	DWORD dwVer, dwPlatform;
-	CDirectSetup::GetVersion( &dwVer, &dwPlatform );
-
-	//------------------------------------------------------
-	// Platform check
-	//------------------------------------------------------
-	//switch( dwPlatform )
-    //{
-      //  case DXVER_PLATFORM_WINDOWS:
-            //strcpy( strBuff, "OS:\tWindows 9x\n" );
-        //    break;
-        //case DXVER_PLATFORM_NT:
-            //strcpy( strBuff, "OS:\tWindows NT\n" );
-          //  break;
-        //default:
-            //strcpy( strBuff, "Error!\n" );
-          //  break;
-    //}
-
-
-	//------------------------------------------------------
-	// DirectX Version check
-	//------------------------------------------------------
-	// DX 7.0 ÀÌ»ó
-    if (dwVer==DXVER_DX_7)
-	{			
-		return true;
-	}
-	
-	//InitFail("You need to install DirectX 7.0 or later version...");
-
-	// ¾È ±ò·ÈÀ¸¸é ¾Æ¿¹ ±ò¾Æ¹ö¸®ÀÚ..
-	char directory[_MAX_PATH];
-
-	// ÇöÀç µð·ºÅä¸®¸¦ ¾ò¾î¼­ 
-	GetCurrentDirectory( _MAX_PATH, directory );
-
-	// ½ÇÇàÈ­ÀÏ ÀÌ¸§À» ºÙÀÎ´Ù.
-	sprintf(directory, "%s\\%s", directory, PROGRAM_FILENAME);
-
-	CDirectSetup::SetRestartProgram(directory);
-	CDirectSetup::DirectXInstall(g_hWnd, g_hInstance, "DirectX7", true);
-	
-	// »õ·Î ±ò°í ³ª¼­ ¹Ù·Î ½ÇÇàÇØµµ µÇ´Â°É±î?
-	// rebooting ÇØ¾ßÇÏÁö ¾ÊÀ»±î??
-
-	return true;    
-	//return false;    
-}
-*/
+ 
  
 //-----------------------------------------------------------------------------
 // Name: WindowProc()
@@ -826,38 +925,25 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		//---------------------------------------------------------------
 		case MM_MCINOTIFY :
 		{
-			// Mid°¡ ´Ù ¿¬ÁÖµÇ¾ú´Ù´Â ¸»ÀÌ´Ù.
+			
 			if (wParam==MCI_NOTIFY_SUCCESSFUL)
 			{
-				// Opening µ¿¿µ»óÀÌ ³¡³­ °æ¿ì
+				
 				if (g_pAvi!=NULL && (DWORD)lParam==g_pAvi->dwID) 
 				{ 
 					g_pAvi->bEndFlag=true; 
 					g_pAvi->Close(); 
 
-					// Login È­¸éÀ¸·Î...
+					
 					SetMode( MODE_MAINMENU );
 				}				
-				// À½¾Ç ¿¬ÁÖ°¡ ³¡³­ °æ¿ì
+				
 				else
 				{
-					/*
-					// ¹Ýº¹ ¿¬ÁÖ ¾ÈÇÑ´Ù.
-					if (g_pUserOption->PlayMusic)//g_Music.IsPause())	// °ú¿¬ ÇÊ¿äÇÒ±î.. - -;
-					{
-						if (g_pUserOption->PlayWaveMusic)
-						{
-							g_pSDLStream->Play( FALSE );
-						}
-						else
-						{
-							g_Music.RePlay();						
-						}
-					}
-					*/
+					 
 					//else
 					//{
-						// ¹Ýº¹ÇØ¼­ ¿¬ÁÖÇÑ´Ù.
+						
 					//	g_Music.RePlay();
 					//}
 //					if(g_pMP3->IsLoop())
@@ -902,43 +988,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		//							WM_ACTIVATE
 		//
 		//---------------------------------------------------------------
-		/*
-		case WM_ACTIVATE :		
-		{
-			#ifdef __WM_OUTPUT_DEBUG__
-					DEBUG_ADD("[WM_ACTIVATE]");
-			#endif
-
-					/*
-			//WORD fActive = LOWORD(wParam);           // activation flag 
-			//BOOL fMinimized = (BOOL) HIWORD(wParam); // minimized flag 
-
-			// activeµÆ°í minimized°¡ ¾Æ´Ñ »óÅÂ°¡ ActiveGameÀÌ´ç..
-			//BOOL bActive = (fActive==WA_ACTIVE) || (fActive==WA_CLICKACTIVE);
-			//				//&& !fMinimized;
-
-			//g_double_click_time = GetDoubleClickTime();
-
-			//if (g_bActiveApp)
-			{
-			//	CheckActivate(bActive);
-			
-			//	g_bActiveGame = bActive;			
-			}			
-		
-			BOOL bActive = (wParam == WA_ACTIVE) || (wParam == WA_CLICKACTIVE);        
-			
-			if (g_pSDLInput!=NULL)
-			{
-				// acquire
-				g_pSDLInput->SetAcquire(bActive);
-				
-				// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
-				g_pSDLInput->Clear();
-			}
-		}
-		break;//return 0L;
-		*/
+		 
 
 		//---------------------------------------------------------------
 		//
@@ -1016,6 +1066,21 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		//---------------------------------------------------------------
         case WM_DESTROY:
             // Clean up and close the app            
+#ifdef SPRITELIB_BACKEND_SDL
+			if (g_pSDLRenderer != NULL)
+			{
+				SDL_DestroyRenderer(g_pSDLRenderer);
+				g_pSDLRenderer = NULL;
+			}
+
+			if (g_pSDLWindow != NULL)
+			{
+				SDL_DestroyWindow(g_pSDLWindow);
+				g_pSDLWindow = NULL;
+			}
+
+			spritectl_shutdown();
+#endif
             PostQuitMessage(0);
         return 0L;
 
@@ -1081,7 +1146,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 			if (g_Mode==MODE_OPENING)
 			{
-				// OpeningÀ» ³¡³½´Ù.
+				
 				if (wParam==VK_ESCAPE || wParam==VK_RETURN || wParam==VK_SPACE)
 				{	
 					if (g_pAvi!=NULL)
@@ -1136,7 +1201,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 				*/
 
 				//-----------------------------------------------
-				// Volume Á¶Àý
+				
 				//-----------------------------------------------
 				/*
 				case VK_F5 :
@@ -1167,7 +1232,7 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 				//-----------------------------------------------
 				//
-				//				Debug Mode ¿ë
+				
 				//
 				//-----------------------------------------------
 				#if defined(OUTPUT_DEBUG)
@@ -1184,113 +1249,12 @@ long FAR PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 					//	return 0L;	
 
 					//-----------------------------------------------
-					// ¿òÁ÷ÀÌ´Â ¹æ¹ý ¼³Á¤
+					
 					//-----------------------------------------------
-					/*
-					case VK_F2 :
-					{					
-						if (g_pPlayer->IsStop())
-						{
-							// ¿òÁ÷ÀÌ´Â ÇüÅÂ ¹Ù²Ù±â
-							//if (g_pPlayer->GetMoveDevice()==MCreature::MOVE_DEVICE_NULL)
-							//{
-							//	g_pPlayer->SetMoveDevice( MCreature::MOVE_DEVICE_MOTOR1 );
-							//}/
-							//else
-							//{
-								//g_pPlayer->SetMoveDevice( MCreature::MOVE_DEVICE_NULL );
-							//}
-						
-							g_pPlayer->SetAction( ACTION_STAND );
-
-							int type = g_pPlayer->GetCreatureType();
-
-							type++;
-
-							if (type==g_CreatureTable.GetSize())
-							{							
-								g_pPlayer->SetCreatureType( 0 );
-							}
-							else
-							{
-								g_pPlayer->SetCreatureType( type );
-							}
-
-							// ³²ÀÚ Slayer
-							if (g_pPlayer->GetCreatureType()==0)
-							{
-								g_pPlayer->RemoveAddon( ADDON_COAT );	
-								g_pPlayer->RemoveAddon( ADDON_TROUSER );
-
-								MCoat		coat1;	
-								MTrouser	trouser1;	
-
-								coat1.SetItemType( 0 ); coat1.SetItemOption( 0 );
-								trouser1.SetItemType( 0 ); trouser1.SetItemOption( 0 );
-
-								g_pPlayer->SetAddonHair(ADDONID_HAIR1_MALE, 0);		// type, color
-								g_pPlayer->SetAddonItem( &coat1 );	
-								g_pPlayer->SetAddonItem( &trouser1 );
-							}
-							else if (g_pPlayer->GetCreatureType()==1)
-							{
-								g_pPlayer->RemoveAddon( ADDON_COAT );	
-								g_pPlayer->RemoveAddon( ADDON_TROUSER );
-
-								MCoat		coat1;	
-								MTrouser	trouser1;	
-
-								coat1.SetItemType( 0 ); coat1.SetItemOption( 0 );
-								trouser1.SetItemType( 0 ); trouser1.SetItemOption( 0 );
-
-								g_pPlayer->SetAddonHair(ADDONID_HAIR1_FEMALE, 0);		// type, 
-
-color
-								g_pPlayer->SetAddonItem( &coat1 );	
-								g_pPlayer->SetAddonItem( &trouser1 );
-							}
-							else
-							{
-								g_pPlayer->RemoveAddon( ADDON_COAT );	
-								g_pPlayer->RemoveAddon( ADDON_TROUSER );
-							}
-							
-
-							// ¹øÂ½~~
-							g_pTopView->SetFadeStart(1, 31, 10,  31,0,0);
-						}							
-					}		
-					return 0L;
-					*/		
+					 		
 
 					
-					/*
-					case VK_F7 :
-						//{
-						//	pWaveVolume->SetCurrentVolume(
-						//			pWaveVolume->GetCurrentVolume() - 0x1000
-						//		);
-						//}
-						//if (g_pPlayer->IsExistAddon(MCreatureWear::ADDON_SHOES))
-							//g_pPlayer->SetAddonNULL(MCreatureWear::ADDON_SHOES); 
-						//else g_pPlayer->SetAddon(MCreatureWear::ADDON_SHOES, 2);					
-						
-						// °ø°Ý ¸ðµå ÀüÈ¯
-						if (g_pPlayer->IsAttackModeAggress())
-						{
-							g_pPlayer->SetAttackModePeace();
-						}
-						else if (g_pPlayer->IsAttackModePeace())
-						{
-							g_pPlayer->SetAttackModeNormal();
-						}
-						else if (g_pPlayer->IsAttackModeNormal())
-						{
-							g_pPlayer->SetAttackModeAggress();
-						}
-
-					return 0L;
-					*/
+					 
 
 					/*
 					case VK_F8 :
@@ -1327,7 +1291,7 @@ color
 						#if defined(_DEBUG)
 							if (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))
 							{
-								//eidt by sonic 2006.7.27   ÐÞ¸Ä¼ÓËÙµØÖ·
+								
 								//g_UpdateDelay = (g_UpdateDelay==1)? DELAY_UPDATE_GAME : 1;
 								g_UpdateDelay = (g_UpdateDelay==1)? (54 ^ 8) : 1;
 							}
@@ -1335,14 +1299,14 @@ color
 						return 0L;
 
 					//-----------------------------------------------
-					// debug ¸Þ¼¼Áö
+					
 					//-----------------------------------------------
 					case VK_F12 : 
 						g_bPutMessage = !g_bPutMessage;
 						return 0L;				
 					
 					//-----------------------------------------------
-					// Debug Message Ã»¼Ò~ÇÏ±â
+					
 					//-----------------------------------------------
 					case VK_DELETE :
 						{
@@ -1439,7 +1403,7 @@ color
 							}
 							else
 							{
-								// Á×Àº °æ¿ì..
+								
 								g_pPlayer->SetDead();						
 							}
 						}
@@ -1450,56 +1414,20 @@ color
 					// [ TEST CODE ]
 					case '/' :
 					{
-						// »óÅÂ º¯°æ
-						/*
-						int newHP = g_pPlayer->GetHP() - 5;
-						int newMP = g_pPlayer->GetMP() - 3;
-
-						if (newHP < 0) newHP = 0;
-						if (newMP < 0) newMP = 0;
-
-						MStatus* pStatus = new MStatus;
-						pStatus->SetStatus(MODIFY_HP, newHP);
-						pStatus->SetStatus(MODIFY_MP, newMP);
 						
-						// UIº¯°æ					
-						gC_vs_ui.SetHP(newHP, 100);
-						gC_vs_ui.SetMP(newMP, 100);
-
-						// °á°ú¿¡ HP°¡ º¯ÇÏµµ·Ï ¼³Á¤
-						MActionResult *pResult = new MActionResult;					
-						pResult->Add( new MActionResultNodeChangeStatus(g_pPlayer->GetID(), pStatus) );
-
-						// °á°ú Action µî·Ï
-						//g_pPlayer->PacketSpecialActionResult( SKILL_ATTACK_MELEE );
-						g_pPlayer->PacketSpecialActionResult( RESULT_VAMPIRE_DIE );
-
-						// °á°ú ³»¿ë µî·Ï(effectID°¡ ÀÖ¾î¾ß µÇ´Âµ¥..)
-						g_pPlayer->PacketAddActionResult(0, pResult);					
-						
-						
-						//switch (rand()%6)
-						//{
-						//	case 0 : g_pPlayer->SetChatString("huk!"); break;
-						//	case 1 : g_pPlayer->SetChatString("kek!"); break;
-						//	case 2 : g_pPlayer->SetChatString("uk!"); break;
-						//	case 3 : g_pPlayer->SetChatString("-_-!"); break;
-						//	case 4 : g_pPlayer->SetChatString("!!!"); break;
-						//	case 5 : g_pPlayer->SetChatString("*_*;"); break;
-						//}	
-						*/
+						 
 					}
 					return 0L;
 					//*/
 
-					// »ìÂ¦ ºÓ°Ô º¯ÇÏ±â
+					
 					case '6' :
 					{
 						g_pTopView->SetFadeStart(25, 31, 2, 31,0,0);					
 					}
 					break;
 
-					// ¹ø°³
+					
 					case '7' :
 					{
 						SetLightning(rand()%4*500+500);					
@@ -1529,7 +1457,7 @@ color
 							
 							g_pPlayer->SetSpecialActionInfo( newActionInfo );
 
-							// player¿¡ ÀÖ´Â actionÀÎ °æ¿ì..
+							
 							if (newActionInfoAction <= maxPlayerAction)
 								break;
 						} while (1);					
@@ -1558,7 +1486,7 @@ color
 							
 							g_pPlayer->SetSpecialActionInfo( newActionInfo );
 
-							// player¿¡ ÀÖ´Â actionÀÎ °æ¿ì..
+							
 							if (newActionInfoAction <= maxPlayerAction)
 								break;
 						} while (1);
@@ -1593,7 +1521,7 @@ color
 			}
             return TRUE;
 		*/		
-		// `ÇÑ±ÛÀÔ·Â½Ã IMEÇ¥½Ã°¡ ³ª¿ÀÁö ¸øÇÏµµ·Ï ÇÑ´Ù.
+		
 		//
 
 		//---------------------------------------------------------------
@@ -1659,15 +1587,16 @@ color
 BOOL
 InitApp(int nCmdShow)
 {
+	TraceStartup("InitApp begin");
 	WNDCLASS                    wc;
-	//Éú³ÉËæ»úÀàÃû,´°¿Ú±êÌâ
+	
 	//char rnd_PROGRAM_NAME[50];
 	//char rnd_PROGRAM_TITLE[50];
 	//get_rand_str(rnd_PROGRAM_NAME,5);
 	//get_rand_str(rnd_PROGRAM_TITLE,5);
     // Set up and register window class
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    wc.lpfnWndProc = (void*)WindowProc;
+    wc.lpfnWndProc = (WNDPROC)WindowProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = g_hInstance;
@@ -1678,9 +1607,12 @@ InitApp(int nCmdShow)
 	wc.lpszClassName = PROGRAM_NAME;
     //wc.lpszClassName = PROGRAM_NAME;
     RegisterClass(&wc);
+	TraceStartup("window class registered");
 	
 	// Calculate the proper size for the window given a client of 640x480
-    int cx,cy;	
+    int cx,cy;
+	int windowX = 0;
+	int windowY = 0;
 	DWORD style = 0;
 	DWORD exStyle = 0;
 
@@ -1693,7 +1625,7 @@ InitApp(int nCmdShow)
 			return FALSE;
 		}
 #endif
-// 2004, 8, 27, sobeit add start - mac address Ã¼Å© ¹×, mac screen mode Ã¼Å©
+
 	memset( g_macAddress, 0, 6*sizeof(BYTE) );
 	//if(GetMacAddressFromSock())
 	if(GetMacAddressFromNetBIOS(g_macAddress))
@@ -1703,7 +1635,7 @@ InitApp(int nCmdShow)
 #endif
 	}
 
-// 2004, 8, 27, sobeit add end - mac address Ã¼Å© ¹×, mac screen mode Ã¼Å©
+
 	if (g_bFullScreen)
 	{
 		exStyle = WS_EX_TOPMOST;// | WS_EX_APPWINDOW;
@@ -1727,7 +1659,7 @@ InitApp(int nCmdShow)
 	//	}
 	//end
 		exStyle = WS_EX_APPWINDOW;				//by viva : add WS_SYSMENU
-		style = WS_CLIPCHILDREN | WS_OVERLAPPED | WS_THICKFRAME | WS_MINIMIZEBOX | WS_SYSMENU;//WS_OVERLAPPEDWINDOW;
+		style = WS_POPUP | WS_CLIPCHILDREN;
 //		style = WS_OVERLAPPEDWINDOW;
 		// add by Sonic 2006.9.26
 //		if(g_MyFull)
@@ -1737,11 +1669,18 @@ InitApp(int nCmdShow)
 		//}
 		//else
 		//{
-			cx = g_GameRect.right + GetSystemMetrics(SM_CXSIZEFRAME)*2;
-			cy = g_GameRect.bottom + GetSystemMetrics(SM_CYSIZEFRAME)*2+GetSystemMetrics(SM_CYMENU);
+			cx = g_GameRect.right;
+			cy = g_GameRect.bottom;
+
+			RECT workArea = { 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN) };
+			SystemParametersInfo(SPI_GETWORKAREA, 0, &workArea, 0);
+			const int workWidth = workArea.right - workArea.left;
+			const int workHeight = workArea.bottom - workArea.top;
+			windowX = workArea.left + max(0, (workWidth - cx) / 2);
+			windowY = workArea.top + max(0, (workHeight - cy) / 2);
 		//}
 	}
-	//Ôö¼ÓËæ»úÀàÃû´°¿ÚÃû±êÌâ
+	
 	// Create a window
 	/*
     g_hWnd = CreateWindowEx(exStyle,//0,
@@ -1753,8 +1692,8 @@ InitApp(int nCmdShow)
                           PROGRAM_NAME,
                           PROGRAM_TITLE,
 						  style,
-                          0,
-                          0,
+                          windowX,
+                          windowY,
 						  cx,
 						  cy,
                           NULL,
@@ -1766,6 +1705,7 @@ InitApp(int nCmdShow)
 	{
         return FALSE;
 	}
+	TraceStartup("window created");
 
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)
 
@@ -1782,20 +1722,52 @@ InitApp(int nCmdShow)
 	//	return 0;
 	//}
 
-	// cursor¸¦ ¾ø¾ÖÁØ´Ù.
+	
 	SetCursor(NULL);
 	ShowCursor( FALSE );
 
-	// window¸¦ º¸¿©ÁØ´Ù.
+	
 	ShowWindow(g_hWnd, nCmdShow);
     UpdateWindow(g_hWnd);
     SetFocus(g_hWnd);	
+	TraceStartup("window shown");
 
+#ifdef SPRITELIB_BACKEND_SDL
+	if (spritectl_init() != 0)
+	{
+		TraceStartup("SpriteLib backend init FAILED");
+		return FALSE;
+	}
+	TraceStartup("SpriteLib backend init OK");
 
+	g_pSDLWindow = SDL_CreateWindowFrom((const void*)g_hWnd);
+	if (g_pSDLWindow == NULL)
+	{
+		TraceStartup("SDL window attached FAILED");
+		return FALSE;
+	}
+	TraceStartup("SDL window attached");
+
+	g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if (g_pSDLRenderer == NULL)
+	{
+		g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_SOFTWARE);
+	}
+
+	if (g_pSDLRenderer == NULL)
+	{
+		TraceStartup("SDL renderer create FAILED");
+		return FALSE;
+	}
+
+	SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, 255);
+	TraceStartup("SDL renderer created");
+#endif
 
 	//---------------------------------------------------
 	// Init Game
 	//---------------------------------------------------
+	TraceStartup("before InitGame");
 	return InitGame();
 }
 
@@ -1860,7 +1832,7 @@ CheckTerriblePatch()
 	
 
 	//-----------------------------------------------------------------------------
-	// Append ÆÐÄ¡¸¦ ÇÑ´Ù.
+	
 	//-----------------------------------------------------------------------------
 	errorCode = 0;
 	for (int i=0; i<apt.GetSize(); i++)
@@ -1885,13 +1857,13 @@ CheckTerriblePatch()
 	}
 	
 	//-----------------------------------------------------------------------
-	// ½É°¢ÇÑ »óÈ²ÀÎ°¡? - -; 
+	
 	//-----------------------------------------------------------------------
 	if (bCrash)
 	{
 		//char str[256];
 		//add by sonic 2006.4.11
-		//sprintf(str, "È­ÀÏÀÌ ¼Õ»óµÇ¾ú½À´Ï´Ù. ´ÙÅ©¿¡µ§ ¿î¿µÆÀÀ¸·Î ¿¬¶ôÁÖ¼¼¿ä [¿¡·¯ÄÚµå:%d]", errorCode);
+		
 		//MessageBox(NULL, str, PROGRAM_TITLE, MB_OK);
 		//end 
 		return false;
@@ -1903,670 +1875,28 @@ CheckTerriblePatch()
 //-----------------------------------------------------------------------------
 // Check TerriblePatch
 //-----------------------------------------------------------------------------
-// auto-patchÀÇ ½Ç¼ö·Î ÀÎÇÏ¿©
-// ¾îÂ¿ ¼ö ¾øÀÌ ½ÇÇàÈ­ÀÏ¿¡¼­ Ã¼Å©ÇØ¼­ ÆÐÄ¡ÇØ¾ßÇÏ´Â °æ¿ìÀÌ´Ù.
-// ±×¸®ÇÏ¿©.. ÇÔ¼ö ÀÌ¸§ÀÌ ÀÌ·¸°Ô µÇ¾ú´Ù.  --;;
+
+
+
 //-----------------------------------------------------------------------------
-/*
-bool
-CheckTerriblePatchOLD()
-{
-	bool bCrash = false;
-	int errorCode = 0;
-		
-	//-----------------------------------------------------------------------
-	//
-	// Update SpritePack
-	//
-	//-----------------------------------------------------------------------
-	// Data\\Image\\¿¡ New18ImageObjectSPK.spk°¡ ÀÖÀ¸¸é..
-	// ImageObjectÀÇ °³¼ö´Â ÀüÃ¼°³¼ö¿Í °°Àºµ¥.. ¿ë·®ÀÌ ´Ù¸£´Ù¸é
-	// "ÆÐÄ¡ ÀÛ¾÷À» ÇÏ´Âµ¥ ½Ã°£ÀÌ Á» °É¸³´Ï´Ù."¶ó°í ¸Þ½ÃÁö¸¦ ¶ç¿öÁØ´Ù.
-	// ÀüÃ¼°³¼ö¸¸Å­ SPK Å©±â¸¦ Àâ°í 
-	// ImageObjectSPK¸¦ SPK·Î LoadÇÑ´Ù.
-	// New18ImageObjectSPK¸¦ SPK·Î LoadÇÑ´Ù.
-	// SPK¸¦ ImageObjectSPK¿¡ writeÇÑ´Ù.
-	// New18ImageObjectSPK.spk¸¦ Áö¿î´Ù.
-	//
-	// [22¹ø ÆÐÄ¡ÇÒ¶§ºÎÅÍ´Â..]
-	// ±âÁ¸¿¡ Àß¸øµÈ ºÎºÐÀÌ ´Ù µ¤Çô¹ö¸±Á¤µµÀÇ ÆÐÄ¡È­ÀÏÀÌ ÁØºñµÇ¾î ÀÖÀ¸¹Ç·Î
-	// 18ÆÐÄ¡È­ÀÏÀÌ ÀÖÀ¸¸é 18¹ø ÆÐÄ¡À§Ä¡ºÎÅÍ ¾²°í
-	// 22ÆÐÄ¡È­ÀÏÀÌ ÀÖÀ¸¸é 22¹ø ÆÐÄ¡À§Ä¡ºÎÅÍ ¾²¸é... µÈ´Ù.
-	const int numWrite = 2;
-	char newSpkFilename[numWrite][80] = 
-	{ 
-		"Data\\Image\\New18ImageObject.spk", 
-		"Data\\Image\\New22ImageObject.spk" 
-	};
-	const long writePosition[numWrite] = 
-	{
-		47564158,	// 18¹ø ÆÐÄ¡ Àû¿ëÇÒ file position
-		49532618	// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ file position
-	};
-	const WORD orgSpkSize[numWrite] = 
-	{
-		0x054C,		// 18¹ø ÆÐÄ¡ Àû¿ëÈÄ °³¼ö
-		0x05D6		// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ °³¼ö
-	};
-	const long orgFileSize[numWrite] = 
-	{
-		49532618,	// 18¹ø ÆÐÄ¡ Àû¿ëÈÄ È­ÀÏ»çÀÌÁî
-		55239016	// 22¹ø ÆÐÄ¡ Àû¿ëÈÄ È­ÀÏ»çÀÌÁî
-	};
-
-	WORD spkSize;
-	std::ifstream imageObjectFile;//(FILE_ISPRITEINDEX_CREATURE, ios::binary);
-	if (!FileOpenBinary(FILE_SPRITE_IMAGEOBJECT, imageObjectFile))
-		return false;
-	imageObjectFile.read((char*)&spkSize, 2);	// SpriteÀÇ °³¼ö
-	imageObjectFile.close();
-	
-	//-----------------------------------------------------------------------
-	// ¿ë·® ´Ù¸£¸é ÆÐÄ¡
-	//-----------------------------------------------------------------------
-	bool bImageObjectPatch;
-	if (spkSize==orgSpkSize[numWrite-1])
-	{
-		 bImageObjectPatch = false;
-	}
-	else
-	{
-		bImageObjectPatch = true;		
-	}
-
-	//-----------------------------------------------------------------------
-	// ÆÐÄ¡¸¦ Àû¿ë½ÃÄÑ¾ß ÇÏ´Â °æ¿ì
-	//-----------------------------------------------------------------------
-	if (bImageObjectPatch)
-	{
-		//MessageBox(NULL, "´ÙÅ©¿¡µ§ µ¥ÀÌÅ¸¸¦ Á¤¸®ÇÏ°í ½ÇÇàÇÒ ¿¹Á¤ÀÔ´Ï´Ù.\n OK¸¦ ´©¸£°í ¹ÝÀÀÀÌ ¾ø´õ¶óµµ ÀÚµ¿À¸·Î ½ÇÇàµÇ´Ï Àá½Ã¸¸ ±â
-
-´Ù·ÁÁÖ¼¼¿ä.", PROGRAM_TITLE, MB_OK);
-
-		for (int i=0; i<numWrite; i++)
-		{
-			std::ifstream newfile(newSpkFilename[i], ios::binary | );				
-			
-			//-------------------------------------------------------------
-			// ÆÐÄ¡ È­ÀÏÀÌ ¾ø´Â °æ¿ì.. ´ÙÀ½²¨ Ã¼Å©
-			//-------------------------------------------------------------
-			if (!newfile.is_open())
-			{
-				continue;
-			}
-			else
-			{
-				SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
-				UpdateProgressBar();
-
-				std::ofstream imageObjectFile(FILE_SPRITE_IMAGEOBJECT, ios::binary | ios::ate);
-
-				newfile.seekg( 2 );	// sizeºÎºÐ Á¦¿Ü
-				imageObjectFile.seekp( writePosition[i] );
-
-				WRITE_FROM_FILE( imageObjectFile, newfile );
-
-				newfile.close();
-				
-				// °³¼ö º¯°æ
-				spkSize = orgSpkSize[i];
-				imageObjectFile.seekp( 0, ios::beg );
-				imageObjectFile.write((const char*)&spkSize, 2);
-				imageObjectFile.close();
-
-				// ÆÐÄ¡È­ÀÏÀ» Áö¿î´Ù.
-				remove( newSpkFilename[i] );
-			}
-		}
-	}
-	
-	
-	//-----------------------------------------------------------------------
-	//
-	// Append SpritePack
-	//
-	//-----------------------------------------------------------------------
-	// 
-	//-----------------------------------------------------------------------
-	// Data\\Image\\New18Creature.ispk - 2001.9.26
-	// ¿ø·¡ÀÖ´øÈ­ÀÏ, Ãß°¡µÇ´ÂÈ­ÀÏ, ÇÕÇÑÈÄ°³¼ö
-	// ÀÌ ¹æ½Ä¿¡¼­´Â spki´Â µû·Î µ¤¾î¾ß ÇÑ´Ù.
-	if (!bCrash)
-	{
-		const int numAppend = 2;
-		char orgFilename[numAppend][80] = 
-		{ 
-			"Data\\Image\\Creature.ispk", 
-			"Data\\Image\\Creature.ispk" 
-		};
-		char appFilename[numAppend][80] = 
-		{ 
-			"Data\\Image\\New18Creature.ispk", 
-			"Data\\Image\\New22Creature.ispk" 
-		};
-
-		int total[numAppend] = 
-		{ 
-			0x2E66, 
-			0x35FE 
-		};
-
-		// ¿©·¯¹ø appendÇØ¼­ total¿¡ µµ´ÞÇÏ°Ô µÇ´Â °æ¿ì°¡ ÀÖ´Ù.
-
-		WORD orgNum, appNum;
-			
-		for (int i=0; i<numAppend; i++)
-		{
-			
-			class fstream orgFile(orgFilename[i], ios::in | ios::out | ios::binary |  | ios::ate);
-			std::ifstream appFile(appFilename[i], ios::binary | );		
-		
-			//-------------------------------------------------------------
-			// ¿ø·¡ È­ÀÏÀÌ ¾ø´Â °æ¿ì - -;
-			//-------------------------------------------------------------
-			if (!orgFile.is_open())
-			{
-				bCrash = true;
-				errorCode = 1;
-				break;			
-			}			
-			
-			orgFile.seekg( 0, ios::beg );
-			orgFile.read((char*)&orgNum, 2);	// SpriteÀÇ °³¼ö
-			
-			if (orgNum>=total[i])
-			{
-				// ÀÌ¹Ì ÆÐÄ¡µÈ »óÈ²ÀÌ´Ù. ´ÙÀ½²¨ Ã¼Å©.
-				orgFile.close();
-				appFile.close();
-				continue;
-			}
-				
-			//-------------------------------------------------------------
-			// appÇÒ²² ¾ø´Â °æ¿ì
-			//-------------------------------------------------------------
-			if (!appFile.is_open())
-			{
-				// °³¼ö´Â ´Ù¸¥µ¥ appÇÒ°ÍÀÌ ¾ø´Â °æ¿ì
-				bCrash = true;
-				errorCode = 2;
-				break;
-			}
-
-			// total size¸¦ Ã¼Å©ÇØ¼­ appendÇÒ ÇÊ¿ä°¡ ÀÖ´ÂÁö Ã¼Å©ÇÑ´Ù.
-			appFile.read((char*)&appNum, 2);	// SpriteÀÇ °³¼ö
-
-			//-------------------------------------------------------------
-			// µÎ°³ ÇÕÃÄ¼­ totalÀÌ µÈ´Ù¸é..		
-			//-------------------------------------------------------------
-			if (orgNum+appNum == total[i])
-			{				
-				SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
-				UpdateProgressBar();
-
-				// orgFileÀÇ ³¡À¸·Î..
-				orgFile.seekp(0, ios::end);
-
-				WRITE_FROM_FILE( orgFile, appFile );
-
-				// ¿ø·¡ È­ÀÏÀÇ °³¼ö¸¦ ¹Ù²ãÁØ´Ù.
-				orgFile.seekp(0, ios::beg);
-				orgFile.write((const char*)&total[i], 2);
-
-				orgFile.close();
-				appFile.close();
-
-				//---------------------------------------------------------------
-				// AppÈ­ÀÏÀº Áö¿î´Ù.
-				//---------------------------------------------------------------
-				remove( appFilename[i] );
-			}
-			//-------------------------------------------------------------
-			// size Äá°¡·ç.. - -;
-			//-------------------------------------------------------------
-			else
-			{
-				// µÎ °³ ÇÕÃÄµµ Á¦´ë·ÎµÈ ¼ýÀÚ°¡ ³ª¿ÀÁö ¾Ê´Â °æ¿ì
-				// ½É°¢ÇÑ »óÈ²ÀÌ´Ù.
-				bCrash = true;
-				errorCode = 3;
-				break;
-			}
-		}
-	}
-	
-	//-----------------------------------------------------------------------
-	// ½É°¢ÇÑ »óÈ²ÀÌ´Ù.
-	//-----------------------------------------------------------------------
-	if (bCrash)
-	{
-		char str[256];
-		sprintf(str, "È­ÀÏÀÌ ¼Õ»óµÇ¾ú½À´Ï´Ù. ´ÙÅ©¿¡µ§ ¿î¿µÆÀÀ¸·Î ¿¬¶ôÁÖ¼¼¿ä [¿¡·¯ÄÚµå:%d]", errorCode);
-		MessageBox(NULL, str, PROGRAM_TITLE, MB_OK);
-
-		return false;
-	}
-
-	return true;
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // ConvertScreenEffect
 //-----------------------------------------------------------------------------
-// ±âÁ¸ÀÇ AlphaEffect¸¦ ScreenEffect¿¡ ¸Â°Ô ¹Ù²Û´Ù.
+
 //-----------------------------------------------------------------------------
-/*
-bool
-ConvertScreenEffect()
-{
-	//------------------------------------------------------------	
-	// Screen SpritePack È®ÀÎ
-	//------------------------------------------------------------	
-	
-//	std::ifstream fileSPK2(FILE_SPRITE_SCREENEFFECT, ios::binary | );
-//	if (fileSPK2.is_open())
-//	{
-//		TYPE_SPRITEID num;
-//		fileSPK2.read((char*)&num, SIZE_SPRITEID);
-//
-//		// Å©±â°¡ °°À¸¸é.. convertÇÒ ÇÊ¿ä ¾ø´Ù.
-//		if (num >= 0x06BE)
-//		{			
-//			return false;
-//		}
-//
-//		fileSPK2.close();
-//	}
-	
-/*	std::ifstream fileSPK2("Data\\Info\\EffectScreenConvert.inf", ios::binary | );
-	if (fileSPK2.is_open())
-	{
-		fileSPK2.close();
-		return false;		
-	}
-
-	
-	const int MAX_EST = 135;
-	const int est[MAX_EST] =
-	{
-		SCR_EFFECTSPRITETYPE_ACID_BALL_1,		// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_ACID_BALL_2,		// ÅÍÁö±â
-		SCR_EFFECTSPRITETYPE_ACID_BOLT_1,		// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_ACID_BOLT_2,		// ÅÍÁö±â	
-		SCR_EFFECTSPRITETYPE_ACID_TOUCH,	
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_SHIELD,	// ¹æ¾î¸·
-		SCR_EFFECTSPRITETYPE_AURA_BALL_1,	// Ä³½ºÆÃ
-		SCR_EFFECTSPRITETYPE_AURA_BALL_2,	// ³¯¾Æ°¡±â
-		SCR_EFFECTSPRITETYPE_AURA_BALL_3,	// ÅÍÁö±â
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_1,	// Ä³½ºÆÃ - ¹Ù´Ú¿¡ ºÙ´Â 
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_2,	// Ä³½ºÆÃ - ¹Ù´Ú¿¡¼­ À§·Î ¿Ã¶ó°¡±â
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_3,	// ºÙ¾î¼­ ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_4,	// ºÙ¾î¼­ ¹Ýº¹
-		SCR_EFFECTSPRITETYPE_AURA_PRISM_5,	// ºÙ¾î¼­ ³¡
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_1,	// Ä³½ºÆÃ
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_2,	// Áö¼Ó
-		SCR_EFFECTSPRITETYPE_AURA_SHIELD_3,	// ¸ÂÀ» ¶§ ¹øÂ½~
-		SCR_EFFECTSPRITETYPE_AURA_RING,
-		SCR_EFFECTSPRITETYPE_BLESS_GROUND_1,
-		SCR_EFFECTSPRITETYPE_BLESS_GROUND_2,
-		SCR_EFFECTSPRITETYPE_BLESS_GROUND_3,
-		SCR_EFFECTSPRITETYPE_BLESS_GROUND_4,
-		SCR_EFFECTSPRITETYPE_BLESS_ING,		// ¹Ýº¹ 
-		SCR_EFFECTSPRITETYPE_BLESS,			// ÇÏ³ª ¹Ýº¹À¸·Î ¹Ù²ñ //½ÃÀÛ	
-		SCR_EFFECTSPRITETYPE_CHAOS_COMBO,	
-		SCR_EFFECTSPRITETYPE_CONTINUAL_LIGHT_1,
-		SCR_EFFECTSPRITETYPE_CONTINUAL_LIGHT_2,
-		SCR_EFFECTSPRITETYPE_CONTINUAL_LIGHT_3,
-		SCR_EFFECTSPRITETYPE_CREATE_HOLY_WATER_1,
-		SCR_EFFECTSPRITETYPE_CREATE_HOLY_WATER_2,
-		SCR_EFFECTSPRITETYPE_CREATE_HOLY_WATER_3,
-		SCR_EFFECTSPRITETYPE_CURE_PARALYSIS,		
-		SCR_EFFECTSPRITETYPE_CURE_CRITICAL_WOUND_1,
-		SCR_EFFECTSPRITETYPE_CURE_CRITICAL_WOUND_2,
-		SCR_EFFECTSPRITETYPE_CURE_CRITICAL_WOUND_3,
-		SCR_EFFECTSPRITETYPE_CURE_SERIOUS_WOUND_1,
-		SCR_EFFECTSPRITETYPE_CURE_SERIOUS_WOUND_2,
-		SCR_EFFECTSPRITETYPE_CURE_SERIOUS_WOUND_3,
-		SCR_EFFECTSPRITETYPE_CURE_LIGHT_WOUND_1,
-		SCR_EFFECTSPRITETYPE_CURE_LIGHT_WOUND_2,
-		SCR_EFFECTSPRITETYPE_CURE_LIGHT_WOUND_3,
-		SCR_EFFECTSPRITETYPE_CURE_POISON,
-		SCR_EFFECTSPRITETYPE_DETECT_HIDDEN,
-		SCR_EFFECTSPRITETYPE_DOUBLE_IMPACT,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING1_1,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING1_2,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING1_3,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING2_1,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING2_2,
-		SCR_EFFECTSPRITETYPE_ENCHANT_CASTING2_3,		
-		SCR_EFFECTSPRITETYPE_EXPLOSION_OLD,
-		SCR_EFFECTSPRITETYPE_HEALING_CASTING_1,
-		SCR_EFFECTSPRITETYPE_HEALING_CASTING_2,
-		SCR_EFFECTSPRITETYPE_HEALING_CASTING_3,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_AR_MALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_SMG_MALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_TR_MALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_SG_MALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_AR_FEMALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_SMG_FEMALE,		
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_TR_FEMALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_SG_FEMALE,
-		SCR_EFFECTSPRITETYPE_HOLY_SHOOTING_HIT,
-		SCR_EFFECTSPRITETYPE_HOLY_WATER_1,	// ±úÁö´Â°Å
-		SCR_EFFECTSPRITETYPE_HOLY_WATER_2,	// ½ÇÆÐ? - -;	
-		SCR_EFFECTSPRITETYPE_HURRICANE_COMBO,	
-		SCR_EFFECTSPRITETYPE_LIGHT_1,
-		SCR_EFFECTSPRITETYPE_LIGHT_2,
-		SCR_EFFECTSPRITETYPE_LIGHT_3,
-		SCR_EFFECTSPRITETYPE_POISONOUS_HAND,
-		SCR_EFFECTSPRITETYPE_POTENTIAL,
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_CURSE,	
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_PARALYSIS,		
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_POISON,
-		SCR_EFFECTSPRITETYPE_RAINBOW_SLASHER,
-		SCR_EFFECTSPRITETYPE_REMOVE_CURSE,
-		SCR_EFFECTSPRITETYPE_RESTORE_1,
-		SCR_EFFECTSPRITETYPE_RESTORE_2,
-		SCR_EFFECTSPRITETYPE_RESTORE_3,
-		SCR_EFFECTSPRITETYPE_GUN_AR_MALE,
-		SCR_EFFECTSPRITETYPE_GUN_SMG_MALE,
-		SCR_EFFECTSPRITETYPE_GUN_AR_FEMALE,
-		SCR_EFFECTSPRITETYPE_GUN_SMG_FEMALE,
-		SCR_EFFECTSPRITETYPE_GUN_TR_MALE,
-		SCR_EFFECTSPRITETYPE_GUN_SG_MALE,
-		SCR_EFFECTSPRITETYPE_GUN_TR_FEMALE,
-		SCR_EFFECTSPRITETYPE_GUN_SG_FEMALE,
-		SCR_EFFECTSPRITETYPE_SCREW_SLASHER,
-		SCR_EFFECTSPRITETYPE_SINGLE_BLOW,
-		SCR_EFFECTSPRITETYPE_SMOKE,	
-		SCR_EFFECTSPRITETYPE_SMOKE_1,	
-		SCR_EFFECTSPRITETYPE_SMOKE_2,	
-		SCR_EFFECTSPRITETYPE_SMOKE_3,	
-		SCR_EFFECTSPRITETYPE_SMOKE_4,	
-		SCR_EFFECTSPRITETYPE_SNAKE_COMBO_OLD,
-		SCR_EFFECTSPRITETYPE_SPIRAL_SLAY,
-		SCR_EFFECTSPRITETYPE_STRIKING_ING_1,
-		SCR_EFFECTSPRITETYPE_STRIKING_ING_2,
-		SCR_EFFECTSPRITETYPE_STRIKING_ING_3,
-		SCR_EFFECTSPRITETYPE_STRIKING_1,
-		SCR_EFFECTSPRITETYPE_STRIKING_2,
-		SCR_EFFECTSPRITETYPE_STRIKING_3,	
-		SCR_EFFECTSPRITETYPE_THUNDER_SPARK,
-		SCR_EFFECTSPRITETYPE_TRIPLE_BREAK,
-		SCR_EFFECTSPRITETYPE_TRIPLE_SLASHER,
-		SCR_EFFECTSPRITETYPE_TWIN_BREAK,
-		SCR_EFFECTSPRITETYPE_VAMPIRE_DEATH,
-		SCR_EFFECTSPRITETYPE_WILD_SMASH,	
-		SCR_EFFECTSPRITETYPE_DETECT_INVISIBILITY,
-		SCR_EFFECTSPRITETYPE_IDENTIFY_1x1,
-		SCR_EFFECTSPRITETYPE_IDENTIFY_1x3,
-		SCR_EFFECTSPRITETYPE_IDENTIFY_2x2,
-		SCR_EFFECTSPRITETYPE_IDENTIFY_2x3,
-		SCR_EFFECTSPRITETYPE_SACRIFICE_1,			// casting
-		SCR_EFFECTSPRITETYPE_SACRIFICE_2,			// Áö¼Ó
-		SCR_EFFECTSPRITETYPE_SNAKE_COMBO,
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_1,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_2,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_SWORD_WAVE_3,			// frameÀº µû·Î ¾ø´Ù.
-		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_1,		// ¹Ù´Ú¿¡ ÂïÈ÷´Â°Å (5ÇÁ·¹ÀÓ ÈÄ¿¡ Ãâ·Â)
-		SCR_EFFECTSPRITETYPE_TORNADO_SEVER_2,		// ¸ö¿¡ ºÙ´Â°Å
-
-		SCR_EFFECTSPRITETYPE_EXPLOSION,
-
-		// 2001.9.3
-		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_1,
-		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_2,		// ¹Ýº¹
-		SCR_EFFECTSPRITETYPE_LIGHTNING_HANDS_3,	
-		
-		// 2001.9.6
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_1,		// ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_PROTECTION_FROM_ACID_2,		// Áö¼Ó
-		
-		// 2001.10.8
-		SCR_EFFECTSPRITETYPE_EXPLOSION_2,
-		SCR_EFFECTSPRITETYPE_EXPLOSION_3,
-		SCR_EFFECTSPRITETYPE_CURE_ALL_1,				// ½ÃÀÛ
-		SCR_EFFECTSPRITETYPE_CURE_ALL_2,				// bless »Ñ·ÁÁÖ±â
-		SCR_EFFECTSPRITETYPE_ENCHANT_1x1,
-		SCR_EFFECTSPRITETYPE_ENCHANT_1x3,
-		SCR_EFFECTSPRITETYPE_ENCHANT_2x2,
-		SCR_EFFECTSPRITETYPE_ENCHANT_2x3		
-	};
-
-	//------------------------------------------------------------	
-	// convertÇÒ¶§.. progress.. ³È..
-	//------------------------------------------------------------	
-	SetProgressBarText("µ¥ÀÌÅ¸ È­ÀÏÀ» Ã¼Å©ÁßÀÔ´Ï´Ù.");
-	SetProgressBarCount( MAX_EST );	
-	
-	int cx = GetSystemMetrics(SM_CXSCREEN);
-	int cy = GetSystemMetrics(SM_CYSCREEN);	
-	
-	ShowWindow(g_hWndProgress, SW_HIDE);
-	CSDLGraphics::Init(g_hWndProgress, cx, cy, CSDLGraphics::FULLSCREEN);	
-	
-	MoveWindow(g_hWndProgress, 
-				(cx-progressBarWidth)/2, 
-				(cy-progressBarHeight)/2, 
-				progressBarWidth, 
-				progressBarHeight, 
-				TRUE);
-	ShowWindow(g_hWndProgress, SW_SHOW);
-
-
-	//------------------------------------------------------------
-	// ÇÊ¿äÇÑ Frame »Ì±â
-	//------------------------------------------------------------
-	COrderedList<int> intList;
-
-	std::ifstream efpkFile(FILE_EFRAME_ALPHAEFFECT, ios::binary);
-	CEffectFramePack	EFPK;
-	EFPK.LoadFromFile( efpkFile );
-	efpkFile.close();
-
-	CEffectFramePack	NewEFPK;
-	NewEFPK.Init( MAX_EST );
-	
-	//------------------------------------------------------------	
-	// ÇÊ¿äÇÑ EFPK¸¦ »ý¼ºÇÏ¸é¼­ »ç¿ëµÈ SpriteIDµµ ±¸ÇÑ´Ù.
-	//------------------------------------------------------------	
-	for (int e=0; e<MAX_EST; e++)
-	{
-		int etype = est[e];
-
-		DIRECTION_EFFECTFRAME_ARRAY& DEA = EFPK[etype];
-
-		NewEFPK[e] = DEA;
-
-		for (int d=0; d<8; d++)
-		{
-			EFFECTFRAME_ARRAY& EA = DEA[d];
-			
-			for (int f=0; f<EA.GetSize(); f++)
-			{
-				CEffectFrame& Frame = EA[f];
-
-				int spriteID = Frame.GetSpriteID();
-
-				intList.Add( spriteID );
-			}
-		}
-
-		UpdateProgressBar();
-	}	
-
-	EFPK.Release();
-
-	//------------------------------------------------------------	
-	// Alpha --> Normal ÁØºñ..
-	//------------------------------------------------------------	
-	CSpriteSurface	surface;
-	surface.InitOffsurface( 640, 480, DDSCAPS_SYSTEMMEMORY );	
-
-	POINT point0 = { 0, 0 };
-	
-	 
-	CAlphaSprite565		ASPR;
-
-	std::ifstream aspkiFile(FILE_ASPRITEINDEX_ALPHAEFFECT, ios::binary);
-	std::ifstream aspkFile(FILE_ASPRITE_ALPHAEFFECT, ios::binary);	
-
-	TYPE_SPRITEID totalNum;
-	int spriteNum = intList.GetSize();
-
-	CSpritePack* pSPK = new CSpritePack;
-	pSPK->Init( spriteNum, CSDLGraphics::Is565() );
-
-	aspkFile.read((char*)&totalNum, 2);
-
-	int* pNewID = new int [totalNum];
-
-	COrderedList<int>::DATA_LIST::const_iterator iID = intList.GetIterator();
-	WORD *lpSurface, lPitch;
-
-	//------------------------------------------------------------	
-	// convertÇÒ¶§.. progress.. ³È..
-	//------------------------------------------------------------	
-	SetProgressBarText("µ¥ÀÌÅ¸ È­ÀÏÀ» º¯°æÁßÀÔ´Ï´Ù.");
-	SetProgressBarCount( spriteNum/8 );	
-	
-
-	//------------------------------------------------------------	
-	// Alpha --> Normal
-	//------------------------------------------------------------		
-	for (int sid=0; sid<spriteNum; sid++)
-	{
-		int spriteID = *iID;
-		
-		aspkFile.seekg( 0 );
-		aspkiFile.seekg( 0 );		
-		
-		//--------------------------------------------------------
-		// LoadÇÒ FilePointer¸¦ ÀÐ¾î¿Â´Ù.
-		//--------------------------------------------------------
-		long fp;	
-		aspkiFile.seekg( 2 + spriteID*4 );		// 2(num) + spriteID * (4 bytes)
-		aspkiFile.read((char*)&fp, 4);		
-		aspkFile.seekg( fp );
-
-		//--------------------------------------------------------
-		// Load
-		//--------------------------------------------------------
-		ASPR.LoadFromFile( aspkFile );
-
-		//--------------------------------------------------------
-		// Å©±â °è»ê.. °Á - -
-		//--------------------------------------------------------
-		int width = ASPR.GetWidth();
-		int height = ASPR.GetHeight();
-		
-		//--------------------------------------------------------
-		// AlphaSprite¸¦ Ãâ·ÂÇÑ ÈÄ¿¡ 
-		// Sprite¸¦ »ý¼ºÇÑ´Ù.
-		//--------------------------------------------------------
-		surface.FillSurface( 0 );
-
-		surface.LockW(lpSurface, lPitch);	
-		surface.BltAlphaSprite( &point0, &ASPR );			
-		((*pSPK)[sid]).SetPixel(lpSurface, lPitch, width, height);
-
-		surface.Unlock();
-	
-		// ¿ø·¡´Â ID°¡ spriteID¿´´ø°Ô sid·Î ¹Ù²î°Ô µÈ´Ù.
-		pNewID[ spriteID ] = sid;
-
-		if ((sid & 0x00000007)==0x00000007)
-		{
-			UpdateProgressBar();	
-		}
-
-		iID++;
-	}
-
-	aspkiFile.close();
-	aspkFile.close();
-
-	//------------------------------------------------------------
-	// SpriteID¸¦ ¼öÁ¤ÇÑ´Ù.
-	//------------------------------------------------------------
-	int numFPK = NewEFPK.GetSize();
-	for (e=0; e<numFPK; e++)
-	{
-		DIRECTION_EFFECTFRAME_ARRAY& DEA = NewEFPK[e];
-
-		for (int d=0; d<8; d++)
-		{
-			EFFECTFRAME_ARRAY& EA = DEA[d];
-			
-			for (int f=0; f<EA.GetSize(); f++)
-			{
-				CEffectFrame& Frame = EA[f];
-
-				int cx = Frame.GetCX();
-				int cy = Frame.GetCY();
-				int light = Frame.GetLight();
-				int spriteID = pNewID[ Frame.GetSpriteID() ];
-
-				Frame.Set( spriteID, cx, cy, light );
-			}
-		}
-	}
-
-	delete [] pNewID;
-
-	//------------------------------------------------------------	
-	// FramePackÀúÀå
-	//------------------------------------------------------------	
-	std::ofstream fileFPK(FILE_EFRAME_SCREENEFFECT, ios::binary);
-	std::ofstream fileFPKI(FILE_EFRAMEINDEX_SCREENEFFECT, ios::binary);
-	NewEFPK.SaveToFile( fileFPK, fileFPKI );
-	fileFPK.close();
-	fileFPKI.close();
-	
-	//------------------------------------------------------------	
-	// SpritePack ÀúÀå
-	//------------------------------------------------------------	
-	std::ofstream fileSPK(FILE_SPRITE_SCREENEFFECT, ios::binary);
-	std::ofstream fileSPKI(FILE_SPRITEINDEX_SCREENEFFECT, ios::binary);
-	pSPK->SaveToFile( fileSPK, fileSPKI );
-	fileSPK.close();
-	fileSPKI.close();
-
-	delete pSPK;
-
-	ShowWindow(g_hWndProgress, SW_HIDE);
-	CSDLGraphics::ReleaseAll();
-	
-	MoveWindow(g_hWndProgress, 
-				(cx-progressBarWidth)/2, 
-				(cy-progressBarHeight)/2, 
-				progressBarWidth, 
-				progressBarHeight, 
-				TRUE);
-	ShowWindow(g_hWndProgress, SW_SHOW);
-
-	//------------------------------------------------------------	
-	// º¯È¯ Ã¼Å©
-	//------------------------------------------------------------	
-	std::ofstream fileCheck("Data\\Info\\EffectScreenConvert.inf", ios::binary);	
-	int a = 1;
-	fileCheck.write((const char*)&a, 4);
-	fileCheck.close();
-
-	return true;
-}
-*/
+ 
 //------------------------------------------------------------------------
 // ApplyPatch 
 //------------------------------------------------------------------------
-// °©ÀÚ±â ¾ÐÃàÀ» ÇÏ°Ô µÇ´Â ¹Ù¶÷¿¡... - -;
+
 //------------------------------------------------------------------------
 bool
 ApplyPatch()
 {	
 	//-----------------------------------------------------------------
-	// ÇöÀç version
+	
 	//-----------------------------------------------------------------
 //	std::ifstream versionFile(FILE_INFO_VERSION, ios::binary);
 //	int version;
@@ -2574,7 +1904,7 @@ ApplyPatch()
 //	versionFile.close();
 
 	//-----------------------------------------------------------------
-	// ÆÐÄ¡¾ÐÃàÈ­ÀÏÀÌ ÀÖ³ª È®ÀÎ
+	
 	//-----------------------------------------------------------------
 //	char packFilename[256];
 //	char infoFilename[256];
@@ -2583,7 +1913,7 @@ ApplyPatch()
 //	long				hFile;
 
 	//-----------------------------------------------------------------
-	// *.mpk fileÀ» Ã£´Â´Ù.
+	
 	//-----------------------------------------------------------------
 //	if ( (hFile = _findfirst( "*.mpk", &FileData )) != -1L )
 //	{		
@@ -2598,30 +1928,30 @@ ApplyPatch()
 //		_findclose( hFile );			
 
 		//-----------------------------------------------------------------
-		// ÆÐÄ¡¾ÐÃàÈ­ÀÏÀÇ ¾ÐÃà ÇØÁ¦ 
+		
 		//-----------------------------------------------------------------
 //		_mkdir( "Update" );
 //
-//		SetProgressBarText("ÆÐÄ¡ È­ÀÏÀÇ ¾ÐÃàÀ» ÇØÁ¦ÇÏ°í ÀÖ½À´Ï´Ù.");
+
 //
 //		MZLib mzlib;
 //
-//		// ¾ÐÃàÇÒ¶§ Updater°æ·Î¸¦ °°ÀÌ ÀúÀåÇßÀ¸¹Ç·Î °°ÀÌ Ç®¸°´Ù.
+
 //		mzlib.Uncompress( packFilename );	
 //
 //		//-----------------------------------------------------------------
-//		// infofileÀÌ¸§ °áÁ¤ - packFilename¿¡ µû¶ó¼­..
+
 //		//-----------------------------------------------------------------
 //		int len = strlen(packFilename);
 //		char str[256];
-//		strncpy(str, packFilename, len-4);	// °Á .±îÁö »©ÁØ´Ù.
+
 //		str[len-4] = '\0';
 //		sprintf(infoFilename, "Update\\%s.inf", str);
 //
 //	}
 	//-----------------------------------------------------------------
-	// mpkÈ­ÀÏÀÌ ¾ø´Â °æ¿ì´Â ¼öµ¿ÆÐÄ¡ÀÎ °æ¿ì¸¦ Ã¼Å©ÇØºÁ¾ßÇÑ´Ù.
-	// packFilenameÀÌ ¸î¹ø version¿¡ Àû¿ëµÇ´Â°ÇÁö ¾Ë¾Æ³½´Ù.
+	
+	
 	//-----------------------------------------------------------------
 //	else
 //	{
@@ -2635,7 +1965,7 @@ ApplyPatch()
 //		}
 //		*/
 //		
-//		// ÇöÀç ¹öÀü¿¡ ¸Â´Â ÆÐÄ¡È­ÀÏÀ» Ã£´Â´Ù.
+
 //		sprintf(infoFilename, "Update\\Patch%d_*.inf", version);
 //
 //		if ( (hFile = _findfirst( infoFilename, &FileData )) != -1L )
@@ -2652,25 +1982,25 @@ ApplyPatch()
 //		}
 //		else
 //		{
-//			// ¼öµ¿ÆÐÄ¡µµ ¾ø´Â °æ¿ì == ÇöÀç ¹öÀü
+
 //			return false;
 //		}
 //	}
 //
 //	//-----------------------------------------------------------------
-//	// info ÀÐ±â
+
 //	//-----------------------------------------------------------------	
-//	CreateProgressBar("ÆÐÄ¡ Á¤º¸¸¦ Ã¼Å© ÁßÀÔ´Ï´Ù.");
+
 //	
 //	UpdateManager	UM;
 //	UM.load( infoFilename );
 //
 //	SetProgressBarCount( UM.getNum()+g_numAppendFiles );	
 //
-//	SetProgressBarText("ÆÐÄ¡ È­ÀÏÀ» Àû¿ë½ÃÅ°°í ÀÖ½À´Ï´Ù.");
+
 //	
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡È­ÀÏ Àû¿ë
+
 //	//-----------------------------------------------------------------
 //	int newVersion = 0;
 //	while (!UM.empty())
@@ -2683,7 +2013,7 @@ ApplyPatch()
 //			// -_-;;
 //		}	
 //
-//		// version upÀÎ°¡?
+
 //		if (pUpdate->getVersion() > newVersion)
 //		{
 //			newVersion = pUpdate->getVersion();
@@ -2693,19 +2023,19 @@ ApplyPatch()
 //	}
 //
 //	//-----------------------------------------------------------------
-//	// »õ versionÀúÀå
+
 //	//-----------------------------------------------------------------
 //	std::ofstream versionFile2(FILE_INFO_VERSION, ios::binary);
 //	versionFile2.write((const char*)&newVersion, 4);
 //	versionFile2.close();
 //	
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡¾ÐÃàÈ­ÀÏ Á¦°Å
+
 //	//-----------------------------------------------------------------
 //	remove( packFilename );
 //
 //	//-----------------------------------------------------------------
-//	// ÆÐÄ¡È­ÀÏ Á¦°Å - Updater µð·ºÅä¸® Áö¿ì¸é¼­ µÇ¹Ç·Î .. ½Å°æ ¾È ½áµµ µÈ´Ù.
+
 //	//-----------------------------------------------------------------
 //
 	return true;
@@ -2729,7 +2059,7 @@ ApplyPatch()
 //		long				hFile;
 //
 //		//-----------------------------------------------------------------
-//		// *.spk fileÀ» Ã£´Â´Ù.
+
 //		//-----------------------------------------------------------------
 //		if ( (hFile = _findfirst( "Data\\UI\\txt\\Log*.txt", &FileData )) != -1L )
 //		{
@@ -2757,7 +2087,7 @@ ApplyPatch()
 //						GetComputerName( computerName,  &numSize );
 //					}
 //					
-//					sprintf(buffer, "\\\\¾¦°«\\Log\\%s-%s", computerName, FileData.name);
+
 //					
 //					_chmod( filename, _S_IREAD | _S_IWRITE );
 //					rename(filename, buffer);						
@@ -2787,7 +2117,7 @@ ApplyPatch()
 		_mkdir( "Log" );
 		
 		//-----------------------------------------------------------------
-		// *.spk fileÀ» Ã£´Â´Ù.
+		
 		//-----------------------------------------------------------------
 		if ( (hFile = _findfirst( "Log\\Log*.txt", &FileData )) != -1L )
 		{
@@ -2826,7 +2156,7 @@ ApplyPatch()
 //							GetComputerName( computerName,  &numSize );
 //						}
 //						
-//						sprintf(buffer, "\\\\¾¦°«\\Log\\%s-%s", computerName, FileData.name);
+
 //						
 //						_chmod( filename, _S_IREAD | _S_IWRITE );
 //						rename(filename, buffer);						
@@ -2874,7 +2204,7 @@ ApplyPatch()
 					DEBUG_ADD_FORMAT("[Time = %d]", g_CurrentTime);
 				}
 
-				// 3ºÐ ÈÄ
+				
 				flushTime = g_CurrentTime + flushDelay;
 			}
 		//#endif
@@ -2892,7 +2222,7 @@ ApplyPatch()
 //    {
 //        KBDLLHOOKSTRUCT* kbhook = (KBDLLHOOKSTRUCT*)lParam;
 //
-//// ¾ËÆ®Å°°¡ ´­¸°°ÍÀÎÁö....
+
 //        if(kbhook->flags & LLKHF_ALTDOWN)
 //        {
 //            switch(kbhook->vkCode)
@@ -2904,7 +2234,7 @@ ApplyPatch()
 //                break;
 //            }
 //        }
-//// Control + ESCµµ ¸·Àð
+
 //		else if(((GetAsyncKeyState( VK_CONTROL ) & 0x8000) || g_pSDLInput != NULL && (g_pSDLInput->KeyDown(DIK_LCONTROL) || g_pSDLInput->KeyDown(DIK_RCONTROL))) && kbhook->vkCode == VK_ESCAPE)
 //		{
 //			SHORT control = GetAsyncKeyState( VK_CONTROL );
@@ -2938,6 +2268,12 @@ WinMain(HINSTANCE hInstance,
         LPSTR lpCmdLine,
         int nCmdShow)
 {	
+	ResetStartupTrace();
+	ResetLoginFlowTrace();
+	TraceStartup("WinMain begin");
+	EnableDpiAwareProcess();
+	timeBeginPeriod(1);
+	ApplyConfiguredGameResolution();
 // 	char tttt[] = "0000000011";
 // 	memcpy(lpCmdLine,tttt,strlen(tttt));
 	//tttt += lpCmdLine;
@@ -2951,6 +2287,7 @@ WinMain(HINSTANCE hInstance,
 	//add by Soargon
 	DEVMODE   DevMode; 
 	EnumDisplaySettings( NULL, ENUM_CURRENT_SETTINGS, &DevMode );
+	TraceStartup("display settings read");
 	if(DevMode.dmBitsPerPel != 16)
 	{
 		DEVMODE	tempDevMode = DevMode;
@@ -2959,75 +2296,37 @@ WinMain(HINSTANCE hInstance,
 	}
 	//end
 	//add by zdj
-	bool cmpFullScreen;
-	if (lpCmdLine[strlen(lpCmdLine)-1] == '1')
+	bool cmpFullScreen = false;
+	size_t cmdLineLength = (lpCmdLine != NULL) ? strlen(lpCmdLine) : 0;
+	char launchMode = (cmdLineLength > 0) ? lpCmdLine[cmdLineLength - 1] : '1';
+	TraceStartup("command line parsed");
+	if (launchMode == '1')
 	{
 		g_MyFull=false;
 		cmpFullScreen = false;
 	}
-	else if (lpCmdLine[strlen(lpCmdLine)-1] == '2')
+	else if (launchMode == '2')
 	{
 		g_MyFull=false;
 		cmpFullScreen=true;
 	}
 	// add by Sonic 2006.9.26
-	else if (lpCmdLine[strlen(lpCmdLine)-1] == '3')
+	else if (launchMode == '3')
 	{
 		g_MyFull=true;
 		cmpFullScreen=false;
-		g_GameRect.left=1023;
-		g_GameRect.top=767;
-		g_GameRect.right=1024;
-		g_GameRect.bottom=768;
-		g_x=512;
-		g_y=384;
-		g_SECTOR_WIDTH           = 21;
-		g_SECTOR_HEIGHT          = 32;
-		g_SECTOR_WIDTH_HALF      = 11;
-		g_SECTOR_HEIGHT_HALF     = 17;
-		g_SECTOR_SKIP_PLAYER_LEFT= -10;
-		g_SECTOR_SKIP_PLAYER_UP  = -16;
-
-		g_TILESURFACE_SECTOR_WIDTH         =27;
-		g_TILESURFACE_SECTOR_HEIGHT        =37;
-		g_TILESURFACE_SECTOR_OUTLINE_RIGHT =24;
-		g_TILESURFACE_SECTOR_OUTLINE_DOWN  =34;
-		g_TILESURFACE_WIDTH                =1296;
-		g_TILESURFACE_HEIGHT               =888;
-		g_TILESURFACE_OUTLINE_RIGHT        =1152;
-		g_TILESURFACE_OUTLINE_DOWN         =816;
-		g_TILE_X_HALF = 24;
-		g_TILE_Y_HALF = 12;
+		ApplyConfiguredGameResolution();
 	}
-	else if (lpCmdLine[strlen(lpCmdLine)-1] == '4')
+	else if (launchMode == '4')
 	{
 		g_MyFull=true;
 		cmpFullScreen=true;
-		g_GameRect.left=1023;
-		g_GameRect.top=767;
-		g_GameRect.right=1024;
-		g_GameRect.bottom=768;
-		g_x=512;
-		g_y=384;
-		g_SECTOR_WIDTH           = 21;
-		g_SECTOR_HEIGHT          = 32;
-		g_SECTOR_WIDTH_HALF      = 11;
-		g_SECTOR_HEIGHT_HALF     = 17;
-		g_SECTOR_SKIP_PLAYER_LEFT= -10;
-		g_SECTOR_SKIP_PLAYER_UP  = -16;
-
-		g_TILESURFACE_SECTOR_WIDTH         =27;
-		g_TILESURFACE_SECTOR_HEIGHT        =37;
-		g_TILESURFACE_SECTOR_OUTLINE_RIGHT =24;
-		g_TILESURFACE_SECTOR_OUTLINE_DOWN  =34;
-		g_TILESURFACE_WIDTH                =1296;
-		g_TILESURFACE_HEIGHT               =888;
-		g_TILESURFACE_OUTLINE_RIGHT        =1152;
-		g_TILESURFACE_OUTLINE_DOWN         =816;
-		g_TILE_X_HALF = 24;
-		g_TILE_Y_HALF = 12;
+		ApplyConfiguredGameResolution();
 	}
-	lpCmdLine[strlen(lpCmdLine)-1]=0x0;
+	if (cmdLineLength > 0 && launchMode >= '1' && launchMode <= '4')
+	{
+		lpCmdLine[cmdLineLength - 1] = 0x0;
+	}
 
 	//std::string tttt = "NEWSTART0";
 	//tttt = lpCmdLine + tttt;
@@ -3053,9 +2352,9 @@ WinMain(HINSTANCE hInstance,
 
 	
 	//----------------------------------------------------------
-	// ÇÏ³ªÀÇ application¸¸ ½ÇÇà½ÃÅ²´Ù.
+	
 	//----------------------------------------------------------
-	// °ª ´ëÃæ ³Ö±â.. --;
+	
 	SECURITY_ATTRIBUTES sa;
 	sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
@@ -3063,8 +2362,9 @@ WinMain(HINSTANCE hInstance,
 
 
 #ifndef OUTPUT_DEBUG
-	// 2006.11.07 edit Coffee  ÐÞÕýÎª³ÌÐò¿ÉÒÔË«¿ª
+	
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");  
+	TraceStartup("mutex created");
 	/*
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");   
 	
@@ -3113,7 +2413,7 @@ WinMain(HINSTANCE hInstance,
 
 #endif
 	
-		// ÇöÀç directory¸¦ ÀúÀåÇØµÐ´Ù.
+		
 //	strcpy(g_CWD, __argv[0]);
  	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
 	char *tempCut = strrchr(g_CWD, '\\');
@@ -3126,22 +2426,23 @@ WinMain(HINSTANCE hInstance,
 
 	
 	SetCurrentDirectory(g_CWD);
+	TraceStartup("current directory set");
 	
-// 	//	// »õ·Î¿î updater½ÇÇàÈ­ÀÏÀÌ Á¸ÀçÇÏ¸é..
+
 //	if (_access(UPDATER_NEW_FILENAME, 0) == 0/* && _access(UPDATER_FILENAME, 0)*/)//updaterNewFile)
 //	{	
-//		// ¿¹Àü Patcher¸¦ Áö¿ì°í..
+
 //		if (remove( UPDATER_FILENAME )==0)
 //		{
-//			// »õ°ÍÀ» ¿¹Àü°É·Î rename
+
 //			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 //			{
 //				DEBUG_ADD("Update Updater.exe OK"); 
 //			}
 //		}
-////		// ¿¹Àü updater¸¦ Áö¿ì°í..
+
 ////		//remove( UPDATER_FILENAME );
-////		// »õ°ÍÀ» ¿¹Àü°É·Î rename
+
 ////		if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 ////		{
 ////			DEBUG_ADD("Update Updater.exe OK"); 
@@ -3199,6 +2500,7 @@ WinMain(HINSTANCE hInstance,
 //yckou end
 //add by sonic Check *.dll have Bug. 2006.4.13
 //yckou begin: check invalid *.dll
+#ifndef PLATFORM_WINDOWS
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
 	bool fFinished = false; 
@@ -3253,40 +2555,13 @@ WinMain(HINSTANCE hInstance,
 		// Close the search handle. 
 		FindClose(hSearch);
 	}
+#endif
 //yckou end
 //end sonic
 
 #endif
 
-	/*
-#include "packet\ServerSocket.h"
-
-	// ÇÑ Client´Â µ¿½Ã¿¡ ´Ù¸¥ ÇÑ Client¿Í Åë½ÅÇÑ´Ù.
-	// ¿©·¯±ºµ¥ÀÇ resource(±æµå¸¶Å©, profile...)°¡ ÇÊ¿äÇÑ °æ¿ì 
-	//		ResourceQueue¿¡ ÀúÀåÇß´Ù°¡ Æ´Æ´È÷ ¹Þµµ·Ï ÇÑ´Ù.
-	// while(1)ºÎºÐÀº ´Ù¸¥ thread·Î »©¾ßµÈ´Ù.
-	// RequestManager Á¢±ÙÇÒ¶§´Â mutex¾²µçÁö ÇØ¾ßµÈ´Ù.
-	// RequestManagerÀÇ Update()´Â main thread¿¡¼­ ÇÑ´Ù.
-	//
-	ServerSocket* pServerSocket = new ServerSocket( 9650 );
-
-	char strClient[256];
-	uint port;
-
-	while (1)
-	{
-		Socket* pSocket = pServerSocket->accept();
-
-		// request¿¡ µî·Ï
-		RequestServerPlayer* pRequestServerPlayer = new RequestServerPlayer( pSocket );
-		g_pRequestManager->AddPlayer( pRequestServerPlayer );
-
-		// g_pRequestManager´Â µî·ÏµÈ RequestServerPlayer¿¡ ´ëÇØ¼­ processInput/Command/Output Ã³¸®
-
-		strcpy(strClient, pSocket->getHost().c_str());
-		port = pSocket->getPort();
-	}
-	*/
+	 
 
 	/*
 	std::ifstream file("ImageObject.spk", ios::binary);
@@ -3349,7 +2624,7 @@ WinMain(HINSTANCE hInstance,
 	*/
 	
 	//-----------------------------------------------------------------------
-	// Client ½ÃÀÛ..
+	
 	//-----------------------------------------------------------------------
 	g_bNeedUpdate = FALSE;
 //	OutPutClassSize();
@@ -3408,6 +2683,7 @@ WinMain(HINSTANCE hInstance,
 	g_hInstance = hInstance;
 	// random
 	srand(time(NULL));
+	TraceStartup("instance initialized");
 
 	
 	
@@ -3426,13 +2702,15 @@ WinMain(HINSTANCE hInstance,
 
 	g_pFileDef = new Properties;
 	g_pFileDef->load(FILE_INFO_FILEDEF);
+	TraceStartup("file definitions loaded");
 
-	// ³Ý¸¶ºí¿ë
+	
 	bool bNetmarble = false;
 	Properties NetmarbleConfig;
 
 	NetmarbleConfig.load(g_pFileDef->getProperty("FILE_INFO_NETMARBLE").c_str());
 	bNetmarble = NetmarbleConfig.getPropertyInt("Netmarble") != 0;
+	TraceStartup("netmarble config loaded");
 
 	if(bNetmarble)
 	{
@@ -3450,11 +2728,11 @@ WinMain(HINSTANCE hInstance,
 	//MessageBox(g_hWnd, lpCmdLine, NULL, MB_OK);
 		
 	//------------------------------------------------------
-	// Server IP°¡ ¼³Á¤µÇ¾î ÀÖÁö ¾ÊÀº °æ¿ì --> Launcher½ÇÇà
+	
 	//------------------------------------------------------
 	if (strlen(lpCmdLine)==0)
 	{
-		#if defined(USE_UPDATER)
+		#if defined(USE_UPDATER) && !defined(PLATFORM_WINDOWS)
 			
 #ifndef OUTPUT_DEBUG
 			if (!ReleaseMutex( hMutex ))
@@ -3486,7 +2764,7 @@ WinMain(HINSTANCE hInstance,
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);
 			_chdir( g_CWD );
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8001,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
@@ -3508,11 +2786,12 @@ WinMain(HINSTANCE hInstance,
 			#endif
 			g_bHAL			= true;
 			g_bMusicSW		= true;		
+			TraceStartup("empty command line accepted");
 			
 		#endif
 	}
 	//------------------------------------------------------
-	// Server IP°¡ ¼³Á¤µÇ¾î ÀÖ´Â °æ¿ì
+	
 	//------------------------------------------------------
 	else
 	{
@@ -3543,7 +2822,7 @@ WinMain(HINSTANCE hInstance,
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8002,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
 
@@ -3555,10 +2834,10 @@ WinMain(HINSTANCE hInstance,
 		//char checkStr[9] = "NEWSTART";
 		//char checkStr[9] = "START";
 
-		//add by sonic 2006.4.9  ÉèÖÃ¼ÓÃÜº¯Êý
+		
 		DWORD GetCommand;
 		// EXECryptor_GetHardwareID() removed (SDL2) - Copy protection no longer needed
-		GetCommand = 0x00000000;  //ÓÃÓÚµ÷ÊÔ
+		GetCommand = 0x00000000;  
 		char checkStr[9];
 		memset(checkStr,0,9);
 		sprintf(checkStr, "%X" ,GetCommand);
@@ -3588,7 +2867,7 @@ WinMain(HINSTANCE hInstance,
 		if (memcmp(checkStr,T_checkStr,strlen(checkStr)))
 		{
 			//MessageBox(0,checkStr,str,MB_OK);
-			//´«Èë²ÎÊý´íÎó///
+			
 			return false;
 			bRunUpdater = true;
 			//break;
@@ -3638,21 +2917,10 @@ WinMain(HINSTANCE hInstance,
 		}
 #endif
 //add by Sonic 2006.7.26
-	//Ôö¼Ó¹ÜµÀ¼ì²â
-		/*
-	if (GetSystem())
-	{
-		HANDLE hClient = CreateFile("\\\\.\\pipe\\¡¡¡¡¡¡\\",GENERIC_WRITE |	GENERIC_READ,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-		if(hClient == INVALID_HANDLE_VALUE)
-		{
-			//MessageBox(0,"Error","Error",MB_OK);
-			bRunUpdater = true;
-			return false;
-		}
-	}
-	*/
+	
+		 
 		#ifdef OUTPUT_DEBUG
-			// Ã¢¸ðµå ½ÃÀÛ..
+			
 			g_bTestMode = true;
 			char checkTestMode[] = "TestMode";
 			for (int i=0; i<strlen(checkTestMode); i++)
@@ -3670,16 +2938,7 @@ WinMain(HINSTANCE hInstance,
 				bRunUpdater = false;
 			}
 		#endif
-			/*
-		if (memcmp(checkStr,str,strlen(checkStr)))
-		{
-			//MessageBox(0,checkStr,str,MB_OK);
-			//´«Èë²ÎÊý´íÎó///
-			return FALSE;
-			bRunUpdater = true;
-			//break;
-		}
-		*/
+			 
 /////////////////////////////edit by sonic 2006.6.20///////////////////////
 		if (bRunUpdater)
 		{
@@ -3709,8 +2968,8 @@ WinMain(HINSTANCE hInstance,
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
 
-			// ¿©±â
-			// [Futec¼öÁ¤]
+			
+			
 //			char szTemp[512];
 //			sprintf(szTemp, "%s %s", UPDATER_FILENAME, lpCmdLine);
 //			DWORD error = WinExec(szTemp, SW_SHOW);
@@ -3732,7 +2991,7 @@ WinMain(HINSTANCE hInstance,
 //				MessageBox(NULL, "The specified path was not found. ", PROGRAM_TITLE, MB_OK);
 //				break;
 //			}
-			//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8003,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+			
 			_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, lpCmdLine, NULL);
 //			ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, lpCmdLine, NULL, SW_SHOW);
 
@@ -3764,29 +3023,29 @@ WinMain(HINSTANCE hInstance,
 		//g_bFullScreen	= true;
 	#endif
 
-	// [Futec¼öÁ¤]
+	
 	GetFutecAddress(lpCmdLine);
 
 
 
 	//------------------------------------------------------------------------
-	// Á¤»óÀûÀÎ Patch 
-	// °©ÀÚ±â ¾ÐÃàÀ» ÇÏ°Ô µÇ´Â ¹Ù¶÷¿¡... - -;
+	
+	
 	//------------------------------------------------------------------------
 //	bool bPatched = ApplyPatch();
 
 	//------------------------------------------------------------------------
-	// ScreenEffect »ý¼º
+	
 	//------------------------------------------------------------------------
 //	ConvertScreenEffect();
 
 	//------------------------------------------------------------------------
-	// ÀÌÁ¦ºÎÅÍ EffectScreen¿¡ AppendµÇ´Â SPK´Â 
-	// ÀÌ ½ÃÁ¡¿¡¼­ AppendÇØ¾ß ÇÑ´Ù.
-	// CheckTerriblePatch¿¡ °°ÀÌ ³Ö¾îµµ µÈ´Ù. - -;;
+	
+	
+	
 	//------------------------------------------------------------------------
 	//AppendScreenEffect();
-//add by sonic 2006.4.10 ÅÐ¶Ï³ÌÐòÆô¶¯Ä£Ê½
+
 	if ( cmpFullScreen )
 		{
 			g_bFullScreen = true;
@@ -3823,19 +3082,19 @@ WinMain(HINSTANCE hInstance,
 	
 
 	//----------------------------------------------------------------
-	// Updater.exe¸¦ update ½ÃÅ²´Ù.
+	
 	//----------------------------------------------------------------
 //	std::ifstream updaterNewFile(UPDATER_NEW_FILENAME, ios::binary | );
 
-	// »õ·Î¿î updater½ÇÇàÈ­ÀÏÀÌ Á¸ÀçÇÏ¸é..
+	
 	if (!_access(UPDATER_NEW_FILENAME, 0))//updaterNewFile)
 	{	
 //		updaterNewFile.close();
 
-		// ¿¹Àü updater¸¦ Áö¿ì°í..
+		
 		if (remove( UPDATER_FILENAME )==0)
 		{
-			// »õ°ÍÀ» ¿¹Àü°É·Î rename
+			
 			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
 			{
 				//MessageBox(0,"Error:[rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0]","Error",MB_OK);
@@ -3846,13 +3105,13 @@ WinMain(HINSTANCE hInstance,
 
 	//strcpy(g_ServerIP, SERVER_IP);
 	//---------------------------------------------------
-	// Update µð·ºÅä¸®¸¦ Áö¿öÁØ´Ù.
+	
 	//---------------------------------------------------
-	// updater¿¡¼­ Áö¿ö¾ß ÇÏ´Âµ¥..»©¸Ô´Â ¹Ù¶÷¿¡.. T_T;;
+	
 	//---------------------------------------------------
 	char CWD[_MAX_PATH];
 
-	// ÇöÀç pathÀÐ±â
+	
 	if (_getcwd( CWD, _MAX_PATH )!=NULL)
 	{	
 		char UpdateDir[_MAX_PATH];
@@ -3872,35 +3131,35 @@ WinMain(HINSTANCE hInstance,
 		
 		if (_rmdir( UpdateDir )!=0)
 		{			
-			// PATH°¡ Àß¸øµÈ °æ¿ì
+			
 			if (errno==ENOENT)
 			{				
 			}
-			// ¹º°¡ ÀÖ¾î¼­ ¾È Áö¿öÁø °æ¿ì..		
+			
 			else //if (errno==ENOTEMPTY)
 			{
-				// ÇöÀç directory¸¦ ±â¾ïÇØµÐ´Ù.				
+				
 				if (_chdir( UpdateDir ) == 0)
 				{
 					//---------------------------------------------------
-					// fileÇÏ³ªÇÏ³ª¸¦ Áö¿öÁØ´Ù. T_T;
+					
 					//---------------------------------------------------
 					struct _finddata_t	FileData;
 					long				hFile;
 
-					// ¸ðµç È­ÀÏÀ» ÀÐ¾î¿Â´Ù.
+					
 					if( (hFile = _findfirst( "*.*", &FileData )) != -1L )					
 					{
 						while (_findnext( hFile, &FileData ) == 0)
 						{
-							// .À¸·Î ½ÃÀÛÇÏ´Â °Ç Áö¿ï ÇÊ¿ä ¾ø´ç..
+							
 							if (FileData.name[0] != '.')
 							{
 								remove( FileData.name );
 							}
 						}
 
-						// ³¡
+						
 						_findclose( hFile );			
 					}
 					
@@ -3908,7 +3167,7 @@ WinMain(HINSTANCE hInstance,
 
 					if (_rmdir( UpdateDir )==0)
 					{
-						// Àß Áö¿öÁ³´Ù.
+						
 					}
 				}				
 			}
@@ -3917,9 +3176,10 @@ WinMain(HINSTANCE hInstance,
 
 	
 	RemoveProgressBar();
+	TraceStartup("progress bar removed");
 
 	//-----------------------------------------------------------------
-	// ÆÐÄ¡ ³»¿ë Âï¾îÁØ´Ù.
+	
 	//-----------------------------------------------------------------
 //	if (bPatched)
 //	{
@@ -3940,7 +3200,7 @@ WinMain(HINSTANCE hInstance,
 			if(NetmarbleConfig.getPropertyInt("Netmarble") == 1)
 			{
 				//add by sonic 2006.4.11
-				//MessageBox(NULL, "³Ý¸¶ºí¿ë ´ÙÅ©¿¡µ§Àº ³Ý¸¶ºí È¨ÆäÀÌÁö¸¦ ÅëÇØ¼­¸¸ ½ÇÇàÀÌ °¡´ÉÇÕ´Ï´Ù.", PROGRAM_TITLE, MB_OK);
+				
 				//end
 
 				return -1;
@@ -3957,16 +3217,17 @@ WinMain(HINSTANCE hInstance,
 		if(ParsingRealServer(lpCmdLine, g_Dimension, RealServerInfo) == false)
 		{
 //#ifndef OUTPUT_DEBUG
-//			MessageBox(NULL, "À¥ ÆäÀÌÁö ¿¡¼­ ´Ù½Ã ½ÇÇàÇØÁÖ½Ã±â ¹Ù¶ø´Ï´Ù.", PROGRAM_TITLE, MB_OK);
+
 //			ShellExecute(NULL, NULL, "www.darkeden.com", NULL, NULL, SW_SHOW);
 //			return -1;
 //
 //#endif
 		}
 	}
-	//Ôö¼Ó¼ì²â
-/* Add by sonic 2006.9.14 Ôö¼Ó¶ÔWPE ¼ì²â */
+	
+ 
 _APICheck.init();
+	TraceStartup("api check initialized");
 /* ************************************* */
 //	FILE *fp = fopen("Data\\Info\\SuperUser.inf","rt");	
 //	MessageBox(NULL,__TIME__,__TIME__,MB_OK);
@@ -4029,28 +3290,29 @@ _APICheck.init();
 //	}
 
 	DARKEDEN_LANGUAGE Language = CheckDarkEdenLanguage();
+	TraceStartup("language checked");
 	
 	switch( Language )
 	{
-	case DARKEDEN_CHINESE :
-		gC_ci = new CI_CHINESE;
-		break;
 	default :
-		gC_ci = new CI_KOREAN;
+		gC_ci = new CI_ENGLISH;
 		break;
 	}
+	TraceStartup("language interface created");
 	
 #ifndef _DEBUG
 	if( gC_ci->IsKorean() == true )
 		InitCrashReport();
 #endif
+	TraceStartup("before InitApp");
 	if (InitApp(nCmdShow))
 	{
+		TraceStartup("InitApp succeeded");
 		// SDL2 doesn't provide video memory queries like DirectX
 		// Use a reasonable default value for all platforms
 		g_dwVideoMemory = 256 * 1024 * 1024;  // 256 MB default
 
-		// ³Ý¸¶ºí¿ë
+		
 		if(bNetmarble)
 		{
 			g_pUserInformation->NetmarbleID = NetmarbleInfo.ID;
@@ -4091,12 +3353,9 @@ _APICheck.init();
 		
 		}
 
-		if( gC_ci->IsKorean() )
-			g_pUserInformation->SetKorean();
-		else if (gC_ci->IsChinese() )
-			g_pUserInformation->SetChinese();
-		else if (gC_ci->IsJapanese() )
-			g_pUserInformation->SetJapanese();
+		// Keep the legacy Korean protocol/config path for server compatibility.
+		// UI/input language is forced independently via CI_ENGLISH.
+		g_pUserInformation->SetKorean();
 
 //		#if !defined(OUTPUT_DEBUG) && !defined(__DEBUG_OUTPUT__)
 //		g_hHook = SetWindowsHookEx(WH_KEYBOARD_LL,(HOOKPROC)KeyboardHook, hInstance, 0);
@@ -4106,24 +3365,27 @@ _APICheck.init();
 
 		//static DWORD lastTime=1;
 		//------------------------------
-		// ÃÊ±âÈ­ µÇÁö ¾Ê¾ÒÀ¸¸é ÃÊ±âÈ­ÇÑ´Ù.
+		
 		//------------------------------
 		if (!g_pTopView->IsInit())
 		{
+			TraceStartup("before top view init");
 			g_pTopView->Init();			
+			TraceStartup("top view initialized");
 		
 		}
 
 		g_bActiveApp = TRUE;
+		TraceStartup("entering message loop");
 		//g_bActiveGame = TRUE;
-		DEBUG_CMD(MIN_CLRSCR, "½ÃÀÛ");
+		DEBUG_CMD(MIN_CLRSCR, "");
 		DEBUG_CMD(MIN_SHOWWND, "------------------------------");
 		
 
 		while (TRUE)
 		{
 //			Sleep(1);	//add by viva
-			/* add by sonic Ôö¼Ó¶Ôsock¼ì²â */
+			 
 				_APICheck.CheckApi();
 			/* *************************** */
 			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
@@ -4151,7 +3413,7 @@ _APICheck.init();
 #ifdef PLATFORM_WINDOWS
 						if (g_pUpdate!=NULL)
 						{
-							// 노파식.. 으이으.. --;;
+							
 							CWinUpdate*	pCurrentUpdate = g_pUpdate;
 
 							pCurrentUpdate->Update();
@@ -4186,7 +3448,7 @@ _APICheck.init();
 					
 							g_FrameRate = (g_FrameCount - g_StartFrameCount) * 1000 / timeGap;
 
-							// 15 fps ÀÌ»ó
+							
 							g_bGoodFPS = (g_FrameRate >= g_FrameGood);
 							
 							g_StartTime = g_CurrentTime;
@@ -4211,9 +3473,10 @@ _APICheck.init();
 	}
 	//add by Soargon
 	ChangeDisplaySettings( &DevMode, CDS_RESET );
+	timeEndPeriod(1);
 	//end
 	//-----------------------------------------------------------------------------
-	// Å¸ÀÌ¸Ó ÀÌ»óÀ¸·Î Á¾·áÇÏ´Â °æ¿ì
+	
 	//-----------------------------------------------------------------------------
 	if (bBadTimer)
 	{
@@ -4224,7 +3487,7 @@ _APICheck.init();
 			{
 				g_pUIDialog->PopupFreeMessageDlg( g_nProtectMessage[g_nProtectSTATUS].c_str() );
 			} else
-				g_pUIDialog->PopupFreeMessageDlg( "¸ÅÅ©·Î³ª ¹ÙÀÌ·¯½º°¡ ¹ß°ßµÇ¾î ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é bug@darkeden.comÀ¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
+				g_pUIDialog->PopupFreeMessageDlg( "    .   ,         bug@darkeden.com  .", -1, -1, 0 );
 #endif
 
 #if defined(__NPROTECT__)&&!defined(__NPROTECT_OLD_VERSION__)
@@ -4239,7 +3502,7 @@ _APICheck.init();
 				else
 				{
 					char szTemp[256];
-					wsprintf(szTemp,"nProtectÀÇ ¾Ë ¼ö ¾ø´Â ¿À·ù ¿¡·¯ÄÚµå[%d][%d]ÀÔ´Ï´Ù. ´ÙÅ©¿¡µ§À» Á¾·áÇÕ´Ï´Ù.",g_nProtectErrorMessage, g_nProtectErrorMessage2);
+					wsprintf(szTemp,"nProtect     [%d][%d].  .",g_nProtectErrorMessage, g_nProtectErrorMessage2);
 					g_pUIDialog->PopupFreeMessageDlg( szTemp );
 				}
 			}
@@ -4247,13 +3510,13 @@ _APICheck.init();
 				
 //			if(g_bForceExitBynProtect2)
 //			{
-//				g_pUIDialog->PopupFreeMessageDlg( "nProtect °ü·Ã ÆÄÀÏ ÃÊ±âÈ­ ¿¡·¯°¡ ¹ß»ýÇß½À´Ï´Ù. °ü¸®ÀÚ °èÁ¤À¸·Î ·Î±×ÀÎÇÏ¿© °ÔÀÓÀ» ½ÇÇàÇÏ½Ã±â ¹Ù¶ø´Ï´Ù.", -1, -1, 0 );
+
 //			}else
 //			{
 //				if(g_bForceExitBynProtect)
-//					g_pUIDialog->PopupFreeMessageDlg( "¹ÙÀÌ·¯½º ¹× ÇØÅ· Â÷´Ü±â¿¡ ÀÇÇØ ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é, bug@darkeden.com À¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
+
 //				else
-//					g_pUIDialog->PopupFreeMessageDlg( "¸ÅÅ©·Î³ª ¹ÙÀÌ·¯½º°¡ ¹ß°ßµÇ¾î ´ÙÅ©¿¡µ§ÀÌ Á¾·áµË´Ï´Ù. ¹ÙÀÌ·¯½º °Ë»ç¸¦ ÇØº¸½Ã°í, Á¤»óÀûÀ¸·Î °ÔÀÓ ÁøÇàÀ» ÇÏ´Âµ¥ ÀÌ·¯ÇÑ ¹®Á¦°¡ ¶Ç ¹ß»ýµÈ´Ù¸é bug@darkeden.comÀ¸·Î ¸ÞÀÏÀ» º¸³»ÁÖ¼¼¿ä.", -1, -1, 0 );
+
 //			}
 //			//MessageBox(NULL, "Timer Error!", PROGRAM_TITLE, MB_OK | MB_TOPMOST);
 			
@@ -4290,7 +3553,7 @@ _APICheck.init();
 	}
 
 	//-----------------------------------------------------------------------------
-	// ¸ðµç objectµé Á¦°Å
+	
 	//-----------------------------------------------------------------------------	
 	ReleaseAllObjects();
 #ifdef __WEB_BROWSER__
@@ -4347,7 +3610,7 @@ _APICheck.init();
 	#endif
 	
 	//----------------------------------------------------------------
-	// Updater¸¦ ½ÇÇà½ÃÅ²´Ù.
+	
 	//----------------------------------------------------------------
 	if (g_bNeedUpdate)
 	{
@@ -4355,7 +3618,7 @@ _APICheck.init();
 		char szTemp[512];
 		sprintf(szTemp, "UPDATE %s", lpCmdLine);
 		_chdir( g_CWD );
-		//::MessageBox(0,"¶ÁÈ¡ÏµÍ³DLL³ö´í£¬´íÎóID£º8004,Çë¼°Ê±ÏòÎÒÃÇÌá½»´íÎó¡£","´íÎó",MB_OK);
+		
 		_spawnl(_P_OVERLAY, UPDATER_FILENAME, UPDATER_FILENAME, szTemp, NULL);		
 //		ShellExecute(g_hWnd, NULL, UPDATER_FILENAME, szTemp, NULL, SW_SHOW);
 	}	
@@ -4373,27 +3636,27 @@ BOOL GetSystem()
 		{
 		case VER_PLATFORM_WIN32_WINDOWS:
 			if(OsInfo.dwMajorVersion == 3)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN95","ÐÅÏ¢",MB_OK);
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN95");
+				
+				
 				return FALSE;
 			else if(OsInfo.dwMajorVersion == 4)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN98","ÐÅÏ¢",MB_OK);
+				
 				return FALSE;
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN98");
+				
 			break;
 		case VER_PLATFORM_WIN32_NT:
 			if(OsInfo.dwMajorVersion == 5)
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WIN2000","ÐÅÏ¢",MB_OK);
+				
 				return TRUE;
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WIN2000");
+				
 			else
 				return TRUE;
-				//MessageBox(0,"²Ù×÷ÏµÍ³:WINNT","ÐÅÏ¢",MB_OK);
-				//strcpy(sys.chSystem,"²Ù×÷ÏµÍ³:WINNT");
+				
+				
 			break;
 		default:
 			return FALSE;
-			//strcpy(sys.chSystem,"Î´ÖªÏµÍ³!!");
+			
 			break;
 		}
 		// version and language

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MBloodyWaveEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MBLOODYWAVEEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MBloodyWaveEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_BLOODY_WAVE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

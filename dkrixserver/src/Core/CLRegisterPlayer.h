@@ -16,8 +16,8 @@
 //
 // class CLRegisterPlayer;
 //
-// 클라이언트가 로그인 서버에게 최초에 전송하는 패킷이다.
-// 아이디와 패스워드가 암호화되어 있다. 아직은 아니당..
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -25,10 +25,10 @@ class CLRegisterPlayer : public Packet {
 public:
     CLRegisterPlayer() {};
     virtual ~CLRegisterPlayer() {};
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -41,21 +41,21 @@ public:
 
     // get packet's body size
     PacketSize_t getPacketSize() const {
-        // 최적화시 미리 계산된 상수를 사용하도록 한다.
-        return szBYTE + m_ID.size()          // 아이디
-               + szBYTE + m_Password.size()  // 암호
-               + szBYTE + m_Name.size()      // 이름
-               + szBYTE                      // 성별
-               + szBYTE + m_SSN.size()       // 주민등록번호
-               + szBYTE + m_Telephone.size() // 전화번호
-               + szBYTE + m_Cellular.size()  // 휴대폰번호
-               + szBYTE + m_ZipCode.size()   // 우편번호
-               + szBYTE + m_Address.size()   // 주소
-               + szBYTE                      // 국가코드
-               + szBYTE + m_Email.size()     // 전자메일
-               + szBYTE + m_Homepage.size()  // 홈페이지
-               + szBYTE + m_Profile.size()   // 자기소개글
-               + szBYTE;                     // 공개여부
+        
+        return szBYTE + m_ID.size()          
+               + szBYTE + m_Password.size()  
+               + szBYTE + m_Name.size()      
+               + szBYTE                      
+               + szBYTE + m_SSN.size()       
+               + szBYTE + m_Telephone.size() 
+               + szBYTE + m_Cellular.size()  
+               + szBYTE + m_ZipCode.size()   
+               + szBYTE + m_Address.size()   
+               + szBYTE                      
+               + szBYTE + m_Email.size()     
+               + szBYTE + m_Homepage.size()  
+               + szBYTE + m_Profile.size()   
+               + szBYTE;                     
     }
 
     // get packet name
@@ -69,8 +69,8 @@ public:
 public:
     //----------------------------------------------------------------------
     // *CAUTION*
-    // 각 setXXX()들은 최대 길이를 체크해서 truncate 하지만, 최소길이는
-    // 체크하지 않는다. 최소 길이는 read()/write() 에서 체크된다.
+    
+    
     //----------------------------------------------------------------------
 
     // get/set player's id
@@ -187,34 +187,34 @@ public:
 
 private:
     //--------------------------------------------------
-    // 플레이어 기본 정보
+    
     //--------------------------------------------------
-    string m_ID;        // 아이디
-    string m_Password;  // 패스워드
+    string m_ID;        
+    string m_Password;  
                         //--------------------------------------------------
-                        // 플레이어 개인 정보
+                        
                         //--------------------------------------------------
-    string m_Name;      // 이름
-    Sex m_Sex;          // 성별
-    string m_SSN;       // 주민등록번호
+    string m_Name;      
+    Sex m_Sex;          
+    string m_SSN;       
                         //--------------------------------------------------
-                        // 플레이어 연락처/주소
+                        
                         //--------------------------------------------------
-    string m_Telephone; // 전화번호
-    string m_Cellular;  // 핸드폰
-    string m_ZipCode;   // 우편번호
-    string m_Address;   // 주소
-    Nation m_Nation;    // 국가 코드
+    string m_Telephone; 
+    string m_Cellular;  
+    string m_ZipCode;   
+    string m_Address;   
+    Nation m_Nation;    
                         //--------------------------------------------------
-                        // 플레이어 전자정보
+                        
                         //--------------------------------------------------
-    string m_Email;     // 전자메일
-    string m_Homepage;  // 홈페이지
+    string m_Email;     
+    string m_Homepage;  
                         //--------------------------------------------------
-                        // 기타
+                        
                         //--------------------------------------------------
-    string m_Profile;   // 하고픈말
-    bool m_bPublic;     // 공개 여부
+    string m_Profile;   
+    bool m_bPublic;     
 };
 
 
@@ -245,21 +245,21 @@ public:
 
     // get packet's max body size
     PacketSize_t getPacketMaxSize() const {
-        // 최적화시 미리 계산된 상수를 사용하도록 한다.
-        return szBYTE + maxIDLength          // 아이디
-               + szBYTE + maxPasswordLength  // 패스워드
-               + szBYTE + maxNameLength      // 이름
-               + szBYTE                      // 성별
-               + szBYTE + maxSSNLength       // 주민등록번호
-               + szBYTE + maxTelephoneLength // 전화번호
-               + szBYTE + maxCellularLength  // 휴대폰번호
-               + szBYTE + maxZipCodeLength   // 우편번호
-               + szBYTE + maxAddressLength   // 주소
-               + szBYTE                      // 국가코드
-               + szBYTE + maxEmailLength     // 전자메일
-               + szBYTE + maxHomepageLength  // 홈페이지
-               + szBYTE + maxProfileLength   // 자기소개
-               + szBYTE;                     // 공개여부
+        
+        return szBYTE + maxIDLength          
+               + szBYTE + maxPasswordLength  
+               + szBYTE + maxNameLength      
+               + szBYTE                      
+               + szBYTE + maxSSNLength       
+               + szBYTE + maxTelephoneLength 
+               + szBYTE + maxCellularLength  
+               + szBYTE + maxZipCodeLength   
+               + szBYTE + maxAddressLength   
+               + szBYTE                      
+               + szBYTE + maxEmailLength     
+               + szBYTE + maxHomepageLength  
+               + szBYTE + maxProfileLength   
+               + szBYTE;                     
     }
 };
 

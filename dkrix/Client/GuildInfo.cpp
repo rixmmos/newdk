@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "GuildInfo.h"
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
+#include "Packet/SocketInputStream.h"
+#include "Packet/SocketOutputStream.h"
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -37,7 +37,7 @@ GuildInfo::~GuildInfo ()
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GuildInfo::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -46,7 +46,7 @@ void GuildInfo::read ( SocketInputStream & iStream )
 		
 	BYTE szGuildName, szGuildMaster, szGuildExpireDate;
 
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	iStream.read( m_GuildID );
 	iStream.read( szGuildName );
 
@@ -79,7 +79,7 @@ void GuildInfo::read ( SocketInputStream & iStream )
 }
 
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GuildInfo::write ( SocketOutputStream & oStream ) 
      const throw ( ProtocolException , Error )
@@ -100,7 +100,7 @@ void GuildInfo::write ( SocketOutputStream & oStream )
 	if ( szGuildMaster > 20 )
 		throw InvalidProtocolException( "too long szGuildMaster size" );
 
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	oStream.write( m_GuildID );
 	oStream.write( szGuildName );
 	oStream.write( m_GuildName );

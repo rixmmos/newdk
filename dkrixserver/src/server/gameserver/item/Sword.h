@@ -86,8 +86,8 @@ private:
     //	BYTE           m_BonusDamage;
     //	Silver_t       m_Silver;
 
-    static Mutex m_Mutex;             // 아이템 ID 관련 락
-    static ItemID_t m_ItemIDRegistry; // 클래스별 고유 아이템 아이디 발급기
+    static Mutex m_Mutex;             
+    static ItemID_t m_ItemIDRegistry; 
 };
 
 
@@ -171,7 +171,7 @@ private:
     Silver_t m_MaxSilver;
     Speed_t m_Speed;
     uint m_ItemLevel;
-    int m_CriticalBonus; // 아이템마다 다른 크리티컬 확률
+    int m_CriticalBonus; 
 };
 
 

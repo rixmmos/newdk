@@ -1,5 +1,5 @@
 # ============================================================================
-# Core 库 - 基础核心代码，不依赖服务器类型
+# Core  - 
 # ============================================================================
 
 set(CORE_SOURCES
@@ -91,7 +91,7 @@ target_include_directories(Core PUBLIC
 )
 
 # ============================================================================
-# 通用 Packet 源文件定义
+#  Packet 
 # ============================================================================
 
 # GC Packets (Game -> Client)
@@ -612,7 +612,7 @@ set(GM_PACKET_SOURCES
     GMServerInfo.cpp GMServerInfoHandler.cpp
 )
 
-# 通用 Packet 管理
+#  Packet 
 set(PACKET_COMMON_SOURCES
     PacketFactoryManager.cpp
     PacketIDSet.cpp
@@ -620,7 +620,7 @@ set(PACKET_COMMON_SOURCES
 )
 
 # ============================================================================
-# GameServerPackets 库 - 使用 __GAME_SERVER__ 宏编译
+# GameServerPackets  -  __GAME_SERVER__ 
 # ============================================================================
 add_library(GameServerPackets STATIC
     ${GC_PACKET_SOURCES}
@@ -645,7 +645,7 @@ target_include_directories(GameServerPackets PRIVATE
 )
 
 # ============================================================================
-# LoginServerPackets 库 - 使用 __LOGIN_SERVER__ 宏编译
+# LoginServerPackets  -  __LOGIN_SERVER__ 
 # ============================================================================
 add_library(LoginServerPackets STATIC
     ${CL_PACKET_SOURCES}
@@ -665,7 +665,7 @@ target_include_directories(LoginServerPackets PRIVATE
 )
 
 # ============================================================================
-# SharedServerPackets 库 - 使用 __SHARED_SERVER__ 宏编译
+# SharedServerPackets  -  __SHARED_SERVER__ 
 # ============================================================================
 add_library(SharedServerPackets STATIC
     ${GS_PACKET_SOURCES}

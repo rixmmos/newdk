@@ -120,7 +120,7 @@ public:
 	bool		IsLoading() const	{ return m_bLoading; }
 
 	//---------------------------------------------------------
-	// m_pData의 memory를 Release한다.		
+	
 	//---------------------------------------------------------
 	void		Release();
 
@@ -151,15 +151,15 @@ public:
 	
 
 protected:
-	WORD			m_Width;		// 가로 pixel수
-	WORD			m_Height;		// 세로 pixel수		
-	DWORD			m_Size;			// 스프라이트의 size
+	WORD			m_Width;		
+	WORD			m_Height;		
+	DWORD			m_Size;			
 
 	BYTE**			m_pPixels;		// pixels point array
 	BYTE*			m_pData;			// data
 
-	bool			m_bInit;		// data가 있는가?
-	bool			m_bLoading;		// Loading중인가?
+	bool			m_bInit;		
+	bool			m_bLoading;		
 
 	static BYTE		s_Colorkey;
 

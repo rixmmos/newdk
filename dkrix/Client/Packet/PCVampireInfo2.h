@@ -10,9 +10,9 @@
 #include "PCInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Vampire 정보를 담고 있는 객체.
-// GCPCList 패킷에 담겨서 클라이언트에게 전송된다.
-// 아이템이나 걸려있는 마법 같은 정보는 담겨있지 않다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCVampireInfo2 : public PCInfo 
@@ -26,26 +26,26 @@ public:
 	uint getSize () const throw ()
 	{
 		return szObjectID				// ObjectID
-			+ szBYTE + m_Name.size() 	// 뱀파이어 이름
-			+ szLevel					// 레벨
-			+ szSex						// 성별
-			+ szColor* 2				// 색상
-			+ szBYTE					// 마스터 이펙트 색상
-			+ szAlignment				// 성향
-			+ szAttr * 3 * 3			// 능력치
+			+ szBYTE + m_Name.size() 	
+			+ szLevel					
+			+ szSex						
+			+ szColor* 2				
+			+ szBYTE					
+			+ szAlignment				
+			+ szAttr * 3 * 3			
 			+ szHP* 2					// HP
-			+ szRank + szRankExp		// 계급 경험치
-			+ szExp						// 경험치
+			+ szRank + szRankExp		
+			+ szExp						
 			+ szFame					// Fame
-			+ szGold 					// 돈
-			+ szSight					// 시야
-			+ szSkillType* 8			// 핫 키
-			+ szSilver					// 핫 키
-			+ szBonus					// 보너스포인트
-			+ szGuildID					// 길드 아이디
-			+ szBYTE + m_GuildName.size()	// 길드 이름
+			+ szGold 					
+			+ szSight					
+			+ szSkillType* 8			
+			+ szSilver					
+			+ szBonus					
+			+ szGuildID					
+			+ szBYTE + m_GuildName.size()	
 			+ szGuildMemberRank			// guild member rank
-			+ szBYTE					// 권한
+			+ szBYTE					
 			+ szuint
 			+ szLevel;
 			+ szExp;
@@ -54,26 +54,26 @@ public:
 	static uint getMaxSize () throw ()
 	{
 		return szObjectID				// ObjectID
-			+ szBYTE + 20				// 뱀파이어 이름
-			+ szLevel					// 레벨
-			+ szSex						// 성별
-			+ szColor* 2				// 색상
-			+ szBYTE					// 마스터 이펙트 색상
-			+ szAlignment				// 성향
-			+ szAttr * 3 * 3			// 능력치
+			+ szBYTE + 20				
+			+ szLevel					
+			+ szSex						
+			+ szColor* 2				
+			+ szBYTE					
+			+ szAlignment				
+			+ szAttr * 3 * 3			
 			+ szHP* 2					// HP
-			+ szRank + szRankExp		// 계급 경험치
-			+ szExp						// 경험치
+			+ szRank + szRankExp		
+			+ szExp						
 			+ szFame					// Fame
-			+ szGold					// 돈
-			+ szSight					// 시야
-			+ szSkillType* 8			// 핫 키
-			+ szSilver					// 핫 키
-			+ szBonus					// 보너스포인트
-			+ szGuildID					// 길드 아이디
-			+ szBYTE + 30				// 길드 이름
+			+ szGold					
+			+ szSight					
+			+ szSkillType* 8			
+			+ szSilver					
+			+ szBonus					
+			+ szGuildID					
+			+ szBYTE + 30				
 			+ szGuildMemberRank +		// guild member rank
-			+ szBYTE					// 권한
+			+ szBYTE					
 			+ szuint
 			+ szLevel;
 			+ szExp;
@@ -231,7 +231,7 @@ private:
 	// HP[0] = current hp, hp[1] == max hp
 	HP_t m_HP[2];
 
-	// 계급
+	
 	BYTE			m_Rank;
 	DWORD			m_RankExp;
 
@@ -244,16 +244,16 @@ private:
 	// Gold
 	Gold_t m_Gold;
 
-	// 시야
+	
 	Sight_t m_Sight;
 
-	// 보너스 포인트
+	
 	Bonus_t m_Bonus;
 
-	// 핫 키
+	
 	SkillType_t m_HotKey[8];
 
-	// 실버 데미지
+	
 	Silver_t m_SilverDamage;
 
 	// Competence

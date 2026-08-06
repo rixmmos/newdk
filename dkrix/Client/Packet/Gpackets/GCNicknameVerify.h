@@ -7,8 +7,8 @@
 #ifndef __GC_NICKNAME_VERIFY_H__
 #define __GC_NICKNAME_VERIFY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 enum 
 {

@@ -28,12 +28,12 @@ int main() {
                  << ",Name:" << pResult->getString(3) << ",Password:" << pResult->getString(4) << ")" << endl;
         }
 
-        // Statement 에서 이전 Result 는 자동으로 삭제한다.
-        // 괜히 외부에서 지우게 되면 골치아프다. - -;
+        
+        
         pResult = pStmt->executeQuery("SELECT ID, Name, Passwd FROM Player WHERE id = 11");
         cout << "SELECT ID, Name, Passwd FROM Player WHERE id = 11" << endl;
 
-        // SELECT 결과 조건을 만족하는 것이 아무것도 없다면, RowCount 가 0 이다.
+        
         cout << "#Rows : " << pResult->getRowCount() << endl;
         cout << "#Cols : " << pResult->getFieldCount() << endl;
 

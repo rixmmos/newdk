@@ -42,7 +42,7 @@ void GSRequestGuildInfoHandler::execute(GSRequestGuildInfo* pPacket, Player* pPl
 
     g_pGuildManager->makeSGGuildInfo(sgGuildInfo);
 
-    // 게임 서버로 패킷을 보낸다.
+    
     pGSPlayer->sendPacket(&sgGuildInfo);
 
 #endif

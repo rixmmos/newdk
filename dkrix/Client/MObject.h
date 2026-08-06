@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MObject.h
 //----------------------------------------------------------------------
-// 화면에 출력되는 Object
+
 //----------------------------------------------------------------------
 /* class hierachy
 
@@ -41,44 +41,23 @@ class MObject {
 		TYPE_OBJECTID	GetID()	const			{ return m_ID; }
 
 		//--------------------------------------------------------
-		// Sector에서의 좌표
+		
 		//--------------------------------------------------------
 		void		SetPosition(TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y)	{ m_X = x; m_Y = y; }
 		void		SetX(TYPE_SECTORPOSITION x)		{ m_X = x; }
 		void		SetY(TYPE_SECTORPOSITION y)		{ m_Y = y; }
-		TYPE_SECTORPOSITION		GetX()	const		{ return m_X; }		// 좌표X
-		TYPE_SECTORPOSITION		GetY()	const		{ return m_Y; }		// 좌표Y
+		TYPE_SECTORPOSITION		GetX()	const		{ return m_X; }		
+		TYPE_SECTORPOSITION		GetY()	const		{ return m_Y; }		
 
 		//------------------------------------------------------
-		// 화면에서의 영역
+		
 		//------------------------------------------------------
 		//extern BOOL g_MyFull;
-		/*  edit by coffee 2007-01-01
-		void				ClearScreenRect()	
-		{ 
-			// 최대/최소값을 구하기 위한 것이므로.. 거꾸로 넣어야 한다.
-			// add by Sonic 2006.9.26
-			if(g_MyFull)
-			{
-				m_ScreenRect.left = 1024;	// 바로 값을 써버린당.
-				m_ScreenRect.top = 768;		// -_-; 이러면 안되지만 고치기 짱난다~
-				m_ScreenRect.right = 0;
-				m_ScreenRect.bottom = 0;
-			}
-			else
-			{
-				m_ScreenRect.left = 800;	// 바로 값을 써버린당.
-				m_ScreenRect.top = 600;		// -_-; 이러면 안되지만 고치기 짱난다~
-				m_ScreenRect.right = 0;
-				m_ScreenRect.bottom = 0;
-			}
-			// end
-		}
-		*/  //end edit
+		   //end edit
 		void				ClearScreenRect()	
 		{
-				m_ScreenRect.left = 800;	// 바로 값을 써버린당.
-				m_ScreenRect.top = 600;		// -_-; 이러면 안되지만 고치기 짱난다~
+				m_ScreenRect.left = 32000;	
+				m_ScreenRect.top = 32000;		
 				m_ScreenRect.right = 0;
 				m_ScreenRect.bottom = 0;
 		}
@@ -104,7 +83,7 @@ class MObject {
 
 	public :
 		//--------------------------------------------------------
-		// Object 종류에 대한 정의 : class ID
+		
 		//--------------------------------------------------------
 		enum OBJECT_TYPE 
 		{
@@ -121,13 +100,13 @@ class MObject {
 		};
 
 	protected :
-		BYTE				m_ObjectType;	// Object의 종류
+		BYTE				m_ObjectType;	
 		TYPE_OBJECTID		m_ID;			// Object's instance ID
 		
-		// 위치
-		TYPE_SECTORPOSITION				m_X, m_Y;		// Sector 좌표 (pixel단위 아님!)
+		
+		TYPE_SECTORPOSITION				m_X, m_Y;		
 
-		// 화면에서의 Sprite충돌 사각 영역
+		
 		RECT					m_ScreenRect;
 };
 

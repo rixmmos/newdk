@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------------
 // AppendPatchInfo.h
 //-----------------------------------------------------------------------------
-// OriginalFile�� FirstSize�� �˰� ������ 
-// AppendFile�� AppendSize�� ����ؼ� ��ġ�� �� �� �ִ�.
+
+
 //
-// �� ������ ȭ�Ϸ� ���θ� ����ȭ�� �ٲ� �ʿ� ����.
+
 //-----------------------------------------------------------------------------
 
 #ifndef __APPENDPATCHINFO_H__
@@ -69,8 +69,8 @@ class AppendPatch {
 		// Execute / Check
 		//------------------------------------------------------------------
 		bool		ExecutePatch() const;
-		bool		CheckFinalInfo() const;			// final file�� �о����
-		bool		CalculateFinalInfo() const;		// �������
+		bool		CheckFinalInfo() const;			
+		bool		CalculateFinalInfo() const;		
 
 		//------------------------------------------------------------------
 		// File I / O

@@ -40,7 +40,7 @@ protected:
 private:
     string m_OwnerName;
 
-    // getZone �� ����......
+    
     Zone* m_pZone;
     bool m_bSetZone;
 };

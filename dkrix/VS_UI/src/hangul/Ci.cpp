@@ -30,8 +30,8 @@ void Timer_BlinkCursor()
 //-----------------------------------------------------------------------------
 // CI::RunCursorBlinker
 //
-// constructor�� �θ� Timer instance�� �����Ǿ����� ���� ���� �ֱ� ������ 
-// �ܺο��� ��������� �Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 void CI::RunCursorBlinker()
 {
@@ -86,9 +86,28 @@ CI_CHINESE::~CI_CHINESE()
 }
 
 //-----------------------------------------------------------------------------
+// CI_ENGLISH
+//-----------------------------------------------------------------------------
+CI_ENGLISH::CI_ENGLISH()
+{
+}
+
+CI_ENGLISH::~CI_ENGLISH()
+{
+}
+
+void CI_ENGLISH::IME_NextComposition()
+{
+}
+
+void CI_ENGLISH::IME_Composition()
+{
+}
+
+//-----------------------------------------------------------------------------
 // IsEngInput
 //
-// ���� �Է»��°� �����̸� true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool CI::IsEngInput() const
 {
@@ -118,7 +137,7 @@ void CI::FinishImeRunning()
 //-----------------------------------------------------------------------------
 // ForceShowCursor
 //
-// ������ cursor�� ���̰� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void CI::ForceShowCursor() const
 {
@@ -152,7 +171,7 @@ bool CI::GetEndOfIME()
 //-----------------------------------------------------------------------------
 // Init
 //
-// �ܺο��� ���� �����ϴ�.
+
 //-----------------------------------------------------------------------------
 void CI::Init()
 {
@@ -182,17 +201,17 @@ void	CI::ClearCurrentIMEComposition()
 //-----------------------------------------------------------------------------
 void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	//pass �� ���̶��ڿ� �ƽ�Ű�� ���� 0xc05d ������ �޺κп� ������°� �ƽ�Ű �������� �ڵ尡 ����ͼ� '��D'�̷������� �ȴ�.
-	//�װ� �����ϱ����� endcomposition���Ŀ� ���� wm_char�ΰ��� �����ϰ� �ߴµ�
-	//�׷��� ���� e5�ڵ尡 ������ �ʴ´�.
+	
+	
+	
 	static int pass = 0;
 	
-	//�̰� �V�� ������ end�Ȱ�ĥ���� ó��
+	
 	if(message == WM_CHAR && m_bl_ime_running)
 		return;
 
-	//�Ʒ����� e5�ڵ尡 �ִ°��� �̸� pass--�� ���ֹǷ� 0xe5�� Ȥ�ó�? ���� ���� ó������ �ʴ´�.
-	//lParam�� 1�ϰ�찡 ime���� ������ WM_CHAR�޼�����
+	
+	
 	if(pass > 0 && message == WM_CHAR && wParam != 0xe5 && lParam == 1)
 	{
 		pass--;
@@ -213,12 +232,12 @@ void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 			m_bl_ime_running = false;
 			IME_EndComposition();
 
-			//����� ���ڰ� ������
+			
 			if(m_composing_char[0])
 			{
 				pass = 2;
 				
-				//������ ���� e5�ڵ�� wm_char�� ������ �����Ƿ� ���⼭ pass�� �ٿ��ش�
+				
 				if((m_composing_char[0] & 0xff00) == 0xe500)
 					pass--;
 			}
@@ -226,7 +245,7 @@ void CI_KOREAN::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_IME_COMPOSITION:
 			//
-			// wParam�� ������ byte ��ġ�� �ٲ�� ���������� ��µȴ�.
+			
 			//
 			m_composing_char[0] = (char_t)(wParam<<8);
 			m_composing_char[0] |= (char_t)((wParam>>8)&0x00FF);
@@ -253,7 +272,7 @@ void CI_CHINESE::IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam
 	int len;
 	if(wParam == 0xe5) return;
 	
-	//�̰� �V�� ������ end�Ȱ�ĥ���� ó��
+	
 	if(message == WM_CHAR && ImeRunning())
 		return;
 	

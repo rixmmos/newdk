@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MFirePiecingEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MFIREPIECINGEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MFirePiecingEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_FIRE_PIECING; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

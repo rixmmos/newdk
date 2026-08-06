@@ -13,7 +13,7 @@
 #include "GCStatusCurrentHP.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Berserker::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -32,7 +32,7 @@ void Berserker::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, 도가 아니라면 사용할 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_BLADE) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -57,7 +57,7 @@ void Berserker::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
         bool bTimeCheck = verifyRunTime(pSkillSlot);
         bool bRangeCheck = checkZoneLevelToUseSkill(pSlayer);
         bool bHitRoll = HitRoll::isSuccessMagic(pSlayer, pSkillInfo, pSkillSlot);
-        // 차징 파워랑 동시에 사용할 수 없다.
+        
         bool bEffected =
             pSlayer->isFlag(Effect::EFFECT_CLASS_BERSERKER) || pSlayer->isFlag(Effect::EFFECT_CLASS_CHARGING_POWER);
 
@@ -69,13 +69,13 @@ void Berserker::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
             computeOutput(input, output);
 
             // by sigi. 2002.12.3
-            // by 홍창. 2002.12.6
+            
             //			int DefensePenalty = 35 - pSkillSlot->getExpLevel()*2/13;	// %
             //			int ProtectionPenalty = 25 - pSkillSlot->getExpLevel()*2/13;	// %
             int DefensePenalty = 25 - pSkillSlot->getExpLevel() * 2 / 13;    // %
             int ProtectionPenalty = 20 - pSkillSlot->getExpLevel() * 2 / 13; // %
 
-            // 이펙트 클래스를 만들어 붙인다.
+            
             EffectBerserker* pEffect = new EffectBerserker(pSlayer);
             pEffect->setDeadline(output.Duration);
             pEffect->setDefensePenalty(DefensePenalty);
@@ -85,14 +85,14 @@ void Berserker::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
             pSlayer->addEffect(pEffect);
             pSlayer->setFlag(Effect::EFFECT_CLASS_BERSERKER);
 
-            // 이로 인하여 바뀌는 능력치를 보낸다.
+            
             SLAYER_RECORD prev;
             pSlayer->getSlayerRecord(prev);
             pSlayer->initAllStat();
             pSlayer->sendRealWearingInfo();
             pSlayer->sendModifyInfo(prev);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
 

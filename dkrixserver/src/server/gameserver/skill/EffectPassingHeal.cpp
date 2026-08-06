@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectPassingHeal.cpp
 // Written by  : excel96
-// Description : PassingHeal에 의해서 생성되는 산성 데미지 약화 이펙트이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "EffectPassingHeal.h"
@@ -98,7 +98,7 @@ void EffectPassingHeal::affect(Creature* pTargetCreature)
     EffectParalyze* pEffectParalyze = NULL;
     EffectSeduction* pEffectSeduction = NULL;
 
-    // 저주 계열 해소
+    
     if (pTargetCreature->isEffect(Effect::EFFECT_CLASS_DOOM)) {
         pEffectDoom = dynamic_cast<EffectDoom*>(pTargetCreature->findEffect(Effect::EFFECT_CLASS_DOOM));
         Assert(pEffectDoom != NULL);
@@ -124,11 +124,11 @@ void EffectPassingHeal::affect(Creature* pTargetCreature)
         bSeduction = HitRoll::isSuccessRemoveCurse(50, 100, 30, pEffectSeduction->getLevel(), 10);
     }
 
-    // 독 계열 해소
-    bool bGreenPoison = false;    // GreenPoison을 치료할까의 여부
-    bool bYellowPoison = false;   // YellowPoison을 치료할까의 여부
-    bool bDarkBluePoison = false; // DarkBluePoison을 치료할까의 여부
-    bool bGreenStalker = false;   // GreenStalker를 치료할까의 여부
+    
+    bool bGreenPoison = false;    
+    bool bYellowPoison = false;   
+    bool bDarkBluePoison = false; 
+    bool bGreenStalker = false;   
 
     EffectPoison* pEffectPoison = NULL;
     EffectYellowPoisonToCreature* pEffectYellowPoisonToCreature = NULL;
@@ -168,18 +168,18 @@ void EffectPassingHeal::affect(Creature* pTargetCreature)
 
     int cureCount = 0;
 
-    // 흡혈당한 상태라면 흡혈 상태를 날려준다.
+    
     if (cureCount < m_CureCount && pEffectBloodDrain != NULL && pEffectBloodDrain->getLevel() < 150 &&
         pTargetCreature->isSlayer()) {
         Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
-        // 흡혈 아르바이트를 방지하기 위한 후유증 이펙트를 붙여준다.
+        
         if (pTargetCreature->isFlag(Effect::EFFECT_CLASS_AFTERMATH)) {
             Effect* pEffect = pTargetCreature->findEffect(Effect::EFFECT_CLASS_AFTERMATH);
             EffectAftermath* pEffectAftermath = dynamic_cast<EffectAftermath*>(pEffect);
-            pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+            pEffectAftermath->setDeadline(5 * 600); 
         } else {
             EffectAftermath* pEffectAftermath = new EffectAftermath(pTargetCreature);
-            pEffectAftermath->setDeadline(5 * 600); // 5분 동안 지속된다.
+            pEffectAftermath->setDeadline(5 * 600); 
             pTargetCreature->addEffect(pEffectAftermath);
             pTargetCreature->setFlag(Effect::EFFECT_CLASS_AFTERMATH);
             pEffectAftermath->create(pTargetCreature->getName());
@@ -223,8 +223,8 @@ void EffectPassingHeal::affect(Creature* pTargetCreature)
         ++cureCount;
     }
 
-    // 각각의 독마다 치료를 하고,
-    // 패킷에다 이펙트 삭제하라고 더한다.
+    
+    
     if (cureCount < m_CureCount && bGreenPoison) {
         pEffectPoison->setDeadline(0);
         pTargetCreature->removeFlag(Effect::EFFECT_CLASS_POISON);
@@ -360,7 +360,7 @@ void EffectPassingHeal::unaffect()
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_PASSING_HEAL);

@@ -28,7 +28,7 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	int est = egInfo.effectSpriteType;
 
-	// 하드 하드~
+	
 	if (est>=EFFECTSPRITETYPE_BLOODY_WALL_1
 		&& est<=EFFECTSPRITETYPE_BLOODY_WALL_3)
 	{
@@ -41,41 +41,21 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	bool			repeatFrame	= (*g_pEffectSpriteTypeTable)[est].RepeatFrame;
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	int	tx, ty;
 	
 	tx = egInfo.x1;
 	ty = egInfo.y1;
 
-	// (sX0, sY0)에서 (sX1, sY1)을 바라보는 방향을 얻어낸다.
+	
 	int lookDirection = egInfo.direction;//MTopView::GetDirectionToPosition(sX0, sY0, sX1, sY1);
 
 	//---------------------------------------------
-	// 방향에 따라서... { 시작보정X, 시작보정Y, 변화pixelX, 변화pixelY }
+	
 	//---------------------------------------------
-	// 5개 출력
-	/*
-	const int dirValue[8][4] = { 
-		{		0,	-12*2,		0,		12 },		// left에서 up
-		{	-24*2,	-12*2,		24,		12 },		// leftdown
-		{	-24*2,		0,		24,		0 },		// down
-		{	24*2,	-12*2,		-24,	12 },		// rightdown
-		{		0,	-24*2,		0,		24 },		// right
-		{	-24*2,	-12*2,		24,		12 },		// rightup
-		{	-24*2,		0,		24,		0 },		// up
-		{	-24*2,	12*2,		24,		-12 }		// leftup
-	};	
-
-	//---------------------------------------------
-	// 시작 값
-	//---------------------------------------------
-	int sx = tx + dirValue[lookDirection][0];
-	int sy = ty + dirValue[lookDirection][1];
-	int cx = dirValue[lookDirection][2];
-	int cy = dirValue[lookDirection][3];
-	int z  = egInfo.z0;
-	*/
+	
+	 
 
 	const POINT dirValue[8][5] =
 	{
@@ -102,7 +82,7 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	MEffect*	pEffect;
 	
 	//---------------------------------------------
-	// Effect 생성
+	
 	//---------------------------------------------
 	for (int i=0; i<5; i++)
 	{		
@@ -115,24 +95,24 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		
 		pEffect->SetFrameID( frameID, maxFrame );	
 
-		//pEffect->SetPixelPosition(sx, sy, z);		// Sector 좌표		
+		
 		pEffect->SetPosition( sX, sY );
 		pEffect->SetZ( z );			
-		pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-		pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+		pEffect->SetStepPixel(egInfo.step);		
+		pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-		// 방향 설정
+		
 		pEffect->SetDirection( egInfo.direction );
 
-		// 위력
+		
 		pEffect->SetPower(egInfo.power);
 
-		// Zone에 추가한다.
+		
 		bool bAdd = g_pZone->AddEffect( pEffect );
 
 		if (bAdd)
 		{
-			// 처음으로 추가된 effect에 대해서 link설정
+			
 			if (!bOK)
 			{
 				pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
@@ -140,10 +120,10 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 				bOK = true;
 			}
 		
-			// 처음으로 추가된거는 아니지만 제대로 들어간 경우
+			
 			else
 			{
-				// 다음 Effect 생성 정보
+				
 				if (egInfo.pEffectTarget == NULL)
 				{
 					pEffect->SetLink( egInfo.nActionInfo, NULL );
@@ -158,8 +138,8 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		}
 
 		//---------------------------------------------
-		// 반복되는 frame이면..
-		// 시작 frame을 다르게 한다.
+		
+		
 		//---------------------------------------------
 		if (bAdd && repeatFrame)
 		{
@@ -175,7 +155,7 @@ MBloodyWallEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		//sx += cx;
 		//sy += cy;
 
-		// 다음 그림
+		
 		if (est>=EFFECTSPRITETYPE_BLOODY_WALL_1
 			&& est<=EFFECTSPRITETYPE_BLOODY_WALL_3)
 		{

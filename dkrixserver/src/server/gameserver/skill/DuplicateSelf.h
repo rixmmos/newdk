@@ -33,7 +33,7 @@ public:
     void computeOutput(const SkillInput& input, SkillOutput& output);
 
 private:
-    // [원래MType] = 분신MType
+    
     unordered_map<MonsterType_t, MonsterType_t> m_DuplicateMonsterTypes;
 };
 

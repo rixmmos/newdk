@@ -2,7 +2,7 @@
 // Filename    : ActionShowTaxBalance.h
 // Written By  : excel96
 // Description :
-// Creature가 PC에게 질문을 던진다. 이 대사는 NPC 대화창에 출력된다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ACTION_SHOW_TAX_BALANCE_H__

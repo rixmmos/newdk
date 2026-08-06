@@ -28,10 +28,10 @@ public:
 
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -79,8 +79,8 @@ public:
     }
 
 private:
-    Coord_t m_X; // 현재 X 좌표
-    Coord_t m_Y; // 현재 Y 좌표
+    Coord_t m_X; 
+    Coord_t m_Y; 
 };
 
 

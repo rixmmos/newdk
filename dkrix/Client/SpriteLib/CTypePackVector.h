@@ -106,13 +106,13 @@ template <class Type>
 bool CTypePackVector<Type>::SaveToFile(std::ofstream &dataFile, std::ofstream &indexFile)
 {
 	//--------------------------------------------------
-	// index file�� �����ϱ� ���� ����
+	
 	//--------------------------------------------------
 //	long*	pIndex = new long [m_Size];
 	std::vector<DWORD> vIndex;
 
 	//--------------------------------------------------
-	// Size ����
+	
 	//--------------------------------------------------
 	WORD m_Size = GetSize();
 	dataFile.write((const char *)&m_Size, 2); 
@@ -146,7 +146,7 @@ bool CTypePackVector<Type>::SaveToFile(std::ofstream &dataFile, std::ofstream &i
 	}
 
 	//--------------------------------------------------
-	// index ����
+	
 	//--------------------------------------------------
 	for (i=0; i<vIndex.size(); i++)
 	{

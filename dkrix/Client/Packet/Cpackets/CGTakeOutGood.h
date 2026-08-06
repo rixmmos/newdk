@@ -7,8 +7,8 @@
 #ifndef __CG_TAKE_OUT_GOOD_H__
 #define __CG_TAKE_OUT_GOOD_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGTakeOutGood;

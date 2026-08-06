@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
 // MWeather.cpp
 //----------------------------------------------------------------------
-// 음.. 시간이 없는 관계로 
-// 예전에 테스트용으로 만들어둔걸 그냥 써야하는 가슴 아픔이랄까. - -;;
-// 아.. 아무리 봐도.. 허접한 구조.. 헐.. 어쩔 수 없지.. 음냐하..
+
+
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MWeather.h"
@@ -31,6 +31,7 @@ MWeather::MWeather()
 	m_nMapEffect		= 0;
 	m_nActiveMapEffect	= 0;
 	m_pMapEffect		= NULL;
+	m_MoreEffectCount	= 0;
 }
 
 MWeather::~MWeather()
@@ -51,14 +52,14 @@ MWeather::~MWeather()
 void
 MWeather::Init(BYTE n)
 {
-	// 이미 잡혀있는 메모리와 같으면 return
+	
 	if (n==m_nMapEffect) 
 		return;
 
-	// 일단 제거
+	
 	Release();
 
-	// memory잡기
+	
 	m_nMapEffect = n;
 	m_pMapEffect = new MAP_EFFECT [ m_nMapEffect ];
 }
@@ -69,7 +70,7 @@ MWeather::Init(BYTE n)
 void
 MWeather::Release()
 {
-	// 메모리에서 제거
+	
 	if (m_pMapEffect != NULL)
 	{
 		delete [] m_pMapEffect;
@@ -82,9 +83,9 @@ MWeather::Release()
 }
 
 //----------------------------------------------------------------------
-// Set Rain (비 개수)
+
 //----------------------------------------------------------------------
-// 비를 오게 한다.
+
 //----------------------------------------------------------------------
 void		
 MWeather::SetRain(BYTE number)
@@ -92,40 +93,40 @@ MWeather::SetRain(BYTE number)
 	if (number==0) return;
 
 	//------------------------------------------------
-	// 이전에도 비가 내리고 있던 중이면..
-	// 비의 개수를 조정해준다.
+	
+	
 	//------------------------------------------------
 	if (m_WeatherType == WEATHER_RAIN)
 	{
 		//----------------------------------------
-		// 같은 수의 비가 오는 경우...
+		
 		//----------------------------------------
 		if (number == m_nMapEffect)
 			return;
 
 		//----------------------------------------
-		// 아닌 경우
+		
 		//----------------------------------------
-		// 새로 메모리를 잡고 
+		
 		MAP_EFFECT*		pMapEffect = new MAP_EFFECT [ number ];
 
 		//----------------------------------------
-		// 비가 더 많이 오는 경우
+		
 		//----------------------------------------
 		int i;
 		if (number > m_nMapEffect)
 		{
-			// 현재 비를 새로운 메모리로 복사..
+			
 			for (i=0; i<m_nActiveMapEffect; i++)
 			{
 				pMapEffect[i] = m_pMapEffect[i];
 			}	
 			
-			// 점차 비가 더 오게 한다.
+			
 			m_MoreEffectCount = 2;
 		}
 		//----------------------------------------
-		// 비가 적게 오는 경우
+		
 		//----------------------------------------
 		else
 		{
@@ -137,10 +138,10 @@ MWeather::SetRain(BYTE number)
 			}
 		}
 
-		// 현재 메모리 제거
+		
 		Release();
 
-		// 위에서 생성한 비를 설정..
+		
 		m_WeatherType	= WEATHER_RAIN;	
 		m_pMapEffect = pMapEffect;
 		m_nMapEffect = number;
@@ -150,19 +151,19 @@ MWeather::SetRain(BYTE number)
 
 	//------------------------------------------------
 	//
-	// 새롭게 모든 비를 생성한다.
+	
 	//
 	//------------------------------------------------
 
-	// number개의 빗줄기를 생성
+	
 	Init( number );
 
-	// 비
+	
 	m_WeatherType	= WEATHER_RAIN;
 	m_StartX		= g_pPlayer->GetX()*TILE_X;
 	m_StartY		= g_pPlayer->GetY()*TILE_Y;
 
-	// 현재 비의 개수
+	
 	m_nActiveMapEffect = 1;
 
 	for (int i=0; i<m_nActiveMapEffect; i++)
@@ -170,14 +171,14 @@ MWeather::SetRain(BYTE number)
 		GenerateRain( i );
 	}
 
-	// MoreEffectCount시간이 지나서야 비가 증가하기 시작한다.
+	
 	m_MoreEffectCount = 2;	
 }
 
 //----------------------------------------------------------------------
-// Set Snow (눈 개수)
+
 //----------------------------------------------------------------------
-// 눈을 오게 한다.
+
 //----------------------------------------------------------------------
 void		
 MWeather::SetSnow(BYTE number)
@@ -185,40 +186,40 @@ MWeather::SetSnow(BYTE number)
 	if (number==0) return;
 
 	//------------------------------------------------
-	// 이전에도 눈이 내리고 있던 중이면..
-	// 눈의 개수를 조정해준다.
+	
+	
 	//------------------------------------------------
 	if (m_WeatherType == WEATHER_SNOW)
 	{
 		//----------------------------------------
-		// 같은 수의 눈이 오는 경우...
+		
 		//----------------------------------------
 		if (number == m_nMapEffect)
 			return;
 
 		//----------------------------------------
-		// 아닌 경우
+		
 		//----------------------------------------
-		// 새로 메모리를 잡고 
+		
 		MAP_EFFECT*		pMapEffect = new MAP_EFFECT [ number ];
 
 		//----------------------------------------
-		// 눈이 더 많이 오는 경우
+		
 		//----------------------------------------
 		int i;
 		if (number > m_nMapEffect)
 		{
-			// 현재 눈을 새로운 메모리로 복사..
+			
 			for (i=0; i<m_nActiveMapEffect; i++)
 			{
 				pMapEffect[i] = m_pMapEffect[i];
 			}	
 			
-			// 점차 눈이 더 오게 한다.
+			
 			m_MoreEffectCount = 2;
 		}
 		//----------------------------------------
-		// 눈이 적게 오는 경우
+		
 		//----------------------------------------
 		else
 		{
@@ -230,10 +231,10 @@ MWeather::SetSnow(BYTE number)
 			}
 		}
 
-		// 현재 메모리 제거
+		
 		Release();
 
-		// 위에서 생성한 눈을 설정..
+		
 		m_WeatherType	= WEATHER_SNOW;	
 		m_pMapEffect = pMapEffect;
 		m_nMapEffect = number;
@@ -243,19 +244,19 @@ MWeather::SetSnow(BYTE number)
 
 	//------------------------------------------------
 	//
-	// 새롭게 모든 눈을 생성한다.
+	
 	//
 	//------------------------------------------------
 
-	// number개의 눈송이 생성
+	
 	Init( number );
 
-	// 눈
+	
 	m_WeatherType	= WEATHER_SNOW;
 	m_StartX		= g_pPlayer->GetX()*TILE_X;
 	m_StartY		= g_pPlayer->GetY()*TILE_Y;
 
-	// 증가 개수
+	
 	m_nActiveMapEffect = 1;
 
 	for (int i=0; i<number; i++)
@@ -267,7 +268,7 @@ MWeather::SetSnow(BYTE number)
 }
 
 //----------------------------------------------------------------------
-// Set Spot (개수)
+
 //----------------------------------------------------------------------
 void		
 MWeather::SetSpot(BYTE number)
@@ -275,40 +276,40 @@ MWeather::SetSpot(BYTE number)
 	if (number==0) return;
 	
 	//------------------------------------------------
-	// 이전에도 있던 중이면..
-	// 눈의 개수를 조정해준다.
+	
+	
 	//------------------------------------------------
 	if (m_WeatherType == WEATHER_SPOT)
 	{
 		//----------------------------------------
-		// 같은 수의 눈이 오는 경우...
+		
 		//----------------------------------------
 		if (number == m_nMapEffect)
 			return;
 		
 		//----------------------------------------
-		// 아닌 경우
+		
 		//----------------------------------------
-		// 새로 메모리를 잡고 
+		
 		MAP_EFFECT*		pMapEffect = new MAP_EFFECT [ number ];
 		
 		//----------------------------------------
-		// 눈이 더 많이 오는 경우
+		
 		//----------------------------------------
 		int i;
 		if (number > m_nMapEffect)
 		{
-			// 현재 눈을 새로운 메모리로 복사..
+			
 			for (i=0; i<m_nActiveMapEffect; i++)
 			{
 				pMapEffect[i] = m_pMapEffect[i];
 			}	
 			
-			// 점차 눈이 더 오게 한다.
+			
 			m_MoreEffectCount = 2;
 		}
 		//----------------------------------------
-		// 눈이 적게 오는 경우
+		
 		//----------------------------------------
 		else
 		{
@@ -320,10 +321,10 @@ MWeather::SetSpot(BYTE number)
 			}
 		}
 		
-		// 현재 메모리 제거
+		
 		Release();
 		
-		// 위에서 생성한 눈을 설정..
+		
 		m_WeatherType	= WEATHER_SPOT;	
 		m_pMapEffect = pMapEffect;
 		m_nMapEffect = number;
@@ -333,19 +334,19 @@ MWeather::SetSpot(BYTE number)
 	
 	//------------------------------------------------
 	//
-	// 새롭게 모든 눈을 생성한다.
+	
 	//
 	//------------------------------------------------
 	
-	// number개의 눈송이 생성
+	
 	Init( number );
 	
-	// 눈
+	
 	m_WeatherType	= WEATHER_SPOT;
 	m_StartX		= g_pPlayer->GetX()*TILE_X;
 	m_StartY		= g_pPlayer->GetY()*TILE_Y;
 	
-	// 증가 개수
+	
 	m_nActiveMapEffect = 1;
 	
 	for (int i=0; i<number; i++)
@@ -360,7 +361,7 @@ MWeather::SetSpot(BYTE number)
 //----------------------------------------------------------------------
 // Generate Rain 
 //----------------------------------------------------------------------
-// n번 째 비 하나를 생성
+
 //----------------------------------------------------------------------
 void
 MWeather::GenerateRain(const BYTE& n)
@@ -370,7 +371,7 @@ MWeather::GenerateRain(const BYTE& n)
 	switch (m_pMapEffect[n].GetType())
 	{			
 		//--------------------------------------------------------
-		// 도착한 비는 사라지고.. 다시 새로운 비를 생성..
+		
 		//--------------------------------------------------------
 		case MAP_EFFECT::MAP_EFFECT_ARRIVE4 : 
 		
@@ -397,7 +398,7 @@ MWeather::GenerateRain(const BYTE& n)
 		break;
 
 		//--------------------------------------------------------
-		// 도착한 비..
+		
 		//--------------------------------------------------------
 		case MAP_EFFECT::MAP_EFFECT_FALL :
 			m_pMapEffect[n].Set(MAP_EFFECT::MAP_EFFECT_ARRIVE1,
@@ -438,7 +439,7 @@ MWeather::GenerateRain(const BYTE& n)
 //----------------------------------------------------------------------
 // Generate Snow 
 //----------------------------------------------------------------------
-// n번 째 눈 하나를 생성
+
 //----------------------------------------------------------------------
 void
 MWeather::GenerateSnow(const BYTE& n)
@@ -448,7 +449,7 @@ MWeather::GenerateSnow(const BYTE& n)
 	switch (m_pMapEffect[n].GetType())
 	{			
 		//--------------------------------------------------------
-		// 도착한 눈은 사라지고.. 다시 새로운 눈을 생성..
+		
 		//--------------------------------------------------------
 		case MAP_EFFECT::MAP_EFFECT_ARRIVE6 : 
 		
@@ -475,7 +476,7 @@ MWeather::GenerateSnow(const BYTE& n)
 		break;
 
 		//--------------------------------------------------------
-		// 도착한 눈..
+		
 		//--------------------------------------------------------
 		case MAP_EFFECT::MAP_EFFECT_FALL :
 			m_pMapEffect[n].Set(MAP_EFFECT::MAP_EFFECT_ARRIVE1,
@@ -531,7 +532,7 @@ MWeather::GenerateSnow(const BYTE& n)
 //----------------------------------------------------------------------
 // Generate Spot
 //----------------------------------------------------------------------
-// n번 째 눈 하나를 생성
+
 //----------------------------------------------------------------------
 void
 MWeather::GenerateSpot(const BYTE& n)
@@ -541,7 +542,7 @@ MWeather::GenerateSpot(const BYTE& n)
 //	switch (m_pMapEffect[n].GetType())
 //	{			
 //		//--------------------------------------------------------
-//		// 도착한 눈은 사라지고.. 다시 새로운 눈을 생성..
+
 //		//--------------------------------------------------------
 //	case MAP_EFFECT::MAP_EFFECT_ARRIVE6 : 
 //		
@@ -568,7 +569,7 @@ MWeather::GenerateSpot(const BYTE& n)
 //		break;
 		
 //		//--------------------------------------------------------
-//		// 도착한 눈..
+
 //		//--------------------------------------------------------
 //		case MAP_EFFECT::MAP_EFFECT_FALL :
 //			m_pMapEffect[n].Set(MAP_EFFECT::MAP_EFFECT_ARRIVE1,
@@ -626,7 +627,7 @@ MWeather::GenerateSpot(const BYTE& n)
 //----------------------------------------------------------------------
 // Action
 //----------------------------------------------------------------------
-// 전체적으로 한 번 움직인다..
+
 //----------------------------------------------------------------------
 void		
 MWeather::Action()
@@ -635,7 +636,7 @@ MWeather::Action()
 		return;
 
 	//---------------------------------------------------------
-	// 표현되고 있는 날씨 효과가 없을 경우..
+	
 	//---------------------------------------------------------
 	if (m_WeatherType == WEATHER_NULL)
 	{
@@ -643,7 +644,7 @@ MWeather::Action()
 	}
 
 	//---------------------------------------------------------
-	// 멈추고 있는 중이면..
+	
 	//---------------------------------------------------------
 	if (m_WeatherType == WEATHER_STOP)
 	{
@@ -669,8 +670,8 @@ MWeather::Action()
 	}
 
 	//---------------------------------------------------------
-	// 현재 작동중인 Effect개수가 
-	// 전체 Effect의 개수보다 적은 경우 --> 더 생성
+	
+	
 	//---------------------------------------------------------
 	if (m_nActiveMapEffect < m_nMapEffect)
 	{
@@ -686,7 +687,7 @@ MWeather::Action()
 
 			BYTE i;
 			
-			// 날씨 종류에 따라서 남은 Effect 몇개를 더 생성한다.
+			
 			switch (m_WeatherType)
 			{
 				case WEATHER_RAIN :
@@ -720,11 +721,11 @@ MWeather::Action()
 	}
 
 	//---------------------------------------------------------
-	// 각각의 MAP_EFFECT에 대해서 한번의 움직임~~
+	
 	//---------------------------------------------------------
 	for (int i=0; i<m_nActiveMapEffect; i++)
 	{
-		// 움직인다.
+		
 		if (m_pMapEffect[i].Move())
 		{
 			switch (m_WeatherType)
@@ -732,7 +733,7 @@ MWeather::Action()
 				case WEATHER_RAIN :
 				break;
 
-				// 눈인 경우.. 하늘하늘~거리게...
+				
 				case WEATHER_SNOW :
 //				case WEATHER_SPOT :
 					if (m_pMapEffect[i].GetCount() & 0x08)
@@ -742,10 +743,10 @@ MWeather::Action()
 				break;
 			}
 		}
-		// 다 움직인 경우
+		
 		if(!m_pMapEffect[i].IsActive())
 		{
-			// 날씨 효과 종류에 따라서 하나만 다시 생성
+			
 			switch (m_WeatherType)
 			{
 				case WEATHER_RAIN :

@@ -22,8 +22,8 @@
 //
 // class CGSay;
 //
-// 클라이언트가 서버에게 보내는 Say 패킷이다.
-// 내부에 Say String 만을 데이타 필드로 가진다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -35,10 +35,10 @@ class CGSay : public Packet {
 public:
     CGSay() {};
     virtual ~CGSay() {};
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -114,7 +114,7 @@ public:
     }
 
     // get packet's max body size
-    // message 의 최대 크기에 대한 설정이 필요하다.
+    
     PacketSize_t getPacketMaxSize() const {
         return szuint + szBYTE + 128;
     }
@@ -138,10 +138,10 @@ public:
     static void opzone(string msg, int i);
     static void opguild(string msg, int i, Creature* pCreature);
 
-    // 전쟁 시스템 관련
+    
     static void opcombat(GamePlayer* pPlayer, string msg, int i);
 
-    // set 이벤트 아이템 확률
+    
     static void opset(GamePlayer* pPlayer, string msg, int i);
 
     static void opview(GamePlayer* pPlayer, string msg, int i);
@@ -212,7 +212,7 @@ public:
     // refresh info
     static void opload(GamePlayer* pPlayer, string msg, int i);
 
-    // 임시
+    
     static void opsoulchain(GamePlayer* pPlayer, string msg, int i);
 
     // credit

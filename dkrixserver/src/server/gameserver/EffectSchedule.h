@@ -55,8 +55,8 @@ public:
     }
 
 private:
-    int m_Code;    // 이펙트에 대한 작업 코드
-    void* m_pData; // 이펙트 작업 코드에 필요한 데이터
+    int m_Code;    
+    void* m_pData; 
 };
 
 
@@ -70,7 +70,7 @@ public:
     ~EffectSchedule();
 
 public:
-    // 작업 대상인 이펙트를 더한다.
+    
     Effect* getEffect(void) const {
         return m_pEffect;
     }
@@ -78,10 +78,10 @@ public:
         m_pEffect = pEffect;
     }
 
-    // 작업을 더한다.
+    
     void addWork(int WorkCode, void* pData);
 
-    // 작업 중에 제일 앞에 있는 작업의 포인터를 리턴한다.
+    
     EffectScheduleWork* getFrontWork(void);
 
 private:
@@ -100,10 +100,10 @@ public:
     ~EffectScheduleManager();
 
 public:
-    // 이펙트 스케쥴을 더한다.
+    
     void addEffectSchedule(EffectSchedule* pEffectSchedule);
 
-    // 이펙트 스케쥴을 실행한다.
+    
     void heartbeat(void);
 
 protected:

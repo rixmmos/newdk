@@ -67,8 +67,8 @@ RequestUserManager::HasRequestUser(const char* pName) const
 //----------------------------------------------------------------------
 // Add RequestUser
 //----------------------------------------------------------------------
-// 이미 있다면.. ip를 바꿔준다.. 
-// 이미 접속중이라면 접속해제..
+
+
 //----------------------------------------------------------------------
 void
 RequestUserManager::AddRequestUser(const char* pName, const char* pIP, int UDPPort)
@@ -77,7 +77,7 @@ RequestUserManager::AddRequestUser(const char* pName, const char* pIP, int UDPPo
 
 	if (pUser==NULL)
 	{		
-		// 없다면 정보 생성.
+		
 		pUser = new RequestUserInfo;
 
 		pUser->Name = pName;
@@ -88,14 +88,14 @@ RequestUserManager::AddRequestUser(const char* pName, const char* pIP, int UDPPo
 	}
 	else
 	{
-		// IP가 달라진 경우..
+		
 		if (pUser->IP != pIP)
 		{
 			pUser->IP = pIP;
 			pUser->UDPPort = UDPPort;
 
-			// 연결되어 있는 상태라면..
-			// IP가 바꼈으므로 연결을 끊어준다.
+			
+			
 			/*
 			if (pUser->Connected)
 			{

@@ -54,13 +54,13 @@ bool EffectYellowPoison::affectCreature(Creature* pTargetCreature, bool bAffectB
 
     Assert(pTargetCreature != NULL);
 
-    // 슬레이어도 아니고 아우스터즈도 아니면 안 걸린다.
+    
     if (!pTargetCreature->isSlayer() && !pTargetCreature->isOusters() && !isForce())
         return false;
     if (pTargetCreature->getCompetence() != 3)
         return false;
 
-    // 안전지대인지 체크한다.
+    
     // 2003.1.10 by bezz.Sequoia
     if (!checkZoneLevelToHitTarget(pTargetCreature)) {
         return false;
@@ -69,10 +69,10 @@ bool EffectYellowPoison::affectCreature(Creature* pTargetCreature, bool bAffectB
     Player* pPlayer = pTargetCreature->getPlayer();
     Assert(pPlayer != NULL);
 
-    // 상대방의 poison 저항력에 따라 걸릴 수도 안 걸릴 수도 있다...
+    
     Resist_t resist = pTargetCreature->getResist(MAGIC_DOMAIN_POISON);
 
-    // poison 저항력에 의해서 걸리지 않았다.
+    
     if (m_bVampire) {
         if (!HitRoll::isSuccessVampireCurse(m_Level, resist))
             return false;
@@ -81,14 +81,14 @@ bool EffectYellowPoison::affectCreature(Creature* pTargetCreature, bool bAffectB
             return false;
     }
 
-    // 중복시키지 않는다. ABCD 2001/03/21
-    // 중복시킬때  OldSight을 얻는 과정에서 문제가 생겨서 Sight가 3으로 고착되는 버그가 있었던
-    // 것 같다.
+    
+    
+    
     if (!pTargetCreature->isFlag(Effect::EFFECT_CLASS_YELLOW_POISON_TO_CREATURE)) {
         Zone* pZone = pTargetCreature->getZone();
 
-        // 플래그가 켜져있지 않으므로, 이펙트도 없겠지만, 혹시나 해서
-        // 이미 걸려 있는 같은 이펙트가 있다면 이미 걸려 있던 것을 지워준다.
+        
+        
         if (pTargetCreature->isFlag(Effect::EFFECT_CLASS_YELLOW_POISON_TO_CREATURE)) {
             pTargetCreature->deleteEffect(Effect::EFFECT_CLASS_YELLOW_POISON_TO_CREATURE);
         }
@@ -96,22 +96,22 @@ bool EffectYellowPoison::affectCreature(Creature* pTargetCreature, bool bAffectB
         Sight_t CurrentSight = pTargetCreature->getSight();
         Sight_t oldSight = CurrentSight;
 
-        // 이펙트를 생성하고, 파라미터를 지정해 준다.
+        
         EffectYellowPoisonToCreature* pEffect = new EffectYellowPoisonToCreature(pTargetCreature);
         pEffect->setDeadline(m_Duration);
         pEffect->setOldSight(CurrentSight);
         pEffect->setLevel(m_Level);
 
-        // Creature에 Effect Flag를 On 시킨다.
+        
         pTargetCreature->setFlag(Effect::EFFECT_CLASS_YELLOW_POISON_TO_CREATURE);
         pTargetCreature->addEffect(pEffect);
 
-        // DB에 Effect를 생성한다.
+        
         // pEffect->create(pTargetCreature->getName());
 
-        // 원래 이 부분에 존 레벨을 체크해서, 안전지대일 경우,
-        // GCChangeDarkLight에다 다크레벨을 0으로 해서 보내주었으나,
-        // 필요가 없는 코드인 것 같아서 빼버렸다. -- 김성민
+        
+        
+        
         GCChangeDarkLight gcChangeDarkLight;
         gcChangeDarkLight.setDarkLevel(15);
         gcChangeDarkLight.setLightLevel(1);
@@ -120,7 +120,7 @@ bool EffectYellowPoison::affectCreature(Creature* pTargetCreature, bool bAffectB
         pTargetCreature->setSight(pTargetCreature->getEffectedSight());
         GCModifyInformation gcMI;
 
-        // 시야가 변했으므로.. 시야 update..
+        
         if (oldSight != pTargetCreature->getSight()) {
             pZone->updateScan(pTargetCreature, oldSight, pTargetCreature->getSight());
             gcMI.addShortData(MODIFY_VISION, pTargetCreature->getSight());
@@ -233,7 +233,7 @@ void EffectYellowPoisonLoader::load(Zone* pZone)
                             pEffect->setDuration(value1);
                             pEffect->setLevel(100);
 
-                            // 존 및 타일에다가 이펙트를 추가한다.
+                            
                             pZone->registerObject(pEffect);
                             // pZone->addEffect(pEffect);  // REMOVED: Don't add permanent tile effects to Zone
                             tile.addEffect(pEffect);

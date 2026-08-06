@@ -14,7 +14,7 @@
 
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
+	#include "../ClientPlayer.h"
 #endif
 
 //--------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ throw ( ProtocolException , Error )
 	
 
 	//--------------------------------------------------
-	// 검증된 Tile에 대한 이동
+	
 	//--------------------------------------------------
 	g_pPlayer->PacketMoveOK(pPacket->getX(), pPacket->getY(), pPacket->getDir());
 

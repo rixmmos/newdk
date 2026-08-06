@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : AttackMelee.cpp
 // Written by  : elca@ewestsoft.com
-// Description : 기본 공격
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "AttackMelee.h"
@@ -17,7 +17,7 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
@@ -38,15 +38,15 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC를 공격할 수는 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayer)" << endl;
             return;
         }
 
-        // 슬레이어는 맨손이면 공격할 수 없다. by sigi. 2002.6.29
+        
         /*
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
 
@@ -58,7 +58,7 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
         */
         bool bIncreaseDomainExp = pSlayer->isRealWearingEx(Slayer::WEAR_RIGHTHAND);
 
-        // 기본 공격 스킬 슬랏을 받아온다.
+        
         SkillSlot* pSkillSlot = pSlayer->hasSkill(SKILL_ATTACK_MELEE);
         Assert(pSkillSlot != NULL);
 
@@ -79,17 +79,17 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
             Exp_t Point = 1;
 
-            // 데미지를 주고, 아이템 내구도를 떨어뜨린다.
+            
             setDamage(pTargetCreature, Damage, pSlayer, SKILL_ATTACK_MELEE, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCAttackMeleeOK1, &_GCAttackMeleeOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pSlayer->getX(), pSlayer->getY());
             }
 
-            // 타겟이 슬레이어가 아니라면 경험치를 올려준다.
+            
             if (!pTargetCreature->isSlayer()) {
                 Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
 
@@ -104,22 +104,22 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                             increaseDomainExp(pSlayer, SKILL_DOMAIN_SWORD, Point, _GCAttackMeleeOK1,
                                               pTargetCreature->getLevel());
                         } else if (pWeapon->getItemClass() == Item::ITEM_CLASS_CROSS) {
-                            // 십자가를 들고 있을 경우 Heal 계열의 경험치를 올려준다.
+                            
                             shareAttrExp(pSlayer, Damage, 1, 1, 8, _GCAttackMeleeOK1);
                             increaseDomainExp(pSlayer, SKILL_DOMAIN_HEAL, Point, _GCAttackMeleeOK1,
                                               pTargetCreature->getLevel());
                         } else if (pWeapon->getItemClass() == Item::ITEM_CLASS_MACE) {
-                            // 메이스를 들고 있을 경우 Enchant 계열의 경험치를 올려준다.
+                            
                             shareAttrExp(pSlayer, Damage, 1, 1, 8, _GCAttackMeleeOK1);
                             increaseDomainExp(pSlayer, SKILL_DOMAIN_ENCHANT, Point, _GCAttackMeleeOK1,
                                               pTargetCreature->getLevel());
                         } else {
-                            // 다른 계열의 무기를 들고, AttackMelee를 하는 것은 불법(?)이다.
+                            
                             Assert(false);
                         }
                     }
                 } else {
-                    // 아무 무기도 들지 않고, 공격을 할 경우, 능력치 경험치만 약간 올려준다.
+                    
                     shareAttrExp(pSlayer, Damage, 1, 1, 1, _GCAttackMeleeOK1);
                 }
 
@@ -143,8 +143,8 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                 Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                 pMonster->addEnemy(pSlayer);
 
-                // 이 부분은 새로 만들어진 부분을 생각해서 고쳐져야 하는데...
-                // 마스터는 딜레이없다.
+                
+                
                 if (!pMonster->isMaster()
 #ifdef __UNDERWORLD__
                     && !pMonster->isUnderworld() && pMonster->getMonsterType() != 599
@@ -179,7 +179,7 @@ void AttackMelee::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
 
@@ -199,7 +199,7 @@ void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거 때문에. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature)) {
             executeSkillFailException(pVampire, getSkillType());
             return;
@@ -210,7 +210,7 @@ void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
         GCAttackMeleeOK2 _GCAttackMeleeOK2;
         GCAttackMeleeOK3 _GCAttackMeleeOK3;
 
-        // 스킬 슬랏을 받아온다.
+        
         VampireSkillSlot* pSkillSlot = pVampire->hasSkill(SKILL_ATTACK_MELEE);
         Assert(pSkillSlot != NULL);
 
@@ -227,19 +227,19 @@ void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
         if (bTimeCheck && bRangeCheck && bHitRoll && bCanHit && bPK) {
             CheckCrossCounter(pVampire, pTargetCreature, Damage);
 
-            // 데미지를 주고, 내구도를 떨어뜨린다.
+            
             setDamage(pTargetCreature, Damage, pVampire, SKILL_ATTACK_MELEE, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             computeAlignmentChange(pTargetCreature, Damage, pVampire, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             decreaseDurability(pVampire, pTargetCreature, NULL, &_GCAttackMeleeOK1, &_GCAttackMeleeOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pVampire->getX(), pVampire->getY());
             }
 
             increaseAlignment(pVampire, pTargetCreature, _GCAttackMeleeOK1);
 
-            // 상대가 죽었다면 경험치를 좀 올려준다.
+            
             if (pTargetCreature->isDead()) {
                 int exp = computeCreatureExp(pTargetCreature, KILL_EXP);
                 shareVampExp(pVampire, exp, _GCAttackMeleeOK1);
@@ -262,7 +262,7 @@ void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
                 Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                 pMonster->addEnemy(pVampire);
 
-                // 마스터는 딜레이없다.
+                
                 if (!pMonster->isMaster()) {
                     Timeval NextTurn = pMonster->getNextTurn();
                     Timeval DelayTurn;
@@ -293,7 +293,7 @@ void AttackMelee::execute(Vampire* pVampire, ObjectID_t TargetObjectID)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터스 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
 
@@ -310,7 +310,7 @@ void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
 
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NoSuch제거 때문에. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature)) {
             executeSkillFailException(pOusters, getSkillType());
             return;
@@ -320,7 +320,7 @@ void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
         GCAttackMeleeOK2 _GCAttackMeleeOK2;
         GCAttackMeleeOK3 _GCAttackMeleeOK3;
 
-        // 스킬 슬랏을 받아온다.
+        
         OustersSkillSlot* pSkillSlot = pOusters->hasSkill(SKILL_ATTACK_MELEE);
         Assert(pSkillSlot != NULL);
 
@@ -338,19 +338,19 @@ void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
             Damage += computeElementalCombatSkill(pOusters, pTargetCreature, _GCAttackMeleeOK1);
             CheckCrossCounter(pOusters, pTargetCreature, Damage);
 
-            // 데미지를 주고, 내구도를 떨어뜨린다.
+            
             setDamage(pTargetCreature, Damage, pOusters, SKILL_ATTACK_MELEE, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             computeAlignmentChange(pTargetCreature, Damage, pOusters, &_GCAttackMeleeOK2, &_GCAttackMeleeOK1);
             decreaseDurability(pOusters, pTargetCreature, NULL, &_GCAttackMeleeOK1, &_GCAttackMeleeOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pTargetCreature, pOusters->getX(), pOusters->getY());
             }
 
             increaseAlignment(pOusters, pTargetCreature, _GCAttackMeleeOK1);
 
-            // 상대가 죽었다면 경험치를 좀 올려준다.
+            
             if (pTargetCreature->isDead()) {
                 int exp = computeCreatureExp(pTargetCreature, 100, pOusters);
                 shareOustersExp(pOusters, exp, _GCAttackMeleeOK1);
@@ -373,7 +373,7 @@ void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
                 Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                 pMonster->addEnemy(pOusters);
 
-                // 마스터는 딜레이없다.
+                
                 if (!pMonster->isMaster()) {
                     Timeval NextTurn = pMonster->getNextTurn();
                     Timeval DelayTurn;
@@ -403,7 +403,7 @@ void AttackMelee::execute(Ousters* pOusters, ObjectID_t TargetObjectID)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackMelee::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -442,11 +442,11 @@ void AttackMelee::execute(Monster* pMonster, Creature* pEnemy)
         if (bRangeCheck && bHitRoll && bCanHit) {
             CheckCrossCounter(pMonster, pEnemy, Damage);
 
-            // 데미지를 주고, 내구도를 떨어뜨린다.
+            
             setDamage(pEnemy, Damage, pMonster, SKILL_ATTACK_MELEE, &_GCAttackMeleeOK2);
             decreaseDurability(pMonster, pEnemy, NULL, NULL, &_GCAttackMeleeOK2);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pEnemy, pMonster->getX(), pMonster->getY());
             }

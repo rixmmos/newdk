@@ -1,11 +1,4 @@
-/**
- * @file test_index_sprite.c
- * @brief Tests for IndexedSprite and IndexedSpritePack
- * 
- * Property 4: ISPK 延迟加载
- * Property 5: ColorSet 映射一致性
- * Validates: Requirements 1.1, 1.2, 1.3, 6.4, 6.5
- */
+ 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -202,15 +195,7 @@ static void test_ispk_load(void) {
     index_spritepack_release(&pack);
 }
 
-/**
- * Property 4: ISPK 延迟加载
- * Test lazy loading of IndexSpritePack
- * Validates: Requirements 1.2, 1.3
- * 
- * For any IndexedSpritePack loaded with LoadFromFileRunning(),
- * accessing a sprite via operator[] should load it from file on demand,
- * and subsequent accesses should return the same sprite.
- */
+ 
 static void test_ispk_lazy_load(void) {
     IndexSpritePack pack;
     index_spritepack_init(&pack);
@@ -269,14 +254,7 @@ static void test_ispk_lazy_load(void) {
     index_spritepack_release(&pack);
 }
 
-/**
- * Property 5: ColorSet 映射一致性
- * Test ColorSet mapping consistency
- * Validates: Requirements 6.4, 6.5
- * 
- * For any valid index value and ColorSet configuration,
- * the rendered color should match the ColorSet table lookup.
- */
+ 
 static void test_colorset_mapping_consistency(void) {
     colorset_init();
     

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// 전쟁에 대한 전반적인 정보 및 전쟁 시작 및 종료시 처리루틴 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "SiegeWar.h"
@@ -85,10 +85,10 @@ bool SiegeWar::addChallengerGuild(GuildID_t gID) {
 // executeStart
 //
 //--------------------------------------------------------------------------------
-// 전쟁이 시작하는 시점에서 처리해야 될 것들
+
 //
-// (!) Zone에 붙어있는 WarScheduler에서 실행되는 부분이므로
-//     자신의 Zone(성)에 대한 처리는 lock이 필요없다.
+
+
 //--------------------------------------------------------------------------------
 void SiegeWar::executeStart()
 
@@ -98,36 +98,17 @@ void SiegeWar::executeStart()
     sendWarStartMessage();
     clearReinforceRegisters();
 
-    // 이 부분은 나중에~~ CastleInfo로 넣는게 낫겠다.
+    
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
     Assert(pCastleInfo != NULL);
 
     ZoneID_t siegeZoneID = SiegeManager::Instance().getSiegeZoneID(m_CastleZoneID);
     Assert(siegeZoneID != 0);
-    /*
-        GuildID_t OwnerGuildID = pCastleInfo->getGuildID();
-        if ( !pCastleInfo->isCommon() )
-        {
-            SiegeManager::Instance().recallGuild( m_CastleZoneID, siegeZoneID, OwnerGuildID, 1, 200 );
-            filelog("WarLog.txt", "%d 길드가 성 주인입니다.", OwnerGuildID);
-        }
-
-        if ( m_ReinforceGuildID != 0 )
-        {
-            SiegeManager::Instance().recallGuild( m_CastleZoneID, siegeZoneID, m_ReinforceGuildID, 2, 200 );
-            filelog("WarLog.txt", "%d 길드가 수성 지원측입니다.", m_ReinforceGuildID);
-        }
-
-        for ( int i=0; i<m_ChallangerGuildCount; ++i )
-        {
-            if ( m_ChallangerGuildID[i] != 0 ) SiegeManager::Instance().recallGuild( m_CastleZoneID, siegeZoneID,
-       m_ChallangerGuildID[i], 3+i, 200 ); filelog("WarLog.txt", "%d 길드가 공격 %d번측입니다.", m_ChallangerGuildID[i],
-       i);
-        }*/
+     
 
     SiegeManager::Instance().start(siegeZoneID);
 
-    // SiegeWarHistory Table 에 기록
+    
     recordSiegeWarStart();
 
     __END_CATCH
@@ -138,27 +119,7 @@ void SiegeWar::recordSiegeWarStart()
 {
     __BEGIN_TRY
 
-    /*	Statement* pStmt = NULL;
-
-        CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo( m_CastleZoneID );
-
-        // NULL 일리도 없지만 혹시나 하는 맘에 -_-;
-        if ( pCastleInfo == NULL )	return;
-
-        BEGIN_DB
-        {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT IGNORE INTO SiegeWarHistory (WarID, SiegeWarID, ServerID, CastleName,
-       DefenseGuildID, DefenseGuildName, AttackGuildID, AttackGuildName) VALUES (%d, '%s', %d, '%s', %d, '%s', %d,
-       '%s')", (int)getWarID(), getWarStartTime().toStringforWeb().c_str(), g_pConfig->getPropertyInt("ServerID"),
-                            pCastleInfo->getName().c_str(),
-                            (int)pCastleInfo->getGuildID(),
-                            g_pGuildManager->getGuildName( pCastleInfo->getGuildID() ).c_str(),
-                            getChallangerGuildID(),
-                            g_pGuildManager->getGuildName( getChallangerGuildID() ).c_str() );
-
-        }
-        END_DB(pStmt)*/
+     
 
     __END_CATCH
 }
@@ -168,7 +129,7 @@ void SiegeWar::recordSiegeWarStart()
 // executeEnd
 //
 //--------------------------------------------------------------------------------
-// 전쟁이 끝나는 시점에서 처리해야 될 것들
+
 //--------------------------------------------------------------------------------
 void SiegeWar::executeEnd()
 
@@ -176,7 +137,7 @@ void SiegeWar::executeEnd()
     __BEGIN_TRY
 
     //----------------------------------------------------------------------------
-    // 전쟁 끝났다는 걸 알린다.
+    
     //----------------------------------------------------------------------------
     sendWarEndMessage();
 
@@ -210,7 +171,7 @@ void SiegeWar::executeEnd()
                     GameServerInfo* pGameServerInfo = itr->second;
 
                     if (pGameServerInfo->getWorldID() == myWorldID) {
-                        // 현재 서버가 아닌 경우에만..(위에서 처리했으므로)
+                        
                         if (pGameServerInfo->getGroupID() == myServerID) {
                         } else if (pGameServerInfo->getCastleFollowingServerID() == myServerID) {
                             g_pLoginServerManager->sendPacket(pGameServerInfo->getIP(), pGameServerInfo->getUDPPort(),
@@ -223,18 +184,18 @@ void SiegeWar::executeEnd()
             }
         }
     } else {
-        // WinnerGuildID 를 지금 주인으로 셋팅해준다
+        
         CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
         m_WinnerGuildID = pCastleInfo->getGuildID();
     }
 
     //----------------------------------------------------------------------------
-    // 전쟁 신청금을 성에 쌓는다.
-    // (우선 전쟁 결과에 따라서 성의 주인이 바뀌었다고 가정한다.)
+    
+    
     //----------------------------------------------------------------------------
     g_pCastleInfoManager->increaseTaxBalance(m_CastleZoneID, m_RegistrationFee);
     m_RegistrationFee = 0;
-    // tinysave("전쟁신청금=0") <-- 할 필요 있을까?
+    
 
     ZoneID_t siegeZoneID = SiegeManager::Instance().getSiegeZoneID(m_CastleZoneID);
     Assert(siegeZoneID != 0);
@@ -242,7 +203,7 @@ void SiegeWar::executeEnd()
     filelog("SiegeWar.log", "[%u] executeEnd : reset zone %u", getWarID(), siegeZoneID);
     SiegeManager::Instance().reset(siegeZoneID);
 
-    // SiegeWarHistory Table 에 기록
+    
     recordSiegeWarEnd();
 
     __END_CATCH
@@ -252,29 +213,7 @@ void SiegeWar::recordSiegeWarEnd()
 
     {__BEGIN_TRY
 
-         /*	Statement* pStmt = NULL;
-
-              BEGIN_DB
-              {
-
-                  pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                  pStmt->executeQuery("UPDATE SiegeWarHistory SET WinnerGuildID = %d , WinnerGuildName = '%s' WHERE
-             WarID = %d", (int)m_WinnerGuildID, g_pGuildManager->getGuildName( m_WinnerGuildID ).c_str(),
-                                  (int)getWarID() );
-
-              }
-              END_DB(pStmt)
-
-              // script 돌리기 ㅡ.,ㅡ system 함수를 쓰게 될 줄이야 !_!
-              char cmd[100];
-              sprintf(cmd, "/home/darkeden/vs/bin/script/recordSiegeWarHistory.py %d %d %d ",
-                              (int)getWarID(),
-                              g_pConfig->getPropertyInt("Dimension"),
-                              g_pConfig->getPropertyInt("WorldID") );
-
-              filelog("script.log", cmd);
-              system(cmd);
-          */
+          
          __END_CATCH}
 
 string SiegeWar::getWarName() const
@@ -282,7 +221,7 @@ string SiegeWar::getWarName() const
 {
     __BEGIN_TRY
 
-    return "공성전";
+    return "";
 
     __END_CATCH
 }
@@ -292,7 +231,7 @@ string SiegeWar::getWarName() const
 //	isModifyCastleOwner( PlayerCreature* pPC )
 //
 //--------------------------------------------------------------------------------
-// 성의 주인이 바뀌는 경우
+
 //--------------------------------------------------------------------------------
 bool SiegeWar::isModifyCastleOwner(PlayerCreature* pPC)
 
@@ -325,7 +264,7 @@ bool SiegeWar::isModifyCastleOwner(PlayerCreature* pPC)
 // getWinnerGuildID( PlayerCreature* pPC )
 //
 //--------------------------------------------------------------------------------
-// 전쟁에 승리한 길드의 GuildID를 넘겨준다.
+
 //--------------------------------------------------------------------------------
 GuildID_t SiegeWar::getWinnerGuildID(PlayerCreature* pPC)
 
@@ -334,9 +273,9 @@ GuildID_t SiegeWar::getWinnerGuildID(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    // 길드전쟁인 경우 : 전쟁신청 길드와 pPC의 길드가 같으면 pPC의 GuildID
-    // 					 아니면 원래 성주인의 길드ID와 같으면 원래 성주인 GuildID
-    //					 아니면 COMMON_GUILD_ID
+    
+    
+    
     //	CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo( m_CastleZoneID );
     //	Assert( pCastleInfo!=NULL );
 
@@ -352,7 +291,7 @@ bool SiegeWar::endWar(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    // < 성 주인 변경 >
+    
     if (isModifyCastleOwner(pPC)) {
         m_WinnerRace = pPC->getRace();
         m_WinnerGuildID = getWinnerGuildID(pPC);
@@ -367,7 +306,7 @@ bool SiegeWar::endWar(PlayerCreature* pPC)
 }
 
 //--------------------------------------------------------------------------------
-// 전쟁 끝날 때
+
 //--------------------------------------------------------------------------------
 void SiegeWar::sendWarEndMessage() const
 
@@ -376,7 +315,7 @@ void SiegeWar::sendWarEndMessage() const
 
     War::sendWarEndMessage();
 
-    // 안전지대 해제 확인? 패킷
+    
     GCNoticeEvent gcNoticeEvent;
     gcNoticeEvent.setCode(NOTICE_EVENT_WAR_OVER);
     gcNoticeEvent.setParameter(m_CastleZoneID);
@@ -417,25 +356,25 @@ void SiegeWar::makeWarInfo(WarInfo* pWarInfo) const
     Assert(pGuildWarInfo != NULL);
 
     //---------------------------------------------------
-    // 현재 성 주인 구하기
+    
     //---------------------------------------------------
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(getCastleZoneID());
     if (pCastleInfo == NULL) {
-        filelog("WarError.log", "CastleInfo가 없다(%d)", getCastleZoneID());
+        filelog("WarError.log", "CastleInfo (%d)", getCastleZoneID());
         return;
     }
 
     GuildID_t ownGuildID = pCastleInfo->getGuildID();
 
-    pGuildWarInfo->addJoinGuild(ownGuildID); // 현재 성 주인
+    pGuildWarInfo->addJoinGuild(ownGuildID); 
 
     for (uint i = 0; i < m_ChallangerGuildCount; ++i)
         pGuildWarInfo->addJoinGuild(m_ChallangerGuildID[i]);
 
     pGuildWarInfo->setCastleID(getCastleZoneID());
 
-    // 공격 길드 이름
-    static const string commonGuild("없음");
+    
+    static const string commonGuild("");
 
     string attackGuildName;
     string defenseGuildName;
@@ -443,7 +382,7 @@ void SiegeWar::makeWarInfo(WarInfo* pWarInfo) const
     attackGuildName = g_pGuildManager->getGuildName(m_ChallangerGuildID[0]);
     if (m_ChallangerGuildCount > 1) {
         char buffer[40];
-        snprintf(buffer, 40, "%s외 %u개", attackGuildName.c_str(), m_ChallangerGuildCount - 1);
+        snprintf(buffer, 40, "%s %u", attackGuildName.c_str(), m_ChallangerGuildCount - 1);
         attackGuildName = buffer;
     }
 

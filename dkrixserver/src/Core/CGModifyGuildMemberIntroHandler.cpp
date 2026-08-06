@@ -37,12 +37,12 @@ void CGModifyGuildMemberIntroHandler::execute(CGModifyGuildMemberIntro* pPacket,
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
     Assert(pPlayerCreature != NULL);
 
-    // 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPlayerCreature->getGuildID());
     if (pGuild == NULL)
         return;
 
-    // 길드 멤버 정보를 가져온다.
+    
     GuildMember* pGuildMember = pGuild->getMember(pPlayerCreature->getName());
     if (pGuildMember == NULL)
         return;

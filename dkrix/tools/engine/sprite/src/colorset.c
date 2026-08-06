@@ -1,13 +1,4 @@
-/**
- * @file colorset.c
- * @brief ColorSet system implementation
- * 
- * Requirements: 6.1, 6.2, 6.3, 6.4
- * 
- * This implements the ColorSet color lookup system used by IndexedSprite
- * for creature color variations. The system supports 495 ColorSets
- * (33 seeds × 15 modifications) with 30 gradation levels each.
- */
+ 
 
 #include "colorset.h"
 #include <string.h>

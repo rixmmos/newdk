@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -42,7 +42,7 @@ throw ( ProtocolException , Error )
 		MCreature* pCreature = g_pZone->GetCreature(vi.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -54,7 +54,7 @@ throw ( ProtocolException , Error )
 	
 			//pCreature->SetCreatureType( 0 );
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			Shape_t shape	= vi.getShape();
 			bool bMale		= vi.getSex()==MALE;
@@ -84,7 +84,7 @@ throw ( ProtocolException , Error )
 
 			pCreature->SetName( vi.getName().c_str() );
 
-			// 임시로
+			
 			pCreature->SetGuildNumber( vi.getGuildID() );
 			
 			pCreature->SetID(vi.getObjectID());
@@ -99,7 +99,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_CURRENT_HP, vi.getCurrentHP() );
 			pCreature->SetStatus( MODIFY_ALIGNMENT, vi.getAlignment() );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( vi.getSkinColor() );
 			pCreature->SetBodyColor2( vi.getCoatColor() );
 
@@ -110,7 +110,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -136,7 +136,7 @@ throw ( ProtocolException , Error )
 #endif
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature이면.
+		
 		//--------------------------------------------------
 		else
 		{
@@ -145,12 +145,12 @@ throw ( ProtocolException , Error )
 
 			pCreature->SetName( vi.getName().c_str() );
 
-			// 임시로
+			
 			pCreature->SetGuildNumber( vi.getGuildID() );
 
 			//pCreature->SetCreatureType( 0 );
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			Shape_t shape	= vi.getShape();
 			bool bMale		= vi.getSex()==MALE;
@@ -186,7 +186,7 @@ throw ( ProtocolException , Error )
 			//pCreature->SetCurrentDirection( vi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( vi.getSkinColor() );
 			pCreature->SetBodyColor2( vi.getCoatColor() );
 
@@ -197,7 +197,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -218,31 +218,31 @@ throw ( ProtocolException , Error )
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
 
 			//--------------------------------------------------
-			// Burrow에서 빠져나오는 Effect == Burrowing하는 Effect
+			
 			//--------------------------------------------------		
 			ExecuteActionInfoFromMainNode(
-				RESULT_MAGIC_HIDE,										// 사용 기술 번호
+				RESULT_MAGIC_HIDE,										
 			
 				pCreature->GetX(), pCreature->GetY(), 0,
-				pCreature->GetDirection(),														// 사용 방향
+				pCreature->GetDirection(),														
 				
-				OBJECTID_NULL,												// 목표에 대한 정보
+				OBJECTID_NULL,												
 				pCreature->GetX(), pCreature->GetY(), 0, 
 				
-				0,													// 기술의 (남은) 지속 시간		
+				0,													
 				
 				NULL,
 				
-				false);			// 기술 첨부터 시작한다.
+				false);			
 		}
 	}
 
-	// [도움말] Vampire가 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT

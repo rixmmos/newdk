@@ -2,7 +2,7 @@
 // 
 // Filename    : GearInfo.h 
 // Written By  : elca@ewestsoft.com
-// Description : 인벤토리 아이템의 정보들
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -10,7 +10,7 @@
 #define __GEAR_INFO_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "GearSlotInfo.h"
 #include "Packet.h"
@@ -19,7 +19,7 @@
 //
 // class GearInfo;
 //
-// 게임서버에서 클라이언트로 자신의 기술이 성공을 알려주기 위한 클래스
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -37,14 +37,14 @@ public :
 public :
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getSize () throw ();
 
 	static uint getMaxSize () throw () { 

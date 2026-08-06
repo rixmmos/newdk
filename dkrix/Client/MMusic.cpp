@@ -15,7 +15,7 @@
 MMusic		g_Music;
 
 /////////////////////////////////////////////////////////////////////////////
-// 문제가 발생했다면 MCI 에러를 설명하는 문자열열을 메시지 상자에출력한다.
+
 bool 
 MMusic::ErrorMsg()
 {
@@ -48,7 +48,7 @@ MMusic::~MMusic()
 
 
 /////////////////////////////////////////////////////////
-// 초기화 
+
 bool MMusic::Init(HWND hwnd)
 {
 	DWORD volume;
@@ -89,7 +89,7 @@ MMusic::SetVolume(WORD volume)
 }
 
 /////////////////////////////////////////////////////////
-// 제거
+
 void MMusic::UnInit()
 {
 	if(m_bInit && m_bLoad)
@@ -137,7 +137,7 @@ bool MMusic::Play(LPCSTR	filename)
 	{
 		char buffer[256];
 
-		// 음악이 로드되어 있다면 정지시킨다.
+		
 		if(m_bLoad)
 		{
 			Stop();

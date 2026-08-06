@@ -88,7 +88,7 @@ CMessageArray::~CMessageArray()
 void
 CMessageArray::Init(int max, int length, const char* filename)
 {
-	// 일단 메모리 제거..
+	
 	Release();
 
 	m_Max		= max;
@@ -107,7 +107,7 @@ CMessageArray::Init(int max, int length, const char* filename)
 	// file Log
 	if (filename!=NULL)
 	{
-		// filename을 기억해둔다.
+		
 		m_Filename = new char [strlen(filename)+1];
 		strcpy(m_Filename, filename);
 
@@ -126,9 +126,9 @@ CMessageArray::Init(int max, int length, const char* filename)
 void
 CMessageArray::Release()
 {
-	// 자꾸 여기서 에러나서리..
-	// 음냐.. 도대체 어디서 문제가 생기는걸까.
-	// 못찾겠다.. 아이고..
+	
+	
+	
 	//#ifndef _DEBUG
 		if (m_ppMessage!=NULL)
 		{
@@ -165,7 +165,7 @@ CMessageArray::Release()
 //----------------------------------------------------------------------
 // Add 
 //----------------------------------------------------------------------
-// String을 추가한다. 끝에~..
+
 //----------------------------------------------------------------------
 void		
 CMessageArray::Add(const char *str)
@@ -181,7 +181,7 @@ CMessageArray::Add(const char *str)
 	// file log
 	if (m_bLog)
 	{ 
-		// [ TEST CODE ] 시간 출력
+		
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -189,7 +189,7 @@ CMessageArray::Add(const char *str)
 		PLATFORM_WRITE( m_LogFile, str, len );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
@@ -207,7 +207,7 @@ CMessageArray::Add(const char *str)
 	}
 	else
 	{
-		// 저장
+		
 		strcpy(m_ppMessage[m_Current], str);
 	}
 
@@ -220,7 +220,7 @@ CMessageArray::Add(const char *str)
 //----------------------------------------------------------------------
 // Add To File
 //----------------------------------------------------------------------
-// File에만 추가한다. 끝에~..
+
 //----------------------------------------------------------------------
 void		
 CMessageArray::AddToFile(const char *str)
@@ -234,7 +234,7 @@ CMessageArray::AddToFile(const char *str)
 	// file log
 	if (m_bLog)
 	{
-		// [ TEST CODE ] 시간 출력
+		
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -242,7 +242,7 @@ CMessageArray::AddToFile(const char *str)
 		PLATFORM_WRITE( m_LogFile, str, strlen( str ) );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
@@ -273,7 +273,7 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 	// file log
 	if (m_bLog)
 	{
-		// [ TEST CODE ] 시간 출력
+		
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -281,14 +281,14 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 		PLATFORM_WRITE( m_LogFile, Buffer, len );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
 		#endif
 	}	
 
-	// 혹시 넘어갈까봐.. (이거 심각한데. - -;;)
+	
 	if (len >= m_Length)
 	{		
 		for (int i=0; i<m_Length; i++)
@@ -300,7 +300,7 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 	}
 	else
 	{
-		// 저장
+		
 		strcpy(m_ppMessage[m_Current], Buffer);
 	}
 	
@@ -314,7 +314,7 @@ CMessageArray::AddFormatVL(const char* format, va_list& vl)
 //--------------------------------------------------------------------------
 // Add Format
 //--------------------------------------------------------------------------
-// 적절한 형식으로 string을 만든다.
+
 //--------------------------------------------------------------------------
 void
 CMessageArray::AddFormat(const char* format, ...)
@@ -338,7 +338,7 @@ CMessageArray::AddFormat(const char* format, ...)
 	// file log
 	if (m_bLog)
 	{
-		// [ TEST CODE ] 시간 출력
+		
 		//sprintf(g_MessageBuffer, "[%4d] ", timeGetTime() % 10000);
 		//PLATFORM_WRITE( m_LogFile, g_MessageBuffer, strlen(g_MessageBuffer) );
 
@@ -346,14 +346,14 @@ CMessageArray::AddFormat(const char* format, ...)
 		PLATFORM_WRITE( m_LogFile, Buffer, len );
 		PLATFORM_WRITE( m_LogFile, "\n", 1 );
 
-		// [ TEST CODE ] 화일 닫고 다시 열기
+		
 		#ifdef OUTPUT_FILE_LOG
 			PLATFORM_CLOSE( m_LogFile );
 			m_LogFile = PLATFORM_OPEN(m_Filename, _O_WRONLY | _O_TEXT | _O_APPEND | _O_CREAT);
 		#endif
 	}	
 
-	// 혹시 넘어갈까봐.. (이거 심각한데. - -;;)
+	
 	if (len >= m_Length)
 	{		
 		for (int i=0; i<m_Length; i++)
@@ -365,7 +365,7 @@ CMessageArray::AddFormat(const char* format, ...)
 	}
 	else
 	{
-		// 저장
+		
 		strcpy(m_ppMessage[m_Current], Buffer);
 	}
 	
@@ -379,7 +379,7 @@ CMessageArray::AddFormat(const char* format, ...)
 //----------------------------------------------------------------------
 // Next
 //----------------------------------------------------------------------
-// Current를 next로 바꾼다..
+
 //----------------------------------------------------------------------
 void
 CMessageArray::Next()
@@ -408,13 +408,13 @@ CMessageArray::Next()
 // operator []
 //----------------------------------------------------------------------
 // 0 ~ MAX-1
-// 0이 가장 오래된 String이고 MAX-1이 가장 최근에 것으로
-// return해야 한다.
+
+
 //----------------------------------------------------------------------
 const char*	
 CMessageArray::operator [] (int i)
 { 
-	//                i   = 실제로 return되어야 하는 값
+	
 	//m_Current - (3-[0]) = m_Current;
 	//m_Current - (3-[1]) = m_Current - 2;
 	//m_Current - (3-[2]) = m_Current - 1;

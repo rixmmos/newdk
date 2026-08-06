@@ -44,9 +44,9 @@ public:
 public:
     // write data to stream (output buffer)
     // *CAUTION*
-    // string �� ���ۿ� writing �� ��, �ڵ����� size �� �տ� ���� ���� �ִ�.
-    // �׷���, string �� ũ�⸦ BYTE/WORD �� ��� ������ �� ������
-    // �ǹ��̴�. ��Ŷ�� ũ��� ���� ���� ���ٴ� ��å�Ͽ��� �ʿ信 ���� string size ���� BYTE �Ǵ� WORD �� �������� ����ϵ��� �Ѵ�.
+    
+    
+    
     uint write(const char* buf, uint len);
     uint write(const string& buf) {
         return write(buf.c_str(), buf.size());
@@ -115,7 +115,7 @@ private:
     uint m_Head;
     uint m_Tail;
 
-    // �������
+    
     BYTE m_Sequence;
     // add by viva 2008-12-31
 public:
@@ -139,8 +139,8 @@ public:
 // ( ( m_Head = m_Tail + 1 ) ||
 //   ( ( m_Head == 0 ) && ( m_Tail == m_BufferLen - 1 ) )
 //
-// �� �� ���� full �� �����Ѵٴ� ���� ���� ����. ����, ������ ��
-// ������ ũ��� �׻� 1 �� ����� �Ѵٴ� ���!
+
+
 //
 //////////////////////////////////////////////////////////////////////
 template <typename T> uint SocketOutputStream::write(T buf) {
@@ -148,16 +148,16 @@ template <typename T> uint SocketOutputStream::write(T buf) {
 
     uint len = sizeof(T);
 
-    // ���� ������ �� ������ ����Ѵ�.
-    // (!) m_Head > m_Tail�� ��쿡 m_Head - m_Tail - 1 �� �����ߴ�. by sigi. 2002.9.16
-    // �ٵ� buffer_resize�� �� ���� �Ͼ��. �ٸ��� ������ �ִµ� �ϴ� ��
-    // ã�����Ƿ�.. back. by sigi. 2002.9.23
-    // �׽�Ʈ �غ��ϱ�.. �������̾���. ������ buffer resize�� ����� �Ͼ�� ������ ����?
-    // �ٽ� ����. by sigi. 2002.9.27
+    
+    
+    
+    
+    
+    
     uint nFree = ((m_Head <= m_Tail) ? m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1);
     // m_Tail - m_Head - 1 );
 
-    // ������ �ϴ� ����Ÿ�� ũ�Ⱑ �� ������ ũ�⸦ �ʰ��� ��� ���۸� ������Ų��.
+    
     if (len >= nFree)
         resize(len - nFree + 1);
 

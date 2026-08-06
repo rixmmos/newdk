@@ -10,7 +10,7 @@
 #include "SimpleTileMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SacredStamp::execute(Slayer* pSlayer, ObjectID_t targetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID) {
     __BEGIN_TRY
@@ -21,7 +21,7 @@ void SacredStamp::execute(Slayer* pSlayer, ObjectID_t targetObjectID, SkillSlot*
     Creature* pTargetCreature = pZone->getCreature(targetObjectID);
     // Assert(pTargetCreature != NULL);
 
-    // NoSuch제거. by sigi. 2002.5.2
+    
     if (pTargetCreature == NULL) {
         executeSkillFailException(pSlayer, getSkillType());
         return;
@@ -60,7 +60,7 @@ void SacredStamp::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSl
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Holy Smashing 이 있다면 데미지 10% 증가
+    
     if (pSlayer->hasRankBonus(RankBonus::RANK_BONUS_HOLY_SMASHING)) {
         RankBonus* pRankBonus = pSlayer->getRankBonus(RankBonus::RANK_BONUS_HOLY_SMASHING);
         Assert(pRankBonus != NULL);

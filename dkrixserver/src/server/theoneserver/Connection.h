@@ -2,7 +2,7 @@
 //
 // File Name 	: Connection.h
 // Written by	: Gday29@ewestsoft.com
-// Description	: 데이타베이스와의 연결을 담당하는 클래스
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ class Statement;
 //
 // class Connection;
 //
-// 데이터 베이스에 연결하고, 관리한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -41,10 +41,10 @@ public:
     // close the connection to database
     void close() throw(SQLConnectException, Error);
 
-    // 데이타베이스에 연결을 시도한다.
+    
     void connect(string host, string db, string user, string password, uint port = 0) throw(SQLConnectException);
 
-    // 데이타베이스에 연결을 시도한다.
+    
     void connect() throw(SQLConnectException);
 
     // check the connection
@@ -55,7 +55,7 @@ public:
         return m_bConnected == false;
     }
 
-    // Statement 객체를 생성해서 리턴한다.
+    
     Statement* createStatement() throw();
 
     // get the MYSQL object
@@ -126,28 +126,28 @@ private:
     // is connected?
     bool m_bConnected;
 
-    // DBMS 가 운영되는 호스트 명
+    
     string m_Host;
 
-    // DBMS 의 연결 포트
+    
     uint m_Port;
 
-    // 데이타베이스 이름
+    
     string m_Database;
 
-    // 사용자 아이디
+    
     string m_User;
 
-    // 사용자 패스워드
+    
     string m_Password;
 
-    // connection name(DatabaseManager 에서 사용할 키값)
+    
     string m_Name;
 
-    // 현재 사용중인 커넥션인가?
+    
     bool m_bBusy;
 
-    // 동시 쿼리를 막기 위한 lock
+    
     Mutex m_Mutex;
 };
 

@@ -21,9 +21,9 @@
 //
 // class UpdateServerPlayer
 //
-// 업데이트 서버용 플레이어 클래스
+
 //
-// 입력은 버퍼링을 하지만, 출력은 버퍼링을 하지 않는다.
+
 //
 //--------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ public:
     virtual void sendPacket(Packet* packet) throw(ProtocolException, Error);
 
     // disconnect
-    // 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
+    
     virtual void disconnect(bool bDisconnected = DISCONNECTED) throw(Error);
 
     // get debug string

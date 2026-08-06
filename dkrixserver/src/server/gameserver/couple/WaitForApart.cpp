@@ -38,7 +38,7 @@ uint WaitForApart::waitPartner(PlayerCreature* pTargetPC) {
 
     GCSystemMessage gcSystemMessage;
     //	StringStream msg;
-    //	msg << pWaitingPC->getName() << "님으로부터 이별 신청이 왔습니다.";
+    
 
     char msg[100];
     sprintf(msg, g_pStringPool->c_str(STRID_REQUEST_APART), pWaitingPC->getName().c_str());
@@ -75,14 +75,14 @@ uint WaitForApart::acceptPartner(PlayerCreature* pRequestedPC) {
     Assert(hasCoupleItem(pRequestedPC));
     Assert(hasCoupleItem(pWaitingPC));
 
-    // 커플링을 없애줘야 함~_~;
+    
     Assert(removeCoupleItem(pRequestedPC));
     Assert(removeCoupleItem(pWaitingPC));
 
-    // 커플매니저에서 헤어졌다고 등록함
+    
     g_pCoupleManager->removeCouple(pRequestedPC, pWaitingPC);
 
-    // 커플이 깨졌으니 Flag 를 다시 돌려준다.
+    
     pRequestedPC->getFlagSet()->turnOff(FLAGSET_IS_COUPLE);
     pWaitingPC->getFlagSet()->turnOff(FLAGSET_IS_COUPLE);
 
@@ -90,52 +90,14 @@ uint WaitForApart::acceptPartner(PlayerCreature* pRequestedPC) {
     pWaitingPC->getFlagSet()->save(pWaitingPC->getName());
 
     return 0;
-    /*	Inventory* pRequestedPCInven = pRequestedPC->getInventory();
-        Inventory* pWaitingPCInven = pWaitingPC->getInventory();
-
-        Item::ItemClass IClass = Item::ITEM_CLASS_COUPLE_ITEM;
-        Item* pRequestedPCCoupleItem = pRequestedPCInven->findItem(IClass , 0);
-        Item* pWaitingPCCoupleItem = pWaitingPCInven->findItem(IClass , 0);
-
-        if (pRequestedPCCoupleItem != NULL && pWaitingPCCoupleItem != NULL)
-        {
-            pRequestedPCInven->deleteItem(pRequestedPCCoupleItem->getObjectID());
-            pWaitingPCInven->deleteItem(pWaitingPCCoupleItem->getObjectID());
-
-            GCDeleteInventoryItem gcDeleteRequestedPCInventoryCoupleItem;
-            GCDeleteInventoryItem gcDeleteWaitingPCInventoryCoupleItem;
-
-            gcDeleteRequestedPCInventoryCoupleItem.setObjectID( pRequestedPCCoupleItem->getObjectID() );
-            gcDeleteWaitingPCInventoryCoupleItem.setObjectID( pWaitingPCCoupleItem->getObjectID() );
-
-            pRequestedPC->getPlayer()->sendPacket( &gcDeleteRequestedPCInventoryCoupleItem );
-            pWaitingPC->getPlayer()->sendPacket( &gcDeleteWaitingPCInventoryCoupleItem );
-
-            // 커플이 깨졌으니 PlayerCreature 에 ItemNameInfo 도 없애줘야하는뎅 ;;
-            // 그냥 NULL 로 셋팅하자 ~_~
-            pRequestedPC->deleteItemNameInfoList( pRequestedPCCoupleItem->getObjectID() );
-            pWaitingPC->deleteItemNameInfoList( pWaitingPCCoupleItem->getObjectID() );
-
-            // 아이템을 없애준다.
-            pRequestedPCCoupleItem->destroy();
-            SAFE_DELETE( pRequestedPCCoupleItem );
-            pWaitingPCCoupleItem->destroy();
-            SAFE_DELETE( pWaitingPCCoupleItem );
-
-            // 딴 남자 or 여자 찾아 떠나야 하므로.
-
-            return true;
-        }
-
-        return false;
-        */
+     
 
     __END_CATCH
 }
 void WaitForApart::timeExpired() {
     __BEGIN_TRY
 
-    // 헤어짐이 거절당했다고 보내준다.
+    
     GCNPCResponse gcNPCResponse;
     gcNPCResponse.setCode(NPC_RESPONSE_APART_WAIT_TIME_EXPIRED);
 
@@ -149,7 +111,7 @@ void WaitForApart::timeExpired() {
 bool WaitForApart::removeCoupleItem(PlayerCreature* pPC) {
     __BEGIN_TRY
 
-    // 네손가락-_-부터 뒤진다.
+    
     if (pPC->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
         Assert(pSlayer != NULL);
@@ -199,10 +161,10 @@ bool WaitForApart::removeCoupleItem(PlayerCreature* pPC) {
     } else
         Assert(false);
 
-    // 마우스에 아이템이 있다.
+    
     Item* pCoupleItem = pPC->getExtraInventorySlotItem();
     if (pCoupleItem == NULL || !isMatchCoupleRing(pPC, pCoupleItem)) {
-        // 마우스에 아이템이 없거나 마우스에 있는 아이템이 커플링이 아니면 인벤토리를 뒤진다.
+        
         pCoupleItem = pPC->getInventory()->findItem(getItemClass(pPC), getItemType(pPC));
         if (pCoupleItem != NULL)
             pPC->getInventory()->deleteItem(pCoupleItem->getObjectID());

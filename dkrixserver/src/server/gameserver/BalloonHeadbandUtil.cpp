@@ -67,7 +67,7 @@ Item* getBalloonHeadbandItem(BalloonHeadband kind) {
     }
 
     if (putInDB) {
-        filelog("BalloonHeadband.log", "아이템이 나왔습니다. : %d", (int)kind);
+        filelog("BalloonHeadband.log", " . : %d", (int)kind);
 
         increaseEventItemCount(ret);
     }

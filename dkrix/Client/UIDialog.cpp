@@ -2,7 +2,7 @@
 // UIDialog.cpp
 //-----------------------------------------------------------------------------
 #include "Client_PCH.h"
-#include "Client.h"			// 이거 안 넣으니까 ambigious.. T_T;;
+#include "Client.h"			
 #include "UIDialog.h"
 #include "VS_UI_ExtraDialog.h" 
 #include "TalkBox.h"
@@ -13,6 +13,8 @@
 #include "ServerInfo.h"
 #include "DebugInfo.h"
 #include "UIFunction.h"
+#include "MNPC.h"
+#include "TextSystem/TextSanitizer.h"
 //#include <string>
 
 #include "Packet/CPackets/CGSelectQuest.h"
@@ -24,7 +26,7 @@
 	#include "AddonDef.h"
 #endif
 
-bool g_bPartyRunning = false;		// ㅋㅋ...
+bool g_bPartyRunning = false;		
 
 using namespace std;
 
@@ -219,7 +221,7 @@ UIDialog::Release()
 	}	
 	
 
-	// 입력 제한 해제
+	
 	s_LockGameInput	= 0;	
 
 #ifdef OUTPUT_DEBUG
@@ -256,7 +258,7 @@ UIDialog::ClosePCTalkDlg()
 
 		UnSetLockInputPCTalk();
 
-		// 파티가 떠 있었다면... 다시 띄운다.
+		
 		if (g_bPartyRunning)
 		{
 			UI_RunParty();
@@ -320,21 +322,21 @@ UIDialog::ShowPCTalkDlg()
 }
 
 //-----------------------------------------------------------------------------
-// NPC 대화 선택 dialog
+
 //-----------------------------------------------------------------------------
 void
 UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 {
 	//-----------------------------------------------------------
-	// 뭔가를 선택했을 때, 
-	// server로 선택된 것을 보낸다.
+	
+	
 	//-----------------------------------------------------------
-	// 삽질 코드.. - -;
+	
 	g_pPCTalkBox->SetAnswerID(id);
 
 	int answerID;
 	//--------------------------------------------------
-	// dialog를 '끝'냈을 때..
+	
 	//--------------------------------------------------
 	//if (id==DIALOG_EXECID_EXIT)
 	//{
@@ -343,7 +345,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 		//UnSetLockInputPCTalk();		
 	//}
 	//--------------------------------------------------
-	// 정상적인 선택..
+	
 	//--------------------------------------------------
 	//else
 	{
@@ -352,14 +354,14 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 	
 
 	//--------------------------------------------------
-	// 검증 받을게 없는 경우에만 packet을 보낸다.
+	
 	//--------------------------------------------------
 	if (g_Mode == MODE_GAME)
 	{
 		if (g_pPlayer->IsWaitVerifyNULL())
 		{	
 			//--------------------------------------------------
-			// 다른 UI가 떠있지 않는 경우에..
+			
 			//--------------------------------------------------
 			if (!UI_IsRunningStorage() 
 				&& !UI_IsRunningExchange()
@@ -372,7 +374,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 				switch (g_pPCTalkBox->GetType())
 				{				
 					//--------------------------------------------------
-					// 일반적인 대화
+					
 					//--------------------------------------------------
 					case PCTalkBox::NORMAL :
 					{						
@@ -388,14 +390,14 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 						g_pSocket->sendPacket( &_CGNPCAskAnswer );
 
 						//--------------------------------------------------
-						// 검증 packet을 기다리는 mode로 설정한다.
+						
 						//--------------------------------------------------
 						g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_NPC_ASK );						
 					}
 					break;
 
 					//--------------------------------------------------
-					// 기술 배울 떄
+					
 					//--------------------------------------------------
 					case PCTalkBox::SKILL_LEARN :
 					{
@@ -403,7 +405,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 						{
 							if (id==999)
 							{
-								// 빠져 나가기
+								
 								pDlg->Run( DIALOG_EXECID_EXIT );
 
 								UnSetLockInputPCTalk();
@@ -425,11 +427,11 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 								g_pSocket->sendPacket( &_CGLearnSkill );
 
 								//--------------------------------------------------
-								// 검증 packet을 기다리는 mode로 설정한다.
+								
 								//--------------------------------------------------
 								//g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_NPC_ASK );						
 								
-								// Dialog 빠져 나가기
+								
 								pDlg->Run( DIALOG_EXECID_EXIT );
 
 								g_pPlayer->SetWaitVerifyNULL();								
@@ -475,7 +477,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 					}
 					break;
 					//--------------------------------------------------
-					// 블러디 바이블  배울 떄
+					
 					//--------------------------------------------------
 					case PCTalkBox::BLOOD_BIBLE_SIGN :
 					{
@@ -483,7 +485,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 						{
 							if (id==999)
 							{
-								// 빠져 나가기
+								
 								pDlg->Run( DIALOG_EXECID_EXIT );
 
 								UnSetLockInputPCTalk();
@@ -504,11 +506,11 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 								g_pSocket->sendPacket( &_CGSelectBloodBible );
 
 								//--------------------------------------------------
-								// 검증 packet을 기다리는 mode로 설정한다.
+								
 								//--------------------------------------------------
 								//g_pPlayer->SetWaitVerify( MPlayer::WAIT_VERIFY_NPC_ASK );						
 								
-								// Dialog 빠져 나가기
+								
 //								pDlg->Run( DIALOG_EXECID_EXIT );
 //
 //								g_pPlayer->SetWaitVerifyNULL();								
@@ -530,7 +532,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 	}
 
 	//-------------------------------------------------------------
-	// ESC 누르거나.. 그냥 빠질때.. 검증... 으흠.. 뭔가 불안.. - -;
+	
 	//-------------------------------------------------------------
 	if (id==DIALOG_EXECID_EXIT)
 	{
@@ -540,7 +542,7 @@ UIDialog::ProcessPCTalkDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 
 		g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 
-		// 파티가 떠 있었다면... 다시 띄운다.
+		
 		if (g_bPartyRunning)
 		{
 			UI_RunParty();
@@ -558,13 +560,13 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 //				C_VS_UI_DIALOG m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, func, DIALOG_OK);
 //
 //				DIALOG_MENU d_menu[] = {
-//					{"사기, 0},
-//					{"팔기", 1},
-//					{"끝내기", DIALOG_EXECID_EXIT},
+
+
+
 //				};
 //				m_pC_dialog->SetMenu(d_menu, 3);
 //
-//				static char * pp_dmsg[] = { // Message는 반드시 static or global로 해야 한다.
+
 //					"line 1",
 //					"line 2",
 //				};
@@ -581,7 +583,7 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 		return;
 	
 	//---------------------------------------------------------
-	// 기존에 있던 dialog를 지운다.
+	
 	//---------------------------------------------------------
 	if (m_pPCTalkDlg!=NULL)
 	{
@@ -589,7 +591,7 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 		m_pPCTalkDlg = NULL;
 	}
 	
-	// 파티가 떠 있었는지 확인
+	
 	if (UI_IsRunningParty() || g_bPartyRunning)
 	{
 		g_bPartyRunning = true;
@@ -600,7 +602,7 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	}
 
 	//---------------------------------------------------------
-	// 다른 dialog들 닫기
+	
 	//---------------------------------------------------------
 	DEBUG_ADD("UID-CloseUIDlg");
 
@@ -614,7 +616,7 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	CloseMessageDlg();
 	
 	//---------------------------------------------------------
-	// size 체크
+	
 	//---------------------------------------------------------
 	int msgSize = g_pPCTalkBox->size();
 
@@ -624,15 +626,15 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	}
 
 	//---------------------------------------------------------
-	// 제목
+	
 	//---------------------------------------------------------
 	const char*	content = g_pPCTalkBox->GetContent();
 	int lenContent = strlen(content);
 
 	//---------------------------------------------------------
-	// dialog의 길이를 정한다.
+	
 	//---------------------------------------------------------
-	// -1 넣으면 자동이다.
+	
 	/*
 	int lengthY;
 	
@@ -648,65 +650,38 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	lengthY += lenContent/150 + 1;	//(lenContent/40)/3 + 1;
 	*/
 	//---------------------------------------------------------
-	// dialog 생성
+	
 	//---------------------------------------------------------
 	DEBUG_ADD("newNPCDLG");
 
+	const char* npcDisplayName = NULL;
+	int logicalNpcID = g_pPCTalkBox->GetCreatureType();
+	MCreature* pDialogCreature = g_pZone != NULL ? g_pZone->GetCreature(g_pPCTalkBox->GetNPCID()) : NULL;
+	if (pDialogCreature != NULL)
+	{
+		npcDisplayName = pDialogCreature->GetName();
+		if (pDialogCreature->GetClassType() == MCreature::CLASS_NPC)
+			logicalNpcID = ((MNPC*)pDialogCreature)->GetNPCID();
+	}
+
+	std::string npcName = TextSystem::NormalizeNpcNameOrFallback(
+		npcDisplayName != NULL && npcDisplayName[0] != '\0'
+			? npcDisplayName
+			: (*g_pCreatureTable)[g_pPCTalkBox->GetCreatureType()].Name.GetString(),
+		logicalNpcID);
 	m_pPCTalkDlg = new C_VS_UI_NPC_DIALOG(ProcessPCTalkDlg,
 							g_pPCTalkBox->GetCreatureType(), 
-							(*g_pCreatureTable)[g_pPCTalkBox->GetCreatureType()].Name.GetString());
+							npcName.c_str());
 							//g_pZone->GetCreature(g_pPCTalkBox->GetNPCID())->GetName());//, SMO_NOFIT);
 
 	//---------------------------------------------------------
-	// 제목 등록
-	//---------------------------------------------------------	
-	/*
-	char* pContent = new char [lenContent+1];
-	strcpy( pContent, content );
-	char* pContentTemp = pContent;
-
-	//-------------------------------------------------------------
-	// 40글자 이상
-	//-------------------------------------------------------------
-	// 콩가루~~~ ㅡ.ㅡ; 귀차나.. 음냐..
-	int numStr = 0;
 	
-	while (lenContent > 40)
-	{
-		char* str = pContentTemp + 40;
-
-		for (int i=40; i>0; i--)
-		{
-			if (*str==' ')
-			{
-				break;
-			}
-
-			str--;
-		}
-
-		strncpy(m_ppDlgMessage[MESSAGE_PCTALK][numStr], pContentTemp, i);
-		m_ppDlgMessage[MESSAGE_PCTALK][numStr][i] = '\0';
-
-		lenContent -= i+1;
-
-		pContentTemp += i+1;		// +1은 공백이다.		
-
-		numStr++;
-	}
-
-	//-------------------------------------------------------------
-	// 40글자 이하
-	//-------------------------------------------------------------
-	strcpy(m_ppDlgMessage[MESSAGE_PCTALK][numStr], pContentTemp);
-	numStr++;	
-
-	m_pPCTalkDlg->SetMessage(m_ppDlgMessage[MESSAGE_PCTALK], numStr);//sizeof(pp_dmsg)/sizeof(char *));
-	*/
+	//---------------------------------------------------------	
+	 
 
 
 	//---------------------------------------------------------
-	// 메뉴 구성..
+	
 	//---------------------------------------------------------
 	DEBUG_ADD("newDLGMENU");
 	DIALOG_MENU* pMenu = new DIALOG_MENU[msgSize];// + 1];
@@ -718,27 +693,27 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	switch (g_pPCTalkBox->GetType())
 	{
 		//-----------------------------------------------------
-		// 일반적인 대화
+		
 		//-----------------------------------------------------
 		case PCTalkBox::NORMAL :
 			while (iString != g_pPCTalkBox->end())
 			{
 				MString* pString = *iString;
 
-				// menu 내용 설정
-				pMenu[i].exec_id		= i+1;						// ID+1
-				pMenu[i].sz_menu_str	= pString->GetString();		// 내용..
 				
-				// 다음..
+				pMenu[i].exec_id		= i+1;						// ID+1
+				pMenu[i].sz_menu_str	= pString->GetString();		
+				
+				
 				iString++;
 				i++;		
 			}
 		break;
 
 		//-----------------------------------------------------
-		// 기술 배울 때
+		
 		//-----------------------------------------------------
-		// %3d%s 형식으로 되어 있다. 임시!~~~ 쩝~~
+		
 		//-----------------------------------------------------
 		case PCTalkBox::SKILL_LEARN :
 		case PCTalkBox::BLOOD_BIBLE_SIGN:
@@ -754,14 +729,14 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 				strID[3] = NULL;
 				strcpy(strName, pString->GetString()+3);
 
-				// 이름 다시 설정
+				
 				*pString = strName;
 				
-				// menu 내용 설정
-				pMenu[i].exec_id		= atoi(strID);
-				pMenu[i].sz_menu_str	= pString->GetString();		// 내용..
 				
-				// 다음..
+				pMenu[i].exec_id		= atoi(strID);
+				pMenu[i].sz_menu_str	= pString->GetString();		
+				
+				
 				iString++;
 				i++;		
 			}
@@ -779,14 +754,14 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 				strID[4] = NULL;
 				strcpy(strName, pString->GetString()+4);
 
-				// 이름 다시 설정
+				
 				*pString = strName;
 				
-				// menu 내용 설정
-				pMenu[i].exec_id		= atoi(strID);
-				pMenu[i].sz_menu_str	= pString->GetString();		// 내용..
 				
-				// 다음..
+				pMenu[i].exec_id		= atoi(strID);
+				pMenu[i].sz_menu_str	= pString->GetString();		
+				
+				
 				iString++;
 				i++;		
 			}
@@ -794,16 +769,16 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	}
 
 
-	// "끝내기"추가
-	//pMenu[i].exec_id		= DIALOG_EXECID_EXIT;			// UI에서 정한 ID
+	
+	
 	//pMenu[i].sz_menu_str	= new char [10];
-	//strcpy(pMenu[i].sz_menu_str, "나가기");
+	
 
 	//---------------------------------------------------------
-	// 메뉴 등록
+	
 	//---------------------------------------------------------
 	DEBUG_ADD("setMENU");
-	m_pPCTalkDlg->SetMenu(pMenu, msgSize, false);// + 1, false);		// 끝내기 포함
+	m_pPCTalkDlg->SetMenu(pMenu, msgSize, false);
 	
 	DEBUG_ADD("spMenu");
 	strcpy(m_ppDlgMessage[MESSAGE_PCTALK][0], g_pPCTalkBox->GetContent());
@@ -817,18 +792,18 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 	//---------------------------------------------------------
 	// delete
 	//---------------------------------------------------------
-	//delete [] pMenu[i].sz_menu_str;		// 끝내기 string만 지워주면 된다.
+	
 	delete [] pMenu;
 //	delete [] pContent;
 
 	//---------------------------------------------------------
-	// dialog 시작..
+	
 	//---------------------------------------------------------
 	DEBUG_ADD("startTalk");
 	m_pPCTalkDlg->Start();
 
 	//---------------------------------------------------------
-	// game으로의 입력을 차단한다.
+	
 	//---------------------------------------------------------
 	SetLockInputPCTalk();
 }
@@ -836,150 +811,17 @@ UIDialog::PopupPCTalkDlg(int x, int y)
 //-----------------------------------------------------------------------------
 // Help dialog
 //-----------------------------------------------------------------------------
-/*
-void 
-UIDialog::ProcessHelpDlg(C_VS_UI_DIALOG * pDlg, id_t id)
-{
-	//--------------------------------------------------
-	// dialog를 '끝'냈을 때..
-	//--------------------------------------------------
-	if (id==DIALOG_EXECID_EXIT)
-	{
-		//UnSetLockInputHelp();
-	}
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // PopupHelpDlg
 //-----------------------------------------------------------------------------
-/*
-void
-UIDialog::PopupHelpDlg(int x, int y)
-{
-//				C_VS_UI_DIALOG m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, func, DIALOG_OK);
-//
-//				DIALOG_MENU d_menu[] = {
-//					{"사기, 0},
-//					{"팔기", 1},
-//					{"끝내기", DIALOG_EXECID_EXIT},
-//				};
-//				m_pC_dialog->SetMenu(d_menu, 3);
-//
-//				static char * pp_dmsg[] = { // Message는 반드시 static or global로 해야 한다.
-//					"line 1",
-//					"line 2",
-//				};
-//
-//				m_pC_dialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *))
-
-	//---------------------------------------------------------
-	// 기존에 있던 dialog를 지운다.
-	//---------------------------------------------------------
-	if (m_pHelpDlg!=NULL)
-	{
-		delete m_pHelpDlg;
-	}
-
-
-	//---------------------------------------------------------
-	// dialog 생성
-	//---------------------------------------------------------
-	m_pHelpDlg = new C_VS_UI_DIALOG(x, y, 4, 3, ProcessHelpDlg, SMO_NOFIT);
-
-	//---------------------------------------------------------
-	// 도움말을 Loading한다.
-	//---------------------------------------------------------
-	if (m_ppDlgMessage[MESSAGE_HELP]==NULL)
-	{	
-		MStringArray	helpMessage;
-		
-		std::ifstream file(FILE_INFO_HELP, ios::binary);
-		helpMessage.LoadFromFile( file );
-		file.close();
-
-		int lines = helpMessage.GetSize();
-
-		m_ppDlgMessage[MESSAGE_HELP] = new char* [lines];
-
-		for (int i=0; i<lines; i++)
-		{
-			m_ppDlgMessage[MESSAGE_HELP][i] = new char [helpMessage[i].GetLength()+1];
-			strcpy(m_ppDlgMessage[MESSAGE_HELP][i], helpMessage[i].GetString());
-		}
-
-		m_ppDlgMessageSize[MESSAGE_HELP] = lines;	
-	}
-
-	m_pHelpDlg->SetMessage(m_ppDlgMessage[MESSAGE_HELP], m_ppDlgMessageSize[MESSAGE_HELP]);
-
-	//---------------------------------------------------------
-	// dialog 시작..
-	//---------------------------------------------------------
-	m_pHelpDlg->Start();
-
-	//---------------------------------------------------------
-	// game으로의 입력을 차단한다.
-	//---------------------------------------------------------
-	//SetLockInputHelp();
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // Popup MessageDlg
 //-----------------------------------------------------------------------------
-/*
-void
-UIDialog::PopupMessageDlg(UIDIALOG_MESSAGE msg, int x, int y)
-{
-//				C_VS_UI_DIALOG m_pC_dialog = new C_VS_UI_DIALOG(50, 20, 6, 2, func, DIALOG_OK);
-//
-//				DIALOG_MENU d_menu[] = {
-//					{"사기, 0},
-//					{"팔기", 1},
-//					{"끝내기", DIALOG_EXECID_EXIT},
-//				};
-//				m_pC_dialog->SetMenu(d_menu, 3);
-//
-//				static char * pp_dmsg[] = { // Message는 반드시 static or global로 해야 한다.
-//					"line 1",
-//					"line 2",
-//				};
-//
-//				m_pC_dialog->SetMessage(pp_dmsg, sizeof(pp_dmsg)/sizeof(char *))
-
-	if (msg >= MAX_MESSAGE || msg==MESSAGE_FREE)
-	{
-		return;
-	}
-
-	//---------------------------------------------------------
-	// 기존에 있던 dialog를 지운다.
-	//---------------------------------------------------------
-	if (m_pMessageDlg!=NULL)
-	{
-		delete m_pMessageDlg;
-	}
-
-	//---------------------------------------------------------
-	// dialog 생성
-	//---------------------------------------------------------
-	m_pMessageDlg = new C_VS_UI_DIALOG(x, y, 3, 0, ProcessMessageDlg, DIALOG_OK);
-
-	m_pMessageDlg->SetMessage(m_ppDlgMessage[msg], m_ppDlgMessageSize[msg], SMO_NOFIT);//sizeof(pp_dmsg)/sizeof(char *));
-
-
-	//---------------------------------------------------------
-	// dialog 시작..
-	//---------------------------------------------------------
-	m_pMessageDlg->Start();
-
-	//---------------------------------------------------------
-	// game으로의 입력을 차단한다.
-	//---------------------------------------------------------
-	SetLockInputHelp();
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // Popup Free MessageDlg
@@ -997,9 +839,9 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 	int dlgSizeY, numStr;
 
 	//-------------------------------------------------------------
-	// 40글자 이상
+	
 	//-------------------------------------------------------------
-	// 콩가루~~~ ㅡ.ㅡ; 귀차나.. 음냐..
+	
 	if (msgSize > 40)
 	{
 		dlgSizeY = 1;
@@ -1030,7 +872,7 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 		numStr = 2;
 	}
 	//-------------------------------------------------------------
-	// 40글자 이하
+	
 	//-------------------------------------------------------------
 	else
 	{
@@ -1040,7 +882,7 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 	}
 
 	//---------------------------------------------------------
-	// 기존에 있던 dialog를 지운다.
+	
 	//---------------------------------------------------------
 	if (m_pMessageDlg!=NULL)
 	{
@@ -1049,7 +891,7 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 	}
 
 	//---------------------------------------------------------
-	// dialog 생성
+	
 	//---------------------------------------------------------
 	m_pMessageDlg = new C_VS_UI_DIALOG(x, y, 3, dlgSizeY, ProcessMessageDlg, fButton);
 
@@ -1059,12 +901,12 @@ UIDialog::PopupFreeMessageDlg(const char* msg, int x, int y, WORD fButton, bool 
 
 
 	//---------------------------------------------------------
-	// dialog 시작..
+	
 	//---------------------------------------------------------
 	m_pMessageDlg->Start();
 
 	//---------------------------------------------------------
-	// game으로의 입력을 차단한다.
+	
 	//---------------------------------------------------------
 	SetLockInputMessage();
 }
@@ -1091,7 +933,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 	UIDialog::PopupAddonSelectDlg(int x, int y)
 	{
 		//---------------------------------------------------------
-		// 기존에 있던 dialog를 지운다.
+		
 		//---------------------------------------------------------
 		if (m_pAddonSelectDlg!=NULL)
 		{
@@ -1100,33 +942,33 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 
 	
 		//---------------------------------------------------------
-		// dialog 생성
+		
 		//---------------------------------------------------------
 		m_pAddonSelectDlg = new C_VS_UI_DIALOG(x, y, 1, 2, ProcessAddonSelectDlg);//, SMO_NOFIT);
 
 		//---------------------------------------------------------
-		// 메뉴 구성..
+		
 		//---------------------------------------------------------
 		const int menuSize = 9;
 		DIALOG_MENU menu[ menuSize ] = {
-					{"머리", 1},
-					{"모자", 2},
-					{"상의", 3},
-					{"하의", 4},
-					{"근접무기", 5},
-					{"총", 6},
-					{"방패", 7},
-					{"오토바이", 8},
+					{"", 1},
+					{"", 2},
+					{"", 3},
+					{"", 4},
+					{"", 5},
+					{"", 6},
+					{"", 7},
+					{"", 8},
 					{"EXIT", DIALOG_EXECID_EXIT},					
 				};
 
 		//---------------------------------------------------------
-		// 메뉴 등록
+		
 		//---------------------------------------------------------
-		m_pAddonSelectDlg->SetMenu(menu, menuSize);		// 끝내기 포함
+		m_pAddonSelectDlg->SetMenu(menu, menuSize);		
 
 		//---------------------------------------------------------
-		// dialog 시작..
+		
 		//---------------------------------------------------------
 		m_pAddonSelectDlg->Start();
 	}
@@ -1143,7 +985,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 머리
+			
 			//----------------------------------------------------------------------
 			case 1 :
 			{
@@ -1184,7 +1026,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 모자
+			
 			//----------------------------------------------------------------------
 			case 2 :
 			{
@@ -1211,7 +1053,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 상의
+			
 			//----------------------------------------------------------------------
 			case 3 :
 			{
@@ -1238,7 +1080,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 하의
+			
 			//----------------------------------------------------------------------
 			case 4 :
 			{
@@ -1265,7 +1107,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 근접무기
+			
 			//----------------------------------------------------------------------
 			case 5 :
 			{
@@ -1315,7 +1157,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 총
+			
 			//----------------------------------------------------------------------
 			case 6 :
 			{
@@ -1352,10 +1194,10 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 				
 					MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
 
-					// 의미 없음 - -;
+					
 					pMagazine->SetID( 0 );
 
-					// 이거는 총에 맞춰서 해줘야된다.
+					
 					for (int j=0; j<(*g_pItemTable)[ITEM_CLASS_MAGAZINE].GetSize(); j++)			
 					{
 						pMagazine->SetItemType(	j );
@@ -1366,14 +1208,14 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 						}
 					}
 
-					// 의미 없음
+					
 					pMagazine->ClearItemOption();
 
-					// 탄창 개수
+					
 					pMagazine->SetNumber( 0xFFFF );
 
 					//------------------------------------
-					// 탄창 설정
+					
 					//------------------------------------
 					pGunItem->SetMagazine( pMagazine );
 
@@ -1389,7 +1231,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 
 
 			//----------------------------------------------------------------------
-			// 방패
+			
 			//----------------------------------------------------------------------
 			case 7 :	
 			{
@@ -1417,7 +1259,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			break;
 
 			//----------------------------------------------------------------------
-			// 오토바이
+			
 			//----------------------------------------------------------------------
 			case 8 :
 			{
@@ -1447,7 +1289,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 	UIDialog::PopupActionSelectDlg(int x, int y)
 	{
 		//---------------------------------------------------------
-		// 기존에 있던 dialog를 지운다.
+		
 		//---------------------------------------------------------
 		if (m_pActionSelectDlg!=NULL)
 		{
@@ -1456,12 +1298,12 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 
 	
 		//---------------------------------------------------------
-		// dialog 생성
+		
 		//---------------------------------------------------------
 		m_pActionSelectDlg = new C_VS_UI_DIALOG(x, y, 1, 3, ProcessActionSelectDlg);//, SMO_NOFIT);
 
 		//---------------------------------------------------------
-		// 메뉴 구성..
+		
 		//---------------------------------------------------------
 		const int menuSize = 11;//21;
 		DIALOG_MENU menu[ menuSize ] = {
@@ -1493,12 +1335,12 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 				};
 
 		//---------------------------------------------------------
-		// 메뉴 등록
+		
 		//---------------------------------------------------------
-		m_pActionSelectDlg->SetMenu(menu, menuSize);		// 끝내기 포함
+		m_pActionSelectDlg->SetMenu(menu, menuSize);		
 
 		//---------------------------------------------------------
-		// dialog 시작..
+		
 		//---------------------------------------------------------
 		m_pActionSelectDlg->Start();
 	}
@@ -1516,7 +1358,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			case DIALOG_EXECID_EXIT :
 			break;
 
-			// Zone의 모든 캐릭터의 action을 바꾼다.
+			
 			default :
 			{
 				MZone::CREATURE_MAP::const_iterator iCreature = g_pZone->GetCreatureBegin();
@@ -1526,7 +1368,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 					MCreature* pCreature = (*iCreature).second;
 
 					//--------------------------------------------------
-					// player인 경우						
+					
 					//--------------------------------------------------
 					if (pCreature->GetID()==g_pPlayer->GetID())
 					{
@@ -1543,12 +1385,12 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 						}
 						else
 						{
-							// 그림이 있다면 action을 설정한다.
+							
 							g_pPlayer->SetAction( actionID );
 						}
 					}
 					//--------------------------------------------------
-					// NPC가 아닌 경우만...
+					
 					//--------------------------------------------------
 					else if (!pCreature->IsNPC())
 					{
@@ -1568,7 +1410,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 									FRAME_ARRAY& FA = DFA[direction];
 									if (FA.GetSize()!=0)
 									{
-										// 그림이 있다면 action을 설정한다.
+										
 										pCreature->SetNextAction( actionID );
 									}
 								}
@@ -1591,7 +1433,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 	UIDialog::PopupDirectionSelectDlg(int x, int y)
 	{
 		//---------------------------------------------------------
-		// 기존에 있던 dialog를 지운다.
+		
 		//---------------------------------------------------------
 		if (m_pDirectionSelectDlg!=NULL)
 		{
@@ -1600,35 +1442,35 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 
 	
 		//---------------------------------------------------------
-		// dialog 생성
+		
 		//---------------------------------------------------------
 		m_pDirectionSelectDlg = new C_VS_UI_DIALOG(x, y, 1, 2, ProcessDirectionSelectDlg);//, SMO_NOFIT);
 
 		//---------------------------------------------------------
-		// 메뉴 구성..
+		
 		//---------------------------------------------------------
 		const int menuSize = 9;//21;
 		DIALOG_MENU menu[ menuSize ] = {
-					{ "좌 (Left)",			0 }, 
-					{ "좌하 (LeftDown)", 	1 }, 
-					{ "하 (Down)", 			2 }, 
-					{ "우하 (RightDown)",	3 }, 
-					{ "우 (Right)", 		4 }, 
-					{ "우상 (RightUp)", 	5 }, 
-					{ "상 (Up)", 			6 }, 
-					{ "좌상 (LeftUp)",		7 }, 
+					{ " (Left)",			0 }, 
+					{ " (LeftDown)", 	1 }, 
+					{ " (Down)", 			2 }, 
+					{ " (RightDown)",	3 }, 
+					{ " (Right)", 		4 }, 
+					{ " (RightUp)", 	5 }, 
+					{ " (Up)", 			6 }, 
+					{ " (LeftUp)",		7 }, 
 					
 					
 					{"EXIT", DIALOG_EXECID_EXIT}
 				};
 
 		//---------------------------------------------------------
-		// 메뉴 등록
+		
 		//---------------------------------------------------------
-		m_pDirectionSelectDlg->SetMenu(menu, menuSize);		// 끝내기 포함
+		m_pDirectionSelectDlg->SetMenu(menu, menuSize);		
 
 		//---------------------------------------------------------
-		// dialog 시작..
+		
 		//---------------------------------------------------------
 		m_pDirectionSelectDlg->Start();
 	}
@@ -1646,7 +1488,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 			case DIALOG_EXECID_EXIT :
 			break;
 
-			// Zone의 모든 캐릭터의 Direction을 바꾼다.
+			
 			default :
 			{
 				MZone::CREATURE_MAP::const_iterator iCreature = g_pZone->GetCreatureBegin();
@@ -1656,7 +1498,7 @@ UIDialog::ProcessMessageDlg(C_VS_UI_DIALOG * pDlg, id_t id)
 					MCreature* pCreature = (*iCreature).second;
 
 					//--------------------------------------------------
-					// NPC가 아닌 경우
+					
 					//--------------------------------------------------					
 					if (!pCreature->IsNPC())
 					{										

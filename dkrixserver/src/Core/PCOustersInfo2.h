@@ -10,9 +10,9 @@
 #include "PCInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Ousters 정보를 담고 있는 객체.
-// GCPCList 패킷에 담겨서 클라이언트에게 전송된다.
-// 아이템이나 걸려있는 마법 같은 정보는 담겨있지 않다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCOustersInfo2 : public PCInfo {
@@ -26,50 +26,50 @@ public:
 
     uint getSize() const {
         return szObjectID                    // ObjectID
-               + szBYTE + m_Name.size()      // 아우스터스 이름
-               + szLevel                     // 레벨
-               + szSex                       // 성별
-               + szColor                     // 머리 색상
-               + szBYTE + szAlignment        // 성향
-               + szAttr * 3 * 3              // 능력치
+               + szBYTE + m_Name.size()      
+               + szLevel                     
+               + szSex                       
+               + szColor                     
+               + szBYTE + szAlignment        
+               + szAttr * 3 * 3              
                + szHP * 2                    // HP
                + szMP * 2                    // MP
-               + szRank + szRankExp          // 계급 경험치
-               + szExp                       // 경험치
-               + szGold                      // 돈
+               + szRank + szRankExp          
+               + szExp                       
+               + szGold                      
                + szFame                      // Fame
-               + szSight                     // 시야
-               + szBonus                     // 보너스 포인트
-               + szSkillBonus                // 스킬 보너스 포인트
-               + szSilver                    // 실버 데미지
-               + szBYTE                      // 권한
-               + szGuildID                   // 길드 아이디
-               + szBYTE + m_GuildName.size() // 길드 이름
+               + szSight                     
+               + szBonus                     
+               + szSkillBonus                
+               + szSilver                    
+               + szBYTE                      
+               + szGuildID                   
+               + szBYTE + m_GuildName.size() 
                + szGuildMemberRank           // guild member rank
                + szuint + szLevel + szExp;
     }
 
     static uint getMaxSize() {
         return szObjectID             // ObjectID
-               + szBYTE + 20          // 아우스터스 이름
-               + szLevel              // 레벨
-               + szSex                // 성별
-               + szColor              // 색상
-               + szBYTE + szAlignment // 성향
-               + szAttr * 3 * 3       // 능력치
+               + szBYTE + 20          
+               + szLevel              
+               + szSex                
+               + szColor              
+               + szBYTE + szAlignment 
+               + szAttr * 3 * 3       
                + szHP * 2             // HP
                + szMP * 2             // MP
-               + szRank + szRankExp   // 계급 경험치
-               + szExp                // 경험치
-               + szGold               // 돈
+               + szRank + szRankExp   
+               + szExp                
+               + szGold               
                + szFame               // Fame
-               + szSight              // 시야
-               + szBonus              // 보너스 포인트
-               + szSkillBonus         // 스킬 보너스 포인트
-               + szSilver             // 실버 데미지
-               + szBYTE               // 권한
-               + szGuildID            // 길드 아이디
-               + szBYTE + 30          // 길드 이름
+               + szSight              
+               + szBonus              
+               + szSkillBonus         
+               + szSilver             
+               + szBYTE               
+               + szGuildID            
+               + szBYTE + 30          
                + szGuildMemberRank    // guild member rank
                + szuint + szLevel + szExp;
     }
@@ -334,7 +334,7 @@ private:
     // MP[0] = current mp, mp[1] == max mp
     MP_t m_MP[2];
 
-    // 계급
+    
     Rank_t m_Rank;
     RankExp_t m_RankExp;
 
@@ -347,22 +347,22 @@ private:
     // Gold
     Gold_t m_Gold;
 
-    // 시야
+    
     Sight_t m_Sight;
 
-    // 보너스 포인트
+    
     Bonus_t m_Bonus;
 
-    // 스킬 보너스 포인트
+    
     SkillBonus_t m_SkillBonus;
 
-    // 실버 데미지
+    
     Silver_t m_SilverDamage;
 
     // Competence
     BYTE m_Competence;
 
-    // 길드 ID
+    
     GuildID_t m_GuildID;
 
     // guild name

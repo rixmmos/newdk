@@ -47,12 +47,12 @@ UserInformation::UserInformation()
 	HasMagicBloodyWarp = false;
 	HasMagicBloodySnake = false;
 
-	// 0이면 시간이 설정되어 있지 않는거다.
+	
 	LogoutTime = 0;
 
 	GameVersion = 0;
 
-	// 넷마블용
+	
 	IsNetmarble = false;
 	WorldID = 0;
 	ServerID = 0;
@@ -66,7 +66,7 @@ UserInformation::UserInformation()
 	bJapanese = false;
 	bEnglish = false;
 	
-	// 머리가격 기본값 100%다.
+	
 	HeadPrice = 100;
 	bCompetence = false;
 	bCompetenceShape = false;

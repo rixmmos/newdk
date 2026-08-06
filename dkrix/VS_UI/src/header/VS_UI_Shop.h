@@ -89,6 +89,7 @@ private:
 	int	GetDialogShowY() const;
 	void	StartBuyConfirmDialog(int _x, int _y, int num);
 	MItem * GetSlotItem(int slot) const;
+	bool	UpdateFocusedSlot(int _x, int _y);
 
 //timer
 	DWORD						m_dw_prev_tickcount;

@@ -18,8 +18,8 @@
 //
 // class RequestClientPlayer
 //
-// 다른 클라이언트에 접속해서 뭔가 요청한다..
-// 하나의 RequestServerPlayer와 접속하게 된다.
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ public :
 	const std::string&	getRequestServerIP() const	{ return m_RequestServerIP; }
 
 	// disconnect
-	// 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
+	
 	virtual void disconnect ( bool bDisconnected = DISCONNECTED ) throw ( ProtocolException , Error );
 	
 	// get debug string
@@ -80,7 +80,7 @@ private :
 	std::string					m_RequestServerName;
 	std::string					m_RequestServerIP;
 
-	// Request하고 있는 것
+	
 	REQUEST_CLIENT_MODE			m_RequestMode;
 
 	DWORD						m_ExpireTime;

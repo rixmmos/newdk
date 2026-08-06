@@ -1,8 +1,8 @@
 //-----------------------------------------------------------------------------
 // DebugInfo.h
 //-----------------------------------------------------------------------------
-// CMessageArray를 통한..
-// Debug정보를 표시해주는가?
+
+
 //-----------------------------------------------------------------------------
 
 #ifdef PLATFORM_WINDOWS
@@ -76,7 +76,7 @@
 		void	DEBUG_ADD_WAR(const char* message);
 		void	DEBUG_CMD(int cmd, const char* message);
 
-	// debug가 아닌 경우..
+	
 	#else
 		#define	DEBUG_MESSAGE(debugMessage)	((void)0)
 

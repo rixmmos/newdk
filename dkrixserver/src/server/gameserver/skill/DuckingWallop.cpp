@@ -19,8 +19,8 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 DuckingWallop::DuckingWallop() throw() {
     __BEGIN_TRY
@@ -81,7 +81,7 @@ DuckingWallop::DuckingWallop() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DuckingWallop::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                             CEffectID_t CEffectID)
@@ -101,7 +101,7 @@ void DuckingWallop::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouster
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pOusters, getSkillType());
 
@@ -120,7 +120,7 @@ void DuckingWallop::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouster
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersSkillSlot* pOustersSkillSlot,
                             CEffectID_t CEffectID)
@@ -131,7 +131,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
     // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << "begin " << endl;
     SkillType_t SkillType = getSkillType();
 
-    // Knowledge of Blood 가 있다면 hit bonus 10
+    
     // int HitBonus = 0;
     if (pOusters->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD)) {
         RankBonus* pRankBonus = pOusters->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_BLOOD);
@@ -147,7 +147,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
 
         Dir_t dir = getDirectionToPosition(pOusters->getX(), pOusters->getY(), X, Y);
 
-        // 강제로 knockback시킬 확률
+        
         //		bool bForceKnockback = rand()%100 < output.ToHit;
 
         Player* pPlayer = pOusters->getPlayer();
@@ -184,23 +184,23 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
 
         if (bManaCheck && bTimeCheck && bRangeCheck && bPassLine &&
             pZone->moveFastPC(pOusters, myX, myY, TargetX, TargetY, getSkillType())) {
-            // 마나를 떨어뜨린다.
+            
             decreaseMana(pOusters, RequiredMP, _GCSkillToTileOK1);
 
-            // 좌표와 방향을 구한다.
+            
             //			Dir_t       dir          = calcDirection(myX, myY, X, Y);
 
             list<Creature*> cList;
 
-            // knockback 때문에 recursive 하게 데미지를 먹는 경우가 있다.
-            // 그래서 제일 먼쪽에 있는 마스크부터 체크한다.
+            
+            
             for (int i = 17; i >= 0; i--) {
                 int tileX = myX + m_pDuckingWallopMask[dir][i].x;
                 int tileY = myY + m_pDuckingWallopMask[dir][i].y;
 
-                // 현재 타일이 존 내부이고, 안전지대가 아니라면 맞을 가능성이 있다.
+                
                 if (rect.ptInRect(tileX, tileY)) {
-                    // 타일을 받아온다.
+                    
                     Tile& tile = pZone->getTile(tileX, tileY);
 
                     list<Creature*> targetList;
@@ -246,7 +246,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
                                 _GCSkillToTileOK2.addCListElement(targetObjectID);
                                 _GCSkillToTileOK5.addCListElement(targetObjectID);
 
-                                // 일단 맞는 놈이 받을 패킷은 널 상태로 한 채로, 데미지를 준다.
+                                
                                 setDamage(pTargetCreature, Damage, pOusters, SkillType, NULL, &_GCSkillToTileOK1);
                                 computeAlignmentChange(pTargetCreature, Damage, pOusters, NULL, &_GCSkillToTileOK1);
 
@@ -263,7 +263,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
             }
 
 
-            // 공격자의 아이템 내구성을 떨어뜨린다.
+            
             decreaseDurability(pOusters, NULL, pSkillInfo, &_GCSkillToTileOK1, NULL);
 
             _GCSkillToTileOK1.setSkillType(SkillType);
@@ -289,7 +289,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
 
             pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-            // 이 기술에 의해 영향을 받는 놈들에게 패킷을 보내줘야 한다.
+            
             for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
                 Creature* pTargetCreature = *itr;
                 Assert(pTargetCreature != NULL);
@@ -297,7 +297,7 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
                 if (pTargetCreature->isPC()) {
                     _GCSkillToTileOK2.clearList();
 
-                    // HP의 변경사항을 패킷에다 기록한다.
+                    
                     HP_t targetHP = 0;
                     if (pTargetCreature->isSlayer()) {
                         targetHP = (dynamic_cast<Slayer*>(pTargetCreature))->getHP(ATTR_CURRENT);
@@ -309,13 +309,13 @@ void DuckingWallop::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ous
 
                     _GCSkillToTileOK2.addShortData(MODIFY_CURRENT_HP, targetHP);
 
-                    // 아이템의 내구력을 떨어뜨린다.
+                    
                     decreaseDurability(NULL, pTargetCreature, pSkillInfo, NULL, &_GCSkillToTileOK2);
 
-                    // 패킷을 보내준다.
+                    
                     pTargetCreature->getPlayer()->sendPacket(&_GCSkillToTileOK2);
                 } else if (pTargetCreature->isMonster()) {
-                    // 당근 적으로 인식한다.
+                    
                     Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                     pMonster->addEnemy(pOusters);
                 }

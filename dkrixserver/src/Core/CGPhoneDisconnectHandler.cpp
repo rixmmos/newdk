@@ -51,30 +51,30 @@ void CGPhoneDisconnectHandler::execute(CGPhoneDisconnect* pPacket, Player* pPlay
 
     // cout << "Disconnect PhoneSlot : " << (int)PhoneSlot << ", Phone Number : " << (int)TargetPhoneNumber << endl;
 
-    // 찾았으면....
+    
     if (pTargetSlayer != NULL) {
         pTargetPlayer = pTargetSlayer->getPlayer();
 
         if (pTargetSlayer->isSlotByPhoneNumber(PhoneNumber)) {
-            // 폰 번호로 그 번호가 들어있는 슬랏을 찾는다.
+            
             TargetPhoneSlot = pTargetSlayer->getSlotWithPhoneNumber(PhoneNumber);
 
             Success = true;
         }
     }
 
-    // 정상적으로 찾고 끊었을 경우
+    
     if (Success) {
-        // 이제 끊기는 마당이므로 0 으로 양측 다 셋팅.
+        
         pTargetSlayer->setPhoneSlotNumber(TargetPhoneSlot, 0);
         pSlayer->setPhoneSlotNumber(PhoneSlot, 0);
 
-        // 끊는 사람에게 날리는 패킷
+        
         GCPhoneDisconnected gcPhoneDisconnected;
         gcPhoneDisconnected.setPhoneNumber(TargetPhoneNumber);
         gcPhoneDisconnected.setSlotID(PhoneSlot);
 
-        // 상대적으로 끊기는 사람에게 날리는 패킷
+        
         GCPhoneDisconnected gcPhoneDisconnected2;
         gcPhoneDisconnected2.setPhoneNumber(PhoneNumber);
         gcPhoneDisconnected2.setSlotID(TargetPhoneSlot);
@@ -84,13 +84,13 @@ void CGPhoneDisconnectHandler::execute(CGPhoneDisconnect* pPacket, Player* pPlay
 
         // cout << "Disconnected Successfull" << endl;
 
-        // 비정상 적일 경우 -_-;
+        
     } else {
-        // 등록된 전화번호를 가진 사람이 특정 이유로 나간 상태이다.
-        // 따라서 등록 번호를 초기화 시켜준다.
+        
+        
         pSlayer->setPhoneSlotNumber(PhoneSlot, 0);
 
-        // 끊는 사람에게 날리는 패킷
+        
         GCPhoneDisconnected gcPhoneDisconnected;
         gcPhoneDisconnected.setPhoneNumber(TargetPhoneNumber);
         gcPhoneDisconnected.setSlotID(PhoneSlot);

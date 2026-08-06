@@ -2,15 +2,15 @@
 // Filename    : PCItemInfo.h
 // Written By  : elca
 // Description :
-// 아이템 하나에 대한 정보를 가지고 있는 패킷이다.
-// 좌표라든지, 이펙트에 관한 정보는 가지고 있지 않다.
-// 인벤토리와 관련된 여러 군데에서 상속되어 사용된다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SLAYER_ITEM_INFO_H__
 #define __SLAYER_ITEM_INFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"

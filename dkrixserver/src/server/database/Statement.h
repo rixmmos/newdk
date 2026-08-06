@@ -2,7 +2,7 @@
 //
 // File Name 	: Statement.h
 // Written by	: Gday29@ewestsoft.com
-// Description	: SQL ���� �����..
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ class Result;
 //
 // class Statement;
 //
-// SQL���� ����� ��� �����Ѵ�.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -37,10 +37,10 @@ public:
     ~Statement();
 
 public:
-    // ������ ������ SQL ���� ������ �����Ѵ�.
+    
     Result* executeQuery();
 
-    // SQL ���� �޾Ƽ� �����Ѵ�.
+    
     Result* executeQuery(const char*, ...);
     Result* executeQueryString(const string& sqlStatement);
 
@@ -49,7 +49,7 @@ public:
         return m_Statement;
     }
 
-    // SQL ���� �����Ѵ�.
+    
     void setStatement(const char* fmt, ...);
 
     // get connection object
@@ -80,13 +80,13 @@ private:
     // Connection
     Connection* m_pConnection;
 
-    // SQL Statement�
+    
     string m_Statement;
 
     // Query Result
     Result* m_pResult;
 
-    // insert, update, delete ���� �� ������ ���� row �� ����
+    
     uint m_nAffectedRows;
 };
 

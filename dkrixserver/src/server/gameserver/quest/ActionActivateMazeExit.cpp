@@ -55,7 +55,7 @@ void ActionActivateMazeExit::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionActivateMazeExit::execute(Creature* pNPC, Creature* pCreature)
 
@@ -66,14 +66,14 @@ void ActionActivateMazeExit::execute(Creature* pNPC, Creature* pCreature)
     Assert(pCreature != NULL);
     Assert(pCreature->isPC());
 
-    // 미로 출구는 유료존 체크 안하고 보내준다. 젠장 -_-
+    
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
     Assert(pPC != NULL);
 
     bool isCorrect = false;
 
     if (!pPC->isFlag(Effect::EFFECT_CLASS_REFINIUM_TICKET)) {
-        filelog("EventBug.log", "미로 안에 있는데 리피늄 티켓이 없어. 로그아웃하는수밖에.. : %s",
+        filelog("EventBug.log", "     . .. : %s",
                 pPC->getName().c_str());
     } else {
         EffectRefiniumTicket* pEffect =

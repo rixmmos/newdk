@@ -13,6 +13,7 @@
 #include "MActionInfoTable.h"
 #include "MSlayerGear.h"
 #include "SkillDef.h"
+#include "PacketFunction.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -25,9 +26,12 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 			// message
+	WriteCombatCrashMarker("GCAttackArmsOK5 attacker=%d target=%d skill=%d success=%d",
+		pPacket->getObjectID(), pPacket->getTargetObjectID(),
+		pPacket->getSkillType(), pPacket->getSkillSuccess());
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -38,7 +42,7 @@ throw ( ProtocolException , Error )
 	}	
 
 	//------------------------------------------------------
-	// 대상이 되는 creature를 얻는다.
+	
 	//------------------------------------------------------
 	MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 	MCreature* pTargetCreature = g_pZone->GetCreature( pPacket->getTargetObjectID() );
@@ -49,7 +53,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------
-	// 맞는 사람만 있는 경우는 맞는 동작만 보여주면 된다.
+	
 	//------------------------------------------------------
 	if (pCreature==NULL)
 	{
@@ -79,7 +83,7 @@ throw ( ProtocolException , Error )
 		return;
 	}
 	//------------------------------------------------------
-	// 때리는 사람만 있는 경우는 때리는 동작만 보여준다.
+	
 	//------------------------------------------------------
 	else if (pTargetCreature==NULL)
 	{
@@ -97,7 +101,7 @@ throw ( ProtocolException , Error )
 		} else
 		{
 			//------------------------------------------------------
-			// Creature가 행동을 취하도록 한다.
+			
 			//------------------------------------------------------
 			pCreature->PacketSpecialActionToNobody(
 							pCreature->GetBasicActionInfo(), 
@@ -111,7 +115,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// 결과(다른 캐릭터가 맞는 모습)를 설정한다.
+	
 	//------------------------------------------------------
 	MActionResult* pResult = NULL;
 
@@ -135,7 +139,7 @@ throw ( ProtocolException , Error )
 		} else
 		{
 			pResult->Add( new MActionResultNodeActionInfo( 
-										pCreature->GetBasicActionInfo(),	// 총 공격
+										pCreature->GetBasicActionInfo(),	
 										pPacket->getObjectID(), 
 										pPacket->getTargetObjectID(), 
 										pTargetCreature->GetX(),
@@ -146,19 +150,19 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------
-	// 행동하는 Creature가 TargetCreature를 바라보도록 한다.
+	
 	//------------------------------------------------------
 	pCreature->SetDirectionToPosition( pTargetCreature->GetX(), pTargetCreature->GetY() );
 
 	//------------------------------------------------------
-	// Creature가 행동을 취하도록 한다.
+	
 	//------------------------------------------------------
 
 	if( actionInfo == SKILL_JABBING_VEIN || actionInfo == SKILL_MOLE_SHOT || actionInfo == SKILL_TRIDENT ||
 		actionInfo == SKILL_QUICK_FIRE || actionInfo == SKILL_ULTIMATE_BLOW || pPacket->getSkillType() == SKILL_HARPOON_BOMB)
 	{
 		pCreature->PacketSpecialActionToOther(
-						// 총 공격
+						
 						actionInfo,
 						pPacket->getTargetObjectID(), 
 						pResult
@@ -166,7 +170,7 @@ throw ( ProtocolException , Error )
 	} else
 	{
 		pCreature->PacketSpecialActionToOther(
-						// 총 공격
+						
 						pCreature->GetBasicActionInfo()	, 
 						pPacket->getTargetObjectID(), 
 						pResult

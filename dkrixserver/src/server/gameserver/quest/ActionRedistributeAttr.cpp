@@ -50,7 +50,7 @@ void ActionRedistributeAttr::read(PropertyBuffer& propertyBuffer)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -65,7 +65,7 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
     Player* pPlayer = pCreature2->getPlayer();
     Assert(pPlayer != NULL);
 
-    // 먼저 클라이언트를 위해 GCNPCResponse를 보내준다.
+    
     GCNPCResponse okpkt;
     pPlayer->sendPacket(&okpkt);
 
@@ -73,15 +73,14 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
 
     Gold_t ATTR_PRICE = g_pVariableManager->getVariable(VAMPIRE_REDISTRIBUTE_ATTR_PRICE);
 
-    // 돈을 가지고 있지 않다면 에러다.
+    
     if (pVampire->getGold() < ATTR_PRICE) {
-        // 먼저 대화창을 닫게 한다.
+        
         GCNPCResponse gcNPCResponse;
         gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
         pPlayer->sendPacket(&gcNPCResponse);
 
-        /*		StringStream msg;
-                msg << pVampire->getName() << " 님은 충분한 돈을 가지고 있지 않습니다.(" << ATTR_PRICE << " 겔드)"; */
+         
 
         char msg[100];
         sprintf(msg, g_pStringPool->c_str(STRID_NOT_ENOUGH_MONEY), pVampire->getName().c_str());
@@ -92,8 +91,8 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         return;
     }
 
-    // 레벨 나누기 2만큼의 능력치만 보너스 포인트로 전환할 수 있다.
-    // 그러므로 이미 그 한계를 다 채우지는 않았는지 검사한다.
+    
+    
     Statement* pStmt = NULL;
     Result* pResult = NULL;
     int RedistributedAttr = 0;
@@ -111,13 +110,13 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         }
 
         if (RedistributedAttr >= pVampire->getLevel()) {
-            // 먼저 대화창을 닫게 한다.
+            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            //			msg << "레벨만큼만 보너스 포인트로 전환할 수 있습니다.";
+            
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_TRANS_BONUS_POINT));
@@ -130,24 +129,24 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
     }
     END_DB(pStmt)
 
-    // 능력치를 변경하기에 앞서 기존의 능력치를 저장한다.
+    
     VAMPIRE_RECORD prev;
     pVampire->getVampireRecord(prev);
 
     StringStream sql;
     StringStream sql2;
 
-    // STR 재분배
+    
     if (m_AttrType == 0) {
-        // 순수힘이 20이하라면 더 이상 재분배할 수가 없다.
+        
         if (pVampire->getSTR(ATTR_BASIC) <= 20) {
-            // 먼저 대화창을 닫게 한다.
+            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            //			msg << "STR을 20이하로 낮출 수는 없습니다.";
+            
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_STR_LOW_LIMIT));
@@ -158,16 +157,16 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         pVampire->setSTR(pVampire->getSTR(ATTR_BASIC) - 1, ATTR_BASIC);
         sql << "STR = " << (int)pVampire->getSTR(ATTR_BASIC);
     }
-    // DEX 재분배
+    
     else if (m_AttrType == 1) {
         if (pVampire->getDEX(ATTR_BASIC) <= 20) {
-            // 먼저 대화창을 닫게 한다.
+            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            //			msg << "DEX를 20이하로 낮출 수는 없습니다.";
+            
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_DEX_LOW_LIMIT));
@@ -178,16 +177,16 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         pVampire->setDEX(pVampire->getDEX(ATTR_BASIC) - 1, ATTR_BASIC);
         sql << "DEX = " << (int)pVampire->getDEX(ATTR_BASIC);
     }
-    // INT 재분배
+    
     else if (m_AttrType == 2) {
         if (pVampire->getINT(ATTR_BASIC) <= 20) {
-            // 먼저 대화창을 닫게 한다.
+            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            //			msg << "INT를 20이하로 낮출 수는 없습니다.";
+            
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_INT_LOW_LIMIT));
@@ -201,9 +200,9 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         Assert(false);
     }
 
-    // 줄어든 능력치를 세이브하고,
-    // 능력치가 줄어들었으니, 보너스를 늘린다.
-    // 그리고 돈을 줄인다.
+    
+    
+    
     pVampire->tinysave(sql.toString());
     pVampire->setBonus(pVampire->getBonus() + 1);
     sql2 << "Bonus = " << (int)pVampire->getBonus();
@@ -221,7 +220,7 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
     pVampire->sendRealWearingInfo();
     pPlayer->sendPacket(&gcMI);
 
-    // 변환한 능력치의 양을 저장해야 한다.
+    
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pStmt->executeQuery("UPDATE Vampire SET RedistributeAttr = %d WHERE Name='%s'", RedistributedAttr + 1,

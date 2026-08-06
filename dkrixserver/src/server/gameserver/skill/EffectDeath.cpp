@@ -61,8 +61,8 @@ void EffectDeath::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_DEATH);
 
     if (pCreature->isVampire()) {

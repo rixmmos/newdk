@@ -7,11 +7,11 @@
 #ifndef __GC_MODIFY_INFORMATION_H__
 #define __GC_MODIFY_INFORMATION_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "ModifyInfo.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../ModifyInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCModifyInformation;

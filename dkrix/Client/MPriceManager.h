@@ -7,7 +7,7 @@
 
 class MItem;
 
-// 가격은 type의 별이 number개.
+
 struct STAR_ITEM_PRICE {
 	int type;
 	int number;
@@ -17,10 +17,10 @@ class MPriceManager {
 	public :
 		enum TRADE_TYPE
 		{
-			NPC_TO_PC,		// player가 물건 살때, m_MarketCondSell
-			PC_TO_NPC,		// player가 물건 팔때, m_MarketCondBuy
-			REPAIR,			// player가 물건 repair할 때,
-			SILVERING,		// player가 물건에 실버코팅할 때,
+			NPC_TO_PC,		
+			PC_TO_NPC,		
+			REPAIR,			
+			SILVERING,		
 		};
 
 	public :
@@ -35,9 +35,9 @@ class MPriceManager {
 		int			GetMysteriousPrice(MItem* pItem) const;
 
 		//-------------------------------------------------------		
-		// 시세
+		
 		//-------------------------------------------------------		
-		// NPC 기준으로 buy, sell
+		
 		void		SetMarketCondBuy(int buy)			{ m_MarketCondBuy = buy; }
 		void		SetMarketCondSell(int sell)			{ m_MarketCondSell = sell; }
 
@@ -48,10 +48,10 @@ class MPriceManager {
 
 	protected :
 		
-		// 시세
-		int					m_MarketCondBuy;		// NPC가 살때(25)
-		int					m_MarketCondSell;		// NPC가 팔때(100)
-		int					m_EventFixPrice;		// 서버에서 정해주는 이벤트 아이템 가격
+		
+		int					m_MarketCondBuy;		
+		int					m_MarketCondSell;		
+		int					m_EventFixPrice;		
 };
 
 extern MPriceManager*		g_pPriceManager;

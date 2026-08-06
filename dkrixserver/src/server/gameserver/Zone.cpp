@@ -177,10 +177,10 @@
 #if defined(__THAILAND_SERVER__) || defined(__CHINA_SERVER__)
 // Server CrashEgg Pattern values
 // add by inthesky 2004 07 26
-const int MAX_EGGSTEP = 7; // 찍어야할 포지션 수
-const int EGG_ZONE = 1311; // 아우스터즈 마을
+const int MAX_EGGSTEP = 7; 
+const int EGG_ZONE = 1311; 
 
-int g_EggTableComplete = 0; // 스텝단계
+int g_EggTableComplete = 0; 
 
 int g_EggTable[MAX_EGGSTEP][3] = {
 
@@ -208,10 +208,10 @@ int g_EggTable[MAX_EGGSTEP][3] = {
 #define endProfileEx(name) ((void)0)
 #endif
 
-// 마스터 레어에서 시체/아이템이 바닥에서 사라지는 시간
-const Turn_t DELAY_MASTER_LAIR_DECAY_CORPSE = 200;       // 20초
-const Turn_t DELAY_MASTER_LAIR_DECAY_ITEM = 400;         // 40초
-const Turn_t DELAY_MASTER_LAIR_DECAY_MASTER_CORPSE = 50; // 5초
+
+const Turn_t DELAY_MASTER_LAIR_DECAY_CORPSE = 200;       
+const Turn_t DELAY_MASTER_LAIR_DECAY_ITEM = 400;         
+const Turn_t DELAY_MASTER_LAIR_DECAY_MASTER_CORPSE = 50; 
 
 
 int g_FastMoveSearchX[8][4] = {
@@ -245,7 +245,7 @@ void strlwr(char* str) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 일반적인 몬스터들이 적으로 인식하느냐 마느냐 하는 함수
+
 //////////////////////////////////////////////////////////////////////////////
 bool isPotentialEnemy(Monster* pMonster, Creature* pCreature) {
     Assert(pCreature != NULL);
@@ -280,7 +280,7 @@ bool isPotentialEnemy(Monster* pMonster, Creature* pCreature) {
             return false;
     }
 
-    // 현재로서는 슬레이어나 아우스터스는 무조건 적이다.
+    
     if (pCreature->isSlayer())
         return true;
 
@@ -294,13 +294,13 @@ bool isPotentialEnemy(Monster* pMonster, Creature* pCreature) {
     } else if (pCreature->isVampire()) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
 
-        // 몬스터의 레벨이 뱀파이어의 레벨보다 10레벨 이상 높을 경우,
-        // 적으로 인식한다.
+        
+        
         if ((pVampire->getLevel() + 10) <= pMonster->getLevel()) {
             return true;
         }
 
-        // 10레벨 이상인 뱀파이어는 적이다.
+        
         if (pVampire->getLevel() > 10) {
             return true;
         }
@@ -315,7 +315,7 @@ bool isPotentialEnemy(Monster* pMonster, Creature* pCreature) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// STL find_if 알고리즘을 이용하기 위한 비교 클래스
+
 //////////////////////////////////////////////////////////////////////////////
 class isSameCreature {
 public:
@@ -356,7 +356,7 @@ list<Packet*>* getRelicEffectPacket(MonsterCorpse* pMonsterCorpse, Effect::Effec
 //////////////////////////////////////////////////////////////////////////////
 // sendRelicEffect( MonsterCorpse* )
 //////////////////////////////////////////////////////////////////////////////
-// pMonsterCorpse에 붙은 Effect를 pPlayer에게 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 list<Packet*>* createRelicEffect(MonsterCorpse* pMonsterCorpse) {
     list<Packet*>* pPackets = NULL;
@@ -517,7 +517,7 @@ list<Packet*>* createRelicEffect(MonsterCorpse* pMonsterCorpse) {
 //////////////////////////////////////////////////////////////////////////////
 // sendRelicEffect( MonsterCorpse* )
 //////////////////////////////////////////////////////////////////////////////
-// pMonsterCorpse에 붙은 Effect를 pPlayer에게 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void sendRelicEffect(MonsterCorpse* pMonsterCorpse, Player* pPlayer) {
     list<Packet*>* pPackets = createRelicEffect(pMonsterCorpse);
@@ -537,7 +537,7 @@ void sendRelicEffect(MonsterCorpse* pMonsterCorpse, Player* pPlayer) {
 //////////////////////////////////////////////////////////////////////////////
 // sendRelicEffect( MonsterCorpse* )
 //////////////////////////////////////////////////////////////////////////////
-// pMonsterCorpse에 붙은 Effect를 (x,y)에 뿌린다.
+
 //////////////////////////////////////////////////////////////////////////////
 void sendRelicEffect(MonsterCorpse* pMonsterCorpse, Zone* pZone, ZoneCoord_t x, ZoneCoord_t y) {
     list<Packet*>* pPackets = createRelicEffect(pMonsterCorpse);
@@ -777,7 +777,7 @@ void Zone::init()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존 파일에서 존 정보를 읽어서 로딩한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::load(bool bOutput)
 
@@ -809,7 +809,7 @@ void Zone::load(bool bOutput)
         setMasterLair(pZoneInfo->isMasterLair());
         setHolyLand(pZoneInfo->isHolyLand());
 
-        // Holy Land 일 경우 HolyLandManager 에 추가
+        
         if (isHolyLand()) {
             g_pHolyLandManager->addHolyLand(this);
         }
@@ -822,7 +822,7 @@ void Zone::load(bool bOutput)
 
         // filelog("zoneInfo.txt", "[%d] %d %d", (int)m_ZoneID, (int)isPayPlay(), (int)isPremiumZone());
 
-        // SMP 정보 파일을 연다.
+        
         string SMPFilename = g_pConfig->getProperty("HomePath") + "/data/" + pZoneInfo->getSMPFilename();
         ifstream SMP(SMPFilename.c_str(), ios::in | ios::binary);
         if (!SMP) {
@@ -887,13 +887,13 @@ void Zone::load(bool bOutput)
         // cout << " type: " << (uint8_t)zoneType << " level: " << (uint8_t)zoneLevel << " width: " << m_Width << "
         // height: " << m_Height << endl;
 
-        // 타일을 2차원배열로 만들어 메모리를 할당한다.
+        
         m_pTiles = new Tile*[m_Width];
         for (uint i = 0; i < m_Width; i++) {
             m_pTiles[i] = new Tile[m_Height];
         }
 
-        // 섹터를 2차원 배열로 만들어 메모리를 할당한다.
+        
         m_SectorWidth = (int)ceil((float)m_Width / (float)SECTOR_SIZE);
         m_SectorHeight = (int)ceil((float)m_Height / (float)SECTOR_SIZE);
         m_pSectors = new Sector*[m_SectorWidth];
@@ -901,7 +901,7 @@ void Zone::load(bool bOutput)
             m_pSectors[x] = new Sector[m_SectorHeight];
         }
 
-        // 각각의 타일에다가 섹터 포인터를 세팅한다.
+        
         for (int x = 0; x < m_Width; x++) {
             for (int y = 0; y < m_Height; y++) {
                 int sx = x / SECTOR_SIZE;
@@ -913,7 +913,7 @@ void Zone::load(bool bOutput)
             }
         }
 
-        // 섹터끼리 연결을 한다.
+        
         VSRect srect(0, 0, m_SectorWidth - 1, m_SectorHeight - 1);
         for (int x = 0; x < m_SectorWidth; x++) {
             for (int y = 0; y < m_SectorHeight; y++) {
@@ -928,7 +928,7 @@ void Zone::load(bool bOutput)
             }
         }
 
-        // MonsterAI를 위해 존의 영역을 구분지어놓은 사각형을 생성한다.
+        
         m_OuterRect.set(0, 0, m_Width - 1, m_Height - 1);
         if (m_Width > 64 && m_Height > 64) {
             m_InnerRect.set(15, 15, m_Width - 15, m_Height - 15);
@@ -945,7 +945,7 @@ void Zone::load(bool bOutput)
                 BYTE flag = 0;
                 SMP.read((char*)&flag, szBYTE);
 
-                // 순서대로 지하, 지상, 공중 블록
+                
                 if (flag & 0x01)
                     m_pTiles[x][y].setBlocked(Creature::MOVE_MODE_BURROWING);
                 if (flag & 0x02)
@@ -953,18 +953,18 @@ void Zone::load(bool bOutput)
                 if (flag & 0x04)
                     m_pTiles[x][y].setBlocked(Creature::MOVE_MODE_FLYING);
 
-                // 아무것도 없는 경우..
-                // 몹 생성을 위한 좌표정보를 만들어둔다.
+                
+                
                 if (flag == 0 && m_InnerRect.ptInRect(x, y)) {
                     m_MonsterRegenPositions.push_back(BPOINT((BYTE)x, (BYTE)y));
                 }
 
-                // 마스터 레어인 경우: block이 하나라도 안 된 곳을 찾는다.
+                
                 if ((flag & 0x07) != 0x07 && (isMasterLair() || m_ZoneID == 3002)) {
                     m_EmptyTilePositions.push_back(BPOINT((BYTE)x, (BYTE)y));
                 }
 
-                // 포탈 정보
+                
                 if (flag & 0x80) {
                     BYTE type;
                     ZoneID_t targetZoneID;
@@ -980,7 +980,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_NORMAL);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -999,7 +999,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_SLAYER);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1020,7 +1020,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_VAMPIRE);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1040,7 +1040,7 @@ void Zone::load(bool bOutput)
                         BYTE size;
                         SMP.read((char*)&size, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         MultiPortal* pMultiPortal = new MultiPortal();
 
                         for (int i = 0; i < size; i++) {
@@ -1050,7 +1050,7 @@ void Zone::load(bool bOutput)
 
                             pMultiPortal->setObjectType(PORTAL_SLAYER);
 
-                            // 타겟 인포를 구성한다.
+                            
                             PortalTargetInfo* pPortalTargetInfo = new PortalTargetInfo();
                             pPortalTargetInfo->setZoneID(targetZoneID);
                             pPortalTargetInfo->setX(targetX);
@@ -1072,7 +1072,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         GuildPortal* pGuildPortal = new GuildPortal();
                         pGuildPortal->setObjectType(PORTAL_GUILD);
                         pGuildPortal->setZoneID(targetZoneID);
@@ -1092,7 +1092,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_NORMAL);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1111,7 +1111,7 @@ void Zone::load(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_OUSTERS);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1131,20 +1131,20 @@ void Zone::load(bool bOutput)
                         bAddPortal = false;
                     }
 
-                    // 포탈이 추가된 경우에
-                    // 목적지 존이 유료존이라면
-                    // TriggeredPortal을 설정해야 한다.
+                    
+                    
+                    
                     if (bAddPortal) {
                         ZoneInfo* pTargetZoneInfo = NULL;
                         try {
                             pTargetZoneInfo = g_pZoneInfoManager->getZoneInfo(targetZoneID);
                         } catch (NoSuchElementException& t) {
-                            throw Error("그런 존이 없다네");
+                            throw Error("  ");
                         }
 
                         Assert(pTargetZoneInfo != NULL);
 
-                        // 기존의 Portal을 지울까?
+                        
                         bool bDeleteOldPortal = false;
 
                         if ((pTargetZoneInfo->isPayPlay() && !pZoneInfo->isPayPlay()) ||
@@ -1159,9 +1159,9 @@ void Zone::load(bool bOutput)
 
                         Tile& rTile = m_pTiles[x][y];
 
-                        // 기존의 Portal을 지우는 경우
+                        
                         if (bDeleteOldPortal) {
-                            // 기존에 있던 portal을 제거한다.
+                            
                             if (rTile.hasPortal()) {
                                 Portal* pOldPortal = rTile.getPortal();
                                 rTile.deletePortal();
@@ -1170,17 +1170,17 @@ void Zone::load(bool bOutput)
                             }
                         }
 
-                        // 포탈을 생성하고, 등록한다.
+                        
 
                         //----------------------------------------
-                        // 마스터 레어인 경우
+                        
                         // by sigi. 2002.9.2
                         //----------------------------------------
                         if (pTargetZoneInfo->isMasterLair()) {
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1188,7 +1188,7 @@ void Zone::load(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
 
@@ -1206,24 +1206,24 @@ void Zone::load(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 지금은 들어갈 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
 
                             // cout << "[" << (int)pTargetZoneInfo->getZoneID() << "] is MasterLair"
                             //	 << endl;
                         }
                         //----------------------------------------
-                        // 아담의 성지로 들어갈려고 할 때
+                        
                         //----------------------------------------
                         else if (pTargetZoneInfo->isHolyLand() && !pZoneInfo->isHolyLand()) {
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1231,7 +1231,7 @@ void Zone::load(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
 
@@ -1252,20 +1252,20 @@ void Zone::load(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 종족전쟁 중에는 신청을 하지 않았으면 들어갈 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
 
                             // cout << "[" << (int)pTargetZoneInfo->getZoneID() << "] is MasterLair"
                             //	 << endl;
                         }
                         //----------------------------------------
-                        // 성 밖에서 성 안으로 들어가는 경우
-                        // isCastleZone 은 성 안에 포함되는 존들인지 체크한다.
-                        // (성 던전도 성 안이다)
+                        
+                        
+                        
                         // by bezz, Sequoia 2003. 1.20.
                         //----------------------------------------
                         else if (pTargetZoneInfo->isCastle() &&
@@ -1273,7 +1273,7 @@ void Zone::load(bool bOutput)
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1281,7 +1281,7 @@ void Zone::load(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
 
@@ -1299,18 +1299,18 @@ void Zone::load(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 들어가실 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
 
                             // cout << "[" << (int)pTargetZoneInfo->getZoneID() << "] is MasterLair"
                             //	 << endl;
                         }
                         //----------------------------------------
-                        // 성 지하 던젼으로 들어가는 입구
+                        
                         // by Sequoia
                         //----------------------------------------
                         else if (isCastle() &&
@@ -1318,7 +1318,7 @@ void Zone::load(bool bOutput)
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1326,7 +1326,7 @@ void Zone::load(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
                             pTrigger->setTriggerType("QUEST");
 
                             sprintf(str, "ConditionType : EnterCastleDungeon\n\t CastleZoneID : %d\n\t", m_ZoneID);
@@ -1344,19 +1344,19 @@ void Zone::load(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 성 주인인 길드원이 아니면 들어가실 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
                             rTile.addPortal(pPortal);
                         }
                         //----------------------------------------
-                        // 유료 존인 경우
+                        
                         //----------------------------------------
                         else if (pTargetZoneInfo->isPayPlay() && !pZoneInfo->isPayPlay()) {
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1364,7 +1364,7 @@ void Zone::load(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
                             pTrigger->setConditions("ConditionType : CanEnterPayZone\n\t");
@@ -1384,7 +1384,7 @@ void Zone::load(bool bOutput)
                                 pTrigger->setCounterActions(str2);
 
                                 //							pTrigger->setCounterActions("ActionType : SystemMessage\n\t
-                                // Content : 유료존이라서 들어갈 수 없습니다.");
+                                
                             } else {
                                 //                            sprintf( str2, "ActionType : SystemMessage\n\t Content :
                                 //                            %s",
@@ -1395,12 +1395,12 @@ void Zone::load(bool bOutput)
                                 pTrigger->setCounterActions(str2);
 
                                 //							pTrigger->setCounterActions("ActionType : SystemMessage\n\t
-                                // Content : 지금은 갈 수 없습니다.");
+                                
                             }
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
                         }
                     }
@@ -1445,21 +1445,21 @@ void Zone::load(bool bOutput)
         }
         //*/
 
-        // Zone 정보를 세팅한다.
+        
         m_ZoneType = pZoneInfo->getZoneType();
         m_ZoneLevel = pZoneInfo->getZoneLevel();
 
-        // 메모리 할당해주고...
+        
         m_ppLevel = new ZoneLevel_t*[m_Width];
         for (uint i = 0; i < m_Width; i++)
             m_ppLevel[i] = new ZoneLevel_t[m_Height];
 
-        // 존 레벨을 디폴트 값으로 초기화시킨다.
+        
         for (ZoneCoord_t x = 0; x < m_Width; x++)
             for (ZoneCoord_t y = 0; y < m_Height; y++)
                 m_ppLevel[x][y] = m_ZoneLevel;
 
-        // SSI 정보 파일을 연다.
+        
         string SSIFilename = g_pConfig->getProperty("HomePath") + "/data/" + pZoneInfo->getSSIFilename();
         ifstream SSI(SSIFilename.c_str(), ios::in | ios::binary);
         if (!SSI) {
@@ -1502,10 +1502,10 @@ void Zone::load(bool bOutput)
 
         SSI.close();
 
-        // 트리거드 포탈을 로드한다.
+        
         loadTriggeredPortal();
 
-        // 몬스터 로드하고....
+        
         m_pMonsterManager->load();
 
 
@@ -1515,14 +1515,14 @@ void Zone::load(bool bOutput)
         //	printf("Event Monster Loading Completed\n");
         // #endif
 
-        // 마스터 레어인 경우
+        
         // by sigi. 2002.9.2
         if (pZoneInfo->isMasterLair()) {
             SAFE_DELETE(m_pMasterLairManager);
             m_pMasterLairManager = new MasterLairManager(this);
         }
 
-        // 성인 경우
+        
         // by sigi. 2003.1.24
         if (isCastle()) {
             SAFE_DELETE(m_pWarScheduler);
@@ -1532,7 +1532,7 @@ void Zone::load(bool bOutput)
             printf("[%d] Castle : WarScheduler->load\n", (int)getZoneID());
         }
 
-        // 아이템 로드한다.
+        
         loadItem();
 
         //	if (isCastle())
@@ -1542,16 +1542,16 @@ void Zone::load(bool bOutput)
         //	}
         //	else
         //	{
-        // NPC 를 로딩한다.
+        
         m_pNPCManager->load(m_ZoneID);
         //	}
 
         loadEffect();
 
-        // 게시판을 로드한다.
+        
         loadBulletinBoard(this);
 
-        // 스프라이트 갯수를 초기화한다.
+        
         initSpriteCount();
 
         SAFE_DELETE(version);
@@ -1584,7 +1584,7 @@ void Zone::load(bool bOutput)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 존 파일에서 존 정보를 읽어서 로딩한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::reload(bool bOutput)
 
@@ -1616,7 +1616,7 @@ void Zone::reload(bool bOutput)
 
         // filelog("zoneInfo.txt", "[%d] %d %d", (int)m_ZoneID, (int)isPayPlay(), (int)isPremiumZone());
 
-        // SMP 정보 파일을 연다.
+        
         string SMPFilename = g_pConfig->getProperty("HomePath") + "/data/" + pZoneInfo->getSMPFilename();
         ifstream SMP(SMPFilename.c_str(), ios::in | ios::binary);
         if (!SMP) {
@@ -1677,7 +1677,7 @@ void Zone::reload(bool bOutput)
 
 
         if (m_pSectors == NULL) {
-            // 섹터를 2차원 배열로 만들어 메모리를 할당한다.
+            
             m_SectorWidth = (int)ceil((float)m_Width / (float)SECTOR_SIZE);
             m_SectorHeight = (int)ceil((float)m_Height / (float)SECTOR_SIZE);
             m_pSectors = new Sector*[m_SectorWidth];
@@ -1685,7 +1685,7 @@ void Zone::reload(bool bOutput)
                 m_pSectors[x] = new Sector[m_SectorHeight];
             }
 
-            // 섹터끼리 연결을 한다.
+            
             VSRect srect(0, 0, m_SectorWidth - 1, m_SectorHeight - 1);
             for (int x = 0; x < m_SectorWidth; x++) {
                 for (int y = 0; y < m_SectorHeight; y++) {
@@ -1701,15 +1701,15 @@ void Zone::reload(bool bOutput)
             }
         }
 
-        // m_pTiles 가 이미 없다면...
+        
         if (m_pTiles == NULL) {
-            // 타일을 2차원배열로 만들어 메모리를 할당한다.
+            
             m_pTiles = new Tile*[m_Width];
             for (i = 0; i < m_Width; i++) {
                 m_pTiles[i] = new Tile[m_Height];
             }
 
-            // 각각의 타일에다가 섹터 포인터를 세팅한다.
+            
             for (int x = 0; x < m_Width; x++) {
                 for (int y = 0; y < m_Height; y++) {
                     int sx = x / SECTOR_SIZE;
@@ -1722,7 +1722,7 @@ void Zone::reload(bool bOutput)
             }
         }
 
-        // MonsterAI를 위해 존의 영역을 구분지어놓은 사각형을 생성한다.
+        
         m_OuterRect.set(0, 0, m_Width - 1, m_Height - 1);
         if (m_Width > 64 && m_Height > 64) {
             m_InnerRect.set(15, 15, m_Width - 15, m_Height - 15);
@@ -1735,7 +1735,7 @@ void Zone::reload(bool bOutput)
         char str[80];
         char str2[80];
 
-        // 다시~
+        
         m_MonsterRegenPositions.clear();
         m_EmptyTilePositions.clear();
 
@@ -1744,7 +1744,7 @@ void Zone::reload(bool bOutput)
                 BYTE flag = 0;
                 SMP.read((char*)&flag, szBYTE);
 
-                // 순서대로 지하, 지상, 공중 블록
+                
                 if (flag & 0x01)
                     m_pTiles[x][y].setBlocked(Creature::MOVE_MODE_BURROWING);
                 if (flag & 0x02)
@@ -1752,18 +1752,18 @@ void Zone::reload(bool bOutput)
                 if (flag & 0x04)
                     m_pTiles[x][y].setBlocked(Creature::MOVE_MODE_FLYING);
 
-                // 아무것도 없는 경우..
-                // 몹 생성을 위한 좌표정보를 만들어둔다.
+                
+                
                 if (flag == 0 && m_InnerRect.ptInRect(x, y)) {
                     m_MonsterRegenPositions.push_back(BPOINT((BYTE)x, (BYTE)y));
                 }
 
-                // 마스터 레어인 경우: block이 하나라도 안 된 곳을 찾는다.
+                
                 if ((flag & 0x07) != 0x07 && (isMasterLair() || m_ZoneID == 3002)) {
                     m_EmptyTilePositions.push_back(BPOINT((BYTE)x, (BYTE)y));
                 }
 
-                // 포탈 정보
+                
                 if (flag & 0x80) {
                     BYTE type;
                     ZoneID_t targetZoneID;
@@ -1774,7 +1774,7 @@ void Zone::reload(bool bOutput)
 
                     bool bAddPortal = true;
 
-                    // 이미 포탈이 있다면 기존의 포탈을 지워준다.
+                    
                     if (m_pTiles[x][y].hasPortal()) {
                         Portal* pPortal = m_pTiles[x][y].getPortal();
                         SAFE_DELETE(pPortal);
@@ -1786,7 +1786,7 @@ void Zone::reload(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_NORMAL);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1805,7 +1805,7 @@ void Zone::reload(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_SLAYER);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1826,7 +1826,7 @@ void Zone::reload(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_VAMPIRE);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1846,7 +1846,7 @@ void Zone::reload(bool bOutput)
                         BYTE size;
                         SMP.read((char*)&size, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         MultiPortal* pMultiPortal = new MultiPortal();
 
                         for (int i = 0; i < size; i++) {
@@ -1856,7 +1856,7 @@ void Zone::reload(bool bOutput)
 
                             pMultiPortal->setObjectType(PORTAL_SLAYER);
 
-                            // 타겟 인포를 구성한다.
+                            
                             PortalTargetInfo* pPortalTargetInfo = new PortalTargetInfo();
                             pPortalTargetInfo->setZoneID(targetZoneID);
                             pPortalTargetInfo->setX(targetX);
@@ -1878,7 +1878,7 @@ void Zone::reload(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         GuildPortal* pGuildPortal = new GuildPortal();
                         pGuildPortal->setObjectType(PORTAL_GUILD);
                         pGuildPortal->setZoneID(targetZoneID);
@@ -1898,7 +1898,7 @@ void Zone::reload(bool bOutput)
                         SMP.read((char*)&targetX, szBYTE);
                         SMP.read((char*)&targetY, szBYTE);
 
-                        // 포탈을 생성해 준다.
+                        
                         NormalPortal* pNormalPortal = new NormalPortal();
                         pNormalPortal->setObjectType(PORTAL_NORMAL);
                         pNormalPortal->setZoneID(targetZoneID);
@@ -1916,20 +1916,20 @@ void Zone::reload(bool bOutput)
                         bAddPortal = false;
                     }
 
-                    // 포탈이 추가된 경우에
-                    // 목적지 존이 유료존이라면
-                    // TriggeredPortal을 설정해야 한다.
+                    
+                    
+                    
                     if (bAddPortal) {
                         ZoneInfo* pTargetZoneInfo = NULL;
                         try {
                             pTargetZoneInfo = g_pZoneInfoManager->getZoneInfo(targetZoneID);
                         } catch (NoSuchElementException& t) {
-                            throw Error("그런 존이 없다네");
+                            throw Error("  ");
                         }
 
                         Assert(pTargetZoneInfo != NULL);
 
-                        // 기존의 Portal을 지울까?
+                        
                         bool bDeleteOldPortal = false;
 
                         if ((pTargetZoneInfo->isPayPlay() && !pZoneInfo->isPayPlay()) ||
@@ -1950,9 +1950,9 @@ void Zone::reload(bool bOutput)
 
                         Tile& rTile = m_pTiles[x][y];
 
-                        // 기존의 Portal을 지우는 경우
+                        
                         if (bDeleteOldPortal) {
-                            // 기존에 있던 portal을 제거한다.
+                            
                             if (rTile.hasPortal()) {
                                 Portal* pOldPortal = rTile.getPortal();
                                 rTile.deletePortal();
@@ -1961,17 +1961,17 @@ void Zone::reload(bool bOutput)
                             }
                         }
 
-                        // 포탈을 생성하고, 등록한다.
+                        
 
                         //----------------------------------------
-                        // 마스터 레어인 경우
+                        
                         // by sigi. 2002.9.2
                         //----------------------------------------
                         if (pTargetZoneInfo->isMasterLair()) {
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -1979,7 +1979,7 @@ void Zone::reload(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
 
@@ -1996,24 +1996,24 @@ void Zone::reload(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 지금은 들어갈 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
 
                             // cout << "[" << (int)pTargetZoneInfo->getZoneID() << "] is MasterLair"
                             //	 << endl;
                         }
                         //----------------------------------------
-                        // 유료존으로 들어가는 경우
+                        
                         //----------------------------------------
                         else if (pTargetZoneInfo->isPayPlay() && !pZoneInfo->isPayPlay()) {
                             TriggeredPortal* pPortal = new TriggeredPortal();
                             getObjectRegistry().registerObject(pPortal);
 
-                            // 포탈 내용을 로드한다.
+                            
                             pPortal->setObjectType(portalType);
 
                             // pPortal->load(m_ZoneID, left, top, right, bottom);
@@ -2021,7 +2021,7 @@ void Zone::reload(bool bOutput)
 
                             Trigger* pTrigger = new Trigger();
 
-                            pTrigger->setTriggerID(0); // 의미없다.
+                            pTrigger->setTriggerID(0); 
 
                             pTrigger->setTriggerType("QUEST");
                             pTrigger->setConditions("ConditionType : PayPlay\n\t");
@@ -2036,11 +2036,11 @@ void Zone::reload(bool bOutput)
                             pTrigger->setCounterActions(str2);
 
                             //						pTrigger->setCounterActions("ActionType : SystemMessage\n\t Content
-                            //: 유료존이라서 들어갈 수 없습니다.");
+                            
 
                             tm.addTrigger(pTrigger);
 
-                            // 타일에다 포탈을 붙인다.
+                            
                             rTile.addPortal(pPortal);
                         }
                     }
@@ -2085,27 +2085,27 @@ void Zone::reload(bool bOutput)
         }
         // */
 
-        // Zone 정보를 세팅한다.
+        
         m_ZoneType = pZoneInfo->getZoneType();
         m_ZoneLevel = pZoneInfo->getZoneLevel();
 
-        // m_ppLevel 제거
+        
         for (i = 0; i < m_Width; i++) {
             SAFE_DELETE_ARRAY(m_ppLevel[i]);
         }
         SAFE_DELETE_ARRAY(m_ppLevel);
 
-        // 메모리 할당해주고...
+        
         m_ppLevel = new ZoneLevel_t*[m_Width];
         for (uint i = 0; i < m_Width; i++)
             m_ppLevel[i] = new ZoneLevel_t[m_Height];
 
-        // 존 레벨을 디폴트 값으로 초기화시킨다.
+        
         for (ZoneCoord_t x = 0; x < m_Width; x++)
             for (ZoneCoord_t y = 0; y < m_Height; y++)
                 m_ppLevel[x][y] = m_ZoneLevel;
 
-        // SSI 정보 파일을 연다.
+        
         string SSIFilename = g_pConfig->getProperty("HomePath") + "/data/" + pZoneInfo->getSSIFilename();
         ifstream SSI(SSIFilename.c_str(), ios::in | ios::binary);
         if (!SSI) {
@@ -2148,21 +2148,21 @@ void Zone::reload(bool bOutput)
 
         SSI.close();
 
-        // 트리거드 포탈을 로드한다.
-        // reload에서는 무시
+        
+        
         // loadTriggeredPortal();
 
-        // 몬스터 로드하고....
+        
         m_pMonsterManager->load();
 
-        // eventMonsterManager는 reload에서는 무시한다.
+        
         // #ifdef __XMAS_EVENT_CODE__
         //	cout << "Begin Event Monster Loading..." << endl;
         //	m_pEventMonsterManager->load();
         //	cout << "Event Monster Loading Completed..." << endl;
         // #endif
 
-        // 마스터 레어인 경우
+        
         // by sigi. 2002.9.2
         if (pZoneInfo->isMasterLair()) {
             if (m_pMasterLairManager != NULL &&
@@ -2172,7 +2172,7 @@ void Zone::reload(bool bOutput)
             }
         }
 
-        // 성인 경우
+        
         // by sigi. 2003.1.24
         if (pZoneInfo->isCastle()) {
             if (m_pWarScheduler != NULL)
@@ -2183,13 +2183,13 @@ void Zone::reload(bool bOutput)
             }
         }
 
-        // reload할 때는 무시한다.
-        // 아이템 로드한다.
+        
+        
         // loadItem();
-        // NPC 를 로딩한다.
+        
         // m_pNPCManager->load(m_ZoneID);
 
-        // 스프라이트 갯수를 초기화한다.
+        
         initSpriteCount();
     } catch (Throwable& t) {
         cout << t.toString() << endl;
@@ -2203,46 +2203,20 @@ void Zone::reload(bool bOutput)
 //////////////////////////////////////////////////////////////////////////////
 // load items from database
 // * NOTE *
-// 현재 바닥에 떨어진 아이템은 서버가 재시작되어도 로딩하지 않는다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::loadItem()
 
 {
     __BEGIN_TRY
 
-    /*
-    // 아이템 로딩...........
-    g_pItemLoaderManager->load(this);
-
-    // 아이템은 다 날려버렸지만...그래두...
-    // 아이템 오브젝트 아이디를 재 할당 받고 다시 저장한다.
-    for (int j = 0; j < m_Height; j++)
-    {
-        for (int i = 0; i < m_Width; i++)
-        {
-            if (m_pTiles[i][j].hasItem())
-            {
-                Item* pItem = m_pTiles[i][j].getItem();
-                m_ObjectRegistry.registerObject(pItem);
-                pItem->save("", STORAGE_ZONE, m_ZoneID, i, j);
-                addToItemList(pItem);
-
-                if (pItem->getItemClass() == Item::ITEM_CLASS_MOTORCYCLE)
-                {
-                    Motorcycle* pMotorcycle = dynamic_cast<Motorcycle*>(pItem);
-                    MotorcycleBox* pMotorcycleBox = new MotorcycleBox(pMotorcycle, this, i, j);
-                    g_pParkingCenter->addMotorcycleBox(pMotorcycleBox);
-                }
-            }
-        }
-    }
-    */
+     
 
     __END_CATCH
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 현재 존에 트리거드 포탈을 로드한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::loadTriggeredPortal()
 
@@ -2253,7 +2227,7 @@ void Zone::loadTriggeredPortal()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        // DynamicZone 일 경우 처리
+        
         ZoneID_t zoneID = m_ZoneID;
         if (isDynamicZone()) {
             zoneID = m_pDynamicZone->getTemplateZoneID();
@@ -2277,22 +2251,22 @@ void Zone::loadTriggeredPortal()
             for (int x = left; x <= right; x++) {
                 for (int y = top; y <= bottom; y++) {
                     if (getTile(x, y).hasPortal()) {
-                        // cerr << "loadTriggeredPortal : 이미 포탈이 존재합니다." << endl;
+                        
                         // cerr << "ZONEID:" << m_ZoneID << ",X:" << x << "Y:" << y << endl;
                         // Portal* pPortal = getTile(x,y).getPortal();
                         // SAFE_DELETE(pPortal);
                         getTile(x, y).deletePortal();
                     }
 
-                    // 포탈을 생성하고, 등록한다.
+                    
                     TriggeredPortal* pPortal = new TriggeredPortal();
                     getObjectRegistry().registerObject(pPortal);
 
-                    // 포탈 내용을 로드한다.
+                    
                     pPortal->setObjectType(PORTAL_NORMAL);
                     pPortal->load(zoneID, left, top, right, bottom);
 
-                    // 타일에다 포탈을 붙인다.
+                    
                     getTile(x, y).addPortal(pPortal);
                 }
             }
@@ -2306,7 +2280,7 @@ void Zone::loadTriggeredPortal()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 이 존에서 나타나는 NPC와 몬스터의 스프라이트갯수를 계산해둔다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::initSpriteCount()
 
@@ -2316,13 +2290,13 @@ void Zone::initSpriteCount()
     m_NPCCount = 0;
     m_MonsterCount = 0;
 
-    // NPC 스프라이트 타입의 갯수를 계산한다.
+    
     const unordered_map<ObjectID_t, Creature*>& NPCMap = m_pNPCManager->getCreatures();
     for (unordered_map<ObjectID_t, Creature*>::const_iterator i = NPCMap.begin(); i != NPCMap.end(); i++) {
         NPC* pNPC = dynamic_cast<NPC*>(i->second);
         bool bAdd = true;
 
-        for (int j = 0; j < m_NPCCount; j++) // 현재 있는 몬스터 타입 중에서
+        for (int j = 0; j < m_NPCCount; j++) 
         {
             if (pNPC->getSpriteType() == m_NPCTypes[j]) {
                 bAdd = false;
@@ -2336,7 +2310,7 @@ void Zone::initSpriteCount()
         }
     }
 
-    // 몬스터 스프라이트 타입의 갯수를 계산한다.
+    
     const unordered_map<SpriteType_t, MonsterCounter*>& MONSTER = m_pMonsterManager->getMonsters();
     for (unordered_map<SpriteType_t, MonsterCounter*>::const_iterator i = MONSTER.begin(); i != MONSTER.end(); i++) {
         Assert(m_MonsterCount < maxMonsterPerZone); // by sigi
@@ -2349,7 +2323,7 @@ void Zone::initSpriteCount()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 타일에 지정된 존 레벨을 리턴한다.
+
 //////////////////////////////////////////////////////////////////////////////
 ZoneLevel_t Zone::getZoneLevel(ZoneCoord_t x, ZoneCoord_t y) const
 
@@ -2358,9 +2332,9 @@ ZoneLevel_t Zone::getZoneLevel(ZoneCoord_t x, ZoneCoord_t y) const
 
     // Assert(x < m_Width && y < m_Height);
 
-    // assert 제거.
-    // 이 값이 한계를 넘어서 assert나서 죽었다.
-    // 이렇게 가도 무리가 없을 듯..
+    
+    
+    
     // by sigi. 2002.8.13
     if (x < m_Width && y < m_Height) {
         return m_ppLevel[x][y];
@@ -2417,10 +2391,10 @@ Sector* Zone::getSector(ZoneCoord_t x, ZoneCoord_t y)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 기본적으로 Zone 의 처리는 mutex 를 사용하지 않는다.
-// 왜냐하면, ZoneGroupThread의 단일 처리를 받기 때문이다. 그런데, 새로 존에
-// PC를 추가하는 것은 IPM에서 이루어지게 되므로, 이런 연유로 mutex 멤버를
-// 추가해야 하며, 아래 메소드에 locking 을 걸어줘야 한다.
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::pushPC(Creature* pCreature)
 
@@ -2440,11 +2414,11 @@ void Zone::pushPC(Creature* pCreature)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// P(cx,cy)에 있는 PC를 dir 방향으로 이동시켜 Q(nx,ny)로 옮긴다.
-// 그리고나서, 주변의 PC들에게 이동 정보를 브로드캐스트한다.
+
+
 //
 // *CAUTION*
-// PC가 아닌 크리처(NPC,Monster)의 이동은 moveCreature를 사용한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
@@ -2465,31 +2439,26 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
 
     const int threshold = 6;
     ////////////////////////////////////////////////////////////
-    // 일단 크리처가 점프를 하려는 건지를 체크한다.
-    // 만약 약간 점프했을 경우, GCMoveError 패킷을 전송한다.
+    
+    
     //
-    // OX, OY : 플레이어의 현재 좌표
-    // CX, CY : 타겟 좌표
+    
+    
     //
     // max(0, OX - threshold) <= CX <= min(OX + threshold, ZONEWIDTH-1)
     // max(0, OY - threshold) <= CY <= min(OY + threshold, ZONEHEIGHT-1)
-    // 를 만족해야 정상적인 이동이다.
+    
     ////////////////////////////////////////////////////////////
     if (pCreature->getX() != cx || pCreature->getY() != cy) {
         if (cx >= max(0, pCreature->getX() - threshold) && cx <= min(m_Width - 1, pCreature->getX() + threshold) &&
             cy >= max(0, pCreature->getY() - threshold) && cy <= min(m_Height - 1, pCreature->getY() + threshold)) {
-            // 허용가능한 오차 범위내에서의 점프는 그냥 무시해준다.
+            
 
-            /*// 주석처리 by sigi - 안 보내는게 맞는 듯..
-            GCMoveError gcMoveError;
-            gcMoveError.setX(cx);
-            gcMoveError.setY(cy);
-            pCreature->getPlayer()->sendPacket(&gcMoveError);
-            */
+             
             filelog("ZoneDebug.txt", "movePC - 2\n\r");
             return;
         } else {
-            // 허용가능한 오차 범위를 넘어설 경우 접속을 차단한다.
+            
             // StringStream msg;
             // msg << pCreature->getName() << " try to jump from ("
             //	<< (int)pCreature->getX() << "," << (int)pCreature->getY()
@@ -2502,14 +2471,14 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
         }
     }
 
-    // 다음 좌표를 계산한다.
+    
     int nx = cx;
     int ny = cy;
 
     //////////////////////////////////////////////////////////////////////////////
     // *CAUTION*
-    // 경계지점에서 경계의 외곽으로 움직이는 패킷이 날아와서는 안된다.
-    // ex> (0,10)에서 LEFT 이동은 날아올 수 없다. (10,0)에서 UP 이동도 마찬가지이다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     nx = nx + dirMoveMask[dir].x;
     ny = ny + dirMoveMask[dir].y;
@@ -2519,20 +2488,20 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
         throw InvalidProtocolException("invalid coordination");
 
     ////////////////////////////////////////////////////////////
-    // 이동할 곳이 block 되어있다면, GCMoveError 를 전송한다.
-    // (PC와 같은 위치가 block 되어야 한다.)
+    
+    
     ////////////////////////////////////////////////////////////
     Tile& newTile = m_pTiles[nx][ny];
     Tile& oldTile = m_pTiles[cx][cy];
 
-    // 성물을 가지고 있는 경우라면.. 안전지대에 들어갈 수 없다.
+    
     if (pCreature->hasRelicItem() || pCreature->isFlag(Effect::EFFECT_CLASS_HAS_FLAG) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER)) {
         ZoneLevel_t ZoneLevel = getZoneLevel(nx, ny);
 
-        // 슬레이어이면 슬레이어 안전지대에 못 들어간다.
-        // 뱀파이어이면  뱀파이어안전지대에 못 들어간다.
-        // 공통 안전지대이면 못 들어간다.
+        
+        
+        
         if (pCreature->isSlayer() && (ZoneLevel & SLAYER_SAFE_ZONE) ||
             pCreature->isVampire() && (ZoneLevel & VAMPIRE_SAFE_ZONE) ||
             pCreature->isOusters() && (ZoneLevel & OUSTERS_SAFE_ZONE) || (ZoneLevel & COMPLETE_SAFE_ZONE)) {
@@ -2558,24 +2527,24 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
     }
 
     if (newTile.isBlocked(pCreature->getMoveMode())
-        // BloodyWallBlocked나
-        // Sanctuary 이펙트가 걸려있다면 못 간다.
+        
+        
         || newTile.hasEffect() && (newTile.getEffect(Effect::EFFECT_CLASS_BLOODY_WALL_BLOCKED) ||
                                    newTile.getEffect(Effect::EFFECT_CLASS_SANCTUARY)) ||
         oldTile.getEffect(Effect::EFFECT_CLASS_SANCTUARY) != NULL) {
         GCMoveError gcMoveError(cx, cy);
         pPlayer->sendPacket(&gcMoveError);
     } else {
-        // 우선 크리처의 좌표를 변경한다.
+        
         pCreature->setXYDir(nx, ny, dir);
 
         try {
-            // 이전 타일에서 크리처를 삭제한다.
+            
             m_pTiles[cx][cy].deleteCreature(pCreature->getObjectID());
 
-            // 새 타일에 크리처를 추가한다.
+            
             if (!newTile.addCreature(pCreature)) {
-                // Portal을 activate 시킨 경우이다. by sigi. 2002.5.6
+                
                 return;
             }
 
@@ -2586,17 +2555,17 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
                 filelog("CheckMineBug.txt", "%s : %s", "movePC", t.toString().c_str());
             }
 
-            // 클라이언트에게 GCMoveOK 를 전송할때, (nx,ny)는 도착 좌표여야 하며,
-            // dir 은 바라보는(이동할) 방향이어야 한다. 그것이 현재의 정책!
+            
+            
             GCMoveOK gcMoveOK(nx, ny, dir);
             pPlayer->sendPacket(&gcMoveOK);
 
-            // 자동으로 GCMove/GCAddSlayer/GCAddVampire 패킷을 브로드캐스트한다.
+            
             movePCBroadcast(pCreature, cx, cy, nx, ny);
         } catch (NoSuchElementException& nsee) {
-            throw Error("이전 타일에 크리처가 존재하지 않습니다.");
+            throw Error("    .");
         } catch (DuplicatedException& de) {
-            throw Error("새 타일에 크리처가 이미 존재합니다.");
+            throw Error("    .");
         } catch (PortalException&) {
         } catch (Error& e) {
             filelog("assertTile.txt", "Zone::movePC : %s", e.toString().c_str());
@@ -2606,7 +2575,7 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
         // process CrashEgg for China and Thailand service
         int eggID = 0;
 
-        // ZoneID(1311) - 아우스터즈 마을
+        
         if (pCreature->getZoneID() == EGG_ZONE && pCreature->isOusters()) {
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
 
@@ -2622,7 +2591,7 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
             string::size_type pattern3_pos = strName.find("xcdt", 0);
             string::size_type pattern4_pos = strName.find("dxtc", 0);
 
-            // 케릭터명에 `dtxc' 가 포함되어있으면 Pattern1 짜리다.
+            
             if (pattern1_pos != string::npos && (tmpSTR == 20 && tmpDEX == 13 && tmpINT == 12)) {
                 for (int ipos = g_EggTableComplete; ipos < MAX_EGGSTEP; ipos++) {
                     if (g_EggTable[ipos][0] == ep_x && g_EggTable[ipos][1] == ep_y) {
@@ -2763,7 +2732,7 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
 
             GGCommand ggCommand;
 
-            // 나(myServerID)아닌 모든 서버들에게 먼저 보낸다.
+            
             for (int worldID = 1; worldID < maxWorldID; worldID++) {
                 for (int groupID = 0; groupID < maxServerGroupID; groupID++) {
                     HashMapGameServerInfo& gameServerInfo = pGameServerInfos[worldID][groupID];
@@ -2807,7 +2776,7 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
                 }
             }
 
-            // 나를 찾아 나에게 던진다.
+            
             for (int worldID = 1; worldID < maxWorldID; worldID++) {
                 for (int groupID = 0; groupID < maxServerGroupID; groupID++) {
                     HashMapGameServerInfo& gameServerInfo = pGameServerInfos[worldID][groupID];
@@ -2856,12 +2825,12 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// PC가 아닌 크리처(NPC,Monster)를 움직일 때 이 메소드를 사용한다.
+
 //
 // *CAUTION*
 //
-// 이때, (nx,ny,dir)은 크리처가 도달할 다음 좌표와 바라보는 방향을 나타낸다.
-// 그리고, 이 좌표에 아무 것도 없다는 검증이 먼저 이루어져야 한다. (길찾기 루틴)
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::moveCreature(Creature* pCreature, ZoneCoord_t nx, ZoneCoord_t ny, Dir_t dir)
 
@@ -2871,15 +2840,15 @@ void Zone::moveCreature(Creature* pCreature, ZoneCoord_t nx, ZoneCoord_t ny, Dir
     ZoneCoord_t cx = pCreature->getX();
     ZoneCoord_t cy = pCreature->getY();
 
-    // 이전 타일에서 크리처를 삭제하고, 다음 타일에 크리처를 추가한다.
+    
     try {
-        // 이전 타일에서 크리처를 삭제한다.
+        
         m_pTiles[cx][cy].deleteCreature(pCreature->getObjectID());
 
-        // 도착 타일에 크리처를 추가한다.
+        
         m_pTiles[nx][ny].addCreature(pCreature);
 
-        // 크리처의 좌표와 방향을 설정한다.
+        
         pCreature->setXYDir(nx, ny, dir);
 
         try {
@@ -2890,15 +2859,15 @@ void Zone::moveCreature(Creature* pCreature, ZoneCoord_t nx, ZoneCoord_t ny, Dir
         }
 
     } catch (NoSuchElementException& nsee) {
-        throw Error("이전 타일에 크리처가 존재하지 않습니다.");
+        throw Error("    .");
     } catch (DuplicatedException& de) {
-        throw Error("새 타일에 크리처가 이미 존재합니다.");
+        throw Error("    .");
     } catch (Error& e) {
         filelog("assertTile.txt", "Zone::moveCreature : %s", e.toString().c_str());
         throw;
     }
 
-    // 알아서 GCMove 랑 GCAddMonster/GCAddNPC 를 브로드캐스트한다.
+    
     moveCreatureBroadcast(pCreature, cx, cy, nx, ny);
 
     __END_CATCH
@@ -2907,8 +2876,8 @@ void Zone::moveCreature(Creature* pCreature, ZoneCoord_t nx, ZoneCoord_t ny, Dir
 //////////////////////////////////////////////////////////////////////////////
 // add PC
 //
-// PC 를 존에 최초로 추가한다. PC 주변의 다른 PC들에게 새 크리처의 출현을 알려주고,
-// 주변을 스캔해서 객체들의 정보를 받아온다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
@@ -2926,7 +2895,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
     if (pt.x != -1) {
         pCreature->setLastTarget(0);
 
-        // 지정된 좌표를 클라이언트로 전송한다.
+        
         GCSetPosition gcSetPosition;
         gcSetPosition.setX(pt.x);
         gcSetPosition.setY(pt.y);
@@ -2934,25 +2903,25 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
         pCreature->getPlayer()->sendPacket(&gcSetPosition);
 
-        // 크리처의 좌표와 방향을 지정한다.
+        
         pCreature->setXYDir(pt.x, pt.y, dir);
 
-        // 적절한 흌일을 찾았으면, 크리처를 실제로
-        // PC매니저와 타일에 각각 집어넣는다.
+        
+        
         m_pTiles[pt.x][pt.y].addCreature(pCreature);
 
-        // checkMine(this, pCreature, pt.x, pt.y);	// 여기서도 mine을 폭발시켜야 하나..?
+        
 
         m_pPCManager->addCreature(pCreature);
 
-        // Sanctuary 플래그가 켜져있으면 꺼준다.
+        
         /*		if ( pCreature->isFlag( Effect::EFFECT_CLASS_SANCTUARY ) && m_pTiles[pt.x][pt.y].getEffect(
         Effect::EFFECT_CLASS_SANCTUARY ) == NULL )
         {
         pCreature->removeFlag( Effect::EFFECT_CLASS_SANCTUARY );
         }*/
 
-        // 패밀리 요금제일경우 Default Option 보너스를 준다.
+        
         GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
         if (pGamePlayer->isFamilyPayAvailable() && !pCreature->isFlag(Effect::EFFECT_CLASS_FAMILY_BONUS)) {
             PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -2963,7 +2932,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
             pPC->setFlag(Effect::EFFECT_CLASS_INIT_ALL_STAT);
         }
 
-        // EFFECT_CLASS_INIT_ALL_STAT 이 켜져 있으면 initAllStat을 부르로 Flag 을 끈다.
+        
         if (pCreature->isFlag(Effect::EFFECT_CLASS_INIT_ALL_STAT)) {
             if (pCreature->isSlayer()) {
                 Slayer* pInitSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -3061,8 +3030,8 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 
         //////////////////////////////////////////////////////////////////////////////
-        // 보내야할 메시지가 있다면 보낸다.
-        // 일단 막아둔다. - bezz 2002. 07. 13
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         if (!pCreature->isFlag(Effect::EFFECT_CLASS_LOGIN_GUILD_MESSAGE)) {
             Statement* pStmt = NULL;
@@ -3089,7 +3058,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 
         //////////////////////////////////////////////////////////////////////////////
-        // PREMIUM_HALF_EVENT 가 on 되어 있고 유료존이면 클라이언트에 알린다.
+        
         //////////////////////////////////////////////////////////////////////////////
         if (g_pVariableManager->getVariable(PREMIUM_HALF_EVENT) &&
             (m_ZoneID == 61 || m_ZoneID == 64 || m_ZoneID == 1007)) {
@@ -3099,7 +3068,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
             pCreature->getPlayer()->sendPacket(&gcNoticeEvent);
         }
 
-        // 주변의 PC들에게 알릴 GCAddSlayer or GCAddVampire 패킷을 생성한다.
+        
         Creature::CreatureClass CClass = pCreature->getCreatureClass();
         if (CClass == Creature::CREATURE_CLASS_SLAYER) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -3108,7 +3077,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
             scan(pCreature, pt.x, pt.y, &gcAddSlayer);
 
-            // 능력치 40 이상인 경우 야전사령부에서 쫓겨난다. by sigi. 2002.11.7
+            
             checkNewbieTransportToGuild(pSlayer);
         } else if (CClass == Creature::CREATURE_CLASS_VAMPIRE) {
             Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
@@ -3117,8 +3086,8 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
             scan(pCreature, pt.x, pt.y, &gcAddVampire);
 
-            // 뱀파이어라면 포탈을 이용해 왔을 가능성이 있으므로,
-            // 플래그를 꺼준다.
+            
+            
             if (pVampire->isFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL)) {
                 pVampire->removeFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL);
             }
@@ -3132,21 +3101,21 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
             throw Error("invalid creature class. must be slayer or vampire...");
         }
 
-        // 파티에 가입되어 있다면 로컬 파티에 가입시킨다.
+        
         uint PartyID = pCreature->getPartyID();
         if (PartyID != 0) {
-            // 파티가 있다면 걍 더한다.
+            
             m_pLocalPartyManager->addPartyMember(PartyID, pCreature);
         }
 
-        // 요금 정보를 보여준다.
+        
 #if !defined(__CONNECT_BILLING_SYSTEM__) && (defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__))
         if (pCreature->isPC()) {
             GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
 
-            // 게임방인 경우에
-            // 유료 사용중이면
-            // 시간이 얼마 남지 않았을 경우에 요금 정보를 표시해준다.
+            
+            
+            
             if ((pGamePlayer->isPayPlaying() || pGamePlayer->isPremiumPlay()) &&
                 pGamePlayer->getPayType() == PAY_TYPE_TIME) {
                 Timeval currentTime;
@@ -3156,25 +3125,25 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
                 int usedMin = payTime.tv_sec / 60;
                 int remainMin = pGamePlayer->getPayPlayAvailableHours() - usedMin;
 
-                // PC방은 남은 시간이 5시간(300분) 이하일 때 출력
+                
                 if (pGamePlayer->getPayPlayType() == PAY_PLAY_TYPE_PCROOM) {
-                    // cout << "PC방 사용시간 : " << usedMin << "/" << pGamePlayer->getPayPlayAvailableHours() << endl;
+                    
 
                     if (remainMin <= 300) {
                         char str[80];
                         sprintf(str, g_pStringPool->c_str(STRID_PCROOM_REMAIN_PLAY_TIME), remainMin);
-                        // sprintf(str, "[PC방] 사용시간이 %d분 남았습니다.", remainMin);
+                        
                         GCSystemMessage gcSystemMessage;
                         gcSystemMessage.setMessage(str);
                         pGamePlayer->sendPacket(&gcSystemMessage);
                     }
                 }
-                // 개인은 남은 시간이 1시간(60분) 이하일 때 출력
+                
                 else if (pGamePlayer->getPayPlayType() == PAY_PLAY_TYPE_PERSON) {
                     if (remainMin <= 60) {
                         char str[80];
                         sprintf(str, g_pStringPool->c_str(STRID_PERSONAL_REMAIN_PLAY_TIME), remainMin);
-                        // sprintf(str, "[개인] 사용시간이 %d분 남았습니다.", remainMin);
+                        
                         GCSystemMessage gcSystemMessage;
                         gcSystemMessage.setMessage(str);
                         pGamePlayer->sendPacket(&gcSystemMessage);
@@ -3184,17 +3153,17 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 #endif
 
-        // 불기둥
+        
         if (isMasterLair() && m_pMasterLairManager != NULL) {
             MasterLairInfo* pInfo = g_pMasterLairInfoManager->getMasterLairInfo(getZoneID());
             Assert(pInfo != NULL);
 
             if (m_pMasterLairManager->getCurrentEvent() == MasterLairManager::EVENT_WAITING_PLAYER) {
-                // 연속적인 불기둥 이펙트가 있는 경우에 알려준다.
+                
                 if (m_pEffectManager->findEffect(Effect::EFFECT_CLASS_CONTINUAL_GROUND_ATTACK) != NULL) {
                     GCNoticeEvent gcNoticeEvent;
                     gcNoticeEvent.setCode(NOTICE_EVENT_CONTINUAL_GROUND_ATTACK);
-                    gcNoticeEvent.setParameter(pInfo->getStartDelay()); // 초
+                    gcNoticeEvent.setParameter(pInfo->getStartDelay()); 
 
                     broadcastPacket(&gcNoticeEvent);
                 }
@@ -3202,7 +3171,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 
         //-----------------------------------------------------------------
-        // 세금 적용되는 경우
+        
         //-----------------------------------------------------------------
         /*		if (isCastle())
         {
@@ -3221,7 +3190,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }*/
 
         //-----------------------------------------------------------------
-        // 전쟁 중인 경우는 전쟁정보를 보내준다.
+        
         //-----------------------------------------------------------------
         if (g_pWarSystem->isWarActive()) {
             PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
@@ -3235,15 +3204,15 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 
         if (m_pLevelWarManager != NULL && m_pLevelWarManager->hasWar()) {
-            // 레벨별 전쟁 중이면 먼가 보내줘야 될 듯
+            
             PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
             m_pLevelWarManager->sendGCWarList(pPC->getPlayer());
         }
 
         //-----------------------------------------------------------------
-        // 아담의 성지에 들어온 경우는 이펙트를 뿌려준다.
+        
         //-----------------------------------------------------------------
-        // 이전에 있던 존을 체크해야 될거 같은데? -_-;
+        
         //-----------------------------------------------------------------
         // if (isHolyLand())
         //{
@@ -3272,7 +3241,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         }
 
 
-        // Player 에게 GCItemNameInfoList 패킷을 보내준다
+        
         /*		PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
         if ( !pPC->isEmptyItemNameInfoList() )
         {
@@ -3282,18 +3251,18 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         pPC->getPlayer()->sendPacket( &gcItemNamInfoList );
         }*/
 
-        // PK존에서 죽어서 되살아나는 경우 부활 이펙트가 붙는다.
+        
         if (pCreature->isFlag(Effect::EFFECT_CLASS_PK_ZONE_RESURRECTION)) {
             Effect* pEffect = pCreature->findEffect(Effect::EFFECT_CLASS_PK_ZONE_RESURRECTION);
             if (pEffect != NULL) {
-                // Effect가 끝나서 사라질 때 부활 이펙트 붙여주라는 패킷이 날라간다.
+                
                 pEffect->setDeadline(0);
             } else {
                 pCreature->removeFlag(Effect::EFFECT_CLASS_PK_ZONE_RESURRECTION);
             }
         }
 
-        // 막 생성된 넘이라면 먼가를 보내준다.
+        
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
         if (pPC->getFlagSet()->isOn(FLAGSET_NOT_JUST_CREATED)) {
             GCNoticeEvent gcNoticeEvent;
@@ -3318,7 +3287,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
                 pPC->getPlayer()->sendPacket(&gcNoticeEvent);
             }
         } else if (!pPC->isFlag(Effect::EFFECT_CLASS_JUST_LOGIN)) {
-            // 컴백 이벤트 광고
+            
             Statement* pStmt = NULL;
             Result* pResult = NULL;
             BEGIN_DB {
@@ -3434,7 +3403,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
         if (pPC->getPetInfo() != NULL)
             sendPetInfo(pGamePlayer);
-        // 존 이동할때  넣어주는 패킷
+        
         Packet* pNicknamePacket = pPC->getNicknameBook()->getNicknameBookListPacket();
         pPC->getPlayer()->sendPacket(pNicknamePacket);
         SAFE_DELETE(pNicknamePacket);
@@ -3454,18 +3423,18 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         {
             GuildUnion* pUnion = GuildUnionManager::Instance().getGuildUnion(pPC->getGuildID());
             if (pUnion != NULL) {
-                //	cout << "GuildUNION : Union이 있는 PlayerCreature" << endl;
+                
 
                 if (g_pGuildManager->isGuildMaster(pPC->getGuildID(), pPC))
-                    //		cout << "GuildUNION : PC가 GuildMaster다" << endl;
+                    
 
                     if (pUnion->getMasterGuildID() == pPC->getGuildID())
-                        //		cout << "GuildUNION : 연합의 마스터 길드가 내 길드다" << endl;
+                        
 
-                        // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+                        
                         if (g_pGuildManager->isGuildMaster(pPC->getGuildID(), pPC) &&
                             pUnion->getMasterGuildID() == pPC->getGuildID()) {
-                            //		cout << "그러면..OfferList를 만들어서 보내주자.." << endl;
+                            
 
                             if (GuildUnionOfferManager::Instance().makeOfferList(pUnion->getUnionID(),
                                                                                  gcUnionOfferList)) {
@@ -3497,7 +3466,7 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
         ZoneCoord_t tempY = Random(20, m_Height);
         addPC(pCreature, tempX, tempY, 0);
 
-        // 맥스카운트 지나도 못 찾은 경우 Assert
+        
         // throw EmptyTileNotExistException("too many pc in this zone.. or too unlucky");
     }
 
@@ -3509,9 +3478,9 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// detect invisibility등의 효과가 사라진 경우..보이는 놈이 안보이게 될 경우
-// pCreature에게 GCDeleteObject를 보내준다. 보고 있던 invisible creature를
-// delete한다. 또는 안보인는 넘이 보이게 될 경우등..
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::updateInvisibleScan(Creature* pCreature) {
     __BEGIN_TRY
@@ -3522,7 +3491,7 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
     Coord_t cy = pCreature->getY();
     Player* pPlayer = pCreature->getPlayer();
 
-    // Revealer 이펙트를 가져온다.
+    
     //	EffectRevealer* pEffectRevealer = NULL;
     //	if ( pCreature->isFlag(Effect::EFFECT_CLASS_REVEALER) )
     //	{
@@ -3530,7 +3499,7 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
     //		Assert( pEffectRevealer != NULL );
     //	}
 
-    // ObservingEey 이펙트를 가져온다.
+    
     EffectObservingEye* pEffectObservingEye = NULL;
     if (pCreature->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
         pEffectObservingEye =
@@ -3539,7 +3508,7 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
     }
 
     EffectGnomesWhisper* pEffectGnomesWhisper = NULL;
-    // GnomesWhisper 이펙트를 가져온다.
+    
     if (pCreature->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
         pEffectGnomesWhisper =
             dynamic_cast<EffectGnomesWhisper*>(pCreature->findEffect(Effect::EFFECT_CLASS_GNOMES_WHISPER));
@@ -3550,8 +3519,8 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
         for (ZoneCoord_t iy = max(0, cy - maxViewportUpperHeight - 1),
                          endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1);
              iy <= endy; iy++) {
-            // darkness영역 조사.
-            // 사실 pCreature는 당연히 slayer다.(updateInvisibleScan이므로..)
+            
+            
             if (pCreature->isSlayer() || pCreature->isOusters()) {
                 const forward_list<Object*>& objectList = m_pTiles[ix][iy].getObjectList();
                 forward_list<Object*>::const_iterator itr = objectList.begin();
@@ -3562,16 +3531,16 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
                         Creature* pPC = dynamic_cast<Creature*>(*itr);
                         Assert(pPC != NULL);
 
-                        // 자기 자신일 경우 통과
+                        
                         if (pCreature == pPC || pPC->isFlag(Effect::EFFECT_CLASS_GHOST))
                             continue;
 
-                        // 숨어있는 대상에 대해서..
-                        // SNIPING이나 INVISIBILITY상태일 경우.
+                        
+                        
                         if (pPC->isFlag(Effect::EFFECT_CLASS_INVISIBILITY) &&
                             pCreature->getVisionState(ix, iy) >= IN_SIGHT) {
-                            // Detect Invisibility 이펙트가 있거나 뱀파이어면 볼 수 있다
-                            // ObservingEye 이펙트가 있을 경우 상대방을 볼 수 있는 레벨이라면
+                            
+                            
                             if (pCreature->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY) || pCreature->isVampire() ||
                                 (pEffectObservingEye != NULL && pEffectObservingEye->canSeeInvisibility(pPC)) ||
                                 (pEffectGnomesWhisper != NULL && pEffectGnomesWhisper->canSeeInvisibility())) {
@@ -3614,7 +3583,7 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
                                     makeGCAddSlayer(&gcAddSlayer, pSlayer);
                                     pPlayer->sendPacket(&gcAddSlayer);
                                 } else {
-                                    throw Error("뱀파이어가 스나이핑 모드에 있다. 미쳐써~");
+                                    throw Error("   . ~");
                                 }
                             } else {
                                 GCDeleteObject gcDO;
@@ -3633,9 +3602,9 @@ void Zone::updateInvisibleScan(Creature* pCreature) {
 
 //--------------------------------------------------------------------------------
 // update hidden scan
-// detect hidden등의 효과가 사라진 경우..보이는 놈이 안보이게 될 경우
-// pCreature에게 GCDeleteObject를 보내준다.
-// 보고 있던 burrow creature를 delete한다. 또는 안보인는 넘이 보이게 될 경우등..
+
+
+
 // ABCD
 //--------------------------------------------------------------------------------
 void Zone::updateHiddenScan(Creature* pCreature)
@@ -3649,7 +3618,7 @@ void Zone::updateHiddenScan(Creature* pCreature)
     Coord_t cy = pCreature->getY();
     Player* pPlayer = pCreature->getPlayer();
 
-    // Revealer 이펙트를 가져온다.
+    
     //	EffectRevealer* pEffectRevealer = NULL;
     //	if ( pCreature->isFlag(Effect::EFFECT_CLASS_REVEALER) )
     //	{
@@ -3662,8 +3631,8 @@ void Zone::updateHiddenScan(Creature* pCreature)
         for (ZoneCoord_t iy = max(0, cy - maxViewportUpperHeight - 1),
                          endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1);
              iy <= endy; iy++) {
-            // darkness영역 조사.
-            // 사실 pCreature는 당연히 slayer다.(updateHiddenScan이므로..)
+            
+            
             if (pCreature->isSlayer()) {
                 const forward_list<Object*>& objectList = m_pTiles[ix][iy].getObjectList();
 
@@ -3674,11 +3643,11 @@ void Zone::updateHiddenScan(Creature* pCreature)
                         Creature* pPC = dynamic_cast<Creature*>(*itr);
                         Assert(pPC != NULL);
 
-                        // 자기 자신일 경우 통과
+                        
                         if (pCreature == pPC)
                             continue;
 
-                        // 숨어있는 대상에 대해서..
+                        
                         if (pPC->isFlag(Effect::EFFECT_CLASS_HIDE) && pCreature->getVisionState(ix, iy) >= IN_SIGHT) {
                             if (pCreature->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN) || pCreature->isVampire())
                             //								|| ( pEffectRevealer != NULL && pEffectRevealer->canSeeHide(
@@ -3707,9 +3676,9 @@ void Zone::updateHiddenScan(Creature* pCreature)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Detect 기능이 생기거나 없어질 경우.
-// 보는 Creature 의 Creature 추가 삭제 처리
-// 아우스터스 용
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::updateDetectScan(Creature* pCreature) {
     __BEGIN_TRY
@@ -3744,7 +3713,7 @@ void Zone::updateDetectScan(Creature* pCreature) {
                         Creature* pPC = dynamic_cast<Creature*>(*itr);
                         Assert(pPC != NULL);
 
-                        // 자기 자신일 경우 통과
+                        
                         if (pCreature == pPC || pPC->isFlag(Effect::EFFECT_CLASS_GHOST))
                             continue;
 
@@ -3822,8 +3791,8 @@ void Zone::updateDetectScan(Creature* pCreature) {
 
 //--------------------------------------------------------------------------------
 // update mine scan
-// detect mine등의 효과가 사라진 경우..보이는 mine이 안보이게 될 경우
-// pCreature에게 GCDeleteObject를 보내준다.
+
+
 //--------------------------------------------------------------------------------
 void Zone::updateMineScan(Creature* pCreature) {
     __BEGIN_TRY
@@ -3842,7 +3811,7 @@ void Zone::updateMineScan(Creature* pCreature) {
             if (pCreature->getVisionState(ix, iy) == OUT_OF_SIGHT)
                 continue;
 
-            // 사실 pCreature는 당연히 slayer다.(updateMineScan이므로..)
+            
             if (pCreature->isSlayer()) {
                 Item* pItem = m_pTiles[ix][iy].getItem();
                 if (pItem) {
@@ -3875,7 +3844,7 @@ void Zone::updateMineScan(Creature* pCreature) {
 
 //--------------------------------------------------------------------------------
 // add Creature
-// 크리처가 존에 최초로 들어갈 때, 크리처 주변의 PC들에게 새 크리처의 출현을 알려준다.
+
 //--------------------------------------------------------------------------------
 void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
 
@@ -3886,16 +3855,16 @@ void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_
 
     TPOINT pt = findSuitablePosition(this, cx, cy, pCreature->getMoveMode());
 
-    // 찾은 경우 체크
+    
     if (pt.x != -1) {
         //--------------------------------------------------------------------------------
-        // OID 를 할당받는다.
+        
         //--------------------------------------------------------------------------------
         m_ObjectRegistry.registerObject(pCreature);
 
         //--------------------------------------------------------------------------------
-        // 적절한 타일을 찾았으면, 크리처를 크리처매니저와 타일에 각각 집어넣는다.
-        // Monster 일 경우, MonsterManager에 추가하며, NPC 일 경우, NPCManager 에 추가한다.
+        
+        
         //--------------------------------------------------------------------------------
         if (pCreature->isMonster()) {
             // #ifdef __XMAS_EVENT_CODE__
@@ -3952,11 +3921,11 @@ void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_
             m_pNPCManager->addCreature(pCreature);
         }
 
-        // cout << "타일에 몬스터 추가하기" << endl;
+        
         m_pTiles[pt.x][pt.y].addCreature(pCreature, false);
 
         //--------------------------------------------------------------------------------
-        // 크리처의 좌표를 지정한다.
+        
         //--------------------------------------------------------------------------------
         pCreature->setXYDir(pt.x, pt.y, dir);
         pCreature->setZone(this);
@@ -3964,9 +3933,9 @@ void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_
         // scanPC(pCreature);
 
         //--------------------------------------------------------------------------------
-        // 주변의 PC들에게 알릴 GCAddNPC or GCAddMonster 패킷을 생성한다.
+        
         //--------------------------------------------------------------------------------
-        // cout << "주변의 PC들에게 알릴 패킷 만들기" << endl;
+        
         Creature::CreatureClass CClass = pCreature->getCreatureClass();
 
         if (CClass == Creature::CREATURE_CLASS_NPC) {
@@ -3975,62 +3944,21 @@ void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_
             makeGCAddNPC(&gcAddNPC, pNPC);
             broadcastPacket(pt.x, pt.y, &gcAddNPC);
         } else if (CClass == Creature::CREATURE_CLASS_MONSTER) {
-            // cout << "몬스터용 패킷 만들기" << endl;
+            
             Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
-            // zone에 처음 들어갈때도 여러가지 상태가 있다.. by sigi
+            
             Packet* pAddMonsterPacket = createMonsterAddPacket(pMonster, NULL);
 
             if (pAddMonsterPacket != NULL) {
                 broadcastPacket(cx, cy, pAddMonsterPacket, pMonster);
-                /*				ZoneCoord_t ix = 0;
-                                ZoneCoord_t iy = 0;
-                                ZoneCoord_t endx = 0;
-                                ZoneCoord_t endy = 0;
-
-
-                                //////////////////////////////////////////////////////////////////////////////
-                                // 루프 변수 초기화..
-                                //////////////////////////////////////////////////////////////////////////////
-                                int Range = 0;
-                                endx = min(m_Width - 1, cx + maxViewportWidth + 1 + Range);
-                                endy = min(m_Height - 1, cy + maxViewportLowerHeight  + 1 + Range);
-
-                                for (ix =  max(0, cx - maxViewportWidth - 1 - Range); ix <= endx ; ix++)
-                                {
-                                    for (iy = max(0, cy - maxViewportUpperHeight - 1 -  Range); iy <= endy ; iy++)
-                                    {
-                                        // 타일에 크리처가 있는 경우에만
-                                        if (m_pTiles[ix][iy].hasCreature())
-                                        {
-                                            const slist<Object*> & objectList = m_pTiles[ix][iy].getObjectList();
-                                            slist<Object*>::const_iterator itr = objectList.begin();
-
-                                            for (; itr != objectList.end() && (*itr)->getObjectPriority() <=
-                   OBJECT_PRIORITY_BURROWING_CREATURE; itr++)
-                                            {
-                                                Creature* pOtherCreature = dynamic_cast<Creature*>(*itr);
-                                                Assert(pOtherCreature != NULL);
-
-                                                if (pOtherCreature->isPC())
-                                                {
-                                                    if ( canSee( pOtherCreature, pMonster ) )
-                                                    {
-                                                        pOtherCreature->getPlayer()->sendPacket(pAddMonsterPacket);
-                                                    }
-                                                } // if
-
-                                            } // for
-                                        }//if
-                                    }//for
-                                }//for
-                */
+                 
                 delete pAddMonsterPacket;
             }
 
             // by sigi. 2002.9.6
-            // 포탈을 통해서 나타나는 모습을 보여준다.
-            // 플래그를 꺼준다.
+            
+            
             if (pMonster->isFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL)) {
                 pMonster->removeFlag(Effect::EFFECT_CLASS_VAMPIRE_PORTAL);
             }
@@ -4048,11 +3976,11 @@ void Zone::addCreature(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_
 
 
 //--------------------------------------------------------------------------------
-// 특정 위치에 아이템을 떨어뜨린다.
+
 // Zone ::addItem()
-// 7x7 영역을 검사해서 빈칸이 존재하면 떨어뜨린다. 문제는 재수없는 경우 빈칸이
-// 존재하지 않을 경우인데.. 이때 예외를 던짐으로써 그 처리를 상위에게 맡기면
-// 될 듯...
+
+
+
 //--------------------------------------------------------------------------------
 TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCreature, Turn_t decayTurn,
                      ObjectID_t DropPetOID)
@@ -4080,7 +4008,7 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
     }
     pt = findSuitablePositionForItem(this, cx, cy, bAllowCreature, bAllowSafeZone, bDropForce);
 
-    // 놓을 위치를 찾아낸 경우
+    
     if (pt.x != -1) {
         m_pTiles[pt.x][pt.y].addItem(pItem);
         addToItemList(pItem);
@@ -4101,7 +4029,7 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
                 makeGCAddSlayerCorpse(&gcAddSlayerCorpse, pSlayerCorpse);
                 broadcastPacket(pt.x, pt.y, &gcAddSlayerCorpse);
 
-                // 마스터 레어에서는 시체가 빨리 사라진다.
+                
                 if (isMasterLair())
                     DelayTime = DELAY_MASTER_LAIR_DECAY_CORPSE;
                 else
@@ -4114,7 +4042,7 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
                 makeGCAddVampireCorpse(&gcAddVampireCorpse, pVampireCorpse);
                 broadcastPacket(pt.x, pt.y, &gcAddVampireCorpse);
 
-                // 마스터 레어에서는 시체가 빨리 사라진다.
+                
                 if (isMasterLair())
                     DelayTime = DELAY_MASTER_LAIR_DECAY_CORPSE;
                 else
@@ -4127,7 +4055,7 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
                 makeGCAddOustersCorpse(&gcAddOustersCorpse, pOustersCorpse);
                 broadcastPacket(pt.x, pt.y, &gcAddOustersCorpse);
 
-                // 마스터 레어에서는 시체가 빨리 사라진다.
+                
                 if (isMasterLair())
                     DelayTime = DELAY_MASTER_LAIR_DECAY_CORPSE;
                 else
@@ -4142,15 +4070,15 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
 
                 isFlag = g_pFlagManager->isFlagPole(pMonsterCorpse);
 
-                // 마스터 레어에서는 시체가 빨리 사라진다.
+                
                 if (isMasterLair()) {
                     MonsterType_t mt = pMonsterCorpse->getMonsterType();
                     const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(mt);
                     Assert(pMonsterInfo != NULL);
 
-                    // 마스터 시체인 경우는 더 빨리 사라진다.
+                    
                     if (pMonsterInfo->isMaster()) {
-                        // 아이템이 없어서 더 빨리 사라지기 때문이다. * 10
+                        
                         DelayTime = DELAY_MASTER_LAIR_DECAY_MASTER_CORPSE * 10;
                     } else {
                         DelayTime = DELAY_MASTER_LAIR_DECAY_CORPSE;
@@ -4160,16 +4088,16 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
 
                 sendRelicEffect(pMonsterCorpse, this, pt.x, pt.y);
 
-                // 이건 임시다. -_-;
-                // 원래 item에는 zone좌표가 들어가지 않는데
-                // 특별히 성물보관대에는 필요하기 때문에..
+                
+                
+                
                 pMonsterCorpse->setX(pt.x);
                 pMonsterCorpse->setY(pt.y);
                 pMonsterCorpse->setZone(this);
 
                 isShrine = pMonsterCorpse->isShrine() && !g_pFlagManager->isFlagPole(pMonsterCorpse);
 
-                // Shrine인 경우 미니맵에 보여준다.
+                
                 if (isShrine) {
                     NPCInfo* pNPCInfo = new NPCInfo();
                     pNPCInfo->setName(pMonsterCorpse->getName());
@@ -4183,42 +4111,42 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
                 Assert(false);
             }
 
-            // 아이템이 들어가있지 않은 시체라면 딜레이 시간을 줄인다.
+            
             Corpse* pCorpse = dynamic_cast<Corpse*>(pItem);
             if (pCorpse->getTreasureCount() == 0) {
                 DelayTime = DelayTime / 10;
             }
-            // Relic인 경우에는 시간의 지연에 따라 아이템이 사라지지 않는다.
+            
             if (!isShrine && !isFlag && !pCorpse->isFlag(Effect::EFFECT_CLASS_SLAYER_RELIC_TABLE) &&
                 !pCorpse->isFlag(Effect::EFFECT_CLASS_VAMPIRE_RELIC_TABLE) &&
                 !pCorpse->isFlag(Effect::EFFECT_CLASS_SHRINE_GUARD) &&
                 !pCorpse->isFlag(Effect::EFFECT_CLASS_SHRINE_HOLY) && pCorpse->getTreasureCount() < 200) {
-                // 강제로 지정한 delay
+                
                 if (decayTurn != 0)
                     DelayTime = decayTurn;
 
-                // 바닥에 떨어지는 아이템은 일정 시간이 지나면 사라지게 된다.
+                
                 EffectDecayCorpse* pEffectDecayCorpse =
                     new EffectDecayCorpse(this, pt.x, pt.y, (Corpse*)pItem, DelayTime);
                 //				pEffectDecayCorpse->setNextTime(999999);
                 m_ObjectRegistry.registerObject(pEffectDecayCorpse);
                 addEffect(pEffectDecayCorpse);
             } else {
-                // 깃대인 경우엔 block되면 안된다.
+                
                 if (!isFlag) {
-                    // 성물 보관대는 아이템(시체)이지만
-                    // Block이 되어야 한다.
+                    
+                    
                     Tile& rTile = getTile(pt.x, pt.y);
 
                     rTile.setBlocked(Creature::MOVE_MODE_WALKING);
                     rTile.setBlocked(Creature::MOVE_MODE_BURROWING);
 
-                    // 성물 보관대의 정보를 저장한다.
+                    
                     m_RelicTableOID = pCorpse->getObjectID();
                     m_RelicTableX = pt.x;
                     m_RelicTableY = pt.y;
 
-                    // cout << "Relic인 경우에는 시체가 사라지지 않습니다" << endl;
+                    
                 }
             }
         } else {
@@ -4228,16 +4156,16 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
 
             broadcastPacket(pt.x, pt.y, &gcDropItemToZone);
 
-            // 모터사이클은 시간이 지나도 사라지지 않는다.
+            
             if (IClass == Item::ITEM_CLASS_MOTORCYCLE) {
-                // transport인 경우를 대비해서 체크해제해야한다.
+                
                 MotorcycleBox* pMotorcycleBox = g_pParkingCenter->getMotorcycleBox(pItem->getItemID());
 
                 if (pMotorcycleBox != NULL) {
                     Motorcycle* pMotorcycle = pMotorcycleBox->getMotorcycle();
                     Assert(pMotorcycle != NULL);
 
-                    // 아이템 저장 최적화. by sigi. 2002.5.15
+                    
                     char pField[80];
                     sprintf(pField, "OwnerID='', Storage=%d, StorageID=%u, X=%d, Y=%d", STORAGE_ZONE, getZoneID(),
                             (int)pt.x, (int)pt.y);
@@ -4251,29 +4179,29 @@ TPOINT Zone::addItem(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCre
                     pMotorcycleBox->setTransport(false);
                 }
             } else if (isRelicItem(IClass)) {
-                // relic은 사라지지 않는다.
+                
                 addEffectRelicPosition(pItem, getZoneID(), pt);
                 char pField[80];
                 sprintf(pField, "OwnerID='', Storage=%d, StorageID=%u, X=%d, Y=%d", STORAGE_ZONE, getZoneID(), pt.x,
                         pt.y);
                 pItem->tinysave(pField);
             } else {
-                // 2002.10.30 장홍창
-                // 아이템 삭제 시간을 현행 10분에서 3분으로 줄인다.
+                
+                
                 // Turn_t DelayTime = 6000;
                 Turn_t DelayTime = 1800;
 
-                // 마스터 레어에서는 아이템이 빨리 사라진다.
+                
                 if (isMasterLair()) {
                     DelayTime = DELAY_MASTER_LAIR_DECAY_ITEM;
                 }
 
                 if (!pItem->isFlagItem() && IClass != Item::ITEM_CLASS_SWEEPER) {
-                    // 강제로 지정한 delay
+                    
                     if (decayTurn != 0)
                         DelayTime = decayTurn;
 
-                    // 바닥에 떨어지는 아이템은 일정 시간이 지나면 사라지게 된다.
+                    
                     EffectDecayItem* pEffectDecayItem = new EffectDecayItem(this, pt.x, pt.y, (Item*)pItem, DelayTime);
                     pEffectDecayItem->setNextTime(999999);
                     m_ObjectRegistry.registerObject(pEffectDecayItem);
@@ -4453,21 +4381,21 @@ void Zone::deleteCreature(Creature* pCreature, ZoneCoord_t x, ZoneCoord_t y)
     try {
         Assert(pCreature->getX() == x && pCreature->getY() == y);
 
-        // 해당되는 CreatureManager 에서 크리처를 삭제한다.
+        
         if (pCreature->isPC()) {
             m_pPCManager->deleteCreature(pCreature->getObjectID());
 
 
-            // 파티 초대중이라면 PartyInviteInfo를 삭제해준다.
+            
             m_pPartyInviteInfoManager->cancelInvite(pCreature);
 
-            // 파티에 가입되어 있었다면 로컬 파티에서 삭제해 준다.
+            
             uint PartyID = pCreature->getPartyID();
             if (PartyID != 0) {
                 m_pLocalPartyManager->deletePartyMember(PartyID, pCreature);
             }
 
-            // 트레이드 중이었다면 트레이드 관련 정보를 삭제해준다.
+            
             TradeInfo* pInfo = m_pTradeManager->getTradeInfo(pCreature->getName());
             if (pInfo != NULL) {
                 m_pTradeManager->cancelTrade(pCreature);
@@ -4498,22 +4426,22 @@ void Zone::deleteCreature(Creature* pCreature, ZoneCoord_t x, ZoneCoord_t y)
             m_pNPCManager->deleteCreature(pCreature->getObjectID());
         }
 
-        // 타일에서 크리처를 삭제한다.
+        
         try {
             getTile(x, y).deleteCreature(pCreature->getObjectID());
         } catch (NoSuchElementException& nsee) {
             // by sigi. 2002.12.10
-            // Player캐릭터가 죽을때..
-            // [1] PCManager::killCreature()에서 tile에서는 지우고 목표존 설정하고
-            // [2] EventResurrect에서 IncomingPlayer로 보내면.. 거기서 적절한 Zone에 들어가는데..
-            // 이 두 과정.. 사이에서 아직 ZonePlayerManager에 있는 동안 Pay정보같은걸로 인해서
-            // transport되면.. tile에서 지우려고 할때 문제가 생긴다..고 보여진다.
-            // 일단, 그 부분(ZPM::pay체크)에서는 GPS_NORMAL인 경우만 하도록 하겠지만.
-            // 이것도 무시할만하다고 보여지므로.. 일단 로그만 남기자.
+            
+            
+            
+            
+            
+            
+            
             filelog("zoneDeleteCreatureError.log", "%s", nsee.toString().c_str());
         }
 
-        // 주변의 PC들에게 크리처가 사라졌다는 사실을 브로드캐스트한다.
+        
         GCDeleteObject gcDeleteObject(pCreature->getObjectID());
         broadcastPacket(x, y, &gcDeleteObject, pCreature);
     } catch (Throwable& t) {
@@ -4538,12 +4466,12 @@ void Zone::deleteObject(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
     __BEGIN_PROFILE_ZONE("Z_DELETE_OBJECT")
 
     //--------------------------------------------------
-    // 존에서 객체를 삭제한다.
+    
     //--------------------------------------------------
     getTile(x, y).deleteObject(pObject->getObjectID());
 
     //--------------------------------------------------
-    // 주변의 PC들에게 객체가 사라졌다는 사실을 브로드캐스트한다.
+    
     //--------------------------------------------------
     GCDeleteObject gcDeleteObject(pObject->getObjectID());
 
@@ -4567,13 +4495,13 @@ void Zone::deleteItem(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
     deleteFromItemList(pObject->getObjectID());
 
     //--------------------------------------------------
-    // 존에서 객체를 삭제한다.
+    
     //--------------------------------------------------
     getTile(x, y).deleteItem();
 
 
     if (pObject->getObjectClass() == Object::OBJECT_CLASS_ITEM) {
-        // 성물 보관함일 경우 Block 을 해제해야 한다.
+        
         Item* pItem = dynamic_cast<Item*>(pObject);
         Assert(pItem != NULL);
         if (pItem->getItemClass() == Item::ITEM_CLASS_CORPSE && pItem->getItemType() == MONSTER_CORPSE) {
@@ -4586,7 +4514,7 @@ void Zone::deleteItem(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
                 pCorpse->isFlag(Effect::EFFECT_CLASS_SHRINE_HOLY)) {
                 Tile& rTile = getTile(x, y);
 
-                // 블록 날리기
+                
                 rTile.clearBlocked(Creature::MOVE_MODE_WALKING);
                 rTile.clearBlocked(Creature::MOVE_MODE_BURROWING);
             }
@@ -4598,7 +4526,7 @@ void Zone::deleteItem(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
     }
 
     //--------------------------------------------------
-    // 주변의 PC들에게 객체가 사라졌다는 사실을 브로드캐스트한다.
+    
     //--------------------------------------------------
     //	GCDeleteObject gcDeleteObject(pObject->getObjectID());
 
@@ -4614,7 +4542,7 @@ void Zone::deleteItem(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
 //
 // broadcast packet
 //
-// 특정 존에 존재하는, owner를 제외한 모든 PC 에게 지정된 패킷을 전송한다.
+
 //
 //--------------------------------------------------------------------------------
 void Zone::broadcastPacket(Packet* pPacket, Creature* owner)
@@ -4643,8 +4571,8 @@ void Zone::broadcastDarkLightPacket(Packet* pPacket1, Packet* pPacket2, Creature
 
 //--------------------------------------------------------------------
 //
-// 채팅을 브로드캐스팅 하는 함수이다. 서로다른 종족간에는 볼 수 없다.-
-// 뱀파이어가 보내는 패킷은 isVampire가 True로 날아온다.
+
+
 //
 //--------------------------------------------------------------------
 void Zone::broadcastSayPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, Creature* owner, bool isVampire)
@@ -4668,13 +4596,13 @@ void Zone::broadcastSayPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, C
     pPacket->writeHeaderNBody(outputStream);
 
     //-------------------------------------------------------------------
-    // 루프 변수 초기화..
+    
     //
-    // Plus 변수가 참일 경우 Range 만큼 더 보내 준다..
-    // 광역 마법의 결과를 효과적으로 보여주기 위함이다.
+    
+    
     //
     // *NOTE
-    // - 최적화를 한다면 VisionInfo에 PLUS_SIGHT라는 변수를 추가하여 연산
+    
     //-------------------------------------------------------------------
     endx = min(m_Width - 1, cx + maxViewportWidth + 1);
     endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1);
@@ -4683,7 +4611,7 @@ void Zone::broadcastSayPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, C
         for (iy = max(0, cy - maxViewportUpperHeight - 1); iy <= endy; iy++) {
             Tile& rTile = m_pTiles[ix][iy]; // by sigi. 2002.5.8
 
-            // 타일에 크리처가 있는 경우에만
+            
             if (rTile.hasCreature()) {
                 const forward_list<Object*>& objectList = rTile.getObjectList();
 
@@ -4693,13 +4621,13 @@ void Zone::broadcastSayPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, C
                     Creature* pCreature = dynamic_cast<Creature*>(*itr);
                     Assert(pCreature != NULL);
 
-                    // PC이면서, owner가 아니면서, (x,y)를 볼 수 있는 경우
+                    
                     if ((pCreature->isPC() && pCreature != owner && pCreature->getVisionState(cx, cy) >= IN_SIGHT) ||
                         (pCreature->isPC() && pCreature != owner)) {
-                        // 숨어 있는 넘이 뭔 짓을 하면 안보여 주는데.. 딴짓 하면 Unborrowing 시켜야 되는디.
-                        // 뱀파이어가 보내는 패킷은 isVampire가 True로 날아온다.
+                        
+                        
                         if (owner != NULL) {
-                            // Creature 에서 ObservingEye 이펙트가 있으면 이펙트를 가져온다.
+                            
                             EffectObservingEye* pEffectObservingEye = NULL;
                             if (pCreature->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
                                 pEffectObservingEye = dynamic_cast<EffectObservingEye*>(
@@ -4744,11 +4672,11 @@ void Zone::broadcastSayPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, C
 //
 // broadcast packet
 //
-// (x,y) 의 사건을 볼 수 있는, owner를 제외한 모든 PC 들에게 패킷을 브로드캐스트한다.
+
 //
 // *CAUTION*
 //
-// unsigned char 를 ZoneCoord_t 로 사용할 때, overflow 및 underflow 를 주의할 것
+
 //
 //--------------------------------------------------------------------------------
 void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, Creature* owner, bool Plus, Range_t Range)
@@ -4772,25 +4700,25 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, Crea
     ZoneCoord_t endy = 0;
 
     //-------------------------------------------------------------------
-    // 루프 변수 초기화..
+    
     //
-    // Plus 변수가 참일 경우 Range 만큼 더 보내 준다..
-    // 광역 마법의 결과를 효과적으로 보여주기 위함이다.
+    
+    
     //
     // *NOTE
-    // - 최적화를 한다면 VisionInfo에 PLUS_SIGHT라는 변수를 추가하여 연산
+    
     //-------------------------------------------------------------------
     endx = min(m_Width - 1, cx + maxViewportWidth + 1 + Range);
     endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1 + Range);
 
     for (ix = max(0, cx - maxViewportWidth - 1 - Range); ix <= endx; ix++) {
         for (iy = max(0, cy - maxViewportUpperHeight - 1 - Range); iy <= endy; iy++) {
-            // (ix,iy)에서 (cx,cy)를 못 볼 경우
+            
             if (VisionInfoManager::getVisionState(ix, iy, cx, cy) == OUT_OF_SIGHT && !Plus)
                 continue;
             Tile& rTile = m_pTiles[ix][iy]; // by sigi.2002.5.8
 
-            // 타일에 크리처가 있는 경우에만
+            
             if (rTile.hasCreature()) {
                 const forward_list<Object*>& objectList = rTile.getObjectList();
 
@@ -4802,12 +4730,12 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, Crea
 
                     // by sigi. 2002.5.14
                     if (pCreature->isPC() && pCreature != owner)
-                    // 위에서 체크했다. by Sequoia
+                    
                     //						&& (pCreature->getVisionState(cx,cy) >= IN_SIGHT || Plus))
                     {
-                        // 숨어 있는 넘이 뭔 짓을 하면 안보여 주는데.. 딴짓 하면 Unborrowing 시켜야 되는디.
+                        
                         if (owner != NULL) {
-                            // canSee 함수로 대체. by bezz 2003.05.29
+                            
                             if (canSee(pCreature, owner)) {
                                 // pCreature->getPlayer()->sendPacket(pPacket);
                                 pCreature->getPlayer()->sendStream(&outputStream);
@@ -4843,7 +4771,7 @@ void Zone::broadcastLevelWarBonusPacket(Packet* pPacket, Creature* owner)
 //
 // update scan
 //
-// 제자리에서 sight가 변했을 경우. Add&Delete packet을 보낸다.
+
 //
 //--------------------------------------------------------------------------------
 void Zone::updateScan(Creature* pPC, Sight_t oldSight, Sight_t newSight) {
@@ -4856,377 +4784,8 @@ void Zone::updateScan(Creature* pPC, Sight_t oldSight, Sight_t newSight) {
 
     __BEGIN_PROFILE_ZONE("Z_UPDATESCAN")
 
-    // 이제 sight 변하는 거 신경 안 쓴다.
-    /*	Coord_t cx = pPC->getX(), cy = pPC->getY();
-
-        Player* pPlayer = pPC->getPlayer();
-        Assert(pPlayer);
-
-        for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1), endx = min(m_Width - 1, cx + maxViewportWidth + 1) ; ix
-    <= endx ; ix++)
-        {
-            for (ZoneCoord_t iy = max(0, cy - maxViewportUpperHeight - 1), endy = min(m_Height - 1, cy +
-    maxViewportLowerHeight + 1) ; iy <= endy ; iy++)
-            {
-                VisionState oldVS = pPC->getVisionState(ix, iy, oldSight);
-                VisionState newVS = pPC->getVisionState(ix, iy, newSight);
-
-                const slist<Object*> & objectList = m_pTiles[ix][iy].getObjectList();
-
-                for (slist<Object*>::const_iterator itr = objectList.begin() ; itr != objectList.end() ; itr++)
-                {
-
-                    Assert(*itr != NULL);
-
-                    // 안보였다가 보이는 경우..
-                    // ADD~~
-                    if (oldVS == OUT_OF_SIGHT && newVS != OUT_OF_SIGHT)
-                    {
-                        //--------------------------------------------------------------------------------
-                        // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을 만들어서
-                        // owner 에게 전송한다.
-                        // *NOTES*
-                        // 가장 출현 확률이 높은 객체 CLASS 가 case 앞부분에 나와야 한다.
-                        //--------------------------------------------------------------------------------
-                        switch ((*itr)->getObjectClass())
-                        {
-                            ////////////////////////////////////////////////////////////
-                            ////////////////////////////////////////////////////////////
-                            case Object::OBJECT_CLASS_CREATURE:
-                                {
-                                    //--------------------------------------------------------------------------------
-                                    // PC의 경우 pPacket을 전송해야 하며, !PC인 경우에는 전송할 필요가 없다.
-                                    // 또한 모든 크리처의 정보를 owner에게 전송해야 한다.
-                                    //--------------------------------------------------------------------------------
-                                    Creature* pCreature = dynamic_cast<Creature*>(*itr);
-                                    Assert(pCreature != NULL);
-
-                                    // 자기 자신의 정보는 받을 필요가 없다.
-                                    if (pCreature == pPC) continue;
-
-                                    switch (pCreature->getCreatureClass())
-                                    {
-                                        case Creature::CREATURE_CLASS_MONSTER :
-                                            {
-                                                Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-
-                                                // by sigi
-                                                Packet* pAddMonsterPacket = createMonsterAddPacket( pMonster, pPC );
-
-                                                if (pAddMonsterPacket!=NULL)
-                                                {
-                                                    pPlayer->sendPacket( pAddMonsterPacket );
-
-                                                    delete pAddMonsterPacket;
-                                                }
-                                            }
-                                            break;
-
-
-                                        case Creature::CREATURE_CLASS_SLAYER:
-                                            {
-                                                // PC 가 Revealer 이펙트를 가지고 있다면 이펙트를 가져온다.
-    //											EffectRevealer* pEffectRevealer = NULL;
-    //											if ( pPC->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
-    //											{
-    //												pEffectRevealer = dynamic_cast<EffectRevealer*>(pPC->findEffect(
-    Effect::EFFECT_CLASS_REVEALER ) );
-    //												Assert( pEffectRevealer );
-    //											}
-
-                                                if (!pCreature->isFlag(Effect::EFFECT_CLASS_GHOST)
-                                                    && (!pCreature->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE)
-                                                        || pPC->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY) ))
-    //												|| ( pEffectRevealer != NULL &&
-    pEffectRevealer->canSeeSniping(pCreature) ) )
-                                                {
-                                                    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-                                                    GCAddSlayer gcAddSlayer;
-                                                    makeGCAddSlayer(&gcAddSlayer, pSlayer);
-                                                    pPlayer->sendPacket(&gcAddSlayer);
-                                                }
-                                            }
-                                            break;
-
-                                        case Creature::CREATURE_CLASS_VAMPIRE :
-                                            {
-                                                // PC 가 Revealer 이펙트를 가지고 있다면 이펙트를 가져온다.
-    //											EffectRevealer* pEffectRevealer = NULL;
-    //											if ( pPC->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
-    //											{
-    //												pEffectRevealer = dynamic_cast<EffectRevealer*>(pPC->findEffect(
-    Effect::EFFECT_CLASS_REVEALER ) );
-    //												Assert( pEffectRevealer );
-    //											}
-
-                                                // PC 가 ObservingEye 이펙트를 가지고 있다면 이펙트를 가져온다.
-                                                EffectObservingEye* pEffectObservingEye = NULL;
-                                                if ( pPC->isFlag( Effect::EFFECT_CLASS_OBSERVING_EYE ) )
-                                                {
-                                                    pEffectObservingEye =
-    dynamic_cast<EffectObservingEye*>(pPC->findEffect( Effect::EFFECT_CLASS_OBSERVING_EYE ) );
-                                                    //Assert( pEffectObservingEye != NULL );
-                                                }
-
-                                                //
-                                                // hide와 invisibility는 동시에 사용될 수 없는다는 가정하에..
-                                                //
-                                                if (!pCreature->isFlag(Effect::EFFECT_CLASS_GHOST))
-                                                {
-                                                    if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE))
-                                                    {
-                                                        if (pPC->isVampire() ||
-    pPC->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN) )
-        //													|| ( pEffectRevealer != NULL && pEffectRevealer->canSeeHide(
-    pCreature ) ) )
-                                                        {
-                                                            GCAddBurrowingCreature gcABC;
-                                                            gcABC.setObjectID(pCreature->getObjectID());
-                                                            gcABC.setName(pCreature->getName());
-                                                            gcABC.setX(ix);
-                                                            gcABC.setY(iy);
-
-                                                            pPlayer->sendPacket(&gcABC);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if (!pCreature->isFlag(Effect::EFFECT_CLASS_INVISIBILITY))
-                                                        {
-                                                            Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-                                                            GCAddVampire gcAddVampire;
-                                                            makeGCAddVampire(&gcAddVampire, pVampire);
-                                                            pPlayer->sendPacket(&gcAddVampire);
-                                                        }
-                                                        // pCreature는 invisibility상태..
-                                                        else if (pPC->isVampire() ||
-    pPC->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY)
-                                                                || ( pEffectObservingEye != NULL &&
-    pEffectObservingEye->canSeeInvisibility( pCreature ) ) )
-                                                        {
-                                                            // FIXME
-                                                            // 설정에따라서 어떻게 보일지 결정된 후..
-                                                            //
-                                                            Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-                                                            GCAddVampire gcAddVampire;
-                                                            makeGCAddVampire(&gcAddVampire, pVampire);
-                                                            pPlayer->sendPacket(&gcAddVampire);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            break;
-
-                                        case Creature::CREATURE_CLASS_OUSTERS:
-                                            {
-                                                if ( !pCreature->isFlag(Effect::EFFECT_CLASS_GHOST) )
-                                                {
-                                                    Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
-                                                    GCAddOusters gcAddOusters;
-                                                    makeGCAddOusters(&gcAddOusters, pOusters);
-                                                    pPlayer->sendPacket(&gcAddOusters);
-                                                }
-                                            }
-                                            break;
-
-                                        case Creature::CREATURE_CLASS_NPC :
-                                            {
-                                                NPC* pNPC = dynamic_cast<NPC*>(pCreature);
-                                                GCAddNPC gcAddNPC;
-                                                makeGCAddNPC(&gcAddNPC, pNPC);
-                                                pPlayer->sendPacket(&gcAddNPC);
-                                            }
-                                            break;
-
-                                        default :
-                                            throw Error("invalid creature class");
-
-                                    }//switch (pCreature->getCreatureClass())
-                                }//case Object::OBJECT_CLASS_CREATURE :
-                                break;
-
-                            //--------------------------------------------------------------------------------
-                            // 타일 위에 아이템이 있을 경우
-                            //--------------------------------------------------------------------------------
-                            case Object::OBJECT_CLASS_ITEM :
-                                {
-                                    Item* pItem = dynamic_cast<Item*>(*itr);
-
-                                    if (pItem->getItemClass() == Item::ITEM_CLASS_CORPSE) {
-                                        switch (pItem->getItemType()) {
-                                            case SLAYER_CORPSE :
-                                                {
-                                                    SlayerCorpse* pSlayerCorpse = dynamic_cast<SlayerCorpse*>(pItem);
-                                                    GCAddSlayerCorpse gcAddSlayerCorpse;
-                                                    makeGCAddSlayerCorpse(&gcAddSlayerCorpse, pSlayerCorpse);
-                                                    pPlayer->sendPacket(&gcAddSlayerCorpse);
-                                                }
-                                                break;
-                                            case VAMPIRE_CORPSE :
-                                                {
-                                                    VampireCorpse* pVampireCorpse = dynamic_cast<VampireCorpse*>(pItem);
-                                                    GCAddVampireCorpse gcAddVampireCorpse;
-                                                    makeGCAddVampireCorpse(&gcAddVampireCorpse, pVampireCorpse);
-                                                    pPlayer->sendPacket(&gcAddVampireCorpse);
-                                                }
-                                                break;
-                                            case NPC_CORPSE :
-                                                {
-                                                    throw UnsupportedError();
-                                                }
-                                                break;
-                                            case MONSTER_CORPSE :
-                                                {
-                                                    MonsterCorpse* pMonsterCorpse = dynamic_cast<MonsterCorpse*>(pItem);
-                                                    GCAddMonsterCorpse gcAddMonsterCorpse;
-                                                    makeGCAddMonsterCorpse(&gcAddMonsterCorpse, pMonsterCorpse, ix, iy);
-                                                    pPlayer->sendPacket(&gcAddMonsterCorpse);
-
-                                                    sendRelicEffect( pMonsterCorpse, pPlayer );
-                                                }
-                                                break;
-                                        }//switch
-                                    }
-                                    // Mine이 Install되어 있는 경우, DetectMine이 없으면 GCAddNewItemToZone Packet을
-    보내지 않는다.
-                                    // 즉 볼 수 없다.
-                                    else if (pItem->getItemClass() == Item::ITEM_CLASS_MINE
-                                        && pItem->isFlag(Effect::EFFECT_CLASS_INSTALL))
-                                    {
-                                        if (pPC->isFlag(Effect::EFFECT_CLASS_REVEALER) )
-                                        {
-                                            GCAddInstalledMineToZone gcAddMine;
-                                            gcAddMine.setObjectID(pItem->getObjectID());
-                                            gcAddMine.setX(cx);
-                                            gcAddMine.setY(cy);
-                                            gcAddMine.setItemClass(pItem->getItemClass());
-                                            gcAddMine.setItemType(pItem->getItemType());
-                                            gcAddMine.setOptionType(pItem->getOptionTypeList());
-                                            gcAddMine.setDurability(pItem->getDurability());
-                                            pPlayer->sendPacket(&gcAddMine);
-
-                                        }
-                                    }
-                                    else
-                                    {
-                                        GCAddNewItemToZone gcAddNewItemToZone;
-                                        makeGCAddNewItemToZone(&gcAddNewItemToZone, pItem, ix, iy);
-                                        pPlayer->sendPacket(&gcAddNewItemToZone);
-                                    }
-                                }
-                                break;
-
-                            ////////////////////////////////////////////////////////////
-                            ////////////////////////////////////////////////////////////
-                            case Object::OBJECT_CLASS_EFFECT :
-                                {
-                                    Effect* pEffect = dynamic_cast<Effect*>(*itr);
-                                    if (pEffect->getEffectClass() == Effect::EFFECT_CLASS_VAMPIRE_PORTAL)
-                                    {
-                                        EffectVampirePortal* pEffectVampirePortal =
-    dynamic_cast<EffectVampirePortal*>(pEffect); ZONE_COORD zonecoord = pEffectVampirePortal->getZoneCoord();
-
-                                        GCAddVampirePortal gcAddVampirePortal;
-                                        gcAddVampirePortal.setObjectID(pEffect->getObjectID());
-                                        gcAddVampirePortal.setOwnerID(pEffectVampirePortal->getOwnerID());
-                                        gcAddVampirePortal.setX(ix);
-                                        gcAddVampirePortal.setY(iy);
-                                        gcAddVampirePortal.setTargetZoneID(zonecoord.id);
-                                        gcAddVampirePortal.setTargetX(zonecoord.x);
-                                        gcAddVampirePortal.setTargetY(zonecoord.y);
-                                        gcAddVampirePortal.setDuration(pEffectVampirePortal->getRemainDuration());
-                                        gcAddVampirePortal.setCreateFlag(0);
-
-                                        pPlayer->sendPacket(&gcAddVampirePortal);
-                                    }
-                                    // by sigi. 2002.6.10
-                                    else if (pEffect->getEffectClass() == Effect::EFFECT_CLASS_SANCTUARY)
-                                    {
-                                        EffectSanctuary* pEffectSanctuary = dynamic_cast<EffectSanctuary*>(pEffect);
-
-                                        ZoneCoord_t centerX = pEffectSanctuary->getCenterX();
-                                        ZoneCoord_t centerY = pEffectSanctuary->getCenterY();
-
-                                        // sanctuary는 중심좌표인 경우만 packet을 보낸다.
-                                        if (centerX==ix && centerY==iy)
-                                        {
-                                            GCAddEffectToTile gcAddEffectToTile;
-
-                                            gcAddEffectToTile.setObjectID(pEffect->getObjectID());
-                                            gcAddEffectToTile.setXY(ix, iy);
-                                            gcAddEffectToTile.setEffectID(pEffect->getSendEffectClass());
-                                            gcAddEffectToTile.setDuration(pEffect->getRemainDuration());
-
-                                            pPlayer->sendPacket(&gcAddEffectToTile);
-                                        }
-                                    }
-                                    // Broadcasting Effect 인지 체크 추가 by Sequoia 2003.3.31
-                                    else if (pEffect->isBroadcastingEffect())
-                                    {
-                                        GCAddEffectToTile gcAddEffectToTile;
-
-                                        gcAddEffectToTile.setObjectID(pEffect->getObjectID());
-                                        gcAddEffectToTile.setXY(ix, iy);
-                                        gcAddEffectToTile.setEffectID(pEffect->getSendEffectClass());
-                                        gcAddEffectToTile.setDuration(pEffect->getRemainDuration());
-
-                                        pPlayer->sendPacket(&gcAddEffectToTile);
-                                    }
-                                }
-                                break;
-
-                            //--------------------------------------------------------------------------------
-                            // 타일 위에 장애물이 있을 경우
-                            //--------------------------------------------------------------------------------
-                            case Object::OBJECT_CLASS_OBSTACLE :
-                                {
-                                }
-                                break;
-
-                            //--------------------------------------------------------------------------------
-                            // 타일 위에 포탈이 있을 경우
-                            //--------------------------------------------------------------------------------
-                            case Object::OBJECT_CLASS_PORTAL :
-                                {
-                                }
-                                break;
-
-                            default :
-                                throw Error("invalid object class");
-
-                        }//switch ((*itr)->getObjectClass())
-                    } // if
-                    // 보였다가 안보이는 경우.
-                    else if (oldVS != OUT_OF_SIGHT && newVS == OUT_OF_SIGHT)
-                    {
-                        switch((*itr)->getObjectClass())
-                        {
-                            case Object::OBJECT_CLASS_CREATURE:
-                            case Object::OBJECT_CLASS_ITEM:
-                                {
-                                    GCDeleteObject gcDO;
-                                    gcDO.setObjectID((*itr)->getObjectID());
-                                    pPlayer->sendPacket(&gcDO);
-                                }
-                                break;
-                            case Object::OBJECT_CLASS_EFFECT:
-                                {
-                                    Effect* pEffect = dynamic_cast<Effect*>(*itr);
-                                    GCDeleteEffectFromTile gcDeleteEffectFromTile;
-                                    gcDeleteEffectFromTile.setObjectID((*itr)->getObjectID());
-                                    gcDeleteEffectFromTile.setEffectID(pEffect->getSendEffectClass());
-                                    gcDeleteEffectFromTile.setXY(ix, iy);
-                                    pPlayer->sendPacket(&gcDeleteEffectFromTile);
-                                }
-                                break;
-                            default:;
-                                // Do nothing
-                        }
-                    }
-                }	// for tile
-            }// for y
-        }// for x
-    */
+    
+     
     __END_PROFILE_ZONE("Z_UPDATESCAN")
 
     __END_CATCH
@@ -5235,11 +4794,11 @@ void Zone::updateScan(Creature* pPC, Sight_t oldSight, Sight_t newSight) {
 
 //--------------------------------------------------------------------------------
 // broadcast packet
-// (x1,y1) (x2,y2) 의 사건을 볼 수 있는,
-// owner를 제외한 모든 PC 들에게 패킷을 브로드캐스트한다.
-// Tile 전용 스킬 broadcastPacket이다.
+
+
+
 // *CAUTION*
-// unsigned char 를 ZoneCoord_t 로 사용할 때, overflow 및 underflow 를 주의할 것
+
 //--------------------------------------------------------------------------------
 list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2,
                                            Packet* pPacket, list<Creature*> creatureList, bool bConcernDarkness)
@@ -5265,14 +4824,14 @@ list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneC
     ZoneCoord_t endy = 0;
 
     //-------------------------------------------------------------------
-    // 루프 변수 초기화..
+    
     //
-    // Plus 변수가 참일 경우 Range 만큼 더 보내 준다..
-    // 광역 마법의 결과를 효과적으로 보여주기 위함이다.
+    
+    
     //
     // *NOTE
     //
-    // - 최적화를 한다면 VisionInfo에 PLUS_SIGHT라는 변수를 추가하여 연산
+    
     //
     //-------------------------------------------------------------------
     endx = min(m_Width - 1, x1 + maxViewportWidth + 1);
@@ -5282,7 +4841,7 @@ list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneC
         for (iy = max(0, y1 - maxViewportUpperHeight - 1); iy <= endy; iy++) {
             Tile& rTile = m_pTiles[ix][iy]; // by sigi.2002.5.8
 
-            // 타일에 크리처가 있는 경우에만
+            
             if (rTile.hasCreature()) {
                 const forward_list<Object*>& objectList = rTile.getObjectList();
 
@@ -5292,26 +4851,13 @@ list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneC
                     Creature* pCreature = dynamic_cast<Creature*>(*itr);
                     Assert(pCreature != NULL);
 
-                    // PC이면서, creature list에 속하지 않으면서 (x,y)를 볼 수 있는 경우
+                    
                     if (pCreature->isPC()) {
-                        // 이 패킷을 발생시킨 놈들인지를 체크한다.
+                        
                         bool belong = false;
                         for (list<Creature*>::const_iterator itr = creatureList.begin(); itr != creatureList.end();
                              itr++) {
-                            /*
-                            if( pCreature->isMonster() )
-                            {
-                                Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-                                // edit by sonic 2006.12.29  錦攣훙잚퓜癎珞加뎌뵨加濫檢
-                                if(pMonster->getMonsterType() 	== 482 ||
-                                     pMonster->getMonsterType() 	== 673 )
-                                     {
-                                            belong =true;
-                                            break;
-                                     }
-                                }
-                            // end by sonic
-                            */
+                             
                             if (pCreature == *itr) {
                                 belong = true;
                                 break;
@@ -5320,7 +4866,7 @@ list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneC
 
                         if (!belong && pCreature->getVisionState(x1, y1) >= IN_SIGHT &&
                             pCreature->getVisionState(x2, y2) >= IN_SIGHT) {
-                            // 숨어 있는 넘이 안 보이면서 스킬을 쓸 이유가 없다.. 따라서 HIDE체크는 하지 않는다.
+                            
                             Player* pPlayer = pCreature->getPlayer();
                             // pPlayer->sendPacket(pPacket);
                             pPlayer->sendStream(&outputStream);
@@ -5345,17 +4891,17 @@ list<Creature*> Zone::broadcastSkillPacket(ZoneCoord_t x1, ZoneCoord_t y1, ZoneC
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// (x,y) 의 사건을 볼 수 있는, creatureList 에 소속된 크리처를 제외한 모든 PC 들에게
-// 패킷을 브로드캐스트한다.
+
+
 //
 // *NOTE*
-// 지속 Tile Magic일 경우 Plus 를 True로 두게 되며 Plus 변수가 True일 경우..
-// Magic 범위의 반지름 만큼 더 범위를 확장하여 보내준다.. 광역 마법이 짤리지 않고,
-// 효과적으로 보여주기 위함이다.
+
+
+
 //
 // *CAUTION*
 //
-// unsigned char 를 ZoneCoord_t 로 사용할 때, overflow 및 underflow 를 주의할 것
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, const list<Creature*>& creatureList,
                            bool Plus, Range_t Range)
@@ -5379,13 +4925,13 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, cons
     ZoneCoord_t endy = 0;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 루프 변수 초기화..
+    
     //
-    // Plus 변수가 참일 경우 Range 만큼 더 보내 준다..
-    // 광역 마법의 결과를 효과적으로 보여주기 위함이다.
+    
+    
     //
     // *NOTE
-    // - 최적화를 한다면 VisionInfo에 PLUS_SIGHT라는 변수를 추가하여 연산
+    
     //////////////////////////////////////////////////////////////////////////////
     endx = min(m_Width - 1, cx + maxViewportWidth + 1 + Range);
     endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1 + Range);
@@ -5396,7 +4942,7 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, cons
                 continue;
             Tile& rTile = m_pTiles[ix][iy]; // by sigi. 2002.5.8
 
-            // 타일에 크리처가 있는 경우에만
+            
             if (rTile.hasCreature()) {
                 const forward_list<Object*>& objectList = rTile.getObjectList();
                 forward_list<Object*>::const_iterator itr = objectList.begin();
@@ -5406,26 +4952,12 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, cons
                     Creature* pCreature = dynamic_cast<Creature*>(*itr);
                     Assert(pCreature != NULL);
 
-                    // PC이면서, creatureList에 소속되지도 않으면서, (x,y)를 볼 수 있는 경우
+                    
                     if (pCreature->isPC()) {
                         bool belong = false;
                         for (list<Creature*>::const_iterator itr = creatureList.begin(); itr != creatureList.end();
                              itr++) {
-                            /*
-                            // edit by sonic 2006.12.29  錦攣훙잚퓜癎珞加뎌뵨加濫檢
-                            if( pCreature->isMonster() )
-                            {
-                                Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-
-                                if(pMonster->getMonsterType() 	== 482 ||
-                                     pMonster->getMonsterType() 	== 673 )
-                                     {
-                                            belong =true;
-                                            break;
-                                     }
-                                }
-                            // end by sonic
-                            */
+                             
                             if (pCreature == *itr) {
                                 belong = true;
                                 break;
@@ -5452,7 +4984,7 @@ void Zone::broadcastPacket(ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket, cons
 
 //////////////////////////////////////////////////////////////////////////////
 // scan
-// (x,y)에서 시야 영역안에 존재하는 모든 객체들의 정보를 받아온다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) {
     __BEGIN_TRY
@@ -5477,7 +5009,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
         for (ZoneCoord_t iy = max(0, cy - maxViewportUpperHeight - 1),
                          endy = min(m_Height - 1, cy + maxViewportLowerHeight + 1);
              iy <= endy; iy++) {
-            //			bool bCanSeeThere = (pPC->getVisionState(ix, iy) >= IN_SIGHT);	// 순수 시야만으로 볼 수 있나?
+            
             if (pPC->getVisionState(ix, iy) == OUT_OF_SIGHT)
                 continue;
 
@@ -5488,30 +5020,30 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
 
                 //--------------------------------------------------------------------------------
                 //
-                // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을 만들어서
-                // owner 에게 전송한다.
+                
+                
                 //
                 // *NOTES*
                 //
-                // 가장 출현 확률이 높은 객체 CLASS 가 case 앞부분에 나와야 한다.
+                
                 //
                 //--------------------------------------------------------------------------------
                 switch ((*itr)->getObjectClass()) {
                 //--------------------------------------------------------------------------------
-                // 타일 위에 크리처가 있을 경우
+                
                 //--------------------------------------------------------------------------------
                 case Object::OBJECT_CLASS_CREATURE: {
                     //--------------------------------------------------------------------------------
-                    // PC의 경우 pPacket을 전송해야 하며, !PC인 경우에는 전송할 필요가 없다.
-                    // 또한 모든 크리처의 정보를 owner에게 전송해야 한다.
+                    
+                    
                     //--------------------------------------------------------------------------------
                     Creature* pCreature = dynamic_cast<Creature*>(*itr);
                     Assert(pCreature != NULL);
 
-                    if (pCreature == pPC) // 자기 자신의 정보는 받을 필요가 없다.
+                    if (pCreature == pPC) 
                         continue;
 
-                    // 안보이면 쌩
+                    
                     //							if ( !canSee( pPC, pCreature ) ) continue;
                     bool bCanSee = canSee(pPC, pCreature);
 
@@ -5530,11 +5062,11 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                         }
 
                         //--------------------------------------------------------------------------------
-                        // 몬스터가 PC 를 볼 수 있는 경우, PC 를 몬스터의 Enemy 로 지정한다.
+                        
                         //--------------------------------------------------------------------------------
                         VisionState vs = pMonster->getVisionState(cx, cy);
 
-                        // Aggressive 몬스터일 경우에만 적으로 등록해준다.
+                        
                         if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE) {
                             if (isPotentialEnemy(pMonster, pPC)) {
                                 pMonster->addPotentialEnemy(pPC);
@@ -5543,7 +5075,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                     } break;
 
                     case Creature::CREATURE_CLASS_SLAYER: {
-                        // 내가 그곳을 볼 수 있다면(darkness와 관련하여)
+                        
                         if (bCanSee) {
                             //											if
                             //(!pCreature->isFlag(Effect::EFFECT_CLASS_GHOST)
@@ -5560,10 +5092,10 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                             //											}
                         }
 
-                        // 상대(슬레이어)가 나를 볼 수 있다면
+                        
                         if (pPacket && pCreature->getVisionState(cx, cy) >= IN_SIGHT) {
                             Assert(pCreature->getPlayer() != NULL);
-                            // canSee 로 대체. 2003.05.29 by bezz
+                            
                             if (canSee(pCreature, pPC)) {
                                 // pCreature->getPlayer()->sendPacket(pPacket);
                                 pCreature->getPlayer()->sendStream(&outputStream);
@@ -5573,7 +5105,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
 
                     case Creature::CREATURE_CLASS_VAMPIRE: {
                         if (bCanSee) {
-                            // PC가 ObservingEye 이펙트를 가지고 있다면 이펙트를 가져온다.
+                            
                             //											EffectObservingEye* pEffectObservingEye = NULL;
                             //											if ( pPC->isFlag(
                             // Effect::EFFECT_CLASS_OBSERVING_EYE ) )
@@ -5615,12 +5147,12 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                             }
                         }
 
-                        // 상대가 나를 볼 수 있다면..
-                        // 상대는 vampire이므로 시야만 가능하다면 darkness와는 관계가 없다.
-                        // 뱀파이어가 상대일땐 스나이핑 모드라면 절대 못 본다...
+                        
+                        
+                        
                         //
-                        // 근데 scan 함수 특성상 snipping 모드를 해제 하지 않고 넘어갈 수는 없다.
-                        // canSee로 대체
+                        
+                        
                         if (pPacket && pCreature->getVisionState(cx, cy) >= IN_SIGHT && canSee(pCreature, pPC)) {
                             Assert(pCreature->getPlayer() != NULL);
                             // pCreature->getPlayer()->sendPacket(pPacket);
@@ -5630,7 +5162,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
 
                     case Creature::CREATURE_CLASS_OUSTERS: {
                         if (bCanSee) {
-                            // PC가 ObservingEye 이펙트를 가지고 있다면 이펙트를 가져온다.
+                            
                             //											EffectObservingEye* pEffectObservingEye = NULL;
                             //											if ( pPC->isFlag(
                             // Effect::EFFECT_CLASS_OBSERVING_EYE ) )
@@ -5676,7 +5208,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                 break;
 
                 //--------------------------------------------------------------------------------
-                // 타일 위에 아이템이 있을 경우
+                
                 //--------------------------------------------------------------------------------
                 case Object::OBJECT_CLASS_ITEM: {
                     //							if (bCanSeeThere)
@@ -5737,7 +5269,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                 } break;
 
                 //--------------------------------------------------------------------------------
-                // 타일 위에 이펙트가 있을 경우
+                
                 //--------------------------------------------------------------------------------
                 case Object::OBJECT_CLASS_EFFECT: {
                     Effect* pEffect = dynamic_cast<Effect*>(*itr);
@@ -5767,7 +5299,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                         ZoneCoord_t centerX = pEffectSanctuary->getCenterX();
                         ZoneCoord_t centerY = pEffectSanctuary->getCenterY();
 
-                        // sanctuary는 중심좌표인 경우만 packet을 보낸다.
+                        
                         if (centerX == ix && centerY == iy) {
                             GCAddEffectToTile gcAddEffectToTile;
 
@@ -5779,7 +5311,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                             pPlayer->sendPacket(&gcAddEffectToTile);
                         }
                     }
-                    // Broadcasting Effect 인지 체크 추가 by Sequoia 2003.3.31
+                    
                     else if (pEffect->isBroadcastingEffect()) {
                         GCAddEffectToTile gcAddEffectToTile;
 
@@ -5795,7 +5327,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
 
 
                 //--------------------------------------------------------------------------------
-                // 타일 위에 장애물이 있을 경우
+                
                 //--------------------------------------------------------------------------------
                 case Object::OBJECT_CLASS_OBSTACLE: {
                     /*
@@ -5803,7 +5335,7 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
                 } break;
 
                 //--------------------------------------------------------------------------------
-                // 타일 위에 포탈이 있을 경우
+                
                 //--------------------------------------------------------------------------------
                 case Object::OBJECT_CLASS_PORTAL: {
                     /*
@@ -5825,8 +5357,8 @@ void Zone::scan(Creature* pPC, ZoneCoord_t cx, ZoneCoord_t cy, Packet* pPacket) 
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터가 존의 (x,y)에 새로 리젠되었을 경우, 시야 영역안에 존재하는 모든 PC들에게
-// GCAddXXX 패킷을 보내면서, 동시에 그 PC 를 잠재적인 적으로 간주한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::scanPC(Creature* pCreature) {
     __BEGIN_TRY
@@ -5842,7 +5374,7 @@ void Zone::scanPC(Creature* pCreature) {
 
     Packet* pGCAddXXX = NULL;
 
-    // 크리쳐의 종류에 따라, 패킷을 만들어둔다.
+    
     Creature::CreatureClass CClass = pCreature->getCreatureClass();
 
     bool isMonster = pCreature->isMonster();
@@ -5899,11 +5431,11 @@ void Zone::scanPC(Creature* pCreature) {
                     Creature* pPC = dynamic_cast<Creature*>(*itr);
                     Assert(pPC != NULL);
 
-                    // PC 이면서, 크리처를 볼 수 있는 경우
+                    
                     if (pPC->isPC() && pPC->getVisionState(cx, cy) >= IN_SIGHT && canSee(pPC, pCreature))
                     //						&& !pPC->isFlag(Effect::EFFECT_CLASS_GHOST)
                     {
-                        // Creature 가 Revealer 이펙트를 가지고 있다면 이펙트를 가져온다.
+                        
                         //						EffectRevealer* pEffectRevealer = NULL;
                         //						if ( pCreature->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
                         //						{
@@ -5912,7 +5444,7 @@ void Zone::scanPC(Creature* pCreature) {
                         //							Assert( pEffectRevealer );
                         //						}
 
-                        // Creature 가 ObservingEye 이펙트를 가지고 있다면 이펙트를 가져온다.
+                        
                         //						EffectObservingEye* pEffectObservingEye = NULL;
                         //						if ( pCreature->isFlag( Effect::EFFECT_CLASS_OBSERVING_EYE ) )
                         //						{
@@ -5922,7 +5454,7 @@ void Zone::scanPC(Creature* pCreature) {
                         //							//Assert( pEffectObservingEye != NULL );
                         //						}
 
-                        // 몬스터가 스나이핑을 쓸리는 없다 그래서 DETECT_HIDDEN과 INVISIBILITY만 체크 한다.
+                        
                         //						if (pPC->isVampire() ||
                         //							((!isMonsterHide ||
                         // pPC->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN))// || ( pEffectRevealer != NULL &&
@@ -5936,7 +5468,7 @@ void Zone::scanPC(Creature* pCreature) {
                         //						}
 
                         if (isMonster) {
-                            // (cx,cy)에 있는 몬스터가 (ix,iy)에 있는 PC를 볼 수 있는가?
+                            
                             VisionState vs = pMonster->getVisionState(ix, iy);
                             if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE &&
                                 canSee(pCreature, pPC)) {
@@ -5964,8 +5496,8 @@ void Zone::scanPC(Creature* pCreature) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// P(x1,y1)에서 Q(x2,y2)로 빠른 이동한 크리처가 주변 영역에 존재하는 PC들에게
-// 브로드캐스트하는 메쏘드이다.
+
+
 // for Skill FlashSliding, ShadowWalk
 //////////////////////////////////////////////////////////////////////////////
 bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2,
@@ -5973,10 +5505,10 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    // 이 메쏘드는 PC 를 대상으로 한다.
+    
     Assert(pPC->isPC());
 
-    // isAbleToMove 로 바꾼다. by bezz. 2002.12.28
+    
     if (!isAbleToMove(pPC))
         return false;
 
@@ -5985,7 +5517,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
             if ( !isPassLine( this, pPC->getX(), pPC->getY(), x2, y2, true ) ) return false;
         }*/
 
-    // 성물을 가지고 있는 경우라면.. 안전지대에 들어갈 수 없다.
+    
     if (pPC->hasRelicItem()) {
         return false;
     }
@@ -6001,21 +5533,21 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
     if (rTile.getEffect(Effect::EFFECT_CLASS_ON_BRIDGE) != NULL)
         return false;
 
-    // 적당한 종착지점을 찾는다.
-    // 전면부에서 적당한 지점..4개 검색
+    
+    
     Dir_t dir = calcDirection(x1, y1, x2, y2);
 
-    // g_FastMoveSearchX, Y로 찾으면 된다. by sigi. 2002.5.8
+    
     int* searchX = g_FastMoveSearchX[dir];
     int* searchY = g_FastMoveSearchY[dir];
 
-    // 빈 타일인지 확인.
+    
     int i = 0;
     for (i = 0; i < 4; i++) {
         int targetX = x2 + searchX[i], targetY = y2 + searchY[i];
         if (targetX >= 0 && targetX < m_Width && targetY >= 0 && targetY < m_Height &&
             !m_pTiles[targetX][targetY].isBlocked(pPC->getMoveMode()) && !m_pTiles[targetX][targetY].hasPortal() &&
-            // Sanctuary 가 걸려있지 않아야 한다. by Sequoia 2003.3.25
+            
             m_pTiles[targetX][targetY].getEffect(Effect::EFFECT_CLASS_SANCTUARY) == NULL &&
             m_pTiles[x1][y1].getEffect(Effect::EFFECT_CLASS_SANCTUARY) == NULL) {
             x2 = targetX;
@@ -6024,7 +5556,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
         }
     }
     if (i == 4) {
-        return false; // 빈타일을 못찾았다!
+        return false; 
     }
 
     Player* pPlayer = pPC->getPlayer();
@@ -6045,16 +5577,16 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
     pPlayer->sendStream(&outputStream);
 
-    // 퀘스트..
+    
     dynamic_cast<PlayerCreature*>(pPC)->getGQuestManager()->fastMove();
 
     //////////////////////////////////////////////////////////////
-    // move의 종류....
-    // 이에따라 GCDelete나 Add등을 보내줘야 할 수 도 있다.
+    
+    
 
-    // PC의 좌표 변경.
+    
     pPC->setXYDir(x2, y2, dir);
-    // 이전 타일에서 크리처를 삭제한다.
+    
 
     try {
         m_pTiles[x1][y1].deleteCreature(pPC->getObjectID());
@@ -6063,7 +5595,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
         throw;
     }
 
-    // 새 타일에 크리처를 추가한다.
+    
     m_pTiles[x2][y2].addCreature(pPC);
 
     try {
@@ -6079,8 +5611,8 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
 
     //--------------------------------------------------------------------------------
-    // GCAddSlayer/GCAddVampire 패킷을 만들어둔다.
-    // 현재의 정책에 의하면, GCAdd 패킷은 현재의 좌표를 바탕으로 한다.
+    
+    
     //--------------------------------------------------------------------------------
     Packet* pGCAddXXX = NULL;
 
@@ -6095,8 +5627,8 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
     } else if (pPC->getCreatureClass() == Creature::CREATURE_CLASS_VAMPIRE) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
 
-        // 음.. hide상태에서 움직일 수는 없지만..
-        // 미래를 대비.
+        
+        
         if (pPC->isFlag(Effect::EFFECT_CLASS_HIDE)) {
             GCAddBurrowingCreature* pGCABC = new GCAddBurrowingCreature();
             pGCABC->setObjectID(pVampire->getObjectID());
@@ -6123,13 +5655,13 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
     }
 
     //--------------------------------------------------------------------------------
-    // GCDeleteObject 패킷을 만들어둔다.
+    
     //--------------------------------------------------------------------------------
     GCDeleteObject gcDeleteObject;
     gcDeleteObject.setObjectID(pPC->getObjectID());
 
 
-    // 총 시야의 범위를 구한다.
+    
     ZoneCoord_t minX, maxX, minY, maxY;
     if (x1 < x2) {
         minX = max(0, x1 - maxViewportWidth);
@@ -6149,7 +5681,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
     //	Sight_t sight = pPC->getSight();
     //	VisionInfo* pVisionInfo = g_pVisionInfoManager->getVisionInfo(sight, pPC->getDir());
 
-    // ObservingEye 이펙트를 가져온다.
+    
     //	EffectObservingEye* pEffectObservingEye = NULL;
     //	if ( pPC->isFlag( Effect::EFFECT_CLASS_OBSERVING_EYE ) )
     //	{
@@ -6164,13 +5696,13 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
             forward_list<Object*>::const_iterator itr = objectList.begin();
 
-            // visionInfo 때문에..
-            // if - do~while()로 구조 변경 by sigi. 2002.5.8
+            
+            
             if (itr != objectList.end()) {
-                // 이전 좌표 P(x1,y1)에서 I(ix,iy)가 어떻게 보이는가?
+                
                 //				VisionState prevVisionState = pVisionInfo->getVisionState(x1,y1,ix,iy);
                 VisionState prevVisionState = VisionInfoManager::getVisionState(x1, y1, ix, iy);
-                // 현재 좌표 Q(x2,y2)에서 I(ix,iy)가 어떻게 보이는가?
+                
                 //				VisionState curVisionState = pVisionInfo->getVisionState(x2,y2,ix,iy);
                 VisionState curVisionState = VisionInfoManager::getVisionState(x2, y2, ix, iy);
 
@@ -6179,23 +5711,23 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                     //--------------------------------------------------------------------------------
                     //
-                    // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을 만들어서
-                    // owner 에게 전송한다.
+                    
+                    
                     //
                     // *NOTES*
                     //
-                    // 가장 출현 확률이 높은 객체 CLASS 가 case 앞부분에 나와야 한다.
+                    
                     //
                     //--------------------------------------------------------------------------------
                     switch ((*itr)->getObjectClass()) {
                     //--------------------------------------------------------------------------------
-                    // 타일 위에 크리처가 있을 경우
+                    
                     //--------------------------------------------------------------------------------
                     case Object::OBJECT_CLASS_CREATURE: {
                         Creature* pCreature = dynamic_cast<Creature*>(*itr);
                         Assert(pCreature != NULL);
 
-                        // 자기 자신의 정보는 받을 필요가 없다.
+                        
                         if (pCreature == pPC)
                             continue;
 
@@ -6205,8 +5737,8 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                             //--------------------------------------------------------------------------------
                             //
-                            // 이전 좌표에서는 이 몬스터를 볼 수 없었으나, 도착 좌표에서 이 몬스터를 보게 될
-                            // 경우 GCAddMonster 패킷을 전송한다.
+                            
+                            
                             //
                             //--------------------------------------------------------------------------------
                             if (prevVisionState == OUT_OF_SIGHT && curVisionState >= IN_SIGHT) {
@@ -6219,11 +5751,11 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             }
 
                             //--------------------------------------------------------------------------------
-                            // PC를 몬스터의 잠재적인 적으로 지정해준다.
+                            
                             //--------------------------------------------------------------------------------
                             VisionState vs = pMonster->getVisionState(x2, y2);
 
-                            // Aggressive 몬스터에게만 적으로 등록시켜준다.
+                            
                             if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE) {
                                 if (isPotentialEnemy(pMonster, pPC)) {
                                     pMonster->addPotentialEnemy(pPC);
@@ -6237,11 +5769,11 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                         //--------------------------------------------------------------------------------
                         case Creature::CREATURE_CLASS_SLAYER: {
                             //--------------------------------------------------------------------------------
-                            // 이전 좌표에서는 보이지 않다가, 이번 좌표에서 새로 보이게 된 크리처만
-                            // GCAddXXX 를 받아온다. 계속 보일 경우에는 받아오지 않는다.
+                            
+                            
                             //--------------------------------------------------------------------------------
                             if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
-                                // 보는 이가 스나이핑 상태라면 디텍트 되어 있어야 한다.
+                                
                                 //												if
                                 //(!pCreature->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE)
                                 //													||
@@ -6264,12 +5796,12 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                             //--------------------------------------------------------------------------------
                             //
-                            // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                            // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                            // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                            // 보내야만 한다.
+                            
+                            
+                            
+                            
                             //
-                            // 요약하면,
+                            
                             //
                             // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                             // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -6278,10 +5810,10 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             VisionState prevVS = pCreature->getVisionState(x1, y1);
                             VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                            // 보이지 않는 영역에서, 경계 영역을 거치지 않고 바로
-                            // 시야 내부 영역으로 들어온다는 것은 불가능하다.
+                            
+                            
 
-                            // canSee 로 대체. by bezz 2003.05.29
+                            
                             if (canSee(pCreature, pPC)) {
                                 if (prevVS == OUT_OF_SIGHT && currVS >= IN_SIGHT) {
                                     pCreature->getPlayer()->sendPacket(pGCAddXXX);
@@ -6298,9 +5830,9 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                         case Creature::CREATURE_CLASS_VAMPIRE: {
                             //--------------------------------------------------------------------------------
-                            // 이전 좌표에서는 보이지 않다가, 이번 좌표에서 새로 보이게 된 크리처만
-                            // GCAddXXX 를 받아온다. 이전에도 NEW_SIGHT 이고, 지금도 NEW_SIGHT 이면,
-                            // 새로 받아오지 않는다.
+                            
+                            
+                            
                             //--------------------------------------------------------------------------------
                             if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
                                 if (canSee(pPC, pCreature)) {
@@ -6329,7 +5861,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                                         makeGCAddVampire(&gcAddVampire, pVampire);
                                         pPlayer->sendPacket(&gcAddVampire);
                                         //													}
-                                        // pCreature는 invisibility상태..
+                                        
                                         //													else if (pPC->isVampire() ||
                                         // pPC->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY)
                                         //															|| (
@@ -6349,12 +5881,12 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             Assert(pCreature->getPlayer() != NULL);
 
                             //--------------------------------------------------------------------------------
-                            // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                            // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                            // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                            // 보내야만 한다.
+                            
+                            
+                            
+                            
                             //
-                            // 요약하면,
+                            
                             //
                             // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                             // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -6363,10 +5895,10 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             VisionState prevVS = pCreature->getVisionState(x1, y1);
                             VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                            // 상대는 뱀파이어이므로 나의 darkness상태는 관계없다.
-                            // Hide도 관계없다.
+                            
+                            
                             // *NOTE
-                            // 상대가 슬레이어라면 슬레이어가 스나이핑 상태인지를 체크 해야 한다.
+                            
                             //											if (!pPC->isSlayer() ||
                             //! pPC->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE))
                             if (canSee(pCreature, pPC)) {
@@ -6385,9 +5917,9 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                         case Creature::CREATURE_CLASS_OUSTERS: {
                             //--------------------------------------------------------------------------------
-                            // 이전 좌표에서는 보이지 않다가, 이번 좌표에서 새로 보이게 된 크리처만
-                            // GCAddXXX 를 받아온다. 이전에도 NEW_SIGHT 이고, 지금도 NEW_SIGHT 이면,
-                            // 새로 받아오지 않는다.
+                            
+                            
+                            
                             //--------------------------------------------------------------------------------
                             if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT &&
                                 canSee(pPC, pCreature)) {
@@ -6403,12 +5935,12 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             Assert(pCreature->getPlayer() != NULL);
 
                             //--------------------------------------------------------------------------------
-                            // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                            // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                            // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                            // 보내야만 한다.
+                            
+                            
+                            
+                            
                             //
-                            // 요약하면,
+                            
                             //
                             // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                             // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -6417,10 +5949,10 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                             VisionState prevVS = pCreature->getVisionState(x1, y1);
                             VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                            // 상대는 뱀파이어이므로 나의 darkness상태는 관계없다.
-                            // Hide도 관계없다.
+                            
+                            
                             // *NOTE
-                            // 상대가 슬레이어라면 슬레이어가 스나이핑 상태인지를 체크 해야 한다.
+                            
                             if (canSee(pCreature, pPC)) {
                                 if (prevVS == OUT_OF_SIGHT && currVS >= IN_SIGHT) {
                                     pCreature->getPlayer()->sendPacket(pGCAddXXX);
@@ -6440,8 +5972,8 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
                             //--------------------------------------------------------------------------------
                             //
-                            // 이전 좌표에서는 이 몬스터를 볼 수 없었으나, 도착 좌표에서 이 몬스터를 보게 될
-                            // 경우 GCAddMonster 패킷을 전송한다.
+                            
+                            
                             //
                             //--------------------------------------------------------------------------------
                             if (prevVisionState == OUT_OF_SIGHT && curVisionState >= IN_SIGHT) {
@@ -6461,7 +5993,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                     break;
 
                     //--------------------------------------------------------------------------------
-                    // 타일 위에 아이템이 있을 경우
+                    
                     //--------------------------------------------------------------------------------
                     case Object::OBJECT_CLASS_ITEM: {
                         if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
@@ -6521,7 +6053,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                     } break;
 
                     //--------------------------------------------------------------------------------
-                    // 타일 위에 이펙트가 있을 경우
+                    
                     //--------------------------------------------------------------------------------
                     case Object::OBJECT_CLASS_EFFECT: {
                         Effect* pEffect = dynamic_cast<Effect*>(*itr);
@@ -6551,7 +6083,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                                 ZoneCoord_t centerX = pEffectSanctuary->getCenterX();
                                 ZoneCoord_t centerY = pEffectSanctuary->getCenterY();
 
-                                // sanctuary는 중심좌표인 경우만 packet을 보낸다.
+                                
                                 if (centerX == ix && centerY == iy) {
                                     GCAddEffectToTile gcAddEffectToTile;
 
@@ -6563,7 +6095,7 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                                     pPlayer->sendPacket(&gcAddEffectToTile);
                                 }
                             }
-                            // Broadcasting Effect 체크 추가 by Sequoia 2003.3.31
+                            
                             else if (pEffect->isBroadcastingEffect()) {
                                 GCAddEffectToTile gcAddEffectToTile;
 
@@ -6578,14 +6110,14 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
                     } break;
 
                     //--------------------------------------------------------------------------------
-                    // 타일 위에 장애물이 있을 경우
+                    
                     //--------------------------------------------------------------------------------
                     case Object::OBJECT_CLASS_OBSTACLE: {
                         // darkness
                     } break;
 
                     //--------------------------------------------------------------------------------
-                    // 타일 위에 포탈이 있을 경우
+                    
                     //--------------------------------------------------------------------------------
                     case Object::OBJECT_CLASS_PORTAL: {
                         // darkness
@@ -6610,8 +6142,8 @@ bool Zone::moveFastPC(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t
 
 
 //////////////////////////////////////////////////////////////////////////////
-// P(x1,y1)에서 Q(x2,y2)로 빠른 이동한 크리처가 주변 영역에 존재하는 PC들에게
-// 브로드캐스트하는 메쏘드이다.
+
+
 // for Skill FlashSliding, ShadowWalk
 //////////////////////////////////////////////////////////////////////////////
 bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2,
@@ -6632,20 +6164,20 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 
     ZoneLevel_t ZoneLevel = getZoneLevel(x2, y2);
 
-    // 안전 지대에 못 들어간다.
+    
     if ((ZoneLevel & SLAYER_SAFE_ZONE) || (ZoneLevel & VAMPIRE_SAFE_ZONE) || (ZoneLevel & COMPLETE_SAFE_ZONE)) {
         return false;
     }
 
-    // 적당한 종착지점을 찾는다.
-    // 전면부에서 적당한 지점..4개 검색
+    
+    
     Dir_t dir = calcDirection(x1, y1, x2, y2);
 
-    // g_FastMoveSearchX, Y로 찾으면 된다. by sigi. 2002.5.8
+    
     int* searchX = g_FastMoveSearchX[dir];
     int* searchY = g_FastMoveSearchY[dir];
 
-    // 빈 타일인지 확인.
+    
     int i = 0;
     for (i = 0; i < 4; i++) {
         int targetX = x2 + searchX[i], targetY = y2 + searchY[i];
@@ -6657,10 +6189,10 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
         }
     }
     if (i == 4) {
-        return false; // 빈타일을 못찾았다!
+        return false; 
     }
 
-    // 일단 패킷을 만들어두고 밑에서 보낸다.
+    
     GCFastMove gcFastMove;
     gcFastMove.setObjectID(pMonster->getObjectID());
     gcFastMove.setXY(x1, y1, x2, y2);
@@ -6674,16 +6206,16 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 #endif
     gcFastMove.writeHeaderNBody(outputStream);
 
-    // 몬스터한테는 보낼 필요가 없다.
+    
     // pPlayer->sendPacket(&gcFastMove);
 
     //////////////////////////////////////////////////////////////
-    // move의 종류....
-    // 이에따라 GCDelete나 Add등을 보내줘야 할 수 도 있다.
+    
+    
 
-    // Monster 좌표 변경.
+    
     pMonster->setXYDir(x2, y2, dir);
-    // 이전 타일에서 크리처를 삭제한다.
+    
 
     try {
         m_pTiles[x1][y1].deleteCreature(pMonster->getObjectID());
@@ -6692,7 +6224,7 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
         throw;
     }
 
-    // 새 타일에 크리처를 추가한다.
+    
     m_pTiles[x2][y2].addCreature(pMonster);
 
     try {
@@ -6704,20 +6236,20 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 
 
     //--------------------------------------------------------------------------------
-    // GCAddSlayer/GCAddVampire 패킷을 만들어둔다.
-    // 현재의 정책에 의하면, GCAdd 패킷은 현재의 좌표를 바탕으로 한다.
+    
+    
     //--------------------------------------------------------------------------------
     Packet* pAddMonsterPacket = createMonsterAddPacket(pMonster, NULL);
 
     if (pAddMonsterPacket != NULL) {
         //--------------------------------------------------------------------------------
-        // GCDeleteObject 패킷을 만들어둔다.
+        
         //--------------------------------------------------------------------------------
         GCDeleteObject gcDeleteObject;
         gcDeleteObject.setObjectID(pMonster->getObjectID());
 
 
-        // 총 시야의 범위를 구한다.
+        
         ZoneCoord_t minX, maxX, minY, maxY;
         if (x1 < x2) {
             minX = max(0, x1 - maxViewportWidth);
@@ -6744,12 +6276,12 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 
                 forward_list<Object*>::const_iterator itr = objectList.begin();
 
-                // visionInfo 때문에..
-                // if - do~while()로 구조 변경 by sigi. 2002.5.8
+                
+                
                 if (itr != objectList.end()) {
-                    // 이전 좌표 P(x1,y1)에서 I(ix,iy)가 어떻게 보이는가?
+                    
                     // VisionState prevVisionState = pVisionInfo->getVisionState(x1,y1,ix,iy);
-                    // 현재 좌표 Q(x2,y2)에서 I(ix,iy)가 어떻게 보이는가?
+                    
                     // VisionState curVisionState = pVisionInfo->getVisionState(x2,y2,ix,iy);
 
                     do {
@@ -6757,23 +6289,23 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 
                         //--------------------------------------------------------------------------------
                         //
-                        // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을 만들어서
-                        // owner 에게 전송한다.
+                        
+                        
                         //
                         // *NOTES*
                         //
-                        // 가장 출현 확률이 높은 객체 CLASS 가 case 앞부분에 나와야 한다.
+                        
                         //
                         //--------------------------------------------------------------------------------
                         switch ((*itr)->getObjectClass()) {
                         //--------------------------------------------------------------------------------
-                        // 타일 위에 크리처가 있을 경우
+                        
                         //--------------------------------------------------------------------------------
                         case Object::OBJECT_CLASS_CREATURE: {
                             Creature* pCreature = dynamic_cast<Creature*>(*itr);
                             Assert(pCreature != NULL);
 
-                            // 자기 자신의 정보는 받을 필요가 없다.
+                            
                             if (pCreature == pMonster)
                                 continue;
 
@@ -6782,11 +6314,11 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 Monster* pOtherMonster = dynamic_cast<Monster*>(pCreature);
 
                                 //--------------------------------------------------------------------------------
-                                // PC를 몬스터의 잠재적인 적으로 지정해준다.
+                                
                                 //--------------------------------------------------------------------------------
                                 // VisionState vs = pMonster->getVisionState(x2,y2);
 
-                                // Aggressive 몬스터에게만 적으로 등록시켜준다.
+                                
                                 // if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE)
                                 {
                                     if (isPotentialEnemy(pOtherMonster, pMonster)) {
@@ -6805,7 +6337,7 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // Creature 가 ObservingEye 이펙트를 가지고 있다면 가져온다.
+                                
                                 //												EffectObservingEye* pEffectObservingEye
                                 //= NULL; 												if ( pCreature->isFlag(
                                 // Effect::EFFECT_CLASS_OBSERVING_EYE ) )
@@ -6817,7 +6349,7 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 // NULL );
                                 //												}
 
-                                // 상대에게 PC의 등장을 알리는 패킷.
+                                
                                 //												if
                                 //((!pMonster->isFlag(Effect::EFFECT_CLASS_HIDE) ||
                                 // pCreature->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN) ) //|| (
@@ -6849,12 +6381,12 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 Assert(pCreature->getPlayer() != NULL);
 
                                 //--------------------------------------------------------------------------------
-                                // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                                // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                                // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                                // 보내야만 한다.
+                                
+                                
+                                
+                                
                                 //
-                                // 요약하면,
+                                
                                 //
                                 // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                                 // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -6863,10 +6395,10 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // 상대는 뱀파이어이므로 나의 darkness상태는 관계없다.
-                                // Hide도 관계없다.
+                                
+                                
                                 // *NOTE
-                                // 상대가 슬레이어라면 슬레이어가 스나이핑 상태인지를 체크 해야 한다.
+                                
                                 if (prevVS == OUT_OF_SIGHT && currVS >= IN_SIGHT) {
                                     pCreature->getPlayer()->sendPacket(pAddMonsterPacket);
                                     // pCreature->getPlayer()->sendPacket(&gcFastMove);
@@ -6885,7 +6417,7 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // 상대에게 PC의 등장을 알리는 패킷.
+                                
                                 if (canSee(pCreature, pMonster)) {
                                     if (prevVS == OUT_OF_SIGHT && currVS >= IN_SIGHT) {
                                         pCreature->getPlayer()->sendPacket(pAddMonsterPacket);
@@ -6912,26 +6444,26 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
                         break;
 
                         //--------------------------------------------------------------------------------
-                        // 타일 위에 아이템이 있을 경우
+                        
                         //--------------------------------------------------------------------------------
                         case Object::OBJECT_CLASS_ITEM: {
                         } break;
 
                         //--------------------------------------------------------------------------------
-                        // 타일 위에 이펙트가 있을 경우
+                        
                         //--------------------------------------------------------------------------------
                         case Object::OBJECT_CLASS_EFFECT: {
                         } break;
 
                         //--------------------------------------------------------------------------------
-                        // 타일 위에 장애물이 있을 경우
+                        
                         //--------------------------------------------------------------------------------
                         case Object::OBJECT_CLASS_OBSTACLE: {
                             // darkness
                         } break;
 
                         //--------------------------------------------------------------------------------
-                        // 타일 위에 포탈이 있을 경우
+                        
                         //--------------------------------------------------------------------------------
                         case Object::OBJECT_CLASS_PORTAL: {
                             // darkness
@@ -6957,13 +6489,13 @@ bool Zone::moveFastMonster(Monster* pMonster, ZoneCoord_t x1, ZoneCoord_t y1, Zo
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// (x1,y1)에서 (x2,y2)로 PC가 이동할 경우, 그 PC가 자리가 바뀜에 따라
-// 새로 보게 되는 것들에 대한 정보를 보내줘야 하고, 그 PC를 새로 보게 되는
-// 다른 크리쳐들에게도 정보를 보내줘야 한다.
+
+
+
 //
-// bSendMove는 move packet을 보내는가에 대한 변수.
-// bKnockback은 현재의 움직임이 정상적인 움직임인가, 아니면 knockback에
-// 의한 강제적인 움직임인가를 나타내는 변수
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2,
                            bool bSendMove, bool bKnockback) {
@@ -6972,13 +6504,13 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
     __BEGIN_PROFILE_ZONE("Z_BC_MOVEPC");
 
     try {
-        // 이 메쏘드는 PC 를 대상으로 한다.
+        
         Assert(pPC->isPC());
 
         //////////////////////////////////////////////////////////////////////////////
-        // 자신의 이동을 나타내는 GCMove 패킷을 만들어둔다. 클라이언트에게 GCMove를
-        // 전송할때, (x,y)는 이전 좌표여야 하며, dir 은 바라보는(이동할) 방향이어야 한다.
-        // 그것이 현재의 정책!
+        
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         GCMove gcMove;
         if (bSendMove) {
@@ -7008,8 +6540,8 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
             gcKnockback.writeHeaderNBody(outputStream);
 
         //////////////////////////////////////////////////////////////////////////////
-        // 움직이는 PC를 새로 보게될 다른 PC들을 위해서 PC의 타입에 따라 GCAdd 패킷을
-        // 만들어둔다.  현재의 정책에 의하면, GCAdd 패킷은 현재의 좌표를 바탕으로 한다.
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         Packet* pGCAddXXX = NULL;
 
@@ -7024,7 +6556,7 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
         } else if (pPC->getCreatureClass() == Creature::CREATURE_CLASS_VAMPIRE) {
             Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
 
-            // 음.. hide상태에서 움직일 수는 없지만. 미래를 대비.
+            
             if (pPC->isFlag(Effect::EFFECT_CLASS_HIDE)) {
                 GCAddBurrowingCreature* pGCABC = new GCAddBurrowingCreature();
                 pGCABC->setObjectID(pVampire->getObjectID());
@@ -7050,9 +6582,9 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
         }
 
         //////////////////////////////////////////////////////////////////////////////
-        // PC가 움직이므로, 보고있던 놈들 중에서 이 PC를 못 보게
-        // 되는 놈들도 있다. 이들에게 보내줄 GCDeleteObject 패킷을
-        // 만들어둔다.
+        
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         GCDeleteObject gcDeleteObject;
         gcDeleteObject.setObjectID(pPC->getObjectID());
@@ -7060,11 +6592,11 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
         Player* pPlayer = pPC->getPlayer();
         Assert(pPlayer != NULL);
 
-        // loop 안에 있던걸 이쪽으로 뺐다. by sigi. 2002.5.8
+        
         //	Sight_t sight = pPC->getSight();
         //	VisionInfo* pVisionInfo = g_pVisionInfoManager->getVisionInfo(sight, pPC->getDir());
 
-        //    // ObservingEye 이펙트를 가져온다.
+        
         //	EffectObservingEye* pEffectObservingEye = NULL;
         //	if ( pPC->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE ) )
         //	{
@@ -7074,8 +6606,8 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
         //	}
 
         //////////////////////////////////////////////////////////////////////////////
-        // 시야 영역의 상하좌우 모두 + 1 씩 증가시킨다.
-        // 이유는 방향에 따른 ON_SIGHT 영역이 증가되기 때문이다.
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         for (ZoneCoord_t ix = max(0, x2 - maxViewportWidth - 1), endx = min(m_Width - 1, x2 + maxViewportWidth + 1);
              ix <= endx; ix++) {
@@ -7084,21 +6616,21 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                  iy <= endy; iy++) {
                 // if (pPC->isFlag(Effect::EFFECT_CLASS_DARKNESS)) sight = DARKNESS_SIGHT;
 
-                // 현재 타일 위에 있는 모든 오브젝트들에 대해 반복한다.
+                
                 const forward_list<Object*>& objectList = m_pTiles[ix][iy].getObjectList();
 
                 forward_list<Object*>::const_iterator itr = objectList.begin();
 
                 //
-                // object가 있는 경우만
-                // pVisionInfo->getVisionState()를 체크 하기 위해서
-                // if - do~while 을 사용했다. by sigi. 2002.5.8
+                
+                
+                
                 //
                 if (itr != objectList.end()) {
-                    // 이전 좌표 P(x1,y1)에서 I(ix,iy)가 어떻게 보이는가?
+                    
                     //				VisionState prevVisionState = pVisionInfo->getVisionState(x1,y1,ix,iy);
                     VisionState prevVisionState = VisionInfoManager::getVisionState(x1, y1, ix, iy);
-                    // 현재 좌표 Q(x2,y2)에서 I(ix,iy)가 어떻게 보이는가?
+                    
                     //				VisionState curVisionState = pVisionInfo->getVisionState(x2,y2,ix,iy);
                     VisionState curVisionState = VisionInfoManager::getVisionState(x2, y2, ix, iy);
 
@@ -7110,41 +6642,41 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                         Object::ObjectClass OClass = pDebugObject->getObjectClass();
 
                         ////////////////////////////////////////////////////////////
-                        // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을
-                        // 만들어서 owner 에게 전송한다.
+                        
+                        
                         ////////////////////////////////////////////////////////////
 
                         ////////////////////////////////////////////////////////////
-                        // 타일 위에 크리처가 있을 경우
+                        
                         ////////////////////////////////////////////////////////////
                         if (OClass == Object::OBJECT_CLASS_CREATURE) {
                             Creature* pCreature = dynamic_cast<Creature*>(*itr);
                             Assert(pCreature != NULL);
 
                             if (pCreature == pPC) {
-                                // 넉백일 경우, 자신의 의지에 의해 움직이는 것이 아니라,
-                                // 타인에 의해 움직이는 것이므로 보내줘야 한다.
+                                
+                                
                                 if (bKnockback) {
                                     // pPC->getPlayer()->sendPacket(&gcKnockback);
                                     pPC->getPlayer()->sendStream(&outputStream);
-                                    // 넉백을 보내줬으면 continue한다.
+                                    
                                 }
 
-                                // 자기 자신의 이동 정보는 받을 필요가 없다.
+                                
                                 continue;
                             }
 
                             Creature::CreatureClass CClass = pCreature->getCreatureClass();
 
-                            // Monster > Slayer > Vampire > NPC 순이라고 판단해서
-                            // if 순서를 바꿨다. 길드 건물 같은 곳은 좀 다르겠지만?
+                            
+                            
                             // by sigi. 2002.5.8
                             if (CClass == Creature::CREATURE_CLASS_MONSTER) {
                                 Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
                                 //--------------------------------------------------------------------------------
-                                // 이전 좌표에서는 이 몬스터를 볼 수 없었으나, 도착 좌표에서 이 몬스터를 보게 될
-                                // 경우 GCAddMonster 패킷을 전송한다.
+                                
+                                
                                 //--------------------------------------------------------------------------------
                                 if (prevVisionState == OUT_OF_SIGHT && curVisionState >= IN_SIGHT) {
                                     // by sigi
@@ -7157,23 +6689,23 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                     }
                                 }
 
-                                // PC를 몬스터의 잠재적인 적으로 지정해준다.
+                                
                                 VisionState vs = pMonster->getVisionState(x2, y2);
 
-                                // Aggressive 몬스터에게만 적으로 등록시켜준다.
+                                
                                 if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE) {
                                     if (isPotentialEnemy(pMonster, pPC)) {
                                         pMonster->addPotentialEnemy(pPC);
                                     }
                                 }
                             } else if (CClass == Creature::CREATURE_CLASS_SLAYER) {
-                                // 현재 타일이 원래는 안 보이다가 이제 보이는 경우에,
-                                // 이 타일에 크리쳐가 서 있다면...
-                                // 움직이고 있는 PC에게 이 타일에 서 있는 놈의 정보를 보내주어야 한다.
+                                
+                                
+                                
                                 if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
-                                    // 현재 움직이는 크리쳐에게 스나이핑 상태가 걸려있지 않거나,
-                                    // 걸려있다면 디텍트 인비저빌러티가 걸려있어야 볼 수 있다.
-                                    // canSee 로 대체. by bezz 2003.05.29
+                                    
+                                    
+                                    
                                     //								if ( canSee( pPC, pCreature, pEffectObservingEye ) )
                                     if (canSee(pPC, pCreature)) {
                                         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -7189,12 +6721,12 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 Assert(pCreature->getPlayer() != NULL);
 
                                 //////////////////////////////////////////////////////////////////////////////
-                                // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                                // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                                // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                                // 보내야만 한다.
+                                
+                                
+                                
+                                
                                 //
-                                // 요약하면,
+                                
                                 //
                                 // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                                 // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -7202,9 +6734,9 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // 보이지 않는 영역에서, 경계 영역을 거치지 않고 바로
-                                // 시야 내부 영역으로 들어온다는 것은 불가능하다.
-                                // 이거 이제 쌩~ IN_SIGHT밖에 없다.
+                                
+                                
+                                
                                 //							Assert(prevVS != OUT_OF_SIGHT || currVS != IN_SIGHT);
 
                                 if (canSee(pCreature, pPC)) {
@@ -7222,9 +6754,9 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 }
                             } else if (CClass == Creature::CREATURE_CLASS_VAMPIRE) {
                                 //////////////////////////////////////////////////////////////////////////////
-                                // 이전 좌표에서는 보이지 않다가, 이번 좌표에서 새로 보이게 된 크리처만
-                                // GCAddXXX 를 받아온다. 이전에도 NEW_SIGHT 이고, 지금도 NEW_SIGHT 이면,
-                                // 새로 받아오지 않는다.
+                                
+                                
+                                
                                 //////////////////////////////////////////////////////////////////////////////
                                 if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
                                     if (canSee(pPC, pCreature)) {
@@ -7272,12 +6804,12 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 Assert(pCreature->getPlayer() != NULL);
 
                                 //////////////////////////////////////////////////////////////////////////////
-                                // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                                // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                                // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                                // 보내야만 한다.
+                                
+                                
+                                
+                                
                                 //
-                                // 요약하면,
+                                
                                 //
                                 // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                                 // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -7285,13 +6817,13 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // 보이지 않는 영역에서, 경계 영역을 거치지 않고 바로
-                                // 시야 내부 영역으로 들어온다는 것은 불가능하다.
-                                // 이거 이제 쌩~ IN_SIGHT밖에 없다.
+                                
+                                
+                                
                                 //							Assert(prevVS != OUT_OF_SIGHT || currVS != IN_SIGHT);
 
-                                // 상대는 뱀파이어이므로 나의 darkness상태는 관계없다.
-                                // Hide도 관계없다.
+                                
+                                
                                 //							if (!pPC->isFlag(Effect::EFFECT_CLASS_GHOST)
                                 //								&& (!pPC->isSlayer()
                                 //									|| !pPC->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE))
@@ -7311,9 +6843,9 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
 
                             else if (CClass == Creature::CREATURE_CLASS_OUSTERS) {
                                 //////////////////////////////////////////////////////////////////////////////
-                                // 이전 좌표에서는 보이지 않다가, 이번 좌표에서 새로 보이게 된 크리처만
-                                // GCAddXXX 를 받아온다. 이전에도 NEW_SIGHT 이고, 지금도 NEW_SIGHT 이면,
-                                // 새로 받아오지 않는다.
+                                
+                                
+                                
                                 //////////////////////////////////////////////////////////////////////////////
                                 if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
                                     //								if (!pCreature->isFlag(Effect::EFFECT_CLASS_GHOST) )
@@ -7331,12 +6863,12 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 Assert(pCreature->getPlayer() != NULL);
 
                                 //////////////////////////////////////////////////////////////////////////////
-                                // Q(x2,y2)가 이 크리처의 시야 사각형의 경계에 위치하면서, P(x1,y1)은 사각형의 외부,
-                                // 즉 보이지 않는 경우에만 GCAddXXX 패킷을 전송한다. 이렇게 하지 않으면, PC
-                                // 크리처가 pCreature의 시야 경계에서 계속 움직이게 되면 계속 서버는 GCAddXXX 패킷을
-                                // 보내야만 한다.
+                                
+                                
+                                
+                                
                                 //
-                                // 요약하면,
+                                
                                 //
                                 // OUT_OF_SIGHT -> ON_SIGHT/NEW_SIGHT : GCAddXXX
                                 // IN_SIGHT/ON_SIGHT/NEW_SIGHT -> IN_SIGHT/ON_SIGHT/NEW_SIGHT : GCMove
@@ -7344,8 +6876,8 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                 VisionState prevVS = pCreature->getVisionState(x1, y1);
                                 VisionState currVS = pCreature->getVisionState(x2, y2);
 
-                                // 보이지 않는 영역에서, 경계 영역을 거치지 않고 바로
-                                // 시야 내부 영역으로 들어온다는 것은 불가능하다.
+                                
+                                
                                 //							Assert(prevVS != OUT_OF_SIGHT || currVS != IN_SIGHT);
 
                                 if (canSee(pCreature, pPC)) {
@@ -7366,8 +6898,8 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
 
                                 //--------------------------------------------------------------------------------
                                 //
-                                // 이전 좌표에서는 이 몬스터를 볼 수 없었으나, 도착 좌표에서 이 몬스터를 보게 될
-                                // 경우 GCAddMonster 패킷을 전송한다.
+                                
+                                
                                 //
                                 //--------------------------------------------------------------------------------
                                 if (prevVisionState == OUT_OF_SIGHT && curVisionState >= IN_SIGHT) {
@@ -7380,7 +6912,7 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                             }
                         }
                         ////////////////////////////////////////////////////////////
-                        // 타일 위에 아이템이 있을 경우
+                        
                         ////////////////////////////////////////////////////////////
                         else if (OClass == Object::OBJECT_CLASS_ITEM) {
                             if (curVisionState >= IN_SIGHT && prevVisionState == OUT_OF_SIGHT) {
@@ -7439,12 +6971,12 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                             }
                         }
                         ////////////////////////////////////////////////////////////
-                        // 타일 위에 이펙트가 있을 경우
+                        
                         ////////////////////////////////////////////////////////////
                         else if (OClass == Object::OBJECT_CLASS_EFFECT) {
                             Effect* pEffect = dynamic_cast<Effect*>(*itr);
 
-                            // broadcasting Effect 인지 체크 추가 2003.3.31 by Sequoia
+                            
                             if (pEffect->isBroadcastingEffect() && curVisionState >= IN_SIGHT &&
                                 prevVisionState == OUT_OF_SIGHT) {
                                 if (pEffect->getEffectClass() == Effect::EFFECT_CLASS_VAMPIRE_PORTAL) {
@@ -7472,7 +7004,7 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                                     ZoneCoord_t centerX = pEffectSanctuary->getCenterX();
                                     ZoneCoord_t centerY = pEffectSanctuary->getCenterY();
 
-                                    // sanctuary는 중심좌표인 경우만 packet을 보낸다.
+                                    
                                     if (centerX == ix && centerY == iy) {
                                         GCAddEffectToTile gcAddEffectToTile;
 
@@ -7496,12 +7028,12 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                             }
                         }
                         ////////////////////////////////////////////////////////////
-                        // 타일 위에 장애물이 있을 경우
+                        
                         ////////////////////////////////////////////////////////////
                         else if (OClass == Object::OBJECT_CLASS_OBSTACLE) {
                         }
                         ////////////////////////////////////////////////////////////
-                        // 타일 위에 포탈이 있을 경우
+                        
                         ////////////////////////////////////////////////////////////
                         else if (OClass == Object::OBJECT_CLASS_PORTAL) {
                             // darkness
@@ -7510,9 +7042,9 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
                         }
 
                     } while (++itr != objectList.end()); // by sigi. 2002.5.8
-                } // for 오브젝트들에 대한 반복
-            } // for Y 좌표에 대한 반복
-        } // for X 좌표에 대한 반복
+                } 
+            } 
+        } 
 
         SAFE_DELETE(pGCAddXXX);
 
@@ -7530,10 +7062,10 @@ void Zone::movePCBroadcast(Creature* pPC, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCo
 //////////////////////////////////////////////////////////////////////////////
 // moveCreatureBroadcast
 //
-// PC가 아닌 크리처(NPC,몬스터)가 P(x1,y1)에서 Q(x2,y2)로 이동했을 때,
-// 주변 영역에 존재하는 PC들에게 브로드캐스트하는 메쏘드이다.
+
+
 //
-// 이 메쏘드를 호출하기 전에, 3 가지 패킷은 만들어둬야만 한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2,
                                  bool bSendMove, bool bKnockback)
@@ -7550,7 +7082,7 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
         Assert(pCreature != NULL);
         Assert(pCreature->isNPC() || pCreature->isMonster());
 
-        // 현재의 정책에 의하면, GCMove 패킷은 이전 좌표와 현재 방향을 전송하게 되어있다.
+        
         GCMove gcMove;
         if (bSendMove) {
             gcMove.setObjectID(pCreature->getObjectID());
@@ -7578,7 +7110,7 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
         else
             gcKnockback.writeHeaderNBody(outputStream);
 
-        // GCAddNPC/GCAddMonster 패킷을 만들어둔다.
+        
         Packet* pGCAddXXX = NULL;
 
         bool isMonster = !pCreature->isNPC();
@@ -7594,21 +7126,21 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
         {
             pMonster = dynamic_cast<Monster*>(pCreature);
 
-            // 일단 다 볼 수 있는 상태(NULL)로 설정해서 packet을 생성한다. by sigi
+            
             pGCAddXXX = createMonsterAddPacket(pMonster, NULL);
 
-            // monster의 상태를 기억해둔다.
+            
             //		isMonsterHide = pMonster->isFlag(Effect::EFFECT_CLASS_HIDE);
             //		isMonsterInvisibility = pMonster->isFlag(Effect::EFFECT_CLASS_INVISIBILITY);
         }
 
-        // 시야에서 벗어날 때, GCDeleteObject 패킷을 보낸다.
+        
         GCDeleteObject gcDeleteObject;
         gcDeleteObject.setObjectID(pCreature->getObjectID());
 
         //////////////////////////////////////////////////////////////////////////////
-        // 시야 영역의 상하좌우 모두 + 1 씩 증가시킨다.
-        // 이유는 방향에 따른 ON_SIGHT 영역이 증가되기 때문이다.
+        
+        
         //////////////////////////////////////////////////////////////////////////////
         for (ZoneCoord_t ix = max(0, x2 - maxViewportWidth - 1), endx = min(m_Width - 1, x2 + maxViewportWidth + 1);
              ix <= endx; ix++) {
@@ -7625,7 +7157,7 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
 
                     Assert(pPC != NULL);
 
-                    // PC 일 경우에만 GCMove, GCAddMonster 패킷을 보내준다. 몬스터한테는 보낼 필요가 없쥐~
+                    
                     if (pPC->isPC()) {
                         Assert(pPC->getPlayer() != NULL);
 
@@ -7636,12 +7168,12 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
                         VisionState prevVS = pPC->getVisionState(x1, y1);
                         VisionState currVS = pPC->getVisionState(x2, y2);
 
-                        // 보이지 않는 영역에서, 경계 영역을 거치지 않고 바로
-                        // 시야 내부 영역으로 들어온다는 것은 불가능하다.
-                        // 이제 쌩~ IN_SIGHT밖에 없다.
+                        
+                        
+                        
                         //					Assert(prevVS != OUT_OF_SIGHT || currVS != IN_SIGHT);
 
-                        // ObservingEye 이펙트를 가져온다.
+                        
                         //					EffectObservingEye* pEffectObservingEye = NULL;
                         //					if ( pPC->isFlag( Effect::EFFECT_CLASS_OBSERVING_EYE ) )
                         //					{
@@ -7673,10 +7205,10 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
                         }
 
                         //--------------------------------------------------------------------------------
-                        // 브로드캐스트를 했으면, 이제 이 PC를 잠재적인 적으로 등록해버리자.
+                        
                         //--------------------------------------------------------------------------------
                         if (pCreature->isMonster()) {
-                            // 저 위에서 이미 dynamic_cast 된 상태이다.
+                            
                             VisionState vs = pMonster->getVisionState(ix, iy);
                             if (vs >= IN_SIGHT && pMonster->getAlignment() == ALIGNMENT_AGGRESSIVE) {
                                 if (isPotentialEnemy(pMonster, pPC)) {
@@ -7693,14 +7225,14 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
 
         } // for
 
-        // 생성한 패킷을 삭제한다.
+        
         SAFE_DELETE(pGCAddXXX);
 
         // by sigi. 2002.12.15
     } catch (Throwable& t) {
         filelog("moveCreatureBroadcastError.log", "%s", t.toString().c_str());
 
-        // 다시 던져서 죽이자 - -;
+        
         throw;
     }
 
@@ -7710,7 +7242,7 @@ void Zone::moveCreatureBroadcast(Creature* pCreature, ZoneCoord_t x1, ZoneCoord_
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 일정 주기마다 해줘야 하는 기능들을 여기에 추가하도록 한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void Zone::heartbeat()
 
@@ -7723,13 +7255,13 @@ void Zone::heartbeat()
 
         beginProfileEx("Z_PCQUEUE");
 
-        // PCQueue의 PC를 존에 추가한다.
+        
         while (!m_PCListQueue.empty()) {
             Creature* pCreature = m_PCListQueue.front();
             Assert(pCreature != NULL);
             Assert(pCreature->getZone() == this);
 
-            // 존에 추가하고, 주변 PC들에게 브로드캐스트한다.
+            
             addPC(pCreature, pCreature->getX(), pCreature->getY(), DOWN);
 
             m_PCListQueue.pop_front();
@@ -7741,12 +7273,12 @@ void Zone::heartbeat()
         m_pPCManager->processCreatures(); // process all PC
         endProfileEx("Z_PC");
 
-        // 마스터 레어 매니저가 있다면 마스터 레어이다
+        
         // by sigi. 2002.9.2
         if (m_pMasterLairManager != NULL)
             m_pMasterLairManager->heartbeat(); // process master lair
 
-        // WarScheduler가 있다면 성이지..
+        
         // by sigi. 2003.1.24
         if (m_pWarScheduler != NULL && g_pVariableManager->isWarActive()) {
             Work* pWork = m_pWarScheduler->heartbeat();
@@ -7761,7 +7293,7 @@ void Zone::heartbeat()
 
         if (m_pLevelWarManager != NULL && g_pVariableManager->isActiveLevelWar()) {
             m_pLevelWarManager->heartbeat();
-            // LevelWar Zone 에는 시간 별로 유료 무료 사용자 출입제한이 이상해서 해줘야 함.
+            
             m_pLevelWarManager->freeUserTimeCheck();
         }
 
@@ -7769,12 +7301,12 @@ void Zone::heartbeat()
         //		{
         //		}
 
-        // player가 있어야 monster를 heartbeat한다.
-        // 즉, player가 없는 zone은 monster가 가만히 있는다.
-        // monster의 EffectManager가 안 돌아가므로 문제가 될 수도 있지만,
-        // 크게 문제가 없다고 보고.. -_-; .. by sigi. 2002.5.6
+        
+        
+        
+        
         // if ( m_ZoneID >= 1121 && m_ZoneID <= 1124)
-        //	m_pCombatMonsterManager->processCreatures(); // 전투용 몬스터의 AI를 처리하는 부분, 김경석
+        
         // else
         //{
         if (getPCCount() > 0 || (isDynamicZone() && (m_pDynamicZone->getStatus() == DYNAMIC_ZONE_STATUS_RUNNING))) {
@@ -7791,11 +7323,11 @@ void Zone::heartbeat()
         endProfileEx("Z_NPC");
 
         beginProfileEx("Z_ESCH");
-        // 먼저 이펙트 스케쥴을 먼저 실행시킨다.
+        
         m_pEffectScheduleManager->heartbeat();
         endProfileEx("Z_ESCH");
 
-        // Item의 EffectManager에서 getCurrentTime을 호출하지 않게 하기 위해서.
+        
         // by sigi. 2002.5.8
         Timeval currentTime;
         getCurrentTime(currentTime);
@@ -7808,7 +7340,7 @@ void Zone::heartbeat()
         m_pLockedEffectManager->heartbeat(currentTime);
         __LEAVE_CRITICAL_SECTION(m_MutexEffect)
 
-        // Debug: 统计 zone 的 effects
+        
         static time_t lastZoneLogTime = 0;
         size_t zoneEffects = m_pEffectManager->getSize();
 
@@ -7852,17 +7384,17 @@ void Zone::heartbeat()
         Timeval currentTime;
         getCurrentTime(currentTime);
 
-        // time band 를 갱신한다.
+        
         if (m_UpdateTimebandTime < currentTime) {
             if (!m_bTimeStop) {
                 m_Timeband = g_pTimeManager->getTimeband();
             }
 
-            // 5초마다 timeband 를 갱신한다. 게임 시간으로 2분
+            
             m_UpdateTimebandTime.tv_sec += 5;
         }
 
-        // DynamicZone 일 경우
+        
         if (isDynamicZone())
             m_pDynamicZone->heartbeat();
     } catch (Throwable& t) {
@@ -7878,19 +7410,19 @@ void Zone::heartbeat()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// PCManager, MonsterManager, NPCManager 에서 지정된 OID 를 가진 크리처를
-// 찾아서 리턴한다. 없을 경우 NoSuchElementException 을 던진다.
+
+
 //
-// 이 메쏘드는 찾고자 하는 크리처의 타입(PC,NPC,Monster)를 모를 경우에
-// 사용한다. 웬만하면, 타입을 알아내서 getCreature(Creature::CreatureClass,ObjectID_t)
-// 메쏘드를 사용하도록 한다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 Creature* Zone::getCreature(ObjectID_t objectID) const
 // NoSuchElementException, Error)
 {
     __BEGIN_TRY
 
-    // NoSuchElementException을 안 쓰는 버전 by sigi. 2002.5.2
+    
     Creature* pCreature = NULL;
 
     pCreature = m_pMonsterManager->getCreature(objectID);
@@ -7957,19 +7489,19 @@ Creature* Zone::getCreature(ObjectID_t objectID) const
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// PCManager, MonsterManager, NPCManager 에서 지정된 Name을 가진 크리처를 찾아서
-// 리턴한다. 없을 경우 NoSuchElementException 을 던진다.
+
+
 //
-// 이 메쏘드는 찾고자 하는 크리처의 타입(PC,NPC,Monster)를 모를 경우에 사용한다.
-// 웬만하면, 타입을 알아내서 getCreature(Creature::CreatureClass,Name)
-// 메쏘드를 사용하도록 한다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 Creature* Zone::getCreature(const string& Name) const
 // NoSuchElementException, Error)
 {
     __BEGIN_TRY
 
-    // NoSuchElementException을 안 쓰는 버전 by sigi. 2002.5.2
+    
     Creature* pCreature = NULL;
 
     pCreature = m_pPCManager->getCreature(Name);
@@ -8038,7 +7570,7 @@ Creature* Zone::getCreature(const string& Name) const
 
 //--------------------------------------------------------------------------------
 //
-// 존에서 특정 OID를 가진 특정 크리처 타입을 가진 크리처를 찾아서 리턴한다.
+
 //
 //--------------------------------------------------------------------------------
 Creature* Zone::getCreature(Creature::CreatureClass creatureClass, ObjectID_t objectID) const
@@ -8113,7 +7645,7 @@ string Zone::toString() const
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// pTargetCreture를 볼 수 있는 자(player)들의 list를 돌려준다.
+
 // **********************************
 //////////////////////////////////////////////////////////////////////////////
 list<Creature*> Zone::getWatcherList(ZoneCoord_t x, ZoneCoord_t y, Creature* pTargetCreature)
@@ -8129,8 +7661,8 @@ list<Creature*> Zone::getWatcherList(ZoneCoord_t x, ZoneCoord_t y, Creature* pTa
         return cList;
 
     ////////////////////////////////////////////////////////////
-    // 시야 영역의 상하좌우 모두 + 1 씩 증가시킨다.
-    // 이유는 방향에 따른 ON_SIGHT 영역이 증가되기 때문이다.
+    
+    
     ////////////////////////////////////////////////////////////
     for (ZoneCoord_t ix = max(0, x - maxViewportWidth - 1), endx = min(m_Width - 1, x + maxViewportWidth + 1);
          ix <= endx; ix++) {
@@ -8150,7 +7682,7 @@ list<Creature*> Zone::getWatcherList(ZoneCoord_t x, ZoneCoord_t y, Creature* pTa
                 if (pCreature->isPC()) {
                     Assert(pCreature->getPlayer() != NULL);
 
-                    // 자기 자신의 정보는 받을 필요가 없다.
+                    
                     if (pTargetCreature == pCreature || pCreature->isFlag(Effect::EFFECT_CLASS_GHOST))
                         continue;
 
@@ -8191,7 +7723,7 @@ void Zone::deleteFromItemList(ObjectID_t id) {
 
     if (itr == m_Items.end())
     // throw NoSuchElementException();
-    //  NoSuch제거. by sigi. 2002.5.3
+    
     {
         return;
     }
@@ -8209,19 +7741,19 @@ void Zone::addVampirePortal(ZoneCoord_t cx, ZoneCoord_t cy, Vampire* pVampire, c
     Assert(m_OuterRect.ptInRect(cx, cy));
     Assert(pVampire != NULL);
 
-    // 뱀파이어의 능력에 따라 들어갈 수 있는 인원과, 지속 시간을 계산한다.
-    // 존에 바로 추가되는 것이 아니므로, 약간의 딜레이를 추가해준다.
-    Duration_t duration = (60 + (pVampire->getINT(ATTR_CURRENT) - 20) / 3) * 10 + 20; // 0.1초 단위기 때문에...
+    
+    
+    Duration_t duration = (60 + (pVampire->getINT(ATTR_CURRENT) - 20) / 3) * 10 + 20; 
     int count = 3 + (pVampire->getINT(ATTR_CURRENT) - 20) / 10;
 
-    // 일단 이펙트 객체 자체를 생성한다.
+    
     EffectVampirePortal* pEffectVampirePortal = new EffectVampirePortal(this, cx, cy);
     pEffectVampirePortal->setDeadline(duration);
     pEffectVampirePortal->setOwnerID(pVampire->getName());
     pEffectVampirePortal->setZoneCoord(ZoneCoord.id, ZoneCoord.x, ZoneCoord.y);
     pEffectVampirePortal->setCount(count);
 
-    // 이펙트 스케쥴을 생성해서 더한다.
+    
     EffectSchedule* pEffectSchedule = new EffectSchedule;
     pEffectSchedule->setEffect(pEffectVampirePortal);
     pEffectSchedule->addWork(WORKCODE_ADD_VAMPIRE_PORTAL, NULL);
@@ -8233,8 +7765,8 @@ void Zone::addVampirePortal(ZoneCoord_t cx, ZoneCoord_t cy, Vampire* pVampire, c
 //-------------------------------------------------------------
 // deleteMotorcycle( x, y, pMotorcycle )
 //-------------------------------------------------------------
-// 바로 지우지 않고.. zone의 heartbeat할때 지우도록
-// EffectDecayItem을 붙여둔다.
+
+
 //-------------------------------------------------------------
 void Zone::deleteMotorcycle(ZoneCoord_t cx, ZoneCoord_t cy, Motorcycle* pMotorcycle)
 
@@ -8245,7 +7777,7 @@ void Zone::deleteMotorcycle(ZoneCoord_t cx, ZoneCoord_t cy, Motorcycle* pMotorcy
     Assert(pMotorcycle != NULL);
 
     EffectDecayItem* pEffectDecayItem = new EffectDecayItem(this, cx, cy, (Item*)pMotorcycle, 0,
-                                                            false); // DB에서는 지우지 않는다.
+                                                            false); 
     pEffectDecayItem->setNextTime(999999);
     m_ObjectRegistry.registerObject(pEffectDecayItem);
     addEffect_LOCKING(pEffectDecayItem);
@@ -8253,33 +7785,13 @@ void Zone::deleteMotorcycle(ZoneCoord_t cx, ZoneCoord_t cy, Motorcycle* pMotorcy
     __END_CATCH
 }
 
-/*
-void Zone::decayMotorcycle(ZoneCoord_t cx, ZoneCoord_t cy, Motorcycle* pMotorcycle, Slayer* pSlayer)
-
-{
-    __BEGIN_TRY
-
-    cout << "Zone::decayMotorcycle	" << endl;
-
-    Assert(m_OuterRect.ptInRect(cx, cy));
-    Assert(pMotorcycle != NULL);
-
-    // 존에서 오토바이를 지우는 이펙트를 추가한다.
-    EffectDecayMotorcycle* pEffectDecayMotorcycle = new EffectDecayMotorcycle(this, cx, cy, (Item*)pMotorcycle, 0,
-                                                                  false); // DB에서는 지우지 않는다.
-    pEffectDecayMotorcycle->setNextTime(999999);
-    m_ObjectRegistry.registerObject(pEffectDecayMotorcycle);
-    addEffect_LOCKING(pEffectDecayMotorcycle);
-
-    __END_CATCH
-}
-*/
+ 
 
 //-------------------------------------------------------------
 // transportItemToCorpse
 //-------------------------------------------------------------
-// 현재 존의 pItem을 pZone의 (cx, cy)로 옮긴다.
-// EffectTransportItem을 붙여서 옮긴다.
+
+
 //-------------------------------------------------------------
 void Zone::transportItemToCorpse(Item* pItem, Zone* pTargetZone, ObjectID_t corpseObjectID)
 
@@ -8291,19 +7803,19 @@ void Zone::transportItemToCorpse(Item* pItem, Zone* pTargetZone, ObjectID_t corp
 
     if (pTargetZone->getZoneGroup() == this->getZoneGroup()) {
         // cout << "same zone - to corpse" << endl;
-        //  같은 zone이면 바로 옮긴다.
+        
         // deleteFromItemList(pItem->getObjectID());
 
         Item* pCorpseItem = pTargetZone->getItem(corpseObjectID);
 
         if (pCorpseItem == NULL) {
             StringStream msg;
-            msg << "[" << (int)m_ZoneID << "] 시체가 없네: corpseObjectID=" << (int)corpseObjectID;
+            msg << "[" << (int)m_ZoneID << "]  : corpseObjectID=" << (int)corpseObjectID;
 
             throw Error(msg.toString());
         } else if (pCorpseItem->getItemClass() != Item::ITEM_CLASS_CORPSE) {
             StringStream msg;
-            msg << "[" << (int)m_ZoneID << "] 시체가 아니네: corpseObjectID=" << (int)corpseObjectID
+            msg << "[" << (int)m_ZoneID << "]  : corpseObjectID=" << (int)corpseObjectID
                 << ", itemClass=" << (int)pCorpseItem->getItemClass()
                 << ", itemType=" << (int)pCorpseItem->getItemType();
 
@@ -8329,8 +7841,8 @@ void Zone::transportItemToCorpse(Item* pItem, Zone* pTargetZone, ObjectID_t corp
 //-------------------------------------------------------------
 // transportItem
 //-------------------------------------------------------------
-// 현재 존의 pItem을 pZone의 (cx, cy)로 옮긴다.
-// EffectTransportItem을 붙여서 옮긴다.
+
+
 //-------------------------------------------------------------
 void Zone::transportItem(ZoneCoord_t x, ZoneCoord_t y, Item* pItem, Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy)
 
@@ -8339,17 +7851,17 @@ void Zone::transportItem(ZoneCoord_t x, ZoneCoord_t y, Item* pItem, Zone* pZone,
 
     // cout << "transportItem : " << (int)pZone->getZoneID() << ", (" << cx << ", " << cy << ")" << endl;
 
-    // 이거 잘못해놔가 다운돼다. ㅜ.ㅜ; by sigi
+    
     Assert(m_OuterRect.ptInRect(x, y));
     Assert(pItem != NULL);
 
     if (pZone->getZoneGroup() == this->getZoneGroup()) {
         // cout << "same zone" << endl;
-        //  같은 zone group 이면 바로 옮긴다.
+        
         deleteFromItemList(pItem->getObjectID());
         getTile(x, y).deleteItem();
 
-        // 아이템이 사라졌다는 패킷을 날린다.
+        
         GCDeleteObject gcDeleteObject;
         gcDeleteObject.setObjectID(pItem->getObjectID());
 
@@ -8371,8 +7883,8 @@ void Zone::transportItem(ZoneCoord_t x, ZoneCoord_t y, Item* pItem, Zone* pZone,
 //-------------------------------------------------------------
 // add Item To Corpse Delayed
 //-------------------------------------------------------------
-// 아이템을 추가하는데.. 다른 thread에서 해도 된다.
-// 다른 heartbeat에서 추가된다.
+
+
 //-------------------------------------------------------------
 void Zone::addItemToCorpseDelayed(Item* pItem, ObjectID_t corpseItemID)
 
@@ -8392,8 +7904,8 @@ void Zone::addItemToCorpseDelayed(Item* pItem, ObjectID_t corpseItemID)
 //-------------------------------------------------------------
 // add Item Delayed
 //-------------------------------------------------------------
-// 아이템을 추가하는데.. 다른 thread에서 해도 된다.
-// 다른 heartbeat에서 추가된다.
+
+
 //-------------------------------------------------------------
 void Zone::addItemDelayed(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCreature)
 
@@ -8411,7 +7923,7 @@ void Zone::addItemDelayed(Item* pItem, ZoneCoord_t cx, ZoneCoord_t cy, bool bAll
     __END_CATCH
 }
 
-// 아직 테스트 안 해본 코드.
+
 void Zone::deleteItemDelayed(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
 
 {
@@ -8431,8 +7943,8 @@ void Zone::deleteItemDelayed(Object* pObject, ZoneCoord_t x, ZoneCoord_t y)
 //-------------------------------------------------------------
 // add Relic Item
 //-------------------------------------------------------------
-// 아이템을 추가하는데.. 다른 thread에서 해도 된다.
-// 다른 heartbeat에서 추가된다.
+
+
 //-------------------------------------------------------------
 bool Zone::addRelicItem(int relicIndex)
 
@@ -8448,15 +7960,15 @@ bool Zone::addRelicItem(int relicIndex)
 
     Assert(m_OuterRect.ptInRect(cx, cy));
 
-    // 이미 성물 보관대가 있는 경우
+    
     if (m_bHasRelicTable) {
         return false;
-        // 현재 존의 성물 보관대를 찾는다. (addItem될때 Zone에 좌표 x,y를 기억해두자)
-        // 성물 보관대에 아무런 성물도 없다면 return
-        // 아니면, 자기 성물이 아닌 성물을 원래의 성물보관대에 넣는다.
-        // addItemDelayed를 사용해서 원래의 Zone에 추가해버리면 된다.
+        
+        
+        
+        
     } else {
-        // Monster를 생성한다.
+        
         Monster* pMonster = NULL;
         try {
             pMonster = new Monster(pRelicInfo->monsterType);
@@ -8470,7 +7982,7 @@ bool Zone::addRelicItem(int relicIndex)
 
         // cout << "new Monster OK" << endl;
 
-        // MonsterCorpse를 생성한다. (성물 보관대)
+        
         MonsterCorpse* pMonsterCorpse = NULL;
         try {
             pMonsterCorpse = new MonsterCorpse(pMonster);
@@ -8505,21 +8017,21 @@ bool Zone::addRelicItem(int relicIndex)
             g_pCombatInfoManager->setRelicOwner(relicIndex, CombatInfoManager::RELIC_OWNER_VAMPIRE);
         }
 
-        // Relic을 생성한다.
+        
         list<OptionType_t> optionNULL;
         Item* pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RELIC, relicIndex, optionNULL);
         Assert(pItem != NULL);
 
         // cout << "new RelicItem OK" << endl;
 
-        // 이 Zone은 RelicTable을 갖고 있다고 표시한다.
+        
         m_bHasRelicTable = true;
 
         pMonsterCorpse->addTreasure(pItem);
 
-        // 일단 relic은 DB에 생성한다.
-        // 대신 CGDissectionCorpseHandler에서 create하지 않는다.
-        // 보관대에서 꺼낼때마다 create되지 않게하기 위해서이다.
+        
+        
+        
         pItem->create("", STORAGE_CORPSE, pMonsterCorpse->getObjectID(), 0, 0);
 
         if (pRelicInfo->relicType == RELIC_TYPE_SLAYER) {
@@ -8538,8 +8050,8 @@ bool Zone::addRelicItem(int relicIndex)
 
         // cout << "addTreasure OK" << endl;
 
-        // 바로 Zone에 추가하면 안되므로(동기화 문제)
-        // Effect를 사용해서 추가하도록 한다.
+        
+        
         EffectAddItem* pEffectAddItem = new EffectAddItem(this, cx, cy, pMonsterCorpse, 0, false);
         pEffectAddItem->setNextTime(999999);
         m_ObjectRegistry.registerObject(pEffectAddItem);
@@ -8557,25 +8069,25 @@ bool Zone::addRelicItem(int relicIndex)
 //-------------------------------------------------------------
 // delete Relic Item
 //-------------------------------------------------------------
-// 아이템을 삭제하는데.. 다른 thread에서 해도 된다.
-// 다른 heartbeat에서 삭제된다.
+
+
 //-------------------------------------------------------------
 bool Zone::deleteRelicItem()
 
 {
     __BEGIN_TRY
 
-    // 성물 보관대가 없다면 리턴
+    
     if (!m_bHasRelicTable) {
         return false;
     }
 
-    // 성물 보관대를 찾는다.
+    
     Item* pItem = dynamic_cast<Item*>(getTile(m_RelicTableX, m_RelicTableY).getObject(m_RelicTableOID));
     Assert(pItem != NULL);
 
-    // 바로 Zone에 추가하면 안되므로(동기화 문제)
-    // Effect를 사용해서 추가하도록 한다.
+    
+    
     EffectDeleteItem* pEffectDeleteItem = new EffectDeleteItem(this, m_RelicTableX, m_RelicTableY, pItem, 0);
     pEffectDeleteItem->setNextTime(999999);
     m_ObjectRegistry.registerObject(pEffectDeleteItem);
@@ -8594,21 +8106,21 @@ bool Zone::deleteRelicItem()
 //-------------------------------------------------------------
 // create MonsterAddPacket
 //-------------------------------------------------------------
-// monster의 상태에 따라서 GCAddXXX packet을 생성한다. by sigi
+
 //-------------------------------------------------------------
 Packet* Zone::createMonsterAddPacket(Monster* pMonster, Creature* pPC) const
 
 {
     Assert(pMonster != NULL);
 
-    // 보는 사람이 설정되지 않은 경우
-    // 다~ 볼 수 있는 상태라고 설정한다.
-    // 일단 packet을 생성해두고 체크하기 위해서다.
+    
+    
+    
     if (pPC != NULL && !canSee(pPC, pMonster))
         return NULL;
     //	bool canSeeAll = (pPC==NULL);
 
-    // ObservingEye 이펙트를 가져온다.
+    
     //	EffectObservingEye* pEffectObservingEye = NULL;
     //	if ( pPC != NULL && pPC->isFlag( Effect::EFFECT_CLASS_OBSERVING_EYE ) )
     //	{
@@ -8618,7 +8130,7 @@ Packet* Zone::createMonsterAddPacket(Monster* pMonster, Creature* pPC) const
     //	}
 
     if (pMonster->isFlag(Effect::EFFECT_CLASS_HIDE)) {
-        // 뱀파거나 볼 수 있다면..
+        
         //		if (canSeeAll
         //			|| pPC->isVampire()
         //			|| pPC->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN) )
@@ -8635,13 +8147,13 @@ Packet* Zone::createMonsterAddPacket(Monster* pMonster, Creature* pPC) const
         }
 
     }
-    // 박쥐인 상태
+    
     else if (pMonster->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT)) {
         GCAddBat* pPacket = new GCAddBat();
         pPacket->setObjectID(pMonster->getObjectID());
         pPacket->setName(pMonster->getName());
         pPacket->setXYDir(pMonster->getX(), pMonster->getY(), pMonster->getDir());
-        pPacket->setItemType(0); // 아직 안 쓴다.
+        pPacket->setItemType(0); 
         pPacket->setMaxHP(pMonster->getHP(ATTR_MAX));
         pPacket->setCurrentHP(pMonster->getHP(ATTR_CURRENT));
         pPacket->setGuildID(1);
@@ -8649,29 +8161,29 @@ Packet* Zone::createMonsterAddPacket(Monster* pMonster, Creature* pPC) const
 
         return pPacket;
     }
-    // 늑대인 상태
+    
     else if (pMonster->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
         GCAddWolf* pPacket = new GCAddWolf();
         pPacket->setObjectID(pMonster->getObjectID());
         pPacket->setName(pMonster->getName());
         pPacket->setXYDir(pMonster->getX(), pMonster->getY(), pMonster->getDir());
-        pPacket->setItemType(0); // 아직 안 쓴다.
+        pPacket->setItemType(0); 
         pPacket->setMaxHP(pMonster->getHP(ATTR_MAX));
         pPacket->setCurrentHP(pMonster->getHP(ATTR_CURRENT));
         pPacket->setGuildID(1);
 
         return pPacket;
     }
-    // invisiblity 상태
+    
     else if (pMonster->isFlag(Effect::EFFECT_CLASS_INVISIBILITY)) {
-        // 보이나? 뱀파거나 볼수 있다면..
+        
         //		if (canSeeAll
         //			|| pPC->isVampire()
         //			|| pPC->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY)
         //			|| ( pEffectObservingEye != NULL && pEffectObservingEye->canSeeInvisibility( pMonster ) ) )
         {
             // FIXME
-            // 설정에따라서 어떻게 보일지 결정된 후..
+            
             GCAddMonster* pPacket = new GCAddMonster();
             makeGCAddMonster(pPacket, pMonster);
             pPacket->setEffectInfo(pMonster->getEffectInfo());
@@ -8693,7 +8205,7 @@ list<NPCInfo*>* Zone::getNPCInfos(void) {
 }
 
 void Zone::addNPCInfo(NPCInfo* pInfo) {
-    // 이거 zone delete할때 지워야된데이.. - -;	by sigi
+    
     m_NPCInfos.push_back(pInfo);
 }
 
@@ -8720,7 +8232,7 @@ DWORD Zone::getLoadValue() const {
         return 200;
     }
 
-    // 10초당 loop수
+    
     DWORD loadValue = m_LoadValue * 10 / elapsedTime.tv_sec;
 
     return loadValue;
@@ -8757,8 +8269,8 @@ void Zone::monsterScan(Monster* pMonster, ZoneCoord_t x, ZoneCoord_t y, Dir_t di
     ZoneCoord_t y2 = y;
 
     //////////////////////////////////////////////////////////////////////////////
-    // 시야 영역의 상하좌우 모두 + 1 씩 증가시킨다.
-    // 이유는 방향에 따른 ON_SIGHT 영역이 증가되기 때문이다.
+    
+    
     //////////////////////////////////////////////////////////////////////////////
     int sight = pMonster->getSight();
 
@@ -8766,16 +8278,16 @@ void Zone::monsterScan(Monster* pMonster, ZoneCoord_t x, ZoneCoord_t y, Dir_t di
         for (ZoneCoord_t iy = max(0, y2 - sight - 1), endy = min(m_Height - 1, y2 + sight + 1); iy <= endy; iy++) {
             // if (pPC->isFlag(Effect::EFFECT_CLASS_DARKNESS)) sight = DARKNESS_SIGHT;
 
-            // 현재 타일 위에 있는 모든 오브젝트들에 대해 반복한다.
+            
             // const forward_list<Object*> & objectList = m_pTiles[ix][iy].getObjectList();
             const forward_list<Object*>& objectList = m_pTiles[ix][iy].getObjectList();
 
             forward_list<Object*>::const_iterator itr = objectList.begin();
 
             //
-            // object가 있는 경우만
-            // pVisionInfo->getVisionState()를 체크 하기 위해서
-            // if - do~while 을 사용했다. by sigi. 2002.5.8
+            
+            
+            
             //
             if (itr != objectList.end()) {
                 do {
@@ -8784,12 +8296,12 @@ void Zone::monsterScan(Monster* pMonster, ZoneCoord_t x, ZoneCoord_t y, Dir_t di
                     Object::ObjectClass OClass = (*itr)->getObjectClass();
 
                     ////////////////////////////////////////////////////////////
-                    // 각 객체의 OBJECT CLASS에 따라서 적합한 GCAddXXX 패킷을
-                    // 만들어서 owner 에게 전송한다.
+                    
+                    
                     ////////////////////////////////////////////////////////////
 
                     ////////////////////////////////////////////////////////////
-                    // 타일 위에 크리처가 있을 경우
+                    
                     ////////////////////////////////////////////////////////////
                     if (OClass == Object::OBJECT_CLASS_CREATURE) {
                         Creature* pCreature = dynamic_cast<Creature*>(*itr);
@@ -8806,7 +8318,7 @@ void Zone::monsterScan(Monster* pMonster, ZoneCoord_t x, ZoneCoord_t y, Dir_t di
 
                             VisionState vs = pOtherMonster->getVisionState(x2, y2);
 
-                            // Aggressive 몬스터에게만 적으로 등록시켜준다.
+                            
                             if (vs >= IN_SIGHT) {
                                 if (isPotentialEnemy(pMonster, pOtherMonster)) {
                                     pMonster->addPotentialEnemy(pOtherMonster);
@@ -8881,7 +8393,7 @@ void Zone::sendNPCInfo()
 {
     __BEGIN_TRY
 
-    // NPC에 대한 정보를 클라이언트에게 보내준다.
+    
     GCNPCInfo gcNPCInfo;
 
     list<NPCInfo*>::const_iterator itr = m_NPCInfos.begin();
@@ -8914,12 +8426,12 @@ void Zone::deleteNPCs(Race_t race)
     __BEGIN_TRY
 
     const unordered_map<ObjectID_t, Creature*>& NPCs =
-        m_pNPCManager->getCreatures(); // unordered_map을 복사해서 써야한다.
+        m_pNPCManager->getCreatures(); 
     unordered_map<ObjectID_t, Creature*>::const_iterator itr = NPCs.begin();
 
     list<ObjectID_t> creatures;
 
-    // 일단 ObjectID들을 저장해둔다.
+    
     for (; itr != NPCs.end(); itr++) {
         Creature* pCreature = itr->second;
         creatures.push_back(pCreature->getObjectID());
@@ -8927,7 +8439,7 @@ void Zone::deleteNPCs(Race_t race)
 
     list<ObjectID_t>::iterator oitr = creatures.begin();
 
-    // NPC를 지운다.
+    
     for (; oitr != creatures.end(); oitr++) {
         Creature* pCreature = m_pNPCManager->getCreature(*oitr);
 
@@ -8980,7 +8492,7 @@ void Zone::loadEffect()
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
         ///////////////////////////////////////////////////////////////////////////////
-        // EffectPKZoneRegen 로드
+        
         ///////////////////////////////////////////////////////////////////////////////
         pResult = pStmt->executeQuery("SELECT LeftX, TopY, RightX, BottomY FROM EffectPKZoneRegen WHERE ZoneID=%u",
                                       getZoneID());
@@ -9006,8 +8518,8 @@ void Zone::loadEffect()
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        // Gnome's Horn의 Waypoint 로드
-        // WayPoint 주위의 3X3 타일에 있는 아우스터즈는 초당 1씩 HP,MP 가 회복된다.
+        
+        
         ///////////////////////////////////////////////////////////////////////////////
         pResult = pStmt->executeQuery("SELECT X, Y FROM WayPointInfo WHERE ZoneID = %u AND Race = %d", getZoneID(),
                                       RACE_OUSTERS);
@@ -9055,7 +8567,7 @@ void Zone::releaseSafeZone()
 
     m_ZoneLevel = NO_SAFE_ZONE;
 
-    // 존 레벨을 초기화시킨다.
+    
     for (ZoneCoord_t x = 0; x < m_Width; x++)
         for (ZoneCoord_t y = 0; y < m_Height; y++)
             m_ppLevel[x][y] = m_ZoneLevel;
@@ -9070,7 +8582,7 @@ void Zone::resetSafeZone()
 
     m_ZoneLevel = g_pZoneInfoManager->getZoneInfo(m_ZoneID)->getZoneLevel();
 
-    // 존 레벨을 초기화시킨다.
+    
     for (ZoneCoord_t x = 0; x < m_Width; x++)
         for (ZoneCoord_t y = 0; y < m_Height; y++)
             m_ppLevel[x][y] = m_ZoneLevel;
@@ -9153,14 +8665,14 @@ void Zone::killAllPCs() {
     __END_CATCH
 }
 
-// 종족 전쟁에 참가하는 사람만 남긴다. 나머지는 kick한다.
+
 void Zone::remainRaceWarPlayers()
 
 {
     __BEGIN_TRY
 
     try {
-        // 참가 인원 제한을 하지 않는다면 무시한다.
+        
         if (!g_pVariableManager->isActiveRaceWarLimiter())
             return;
 
@@ -9197,7 +8709,7 @@ void Zone::remainRaceWarPlayers()
                 pEventTransport->setTargetZone(ZC.id, ZC.x, ZC.y);
                 pEventTransport->setZoneName(pZoneInfo->getFullName());
 
-                // 몇 초후에 어디로 이동한다.고 보내준다.
+                
                 pEventTransport->sendMessage();
 
                 pGamePlayer->addEvent(pEventTransport);
@@ -9280,7 +8792,7 @@ void Zone::remainPayPlayer()
                 gcSystemMessage.setMessage(msg);
                 pPlayer->sendPacket(&gcSystemMessage);
 
-                // 몇 초후에 어디로 이동한다.고 보내준다.
+                
                 //              pEventTransport->sendMessage();
 
                 pGamePlayer->addEvent(pEventTransport);

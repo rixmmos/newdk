@@ -13,7 +13,7 @@
 #include "SkillUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void MultiAmputate::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -43,7 +43,7 @@ void MultiAmputate::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
     Creature* pTargetCreature = pSlayer->getZone()->getCreature(TargetObjectID);
     bool bRangeCheck = pTargetCreature != NULL && verifyDistance(pSlayer, pTargetCreature, output.Range);
 
-    // 저 안에서는 Max Range 만 체크한다. -_-;
+    
     if (!bRangeCheck) {
         executeSkillFailNormal(pSlayer, param.SkillType, pTargetCreature);
         return;

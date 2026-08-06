@@ -4,6 +4,7 @@
 #include "../Client_PCH.h"
 #include "../basic/BasicException.h"
 #include "../basic/BasicData.h"
+#include "../basic/2d.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,10 +51,22 @@ void g_SetFL2Surface(void* pSurface)
 //----------------------------------------------------------------------
 // OpenGL Initialization
 //----------------------------------------------------------------------
-bool InitializeGL(int width, int height, int bpp, int fullscreen)
+static bool InitializeGLStub(int width, int height, int bpp, int fullscreen)
 {
+	(void)width;
+	(void)height;
+	(void)bpp;
+	(void)fullscreen;
     // Stub: SDL backend handles this
     return true;
+}
+
+void InitializeGL(int bpp, int r_bit, int g_bit, int b_bit)
+{
+	(void)r_bit;
+	(void)g_bit;
+	(void)b_bit;
+	InitializeGLStub(0, 0, bpp, 0);
 }
 
 //----------------------------------------------------------------------
@@ -125,7 +138,11 @@ static TextSystem::TextStyle BuildStyleFromPrintInfo(const PrintInfo* pInfo)
 	TextSystem::TextStyle style = service.GetDefaultStyle();
 
 	int size = TextSystem::DecodeFontSizeHandle(pInfo ? pInfo->hfont : NULL, 16);
-	TextSystem::FontHandle font = service.GetFont(size);
+	const int familyId = TextSystem::DecodeFontFamilyHandle(pInfo ? pInfo->hfont : NULL);
+	const char* family =
+		(familyId == TextSystem::FontFamilyCormorantGaramond) ? "Cormorant Garamond" :
+		(familyId == TextSystem::FontFamilyUnifrakturCook) ? "UnifrakturCook" : "";
+	TextSystem::FontHandle font = service.GetFont(size, family);
 	if (font.IsValid())
 		style.font = font;
 
@@ -152,6 +169,16 @@ static int AdjustXForAlignment(int x, const char* text, const TextSystem::TextSt
 	return x;
 }
 
+static int GetBaselineAdjustY(const PrintInfo* pInfo)
+{
+	const int familyId = TextSystem::DecodeFontFamilyHandle(pInfo ? pInfo->hfont : NULL);
+	if (familyId == TextSystem::FontFamilyCormorantGaramond)
+		return -2;
+	if (familyId == TextSystem::FontFamilyUnifrakturCook)
+		return -1;
+	return 0;
+}
+
 // Basic print function (PrintInfo version)
 void g_Print(int x, int y, const char* pStr, PrintInfo* pInfo)
 {
@@ -168,7 +195,7 @@ void g_Print(int x, int y, const char* pStr, PrintInfo* pInfo)
 		drawX = AdjustXForAlignment(x, pStr, style, pInfo->text_align);
 
 	TextSystem::SpriteSurfaceRenderTarget target(surface);
-	TextSystem::TextService::Get().DrawLine(target, pStr, drawX, y, 0, style);
+	TextSystem::TextService::Get().DrawLine(target, pStr, drawX, y + GetBaselineAdjustY(pInfo), 0, style);
 }
 
 // Basic print function (void* version for legacy callers)
@@ -265,7 +292,11 @@ int g_GetStringWidth(const char* pStr, void* pFont)
 	TextSystem::TextService& service = TextSystem::TextService::Get();
 	TextSystem::TextStyle style = service.GetDefaultStyle();
 	int size = TextSystem::DecodeFontSizeHandle(pFont, 16);
-	TextSystem::FontHandle font = service.GetFont(size);
+	const int familyId = TextSystem::DecodeFontFamilyHandle(pFont);
+	const char* family =
+		(familyId == TextSystem::FontFamilyCormorantGaramond) ? "Cormorant Garamond" :
+		(familyId == TextSystem::FontFamilyUnifrakturCook) ? "UnifrakturCook" : "";
+	TextSystem::FontHandle font = service.GetFont(size, family);
 
 	if (font.IsValid())
 		style.font = font;
@@ -281,7 +312,11 @@ int g_GetStringHeight(const char* pStr, void* pFont)
     TextSystem::TextService& service = TextSystem::TextService::Get();
     TextSystem::TextStyle style = service.GetDefaultStyle();
     int size = TextSystem::DecodeFontSizeHandle(pFont, 16);
-    TextSystem::FontHandle font = service.GetFont(size);
+	const int familyId = TextSystem::DecodeFontFamilyHandle(pFont);
+	const char* family =
+		(familyId == TextSystem::FontFamilyCormorantGaramond) ? "Cormorant Garamond" :
+		(familyId == TextSystem::FontFamilyUnifrakturCook) ? "UnifrakturCook" : "";
+    TextSystem::FontHandle font = service.GetFont(size, family);
 
     if (font.IsValid())
         style.font = font;
@@ -299,8 +334,18 @@ int g_GetStringHeight(const char* pStr, void* pFont)
 // Check if string can be cut at width
 bool g_PossibleStringCut(const char* pStr, int maxWidth)
 {
-    int width = g_GetStringWidth(pStr, NULL);
+    int width = g_GetStringWidth(pStr, (void*)NULL);
     return width <= maxWidth;
+}
+
+int g_GetStringWidth(const char* pStr, HFONT hfont)
+{
+	return g_GetStringWidth(pStr, reinterpret_cast<void*>(hfont));
+}
+
+int g_GetStringHeight(const char* pStr, HFONT hfont)
+{
+	return g_GetStringHeight(pStr, reinterpret_cast<void*>(hfont));
 }
 
 int g_DBCSLen(const char_t* p_dbcs)
@@ -409,14 +454,14 @@ std::string g_GetStringByMoney(DWORD money)
 {
     static char buffer[64];
 
-    if (money >= 100000000) // 1亿
+    if (money >= 100000000) 
     {
-        snprintf(buffer, sizeof(buffer), "%d.%02d亿", (int)(money / 100000000),
+        snprintf(buffer, sizeof(buffer), "%d.%02d", (int)(money / 100000000),
                  (int)((money % 100000000) / 1000000));
     }
-    else if (money >= 10000) // 1万
+    else if (money >= 10000) 
     {
-        snprintf(buffer, sizeof(buffer), "%d.%04d万", (int)(money / 10000),
+        snprintf(buffer, sizeof(buffer), "%d.%04d", (int)(money / 10000),
                  (int)(money % 10000));
     }
     else

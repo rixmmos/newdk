@@ -36,7 +36,7 @@ void SiegeManager::init(ZoneID_t zoneID) {
     if (pSiegeZone == NULL)
         return;
 
-    MonsterCorpse* pShrine = new MonsterCorpse(560, "加膠괏밗憩", 2);
+    MonsterCorpse* pShrine = new MonsterCorpse(560, "", 2);
     Assert(pShrine != NULL);
 
     pShrine->setShrine(true);
@@ -127,7 +127,7 @@ void SiegeManager::start(ZoneID_t zoneID) {
         Monster* pMonster = new Monster(mType);
         pMonster->setTreasure(false);
         pMonster->setScanEnemy(true);
-        pMonster->setName("括깡");
+        pMonster->setName("");
 
         try {
             pSiegeZone->addCreature(pMonster, guardPosition[i].x, guardPosition[i].y, 0);
@@ -221,7 +221,7 @@ void SiegeManager::putItem(PlayerCreature* pPC, MonsterCorpse* pCorpse, Item* pI
 
     GCSystemMessage gcSM;
     char buffer[256];
-    sprintf(buffer, "%d뵀묑샌렘삿돤價적.10취빈盧땡돕릿삶뒈듐.", side);
+    sprintf(buffer, "%d.10.", side);
     gcSM.setMessage(buffer);
     pPC->getZone()->broadcastPacket(&gcSM);
 
@@ -244,7 +244,7 @@ void SiegeManager::recallGuild(ZoneID_t currentZoneID, ZoneID_t siegeZoneID, Gui
         if (pTargetCreature == NULL)
             continue;
 
-        // 소환자의 존과 좌표.
+        
         ZoneID_t ZoneNum = siegeZoneID;
         Coord_t ZoneX = targetPos[side - 1].x;
         Coord_t ZoneY = targetPos[side - 1].y;

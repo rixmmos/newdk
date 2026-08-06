@@ -17,7 +17,7 @@
 #include "GCSkillToTileOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î ¿ÀºêÁ§Æ® ÇÚµé·¯
+
 //////////////////////////////////////////////////////////////////////////////
 void BombCrashWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -37,7 +37,7 @@ void BombCrashWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuchÁ¦°Å. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pSlayer, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pSlayer, getSkillType());
 
@@ -56,8 +56,8 @@ void BombCrashWalk::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î Å¸ÀÏ ÇÚµé·¯
-//  ½½·¹ÀÌ¾î°¡ Wide Lightning SkillÀ» Tile¿¡ »ç¿ëÇßÀ»¶§ »ç¿ëÇÏ´Â Handler
+
+
 //////////////////////////////////////////////////////////////////////////////
 void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -91,8 +91,8 @@ void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Skill
         bool bTimeCheck = verifyRunTime(pSkillSlot);
         bool bRangeCheck = verifyDistance(pSlayer, X, Y, pSkillInfo->getRange());
 
-        // ÀÏ´Ü ±â¼úÀº ¼º°øÇÏ´Â °ÍÀ¸·Î ÇÏ°í µ¥¹ÌÁö¸¦ °è»êÇÒ¶§(EffectBombCrashWalk::affect())
-        // Å©¸®ÃÄ º°·Î ´Ù½Å °è»êÇÏ´Â °É·Î ÇÑ´Ù.
+        
+        
         // 2003.1.8 by bezz
         // bool bHitRoll = HitRoll::isSuccessMagic(pSlayer, pSkillInfo, pSkillSlot);
 
@@ -104,9 +104,9 @@ void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Skill
                 bTileCheck = true;
         }
         // 		bool bUseSkill	 = false;
-        // 		// È¡³öµ±Ç°Ê¹ÓÃ¼¼ÄÜ½ÇÉ«ËùÊ¹ÓÃµÄÎäÆ÷
+        
         // 		Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
-        // 		//Ã»ÓÐÎäÆ÷²»ÄÜÊ¹ÓÃ¼¼ÄÜ
+        
         // 		if (pWeapon != NULL)
         // 		{
         // 			Silver_t silverDamage= pWeapon->getSilver();
@@ -144,7 +144,7 @@ void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Skill
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // ±â¼úÀ» »ç¿ëÇÑ »ç¶÷µé¿¡°Ô
+            
             _GCSkillToTileOK1.setSkillType(SkillType);
             _GCSkillToTileOK1.setCEffectID(CEffectID);
             _GCSkillToTileOK1.setX(X);
@@ -152,21 +152,21 @@ void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Skill
             _GCSkillToTileOK1.setDuration(output.Duration);
             _GCSkillToTileOK1.setRange(Range);
 
-            // ±â¼úÀ» ¾´ »ç¶÷¸¸ º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô
+            
             _GCSkillToTileOK3.setObjectID(pSlayer->getObjectID());
             _GCSkillToTileOK3.setSkillType(SkillType);
             _GCSkillToTileOK3.setX(X);
             _GCSkillToTileOK3.setY(Y);
             //_GCSkillToTileOK3.setRange(Range);
 
-            // ±â¼úÀ» ´çÇÑ »ç¶÷¸¸ º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô
+            
             _GCSkillToTileOK4.setSkillType(SkillType);
             _GCSkillToTileOK4.setX(X);
             _GCSkillToTileOK4.setY(Y);
             _GCSkillToTileOK4.setDuration(output.Duration);
             _GCSkillToTileOK4.setRange(Range);
 
-            // ±â¼úÀ» ¾´ »ç¶÷°ú ´çÇÑ »ç¶÷À» ¸ðµÎ º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô
+            
             _GCSkillToTileOK5.setObjectID(pSlayer->getObjectID());
             _GCSkillToTileOK5.setSkillType(SkillType);
             _GCSkillToTileOK5.setX(X);
@@ -174,23 +174,23 @@ void BombCrashWalk::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Skill
             _GCSkillToTileOK5.setDuration(output.Duration);
             _GCSkillToTileOK5.setRange(Range);
 
-            // ±â¼úÀ» »ç¿ëÇÑ »ç¶÷¿¡°Ô packet Àü´Þ
+            
             pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-            // ±â¼úÀ» ¾µ »ç¶÷°ú ´çÇÑ »ç¶÷À» ¸ðµÎ º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô broadcasing
-            // broadcastingÈÄ 5¹øOK¸¦ ¹ÞÀº »ç¶÷À» ±â·ÏÇÑ´Ù.
-            // ¿©±â¿¡ ±â·ÏµÈ »ç¶÷Àº Â÷ÈÄ broadcasting¿¡¼­ Á¦¿ÜµÈ´Ù.
+            
+            
+            
             list<Creature*> cList;
             cList.push_back(pSlayer);
             cList = pZone->broadcastSkillPacket(myX, myY, X, Y, &_GCSkillToTileOK5, cList);
 
-            // ±â¼úÀ» ¾´ »ç¶÷À» º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô broadcasting
+            
             pZone->broadcastPacket(myX, myY, &_GCSkillToTileOK3, cList);
 
-            // ±â¼úÀ» ´çÇÑ »ç¶÷À» º¼ ¼ö ÀÖ´Â »ç¶÷µé¿¡°Ô broadcasting
+            
             pZone->broadcastPacket(X, Y, &_GCSkillToTileOK4, cList);
 
-            // ±â¼ú delay setting
+            
             pSkillSlot->setRunTime(output.Delay);
 
         } else {

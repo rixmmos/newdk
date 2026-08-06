@@ -22,8 +22,8 @@ throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
-	// 캐릭 생성중이고
-	// 캐릭터 아이디 맞는 경우..
+	
+	
 	if (g_Mode==MODE_WAIT_SELECTPC
 		&& g_pUserInformation->WhisperID==pPacket->getCharacterName().c_str())
 	{

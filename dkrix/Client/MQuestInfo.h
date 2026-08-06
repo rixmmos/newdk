@@ -32,9 +32,9 @@ public  :
 	void			SetType(QUEST_INFO_TYPE type) { m_Type = type; }
 	
 protected :
-	DWORD			m_ID;						// 퀘스트 아이디
-	QUEST_INFO_TYPE	m_Type;						// 퀘스트 타입
-	DWORD			m_TimeLimit;				// 시간 제한
+	DWORD			m_ID;						
+	QUEST_INFO_TYPE	m_Type;						
+	DWORD			m_TimeLimit;				
 };
 
 #endif

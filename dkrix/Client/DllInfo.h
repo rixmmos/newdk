@@ -8,7 +8,7 @@
 // Platform-specific exports
 #ifdef PLATFORM_WINDOWS
 	//#define __WORK__
-	//#define __MK_DLL__			// DLL만들때
+	
 	#ifdef __WORK__
 
 		#define         __EX

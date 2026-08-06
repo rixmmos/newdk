@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void WideIceField::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -46,7 +46,7 @@ void WideIceField::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
         ZoneCoord_t myY = pMonster->getY();
 
         if (bHitRoll) {
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             SkillOutput output;
             computeOutput(input, output);
@@ -62,7 +62,7 @@ void WideIceField::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                         Tile& tile = pZone->getTile(tX, tY);
                         if (tile.canAddEffect())
                             bTileCheck = true;
-                        // 머시 그라운드 있음 추가 못한당.
+                        
                         if (tile.getEffect(Effect::EFFECT_CLASS_MERCY_GROUND) != NULL)
                             bTileCheck = false;
                     }
@@ -72,14 +72,14 @@ void WideIceField::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
                     Tile& tile = pZone->getTile(tX, tY);
 
-                    // 같은 이펙트가 이미 존재한다면 삭제한다.
+                    
                     Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_ICE_FIELD);
                     if (pOldEffect != NULL) {
                         ObjectID_t effectID = pOldEffect->getObjectID();
                         pZone->deleteEffect(effectID);
                     }
 
-                    // 이펙트 오브젝트를 생성한다.
+                    
                     EffectIceField* pEffect = new EffectIceField(pZone, tX, tY);
                     pEffect->setCasterName(pMonster->getName());
                     pEffect->setCasterID(pMonster->getObjectID());
@@ -89,11 +89,11 @@ void WideIceField::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                     pEffect->setTick(output.Tick);
                     pEffect->setForce(true);
 
-                    // 타일에 붙은 이펙트는 OID를 받아야 한다.
+                    
                     ObjectRegistry& objectregister = pZone->getObjectRegistry();
                     objectregister.registerObject(pEffect);
 
-                    // 존 및 타일에다가 이펙트를 추가한다.
+                    
                     pZone->addEffect(pEffect);
                     tile.addEffect(pEffect);
                 }

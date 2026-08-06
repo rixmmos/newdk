@@ -54,16 +54,16 @@ void CGPhoneSayHandler::execute(CGPhoneSay* pPacket, Player* pPlayer)
         }
     }
 
-    // 정상적인 통신 상태일때 Message를 날린다.
+    
     if (Success) {
         SlotID_t TargetPhoneSlot = pTargetSlayer->getSlotWithPhoneNumber(PhoneNumber);
 
         Player* pTargetPlayer = pTargetSlayer->getPlayer();
 
-        // 서버에서 클라이언트로 전송하므로 GC- 패킷을 사용해야 한다.
+        
         GCPhoneSay gcPhoneSay;
 
-        // 크리처 이름과 메시지를 패킷에 대입한다.
+        
         gcPhoneSay.setSlotID(TargetPhoneSlot);
         gcPhoneSay.setMessage(pPacket->getMessage());
 
@@ -71,7 +71,7 @@ void CGPhoneSayHandler::execute(CGPhoneSay* pPacket, Player* pPlayer)
 
         // cout << "Phone Say Successfull " << endl;
 
-        // 상대의 접속이 끊겼거나 이상한 짓거리가 발생했을때..
+        
     } else {
         GCPhoneDisconnected gcPhoneDisconnected;
         gcPhoneDisconnected.setSlotID(PhoneSlot);

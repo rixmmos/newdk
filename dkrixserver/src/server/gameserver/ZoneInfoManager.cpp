@@ -32,7 +32,7 @@ ZoneInfoManager::~ZoneInfoManager()
         SAFE_DELETE(pInfo);
     }
 
-    // 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+    
     m_ZoneInfos.clear();
 
     __END_CATCH_NO_RETHROW
@@ -162,17 +162,17 @@ void ZoneInfoManager::addZoneInfo(ZoneInfo* pZoneInfo)
 {
     __BEGIN_TRY
 
-    // 일단 같은 아이디의 존이 있는지 체크해본다.
+    
     unordered_map<ZoneID_t, ZoneInfo*>::iterator itr = m_ZoneInfos.find(pZoneInfo->getZoneID());
 
     if (itr != m_ZoneInfos.end())
-        // 똑같은 아이디가 이미 존재한다는 소리다. - -;
+        
         throw Error("duplicated zone id");
 
     m_ZoneInfos[pZoneInfo->getZoneID()] = pZoneInfo;
 
-    // Zone full name 맵에다 존 ID를 집어넣어둔다.
-    // 운영자 명령어를 위한 기능이다.
+    
+    
     unordered_map<string, ZoneInfo*>::iterator fitr = m_FullNameMap.find(pZoneInfo->getFullName());
     if (fitr != m_FullNameMap.end()) {
         cerr << "Duplicated Zone Full Name:" << pZoneInfo->getFullName() << endl;
@@ -181,8 +181,8 @@ void ZoneInfoManager::addZoneInfo(ZoneInfo* pZoneInfo)
 
     m_FullNameMap[pZoneInfo->getFullName()] = pZoneInfo;
 
-    // Zone short name 맵에다 존 ID를 집어넣어둔다.
-    // 운영자 명령어를 위한 기능이다.
+    
+    
     unordered_map<string, ZoneInfo*>::iterator sitr = m_ShortNameMap.find(pZoneInfo->getShortName());
     if (sitr != m_ShortNameMap.end()) {
         cerr << "Duplicated Zone Short Name" << endl;
@@ -204,13 +204,13 @@ void ZoneInfoManager::deleteZoneInfo(ZoneID_t zoneID) {
     unordered_map<ZoneID_t, ZoneInfo*>::iterator itr = m_ZoneInfos.find(zoneID);
 
     if (itr != m_ZoneInfos.end()) {
-        // 존을 삭제한다.
+        
         SAFE_DELETE(itr->second);
 
-        // pair를 삭제한다.
+        
         m_ZoneInfos.erase(itr);
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -234,7 +234,7 @@ ZoneInfo* ZoneInfoManager::getZoneInfo(ZoneID_t zoneID) {
         pZoneInfo = itr->second;
 
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -249,19 +249,19 @@ ZoneInfo* ZoneInfoManager::getZoneInfo(ZoneID_t zoneID) {
 // get zone from zone info manager
 //////////////////////////////////////////////////////////////////////////////
 ZoneInfo* ZoneInfoManager::getZoneInfoByName(const string& ZoneName) {
-    // 먼저 short name map을 검색한다.
+    
     unordered_map<string, ZoneInfo*>::const_iterator short_itr = m_ShortNameMap.find(ZoneName);
     if (short_itr != m_ShortNameMap.end()) {
         return short_itr->second;
     }
 
-    // 없다면 full name map을 검색한다.
+    
     unordered_map<string, ZoneInfo*>::const_iterator full_itr = m_FullNameMap.find(ZoneName);
     if (full_itr != m_FullNameMap.end()) {
         return full_itr->second;
     }
 
-    // 아무 곳에도 없었다면 그냥 NULL을 리턴한다.
+    
     return NULL;
 }
 

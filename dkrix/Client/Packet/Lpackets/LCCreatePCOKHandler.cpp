@@ -13,8 +13,8 @@
 #include "UIFunction.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
-	#include "Cpackets/CLGetPCList.h"
+	#include "../ClientPlayer.h"
+	#include "../Cpackets/CLGetPCList.h"
 #endif
 
 //----------------------------------------------------------------------
@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 
 	UI_NewCharacterCreateOk();
 
-	// 다시 PC LIST 를 받아와야 한다.
+	
 	CLGetPCList clGetPCList;
 	pClientPlayer->sendPacket( &clGetPCList );
 

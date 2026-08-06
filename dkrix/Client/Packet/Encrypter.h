@@ -10,7 +10,7 @@
 #define __ENCRYPTER__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "EncryptUtility.h"
 

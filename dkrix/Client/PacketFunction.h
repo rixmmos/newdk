@@ -83,7 +83,7 @@ int				GetMineActionInfo(int itemType);
 int				GetBombActionInfo(int itemType);
 
 //-----------------------------------------------------------------------------
-// 정보 설정
+
 //-----------------------------------------------------------------------------
 extern int		GetVampireCreatureType(int shape, bool bMale, int coatType);
 extern int		GetOustersCreatureType(int coatType);
@@ -95,6 +95,7 @@ extern void		SetGearInfo(GearInfo* pGearInfo, BloodBibleSignInfo* pBloodBibleInf
 extern void		SetExtraInfo(ExtraInfo* pExtraInfo);
 extern void		SetEffectInfo(MCreature* pCreature, EffectInfo* pEffectInfo, int delayedFrame=0);
 extern void		AffectModifyInfo(MStatus* pStatus, ModifyInfo* pInfo);
+extern void		WriteCombatCrashMarker(const char* format, ...);
 
 //-----------------------------------------------------------------------------
 // set addon
@@ -132,7 +133,7 @@ extern void		SkillIllendue(MCreature* pUserCreature, MCreature* pTargetCreature,
 extern void		SkillBlazeWalk(MCreature* pUserCreature, MCreature* pTargetCreature, int skillID, BYTE grade);
 
 //-----------------------------------------------------------------------------
-// Portal 관련
+
 //-----------------------------------------------------------------------------
 extern void		MoveIntoPortal(MCreature* pCreature);
 extern void		ComeFromPortal(MCreature* pCreature);
@@ -141,33 +142,33 @@ extern void		ComeFromPortal(MCreature* pCreature);
 // execute action info from mainnode
 //-----------------------------------------------------------------------------
 extern void		ExecuteActionInfoFromMainNode(
-						TYPE_ACTIONINFO nActionInfo,										// 사용 기술 번호
+						TYPE_ACTIONINFO nActionInfo,										
 					
-						TYPE_SECTORPOSITION startX, TYPE_SECTORPOSITION startY, int startZ, // 기술 사용하는 사람(?) 
-						int direction,														// 사용 방향
+						TYPE_SECTORPOSITION startX, TYPE_SECTORPOSITION startY, int startZ, 
+						int direction,														
 						
-						TYPE_OBJECTID targetID,												// 목표에 대한 정보
+						TYPE_OBJECTID targetID,												
 						TYPE_SECTORPOSITION targetX, TYPE_SECTORPOSITION targetY, int targetZ, 
 						
-						DWORD delayFrame,													// 기술의 (남은) 지속 시간		
+						DWORD delayFrame,													
 						
-						MActionResult* pActionResult,	// 결과 정보
+						MActionResult* pActionResult,	
 						
 						bool bStartFromMainNode = true,
 
-						int sX = 0, int sY = 0		// 좌표 보정
+						int sX = 0, int sY = 0		
 				);
 
 extern void		AddVampirePortal(
-						int serverID,								// 이펙트의 OID
-						const char* ownerName,								// 포탈 주인 이름
-						TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY,		// 포탈의 좌표
-						DWORD delayFrame,							// 포탈의 지속 시간
+						int serverID,								
+						const char* ownerName,								
+						TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY,		
+						DWORD delayFrame,							
 						
-						// 목표 정보
-						int zoneID,							// 포탈의 목표 존 ID
-						TYPE_SECTORPOSITION zoneX,			// 포탈의 목표 좌표 x
-						TYPE_SECTORPOSITION zoneY,			// 포탈의 목표 좌표 y
+						
+						int zoneID,							
+						TYPE_SECTORPOSITION zoneX,			
+						TYPE_SECTORPOSITION zoneY,			
 
 						bool bStartFromMainNode = true
 				);

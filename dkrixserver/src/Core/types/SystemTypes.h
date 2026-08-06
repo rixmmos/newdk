@@ -7,16 +7,13 @@
 #ifndef __SYSTEM_TYPES_H__
 #define __SYSTEM_TYPES_H__
 
-/* �׼�/���� ��ġ�� ���� ���� ������ �Ʒ� BUILD_NUMBER ��
- * BUILD_INFO�� ä���ִ´�. BUILD_NUMBER ����� BUILD_INFO  +Add (�߰��� ��� ���� ���) -Delete (������ ��� ���� ���) *Fix
- * (������ġ/���� ���� ���) BUILD_INFO �� �����ϰ� �������� ���
- */
+ 
 #define BUILD_NUMBER 40518
 #define BUILD_INFO "<Version Information>\n+Add ----- \n-Delete -----\nFix -----\n"
 
 
 #if defined(__WINDOWS__)
-// 4786 - STL�� �ɺ����� ���̰� 255�� �Ѿ ��
+
 #pragma warning(disable : 4786)
 #include <Windows.h>
 #elif defined(__LINUX__) || defined(__APPLE__)

@@ -2,7 +2,7 @@
 // Filename    : EffectLightness.h
 // Written by  : excel96
 // Description :
-// Lightness에 의해서 생성되는 산성 데미지 약화 이펙트이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EFFECT_LIGHTNESS__

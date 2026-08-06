@@ -324,7 +324,7 @@ public:
         return m_ServerStat;
     }
 
-    // premium play ����
+    
     void setPremiumZone() {
         m_fPremium |= FLAG_PREMIUM_ZONE;
     }
@@ -396,7 +396,7 @@ private:
     //--------------------------------------------------------------------------------
     // PC Information
     //--------------------------------------------------------------------------------
-    // PCSlayerInfo2 �Ǵ� PCVampireInfo2 �� ����Ѵ�.
+    
     PCInfo* m_pPCInfo;
 
     //--------------------------------------------------------------------------------
@@ -420,7 +420,7 @@ private:
     EffectInfo* m_pEffectInfo;
 
     //--------------------------------------------------------------------------------
-    // �������Ŭ�� �ֳ� ����.
+    
     //--------------------------------------------------------------------------------
     bool m_hasMotorcycle;
 
@@ -433,25 +433,25 @@ private:
     // quick item slot
     // gear
 
-    // ����(PDA)
-    // ���� ����Ʈ ����
-    // ��������, �̺�Ʈ ����
-    // ����.. ����� ó�� PDS�� �� �� �ٿ�����.. - -;
+    
+    
+    
+    
 
     //--------------------------------------------------------------------------------
     // Zone Information
     //--------------------------------------------------------------------------------
-    // �� ���̵�
+    
     ZoneID_t m_ZoneID;
 
-    // ��Ÿ�� ��ǥ�� �밭�� ��ġ
+    
     Coord_t m_ZoneX;
     Coord_t m_ZoneY;
 
     // Game Time
     GameTime m_GameTime;
 
-    // Weather(���� ����)
+    
     Weather m_Weather;
     WeatherLevel_t m_WeatherLevel;
 
@@ -459,21 +459,21 @@ private:
     DarkLevel_t m_DarkLevel;
     LightLevel_t m_LightLevel;
 
-    // ���� �����ϴ� NPC ��������Ʈ Ÿ���� ����, ��������Ʈ Ÿ�� �迭
+    
     BYTE m_nNPCs;
     NPCType_t m_NPCTypes[maxNPCPerZone];
 
-    // ���� �����ϴ� ���� ��������Ʈ Ÿ���� ����, ��������Ʈ Ÿ�� �迭
+    
     BYTE m_nMonsters;
     MonsterType_t m_MonsterTypes[maxMonsterPerZone];
 
-    // ���� ���� �����ϴ� NPC�鿡 ���� ����
+    
     list<NPCInfo*> m_NPCInfos;
 
-    // ���� ����
+    
     BYTE m_ServerStat;
 
-    // �����̾� ����
+    
     BYTE m_fPremium;
 
     DWORD m_SMSCharge;
@@ -481,13 +481,13 @@ private:
 
     BYTE m_NonPK;
 
-    // ���ձ�� ����
+    
     uint m_GuildUnionID;
     BYTE m_GuildUnionUserType;
 
     BloodBibleSignInfo* m_pBloodBibleSign;
 
-    // �Ŀ�¯ ����Ʈ
+    
     int m_PowerPoint;
 };
 
@@ -519,7 +519,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCUpdateInfoPacketMaxSize �� ����, �����϶�.
+    
     PacketSize_t getPacketMaxSize() const {
         PacketSize_t size = 0;
 
@@ -546,9 +546,9 @@ public:
 
         size += szBYTE;
         size += NPCInfo::getMaxSize() * 255;
-        // ���� ����
+        
         size += szBYTE;
-        // �����̾�
+        
         size += szBYTE;
         size += szDWORD;
         size += NicknameInfo::getMaxSize();
@@ -561,7 +561,7 @@ public:
 
         size += BloodBibleSignInfo::getMaxSize();
 
-        // �Ŀ�¯ ����Ʈ
+        
         size += szint;
 
         return size;

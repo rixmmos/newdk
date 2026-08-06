@@ -9,7 +9,7 @@
 #define __PACKET_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
@@ -46,11 +46,11 @@ const uint szPacketHeader = szPacketID + szPacketSize + szSequenceSize;
 //
 // class Packet;
 //
-// 패킷 데이타를 나타내는 인터페이스 클래스이다.
+
 //
-// read()와 write()를 주의깊게 살펴보라. 소켓입력스트림과 소켓출력스트림은
-// 모든 패킷을 어떻게 읽고 쓸 것인지를 알 수 없다. 따라서, 패킷 자신이 각
-// 스트림에 어떻게 읽고 쓸 것인지를 알고 있어야 한다.
+
+
+
 //
 //----------------------------------------------------------------------
 
@@ -582,19 +582,19 @@ public :
 	// destructor
 	virtual ~Packet ()  {}
 
-	// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+	
 	virtual void read (SocketInputStream & iStream)  = 0;
 
-	// 소켓으로부터 직접 데이터를 읽어서 패킷을 초기화한다.
+	
 	virtual void read (Socket* pSocket)  { throw UnsupportedError(); }	
 
-	// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+	
 	virtual void write (SocketOutputStream & oStream) const  = 0;
 
-	// 소켓으로 직접 패킷의 바이너리 이미지를 보낸다.
+	
 	virtual void write (Socket* pSocket) const  { throw UnsupportedError(); }	
 
-	// 출력 스트림에 패킷의 헤더와 바디를 모두 쓴다.
+	
 	void writeHeaderNBody (SocketOutputStream& oStream ) const
 	{
 		oStream.write( getPacketID() );

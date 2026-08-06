@@ -7,22 +7,25 @@
 #pragma once
 
 #ifdef _DEBUG
+#include <cstddef>
+#include <cstdlib>
+#include <cstdint>
 
-void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum);
+void AddTrack(std::uintptr_t addr, std::size_t asize, const char *fname, DWORD lnum);
 void DumpUnfreed();
-void RemoveTrack(DWORD addr);
+void RemoveTrack(std::uintptr_t addr);
 
-__inline void * __cdecl operator new(unsigned int size,
+__inline void * __cdecl operator new(std::size_t size,
 								   const char *file, int line)
 {
 	void *ptr = (void *)malloc(size);
-	AddTrack((unsigned int)ptr, size, file, line);
+	AddTrack(reinterpret_cast<std::uintptr_t>(ptr), size, file, line);
 	return(ptr);
 }
 
 __inline void __cdecl operator delete(void *p)
 {
-	RemoveTrack((unsigned int)p);
+	RemoveTrack(reinterpret_cast<std::uintptr_t>(p));
 	free(p);
 }
 

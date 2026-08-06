@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCGoodsList.h 
-// Written By  : 김성민
+
 // Description : 
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_GOODS_LIST_H__
 #define __GC_GOODS_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include <list>
 
 #define MAX_GOODS_LIST 20

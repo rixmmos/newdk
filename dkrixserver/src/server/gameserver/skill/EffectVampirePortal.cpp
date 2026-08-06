@@ -59,11 +59,11 @@ void EffectVampirePortal::unaffect()
 
     // cout << "EffectVampirePortal::unaffect() begin" << endl;
 
-    // 타일에서 이펙트를 삭제하고...
+    
     Tile& tile = m_pZone->getTile(m_X, m_Y);
     tile.deleteEffect(m_ObjectID);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCDeleteEffectFromTile gcDeleteEffectFromTile;
     gcDeleteEffectFromTile.setEffectID(Effect::EFFECT_CLASS_VAMPIRE_PORTAL);
     gcDeleteEffectFromTile.setObjectID(m_ObjectID);

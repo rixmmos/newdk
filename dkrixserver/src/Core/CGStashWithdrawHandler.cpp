@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : CGStashWithdrawHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -36,9 +36,9 @@ void CGStashWithdrawHandler::execute(CGStashWithdraw* pPacket, Player* pPlayer)
     Gold_t amount = pPacket->getAmount();
 
     if (!pPC->checkGoldIntegrity() || !pPC->checkStashGoldIntegrity()) {
-        filelog("GoldBug.log", "CGStashWithdraw : 돈이 DB랑 안 맞는다! [%s:%s]", pGamePlayer->getID().c_str(),
+        filelog("GoldBug.log", "CGStashWithdraw :  DB  ! [%s:%s]", pGamePlayer->getID().c_str(),
                 pPC->getName().c_str());
-        throw DisconnectException("CGStashWithdraw : 돈이 DB랑 안 맞는다!");
+        throw DisconnectException("CGStashWithdraw :  DB  !");
     }
 
     if (amount == 0)

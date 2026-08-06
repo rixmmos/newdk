@@ -11,7 +11,7 @@ public:
         Range = 0;
         PartySize = 1;
 
-        // 테스트할때 설정되어야 하는 값
+        
         /*
         SkillLevel
 

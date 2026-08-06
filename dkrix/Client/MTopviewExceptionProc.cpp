@@ -4,8 +4,8 @@
 // MTopViewDraw.cpp
 //----------------------------------------------------------------------
 //
-// 복잡한 Draw 함수 부분만 따로 빼놓는다.
-// 작업하기가 영 불편해서 
+
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #pragma warning(disable:4786)
@@ -41,7 +41,7 @@ void GildreProc( MCreature* pCreature, int& action, int& frame, int& direction )
 	if( pCreature->HasEffectStatus( EFFECTSTATUS_GDR_FLOATING )/* && action == ACTION_MOVE */)
 	{
 		action = ACTION_VAMPIRE_DRAIN;
-		frame = 6 + (frame & 0x07);		// 흡혈 동작에서 반복 frame의 시작이 6이다.		
+		frame = 6 + (frame & 0x07);		
 		
 		//			m_MoveAction = ACTION_DRAINED;
 		//SetAction(ACTION_DRAINED);
@@ -51,7 +51,7 @@ void GildreProc( MCreature* pCreature, int& action, int& frame, int& direction )
 		if(pCreature->GetActionCount()>=pCreature->GetActionCountMax())
 		{
 			if(pCreature->GetCreatureType()  == 723)
-				frame = 46; // 무릎꿇은 상태로..나둔당..			
+				frame = 46; 
 		}
 	}
 }
@@ -67,7 +67,7 @@ void FrozenGildreProc( MCreature* pCreature, int& action, int& frame, int& direc
 
 void FishShopLandLord( MCreature* pCreature, int& action, int& frame, int& direction )
 {
-	// 생선가게 주인 - 퀘스트용, 일단 누워있게..나중에 분석점 하고 수정하자..
+	
 	action = 6;
 	frame = 14;
 }
@@ -127,7 +127,7 @@ void ObstacleProc( MCreature* pCreature, int& action, int& frame, int& direction
 
 void MakeStandAndSouthDirectionProc( MCreature* pCreature, int& action, int& frame, int& direction )
 {
-	// 아래 방향에 stand 액션, 프레임을 0으로 만든다.
+	
 	action = ACTION_STAND;
 	frame = 0;
 	direction = 2;
@@ -168,7 +168,7 @@ void Ctype_764_765_Proc( MCreature* pCreature, int& action, int& frame, int& dir
 		pCreature->SetShadowCount(0);
 	if(action == ACTION_MOVE)
 	{
-		if(frame == 1 || frame == 8) // 실제로는 3,10프레임이 발 딛는 프레임인데..두프레임정도 앞서면 싱크가 대충 맞지 않을까...ㅎㅎ
+		if(frame == 1 || frame == 8) 
 		{
 			MEvent event;
 			event.eventID = EVENTID_METEOR_SHAKE;
@@ -209,7 +209,7 @@ void GuildWarGateProc( MCreature* pCreature, int& action, int& frame, int& direc
 		frame = 4;
 }
 // 2004, 12, 11, sobeit add end
-// 2005, 1, 17, sobeit add start - 이성의 봉인
+
 void Ctype_792( MCreature* pCreature, int& action, int& frame, int& direction )
 {
 	if(action != ACTION_DIE)
@@ -273,7 +273,7 @@ void	MTopView::InitMapingExceptionProc()
 	RegistExceptionProcFunction( 729 , GuildWarGateProc );
 	// 2004, 12, 11, sobeit add end
 	
-	// 2005, 1, 17, sobeit add start - 이성의 봉인
+	
 	RegistExceptionProcFunction( 792 , Ctype_792 );
 	// 2005, 1, 17, sobeit add end
 

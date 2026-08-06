@@ -18,12 +18,12 @@
 #include "VariableManager.h"
 #include "ZoneGroupManager.h"
 
-// 전쟁 하는 날짜
+
 int LevelWarTime[4][3] = {
-    {2, 20, 0}, // 화요일 8시
-    {4, 20, 0}, // 목요일 8시
-    {2, 21, 0}, // 화요일 9시
-    {4, 21, 0}, // 목요일 9시
+    {2, 20, 0}, 
+    {4, 20, 0}, 
+    {2, 21, 0}, 
+    {4, 21, 0}, 
 };
 
 void LevelWarManager::init() {
@@ -34,7 +34,7 @@ void LevelWarManager::init() {
     VSDateTime warStartTime = getNextLevelWarTime();
     m_pLevelWarSchedule = new Schedule(new LevelWar(this), warStartTime);
 
-    filelog("WarLog.txt", "[Level=%d, Time=%s] 레벨별 전쟁을 추가합니다.", m_Level, warStartTime.toString().c_str());
+    filelog("WarLog.txt", "[Level=%d, Time=%s]   .", m_Level, warStartTime.toString().c_str());
 
     addSchedule(m_pLevelWarSchedule);
 }
@@ -50,7 +50,7 @@ Work* LevelWarManager::heartbeat()
     }
 
     if (m_bHasWar) {
-        // 전쟁이 있으면 GCWarList 를 갱신해준다
+        
         makeGCWarList();
     }
 
@@ -60,8 +60,8 @@ Work* LevelWarManager::heartbeat()
 void LevelWarManager::startWar() {
     m_bHasWar = true;
 
-    // 현재 시간을 start time 으로 기록해둔다.
-    // startTime 과 Level 이 기록을 남길 때 꼭 필요하다.
+    
+    
     setLevelWarStartTime(VSDateTime::currentDateTime());
 
     int year = VSDate::currentDate().year() - 2000;
@@ -93,7 +93,7 @@ void LevelWarManager::startWar() {
     g_pSweeperBonusManager->makeVoidSweeperBonusInfo(gcSweeperBonusInfo);
     g_pLevelWarZoneInfoManager->broadcast(m_pZone->getZoneID(), &gcSweeperBonusInfo);
 
-    // 기록 남긴다.
+    
     recordLevelWarStart();
 }
 
@@ -159,14 +159,14 @@ void LevelWarManager::endWar() {
     VSDateTime warStartTime = getNextLevelWarTime();
     m_pLevelWarSchedule = new Schedule(new LevelWar(this), warStartTime);
 
-    filelog("WarLog.txt", "[Level=%d, Time=%s] 레벨별 전쟁을 추가합니다.", m_Level, warStartTime.toString().c_str());
+    filelog("WarLog.txt", "[Level=%d, Time=%s]   .", m_Level, warStartTime.toString().c_str());
     addSchedule(m_pLevelWarSchedule);
 
     char sLoad[100];
     sprintf(sLoad, "*world *load sweeper_owner %d", m_Level);
     CGSayHandler::opworld(NULL, sLoad, 0, true);
 
-    // 기록 남긴다
+    
     recordLevelWarEnd();
 }
 
@@ -205,7 +205,7 @@ void LevelWarManager::recordLevelWarEnd() {
     }
     END_DB(pStmt)
 
-    // script 돌리기 ㅡ.,ㅡ system 함수를 쓰게 될 줄이야 !_!
+    
     char cmd[100];
     sprintf(cmd, "/home/darkeden/vs/bin/script/recordLevelWarHistory.py %d %s %d %d ", m_Level,
             getLevelWarStartTime().toStringforWeb().c_str(), g_pConfig->getPropertyInt("Dimension"),
@@ -396,7 +396,7 @@ void LevelWarManager::freeUserTimeCheck()
     if (m_bCanEnterFreeUser && hour != LevelWarTime[m_Level - 1][1]) {
         m_bCanEnterFreeUser = false;
 
-        // Zone 에 있는 사람 다 튕겨주자.
+        
         m_pZone->remainPayPlayer();
     } else if (!m_bCanEnterFreeUser && hour == LevelWarTime[m_Level - 1][1]) {
         m_bCanEnterFreeUser = true;

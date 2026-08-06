@@ -25,17 +25,17 @@ UserInfoManager::UserInfoManager() noexcept {}
 //----------------------------------------------------------------------
 UserInfoManager::~UserInfoManager() noexcept {
     try {
-        // hashmap ���� �� pair �� second, �� UserInfo ��ü���� �����ϰ�
-        // pair ��ü�� �״�� �д�. (UserInfo�� ���� �����Ǿ� �ִٴ� �Ϳ�
-        // �����϶�. �� �ʻ������ �ؾ� �Ѵ�. �ϱ�, ZGIM�� destruct �ȴٴ� ����
-        // �α��� ������ �˴ٿ�ȴٴ� ���� �ǹ��ϴϱ�.. - -; )
+        
+        
+        
+        
         for (int i = 1; i < m_MaxWorldID; i++) {
             for (HashMapUserInfo::iterator itr = m_UserInfos[i].begin(); itr != m_UserInfos[i].end(); itr++) {
                 delete itr->second;
                 itr->second = NULL;
             }
 
-            // ���� �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+            
             m_UserInfos[i].clear();
         }
 
@@ -100,13 +100,13 @@ void UserInfoManager::load() noexcept(false) {
         }
 
     } catch (SQLQueryException& sqe) {
-        // �ʻ� ����!
+        
         delete pStmt;
 
         throw Error(sqe.toString());
     }
 
-    // �ʻ� ����!
+    
     delete pStmt;
 
     __END_CATCH
@@ -137,10 +137,10 @@ void UserInfoManager::deleteUserInfo(ZoneGroupID_t ServerGroupID, WorldID_t Worl
     HashMapUserInfo::iterator itr = m_UserInfos[WorldID].find(ServerGroupID);
 
     if (itr != m_UserInfos[WorldID].end()) {
-        // UserInfo �� �����Ѵ�.
+        
         delete itr->second;
 
-        // pair�� �����Ѵ�.
+        
         m_UserInfos[WorldID].erase(itr);
 
     } else { // not found
@@ -197,7 +197,7 @@ string UserInfoManager::toString() const noexcept(false) {
             //--------------------------------------------------
             // *OPTIMIZATION*
             //
-            // for_each()�� ����� ��
+            
             //--------------------------------------------------
             for (HashMapUserInfo::const_iterator itr = m_UserInfos[i].begin(); itr != m_UserInfos[i].end(); itr++)
                 msg << itr->second->toString();

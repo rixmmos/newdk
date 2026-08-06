@@ -17,6 +17,7 @@
 #include "SystemAvailabilities.h"
 #include "SkinManager.h"
 #include "MGameStringTable.h"
+#include "NicknameInfo.h"
 //#include "ex\DebugInfo.h"
 
 
@@ -24,46 +25,51 @@
 #define	MAX_MUSIC_VOLUME		16
 #define	MAX_GAMMA_VALUE			100 
 
+static void TraceVSUIGameStart(const char* step)
+{
+	(void)step;
+}
+
 
 //----------------------------------------------------------------------------
 // Globals
 //
-// C_VS_UI_GAME Object�� �����߿� ���� �� ��ȿ�ϴ�.
+
 //----------------------------------------------------------------------------
 bool gbl_item_lock; // no static member, 'static GLOBAL!'
-						  // �ʱ�ȭ�� C_VS_UI_GAME::Start()���� ���ش�.
+						  
 bool gbl_gear_lock;
 
 bool gbl_item_trade_lock;
 
-// shop���� ������ �춧�� �칰�ǿ� ���� price�� ���������ϰ�,
-// �� ���� ���� �׷����Ѵ�.
-bool gbl_sell_running; // ��� ��..
-bool gbl_buy_running; // �Ĵ� ��..
-bool gbl_repair_running; // ��ġ�� ��...
-bool gbl_silvering_running; // ������ �ϴ���
-bool gbl_buy_storage_running; // ��ġ�� ��...
-bool gbl_exchange_ask_running; // ��ȯ�ҷ�? �� �ִ� ��.. --;		// by sigi
-bool gbl_exchange_cancel_running; // ��ȯ����ҷ�? �� �ִ� ��.. --;	// by sigi
-bool gbl_party_ask_running; // ��Ƽ�ҷ�? �� �ִ� ��.. --;
-bool gbl_party_cancel_running; // ��Ƽ����ҷ�? �� �ִ� ��.. --;
-bool gbl_enchant_running; // Enchant�ҷ�? �� �ִ� ��.. --;
-bool gbl_use_pet_food_running; // �� ���� ���Ϸ�? �� �ִ���
-bool gbl_keep_petitem_running; // �� �±淡? �� �ִ���
-bool gbl_get_keep_petitem_running; // �� ã��? �� �ִ���
-bool gbl_use_askitem_running; // �������� item ����ҷ�? �� �ִ���
+
+
+bool gbl_sell_running; 
+bool gbl_buy_running; 
+bool gbl_repair_running; 
+bool gbl_silvering_running; 
+bool gbl_buy_storage_running; 
+bool gbl_exchange_ask_running; 
+bool gbl_exchange_cancel_running; 
+bool gbl_party_ask_running; 
+bool gbl_party_cancel_running; 
+bool gbl_enchant_running; 
+bool gbl_use_pet_food_running; 
+bool gbl_keep_petitem_running; 
+bool gbl_get_keep_petitem_running; 
+bool gbl_use_askitem_running; 
 //bool gbl_option_running; // by sigi
-bool gbl_tutorial_exit_ask_running; // ���⼱���Ѱ� �ȹٲٱ� ������? ���ִ���..		//by larosel
-bool gbl_no_search_result_running; // �˻���� ���� �� �ִ� ��
-bool gbl_deposit_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_withdraw_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_exchange_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_bring_fee_limit_running; // �˻���� ���� �� �ִ� ��
-bool gbl_getitem_from_itemlist_running;	// ������ ����Ʈ���� ������ �����ö�
+bool gbl_tutorial_exit_ask_running; 
+bool gbl_no_search_result_running; 
+bool gbl_deposit_limit_running; 
+bool gbl_withdraw_limit_running; 
+bool gbl_exchange_limit_running; 
+bool gbl_bring_fee_limit_running; 
+bool gbl_getitem_from_itemlist_running;	
 bool gbl_trans_item_running;
 bool	gbl_skip_escape = false;
 
-bool gbl_swap_advancement_item_running; // ���� �����۰� ��ȯ��
+bool gbl_swap_advancement_item_running; 
 Race	g_eRaceInterface = RACE_SLAYER;  // Default to Slayer interface
 
 extern int					g_Dimension ;
@@ -285,7 +291,7 @@ void ExecF_UsePetFood(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 	{
 	case DIALOG_EXECID_OK:
 		{
-			#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+			#ifdef __TEST_SUB_INVENTORY__   
 				if(((C_VS_UI_ASK_DIALOG*)p_this_dialog)->GetdwTemporayValue())
 				{
 					MSubInventory* pSubInventory = (MSubInventory*)((C_VS_UI_ASK_DIALOG*)p_this_dialog)->GetpTemporayValue();
@@ -543,29 +549,7 @@ void ExecF_Use_AskItem(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 	
 	gC_vs_ui.AcquireChatting();
 }
-/*
-// by larosel
-void ExecF_TutorialExitAsk(C_VS_UI_DIALOG * p_this_dialog, id_t id)
-{
-	switch (id)
-	{
-		case DIALOG_EXECID_OK:
-			// �ּ� by sigi
-			//gpC_base->SendMessage( UI_TUTORIAL_EXIT_ACCEPT, TRUE );
-			gC_vs_ui.RunTutorialExitAccept();	// �ٷ� ���� by sigi
-			gbl_tutorial_exit_ask_running = false;
-		break;
-
-		case DIALOG_EXECID_CANCEL:
-		case DIALOG_EXECID_EXIT:
-			gpC_base->SendMessage( UI_STORAGE_BUY, FALSE );
-			gbl_tutorial_exit_ask_running = false;
-			break;
-	}
-
-	gC_vs_ui.AcquireChatting();
-}
-*/
+ 
 //----------------------------------------------------------------------------
 // Operations
 //----------------------------------------------------------------------------
@@ -573,7 +557,7 @@ void ExecF_TutorialExitAsk(C_VS_UI_DIALOG * p_this_dialog, id_t id)
 //-----------------------------------------------------------------------------
 // Lock/Unlock Item
 //
-// Lock�Ǹ� Item ����/����/�ٲٱⰡ �Ұ���������. Unlock�� �װ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::LockItem()
 {
@@ -617,11 +601,15 @@ void C_VS_UI_GAME::UnlockGear()
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ChangeToSlayerInterface()
 {
+	TraceVSUIGameStart("ChangeToSlayerInterface begin");
 	CloseDescDialog();
+	TraceVSUIGameStart("ChangeToSlayerInterface after CloseDescDialog");
 
 	CloseInfo();
+	TraceVSUIGameStart("ChangeToSlayerInterface after CloseInfo");
 	DeleteNew(m_pC_info);
 	DeleteNew(m_pC_other_info);
+	TraceVSUIGameStart("ChangeToSlayerInterface after delete info");
 
 //	CloseSkillView();
 //	DeleteNew(m_pC_skill_view);
@@ -629,15 +617,21 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = false;
-	g_eRaceInterface = RACE_SLAYER; // ousters interface �߰�
+	g_eRaceInterface = RACE_SLAYER; 
 
 	DeleteNew(m_pC_tribe_interface);
+	TraceVSUIGameStart("ChangeToSlayerInterface after delete tribe");
 
 	// change skin data
+	TraceVSUIGameStart("ChangeToSlayerInterface before FreeAssemble");
 	gpC_global_resource->FreeAssemble();
+	TraceVSUIGameStart("ChangeToSlayerInterface before LoadAssemble");
 	gpC_global_resource->LoadAssemble();
+	TraceVSUIGameStart("ChangeToSlayerInterface after LoadAssemble");
 	
+	TraceVSUIGameStart("ChangeToSlayerInterface before new C_VS_UI_SLAYER");
 	m_pC_tribe_interface = new C_VS_UI_SLAYER;
+	TraceVSUIGameStart("ChangeToSlayerInterface after new C_VS_UI_SLAYER");
 
 	char sz_filename[512],sz_filename2[512],sz_filename3[512];
 	wsprintf(sz_filename, "UserSet\\%s.set", g_char_slot_ingame.sz_name.c_str());
@@ -645,6 +639,7 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	wsprintf(sz_filename3,"UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 		
 	ifstream file(sz_filename3, ios::binary);
+	TraceVSUIGameStart("ChangeToSlayerInterface after open user set 3");
 	
 	if(file.is_open())
 	{
@@ -671,11 +666,16 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 	}
 
 	m_pC_hotkey = m_pC_tribe_interface;
+	TraceVSUIGameStart("ChangeToSlayerInterface before TribeChanged");
 	m_pC_chatting->TribeChanged();
+	TraceVSUIGameStart("ChangeToSlayerInterface before SetChattingInterface");
 	m_pC_tribe_interface->SetChattingInterface(m_pC_chatting);
 	
+	TraceVSUIGameStart("ChangeToSlayerInterface before tribe Start");
 	m_pC_tribe_interface->Start();	
+	TraceVSUIGameStart("ChangeToSlayerInterface after tribe Start");
 	m_pC_info = new C_VS_UI_INFO;
+	TraceVSUIGameStart("ChangeToSlayerInterface end");
 }
 
 //-----------------------------------------------------------------------------
@@ -685,11 +685,15 @@ void C_VS_UI_GAME::ChangeToSlayerInterface()
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ChangeToVampireInterface()
 {
+	TraceVSUIGameStart("ChangeToVampireInterface begin");
 	CloseDescDialog();
+	TraceVSUIGameStart("ChangeToVampireInterface after CloseDescDialog");
 
 	CloseInfo();
+	TraceVSUIGameStart("ChangeToVampireInterface after CloseInfo");
 	DeleteNew(m_pC_info);
 	DeleteNew(m_pC_other_info);
+	TraceVSUIGameStart("ChangeToVampireInterface after delete info");
 
 //	CloseSkillView();
 //	DeleteNew(m_pC_skill_view);
@@ -697,15 +701,21 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = true;
-	g_eRaceInterface = RACE_VAMPIRE; // ouster interface �߰�
+	g_eRaceInterface = RACE_VAMPIRE; 
 
 	DeleteNew(m_pC_tribe_interface);
+	TraceVSUIGameStart("ChangeToVampireInterface after delete tribe");
 
 	// change skin data
+	TraceVSUIGameStart("ChangeToVampireInterface before FreeAssemble");
 	gpC_global_resource->FreeAssemble();
+	TraceVSUIGameStart("ChangeToVampireInterface before LoadAssemble");
 	gpC_global_resource->LoadAssemble();
+	TraceVSUIGameStart("ChangeToVampireInterface after LoadAssemble");
 
+	TraceVSUIGameStart("ChangeToVampireInterface before new C_VS_UI_VAMPIRE");
 	m_pC_tribe_interface = new C_VS_UI_VAMPIRE;
+	TraceVSUIGameStart("ChangeToVampireInterface after new C_VS_UI_VAMPIRE");
 
 	char sz_filename[512];
 	char sz_filename2[512];
@@ -715,6 +725,7 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 	wsprintf(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 	
 	ifstream file(sz_filename3, ios::binary);
+	TraceVSUIGameStart("ChangeToVampireInterface after open user set 3");
 	
 	if(file.is_open())
 	{
@@ -739,11 +750,16 @@ void C_VS_UI_GAME::ChangeToVampireInterface()
 	}
 	
 	m_pC_hotkey = m_pC_tribe_interface;
+	TraceVSUIGameStart("ChangeToVampireInterface before TribeChanged");
 	m_pC_chatting->TribeChanged();
+	TraceVSUIGameStart("ChangeToVampireInterface before SetChattingInterface");
 	m_pC_tribe_interface->SetChattingInterface(m_pC_chatting);
 
+	TraceVSUIGameStart("ChangeToVampireInterface before tribe Start");
 	m_pC_tribe_interface->Start();
+	TraceVSUIGameStart("ChangeToVampireInterface after tribe Start");
 	m_pC_info = new C_VS_UI_INFO;
+	TraceVSUIGameStart("ChangeToVampireInterface end");
 }
 
 //-----------------------------------------------------------------------------
@@ -868,7 +884,7 @@ C_VS_UI_GAME::C_VS_UI_GAME()
 	m_pC_dialog_Campaign_Help = NULL;
 	m_pC_Quest_Npc_Dialog = NULL;
 	m_pC_WebBrowser = NULL;
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		m_pC_SubInventory = NULL;
 	#endif
 }
@@ -889,13 +905,9 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	}
 	if(m_NickNameList.size())
 	{
-		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
-		while(itr != m_NickNameList.end())
-		{
-			C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
-			m_NickNameList.erase(itr);
-			DeleteNew(TempInfo2);
-		}
+		for (std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
+			itr != m_NickNameList.end(); ++itr)
+			DeleteNew(*itr);
 		m_NickNameList.clear();
 	}
 	
@@ -909,7 +921,7 @@ C_VS_UI_GAME::~C_VS_UI_GAME()
 	DeleteNew(m_pC_dialog_Campaign_Help);
 	DeleteNew(m_pC_Quest_Npc_Dialog);
 	DeleteNew(m_pC_WebBrowser);
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		DeleteNew(m_pC_SubInventory);
 	#endif
 	DeleteNew(m_pC_sms_message);
@@ -1391,14 +1403,14 @@ void	C_VS_UI_GAME::RunGameMenu()
 //-----------------------------------------------------------------------------
 // C_VS_UI_GAME::ClosePopupWindow
 //
-// �ϳ��� ������ true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool	C_VS_UI_GAME::ClosePopupWindow()
 {
 	//
-	// Inventory/Gear�� �ѽ��� Popup Window�� ����. �� ���� ���� �� �ִٸ� ���� ������ ���̴�.
-	// �׵��� pinned Window�̹Ƿ� �����Ǿ� �ִ� ���� Interface���� no pinned Window�� ����
-	// ��µȴ�. ���� Inventory/Gear -> Other Window ������ close�Ѵ�.
+	
+	
+	
 	//
 	bool charinfo_closed = false;
 
@@ -1414,7 +1426,7 @@ bool	C_VS_UI_GAME::ClosePopupWindow()
 		return true;
 	}
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		if(IsRunningSubInventory())
 		{
 			CloseSubInventory();
@@ -1657,14 +1669,14 @@ bool	C_VS_UI_GAME::ClosePopupWindow()
 	}
 	
 	// by sigi
-	// å �а� ������ å �ݱ�
+	
 	if (IsRunningBookcase() && m_pC_bookcase->IsReadingBook())
 	{
 		m_pC_bookcase->CloseBook();
 
 		return true;
 	}
-	// �ƴϸ�.. bookcase �ݱ�
+	
 	else if (IsRunningBookcase())
 	{
 //		gpC_base->SendMessage(UI_CLOSE_BOOKCASE);		
@@ -1888,7 +1900,7 @@ void	C_VS_UI_GAME::AddChatToHistory(char * str, char * sz_id, CHAT_LINE_CONDITIO
 //	}
 //	else
 	{
-		// �Ϲ�ä��â����...
+		
 		m_pC_chatting->AddChatToHistory(str, sz_id, condition, color);
 	}
 }
@@ -2344,7 +2356,7 @@ void	C_VS_UI_GAME::CloseSkillTree()
 //-----------------------------------------------------------------------------
 // FinishItemSelling
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemSelling()
 {
@@ -2375,7 +2387,7 @@ void C_VS_UI_GAME::OpenInventoryToSell()
 //-----------------------------------------------------------------------------
 // FinishItemRepairing
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemRepairing()
 {
@@ -2392,7 +2404,7 @@ void C_VS_UI_GAME::FinishItemRepairing()
 //-----------------------------------------------------------------------------
 // FinishItemSilvering
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishItemSilvering()
 {
@@ -2468,7 +2480,7 @@ void C_VS_UI_GAME::SetPetStorage(MStorage* pStorage)
 //-----------------------------------------------------------------------------
 // CloseShop
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseShop()
 {
@@ -2488,7 +2500,7 @@ void C_VS_UI_GAME::CloseShop()
 //-----------------------------------------------------------------------------
 // CloseStorage
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseStorage()
 {
@@ -2502,7 +2514,7 @@ void C_VS_UI_GAME::CloseStorage()
 //-----------------------------------------------------------------------------
 // ClosePetStorage
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePetStorage()
 {
@@ -2516,7 +2528,7 @@ void C_VS_UI_GAME::ClosePetStorage()
 //-----------------------------------------------------------------------------
 // CloseExchange
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchange()
 {
@@ -2576,7 +2588,7 @@ bool C_VS_UI_GAME::IsRunningPointExchange() const
 //-----------------------------------------------------------------------------
 // CloseExchangeAsk
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchangeAsk()
 {
@@ -2595,7 +2607,7 @@ void C_VS_UI_GAME::CloseExchangeAsk()
 //-----------------------------------------------------------------------------
 // CloseExchangeCancel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseExchangeCancel()
 {
@@ -2614,7 +2626,7 @@ void C_VS_UI_GAME::CloseExchangeCancel()
 //-----------------------------------------------------------------------------
 // CloseGameMenuOption
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 /*
 void C_VS_UI_GAME::CloseOption()
@@ -2635,7 +2647,7 @@ void C_VS_UI_GAME::CloseOption()
 //-----------------------------------------------------------------------------
 // RunShop
 //
-// Shop�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunShop()
 {
@@ -2647,7 +2659,7 @@ void C_VS_UI_GAME::RunShop()
 
 		m_pC_tribe_interface->DoCommonActionBeforeEventOccured();
 
-		// Shop Window�� �Բ� ��� �͵��� �����Ѵ�.
+		
 		m_pC_tribe_interface->ShopRunningAnnounced();
 		m_pC_shop->Start();
 		gbl_buy_running = true;
@@ -2657,7 +2669,7 @@ void C_VS_UI_GAME::RunShop()
 //-----------------------------------------------------------------------------
 // RunStorage
 //
-// Storage�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunStorage()
 {
@@ -2676,7 +2688,7 @@ void C_VS_UI_GAME::RunStorage()
 //-----------------------------------------------------------------------------
 // RunPetStorage
 //
-// Storage�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPetStorage()
 {
@@ -2695,7 +2707,7 @@ void C_VS_UI_GAME::RunPetStorage()
 //-----------------------------------------------------------------------------
 // RunStorageBuy
 //
-// Storage�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunStorageBuy(int price)
 {
@@ -2714,35 +2726,11 @@ void C_VS_UI_GAME::RunStorageBuy(int price)
 
 	m_pC_storage_buy_dialog->Start();	
 }
-/*
-//-----------------------------------------------------------------------------
-// RunOption
-//
-// �ɼ�â ����
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::RunOption()
-{
-	//gC_vs_ui.CloseGameMenu();
-
-	if (m_pC_option!= NULL)
-	{
-		DeleteNew(m_pC_option);
-	}
-
-	// center
-	m_pC_option = new C_VS_UI_OPTION;
-
-	assert(m_pC_option != NULL);
-
-//	gbl_option_running = true;
-
-	m_pC_option->Start();	
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // RunSkillView //by larosel
 //
-// ��ų������ �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 //void C_VS_UI_GAME::RunSkillView()
 //{
@@ -2762,7 +2750,7 @@ void C_VS_UI_GAME::RunOption()
 //-----------------------------------------------------------------------------
 // CloseSkillView
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 //void C_VS_UI_GAME::CloseSkillView()
 //{
@@ -2781,7 +2769,7 @@ void C_VS_UI_GAME::RunOption()
 //-----------------------------------------------------------------------------
 // RunDescDialog //by larosel
 //
-// ����â�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunDescDialog(int type, void *ptr, void *ptr2)
 {
@@ -2801,7 +2789,7 @@ void C_VS_UI_GAME::RunDescDialog(int type, void *ptr, void *ptr2)
 //-----------------------------------------------------------------------------
 // CloseDescDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseDescDialog()
 {
@@ -2817,7 +2805,7 @@ void C_VS_UI_GAME::CloseDescDialog()
 //-----------------------------------------------------------------------------
 // RunFileDialog //by larosel
 //
-// ����â�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 {
@@ -2837,7 +2825,7 @@ void C_VS_UI_GAME::RunFileDialog(C_VS_UI_FILE_DIALOG::MODE Mode, char *type)
 //-----------------------------------------------------------------------------
 // CloseFileDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseFileDialog()
 {
@@ -2856,7 +2844,7 @@ void C_VS_UI_GAME::CloseFileDialog()
 //-----------------------------------------------------------------------------
 // RunElevator //by larosel
 //
-// ���������� �������̽��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunElevator()
 {
@@ -2876,7 +2864,7 @@ void C_VS_UI_GAME::RunElevator()
 //-----------------------------------------------------------------------------
 // CloseElevator
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseElevator()
 {
@@ -2892,7 +2880,7 @@ void C_VS_UI_GAME::CloseElevator()
 //-----------------------------------------------------------------------------
 // RunBookcase //by larosel
 //
-// å���� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunBookcase()
 {
@@ -2912,7 +2900,7 @@ void C_VS_UI_GAME::RunBookcase()
 //-----------------------------------------------------------------------------
 // CloseBookcase
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseBookcase()
 {
@@ -2924,48 +2912,11 @@ void C_VS_UI_GAME::CloseBookcase()
 	assert(m_pC_tribe_interface != NULL);
 	m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
 }
-/*
-//-----------------------------------------------------------------------------
-// RunBriefing //by larosel
-//
-// �긮���� �����Ѵ�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::RunBriefing()
-{
-	if (m_pC_briefing == NULL)
-	{
-		m_pC_briefing = new C_VS_UI_BRIEFING;
-
-		assert(m_pC_briefing != NULL);
-
-		m_pC_tribe_interface->DoCommonActionBeforeEventOccured();
-
-		m_pC_briefing->Start();
-
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// CloseBriefing //by larosel
-//
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::CloseBriefing()
-{
-	if (!m_pC_briefing)
-		return;
-
-	DeleteNew(m_pC_briefing);
-
-	assert(m_pC_tribe_interface != NULL);
-	m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
-}
-*/
+ 
 //-----------------------------------------------------------------------------
 // RunComputer //by larosel
 //
-// ��ǻ�͸� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunComputer()
 {
@@ -2999,7 +2950,7 @@ void C_VS_UI_GAME::RunComputer()
 //-----------------------------------------------------------------------------
 // CloseComputer //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseComputer()
 {
@@ -3013,100 +2964,12 @@ void C_VS_UI_GAME::CloseComputer()
 	m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
 
 }
-/*
-//-----------------------------------------------------------------------------
-// RunTutorialExit //by larosel
-//
-// Ʃ�丮�� �����⸦ �����Ѵ�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::RunTutorialExit()
-{
-	if (m_pC_tutorial_exit == NULL)
-	{
-		m_pC_tutorial_exit = new C_VS_UI_TUTORIAL_EXIT;
-
-		assert(m_pC_tutorial_exit != NULL);
-
-		m_pC_tribe_interface->DoCommonActionBeforeEventOccured();
-
-		m_pC_tutorial_exit->Start();
-
-	}
-}
-
-
-//-----------------------------------------------------------------------------
-// CloseTutorialExit //by larosel
-//
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::CloseTutorialExit()
-{
-	if (!m_pC_tutorial_exit)
-		return;
-
-	// ask�� ���� �� �� �ݾ��ش� -_-; by sigi
-	CloseTutorialExitAsk();
-
-	DeleteNew(m_pC_tutorial_exit);
-
-	assert(m_pC_tribe_interface != NULL);
-	m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
-}
-
-//-----------------------------------------------------------------------------
-// RunTutorialExitAsk	// by larosel
-//
-// Ʃ�丮�� ������Ȯ���� �����Ѵ�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::RunTutorialExitAsk(const int select, const char* pName)
-{
-	if (m_pC_tutorial_exit_ask_dialog != NULL)
-	{
-		DeleteNew(m_pC_tutorial_exit_ask_dialog);
-	}
-
-	// center
-	m_pC_tutorial_exit_ask_dialog = new C_VS_UI_ASK_DIALOG(-1, -1, 2, 0, ExecF_TutorialExitAsk, DIALOG_OK|DIALOG_CANCEL, 
-												C_VS_UI_ASK_DIALOG::ASK_TUTORIAL_EXIT, select, (void *)pName);
-
-	assert(m_pC_tutorial_exit_ask_dialog != NULL);
-
-	gbl_tutorial_exit_ask_running = true;
-
-	m_pC_tutorial_exit_ask_dialog->Start();	
-}
-
-void C_VS_UI_GAME::RunTutorialExitAccept()
-{
-	assert(m_pC_tutorial_exit);
-	m_pC_tutorial_exit->Accept();
-}
-
-//-----------------------------------------------------------------------------
-// CloseTutorialExitAsk
-//
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
-//-----------------------------------------------------------------------------
-void C_VS_UI_GAME::CloseTutorialExitAsk()
-{
-	if (!m_pC_tutorial_exit_ask_dialog)
-		return;
-
-	DeleteNew(m_pC_tutorial_exit_ask_dialog);
-	
-	//assert(m_pC_tribe_interface != NULL);
-	//m_pC_tribe_interface->DoCommonActionAfterEventOccured();	
-
-	gbl_tutorial_exit_ask_running = false;
-	gC_vs_ui.AcquireChatting();
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // RunHorn //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunHorn(int currentZoneID)
 {
@@ -3127,7 +2990,7 @@ void C_VS_UI_GAME::RunHorn(int currentZoneID)
 //-----------------------------------------------------------------------------
 // CloseHorn //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseHorn()
 {
@@ -3153,7 +3016,7 @@ bool	C_VS_UI_GAME::IsRunningHorn() const
 //-----------------------------------------------------------------------------
 // RunMailBox //by larosel
 //
-// ������
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunMailBox()
 {
@@ -3164,7 +3027,7 @@ void C_VS_UI_GAME::RunMailBox()
 //-----------------------------------------------------------------------------
 // CloseMailBox //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseMailBox()
 {
@@ -3231,7 +3094,7 @@ void	C_VS_UI_GAME::AddHelpMail(DWORD id,  bool open)
 //-----------------------------------------------------------------------------
 // RunFindingMine //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunFindingMine()
 {
@@ -3252,7 +3115,7 @@ void C_VS_UI_GAME::RunFindingMine()
 //-----------------------------------------------------------------------------
 // CloseFindingMine //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseFindingMine()
 {
@@ -3278,7 +3141,7 @@ bool	C_VS_UI_GAME::IsRunningFindingMine() const
 //-----------------------------------------------------------------------------
 // RunSlayerPortal //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunSlayerPortal()
 {
@@ -3299,7 +3162,7 @@ void C_VS_UI_GAME::RunSlayerPortal()
 //-----------------------------------------------------------------------------
 // CloseSlayerPortal //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseSlayerPortal()
 {
@@ -3325,7 +3188,7 @@ bool	C_VS_UI_GAME::IsRunningSlayerPortal() const
 //-----------------------------------------------------------------------------
 // RunTeamList //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTeamList(bool ready, bool IsUnion)
 {
@@ -3346,7 +3209,7 @@ void C_VS_UI_GAME::RunTeamList(bool ready, bool IsUnion)
 //-----------------------------------------------------------------------------
 // CloseTeamList //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamList()
 {
@@ -3383,7 +3246,7 @@ bool	C_VS_UI_GAME::IsRunningTeamList(bool IsUnion) const
 //-----------------------------------------------------------------------------
 // RunTeamMemberList //by larosel
 //
-// �����̾� ��Ż�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunTeamMemberList()
 {
@@ -3404,7 +3267,7 @@ void C_VS_UI_GAME::RunTeamMemberList()
 //-----------------------------------------------------------------------------
 // CloseTeamMemberList //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamMemberList()
 {
@@ -3450,7 +3313,7 @@ void C_VS_UI_GAME::RunTeamInfo(bool ready, void *info, bool IsUnion)
 //-----------------------------------------------------------------------------
 // CloseTeamInfo //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamInfo()
 {
@@ -3503,7 +3366,7 @@ void C_VS_UI_GAME::RunTeamMemberInfo(C_VS_UI_TEAM_MEMBER_INFO::MEMBER_INFO *info
 //-----------------------------------------------------------------------------
 // CloseTeamMemberInfo //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamMemberInfo()
 {
@@ -3549,7 +3412,7 @@ void C_VS_UI_GAME::RunTeamRegist(bool member, int reg_fee, int rank, char *date,
 //-----------------------------------------------------------------------------
 // CloseTeamRegist //by larosel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseTeamRegist()
 {
@@ -3609,9 +3472,9 @@ bool	C_VS_UI_GAME::IsRunningTeamRegist() const
 }
 
 //-----------------------------------------------------------------------------
-// RunExchangeAsk ( ��ȯ�ҷ��� ��� �̸� )
+
 //
-// ��ȯ�Ұųİ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchangeAsk(const char* pName)
 {
@@ -3711,7 +3574,7 @@ void C_VS_UI_GAME::RunFriendDeleteAsk(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchangeCancel
 //
-// ��ȯ�Ұųİ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchangeCancel(const char* pName)
 {
@@ -3734,7 +3597,7 @@ void C_VS_UI_GAME::RunExchangeCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunExchange
 //
-// ��ȯâ�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunExchange()
 {
@@ -4272,7 +4135,7 @@ void C_VS_UI_GAME::HotKey_Mark()
 		m_pC_hotkey->HotKey_Mark();
 }
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 	void C_VS_UI_GAME::HotKey_Inventory(bool IsCheckSubInventory)
 #else
 	void C_VS_UI_GAME::HotKey_Inventory()
@@ -4281,7 +4144,7 @@ void C_VS_UI_GAME::HotKey_Mark()
 	assert(m_pC_hotkey);
 
 	//if (!gpC_window_manager->GetShowState(m_pC_gamemenu))
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		if (!m_pC_gamemenu)
 			m_pC_hotkey->HotKey_Inventory(IsCheckSubInventory);
 	#else
@@ -4407,14 +4270,14 @@ void C_VS_UI_GAME::HotKey_ExtendChat()		// ctrl + e
 void C_VS_UI_GAME::HotKey_ESC()
 {
 	//
-	// ESCŰ�� �ۿ�
+	
 	//
-	// (1) Window�� �̵����ΰ�? -> Window�� ������Ų��.
-	// (2) ��ư�� ������ �ִ°�? -> ������ �����Ѵ�.
-	// (3) Popup Window�� �� �ִ°�? -> Window�� �ݴ´�.
-	// (3-2) event lock�� �����Ѵ�.
-	// (4) Item�� ��� �ִ°�? -> GameMenu�� ȣ���Ѵ�. �̶��� ��� Mouse pointer�� Item�� �ƴ�
-	//										������ ������ ���Ѵ�.
+	
+	
+	
+	
+	
+	
 	//
 
 	if( gbl_skip_escape )
@@ -4427,15 +4290,15 @@ void C_VS_UI_GAME::HotKey_ESC()
 	if (p_window != NULL) // (1)
 	{
 		p_window->ClearInputState();
-		gpC_window_manager->CancelPushStateOfCurrentPushedWindow(); // !�߿�
+		gpC_window_manager->CancelPushStateOfCurrentPushedWindow(); 
 	}
 	else if (gpC_window_manager->CancelPushStateOfCurrentPushedWindow() == false) // (2)
 	{
 		//
-		// Popup Window�� ���� ���� �켱 MessageBox�� �����Ѵ�. �׵��� topmost Window��
-		// ������� ó���Ǳ� ���Ѵ�. �̰��� hot-key ��å(VS_UI.cpp ����)�� ���� ���̴�.
-		// �׷��ϱ� escape���� �� Window�� �´� ó���� �ϰ��ϱ� ���ؼ� Window�� message��
-		// ������(topmost Window��).
+		
+		
+		
+		
 		//
 		Window * p_first_window = gpC_window_manager->GetFirstPriorityWindow();
 		if (p_first_window != NULL)
@@ -4447,42 +4310,7 @@ void C_VS_UI_GAME::HotKey_ESC()
 					return;
 				}
 			}
-/*
-		//
-		// Inventory/Gear�� �ѽ��� Popup Window�� ����. �� ���� ���� �� �ִٸ� ���� ������ ���̴�.
-		// �׵��� pinned Window�̹Ƿ� �����Ǿ� �ִ� ���� Interface���� no pinned Window�� ����
-		// ��µȴ�. ���� Inventory/Gear -> Other Window ������ close�Ѵ�.
-		//
-		if (m_pC_tribe_interface->CloseInventoryGearWindow() == false)
-		{
-			if (gbl_sell_running)
-			{
-				gC_vs_ui.TerminateItemSelling();
-			}
-			else if (gbl_buy_running)
-			{
-				gpC_base->SendMessage(UI_CLOSE_SHOP);
-			}
-			else if (m_pC_tribe_interface->SkillTreeRunning())
-			{
-				CloseSkillTree();
-			}
-			else
-			{
-				if (gpC_mouse_pointer->GetPickUpItem() != NULL)
-				{
-				}
-				
-				if (m_pC_gamemenu)
-				{
-					DeleteNew(m_pC_gamemenu);
-				}
-				else
-				{
-					RunGameMenu();
-				}
-			}
-		}*/
+ 
 
 		if (ClosePopupWindow() == false)
 		{
@@ -4623,7 +4451,9 @@ void C_VS_UI_GAME::ResetHotKey()
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::Start()
 {
+	TraceVSUIGameStart("C_VS_UI_GAME::Start begin");
 	PI_Processor::Start();
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after PI_Processor::Start");
 
 //	if(bl_load_set)
 //	{
@@ -4643,58 +4473,74 @@ void C_VS_UI_GAME::Start()
 	gbl_item_lock	= false;
 	gbl_gear_lock	= false;
 	gbl_item_trade_lock = false;
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after lock reset");
 
 	m_pC_hotkey = NULL;
 
 	if(m_pC_chatting != NULL)
 	{
+		TraceVSUIGameStart("C_VS_UI_GAME::Start before delete chatting");
 		DeleteNew(m_pC_chatting);
+		TraceVSUIGameStart("C_VS_UI_GAME::Start after delete chatting");
 		m_pC_chatting = NULL;
 	}
+	TraceVSUIGameStart("C_VS_UI_GAME::Start before new chatting");
 	m_pC_chatting = new C_VS_UI_CHATTING;
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after new chatting");
 
 	if(m_pC_mailbox != NULL)
 	{
+		TraceVSUIGameStart("C_VS_UI_GAME::Start before delete mailbox");
 		DeleteNew(m_pC_mailbox);
+		TraceVSUIGameStart("C_VS_UI_GAME::Start after delete mailbox");
 		m_pC_mailbox = NULL;
 	}
+	TraceVSUIGameStart("C_VS_UI_GAME::Start before new mailbox");
 	m_pC_mailbox = new C_VS_UI_MAILBOX;
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after new mailbox");
 	
 	MString mailFileName;
 	mailFileName.Format("UserSet\\%s-%d-%d.mail", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 
+	TraceVSUIGameStart("C_VS_UI_GAME::Start before mailbox LoadFromFile");
 	m_pC_mailbox->LoadFromFile(mailFileName.GetString());
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after mailbox LoadFromFile");
 
 	bool IsTestServer = false;
+	TraceVSUIGameStart("C_VS_UI_GAME::Start before testserver file");
 	ifstream IsTestServerFile(FILE_INFO_TESTSERVER, ios::binary);
 	IsTestServerFile.read((char *)&IsTestServer, 1);
 	IsTestServerFile.close();
 	g_pUserInformation->IsTestServer = IsTestServer;
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after testserver file");
 //	for(int zone = 0; zone < zoneNum; zone++)
 
 	
 	// default: Slayer interface
+	TraceVSUIGameStart("C_VS_UI_GAME::Start before race interface switch");
 	switch(g_eRaceInterface)
 	{
 	case RACE_SLAYER:
+		TraceVSUIGameStart("C_VS_UI_GAME::Start race slayer");
 		ChangeToSlayerInterface();
 		break;
 
 	case RACE_VAMPIRE:
+		TraceVSUIGameStart("C_VS_UI_GAME::Start race vampire");
 		ChangeToVampireInterface();
 		break;
 
 	case RACE_OUSTERS:
+		TraceVSUIGameStart("C_VS_UI_GAME::Start race ousters");
 		ChangeToOustersInterface();		
 	}	
+	TraceVSUIGameStart("C_VS_UI_GAME::Start after race interface switch");
 
-	// Client ���� Inventory data structure.
-	g_pInventory->Init(C_VS_UI_INVENTORY::GRID_X, C_VS_UI_INVENTORY::GRID_Y);
-	g_pSlayerGear->Init();
-	g_pVampireGear->Init();
-	g_pOustersGear->Init();
+	
+	TraceVSUIGameStart("C_VS_UI_GAME::Start preserving inventory/gear from GCUpdateInfo");
 
 	g_descriptor_manager.Unset();
+	TraceVSUIGameStart("C_VS_UI_GAME::Start end");
 //	MHelpMessageManager::Instance().LoadHelpMessageRpk("helpmessage.txt");
 }
 
@@ -4730,7 +4576,7 @@ void C_VS_UI_GAME::SelectSkill(int id)
 //-----------------------------------------------------------------------------
 // RequestDie
 //
-// ����-_-��û? ������ ���
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestDie(DWORD timer)
 {
@@ -4748,7 +4594,7 @@ void C_VS_UI_GAME::RequestDie(DWORD timer)
 //-----------------------------------------------------------------------------
 // FinishRequestDie
 //
-// ��Ƽ��û ������ ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestDie()
 {
@@ -4775,7 +4621,7 @@ bool	C_VS_UI_GAME::IsRunningRequestDie() const
 //-----------------------------------------------------------------------------
 // RequestParty
 //
-// ��Ƽ��û ������ ���
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestParty(const char *name, DWORD timer)
 {
@@ -4793,7 +4639,7 @@ void C_VS_UI_GAME::RequestParty(const char *name, DWORD timer)
 //-----------------------------------------------------------------------------
 // FinishRequestParty
 //
-// ��Ƽ��û ������ ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestParty()
 {
@@ -4824,9 +4670,9 @@ bool	C_VS_UI_GAME::IsRunningPartyAsk() const
 }
 
 //-----------------------------------------------------------------------------
-// RunPartyAsk ( ��û�� ��� �̸� )
+
 //
-// ��Ƽ�� �����Ұųİ� ���´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST_PARTY type)
 {
@@ -4857,7 +4703,7 @@ void C_VS_UI_GAME::RunPartyAsk(const char* pName, C_VS_UI_REQUEST_PARTY::REQUEST
 //-----------------------------------------------------------------------------
 // RunPartyCancel
 //
-// ��Ƽ�� �����ϴ°� ��Ѹ�����..
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunPartyCancel(const char* pName)
 {
@@ -4880,7 +4726,7 @@ void C_VS_UI_GAME::RunPartyCancel(const char* pName)
 //-----------------------------------------------------------------------------
 // RunEnchant
 //
-// Enchant�ҷ� �ϰ� ������...
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunEnchant(int value)
 {
@@ -4903,7 +4749,7 @@ void C_VS_UI_GAME::RunEnchant(int value)
 //-----------------------------------------------------------------------------
 // CloseEnchant
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseEnchant()
 {
@@ -4923,9 +4769,9 @@ void C_VS_UI_GAME::CloseEnchant()
 //-----------------------------------------------------------------------------
 // RunUsePetFood
 //
-// �� ���� ���Ϸ� �ϰ� ������...
+
 //-----------------------------------------------------------------------------
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 	void C_VS_UI_GAME::RunUsePetFood(DWORD UsingObjectID, MItem* SubInventory)
 #else
 	void C_VS_UI_GAME::RunUsePetFood()
@@ -4938,7 +4784,7 @@ void C_VS_UI_GAME::CloseEnchant()
 	
 	// center
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+	#ifdef __TEST_SUB_INVENTORY__   
 		m_pC_use_pet_food_dialog = new C_VS_UI_ASK_DIALOG(-1, 50, 5, 1, ExecF_UsePetFood, DIALOG_CANCEL | DIALOG_OK, 
 			C_VS_UI_ASK_DIALOG::ASK_USE_PET_FOOD, UsingObjectID, SubInventory);	// by sigi
 	#else
@@ -4957,7 +4803,7 @@ void C_VS_UI_GAME::CloseEnchant()
 //-----------------------------------------------------------------------------
 // CloseUsePetFood
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseUsePetFood()
 {
@@ -4976,7 +4822,7 @@ void C_VS_UI_GAME::CloseUsePetFood()
 //-----------------------------------------------------------------------------
 // RunKeepPetItemFood
 //
-// ���� ���� �ҷ�? �ϰ� ������...
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunKeepPetItemDialog()
 {
@@ -4999,7 +4845,7 @@ void C_VS_UI_GAME::RunKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseKeepPetItemDialog()
 {
@@ -5018,7 +4864,7 @@ void C_VS_UI_GAME::CloseKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunGetKeepPetItemDialog
 //
-// ���� ���� �ҷ�? �ϰ� ������...
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunGetKeepPetItemDialog()
 {
@@ -5041,7 +4887,7 @@ void C_VS_UI_GAME::RunGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseGetKeepPetItemDialog()
 {
@@ -5059,7 +4905,7 @@ void C_VS_UI_GAME::CloseGetKeepPetItemDialog()
 //-----------------------------------------------------------------------------
 // RunNoSearchResult
 //
-// �˻���� ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunNoSearchResult()
 {
@@ -5082,7 +4928,7 @@ void C_VS_UI_GAME::RunNoSearchResult()
 //-----------------------------------------------------------------------------
 // RunDepositLimit
 //
-// �˻���� ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunDepositLimit()
 {
@@ -5120,7 +4966,7 @@ void	C_VS_UI_GAME::RunBringFeeLimit()
 //-----------------------------------------------------------------------------
 // RunWithdrawLimit
 //
-// �˻���� ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunWithdrawLimit()
 {
@@ -5144,7 +4990,7 @@ void C_VS_UI_GAME::RunWithdrawLimit()
 //-----------------------------------------------------------------------------
 // ClosePartyAsk
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyAsk()
 {
@@ -5165,7 +5011,7 @@ void C_VS_UI_GAME::ClosePartyAsk()
 //-----------------------------------------------------------------------------
 // ClosePartyCancel
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyCancel()
 {
@@ -5185,7 +5031,7 @@ void C_VS_UI_GAME::ClosePartyCancel()
 //-----------------------------------------------------------------------------
 // CloseNoSearchResult
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseNoSearchResult()
 {
@@ -5205,7 +5051,7 @@ void C_VS_UI_GAME::CloseNoSearchResult()
 //-----------------------------------------------------------------------------
 // CloseDepositLimit
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseDepositLimit()
 {
@@ -5225,7 +5071,7 @@ void C_VS_UI_GAME::CloseDepositLimit()
 //-----------------------------------------------------------------------------
 // CloseWithdrawLimit
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseWithdrawLimit()
 {
@@ -5265,7 +5111,7 @@ void C_VS_UI_GAME::RunPartyManager()
 //-----------------------------------------------------------------------------
 // ClosePartyManager
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ClosePartyManager()
 {
@@ -5596,7 +5442,7 @@ void	C_VS_UI_GAME::CloseTransItem()
 //-----------------------------------------------------------------------------
 // RequestResurrect
 //
-// ����-_-��û? ������ ���
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RequestResurrect(bool f1, bool f2, bool eternity, bool IsSiegeAttacker)
 {
@@ -5622,7 +5468,7 @@ void C_VS_UI_GAME::SetDelayRequestResurrect( C_VS_UI_REQUEST_RESURRECT::RESURREC
 //-----------------------------------------------------------------------------
 // FinishRequestResurrect
 //
-// ��Ƽ��û ������ ����
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::FinishRequestResurrect()
 {
@@ -5652,11 +5498,15 @@ bool	C_VS_UI_GAME::IsRunningRequestResurrect() const
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::ChangeToOustersInterface()
 {
+	TraceVSUIGameStart("ChangeToOustersInterface begin");
 	CloseDescDialog();
+	TraceVSUIGameStart("ChangeToOustersInterface after CloseDescDialog");
 
 	CloseInfo();
+	TraceVSUIGameStart("ChangeToOustersInterface after CloseInfo");
 	DeleteNew(m_pC_info);
 	DeleteNew(m_pC_other_info);
+	TraceVSUIGameStart("ChangeToOustersInterface after delete info");
 
 //	CloseSkillView();
 //	DeleteNew(m_pC_skill_view);
@@ -5664,15 +5514,21 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 	g_descriptor_manager.Unset();
 
 //	gbl_vampire_interface = true;
-	g_eRaceInterface = RACE_OUSTERS; // ousters interface �߰�
+	g_eRaceInterface = RACE_OUSTERS; 
 
 	DeleteNew(m_pC_tribe_interface);
+	TraceVSUIGameStart("ChangeToOustersInterface after delete tribe");
 
 	// change skin data
+	TraceVSUIGameStart("ChangeToOustersInterface before FreeAssemble");
 	gpC_global_resource->FreeAssemble();
+	TraceVSUIGameStart("ChangeToOustersInterface before LoadAssemble");
 	gpC_global_resource->LoadAssemble();
+	TraceVSUIGameStart("ChangeToOustersInterface after LoadAssemble");
 
+	TraceVSUIGameStart("ChangeToOustersInterface before new C_VS_UI_OUSTERS");
 	m_pC_tribe_interface = new C_VS_UI_OUSTERS;
+	TraceVSUIGameStart("ChangeToOustersInterface after new C_VS_UI_OUSTERS");
 
 	char sz_filename[512];
 	char sz_filename2[512];
@@ -5682,6 +5538,7 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 	wsprintf(sz_filename3, "UserSet\\%s-%d-%d.set", g_char_slot_ingame.sz_name.c_str(),g_Dimension,g_pUserInformation->WorldID);
 	
 	ifstream file(sz_filename3, ios::binary);
+	TraceVSUIGameStart("ChangeToOustersInterface after open user set 3");
 	
 	if(file.is_open())
 	{
@@ -5706,11 +5563,16 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 	}
 	
 	m_pC_hotkey = m_pC_tribe_interface;
+	TraceVSUIGameStart("ChangeToOustersInterface before TribeChanged");
 	m_pC_chatting->TribeChanged();
+	TraceVSUIGameStart("ChangeToOustersInterface before SetChattingInterface");
 	m_pC_tribe_interface->SetChattingInterface(m_pC_chatting);
 
+	TraceVSUIGameStart("ChangeToOustersInterface before tribe Start");
 	m_pC_tribe_interface->Start();
+	TraceVSUIGameStart("ChangeToOustersInterface after tribe Start");
 	m_pC_info = new C_VS_UI_INFO;
+	TraceVSUIGameStart("ChangeToOustersInterface end");
 
 }
 
@@ -5718,7 +5580,7 @@ void C_VS_UI_GAME::ChangeToOustersInterface()
 //-----------------------------------------------------------------------------
 // RunMixingForge
 //
-// MixingForge�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class, C_VS_UI_MIXING_FORGE::FORGE_TYPE forge_type)
 {
@@ -5739,7 +5601,7 @@ void C_VS_UI_GAME::RunMixingForge(C_VS_UI_MIXING_FORGE::FORGE_CLASS forge_class,
 //-----------------------------------------------------------------------------
 // CloseMixingForge
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseMixingForge()
 {
@@ -6244,7 +6106,7 @@ void C_VS_UI_GAMEMENU::Run(id_t id)
 			break;
 
 		case CONTINUE:
-			//gC_vs_ui.HotKey_ESC(); // ��ư ������ �Ͱ� u_window���� push window ���� �켱���� ������ �־ �ȵ�.
+			
 			gpC_base->SendMessage(UI_GAMEMENU_CONTINUE);
 			break;
 	}
@@ -6269,7 +6131,7 @@ bool C_VS_UI_GAMEMENU::MouseControl(UINT message, int _x, int _y)
 -----------------------------------------------------------------------------*/
 void C_VS_UI_GAMEMENU::KeyboardControl(UINT message, UINT key, long extra)
 {
-	// ���� IME toggle�Ǿ� ���� ��츦 ����Ͽ� scan code�� �Ѵ�.
+	
 
 	id_t id = INVALID_ID;
 	if (message == WM_KEYDOWN)
@@ -6322,9 +6184,21 @@ void C_VS_UI_GAMEMENU::Show()
 	{
 		m_pC_gamemenu_spk->BltLocked(x, y, GAMEMENU_WINDOW);
 		
-		m_pC_button_group->Show();
+		RECT text_cover = { x + 34, y + 29, x + w - 30, y + 138 };
+		gpC_base->m_p_DDSurface_back->FillRect(&text_cover, CSDLGraphics::Color(6, 4, 3));
+		gpC_global_resource->DrawOutBoxLocked(text_cover.left, text_cover.top,
+			text_cover.right - text_cover.left, text_cover.bottom - text_cover.top);
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
+
+	PrintInfo menu_pi = gpC_base->m_desc_menu_pi;
+	menu_pi.text_align = TA_CENTER;
+
+	const int center_x = x + w / 2;
+	g_PrintColorStr(center_x, y + 35, "Menu", menu_pi, RGB(232, 214, 172));
+	g_PrintColorStr(center_x, y + 70, "Options (O)", menu_pi, RGB(232, 214, 172));
+	g_PrintColorStr(center_x, y + 93, "Logout (L)", menu_pi, RGB(232, 214, 172));
+	g_PrintColorStr(center_x, y + 116, "Cancel (C)", menu_pi, RGB(232, 214, 172));
 
 /*
 	// TEST -- 
@@ -6552,7 +6426,7 @@ void	C_VS_UI_GAME::CloseNaming()
 //-----------------------------------------------------------------------------
 // RunUseSMSItemDialog
 //
-// sms �������� ��� �ҷ�?? �ϰ� ������...
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::RunAskUseItemDialog(int AskType)
 {
@@ -6577,7 +6451,7 @@ void C_VS_UI_GAME::RunAskUseItemDialog(int AskType)
 //-----------------------------------------------------------------------------
 // CloseKeepPetItemDialog
 //
-// �̹� finish�� �����̸� �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_GAME::CloseAskUseItemDialog()
 {
@@ -6622,6 +6496,19 @@ void C_VS_UI_GAME::Change_Custom_Naming(int nID, char* szName)
 	}
 
 }
+
+static const char* GetSafeNicknameString(WORD index)
+{
+	if (g_pNickNameStringTable == NULL || g_pNickNameStringTable->GetSize() == 0)
+		return "No Title";
+
+	if (index >= g_pNickNameStringTable->GetSize())
+		index = 0;
+
+	const char* text = (*g_pNickNameStringTable)[index].GetString();
+	return (text != NULL && text[0] != '\0') ? text : "No Title";
+}
+
 // 2004, 6, 15 sobeit end
 
 // 2004, 6, 16 sobeit add start
@@ -6631,47 +6518,51 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 		return;
 	if(m_NickNameList.size())
 	{
-		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
-		while(itr != m_NickNameList.end())
-		{
-			C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
-			m_NickNameList.erase(itr);
-			DeleteNew(TempInfo2);
-		}
+		for (std::vector<C_VS_UI_NicknameInfo*>::iterator itr = m_NickNameList.begin();
+			itr != m_NickNameList.end(); ++itr)
+			DeleteNew(*itr);
 		m_NickNameList.clear();
 	}
 
-	std::vector<C_VS_UI_NicknameInfo*>	*TempList = (std::vector<C_VS_UI_NicknameInfo*>*)pData;
+	std::vector<NicknameInfo*>	*TempList = (std::vector<NicknameInfo*>*)pData;
 	
 	if(TempList->size())
 	{
 		WORD TempID = 0;
 		WORD TempIndex = 0;
 		BYTE TempType = 0;
-		std::vector<C_VS_UI_NicknameInfo*>::iterator itr = TempList->begin();
+		std::vector<NicknameInfo*>::iterator itr = TempList->begin();
 
-		// ����Ʈ�� �� ÷�� �г��� ���ִ� �� �߰��Ѵ�. - start
+		
 		C_VS_UI_NicknameInfo * FirstInfo = new C_VS_UI_NicknameInfo;
 		FirstInfo->setNicknameID(0xffff);
 		FirstInfo->setNicknameType(C_VS_UI_NicknameInfo::NICK_CUSTOM);
-		FirstInfo->setNickname((*g_pNickNameStringTable)[0].GetString());
+		FirstInfo->setNickname(GetSafeNicknameString(0));
 		m_NickNameList.push_back(FirstInfo);
-		// ����Ʈ�� �� ÷�� �г��� ���ִ� �� �߰��Ѵ�. -end
+		
 
 		while(itr != TempList->end())
 		{
-			C_VS_UI_NicknameInfo * TempInfo2 = (*itr);
+			NicknameInfo * TempInfo2 = (*itr);
+			if (TempInfo2 == NULL)
+			{
+				++itr;
+				continue;
+			}
+
 			C_VS_UI_NicknameInfo * TempInfo = new C_VS_UI_NicknameInfo;
 			
 			TempID	   = TempInfo2->getNicknameID();
 			TempIndex = TempInfo2->getNicknameIndex();
 			TempType  = TempInfo2->getNicknameType();
+			if (TempType > C_VS_UI_NicknameInfo::NICK_CUSTOM)
+				TempType = C_VS_UI_NicknameInfo::NICK_NONE;
 			
 			TempInfo->setNicknameID(TempID);
 			TempInfo->setNicknameIndex(TempIndex);
 			TempInfo->setNicknameType(TempType);
 			
-			// Ŀ���� �г��� �϶�
+			
 			if(TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM_FORCED)
 			{
 				TempInfo->setNickname(TempInfo2->getNickname());
@@ -6683,11 +6574,9 @@ void C_VS_UI_GAME::SetNickNameList(void* pData)
 //				else
 					TempInfo->setNickname(TempInfo2->getNickname());
 			}
-			else // �г��� �ε����� ���� ��
+			else 
 			{
-				if(TempIndex >= g_pNickNameStringTable->GetSize())
-					TempIndex = 0;
-				TempInfo->setNickname((*g_pNickNameStringTable)[TempIndex].GetString());
+				TempInfo->setNickname(GetSafeNicknameString(TempIndex));
 			}
 			m_NickNameList.push_back(TempInfo);
 			itr ++;
@@ -6700,28 +6589,28 @@ void C_VS_UI_GAME::AddNickNameList(void* pData)
 {
 	if(NULL == pData)
 		return;
-	C_VS_UI_NicknameInfo *TempInfo2 = (C_VS_UI_NicknameInfo*)pData;
+	NicknameInfo *TempInfo2 = (NicknameInfo*)pData;
 	C_VS_UI_NicknameInfo * TempInfo = new C_VS_UI_NicknameInfo;
 
 	WORD TempID	   = TempInfo2->getNicknameID();
 	WORD TempIndex = TempInfo2->getNicknameIndex();
 	BYTE TempType  = TempInfo2->getNicknameType();
+	if (TempType > C_VS_UI_NicknameInfo::NICK_CUSTOM)
+		TempType = C_VS_UI_NicknameInfo::NICK_NONE;
 	
 	TempInfo->setNicknameID(TempID);
 	TempInfo->setNicknameIndex(TempIndex);
 	TempInfo->setNicknameType(TempType);
 	
-	// Ŀ���� �г��� �϶�
+	
 	if(TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM_FORCED ||
 		TempType == C_VS_UI_NicknameInfo::NICK_CUSTOM)
 	{
 		TempInfo->setNickname(TempInfo2->getNickname());
 	}
-	else // �г��� �ε����� ���� ��
+	else 
 	{
-		if(TempIndex >= g_pNickNameStringTable->GetSize())
-			TempIndex = 0;
-		TempInfo->setNickname((*g_pNickNameStringTable)[TempIndex].GetString());
+		TempInfo->setNickname(GetSafeNicknameString(TempIndex));
 	}
 
 	m_NickNameList.push_back(TempInfo);
@@ -6963,7 +6852,7 @@ void	C_VS_UI_GAME::DeleteQuestItem(int nSlot)
 	m_pC_quest_manager->DeleteQuestItem(nSlot);
 }
 
-// 2004, 10, 25, sobeit add start - ���� ����
+
 void	C_VS_UI_GAME::RunModifyTax()
 {
 	if(m_pC_dialog_Modify_Tax)
@@ -7129,7 +7018,7 @@ bool	C_VS_UI_GAME::IsRunningSwapAdvancementItem() const
 // 2005, 1, 3, sobeit add end
 
 
-// 2005, 1, 11, sobeit add start - �ҿ��̿����� â
+
 void	C_VS_UI_GAME::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 {
 	if(m_pC_dialog_Campaign_Help)
@@ -7144,7 +7033,7 @@ void	C_VS_UI_GAME::Run_Campaign_Help_Unfortunate_Neighbors(int value)
 // 2005, 1, 11, sobeit add end
 
 
-// 2005, 1, 17, sobeit add start - ����Ʈ ����
+
 void	C_VS_UI_GAME::SetQuestNpcDialog(void* pVoid)
 {
 	if(NULL == pVoid) 
@@ -7156,8 +7045,8 @@ void	C_VS_UI_GAME::SetQuestNpcDialog(void* pVoid)
 	m_pC_Quest_Npc_Dialog->SetQuestNpcDialog((C_VS_UI_NPC_DIALOG*)pVoid);
 	
 }
-// 2005, 1, 17, sobeit add end - ����Ʈ ����
-// 2005, 1, 24, sobeit add start - ������ �ޱ� �̺�Ʈ
+
+
 void	C_VS_UI_GAME::Run_Confirm_GetItemEvent(int value)
 {
 	if (m_pC_get_event_item != NULL)
@@ -7218,7 +7107,7 @@ bool C_VS_UI_GAME::IsInRectPointWebBrowser(int X, int Y)
 	return m_pC_WebBrowser->IsInRectPoint(X, Y);
 }
 // 2005, 2, 1, sobeit add end
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 
 // 2005, 2, 24, sobeit add start
 void	C_VS_UI_GAME::RunSubInventory(MItem* pItem)

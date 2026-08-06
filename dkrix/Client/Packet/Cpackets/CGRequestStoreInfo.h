@@ -10,10 +10,10 @@
 #define __CG_REQUEST_STORE_INFO_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -25,10 +25,10 @@ class CGRequestStoreInfo : public Packet
 {
 public:
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler
@@ -50,7 +50,7 @@ public:
 	void		setOwnerObjectID(ObjectID_t oid) { m_OwnerObjectID = oid; }
 
 private:
-	ObjectID_t	m_OwnerObjectID;	// 0이면 자기 자신의 상점 정보
+	ObjectID_t	m_OwnerObjectID;	
 };
 
 

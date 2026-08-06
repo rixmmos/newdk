@@ -19,10 +19,10 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// 플레이어가 NPC를 클릭할 경우, 클라이언트가 CGNPCAskAnswer 패킷을
-// 서버로 전송한다.  서버는 이 패킷을 핸들링할 때,
-// NPC에 CONDITION_TALKED_BY 컨디션 플래그가 켜져 있으면,
-// 트리거를 탐색하면서 적절한 트리거를 찾아서 연관된 액션을 실행한다.
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 void CGNPCAskAnswerHandler::execute(CGNPCAskAnswer* pPacket, Player* pPlayer)
 
@@ -46,20 +46,10 @@ void CGNPCAskAnswerHandler::execute(CGNPCAskAnswer* pPacket, Player* pPlayer)
     if (pZone == NULL)
         return;
 
-    /*
-    try
-    {
-        pCreature = pZone->getCreature(pPacket->getObjectID());
-    }
-    catch (NoSuchElementException)
-    {
-        //cout << "여기 NPC 없다~" << endl;
-        pCreature = NULL;
-    }
-    */
+     
     // cout << pPacket->toString().c_str() << endl;
 
-    // NoSuch제거. by sigi. 2002.5.2
+    
     pCreature = pZone->getCreature(pPacket->getObjectID());
 
     if (pCreature == NULL || !pCreature->isNPC()) {
@@ -93,7 +83,7 @@ void CGNPCAskAnswerHandler::execute(CGNPCAskAnswer* pPacket, Player* pPlayer)
             // check all condition after check main condition
             if (pTrigger->hasCondition(Condition::CONDITION_ANSWERED_BY) &&
                 pTrigger->isAllSatisfied(Trigger::PASSIVE_TRIGGER, pNPC, pPC, (void*)&cond)) {
-                // 최초로 발견된 트리거만 실행한 다음 break 한다.
+                
                 pTrigger->activate(pNPC, pPC);
                 break;
             }

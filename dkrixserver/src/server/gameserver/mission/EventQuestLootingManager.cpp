@@ -51,7 +51,7 @@ bool EventQuestLootingInfo::isTargetMonster(PlayerCreature* pPC, Monster* pMonst
 
             qGrade = pOusters->getLevel();
         } else {
-            cout << "�͹���!" << endl;
+            cout << "!" << endl;
             qGrade = 0;
         }
 

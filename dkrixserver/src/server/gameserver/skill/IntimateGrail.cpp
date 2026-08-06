@@ -19,7 +19,7 @@
 #include "PacketUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -40,7 +40,7 @@ void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        if (pTargetCreature == NULL) // NoSuch 제거. by sigi. 2002.5.2
+        if (pTargetCreature == NULL) 
         {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayerobject)" << endl;
@@ -67,7 +67,7 @@ void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
 
-            // 기술의 효과치 및 지속시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             if (pTargetCreature->getCreatureClass() == Creature::CREATURE_CLASS_SLAYER)
                 input.TargetType = SkillInput::TARGET_SELF;
@@ -76,14 +76,14 @@ void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트를 만들어 붙인다.
+            
             EffectIntimateGrail* pEffect = new EffectIntimateGrail(pTargetCreature);
             pEffect->setSkillLevel(input.SkillLevel);
             pEffect->setDeadline(output.Duration);
             pTargetCreature->setFlag(Effect::EFFECT_CLASS_INTIMATE_GRAIL);
             pTargetCreature->addEffect(pEffect);
 
-            // 이펙트를 붙였으니, 능력치를 재계산한다.
+            
             /*			SLAYER_RECORD prev;
                         pTargetSlayer->getSlayerRecord(prev);
                         pTargetSlayer->initAllStat();
@@ -95,7 +95,7 @@ void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
                 pTargetPC->initAllStatAndSend();
             }
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToObjectOK1);
@@ -174,7 +174,7 @@ void IntimateGrail::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlo
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void IntimateGrail::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -217,21 +217,21 @@ void IntimateGrail::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t 
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트를 만들어 붙인다.
+            
             EffectIntimateGrail* pEffect = new EffectIntimateGrail(pSlayer);
             pEffect->setSkillLevel(input.SkillLevel);
             pEffect->setDeadline(output.Duration);
             pSlayer->setFlag(Effect::EFFECT_CLASS_INTIMATE_GRAIL);
             pSlayer->addEffect(pEffect);
 
-            // 이펙트를 붙였으니, 능력치를 재계산한다.
+            
             SLAYER_RECORD prev;
             pSlayer->getSlayerRecord(prev);
             pSlayer->initAllStat();
             pSlayer->sendRealWearingInfo();
             pSlayer->addModifyInfo(prev, _GCSkillToSelfOK1);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToSelfOK1);

@@ -115,19 +115,19 @@ Turn_t OustersSkillSlot::getRemainTurn(Timeval currentTime) const throw() {
 }
 
 void OustersSkillSlot::setRunTime() throw() {
-    // 현재 시간을 받아온다.
+    
     getCurrentTime(m_runTime);
 
-    // 다음 쓸 수 있는 시간을 세팅한다.
+    
     m_runTime.tv_sec += m_Interval / 10;
     m_runTime.tv_usec += (m_Interval % 10) * 100000;
 }
 
 void OustersSkillSlot::setRunTime(Turn_t delay) throw() {
-    // 현재 시간을 받아온다.
+    
     getCurrentTime(m_runTime);
 
-    // 다음 쓸 수 있는 시간을 세팅한다.
+    
     m_runTime.tv_sec += delay / 10;
     m_runTime.tv_usec += (delay % 10) * 100000;
 
@@ -149,7 +149,7 @@ void OustersSkillSlot::setRunTime(Turn_t delay) throw() {
         case SKILL_HOWL:
             break;
         default:
-            save(m_Name); // 달리진 딜레이를 세이브한다.
+            save(m_Name); 
             break;
         }
     }

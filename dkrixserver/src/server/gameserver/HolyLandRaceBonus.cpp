@@ -15,14 +15,14 @@ void HolyLandRaceBonus::refresh()
 {
     __BEGIN_TRY
 
-    // 기존꺼는 지우고..
+    
     clear();
 
     const unordered_map<ZoneID_t, CastleInfo*>& castleInfos = g_pCastleInfoManager->getCastleInfos();
     unordered_map<ZoneID_t, CastleInfo*>::const_iterator itr = castleInfos.begin();
 
 
-    // 현재 성의 소유종족에 따라서 보너스를 설정한다.
+    
     for (; itr != castleInfos.end(); itr++) {
         CastleInfo* pCastleInfo = itr->second;
 
@@ -33,7 +33,7 @@ void HolyLandRaceBonus::refresh()
             const list<OptionType_t>& optionTypes = pCastleInfo->getOptionTypeList();
             m_VampireOptionTypes.insert(m_VampireOptionTypes.begin(), optionTypes.begin(), optionTypes.end());
         } else {
-            // 무시
+            
         }
     }
 

@@ -12,6 +12,7 @@
 #include "ClientDef.h"
 #include "MActionInfoTable.h"
 #include "SkillDef.h"
+#include "PacketFunction.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -24,9 +25,11 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 	
 	// message
+	WriteCombatCrashMarker("GCAttackMeleeOK1 target=%d short=%d long=%d",
+		pPacket->getObjectID(), pPacket->getShortCount(), pPacket->getLongCount());
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
@@ -38,12 +41,16 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
+	WriteCombatCrashMarker("GCAttackMeleeOK1 before modify target=%d short=%d long=%d",
+		pPacket->getObjectID(), pPacket->getShortCount(), pPacket->getLongCount());
 	AffectModifyInfo(g_pPlayer, pPacket);
+	WriteCombatCrashMarker("GCAttackMeleeOK1 after modify target=%d hp=%d/%d",
+		pPacket->getObjectID(), g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP());
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -52,28 +59,24 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
+		WriteCombatCrashMarker("GCAttackMeleeOK1 creature lookup target=%d creature=%p",
+			pPacket->getObjectID(), pCreature);
 
-		// Creature에게 Damage 입힘
+		
 		if (pCreature != NULL)
 		{
-			// SKILL_ATTACK_MELEE에 대한 결과를 표현해준다.
-			/*
-			// 바로 맞는 모습
-			pCreature->PacketSpecialActionResult( 
-								g_pPlayer->GetBasicActionInfo() + g_ActionInfoTable.GetMinResultActionInfo(),
-								pCreature->GetID(),
-								pCreature->GetX(),
-								pCreature->GetY()
-								);
-				*/
-			// action이 끝나고 맞는 동작
+			
+			 
+			
 			if (pCreature!=NULL)
 			{
+				WriteCombatCrashMarker("GCAttackMeleeOK1 before action target=%d basicAI=%d creature=%d,%d",
+					pPacket->getObjectID(), g_pPlayer->GetBasicActionInfo(), pCreature->GetX(), pCreature->GetY());
 				MActionResult* pResult = new MActionResult;
 			
 				pResult->Add( new MActionResultNodeActionInfo( 
@@ -87,6 +90,7 @@ throw ( ProtocolException , Error )
 
 				//g_pPlayer->PacketAddActionResult( effectID, pResult );
 				g_pPlayer->PacketAddActionResult( 0, pResult );
+				WriteCombatCrashMarker("GCAttackMeleeOK1 after action target=%d", pPacket->getObjectID());
 			}
 		}
 	}	

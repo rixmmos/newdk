@@ -12,8 +12,8 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // class PCOustersInfo3;
-// 뱀파이어의 외모 정보를 담고 있는 객체
-// GCAddOusters, GCAddOustersCorpse 에 담겨서 전송된다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCOustersInfo3 : public PCInfo {
@@ -54,33 +54,33 @@ public:
 
     uint getSize() const {
         return szObjectID                    // ObjectID
-               + szBYTE + m_Name.size()      // 뱀파이어 이름
-               + szCoord + szCoord + szDir   // 좌표와 방향
-               + szSex                       // 성별
+               + szBYTE + m_Name.size()      
+               + szCoord + szCoord + szDir   
+               + szSex                       
                + szBYTE                      // shape
-               + szColor * OUSTERS_COLOR_MAX // 색상
-               + szBYTE + szHP * 2           // 최대 체력
-               + szAlignment                 // 성향
-               + szSpeed                     // 공격 속도
-               + szGuildID                   // 길드 아이디
-               + szRank                      // 계급
-               + szBYTE                      // 권한
+               + szColor * OUSTERS_COLOR_MAX 
+               + szBYTE + szHP * 2           
+               + szAlignment                 
+               + szSpeed                     
+               + szGuildID                   
+               + szRank                      
+               + szBYTE                      
                + szuint + szLevel;
     }
 
     // get max size of object
     static uint getMaxSize() {
         return szObjectID                    // ObjectID
-               + szBYTE + 20                 // 뱀파이어 이름
-               + szCoord + szCoord + szDir   // 좌표와 방향
-               + szSex                       // 성별
+               + szBYTE + 20                 
+               + szCoord + szCoord + szDir   
+               + szSex                       
                + szBYTE                      // shape
-               + szColor * OUSTERS_COLOR_MAX // 색상
-               + szBYTE + szHP * 2           // 최대 체력
-               + szSpeed                     // 공격 속도
-               + szGuildID                   // 길드 아이디
-               + szRank                      // 계급
-               + szBYTE                      // 권한
+               + szColor * OUSTERS_COLOR_MAX 
+               + szBYTE + szHP * 2           
+               + szSpeed                     
+               + szGuildID                   
+               + szRank                      
+               + szBYTE                      
                + szuint + szLevel;
     }
 
@@ -316,7 +316,7 @@ private:
     // colors
     Color_t m_Colors[OUSTERS_COLOR_MAX];
 
-    // 마스터 이펙트 색깔
+    
     BYTE m_MasterEffectColor;
 
     // Current HP
@@ -328,18 +328,18 @@ private:
     // Attack Speed
     Speed_t m_AttackSpeed;
 
-    // 성향
+    
     Alignment_t m_Alignment;
 
-    // 권한
+    
     BYTE m_Competence;
 
-    // 길드 아이디
+    
     GuildID_t m_GuildID;
 
     uint m_UnionID;
 
-    // 계급
+    
     Rank_t m_Rank;
 
     Level_t m_AdvancementLevel;

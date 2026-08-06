@@ -22,24 +22,18 @@ bool ConditionCanEnterGDRLair::isSatisfied(Creature* pCreature1, Creature* pCrea
 
     //	return false;
 
-    /*	if ( GDRLairManager::Instance().getTotalPCs() > 36 )
-        {
-            GCSystemMessage gcSystemMessage;
-            gcSystemMessage.setMessage( "제한 인원이 초과되어 들어갈 수 없습니다." );
-            pCreature2->getPlayer()->sendPacket (&gcSystemMessage);
-            return false;
-        }*/
+     
 
     if (!GDRLairManager::Instance().canEnter()) {
         GCSystemMessage gcSystemMessage;
-        gcSystemMessage.setMessage("훑댐흩契묵뻘청역폘.");
+        gcSystemMessage.setMessage(".");
         pCreature2->getPlayer()->sendPacket(&gcSystemMessage);
         return false;
     }
 
     if (!pCreature2->isFlag(Effect::EFFECT_CLASS_CAN_ENTER_GDR_LAIR)) {
         GCSystemMessage gcSystemMessage;
-        gcSystemMessage.setMessage("극伎돕呵쭝裂檢2꿔팎뻐謳찝薑채훙柯獗.");
+        gcSystemMessage.setMessage("2.");
         pCreature2->getPlayer()->sendPacket(&gcSystemMessage);
         return false;
     }

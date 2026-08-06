@@ -17,7 +17,7 @@
 #include "SimpleMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î ¿ÀºêÁ§Æ® ÇÚµé·¯
+
 //////////////////////////////////////////////////////////////////////////////
 void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot,
                                 CEffectID_t CEffectID)
@@ -45,7 +45,7 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Holy Smashing ÀÌ ÀÖ´Ù¸é µ¥¹ÌÁö Áõ°¡
+    
     if (pSlayer->hasRankBonus(RankBonus::RANK_BONUS_SOUL_SMASHING)) {
         RankBonus* pRankBonus = pSlayer->getRankBonus(RankBonus::RANK_BONUS_SOUL_SMASHING);
         Assert(pRankBonus != NULL);
@@ -85,15 +85,15 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
         Damage_t Damage = 0;
 
         if (param.bAdd) {
-            // ÆÄ¶ó¹ÌÅÍ·Î Àü´ÞµÈ µ¥¹ÌÁö °ªÀÌ ´õÇØÁö´Â µ¥¹ÌÁö¶ó¸é,
-            // ÀÏ¹Ý µ¥¹ÌÁö¸¦ °è»ê ÈÄ, µ¥¹ÌÁö¸¦ ´õÇØ¾ß ÇÑ´Ù.
-            // ÆÄ¶ó¹ÌÅÍ·Î Àü´ÞµÈ µ¥¹ÌÁö °ªÀÌ Á÷Á¢ÀûÀ¸·Î ¾²ÀÌ´Â µ¥¹ÌÁö¶ó¸é,
-            // ÀÌ ºÎºÐ±îÁö µé¾î¿ÀÁö ¾ÊÀ¸¹Ç·Î, ¹ØÀÇ ºÎºÐ±îÁö 0À¸·Î Àü´ÞµÈ´Ù.
+            
+            
+            
+            
             Damage += computeDamage(pSlayer, pTargetCreature, SkillLevel / 5, bCriticalHit);
         }
 
         if (param.bMagicDamage) {
-            // ¸¸ÀÏ ½ºÅ³ µ¥¹ÌÁö°¡ ¸¶¹ý µ¥¹ÌÁö¶ó¸é, ¸¶¹ý µ¥¹ÌÁö °è»ê ÇÔ¼ö¸¦ ÀÌ¿ëÇØ °è»êÀ» ÇØÁØ´Ù.
+            
             Damage += computeMagicDamage(pTargetCreature, param.SkillDamage, param.SkillType);
         } else {
             Damage += param.SkillDamage;
@@ -112,21 +112,7 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
         bool bPK = verifyPK(pSlayer, pTargetCreature);
 
         bool bUseSkill = false;
-        /*
-        // È¡³öµ±Ç°Ê¹ÓÃ¼¼ÄÜ½ÇÉ«ËùÊ¹ÓÃµÄÎäÆ÷
-        Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
-        //Ã»ÓÐÎäÆ÷²»ÄÜÊ¹ÓÃ¼¼ÄÜ
-        if (pWeapon != NULL)
-        {
-            Silver_t silverDamage= pWeapon->getSilver();
-            if (silverDamage >50)
-            {
-                silverDamage-=50;
-                pWeapon->setSilver(silverDamage);
-                bUseSkill=true;
-            }
-        }
-        */
+         
         bUseSkill = true;
 
 
@@ -139,12 +125,12 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bPK && bUseSkill) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
 
-            // µ¥¹ÌÁö¸¦ °¡ÇÏ°í, ³»±¸µµ¸¦ ¶³¾î¶ß¸°´Ù.
+            
             setDamage(pTargetCreature, Damage, pSlayer, param.SkillType, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
             decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCSkillToObjectOK1, &_GCSkillToObjectOK2);
 
-            // Å¸°ÙÀÌ ½½·¹ÀÌ¾î°¡ ¾Æ´Ñ °æ¿ì¿¡¸¸ °æÇèÄ¡¸¦ ¿Ã·ÁÁØ´Ù.
+            
             if (!pTargetCreature->isSlayer()) {
                 shareAttrExp(pSlayer, Damage, param.STRMultiplier, param.DEXMultiplier, param.INTMultiplier,
                              _GCSkillToObjectOK1);
@@ -153,7 +139,7 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
                 increaseSkillExp(pSlayer, DomainType, pSkillSlot, pSkillInfo, _GCSkillToObjectOK1);
                 increaseAlignment(pSlayer, pTargetCreature, _GCSkillToObjectOK1);
             }
-            // ÎüÈ¡Ä¿±êHP
+            
             HP_t HealPoint = Damage;
             HP_t CurrentHP = pSlayer->getHP();
             HP_t MaxHP = pSlayer->getHP(ATTR_MAX);
@@ -216,30 +202,7 @@ void IllusionInversion::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Skil
     } catch (Throwable& t) {
         executeSkillFailException(pSlayer, param.SkillType);
     }
-    /*
-        g_SimpleMissileSkill.execute(pSlayer, TargetObjectID, pSkillSlot, param, result);
-        // È¡³öÉËº¦Öµ
-        Zone* pZone = pSlayer->getZone();
-        Player* pPlayer = pSlayer->getPlayer();
-        Assert(pPlayer != NULL);
-        Assert(pZone != NULL);
-        Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
-
-        if (pTargetCreature==NULL		// NoSuch Á¦°Å. by sigi. 2002.5.2
-            || pTargetCreature->isNPC()
-            || !canAttack( pSlayer, pTargetCreature )
-            || pTargetCreature->isDead()
-            )
-        {
-            executeSkillFailException(pSlayer, getSkillType());
-            return;
-        }
-        int targetLevel = 0;
-        int targetMaxHP = 0;
-        Exp_t Exp = output.Damage;
-        cout << "Ê¹ÓÃ¼¼ÄÜ:¿Ö²À»Ã¾õ,Ôì³ÉÉËº¦:"<< (int)output.Damage << endl;
-    //	cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayer)" << endl;
-    */
+     
     __END_CATCH
 }
 

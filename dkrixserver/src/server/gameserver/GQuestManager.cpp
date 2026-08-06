@@ -40,7 +40,7 @@ void GQuestManager::load()
 
             if (sta != QuestStatusInfo::COMPLETE && sta != QuestStatusInfo::FAIL &&
                 sta != QuestStatusInfo::CAN_REPLAY) {
-                filelog("GQuestError.log", "저장된 퀘스트의 status가 잘못되었습니다 : [%s]:%d/%d",
+                filelog("GQuestError.log", "  status  : [%s]:%d/%d",
                         m_pOwner->getName().c_str(), qID, sta);
             } else {
                 if (sta == QuestStatusInfo::CAN_REPLAY)
@@ -56,9 +56,9 @@ void GQuestManager::load()
                 int lastSec = pResult->getInt(3);
                 if (lastSec > EVENT_QUEST_TIME_LIMIT)
                     lastSec = EVENT_QUEST_TIME_LIMIT;
-                cout << "지난 시간 lastSec : " << lastSec << endl;
+                cout << "  lastSec : " << lastSec << endl;
                 pEffect->setDeadline((EVENT_QUEST_TIME_LIMIT - lastSec) * 10);
-                cout << "데드라인 : " << (Turn_t)((EVENT_QUEST_TIME_LIMIT - lastSec) * 10) << endl;
+                cout << " : " << (Turn_t)((EVENT_QUEST_TIME_LIMIT - lastSec) * 10) << endl;
                 pEffect->setNextTime(((EVENT_QUEST_TIME_LIMIT - lastSec) % BROADCASTING_DELAY) * 10);
                 m_pOwner->addEffect(pEffect);
             }
@@ -135,18 +135,18 @@ Packet* GQuestManager::getStatusInfoPacket() const {
 void GQuestManager::accept(DWORD qID) {
     unordered_map<DWORD, GQuestStatus*>::iterator itr = m_QuestStatuses.find(qID);
     if (itr == m_QuestStatuses.end()) {
-        cout << "accept : 없다 -_- " << qID << endl;
+        cout << "accept :  -_- " << qID << endl;
         return;
     }
 
     //	GQuestStatus* pQS = m_QuestStatuses[qID];
     GQuestStatus* pQS = itr->second;
     if (pQS == NULL) {
-        cout << "accept : 널이다 -_- " << qID << endl;
+        cout << "accept :  -_- " << qID << endl;
         return;
     }
     if (pQS->getStatus() != QuestStatusInfo::CAN_ACCEPT && pQS->getStatus() != QuestStatusInfo::CAN_REPLAY) {
-        cout << "accept : CAN_ACCEPT가 아니다 -_- " << (int)pQS->getStatus() << endl;
+        cout << "accept : CAN_ACCEPT  -_- " << (int)pQS->getStatus() << endl;
         return;
     }
 
@@ -163,18 +163,18 @@ void GQuestManager::accept(DWORD qID) {
 void GQuestManager::cancel(DWORD qID) {
     unordered_map<DWORD, GQuestStatus*>::iterator itr = m_QuestStatuses.find(qID);
     if (itr == m_QuestStatuses.end()) {
-        cout << "accept : 없다 -_- " << qID << endl;
+        cout << "accept :  -_- " << qID << endl;
         return;
     }
 
     //	GQuestStatus* pQS = m_QuestStatuses[qID];
     GQuestStatus* pQS = itr->second;
     if (pQS == NULL) {
-        cout << "cancel : 널이다 -_- " << qID << endl;
+        cout << "cancel :  -_- " << qID << endl;
         return;
     }
     if (pQS->getStatus() != QuestStatusInfo::DOING) {
-        cout << "cancel : DOING이 아니다 -_- " << (int)pQS->getStatus() << endl;
+        cout << "cancel : DOING  -_- " << (int)pQS->getStatus() << endl;
         return;
     }
 
@@ -200,7 +200,7 @@ void GQuestManager::heartbeat() {
         Timeval endTime = pTimeMission->getEndTime();
         if (gCurrentTime > endTime) {
             pTimeMission->m_pParent->update();
-            // -_- 땜빵;
+            
             break;
         }
     }
@@ -218,12 +218,12 @@ void GQuestManager::blooddrain() {
         char buffer[256];
 
         if (m_pOwner->isVampire()) {
-            sprintf(buffer, "쏵契죄%u늴俱沂.", pBloodDrainMission->getCurrent());
+            sprintf(buffer, "%u.", pBloodDrainMission->getCurrent());
             GCSystemMessage gcSM;
             gcSM.setMessage(buffer);
             m_pOwner->getPlayer()->sendPacket(&gcSM);
         } else if (m_pOwner->isOusters()) {
-            sprintf(buffer, "쏵契죄%u늴俱쥣.", pBloodDrainMission->getCurrent());
+            sprintf(buffer, "%u.", pBloodDrainMission->getCurrent());
             GCSystemMessage gcSM;
             gcSM.setMessage(buffer);
             m_pOwner->getPlayer()->sendPacket(&gcSM);
@@ -238,7 +238,7 @@ void GQuestManager::blooddrain() {
             m_pOwner->getPlayer()->sendPacket(&gcSM);
         }
 
-        // -_- 땜빵;
+        
         //		break;
     }
 }
@@ -253,7 +253,7 @@ void GQuestManager::levelUp() {
 
         if (pLevelMission->isSuccess(m_pOwner)) {
             pLevelMission->m_pParent->update();
-            // -_- 땜빵;
+            
             //			break;
         }
     }
@@ -280,7 +280,7 @@ bool GQuestManager::metNPC(NPC* pNPC) {
 
         GQuestSayNPCElement* pSayNPCElement = dynamic_cast<GQuestSayNPCElement*>(*pSayNPCMission->m_Position);
         if (pSayNPCElement == NULL) {
-            cout << "SayNPCElement 캐스팅 실패!!!!" << endl;
+            cout << "SayNPCElement  !!!!" << endl;
             Assert(false);
         }
 
@@ -289,7 +289,7 @@ bool GQuestManager::metNPC(NPC* pNPC) {
         if (pSayNPCElement->getTarget() == pNPC->getNPCID()) {
             pSayNPCMission->meet();
             pSayNPCMission->m_pParent->update();
-            // 한번에 한명씩만 만나기
+            
             return true;
         }
     }
@@ -324,7 +324,7 @@ void GQuestManager::killed() {
             pKilledMission->m_pParent->update();
         }
 
-        // -_- 땜빵;
+        
         //		break;
     }
 }
@@ -357,7 +357,7 @@ void GQuestManager::rideMotorcycle(bool isParty) {
             pRideMotorcycleMission->m_pParent->update();
         }
 
-        // -_- 땜빵;
+        
         //		break;
     }
 
@@ -395,14 +395,14 @@ void GQuestManager::touchWayPoint(MonsterCorpse* pWayPoint) {
         GQuestTouchWayPointElement* pTouchWayPointElement =
             dynamic_cast<GQuestTouchWayPointElement*>(*pTouchWayPointMission->m_Position);
         if (pTouchWayPointElement == NULL) {
-            cout << "TouchWayPointElement 캐스팅 실패!!!!" << endl;
+            cout << "TouchWayPointElement  !!!!" << endl;
             Assert(false);
         }
 
         if (pTouchWayPointElement->m_ZoneID == m_pOwner->getZoneID() &&
             pTouchWayPointElement->m_X == pWayPoint->getX() && pTouchWayPointElement->m_Y == pWayPoint->getY()) {
             if (pTouchWayPointElement->m_Type != pWayPoint->getMonsterType())
-                cout << "몬스터 타입이 다르다!! 먼일이지 -_-" << endl;
+                cout << "  !!  -_-" << endl;
             pTouchWayPointMission->touch();
 
             pTouchWayPointMission->m_pParent->update();
@@ -444,7 +444,7 @@ void GQuestManager::killedMonster(Monster* pMonster) {
             GQuestKillMonsterElement* pKillMonsterElement =
                 dynamic_cast<GQuestKillMonsterElement*>(*pKillMonsterMission->m_Position);
             if (pKillMonsterElement == NULL) {
-                cout << "KillMonsterElement 캐스팅 실패!!!!" << endl;
+                cout << "KillMonsterElement  !!!!" << endl;
                 Assert(false);
             }
             if (pKillMonsterElement->getGoal() <= pKillMonsterMission->getCurrent()) {
@@ -463,16 +463,16 @@ void GQuestManager::partyDissect(MonsterCorpse* pMonsterCorpse) {
         if (pPartyDissectMission == NULL)
             continue;
 
-        cout << "목표 : " << pPartyDissectMission->m_StrArg << endl;
-        cout << "숫자 : " << (int)pPartyDissectMission->getTargetList().front() << endl;
-        cout << "잡은놈 : " << pMonsterCorpse->getMonsterType() << endl;
+        cout << " : " << pPartyDissectMission->m_StrArg << endl;
+        cout << " : " << (int)pPartyDissectMission->getTargetList().front() << endl;
+        cout << " : " << pMonsterCorpse->getMonsterType() << endl;
 
         if (pPartyDissectMission->isTarget(
                 g_pMonsterInfoManager->getMonsterInfo(pMonsterCorpse->getMonsterType())->getSpriteType())) {
             GQuestPartyDissectElement* pPartyDissectElement =
                 dynamic_cast<GQuestPartyDissectElement*>(*pPartyDissectMission->m_Position);
             if (pPartyDissectElement == NULL) {
-                cout << "PartyDissectElement 캐스팅 실패!!!!" << endl;
+                cout << "PartyDissectElement  !!!!" << endl;
                 Assert(false);
             }
             pPartyDissectMission->increase();
@@ -491,7 +491,7 @@ void GQuestManager::partyDissect(MonsterCorpse* pMonsterCorpse) {
 
 void GQuestManager::eventParty() {
     m_bPartyQuest = true;
-    cout << "이벤트 파티가 결성되었습니다. : " << m_pOwner->getName() << endl;
+    cout << "  . : " << m_pOwner->getName() << endl;
     list<GQuestMission*>::iterator itr = m_EventMissions[EVENT_PARTY].begin();
     while (itr != m_EventMissions[EVENT_PARTY].end()) {
         GQuestEventPartyMission* pEventPartyMission = dynamic_cast<GQuestEventPartyMission*>((*itr));
@@ -502,7 +502,7 @@ void GQuestManager::eventParty() {
         GQuestEventPartyElement* pEventPartyElement =
             dynamic_cast<GQuestEventPartyElement*>(*pEventPartyMission->m_Position);
         if (pEventPartyElement == NULL) {
-            cout << "EventPartyElement 캐스팅 실패!!!!" << endl;
+            cout << "EventPartyElement  !!!!" << endl;
             Assert(false);
         }
 
@@ -515,7 +515,7 @@ void GQuestManager::eventParty() {
 
 void GQuestManager::eventPartyCrash() {
     m_bPartyQuest = false;
-    cout << "이벤트 파티가 깨졌습니다. : " << m_pOwner->getName() << endl;
+    cout << "  . : " << m_pOwner->getName() << endl;
     list<GQuestMission*>::iterator itr = m_EventMissions[EVENT_PARTY_CRASH].begin();
     while (itr != m_EventMissions[EVENT_PARTY_CRASH].end()) {
         GQuestEventPartyCrashMission* pEventPartyCrashMission = dynamic_cast<GQuestEventPartyCrashMission*>((*itr));
@@ -526,7 +526,7 @@ void GQuestManager::eventPartyCrash() {
         GQuestEventPartyCrashElement* pEventPartyCrashElement =
             dynamic_cast<GQuestEventPartyCrashElement*>(*pEventPartyCrashMission->m_Position);
         if (pEventPartyCrashElement == NULL) {
-            cout << "EventPartyCrashElement 캐스팅 실패!!!!" << endl;
+            cout << "EventPartyCrashElement  !!!!" << endl;
             Assert(false);
         }
 
@@ -644,7 +644,7 @@ void GQuestManager::advancementClassLevelUp() {
 
         if (pAdvancementClassLevelMission->isSuccess(m_pOwner)) {
             pAdvancementClassLevelMission->m_pParent->update();
-            // -_- 땜빵;
+            
             //			break;
         }
     }
@@ -663,7 +663,7 @@ void GQuestManager::clearDynamicZone(ZoneID_t zoneID) {
 
         if (pClearDynamicZoneMission->isClear()) {
             pClearDynamicZoneMission->m_pParent->update();
-            // -_- 땜빵;
+            
             //			break;
         }
     }
@@ -680,7 +680,7 @@ void GQuestManager::enterDynamicZone(ZoneID_t zoneID) {
 
         if (pEnterDynamicZoneMission->isEnter()) {
             pEnterDynamicZoneMission->m_pParent->update();
-            // -_- 땜빵;
+            
             //			break;
         }
     }

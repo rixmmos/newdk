@@ -8,13 +8,13 @@
 //
 // *Reiot's Notes*
 //
-// 시스템에서 가장 빈번하게 사용되는 클래스중의 하나이다.
-// 속도에 무지막지한 영향을 미치므로, 만일 좀더 속도를 보강하고
-// 싶다면, exception을 빼고 re-write 하라. 
+
+
+
 //
-// 현재 nonblocking 이 굉장히-억수로-졸라 많이 발생한다고 했을때,
-// 이것이 NonBlockingIOException으로 wrapping될때 overhead가 발생할
-// 확률이 높다고 추측된다.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +22,7 @@
 #define __SOCKET_INPUT_STREAM_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "Socket.h"
 
@@ -107,6 +107,14 @@ public :
 
 	// get debug string
 	std::string toString () const throw ();
+
+	virtual void resetState () throw ()
+	{
+		m_Head = 0;
+		m_Tail = 0;
+		m_EncryptKey = 0;
+		m_HashTable = NULL;
+	}
 
 
 //////////////////////////////////////////////////

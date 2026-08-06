@@ -5,7 +5,37 @@
 #ifndef __IFC_H__
 #define __IFC_H__
 
+#if defined(USE_SDL_BACKEND) || (!defined(_WIN32) && !defined(_WIN64))
 
+class CImm
+{
+public:
+	enum FORCE_UI_ID
+	{
+		FORCE_UI_DRAG,
+		FORCE_UI_WINDOW,
+		FORCE_UI_BUTTON,
+		FORCE_UI_GRID,
+		FORCE_UI_MAX,
+	};
+
+	CImm() {}
+	~CImm() {}
+
+	void Enable(bool enable = true) { (void)enable; }
+	void Disable() {}
+	bool IsDevice() { return false; }
+
+	void ForceUI(const unsigned int ID) const { (void)ID; }
+	void ForceAction(const int sound_id) const { (void)sound_id; }
+	void ForceSkill(const int sound_id) const { (void)sound_id; }
+	void ForceInventory(const int sound_id) const { (void)sound_id; }
+	void ForceUseItem(const int sound_id) const { (void)sound_id; }
+};
+
+extern CImm *gpC_Imm;
+
+#else
 
 #include "ifc.h"
 #include <vector>
@@ -59,7 +89,7 @@ public:
 	CImm();
 	~CImm();
 
-	void	Enable();
+	void	Enable(bool enable = true);
 	void	Disable();
 	bool	IsDevice()	{ return m_pDevice != NULL; }
 
@@ -75,5 +105,7 @@ public:
 
 extern CImm *gpC_Imm;
 extern HWND g_hWnd;
+
+#endif
 
 #endif // !defined(AFX_CIMM_H__F8627A31_A1CE_4724_9B35_8601BDDC598E__INCLUDED_)

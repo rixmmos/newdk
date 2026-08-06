@@ -24,11 +24,11 @@ ServerSocket::ServerSocket(uint port, uint backlog) : m_Impl(NULL) {
     m_Impl->create();
 
     // reuse address before Bind()
-    // ���ε� �ϱ� ���� �ּ� ����� �ý��ۿ� �˷��� �Ѵ�.
+    
     m_Impl->setReuseAddr();
 
     // bind address to socket
-    // �̹� port�� m_Impl�� ����Ǿ� �����Ƿ�, �Ķ���;��� Bind()�� ȣ���ص� �ȴ�.
+    
     m_Impl->bind();
 
     //	m_Impl->setSendBufferSize( 9000 );

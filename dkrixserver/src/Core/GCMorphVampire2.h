@@ -19,7 +19,7 @@
 //
 // class GCMorphVampire2;
 //
-// slayer등이 vampire로 변신하는 걸 지켜보는 분들에게 보낸다.
+
 //----------------------------------------------------------------------
 
 class GCMorphVampire2 : public Packet {
@@ -30,10 +30,10 @@ public:
     ~GCMorphVampire2() {};
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -69,7 +69,7 @@ public:
 
 
 private:
-    // 외모 정보
+    
     PCVampireInfo3 m_VampireInfo3;
 };
 

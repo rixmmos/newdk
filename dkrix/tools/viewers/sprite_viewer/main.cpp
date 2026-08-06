@@ -1,12 +1,4 @@
-/**
- * @file sprite_viewer.cpp
- * @brief Sprite Viewer - 使用 Client/SpriteLib C++ 库
- *
- * 功能：
- * - 加载并显示 .spk 精灵包文件
- * - 支持导航、缩放、信息显示
- * - 测试 CSpritePack 和 CSpriteSurface 的功能
- */
+ 
 
 #include "Client/SpriteLib/CSpritePack.h"
 #include "Client/SpriteLib/CSpriteSurface.h"

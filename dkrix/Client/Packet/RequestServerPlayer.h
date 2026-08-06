@@ -18,7 +18,7 @@
 //
 // class RequestServerPlayer
 //
-// 다른 클라이언트의 요청을 처리하는 플레이어 클래스
+
 //
 //--------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ public :
 	
 
 	// disconnect
-	// 정식 로그아웃의 경우 disconnect(UNDISCONNECTED)
+	
 	virtual void disconnect ( bool bDisconnected = DISCONNECTED ) throw ( ProtocolException , Error );
 	
 	void				setName(const char* pName)	{ m_Name = pName; }
@@ -76,7 +76,7 @@ private :
 	DWORD		m_ExpireTime;
 	std::string		m_Name;
 
-	// Request하고 있는 것
+	
 	REQUEST_CLIENT_MODE			m_RequestMode;
 
 	// player status

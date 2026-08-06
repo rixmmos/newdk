@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : ActionTradeGiftBox.cpp
-// Written By  : 장홍창
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 #include "ActionTradeGiftBox.h"
@@ -89,7 +89,7 @@ void ActionTradeGiftBox::read(PropertyBuffer& propertyBuffer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -122,7 +122,7 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
     Item* pItem;
     Item* pGiftBoxItem;
 
-    // 이미 선물을 교환해 갔다면
+    
     if (pFlagSet->isOn(FLAGSET_TRADE_GIFT_BOX_2002_12)) {
         GCNPCResponse response;
         response.setCode(NPC_RESPONSE_TRADE_GIFT_BOX_ALREADY_TRADE);
@@ -135,7 +135,7 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
         return;
     }
 
-    // 빨간 선물 상자가 있는지 확인한다.
+    
     CoordInven_t X, Y;
     pGiftBoxItem = pInventory->findItem(Item::ITEM_CLASS_EVENT_GIFT_BOX, 1, X, Y);
     if (pGiftBoxItem == NULL) {
@@ -154,7 +154,7 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
     string luaFileName;
 
     if (pPC->isSlayer()) {
-        // 루아에 슬레이어 능력치의 합을 set한다.
+        
         Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
         Assert(pSlayer != NULL);
 
@@ -165,7 +165,7 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
         luaFileName = m_SlayerFilename;
 
     } else if (pPC->isVampire()) {
-        // 루아에 뱀파이어의 레벨을 set한다.
+        
         Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
         Assert(pVampire != NULL);
 
@@ -176,31 +176,12 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
     }
 
     //--------------------------------------------------------
-    // 속도 체크를 위해서 1000번 돌려보는 코드
-    // 결과는.. 0.07초 정도 나왔다. 감덩~ -_-;
-    /*
-    Timeval beforeTime;
-    getCurrentTime(beforeTime);
-
-    for (int i=0; i<1000; i++)
-    {
-        // 루아의 계산 결과를 받아 아이템을 생성한다.
-        pLuaSelectItem->prepare();
-
-        int result = pLuaSelectItem->executeFile( luaFileName );
-        LuaState::logError(result);
-        pLuaSelectItem->clear();
-    }
-
-    Timeval afterTime;
-    getCurrentTime(afterTime);
-
-    cout << "luaExecute time before : " << beforeTime.tv_sec  << "." << beforeTime.tv_usec << endl;
-    cout << "luaExecute time after  : " << afterTime.tv_sec  << "." << afterTime.tv_usec << endl;
-    */
+    
+    
+     
     //--------------------------------------------------------
 
-    // 루아의 계산 결과를 받아 아이템을 생성한다.
+    
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);
@@ -226,14 +207,14 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
         return;
     }
 
-    // 클라이언트에 선물상자를 지우도록 한다.
+    
     GCDeleteInventoryItem gcDeleteInventoryItem;
     gcDeleteInventoryItem.setObjectID(pGiftBoxItem->getObjectID());
     pPlayer->sendPacket(&gcDeleteInventoryItem);
 
-    // 선물상자를 지운다.
+    
     pInventory->deleteItem(X, Y);
-    // ItemTraceLog 를 남긴다
+    
     if (pGiftBoxItem != NULL && pGiftBoxItem->isTraceItem()) {
         remainTraceLog(pGiftBoxItem, pCreature2->getName(), pCreature1->getName(), ITEM_LOG_DELETE, DETAIL_EVENTNPC);
     }
@@ -241,7 +222,7 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
     SAFE_DELETE(pGiftBoxItem);
 
 
-    // 선물(Item)을 만든다.
+    
     list<OptionType_t> optionTypeList;
     if (OptionType != 0)
         optionTypeList.push_back(OptionType);
@@ -250,28 +231,28 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
     Assert(pItem != NULL);
 
 
-    // 선물을 인벤토리에 추가한다.
+    
     pZone->getObjectRegistry().registerObject(pItem);
     pInventory->addItem(X, Y, pItem);
     pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, X, Y);
 
-    // ItemTraceLog 를 남긴다
+    
     if (pItem != NULL && pItem->isTraceItem()) {
         remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
     }
 
-    // 클라이언트에 선물이 추가되었음을 알린다.
+    
     GCCreateItem gcCreateItem;
     makeGCCreateItem(&gcCreateItem, pItem, X, Y);
     pPlayer->sendPacket(&gcCreateItem);
 
-    // Flag을 켠다.
+    
     pFlagSet->turnOn(FLAGSET_TRADE_GIFT_BOX_2002_12);
 
-    // Flag을 저장한다.
+    
     pFlagSet->save(pPC->getName());
 
-    // 아이템 교환이 이루어 졌다고 클라이언트에 알린다.
+    
     GCNPCResponse response;
     response.setCode(NPC_RESPONSE_TRADE_GIFT_BOX_OK);
     pPlayer->sendPacket(&response);

@@ -100,7 +100,7 @@ void CBillingPlayer::processOutput() {
     try {
         m_pOutputStream->flush();
     } catch (InvalidProtocolException&) {
-        throw DisconnectException("�̻��� ��Ŷ��");
+        throw DisconnectException(" ");
     }
 
     __END_CATCH
@@ -111,13 +111,13 @@ void CBillingPlayer::processCommand() {
     __BEGIN_TRY
 
     try {
-        // �Է� ���ۿ� ����ִ� ������ ��Ŷ���� ������ ó���Ѵ�.
+        
         while (true) {
-            // ����� ������ ���� ����
+            
             CBillingPacketHeader header;
 
-            // �ϴ� ����� �д´�. peek. �Է¹��ۿ��� �������� �ʴ´�.
-            // ����� �������� ������ �н�
+            
+            
             if (!m_pInputStream->peek((char*)&header, szCBillingPacketHeaderInfo))
                 return;
 
@@ -128,7 +128,7 @@ void CBillingPlayer::processCommand() {
             header.Body_Length = ntohl(header.Body_Length);
 
             ////////////////////////////////////////////////////////////////////////////////////
-            // Packet_Type, Method_Code, Return_Code �� ���� �ٵ� ������ �����ϴ��� Ȯ���Ѵ�.
+            
             ////////////////////////////////////////////////////////////////////////////////////
             if (header.Packet_Type != CBILLING_PACKET_RESPONSE) {
                 cout << "error" << endl;
@@ -138,115 +138,115 @@ void CBillingPlayer::processCommand() {
 
                 g_pCBillingPlayerManager->setForceDisconnect();
                 return;
-                // ������ ����~
+                
             }
 
-            // ������ ���
+            
             if (header.Return_Code != CBILLING_RETURN_CODE_SUCCESS) {
-                // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                
                 if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketErrorBodyInfo)
                     return;
 
-                // ���� ������ ������ �о� ����.
+                
                 CBillingPacketErrorBody body;
                 header.read(*m_pInputStream);
                 body.read(*m_pInputStream);
 
                 executeError(header, body);
-            } else // ������ ���
+            } else 
             {
                 switch (header.Method_Code) {
 #ifdef __LOGIN_SERVER__
                 case CBILLING_METHOD_CODE_LOGIN: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketResponseLoginBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseLoginBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeLogin(header, body);
 
                     break;
                 }
 #elif defined(__GAME_SERVER__)
                 case CBILLING_METHOD_CODE_INTERVAL_VALIDATION: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseIntervalValidationBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseIntervalValidationBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeIntervalValidation(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_LOGIN: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketResponseLoginBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseLoginBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeLogin(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_MINUS_POINT: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseMinusPointBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseMinusPointBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeMinusPoint(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_MINUS_MINUTE: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() <
                         szCBillingPacketHeaderInfo + szCBillingPacketResponseMinusMinuteBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseMinusMinuteBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeMinusMinute(header, body);
 
                     break;
                 }
                 case CBILLING_METHOD_CODE_LOGOUT: {
-                    // �ٵ� ������ ����ִ��� Ȯ���Ѵ�.
+                    
                     if (m_pInputStream->length() < szCBillingPacketHeaderInfo + szCBillingPacketResponseLogoutBodyInfo)
                         return;
 
-                    // ���� ������ ������ �о� ����.
+                    
                     CBillingPacketResponseLogoutBody body;
                     header.read(*m_pInputStream);
                     body.read(*m_pInputStream);
 
-                    // ����
+                    
                     executeLogout(header, body);
 
                     break;
@@ -255,7 +255,7 @@ void CBillingPlayer::processCommand() {
                 default: {
                     throw Error("Invaild Code");
 
-                    // ������.
+                    
                     break;
                 }
                 }
@@ -523,7 +523,7 @@ void CBillingPlayer::executeError(CBillingPacketHeader& header, CBillingPacketEr
     LoginPlayer* pLoginPlayer = g_pLoginPlayerManager->getPlayer_NOLOCKED(body.Login_Name);
 
     if (pLoginPlayer != NULL) {
-        // ���� �Ǿ��ٰ� üũ�Ѵ�. ���� ����ڰ� �ƴϹǷ� CLSelectPC ���� ©����.
+        
         pLoginPlayer->setCBillingVerified();
     }
 
@@ -531,7 +531,7 @@ void CBillingPlayer::executeError(CBillingPacketHeader& header, CBillingPacketEr
 
 #elif defined(__GAME_SERVER__)
 
-    // ���� ������ ©����~
+    
     __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
     Creature* pCreature = g_pPCFinder->getCreatureByID_LOCKED(body.Login_Name);
@@ -573,7 +573,7 @@ void CBillingPlayer::executeLogin(CBillingPacketHeader& header, CBillingPacketRe
         LoginPlayer* pLoginPlayer = g_pLoginPlayerManager->getPlayer_NOLOCKED(body.Login_Name);
 
         if (pLoginPlayer != NULL) {
-            // ���� �Ǿ��ٰ� üũ�Ѵ�.
+            
             pLoginPlayer->setCBillingVerified();
 
             bool bPayPlayer = (body.Free_Left_Time + body.Rating_Left_Time > 0);
@@ -605,8 +605,8 @@ void CBillingPlayer::executeIntervalValidation(CBillingPacketHeader& header,
     __BEGIN_TRY
 
     if (atoi(body.Parameter_Value) != g_pCBillingPlayerManager->getMinusIntervalInt()) {
-        // ���Ӽ����� �߱� ���� �������� minus interval �� ���� �ʴ�.
-        // �׾�� �Ѵ�.
+        
+        
         cerr << "-------------------------------------------------------------------------------" << endl;
         cerr << "Interval configuration is different between gameserver and china billing server" << endl;
         cerr << "gameserver interval : " << g_pCBillingPlayerManager->getMinusIntervalInt()
@@ -618,7 +618,7 @@ void CBillingPlayer::executeIntervalValidation(CBillingPacketHeader& header,
                 "billing server interval : %s",
                 g_pCBillingPlayerManager->getMinusIntervalInt(), body.Parameter_Value);
 
-        // �׾��. ���� �Ф�.
+        
         kill(getpid(), 9);
     }
 
@@ -649,7 +649,7 @@ void CBillingPlayer::executeLogin(CBillingPacketHeader& header, CBillingPacketRe
             Assert(false);
         }
 
-        // ���� �Ǿ��ٰ� üũ�Ѵ�.
+        
         pGamePlayer->setCBillingVerified();
 
         // set CBillingInfo
@@ -722,7 +722,7 @@ void CBillingPlayer::executeMinusPoint(CBillingPacketHeader& header, CBillingPac
             Assert(false);
         }
 
-        // �������� ���, �ð��� �� ���Ҵٰ� �����ش�.
+        
         if (body.Player_Type == CBILLING_PLAYER_TYPE_POINT) {
             int leftTime = body.Free_Left_Time + body.Rating_Left_Time;
 
@@ -734,7 +734,7 @@ void CBillingPlayer::executeMinusPoint(CBillingPacketHeader& header, CBillingPac
                 msg.setMessage(m);
                 pGamePlayer->sendPacket(&msg);
 
-                // ������ ���� �� �ð� ����
+                
                 pGamePlayer->setCBLastShowLeftTime(leftTime - 30);
             }
         }
@@ -743,7 +743,7 @@ void CBillingPlayer::executeMinusPoint(CBillingPacketHeader& header, CBillingPac
             if (body.Player_Type == CBILLING_PLAYER_TYPE_POINT) {
                 int leftTime = body.Free_Left_Time + body.Rating_Left_Time;
 
-                // point user �� �ٲ���.
+                
                 char m[200];
                 sprintf(m, g_pStringPool->c_str(STRID_CB_CHANGE_TO_POINT_PLAYER), leftTime / 10);
 
@@ -751,7 +751,7 @@ void CBillingPlayer::executeMinusPoint(CBillingPacketHeader& header, CBillingPac
                 msg.setMessage(m);
                 pGamePlayer->sendPacket(&msg);
             } else if (body.Player_Type == CBILLING_PLAYER_TYPE_MONTHLY) {
-                // monthly user �� �ٲ���.
+                
                 char m[200];
                 sprintf(m, g_pStringPool->c_str(STRID_CB_CHANGE_TO_MONTHLY_PLAYER));
 
@@ -834,7 +834,7 @@ void CBillingPlayer::checkSessionID(CBillingPacketHeader& header, GamePlayer* pG
 #endif
 
 #ifdef __GAME_SERVER__
-// DB�� packet �α� �����
+
 void CBillingPlayer::logPacket(CBillingPacketHeader* header, CBillingPacketResponseLoginBody* login,
                                CBillingPacketResponseMinusPointBody* point, CBillingPacketResponseLogoutBody* logout,
                                CBillingPacketErrorBody* error) {

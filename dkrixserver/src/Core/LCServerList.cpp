@@ -28,7 +28,7 @@ LCServerList::LCServerList()
 LCServerList::~LCServerList() noexcept
 
 {
-    // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+    
     while (!m_ServerGroupInfoList.empty()) {
         ServerGroupInfo* pServerGroupInfo = m_ServerGroupInfoList.front();
         SAFE_DELETE(pServerGroupInfo);
@@ -38,7 +38,7 @@ LCServerList::~LCServerList() noexcept
 
 
 //----------------------------------------------------------------------
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //----------------------------------------------------------------------
 void LCServerList::read(SocketInputStream& iStream)
 
@@ -49,7 +49,7 @@ void LCServerList::read(SocketInputStream& iStream)
 
     BYTE ListNum;
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(ListNum);
     for (int i = 0; i < ListNum; i++) {
         ServerGroupInfo* pServerGroupInfo = new ServerGroupInfo();
@@ -62,7 +62,7 @@ void LCServerList::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void LCServerList::write(SocketOutputStream& oStream) const
 
@@ -72,7 +72,7 @@ void LCServerList::write(SocketOutputStream& oStream) const
     oStream.write(m_CurrentServerGroupID);
 
     BYTE ListNum = m_ServerGroupInfoList.size();
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(ListNum);
 
     for (list<ServerGroupInfo*>::const_iterator itr = m_ServerGroupInfoList.begin(); itr != m_ServerGroupInfoList.end();
@@ -104,7 +104,7 @@ PacketSize_t LCServerList::getPacketSize() const
 {
     __BEGIN_TRY
 
-    // ����Ʈ ������ ����
+    
     PacketSize_t PacketSize = szServerGroupID + szBYTE;
 
     for (list<ServerGroupInfo*>::const_iterator itr = m_ServerGroupInfoList.begin(); itr != m_ServerGroupInfoList.end();

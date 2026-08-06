@@ -65,11 +65,11 @@ public: // misc
     ///// Member data /////
 
 protected:
-    short m_Type;     // 사건의 종류
-    short m_ZoneID;   // 사건이 일어난 곳의 zone id
-    string m_Source;  // 사건을 발생시킨 플레이어의 이름
-    string m_Target;  // 사건을 당한(?) 플레이어의 이름
-    string m_Content; // 사건의 내용
+    short m_Type;     
+    short m_ZoneID;   
+    string m_Source;  
+    string m_Target;  
+    string m_Content; 
 };
 
 #endif

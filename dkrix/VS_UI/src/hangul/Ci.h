@@ -21,8 +21,8 @@
 //
 // Character inputer.
 //
-// Windows IME(Input Method Editor)�� ���� �Է¹��� ���ڸ� ó���Ѵ�.
-// DBCS(Double-Byte Character Set) ����̴�.
+
+
 //-----------------------------------------------------------------------------
 class CI
 {
@@ -31,7 +31,7 @@ protected :
 	// m_bl_insert_mode
 	//
 	// insert or edit mode
-	// �������� ��ü���� �ٸ��� ���� �ʱ� ���ؼ� CI�� �����Ѵ�.
+	
 	//
 	bool			m_bl_insert_mode; 
 
@@ -61,7 +61,7 @@ public:
 	bool	GetInsertModeState() const { return m_bl_insert_mode; }
 	void	ToggleInsertMode() { m_bl_insert_mode = !m_bl_insert_mode; }
 	bool	GetEndOfIME();
-	bool	ImeRunning() const { return m_bl_ime_running; } // IME�� ������?
+	bool	ImeRunning() const { return m_bl_ime_running; } 
 	bool	GetCursorBlink() const;
 	void	ForceShowCursor() const;
 	void	FinishImeRunning();
@@ -76,6 +76,8 @@ public:
 class CI_KOREAN : public CI
 {
 public :
+	CI_KOREAN();
+	virtual ~CI_KOREAN();
 	bool	IsKorean() { return true; }
 	
 	void IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam);
@@ -86,9 +88,22 @@ public :
 class CI_CHINESE : public CI
 {
 public :
+	CI_CHINESE();
+	virtual ~CI_CHINESE();
 	bool	IsChinese() { return true; }
 	
 	void IME_MessageProcessor(UINT message, WPARAM wParam, LPARAM lParam);
+	void IME_NextComposition();
+	void IME_Composition();
+};
+
+class CI_ENGLISH : public CI
+{
+public:
+	CI_ENGLISH();
+	virtual ~CI_ENGLISH();
+	bool IsEnglish() { return true; }
+
 	void IME_NextComposition();
 	void IME_Composition();
 };

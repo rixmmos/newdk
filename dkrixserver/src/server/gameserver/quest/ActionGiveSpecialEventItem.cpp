@@ -36,7 +36,7 @@ void ActionGiveSpecialEventItem::read(PropertyBuffer& propertyBuffer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// �׼��� �����Ѵ�.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -54,7 +54,7 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
     Player* pPlayer = pPC->getPlayer();
     Assert(pPlayer != NULL);
 
-    // ���� Ŭ���̾�Ʈ�� ���� GCNPCResponse�� �����ش�.
+    
     GCNPCResponse okpkt;
     pPlayer->sendPacket(&okpkt);
 
@@ -66,10 +66,10 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
         pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
         pResult = pStmt->executeQuery("SELECT Count FROM SpecialEvent WHERE Name='%s'", pPlayer->getID().c_str());
 
-        // �ش� �ο찡 ���ٴ� ���� �� ����� �̺�Ʈ �������� ���� �ڰ��� ���ٴ� ���� ���Ѵ�.
+        
         if (pResult->getRowCount() == 0) {
             //			StringStream buf;
-            //			buf << pPlayer->getID() << " ���� ���� ���� �̺�Ʈ�� �������� �����̽��ϴ�.";
+            
 
             char buf[100];
             sprintf(buf, g_pStringPool->c_str(STRID_DO_NOT_JOIN_BLOOD_WAR_EVENT), pPlayer->getID().c_str());
@@ -89,11 +89,11 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
     }
     END_DB(pStmt)
 
-    // ī��Ʈ�� 0���϶�� ���� �� ����� �̹� ��������
-    // �޾Ҵٴ� ���� �ǹ��Ѵ�.
+    
+    
     if (count <= 0) {
         //		StringStream buf;
-        //		buf << pPlayer->getID() << " ���� �̹� ���� ���� �̺�Ʈ ���� �������� �����̽��ϴ�.";
+        
 
         char buf[100];
         sprintf(buf, g_pStringPool->c_str(STRID_ALREADY_TAKE_BLOOD_WAR_EVET_ITEM), pPlayer->getID().c_str());
@@ -126,7 +126,7 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
 
         Key* pKey = dynamic_cast<Key*>(pKeyItem);
 
-        // OID�� ��Ϲ޴´�.
+        
         OR.registerObject(pItem1);
         OR.registerObject(pItem2);
         OR.registerObject(pMotorcycle);
@@ -162,19 +162,19 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
 
                 msg << "Inventory Adding Succeeded : " << pItem->toString() << "\n";
 
-                // ItemTraceLog �� �����
+                
                 if (pItem != NULL && pItem->isTraceItem()) {
                     remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE,
                                    DETAIL_EVENTNPC);
                 }
             } else {
-                // �ڸ��� ���ٸ� ������ ����߸���.
+                
                 pt = pZone->addItem(pItem, pPC->getX(), pPC->getY());
                 if (pt.x != -1) {
                     pItem->create("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
                     pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                    // ItemTraceLog �� �����
+                    
                     if (pItem != NULL && pItem->isTraceItem()) {
                         char zoneName[15];
                         sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);
@@ -197,7 +197,7 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
         Item* pItem3 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_RING, 3, option50);
         Item* pItem4 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_RING, 3, option50);
 
-        // OID�� ��Ϲ޴´�.
+        
         OR.registerObject(pItem1);
         OR.registerObject(pItem2);
         OR.registerObject(pItem3);
@@ -231,19 +231,19 @@ void ActionGiveSpecialEventItem::execute(Creature* pCreature1, Creature* pCreatu
 
                 msg << "Inventory Adding Succeeded : " << pItem->toString() << "\n";
 
-                // ItemTraceLog �� �����
+                
                 if (pItem != NULL && pItem->isTraceItem()) {
                     remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE,
                                    DETAIL_EVENTNPC);
                 }
             } else {
-                // �ڸ��� ���ٸ� ������ ����߸���.
+                
                 pt = pZone->addItem(pItem, pPC->getX(), pPC->getY());
                 if (pt.x != -1) {
                     pItem->create("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
                     pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                    // ItemTraceLog �� �����
+                    
                     if (pItem != NULL && pItem->isTraceItem()) {
                         char zoneName[15];
                         sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);

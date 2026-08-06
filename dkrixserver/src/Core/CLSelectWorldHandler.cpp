@@ -26,7 +26,7 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// 월드 선택
+
 //////////////////////////////////////////////////////////////////////////////
 void CLSelectWorldHandler::execute(CLSelectWorld* pPacket, Player* pPlayer)
 
@@ -49,14 +49,14 @@ void CLSelectWorldHandler::execute(CLSelectWorld* pPacket, Player* pPlayer)
         throw DisconnectException("WorldID over");
     }
 
-    // close된 상태에서 못 들어오게 막기. by sigi. 2002.1.7
+    
     GameWorldInfo* pGameWorldInfo = g_pGameWorldInfoManager->getGameWorldInfo(WorldID);
     if (pGameWorldInfo->getStatus() == WORLD_CLOSE) {
         filelog("errorLogin.txt", "WorldClosed[%d]", (int)WorldID);
         throw DisconnectException("WorldClosed");
     }
 
-    // 트랜실(2) 빼기
+    
     // if (WorldID==2) throw DisconnectException();
 
     pLoginPlayer->setWorldID(WorldID);

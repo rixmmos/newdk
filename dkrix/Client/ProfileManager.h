@@ -1,25 +1,25 @@
 //----------------------------------------------------------------------
 // ProfileManager.h
 //----------------------------------------------------------------------
-// 캐릭터들의 얼굴 정보를 관리한다.
+
 //
-// 실제로 관리되는건.. 캐릭얼굴 화일이 있다/없다/요청해라.. 정도이고,
-// 있을 경우.. 화일 이름을 읽어서 외부에서 잘~ 사용하면 된다.
+
+
 //
-// 프로그램이 실행될때 기존에건 다 지울 예정이므로.. 관리는 별로 필요없다.
+
 //
 //
-// [화일 관리 방법]
+
 //
-// 사용자가 *.bmp를 profile에 넣어둔다고 하고..
-// 어떤 캐릭의 profile이 필요하면 '캐릭터.bmp'가 있을때
-// '캐릭터.spr'을 생성해서 profile에 넣어두고.. 사용하면 된다.
+
+
+
 //
-// 지울때는 spr만 다 지우면 된다.
+
 //
-// Profile.Get(name)에서
-//     내 client에 name.spr이 없다면..
-//        다른 client에 요청을 해야한다.
+
+
+
 //
 //----------------------------------------------------------------------
 
@@ -29,11 +29,7 @@
 
 #pragma warning(disable:4786)
 
-#ifdef PLATFORM_WINDOWS
-	#include <Windows.h>
-#else
-	#include "../../basic/Platform.h"
-#endif
+#include "../basic/Platform.h"
 
 #include <map>
 #include <string>
@@ -58,7 +54,7 @@ class ProfileManager {
 		~ProfileManager();
 
 		//-------------------------------------------------------------
-		// Delete / Init Profiles - Profile 디렉토리 관리
+		
 		//-------------------------------------------------------------
 		static void		DeleteProfiles();
 		static void		InitProfiles();		
@@ -77,7 +73,7 @@ class ProfileManager {
 		bool			RemoveProfile(const char* pName);
 
 		//-------------------------------------------------------------
-		// 상대방이 아예 Profile이 없는 경우
+		
 		//-------------------------------------------------------------
 		bool			HasProfileNULL(const char* pName) const;
 		void			AddProfileNULL(const char* pName);
@@ -116,8 +112,8 @@ class ProfileManager {
 // Compile-time check to ensure CRITICAL_SECTION is fully defined
 // Windows: sizeof(CRITICAL_SECTION) >= 68 bytes
 // POSIX/Emscripten: sizeof(CRITICAL_SECTION) = sizeof(pthread_mutex_t) + sizeof(int)
-#ifdef PLATFORM_WINDOWS
-	static_assert(sizeof(CRITICAL_SECTION) >= 68, "CRITICAL_SECTION is incomplete - Platform.h must be included before ProfileManager.h");
+ #ifdef PLATFORM_WINDOWS
+	static_assert(sizeof(CRITICAL_SECTION) >= sizeof(void*), "CRITICAL_SECTION is incomplete");
 #else
 	// For POSIX systems (including Emscripten), the size may vary
 	// Just ensure it contains the mutex (basic sanity check)

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-// ServerInformation.h
+// CServerInformation.h
 //----------------------------------------------------------------------
-// Server의 정보
+
 //----------------------------------------------------------------------
 
 #ifndef	__SERVERINFORMATION_H__
@@ -44,8 +44,8 @@ class SERVER_INFO {
 //----------------------------------------------------------------------
 // ServerGroup
 //----------------------------------------------------------------------
-// 한 ServerGroup에 대한 정보당.
-// <id, ServerName>의 map에.. Group의 이름..이다.
+
+
 //----------------------------------------------------------------------
 /*
 	enum ServerStatus 
@@ -70,7 +70,7 @@ class ServerGroup : public CTypeMap2<SERVER_INFO> {
 		const char*	GetGroupName() const			{ return m_GroupName.GetString(); }
 
 		//--------------------------------------------------------------
-		// 서버 상태
+		
 		//--------------------------------------------------------------
 		void		SetGroupStatus(int status)		{ m_GroupStatus = status; }
 		int			GetGroupStatus() const			{ return m_GroupStatus; }
@@ -81,24 +81,24 @@ class ServerGroup : public CTypeMap2<SERVER_INFO> {
 };
 
 //----------------------------------------------------------------------
-// ServerInformation
+// CServerInformation
 //----------------------------------------------------------------------
-// <ServerGroupID, ServerGroup>의 map에다가.. 선택된 server에 대한 정보.
+
 //----------------------------------------------------------------------
-class ServerInformation : public CTypeMap2<ServerGroup> {
+class CServerInformation : public CTypeMap2<ServerGroup> {
 	public :
 		typedef CTypeMap2<ServerGroup>		SERVER_GROUP_MAP;
 
 	public :
-		ServerInformation();
-		~ServerInformation();
+		CServerInformation();
+		~CServerInformation();
 
 		void			Release();
 
 		//-------------------------------------------------------------
-		// 현재의 server에 대한 정보
+		
 		//-------------------------------------------------------------
-		// 반드시, Group을 먼저 선택해야 한다.
+		
 		//-------------------------------------------------------------
 		bool			SetServerGroupID(unsigned int id);
 		bool			SetServerID(unsigned int id);
@@ -106,7 +106,7 @@ class ServerInformation : public CTypeMap2<ServerGroup> {
 		unsigned int	GetServerGroupID()		{ return m_ServerGroupID; }
 		unsigned int	GetServerID()			{ return m_ServerID; }
 
-		// 자동으로 지정되는데.. 임시로 사용하기 위해서..
+		
 		void			SetServerGroupName(const char* pName)	{ m_ServerGroupName = pName; }
 		void			SetServerName(const char* pName)		{ m_ServerName = pName; }
 
@@ -131,7 +131,7 @@ class ServerInformation : public CTypeMap2<ServerGroup> {
 		
 };
 
-extern	ServerInformation*	g_pServerInformation;
+extern	CServerInformation*	g_pServerInformation;
 
 #endif
 

@@ -22,7 +22,7 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,14 +31,14 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -46,7 +46,7 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 
 			pCreature->SetZone( g_pZone );
 
-			// 어차피 안 움직일거니까 관계없다.
+			
 			pCreature->SetCreatureType( CREATURETYPE_VAMPIRE_MALE1 );	
 
 
@@ -68,7 +68,7 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 			pCreature->SetStatus( MODIFY_CURRENT_HP, 100 );
 
 			//si.getName()
-			// 색상 정보
+			
 
 			
 
@@ -79,13 +79,13 @@ void GCAddBurrowingCreatureHandler::execute ( GCAddBurrowingCreature * pPacket ,
 		}
 		else
 		{
-			// 이미 있다면.. Underground Creature로 만든다.
+			
 			pCreature->SetUndergroundCreature();
 
-			// 이름 다시 설정 - -;
+			
 			pCreature->SetName( pPacket->getName().c_str() );
 
-			// 좌표 설정
+			
 			pCreature->MovePosition( pPacket->getX(), pPacket->getY() );
 			pCreature->SetServerPosition( pPacket->getX(), pPacket->getY() );
 

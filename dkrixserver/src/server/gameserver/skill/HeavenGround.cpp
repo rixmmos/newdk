@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : HeavenGround.cpp
-// SkillName   : ÌìÉñ½µÁÙ ÈËÀàÒ½Éú¼¼ÄÜ
+
 // Written by  :
 // Description :
 //////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@
 #include "GCSkillToTileOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î ¿ÀºêÁ§Æ® ÇÚµé·¯
+
 //////////////////////////////////////////////////////////////////////////////
 void HeavenGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -38,7 +38,7 @@ void HeavenGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuchÁ¦°Å. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;
@@ -55,7 +55,7 @@ void HeavenGround::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î Å¸ÀÏ ÇÚµé·¯
+
 //////////////////////////////////////////////////////////////////////////////
 void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -99,24 +99,10 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
             bTileCheck = true;
 
         bool bUseSkill = false;
-        /*
-        // È¡³öµ±Ç°Ê¹ÓÃ¼¼ÄÜ½ÇÉ«ËùÊ¹ÓÃµÄÎäÆ÷
-        Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
-        //Ã»ÓÐÎäÆ÷²»ÄÜÊ¹ÓÃ¼¼ÄÜ
-        if (pWeapon != NULL)
-        {
-            Silver_t silverDamage= pWeapon->getSilver();
-            if (silverDamage >50)
-            {
-                silverDamage-=50;
-                pWeapon->setSilver(silverDamage);
-                bUseSkill=true;
-            }
-        }
-        */
+         
         bUseSkill = true;
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && bTileCheck && bUseSkill) {
-            // ÀÌÆåÆ®ÀÇ Áö¼Ó½Ã°£À» °è»êÇÑ´Ù.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
@@ -126,12 +112,12 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
             int oX, oY;
 
             list<Creature*> cList;
-            // 5 * 5 ·¶Î§
+            
             for (oY = -2; oY <= 2; oY++)
                 for (oX = -2; oX <= 2; oX++) {
                     int tileX = X + oX;
                     int tileY = Y + oY;
-                    // ¼ì²âÊÇ·ñ´óÓÚµØÍ¼´óÐ¡
+                    
                     // cout << "HeavenGround setup1" << endl;
                     if (rect.ptInRect(tileX, tileY)) {
                         // cout << "HeavenGround setup2" << endl;
@@ -140,7 +126,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                         if (tile.canAddEffect()) {
                             // cout << "HeavenGround setup3" << endl;
                             if (tile.getEffect(Effect::EFFECT_CLASS_MERCY_GROUND) != NULL ||
-                                tile.getEffect(Effect::EFFECT_CLASS_SUMMON_CLAY) != NULL) // ÈÊ´È´óµØ slayer
+                                tile.getEffect(Effect::EFFECT_CLASS_SUMMON_CLAY) != NULL) 
                             {
                                 // cout << "HeavenGround setup4" << endl;
                                 executeSkillFailNormal(pSlayer, getSkillType(), NULL);
@@ -153,16 +139,10 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                                 pZone->deleteEffect(effectID); // fix me
                             }
 
-                            // È¥³ýµ±Ç°½Úµã´øÓÐÉËº¦µÄÐ§¹û
-                            /*
-                            case 0:	e = Effect::EFFECT_CLASS_PROMINENCE;	break;		// µØÓü»ðº£ Oust
-                            case 1: e = Effect::EFFECT_CLASS_ACID_SWAMP;	break;		// ËáÐÔÕÓÔó vamp
-                            case 2: e = Effect::EFFECT_CLASS_BLOODY_WALL;   break;		// ÑªÇ½     vamp
-                            case 3: e = Effect::EFFECT_CLASS_GREEN_POISON;  break;		// Ó«ÂÌÖ®¶¾ vamp
-                            case 4: e = Effect::EFFECT_CLASS_HELLFIRE;	    break;      // µØÓü»ð   oust
-                            */
+                            
+                             
                             Effect* pDeleteEffect = NULL;
-                            // µØÓü»ðº£ Oust
+                            
                             pDeleteEffect = tile.getEffect(Effect::EFFECT_CLASS_PROMINENCE);
                             if (pDeleteEffect != NULL) {
                                 ObjectID_t effectObjectID = pDeleteEffect->getObjectID();
@@ -176,7 +156,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                                 pZone->broadcastPacket(tileX, tileY, &gcDeleteEffectFromTile);
                                 // cout << "DeleteEffect[" <<  Effect::EFFECT_CLASS_PROMINENCE << "]" << endl;
                             }
-                            // ËáÐÔÕÓÔó vamp
+                            
                             pDeleteEffect = tile.getEffect(Effect::EFFECT_CLASS_ACID_SWAMP);
                             if (pDeleteEffect != NULL) {
                                 ObjectID_t effectObjectID = pDeleteEffect->getObjectID();
@@ -190,7 +170,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                                 pDeleteEffect->setDeadline(1);
                                 cout << "DeleteEffect[" << "Effect::EFFECT_CLASS_ACID_SWAMP" << "]" << endl;
                             }
-                            // ÑªÇ½     vamp
+                            
                             pDeleteEffect = tile.getEffect(Effect::EFFECT_CLASS_BLOODY_WALL);
                             if (pDeleteEffect != NULL) {
                                 ObjectID_t effectObjectID = pDeleteEffect->getObjectID();
@@ -203,7 +183,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                                 pZone->broadcastPacket(tileX, tileY, &gcDeleteEffectFromTile);
                                 // cout << "DeleteEffect[" <<  (int)Effect::EFFECT_CLASS_BLOODY_WALL << "]" << endl;
                             }
-                            // Ó«ÂÌÖ®¶¾ vamp
+                            
                             pDeleteEffect = tile.getEffect(Effect::EFFECT_CLASS_GREEN_POISON);
                             if (pDeleteEffect != NULL) {
                                 ObjectID_t effectObjectID = pDeleteEffect->getObjectID();
@@ -216,7 +196,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                                 pZone->broadcastPacket(tileX, tileY, &gcDeleteEffectFromTile);
                                 // cout << "DeleteEffect[" <<  (int)Effect::EFFECT_CLASS_GREEN_POISON << "]" << endl;
                             }
-                            // µØÓü»ð   oust
+                            
                             pDeleteEffect = tile.getEffect(Effect::EFFECT_CLASS_HELLFIRE);
                             if (pDeleteEffect != NULL) {
                                 ObjectID_t effectObjectID = pDeleteEffect->getObjectID();
@@ -238,7 +218,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                     }
                 }
 
-            // ½ÇÆÐÇÏ¸é ¸¶³ª°¡ ÁÙ¸é ¾È µÇ¹Ç·Î ¿©±â¼­ ÁÙ¿©ÁØ´Ù.
+            
             decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
             for (oY = -2; oY <= 2; oY++)
@@ -248,12 +228,12 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                     if (rect.ptInRect(tileX, tileY)) {
                         Tile& tile = pZone->getTile(tileX, tileY);
 
-                        // ÇöÀç Å¸ÀÏ¿¡´Ù ÀÌÆåÆ®¸¦ Ãß°¡ÇÒ ¼ö ÀÖ´Ù¸é...
-                        // if (tile.canAddEffect())	// À§¿¡¼­ Ã¼Å©Çß´Ù.
+                        
+                        
                         {
-                            // ÀÌÆåÆ® Å¬·¡½º¸¦ »ý¼ºÇÑ´Ù.
+                            
                             EffectHeavenGround* pEffect = new EffectHeavenGround(pZone, tileX, tileY);
-                            // ÉèÖÃÐ§¹ûÉËº¦
+                            
                             pEffect->setUserObjectID(pSlayer->getObjectID());
                             pEffect->setDamage(output.Damage);
                             pEffect->setTick(output.Tick);
@@ -262,7 +242,7 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
                             pEffect->setLevel(pSkillInfo->getLevel() / 2);
                             pEffect->setDeadline(output.Duration);
 
-                            // ×¢²á¼¼ÄÜÐ§¹û
+                            
                             pZone->registerObject(pEffect);
                             pZone->addEffect(pEffect);
                             tile.addEffect(pEffect);
@@ -348,8 +328,8 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
 
             list<Creature*> watcherList = pZone->getWatcherList(myX, myY, pSlayer);
 
-            // watcherList¿¡¼­ cList¿¡ ¼ÓÇÏÁö ¾Ê°í, caster(pSlayer)¸¦ º¼ ¼ö ¾ø´Â °æ¿ì´Â
-            // OK4¸¦ º¸³»°í.. cList¿¡ Ãß°¡ÇÑ´Ù.
+            
+            
             for (list<Creature*>::const_iterator itr = watcherList.begin(); itr != watcherList.end(); itr++) {
                 bool bBelong = false;
                 for (list<Creature*>::const_iterator tItr = cList.begin(); tItr != cList.end(); tItr++)
@@ -358,9 +338,9 @@ void HeavenGround::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillS
 
                 Creature* pWatcher = (*itr);
                 if (bBelong == false && canSee(pWatcher, pSlayer) == false) {
-                    // Assert(pWatcher->isPC());	// ´ç¿¬ PC´Ù.. Zone::getWatcherList´Â PC¸¸ returnÇÑ´Ù
+                    
                     if (!pWatcher->isPC()) {
-                        // cout << "HeavenGround : ¿ÓÃ³ ¸®½ºÆ®°¡ PC°¡ ¾Æ´Õ´Ï´Ù." << endl;
+                        
                         GCSkillFailed1 _GCSkillFailed1;
                         _GCSkillFailed1.setSkillType(getSkillType());
                         pSlayer->getPlayer()->sendPacket(&_GCSkillFailed1);

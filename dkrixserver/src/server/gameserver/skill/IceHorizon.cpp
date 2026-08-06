@@ -23,7 +23,7 @@ IceHorizon::IceHorizon() throw() {
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void IceHorizon::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -43,7 +43,7 @@ void IceHorizon::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature)) {
             executeSkillFailException(pOusters, getSkillType());
             return;
@@ -60,7 +60,7 @@ void IceHorizon::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -100,7 +100,7 @@ void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
         ZoneCoord_t myX = pOusters->getX();
         ZoneCoord_t myY = pOusters->getY();
 
-        // 이펙트의 지속시간을 계산한다.
+        
         SkillInput input(pOusters, pOustersSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -133,16 +133,16 @@ void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
                         if (tile.getEffect(Effect::EFFECT_CLASS_TRYING_POSITION))
                             continue;
 
-                        // 현재 타일에다 이펙트를 추가할 수 있다면...
+                        
                         if (tile.canAddEffect()) {
-                            // 같은 effect가 있으면 지운다.
+                            
                             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_ICE_HORIZON);
                             if (pOldEffect != NULL) {
                                 ObjectID_t effectID = pOldEffect->getObjectID();
                                 pZone->deleteEffect(effectID); // fix me
                             }
 
-                            // 이펙트 클래스를 생성한다.
+                            
                             EffectIceHorizon* pEffect = new EffectIceHorizon(pZone, tileX, tileY);
                             pEffect->setCasterName(pOusters->getName());
                             pEffect->setCasterID(pOusters->getObjectID());
@@ -154,7 +154,7 @@ void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
                             if (i != 0 || j != 0)
                                 pEffect->setBroadcastingEffect(false);
 
-                            // Tile에 붙이는 Effect는 ObjectID를 등록받아야 한다.
+                            
                             ObjectRegistry& objectregister = pZone->getObjectRegistry();
                             objectregister.registerObject(pEffect);
                             pZone->addEffect(pEffect);
@@ -231,8 +231,8 @@ void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
 
             list<Creature*> watcherList = pZone->getWatcherList(myX, myY, pOusters);
 
-            // watcherList에서 cList에 속하지 않고, caster(pOusters)를 볼 수 없는 경우는
-            // OK4를 보내고.. cList에 추가한다.
+            
+            
             for (list<Creature*>::const_iterator itr = watcherList.begin(); itr != watcherList.end(); itr++) {
                 bool bBelong = false;
                 for (list<Creature*>::const_iterator tItr = cList.begin(); tItr != cList.end(); tItr++)
@@ -241,9 +241,9 @@ void IceHorizon::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
 
                 Creature* pWatcher = (*itr);
                 if (bBelong == false && canSee(pWatcher, pOusters) == false) {
-                    // Assert(pWatcher->isPC());	// 당연 PC다.. Zone::getWatcherList는 PC만 return한다
+                    
                     if (!pWatcher->isPC()) {
-                        // cout << "IceHorizon : 왓처 리스트가 PC가 아닙니다." << endl;
+                        
                         //						GCSkillFailed1 _GCSkillFailed1;
                         //						_GCSkillFailed1.setSkillType(getSkillType());
                         //						pOusters->getPlayer()->sendPacket(&_GCSkillFailed1);

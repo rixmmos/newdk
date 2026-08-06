@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // DynamicZoneManager.cpp
-// 서버에서 생겼다 사라졌다하는 존을 관리하는 넘
+
 /////////////////////////////////////////////////////////////////////////////
 
 // include files
@@ -13,8 +13,8 @@
 // global variable
 DynamicZoneManager* g_pDynamicZoneManager = NULL;
 
-// 새로 만들기 시작할 DynamicZoneID 시작 위치
-// 만들때마다 1 씩 증가
+
+
 const ZoneID_t StartDynamicZoneID = 15001;
 
 // constructor
@@ -28,10 +28,10 @@ DynamicZoneManager::~DynamicZoneManager() {
 }
 
 void DynamicZoneManager::init() {
-    // DynamicZoneGroup 추가. 수동
+    
 
     {
-        // 제단 입구
+        
         DynamicZoneGroup* pDynamicZoneGroup = new DynamicZoneGroup();
         pDynamicZoneGroup->setDynamicZoneType(DYNAMIC_ZONE_GATE_OF_ALTER);
         pDynamicZoneGroup->setTemplateZoneID(
@@ -41,7 +41,7 @@ void DynamicZoneManager::init() {
     }
 
     {
-        // 피의 제단
+        
         DynamicZoneGroup* pDynamicZoneGroup = new DynamicZoneGroup();
         pDynamicZoneGroup->setDynamicZoneType(DYNAMIC_ZONE_ALTER_OF_BLOOD);
         pDynamicZoneGroup->setTemplateZoneID(
@@ -51,7 +51,7 @@ void DynamicZoneManager::init() {
     }
 
     {
-        // 슬레이어 심연의 거울
+        
         DynamicZoneGroup* pDynamicZoneGroup = new DynamicZoneGroup();
         pDynamicZoneGroup->setDynamicZoneType(DYNAMIC_ZONE_SLAYER_MIRROR_OF_ABYSS);
         pDynamicZoneGroup->setTemplateZoneID(
@@ -61,7 +61,7 @@ void DynamicZoneManager::init() {
     }
 
     {
-        // 뱀파이어 심연의 거울
+        
         DynamicZoneGroup* pDynamicZoneGroup = new DynamicZoneGroup();
         pDynamicZoneGroup->setDynamicZoneType(DYNAMIC_ZONE_VAMPIRE_MIRROR_OF_ABYSS);
         pDynamicZoneGroup->setTemplateZoneID(
@@ -71,7 +71,7 @@ void DynamicZoneManager::init() {
     }
 
     {
-        // 아우스터즈 심연의 거울
+        
         DynamicZoneGroup* pDynamicZoneGroup = new DynamicZoneGroup();
         pDynamicZoneGroup->setDynamicZoneType(DYNAMIC_ZONE_OUSTERS_MIRROR_OF_ABYSS);
         pDynamicZoneGroup->setTemplateZoneID(

@@ -36,8 +36,8 @@ protected:
     void ARSMGexecute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pSkillSlot, CEffectID_t CEffectID);
 
 protected:
-    POINT m_pSGMask[8];    // SG 마스크는 방향과는 관계가 없다.
-    POINT m_pARMask[8][3]; // AR, SMG마스크는 방향과 관계가 있다.
+    POINT m_pSGMask[8];    
+    POINT m_pARMask[8][3]; 
 };
 
 // global variable declaration

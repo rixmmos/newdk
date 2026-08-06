@@ -38,18 +38,18 @@ class Packet;
 class Tile {
 public:
     enum TileFlags {
-        TILE_GROUND_BLOCKED = 0,  // 타일의 지상이 막혔을 경우
-        TILE_AIR_BLOCKED,         // 타일의 공중이 막혔을 경우
-        TILE_UNDERGROUND_BLOCKED, // 타일의 지하가 막혔을 경우
-        TILE_WALKING_CREATURE,    // 타일의 지상에 크리처가 있을 경우
-        TILE_FLYING_CREATURE,     // 타일의 공중에 크리처가 있을 경우
-        TILE_BURROWING_CREATURE,  // 타일의 지하에 크리처가 있을 경우
-        TILE_ITEM,                // 타일 위에 아이템이 놓여 있을 경우
-        TILE_OBSTACLE,            // 타일 위에 상태를 가진 장애물이 놓여 있을 경우
-        TILE_EFFECT,              // 타일 위에 마법 객체가 있을 경우
-        TILE_BUILDING,            // 타일 위에 건물이 있을 경우
-        TILE_PORTAL,              // 타일 위에 포탈이 놓여 있을 경우
-        TILE_TERRAIN              // 효과를 주는 배경 타일일 경우
+        TILE_GROUND_BLOCKED = 0,  
+        TILE_AIR_BLOCKED,         
+        TILE_UNDERGROUND_BLOCKED, 
+        TILE_WALKING_CREATURE,    
+        TILE_FLYING_CREATURE,     
+        TILE_BURROWING_CREATURE,  
+        TILE_ITEM,                
+        TILE_OBSTACLE,            
+        TILE_EFFECT,              
+        TILE_BUILDING,            
+        TILE_PORTAL,              
+        TILE_TERRAIN              
     };
 
 public:
@@ -188,10 +188,10 @@ public:
     string toString() const;
 
 private:
-    WORD m_wFlags;                   // 타일 속성 플래그
-    WORD m_wOption;                  // 옵션 플래그, 타일 속성 플래그에 따라서 다르게 사용된다.
-    forward_list<Object*> m_Objects; // 오브젝트 포인터의 리스트
-    Sector* m_pSector;               // 이 타일이 속한 섹터에 대한 포인터
+    WORD m_wFlags;                   
+    WORD m_wOption;                  
+    forward_list<Object*> m_Objects; 
+    Sector* m_pSector;               
 };
 
 #endif

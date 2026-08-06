@@ -72,7 +72,7 @@ void EffectSacrifice::unaffect(Creature* pCreature)
 
     pCreature->removeFlag(Effect::EFFECT_CLASS_SACRIFICE);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_SACRIFICE);

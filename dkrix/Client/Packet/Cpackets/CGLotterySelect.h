@@ -10,16 +10,16 @@
 #define __CG_LOTTERY_SELECT_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 enum
 {
-	TYPE_SELECT_LOTTERY = 0,					// 복권 선택
-	TYPE_FINISH_SCRATCH,				// 복권 긁음 완료
-	TYPE_OVER_ENDING,					// 엔딩 종료
+	TYPE_SELECT_LOTTERY = 0,					
+	TYPE_FINISH_SCRATCH,				
+	TYPE_OVER_ENDING,					
 
 	TYPE_MAX,
 };
@@ -35,10 +35,10 @@ class CGLotterySelect : public Packet
 {
 public:
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler

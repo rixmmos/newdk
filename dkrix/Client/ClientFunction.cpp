@@ -41,7 +41,7 @@ extern RECT g_GameRect;
 #if !defined(_LIB) && !defined(__GAME_CLIENT__)
 	
 //-----------------------------------------------------------------------------
-// 초기화 할 때,
+
 //-----------------------------------------------------------------------------
 void
 InitSound()
@@ -60,12 +60,12 @@ InitSound()
 
 
 	//------------------------------------------------
-	// DXSound & SoundManager 초기화
+	
 	//------------------------------------------------
 	if (g_SDLAudio.Init(g_hWnd))
 	{
 		g_pSoundManager = new CSoundPartManager;
-		g_pSoundManager->Init( g_pSoundTable->GetSize(), 50 );	// 50개의 wav만 loading한다는 의미
+		g_pSoundManager->Init( g_pSoundTable->GetSize(), 50 );	
 	}
 }
 
@@ -86,38 +86,38 @@ UnInitSound()
 	//---------------------------------------------------------------------------
 	// PlaySound
 	//---------------------------------------------------------------------------
-	// Client가 아닌 경우에 사용..
+	
 	//---------------------------------------------------------------------------	
 	void		
 	PlaySound(TYPE_SOUNDID soundID)
 	{
 		//-----------------------------------------------------------
-		// 정의되지 않는 sound ID일 경우..
+		
 		//-----------------------------------------------------------
 		if (!g_SDLAudio.IsInit() || soundID >= g_pSoundTable->GetSize())
 			return;
 
 		//-----------------------------------------------------------
-		// 없으면 --> Load & Play
+		
 		//-----------------------------------------------------------
 		if (g_pSoundManager->IsDataNULL(soundID))
 		{
-			// 다시 load						
+			
 			const char* filename = (*g_pSoundTable)[soundID].Filename.GetString();
  			LPDIRECTSOUNDBUFFER pBuffer = g_SDLAudio.LoadWav( (char*)filename );
 
 			//-----------------------------------------------------------
-			// Loading 실패
+			
 			//-----------------------------------------------------------
 			if (pBuffer==NULL)
 			{
 			}
 			//-----------------------------------------------------------
-			// Load에 성공 했으면...
+			
 			//-----------------------------------------------------------
 			else		
 			{
-				// Replace됐으면 원래것을 메모리에서 지운다.
+				
 #ifdef PLATFORM_WINDOWS
 				LPDIRECTSOUNDBUFFER pOld;
 				if (g_pSoundManager->SetData( soundID, pBuffer, pOld )!=0xFFFF)
@@ -134,7 +134,7 @@ UnInitSound()
 			}
 		}
 		//-----------------------------------------------------------
-		// 있는 경우 --> Play
+		
 		//-----------------------------------------------------------
 		else
 		{
@@ -194,13 +194,13 @@ UnInitSound()
 //---------------------------------------------------------------------------
 // DrawInventoryEffect
 //---------------------------------------------------------------------------
-// InventoryEffect들을 그려준다.
+
 //---------------------------------------------------------------------------
 void
 DrawInventoryEffect()
 {
 	#ifdef __GAME_CLIENT__
-		// 현재 inventory의 첫 좌표			
+		
 		POINT point = UI_GetInventoryPosition();
 		
 		// TODO: [SDL_BACKEND] DrawInventoryEffect not implemented for SDL backend
@@ -213,7 +213,7 @@ void
 DrawTitleEffect()
 {
 	#ifdef __GAME_CLIENT__
-		// 현재 inventory의 첫 좌표			
+		
 		POINT point = 	{400,528};
 
 		g_pTopView->DrawTitleEffect(&point);
@@ -223,14 +223,14 @@ DrawTitleEffect()
 
 // 2004, 11, 22, sobeit add start
 //--------------------------------------------------------------------
-//	기어 창에 피의 성서 아이템 뒤에 뿌린다..
-//  DrawInventoryEffect 처럼 generator 만들수도 있지만..특수한 경우기 때문에 무시
+
+
 //-------------------------------------------------------------------
 void 
 DrawBloodBibleEffect_InGear(int X, int Y)
 {
 	#ifdef __GAME_CLIENT__
-		// 현재 inventory의 첫 좌표			
+		
 		POINT point = 	{X,Y};
 
 		g_pTopView->DrawBloodBibleEffect_InGear(&point);
@@ -241,7 +241,7 @@ DrawBloodBibleEffect_InGear(int X, int Y)
 //---------------------------------------------------------------------------
 // Add New_Inventory_Effect
 //---------------------------------------------------------------------------
-// 화면좌표(x,y)
+
 //---------------------------------------------------------------------------
 void
 AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DWORD value)
@@ -251,14 +251,14 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 		DEBUG_ADD("AddNewInventoryEffect");
 
 		//---------------------------------------------------------
-		// 기술 설정이 잘못된 경우
+		
 		//---------------------------------------------------------
 		if (ai>=g_pActionInfoTable->GetSize())
 		{
 			return;
 		}
 
-		// item의 grid 좌표
+		
 		int x, y;
 
 		const MItem* pItem = g_pInventory->GetItemToModify( id );
@@ -281,7 +281,7 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 		*/
 
 		//---------------------------------------------------------
-		// item이 없는 경우
+		
 		//---------------------------------------------------------
 		if (pItem==NULL || !(*g_pActionInfoTable)[ai].IsTargetItem())
 		{
@@ -293,7 +293,7 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 		y = pItem->GetGridY();
 
 		//---------------------------------------------------------
-		// 기술의 연결 동작?들이 있는 경우에만...
+		
 		//---------------------------------------------------------
 		if ((*g_pActionInfoTable)[ai].GetSize()!=0)
 		{
@@ -305,19 +305,19 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 
 			//--------------------------------------------------------
 			//
-			//                   Effect생성		
+			
 			//
 			//--------------------------------------------------------
 			g_pEffectGeneratorTable->Generate(
-					x,y,0,		// 시작 위치
-					0, 			// 방향
+					x,y,0,		
+					0, 			
 					1,			// power
-					ai,			//	ActionInfoTable종류,
-					pEffectTarget		// 목표 정보
+					ai,			
+					pEffectTarget		
 			);
 
 			//------------------------------------------------------
-			// 결과 생성
+			
 			//------------------------------------------------------
 			MActionResult* pResult = new MActionResult;
 			MActionResultNode* pActionResultNode = NULL;
@@ -339,7 +339,7 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 				{
 					MItem* pInvenItem = g_pInventory->GetItem(id);
 
-					// 대상 아이템이 펫아이템인경우는 처리 안함
+					
 					if(pInvenItem != NULL)
 					{
 						if(pInvenItem->GetItemClass() != ITEM_CLASS_PET_ITEM)
@@ -380,14 +380,14 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 			DEBUG_ADD_FORMAT("[AddNewInventoryEffect] ai=%d, item id=%d", ai, id);
 		}
 		//---------------------------------------------------------
-		// 기술의 연결 동작이 없는 경우
+		
 		//---------------------------------------------------------
 		else
 		{
 			//------------------------------------------------------------
-			// 결과를 처리해야하는 시점인가? - 당연하다고 본다 *_*;
+			
 			//------------------------------------------------------------				
-			// 음.. 결과는 어딨지.. - -;;
+			
 		}
 	#endif
 }
@@ -396,12 +396,12 @@ AddNewInventoryEffect(TYPE_OBJECTID id, TYPE_ACTIONINFO ai, DWORD delayFrame, DW
 //---------------------------------------------------------------------------
 // Draw AlphaBox (pRect,  (r,g,b),  alpha)
 //---------------------------------------------------------------------------
-// alpha가 커지면.. 더 진해지게 되어 있음..
+
 //---------------------------------------------------------------------------
 void
 DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 {
-	// 클리핑
+	
 	RECT rect = *pRect;
 	pRect = &rect;
 	// add by Sonic 2006.9.26
@@ -431,7 +431,7 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 #ifdef PLATFORM_WINDOWS
 		WORD color;
 		//------------------------------------------------
-		// Lock 상태로 만든다.
+		
 		//------------------------------------------------
 		BOOL bUnlock = !gpC_base->m_p_DDSurface_back->IsLock();
 		if (bUnlock)
@@ -442,7 +442,7 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 		color = CSDLGraphics::Color(r,g,b);
 
 		//-------------------------------------------------
-		// 검정색이면.. 쉽게 된다~
+		
 		//-------------------------------------------------
 		if (color==0)
 		{
@@ -458,7 +458,7 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 			}
 		}
 		//-------------------------------------------------
-		// 아니면...
+		
 		//-------------------------------------------------
 		else
 		{
@@ -466,7 +466,7 @@ DrawAlphaBox(RECT* pRect, BYTE r, BYTE g, BYTE b, BYTE alpha)
 		}
 
 		//------------------------------------------------
-		// 원래의 Lock 상태로 되돌린다.
+		
 		//------------------------------------------------
 		if (bUnlock)
 		{

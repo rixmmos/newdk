@@ -9,7 +9,7 @@
 #include "Mofus.h"
 
 
-// 실행 함수
+
 void PKTLogoutHandler::execute(GameServerPlayer* pPlayer, MPacket* pPacket) {
     cout << "--------------------------------------------------" << endl;
     cout << "RECV Logout" << endl;

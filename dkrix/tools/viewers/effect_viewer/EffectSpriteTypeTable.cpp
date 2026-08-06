@@ -179,12 +179,12 @@ void EffectSpriteTypeTable::DebugAccess(int index, const char* location) const
     std::cout << "Table Size: " << m_table.size() << std::endl;
 
     if (index < 0) {
-        std::cout << "  ❌ ERROR: Negative index!" << std::endl;
+        std::cout << "   ERROR: Negative index!" << std::endl;
     } else if (index >= (int)m_table.size()) {
-        std::cout << "  ❌ ERROR: Index out of bounds! Offset=" << (index - m_table.size() + 1) << std::endl;
+        std::cout << "   ERROR: Index out of bounds! Offset=" << (index - m_table.size() + 1) << std::endl;
         std::cout << "  This would cause heap-buffer-overflow in the game!" << std::endl;
     } else {
-        std::cout << "  ✅ OK: Index is valid" << std::endl;
+        std::cout << "   OK: Index is valid" << std::endl;
     }
 
     // Show which section this index falls into

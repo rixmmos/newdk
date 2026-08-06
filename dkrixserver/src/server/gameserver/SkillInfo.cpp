@@ -180,7 +180,7 @@ SkillInfoManager::~SkillInfoManager()
 {
     __BEGIN_TRY
 
-    // 이것만 해서는 안되는디.. 어차피 안 불려질거기 때문에 일단 무시.. by sigi
+    
     SAFE_DELETE_ARRAY(m_SkillInfoList);
 
     __END_CATCH_NO_RETHROW
@@ -200,7 +200,7 @@ void SkillInfoManager::init() {
                 SkillInfo* pRequireSkillInfo = m_SkillInfoList[(*itr)];
 
                 if (pRequireSkillInfo == NULL) {
-                    cout << "스킬 로드 순서가 틀려먹었습니다. : " << (int)m_SkillInfoList[i]->getType() << " / "
+                    cout << "   . : " << (int)m_SkillInfoList[i]->getType() << " / "
                          << (int)(*itr) << endl;
                     Assert(false);
                 }
@@ -210,14 +210,14 @@ void SkillInfoManager::init() {
         }
     }
 
-    // 스킬 레벨 맵 초기화
+    
     for (int i = 0; i < SKILL_DOMAIN_MAX; i++) {
         for (int j = 0; j < SLAYER_MAX_DOMAIN_LEVEL + 1; j++) {
             m_SkillLevelMap[i][j] = 0;
         }
     }
 
-    // 레벨에 따른 도메인 그레이드 초기화
+    
     for (int i = 0; i < GRADE_APPRENTICE_LIMIT_LEVEL + 1; i++) {
         m_DomainGradeMap[i] = SKILL_GRADE_APPRENTICE;
     }
@@ -238,7 +238,7 @@ void SkillInfoManager::init() {
     }
 
 
-    // 도메인 그레이드에 따른 기술 레벨 제한 초기화
+    
     m_LimitLevelMap[SKILL_GRADE_APPRENTICE] = GRADE_APPRENTICE_LIMIT_LEVEL;
     m_LimitLevelMap[SKILL_GRADE_ADEPT] = GRADE_ADEPT_LIMIT_LEVEL;
     m_LimitLevelMap[SKILL_GRADE_EXPERT] = GRADE_EXPERT_LIMIT_LEVEL;
@@ -246,7 +246,7 @@ void SkillInfoManager::init() {
     m_LimitLevelMap[SKILL_GRADE_GRAND_MASTER] = GRADE_GRAND_MASTER_LIMIT_LEVEL;
     m_LimitLevelMap[SKILL_GRADE_GRAND_MASTER + 1] = GRADE_GRAND_MASTER_LIMIT_LEVEL;
 
-    // 인트에 따른 MP 감소율 테이블 초기화
+    
     for (int i = 0; i < 43; i++) {
         m_decreaseConsumeMP[i] = 0;
     }
@@ -303,7 +303,7 @@ void SkillInfoManager::load() {
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
-    // Skill Property Manager 를 초기화한다.
+    
     g_pSkillPropertyManager->init();
 
     BEGIN_DB {
@@ -357,7 +357,7 @@ void SkillInfoManager::load() {
             pSkillInfo->setDomainType(pResult->getBYTE(++i));
             pSkillInfo->setMagicDomain(pResult->getBYTE(++i));
 
-            // Skill Property 추가
+            
             SkillProperty* pSkillProperty = new SkillProperty();
 
             pSkillProperty->setType(pSkillInfo->getType());
@@ -376,7 +376,7 @@ void SkillInfoManager::load() {
                 pSkillInfo->setCanDelete(pResult->getInt(++i));
             }
 
-            // Skill Info 추가
+            
             addSkillInfo(pSkillInfo);
         }
 
@@ -408,21 +408,7 @@ void SkillInfoManager::addSkillInfo(SkillInfo* pSkillInfo) {
 
     m_SkillLevelMap[pSkillInfo->getDomainType()][pSkillInfo->getLevel()] = pSkillInfo->getType();
 
-    /*	list<SkillType_t>& rSkills = pSkillInfo->getRequireSkills();
-        list<SkillType_t>::iterator itr = rSkills.begin();
-
-        for ( ; itr != rSkills.end(); ++itr )
-        {
-            SkillInfo* pRequireSkillInfo = m_SkillInfoList[(*itr)];
-
-            if ( pRequireSkillInfo == NULL )
-            {
-                cout << "스킬 로드 순서가 틀려먹었습니다. : " << (int)pSkillInfo->getType() << " / " << (int)(*itr) <<
-       endl; Assert(false);
-            }
-
-            pRequireSkillInfo->addRequiredSkill(pSkillInfo->getType());
-        }*/
+     
 
     __END_CATCH
 }
@@ -458,7 +444,7 @@ SkillType_t SkillInfoManager::getSkillTypeByLevel(SkillDomainType_t SkillDomain,
     __END_CATCH
 }
 
-// 도메인의 레벨로 그 레벨은 어떤 등급에 해당하는지 아는 함수.
+
 SkillGrade SkillInfoManager::getGradeByDomainLevel(Level_t Level) {
     __BEGIN_TRY
 
@@ -469,7 +455,7 @@ SkillGrade SkillInfoManager::getGradeByDomainLevel(Level_t Level) {
     __END_CATCH
 }
 
-// 현재 등급에서 기술이 어느정도 레벨까지 올라갈 수 있는지 알아 본다.
+
 Level_t SkillInfoManager::getLimitLevelByDomainGrade(SkillGrade Grade) {
     __BEGIN_TRY
 

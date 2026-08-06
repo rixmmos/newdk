@@ -35,18 +35,18 @@ SimpleQuest::~SimpleQuest() throw(Error) {
 void SimpleQuest::setDeadline(Turn_t delay) throw() {
     __BEGIN_TRY
 
-    // 현재 시간을 측정한다.
+    
     getCurrentTime(m_Deadline);
 
-    // 데드라인을 결정한다.
-    // 이때, delay 는 0.1 초가 1 이다.
+    
+    
     m_Deadline.tv_sec += delay / 10;
     m_Deadline.tv_usec += (delay % 10) * 100000;
 
     __END_CATCH
 }
 
-// 남은 duration(1/10초 단위)
+
 Duration_t SimpleQuest::getRemainDuration() const throw() {
     __BEGIN_TRY
 
@@ -152,7 +152,7 @@ void SimpleQuest::take(Creature* pCreature, bool bNewQuest) throw(Error) {
 
     setOwner(pCreature);
 
-    // 처음 받은 퀘스트인 경우만.. 시간 설정과 DB생성을 한다
+    
     if (bNewQuest) {
         getCurrentTime(m_Deadline);
         m_Deadline.tv_sec += m_AvailableSecond;

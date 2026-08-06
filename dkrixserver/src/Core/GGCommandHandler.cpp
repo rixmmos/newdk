@@ -20,8 +20,8 @@
 //
 // GGCommandHander::execute()
 //
-// 게임 서버가 로그인 서버로부터 GGCommand 패킷을 받게 되면,
-// ReconnectLoginInfo를 새로 추가하게 된다.
+
+
 //
 //----------------------------------------------------------------------
 void GGCommandHandler::execute(GGCommand* pPacket)
@@ -31,7 +31,7 @@ void GGCommandHandler::execute(GGCommand* pPacket)
 
 #ifdef __GAME_SERVER__
 
-            // pPacket이 다른 GameServer로부터 날아온것인지를 확인해야 한다.
+            
             cout
         << "[" << pPacket->getHost().c_str() << ":" << pPacket->getPort() << "] " << pPacket->toString().c_str()
         << endl;
@@ -70,9 +70,9 @@ void GGCommandHandler::execute(GGCommand* pPacket)
 
     }
 
-    // 각종 함수용 값 세팅용 함수
-    // set type value 형태로 정의된다.
-    // 2002.5.8 별 확률을 자율적으로 조절하기 위해서 만듬
+    
+    
+    
     else if (msg.substr(i + 1, 3) == "set") {
         CGSayHandler::opset(NULL, msg, i);
     }

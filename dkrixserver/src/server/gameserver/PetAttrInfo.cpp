@@ -38,7 +38,7 @@ void PetAttrInfoManager::load() {
             if (m_PetAttrInfoMap[PetAttr] != NULL)
                 m_PetAttrInfoMap[PetAttr]->setEnchantRatio(pResult->getInt(2));
             else
-                cout << "PetAttrInfo에 있는 PetAttr이 존재하지 않는 속성입니다." << endl;
+                cout << "PetAttrInfo  PetAttr   ." << endl;
         }
 
         SAFE_DELETE(pStmt);
@@ -62,7 +62,7 @@ bool PetAttrInfoManager::enchantRandomAttr(PetInfo* pPetInfo, int ratio) {
 
     value = rand() % 100;
 
-    cout << "옵션선택 : " << value << endl;
+    cout << " : " << value << endl;
 
     for (; itr != endItr; ++itr) {
         PetAttrInfo* pPetAttrInfo = itr->second;
@@ -93,7 +93,7 @@ bool PetAttrInfoManager::enchantSpecAttr(PetInfo* pPetInfo, PetAttr_t PetAttr) {
 
     PetAttrInfo* pPetAttrInfo = m_PetAttrInfoMap[PetAttr];
     if (pPetAttrInfo == NULL) {
-        filelog("PetBug.log", "속성 지정 펫 인챈트에서 이상한 값이 들어있다. : %u", PetAttr);
+        filelog("PetBug.log", "      . : %u", PetAttr);
         return false;
     }
 

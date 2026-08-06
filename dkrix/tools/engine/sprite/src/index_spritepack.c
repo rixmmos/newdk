@@ -1,19 +1,4 @@
-/**
- * @file index_spritepack.c
- * @brief IndexedSpritePack implementation
- * 
- * Requirements: 1.1, 1.2, 1.3
- * 
- * File format:
- * 
- * .ispk (pack file):
- *   [size: 2 bytes] - Number of sprites
- *   [sprite data...] - Sequential sprite data
- * 
- * .ispki (index file):
- *   [size: 2 bytes] - Number of sprites
- *   [offset: 4 bytes] × size - File offsets for each sprite
- */
+ 
 
 #include "index_spritepack.h"
 #include <stdlib.h>

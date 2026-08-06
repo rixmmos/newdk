@@ -155,12 +155,12 @@ void SMSServiceThread::run() {
         if (dummyQueryTime < currentTime) {
             g_pDatabaseManager->executeDummyQuery(m_pConnection);
 
-            // 1시간 ~ 1시간 30분 사이에서 dummy query 시간을 설정한다.
-            // timeout이 되지 않게 하기 위해서이다.
+            
+            
             dummyQueryTime.tv_sec += (60 + rand() % 30) * 60;
         }
 
-        sleep(1); // 1초에 한번씩 큐를 체크한다.
+        sleep(1); 
     }
 
     __END_CATCH

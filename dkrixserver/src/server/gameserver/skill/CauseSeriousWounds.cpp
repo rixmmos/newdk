@@ -10,7 +10,7 @@
 #include "SimpleMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void CauseSeriousWounds::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot,
                                  CEffectID_t CEffectID)
@@ -38,7 +38,7 @@ void CauseSeriousWounds::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, Ski
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Soul Smashing 이 있다면 데미지 10% 증가
+    
     if (pSlayer->hasRankBonus(RankBonus::RANK_BONUS_SOUL_SMASHING)) {
         RankBonus* pRankBonus = pSlayer->getRankBonus(RankBonus::RANK_BONUS_SOUL_SMASHING);
         Assert(pRankBonus != NULL);

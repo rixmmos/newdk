@@ -109,15 +109,9 @@ static BOOL InitApp(int nCmdShow)
 	} else {
 		flags |= SDL_WINDOW_RESIZABLE;
 
-		// Check for 1024x768 mode
 		extern RECT g_GameRect;
-		if (g_MyFull) {
-			cx = 1024;
-			cy = 768;
-		} else {
-			cx = g_GameRect.right;
-			cy = g_GameRect.bottom;
-		}
+		cx = g_GameRect.right;
+		cy = g_GameRect.bottom;
 	}
 
 	// Create SDL window
@@ -220,18 +214,12 @@ int main(int argc, char* argv[])
 	extern bool g_bFullScreen;
 	extern RECT g_GameRect;
 	extern int g_x, g_y;
-	extern int g_SECTOR_WIDTH, g_SECTOR_HEIGHT;
-	extern int g_SECTOR_WIDTH_HALF, g_SECTOR_HEIGHT_HALF;
-	extern int g_SECTOR_SKIP_PLAYER_LEFT, g_SECTOR_SKIP_PLAYER_UP;
-	extern int g_TILESURFACE_SECTOR_WIDTH, g_TILESURFACE_SECTOR_HEIGHT;
-	extern int g_TILESURFACE_SECTOR_OUTLINE_RIGHT, g_TILESURFACE_SECTOR_OUTLINE_DOWN;
-	extern int g_TILESURFACE_WIDTH, g_TILESURFACE_HEIGHT;
-	extern int g_TILESURFACE_OUTLINE_RIGHT, g_TILESURFACE_OUTLINE_DOWN;
-	extern int g_TILE_X_HALF, g_TILE_Y_HALF;
+	extern void ApplyConfiguredGameResolution();
 	extern DWORD g_dwVideoMemory;
 	extern MTopView* g_pTopView;
 
 	bool cmpFullScreen = false;
+	ApplyConfiguredGameResolution();
 
 	// Parse command line (from WinMain lines 3047-3115)
 	size_t cmdLen = strlen(cmdLine);
@@ -249,54 +237,12 @@ int main(int argc, char* argv[])
 		else if (lastChar == '3') {
 			g_MyFull = true;
 			cmpFullScreen = false;
-			g_GameRect.left = 1023;
-			g_GameRect.top = 767;
-			g_GameRect.right = 1024;
-			g_GameRect.bottom = 768;
-			g_x = 512;
-			g_y = 384;
-			g_SECTOR_WIDTH = 21;
-			g_SECTOR_HEIGHT = 32;
-			g_SECTOR_WIDTH_HALF = 11;
-			g_SECTOR_HEIGHT_HALF = 17;
-			g_SECTOR_SKIP_PLAYER_LEFT = -10;
-			g_SECTOR_SKIP_PLAYER_UP = -16;
-			g_TILESURFACE_SECTOR_WIDTH = 27;
-			g_TILESURFACE_SECTOR_HEIGHT = 37;
-			g_TILESURFACE_SECTOR_OUTLINE_RIGHT = 24;
-			g_TILESURFACE_SECTOR_OUTLINE_DOWN = 34;
-			g_TILESURFACE_WIDTH = 1296;
-			g_TILESURFACE_HEIGHT = 888;
-			g_TILESURFACE_OUTLINE_RIGHT = 1152;
-			g_TILESURFACE_OUTLINE_DOWN = 816;
-			g_TILE_X_HALF = 24;
-			g_TILE_Y_HALF = 12;
+			ApplyConfiguredGameResolution();
 		}
 		else if (lastChar == '4') {
 			g_MyFull = true;
 			cmpFullScreen = true;
-			g_GameRect.left = 1023;
-			g_GameRect.top = 767;
-			g_GameRect.right = 1024;
-			g_GameRect.bottom = 768;
-			g_x = 512;
-			g_y = 384;
-			g_SECTOR_WIDTH = 21;
-			g_SECTOR_HEIGHT = 32;
-			g_SECTOR_WIDTH_HALF = 11;
-			g_SECTOR_HEIGHT_HALF = 17;
-			g_SECTOR_SKIP_PLAYER_LEFT = -10;
-			g_SECTOR_SKIP_PLAYER_UP = -16;
-			g_TILESURFACE_SECTOR_WIDTH = 27;
-			g_TILESURFACE_SECTOR_HEIGHT = 37;
-			g_TILESURFACE_SECTOR_OUTLINE_RIGHT = 24;
-			g_TILESURFACE_SECTOR_OUTLINE_DOWN = 34;
-			g_TILESURFACE_WIDTH = 1296;
-			g_TILESURFACE_HEIGHT = 888;
-			g_TILESURFACE_OUTLINE_RIGHT = 1152;
-			g_TILESURFACE_OUTLINE_DOWN = 816;
-			g_TILE_X_HALF = 24;
-			g_TILE_Y_HALF = 12;
+			ApplyConfiguredGameResolution();
 		}
 	}
 
@@ -342,29 +288,10 @@ int main(int argc, char* argv[])
 	// This MUST be done before InitGame() - same order as WinMain
 	//-----------------------------------------------------------------
 	printf("Detecting language and initializing IME...\n");
-	DARKEDEN_LANGUAGE Language = CheckDarkEdenLanguage();
-
-	// Override to Chinese for macOS/Linux builds with Chinese resources
-	Language = DARKEDEN_CHINESE;
-
-	switch (Language)
-	{
-	case DARKEDEN_CHINESE:
-		gC_ci = new CI_CHINESE;
-		printf("Language: Chinese (Simplified)\n");
-		break;
-
-	case DARKEDEN_KOREAN:
-		gC_ci = new CI_KOREAN;
-		printf("Language: Korean\n");
-		break;
-
-	default:
-		// Default to Chinese for non-Windows platforms
-		gC_ci = new CI_CHINESE;
-		printf("Language: Chinese (Simplified - default)\n");
-		break;
-	}
+	DARKEDEN_LANGUAGE Language = DARKEDEN_ENGLISH;
+	(void)Language;
+	gC_ci = new CI_ENGLISH;
+	printf("Language: English (Latin-only)\n");
 
 	//-----------------------------------------------------------------
 	// Initialize App (create window, init game)
@@ -388,21 +315,10 @@ int main(int argc, char* argv[])
 		extern UserInformation* g_pUserInformation;
 		if (g_pUserInformation != NULL)
 		{
-			if (gC_ci->IsKorean())
-			{
-				g_pUserInformation->SetKorean();
-				printf("User language set to: Korean\n");
-			}
-			else if (gC_ci->IsChinese())
-			{
-				g_pUserInformation->SetChinese();
-				printf("User language set to: Chinese\n");
-			}
-			else if (gC_ci->IsJapanese())
-			{
-				g_pUserInformation->SetJapanese();
-				printf("User language set to: Japanese\n");
-			}
+			// Keep the legacy Korean protocol/config path for server compatibility.
+			// UI/input language is forced independently via CI_ENGLISH.
+			g_pUserInformation->SetKorean();
+			printf("User protocol compatibility set to: Korean\n");
 		}
 
 		//-----------------------------------------------------------------

@@ -64,17 +64,17 @@ class PCTalkBox : public MStringList
 		void				SetAnswerID(unsigned int id)		{ m_AnswerID = id; }
 		unsigned int		GetAnswerID() const					{ return m_AnswerID; }
 			
-		std::vector<int>	m_AnswerIDMap;	// 시간이 없어서 어쩔 수 없다-_-;
+		std::vector<int>	m_AnswerIDMap;	
 
 	protected :
 		TALKBOX_TYPE		m_Type;
 
-		MString				m_Content;		// 대화 주제
+		MString				m_Content;		
 
-		unsigned int		m_NPCID;		// 대화하는 NPC의 ID
-		unsigned int		m_CreatureType;	// 대화하는 NPC의 CreatureType
-		unsigned int		m_ScriptID;		// 대화 ID
-		unsigned int		m_AnswerID;		// 대답 번호		
+		unsigned int		m_NPCID;		
+		unsigned int		m_CreatureType;	
+		unsigned int		m_ScriptID;		
+		unsigned int		m_AnswerID;		
 		
 };
 

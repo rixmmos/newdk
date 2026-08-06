@@ -2,8 +2,8 @@
 //
 // Filename    : ExtraInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -30,7 +30,7 @@ ExtraInfo::ExtraInfo() {
 // destructor
 //////////////////////////////////////////////////////////////////////
 ExtraInfo::~ExtraInfo() noexcept {
-    // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+    
     while (!m_ExtraSlotInfoList.empty()) {
         ExtraSlotInfo* pExtraSlotInfo = m_ExtraSlotInfoList.front();
         SAFE_DELETE(pExtraSlotInfo);
@@ -40,12 +40,12 @@ ExtraInfo::~ExtraInfo() noexcept {
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void ExtraInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_ListNum);
 
     for (int i = 0; i < m_ListNum; i++) {
@@ -59,12 +59,12 @@ void ExtraInfo::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void ExtraInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_ListNum);
 
     for (list<ExtraSlotInfo*>::const_iterator itr = m_ExtraSlotInfoList.begin(); itr != m_ExtraSlotInfoList.end();

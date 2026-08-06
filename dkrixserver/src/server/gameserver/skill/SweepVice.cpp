@@ -26,7 +26,7 @@ void SweepVice::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
 

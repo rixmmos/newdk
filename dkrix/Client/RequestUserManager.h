@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // RequestUserManager.h
 //----------------------------------------------------------------------
-// 다른 Client의 Name, IP 등의 정보를 갖는다.
+
 //----------------------------------------------------------------------
 
 #ifndef __REQUEST_USER_MANAGER_H__
@@ -22,14 +22,14 @@
 //----------------------------------------------------------------------
 // RequestUserInfo
 //----------------------------------------------------------------------
-// 다른 Client에 대한 정보
+
 //----------------------------------------------------------------------
 class RequestUserInfo {
 	public :
 		enum USER_STATUS
 		{
-			USER_STATUS_NORMAL,			// 정상 상태
-			USER_STATUS_UNABLE			// 접속 불가
+			USER_STATUS_NORMAL,			
+			USER_STATUS_UNABLE			
 		};
 
 	public :
@@ -95,7 +95,7 @@ class RequestUserManager {
 		bool				RemoveRequestingUser(const char* pName);
 
 		//-------------------------------------------------------------
-		// RemoveUser - 다른 thread에서.. 냠..
+		
 		//-------------------------------------------------------------
 		void				RemoveRequestUserLater(const char* pName);
 
@@ -120,9 +120,9 @@ class RequestUserManager {
 	private :
 		CRITICAL_SECTION		m_Lock;
 
-		REQUEST_USER_MAP		m_RequestUsers;		// IP를 알고 있는 애덜
+		REQUEST_USER_MAP		m_RequestUsers;		
 
-		REQUESTING_USER_MAP		m_RequestingUsers;	// 서버에 IP를 요청중인 애덜
+		REQUESTING_USER_MAP		m_RequestingUsers;	
 
 		REMOVE_USER_LIST		m_RemoveUsers;
 };

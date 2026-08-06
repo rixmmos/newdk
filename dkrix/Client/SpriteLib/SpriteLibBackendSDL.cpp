@@ -160,6 +160,7 @@ spritectl_surface_t spritectl_create_surface(int width, int height, int format) 
 	surface->height = height;
 	surface->format = format;
 	surface->locked = 0;
+	surface->texture_dirty = 1;
 	surface->ref_count = 1;
 
 	return surface;
@@ -216,6 +217,7 @@ int spritectl_unlock_surface(spritectl_surface_t surface) {
 
 	SDL_UnlockSurface(surface->surface);
 	surface->locked--;
+	surface->texture_dirty = 1;
 
 	return 0;
 }
@@ -234,6 +236,7 @@ int spritectl_clear_surface(spritectl_surface_t surface, uint32_t color) {
 	rect.h = surface->height;
 
 	SDL_FillRect(surface->surface, &rect, (Uint32)color);
+	surface->texture_dirty = 1;
 
 	return 0;
 }
@@ -274,6 +277,7 @@ spritectl_sprite_t spritectl_create_sprite(int width, int height, int format,
 	sprite->format = format;
 	sprite->data_size = data_size;
 	sprite->rgba_pixels = NULL;
+	sprite->blit_surface = NULL;
 	sprite->scanline_rle = NULL;
 	sprite->scanline_lens = NULL;
 	sprite->has_rle = 0;
@@ -306,6 +310,9 @@ void spritectl_destroy_sprite(spritectl_sprite_t sprite) {
 	}
 	if (sprite->rgba_pixels) {
 		free(sprite->rgba_pixels);
+	}
+	if (sprite->blit_surface) {
+		SDL_FreeSurface(sprite->blit_surface);
 	}
 
 	/* Free RLE data */
@@ -548,6 +555,7 @@ spritectl_sprite_t spritectl_create_sprite_rle(int width, int height) {
 	sprite->format = SPRITECTL_FORMAT_RGB565;  /* Assume RGB565 for RLE sprites */
 	sprite->data_size = 0;
 	sprite->rgba_pixels = NULL;
+	sprite->blit_surface = NULL;
 	sprite->pixels = NULL;  /* RLE sprites don't have decoded pixels */
 	sprite->ref_count = 1;
 	sprite->has_rle = 1;  /* Mark as RLE sprite */
@@ -600,15 +608,127 @@ int spritectl_sprite_set_scanline_rle(spritectl_sprite_t sprite, int y,
 	return 0;
 }
 
+static int spritectl_ensure_rle_rgba_pixels(spritectl_sprite_t sprite) {
+	if (!sprite || !sprite->has_rle || !sprite->scanline_rle) {
+		return -1;
+	}
+
+	if (sprite->rgba_pixels != NULL) {
+		return 0;
+	}
+
+	size_t pixel_count = (size_t)sprite->width * (size_t)sprite->height;
+	sprite->rgba_pixels = (uint32_t*)calloc(pixel_count, sizeof(uint32_t));
+	if (!sprite->rgba_pixels) {
+		return -1;
+	}
+
+	for (int y = 0; y < sprite->height; y++) {
+		const uint16_t* rle_data = sprite->scanline_rle[y];
+		const uint16_t rle_size = sprite->scanline_lens[y];
+		if (!rle_data || rle_size == 0) {
+			continue;
+		}
+
+		int rle_index = 0;
+		const int seg_count = rle_data[rle_index++];
+		int x = 0;
+
+		for (int seg = 0; seg < seg_count && rle_index < rle_size; seg++) {
+			if (rle_index + 1 >= rle_size) {
+				break;
+			}
+
+			const int trans_count = rle_data[rle_index++];
+			const int color_count = rle_data[rle_index++];
+			x += trans_count;
+
+			for (int c = 0; c < color_count && rle_index < rle_size; c++, x++) {
+				if (x < 0 || x >= sprite->width) {
+					rle_index++;
+					continue;
+				}
+
+				uint8_t r, g, b;
+				const uint16_t pixel = rle_data[rle_index++];
+				spritectl_565_to_rgb(pixel, &r, &g, &b);
+				sprite->rgba_pixels[y * sprite->width + x] = spritectl_rgb_to_rgba(r, g, b, 255);
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int spritectl_ensure_sprite_blit_surface(spritectl_sprite_t sprite) {
+	if (!sprite) {
+		return -1;
+	}
+
+	if (sprite->blit_surface != NULL) {
+		return 0;
+	}
+
+	if (sprite->has_rle && sprite->scanline_rle) {
+		if (spritectl_ensure_rle_rgba_pixels(sprite) != 0) {
+			return -1;
+		}
+	} else if (sprite->rgba_pixels == NULL && sprite->format != SPRITECTL_FORMAT_RGBA32) {
+		sprite->rgba_pixels = (uint32_t*)malloc(sprite->width * sprite->height * sizeof(uint32_t));
+		if (!sprite->rgba_pixels) {
+			return -1;
+		}
+
+		if (sprite->format == SPRITECTL_FORMAT_RGB565) {
+			spritectl_convert_565_to_rgba(sprite->pixels, sprite->rgba_pixels,
+			                              sprite->width * sprite->height, 0x0000);
+		} else if (sprite->format == SPRITECTL_FORMAT_RGB555) {
+			spritectl_convert_555_to_rgba(sprite->pixels, sprite->rgba_pixels,
+			                              sprite->width * sprite->height, 0x0000);
+		} else {
+			for (int i = 0; i < sprite->width * sprite->height; i++) {
+				sprite->rgba_pixels[i] = 0xFFFFFFFF;
+			}
+		}
+	}
+
+	sprite->blit_surface = SDL_CreateRGBSurface(0, sprite->width, sprite->height, 32,
+	                                            0xFF, 0xFF00, 0xFF0000, 0xFF000000);
+	if (!sprite->blit_surface) {
+		return -1;
+	}
+
+	const uint32_t* pixel_src = (sprite->format == SPRITECTL_FORMAT_RGBA32)
+		? (const uint32_t*)sprite->pixels
+		: sprite->rgba_pixels;
+	if (!pixel_src) {
+		SDL_FreeSurface(sprite->blit_surface);
+		sprite->blit_surface = NULL;
+		return -1;
+	}
+
+	SDL_LockSurface(sprite->blit_surface);
+	memcpy(sprite->blit_surface->pixels, pixel_src,
+	       sprite->width * sprite->height * sizeof(uint32_t));
+	SDL_UnlockSurface(sprite->blit_surface);
+	SDL_SetSurfaceBlendMode(sprite->blit_surface, SDL_BLENDMODE_BLEND);
+
+	return 0;
+}
+
 int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
                          spritectl_sprite_t sprite, int flags, int alpha) {
 	if (!dest || !sprite) {
 		return -1;
 	}
 
-	/* If sprite has RLE data, use RLE-based rendering (like original DirectX) */
+	/* RLE sprites are decoded to RGBA once and then use the generic SDL blit path.
+	 * This has proven more reliable than the direct-write RLE path for UI packs.
+	 */
 	if (sprite->has_rle && sprite->scanline_rle) {
-		return spritectl_blt_sprite_rle(dest, x, y, sprite, flags, alpha);
+		if (spritectl_ensure_rle_rgba_pixels(sprite) != 0) {
+			return spritectl_blt_sprite_rle(dest, x, y, sprite, flags, alpha);
+		}
 	}
 
 	/* Fallback to old method for sprites without RLE data */
@@ -642,69 +762,20 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 	 * Locking the destination surface before blitting is incorrect and will cause errors.
 	 */
 
-	/* Create temporary surface from sprite pixels */
-	src_surface = SDL_CreateRGBSurface(0, sprite->width, sprite->height, 32,
-	                                  0xFF, 0xFF00, 0xFF0000, 0xFF000000);
-	if (!src_surface) {
+	if (spritectl_ensure_sprite_blit_surface(sprite) != 0) {
 		return -1;
 	}
-
-	/* Use cached RGBA pixels if available, otherwise convert and cache */
-	if (sprite->rgba_pixels == NULL && sprite->format != SPRITECTL_FORMAT_RGBA32) {
-		/* Convert and cache RGBA pixels for non-RGBA32 formats */
-		sprite->rgba_pixels = (uint32_t*)malloc(sprite->width * sprite->height * sizeof(uint32_t));
-		if (sprite->rgba_pixels) {
-			if (sprite->format == SPRITECTL_FORMAT_RGB565) {
-				spritectl_convert_565_to_rgba(sprite->pixels, sprite->rgba_pixels,
-				                              sprite->width * sprite->height, 0x0000);
-			} else if (sprite->format == SPRITECTL_FORMAT_RGB555) {
-				spritectl_convert_555_to_rgba(sprite->pixels, sprite->rgba_pixels,
-				                              sprite->width * sprite->height, 0x0000);
-			} else {
-				/* Unknown format, fill with opaque white */
-				for (int i = 0; i < sprite->width * sprite->height; i++) {
-					sprite->rgba_pixels[i] = 0xFFFFFFFF;
-				}
-			}
-		}
-	}
-
-	/* Determine pixel source */
-	const uint32_t* pixel_src;
-	if (sprite->format == SPRITECTL_FORMAT_RGBA32) {
-		pixel_src = (const uint32_t*)sprite->pixels;
-	} else if (sprite->rgba_pixels) {
-		pixel_src = sprite->rgba_pixels;
-	} else {
-		/* Fallback: fill with opaque white */
-		static uint32_t* fallback_pixels = NULL;
-		static int fallback_size = 0;
-		if (!fallback_pixels || fallback_size < sprite->width * sprite->height) {
-			free(fallback_pixels);
-			fallback_pixels = (uint32_t*)malloc(sprite->width * sprite->height * sizeof(uint32_t));
-			fallback_size = sprite->width * sprite->height;
-			if (fallback_pixels) {
-				for (int i = 0; i < sprite->width * sprite->height; i++) {
-					fallback_pixels[i] = 0xFFFFFFFF;
-				}
-			}
-		}
-		pixel_src = fallback_pixels;
-	}
-
-	/* Copy to temporary surface */
-	SDL_LockSurface(src_surface);
-	uint32_t* src_pixels = (uint32_t*)src_surface->pixels;
-	memcpy(src_pixels, pixel_src, sprite->width * sprite->height * sizeof(uint32_t));
-	SDL_UnlockSurface(src_surface);
+	src_surface = sprite->blit_surface;
 
 	/* Handle alpha blending */
 	if (flags & SPRITECTL_BLT_ALPHA) {
 		SDL_SetSurfaceAlphaMod(src_surface, alpha);
+	} else {
+		SDL_SetSurfaceAlphaMod(src_surface, 255);
 	}
 
-	/* 关键: 始终启用混合模式以支持 alpha 通道 */
-	/* 即使不是 alpha 模式，也需要 BLEND 模式来处理 colorkey 产生的透明像素 */
+	 
+	 
 	if (SDL_SetSurfaceBlendMode(src_surface, SDL_BLENDMODE_BLEND) != 0) {
 		fprintf(stderr, "[SpriteLib] SDL_SetSurfaceBlendMode failed: %s\n",
 		        SDL_GetError());
@@ -723,9 +794,6 @@ int spritectl_blt_sprite(spritectl_surface_t dest, int x, int y,
 	} else {
 		result = 0;
 	}
-
-	/* Cleanup */
-	SDL_FreeSurface(src_surface);
 
 	// Re-lock the surface if it was locked before (to maintain expected state)
 	if (was_locked) {
@@ -757,61 +825,10 @@ int spritectl_blt_sprite_scaled(spritectl_surface_t dest, int x, int y,
 		return 0;  /* Too small to see */
 	}
 
-	/* Create temporary surface from sprite pixels */
-	src_surface = SDL_CreateRGBSurface(0, sprite->width, sprite->height, 32,
-	                                  0xFF, 0xFF00, 0xFF0000, 0xFF000000);
-	if (!src_surface) {
+	if (spritectl_ensure_sprite_blit_surface(sprite) != 0) {
 		return -1;
 	}
-
-	/* Use cached RGBA pixels if available, otherwise convert and cache */
-	if (sprite->rgba_pixels == NULL && sprite->format != SPRITECTL_FORMAT_RGBA32) {
-		/* Convert and cache RGBA pixels for non-RGBA32 formats */
-		sprite->rgba_pixels = (uint32_t*)malloc(sprite->width * sprite->height * sizeof(uint32_t));
-		if (sprite->rgba_pixels) {
-			if (sprite->format == SPRITECTL_FORMAT_RGB565) {
-				spritectl_convert_565_to_rgba(sprite->pixels, sprite->rgba_pixels,
-				                              sprite->width * sprite->height, 0x0000);
-			} else if (sprite->format == SPRITECTL_FORMAT_RGB555) {
-				spritectl_convert_555_to_rgba(sprite->pixels, sprite->rgba_pixels,
-				                              sprite->width * sprite->height, 0x0000);
-			} else {
-				/* Unknown format, fill with opaque white */
-				for (int i = 0; i < sprite->width * sprite->height; i++) {
-					sprite->rgba_pixels[i] = 0xFFFFFFFF;
-				}
-			}
-		}
-	}
-
-	/* Determine pixel source */
-	const uint32_t* pixel_src;
-	if (sprite->format == SPRITECTL_FORMAT_RGBA32) {
-		pixel_src = (const uint32_t*)sprite->pixels;
-	} else if (sprite->rgba_pixels) {
-		pixel_src = sprite->rgba_pixels;
-	} else {
-		/* Fallback: fill with opaque white */
-		static uint32_t* fallback_pixels = NULL;
-		static int fallback_size = 0;
-		if (!fallback_pixels || fallback_size < sprite->width * sprite->height) {
-			free(fallback_pixels);
-			fallback_pixels = (uint32_t*)malloc(sprite->width * sprite->height * sizeof(uint32_t));
-			fallback_size = sprite->width * sprite->height;
-			if (fallback_pixels) {
-				for (int i = 0; i < sprite->width * sprite->height; i++) {
-					fallback_pixels[i] = 0xFFFFFFFF;
-				}
-			}
-		}
-		pixel_src = fallback_pixels;
-	}
-
-	/* Copy to temporary surface */
-	SDL_LockSurface(src_surface);
-	uint32_t* src_pixels = (uint32_t*)src_surface->pixels;
-	memcpy(src_pixels, pixel_src, sprite->width * sprite->height * sizeof(uint32_t));
-	SDL_UnlockSurface(src_surface);
+	src_surface = sprite->blit_surface;
 
 	/* Create scaled surface */
 	scaled_surface = SDL_CreateRGBSurface(0, scaled_width, scaled_height, 32,
@@ -838,9 +855,7 @@ int spritectl_blt_sprite_scaled(spritectl_surface_t dest, int x, int y,
 		result = 0;
 	}
 
-	/* Cleanup */
 	SDL_FreeSurface(scaled_surface);
-	SDL_FreeSurface(src_surface);
 
 	return result;
 }
@@ -1308,23 +1323,36 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 		return -1;
 	}
 
-	/* Create texture from surface */
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
-	if (!texture) {
-		fprintf(stderr, "SpriteLib Backend: Failed to create texture: %s\n", SDL_GetError());
-		return -1;
+	/* Recreate cached texture when renderer changes or texture is missing. */
+	if (surface->texture != NULL && surface->renderer != renderer) {
+		SDL_DestroyTexture(surface->texture);
+		surface->texture = NULL;
 	}
 
-	// DEBUG: Check texture format
-	static int texture_debug_count = 0;
-	if (texture_debug_count < 3) {
-		Uint32 format;
-		if (SDL_QueryTexture(texture, &format, NULL, NULL, NULL) == 0) {
-			const char* format_name = SDL_GetPixelFormatName(format);
-			fprintf(stderr, "Texture created: surface_format=%s, texture_format=%s\n",
-				SDL_GetPixelFormatName(sdl_surface->format->format), format_name);
-			texture_debug_count++;
+	if (surface->texture == NULL) {
+		const Uint32 pixel_format = spritectl_sdl_get_pixelformat(surface->format);
+		surface->texture = SDL_CreateTexture(renderer,
+		                                     pixel_format,
+		                                     SDL_TEXTUREACCESS_STREAMING,
+		                                     sdl_surface->w,
+		                                     sdl_surface->h);
+		if (!surface->texture) {
+			fprintf(stderr, "SpriteLib Backend: Failed to create cached texture: %s\n", SDL_GetError());
+			return -1;
 		}
+
+		surface->renderer = renderer;
+		surface->texture_dirty = 1;
+		SDL_SetTextureBlendMode(surface->texture, SDL_BLENDMODE_NONE);
+	}
+
+	if (surface->texture_dirty) {
+		if (SDL_UpdateTexture(surface->texture, NULL, sdl_surface->pixels, sdl_surface->pitch) != 0) {
+			fprintf(stderr, "SpriteLib Backend: Failed to update texture: %s\n", SDL_GetError());
+			return -1;
+		}
+
+		surface->texture_dirty = 0;
 	}
 
 	/* Render texture to screen */
@@ -1334,14 +1362,10 @@ int spritectl_present_surface(spritectl_surface_t surface, void* renderer_ptr) {
 	dest_rect.w = sdl_surface->w;
 	dest_rect.h = sdl_surface->h;
 
-	if (SDL_RenderCopy(renderer, texture, NULL, &dest_rect) != 0) {
+	if (SDL_RenderCopy(renderer, surface->texture, NULL, &dest_rect) != 0) {
 		fprintf(stderr, "SpriteLib Backend: Failed to render texture: %s\n", SDL_GetError());
-		SDL_DestroyTexture(texture);
 		return -1;
 	}
-
-	/* Clean up texture */
-	SDL_DestroyTexture(texture);
 
 	return 0;
 }

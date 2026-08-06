@@ -107,7 +107,7 @@ void RegenZoneManager::reload() {
             Item* pTowerItem = pZone->getTile(ZoneX, ZoneY).getItem();
             if (pTowerItem == NULL || pTowerItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
                 pTowerItem->getItemType() != MONSTER_CORPSE) {
-                filelog("RaceWar.log", "리젠존 타워를 못 찾았습니다. [%d:(%d,%d)]", ZoneID, ZoneX, ZoneY);
+                filelog("RaceWar.log", "   . [%d:(%d,%d)]", ZoneID, ZoneX, ZoneY);
                 pZone->unlock();
                 continue;
             }
@@ -117,7 +117,7 @@ void RegenZoneManager::reload() {
 
             RegenZoneInfo* pInfo = m_RegenZoneInfos[ID];
             if (pInfo == NULL) {
-                filelog("RaceWar.log", "Reload : 해당되는 리젠존이 없습니다. [%d]", ID);
+                filelog("RaceWar.log", "Reload :   . [%d]", ID);
                 m_RegenZoneInfos.erase(ID);
                 pZone->unlock();
                 continue;
@@ -128,7 +128,7 @@ void RegenZoneManager::reload() {
             EffectRegenZone* pEffect = dynamic_cast<EffectRegenZone*>(
                 pTower->getEffectManager().findEffect(Effect::EFFECT_CLASS_SLAYER_REGEN_ZONE));
             if (pEffect == NULL) {
-                filelog("RaceWar.log", "Reload : 리젠존 이펙트가 날라갔습니다. [%d]", ID);
+                filelog("RaceWar.log", "Reload :   . [%d]", ID);
                 pZone->unlock();
                 continue;
             }
@@ -287,11 +287,11 @@ bool RegenZoneManager::canRegen(PlayerCreature* pPC, uint ID) {
 
     if (itr == m_RegenZoneInfos.end()) {
         switch (ID) {
-        case 8:  // 옥타부스
-        case 10: // 셉티무스
+        case 8:  
+        case 10: 
             return pPC->isSlayer();
-        case 9:  // 테르티우스
-        case 11: // 쿠아르투스
+        case 9:  
+        case 11: 
             return pPC->isVampire();
         case 12:
         case 13:
@@ -305,7 +305,7 @@ bool RegenZoneManager::canRegen(PlayerCreature* pPC, uint ID) {
             unordered_map<ObjectID_t, Creature*>& cmap = pMM->getCreatures();
             unordered_map<ObjectID_t, Creature*>::iterator itr = cmap.begin();
 
-            // 성문이 있으면 안된다.
+            
             for (; itr != cmap.end(); ++itr) {
                 Monster* pMonster = dynamic_cast<Monster*>((itr->second));
                 if (pMonster != NULL && pMonster->getMonsterType() == 726)
@@ -335,28 +335,28 @@ void RegenZoneManager::regeneratePC(PlayerCreature* pPC, uint ID) {
 
     if (itr == m_RegenZoneInfos.end()) {
         switch (ID) {
-        case 8: // 옥타부스
+        case 8: 
         {
             targetPos.id = 1201;
             targetPos.x = 120;
             targetPos.y = 120;
             break;
         }
-        case 9: // 테르티우스
+        case 9: 
         {
             targetPos.id = 1202;
             targetPos.x = 30;
             targetPos.y = 120;
             break;
         }
-        case 10: // 셉티무스
+        case 10: 
         {
             targetPos.id = 1203;
             targetPos.x = 120;
             targetPos.y = 30;
             break;
         }
-        case 11: // 쿠아르투스
+        case 11: 
         {
             targetPos.id = 1204;
             targetPos.x = 30;

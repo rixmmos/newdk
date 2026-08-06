@@ -13,7 +13,7 @@
 #include "MSkillManager.h"
 #include "PacketFunction2.h"
 
-// [새기술2]
+
 #include "SkillDef.h"	
 void	SkillShadowDancing(MCreature* pUserCreature, MCreature* pTargetCreature, int skillID);
 extern void Add_RocketRuncher(MCreature* UserCreature, MCreature* TargetCreature);
@@ -30,7 +30,7 @@ throw ( ProtocolException , Error )
 
 	
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
@@ -51,7 +51,7 @@ throw ( ProtocolException , Error )
 	int delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -59,14 +59,14 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
 
-		// 내(Player)가 누군가가 사용한 SKill을 맞은 경우..
+		
 		// [ TEST CODE ]
 		MActionResult* pResult = new MActionResult;
 
@@ -90,7 +90,7 @@ throw ( ProtocolException , Error )
 		}
 		// 2005, 1, 3, sobeit add end
 		//------------------------------------------------------------------
-		// effect status를 적용시킨다.
+		
 		//------------------------------------------------------------------
 		if (g_pPlayer->GetEFFECT_STAT()!=EFFECTSTATUS_NULL)
 		{
@@ -105,7 +105,7 @@ throw ( ProtocolException , Error )
 		else
 		{
 			//------------------------------------------------------
-			// EffectStatus가 있다면 붙인다.
+			
 			//------------------------------------------------------
 			EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 			
@@ -118,10 +118,10 @@ throw ( ProtocolException , Error )
 		}
 
 		//------------------------------------------------------
-		// [새기술]
-		// Typhoon 맞은 경우는 한동안 못 움직이게 한다.
-		// 임시로(-_-;) 1초
-		// player만 못 움직이도록 막으면 된다.
+		
+		
+		
+		
 		//------------------------------------------------------
 		if (skillID==SKILL_TYPHOON || skillID == SKILL_WILD_TYPHOON)
 		{
@@ -136,7 +136,7 @@ throw ( ProtocolException , Error )
 		}
 		// 2004, 11, 13, sobeit add end
 	
-		// 현재 무기의 적용을 받는 기술이면..
+		
 		if ((*g_pActionInfoTable)[skillID].IsAffectCurrentWeaponAction()
 			&& pCreature!=NULL)
 		{
@@ -159,13 +159,13 @@ throw ( ProtocolException , Error )
 
 		//------------------------------------------------------
 		//
-		// skill에 결과가 있으면 적용 시킨다.
+		
 		//
 		//------------------------------------------------------
 		MActionResultNode* pActionResultNode = CreateActionResultNode(g_pPlayer, skillID, pPacket->getGrade() );
 
 		//------------------------------------------------------
-		// NULL이 아니면 실행
+		
 		//------------------------------------------------------
 		if (pActionResultNode!=NULL)
 		{
@@ -173,35 +173,35 @@ throw ( ProtocolException , Error )
 		}
 
 		//------------------------------------------------------
-		// 사용자가 없는 경우
+		
 		//------------------------------------------------------
 		if (pCreature == NULL)
 		{
 			ExecuteActionInfoFromMainNode(
-						skillID + (*g_pActionInfoTable).GetMinResultActionInfo(),										// 사용 기술 번호
+						skillID + (*g_pActionInfoTable).GetMinResultActionInfo(),										
 					
 						g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetZ(),
-						g_pPlayer->GetDirection(),														// 사용 방향
+						g_pPlayer->GetDirection(),														
 						
-						g_pPlayer->GetID(),												// 목표에 대한 정보
+						g_pPlayer->GetID(),												
 						g_pPlayer->GetX(), g_pPlayer->GetY(), g_pPlayer->GetZ(),
 						
-						delayFrame,													// 기술의 (남은) 지속 시간		
+						delayFrame,													
 						
 						pResult,
 						
-						false);			// 기술 첨부터 시작한다.
+						false);			
 		}
 		//------------------------------------------------------
-		// 사용자가 있는 경우
+		
 		//------------------------------------------------------
 		else
 		{
 			if(skillID == SKILL_ABSORB_SOUL)
 				pCreature->ClearStopBloodDrain();
 
-			// [새기술2]
-			// ShadowDancing인지 체크하고 임시로(-_-;) DoubleImpacet를 쓴다.
+			
+			
 
 			switch( skillID )
 			{
@@ -214,7 +214,7 @@ throw ( ProtocolException , Error )
 				break;
 			// end by Coffee	
 			case SKILL_ILLENDUE :
-				// 2004, 12, 15, sobeit modify start - 힐직이 인챈 라이트볼 쓰는게 버그.
+				
 				//SkillIllendue( pCreature, g_pPlayer, SKILL_LIGHT_BALL );
 				SkillIllendue( pCreature, g_pPlayer, MAGIC_CAUSE_SERIOUS_WOUNDS );
 				// 2004, 12, 15, sobeit modify end
@@ -233,7 +233,7 @@ throw ( ProtocolException , Error )
 			}
 			
 			//------------------------------------------------------
-			// Player에게 protection이 걸려있는 경우
+			
 			//------------------------------------------------------
 			if (g_pPlayer->HasEffectStatus(EFFECTSTATUS_PROTECTION_FROM_ACID))
 			{
@@ -249,42 +249,26 @@ throw ( ProtocolException , Error )
 
 			// [ TEST CODE ]
 			//
-			// 결과를 생성&저장해서 보내야 한다.
+			
 			//
-			// 방향을 바라보기
+			
 			pCreature->SetDirectionToPosition(g_pPlayer->GetX(), g_pPlayer->GetY());
 
 			//Duration_t	m_Duration;
 			pCreature->PacketSpecialActionToOther(
 								skillID, 
 								g_pPlayer->GetID(),//pPacket->getObjectID(),
-								pResult						// 결과
+								pResult						
 			);
 		}
 	}		
 	
-	/*
-	//------------------------------------------------------
-	// Player가 기술을 당했을 때의 모습..
-	//------------------------------------------------------
-	int resultActionInfo =  pPacket->getSkillType() + (*g_pActionInfoTable).GetMinResultActionInfo();
-	g_pPlayer->PacketSpecialActionResult( 
-						resultActionInfo,
-						g_pPlayer->GetID(),
-						g_pPlayer->GetX(),
-						g_pPlayer->GetY()
-	);
-
-	//------------------------------------------------------------
-	// Delay Frame 설정
-	//------------------------------------------------------------
-	g_pPlayer->SetEffectDelayFrame( resultActionInfo, delayFrame );
-	*/
+	 
 
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );

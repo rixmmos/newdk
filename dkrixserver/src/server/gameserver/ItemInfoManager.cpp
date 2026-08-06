@@ -137,7 +137,7 @@ void ItemInfoManager::init()
 {
     __BEGIN_TRY
 
-    // ItemIDSuccessor와 Base를 입력한다.
+    
     m_ItemIDSuccessor = g_pConfig->getPropertyInt("ServerCount");
     m_ItemIDBase = g_pConfig->getPropertyInt("ServerID");
 
@@ -737,8 +737,8 @@ vector<ItemType_t> ItemInfoManager::getPossibleItemTypes(Item::ItemClass IClass,
 
         uint itemLevel = pItemInfo->getItemLevel();
 
-        // 현재 지정된 아이템의 레벨이 min 레벨보다 높고,
-        // max 레벨보다 낮다면, 아이템 타입을 벡터에다 더한다.
+        
+        
         if (minLevel <= itemLevel && itemLevel <= maxLevel) {
             result.push_back(i);
         }

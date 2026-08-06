@@ -16,7 +16,7 @@
 #include "GCSkillToObjectOK6.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void HeterChakram::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                            CEffectID_t CEffectID)
@@ -36,8 +36,8 @@ void HeterChakram::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ousters
 
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
 
-        // NPC는 공격할 수가 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), Grade);
             return;
@@ -58,7 +58,7 @@ void HeterChakram::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ousters
         GCSkillToObjectOK5 _GCSkillToObjectOK5;
         GCSkillToObjectOK6 _GCSkillToObjectOK6;
 
-        // 쇱꿎嶠포북랬昑
+        
         Item* pItem = pOusters->getWearItem(Ousters::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_OUSTERS_CHAKRAM ||
             !pOusters->isRealWearingEx(Ousters::WEAR_RIGHTHAND)) {
@@ -69,7 +69,7 @@ void HeterChakram::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ousters
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(getSkillType());
 
         int RequiredMP = (int)pSkillInfo->getConsumeMP() + pOustersSkillSlot->getExpLevel() / 3;
-        // 헌뇜杰唐MP
+        
         // RequiredMP = pOusters->getMP();
 
         bool bManaCheck = hasEnoughMana(pOusters, RequiredMP);

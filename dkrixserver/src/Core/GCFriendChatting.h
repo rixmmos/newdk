@@ -49,11 +49,11 @@ enum {
 class GCFriendChatting : public Packet {
 public:
     GCFriendChatting();
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -158,7 +158,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GCSayPacketMaxSize �� ����, �����϶�.
+    
     PacketSize_t getPacketMaxSize() const {
         return szDWORD + szBYTE + 32 + szWORD + 512 + szBYTE + szBYTE;
     }

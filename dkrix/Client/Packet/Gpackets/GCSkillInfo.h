@@ -10,21 +10,21 @@
 #define __GC_SKILL_INFO_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PCSkillInfo.h"
-#include "SlayerSkillInfo.h"
-#include "VampireSkillInfo.h"
-#include "OustersSkillInfo.h"
-#include "Assert.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PCSkillInfo.h"
+#include "../SlayerSkillInfo.h"
+#include "../VampireSkillInfo.h"
+#include "../OustersSkillInfo.h"
+#include "../Assert.h"
 
 //--------------------------------------------------------------------------------
 //
 // class GCSkillInfo;
 //
-// 클라이언트가 게임 서버에 접속해서 CGConnect 패킷을 보내면, 게임 서버는 크리처와
-// 소유 아이템을 로딩해서 존에 들어갈 준비를 하게 된다. 그다음 PC와 아이템 정보,
-// 그리고 존 정보를 GCSkillInfo에 담아서 클라이언트로 전송하게 된다.
+
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -38,10 +38,10 @@ public :
 	// destructor
 	~GCSkillInfo () throw ();
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -91,7 +91,7 @@ private :
 
 	//---------------------------------------------------------
 	// PC Skill Information
-	// SlayerSkillInfo 또는 VampireSkillInfo 를 사용한다.
+	
 	//---------------------------------------------------------
 	std::list<PCSkillInfo *> m_pPCSkillInfoList;
 
@@ -123,7 +123,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCSkillInfoPacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () 
 	{ 
 		return SlayerSkillInfo::getMaxSize();

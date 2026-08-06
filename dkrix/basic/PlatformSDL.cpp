@@ -11,6 +11,12 @@
 
 #include "Platform.h"
 
+#ifdef PLATFORM_WINDOWS
+extern "C" int platform_is_ctrl_pressed(void) {
+	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) ? 1 : 0;
+}
+#endif
+
 #ifndef PLATFORM_WINDOWS
 /* Only compile on non-Windows platforms */
 
@@ -297,7 +303,7 @@ int platform_create_directory(const char* path) {
  * Keyboard Functions
  * ============================================================================ */
 
-int platform_is_ctrl_pressed(void) {
+extern "C" int platform_is_ctrl_pressed(void) {
 	/* Check keyboard state via SDL */
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	return (state[SDL_SCANCODE_LCTRL] || state[SDL_SCANCODE_RCTRL]) ? 1 : 0;

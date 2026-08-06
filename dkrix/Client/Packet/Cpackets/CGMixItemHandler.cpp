@@ -49,9 +49,9 @@ throw ( ProtocolException , Error )
 	CoordInven_t InvenX = pPacket->getX();
 	CoordInven_t InvenY = pPacket->getY();
 
-	//cout << "패킷날라옴 : " << pPacket->toString() << endl;
+	
 
-	// 인벤토리 좌표를 넘어가는 영역이라면 안 된다.
+	
 	if (InvenX >= pInventory->getWidth() || InvenY >= pInventory->getHeight())
 	{
 		GCCannotUse _GCCannotUse;
@@ -60,7 +60,7 @@ throw ( ProtocolException , Error )
 		return;
 	}
 
-	// 인벤토리에 그 아이템이 없다면 에러다.
+	
 	Item* pItem = pInventory->getItem(InvenX, InvenY);
 	if (pItem == NULL)
 	{
@@ -70,13 +70,13 @@ throw ( ProtocolException , Error )
 		return;
 	}
 
-	// 인벤토리에 있는 아이템의 Object를 받는다.
+	
 	ObjectID_t ItemObjectID = pItem->getObjectID();
 
-	// OID가 일치하지 않거나, 사용할 수 없는 아이템이라면 에러다.
+	
 	if (ItemObjectID != pPacket->getObjectID() || !isUsableItem(pItem, pCreature))
 	{
-		//cout << "아템 사용 불가. 옵젝트 아디가 안 맞던가..." << endl;
+		
 		GCCannotUse _GCCannotUse;
 		_GCCannotUse.setObjectID(pPacket->getObjectID());
 		pGamePlayer->sendPacket(&_GCCannotUse);

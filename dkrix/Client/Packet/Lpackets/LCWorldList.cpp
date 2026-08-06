@@ -9,9 +9,9 @@
 // include files
 #include "Client_PCH.h"
 #include "LCWorldList.h"
-#include "PCSlayerInfo.h"
-#include "PCVampireInfo.h"
-#include "PCOustersInfo.h"
+#include "../PCSlayerInfo.h"
+#include "../PCVampireInfo.h"
+#include "../PCOustersInfo.h"
 
 //----------------------------------------------------------------------
 // constructor
@@ -31,7 +31,7 @@ LCWorldList::~LCWorldList ()
 {
 	__BEGIN_TRY
 
-	// 소속된 모든 객체들을 삭제한다.
+	
 	while ( !m_WorldInfoList.empty() ) 
 	{
 		WorldInfo * pWorldInfo = m_WorldInfoList.front();
@@ -48,7 +48,7 @@ LCWorldList::~LCWorldList ()
 
 
 //----------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //----------------------------------------------------------------------
 void LCWorldList::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -59,7 +59,7 @@ void LCWorldList::read ( SocketInputStream & iStream )
 
 	BYTE ListNum;
 
-    // 최적화 작업시 실제 크기를 명시하도록 한다.
+    
 	iStream.read( ListNum );
 	for( int i = 0; i < ListNum; i++ ) {
 		WorldInfo * pWorldInfo = new WorldInfo();
@@ -72,7 +72,7 @@ void LCWorldList::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void LCWorldList::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -82,7 +82,7 @@ void LCWorldList::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_CurrentWorldID );
 
 	BYTE ListNum = m_WorldInfoList.size();
-	// 최적화 작업시 실제 크기를 명시하도록 한다.
+	
 	oStream.write( ListNum );
 
 	for ( std::list<WorldInfo*>:: const_iterator itr = m_WorldInfoList.begin(); itr!= m_WorldInfoList.end(); itr++) {
@@ -113,7 +113,7 @@ PacketSize_t LCWorldList::getPacketSize () const
 {
 	__BEGIN_TRY
 
-	// 리스트 인자의 갯수
+	
 	PacketSize_t PacketSize = szWorldID + szBYTE;
 
 	for ( std::list< WorldInfo* >::const_iterator itr = m_WorldInfoList.begin() ; itr != m_WorldInfoList.end() ; itr ++ ) {

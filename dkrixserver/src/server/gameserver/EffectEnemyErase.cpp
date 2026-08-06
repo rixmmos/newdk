@@ -23,7 +23,7 @@ EffectEnemyErase::EffectEnemyErase(Creature* pCreature)
 
     setTarget(pCreature);
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -123,7 +123,7 @@ void EffectEnemyErase::create(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery(
             "INSERT INTO EnemyErase (OwnerID , YearTime, DayTime, EnemyName) VALUES ('%s', %ld, %ld, '%s')",
             ownerID.c_str(), currentYearTime, m_Deadline.tv_sec, m_EnemyName.c_str());
@@ -151,7 +151,7 @@ void EffectEnemyErase::destroy(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("DELETE FROM EnemyErase WHERE OwnerID = '%s' AND EnemyName = '%s'", ownerID.c_str(),
                             m_EnemyName.c_str());
 
@@ -235,7 +235,7 @@ void EffectEnemyEraseLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         Result* pResult = pStmt->executeQuery("SELECT DayTime, EnemyName FROM EnemyErase WHERE OwnerID = '%s'",
                                               pCreature->getName().c_str());
 

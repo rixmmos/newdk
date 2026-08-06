@@ -41,7 +41,7 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer)
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("뻘청唐역렴늪묘콘.");
+    gcSM.setMessage(".");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -58,11 +58,11 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer)
         return;
     }
 
-    // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -84,7 +84,7 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer)
     }
     string TargetGuildMaster = pGuild->getMaster();
 
-    // cout << "탈퇴가 거부되었다. 통보받을 유저는 : " << TargetGuildMaster.c_str() << endl;
+    
 
 
     Statement* pStmt = NULL;

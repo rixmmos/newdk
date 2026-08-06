@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneEmptyRectEffectGenerator.h
 //----------------------------------------------------------------------
-// 사각형으로 생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONEEMPTYRECTEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopZoneEmptyRectEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_EMPTY_RECT; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

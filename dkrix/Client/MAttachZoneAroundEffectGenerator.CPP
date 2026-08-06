@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachZoneEffectGenerator.cpp
 //----------------------------------------------------------------------
-// Tile과 맞붙은 Effect들을 생성한다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MAttachZoneAroundEffectGenerator.h"
@@ -37,7 +37,7 @@ MAttachZoneAroundEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			MEffect*		pEffect;
 			pEffect = new MEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );
-			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
+			pEffect->SetStepPixel(egInfo.step);		
 			if(i>0)
 				pEffect->SetPosition( tX + TempX[egInfo.direction][i-1], tY + TempY[egInfo.direction][i-1]);
 			else
@@ -92,7 +92,7 @@ MAttachZoneAroundEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 			pEffect = new MEffect(bltType);
 			pEffect->SetFrameID( frameID, maxFrame );
-			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
+			pEffect->SetStepPixel(egInfo.step);		
 			pEffect->SetPosition( tX + x, tY + y );
 //			pEffect->SetPixelPosition( egInfo.x0 + x * 24 , egInfo.y0 + y * 12 , egInfo.z0);
 			pEffect->SetCount( egInfo.count, egInfo.linkCount );

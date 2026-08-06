@@ -117,21 +117,21 @@ bool PartyInviteInfoManager::canInvite(Creature* pHost, Creature* pGuest)
 
     Assert(pHost != NULL && pGuest != NULL);
 
-    // 사람끼리 초대를 해야 한다.
+    
     if (!pHost->isPC() || !pGuest->isPC())
         return false;
 
-    // 다른 종족끼리는 초대할 수 없다.
+    
     if (!isSameRace(pHost, pGuest))
         return false;
 
-    // 이미 누군가를 초대하고 있거나, 초대받고 있다면 초대할 수 없다.
+    
     PartyInviteInfo* pHostInfo = getInviteInfo(pHost->getName());
     PartyInviteInfo* pGuestInfo = getInviteInfo(pGuest->getName());
     if (pHostInfo != NULL || pGuestInfo != NULL)
         return false;
 
-    // 게스트가 이미 파티에 가입되어 있다면 초대할 수 없다.
+    
     // if (pGuest->getPartyID() != 0) return false;
 
     return true;
@@ -152,7 +152,7 @@ bool PartyInviteInfoManager::isInviting(Creature* pHost, Creature* pGuest)
     if (pHostInfo == NULL || pGuestInfo == NULL)
         return false;
 
-    // 서로가 쌍방향으로 상대를 가리키고 있어야 한다.
+    
     // A(Host)      | B(Guest)
     // Host  : shit | Host  : fuck
     // Guest : fuck | Guest : shit
@@ -171,10 +171,10 @@ void PartyInviteInfoManager::initInviteInfo(Creature* pHost, Creature* pGuest)
     __BEGIN_TRY
 
     if (hasInviteInfo(pHost->getName()) || hasInviteInfo(pGuest->getName())) {
-        // 여기서 무언가 중첩 현상이 일어났었다. 그러니까, CGPartyInvite
-        // 패킷에 의해서 파티 초대 정보가 초기화되려는 시점인데, 이미
-        // 초대 정보가 존재한다는 말이다. 원래는 에러를 던져야 하는데,
-        // 원인을 알 수가 없어서, 걍 쌍방의 정보를 취소해 버리도록 변경했다.
+        
+        
+        
+        
         cancelInvite(pHost, pGuest);
         return;
     }
@@ -207,7 +207,7 @@ void PartyInviteInfoManager::cancelInvite(Creature* pHost, Creature* pGuest)
 
     int nCondition = 0;
 
-    // 둘 다 사람이 아니라면 곤란한다.
+    
     if (!pHost->isPC() || !pGuest->isPC())
         nCondition = 1;
     if (!isSameRace(pHost, pGuest))
@@ -217,8 +217,8 @@ void PartyInviteInfoManager::cancelInvite(Creature* pHost, Creature* pGuest)
 
     if (nCondition != 0) {
         cerr << "PartyInviteInfoManager::cancelInvite() : Error = " << nCondition << endl;
-        // initInviteInfo()에서 일어나는 현상과 마찬가지로 여기에서도
-        // 그 반대의 현상이 일어나서, 주석처리해 버렸다.
+        
+        
         // throw Error("PartyInviteInfoManager::cancelInvite()");
     }
 
@@ -238,9 +238,9 @@ void PartyInviteInfoManager::cancelInvite(Creature* pCreature)
     PartyInviteInfo* pInfo = getInviteInfo(pCreature->getName());
 
     if (pInfo != NULL) {
-        Zone* pZone = pCreature->getZone(); // if 밖에 있던걸 옮김. by sigi. 2002.5.8
+        Zone* pZone = pCreature->getZone(); 
 
-        const string& HostName = pInfo->getHostName(); // &추가. by sigi. 2002.5.8
+        const string& HostName = pInfo->getHostName(); 
         const string& GuestName = pInfo->getGuestName();
 
         Creature* pTargetCreature = NULL;
@@ -255,11 +255,11 @@ void PartyInviteInfoManager::cancelInvite(Creature* pCreature)
         }
         */
 
-        // NoSuch.. 제거. by sigi. 2002.5.2
+        
         pTargetCreature = pZone->getCreature(GuestName);
 
-        // 파티 초대 상대가 같은 존에 존재할 경우, 상대방에게 초대가
-        // 거부되었다는 정보를 날려준다.
+        
+        
         GCPartyInvite gcPartyInvite;
         gcPartyInvite.setTargetObjectID(pCreature->getObjectID());
         gcPartyInvite.setCode(GC_PARTY_INVITE_REJECT);
@@ -294,7 +294,7 @@ bool PartyInviteInfoManager::addInviteInfo(PartyInviteInfo* pInfo)
         cerr << "PartyInviteInfoManager::addInviteInfo() : DuplicatedException" << endl;
         // throw DuplicatedException("PartyInviteInfoManager::addInviteInfo() : DuplicatedException");
 
-        // Exception제거. by sigi. 2002.5.9
+        
         return false;
     }
 
@@ -358,12 +358,12 @@ Party::Party(Creature::CreatureClass CClass)
 {
     __BEGIN_TRY
 
-    // 파티에 속할 수 있는 크리쳐 클래스를 정해주고...
+    
     m_CreatureClass = CClass;
 
     m_bFamilyPay = false;
 
-    // 뮤텍스에 이름을 세팅한다. (디버깅용)
+    
     m_Mutex.setName("Party");
 
     __END_CATCH
@@ -383,7 +383,7 @@ Party::~Party()
     __END_CATCH_NO_RETHROW
 }
 
-// 이름으로 파티에 멤버를 찾아서 리턴한다.
+
 Creature* Party::getMember(const string& name) const
 
 {
@@ -412,7 +412,7 @@ Creature* Party::getMember(const string& name) const
     __END_CATCH
 }
 
-// 멤버를 더한다.
+
 void Party::addMember(Creature* pCreature)
 
 {
@@ -420,7 +420,7 @@ void Party::addMember(Creature* pCreature)
 
     // cout << "Party::addMember() : BEGIN" << endl;
 
-    // 파티에 속할 수 있는 종족이 아니라면...
+    
     if (pCreature->getCreatureClass() != m_CreatureClass) {
         cerr << "Party::addMember() : Invalid Creature Class" << endl;
         throw Error("Party::addMember() : Invalid Creature Class");
@@ -445,7 +445,7 @@ void Party::addMember(Creature* pCreature)
     __END_CATCH
 }
 
-// 파티에서 멤버를 삭제한다.
+
 void Party::deleteMember(const string& name)
 
 {
@@ -474,7 +474,7 @@ void Party::deleteMember(const string& name)
     __END_CATCH
 }
 
-// 파티에 특정 이름을 가진 멤버가 있는지 조사한다.
+
 bool Party::hasMember(const string& name) const
 
 {
@@ -501,9 +501,9 @@ bool Party::hasMember(const string& name) const
     __END_CATCH
 }
 
-// 글로벌 파티 매니저에서만 사용한다...
-// 파티를 해체하기 전에 파티 멤버들의 파티 ID를 0으로 만들고,
-// 로컬 파티 매니저에서 해당 ID를 가진 파티를 삭제한다.
+
+
+
 void Party::destroyParty(void)
 
 {
@@ -520,9 +520,9 @@ void Party::destroyParty(void)
         pCreature->setPartyID(0);
         //		pCreature->removeFlag( Effect::EFFECT_CLASS_CAN_ENTER_GDR_LAIR );
 
-        // cout << "파티에 남아있는 크리쳐[" << pCreature->getName() << "]의 파티 ID를 0으로 만들었습니다." << endl;
+        
 
-        // 각각의 존에 있는 로컬 파티 매니저에서 해당하는 파티 객체를 삭제한다.
+        
         Zone* pZone = pCreature->getZone();
         if (pZone != NULL) {
             LocalPartyManager* pLocalPartyManager = pZone->getLocalPartyManager();
@@ -538,7 +538,7 @@ void Party::destroyParty(void)
     __END_CATCH
 }
 
-// 파티 멤버들에게 패킷을 날린다.
+
 void Party::broadcastPacket(Packet* pPacket, Creature* pOwner) {
     __BEGIN_TRY
 
@@ -562,8 +562,8 @@ void Party::broadcastPacket(Packet* pPacket, Creature* pOwner) {
     __END_CATCH
 }
 
-// 새로운 파티원이 추가되었을 때, 파티원들에게 날아가는
-// GCPartyJoined 패킷을 구성한다.
+
+
 void Party::makeGCPartyJoined(GCPartyJoined* pGCPartyJoined) const
 
 {
@@ -597,7 +597,7 @@ void Party::makeGCPartyJoined(GCPartyJoined* pGCPartyJoined) const
             pInfo->hair_style = 0;
             pInfo->ip = pVampire->getIP();
         } else if (pCreature->isOusters()) {
-            // 아우스터스 추가. by bezz 2003.04.19
+            
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
 
             pInfo->name = pOusters->getName();
@@ -658,18 +658,18 @@ int Party::getAdjacentMemberSize(Creature* pLeader) const
         Creature* pCreature = itr->second;
         Assert(pCreature != NULL);
 
-        // 파티의 숫자에는 자신도 포함되기 때문에
-        // 같은 놈인지 다른 놈인지는 체크하지 않는다.
+        
+        
         Zone* pTZone = pCreature->getZone();
 
-        // 존 포인터가 일치한다면 같은 존에 있다는 것을 의미한다.
+        
         if (pTZone == pZone && pCreature->getDistance(cx, cy) <= 8)
             rValue++;
     }
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
-    // 자신도 포함되므로 적어도 1보다는 커야 한다.
+    
     // Assert(rValue >= 1);
     if (rValue == 0)
         rValue = 1;
@@ -703,18 +703,18 @@ int Party::getAdjacentMemberSize_LOCKED(Creature* pLeader) const
         Creature* pCreature = itr->second;
         Assert(pCreature != NULL);
 
-        // 파티의 숫자에는 자신도 포함되기 때문에
-        // 같은 놈인지 다른 놈인지는 체크하지 않는다.
+        
+        
         Zone* pTZone = pCreature->getZone();
 
-        // 존 포인터가 일치한다면 같은 존에 있다는 것을 의미한다.
+        
         if (pTZone == pZone && pCreature->getDistance(cx, cy) <= 8)
             rValue++;
     }
 
     //__LEAVE_CRITICAL_SECTION(m_Mutex)
 
-    // 자신도 포함되므로 적어도 1보다는 커야 한다.
+    
     Assert(rValue >= 1);
 
     // cout << "Party::getAdjacentMemberSize() : END" << endl;
@@ -724,9 +724,9 @@ int Party::getAdjacentMemberSize_LOCKED(Creature* pLeader) const
     __END_CATCH
 }
 
-// 리더 및 파티원들의 능력치 경험치를 올린다.
-// 리더의 올라간 경험치는 LeaderModifyInfo에다 집어넣고,
-// 나머지 멤버들의 올라간 경험치는 패킷을 따로 만들어 보낸다.
+
+
+
 int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DEXMultiplier, int INTMultiplier,
                         ModifyInfo& LeaderModifyInfo) const
 
@@ -744,34 +744,34 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 (경험치를 올려줄) 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
         Assert(pCreature != NULL);
 
-        // 로컬 파티 매니저를 통해서만 불리는 함수이기 때문에,
-        // 이 파티는 현재 로컬 파티라고 가정할 수 있다.
-        // 로컬 파티 내부에서는 같은 존에 있는지를 검사할 필요가 없기 때문에
-        // 거리 검사만을 한다.
-        // 사실 매번 계산 때마다 이렇게 거리 계산을 한다는 것은 약간은
-        // 무리가 있다고 생각하는데, 같은 존에 있으면 경험치 보너스를 받는
-        // 쪽이 좋지 않을까? -- 김성민
+        
+        
+        
+        
+        
+        
+        
         if (pCreature->getDistance(cx, cy) <= 8) {
             // Assert(pCreature->getZone() == pLeader->getZone());
 
-            // 어딘가에서(아마 PCManager::killCreature인거 같은데)
-            // Zone이 바뀐다. -_-;
-            // 찾을 시간이 없어서 일단 이렇게 간다. by sigi. 2002.5.8
+            
+            
+            
             if (pCreature->getZone() == pLeader->getZone()) {
                 MemberList.push_back(pCreature);
 
-                // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+                
                 if (pCreature->isSlayer()) {
                     Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
                     LevelSum += pSlayer->getSlayerLevel();
                 } else if (pCreature->isVampire()) {
-                    // 슬레이어 파티에 뱀파이어가 있을 수 있을까?
+                    
                     Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
                     LevelSum += pVampire->getLevel();
                 }
@@ -779,11 +779,11 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
         }
     }
 
-    // 경험치를 파티원의 숫자에 증폭시킨다.
+    
     int nMemberSize = MemberList.size();
 
-    // cout << "파티원의 숫자 : " << nMemberSize << endl;
-    // cout << "원래 경험치 : " << amount << endl;
+    
+    
 
     if (nMemberSize == 1) {
         m_Mutex.unlock();
@@ -791,9 +791,9 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
         Assert(pLeader->isSlayer());
         Slayer* pLeaderSlayer = dynamic_cast<Slayer*>(pLeader);
 
-        // 파티원이 하나라면 (근처에 다른 파티원이 없다면) 그냥 혼자 올려주고, 리턴한다.
+        
         divideAttrExp(pLeaderSlayer, amount, STRMultiplier, DEXMultiplier, INTMultiplier, LeaderModifyInfo,
-                      nMemberSize); // 파티원의 숫자
+                      nMemberSize); 
 
         return 0;
     }
@@ -818,10 +818,10 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
         break;
     }
 
-    // cout << "증폭된 경험치 : " << amount << endl;
-    // cout << "파티원의 레벨합 : " << LevelSum << endl;
+    
+    
 
-    // 각각의 파티원들의 경험치를 올려준다.
+    
     list<Creature*>::iterator itr = MemberList.begin();
     for (; itr != MemberList.end(); itr++) {
         Creature* pCreature = (*itr);
@@ -831,10 +831,10 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         int myQuota = (int)((float)amount * (float)pSlayer->getSlayerLevel() / (float)LevelSum);
 
-        // cout << "나의 몫 : " << myQuota << endl;
+        
 
         if (pCreature->getName() != pLeader->getName()) {
-            // cout << "본인[" << pCreature->getName() << "]이 아니라서 패킷을 보냅니다." << endl;
+            
 
             Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
             if (pWeapon != NULL) {
@@ -866,16 +866,16 @@ int Party::shareAttrExp(Creature* pLeader, int amount, int STRMultiplier, int DE
                     break;
                 }
 
-                // 본인이 아니라면...
+                
                 GCModifyInformation gcModifyInformation;
                 divideAttrExp(pSlayer, myQuota, _STR, _DEX, _INT, gcModifyInformation, nMemberSize);
 
                 pSlayer->getPlayer()->sendPacket(&gcModifyInformation);
             }
         } else {
-            // cout << "본인[" << pCreature->getName() << "]이라서 패킷 준비만 합니다." << endl;
+            
 
-            // 본인이라면 일단 나중에 보내기 위해, 담기만 한다.
+            
             divideAttrExp(pSlayer, myQuota, STRMultiplier, DEXMultiplier, INTMultiplier, LeaderModifyInfo, nMemberSize);
         }
     }
@@ -903,26 +903,26 @@ int Party::shareVampireExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 (경험치를 올려줄) 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
         Assert(pCreature != NULL);
 
-        // 로컬 파티 매니저를 통해서만 불리는 함수이기 때문에,
-        // 이 파티는 현재 로컬 파티라고 가정할 수 있다.
-        // 로컬 파티 내부에서는 같은 존에 있는지를 검사할 필요가 없기 때문에
-        // 거리 검사만을 한다.
-        // 사실 매번 계산 때마다 이렇게 거리 계산을 한다는 것은 약간은
-        // 무리가 있다고 생각하는데, 같은 존에 있으면 경험치 보너스를 받는
-        // 쪽이 좋지 않을까? -- 김성민
-        // 박쥐상태에서는 파티경험치 못 먹는다. by Sequoia
+        
+        
+        
+        
+        
+        
+        
+        
         if (pCreature->getDistance(cx, cy) <= 8 && !pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT)) {
             MemberList.push_back(pCreature);
 
-            // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+            
             if (pCreature->isSlayer()) {
-                // 뱀파이어 파티에 슬레이어가 있을 수 있을까?
+                
                 Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
                 LevelSum += pSlayer->getSlayerLevel();
             } else if (pCreature->isVampire()) {
@@ -932,11 +932,11 @@ int Party::shareVampireExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         }
     }
 
-    // 경험치를 파티원의 숫자에 증폭시킨다.
+    
     int nMemberSize = MemberList.size();
 
-    // cout << "파티원의 숫자 : " << nMemberSize << endl;
-    // cout << "원래 경험치 : " << amount << endl;
+    
+    
 
     if (nMemberSize == 1) {
         m_Mutex.unlock();
@@ -944,7 +944,7 @@ int Party::shareVampireExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         Assert(pLeader->isVampire());
         Vampire* pLeaderVampire = dynamic_cast<Vampire*>(pLeader);
 
-        // 파티원이 하나라면 (근처에 다른 파티원이 없다면) 그냥 혼자 올려주고, 리턴한다.
+        
         increaseVampExp(pLeaderVampire, amount, LeaderModifyInfo);
         return 0;
     }
@@ -969,10 +969,10 @@ int Party::shareVampireExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         break;
     }
 
-    // cout << "증폭된 경험치 : " << amount << endl;
-    // cout << "파티원들의 레벨 합 : " << LevelSum << endl;
+    
+    
 
-    // 각각의 파티원들의 경험치를 올려준다.
+    
     list<Creature*>::iterator itr = MemberList.begin();
     for (; itr != MemberList.end(); itr++) {
         Creature* pCreature = (*itr);
@@ -982,19 +982,19 @@ int Party::shareVampireExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
         int myQuota = (int)((float)amount * (float)pVampire->getLevel() / (float)LevelSum);
 
-        // cout << "나의 몫 : " << myQuota << endl;
+        
 
         if (pCreature != pLeader) {
-            // cout << "본인이 아니라서 패킷을 보냅니다." << endl;
+            
 
-            // 본인이 아니라면...
+            
             GCModifyInformation gcModifyInformation;
             increaseVampExp(pVampire, myQuota, gcModifyInformation);
             pVampire->getPlayer()->sendPacket(&gcModifyInformation);
         } else {
-            // cout << "본인이라서 패킷을 보내지 않습니다." << endl;
+            
 
-            // 본인이라면 일단 나중에 보내기 위해, 담기만 한다.
+            
             increaseVampExp(pVampire, myQuota, LeaderModifyInfo);
         }
     }
@@ -1022,23 +1022,23 @@ int Party::shareOustersExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 (경험치를 올려줄) 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
         Assert(pCreature != NULL);
 
-        // 로컬 파티 매니저를 통해서만 불리는 함수이기 때문에,
-        // 이 파티는 현재 로컬 파티라고 가정할 수 있다.
-        // 로컬 파티 내부에서는 같은 존에 있는지를 검사할 필요가 없기 때문에
-        // 거리 검사만을 한다.
-        // 사실 매번 계산 때마다 이렇게 거리 계산을 한다는 것은 약간은
-        // 무리가 있다고 생각하는데, 같은 존에 있으면 경험치 보너스를 받는
-        // 쪽이 좋지 않을까? -- 김성민
+        
+        
+        
+        
+        
+        
+        
         if (pCreature->getDistance(cx, cy) <= 8) {
             MemberList.push_back(pCreature);
 
-            // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+            
             if (pCreature->isOusters()) {
                 Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
                 LevelSum += pOusters->getLevel();
@@ -1046,11 +1046,11 @@ int Party::shareOustersExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         }
     }
 
-    // 경험치를 파티원의 숫자에 증폭시킨다.
+    
     int nMemberSize = MemberList.size();
 
-    // cout << "파티원의 숫자 : " << nMemberSize << endl;
-    // cout << "원래 경험치 : " << amount << endl;
+    
+    
 
     if (nMemberSize == 1) {
         m_Mutex.unlock();
@@ -1058,7 +1058,7 @@ int Party::shareOustersExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         Assert(pLeader->isOusters());
         Ousters* pLeaderOusters = dynamic_cast<Ousters*>(pLeader);
 
-        // 파티원이 하나라면 (근처에 다른 파티원이 없다면) 그냥 혼자 올려주고, 리턴한다.
+        
         increaseOustersExp(pLeaderOusters, amount, LeaderModifyInfo);
         return 0;
     }
@@ -1083,7 +1083,7 @@ int Party::shareOustersExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         break;
     }
 
-    // 각각의 파티원들의 경험치를 올려준다.
+    
     list<Creature*>::iterator itr = MemberList.begin();
     for (; itr != MemberList.end(); itr++) {
         Creature* pCreature = (*itr);
@@ -1094,16 +1094,16 @@ int Party::shareOustersExp(Creature* pLeader, int amount, ModifyInfo& LeaderModi
         int myQuota = (int)((float)amount * (float)pOusters->getLevel() / (float)LevelSum);
 
         if (pCreature != pLeader) {
-            // cout << "본인이 아니라서 패킷을 보냅니다." << endl;
+            
 
-            // 본인이 아니라면...
+            
             GCModifyInformation gcModifyInformation;
             increaseOustersExp(pOusters, myQuota, gcModifyInformation);
             pOusters->getPlayer()->sendPacket(&gcModifyInformation);
         } else {
-            // cout << "본인이라서 패킷을 보내지 않습니다." << endl;
+            
 
-            // 본인이라면 일단 나중에 보내기 위해, 담기만 한다.
+            
             increaseOustersExp(pOusters, myQuota, LeaderModifyInfo);
         }
     }
@@ -1133,23 +1133,23 @@ void Party::shareRankExp(Creature* pLeader, int otherLevel)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 (경험치를 올려줄) 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
         Assert(pCreature != NULL);
 
-        // 로컬 파티 매니저를 통해서만 불리는 함수이기 때문에,
-        // 이 파티는 현재 로컬 파티라고 가정할 수 있다.
-        // 로컬 파티 내부에서는 같은 존에 있는지를 검사할 필요가 없기 때문에
-        // 거리 검사만을 한다.
-        // 사실 매번 계산 때마다 이렇게 거리 계산을 한다는 것은 약간은
-        // 무리가 있다고 생각하는데, 같은 존에 있으면 경험치 보너스를 받는
-        // 쪽이 좋지 않을까? -- 김성민
+        
+        
+        
+        
+        
+        
+        
         if (pCreature->getDistance(cx, cy) <= 8) {
             MemberList.push_back(pCreature);
 
-            // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+            
             if (pCreature->isSlayer()) {
                 Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
                 LevelSum += pSlayer->getSlayerLevel();
@@ -1169,21 +1169,21 @@ void Party::shareRankExp(Creature* pLeader, int otherLevel)
         }
     }
 
-    // 경험치를 파티원의 숫자에 증폭시킨다.
+    
     int nMemberSize = MemberList.size();
 
-    // 파티원 평균 레벨에 의한 경험치를 구한다.
+    
     int amount = (int)computeRankExp(LevelSum2 / nMemberSize, otherLevel);
 
-    // cout << "파티원의 숫자 : " << nMemberSize << endl;
-    // cout << "원래 경험치 : " << amount << endl;
+    
+    
 
     if (nMemberSize == 1) {
         m_Mutex.unlock();
 
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pLeader);
 
-        // 파티원이 하나라면 (근처에 다른 파티원이 없다면) 그냥 혼자 올려주고, 리턴한다.
+        
         pPC->increaseRankExp(amount);
         return;
     }
@@ -1208,16 +1208,16 @@ void Party::shareRankExp(Creature* pLeader, int otherLevel)
         break;
     }
 
-    // cout << "증폭된 경험치 : " << amount << endl;
-    // cout << "파티원들의 레벨 합 : " << LevelSum << endl;
+    
+    
 
-    // 각각의 파티원들의 경험치를 올려준다.
+    
     list<Creature*>::iterator itr = MemberList.begin();
     for (; itr != MemberList.end(); itr++) {
         Creature* pCreature = (*itr);
         Assert(pCreature != NULL);
 
-        // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+        
         int level = 0;
         if (pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -1263,37 +1263,37 @@ void Party::shareAdvancementExp(Creature* pLeader, int amount)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 (경험치를 올려줄) 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         PlayerCreature* pCreature = dynamic_cast<PlayerCreature*>(mitr->second);
         Assert(pCreature != NULL);
 
-        // 로컬 파티 매니저를 통해서만 불리는 함수이기 때문에,
-        // 이 파티는 현재 로컬 파티라고 가정할 수 있다.
-        // 로컬 파티 내부에서는 같은 존에 있는지를 검사할 필요가 없기 때문에
-        // 거리 검사만을 한다.
-        // 사실 매번 계산 때마다 이렇게 거리 계산을 한다는 것은 약간은
-        // 무리가 있다고 생각하는데, 같은 존에 있으면 경험치 보너스를 받는
-        // 쪽이 좋지 않을까? -- 김성민
+        
+        
+        
+        
+        
+        
+        
         if (pCreature->isAdvanced() && pCreature->getDistance(cx, cy) <= 8) {
             MemberList.push_back(pCreature);
             LevelSum += pCreature->getLevel() + pCreature->getAdvancementClassLevel();
         }
     }
 
-    // 경험치를 파티원의 숫자에 증폭시킨다.
+    
     int nMemberSize = MemberList.size();
 
-    // cout << "파티원의 숫자 : " << nMemberSize << endl;
-    // cout << "원래 경험치 : " << amount << endl;
+    
+    
 
     if (nMemberSize == 1) {
         m_Mutex.unlock();
 
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pLeader);
 
-        // 파티원이 하나라면 (근처에 다른 파티원이 없다면) 그냥 혼자 올려주고, 리턴한다.
+        
         if (pPC->isAdvanced())
             pPC->increaseAdvancementClassExp(amount);
         return;
@@ -1319,16 +1319,16 @@ void Party::shareAdvancementExp(Creature* pLeader, int amount)
         break;
     }
 
-    // cout << "증폭된 경험치 : " << amount << endl;
-    // cout << "파티원들의 레벨 합 : " << LevelSum << endl;
+    
+    
 
-    // 각각의 파티원들의 경험치를 올려준다.
+    
     list<Creature*>::iterator itr = MemberList.begin();
     for (; itr != MemberList.end(); itr++) {
         PlayerCreature* pCreature = dynamic_cast<PlayerCreature*>(*itr);
         Assert(pCreature != NULL);
 
-        // 근처에 있는 파티원 검색하는 김에 파티원들의 레벨 합도 구해둔다.
+        
         int myQuota = amount * pCreature->getLevel() / LevelSum;
         pCreature->increaseAdvancementClassExp(myQuota);
     }
@@ -1353,7 +1353,7 @@ void Party::shareRevealer(Creature* pCaster, int Duration)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1369,10 +1369,10 @@ void Party::shareRevealer(Creature* pCaster, int Duration)
     }
 
     if (!pCaster->isFlag(Effect::EFFECT_CLASS_REVEALER)) {
-        throw Error("Revealer 이펙트가 걸려 있지 않음");
+        throw Error("Revealer    ");
     }
 
-    // Caster 의 Revelaer 스킬 레벨을 가져온다
+    
     Slayer* pSlayer = dynamic_cast<Slayer*>(pCaster);
     Assert(pSlayer != NULL);
     SkillSlot* pSkillSlot = pSlayer->getSkill(SKILL_REVEALER);
@@ -1425,7 +1425,7 @@ void Party::shareActivation(Creature* pCaster, int Duration)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1482,7 +1482,7 @@ void Party::shareGnomesWhisper(Creature* pCaster, int Duration, int SkillLevel)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1505,7 +1505,7 @@ void Party::shareGnomesWhisper(Creature* pCaster, int Duration, int SkillLevel)
 
         if (pCreature != pCaster) {
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectGnomesWhisper* pEffect = new EffectGnomesWhisper(pOusters);
             pEffect->setDeadline(Duration);
             pEffect->setLevel(SkillLevel);
@@ -1540,7 +1540,7 @@ void Party::shareHolyArmor(Creature* pCaster, int DefBonus, int SkillLevel)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1564,7 +1564,7 @@ void Party::shareHolyArmor(Creature* pCaster, int DefBonus, int SkillLevel)
         if (pCreature != pCaster) {
             int Duration = (30 + SkillLevel / 2) * 10;
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectHolyArmor* pEffect = new EffectHolyArmor(pSlayer);
             pEffect->setDeadline(Duration);
             pEffect->setDefBonus(DefBonus);
@@ -1604,7 +1604,7 @@ bool Party::shareWaterElementalHeal(Creature* pCaster, int HealPoint)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1679,7 +1679,7 @@ void Party::shareGDRLairEnter(Creature* pLeader)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1738,7 +1738,7 @@ void Party::shareDetectHidden(Creature* pCaster, int Duration)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1796,7 +1796,7 @@ void Party::shareDetectInvisibility(Creature* pCaster, int Duration)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1854,7 +1854,7 @@ void Party::shareExpansion(Creature* pCaster, int Duration, int Percent)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -1878,7 +1878,7 @@ void Party::shareExpansion(Creature* pCaster, int Duration, int Percent)
         if (pCreature != pCaster && pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
-            // 이미 같은 이펙트가 존재한다면 이전의 이펙트를 삭제해주어야 한다.
+            
             if (pSlayer->isFlag(Effect::EFFECT_CLASS_EXPANSION)) {
                 pSlayer->deleteEffect(Effect::EFFECT_CLASS_EXPANSION);
             }
@@ -1889,8 +1889,8 @@ void Party::shareExpansion(Creature* pCaster, int Duration, int Percent)
             pSlayer->addEffect(pEffectExpansion);
             pSlayer->setFlag(Effect::EFFECT_CLASS_EXPANSION);
 
-            // 이펙트를 붙였으니, 능력치를 재계산한다.
-            // 그리고 본인에게 변화된 사항을 알려준다.
+            
+            
             SLAYER_RECORD prev;
             pSlayer->getSlayerRecord(prev);
             pSlayer->initAllStat();
@@ -1903,7 +1903,7 @@ void Party::shareExpansion(Creature* pCaster, int Duration, int Percent)
             gcAddEffect.setDuration(Duration);
             pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcAddEffect);
 
-            // 아마도 최대 체력이 변경되었을 테니, HP 역시 브로드캐스팅한다.
+            
             GCOtherModifyInfo gcOtherModifyInfo;
             makeGCOtherModifyInfo(&gcOtherModifyInfo, pSlayer, &prev);
             pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcOtherModifyInfo, pSlayer);
@@ -1931,7 +1931,7 @@ void Party::dissectCorpse(Creature* pDissecter, MonsterCorpse* pCorpse) {
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 근처에 있는 이펙트를 걸어줄 파티원의 리스트를 가져온다.
+    
     unordered_map<string, Creature*>::const_iterator mitr = m_MemberMap.begin();
     for (; mitr != m_MemberMap.end(); mitr++) {
         Creature* pCreature = mitr->second;
@@ -2001,8 +2001,8 @@ void Party::refreshFamilyPay() {
         }
     }
 
-    // 패밀리 요금제 적용이 바뀌면 모든 파티원들에게 적용시킨다.
-    // 단 패밀리 요금제 가입자는 제외한다.
+    
+    
     if (oldFamilyPay != m_bFamilyPay) {
         mitr = m_MemberMap.begin();
 
@@ -2014,10 +2014,10 @@ void Party::refreshFamilyPay() {
 
             if (!pGamePlayer->isFamilyPayAvailable()) {
                 if (m_bFamilyPay) {
-                    // 패밀리 요금제 적용
+                    
                     pGamePlayer->setFamilyPayPartyType(FAMILY_PAY_PARTY_TYPE_FREE_PASS);
                 } else {
-                    // 패밀리 요금제 적용이 끝났음을 알려야한다.
+                    
                     pGamePlayer->setFamilyPayPartyType(FAMILY_PAY_PARTY_TYPE_FREE_PASS_END);
                 }
             }
@@ -2086,7 +2086,7 @@ bool PartyManager::createParty(int ID, Creature::CreatureClass CClass)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 중첩되는 파티를 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(ID);
     if (itr != m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2110,7 +2110,7 @@ Party* PartyManager::getParty(int ID) // by sigi. 2002.10.14
 {
     __BEGIN_TRY
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
         return NULL;
@@ -2127,16 +2127,16 @@ bool PartyManager::addPartyMember(int ID, Creature* pCreature) {
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
-        // 없다면 여기서 생성해준다.
+        
         Party* pNewParty = new Party(pCreature->getCreatureClass());
         pNewParty->setID(ID);
 
         m_PartyMap[ID] = pNewParty;
 
-        // 의미가 있는 체크일까...-_-
+        
         if (pNewParty->getSize() >= PARTY_MAX_SIZE) {
             m_Mutex.unlock();
             return false;
@@ -2169,7 +2169,7 @@ bool PartyManager::deletePartyMember(int ID, Creature* pCreature)
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2226,7 +2226,7 @@ void LocalPartyManager::heartbeat(void)
         Assert(pParty != NULL);
 
         if (pParty->getSize() == 0) {
-            // cout << "로컬파티의 사이즈가 0이 되어서, 파티 객체[" << pParty->getID() << "]를 삭제합니다." << endl;
+            
 
             SAFE_DELETE(pParty);
 
@@ -2259,7 +2259,7 @@ int LocalPartyManager::getAdjacentMemberSize(int PartyID, Creature* pLeader) con
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2288,7 +2288,7 @@ int LocalPartyManager::shareAttrExp(int PartyID, Creature* pLeader, int amount, 
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2316,7 +2316,7 @@ int LocalPartyManager::shareVampireExp(int PartyID, Creature* pLeader, int amoun
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2344,7 +2344,7 @@ int LocalPartyManager::shareOustersExp(int PartyID, Creature* pLeader, int amoun
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2372,7 +2372,7 @@ int LocalPartyManager::shareRankExp(int PartyID, Creature* pLeader, int amount) 
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2398,7 +2398,7 @@ void LocalPartyManager::shareRevealer(int PartyID, Creature* pCaster, int Durati
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2422,7 +2422,7 @@ void LocalPartyManager::shareDetectHidden(int PartyID, Creature* pCaster, int Du
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2446,7 +2446,7 @@ void LocalPartyManager::shareDetectInvisibility(int PartyID, Creature* pCaster, 
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2470,7 +2470,7 @@ void LocalPartyManager::shareExpansion(int PartyID, Creature* pCaster, int Durat
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2494,7 +2494,7 @@ void LocalPartyManager::shareActivation(int PartyID, Creature* pCaster, int Dura
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2518,7 +2518,7 @@ void LocalPartyManager::shareGnomesWhisper(int PartyID, Creature* pCaster, int D
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2542,7 +2542,7 @@ void LocalPartyManager::shareHolyArmor(int PartyID, Creature* pCaster, int DefBo
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2568,7 +2568,7 @@ bool LocalPartyManager::shareWaterElementalHeal(int PartyID, Creature* pCaster, 
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2594,7 +2594,7 @@ void LocalPartyManager::shareGDRLairEnter(int PartyID, Creature* pLeader)
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2618,7 +2618,7 @@ int LocalPartyManager::shareAdvancementExp(int PartyID, Creature* pLeader, int a
 
     __ENTER_CRITICAL_SECTION(m_Mutex);
 
-    // 해당하는 파티가 있는지 찾아본다.
+    
     unordered_map<int, Party*>::const_iterator itr = m_PartyMap.find(PartyID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2721,7 +2721,7 @@ bool GlobalPartyManager::addPartyMember(int ID, Creature* pCreature) {
 
     // cout << "GlobalPartyManager::addPartyMember() : BEGIN" << endl;
 
-    // 먼저 해당파티를 찾아서 피티원의 숫자를 확인한다.
+    
     unordered_map<int, Party*>::iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
         m_Mutex.unlock();
@@ -2729,7 +2729,7 @@ bool GlobalPartyManager::addPartyMember(int ID, Creature* pCreature) {
         // cerr << "GlobalPartyManager::addPartyMember() : NoSuchElementException" << endl;
         // throw NoSuchElementException("GlobalPartyManager::addPartyMember() : NoSuchElementException");
 
-        // NoSuch제거. by sigi. 2002.5.13
+        
         return false;
     }
 
@@ -2738,7 +2738,7 @@ bool GlobalPartyManager::addPartyMember(int ID, Creature* pCreature) {
     if (pParty->getSize() >= PARTY_MAX_SIZE) {
         m_Mutex.unlock();
 
-        // cout << "파티 맥스 사이즈를 초과" << endl;
+        
         // cout << "GlobalPartyManager::addPartyMember() : END" << endl;
         return false;
     }
@@ -2747,17 +2747,17 @@ bool GlobalPartyManager::addPartyMember(int ID, Creature* pCreature) {
         pParty->eventPartyCrash();
     }
 
-    // 파티원을 추가한다.
+    
     pParty->addMember(pCreature);
     pCreature->setPartyID(pParty->getID());
 
-    // 다른 멤버들에게 파티원이 추가되었다는 사실을 알려준다.
-    // 최초에 2명이 파티를 구성할 경우, 1명을 더한 다음에 그 사람에게
-    // 한명 이름만이 들어가 있는 파티 리스트가 날아가게 된다.
-    // 그 다음 2번째 멤버가 들어가면 2명에게 2명이 들어가 있는 리스트가
-    // 차례로 날아가게 된다.
-    // 그러므로 파티원이 1명일 때는 보내지 않아야, 파티 리스트가 2번
-    // 날아가는 것을 방지할 수 있다.
+    
+    
+    
+    
+    
+    
+    
     if (pParty->getSize() != 1) {
         GCPartyJoined gcPartyJoined;
         pParty->makeGCPartyJoined(&gcPartyJoined);
@@ -2783,14 +2783,14 @@ bool GlobalPartyManager::addPartyMember(int ID, Creature* pCreature) {
         }
     }
 
-    // 패밀리 요금제 적용 처리
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
     if (pGamePlayer != NULL) {
         if (pParty->isFamilyPay() && !pGamePlayer->isFamilyPayAvailable()) {
-            // 패밀리 요금제 적용 파티라면 유료존 출입권을 준다.
+            
             pGamePlayer->setFamilyPayPartyType(FAMILY_PAY_PARTY_TYPE_FREE_PASS);
         } else if (pGamePlayer->isFamilyPayAvailable()) {
-            // 패밀리 요금제인 파티원이 참가하게 될 경우 파티를 패밀리 요금제 적용 파티로 만든다.
+            
             pParty->refreshFamilyPay();
         }
     }
@@ -2820,18 +2820,18 @@ bool GlobalPartyManager::deletePartyMember(int ID, Creature* pCreature)
         cerr << "GlobalPartyManager::deletePartyMember() : NoSuchElementException" << endl;
         // throw NoSuchElementException("GlobalPartyManager::deletePartyMember() : NoSuchElementException");
 
-        // 외부에서 NoSuch처리도 안하는데 -_-; by sigi. 2002.5.9
+        
         m_Mutex.unlock();
         return false;
     }
 
     Party* pParty = itr->second;
 
-    // cout << "파티를 찾았다." << endl;
+    
     // cout << pParty->toString() << endl;
-    // cout << "지우려고하는 놈의 이름은:" << pCreature->getName() << endl;
+    
 
-    // 멤버들에게 파티원이 파티에서 추방되었다는 사실을 알려준다.
+    
     GCPartyLeave gcPartyLeave;
     gcPartyLeave.setExpellee(pCreature->getName());
     gcPartyLeave.setExpeller("");
@@ -2839,34 +2839,34 @@ bool GlobalPartyManager::deletePartyMember(int ID, Creature* pCreature)
 
     pParty->eventPartyCrash();
 
-    // 떠나는 당사자에게도 GCPartyLeave가 날아가야하기 때문에,
-    // 먼저 패킷을 브로드캐스팅한 다음에, 실제로 파티에서 삭제해준다.
+    
+    
     pParty->deleteMember(pCreature->getName());
     pCreature->setPartyID(0);
 
-    // 패밀리 요금제 적용 처리
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
     if (pGamePlayer != NULL) {
         if (pGamePlayer->isFamilyPayAvailable()) {
-            // 패밀리 요금제인 파티원이 떠나하게 될 경우 패밀리 요금제 적용을 새로 계산한다.
+            
             pParty->refreshFamilyPay();
         } else if (pParty->isFamilyPay()) {
-            // 패밀리 요금제 적용 파티일 경우 패밀리 적용을 끝낸다.
+            
             pGamePlayer->setFamilyPayPartyType(FAMILY_PAY_PARTY_TYPE_FREE_PASS_END);
         }
     }
 
-    // 파티의 사이즈가 1이 되었다면 삭제한다.
+    
     if (pParty->getSize() == 1) {
-        // cout << "글로벌파티의 사이즈가 0이 되어서, 파티 객체[" << pParty->getID() << "]를 삭제합니다." << endl;
+        
 
         m_PartyMap.erase(itr);
 
-        // 남은 파티원들의 파티 ID를 0으로 만들고,
-        // 각각의 로컬 파티 매니저에서 파티를 삭제한다.
+        
+        
         pParty->destroyParty();
 
-        // 객체를 지운다.
+        
         SAFE_DELETE(pParty);
     }
 
@@ -2888,12 +2888,12 @@ bool GlobalPartyManager::expelPartyMember(int ID, Creature* pExpeller, const str
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 먼저 해당파티를 찾는다.
+    
     unordered_map<int, Party*>::iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
         cerr << "GlobalPartyManager::expelPartyMember() : NoSuchElementException" << endl;
 
-        // 외부에서 NoSuch처리도 안하는데 -_-; by sigi. 2002.5.9
+        
         // throw NoSuchElementException("GlobalPartyManager::expelPartyMember() : NoSuchElementException");
 
         m_Mutex.unlock();
@@ -2902,27 +2902,27 @@ bool GlobalPartyManager::expelPartyMember(int ID, Creature* pExpeller, const str
 
     Party* pParty = itr->second;
 
-    // 추방하는 놈이 이 파티에 있는지 검사해야 한다.
+    
     if (!pParty->hasMember(pExpeller->getName())) {
         m_Mutex.unlock();
 
-        // 에러인데...?
-        // cout << "추방하는 놈이 파티에 존재하지 않음" << endl;
+        
+        
         // cout << "GlobalPartyManager::expelPartyMember() : END" << endl;
         return false;
     }
 
-    // 추방당할 놈이 파티에 존재하는지를 체크해야 한다.
+    
     if (!pParty->hasMember(ExpelleeName)) {
         m_Mutex.unlock();
 
-        // 에러인데...?
-        // cout << "추방당하는 놈이 파티에 존재하지 않음" << endl;
+        
+        
         // cout << "GlobalPartyManager::expelPartyMember() : END" << endl;
         return false;
     }
 
-    // 멤버들에게 파티원이 파티에서 추방되었다는 사실을 알려준다.
+    
     GCPartyLeave gcPartyLeave;
     gcPartyLeave.setExpellee(ExpelleeName);
     gcPartyLeave.setExpeller(pExpeller->getName());
@@ -2930,46 +2930,46 @@ bool GlobalPartyManager::expelPartyMember(int ID, Creature* pExpeller, const str
 
     pParty->eventPartyCrash();
 
-    // cout << "멤버들에게 파티원이 파티에서 추방되었다는 사실을 알려준다." << endl;
+    
 
-    // 추방당할 놈을 파티에서 삭제한다.
+    
     // * NOTE *
-    // 파티에서 먼저 삭제하지 않고, 패킷을 보낸 다음에 삭제하는 이유는
-    // 추방당한 놈에게 가는 패킷이나, 다른 멤버들에게 추방되었다고 알려주는
-    // 패킷이나 같은 패킷을 쓰기 때문이다.
+    
+    
+    
     Creature* pExpellee = pParty->getMember(ExpelleeName);
     pExpellee->setPartyID(0);
     pParty->deleteMember(ExpelleeName);
 
-    // 패밀리 요금제 적용 처리
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pExpellee->getPlayer());
     if (pGamePlayer != NULL) {
         if (pGamePlayer->isFamilyPayAvailable()) {
-            // 패밀리 요금제인 파티원이 떠나하게 될 경우 패밀리 요금제 적용을 새로 계산한다.
+            
             pParty->refreshFamilyPay();
         } else if (pParty->isFamilyPay()) {
-            // 패밀리 요금제 적용 파티일 경우 패밀리 적용을 끝낸다.
+            
             pGamePlayer->setFamilyPayPartyType(FAMILY_PAY_PARTY_TYPE_FREE_PASS_END);
         }
     }
 
-    // cout << "파티에서 [" << pExpellee->getName() << "]를 삭제했다." << endl;
+    
 
-    // 파티의 사이즈가 1이 되었다면 삭제한다.
+    
     if (pParty->getSize() == 1) {
-        // cout << "파티 사이즈가 1이 되어서 파티를 삭제한다." << endl;
+        
 
         m_PartyMap.erase(itr);
 
-        // cout << "itr을 삭제" << endl;
+        
 
-        // 남은 파티원들의 파티 ID를 0으로 만들고,
-        // 각각의 로컬 파티 매니저에서 파티를 삭제한다.
+        
+        
         pParty->destroyParty();
 
         // cout << "After Party::destroyParty()" << endl;
 
-        // 객체를 지운다.
+        
         SAFE_DELETE(pParty);
 
         // cout << "After object deletion" << endl;
@@ -2987,7 +2987,7 @@ bool GlobalPartyManager::expelPartyMember(int ID, Creature* pExpeller, const str
 void GlobalPartyManager::refreshFamilyPay(int ID) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    // 먼저 해당파티를 찾는다.
+    
     unordered_map<int, Party*>::iterator itr = m_PartyMap.find(ID);
     if (itr == m_PartyMap.end()) {
         cerr << "GlobalPartyManager::refreshFamilyPay() : NoSuchElementException" << endl;
@@ -3048,7 +3048,7 @@ string GlobalPartyManager::toString(void) const
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// 편의를 위한 전역 함수들...
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void deleteAllPartyInfo(Creature* pCreature)
@@ -3064,8 +3064,8 @@ void deleteAllPartyInfo(Creature* pCreature)
     PartyInviteInfoManager* pPIIM = pZone->getPartyInviteInfoManager();
     Assert(pPIIM != NULL);
 
-    // 클래스가 삭제될 경우, 해당하는 파티 초청 정보를 삭제해야 함은 물론,
-    // 파티 초청 상대에게도 이 사실을 알려줘야 한다.
+    
+    
     PartyInviteInfo* pInviteInfo = pPIIM->getInviteInfo(pCreature->getName());
     if (pInviteInfo != NULL) {
         pPIIM->cancelInvite(pCreature);
@@ -3073,31 +3073,31 @@ void deleteAllPartyInfo(Creature* pCreature)
 
     int PartyID = pCreature->getPartyID();
 
-    // 파티에 속해있을 경우에는 파티에서 자신을 삭제하고,
-    // 다른 파티원들에게 알려야 한다.
+    
+    
     if (PartyID != 0) {
-        // 글로벌 파티에서 삭제하고, 파티원들에게 알린다.
+        
         g_pGlobalPartyManager->deletePartyMember(PartyID, pCreature);
 
-        // 현재 속해있는 존의 로컬파티매니저에서 정보를 삭제한다.
-        // Zone::deleteCreature() 함수 내부에서 특정 크리쳐가
-        // 그 존을 떠날 경우, LocalPartyManager 내부에서 그 크리쳐가
-        // 속한 파티에서 크리쳐를 지워주므로, 여기서 지워줄 필요가 없다.
+        
+        
+        
+        
         //
-        // 어디인지는 정확하게 알 수는 없으나, 어디에선가 로컬 파티에서
-        // 포인터를 확실히 지워주지 않는 현상이 발생하는 듯 하다.
-        // 그래서 원래 주석처리했던 부분이었으나, 다시 주석처리를 제거한다.
-        // -- 2002.01.08 김성민
+        
+        
+        
+        
         Zone* pZone = pCreature->getZone();
         if (pZone != NULL) {
-            // 로컬 파티에서 삭제한다.
+            
             LocalPartyManager* pLocalPartyManager = pZone->getLocalPartyManager();
             Assert(pLocalPartyManager != NULL);
             pLocalPartyManager->deletePartyMember(PartyID, pCreature);
         }
 
-        // 글로벌 파티 내부에서 파티 ID를 0으로 만들지만,
-        // 확실하게 해주는 의미에서 다시한번 0으로 만들어준다.
+        
+        
         pCreature->setPartyID(0);
     }
 

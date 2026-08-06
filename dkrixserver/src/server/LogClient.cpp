@@ -35,42 +35,15 @@ LogClient* g_pLogClient = NULL;
 int LogClient::m_LogLevel = 0;
 
 void log(short type, const string& source, const string& target) {
-    /*
-    // 로그 타입을 검사하는 일은 LogClient::log() 함수 내에서
-    // 체크해야 깔끔할 것 같지만, 될 수 있는 한 함수 호출을 줄이기 위해서
-    // 전역 함수 내에서 했다.
-    if (type < LogClient::getLogLevel())
-    {
-        g_pLogClient->_log(type, source, target);
-    }
-    else { }
-    */
+     
 }
 
 void log(short type, const string& source, const string& target, const string& content) {
-    /*
-    // 로그 타입을 검사하는 일은 LogClient::log() 함수 내에서
-    // 체크해야 깔끔할 것 같지만, 될 수 있는 한 함수 호출을 줄이기 위해서
-    // 전역 함수 내에서 했다.
-    if (type < LogClient::getLogLevel())
-    {
-        g_pLogClient->_log(type, source, target, content);
-    }
-    else { }
-    */
+     
 }
 
 void log(short type, const string& source, const string& target, const string& content, short zoneid) {
-    /*
-    // 로그 타입을 검사하는 일은 LogClient::log() 함수 내에서
-    // 체크해야 깔끔할 것 같지만, 될 수 있는 한 함수 호출을 줄이기 위해서
-    // 전역 함수 내에서 했다.
-    if (type < LogClient::getLogLevel())
-    {
-        g_pLogClient->_log(type, source, target, content, zoneid);
-    }
-    else { }
-    */
+     
 }
 
 

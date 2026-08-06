@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachZoneEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACHZONEEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttachZoneEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACH_ZONE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

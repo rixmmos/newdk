@@ -7,15 +7,15 @@ BYTE CSpritePalBase::s_Colorkey = 0xFF;
 
 CSpritePalBase::CSpritePalBase()
 {
-	m_Width = 0;		// 가로 pixel수
-	m_Height = 0;		// 세로 pixel수		
-	m_Size = 0;			// 스프라이트의 size
+	m_Width = 0;		
+	m_Height = 0;		
+	m_Size = 0;			
 	
 	m_pPixels = NULL;		// pixels point array
 	m_pData = NULL;			// data
 	
-	m_bInit = false;		// data가 있는가?
-	m_bLoading = false;		// Loading중인가?
+	m_bInit = false;		
+	m_bLoading = false;		
 }
 
 CSpritePalBase::~CSpritePalBase()
@@ -25,9 +25,9 @@ CSpritePalBase::~CSpritePalBase()
 
 void CSpritePalBase::Release()
 {
-	m_Width = 0;		// 가로 pixel수
-	m_Height = 0;		// 세로 pixel수		
-	m_Size = 0;			// 스프라이트의 size
+	m_Width = 0;		
+	m_Height = 0;		
+	m_Size = 0;			
 
 	if(m_pData != NULL)
 	{
@@ -36,8 +36,8 @@ void CSpritePalBase::Release()
 		m_pPixels = NULL;
 	}
 	
-	m_bInit = false;		// data가 있는가?
-	m_bLoading = false;		// Loading중인가?
+	m_bInit = false;		
+	m_bLoading = false;		
 }
 
 void CSpritePalBase::SetEmptySprite()
@@ -52,7 +52,7 @@ bool CSpritePalBase::LoadFromFile(std::ifstream &file)
 	
 	file.read((char *)&m_Size, 4);
 
-//	// size 가 없으면 리턴하쟈
+
 //	if(m_Size == 0)
 //		return true;
 
@@ -89,7 +89,7 @@ bool CSpritePalBase::SaveToFile(std::ofstream &file)
 {
 	if(IsNotInit())
 	{
-		MessageBox(NULL, "아무것도 없는데 멀 저장해-_-", "CSpritePalBase", MB_OK);
+		MessageBox(NULL, "   -_-", "CSpritePalBase", MB_OK);
 		return false;
 	}
 
@@ -100,7 +100,7 @@ bool CSpritePalBase::SaveToFile(std::ofstream &file)
 
 	file.write((const char *)&m_Size, 4);
 
-//	// size가 0이면 리턴하쟈
+
 //	if(m_Size == 0)
 //		return true;
 
@@ -120,7 +120,7 @@ bool CSpritePalBase::SaveToFile(std::ofstream &file)
 		}
 		else
 			index = m_pPixels[i+1] - m_pPixels[i];
-		// byte수와 실제 data를 저장한다.
+		
 		file.write((const char*)&index, 2);
 	}
 
@@ -129,7 +129,7 @@ bool CSpritePalBase::SaveToFile(std::ofstream &file)
 
 void CSpritePalBase::operator = (const CSpritePalBase& sprite)
 {
-	// 메모리 해제
+	
 	Release();
 
 	m_Size = sprite.m_Size;

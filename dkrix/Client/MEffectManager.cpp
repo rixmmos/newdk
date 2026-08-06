@@ -32,7 +32,7 @@ MEffectManager::Release()
 {
 	EFFECT_LIST::iterator iEffect = m_listEffect.begin();
 
-	// 다 지운당..
+	
 	while (iEffect != m_listEffect.end())
 	{
 		MEffect* pEffect = *iEffect;
@@ -53,7 +53,7 @@ MEffectManager::AddEffect(MEffect* pEffect)
 {
 	if (pEffect != NULL)
 	{
-		// list에 추가
+		
 		m_listEffect.push_front( pEffect );
 	}
 }
@@ -61,26 +61,4 @@ MEffectManager::AddEffect(MEffect* pEffect)
 //-----------------------------------------------------------------------------
 // Update
 //-----------------------------------------------------------------------------
-/*
-void		
-MEffectManager::Update()
-{
-	EFFECT_LIST::iterator iEffect = m_listEffect.begin();
-
-	while (iEffect != m_listEffect.end())
-	{
-		MEffect* pEffect = *iEffect;
-
-		if (pEffect->Update())
-		{
-			// 보통?의 경우
-		}
-		else
-		{
-			// Effect가 끝난 경우(더 이상 update할 필요가 없는 경우)
-		}
-
-		iEffect ++;
-	}
-}
-*/
+ 

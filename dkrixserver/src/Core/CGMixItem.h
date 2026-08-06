@@ -2,8 +2,8 @@
 // Filename    : CGMixItem.h
 // Written By  : excel96
 // Description :
-// 인벤토리 안의 아이템을 사용할 때, 클라이언트가 X, Y 및 ObjectID를
-// 보내면 아이템 클래스에 따라서, 서버가 이에 맞는 코드를 처리한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_MIX_ITEM_H__
@@ -67,11 +67,11 @@ public:
     }
 
 private:
-    ObjectID_t m_ObjectID; // 아이템의 object id
-    CoordInven_t m_InvenX; // 아이템의 인벤토리 좌표 X
-    CoordInven_t m_InvenY; // 아이템의 인벤토리 좌표 Y
+    ObjectID_t m_ObjectID; 
+    CoordInven_t m_InvenX; 
+    CoordInven_t m_InvenY; 
 
-    ObjectID_t m_TargetObjectID[2]; // 합칠 두 아이템의 오브젝트 ID
+    ObjectID_t m_TargetObjectID[2]; 
 };
 
 

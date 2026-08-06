@@ -16,7 +16,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // class ZoneInfoManager;
-// ZoneID 를 키값으로 해서 존 정보를 검색할 수 있는 기능을 제공한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class ZoneInfoManager {
@@ -41,7 +41,7 @@ public:
     string toString() const;
 
 private:
-    unordered_map<ZoneID_t, ZoneInfo*> m_ZoneInfos; // zone info 의 해쉬맵
+    unordered_map<ZoneID_t, ZoneInfo*> m_ZoneInfos; 
     unordered_map<string, ZoneInfo*> m_FullNameMap;
     unordered_map<string, ZoneInfo*> m_ShortNameMap;
 };

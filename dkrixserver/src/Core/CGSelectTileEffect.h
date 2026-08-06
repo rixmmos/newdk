@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    ObjectID_t m_EffectObjectID; // 선택한 이펙트의 오브젝트 ID
+    ObjectID_t m_EffectObjectID; 
 };
 
 

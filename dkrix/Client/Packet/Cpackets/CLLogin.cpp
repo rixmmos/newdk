@@ -13,7 +13,7 @@
 
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void CLLogin::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -51,7 +51,7 @@ void CLLogin::read ( SocketInputStream & iStream )
 
 		    
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void CLLogin::write ( SocketOutputStream & oStream ) const 
      throw ( ProtocolException , Error )
@@ -86,7 +86,7 @@ void CLLogin::write ( SocketOutputStream & oStream ) const
 		oStream.write( (char*)m_MacAddress, 6*sizeof(BYTE) );
 		
 		BYTE loginMode = 0;
-		// add by Coffee 2006.11.7 藤속貢籃되쩍친駕
+		
 		oStream.write( loginMode );
 		// end by Coffee
 		//oStream.write( m_LoginMode );

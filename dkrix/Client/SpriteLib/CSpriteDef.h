@@ -18,7 +18,7 @@ std::ofstream;
 typedef	std::list<int>	INT_LIST;
 
 //----------------------------------------------------------------------
-// (SpriteID, FilePosition)의 List를 받아서 Load한다.
+
 //----------------------------------------------------------------------
 class SPRITE_FILEPOSITION_NODE
 {
@@ -33,7 +33,7 @@ class SPRITE_FILEPOSITION_NODE
 };
 
 //----------------------------------------------------------------------
-// FilePosition Array 정의
+
 //----------------------------------------------------------------------
 typedef	TArray<SPRITE_FILEPOSITION_NODE, TYPE_SPRITEID>	CSpriteFilePositionArray;
 

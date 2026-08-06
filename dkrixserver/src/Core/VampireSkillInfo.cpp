@@ -2,8 +2,8 @@
 //
 // Filename    : VampireSkillInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,7 +31,7 @@ VampireSkillInfo::VampireSkillInfo() {
 // destructor
 //////////////////////////////////////////////////////////////////////
 VampireSkillInfo::~VampireSkillInfo() noexcept {
-    // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+    
     while (!m_SubVampireSkillInfoList.empty()) {
         SubVampireSkillInfo* pSubVampireSkillInfo = m_SubVampireSkillInfoList.front();
         SAFE_DELETE(pSubVampireSkillInfo);
@@ -41,12 +41,12 @@ VampireSkillInfo::~VampireSkillInfo() noexcept {
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void VampireSkillInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_bLearnNewSkill);
     iStream.read(m_ListNum);
 
@@ -61,12 +61,12 @@ void VampireSkillInfo::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void VampireSkillInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_bLearnNewSkill);
     oStream.write(m_ListNum);
 

@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 //MStopZoneEmptyHorizontalWallEffectGenerator	g_StopZoneWallEffectGenerator;
 //---------------------------------------------
-// 방향에 따라서... { 시작보정X, 시작보정Y, 변화X, 변화Y }
+
 //---------------------------------------------
 const int g_WallHorizontalDirValue[8][4] = { 
 	{ 0, -1, 0, 1 },		// left
@@ -43,7 +43,7 @@ MStopZoneEmptyHorizontalWallEffectGenerator::Generate( const EFFECTGENERATOR_INF
 	TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].FrameID;
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	int	//sX0, sY0, 
 		sX1, sY1;
@@ -51,29 +51,29 @@ MStopZoneEmptyHorizontalWallEffectGenerator::Generate( const EFFECTGENERATOR_INF
 	//sX0 = g_pTopView->PixelToMapX(egInfo.x0);
 	//sY0 = g_pTopView->PixelToMapY(egInfo.y0);
 
-	// 지뢰인 경우
+	
 	if (egInfo.nActionInfo>=MINE_ANKLE_KILLER 
 		&& egInfo.nActionInfo<=MINE_COBRA)
 	{
-		// 시작 위치
+		
 		sX1 = g_pTopView->PixelToMapX(egInfo.x0);
 		sY1 = g_pTopView->PixelToMapY(egInfo.y0);
 	}
 	else
 	{
-		// 목표 위치
+		
 		sX1 = g_pTopView->PixelToMapX(egInfo.x1);
 		sY1 = g_pTopView->PixelToMapY(egInfo.y1);
 	}
 
-	// (sX0, sY0)에서 (sX1, sY1)을 바라보는 방향을 얻어낸다.
+	
 	int lookDirection = egInfo.direction;//MTopView::GetDirectionToPosition(sX0, sY0, sX1, sY1);
 
 	
 	//---------------------------------------------
-	// 시작 값
+	
 	//---------------------------------------------
-	// step(개수)   stepMulti(시작값 변화)
+	
 	// 1			 0
 	// 3			 1
 	// 5			 2
@@ -90,36 +90,36 @@ MStopZoneEmptyHorizontalWallEffectGenerator::Generate( const EFFECTGENERATOR_INF
 
 	MEffect*	pEffect;
 	//---------------------------------------------
-	// [1]Effect 생성
+	
 	//---------------------------------------------
 	for (int i=0; i<egInfo.step; i++)
 	{
-		// 가운데꺼 하나를 뺀다.
+		
 		if (i!=stepMulti)
 		{
 			pEffect = new MEffect(bltType);
 
 			//---------------------------------------------
-			// 한번은 EffectTarget을 new할 필요가 없다.
+			
 			//---------------------------------------------
 			
 			pEffect->SetFrameID( frameID, maxFrame );	
 
-			pEffect->SetPosition(sX, sY);		// Sector 좌표		
+			pEffect->SetPosition(sX, sY);		
 			pEffect->SetZ(egInfo.z0);			
-			pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-			pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+			pEffect->SetStepPixel(egInfo.step);		
+			pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-			// 방향 설정
+			
 			pEffect->SetDirection( egInfo.direction );
 
-			// 위력
+			
 			pEffect->SetPower(egInfo.power);
 
-			// 빛의 밝기
+			
 			//pEffect->SetLight( light );
 
-			// Zone에 추가한다.
+			
 			bool bAdd = g_pZone->AddEffect( pEffect );
 
 			/*
@@ -138,7 +138,7 @@ MStopZoneEmptyHorizontalWallEffectGenerator::Generate( const EFFECTGENERATOR_INF
 			{
 				if (!bOK)
 				{				
-					// 처음으로 추가된 effect에 대해서 link설정
+					
 					pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );
 
 					bOK = true;
@@ -156,7 +156,7 @@ MStopZoneEmptyHorizontalWallEffectGenerator::Generate( const EFFECTGENERATOR_INF
 			}
 		}
 
-		// 다음 좌표
+		
 		sX += cX;
 		sY += cY;
 

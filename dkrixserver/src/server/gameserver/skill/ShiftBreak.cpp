@@ -13,8 +13,8 @@
 #include "ZoneUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 ShiftBreak::ShiftBreak() throw() {
     __BEGIN_TRY
@@ -52,7 +52,7 @@ ShiftBreak::ShiftBreak() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void ShiftBreak::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                          CEffectID_t CEffectID)
@@ -72,7 +72,7 @@ void ShiftBreak::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSk
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pOusters, getSkillType());
             return;
@@ -166,10 +166,10 @@ void ShiftBreak::execute(Ousters* pOusters, ZoneCoord_t X, ZoneCoord_t Y, Ouster
         //		if ( input.SkillLevel > 15 ) Ratio += 10;
         //		Ratio = max(10, Ratio);
 
-        cout << "다크니스 있음. 확률 " << Ratio << endl;
+        cout << " .  " << Ratio << endl;
 
         if (rand() % 100 < Ratio) {
-            cout << "성공 " << endl;
+            cout << " " << endl;
             pZone->deleteEffect(pEffect->getObjectID());
 
             GCDeleteEffectFromTile gcDeleteEffectFromTile;

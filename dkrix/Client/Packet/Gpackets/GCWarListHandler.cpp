@@ -44,7 +44,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	
-	// 현재 존도 있는지 검색해야 한다.		
+	
 	WarInfo *pInfo = g_pWarManager->GetWarInfo(g_pZone->GetID());
 	if(pInfo != NULL && pInfo->getWarType() == WAR_RACE)
 	{

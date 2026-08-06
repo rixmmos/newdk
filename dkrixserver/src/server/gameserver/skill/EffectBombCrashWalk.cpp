@@ -51,11 +51,11 @@ void EffectBombCrashWalk::affect()
 
     Assert(m_pZone != NULL);
 
-    // ����ڸ� �����´�.
-    // !! �̹� ���� ������ �� �����Ƿ� NULL�� �� �� �ִ�.
+    
+    
     // by bezz. 2003.1.4
     Creature* pCastCreature = m_pZone->getCreature(m_UserObjectID);
-    // ĳ���Ͱ� ������ �����Ѵ�.
+    
     if (pCastCreature == NULL)
         return;
 
@@ -94,8 +94,8 @@ void EffectBombCrashWalk::affect()
     Level_t maxEnemyLevel = 0;
     uint EnemyNum = 0;
 
-    // ���� ����Ʈ�� �پ��ִ� Ÿ���� �޾ƿ´�.
-    // �߽�Ÿ�� + ���÷��� Ÿ��
+    
+    
     for (int oX = -diff; oX <= diff; oX++)
         for (int oY = -diff; oY <= diff; oY++) {
             int tileX = m_X + oX;
@@ -127,18 +127,18 @@ void EffectBombCrashWalk::affect()
 
 
                     if (bPK && bZoneLevelCheck && bHitRoll) {
-                        // ���� �������� ��ų ������ ���ʽ��� ���� ���� �������� ���Ѵ�.
+                        
                         bool bCriticalHit = false;
                         Damage_t FinalDamage = 0;
                         FinalDamage += computeDamage(pSlayer, pTargetCreature, SkillLevel / 2, bCriticalHit);
                         FinalDamage += m_Damage;
 
-                        // ��...�� ũ�� �߰� ����...�ʻ� ��� �ڵ�
+                        
                         int DamageModifier = BombCrashWalkDamageModify[oX + 2][oY + 2];
                         Damage_t TileDamage = getPercentValue(FinalDamage, DamageModifier);
 
                         if (pTargetCreature != NULL && !pTargetCreature->isSlayer()) {
-                            // �����˺�
+                            
                             if (pTargetCreature->isPC()) {
                                 GCModifyInformation gcMI;
                                 ::setDamage(pTargetCreature, TileDamage, pSlayer, m_SkillType, &gcMI);
@@ -151,8 +151,8 @@ void EffectBombCrashWalk::affect()
 
                                 pMonster->addEnemy(pSlayer);
                             }
-                            // add by Coffee ����Ŀ������˺���Ч��
-                            // ����Ƿ�ɹ���
+                            
+                            
                             bool bAttackCheck = false;
                             int rn = Random(10, 100);
                             if (rn > 70 && iMode == 0)
@@ -193,7 +193,7 @@ void EffectBombCrashWalk::affect()
 
                                 if (TileDamage > maxDamage)
                                     maxDamage = TileDamage;
-                                // ֪ͨʹ�ü�����
+                                
                                 Player* pPlayer = pSlayer->getPlayer();
                                 pPlayer->sendPacket(&_GCSkillToObjectOK1);
                                 _GCSkillToObjectOK1.setSkillType(m_SkillType);
@@ -202,14 +202,14 @@ void EffectBombCrashWalk::affect()
                                 _GCSkillToObjectOK1.setDuration(delay);
 
                                 if (pTargetCreature->isPC()) {
-                                    // ֪ͨ����������
+                                    
                                     _GCSkillToObjectOK2.setObjectID(pSlayer->getObjectID());
                                     _GCSkillToObjectOK2.setSkillType(m_SkillType);
                                     _GCSkillToObjectOK2.setDuration(delay);
 
                                     pTargetCreature->getPlayer()->sendPacket(&_GCSkillToObjectOK2);
                                 }
-                                // ����ȫ�������㲥��Ϣ
+                                
                                 _GCSkillToObjectOK4.setTargetObjectID(pTargetCreature->getObjectID());
                                 _GCSkillToObjectOK4.setSkillType(m_SkillType);
                                 _GCSkillToObjectOK4.setDuration(delay);
@@ -235,7 +235,7 @@ void EffectBombCrashWalk::affect()
         pSlayer->getPlayer()->sendPacket(&gcMI);
     }
 
-    // ������ ����!!
+    
     m_StormTime--;
     if (m_StormTime <= 0)
         setDeadline(0);

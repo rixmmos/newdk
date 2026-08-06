@@ -14,7 +14,7 @@
 // Static member
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
-// ItemClass에 맞게 메모리를 잡아주는 class table을 설정..
+
 //----------------------------------------------------------------------
 MShopShelf::FUNCTION_NEWSHELFCLASS
 MShopShelf::s_NewShelfClassTable[MAX_SHELF] =
@@ -35,7 +35,7 @@ MShopShelf::MShopShelf()
 
 	m_Version = 0;
 
-	// 모두 NULL로 초기화
+	
 	for (int i=0; i<SHOP_SHELF_SLOT; i++)
 	{
 		m_pItems[i] = NULL;
@@ -55,7 +55,7 @@ MShopShelf::~MShopShelf()
 //----------------------------------------------------------------------
 // New Shelf
 //----------------------------------------------------------------------
-// ShelfClass에 맞는 class의 객체를 생성해서(new) 넘겨준다.
+
 //----------------------------------------------------------------------
 MShopShelf*		
 MShopShelf::NewShelf(MShopShelf::SHELF_TYPE ShelfClass)
@@ -77,7 +77,7 @@ MShopShelf::Release()
 
 	for (int i=0; i<SHOP_SHELF_SLOT; i++)
 	{
-		// 뭔가 있으면 지우고.. NULL로..
+		
 		if (m_pItems[i]!=NULL)
 		{
 			delete m_pItems[i];
@@ -117,14 +117,14 @@ MShopShelf::GetItem(unsigned int slot) const
 //----------------------------------------------------------------------
 // Add Item
 //----------------------------------------------------------------------
-// 앞에서부터 검색해서 빈 곳에 추가한다.
+
 //----------------------------------------------------------------------
 bool		
 MShopShelf::AddItem(MItem* pItem)
 {
 	for (int i=0; i<SHOP_SHELF_SLOT; i++)
 	{
-		// 빈 곳에 추가한다.
+		
 		if (m_pItems[i]==NULL)
 		{
 			if (SetItem( i, pItem ))
@@ -150,7 +150,7 @@ MShopShelf::SetItem(unsigned int  slot, MItem* pItem)
 		return false;
 	}
 
-	// 이전에 뭔가 있었으면..
+	
 	if (m_pItems[slot]!=NULL)
 	{
 		delete m_pItems[slot];
@@ -159,7 +159,7 @@ MShopShelf::SetItem(unsigned int  slot, MItem* pItem)
 	m_pItems[slot] = pItem;
 
 	//------------------------------------------------------
-	// 사용 가능 여부 체크
+	
 	//------------------------------------------------------
 	#ifdef __GAME_CLIENT__
 		g_pPlayer->CheckAffectStatus( pItem );
@@ -169,7 +169,7 @@ MShopShelf::SetItem(unsigned int  slot, MItem* pItem)
 }
 
 //----------------------------------------------------------------------
-// Remove - Shelf에서 제거해서 return해준다.(외부에서 delete해야한다.)
+
 //----------------------------------------------------------------------
 MItem*		
 MShopShelf::RemoveItem(unsigned int slot)
@@ -179,17 +179,17 @@ MShopShelf::RemoveItem(unsigned int slot)
 		return NULL;
 	}
 
-	// 임시로 저장하고 
+	
 	MItem* pRemoveItem = m_pItems[slot];
 
-	// 내부에 있는 걸 지워준다.
+	
 	m_pItems[slot] = NULL;
 
 	return pRemoveItem;
 }
 
 //----------------------------------------------------------------------
-// Delete - Shelf 내부에 있는걸 지워준다.
+
 //----------------------------------------------------------------------
 void		
 MShopShelf::DeleteItem(unsigned int slot)
@@ -199,13 +199,13 @@ MShopShelf::DeleteItem(unsigned int slot)
 		return;
 	}
 
-	// 이전에 뭔가 있었으면..
+	
 	if (m_pItems[slot]!=NULL)
 	{
 		delete m_pItems[slot];
 	}
 
-	// 없애준다.
+	
 	m_pItems[slot] = NULL;
 }
 
@@ -218,60 +218,7 @@ MShopShelf::DeleteItem(unsigned int slot)
 //----------------------------------------------------------------------
 // Init From FixedItemTable
 //----------------------------------------------------------------------
-/*
-bool		
-MShopFixedShelf::InitFromFixedItemTable(unsigned int tableID)
-{
-	FIXED_ITEM_INFO* pInfo = g_ShopFixedItemTable.GetItemInfo( tableID );
-
-	// 그런 id의 정보는 없따~
-	if (pInfo==NULL)
-	{
-		return false;
-	}
-
-
-	//---------------------------------------------------------
-	// 그 tableID에 속한 모든 item들을 검색..
-	//---------------------------------------------------------
-	FIXED_ITEM_INFO::iterator iInfo = pInfo->begin();
-
-	while (iInfo != pInfo->end())
-	{
-		unsigned int	slotID		= (*iInfo).first;
-		ITEM_INFO*		pItemInfo	= (*iInfo).second;
-
-		//---------------------------------------------------------
-		// Item을 생성하고 정보를 설정한다.
-		//---------------------------------------------------------
-		MItem* pItem = MItem::NewItem( pItemInfo->Class );
-		
-		pItem->SetItemType( pItemInfo->Type );
-
-		pItem->SetItemOption( pItemInfo->Option );
-
-		pItem->SetCurrentDurability( pItemInfo->Durability );
-
-		pItem->SetNumber( pItemInfo->Number );
-
-		//---------------------------------------------------------
-		// 생성된 item을 shelf에 추가한다.
-		//---------------------------------------------------------
-		if (!SetItem( slotID, pItem ))
-		{
-			// item이 shelf에 추가되지 못한 경우.. -_-;;
-			delete pItem;
-		}
-	
-		//---------------------------------------------------------
-		// 다음
-		//---------------------------------------------------------
-		iInfo++;
-	}
-
-	return true;
-}
-*/
+ 
 
 //----------------------------------------------------------------------
 //

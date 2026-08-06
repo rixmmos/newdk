@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : CGStashList.h 
-// Written By  : 김성민
+
 // Description : 
-// 클라이언트가 보관함 안에 들어있는 아이템의 리스트를 요구할 때 쓰이는
-// 패킷이다. 
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_STASH_LIST_H__
 #define __CG_STASH_LIST_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -38,7 +38,7 @@ public:
 	void setObjectID(ObjectID_t id) throw() { m_ObjectID = id; }
 
 private:
-	ObjectID_t m_ObjectID; // 플레이어 크리쳐의 object id
+	ObjectID_t m_ObjectID; 
 
 };
 

@@ -9,8 +9,8 @@
 #include "SimpleTileMeleeSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 생성자
-// 마스크를 초기화한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 TornadoSever::TornadoSever() throw() {
     __BEGIN_TRY
@@ -29,7 +29,7 @@ TornadoSever::TornadoSever() throw() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void TornadoSever::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -48,7 +48,7 @@ void TornadoSever::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL) {
             executeSkillFailException(pSlayer, getSkillType());
             return;

@@ -2,9 +2,9 @@
 // Filename    : ModifyInfo.h
 // Written By  : elca@ewestsoft.com
 // Description :
-// �÷��̾��� ���°� ���� ��, Ŭ���̾�Ʈ���� ���ư��� ��Ŷ�̴�.
-// �ַ� �÷��̾ ���� ����� ���� ��� ��Ŷ�� �� ��Ŷ��
-// ��ӹ޾Ƽ� ���� ��찡 ����.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __MODIFY_INFO_H__
@@ -17,87 +17,87 @@
 #include "Types.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// ���� ��ȭ Ÿ��
+
 //////////////////////////////////////////////////////////////////////////////
 enum ModifyType {
-    MODIFY_BASIC_STR = 0,           // �⺻ STR�� ����
-    MODIFY_CURRENT_STR,             // ���� STR�� ����
-    MODIFY_MAX_STR,                 // �ƽ� STR�� ����
-    MODIFY_STR_EXP,                 // STR ����ġ�� ����
-    MODIFY_BASIC_DEX,               // �⺻ DEX�� ����
-    MODIFY_CURRENT_DEX,             // ���� DEX�� ����
-    MODIFY_MAX_DEX,                 // �ƽ� DEX�� ����
-    MODIFY_DEX_EXP,                 // DEX ����ġ�� ����
-    MODIFY_BASIC_INT,               // �⺻ INT�� ����
-    MODIFY_CURRENT_INT,             // ���� INT�� ����
-    MODIFY_MAX_INT,                 // �ƽ� INT�� ����
-    MODIFY_INT_EXP,                 // INT ����ġ�� ����
-    MODIFY_CURRENT_HP,              // ���� HP�� ����
-    MODIFY_MAX_HP,                  // �ƽ� HP�� ����
-    MODIFY_CURRENT_MP,              // ���� MP�� ����
-    MODIFY_MAX_MP,                  // �ƽ� MP�� ����
-    MODIFY_MIN_DAMAGE,              // �ּ� �������� ����
-    MODIFY_MAX_DAMAGE,              // �ƽ� �������� ����
-    MODIFY_DEFENSE,                 // ���潺�� ����
-    MODIFY_PROTECTION,              // �����ؼ��� ����
-    MODIFY_TOHIT,                   // ���߷��� ����
-    MODIFY_VISION,                  // �þ߸� ����
-    MODIFY_FAME,                    // ������ ����
-    MODIFY_GOLD,                    // �������� ����
-    MODIFY_SWORD_DOMAIN_LEVEL,      // �� �迭 ������ ����
-    MODIFY_SWORD_DOMAIN_EXP,        // �� �迭 ������ ����
-    MODIFY_SWORD_DOMAIN_GOAL_EXP,   // �� �迭 ������ ����
-    MODIFY_BLADE_DOMAIN_LEVEL,      // �� �迭 ������ ����
-    MODIFY_BLADE_DOMAIN_EXP,        // �� �迭 ������ ����
-    MODIFY_BLADE_DOMAIN_GOAL_EXP,   // �� �迭 ������ ����
-    MODIFY_HEAL_DOMAIN_LEVEL,       // �� �迭 ������ ����
-    MODIFY_HEAL_DOMAIN_EXP,         // �� �迭 ������ ����
-    MODIFY_HEAL_DOMAIN_GOAL_EXP,    // �� �迭 ������ ����
-    MODIFY_ENCHANT_DOMAIN_LEVEL,    // ��æƮ �迭 ������ ����
-    MODIFY_ENCHANT_DOMAIN_EXP,      // ��æƮ �迭 ������ ����
-    MODIFY_ENCHANT_DOMAIN_GOAL_EXP, // ��æƮ �迭 ������ ����
-    MODIFY_GUN_DOMAIN_LEVEL,        // �� �迭 ������ ����
-    MODIFY_GUN_DOMAIN_EXP,          // �� �迭 ������ ����
-    MODIFY_GUN_DOMAIN_GOAL_EXP,     // �� �迭 ������ ����
-    MODIFY_ETC_DOMAIN_LEVEL,        // ��Ÿ �迭 ������ ����
-    MODIFY_ETC_DOMAIN_EXP,          // ��Ÿ �迭 ������ ����
-    MODIFY_ETC_DOMAIN_GOAL_EXP,     // ��Ÿ �迭 ������ ����
-    MODIFY_SKILL_LEVEL,             // Ư�� ��ų ������ ����
-    MODIFY_LEVEL,                   // �����̾� ������ ����
-    MODIFY_EFFECT_STAT,             // ����Ʈ ���¸� ����
-    MODIFY_DURATION,                // ����Ʈ ���� �ð��� ����
-    MODIFY_BULLET,                  // ��� �ִ� �Ѿ��� �Ѿ� ���� ����
-    MODIFY_BONUS_POINT,             // �����̾��� ���ʽ� ����Ʈ�� ����
-    MODIFY_DURABILITY,              // ��� �ִ� ������ �� �ϳ��� �������� ����
-    MODIFY_NOTORIETY,               // �Ǹ�ġ�� ����
-    MODIFY_VAMP_GOAL_EXP,           // �����̾��� ����ġ�� ����
-    MODIFY_SILVER_DAMAGE,           // �� �������� ����
-    MODIFY_ATTACK_SPEED,            // ���� �ӵ��� ����
-    MODIFY_ALIGNMENT,               // ����
-    MODIFY_SILVER_DURABILITY,       // �� ���ݾ��� ����
-    MODIFY_REGEN_RATE,              // ���� �ð��� �������� ����
-    MODIFY_GUILDID,                 // ��� ���̵� ����
-    MODIFY_RANK,                    // ��� �ܰ�
-    MODIFY_RANK_EXP,                // ��� ����ġ
-    MODIFY_OUSTERS_GOAL_EXP,        // �ƿ콺�ͽ��� ����ġ�� ����
-    MODIFY_SKILL_BONUS_POINT,       // �ƿ콺�ͽ��� ��ų ���ʽ� ����Ʈ�� ����
+    MODIFY_BASIC_STR = 0,           
+    MODIFY_CURRENT_STR,             
+    MODIFY_MAX_STR,                 
+    MODIFY_STR_EXP,                 
+    MODIFY_BASIC_DEX,               
+    MODIFY_CURRENT_DEX,             
+    MODIFY_MAX_DEX,                 
+    MODIFY_DEX_EXP,                 
+    MODIFY_BASIC_INT,               
+    MODIFY_CURRENT_INT,             
+    MODIFY_MAX_INT,                 
+    MODIFY_INT_EXP,                 
+    MODIFY_CURRENT_HP,              
+    MODIFY_MAX_HP,                  
+    MODIFY_CURRENT_MP,              
+    MODIFY_MAX_MP,                  
+    MODIFY_MIN_DAMAGE,              
+    MODIFY_MAX_DAMAGE,              
+    MODIFY_DEFENSE,                 
+    MODIFY_PROTECTION,              
+    MODIFY_TOHIT,                   
+    MODIFY_VISION,                  
+    MODIFY_FAME,                    
+    MODIFY_GOLD,                    
+    MODIFY_SWORD_DOMAIN_LEVEL,      
+    MODIFY_SWORD_DOMAIN_EXP,        
+    MODIFY_SWORD_DOMAIN_GOAL_EXP,   
+    MODIFY_BLADE_DOMAIN_LEVEL,      
+    MODIFY_BLADE_DOMAIN_EXP,        
+    MODIFY_BLADE_DOMAIN_GOAL_EXP,   
+    MODIFY_HEAL_DOMAIN_LEVEL,       
+    MODIFY_HEAL_DOMAIN_EXP,         
+    MODIFY_HEAL_DOMAIN_GOAL_EXP,    
+    MODIFY_ENCHANT_DOMAIN_LEVEL,    
+    MODIFY_ENCHANT_DOMAIN_EXP,      
+    MODIFY_ENCHANT_DOMAIN_GOAL_EXP, 
+    MODIFY_GUN_DOMAIN_LEVEL,        
+    MODIFY_GUN_DOMAIN_EXP,          
+    MODIFY_GUN_DOMAIN_GOAL_EXP,     
+    MODIFY_ETC_DOMAIN_LEVEL,        
+    MODIFY_ETC_DOMAIN_EXP,          
+    MODIFY_ETC_DOMAIN_GOAL_EXP,     
+    MODIFY_SKILL_LEVEL,             
+    MODIFY_LEVEL,                   
+    MODIFY_EFFECT_STAT,             
+    MODIFY_DURATION,                
+    MODIFY_BULLET,                  
+    MODIFY_BONUS_POINT,             
+    MODIFY_DURABILITY,              
+    MODIFY_NOTORIETY,               
+    MODIFY_VAMP_GOAL_EXP,           
+    MODIFY_SILVER_DAMAGE,           
+    MODIFY_ATTACK_SPEED,            
+    MODIFY_ALIGNMENT,               
+    MODIFY_SILVER_DURABILITY,       
+    MODIFY_REGEN_RATE,              
+    MODIFY_GUILDID,                 
+    MODIFY_RANK,                    
+    MODIFY_RANK_EXP,                
+    MODIFY_OUSTERS_GOAL_EXP,        
+    MODIFY_SKILL_BONUS_POINT,       
 
     MODIFY_ELEMENTAL_FIRE,
     MODIFY_ELEMENTAL_WATER,
     MODIFY_ELEMENTAL_EARTH,
     MODIFY_ELEMENTAL_WIND,
 
-    MODIFY_SKILL_EXP, // �����̾� ��ų ����ġ ����
+    MODIFY_SKILL_EXP, 
 
     MODIFY_PET_HP,
-    MODIFY_PET_EXP, // �� ����
+    MODIFY_PET_EXP, 
 
-    MODIFY_LAST_TARGET, // ���� ������ ��� ����
-    MODIFY_UNIONID,     // ��忬�� ���̵�
-    MODIFY_UNIONGRADE,  // ��忬�տ����� ��ġ
+    MODIFY_LAST_TARGET, 
+    MODIFY_UNIONID,     
+    MODIFY_UNIONGRADE,  
 
-    MODIFY_ADVANCEMENT_CLASS_LEVEL,    // ���� ����
-    MODIFY_ADVANCEMENT_CLASS_GOAL_EXP, // ���� ����ġ
+    MODIFY_ADVANCEMENT_CLASS_LEVEL,    
+    MODIFY_ADVANCEMENT_CLASS_GOAL_EXP, 
 
     MODIFY_MAX
 };
@@ -169,22 +169,22 @@ const string ModifyType2String[] = {"BASIC_STR",
                                     "MODIFY_ELEMENTAL_EARTH",
                                     "MODIFY_ELEMENTAL_WIND",
 
-                                    "MODIFY_SKILL_EXP", // �����̾� ��ų ����ġ ����
+                                    "MODIFY_SKILL_EXP", 
 
                                     "MODIFY_PET_HP",
-                                    "MODIFY_PET_EXP", // �� ����
+                                    "MODIFY_PET_EXP", 
 
-                                    "MODIFY_LAST_TARGET", // ���� ������ ��� ����
+                                    "MODIFY_LAST_TARGET", 
                                     "MODIFY_UNIONID",
                                     "MODIFY_UNIONGRADE",
 
-                                    "MODIFY_ADVANCEMENT_CLASS_LEVEL",    // ���� ����
-                                    "MODIFY_ADVANCEMENT_CLASS_GOAL_EXP", // ���� ����ġ
+                                    "MODIFY_ADVANCEMENT_CLASS_LEVEL",    
+                                    "MODIFY_ADVANCEMENT_CLASS_GOAL_EXP", 
 
                                     "MAX"};
 
 //////////////////////////////////////////////////////////////////////////////
-// 2����Ʈ�� ����� �������� ���, �� ����ü�� ����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////////////
 typedef struct _SHORTDATA {
     BYTE type;
@@ -193,7 +193,7 @@ typedef struct _SHORTDATA {
 } SHORTDATA;
 
 //////////////////////////////////////////////////////////////////////////////
-// 4����Ʈ�� ����� �������� ���, �� ����ü�� ����Ѵ�.
+
 //////////////////////////////////////////////////////////////////////////////
 typedef struct _LONGDATA {
     BYTE type;
@@ -204,8 +204,8 @@ typedef struct _LONGDATA {
 
 //////////////////////////////////////////////////////////////////////////////
 // class ModifyInfo;
-// ���Ӽ������� Ŭ���̾�Ʈ�� �ڽ��� ������ �����͸�
-// �˷��ֱ� ���� ��ä ModifyInformation, SkillToObjectOK � �Ƿ��� ���ư���.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class ModifyInfo : public Packet {

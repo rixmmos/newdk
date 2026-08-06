@@ -121,7 +121,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static CGCrashReportPacketSize 를 정의해서 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return 19 + szWORD + 10 + szWORD + 100 + szWORD + 1024 + szWORD + 1024;
     }

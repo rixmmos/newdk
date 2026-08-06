@@ -11,15 +11,15 @@
 
 // include files
 #include "Client_PCH.h"
-#include "DatagramPacket.h"
-#include "PacketFactory.h"
+#include "../DatagramPacket.h"
+#include "../PacketFactory.h"
 
 
 //----------------------------------------------------------------------
 //
 // class RCPositionInfo;
 //
-// 내가 다른 클라이언트에게 말하는 패킷
+
 //
 //----------------------------------------------------------------------
 
@@ -28,10 +28,10 @@ class RCPositionInfo : public DatagramPacket {
 public :
 	RCPositionInfo();
 	
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( Datagram & iDatagram ) throw ( ProtocolException , Error );
 		    
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( Datagram & oDatagram ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -76,7 +76,7 @@ protected :
 
 	ZoneID_t	m_ZoneID;	
 
-	// 나타날 좌표의 대강의 위치
+	
 	Coord_t m_ZoneX;
 	Coord_t m_ZoneY;	
 };

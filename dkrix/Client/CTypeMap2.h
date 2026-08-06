@@ -1,11 +1,11 @@
 //----------------------------------------------------------------------
 // CTypeMap2.h
 //----------------------------------------------------------------------
-// DataType은 pointer type이어야 한다.
+
 //
-// fstream.h와 fstream의 충돌로 인해서..
-// 임시로...
-// fstream을 사용하지 않는 version이당. - -;
+
+
+
 //----------------------------------------------------------------------
 
 #ifndef __CTYPEMAP2_H__
@@ -16,7 +16,7 @@
 #include <map>
 
 //----------------------------------------------------------------------
-// CTypeMap2 (id, DataType*)의 map
+
 //----------------------------------------------------------------------
 template <class DataType>
 class CTypeMap2 : public std::map<unsigned int, DataType*> {
@@ -100,13 +100,13 @@ CTypeMap2<DataType>::AddData( unsigned int id, DataType* pData )
 
 	if (iData != end())
 	{
-		// 이미 있는 경우
-		// pData는 외부에서 지워줘야한다.
+		
+		
 		return false;
 	}
 
 	//------------------------------------------------------
-	// 없는 경우 --> 추가
+	
 	//------------------------------------------------------
 	insert(typename TYPE_MAP::value_type(id, pData));
 
@@ -124,11 +124,11 @@ CTypeMap2<DataType>::GetData( unsigned int id )
 
 	if (iData == end())
 	{
-		// 없는 경우 
+		
 		return NULL;
 	}
 
-	// 있는 경우
+	
 	return (*iData).second;
 }
 
@@ -143,11 +143,11 @@ CTypeMap2<DataType>::GetData( unsigned int id ) const
 
 	if (iData == end())
 	{
-		// 없는 경우 
+		
 		return NULL;
 	}
 
-	// 있는 경우
+	
 	return (*iData).second;
 }
 
@@ -162,11 +162,11 @@ CTypeMap2<DataType>::RemoveData( unsigned int id )
 
 	if (iData == end())
 	{
-		// 없는 경우 
+		
 		return false;
 	}
 
-	// 있으면 지워줘야 한다.
+	
 	delete (*iData).second;
 
 	TYPE_MAP::erase( iData );

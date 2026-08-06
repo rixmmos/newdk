@@ -10,6 +10,8 @@ Makefile
 
 # Build directory
 build/
+publish/
+test-install/
 
 # macOS
 .DS_Store

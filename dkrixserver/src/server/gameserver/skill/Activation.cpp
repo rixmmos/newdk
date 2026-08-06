@@ -13,7 +13,7 @@
 #include "Party.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Activation::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -49,18 +49,18 @@ void Activation::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEf
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToSelfOK1);
 
-            // 기술이 유지되는 시간은 숙련도에 따라서 달라진다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성해서 붙인다.
+            
             EffectActivation* pEffectActivation = new EffectActivation(pSlayer);
             pEffectActivation->setDeadline(output.Duration);
             pSlayer->addEffect(pEffectActivation);
             pSlayer->setFlag(Effect::EFFECT_CLASS_ACTIVATION);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1) * 2;
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToSelfOK1);
@@ -79,7 +79,7 @@ void Activation::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEf
 
             pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &_GCSkillToSelfOK2, pSlayer);
 
-            // 이펙트가 붙었다고 알려준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pSlayer->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_ACTIVATION);

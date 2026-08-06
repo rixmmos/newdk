@@ -39,7 +39,7 @@ throw ( ProtocolException , Error )
 		PopupErrorMessage( (ErrorID)pPacket->getErrorID() );
 	}
 
-	// 다시 UI를 기다리는 상태로 바꾼다.
+	
 	g_ModeNext = MODE_NEWUSER;
 
 #endif

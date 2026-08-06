@@ -124,7 +124,7 @@ void DarkLightInfoManager::load()
             pDIInfo->setDarkLevel(pResult->getInt(++i));
             pDIInfo->setLightLevel(pResult->getInt(++i));
 
-            // 월은 1-12 이지만, 시간은 0-23 이며, 분은 0, 10, 20, 30, 40, 50 이다.
+            
             int index = (month - 1) * (24 * 6) + (hour) * 6 + (minute / 10);
             Assert(m_DarkLightInfos[index] == NULL);
             m_DarkLightInfos[index] = pDIInfo;
@@ -134,7 +134,7 @@ void DarkLightInfoManager::load()
     }
     END_DB(pStmt)
 
-    // 지정되지 않은 빈칸은 이전값을 사용해서 복사한다.
+    
     Assert(m_DarkLightInfos[0] != NULL);
 
     for (uint i = 1; i < nDarkLightInfos; i++) {
@@ -185,12 +185,12 @@ const DarkLightInfo* DarkLightInfoManager::getCurrentDarkLightInfo(Zone* pZone) 
 {
     __BEGIN_TRY
 
-    // 존에 시간이 고정된 경우라면 적절한 DarkLight 정보를 리턴한다.
+    
     if (pZone != NULL && pZone->isTimeStop()) {
         return m_DarkLightInfos[DLIndexByTimeband[pZone->getTimeband()]];
     }
 
-    // 글로벌 타임 매니저로부터 게임 시간을 받아온다.
+    
     GameTime gametime = g_pTimeManager->getGameTime();
 
     return getDarkLightInfo(gametime.getMonth(), gametime.getHour(), gametime.getMinute());
@@ -203,12 +203,12 @@ DarkLightInfo* DarkLightInfoManager::getCurrentDarkLightInfo(Zone* pZone)
 {
     __BEGIN_TRY
 
-    // 존에 시간이 고정된 경우라면 적절한 DarkLight 정보를 리턴한다.
+    
     if (pZone != NULL && pZone->isTimeStop()) {
         return m_DarkLightInfos[DLIndexByTimeband[pZone->getTimeband()]];
     }
 
-    // 글로벌 타임 매니저로부터 게임 시간을 받아온다.
+    
     GameTime gametime = g_pTimeManager->getGameTime();
 
     return getDarkLightInfo(gametime.getMonth(), gametime.getHour(), gametime.getMinute());

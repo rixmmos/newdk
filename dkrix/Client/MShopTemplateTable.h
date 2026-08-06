@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // MShopTemplateTable.h
 //-----------------------------------------------------------------------------
-// ShopTemplateTable은 ShopTemplate의 array - map을 사용하자...
+
 //-----------------------------------------------------------------------------
 
 #ifndef __MSHOPTEMPLATE_H__
@@ -23,7 +23,7 @@ class MShopTemplate {
 	public :
 		//UINT				m_ID;
 
-		BYTE				Type;				// 상점 type
+		BYTE				Type;				
 
 		// item class
 		int					Class;

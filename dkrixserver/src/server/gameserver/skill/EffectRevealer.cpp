@@ -18,7 +18,7 @@ EffectRevealer::EffectRevealer(Creature* pCreature)
 {
     __BEGIN_TRY
 
-    // 디텍트 히든은 슬레이어만이 쓸 수 있다.
+    
     Assert(pCreature != NULL);
     Assert(pCreature->isSlayer());
 
@@ -57,17 +57,17 @@ void EffectRevealer::unaffect(Creature* pCreature)
     Assert(pCreature != NULL);
     Assert(pCreature->isSlayer());
 
-    // 플래그를 제거한다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_REVEALER);
 
-    // 마법의 힘으로 보고 있던 크리쳐들을 삭제한다.
+    
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
     pZone->updateMineScan(pCreature);
-    // 이제 hidden도 본다.
+    
     pZone->updateHiddenScan(pCreature);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_REVEALER);
@@ -130,7 +130,7 @@ bool EffectRevealer::canSeeHide(Creature* pTarget) const
 
         level = pMonster->getLevel();
     } else {
-        throw Error("뱀파이어나 몬스터가 아닌데 하이드하고 있다");
+        throw Error("    ");
     }
 
     if (m_SkillLevel >= 25 && m_SkillLevel > level)
@@ -180,7 +180,7 @@ bool EffectRevealer::canSeeInvisibility(Creature* pTarget) const
 
         level = pMonster->getLevel();
     } else {
-        throw Error("뱀파이어나 몬스터가 아닌데 인비지빌리티를 쓰고 있다.");
+        throw Error("     .");
     }
 
     if (m_SkillLevel >= 65 && (m_SkillLevel - 20) >= level)

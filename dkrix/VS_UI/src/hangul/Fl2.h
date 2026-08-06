@@ -20,7 +20,7 @@
 // NOTE: Do not include SP.h here as it defines a stub PrintInfo that conflicts
 // with the full definition below. Files that need SP.h should include it separately.
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 void	g_SetFL2Surface(LPDIRECTDRAWSURFACE7 surface);
 
 extern LPDIRECTDRAWSURFACE7	gpC_fl2_surface;

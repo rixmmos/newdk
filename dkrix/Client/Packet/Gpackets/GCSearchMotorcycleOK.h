@@ -1,8 +1,8 @@
 //--------------------------------------------------------------------------------
 // 
 // Filename    : GCSearchMotorcycleOK.h 
-// Written By  : 김성민
-// Description : 플레이어에게 서버 측의 상점 버전을 알려줄 때 쓰이는 패킷이다.
+
+
 // 
 //--------------------------------------------------------------------------------
 
@@ -10,8 +10,8 @@
 #define __GC_SEARCH_MOTORCYCLE_OK_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 
 //--------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCSearchMotorcycleOKPacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return szZoneID + szCoord*2; }
 
 };

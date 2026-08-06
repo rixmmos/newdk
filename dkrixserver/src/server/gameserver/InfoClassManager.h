@@ -54,11 +54,11 @@ public:
     string toString() const;
 
 protected:
-    uint m_InfoCount;        // #아이템정보
+    uint m_InfoCount;        
     ItemInfo** m_pItemInfos; // array of item info
 
-    int m_TotalRatio;       // item type들의 total Ratio
-    Price_t m_AveragePrice; // 이 item class의 모든 item 가격의 평균
+    int m_TotalRatio;       
+    Price_t m_AveragePrice; 
 };
 
 #endif

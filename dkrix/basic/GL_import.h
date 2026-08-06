@@ -28,6 +28,13 @@ DllImport void (*CkBltz)(const S_SURFACEINFO *,
 DllImport void	SetSurfaceInfo(S_SURFACEINFO *surface_info, const DDSURFACEDESC2 *p_ddsd);
 DllImport void	SetSurfaceInfo(S_SURFACEINFO *surface_info, const DDSURFACEDESC *p_ddsd);
 #endif
+static inline void SetSurfaceInfo(S_SURFACEINFO *surface_info, const S_SURFACEINFO *src_surface_info)
+{
+	if (surface_info != NULL && src_surface_info != NULL)
+	{
+		*surface_info = *src_surface_info;
+	}
+}
 DllImport void	SetSurfaceInfo(S_SURFACEINFO &surface_info, void *p_surface, int w, int h, int pitch=0);
 DllImport void	SetRect(S_RECT &rect, int x, int y, int w, int h);
 DllImport int	Get_ColorkeyColor(S_PICINFO *picinfo);
@@ -42,7 +49,7 @@ DllImport void	TransparentBlt16(S_SURFACEINFO *dest_surface_info,
 								S_SURFACEINFO *src_surface_info, 
 								S_RECT *dest_rect,
 								S_RECT *src_rect);
-DllImport int	getPixel16(S_SURFACEINFO *info, int x, int y); // utility���� ���!
+DllImport int	getPixel16(S_SURFACEINFO *info, int x, int y); 
 
 DllImport bool	TestTga(const char * filename);
 DllImport bool GetTgaPicInfo(const char * sz_filename, S_PICINFO &picinfo);

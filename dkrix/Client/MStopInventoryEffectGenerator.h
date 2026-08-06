@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopInventoryEffectGenerator.h
 //----------------------------------------------------------------------
-// Inventory의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPINVENTORYEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopInventoryEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_INVENTORY; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

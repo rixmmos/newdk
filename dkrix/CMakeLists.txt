@@ -13,6 +13,20 @@ project(DarkEdenClient VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Use a modern Windows SDK baseline so WinSDK declarations are available consistently.
+if(WIN32)
+	add_compile_definitions(
+		PLATFORM_WINDOWS
+		WINVER=0x0A00
+		_WIN32_WINNT=0x0A00
+		NTDDI_VERSION=0x0A000000
+	)
+endif()
+
+if(MSVC)
+	add_compile_options(/FS)
+endif()
+
 # Note: We do NOT define _DEBUG here because it conflicts with DebugInfo.h
 # Instead, rely on the new DebugLog.h system which is always available
 # Debug builds will have console output enabled via log_init() in GameInit.cpp
@@ -55,6 +69,10 @@ set(USE_SDL_BACKEND ON CACHE BOOL "Use SDL backend instead of native Windows API
 
 option(BUILD_ENGINE "Build new SDL-based engine" ON)
 
+if(WIN32)
+	set(BUILD_ENGINE OFF CACHE BOOL "Build new SDL-based engine" FORCE)
+endif()
+
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -91,6 +109,12 @@ if(BUILD_ENGINE OR USE_SDL_BACKEND OR NOT WIN32)
 		find_package(SDL2_image REQUIRED)
 		find_package(SDL2_ttf REQUIRED)
 	endif()
+endif()
+
+# Windows SDL executables that include <SDL.h> directly need SDL2main.
+set(SDL2_VIEWER_MAIN_LIB)
+if(WIN32)
+	set(SDL2_VIEWER_MAIN_LIB SDL2::SDL2main)
 endif()
 
 # Find JPEG library (needed for UtilityFunction.cpp)
@@ -156,7 +180,7 @@ if(BUILD_ENGINE)
 endif()
 
 # ============================================================
-# VS_UI Library - UI System (按需编译必要的 Client 文件)
+# VS_UI Library - UI System ( Client )
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
 	# VS_UI source files
@@ -166,22 +190,33 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	# Exclude Windows-specific files
-	if(NOT WIN32)
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*Imm.*")
+	if(WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WebBrowser.*")
+		if(USE_SDL_BACKEND)
+			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
+			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/Imm/CImm\\.cpp")
+		else()
+			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci_macOS\\.cpp")
+		endif()
+		if(USE_SDL_BACKEND)
+			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
+		endif()
+	endif()
+
+	if(NOT WIN32)
+		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*Imm.*")
 		# Exclude Windows-specific Korean input method files (except macOS stub)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/FL2\\.cpp")
-		# U_edit is now cross-platform (SDL-based), so don't exclude it
-		# Exclude problematic files in VS_UI root directory
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/MitemTableInit\\.cpp")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
-		# Note: u_window.cpp is now cross-platform compatible
 	endif()
 
-	# Client files that VS_UI depends on (按需编译)
+	# Exclude problematic VS_UI root files from the library baseline build
+	list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/DebugInfo\\.cpp")
+	list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/MitemTableInit\\.cpp")
+	list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/SXml\\.cpp")
+
+	# Client files that VS_UI depends on ()
 	set(VS_UI_CLIENT_SOURCES
 		# Core
 		Client/Client.cpp
@@ -266,12 +301,12 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/header
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/widget
 		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/hangul
+		${CMAKE_CURRENT_SOURCE_DIR}/VS_UI/src/Imm
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}
 	)
 
@@ -283,10 +318,13 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		framelib
 		TextSystem
 		SDL2::SDL2
-		SDL2::SDL2main
 		SDL2_image::SDL2_image
 		SDL2_ttf::SDL2_ttf
 	)
+
+	if(NOT WIN32)
+		target_link_libraries(VS_UI PUBLIC SDL2::SDL2main)
+	endif()
 
 	# Platform-specific definitions
 	if(NOT WIN32)
@@ -297,7 +335,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Define _LIB to match original VC6 build configuration
 	# This excludes test/debug code wrapped in #ifndef _LIB from library builds
-	target_compile_definitions(VS_UI PRIVATE _LIB)
+	target_compile_definitions(VS_UI PRIVATE _LIB USE_SDL_BACKEND SPRITELIB_BACKEND_SDL)
 
 	message(STATUS "VS_UI library will be built from ${VS_UI_SRC_SOURCES} VS_UI files + ${VS_UI_CLIENT_SOURCES} Client files")
 endif()
@@ -339,6 +377,7 @@ target_link_libraries(sprite_viewer PRIVATE
 	dxlib
 	basic
 	SDL2::SDL2
+	${SDL2_VIEWER_MAIN_LIB}
 )
 
 set_target_properties(sprite_viewer PROPERTIES
@@ -373,6 +412,7 @@ target_link_libraries(item_viewer PRIVATE
 	dxlib
 	basic
 	SDL2::SDL2
+	${SDL2_VIEWER_MAIN_LIB}
 )
 
 set_target_properties(item_viewer PROPERTIES
@@ -397,77 +437,80 @@ target_link_libraries(creature_viewer PRIVATE
 	dxlib
 	basic
 	SDL2::SDL2
+	${SDL2_VIEWER_MAIN_LIB}
 )
 
 set_target_properties(creature_viewer PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
-# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib)
-add_executable(map_viewer
-	tools/viewers/map_viewer/main.cpp
-	tools/viewers/map_viewer/zoneloader.cpp
-	Client/TileRenderer.cpp
-)
+if(NOT WIN32)
+	# Map Viewer - browse zone maps with pan/zoom (C++ version using Client/SpriteLib)
+	add_executable(map_viewer
+		tools/viewers/map_viewer/main.cpp
+		tools/viewers/map_viewer/zoneloader.cpp
+		Client/TileRenderer.cpp
+	)
 
-target_include_directories(map_viewer PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/Client
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
-	${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
-)
+	target_include_directories(map_viewer PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/Client
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
+	)
 
-target_link_libraries(map_viewer PRIVATE
-	sprite
-	SpriteLib
-	dxlib
-	basic
-	SDL2::SDL2
-)
+	target_link_libraries(map_viewer PRIVATE
+		sprite
+		SpriteLib
+		dxlib
+		basic
+		SDL2::SDL2
+		${SDL2_VIEWER_MAIN_LIB}
+	)
 
-set_target_properties(map_viewer PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
-
-# Effect Viewer - test and debug effect system
-add_executable(effect_viewer
-	tools/viewers/effect_viewer/main.cpp
-	tools/viewers/effect_viewer/EffectSpriteTypeTable.cpp
-	tools/viewers/effect_viewer/stubs.cpp
-	Client/MObject.cpp
-	Client/EffectResourceContainer.cpp
-	Client/MEffect.cpp
-)
-
-target_include_directories(effect_viewer PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/Client
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
-	${CMAKE_CURRENT_SOURCE_DIR}/basic
-)
-
-target_link_libraries(effect_viewer PRIVATE
-	sprite
-	SpriteLib
-	framelib
-	dxlib
-	basic
-	SDL2::SDL2
-)
-
-# Set output directory for effect_viewer
-# Use CMAKE_BINARY_DIR to avoid nesting (build/debug-asan/bin/)
-if(CMAKE_BUILD_TYPE STREQUAL "debug-asan")
-	set_target_properties(effect_viewer PROPERTIES
+	set_target_properties(map_viewer PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 	)
-else()
-	set_target_properties(effect_viewer PROPERTIES
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+
+	# Effect Viewer - test and debug effect system
+	add_executable(effect_viewer
+		tools/viewers/effect_viewer/main.cpp
+		tools/viewers/effect_viewer/EffectSpriteTypeTable.cpp
+		tools/viewers/effect_viewer/stubs.cpp
+		Client/MObject.cpp
+		Client/EffectResourceContainer.cpp
+		Client/MEffect.cpp
 	)
+
+	target_include_directories(effect_viewer PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/Client
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
+		${CMAKE_CURRENT_SOURCE_DIR}/basic
+	)
+
+	target_link_libraries(effect_viewer PRIVATE
+		sprite
+		SpriteLib
+		framelib
+		dxlib
+		basic
+		SDL2::SDL2
+		${SDL2_VIEWER_MAIN_LIB}
+	)
+
+	if(CMAKE_BUILD_TYPE STREQUAL "debug-asan")
+		set_target_properties(effect_viewer PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+		)
+	else()
+		set_target_properties(effect_viewer PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+		)
+	endif()
 endif()
 
 
@@ -518,6 +561,8 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/GamePacketFunctions.cpp
 		# Exclude ActionFunctions.cpp - functions now in PacketFunction.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/ActionFunctions.cpp
+		# Exclude legacy Client sprite implementation; SpriteLib already provides it
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/CSpritePal.cpp
 	)
 
 	# Note: Cpackets contains CG (Client to Game) handlers
@@ -573,13 +618,21 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		basic
 		framelib
 		VS_UI
+		basic
 		TextSystem
 		SDL2::SDL2
-		SDL2::SDL2main
 	)
 
-	# Link iconv library (not needed for Emscripten - has stub implementations)
-	if(NOT EMSCRIPTEN)
+	if(NOT WIN32)
+		target_link_libraries(DarkEden PRIVATE SDL2::SDL2main)
+	endif()
+
+	if(WIN32)
+		target_link_libraries(DarkEden PRIVATE ws2_32 netapi32 comctl32 wininet shlwapi)
+	endif()
+
+	# Link iconv only on platforms that actually use it.
+	if(NOT EMSCRIPTEN AND NOT WIN32)
 		target_link_libraries(DarkEden PRIVATE iconv)
 	endif()
 
@@ -599,7 +652,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 #		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
 #		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/ui/include
@@ -625,6 +677,10 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Platform-specific definitions
 	if(NOT WIN32)
 		target_compile_definitions(DarkEden PRIVATE PLATFORM_MACOS)
+	endif()
+
+	if(WIN32)
+		set_target_properties(DarkEden PROPERTIES WIN32_EXECUTABLE ON)
 	endif()
 
 	message(STATUS "DarkEden executable will be built from remaining Client files (VS_UI compiled separately)")

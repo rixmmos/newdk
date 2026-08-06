@@ -1,5 +1,5 @@
 # ============================================================================
-# LoginServer 可执行文件
+# LoginServer 
 # ============================================================================
 
 set(LOGINSERVER_SOURCES
@@ -19,10 +19,10 @@ set(LOGINSERVER_SOURCES
 
 add_executable(loginserver ${LOGINSERVER_SOURCES})
 
-# 编译定义
+
 target_compile_definitions(loginserver PRIVATE __LOGIN_SERVER__)
 
-# 包含目录
+
 target_include_directories(loginserver PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src/Core
@@ -31,7 +31,7 @@ target_include_directories(loginserver PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
 )
 
-# 链接库
+
 if(APPLE)
     set(EXTRA_LIBS z)
 elseif(UNIX)

@@ -36,7 +36,7 @@ void SGModifyGuildIntroOKHandler::execute(SGModifyGuildIntroOK* pPacket)
 
         Assert(pPacket != NULL);
 
-    // 길드를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
     try {
         Assert(pGuild != NULL);

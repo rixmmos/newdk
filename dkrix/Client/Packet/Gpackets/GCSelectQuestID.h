@@ -10,8 +10,8 @@
 #define __GC_SELECT_QUEST_ID_H__
 
 #include <list>
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 class PlayerCreature;
 const BYTE maxQuestNum = 255;

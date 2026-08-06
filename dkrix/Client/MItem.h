@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MItem.h
 //----------------------------------------------------------------------
-// 아이템..
+
 //----------------------------------------------------------------------
 /*
 
@@ -77,24 +77,24 @@ class MCreature;
 class MItem : public MObject, public CAnimationFrame {
 	public :
 		//----------------------------------------------------------------------
-		// Item이 장착되는 위치
+		
 		//----------------------------------------------------------------------
 		enum ITEM_GEAR_SLOT
 		{	
-			SLOT_HELM = 0,			// 모자
-			SLOT_NECKLACE,			// 목걸이
-			SLOT_COAT,				// 상의
-			SLOT_LEFTHAND,			// 왼손
-			SLOT_RIGHTHAND,			// 오른손
-			SLOT_TWOHAND,			// 양손
-			SLOT_BELT,				// 혁대
-			SLOT_BRACELET,			// 팔찌
-			SLOT_TROUSER,			// 하의
-			SLOT_RING,				// 반지
-			SLOT_SHOES,				// 신발
-			SLOT_GLOVE,				// 장갑
+			SLOT_HELM = 0,			
+			SLOT_NECKLACE,			
+			SLOT_COAT,				
+			SLOT_LEFTHAND,			
+			SLOT_RIGHTHAND,			
+			SLOT_TWOHAND,			
+			SLOT_BELT,				
+			SLOT_BRACELET,			
+			SLOT_TROUSER,			
+			SLOT_RING,				
+			SLOT_SHOES,				
+			SLOT_GLOVE,				
 			SLOT_PDA,				// PDA
-			SLOT_SHOULDER,			// 어깨
+			SLOT_SHOULDER,			
 
 			// vampire 
 			SLOT_VAMPIRE_RING,
@@ -104,32 +104,32 @@ class MItem : public MObject, public CAnimationFrame {
 			SLOT_VAMPIRE_EARRING,
 			SLOT_VAMPIRE_LEFTHAND,
 			SLOT_VAMPIRE_RIGHTHAND,
-			SLOT_VAMPIRE_TWOHAND,			// 양손
+			SLOT_VAMPIRE_TWOHAND,			
 			SLOT_VAMPIRE_AMULET,
-			SLOT_VAMPIRE_DERMIS,			// 문신
-			SLOT_VAMPIRE_PERSONA,			// 가면
+			SLOT_VAMPIRE_DERMIS,			
+			SLOT_VAMPIRE_PERSONA,			
 
 			// ousters
-			SLOT_OUSTERS_CIRCLET,			// 서클릿
-			SLOT_OUSTERS_COAT,				// 옷
-			SLOT_OUSTERS_LEFTHAND,			// 왼손
-			SLOT_OUSTERS_RIGHTHAND,			// 오른손
-			SLOT_OUSTERS_TWOHAND,			// 양손
-			SLOT_OUSTERS_BOOTS,				// 신발
-			SLOT_OUSTERS_ARMSBAND,			// 암스밴드
-			SLOT_OUSTERS_RING,				// 링
-			SLOT_OUSTERS_PENDENT,			// 목걸이
-			SLOT_OUSTERS_STONE,			// 정령석
-			SLOT_OUSTERS_FASCIA,			// 허리장식
-			SLOT_OUSTERS_MITTEN,			// 장갑
+			SLOT_OUSTERS_CIRCLET,			
+			SLOT_OUSTERS_COAT,				
+			SLOT_OUSTERS_LEFTHAND,			
+			SLOT_OUSTERS_RIGHTHAND,			
+			SLOT_OUSTERS_TWOHAND,			
+			SLOT_OUSTERS_BOOTS,				
+			SLOT_OUSTERS_ARMSBAND,			
+			SLOT_OUSTERS_RING,				
+			SLOT_OUSTERS_PENDENT,			
+			SLOT_OUSTERS_STONE,			
+			SLOT_OUSTERS_FASCIA,			
+			SLOT_OUSTERS_MITTEN,			
 
 
-			// 공통
-			SLOT_BLOOD_BIBLE,			 // 블러드 바이블
+			
+			SLOT_BLOOD_BIBLE,			 
 
-			MAX_SLOT,				// 최대값
+			MAX_SLOT,				
 
-			SLOT_NULL				// 없는 경우
+			SLOT_NULL				
 		};
 
 
@@ -138,7 +138,7 @@ class MItem : public MObject, public CAnimationFrame {
 		virtual ~MItem();
 
 		//-------------------------------------------------------
-		// Item의 class
+		
 		//-------------------------------------------------------
 		virtual ITEM_CLASS	GetItemClass() const				{ return ITEM_CLASS_NULL; }
 
@@ -186,44 +186,44 @@ class MItem : public MObject, public CAnimationFrame {
 		int					IsOustersItem() const			{ return ((*g_pItemTable)[GetItemClass()][m_ItemType].Race & FLAG_RACE_OUSTERS); }
 
 		//-------------------------------------------------------
-		// 기본 Item Color
+		
 		//-------------------------------------------------------
 		void				SetItemColorSet(WORD cs)		{ m_ItemColorSet = cs; }		
 		WORD				GetItemColorSet() const			{ return m_ItemColorSet; }		
 
 		//-------------------------------------------------------
-		// 속성
+		
 		//-------------------------------------------------------
-		// Container로 사용할 수 있는 Item인가?
+		
 		virtual bool		IsContainerItem() const		{ return false; }		
 
-		// 같은 Item끼리 쌓이는가?
+		
 		virtual bool		IsPileItem() const				{ return false; }
 
-		// 쌓이는거랑은 다르다. 개수만 바뀐다.
+		
 		virtual bool		IsChargeItem() const			{ return false; }
 
-		// 장착할 수 있는가?
+		
 		virtual bool		IsGearItem() const			{ return false; }
 
-		// 착용해서 그림이 바뀌는 Item인가?
+		
 		virtual bool		IsAddonItem() const			{ return false; }
 
-		// 기본 공격 무기인가?
+		
 		virtual bool		IsBasicWeapon() const		{ return false; }
 
-		// 총인가?
+		
 		virtual bool		IsGunItem() const			{ return false; }
 
-		// Inventory에 들어갈 수 있는 Item인가?
+		
 		virtual bool		IsInventoryItem() const		{ return true; }
 		
-		// QuickItem에 들어가는가?
-		// QuickItem은 기본적으로 사용가능한것들만 넣기 때문에 QuickItem이면 무조건 사용 가능하다.
+		
+		
 		virtual bool		IsQuickItem() const			{ return false; }
 
-		// 사용 가능한 아이템인가?
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+		
+	#ifdef __TEST_SUB_INVENTORY__   
 		virtual void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0)	{}
 	#else
 		virtual void		UseInventory()				{}
@@ -232,29 +232,29 @@ class MItem : public MObject, public CAnimationFrame {
 		virtual void		UseGear()					{}
 
 
-		// 다른 Item에 추가될 수 있는가?
+		
 		virtual bool		IsInsertToItem(const MItem* pItem) const;
 
-		// 장착할 수 있는 곳은?
+		
 		virtual ITEM_GEAR_SLOT	GetGearSlot() const				{ return SLOT_NULL; }
 
-		// 특정 부위에 장착할 수 있는가?
-		virtual bool		IsGearSlotHelm()	const			{ return false; }	// 모자
-		virtual bool		IsGearSlotNecklace() const		{ return false; }	// 목걸이
-		virtual bool		IsGearSlotCoat() const			{ return false; }	// 상의
-		virtual bool		IsGearSlotLeftHand() const		{ return false; }	// 왼손
-		virtual bool		IsGearSlotRightHand() const		{ return false; }	// 오른손
-		virtual bool		IsGearSlotTwoHand() const		{ return false; }	// 양손
-		virtual bool		IsGearSlotBelt() const			{ return false; }	// 혁대
-		virtual bool		IsGearSlotBracelet() const		{ return false; }	// 팔찌
-		virtual bool		IsGearSlotTrouser() const		{ return false; }	// 하의
-		virtual bool		IsGearSlotRing() const			{ return false; }	// 반지
-		virtual bool		IsGearSlotShoes() const			{ return false; }	// 신발		
-		virtual bool		IsGearSlotGlove() const			{ return false; }	// 장갑		
-		virtual bool		IsGearSlotCoreZap() const		{ return false; }	// 코어잽	
-		virtual bool		IsGearSlotBloodBible() const		{ return false; }	// 블러드 바이블
-		virtual bool		IsGearSlotPDA() const			{ return false; }	// PDA 슬롯
-		virtual bool		IsGearSlotShoulder() const		{ return false; }	// 어깨 슬롯
+		
+		virtual bool		IsGearSlotHelm()	const			{ return false; }	
+		virtual bool		IsGearSlotNecklace() const		{ return false; }	
+		virtual bool		IsGearSlotCoat() const			{ return false; }	
+		virtual bool		IsGearSlotLeftHand() const		{ return false; }	
+		virtual bool		IsGearSlotRightHand() const		{ return false; }	
+		virtual bool		IsGearSlotTwoHand() const		{ return false; }	
+		virtual bool		IsGearSlotBelt() const			{ return false; }	
+		virtual bool		IsGearSlotBracelet() const		{ return false; }	
+		virtual bool		IsGearSlotTrouser() const		{ return false; }	
+		virtual bool		IsGearSlotRing() const			{ return false; }	
+		virtual bool		IsGearSlotShoes() const			{ return false; }	
+		virtual bool		IsGearSlotGlove() const			{ return false; }	
+		virtual bool		IsGearSlotCoreZap() const		{ return false; }	
+		virtual bool		IsGearSlotBloodBible() const		{ return false; }	
+		virtual bool		IsGearSlotPDA() const			{ return false; }	
+		virtual bool		IsGearSlotShoulder() const		{ return false; }	
 
 		// vampire
 		virtual bool		IsGearSlotVampireEarRing() const	{ return false; }
@@ -264,35 +264,35 @@ class MItem : public MObject, public CAnimationFrame {
 		virtual bool		IsGearSlotVampireCoat() const	{ return false; }
 		virtual bool		IsGearSlotVampireLeftHand() const	{ return false; }
 		virtual bool		IsGearSlotVampireRightHand() const	{ return false; }
-		virtual bool		IsGearSlotVampireTwoHand() const	{ return false; }	// 양손
+		virtual bool		IsGearSlotVampireTwoHand() const	{ return false; }	
 		virtual bool		IsGearSlotVampireAmulet() const	{ return false; }
-		virtual bool		IsGearSlotVampireCoreZap() const		{ return false; }	// 코어잽	
-		virtual bool		IsGearSlotVampireBloodBible() const		{ return false; }	// 블러드 바이블
-		virtual bool		IsGearSlotVampireDermis() const		{ return false; }	// 문신
-		virtual bool		IsGearSlotVampirePersona() const		{ return false; }	// 페르소나
+		virtual bool		IsGearSlotVampireCoreZap() const		{ return false; }	
+		virtual bool		IsGearSlotVampireBloodBible() const		{ return false; }	
+		virtual bool		IsGearSlotVampireDermis() const		{ return false; }	
+		virtual bool		IsGearSlotVampirePersona() const		{ return false; }	
 
 		// ousters
 		virtual bool		IsGearSlotOustersCirclet() const		{ return false; }
 		virtual bool		IsGearSlotOustersCoat() const			{ return false; }
 		virtual bool		IsGearSlotOustersLeftHand() const		{ return false; }
 		virtual bool		IsGearSlotOustersRightHand() const		{ return false; }
-		virtual bool		IsGearSlotOustersTwoHand() const		{ return false; }	// 양손
+		virtual bool		IsGearSlotOustersTwoHand() const		{ return false; }	
 		virtual bool		IsGearSlotOustersBoots() const			{ return false; }
 		virtual bool		IsGearSlotOustersArmsBand() const		{ return false; }
 		virtual bool		IsGearSlotOustersRing() const			{ return false; }
 		virtual bool		IsGearSlotOustersPendent() const		{ return false; }
 		virtual bool		IsGearSlotOustersStone() const			{ return false; }
-		virtual bool		IsGearSlotOustersCoreZap() const		{ return false; }	// 코어잽	
-		virtual bool		IsGearSlotOustersBloodBible() const		{ return false; }	// 블러드 바이블
-		virtual bool		IsGearSlotOustersFascia() const		{ return false; }	// 허리장식
-		virtual bool		IsGearSlotOustersMitten() const		{ return false; }	// 장갑
+		virtual bool		IsGearSlotOustersCoreZap() const		{ return false; }	
+		virtual bool		IsGearSlotOustersBloodBible() const		{ return false; }	
+		virtual bool		IsGearSlotOustersFascia() const		{ return false; }	
+		virtual bool		IsGearSlotOustersMitten() const		{ return false; }	
 
 		// 2005, 1, 3, sobeit add start
-		virtual bool		IsDurationAlwaysOkay() const		{ return false; }	// 내구 체크 안하는 아이템
+		virtual bool		IsDurationAlwaysOkay() const		{ return false; }	
 		// 2005, 1, 3, sobeit add end
 		
 		//-------------------------------------------------------
-		// 아이템 이름 : 한글 / 영어?
+		
 		//-------------------------------------------------------
 		static bool			IsUseKorean()	{ return s_bUseKorean; }
 		static bool			IsUseEnglish()	{ return !s_bUseKorean; }
@@ -300,7 +300,7 @@ class MItem : public MObject, public CAnimationFrame {
 		static void			UseEnglish()	{ s_bUseKorean = false; }
 
 		//---------------------------------------------------
-		// class마다 고정된 정보
+		
 		//---------------------------------------------------
 		const char*				GetName();
 		const char*				GetEName() const;
@@ -311,31 +311,31 @@ class MItem : public MObject, public CAnimationFrame {
 		BYTE					GetGridHeight() const;
 
 		// FrameID
-		TYPE_FRAMEID			GetTileFrameID() const;			// Tile에서의 FrameID
-		TYPE_FRAMEID			GetInventoryFrameID() const;	// Inventory에서의 Frame ID
-		TYPE_FRAMEID			GetGearFrameID() const;			// Gear에서의 Frame ID
+		TYPE_FRAMEID			GetTileFrameID() const;			
+		TYPE_FRAMEID			GetInventoryFrameID() const;	
+		TYPE_FRAMEID			GetGearFrameID() const;			
 		TYPE_FRAMEID			GetAddonMaleFrameID() const;
 		TYPE_FRAMEID			GetAddonFemaleFrameID() const;
-		TYPE_FRAMEID			GetDropFrameID() const;			// 바닥에 떨어지는 Item
+		TYPE_FRAMEID			GetDropFrameID() const;			
 
 		// Sound ID
-		TYPE_SOUNDID			GetUseSoundID() const;			// Item 사용 SoundID			
-		TYPE_SOUNDID			GetTileSoundID() const;			// Item 줍기 SoundID
-		TYPE_SOUNDID			GetInventorySoundID() const;	// Inventory에서의 Sound
-		TYPE_SOUNDID			GetGearSoundID() const;			// Gear에서의 Sound	
+		TYPE_SOUNDID			GetUseSoundID() const;			
+		TYPE_SOUNDID			GetTileSoundID() const;			
+		TYPE_SOUNDID			GetInventorySoundID() const;	
+		TYPE_SOUNDID			GetGearSoundID() const;			
 
 		// addon slot
 		virtual ADDON			GetAddonSlot() const	{ return ADDON_NULL; }
 
 		//---------------------------------------------------
-		// 성별
+		
 		//---------------------------------------------------
 		bool					IsGenderForMale() const;
 		bool					IsGenderForFemale() const;
 		bool					IsGenderForAll() const;
 
 		//---------------------------------------------------
-		// 필요능력
+		
 		//---------------------------------------------------
 		BYTE					GetRequireSTR()	const;
 		BYTE					GetRequireDEX()	const;
@@ -344,12 +344,12 @@ class MItem : public MObject, public CAnimationFrame {
 		WORD					GetRequireSUM() const;		
 
 		//---------------------------------------------------
-		// 장착했을 때 바뀌는.. BasicActionInfo
+		
 		//---------------------------------------------------
 		TYPE_ACTIONINFO			GetUseActionInfo() const;
 
 		//---------------------------------------------------
-		// Option에 따른 정보
+		
 		//---------------------------------------------------
 		BYTE				GetItemOptionPart(int OptionNum = 0) const;
 		const char*			GetItemOptionName(int OptionNum = 0) const;
@@ -365,50 +365,50 @@ class MItem : public MObject, public CAnimationFrame {
 		int					GetItemOptionRequireSUM() const;
 
 		//---------------------------------------------------
-		// 세부 정보
+		
 		//---------------------------------------------------
-		// Inventory에서의 좌표
+		
 		void					SetGridXY(BYTE x, BYTE y)	{ m_GridX=x; m_GridY=y; }
 		BYTE					GetGridX() const			{ return m_GridX; }
 		BYTE					GetGridY() const			{ return m_GridY; }		
 
-		// 어떤(?) Slot에서의 좌표 (m_GridX를 이용한다. 관계없다. - -;;)
+		
 		void					SetItemSlot(BYTE n)		{ m_GridX = n; }
 		BYTE					GetItemSlot() const		{ return m_GridX; }
 		
-		// 내구성(현재)
+		
 		TYPE_ITEM_DURATION		GetCurrentDurability() const				{ return m_CurrentDurability; }
 		virtual void			SetCurrentDurability(TYPE_ITEM_DURATION d)	{ m_CurrentDurability = d; }
 
-		// 개수( 돈, 쌓인 개수)
+		
 		virtual TYPE_ITEM_NUMBER	GetNumber() const					{ return m_Number; }
 		virtual void				SetNumber(TYPE_ITEM_NUMBER n)		{ m_Number = n; }
 
-		// 최대 개수
+		
 		virtual TYPE_ITEM_NUMBER	GetMaxNumber() const				{ return 1; }
 
 		
 		//---------------------------------------------------
-		// Value들..
+		
 		//---------------------------------------------------		
-		virtual int		GetMaxDurability() const	{ return -1; }	// 내구성
-		virtual int		GetCarryingCapacity() const	{ return -1; }	// 운반 가능 무게
-		virtual int		GetProtectionValue() const	{ return -1; }	// 방어력
-		virtual int		GetDefenseValue() const		{ return -1; }	// 방어력
-		virtual int		GetPocketNumber() const		{ return -1; }	// 포켓수
-		virtual int		GetMinDamage() const		{ return -1; }	// 최소 공격력
-		virtual int		GetMaxDamage() const		{ return -1; }	// 최대 공격력
-		virtual int		GetHealPoint() const		{ return -1; }	// HP수치
-		virtual int		GetManaPoint() const		{ return -1; }	// MP수치
-		virtual ITEM_CLASS	GetGunClass() const		{ return ITEM_CLASS_NULL; }	// 총의 종류
-		virtual int		GetMagazineSize() const		{ return -1; }	// 탄창 수
-		virtual int		GetReach() const			{ return  1; }	// 사정거리
+		virtual int		GetMaxDurability() const	{ return -1; }	
+		virtual int		GetCarryingCapacity() const	{ return -1; }	
+		virtual int		GetProtectionValue() const	{ return -1; }	
+		virtual int		GetDefenseValue() const		{ return -1; }	
+		virtual int		GetPocketNumber() const		{ return -1; }	
+		virtual int		GetMinDamage() const		{ return -1; }	
+		virtual int		GetMaxDamage() const		{ return -1; }	
+		virtual int		GetHealPoint() const		{ return -1; }	
+		virtual int		GetManaPoint() const		{ return -1; }	
+		virtual ITEM_CLASS	GetGunClass() const		{ return ITEM_CLASS_NULL; }	
+		virtual int		GetMagazineSize() const		{ return -1; }	
+		virtual int		GetReach() const			{ return  1; }	
 		virtual int		GetToHit() const			{ return -1; }	// ToHit
-		virtual int		GetCriticalHit() const		{ return -1; }	// 크리티컬힛 확률
-		virtual int		GetLucky() const			{ return -9999; }	// 럭키!
+		virtual int		GetCriticalHit() const		{ return -1; }	
+		virtual int		GetLucky() const			{ return -9999; }	
 
 		//---------------------------------------------------
-		// Item떨어뜨리기..
+		
 		//---------------------------------------------------
 		void		SetDropping();
 		BOOL		IsDropping() const		{ return m_bDropping; }
@@ -423,14 +423,14 @@ class MItem : public MObject, public CAnimationFrame {
 		void		UnSetIdentified()		{ m_bIdentified = FALSE; }
 
 		//-----------------------------------------------
-		// AffectStatus - 수치 적용되는가?
+		
 		//-----------------------------------------------
 		bool	IsAffectStatus() const		{ return m_bAffectStatus; }
 		void	SetAffectStatus() 			{ m_bAffectStatus = true; }
 		void	UnSetAffectStatus()			{ m_bAffectStatus = false; }
 
 		//---------------------------------------------------
-		// Trade - 교환할려고 선택한 Item인가?
+		
 		//---------------------------------------------------
 		BOOL		IsTrade() const			{ return m_bTrade; }
 		void		SetTrade()				{ m_bTrade = TRUE; }
@@ -439,7 +439,7 @@ class MItem : public MObject, public CAnimationFrame {
 		//---------------------------------------------------
 		// Silver
 		//---------------------------------------------------
-		int			GetSilverMax() const	{ return (*g_pItemTable)[GetItemClass()][m_ItemType].SilverMax; }	// Silver coating최대값
+		int			GetSilverMax() const	{ return (*g_pItemTable)[GetItemClass()][m_ItemType].SilverMax; }	
 		int			GetSilver() const		{ return m_Silver; }
 		virtual void	SetSilver(int s)		{ m_Silver = s; }
 
@@ -463,7 +463,7 @@ class MItem : public MObject, public CAnimationFrame {
 		virtual void	SetEnchantLevel(WORD s)		{ m_EnchantLevel = s; }
 
 		//-------------------------------------------------------
-		// 이름 
+		
 		//-------------------------------------------------------
 		void		SetName(const char* pName);
 
@@ -485,49 +485,49 @@ class MItem : public MObject, public CAnimationFrame {
 		//void	LoadFromFile(std::ifstream& file);
 
 	public :		
-		// NewItem()에 대한 functions pointer
+		
 		typedef MItem* (*FUNCTION_NEWITEMCLASS)();
 
 		//-------------------------------------------------------
-		// 원하는 class의 Item의 객체를 생성한다.
+		
 		//-------------------------------------------------------
 		static MItem*		NewItem(ITEM_CLASS itemClass);
 
-		// 각 class별로 NewItem()에 대한 function pointer
+		
 		static FUNCTION_NEWITEMCLASS		s_NewItemClassTable[MAX_ITEM_CLASS];
 
 	
 	//-------------------------------------------------------
 	//
-	//			하나의 Item instance에 대한 정보
+	
 	//
 	//-------------------------------------------------------
 	protected :				
-		// Item의 종류에 대한 ID
+		
 		TYPE_ITEMTYPE			m_ItemType;	
 
-		// Item의 option
+		
 		std::list<TYPE_ITEM_OPTION>		m_ItemOptionList;
 
-		// 기본 Color
+		
 		WORD					m_ItemColorSet;
 		
-		// Inventory에서의 좌표
+		
 		BYTE					m_GridX;
 		BYTE					m_GridY;
 
-		// 세부 정보
+		
 		TYPE_ITEM_DURATION		m_CurrentDurability;		
 
-		// 개수 (돈, 쌓인 개수)
+		
 		TYPE_ITEM_NUMBER		m_Number;
 
 		//---------------------------------------------------
 		// drop
 		//---------------------------------------------------
-		BOOL					m_bDropping;					// 떨어지고 있는 중
-		int						m_DropCount;					// 현재 count
-		static int				s_DropHeight[MAX_DROP_COUNT];	// Drop 높이
+		BOOL					m_bDropping;					
+		int						m_DropCount;					
+		static int				s_DropHeight[MAX_DROP_COUNT];	
 
 		//---------------------------------------------------
 		// identified
@@ -535,12 +535,12 @@ class MItem : public MObject, public CAnimationFrame {
 		BOOL					m_bIdentified;
 
 		//---------------------------------------------------
-		// item입은 상태가 모두 제대로 적용됐는가?
+		
 		//---------------------------------------------------
 		bool					m_bAffectStatus;	
 
 		//---------------------------------------------------
-		// 교환할 item인가?
+		
 		//---------------------------------------------------
 		BOOL					m_bTrade;
 
@@ -565,15 +565,15 @@ class MItem : public MObject, public CAnimationFrame {
 		int						m_EnchantLevel;		
 		
 		//---------------------------------------------------
-		// item 이름
+		
 		//---------------------------------------------------
 		char*					m_pName;
 
-		// Item이름에 한글을 사용하는가?
+		
 		static bool				s_bUseKorean;
 		
 		//---------------------------------------------------
-		// 아이템이 퀘스트 아이템인가? (Time Manager에 등록되지 않았을경우..
+		
 		//---------------------------------------------------
 		bool					m_Quest;
 		bool					m_persnal;
@@ -584,7 +584,7 @@ class MItem : public MObject, public CAnimationFrame {
 
 //----------------------------------------------------------------------
 //
-//          Gear에 사용하는 Item인 경우.. 착용할 수 있다.
+
 //
 //----------------------------------------------------------------------
 class MGearItem : public MItem {
@@ -595,15 +595,15 @@ class MGearItem : public MItem {
 	public :
 		bool			IsGearItem() const			{ return true; }
 
-		// 값
-		virtual int	GetMaxDurability() const;//	{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value1; }	// 내구성
-		virtual int	GetProtectionValue() const	{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value2; }	// 방어력
+		
+		virtual int	GetMaxDurability() const;
+		virtual int	GetProtectionValue() const	{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value2; }	
 		virtual int	GetDefenseValue() const		{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value6; }	// def
 };
 
 //----------------------------------------------------------------------
 //
-//               Pile(쌓이는) Item인 경우..
+
 //
 //----------------------------------------------------------------------
 class MPileItem : public MItem {
@@ -618,12 +618,12 @@ class MPileItem : public MItem {
 };
 
 //-------------------------------------------------------
-// MUsePotionItem - 포션 아이템은 기본적으로 같은 루틴이라 검사 조건을 제외하고는 상속받아서 으쌰으쌰
+
 //-------------------------------------------------------
 class MUsePotionItem : public MPileItem
 {
 public:
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		virtual void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		virtual void	UseInventory();
@@ -684,7 +684,7 @@ class MBelt : public MArmorItem2, public MSlotItemManager {
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_BELT; }
 
 		//------------------------------------------------
-		// ItemType설정
+		
 		//------------------------------------------------
 		void				SetItemType(TYPE_ITEMTYPE type);
 
@@ -698,19 +698,19 @@ class MBelt : public MArmorItem2, public MSlotItemManager {
 		//				SlotItemManager
 		//
 		//------------------------------------------------
-		// AddItem : slot(n)에 pItem을 추가한다.
+		
 		//------------------------------------------------
 		bool			AddItem(MItem* pItem);
 		bool			AddItem(MItem* pItem, BYTE n);
 		
 		//------------------------------------------------
-		// ReplaceItem : pItem을 추가하고 딴게 있다면 Item교환
+		
 		//------------------------------------------------
 		bool			ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem);	
 
 		//------------------------------------------------
-		// Can ReplaceItem : n slot에 pItem을 추가가능한가? 
-		// pOldItem에는 이전에 있던 것..
+		
+		
 		//------------------------------------------------
 		bool			CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem);
 
@@ -719,8 +719,8 @@ class MBelt : public MArmorItem2, public MSlotItemManager {
 		//------------------------------------------------
 		bool			FindSlotToAddItem(MItem* pItem, int &slot) const;
 
-		// 값
-		virtual int	GetPocketNumber() const		{ return (*g_pItemTable)[ITEM_CLASS_BELT][m_ItemType].Value3; }	// 포켓수		
+		
+		virtual int	GetPocketNumber() const		{ return (*g_pItemTable)[ITEM_CLASS_BELT][m_ItemType].Value3; }	
 
 		static MItem*	NewItem()				{ return new MBelt; }
 };
@@ -742,15 +742,15 @@ class MCorpse : public MItem, public MGridItemManager  {
 
 		static MItem*	NewItem()				{ return new MCorpse; }
 
-		// 캐릭터 관련
+		
 		//----------------------------------------------------------
-		// 탄창
+		
 		//----------------------------------------------------------
 		MCreature*		GetCreature() const			{ return m_pCreature; }	
 		MCreature*		SetCreature(MCreature* pCreature)	{ MCreature* pTemp=m_pCreature; m_pCreature=pCreature; return pTemp; }
 
 	public :
-		// 시체의 원래 캐릭터
+		
 		MCreature*		m_pCreature;
 };
 
@@ -765,17 +765,17 @@ class MPotion : public MUsePotionItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_POTION; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// quick item
 		bool		IsQuickItem() const			{ return true; }
 
-		// heal 되는 수치
-		int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_POTION][m_ItemType].Value1; }	// HP수치
 		
-		// mana 되는 수치
-		int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_POTION][m_ItemType].Value2; }	// MP수치
+		int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_POTION][m_ItemType].Value1; }	
+		
+		
+		int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_POTION][m_ItemType].Value2; }	
 
 		// use item
 		void	UseQuickItem();
@@ -794,11 +794,11 @@ class MWater : public MPileItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_WATER; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
-		// 사용 가능한 아이템이다.
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+		
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -818,12 +818,12 @@ class MHolyWater : public MPileItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_HOLYWATER; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// damage
-		virtual int	GetMinDamage() const	{ return (*g_pItemTable)[ITEM_CLASS_HOLYWATER][m_ItemType].Value1; }	// 최소 공격력
-		virtual int	GetMaxDamage() const	{ return (*g_pItemTable)[ITEM_CLASS_HOLYWATER][m_ItemType].Value2; }	// 최대 공격력	
+		virtual int	GetMinDamage() const	{ return (*g_pItemTable)[ITEM_CLASS_HOLYWATER][m_ItemType].Value1; }	
+		virtual int	GetMaxDamage() const	{ return (*g_pItemTable)[ITEM_CLASS_HOLYWATER][m_ItemType].Value2; }	
 
 		static MItem*	NewItem()	{ return new MHolyWater; }
 };
@@ -839,26 +839,26 @@ class MMagazine : public MPileItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_MAGAZINE; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// quick item
 		bool		IsQuickItem() const			{ return true; }
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
 	#endif
 		void		UseQuickItem();
 
-		// 다른 Item에 추가될 수 있는가?
+		
 		bool		IsInsertToItem(const MItem* pItem) const;
 		
-		// 탄창 수
-		ITEM_CLASS	GetGunClass() const		{ return (ITEM_CLASS)(*g_pItemTable)[ITEM_CLASS_MAGAZINE][m_ItemType].Value1; }	// 총의 종류
-		virtual int	GetMagazineSize() const	{ return (*g_pItemTable)[ITEM_CLASS_MAGAZINE][m_ItemType].Value2; }	// 탄창수
+		
+		ITEM_CLASS	GetGunClass() const		{ return (ITEM_CLASS)(*g_pItemTable)[ITEM_CLASS_MAGAZINE][m_ItemType].Value1; }	
+		virtual int	GetMagazineSize() const	{ return (*g_pItemTable)[ITEM_CLASS_MAGAZINE][m_ItemType].Value2; }	
 
 		static MItem*	NewItem()	{ return new MMagazine; }
 };
@@ -983,9 +983,9 @@ class MWeaponItem : public MGearItem
 
 		bool		IsBasicWeapon() const		{ return true; }
 		
-		int			GetMinDamage() const;//		{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value3; }	// 최소 공격력
-		int			GetMaxDamage() const;//		{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value4; }	// 최대 공격력		
-		int			GetToHit() const;//			{ return (*g_pItemTable)[GetItemClass()][m_ItemType].ToHit; }		// 최대 공격력		
+		int			GetMinDamage() const;
+		int			GetMaxDamage() const;
+		int			GetToHit() const;
 		int			GetCriticalHit() const;//		{ return (*g_pItemTable)[GetItemClass()][m_ItemType].CriticalHit; }
 
 };
@@ -1073,8 +1073,8 @@ class MCross : public MWeaponItem {
 		bool		IsAddonItem() const				{ return true; }
 		ADDON		GetAddonSlot() const			{ return ADDON_RIGHTHAND; }
 
-		// 값
-		virtual int	GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_CROSS][m_ItemType].Value5; }	// MP수치
+		
+		virtual int	GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_CROSS][m_ItemType].Value5; }	
 		
 		static MItem*	NewItem()	{ return new MCross; }
 };
@@ -1098,8 +1098,8 @@ class MMace : public MWeaponItem {
 		bool		IsAddonItem() const				{ return true; }
 		ADDON		GetAddonSlot() const			{ return ADDON_RIGHTHAND; }
 
-		// 값		
-		virtual int	GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_MACE][m_ItemType].Value5; }	// MP수치
+		
+		virtual int	GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_MACE][m_ItemType].Value5; }	
 		
 		static MItem*	NewItem()	{ return new MMace; }
 };
@@ -1152,17 +1152,17 @@ class MGunItem : public MWeaponItem {
 		~MGunItem() { if (m_pMagazine!=NULL) delete m_pMagazine; }
 
 	public :
-		bool			IsGunItem() const				{ return true; }	// 총인가?
+		bool			IsGunItem() const				{ return true; }	
 
 		bool			IsAddonItem() const				{ return true; }
 		ADDON			GetAddonSlot() const			{ return ADDON_RIGHTHAND; }
 
-		// 값		
-		virtual int	GetReach() const			{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value5; }	// MP수치
-		virtual int	GetMagazineSize() const		{ return (m_pMagazine==NULL)?0:m_pMagazine->GetNumber(); }	// 탄창 수
+		
+		virtual int	GetReach() const			{ return (*g_pItemTable)[GetItemClass()][m_ItemType].Value5; }	
+		virtual int	GetMagazineSize() const		{ return (m_pMagazine==NULL)?0:m_pMagazine->GetNumber(); }	
 		
 		//----------------------------------------------------------
-		// 탄창
+		
 		//----------------------------------------------------------
 		MMagazine*		GetMagazine() const					{ return m_pMagazine; }
 		MMagazine*		RemoveMagazine()					{ MMagazine* pTemp=m_pMagazine; m_pMagazine=NULL; return pTemp; }
@@ -1255,7 +1255,7 @@ class MItemETC : public MPileItem {
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1282,9 +1282,9 @@ class MMotorcycle : public MItem, public MGridItemManager  {
 
 		bool			IsAddonItem() const				{ return true; }
 		ADDON			GetAddonSlot() const			{ return ADDON_MOTOR; }
-		// 값
-		virtual int	GetMaxDurability() const;//	{ return (*g_pItemTable)[ITEM_CLASS_MOTORCYCLE][m_ItemType].Value1; }	// 내구성
-		virtual int	GetCarryingCapacity() const	{ return (*g_pItemTable)[ITEM_CLASS_MOTORCYCLE][m_ItemType].Value2; }	// 운반가능무게
+		
+		virtual int	GetMaxDurability() const;
+		virtual int	GetCarryingCapacity() const	{ return (*g_pItemTable)[ITEM_CLASS_MOTORCYCLE][m_ItemType].Value2; }	
 		
 		static MItem*	NewItem()	{ return new MMotorcycle; }
 };
@@ -1301,7 +1301,7 @@ class MKey : public MItem {
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_KEY; }
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1335,12 +1335,12 @@ class MBombMaterial : public MPileItem {
 		~MBombMaterial() {}
 
 	public :
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_BOMB_MATERIAL; }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1379,7 +1379,7 @@ class MMoney : public MPileItem {
 		static MItem*	NewItem()	{ return new MMoney; }
 
 		//yckou
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1400,9 +1400,9 @@ class MBomb : public MPileItem {
 
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
-		// 값
-		int		GetMinDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_BOMB][m_ItemType].Value1; }	// 최소 공격력
-		int		GetMaxDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_BOMB][m_ItemType].Value2; }	// 최대 공격력
+		
+		int		GetMinDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_BOMB][m_ItemType].Value1; }	
+		int		GetMaxDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_BOMB][m_ItemType].Value2; }	
 
 		static MItem*	NewItem()	{ return new MBomb; }
 };
@@ -1420,17 +1420,17 @@ class MMine : public MPileItem {
 
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
-		// 값
-		int		GetMinDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_MINE][m_ItemType].Value1; }	// 최소 공격력
-		int		GetMaxDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_MINE][m_ItemType].Value2; }	// 최대 공격력
+		
+		int		GetMinDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_MINE][m_ItemType].Value1; }	
+		int		GetMaxDamage() const		{ return (*g_pItemTable)[ITEM_CLASS_MINE][m_ItemType].Value2; }	
 
-		// 설치되었나?
+		
 		bool	IsInstalled() const			{ return m_bInstalled; }
 		void	SetInstalled() 				{ m_bInstalled = true; }
 		void	UnSetInstalled() 			{ m_bInstalled = false; }
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1560,11 +1560,11 @@ class MSkull : public MPileItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_SKULL; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1574,7 +1574,7 @@ class MSkull : public MPileItem {
 };
 
 //----------------------------------------------------------------------
-// Serum - 혈청
+
 //----------------------------------------------------------------------
 class MSerum : public MUsePotionItem {
 	public :
@@ -1584,11 +1584,11 @@ class MSerum : public MUsePotionItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_SERUM; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 		
-		// heal 되는 수치
-		int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_SERUM][m_ItemType].Value1; }	// HP수치	
+		
+		int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_SERUM][m_ItemType].Value1; }	
 
 		static MItem*	NewItem()	{ return new MSerum; }
 };
@@ -1604,11 +1604,11 @@ class MVampireETC : public MPileItem {
 	public :
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_VAMPIRE_ETC; }
 
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1638,7 +1638,7 @@ class MSlayerPortalItem : public MItem {
 		void				SetEnchantLevel(WORD s);
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1657,7 +1657,7 @@ class MVampirePortalItem : public MItem {
 
 		ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_VAMPIRE_PORTAL_ITEM; }
 		
-		// 쌓이는 최대 개수
+		
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		TYPE_ITEM_NUMBER	GetNumber() const					{ return m_Number; }
@@ -1665,20 +1665,20 @@ class MVampirePortalItem : public MItem {
 
 		bool				IsChargeItem() const				{ return true; }
 
-		// 목표 zone에 대한 정보
+		
 		bool				IsMarked() const;
 		void				SetZone(int zoneID, TYPE_SECTORPOSITION x, TYPE_SECTORPOSITION y);
 		int					GetZoneID() const	{ return m_ZoneID; }
 		TYPE_SECTORPOSITION	GetZoneX() const	{ return m_ZoneX; }
 		TYPE_SECTORPOSITION	GetZoneY() const	{ return m_ZoneY; }
 
-		// zone정보 설정한다. - -;;
+		
 		void				SetSilver(int s);
 		void				SetCurrentDurability(TYPE_ITEM_DURATION d);
 		void				SetEnchantLevel(WORD s);
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1702,7 +1702,7 @@ class MEventGiftBoxItem : public MItem {
 
 		ITEM_CLASS	GetItemClass() const			{ return ITEM_CLASS_EVENT_GIFT_BOX; }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1723,7 +1723,7 @@ class MEventStarItem : public MPileItem {
 
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1764,7 +1764,7 @@ class MVampireAmulet : public MAccessoryItem {
 
 		ITEM_GEAR_SLOT	GetGearSlot() const				{ return SLOT_VAMPIRE_AMULET; }
 		bool		IsGearSlotVampireAmulet() const			{ return true; }
-		bool		IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsDurationAlwaysOkay() const		{ return true; }	
 		static MItem*	NewItem()	{ return new MVampireAmulet; }
 };
 
@@ -1791,7 +1791,7 @@ class MEventTreeItem : public MItem {
 
 		ITEM_CLASS	GetItemClass() const			{ return ITEM_CLASS_EVENT_TREE; }
 
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1813,7 +1813,7 @@ class MEventEtcItem : public MPileItem {
 		TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 		// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1866,7 +1866,7 @@ class MCoupleRing : public MRing {
 
 		// use item
 		void	UseGear();
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 
 		static MItem*	NewItem()	{ return new MCoupleRing; }
 };
@@ -1884,7 +1884,7 @@ class MVampireCoupleRing : public MVampireRing {
 		
 		// use item
 		void	UseGear();
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 		static MItem*	NewItem()	{ return new MVampireCoupleRing; }
 };
 
@@ -1907,7 +1907,7 @@ public :
 	ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_DYE_POTION; }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1939,7 +1939,7 @@ public :
 	TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -1971,18 +1971,18 @@ public :
 	//				SlotItemManager
 	//
 	//------------------------------------------------
-	// AddItem : slot(n)에 pItem을 추가한다.
+	
 	//------------------------------------------------
 	bool			AddItem(MItem* pItem);
 	bool			AddItem(MItem* pItem, BYTE n);
 	
 	//------------------------------------------------
-	// ReplaceItem : pItem을 추가하고 딴게 있다면 Item교환
+	
 	//------------------------------------------------
 	bool			ReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem);		
 	//------------------------------------------------
-	// Can ReplaceItem : n slot에 pItem을 추가가능한가? 
-	// pOldItem에는 이전에 있던 것..
+	
+	
 	//------------------------------------------------
 	bool			CanReplaceItem(MItem* pItem, BYTE n, MItem*& pOldItem);
 	
@@ -1990,8 +1990,8 @@ public :
 	// Find Slot To Add Item
 	//------------------------------------------------
 	bool			FindSlotToAddItem(MItem* pItem, int &slot) const;	
-	// 값
-	virtual int	GetPocketNumber() const		{ return (*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][m_ItemType].Value3; }	// 포켓수
+	
+	virtual int	GetPocketNumber() const		{ return (*g_pItemTable)[ITEM_CLASS_OUSTERS_ARMSBAND][m_ItemType].Value3; }	
 	
 	static MItem*	NewItem()	{ return new MOustersArmsBand; }
 };
@@ -2175,10 +2175,10 @@ public :
 	ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_PUPA; }
 	TYPE_ITEM_NUMBER	GetMaxNumber() const;
 	
-	// heal 되는 수치
-	int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_PUPA][m_ItemType].Value1; }	// HP수치	
-	// mana 되는 수치
-	int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_PUPA][m_ItemType].Value2; }	// MP수치
+	
+	int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_PUPA][m_ItemType].Value1; }	
+	
+	int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_PUPA][m_ItemType].Value2; }	
 
 	bool	IsQuickItem() const			{ return true; }
 
@@ -2201,11 +2201,11 @@ public :
 	ITEM_CLASS	GetItemClass() const		{ return ITEM_CLASS_COMPOS_MEI; }
 	TYPE_ITEM_NUMBER	GetMaxNumber() const;
 
-	// heal 되는 수치
-	int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_COMPOS_MEI][m_ItemType].Value1; }	// HP수치
 	
-	// mana 되는 수치
-	int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_COMPOS_MEI][m_ItemType].Value2; }	// MP수치
+	int		GetHealPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_COMPOS_MEI][m_ItemType].Value1; }	
+	
+	
+	int		GetManaPoint() const		{ return (*g_pItemTable)[ITEM_CLASS_COMPOS_MEI][m_ItemType].Value2; }	
 
 	bool	IsQuickItem() const			{ return true; }
 
@@ -2229,7 +2229,7 @@ public :
 	
 	static MItem*	NewItem()	{ return new MOustersSummonGem; }
 
-	// 쌓이는 최대 개수
+	
 	TYPE_ITEM_NUMBER	GetMaxNumber() const;
 	
 	TYPE_ITEM_NUMBER	GetNumber() const					{ return m_Number; }
@@ -2238,7 +2238,7 @@ public :
 	void				SetEnchantLevel(WORD s);
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2258,7 +2258,7 @@ public :
 	static MItem* NewItem()		{ return new MEffectItem; }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2275,7 +2275,7 @@ public :
 	ITEM_CLASS	GetItemClass() const			{ return ITEM_CLASS_CODE_SHEET; }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2290,7 +2290,7 @@ public :
 	~MMoonCardItem() { }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2315,7 +2315,7 @@ private:
 	DWORD	m_UpdateTime;
 	DWORD	m_PetExpRemain;
 	//2004, 5, 11 sobeit add start
-	DWORD	m_PetKeepedDay;//보관날짜
+	DWORD	m_PetKeepedDay;
 	//2004, 5, 11 sobeit add end
 	WORD	m_PetFoodType;
 	bool	m_bCanGamble;
@@ -2351,7 +2351,7 @@ public :
 	std::string				GetPetOptionEName();
 	
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2370,7 +2370,7 @@ public :
 	TYPE_ITEM_NUMBER		GetMaxNumber() const;
 	
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2385,7 +2385,7 @@ public :
 	~MPetEnchantItem() { }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2419,7 +2419,7 @@ public :
 
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2441,7 +2441,7 @@ public :
 	bool	IsGearSlotCoreZap() const					{ return true; }
 	bool	IsGearSlotVampireCoreZap() const			{ return true; }
 	bool	IsGearSlotOustersCoreZap() const			{ return true; }
-	bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+	bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 class MGQuestItem : public MItem {
@@ -2461,7 +2461,7 @@ public :
 	~MTrapItem() { }
 
 	// use item
-	#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+	#ifdef __TEST_SUB_INVENTORY__   
 		void		UseInventory(TYPE_OBJECTID SubInventoryItemID = 0);
 	#else
 		void		UseInventory();
@@ -2488,7 +2488,7 @@ public :
 	bool	IsGearSlotVampireBloodBible() const			{ return true; }
 	bool	IsGearSlotOustersBloodBible() const			{ return true; }
 
-	bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+	bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 class MWarItem : public MItem {
@@ -2501,7 +2501,7 @@ public :
 
 };
 
-// By csm 2004.12.27 전직 아이템 추가 
+
 
 class MCarryingReceiver : public MAccessoryItem {
 	public :
@@ -2515,8 +2515,8 @@ class MCarryingReceiver : public MAccessoryItem {
 //
 		static MItem*	NewItem()	{ return new MCarryingReceiver; }
 
-		bool		IsGearSlotPDA() const			{ return true; }	// PDA 슬롯
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotPDA() const			{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 class MShoulderArmor : public MAccessoryItem {
@@ -2531,8 +2531,8 @@ class MShoulderArmor : public MAccessoryItem {
 
 		static MItem*	NewItem()	{ return new MShoulderArmor; }
 
-		bool		IsGearSlotShoulder() const		{ return true; }	// 어깨 슬롯
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotShoulder() const		{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 		bool		IsAddonItem() const				{ return true; }
 };
 class MDermis : public MAccessoryItem {
@@ -2547,8 +2547,8 @@ class MDermis : public MAccessoryItem {
 		//bool		IsGearSlotVampireRing() const			{ return true; }
 
 		static MItem*	NewItem()	{ return new MDermis; }
-		bool		IsGearSlotVampireDermis() const		{ return true; }	// 문신
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotVampireDermis() const		{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 class MPersona : public MAccessoryItem {
@@ -2563,8 +2563,8 @@ class MPersona : public MAccessoryItem {
 //		bool		IsGearSlotVampireRing() const			{ return true; }
 
 		static MItem*	NewItem()	{ return new MPersona; }
-		bool		IsGearSlotVampirePersona() const		{ return true; }	// 페르소나
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotVampirePersona() const		{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 
@@ -2580,8 +2580,8 @@ class MFascia : public MAccessoryItem {
 //		bool		IsGearSlotVampireRing() const			{ return true; }
 
 		static MItem*	NewItem()	{ return new MFascia; }
-		bool		IsGearSlotOustersFascia() const		{ return true; }	// 허리장식
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotOustersFascia() const		{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
 class MMitten : public MArmorItem {
@@ -2599,11 +2599,11 @@ class MMitten : public MArmorItem {
 //		ADDON		GetAddonSlot() const			{ return ADDON_COAT; }
 
 		static MItem*	NewItem()	{ return new MMitten; }
-		bool		IsGearSlotOustersMitten() const		{ return true; }	// 장갑
-		bool	IsDurationAlwaysOkay() const		{ return true; }	// 내구 체크 안하는 아이템
+		bool		IsGearSlotOustersMitten() const		{ return true; }	
+		bool	IsDurationAlwaysOkay() const		{ return true; }	
 };
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 藤속관櫓관
+#ifdef __TEST_SUB_INVENTORY__   
 
 class MSubInventory : public MItem , public MGridItemManager {
 	public :
@@ -2627,19 +2627,19 @@ class MSubInventory : public MItem , public MGridItemManager {
 		//				SlotItemManager
 		//
 		//------------------------------------------------
-		// AddItem : slot(n)에 pItem을 추가한다.
+		
 		//------------------------------------------------
 		bool			AddItem(MItem* pItem);
 		bool			AddItem(MItem* pItem, BYTE X, BYTE Y);
 		
 		//------------------------------------------------
-		// ReplaceItem : pItem을 추가하고 딴게 있다면 Item교환
+		
 		//------------------------------------------------
 		bool			ReplaceItem(MItem* pItem, BYTE X, BYTE Y, MItem*& pOldItem);	
 
 		//------------------------------------------------
-		// Can ReplaceItem : n slot에 pItem을 추가가능한가? 
-		// pOldItem에는 이전에 있던 것..
+		
+		
 		//------------------------------------------------
 		bool			CanReplaceItem(MItem* pItem,BYTE X, BYTE Y, MItem*& pOldItem);
 };

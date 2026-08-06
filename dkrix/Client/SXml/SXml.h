@@ -58,7 +58,7 @@ public:
 //class StrX
 //{
 //private:
-//	char* m_pCSTR; ///< 내부 문자열 버퍼
+
 //
 //public:
 //	StrX(const XMLCh* const toTranscode) { m_pCSTR = XMLString::transcode(toTranscode); }
@@ -103,14 +103,14 @@ private:
 	typedef map<string, XMLTree*> CHILDREN_MAP;
 	typedef vector<XMLTree *> CHILDREN_VECTOR;
 
-	string     m_Name;        ///< 노드의 이름
-	string     m_Text;        ///< 노드에 속한 텍스트
-	XMLTree*   m_pParent;     ///< 부모 노드의 포인터
+	string     m_Name;        
+	string     m_Text;        
+	XMLTree*   m_pParent;     
 
-	ATTRIBUTES_MAP m_AttributesMap;  ///< 가지고 있는 속성값들
-	ATTRIBUTES_VECTOR m_AttributesVector;  ///< 가지고 있는 속성값들
-	CHILDREN_MAP   m_ChildrenMap;    ///< 자식 노드들
-	CHILDREN_VECTOR   m_ChildrenVector;    ///< 자식 노드들
+	ATTRIBUTES_MAP m_AttributesMap;  
+	ATTRIBUTES_VECTOR m_AttributesVector;  
+	CHILDREN_MAP   m_ChildrenMap;    
+	CHILDREN_VECTOR   m_ChildrenVector;    
 
 public:
 	XMLTree();
@@ -155,8 +155,8 @@ private:
 //class XMLTreeGenerator : public DefaultHandler
 //{
 //private:
-//	XMLTree* m_pRoot;   ///< 최상위 노드
-//	XMLTree* m_pBuffer; ///< XML 파싱용 임시 노드
+
+
 //
 //
 //public:
@@ -200,10 +200,10 @@ public:
 
 
 public:
-	/// \brief 지정된 위치에 있는 파일 또는 웹 문서를 파싱한다.
+	
 //	void parseURL(const char* pURL);
 
-	/// \brief 인수로 넘겨지는 문자열을 XML 문서로 가정하고 파싱한다.
+	
 	char* parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector = false);
 };
 

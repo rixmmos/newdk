@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectHasPet.cpp
-// Written by  : 쉭
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +65,7 @@ void EffectHasPet::affect(Creature* pCreature)
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
     Assert(pPC != NULL);
 
-    // cout << pPC->getName() << " 의 펫이 밥먹을때가 됐습니다." << endl;
+    
 
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPC->getPlayer());
     Assert(pGamePlayer != NULL);
@@ -80,11 +80,11 @@ void EffectHasPet::affect(Creature* pCreature)
 
         PetInfo* pPetInfo = pPetItem->getPetInfo();
 
-        // cout << pPC->getName() << " 의 펫인 " << pPetItem->getObjectID() << " 번 펫이 밥먹습니다." <<
+        
         // pPetInfo->getPetHP() << endl;
 
         if (pPetInfo == NULL) {
-            filelog("PetBug.log", "EffectHasPet 돌아가는데 펫이 없다 : %s", pPC->getName().c_str());
+            filelog("PetBug.log", "EffectHasPet    : %s", pPC->getName().c_str());
             continue;
         }
 
@@ -96,17 +96,17 @@ void EffectHasPet::affect(Creature* pCreature)
         int secsLast = pPetInfo->getLastFeedTime().secsTo(currentTime);
         //		if ( secsLast > 70 )
         //		{
-        //			filelog( "PetBug.log", "펫이 밥먹는데 70초 넘게 걸렸다. %d초 : %s", secsLast, pPC->getName().c_str()
+        
         //);
         //		}
 
-        // 50레벨 펫은 10분에 한번씩 밥먹는다.
+        
         if (pPetInfo->getPetLevel() == 50 && secsLast < 600)
             continue;
 
         pPetInfo->setCurrentFeedTurn(pPetInfo->getCurrentFeedTurn() + 1);
 
-        // 가끔 밥먹인다.
+        
         if (pPetInfo->getCurrentFeedTurn() >= pPetInfo->getFeedTurn()) {
             pPetInfo->setCurrentFeedTurn(0);
 
@@ -114,8 +114,8 @@ void EffectHasPet::affect(Creature* pCreature)
             pPetInfo->setFeedTime(currentTime);
 
             if (pPetInfo->getPetHP() == 0) {
-                filelog("Pet.log", "%s의 펫이 죽었다.", pPC->getName().c_str());
-                // cout << pPC->getName() << "의 펫이 죽었다" << endl;
+                filelog("Pet.log", "%s  .", pPC->getName().c_str());
+                
                 if (pPC->getPetInfo() == pPetInfo) {
                     pPC->setPetInfo(NULL);
                     pPC->initAllStatAndSend();
@@ -177,10 +177,10 @@ void EffectHasPet::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // cout << "EffectHasPet 지웁니다." << endl;
+    
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_HAS_PET);
 
     Zone* pZone = pCreature->getZone();

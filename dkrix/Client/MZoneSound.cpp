@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 ZONESOUND_INFO::ZONESOUND_INFO()
 {
-	ID = 0;				// ZoneSound의 ID
+	ID = 0;				
 	SoundID = 0;		// SoundID
 }
 
@@ -26,7 +26,7 @@ ZONESOUND_INFO::~ZONESOUND_INFO()
 void					
 ZONESOUND_INFO::SaveToFile(std::ofstream& file)
 {
-	file.write((const char*)&ID, 2);				// ZoneSound의 ID
+	file.write((const char*)&ID, 2);				
 	file.write((const char*)&SoundID, SIZE_SOUNDID);		// SoundID
 	
 	ShowTimeChecker::SaveToFile( file );
@@ -38,7 +38,7 @@ ZONESOUND_INFO::SaveToFile(std::ofstream& file)
 void					
 ZONESOUND_INFO::LoadFromFile(std::ifstream& file)
 {
-	file.read((char*)&ID, 2);				// ZoneSound의 ID
+	file.read((char*)&ID, 2);				
 	file.read((char*)&SoundID, SIZE_SOUNDID);		// SoundID
 	
 	ShowTimeChecker::LoadFromFile( file );

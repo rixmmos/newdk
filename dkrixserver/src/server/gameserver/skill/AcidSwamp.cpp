@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AcidSwamp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                         CEffectID_t CEffectID)
@@ -37,8 +37,8 @@ void AcidSwamp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSki
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -57,7 +57,7 @@ void AcidSwamp::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSki
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, VampireSkillSlot* pVampireSkillSlot,
                         CEffectID_t CEffectID)
@@ -84,7 +84,7 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
         SkillType_t SkillType = pVampireSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // Knowledge of Acid 가 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_ACID)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_ACID);
@@ -105,7 +105,7 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
             Tile& tile = pZone->getTile(X, Y);
             if (tile.canAddEffect())
                 bTileCheck = true;
-            // 머시 그라운드 있음 추가 못한당.
+            
             if (tile.getEffect(Effect::EFFECT_CLASS_MERCY_GROUND) != NULL)
                 bTileCheck = false;
             if (tile.getEffect(Effect::EFFECT_CLASS_TRYING_POSITION) != NULL)
@@ -120,9 +120,9 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
             decreaseMana(pVampire, RequiredMP, _GCSkillToTileOK1);
 
             Tile& tile = pZone->getTile(X, Y);
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
-            // 같은 이펙트가 이미 존재한다면 삭제한다.
+            
             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_ACID_SWAMP);
             if (pOldEffect != NULL) {
                 ObjectID_t effectID = pOldEffect->getObjectID();
@@ -131,12 +131,12 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
 
             checkMine(pZone, X, Y);
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pVampire);
             SkillOutput output;
             computeOutput(input, output);
 
-            // Wisdom of Swamp 가 있다면 지속시간 20% 증가
+            
             if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_WISDOM_OF_SWAMP)) {
                 RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_WISDOM_OF_SWAMP);
                 Assert(pRankBonus != NULL);
@@ -144,7 +144,7 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
                 output.Duration += getPercentValue(output.Duration, pRankBonus->getPoint());
             }
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectAcidSwamp* pEffect = new EffectAcidSwamp(pZone, X, Y);
             pEffect->setUserObjectID(pVampire->getObjectID());
             pEffect->setDeadline(output.Duration);
@@ -162,15 +162,15 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
                 pEffect->setBurrowingTargetObjectID(tile.getCreature(Creature::MOVE_MODE_BURROWING)->getObjectID());
             }
 
-            // 타일에 붙은 이펙트는 OID를 받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // 타일 위에 크리쳐가 있다면 바로 영향을 주도록 한다.
+            
             bool bEffected = false;
             Creature* pTargetCreature = NULL;
 
@@ -275,7 +275,7 @@ void AcidSwamp::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vampire
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AcidSwamp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -306,7 +306,7 @@ void AcidSwamp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             Tile& tile = pZone->getTile(X, Y);
             if (tile.canAddEffect())
                 bTileCheck = true;
-            // 머시 그라운드 있음 추가 못한당.
+            
             if (tile.getEffect(Effect::EFFECT_CLASS_MERCY_GROUND) != NULL)
                 bTileCheck = false;
             if (tile.getEffect(Effect::EFFECT_CLASS_HEAVEN_GROUND) != NULL)
@@ -319,21 +319,21 @@ void AcidSwamp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             }
 
             Tile& tile = pZone->getTile(X, Y);
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
-            // 같은 이펙트가 이미 존재한다면 삭제한다.
+            
             Effect* pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_ACID_SWAMP);
             if (pOldEffect != NULL) {
                 ObjectID_t effectID = pOldEffect->getObjectID();
                 pZone->deleteEffect(effectID);
             }
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectAcidSwamp* pEffect = new EffectAcidSwamp(pZone, X, Y);
             pEffect->setUserObjectID(pMonster->getObjectID());
             pEffect->setDeadline(output.Duration);
@@ -342,15 +342,15 @@ void AcidSwamp::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             pEffect->setDamage(output.Damage);
             pEffect->setLevel(pSkillInfo->getLevel() / 2);
 
-            // 타일에 붙은 이펙트는 OID를 받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // 타일 위에 크리쳐가 있다면 바로 영향을 주도록 한다.
+            
             bool bEffected = false;
             Creature* pTargetCreature = NULL;
 

@@ -8,7 +8,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCFakeMove.h"
-#include "Player.h"
+#include "../Player.h"
 #include "ClientDef.h"
 #include "MFakeCreature.h"
 
@@ -35,7 +35,7 @@ throw ( ProtocolException , Error )
 //	pFakeCreature->SetFakePosition( pCreature->GetX(), pCreature->GetY() );
 	
 	//------------------------------------------------------
-	// Fake Creature를 Zone에 추가
+	
 	//------------------------------------------------------
 	if (!g_pZone->AddFakeCreature( pFakeCreature ))
 	{

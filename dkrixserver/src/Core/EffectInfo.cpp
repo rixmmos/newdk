@@ -2,7 +2,7 @@
 //
 // Filename    : EffectInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : ����Ʈ ���� ����Ʈ ��� ����.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,12 +31,12 @@ EffectInfo::~EffectInfo() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void EffectInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_ListNum);
 
     WORD m_Value;
@@ -50,12 +50,12 @@ void EffectInfo::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void EffectInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_ListNum);
 
     for (list<WORD>::const_iterator itr = m_EList.begin(); itr != m_EList.end(); itr++) {
@@ -69,19 +69,19 @@ void EffectInfo::write(SocketOutputStream& oStream) const {
 //
 // EffectInfo::addListElement()
 //
-// ( ��ȭ����, ��ȭ��ġ ) �� �� ���� ����Ʈ�� �ֱ� ���� ��� �Լ�.
+
 //
 //////////////////////////////////////////////////////////////////////
 void EffectInfo::addListElement(EffectID_t EffectID, WORD Value) {
     __BEGIN_TRY
 
-    // ���ϴ� ���� �������� List�� �ִ´�.
+    
     m_EList.push_back(EffectID);
 
-    // ���ϴ� ��ġ�� List�� �ִ´�.
+    
     m_EList.push_back(Value);
 
-    // ��ȭ ���� ������ �ϳ� ���� ��Ų��.
+    
     m_ListNum++;
 
     __END_CATCH

@@ -6,11 +6,11 @@
 //
 //----------------------------------------------------------------------
 //
-// Data Type과  Size Type이 Template이다.
+
 //
-// File I/O를 하려면  Data가 되는 class에 
+
 //      bool		SaveToFile(std::ofstream& file);
-//		bool		LoadFromFile(std::ifstream& file);  이 구현되어야 한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -18,7 +18,7 @@
 #define	__TARRAY_H__
 
 
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
 #include "../../basic/Platform.h"
@@ -57,7 +57,7 @@ class TArray {
 		const DataType&	operator [] (SizeType n) const	{ return m_pData[n]; }
 		void		operator = (const TArray<DataType, SizeType>& array);
 		
-		// 현재 Array에 다른 array를 더한다.
+		
 		void		operator += (const TArray<DataType, SizeType>& array);
 
 
@@ -65,7 +65,7 @@ class TArray {
 		SizeType		m_Size;
 		DataType*		m_pData;
 
-		// sizeof(SizeType) 의 값
+		
 		static BYTE		s_SIZEOF_SizeType;
 };
 
@@ -114,7 +114,7 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::Init(SizeType size)
 {
-	// 일단 해제
+	
 	Release();
 
 	if (size==0) return;
@@ -142,8 +142,8 @@ TArray<DataType, SizeType>::Release()
 //----------------------------------------------------------------------
 // Add Array to *this
 //----------------------------------------------------------------------
-// 두 Array에 존재하는 data의 개수를 더한만큼의 
-// memory를 *this에 다시 잡고 copy~~
+
+
 //----------------------------------------------------------------------
 template <class DataType, class SizeType>
 void
@@ -152,12 +152,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	SizeType newSize = m_Size + array.m_Size;
 
 	//------------------------------------------------
-	// 두 Array를 더한 개수만큼의 memory를 잡는다.
+	
 	//------------------------------------------------
 	DataType*	pTempData = new DataType [newSize];
 	
 	//------------------------------------------------
-	// temp에 *this를 copy
+	
 	//------------------------------------------------
 	SizeType k=0;
 	for (SizeType i=0; i<m_Size; i++)
@@ -168,7 +168,7 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// temp에 FramePack을 copy
+	
 	//------------------------------------------------
 	for (SizeType i=0; i<array.m_Size; i++)
 	{
@@ -178,12 +178,12 @@ TArray<DataType, SizeType>::operator += (const TArray<DataType, SizeType>& array
 	}
 
 	//------------------------------------------------
-	// memory해제한다.
+	
 	//------------------------------------------------
 	Release();
 
 	//------------------------------------------------
-	// *this가 temp를 가리키도록 한다.
+	
 	//------------------------------------------------
 	m_Size		= newSize;
 	m_pData		= pTempData;	
@@ -197,10 +197,10 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::SaveToFile(std::ofstream& file)
 {
-	// 0이라도 개수는 저장한다.
+	
 	file.write((const char*)&m_Size, s_SIZEOF_SizeType);
 
-	// 아무것도 없으면..
+	
 	if (m_pData==NULL || m_Size==0) 
 		return false;
 
@@ -217,12 +217,12 @@ template <class DataType, class SizeType>
 bool
 TArray<DataType, SizeType>::LoadFromFile(std::ifstream& file)
 {
-	// frame 개수
+	
 	file.read((char*)&m_Size, s_SIZEOF_SizeType);
 
 	if (m_Size==0) return false;
 	
-	// memory잡기
+	
 	Init(m_Size);
 
 	for (SizeType i=0; i<m_Size; i++)
@@ -238,10 +238,10 @@ template <class DataType, class SizeType>
 void	
 TArray<DataType, SizeType>::operator = (const TArray<DataType, SizeType>& array)
 {
-	// frameArray와 똑같이 해야 한다.
+	
 	Init( array.m_Size );
 
-	// 모든 element를 copy해야 한다.
+	
 	for (SizeType i=0; i<m_Size; i++)
 	{
 		m_pData[i] = array.m_pData[i];

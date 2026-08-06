@@ -104,7 +104,7 @@ void RankEXPInfoManager::load(RankType rankType)
             throw Error("There is no data in RankEXPInfo Table");
         }
 
-        // 전체 갯수를 세팅한다.
+        
         pResult->next();
         m_RankEXPCount = pResult->getInt(1) + 1;
 
@@ -113,11 +113,11 @@ void RankEXPInfoManager::load(RankType rankType)
         m_RankEXPInfoList = new RankEXPInfo*[m_RankEXPCount];
         Assert(m_RankEXPInfoList != NULL);
 
-        // 배열을 초기화
+        
         for (uint i = 0; i < m_RankEXPCount; i++)
             m_RankEXPInfoList[i] = NULL;
 
-        // 데이터를 집어넣는다.
+        
         pResult =
             pStmt->executeQuery("Select Level, GoalExp, AccumExp from RankEXPInfo WHERE RankType=%d", (int)rankType);
         while (pResult->next()) {
@@ -159,7 +159,7 @@ RankEXPInfo* RankEXPInfoManager::getRankEXPInfo(uint value) const
     __BEGIN_TRY
 
     if (value >= m_RankEXPCount || m_RankEXPInfoList[value] == NULL) {
-        filelog("RankEXPError.log", "RankEXP 능력치 초과 또는 미만");
+        filelog("RankEXPError.log", "RankEXP    ");
         throw InvalidProtocolException();
     }
 

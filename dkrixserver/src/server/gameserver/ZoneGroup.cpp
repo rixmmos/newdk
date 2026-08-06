@@ -46,7 +46,7 @@ ZoneGroup::~ZoneGroup()
 {
     __BEGIN_TRY
 
-    // 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+    
     m_Zones.clear();
 
     __END_CATCH_NO_RETHROW
@@ -127,8 +127,8 @@ void ZoneGroup::processPlayers()
 
         //__LEAVE_CRITICAL_SECTION(m_pZonePlayerManager)
     } catch (TimeoutException&) {
-        // timeout 이 발생하면, 입력, 출력, OOB 처리 어느 것이나 할 게 없당..
-        // 잘못된 FD가 있을 경우 짜르기 위하여 시행한다 -_-;
+        
+        
         // m_pZonePlayerManager->processOutputs();
     } catch (InterruptedException& ie) {
         // throw Error(ie.toString());
@@ -141,7 +141,7 @@ void ZoneGroup::processPlayers()
     }
 
     try {
-        // 모든 플레이어의 명령을 처리한다.
+        
         beginProfileEx("ZPM_COMMAND");
         //	__ENTER_CRITICAL_SECTION(m_pZonePlayerManager)
         m_pZonePlayerManager->processCommands();
@@ -157,7 +157,7 @@ void ZoneGroup::processPlayers()
 
     try {
         beginProfileEx("ZPM_HEARTBEAT");
-        m_pZonePlayerManager->heartbeat(); // 내부에서 lock건다.
+        m_pZonePlayerManager->heartbeat(); 
         endProfileEx("ZPM_HEARTBEAT");
     } catch (Error& er) {
         filelog("errorLog.txt", "%s", er.toString().c_str());
@@ -233,11 +233,11 @@ void ZoneGroup::addZone(Zone* pZone)
 {
     __BEGIN_TRY
 
-    // 일단 같은 아이디의 존이 있는지 체크해본다.
+    
     unordered_map<ZoneID_t, Zone*>::iterator itr = m_Zones.find(pZone->getZoneID());
 
     if (itr != m_Zones.end())
-        // 똑같은 아이디가 이미 존재한다는 소리다. - -;
+        
         throw Error("duplicated zone id");
 
     m_Zones[pZone->getZoneID()] = pZone;
@@ -254,13 +254,13 @@ void ZoneGroup::deleteZone(ZoneID_t zoneID) {
     unordered_map<ZoneID_t, Zone*>::iterator itr = m_Zones.find(zoneID);
 
     if (itr != m_Zones.end()) {
-        // 존을 삭제한다.
+        
         SAFE_DELETE(itr->second);
 
-        // pair를 삭제한다.
+        
         m_Zones.erase(itr);
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -271,7 +271,7 @@ void ZoneGroup::deleteZone(ZoneID_t zoneID) {
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove zone from zone group
-// delete하지 않고 node만 지워준다.
+
 //////////////////////////////////////////////////////////////////////////////
 Zone* ZoneGroup::removeZone(ZoneID_t zoneID) {
     __BEGIN_TRY
@@ -279,16 +279,16 @@ Zone* ZoneGroup::removeZone(ZoneID_t zoneID) {
     unordered_map<ZoneID_t, Zone*>::iterator itr = m_Zones.find(zoneID);
 
     if (itr != m_Zones.end()) {
-        // 존을 삭제한다.
+        
         // SAFE_DELETE(itr->second);
         Zone* pZone = itr->second;
 
-        // pair를 삭제한다.
+        
         m_Zones.erase(itr);
 
         return pZone;
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -312,7 +312,7 @@ Zone* ZoneGroup::getZone(ZoneID_t zoneID) const {
     if (itr != m_Zones.end()) {
         pZone = itr->second;
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());

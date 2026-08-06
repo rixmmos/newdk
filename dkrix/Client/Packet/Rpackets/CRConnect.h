@@ -2,7 +2,7 @@
 // 
 // Filename    : CRConnect.h 
 // Written By  : crazydog
-// Description : Effect 제거.
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -10,18 +10,18 @@
 #define __CR_CONNECT_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
 // class CRConnect;
 //
-// 클라이언트에서 다른 클라이언트로 접속을 요청하는거다.
+
 //
-// 자기 캐릭터 이름과 상대의 캐릭터 이름을 알아야 한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -47,16 +47,16 @@ public :
 	#endif
 
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 	// execute packet's handler
 	void execute ( Player * pPlayer ) throw ( ProtocolException , Error );
 
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getPacketSize () const throw () { return szBYTE + m_RequestServerName.size() + szBYTE + m_RequestClientName.size(); }
 	static PacketSize_t getPacketMaxSize() throw() { return  szBYTE + 10 + szBYTE + 10;}
 

@@ -77,7 +77,7 @@ MFakeCreature*
 NewFakeCreature(int creatureType, int x, int y, int dir)
 {
 	//------------------------------------------------------
-	// Fake Creature 생성
+	
 	//------------------------------------------------------
 	MFakeCreature* pFakeCreature = new MFakeCreature;
 
@@ -89,7 +89,7 @@ NewFakeCreature(int creatureType, int x, int y, int dir)
 	pFakeCreature->SetName( name );
 #endif
 
-	//pFakeCreature->SetID( 0 );  자동 발급 된다.
+	
 //	pFakeCreature->SetSameBody( pCreature );
 
 //	if (pCreature->IsWear())
@@ -115,7 +115,7 @@ MFakeCreature*
 NewFakeCreature(MCreature* pCreature, int x, int y)
 {
 	//------------------------------------------------------
-	// Fake Creature 생성
+	
 	//------------------------------------------------------
 	MFakeCreature* pFakeCreature = new MFakeCreature;
 
@@ -127,7 +127,7 @@ NewFakeCreature(MCreature* pCreature, int x, int y)
 		pFakeCreature->SetName( name );
 	#endif
 
-	//pFakeCreature->SetID( 0 );  자동 발급 된다.
+	
 	pFakeCreature->SetSameBody( pCreature );
 
 	if (pCreature->IsWear())
@@ -216,7 +216,7 @@ void ComeFromPortal(MCreature* pCreature)
 		return;
 
 	//------------------------------------------------------
-	// Fake Creature 생성
+	
 	//------------------------------------------------------
 	int x = pCreature->GetX();
 	int y = pCreature->GetY();
@@ -225,7 +225,7 @@ void ComeFromPortal(MCreature* pCreature)
 	pFakeCreature->SetFakeCreatureType( MFakeCreature::FAKE_CREATURE_TO_PORTAL );
 
 	//------------------------------------------------------
-	// Fake Creature를 Zone에 추가
+	
 	//------------------------------------------------------
 	if (!g_pZone->AddFakeCreature( pFakeCreature ))
 	{
@@ -233,7 +233,7 @@ void ComeFromPortal(MCreature* pCreature)
 	}
 
 	//------------------------------------------------------
-	// 빙빙 돌아서 캐릭을 휘감는 이펙트 표현..
+	
 	//------------------------------------------------------
 	ExecuteActionInfoFromMainNode(
 			RESULT_MAGIC_BLOODY_TUNNEL_INTO,
@@ -258,7 +258,7 @@ void MoveIntoPortal(MCreature* pCreature)
 	pFakeCreature->SetFakeCreatureType( MFakeCreature::FAKE_CREATURE_TO_PORTAL );
 
 	//------------------------------------------------------
-	// Fake Creature를 Zone에 추가
+	
 	//------------------------------------------------------
 	if (!g_pZone->AddFakeCreature( pFakeCreature ))
 	{
@@ -266,7 +266,7 @@ void MoveIntoPortal(MCreature* pCreature)
 	}
 
 	//------------------------------------------------------
-	// 빙빙 돌아서 캐릭을 휘감는 이펙트 표현..
+	
 	//------------------------------------------------------
 	ExecuteActionInfoFromMainNode(
 			RESULT_MAGIC_BLOODY_TUNNEL_INTO,
@@ -440,7 +440,7 @@ void SetPCSlayerInfo(PCSlayerInfo2* pInfo)
 	g_pPlayer->SetSight( pInfo->getSight() );
 
 	//--------------------------------------------------
-	// Player 몸 설정 - IMPORTANT: Set creature type!
+	
 	//--------------------------------------------------
 	if (pInfo->getCompetence()==0)
 	{
@@ -548,7 +548,7 @@ void SetAddonToSlayer(MCreatureWear* pCreature, const PCSlayerInfo2* pInfo)
 	if (pCreature == NULL || pInfo == NULL) return;
 
 	//--------------------------------------------------
-	// 머리 설정
+	
 	//--------------------------------------------------
 	if (pInfo->getSex()==MALE)
 	{
@@ -607,7 +607,7 @@ void SetPCOustersInfo(PCOustersInfo2* pInfo)
 	g_pPlayer->SetSight( pInfo->getSight() );
 
 	//--------------------------------------------------
-	// Player 몸 설정 - IMPORTANT: Set creature type!
+	
 	//--------------------------------------------------
 	if (pInfo->getCompetence()==0)
 	{
@@ -640,9 +640,9 @@ void SetPCVampireInfo(PCVampireInfo2* pInfo)
 	g_pPlayer->SetSight( pInfo->getSight() );
 
 	//--------------------------------------------------
-	// Player 몸 설정 - IMPORTANT: Set creature type!
+	
 	//--------------------------------------------------
-	// 박쥐나 늑대로 변신 중인 경우..
+	
 	if (g_PreviousCreatureType==CREATURETYPE_WOLF
 		|| g_PreviousCreatureType==CREATURETYPE_BAT
 		|| g_PreviousCreatureType==CREATURETYPE_WER_WOLF)
@@ -668,7 +668,7 @@ void SetPCVampireInfo(PCVampireInfo2* pInfo)
 
 	g_pPlayer->SetMale( pInfo->getSex()==MALE );
 
-	// 지상, 공중 이동 결정
+	
 	if (g_pPlayer->GetCreatureType()==CREATURETYPE_BAT)
 	{
 		g_pPlayer->SetFlyingCreature();

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MFakeCreature.h
 //----------------------------------------------------------------------
-// sector에는 존재하지 않는 애덜..
+
 //
 //
 //----------------------------------------------------------------------
@@ -18,7 +18,7 @@
 #define __DNODE_DEFINE__
 //----------------------------------------------------------------------
 //
-// 길찾기에 이용할 Direction Node
+
 //
 //----------------------------------------------------------------------
 class DNode {
@@ -46,39 +46,39 @@ class DNode {
 
 //----------------------------------------------------------------------
 //
-// 길찾기할 때 더 나은 Node를 선택하는 비교 연산
+
 //
 //----------------------------------------------------------------------
-// [1] 거리가 가까운 것
-// [2] 움직인 회수가 적은 것
-// [3] 이전 방향과 같은 것
+
+
+
 class Comparison {
 	public :
-		// distance가 적을 걸 선택해야 한다.		
-		// true : right를 선택한다.
-		// false : left를 선택한다.
+		
+		
+		
 		bool operator () (DNode * left, DNode * right) const
 		{ 
 			int diff = left->distance - right->distance;			
 			int s = left->step - right->step;
 
-			// 거리가(diff) 같은 경우..
+			
 			if (diff==0)
 			{			
-				// 움직인 회수가 같은 경우
+				
 				if (s==0)
 				{
 					if (left->pParent!=NULL && right->pParent!=NULL)
 					{
 						if (right->pParent->direction == right->direction)
 						{
-							return true;	// right선택
+							return true;	
 						}
 						
-						return false;	// left선택						
+						return false;	
 					}
 				}
-				// 움직인 회수가 적은 것
+				
 				else if (s>0) 
 				{
 					return true;
@@ -86,7 +86,7 @@ class Comparison {
 				
 				return false;				
 			}			
-			// 거리가 적은 것
+			
 			else if (diff>0) return true; 
 
 			return false;
@@ -101,28 +101,28 @@ class MFakeCreature : public MCreatureWear {
 	public :
 		enum FAKE_CREATURE_TYPE
 		{
-			FAKE_CREATURE_STAND,			// 가만히 서 있는 것
-			FAKE_CREATURE_WANDER,			// 방황
-			FAKE_CREATURE_FADE_ACTION,		// 흐릿모양의 한가지 동작 후에 사라짐.
-			FAKE_CREATURE_TO_PORTAL,		// 포탈로 들어가는 캐릭터(뱀파)			
-			FAKE_CREATURE_TURNING_MOVE,		// 빙글빙글 이동(테스트)
-			FAKE_CREATURE_FAST_MOVE_ACTION,	// 빨리 이동해서 공격함하기 [새기술]
-			FAKE_CREATURE_BRIGHTNESS,		// 밝게 찍기
-			FAKE_CREATURE_TRACE,			// 추적
-			FAKE_CREATURE_GHOST,			// 질드레 레어 유령
-			FAKE_CREATURE_ROCKET,			// 로켓 런쳐
-			FAKE_CREATURE_WILD_WOLF,		// 와일드 울프 공격
-			FAKE_CREATURE_DRAGON_TORNADO,	// 드레곤 토네이도
+			FAKE_CREATURE_STAND,			
+			FAKE_CREATURE_WANDER,			
+			FAKE_CREATURE_FADE_ACTION,		
+			FAKE_CREATURE_TO_PORTAL,		
+			FAKE_CREATURE_TURNING_MOVE,		
+			FAKE_CREATURE_FAST_MOVE_ACTION,	
+			FAKE_CREATURE_BRIGHTNESS,		
+			FAKE_CREATURE_TRACE,			
+			FAKE_CREATURE_GHOST,			
+			FAKE_CREATURE_ROCKET,			
+			FAKE_CREATURE_WILD_WOLF,		
+			FAKE_CREATURE_DRAGON_TORNADO,	
 		};
 
-		enum WILD_WOLF_ATTACK_MODE // 차례대로
+		enum WILD_WOLF_ATTACK_MODE 
 		{
-			 WILD_WOLF_MODE_ATTACK_1st = 0, // 첫번쨰 공격 
-			 WILD_WOLF_MODE_MOVE_1st,		// 이동
-			 WILD_WOLF_MODE_ATTACK_2nd,		// 두번째 공격
-			 WILD_WOLF_MODE_MOVE_2st,		// 이동
-			 WILD_WOLF_MODE_ATTACK_3rd,		// 세번째 공격
-			 WILD_WOLF_MODE_REMOVE,			// 제거
+			 WILD_WOLF_MODE_ATTACK_1st = 0, 
+			 WILD_WOLF_MODE_MOVE_1st,		
+			 WILD_WOLF_MODE_ATTACK_2nd,		
+			 WILD_WOLF_MODE_MOVE_2st,		
+			 WILD_WOLF_MODE_ATTACK_3rd,		
+			 WILD_WOLF_MODE_REMOVE,			
 		};
 	public :
 		MFakeCreature();
@@ -140,10 +140,10 @@ class MFakeCreature : public MCreatureWear {
 
 		//----------------------------------------------------------
 		//
-		//         길찾기
+		
 		//
 		//----------------------------------------------------------
-		// Zone상에서의 목표위치를 설정
+		
 		bool	SetNextDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);
 		bool	SetDestination(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY);		
 		bool	IsNextDirectionNULL()		{ return m_listDirection.empty(); }
@@ -155,10 +155,10 @@ class MFakeCreature : public MCreatureWear {
 		bool	GetNextPosition(POINT &next);
 		BYTE	GetNextDirection()	const			{ return m_listDirection.front(); }
 
-		// list node를 지운다.
+		
 		void	RemoveNodes();
 
-		// 목표위치까지의 거리 계산
+		
 		int		CalculateDistance(int x, int y);
 
 		//------------------------------------------------------
@@ -200,10 +200,10 @@ class MFakeCreature : public MCreatureWear {
 		MPetItem*			GetPetItem()					{ return m_pPetItem; }
 		void				SetPetItem(MPetItem* pItem)		{ m_pPetItem = pItem; }
 
-		// [새기술]
+		
 		//void				SetActionResult(MActionResult* pResult);
 
-		// [새기술]
+		
 		void				PacketSpecialActionToOther(TYPE_ACTIONINFO nActionInfo, TYPE_OBJECTID id, MActionResult* pActionResult);
 		void				SetFakeCreatureFastMoveAction(TYPE_SECTORPOSITION sX, TYPE_SECTORPOSITION sY,
 											 TYPE_ACTIONINFO skillID, 
@@ -239,7 +239,7 @@ class MFakeCreature : public MCreatureWear {
 	protected :
 		FAKE_CREATURE_TYPE		m_FakeCreatureType;
 
-		// 좌표.. 뭔가에 사용할 - -;
+		
 		TYPE_SECTORPOSITION		m_FakeX;
 		TYPE_SECTORPOSITION		m_FakeY;
 		float					m_FakeSX;
@@ -248,7 +248,7 @@ class MFakeCreature : public MCreatureWear {
 		float					m_FakeCY;
 		DWORD					m_Delay;
 		
-		TYPE_OBJECTID			m_OwnerID;		// Pet에 사용한다
+		TYPE_OBJECTID			m_OwnerID;		
 		bool					m_bTraceFlag;
 		
 		MPetItem*				m_pPetItem;
@@ -258,31 +258,31 @@ class MFakeCreature : public MCreatureWear {
 		DIRECTION_LIST	m_listDirection;
 
 		TYPE_SECTORPOSITION			m_DestX;
-		TYPE_SECTORPOSITION			m_DestY;					// 목표위치(Sector)
+		TYPE_SECTORPOSITION			m_DestY;					
 
 		TYPE_SECTORPOSITION			m_NextDestX; 
-		TYPE_SECTORPOSITION			m_NextDestY;				// 다음 목표위치(Sector)
+		TYPE_SECTORPOSITION			m_NextDestY;				
 
-		TYPE_SECTORPOSITION			m_BlockDestX;				// 못 갔던 곳.. 
+		TYPE_SECTORPOSITION			m_BlockDestX;				
 		TYPE_SECTORPOSITION			m_BlockDestY;				// 
 
-		// 움직이는데 필요한 것들..
+		
 		typedef std::priority_queue<DNode*, std::vector<DNode*>, Comparison>	DNODE_PQ;
 		typedef	std::list<DNode*>												DNODE_LIST;
 
 		DNODE_PQ			m_pqDNodes;
 		DNODE_LIST			m_listDNodes;
 
-		// 계산 했던 곳인지 check
+		
 		DWORD						m_nextMoveTime;
 		int							m_PatrolCount;
 		BYTE						m_TurretDirect;
 		BYTE						m_FinalTurretDirect;
 		BYTE						m_TurretDelay;
 
-		// 와일드 울프
+		
 		BYTE						m_WildWolf_Mode;
-		bool						m_IsEatCorps; // false : 공격, true : 시체 먹기
+		bool						m_IsEatCorps; 
 
 };
 

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttackZoneEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점까지 이동하는 Effect생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACKZONEEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttackZoneEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACK_ZONE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

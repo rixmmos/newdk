@@ -14,8 +14,8 @@
 extern void		PopupErrorMessage(ErrorID errorID);
 
 //----------------------------------------------------------------------
-// 캐릭터의 삭제가 실패했다는 뜻이다.
-// 가만히 생각해보니, 삭제 실패는 크래킹 시도가 아닌가?? - -;
+
+
 //----------------------------------------------------------------------
 void LCDeletePCErrorHandler::execute ( LCDeletePCError * pPacket , Player * pPlayer )
 	 

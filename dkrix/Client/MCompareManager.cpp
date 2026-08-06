@@ -124,7 +124,7 @@ MCompareManager::Execute_HC_PLAYER_IN_TRADE()
 BOOL	
 MCompareManager::Execute_HC_PLAYER_IN_NORMAL_GAME_MODE()
 {	
-	// -_-; 별 의미 없나.. 으흠..
+	
 	return g_pPlayer!=NULL && g_pPlayer->IsWaitVerifyNULL() && g_pPlayer->IsItemCheckBufferNULL();
 }
 
@@ -195,7 +195,7 @@ MCompareManager::Execute_HC_HAS_HEAL_POTION_IN_BELT()
 	{
 		MItem* pItem = g_pQuickSlot->Get();
 
-		// Heal포션인 경우..
+		
 		if (pItem!=NULL 
 			&& pItem->GetItemClass()==ITEM_CLASS_POTION
 			&& pItem->GetItemType() < 5)
@@ -226,7 +226,7 @@ MCompareManager::Execute_HC_HAS_HEAL_POTION_IN_INVENTORY()
 	{
 		MItem* pItem = g_pInventory->Get();
 
-		// Heal포션인 경우..
+		
 		if (pItem!=NULL 
 			&& pItem->GetItemClass()==ITEM_CLASS_POTION
 			&& pItem->GetItemType() < 5)
@@ -257,7 +257,7 @@ MCompareManager::Execute_HC_HAS_MANA_POTION_IN_BELT()
 	{
 		MItem* pItem = g_pQuickSlot->Get();
 
-		// Mana포션인 경우..
+		
 		if (pItem!=NULL 
 			&& pItem->GetItemClass()==ITEM_CLASS_POTION
 			&& pItem->GetItemType() >= 5)
@@ -288,7 +288,7 @@ MCompareManager::Execute_HC_HAS_MANA_POTION_IN_INVENTORY()
 	{
 		MItem* pItem = g_pInventory->Get();
 
-		// Heal포션인 경우..
+		
 		if (pItem!=NULL 
 			&& pItem->GetItemClass()==ITEM_CLASS_POTION
 			&& pItem->GetItemType() >= 5)
@@ -308,7 +308,7 @@ MCompareManager::Execute_HC_HAS_MANA_POTION_IN_INVENTORY()
 BOOL	
 MCompareManager::Execute_HC_RECEIVE_FIRST_BONUS_POINT()
 {	
-	// 2 Level이고 Bonus Point가 있으면 처음 받은거다.
+	
 	return g_pPlayer!=NULL 
 			&& g_pPlayer->IsVampire()
 			&& g_pPlayer->GetLEVEL()==2
@@ -321,7 +321,7 @@ MCompareManager::Execute_HC_RECEIVE_FIRST_BONUS_POINT()
 BOOL	
 MCompareManager::Execute_HC_DIDNOT_WHISPER_YET()
 {	
-	// 귓속말 해본적이 있다면..
+	
 	return false;
 	//return !g_pHelpManager->IsEventOccured( HE_CHAT_WHISPER );
 }
@@ -332,7 +332,7 @@ MCompareManager::Execute_HC_DIDNOT_WHISPER_YET()
 BOOL	
 MCompareManager::Execute_HC_ITEM_PICKED_UP()
 {		
-	// item주운적이 있다면..
+	
 	return false;
 	//return g_pHelpManager->IsEventOccured( HE_ITEM_PICKUP );
 }
@@ -343,7 +343,7 @@ MCompareManager::Execute_HC_ITEM_PICKED_UP()
 BOOL	
 MCompareManager::Execute_HC_USED_ALT_FOR_ITEM()
 {	
-	// alt 누른적이 있다면..
+	
 	return false;
 //	return g_pHelpManager->IsEventOccured( HE_PRESSED_ALT );
 }
@@ -354,7 +354,7 @@ MCompareManager::Execute_HC_USED_ALT_FOR_ITEM()
 BOOL	
 MCompareManager::Execute_HC_USED_FUNCTION_KEY_FOR_QUICKITEM()
 {	
-	// 단축키로 quickitem쓴적이 잇다면..
+	
 	return false;
 	//return g_pHelpManager->IsEventOccured( HE_PRESSED_FUNCTION_KEY_FOR_QUICKITEM );
 }
@@ -371,7 +371,7 @@ MCompareManager::Execute_HC_EMPTY_BULLET()
 //-----------------------------------------------------------------------------
 // Compare
 //-----------------------------------------------------------------------------
-// message와 연결되어 있는 적절한 처리 함수를 호출한다.
+
 //-----------------------------------------------------------------------------
 BOOL
 MCompareManager::Compare(HELP_COMPARE message)

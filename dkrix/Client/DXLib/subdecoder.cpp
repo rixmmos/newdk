@@ -24,7 +24,7 @@ struct
 int		slen[2][16]			=	{{0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4},
 								{0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3}};
 
-// 스케일 팩터를 설정한다.
+
 void get_scale_factors(MP3 *mp3, int ch, int gr)
 {
 	int	sfb, window;

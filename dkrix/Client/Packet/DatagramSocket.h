@@ -10,7 +10,7 @@
 #define __DATAGRAM_SOCKET_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketAPI.h"
 #include "Datagram.h"
@@ -19,8 +19,8 @@
 //
 // class DatagramSocket;
 //
-// 만약 데이터그램 소켓의 내부 버퍼가 데이터그램 패킷의 최대 크기보다
-// 크다면, 아마도 패킷이 잘리는 일은 없을 것이다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 

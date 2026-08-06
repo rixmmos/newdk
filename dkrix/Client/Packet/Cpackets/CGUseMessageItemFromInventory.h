@@ -2,15 +2,15 @@
 // Filename    : CGUseMessageItemFromInventory.h 
 // Written By  : excel96
 // Description : 
-// 인벤토리 안의 아이템을 사용할 때, 클라이언트가 X, Y 및 ObjectID를
-// 보내면 아이템 클래스에 따라서, 서버가 이에 맞는 코드를 처리한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_USE_MESSAGE_ITEM_FROM_INVENTORY_H__
 #define __CG_USE_MESSAGE_ITEM_FROM_INVENTORY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 #include "CGUseItemFromInventory.h"
 
 //////////////////////////////////////////////////////////////////////////////

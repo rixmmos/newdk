@@ -13,7 +13,7 @@ class MSkipEffect : public MEffect {
 		int  GetSkipValue() { return m_nSkipValue; }
 		
 		//--------------------------------------------------------
-		// 한 번의 Update에 호출될 함수..
+		
 		//--------------------------------------------------------
 		virtual bool	Update();
 		

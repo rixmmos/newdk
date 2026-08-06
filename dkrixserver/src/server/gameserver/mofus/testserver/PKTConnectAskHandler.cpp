@@ -11,7 +11,7 @@
 #include "PKTConnectAccept.h"
 
 
-// 실행 함수
+
 void PKTConnectAskHandler::execute(GameServerPlayer* pPlayer, MPacket* pPacket) {
     cout << "RECV ConnectAsk" << endl;
 

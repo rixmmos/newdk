@@ -77,7 +77,7 @@ void EffectLight::unaffect(Creature* pCreature)
 
         pPlayer->sendPacket(&_GCModifyInformation);
 
-        // 이펙트가 사라졌다고 알려준다.
+        
         GCRemoveEffect gcRemoveEffect;
         gcRemoveEffect.setObjectID(pSlayer->getObjectID());
         gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_LIGHT);
@@ -207,7 +207,7 @@ void EffectLightLoader::load(Creature* pCreature)
     __BEGIN_TRY
 
     if (pCreature == NULL) {
-        // cout << "EffectLightLoader : 크리쳐가 널입니다." << endl;
+        
         return;
     }
 

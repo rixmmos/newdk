@@ -38,7 +38,7 @@ GQuestElement::ResultType GQuestGiveItemElement::checkCondition(PlayerCreature* 
         makeGCCreateItem(&gcCreateItem, pItem, pt.x, pt.y);
         pPC->getPlayer()->sendPacket(&gcCreateItem);
 
-        // ItemTraceLog 를 남긴다
+        
         if (pItem->isTraceItem()) {
             remainTraceLog(pItem, "GQuest", pPC->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
             remainTraceLogNew(pItem, pPC->getName(), ITL_GET, ITLD_EVENTNPC, pPC->getZone()->getZoneID());
@@ -46,7 +46,7 @@ GQuestElement::ResultType GQuestGiveItemElement::checkCondition(PlayerCreature* 
     }
 
     GCSystemMessage gcSM;
-    gcSM.setMessage("삿돤膠틔.");
+    gcSM.setMessage(".");
     pPC->getPlayer()->sendPacket(&gcSM);
 
     return OK;

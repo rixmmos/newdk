@@ -18,7 +18,7 @@
 //
 // class GuildMemberInfo2;
 //
-// 클라이언트에 길드 리스트를 보낸다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -31,14 +31,14 @@ public:
     ~GuildMemberInfo2();
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // get packet's body size
-    // 최적화시, 미리 계산된 정수를 사용한다.
+    
     PacketSize_t getSize();
 
     static uint getMaxSize() {
@@ -81,10 +81,10 @@ public:
     }
 
 private:
-    // 길드 아이디
+    
     GuildID_t m_GuildID;
 
-    // 이름
+    
     string m_Name;
 
     // Guild Member Rank

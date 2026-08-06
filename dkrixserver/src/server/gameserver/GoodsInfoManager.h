@@ -99,8 +99,8 @@ private:
     Grade_t m_Grade;                  // Grade
     list<OptionType_t> m_OptionTypes; // OptionType list
     int m_Num;
-    bool m_bTimeLimit; // 시간제한 아이템인가?
-    int m_Hour;        // 사용 제한 시간
+    bool m_bTimeLimit; 
+    int m_Hour;        
 };
 
 //////////////////////////////////////////////////////////////////////////////

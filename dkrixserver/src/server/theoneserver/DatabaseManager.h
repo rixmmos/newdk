@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : DatabaseManager.h
 // Written By  : elca
-// Description : ����Ÿ���̽� �Ŵ���
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __DATABASE_MANAGER_H__
@@ -31,10 +31,10 @@ public:
     void executeDummyQuery(Connection* pConnection) throw(Error);
 
 private:
-    // �� �����庰�� �����ϴ� DB ����
+    
     hash_map<int, Connection*> m_Connections;
 
-    // ���� ó�� �����Ǵ� �⺻ DB ����
+    
     Connection* m_pDefaultConnection;
 
     mutable Mutex m_Mutex;

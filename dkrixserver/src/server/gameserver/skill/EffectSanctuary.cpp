@@ -31,10 +31,10 @@ EffectSanctuary::EffectSanctuary(Zone* pZone, ZoneCoord_t ZoneX, ZoneCoord_t Zon
 
 //////////////////////////////////////////////////////////////////////////////
 // EffectSanctuary::affectCreature()
-// bAffectByMove가 false면 제자리에서 당하는 것이므로..
-// 외부의 SkillOK에서 modify info를 보낸다. 따라서 GCModifyInformation을
-// 보낼 필요가 없다.
-// pTarget의 시야가 변한  경우 true를 return
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 bool EffectSanctuary::affectObject(Object* pTarget, bool bAffectByMove)
 
@@ -44,7 +44,7 @@ bool EffectSanctuary::affectObject(Object* pTarget, bool bAffectByMove)
     //	if (pTarget->getObjectClass() == Object::OBJECT_CLASS_CREATURE)
     //	{
     //		Creature* pTargetCreature = dynamic_cast<Creature*>(pTarget);
-    //		// 이미 걸려있는 경우에는 다시 걸지 않는다.
+    
     //		if (pTargetCreature->isFlag(Effect::EFFECT_CLASS_SANCTUARY))
     //		{
     //			return false;

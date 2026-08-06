@@ -105,13 +105,13 @@ void PCOustersInfo2::read(SocketInputStream& iStream) {
     iStream.read(m_Bonus);
     iStream.read(m_SkillBonus);
 
-    // 은도금 데미쥐
+    
     iStream.read(m_SilverDamage);
 
-    // 권한
+    
     iStream.read(m_Competence);
 
-    // 길드 아이디
+    
     iStream.read(m_GuildID);
 
     BYTE szGuildName;
@@ -229,13 +229,13 @@ void PCOustersInfo2::write(SocketOutputStream& oStream) const {
     oStream.write(m_Bonus);
     oStream.write(m_SkillBonus);
 
-    // 은도금 데미지
+    
     oStream.write(m_SilverDamage);
 
-    // 권한
+    
     oStream.write(m_Competence);
 
-    // 길드 아이디
+    
     oStream.write(m_GuildID);
 
     BYTE szGuildName = m_GuildName.size();

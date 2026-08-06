@@ -31,19 +31,19 @@ CStorageSurface::~CStorageSurface()
 //----------------------------------------------------------------------
 // Init
 //----------------------------------------------------------------------
-// (사용할Surface개수, surface가로크기, 세로크기)
+
 //----------------------------------------------------------------------
 void
 CStorageSurface::Init(int size, int width, int height)
 {
-	// parameter가 잘못된 경우..
+	
 	if (size==0 || width==0 || height==0)
 		return;
 
-	// 일단 이전에 있던걸 해제한 후에..
+	
 	Release();	
 
-	// 새로 설정.. 메모리 잡기
+	
 	m_Size = size;
 	m_pPoint = new POINT [m_Size];
 	m_pStorageSurface = new CSpriteSurface [m_Size];
@@ -51,11 +51,11 @@ CStorageSurface::Init(int size, int width, int height)
 	
 	for (int i=0; i<m_Size; i++)	
 	{
-		// 각 surface의 기억 위치를 초기화한다.
+		
 		m_pPoint[i].x = 0;
 		m_pPoint[i].y = 0;
 
-		// 각 surface의 크기를 결정해둔다.
+		
 		m_pStorageSurface[i].InitOffsurface(width, height);
 		m_pStorageSurface[i].SetTransparency(0);
 	}
@@ -64,7 +64,7 @@ CStorageSurface::Init(int size, int width, int height)
 //----------------------------------------------------------------------
 // Release
 //----------------------------------------------------------------------
-// 메모리 제거
+
 //----------------------------------------------------------------------
 void
 CStorageSurface::Release()
@@ -87,12 +87,12 @@ CStorageSurface::Release()
 //----------------------------------------------------------------------
 // Store
 //----------------------------------------------------------------------
-// pSurface의 pPoint부분을 읽어서 i번째 surface에 기억시켜둔다.
+
 //----------------------------------------------------------------------
 void				
 CStorageSurface::Store(int i, CSpriteSurface* pSurface, POINT* pPoint)
 {
-	// i가 없는 surface번호일 경우..
+	
 	if (i<0 || i>=m_Size)
 		return;
 
@@ -125,7 +125,7 @@ CStorageSurface::Store(int i, CSpriteSurface* pSurface, POINT* pPoint)
 		height = pSurface->GetHeight();
 	}	
 
-	// pSurface에서 기억시켜둘 영역
+	
 	RECT	rect = 
 			{
 				pPoint->x, 
@@ -135,11 +135,11 @@ CStorageSurface::Store(int i, CSpriteSurface* pSurface, POINT* pPoint)
 			};	
 	
 	
-	// 기억시킨 위치를 저장해둔다.
+	
 	m_pPoint[i] = *pPoint;
 
-	// m_pStorageSurface[i]의 (0,0)에 
-	// pSurface의 영역을 기억시켜둔다.
+	
+	
 	m_pStorageSurface[i].BltNoColorkey(&origin, pSurface, &rect);
 
 	//DEBUG_ADD_FORMAT("Store : [%d] (%d, %d)", i, m_pPoint[i].x, m_pPoint[i].y);
@@ -148,16 +148,16 @@ CStorageSurface::Store(int i, CSpriteSurface* pSurface, POINT* pPoint)
 //----------------------------------------------------------------------
 // Restore
 //----------------------------------------------------------------------
-// i번째 surface를 pSurface의 원래위치(m_pPoint)로 출력해준다.
+
 //----------------------------------------------------------------------
 void				
 CStorageSurface::Restore(int i, CSpriteSurface* pSurface, POINT* pPoint) const
 {
-	// i가 없는 surface번호일 경우..
+	
 	if (i<0 || i>=m_Size)
 		return;
 
-	// pSurface에서 기억시켜둘 영역
+	
 	RECT	rect = 
 			{
 				0, 
@@ -167,8 +167,8 @@ CStorageSurface::Restore(int i, CSpriteSurface* pSurface, POINT* pPoint) const
 			};
 
 
-	// pSurface의 원래 위치(m_pPoint)에 
-	// m_pStorageSurface[i]의 기억된 영역을 출력시킨다.	
+	
+	
 	if (pPoint==NULL)
 	{
 		POINT point = m_pPoint[i];

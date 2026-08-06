@@ -228,10 +228,10 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 	char szBuffer[256];
 	char szCost[100];
 
-	// 1�������Ҵ�ȸ������Ʈ * ���ҷ��� * (ĳ���ͷ���)^1.3 * 200
+	
 	int DownPrice = int ( float((*g_pSkillInfoTable)[g_CurrentSkillID].LevelUpPoint) * pow(g_char_slot_ingame.level, 1.3 ) * 200.0f   ) * PriceRaito;
 	if(0 == DownPrice)
-		DownPrice = 1000000; // �鸸��
+		DownPrice = 1000000; 
 	wsprintf(szCost,"%d", DownPrice);
 	
 	std::string sstr = szCost;
@@ -263,7 +263,7 @@ void g_StartOustersDownSkill( int _x, int _y , int PriceRaito)
 //------------------------------------------------------------------------------
 // C_VS_UI_ITEM_LIST
 //
-// �˾�â�� ����.
+
 //------------------------------------------------------------------------------
 C_VS_UI_ITEM_LIST::C_VS_UI_ITEM_LIST()
 {	
@@ -449,13 +449,13 @@ void	C_VS_UI_ITEM_LIST::Show()
 			TitleColor = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 			ShadowColor = 0;//RGB(0,0,31<<3);
 		}
-		// add by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		
 		else if(pItem->GetItemOptionListCount() > 2)
 		{
 			TitleColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 			ShadowColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 		}
-		// end by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		
 		else
 		if ( pItem->IsEmptyItemOptionList() )
 		{
@@ -520,13 +520,13 @@ void	C_VS_UI_ITEM_LIST::Show()
 			TitleColor = g_pClientConfig->COLOR_NAME_ITEM_RARE_OPTION;
 			ShadowColor = 0;//RGB(0,0,31<<3);
 		}
-		// add by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		
 		else if(pCurrentFocusItem->GetItemOptionListCount() > 2)
 		{
 			TitleColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 			ShadowColor = g_pClientConfig->COLOR_NAME_VAMPIRE; //Red
 		}
-		// end by Sonic 2006.10.28 ������ʾ������װ��Ϊ��ɫ
+		
 		else
 		if ( pCurrentFocusItem->IsEmptyItemOptionList() )
 		{
@@ -597,7 +597,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 		}
 		int vx;
 		// Damage
-		if (pCurrentFocusItem->GetMaxDamage() != -1) // damage�� �ִ°�?
+		if (pCurrentFocusItem->GetMaxDamage() != -1) 
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_DAMAGE].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			sprintf(sz_buf, "%d~%d", pCurrentFocusItem->GetMinDamage(), pCurrentFocusItem->GetMaxDamage());				
@@ -605,7 +605,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 			strY += line_gap;
 		}			
 		// critical hit
-		if (pCurrentFocusItem->GetCriticalHit() != -1)//ũ��Ʈ�� ��Ʈ�� �ִ°�?
+		if (pCurrentFocusItem->GetCriticalHit() != -1)
 		{
 			vx = g_PrintColorStr(strX, strY, (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_CRITICALHIT].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 			sprintf(sz_buf, "%d", pCurrentFocusItem->GetCriticalHit());
@@ -744,7 +744,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; 
 					
 					if (pPartName)
 					{
@@ -788,7 +788,7 @@ void	C_VS_UI_ITEM_LIST::Show()
 					if(pCurrentFocusItem->IsVampireItem() && strstr(pPartName,"MP") != NULL)
 						*strstr(pPartName,"MP") = 'H';
 					
-					BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+					BYTE PlusPoint	= optionInfo.PlusPoint; 
 					
 					if (pPartName)
 					{
@@ -1133,7 +1133,7 @@ bool	C_VS_UI_ITEM_LIST::DeleteItem( DWORD ID )
 //------------------------------------------------------------------------------
 // C_VS_UI_IMAGE_NOTICE
 //
-// �˾�â�� ����.
+
 //------------------------------------------------------------------------------
 
 C_VS_UI_IMAGE_NOTICE::C_VS_UI_IMAGE_NOTICE()
@@ -1403,7 +1403,7 @@ C_VS_UI_BULLETIN_BOARD::C_VS_UI_BULLETIN_BOARD(const MItem *pItem)
 	AttrTopmost(true);
 	AttrKeyboardControl(true);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(169, 116, m_pC_back_spk->GetWidth(BUTTON_OK), 
@@ -1516,7 +1516,7 @@ void	C_VS_UI_BULLETIN_BOARD::WindowEventReceiver(id_t event)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 {
-	// ��ư�� ��Ȱ�������̸� ����!
+	
 	if(status == true) return;
 
 	switch (id)
@@ -1565,7 +1565,7 @@ void	C_VS_UI_BULLETIN_BOARD::Run(id_t id)
 			}
 			else
 			{
-				// ���׸��� �ֽ��ϴ�.
+				
 				gpC_base->SendMessage(UI_USE_XMAS_TREE, (int)(intptr_t)m_pItem, 1, NULL);
 			}
 		}
@@ -2119,7 +2119,7 @@ C_VS_UI_MIXING_FORGE::C_VS_UI_MIXING_FORGE( FORGE_CLASS forge_class, FORGE_TYPE 
 	AttrTopmost(true);
 	//AttrKeyboardControl(true);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(26, 123, m_pC_back_spk->GetWidth(BUTTON_OK), 
@@ -2308,7 +2308,7 @@ bool	C_VS_UI_MIXING_FORGE::MouseControl(UINT message, int _x, int _y)
 
 				if (loop == ITEM_REF_POINT_COUNT)
 				{
-					// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+					
 					const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 					int a, b;
 					switch (i)
@@ -2406,7 +2406,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 	m_pC_button_group->ShowDescription();
 	SHOW_WINDOW_ATTR;
 
-	//���� �����͵��� ����ص״ٰ� �Ѳ����� ��´�.
+	
 	std::vector<RECT>	vNumRect;
 	std::vector<int>	vNum;
 	
@@ -2438,7 +2438,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 		{
 			const MItem * p_item = g_pInventory->Get();
 
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -2450,12 +2450,12 @@ void	C_VS_UI_MIXING_FORGE::Show()
 			int print_y = item_y + p_item->GetGridHeight()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_Y - 12;
 			int print_x = item_x + p_item->GetGridWidth()*C_VS_UI_INVENTORY::GRID_UNIT_PIXEL_X-1;
 
-			// Item�� �����ִ� ���� ǥ��
+			
 			for (int j = 0; j < p_item->GetGridHeight(); j++)
 				for (int i = 0; i < p_item->GetGridWidth(); i++)
 				{
 					//------------------------------------------------------------
-					// ��ȯ�ҷ��� �������� ���
+					
 					//------------------------------------------------------------
 					if( m_v_check[check_index] )//if (p_item->IsTrade())
 					{
@@ -2491,7 +2491,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 					CIndexSprite::SetUsingColorSet(const_cast<MItem *>(p_item)->GetItemOptionColorSet(), 0);
 
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� ���
+				
 				//------------------------------------------------------------
 				if( m_v_check[check_index] )
 				{
@@ -2506,7 +2506,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 					}
 				}
 				//------------------------------------------------------------
-				// ��ȯ�ҷ��� �������� �ƴ� ���
+				
 				//------------------------------------------------------------
 				else
 				{
@@ -2514,7 +2514,7 @@ void	C_VS_UI_MIXING_FORGE::Show()
 				}
 			}
 
-			//������ ���� ���� alphabox ���ڴ� ���� �ʴ´� ������ �״ٰ� ���߿� ���Ƽ� �Ѳ����� ��´�
+			
 			if(p_item->IsPileItem() || p_item->IsChargeItem())
 			{
 				RECT rt;
@@ -2638,11 +2638,11 @@ bool	C_VS_UI_MIXING_FORGE::IsPixel(int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_MIXING_FORGE::Check
 //
-// ��ȯ�ҷ��� item�� üũ�Ѵ�. 
-// �̹� üũ�Ǿ��ִٸ�.. ����Ѵ�.
+
+
 //
-// grid_start_x, grid_start_y�� igrid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 {
@@ -2693,11 +2693,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 		if(m_p_select_item[0] != NULL && m_p_select_item[1] == NULL &&
 			abs(m_p_select_item[0]->GetGrade() - p_item->GetGrade())>2)
 			msg = UI_STRING_MESSAGE_CANNOT_MIXING_GRADE_VALUE;
-		/*********************************************************
-
-			TO DO : ���� �ɼ� üũ�� �� �ʿ� �� �� ���⿡ �߰�
-			
-		**********************************************************/
+		 
 //		else if(p_item->GetItemClass() == ITEM_CLASS_OUSTERS_WRISTLET)
 //		{
 //			ITEMTABLE_INFO::ELEMENTAL_TYPE eType = (*g_pItemTable)[p_item->GetItemClass()][p_item->GetItemType()].ElementalType;
@@ -2732,7 +2728,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 //		}
 //		//2004,04,27 sobeit check grade add end
 //		else if(p_item->GetItemClass() != ITEM_CLASS_OUSTERS_STONE)
-//		{// �ƿ콺���� ���ɼ��� �ƴ� �� �ɼ� üũ 
+
 //			if( !IsCorrectType( p_item->GetItemType() , p_item->GetItemClass()))
 //				msg = UI_STRING_MESSAGE_CANNOT_MIXING_ITEM_TYPE;
 //			else		
@@ -2746,10 +2742,10 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 //
 //		}
 //		else if(p_item->GetItemClass() == ITEM_CLASS_OUSTERS_STONE)
-//		{	// �ƿ콺���� ���ɼ� �� ��
-//			// 0~4 �� ���ɼ�
-//			// 5~9 �� ���ɼ�
-//			// 10~14 ���� ���ɼ�
+
+
+
+
 //			int nType1 = -1; int nType2 = -1;
 //			if(m_p_select_item[0] == NULL && m_p_select_item[1] != NULL)
 //			{
@@ -2791,7 +2787,7 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 #endif
 	if( m_p_select_item[0] == NULL && m_p_select_item[1] == NULL )
 	{
-		// �ͽ̰����� ����, ����,�Ƹ�,�Ǽ��� �´��� üũ
+		
 		if (p_item != NULL &&
 			p_item->IsUniqueItem() == false &&
 			p_item->GetItemOptionListCount() == 1 &&
@@ -2809,15 +2805,15 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 	else
 	if( m_p_select_item[0] == NULL && m_p_select_item[1] != NULL )
 	{
-		// ���� �������̸� Check Off
+		
 		if( p_item == m_p_select_item[1] )
 		{
 			m_p_select_item[1] = NULL;
 			b_check = true;
 		}
 		else
-		// ù��° �����۰� �����迭����, �ͽ̰����� �������� �˻�
-		// ���� �迭, �ٸ� �ɼ�, ����������� �ʵ�
+		
+		
 		if( p_item != NULL &&			
 			p_item->GetItemClass() == m_p_select_item[1]->GetItemClass() &&
 			p_item->GetItemType()  == m_p_select_item[1]->GetItemType() &&
@@ -2836,15 +2832,15 @@ bool C_VS_UI_MIXING_FORGE::Check(int grid_start_x, int grid_start_y)
 	else
 	if( m_p_select_item[0] != NULL && m_p_select_item[1] == NULL )
 	{
-		// ���� �������̸� Check Off
+		
 		if( p_item == m_p_select_item[0] )
 		{
 			m_p_select_item[0] = NULL;
 			b_check = true;
 		}
 		else
-		// ù��° �����۰� �����迭����, �ͽ̰����� �������� �˻�
-		// ���� �迭, �ٸ� �ɼ�, ����������� �ʵ�
+		
+		
 		if( p_item != NULL &&			
 			p_item->GetItemClass() == m_p_select_item[0]->GetItemClass() &&
 			p_item->GetItemType() == m_p_select_item[0]->GetItemType() &&
@@ -3186,7 +3182,7 @@ bool C_VS_UI_MIXING_FORGE::IsCorrectOption(MItem *p_item1, MItem *p_item2)
 //--------------------------------------------------------------------------------------
 // C_VS_UI_REMOVE_OPTION
 // 
-// ��������� �ɼ��� ����� ������.
+
 //--------------------------------------------------------------------------------------
 C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *pCurItem)
 {		
@@ -3211,7 +3207,7 @@ C_VS_UI_REMOVE_OPTION::C_VS_UI_REMOVE_OPTION(const MItem * pItem, const MItem *p
 
 	if(m_pMouseItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && m_pMouseItem->GetItemType() == 18)
 		m_IsBokjory = true;
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(ok_x, ok_y, 
@@ -3531,14 +3527,14 @@ void	C_VS_UI_REMOVE_OPTION::CheckOption()
 }
 
 
-// ���� ��� �ִ� ���������� ������ �������� �ɼ��� ������ �� �ִ��� �Ǻ��Ѵ�.
+
 bool
 C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem* pTItem)
 {
 	if( pItem == NULL || pTItem == NULL ||
 		pTItem->IsQuestItem() || pTItem->IsUniqueItem() || 
 		
-		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() != 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 2 || // �Ϲ������� 2�ɼ��� �ϳ��� ���� �Ѵ�.
+		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() != 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 2 || 
 		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && pItem->GetItemType() == 18 &&pTItem->GetItemClass() != ITEM_CLASS_PET_ITEM && pTItem->GetItemOptionListCount() != 1||
 		!(
 		pItem->GetItemClass() == ITEM_CLASS_MIXING_ITEM && 
@@ -3566,7 +3562,7 @@ C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem
 	else if(pItem->GetItemType() >= 15 && pItem->GetItemType() <= 17
 		|| pItem->GetItemType() == 24)
 		RemoveItemClass = CLASS_ACCESSORY;
-	else if(pItem->GetItemType() == 18) // ������
+	else if(pItem->GetItemType() == 18) 
 		RemoveItemClass = CLASS_ALL;
 	else return false;
 
@@ -3623,7 +3619,7 @@ C_VS_UI_REMOVE_OPTION::IsCanRemoveOption_Puritas(const MItem* pItem, const MItem
 	default :
 		return false;
 	}	
-	// ������� ������ Ŭ������ �����Ǿ���. ������ Ÿ����-_- �����ϸ� �ȴ�.
+	
 	
 	enum {TYPE_A,TYPE_B,TYPE_C, TYPE_D};
 	int RemoveItemType = TYPE_A + (pItem->GetItemType() - 9) %3;
@@ -3816,7 +3812,7 @@ C_VS_UI_OUSTERS_SKILL_INFO::C_VS_UI_OUSTERS_SKILL_INFO(int skillID, int window_x
 
 	SetSkillID(skillID);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = w-45, close_y = h-40;
@@ -3824,7 +3820,7 @@ C_VS_UI_OUSTERS_SKILL_INFO::C_VS_UI_OUSTERS_SKILL_INFO(int skillID, int window_x
 	int alpha_x = 30, alpha_y = h-40;
 	int learn_x = w-140, learn_y = h-43;
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_X), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_X), CLOSE_ID, this,C_GLOBAL_RESOURCE::AB_BUTTON_X));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(help_x, help_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), HELP_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION));
@@ -4536,14 +4532,14 @@ C_VS_UI_HORN::C_VS_UI_HORN(int currentZoneID)
 		Set(800/2-m_SPK.GetWidth(MAIN_WINDOW)/2, 600/2-m_SPK.GetHeight(MAIN_WINDOW)/2, m_SPK.GetWidth(MAIN_WINDOW), m_SPK.GetHeight(MAIN_WINDOW));
 	}
 
-	//�����ư
+	
 //	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = 217, close_y = 242;
 	int up_x = 114, up_y = 51;
 	int down_x = 114, down_y = 198;
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(up_x, up_y, m_SPK.GetWidth(UD_BUTTON), m_SPK.GetHeight(UD_BUTTON), UP_ID, this,UD_BUTTON));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(down_x, down_y, m_SPK.GetWidth(UD_BUTTON), m_SPK.GetHeight(UD_BUTTON), DOWN_ID, this,UD_BUTTON));
@@ -4677,7 +4673,7 @@ void	C_VS_UI_HORN::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 	
-	// ���� �� ������ 
+	
 	num = 0;	itr = portalList.begin();
 	while(itr != endItr)
 	{
@@ -4975,7 +4971,7 @@ C_VS_UI_MAILBOX::C_VS_UI_MAILBOX()
 
 	m_listCount = 10;
 	m_overcnt = NULL;
-	//�����ư
+	
 //	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group = NULL;
 	m_pC_scroll_bar = NULL;
@@ -5023,7 +5019,7 @@ void	C_VS_UI_MAILBOX::Start(TAB_ID tab_id)
 		break;
 	}
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(m_ptTab.x, m_ptTab.y, 62, 18, MAILTAB_ID, this, 0));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(m_ptTab.x+62, m_ptTab.y, 57, 18, HELPTAB_ID, this, 0));
@@ -5087,7 +5083,7 @@ void	C_VS_UI_MAILBOX::Show()
 	}
 	else
 	{
-		// ����Ʈ ��¿�
+		
 		if(gpC_base->m_p_DDSurface_back->Lock())
 		{
 			gpC_global_resource->DrawDialogLocked(x+10, y, w, h, GetAttributes()->alpha);
@@ -5130,7 +5126,7 @@ void	C_VS_UI_MAILBOX::Show()
 			m_SPK.BltLocked(x+title_x, y+title_y, titleSpriteID);
 			m_SPK.BltLocked(x+m_ptTab.x, y+m_ptTab.y, tabSpriteID);
 
-			// �ȿ� ���� ����Ʈ ���
+			
 			m_rtContents.x = w/2-m_SPK.GetWidth(contentsSpriteID)/2;
 			m_rtContents.y = 80;
 			m_rtContents.w = m_SPK.GetWidth(contentsSpriteID);
@@ -5164,7 +5160,7 @@ void	C_VS_UI_MAILBOX::Show()
 			gpC_base->m_p_DDSurface_back->Unlock();
 		}
 		
-		// ���� ����Ʈ ���� ���
+		
 		g_FL2_GetDC();
 
 		const int sender_x = 80, title_x = 145, line_plus = 4, date_x = 450;
@@ -5228,7 +5224,7 @@ bool	C_VS_UI_MAILBOX::MouseControl(UINT message, int _x, int _y)
 		{
 			m_focusContents = (_y-(m_rtContents.y+m_rtContents.h))/m_rtContents.h;
 
-			// ������ �Ѿ�� -1
+			
 			int indexSize = 0;
 			for(int mailIndex = 0; mailIndex < m_mail[m_currentTab].size(); mailIndex++)
 			{
@@ -5418,7 +5414,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	MAILVECTOR_TYPE::iterator itr = m_mail[TAB_HELP_ID].begin();
 	MAILVECTOR_TYPE::iterator endItr = m_mail[TAB_HELP_ID].end();
 
-	// ���� ������ ���� �׳� ����..
+	
 	while(itr != endItr)
 	{
 		if(itr->id == id)
@@ -5432,31 +5428,31 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(id);
 
 	
-	// ���� üũ
+	
 	switch(g_eRaceInterface)
 	{
-		case RACE_SLAYER: // �ɷ�ġ ������ üũ
+		case RACE_SLAYER: 
 			if(message.m_iAttrLow[RACE_SLAYER] != -1)
 			{
 				int Attr_sum = g_char_slot_ingame.STR_CUR + g_char_slot_ingame.DEX_CUR + g_char_slot_ingame.INT_CUR;
 				if(Attr_sum < message.m_iAttrLow[RACE_SLAYER] || Attr_sum > message.m_iAttrLow[RACE_SLAYER])
 					return;
 			}
-//			if(message.m_iLevelLow[RACE_SLAYER] != -1) // ������ üũ
+
 //			{
 //				int Lead_Lev = max(g_char_slot_ingame.DOMAIN_SWORD, max(g_char_slot_ingame.DOMAIN_BLADE, max(g_char_slot_ingame.DOMAIN_GUN, max(g_char_slot_ingame.DOMAIN_HEAL, g_char_slot_ingame.DOMAIN_ENCHANT))));
 //				if(Lead_Lev < message.m_iAttrLow[RACE_SLAYER] || Lead_Lev > message.m_iLevelMax[RACE_SLAYER])
 //					return;
 //			}
 			break;
-		case RACE_VAMPIRE: // ������ üũ
+		case RACE_VAMPIRE: 
 			if(message.m_iLevelLow[RACE_VAMPIRE] != -1)
 			{
 				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_VAMPIRE] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_VAMPIRE])
 					return;
 			}
 			break;
-		case RACE_OUSTERS: // ������ üũ
+		case RACE_OUSTERS: 
 			if(message.m_iLevelLow[RACE_OUSTERS] != -1)
 			{
 				if(g_char_slot_ingame.level < message.m_iLevelLow[RACE_OUSTERS] || g_char_slot_ingame.level > message.m_iLevelMax[RACE_OUSTERS])
@@ -5471,7 +5467,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 	
 	if(nSender<0 || nSender >= nMaxSenderSize)
 	{
-		// ���� ��� �Է� ���߰ų�..���� �̻� �� �� 
+		
 		strSender = "";  
 	}
 	else
@@ -5501,7 +5497,7 @@ void	C_VS_UI_MAILBOX::AddHelpMail(DWORD id, bool open)
 		mail.contents = message.m_strDetail[g_eRaceInterface];
 		break;
 	}
-	if(!mail.title.GetLength()) //������ ������...����..
+	if(!mail.title.GetLength()) 
 		return;
 	mail.show = true;
 	mail.mark = false;
@@ -5535,9 +5531,9 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 	std::string dateString;
 	sprintf(szTemp, "%d", date/100);
 	
-	// �տ� �⵵�� ���� 03 �̷������� ���� �տ� 0�� ���µ� ����Ҷ� 03�� �̷��� ������ �ϹǷ� �⵵�� ���ڸ����� �տ� 0�� �ٿ��ش�.
+	
 //	if(date < 10000000)
-//		// �⵵�� ���ڸ��϶�
+
 //	{
 //		dateString = "0";
 //	}
@@ -5557,7 +5553,7 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 	{
 		if(itr->id == id)
 		{
-			// ��¥�� �޶�
+			
 			if(strcmp(itr->date.GetString(), dateString.c_str()) != 0)
 			{
 				itr->date = dateString.c_str();
@@ -5599,9 +5595,9 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 //	std::string dateString;
 //	sprintf(szTemp, "%d", date/100);
 //	
-//	// �տ� �⵵�� ���� 03 �̷������� ���� �տ� 0�� ���µ� ����Ҷ� 03�� �̷��� ������ �ϹǷ� �⵵�� ���ڸ����� �տ� 0�� �ٿ��ش�.
+
 ////	if(date < 10000000)
-////		// �⵵�� ���ڸ��϶�
+
 ////	{
 ////		dateString = "0";
 ////	}
@@ -5621,7 +5617,7 @@ void	C_VS_UI_MAILBOX::AddMail(TAB_ID tab_id, DWORD id, SIZE windowSize, const ch
 //	{
 //		if(itr->id == id)
 //		{
-//			// ��¥�� �޶�
+
 //			if(strcmp(itr->date.GetString(), dateString.c_str()) != 0)
 //			{
 //				itr->date = dateString.c_str();
@@ -5736,7 +5732,7 @@ void	C_VS_UI_MAILBOX::ReadMail(TAB_ID tabID, DWORD id)
 	MAILVECTOR_TYPE::iterator itr = m_mail[tabID].begin();
 	MAILVECTOR_TYPE::iterator endItr = m_mail[tabID].end();
 
-	//by csm ���� �о�帰 id �� �ܺο��� �ʿ��ؼ� 
+	
 	SetCurId(id);
 	DIALOG_MENU d_menu[] = {	{(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_JOIN_ACCEPT].GetString(), 0},
 								{(*g_pGameStringTable)[UI_STRING_MESSAGE_TEAM_INFO_JOIN_DENY].GetString(), 1},
@@ -5761,11 +5757,11 @@ void	C_VS_UI_MAILBOX::ReadMail(TAB_ID tabID, DWORD id)
 
 			if(itr->contents.GetLength() == 0)
 			{
-				// �޼��� ������
+				
 			}
 			else
 			{
-				if(tabID == TAB_HELP_ID) //HelPMessage ���
+				if(tabID == TAB_HELP_ID) 
 				{
 					//gC_vs_ui.RunHelpDesc(m_mail[tabID][id].contents ,m_mail[tabID][id].title , id);
 					gC_vs_ui.RunHelpDesc((itr)->contents,(itr)->title, id);
@@ -5861,7 +5857,7 @@ bool C_VS_UI_MAILBOX::C_VS_UI_MAIL::LoadFromFile(std::ifstream &file)
 	contents.LoadFromFile(file);
 	date.LoadFromFile(file);
 	file.read((char *)&windowSize, sizeof(SIZE));
-	if(id == 9) // ���Ͽ� ��忡 ���ѰŸ� �ε��ʴ´�.
+	if(id == 9) 
 		return false;
 	return true;
 }
@@ -5973,14 +5969,14 @@ C_VS_UI_FINDING_MINE::C_VS_UI_FINDING_MINE()
 
 // 	m_SPK.Open(SPK_HORN);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 
 	int close_x = 217, close_y = 242;
 	int start_x = 30, start_y = BLOCK_START_Y-41;
 ;
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(start_x, start_y, 26, 26, START_ID, this, 0));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(BLOCK_START_X, BLOCK_START_X, 42, 26, LEVEL0_ID, this, 0));
@@ -6099,7 +6095,7 @@ void	C_VS_UI_FINDING_MINE::Finish()
 
 void	C_VS_UI_FINDING_MINE::Show()
 {
-	// �⺻ ��� �����
+	
 	RECT rect = {x, y, x+w, y+h};
 	gpC_base->m_p_DDSurface_back->FillRect(&rect, GRAY);
 
@@ -6445,9 +6441,9 @@ void	C_VS_UI_FINDING_MINE::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	{
 		char szGameLevel[GAMELEVEL_MAX][16] = 
 		{
-			"�ʱ�",
-			"�߱�",
-			"����",
+			"",
+			"",
+			"",
 		};
 
 		g_PrintColorStr(smile_x+5, smile_y+6, szGameLevel[p_button->GetID()-LEVEL0_ID], gpC_base->m_item_name_pi, BLACK);
@@ -6505,7 +6501,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 {
 	RECT drawRect = {rect.left, rect.top, rect.right, rect.bottom};
 	
-	// �ٱ� �׵θ�
+	
 	drawRect.bottom = drawRect.top+depth;
 	gpC_base->m_p_DDSurface_back->FillRect(&drawRect, color);
 	
@@ -6526,7 +6522,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 
 	for(int i = 0; i < depth; i++)
 	{
-		// ���
+		
 		drawRect.left = rect.right-i-1;
 		drawRect.top = rect.top+i;
 		drawRect.right = drawRect.left+1;
@@ -6539,7 +6535,7 @@ void C_VS_UI_FINDING_MINE::DrawRect(RECT &rect, int depth, WORD color, WORD colo
 		drawRect.bottom = drawRect.top+1;
 		gpC_base->m_p_DDSurface_back->FillRect(&drawRect, color);
 
-		// ����
+		
 		drawRect.left = rect.left+i;
 		drawRect.top = rect.bottom-i-1;
 		drawRect.right = drawRect.left+1;
@@ -6576,19 +6572,19 @@ void	C_VS_UI_FINDING_MINE::ClearBlockFocus(int x, int y, int w, int h)
 void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 {
 
-	// ������ ������� return
+	
 	if(x < 0 || y < 0 || x >= m_boardSize.cx || y >= m_boardSize.cy)
 		return;
 
-	// �����غ����̳� �������ΰ�찡 �ƴϸ� return
+	
 	if(m_status == GAMESTATUS_DIE || m_status == GAMESTATUS_CLEAR)
 	{
 		return;
 	}
 	
-	if(bCenter)	// ��� ��ư ��������
+	if(bCenter)	
 	{
-		// ���� ���°� �ƴϸ� return
+		
 		if(m_Blocks[y*m_boardSize.cx+x].status != BLOCKSTATUS_OPEN)
 			return;
 
@@ -6602,11 +6598,11 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 			}
 		}
 
-		// ������ ��� ������ num�� Ʋ���� return
+		
 		if(flagSum != m_Blocks[y*m_boardSize.cx+x].num)
 			return;
 
-		// ���� 8���� ����
+		
 		OpenBlock(x-1, y-1);
 		OpenBlock(x, y-1);
 		OpenBlock(x+1, y-1);
@@ -6617,9 +6613,9 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 		OpenBlock(x+1, y+1);
 
 	}
-	else	// ���ʹ�ư ��������
+	else	
 	{
-		// �̹� �����ְų� ��� ���¸� return
+		
 		if(m_Blocks[y*m_boardSize.cx+x].status == BLOCKSTATUS_OPEN || m_Blocks[y*m_boardSize.cx+x].status == BLOCKSTATUS_FLAG)
 			return;
 
@@ -6629,16 +6625,16 @@ void	C_VS_UI_FINDING_MINE::OpenBlock(int x, int y, bool bCenter)
 			m_startTime = timeGetTime();
 		}
 
-		// ����
+		
 		m_Blocks[y*m_boardSize.cx+x].status = BLOCKSTATUS_OPEN;
 		
-		// ���ڰ� ������ ���̴���
+		
 		if(m_Blocks[y*m_boardSize.cx+x].num == -1)
 		{
 			m_status = GAMESTATUS_DIE;
 			m_startTime = timeGetTime()-m_startTime;
 		}
-		else if(m_Blocks[y*m_boardSize.cx+x].num == 0)	// ���ڰ� ������ ���� ���ϵ��� ����
+		else if(m_Blocks[y*m_boardSize.cx+x].num == 0)	
 		{
 			OpenBlock(x-1, y-1);
 			OpenBlock(x, y-1);
@@ -6677,7 +6673,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 	switch(block.status)
 	{
 	case BLOCKSTATUS_CLOSE:
-		if(m_status == GAMESTATUS_DIE && block.num == -1)	// ���ڱ׸���
+		if(m_status == GAMESTATUS_DIE && block.num == -1)	
 		{
 			gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 			gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
@@ -6711,7 +6707,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 		break;
 		
 	case BLOCKSTATUS_QUESTION:
-		if(m_status == GAMESTATUS_DIE && block.num == -1)	// ���ڱ׸���
+		if(m_status == GAMESTATUS_DIE && block.num == -1)	
 		{
 			gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 			gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
@@ -6751,7 +6747,7 @@ void	C_VS_UI_FINDING_MINE::DrawBlock(int x, int y, BLOCK_STRUCT &block)
 		gpC_base->m_p_DDSurface_back->HLine(rect.left, rect.top, rect.right-rect.left, DARKGRAY);
 		gpC_base->m_p_DDSurface_back->VLine(rect.left, rect.top, rect.bottom-rect.top, DARKGRAY);
 		
-		if(block.num == -1)	// ���ڱ׸���
+		if(block.num == -1)	
 		{
 			RECT fillRect = {rect.left+1, rect.top+1, rect.right, rect.bottom };
 			gpC_base->m_p_DDSurface_back->FillRect(&fillRect, RED);
@@ -6862,7 +6858,7 @@ void C_VS_UI_FINDING_MINE::DrawNumbers(int x, int y, int number)
 
 void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 {
-	// �� ���� 
+	
 	if(flag & 0x40)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+2, y+1, 9, LIGHTRED);
@@ -6882,7 +6878,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->HLine(x+7, y+3, 1, DARKRED);
 	}
 
-	// ���� ����
+	
 	if(flag & 0x20)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+1, y+2, 9, LIGHTRED);
@@ -6905,7 +6901,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+3, y+8, 1, DARKRED);
 	}
 
-	// ���� ������
+	
 	if(flag & 0x10)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+11, y+2, 9, LIGHTRED);
@@ -6928,7 +6924,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+9, y+8, 1, DARKRED);
 	}
 
-	// ���
+	
 	if(flag & 0x08)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+3, y+10, 7, LIGHTRED);
@@ -6949,7 +6945,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->HLine(x+8, y+12, 1, DARKRED);
 	}
 
-	// �Ʒ� ����
+	
 	if(flag & 0x04)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+1, y+12, 9, LIGHTRED);
@@ -6972,7 +6968,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+3, y+18, 1, DARKRED);
 	}
 	
-	// �Ʒ� ������
+	
 	if(flag & 0x02)
 	{
 		gpC_base->m_p_DDSurface_back->VLine(x+11, y+12, 9, LIGHTRED);
@@ -6995,7 +6991,7 @@ void C_VS_UI_FINDING_MINE::DrawNumber(int x, int y, BYTE flag)
 		gpC_base->m_p_DDSurface_back->VLine(x+9, y+18, 1, DARKRED);
 	}
 
-	// �� �̷�
+	
 	if(flag & 0x01)
 	{
 		gpC_base->m_p_DDSurface_back->HLine(x+2, y+21, 9, LIGHTRED);
@@ -7114,7 +7110,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 
 		if(GetMapSize() > 0 )
 		{
-			// ���带 �׸��� 		
+			
 			int index=0;
 			for(int tx=0;tx<GetMapSize();tx++)
 			{
@@ -7186,18 +7182,18 @@ void	C_VS_UI_ARROW_TILE::Show()
 				break;
 			}
 			m_SPK.BltLocked(startX+ArrowSizeX*GetMapSize()+m_SPK.GetWidth(SPK_GOAL)-2, startY+ArrowSizeY*GetMapSize(),SPK_IN_BOX_BOTTOM);
-			if( m_Player.X == -1 && m_Player.Y == 0 )		// �÷��̾ ���� �غ����̸�
+			if( m_Player.X == -1 && m_Player.Y == 0 )		
 			{
 				m_SPK.BltLocked( startX + ( m_SPK.GetWidth(SPK_START)/2 - m_SPK.GetWidth(myspr+2)/2) ,
 					startY + (m_SPK.GetHeight(SPK_START)/2 - m_SPK.GetHeight(myspr+2)/2), myspr+2 );
 			} else
-			if( m_Player.X == GetMapSize() && m_Player.Y == GetMapSize() -1 )		// �÷��̾ ��ǥ ������ �������� ���
+			if( m_Player.X == GetMapSize() && m_Player.Y == GetMapSize() -1 )		
 			{
 				m_SPK.BltLocked( startX + m_SPK.GetWidth(SPK_GOAL)+GetMapSize() * ArrowSizeX + m_SPK.GetWidth(SPK_START) + (m_SPK.GetWidth(SPK_GOAL)/2 - m_SPK.GetWidth(myspr+2)/2) ,
 					startY + (GetMapSize() -1) * ArrowSizeY + (m_SPK.GetHeight(SPK_GOAL)/2 - m_SPK.GetHeight(myspr+2)/2), myspr+2 );
 				m_Player.Status = PLAYER_STATUS_FINISH;
 			} else
-			{												// �Ϲ� �������̸�
+			{												
 				if( m_Player.Status != PLAYER_STATUS_FINISH )
 				{
 					int sprid = myspr + GetDirection(&m_Player);
@@ -7259,7 +7255,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 //		wsprintf(szTemp,"%d.%d",m_MyBestScore/100, (m_MyBestScore%100) );
 //		g_PrintColorStrOut(x+440,y+53,szTemp, gpC_base->m_item_name_pi, RGB_WHITE, RGB_BLACK);
 
-		// �ð� ǥ��		
+		
 		if( m_Player.Status != PLAYER_STATUS_READY )
 		{
 			if( m_Player.Status == PLAYER_STATUS_DIE || m_Player.Status == PLAYER_STATUS_FINISH )
@@ -7275,7 +7271,7 @@ void	C_VS_UI_ARROW_TILE::Show()
 			}
 		}
 
-		// �ְ� ���ǥ��		
+		
 		wsprintf(szTemp, "%s Best Score : %s %d.%d",g_pUserInformation->WorldName.GetString(),
 			m_topName.c_str(), m_topScore/100, (m_topScore%100));
 		g_PrintColorStrOut(x+120, y+20, szTemp,gpC_base->m_item_name_pi, RGB_WHITE,RGB_BLACK);
@@ -7443,7 +7439,7 @@ void	C_VS_UI_ARROW_TILE::ProcessGameMain()
 		m_Stage = GAME_STAGE(m_Stage+1);
 		if(m_Stage == STAGE_END )
 		{
-			// ����
+			
 //			gpC_base->SendMessage(UI_CLEAR_STAGE,MAKELONG(WORD(m_Stage-STAGE_5X5),0), m_Player.EndTime-m_Player.StartTime);
 			m_Stage = GAME_STAGE(m_Stage);
 
@@ -7476,12 +7472,12 @@ void	C_VS_UI_ARROW_TILE::ProcessTile()
 
 void	C_VS_UI_ARROW_TILE::ProcessTimeExpired()
 {
-	// ���� �ð������� ����.
+	
 }
 
 void	C_VS_UI_ARROW_TILE::ProcessRotation()
 {
-	// ȸ���κ� ó��.
+	
 }
 
 void	C_VS_UI_ARROW_TILE::ProcessCharacter()
@@ -7499,7 +7495,7 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 		
 		if( m_Player.X == Monster->X && m_Player.Y == Monster->Y )
 		{
-			// ���� ��ġ�� ������ ����
+			
 			
 			SetDie();
 		}
@@ -7529,7 +7525,7 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 	if( m_Player.X == 0 && m_Player.bCanRotation == false && GetDirection(&m_Player) == DIRECTION_LEFT 
 		&&	m_Player.Status != PLAYER_STATUS_READY)
 	{
-		// ĳ���� ����
+		
 		SetDie();
 	}
 	else if ( m_Player.Y == 0 && m_Player.bCanRotation == false && GetDirection(&m_Player) == DIRECTION_UP 
@@ -7549,15 +7545,15 @@ void	C_VS_UI_ARROW_TILE::ProcessCharacter()
 	}
 }
 
-void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
+void	C_VS_UI_ARROW_TILE::ActionMove()					
 {
 	if( m_Player.Status == PLAYER_STATUS_DIE || !m_bCanStart)
 		return;
 	
-	// ������̸�
+	
 	if( m_Player.X == -1 && m_Player.Y == 0 || m_Player.Status == PLAYER_STATUS_READY)
 	{
-		// ����
+		
 		m_Player.X = 0;
 		m_Player.Y = 0;
 		m_Player.bCanRotation = true;
@@ -7566,7 +7562,7 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
 	} 
 	else if( m_Player.X == GetMapSize() -1 && m_Player.Y == GetMapSize() -1 && GetDirection(&m_Player) == DIRECTION_RIGHT ) 
 	{
-		// �������̸�
+		
 		m_Player.EndTime = timeGetTime();
 		m_Player.X ++;
 	} 
@@ -7653,7 +7649,7 @@ void	C_VS_UI_ARROW_TILE::ActionMove()					// Move ��ư Ŭ����
 	}
 }
 
-void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���� 1�� ������
+void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					
 {
 	if( m_Stage == STAGE_NONE || m_Stage == STAGE_END || !m_Player.bCanRotation || m_Player.Status == PLAYER_STATUS_DIE)
 		return;
@@ -7669,7 +7665,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 		break;
 	}
 
-	// ���� �밡�� ȸ��
+	
 	if( Value != 0 )
 	{
 		for(int i=0;i<GetMapSize()*GetMapSize();i++)
@@ -7680,7 +7676,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 				m_Tile[i].Direction -= MAX_DIRECTION;
 			if(m_Tile[i].Direction < 0 )
 				m_Tile[i].Direction += MAX_DIRECTION;
-			if( temp < m_Tile[i].Direction )	// ���������� ���� ���
+			if( temp < m_Tile[i].Direction )	
 			{
 				m_Tile[i].RemainRotationAngle = 3;
 				m_Tile[i].AniFrame[2] = SPK_ARROW_UP+(temp*4) +1;
@@ -7688,7 +7684,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 				m_Tile[i].AniFrame[0] = SPK_ARROW_UP+(temp*4) +3;
 			} else
 			{
-				// �������� ���� ���
+				
 				if( temp == DIRECTION_RIGHT )
 				{
 					m_Tile[i].RemainRotationAngle = 3;
@@ -7710,7 +7706,7 @@ void	C_VS_UI_ARROW_TILE::ActionRotation(BYTE Direction)					// 0�� ���
 
 void	C_VS_UI_ARROW_TILE::MoveMonster()
 {
-	// ���Ͱ� ������ �ð� -_- ��� �ʿ� ���µ� ��
+	
 	m_TimeMoveMonster = timeGetTime();
 	
 	std::list<S_CHARACTER*>::const_iterator itr = m_MonsterList.begin();
@@ -7750,7 +7746,7 @@ bool	C_VS_UI_ARROW_TILE::MoveRIGHT(S_CHARACTER *Character)
 	{
 		Character->X ++;
 
-		// �ⱸ���� �Ǻ��Ѵ�.
+		
 		if(Character->Y == GetMapSize() - 1 && Character->X == GetMapSize() && Character->PlayerType == PLAYER_USER )
 		{
 			m_Player.Status = PLAYER_STATUS_FINISH;
@@ -8026,7 +8022,7 @@ bool	C_VS_UI_ARROW_TILE::TimerMonsterMove(DWORD len)
 
 bool	C_VS_UI_ARROW_TILE::IsExistMonster(short id, int x, int y )
 {
-	// ���ͳ����� �浹�ϴ°� �������-_- ��
+	
 	if( id == 0 )
 		return false;
 	
@@ -8663,7 +8659,7 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 
 			if ( m_MineBoard[x][y].isMine )
 			{
-				/// �ٿ���
+				
 				m_bDead = true;
 				g_StartGameOverMessage(-1,-1);
 //				gpC_base->SendMessage(UI_REQUEST_FORCE_DIE, 11);
@@ -8674,7 +8670,7 @@ void C_VS_UI_CRAZY_MINE::ActionDoubleClick(int x, int y)
 		}
 	}
 
-	m_LatestClickTime = GetTickCount() - 5000;				// -_- 5�������� �س��´�~
+	m_LatestClickTime = GetTickCount() - 5000;				
 
 	CheckSuccess();
 }
@@ -8734,7 +8730,7 @@ C_VS_UI_QUEST_INVENTORY::C_VS_UI_QUEST_INVENTORY(const MItem* pItem)
 	Set(80, g_GameRect.bottom/2 - m_SPK.GetHeight(INVENTORY_WINDOW)/2, m_SPK.GetWidth(INVENTORY_WINDOW), m_SPK.GetHeight(INVENTORY_WINDOW));
 	
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(help_button_offset_x, help_button_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION), HELP_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_QUESTION));
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_button_offset_x, close_button_offset_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_X), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_X), CLOSE_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_X));	
@@ -8834,7 +8830,7 @@ void	C_VS_UI_QUEST_INVENTORY::WindowEventReceiver(id_t event)
 //-----------------------------------------------------------------------------
 void	C_VS_UI_QUEST_INVENTORY::Run(id_t id)
 {
-	// ��ư�� ��Ȱ�������̸� ����!
+	
 	switch (id)
 	{
 	case OK_ID:		
@@ -9024,14 +9020,14 @@ void	C_VS_UI_QUEST_INVENTORY::DropToQuestInventory( const MItem* pItem)
 	if(! CanDropToInventory( pItem ) || m_CurMousePos < 0 || m_CurMousePos >= 60)
 		return;
 
-	// �������� ���� �� �ִ�.
+	
 
 	gpC_base->SendMessage(UI_ADD_ITEM_TO_CODE_SHEET, MAKELONG(m_CurMousePos/10,m_CurMousePos%10), pItem->GetItemType() - minType ,(void*) m_pCodeSheet );
 }
 
 bool	C_VS_UI_QUEST_INVENTORY::CanDropToInventory(const MItem* pItem)
 {
-	// �� üũ�غ���.
+	
 	const int minType = 22;
 	
 	int InvenX = m_CurMousePos%10;
@@ -9044,31 +9040,31 @@ bool	C_VS_UI_QUEST_INVENTORY::CanDropToInventory(const MItem* pItem)
 	if( InvenX < 0 || InvenX >= 10 || InvenY < 0 || InvenY >= 6 )
 		return false;
 
-	// 4���� ������ üũ�ؾ� �Ѵ�. ���� ������ Ÿ���� ������ ��ȿ!
+	
 	bool	bCanDrop = true;
 
 	if( m_Inventory[InvenY*10+InvenX] != -1 )
 		return false;
 
-	// ���� -_-
+	
 	if( InvenX > 0 )
 	{
 		 if( m_Inventory[InvenY*10+InvenX-1] == ItemType )
 			 bCanDrop = false;
 	}
-	// ������ -_-
+	
 	if( InvenX < 9 )
 	{
 		if( m_Inventory[InvenY*10+InvenX+1] == ItemType )
 			 bCanDrop = false;		
 	}
-	// ���� -_-
+	
 	if( InvenY > 0 )
 	{
 		if( m_Inventory[(InvenY-1)*10+InvenX] == ItemType )
 			 bCanDrop = false;		
 	}
-	// �Ʒ��� -_-
+	
 	if( InvenY < 5 )
 	{
 		if( m_Inventory[(InvenY+1)*10+InvenX] == ItemType )
@@ -9094,7 +9090,7 @@ C_VS_UI_STATUS_CTF::C_VS_UI_STATUS_CTF()
 	
 	g_RegisterWindow(this);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(248, 7, m_pC_spk.GetWidth(HELP_BUTTON), 
@@ -9353,7 +9349,7 @@ void	C_VS_UI_STATUS_CTF::Show()
 		if( m_num_flag[0] == m_num_flag[1] && m_num_flag[1] == m_num_flag[2] )
 			topscore = -1;
 		
-		// �����ð� ���
+		
 		char szBuffer[64],min[5],sec[5];
 		DWORD RemainTime = m_finish_time - timeGetTime();
 		if( (RemainTime/1000)/60/60 > 3 )
@@ -9683,10 +9679,10 @@ C_VS_UI_PET_INFO::C_VS_UI_PET_INFO(PETINFO *petInfo)
 		m_IsWolverine = true;
 	else
 		m_IsWolverine = false;
-	// add by coffee 2006-12-21  ����ʥ����������
+	
 	//if (m_PetInfo.ITEM_TYPE==6)
 	//{
-	//	m_PetInfo.NAME="¹";
+	
 	//}
 	switch(m_PetInfo.ITEM_TYPE)
 	{
@@ -9748,7 +9744,7 @@ C_VS_UI_PET_INFO::C_VS_UI_PET_INFO(PETINFO *petInfo)
 
 	AttrPin(true);
 	
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(223, h-19, m_pC_spk.GetWidth(CLOSE_BUTTON), m_pC_spk.GetHeight(CLOSE_BUTTON), CLOSE_ID, this, CLOSE_BUTTON));
@@ -9797,12 +9793,12 @@ C_VS_UI_PET_INFO::~C_VS_UI_PET_INFO()
 void	C_VS_UI_PET_INFO::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 {	
 	const char* description_msg[6] = {
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_PET_INFO].GetString(), //"�ֿϵ��� ����â�� �ݽ��ϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT_PET].GetString(), //"2�� �ɷ��� �ο��� �� �ֽ��ϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_ENCHANT_PET].GetString(), //"������ 2�� �ɷ��� �ο��� �� �����ϴ�."
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_3RD_ENCHANT_PET].GetString(),	//"3�� �ɷ��� �ο��� �� �ֽ��ϴ�.";	
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_3RD_ENCHANT_PET].GetString(),	//"������ 3�� �ɷ��� �ο��� �� �����ϴ�."
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString()	//] = "���� �г����� �����մϴ�.";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_PET_INFO].GetString(), 
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_ENCHANT_PET].GetString(), 
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_ENCHANT_PET].GetString(), 
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CAN_3RD_ENCHANT_PET].GetString(),	
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CANNOT_3RD_ENCHANT_PET].GetString(),	
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString()	
 	};
 	
 	switch( p_button->GetID() )
@@ -9827,7 +9823,7 @@ void	C_VS_UI_PET_INFO::ShowButtonDescription(C_VS_UI_EVENT_BUTTON * p_button)
 			{
 				if(!m_PetInfo.ATTACK)
 				{ 
-					if(m_PetInfo.CUT_HEAD && m_PetInfo.ITEM_TYPE >2) // 2�� �길 3���ɷ�(���� or ����)�� �ִ�
+					if(m_PetInfo.CUT_HEAD && m_PetInfo.ITEM_TYPE >2) 
 						g_descriptor_manager.Set(DID_INFO, x+p_button->x, y+p_button->y, (void *)description_msg[4],0,0);
 					else
 						g_descriptor_manager.Set(DID_INFO, x+p_button->x, y+p_button->y, (void *)description_msg[2],0,0);
@@ -9939,7 +9935,7 @@ bool	C_VS_UI_PET_INFO::MouseControl(UINT message, int _x, int _y)
 			
 			std::string tempStr;
 
-			// ���� ����ġ
+			
 			if( Exp.IsInRect( _x, _y ) && m_PetInfo.LEVEL < 50 )
 			{
 				sprintf( sztemp, "%d", m_PetInfo.LEVEL );
@@ -10048,7 +10044,7 @@ void	C_VS_UI_PET_INFO::Show()
 	}
 
 	int hpday_y = y+166, hptime_y = y+180, hp_x = x+117;
-	// hptime �� �д����� ������ �ִ´�.
+	
 	int hptime = m_PetInfo.HP%(60*24), hpday = m_PetInfo.HP/(60*24);
 
 
@@ -10057,13 +10053,13 @@ void	C_VS_UI_PET_INFO::Show()
 	{
 		m_pC_spk.BltLocked(x+m_MainWindowPosition.x, y+m_MainWindowPosition.y, MAIN_WINDOW);
 
-		// pet ��
+		
 		int PetFaceLevel = max(0,m_PetInfo.LEVEL/10 -1);
 		int PetType  = max( 0, (m_PetInfo.ITEM_TYPE-2));
 		int faceSpriteID = max(0, PetFaceLevel+(PetType*5));
 		m_pC_pet_face.BltLocked(x+48, y+68, faceSpriteID);
 
-		// pet ����
+		
 		TYPE_FRAMEID frame_id = (*g_pItemTable)[ITEM_CLASS_PET_FOOD][m_PetInfo.FOODTYPE].InventoryFrameID;
 		int item_x = x+73-gpC_item->GetWidth(frame_id)/2, item_y = y+173-gpC_item->GetHeight(frame_id)/2;
 		gpC_item->BltLocked(item_x, item_y, frame_id);
@@ -10074,7 +10070,7 @@ void	C_VS_UI_PET_INFO::Show()
 
 		if(hpday > 0 && hpday <= 30)
 		{
-			Rect rect(0, 0, m_pC_spk.GetWidth(HP_DAY_BAR)*hpday/30, m_pC_spk.GetHeight(HP_DAY_BAR));	// 30�� �ƽ�
+			Rect rect(0, 0, m_pC_spk.GetWidth(HP_DAY_BAR)*hpday/30, m_pC_spk.GetHeight(HP_DAY_BAR));	
 			m_pC_spk.BltLockedClip(hp_x+1, hpday_y+1, rect, HP_DAY_BAR);
 		}
 
@@ -10094,7 +10090,7 @@ void	C_VS_UI_PET_INFO::Show()
 	{
 		COLORREF fontColor = RGB(255, 255, 120);
 		
-		// �� �̸�
+		
 		const int name_x = x+130, name_y = y+25;
 		std::string petName;
 //		if(m_PetInfo.NICK_NAME.size())
@@ -10106,24 +10102,24 @@ void	C_VS_UI_PET_INFO::Show()
 		if(!m_IsWolverine && m_PetInfo.NICK_NAME.size())
 			g_PrintColorStr(x +50, name_y+ 202, m_PetInfo.NICK_NAME.c_str(), gpC_base->m_char_chat_pi, RGB_YELLOW);
 
-		// �Ӽ�
-		// ���� enchant level�� ��Ӽ����� ����Ѵ�
-		// enchant level �� ��þƮ�ʹ� �ƹ� ���� ������ ����� ChargeItem�� Charge���� ���� �� ����
-		// ��� �������� Enchant Level�� ������ ������ Number�� �����Ѵ�. �׷��� ���� �����ۿ���
-		// GetEnchantLevel�� �ص� �ƹ��͵� �ȳ��´�.
-		// �װ� ���� �����۸��̰� ���� �׳� EnchantLevel �״�� ����
-		// �� �Ӽ� ��ġ�� Silver���� ����. 
+		
+		
+		
+		
+		
+		
+		
 
 		int px;
 
 		char sz_buf[512];
 
-		// ����
+		
 		sprintf(sz_buf, "%d", m_PetInfo.LEVEL);
 		int level_x = x+230-g_GetStringWidth(sz_buf, gpC_base->m_char_chat_large_pi.hfont)/2, level_y = y+23;
 		g_PrintColorStr(level_x, level_y, sz_buf, gpC_base->m_char_chat_large_pi, RGB_YELLOW);
 
-		// �� �Ӽ�
+		
 		px = g_PrintColorStr(hp_x, str_y[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_ATTR].GetString(), gpC_base->m_item_desc_pi, ITEM_DESC_RGB);
 		if(m_PetInfo.ATTR_VALUE > 0)
 		{
@@ -10135,7 +10131,7 @@ void	C_VS_UI_PET_INFO::Show()
 			g_PrintColorStr(px, str_y[0], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 		}
 
-		// �ɼ�
+		
 		px = g_PrintColorStr(hp_x, str_y[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_OPTION].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		if(m_PetInfo.OPTION >= 0)
 		{
@@ -10151,7 +10147,7 @@ void	C_VS_UI_PET_INFO::Show()
 					*strstr(pPartName,"MP") = 'E';
 			}
 			
-			BYTE PlusPoint	= optionInfo.PlusPoint; // ����Ǵ� ��ġ
+			BYTE PlusPoint	= optionInfo.PlusPoint; 
 			
 			if (pPartName)
 			{
@@ -10178,19 +10174,19 @@ void	C_VS_UI_PET_INFO::Show()
 		{
 			g_PrintColorStr(px, str_y[1], (*g_pGameStringTable)[UI_STRING_MESSAGE_DESC_NOT_EXIST].GetString(), gpC_base->m_chatting_pi, RGB_WHITE);
 		}
-		// 2���ɷ�
+		
 		if(m_PetInfo.CUT_HEAD)
 			g_PrintColorStr(hp_x, str_y[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CAN_CUT_HEAD].GetString(), gpC_base->m_chatting_pi, RGB_YELLOW);
 		else
 			g_PrintColorStr(hp_x, str_y[2], (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_CANNOT_CUT_HEAD].GetString(), gpC_base->m_chatting_pi, RGB_RED);
 
-		// ����ġ
+		
 		g_PrintColorStr(hp_x, str_y[3], (*g_pGameStringTable)[UI_STRING_MESSAGE_LEFT_EXP].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 
-		// ����ġ ��ġ
+		
 		g_PrintColorStr(hp_x, str_y[4], g_GetNumberString(m_PetInfo.EXP_REMAIN).c_str(), gpC_base->m_chatting_pi, RGB_WHITE);
 
-		// ���� ���̾�
+		
 		g_PrintColorStr(hp_x, hpday_y-15, (*g_pGameStringTable)[UI_STRING_MESSAGE_PET_DESC_DURABILITY_2].GetString(), gpC_base->m_chatting_pi, ITEM_DESC_RGB);
 		
 		// hp
@@ -10295,8 +10291,8 @@ C_VS_UI_HELPDESC::C_VS_UI_HELPDESC(const char *detail,const char *title,DWORD id
 	int window_w = 500, window_h = 450;
 	Set(g_GameRect.right/2-window_w/2, g_GameRect.bottom/2-window_h/2, window_w, window_h);
 	int close_x = w-95, close_y = h-50;
-//	m_SPK.Open(HELP_MESSAGE_DESC); // ���� ���� �޼��� �̹����� �����Ѵ�.
-//	m_SPK.Open(SPK_BULLETIN_BOARD);// �ӽÿ� �̹��� 
+
+
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), gpC_global_resource->m_pC_assemble_box_button_spk->GetHeight(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), CLOSE_ID, this, C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE));
 	m_pC_scroll_bar = new C_VS_UI_SCROLL_BAR(0, Rect(w-25,50,-1,window_h-140));
@@ -10354,7 +10350,7 @@ void C_VS_UI_HELPDESC::Run(id_t id)
 	{
 	case CLOSE_ID:
 		Finish();
-		// 2004, 5, 6 - sobeit add start - �������̽� ���� ���� �� �ʺ��� ����� ���� �߰� ^^
+		
 		if( HELP_EVENT_INTERFACE == m_helpindex )
 			gC_vs_ui.AddHelpMail(HELP_EVENT_BEGINNER_ZONE);
 		// 2004, 5, 6 - sobeit add end
@@ -10362,121 +10358,7 @@ void C_VS_UI_HELPDESC::Run(id_t id)
 		break;
 	}
 }
-/*
-void C_VS_UI_HELPDESC::Show()
-{
-	if(gpC_base->m_p_DDSurface_back->Lock())
-	{
-		gpC_global_resource->DrawDialogLocked2(x,y,w,h,GetAttributes()->alpha);
-		m_pC_button_group->Show();	
-		gpC_base->m_p_DDSurface_back->Unlock();
-	}
-	
-//	if(MHelpMessageManager::Instance().getMessageSize() == NULL) return;
-//	const MHelpMessage& message = MHelpMessageManager::Instance().getMessage(m_helpindex);
-	std::string content  = m_title;
-	
-	char buf[1024];
-	sprintf(buf, "���� : %s", content.c_str());
-	g_PrintColorStr(x+30, y+10, buf , gpC_base->m_dialog_msg_pi, RGB_GOLD);
-	
-	int NullSizex,NullSizey;
-	std::string tempappend;
-	std::string tempspk;
-	std::string tempPos;
-	std::string tempindex; 
-	std::string tempcolor;
-	std::vector<std::string>::iterator itr = parsing_data.begin();
-	std::vector<std::string>::iterator EndItr = parsing_data.end();
-	const int char_width = g_GetStringWidth("a", gpC_base->m_dialog_msg_pi.hfont);
-	const int char_height = g_GetStringHeight("a", gpC_base->m_dialog_msg_pi.hfont);
-	
-	int line = 0;
-	int imgcnt = 0;
-	int linelimit = 15;
-	int  m_width,m_height;
-			
-	DWORD color;
-	
-	const char *isfont = NULL;
-	const char *istag  = NULL;
-	
-	while(itr!=EndItr)
-	{		
-
-		std::string str = *itr;
-		std::string tagstr;
-		istag = strstr(str.c_str(), "<");
-		isfont =  strstr(str.c_str(),"#");
-
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
-		{
-			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
-			{
-				tempappend = findkey(tagstr.c_str(),"a");
-				tempcolor = findkey(tagstr.c_str(),"color");
-			}
-			else // �±׿� "<" �� ���ԵǾ��������
-			{
-				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
-				tempspk += ".jpg";
-				
-				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
-				m_height = pSurface->GetHeight();		
-				
-				NullSizex = (m_width/(char_width));									// �̹����� �ʿ�� ���� ���
-				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
-				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
-				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.
-			}
-		}
-		else 
-		{
-			// ���� ���õ� ������ ������?
-			color = RGB_WHITE;
-			if(!tempcolor.empty())
-			{
-				_stscanf(tempcolor.c_str(),_T("%x"),&color);
-			}
-			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
-			{
-				line --;
-				if(line < 0) line = 0;
-				tempappend = "";
-			}
-			
-			m_pC_scroll_bar->Show(x,y);
-			int scrollpos = m_pC_scroll_bar->GetScrollPos();
-			int top = line - scrollpos;
-			if(top >= 0)
-			{
-				g_PrintColorStr(x+30, y+40+(top*LINEWIDTH), itr->c_str() , gpC_base->m_dialog_msg_pi, color);
-			}
-			line++;
-		}
-		itr++;
-		
-		if((line) - m_pC_scroll_bar->GetScrollPos()  > (linelimit))
-		{
-			break;
-		}
-	}
-	m_pC_button_group->ShowDescription();
-
-	line = 0;
-	imgcnt = 0;
-	tempPos = "";
-	SHOW_WINDOW_ATTR;
-	
-}
-*/
+ 
 
 
 void C_VS_UI_HELPDESC::Show()
@@ -10525,42 +10407,42 @@ void C_VS_UI_HELPDESC::Show()
 		istag = strstr(str.c_str(), "<");
 		isfont =  strstr(str.c_str(),"#");
 
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
+		if(istag)  
 		{
 			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
+			if(isfont)
 			{
 				tempappend = findkey(tagstr.c_str(),"a");
 				tempcolor = findkey(tagstr.c_str(),"color");
 			}
-			else // �±׿� "<" �� ���ԵǾ��������
+			else 
 			{
-//				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-//				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
+
+
 //				tempspk += ".jpg";
 //				
 //				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-//				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+
 //				m_height = pSurface->GetHeight();		
 //				
-//				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
+
 //				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
+				
 //				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
 //				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.	
+				
 			}
 		}
 		else 
 		{
-			// ���� ���õ� ������ ������?
+			
 			color = RGB_WHITE;
 			if(!tempcolor.empty())
 			{
 				_stscanf(tempcolor.c_str(),_T("%x"),&color);
 			}
 			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
+			if(strcmp(tempappend.c_str(),"y") == 0) 
 			{
 				line --;
 				if(line < 0) line = 0;
@@ -10599,31 +10481,31 @@ void C_VS_UI_HELPDESC::Show()
 		istag = strstr(str.c_str(), "<");
 		isfont =  strstr(str.c_str(),"#");
 		
-		if(istag)  // ù��° ���ڿ��� '<'�ΰ��
+		if(istag)  
 		{
 			tagstr = str ;
-			if(isfont)// ��ũ�� "#"�� �������
+			if(isfont)
 			{
 				tempappend = findkey(tagstr.c_str(),"a");
 				tempcolor = findkey(tagstr.c_str(),"color");
 			}
-			else // �±׿� "<" �� ���ԵǾ��������
+			else 
 			{
 				
-				tempspk = findkey( tagstr.c_str(), "file" );     					 // spk ���� ���´�.
-				tempPos = findkey( tagstr.c_str(), "pos" );							 // pos ���� ���´�
+				tempspk = findkey( tagstr.c_str(), "file" );     					 
+				tempPos = findkey( tagstr.c_str(), "pos" );							 
 				tempspk += ".jpg";
 				
 				CDirectDrawSurface *pSurface = GetJpgFileLoading(tempspk);
-				m_width = pSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+				m_width = pSurface->GetWidth();										
 				m_height = pSurface->GetHeight();		
 				
-				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
+				NullSizex = (m_width/(char_width-1));									
 				NullSizey = (m_height/(char_height+5))+1;	
-				// �̹����� �ʿ��� ������ ���
+				
 				DrawImg(m_width, m_height, tempspk.c_str(), tempPos.c_str() , max(imgcnt,line));
 				imgcnt+=NullSizey;		
-				// Memdc ��..pasing �� �����͸� �����ͼ� ��ο� �Ѵ�.
+				
 			}
 		}
 		else 
@@ -10634,7 +10516,7 @@ void C_VS_UI_HELPDESC::Show()
 				_stscanf(tempcolor.c_str(),_T("%x"),&color);
 			}
 			
-			if(strcmp(tempappend.c_str(),"y") == 0) // ��Ʈ ��ũ �������� �̾���Ѵ�
+			if(strcmp(tempappend.c_str(),"y") == 0) 
 			{
 				line --;
 				if(line < 0) line = 0;
@@ -10671,44 +10553,44 @@ void C_VS_UI_HELPDESC::Show()
 void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename,const char * pos, int linecnt)
 {
 
-	int Pagewidth = 500;										// ���� �����信 ��µ� x ������
-	int Pageheight = 500;										// ���� �����信 ��µ� y ������
-	int blankwidth = 35;										// left ���� ������
-	int blankheight = 7;										// top ���� ������
+	int Pagewidth = 500;										
+	int Pageheight = 500;										
+	int blankwidth = 35;										
+	int blankheight = 7;										
 	int imagelinesize = 20;
 	
 	Rect rect;
-	if(strcmp("L",pos) == 0)			// ���������ϰ��
+	if(strcmp("L",pos) == 0)			
 	{
 		rect.x = blankheight+20;        
 		rect.y = (linecnt*imagelinesize)+blankwidth-15;
 	}
 	
-	if(strcmp("R",pos) == 0)			// �����������ϰ��,
+	if(strcmp("R",pos) == 0)			
 	{
 		rect.x = Pagewidth-m_width-30 ; 
 		rect.y =(linecnt*imagelinesize) +blankwidth-15;
 	}
 
-	if(strcmp("LT",pos) == 0)			// ,���� ��ü 
+	if(strcmp("LT",pos) == 0)			
 	{
 		rect.x = blankheight+20;        
 		rect.y = (linecnt*imagelinesize)+blankwidth-15;
 	}
 
-	if( strcmp("RT",pos)  == 0)		 //  ��������ü 
+	if( strcmp("RT",pos)  == 0)		 
 	{
 		rect.x = Pagewidth-m_width+blankheight -40; 
 		rect.y  =(linecnt*imagelinesize) +blankwidth-15;
 	}
 	
-	if(strcmp("C",pos) == 0)		// �����ϰ�� 
+	if(strcmp("C",pos) == 0)		
 	{
 		rect.x = (Pagewidth-m_width)/2;  
 		rect.y = (linecnt*imagelinesize)+blankwidth+15;
 	}
 	Rect rectimg(0,0, m_width, m_height);
-	// Ŭ���� ó�� 	
+	
 	int top = rect.y - (m_pC_scroll_bar->GetScrollPos()*imagelinesize);
 
 	POINT p = { x + rect.x,  20 + y +top };
@@ -10719,7 +10601,7 @@ void  C_VS_UI_HELPDESC::DrawImg(int m_width, int m_height ,const char * filename
 		RECT re = {x ,  y+30 , x+ 500, y +400};
 		gpC_base->m_p_DDSurface_back->SetClip(&re);
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 		gpC_base->m_p_DDSurface_back->BltNoColorkey( &p, pSurface, &r );
 #else
 		// SDL backend: cast CDirectDrawSurface* to CSpriteSurface*
@@ -11013,8 +10895,8 @@ void C_VS_UI_HELPDESC::LoadCustomstr(char * customstrfilename)
 	
 	while(file.getline(sztemp,1024))
 	{
-		int len = strlen(sztemp);				    	// �Ѷ����� ���̸� ���Ѵ�.
-		for(int i = len ; i >= 0; i--)					// ������������ �������� /r,/n �� ������ �����ֱ� ���ؼ�
+		int len = strlen(sztemp);				    	
+		for(int i = len ; i >= 0; i--)					
 		{
 			if(sztemp[i] =='\r' || sztemp[i] =='\n')
 			{
@@ -11036,14 +10918,14 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 	char sztemp[MAXBUFFER];
 	int  m_width,m_height;
 	std::string szParsingData;
-	std::string tempstr;												// ��Ʈ���� �����ϴ� �Լ�
-	std::string tempspk;												// spk ����
-	std::string tempPos;												// �̹��� ��ġ 
-	std::string tempindex;												// spk ���ؽ�
-	std::string tempappend;												// �̾��
-	char *pCur = NULL;													// �Ѷ����� �о����� �����ϴ� ����
-	const char *istag = NULL;													//��ũ�� �ִ��� �˻��ϴ� ����
-	const char *isfont = NULL;												//��ũ�� �ִ��� �˻��ϴ� ����
+	std::string tempstr;												
+	std::string tempspk;												
+	std::string tempPos;												
+	std::string tempindex;												
+	std::string tempappend;												
+	char *pCur = NULL;													
+	const char *istag = NULL;													
+	const char *isfont = NULL;												
 	
 	int NullSizex = 0,NullSizey = 0;
 	
@@ -11059,7 +10941,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //	std::string  content = 	message.m_strDetail[g_eRaceInterface];
 	std::string content  = m_detail;
 	
-	content +="\r\n";		// �������� ���α��� �˻縦 �ϱ����ؼ� 
+	content +="\r\n";		
 	while(pCur != NULL || ((cur= content.find("\r\n")) != -1))
 	{
 		if(pCur == NULL)
@@ -11072,24 +10954,24 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //			}
 		}
 		tempstr = sztemp;
-		istag = strstr(tempstr.c_str(),"<");  //�̹��� �±��ϰ��
-		isfont = strstr(tempstr.c_str(),"#"); // �ؽ�Ʈ �±�
+		istag = strstr(tempstr.c_str(),"<");  
+		isfont = strstr(tempstr.c_str(),"#"); 
 
 		int  num =0;
 		int start = 0;
 		int index = 0;
 		char* pch = NULL;
-		std::string digit,custom;										// Ŀ���� ��Ʈ�� ���� ����
-		pch = strchr(sztemp, '%');										// '%' �� ã�Ƽ� �װ��� ��ġ�� �����Ѵ�.
-		szParsingData = sztemp;											// �Ѷ����� �о�ͼ� szpasingdata �� �����Ѵ�.
+		std::string digit,custom;										
+		pch = strchr(sztemp, '%');										
+		szParsingData = sztemp;											
 		
-		while (pch!=NULL)												// '%' �� ������ ���� while ����
+		while (pch!=NULL)												
 		{
-			num = pch-(sztemp+start);									// % �������������� ���̸� ���Ѵ�/
-			custom = "%";												// customstr "%" ���� �ʱ�ȭ���ش�
+			num = pch-(sztemp+start);									
+			custom = "%";												
 			int cnt = 0;
-			start += (num+1);											///%���������������� ���̸� ��Ӵ����ش�.
-			while(sztemp[start+cnt] >= '0' && sztemp[start+cnt] <= '9') // ������ ���ڰ� �ƴҶ� ���� �����ش�/
+			start += (num+1);											
+			while(sztemp[start+cnt] >= '0' && sztemp[start+cnt] <= '9') 
 			{
 				digit += sztemp[start+cnt];		
 				custom += sztemp[start+cnt];
@@ -11098,7 +10980,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			
 			if(custom_strting.size() > 0)
 			{
-				if(num >= 0)									// �̻������� empty �� �̻��Ѱ��� ���ͼ� ��¿�� ���� size �� ó���ߵ� �Ѥ�
+				if(num >= 0)									
 				{
 					if(custom_strting[num].size() < 2048)
 					{						
@@ -11121,43 +11003,10 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			digit.empty();
 		}
 		
-/*		int  num =0;
-		int start = 0;
-		int index = 0;
-		szParsingData = sztemp;											// �Ѷ����� �о�ͼ� szpasingdata �� �����Ѵ�.
-		int pos;
-
-		while( ( pos = szParsingData.find( "%" ) ) != -1 )				// '%' �� ���������� ���ڿ��� ã�Ƴ���
-		{
-			int cnt = 1;
-			strcpy(sztemp ,szParsingData.c_str());
-			while(sztemp[pos+cnt] >= '0' && sztemp[pos+cnt] <= '9') // ������ ���ڰ� �ƴҶ� ���� �����ش�/
-			cnt++;
-			char digit[100];
-			memset( digit, 0, 100 );
-			memcpy( digit, szParsingData.c_str() + pos + 1, cnt );
-			int num = atoi(digit);			
-			if(custom_strting.size() > 0)
-			{
-				if(num >= 0)									// �̻������� empty �� �̻��Ѱ��� ���ͼ� ��¿�� ���� size �� ó���ߵ� �Ѥ�
-				{
-					if(custom_strting[num].size() < 2048)
-					{						
-						int pos = szParsingData.find( "%" );
-						if( pos != -1 )
-						{
-							szParsingData.replace( szParsingData.begin() + pos,
-								szParsingData.begin() + pos + cnt,
-								custom_strting[ num ] );
-						}						
-					}
-				}
-			}
-		}
-*/
-		strcpy(sztemp,szParsingData.c_str());       // Ŀ���� ��Ʈ���� ����ȹ��ڿ�//
-		int len = strlen(sztemp);					// �Ѷ����� ���̸� ���Ѵ�.
-		for(int  i = len ; i >= 0; i--)					// ������������ �������� /r,/n �� ������ �����ֱ� ���ؼ�
+ 
+		strcpy(sztemp,szParsingData.c_str());       
+		int len = strlen(sztemp);					
+		for(int  i = len ; i >= 0; i--)					
 		{
 			if(sztemp[i] =='\r' || sztemp[i] =='\n')
 			{
@@ -11166,27 +11015,27 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 			}
 		}
 
-		if(istag)// �±��ϰ��
+		if(istag)
 		{
-			if(isfont) // ��Ʈ(����) �±� �ϰ��
+			if(isfont) 
 			{
 				parsing_data.push_back(tempstr.c_str());
-				tempappend = findkey(tempstr.c_str(),"a"); // ����� ������ �̾���Ѵ�
+				tempappend = findkey(tempstr.c_str(),"a"); 
 				linecnt = 1;
 			}
-			else // �̹��� ����±��ϰ��
+			else 
 			{
-				while(NullSizey > 0)						// �̰��� �̹����� ysize ���� �ؽ�Ʈ�� ������
-				{											// ���� ysize ��ŭ ��������� �־��ش�
+				while(NullSizey > 0)						
+				{											
 					NullSizey--;
 					parsing_data.push_back(" ");
 					if(NullSizey == 0) break;
 				}
 
-				parsing_data.push_back(tempstr.c_str());        // �̰��� �±� ��ü ������ �����Ѵ�
-				tempspk = findkey( tempstr.c_str(), "file" );    // �±װ��� ��������Ʈ ���� ã��
-				tempPos = findkey( tempstr.c_str(), "pos" );	// �±��� �̹��� ��ġ�� ����
-				//tempindex = findkey( tempstr.c_str(), "index" ); // spk �� �ε����� ã�´�
+				parsing_data.push_back(tempstr.c_str());        
+				tempspk = findkey( tempstr.c_str(), "file" );    
+				tempPos = findkey( tempstr.c_str(), "pos" );	
+				
 				tempstr = "";
 			
 //				CJpeg jpg;
@@ -11199,13 +11048,13 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 //				jpg.Open(file_path.c_str());
 				
 				CDirectDrawSurface *pJpgSurface = GetJpgFileLoading( tempspk );
-				m_width = pJpgSurface->GetWidth();										// ������ spk ��m_midth �� ���´�
+				m_width = pJpgSurface->GetWidth();										
 				m_height = pJpgSurface->GetHeight();	
-			//	m_width = m_SPK.GetWidth(atoi(tempindex.c_str()));										// ������ spk ��m_midth �� ���´�
-			//	m_height = m_SPK.GetHeight(atoi(tempindex.c_str()));									// ������ spk ��m_heigh �� ���´�
+			
+			
 				
-				NullSizex = (m_width/(char_width-1));									// �̹����� �ʿ�� ���� ���
-				NullSizey = (m_height/(char_height+5))+1;								// �̹����� �ʿ��� ������ ���
+				NullSizex = (m_width/(char_width-1));									
+				NullSizey = (m_height/(char_height+5))+1;								
 //				jpg.Release();
 				
 			}
@@ -11213,7 +11062,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 		else 
 		{
 			tempstr = "";
-			if(strcmp(tempPos.c_str(),"L") == 0) // ���ʿ� �̹����� �ִ°��:�켱�տ� sizex �� ������ ������ ���ٿ� ������ �ִ� ���̸� �����Ѵ�
+			if(strcmp(tempPos.c_str(),"L") == 0) 
 			{
 				if(strcmp(tempappend.c_str(),"y") == 0 )
 				{
@@ -11230,13 +11079,13 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				}
 			}
 
-			if(strcmp(tempPos.c_str(),"R") == 0) //�����ʿ� �̹����� �ִ°��:���ٿ� �������ִ� ���̸� ����
+			if(strcmp(tempPos.c_str(),"R") == 0) 
 			{
 				count = limitlinecnt -NullSizex;
 			}
 
 			if(strcmp(tempPos.c_str(),"C") == 0 || strcmp(tempPos.c_str(),"RT") == 0 || strcmp(tempPos.c_str(),"LT") == 0)
-			{ // �߰� , ���� ��ü����, ������ ��ü ���� : size y ��ŭ�� ����������־��ش�
+			{ 
 				while(NullSizey > 0)
 				{
 					NullSizey--;
@@ -11244,7 +11093,7 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				}
 			}
 
-			if(strcmp(tempappend.c_str(),"y") == 0 ) // ����� ����?�ƴϳ�?
+			if(strcmp(tempappend.c_str(),"y") == 0 ) 
 			{
 				count = count - appendtemp;
 				while(appendtemp > 0)
@@ -11259,35 +11108,35 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				NullSizey++;
 			}
 
-			if(NullSizey > 0)						// �̹��� �� �ִٸ� yszie �� �����������
+			if(NullSizey > 0)						
 			{
-				NullSizex = (m_width/(char_width-1)); // ������ �־ �پ��  Nullsizex ũ�⸦ �������ش�
+				NullSizex = (m_width/(char_width-1)); 
 			}
 			else
 			{
-				tempPos = "";					 // �̹����� ysize �� ��������� ������ pos �±׸� Ŭ���� ���ش�
+				tempPos = "";					 
 			}
 
-			if(pCur == NULL) // pCur �� ���������
+			if(pCur == NULL) 
 			{
-				pCur = sztemp;  // pCur ��.. �Ѷ����о�帰 ���ڿ��� �����Ѵ�.
+				pCur = sztemp;  
 			}
 			
-			size_t linecount = strlen(pCur); // linecount �� �Ѷ����� �ѹ��ڿ� ���̸� �����Ѵ�
-			size_t cutCount = count;         // �ѱ� 2byte �߰��� ������ ������ �������ؼ� ����ϴ� ����
-			if(linecount < count)			//  ���ڿ��� count ���� �������
+			size_t linecount = strlen(pCur); 
+			size_t cutCount = count;         
+			if(linecount < count)			
 			{
-				tempstr += pCur;			// �ش繮�ڿ��� �����Ѵ�
-				count -= linecount;			// count �� �������ڿ������� ���� �����;� ������ ���������� ���ڿ����̸� ���ش�
+				tempstr += pCur;			
+				count -= linecount;			
 				pCur = NULL;		
 				count = limitlinecnt;
 			}
 			else
 			{
 				char szbuf[MAXBUFFER];    
-				if(g_PossibleStringCut(pCur, static_cast<int>(cutCount)) == false) // ���������ڿ��� �����ؼ� �ѱ��ϰ�� 
+				if(g_PossibleStringCut(pCur, static_cast<int>(cutCount)) == false) 
 				{
-					cutCount--;  // ���ڿ��� ���ڸ� �ϳ� �ٿ��ش�
+					cutCount--;  
 				}
 				memcpy(szbuf, pCur, cutCount);
 				szbuf[cutCount] = '\0';
@@ -11296,14 +11145,14 @@ void C_VS_UI_HELPDESC::HelpDescPasing()
 				count = limitlinecnt;
 			}
 			
-			appendtemp = tempstr.length(); // appen ����϶� �����ٿ� ���ʿ� ������ ��Ű���ؼ�
+			appendtemp = tempstr.length(); 
 			parsing_data.push_back(tempstr.c_str());
-			NullSizey--; // �̹����� ������� �������� push_back �� ������ ���� ���پ� ���ش�.
+			NullSizey--; 
 			tempstr = "";
 		}
 	}
-	while(NullSizey > 0)						// �̰��� �̹����� ysize ���� �ؽ�Ʈ�� ������
-	{											// ���� ysize ��ŭ ��������� �־��ش�
+	while(NullSizey > 0)						
+	{											
 		NullSizey--;
 		parsing_data.push_back(" ");
 		if(NullSizey == 0) break;
@@ -11327,7 +11176,7 @@ char* C_VS_UI_HELPDESC::findkey(const char* tagstr ,char* keyword)
 	if(s == NULL )
 		return NULL;
 	
-	static char Buffer[512];  // ������ static  ���� �ؾ��Ѵ� �޸� ħ���� �������ؼ� (�߿��ϴ�)
+	static char Buffer[512];  
 	memset( Buffer, 0, 512 );
 	
 	const char *start = strstr( s, "'" );
@@ -11901,7 +11750,7 @@ bool	C_VS_UI_SMS_MESSAGE::MouseControl(UINT message, int _x, int _y)
 	if(m_SubWindow == true && m_sub_rect.IsInRect(_x, _y))
 	{
 		gpC_mouse_pointer->SetCursorDefault();
-		// sub window �ȿ� ������ sub scroll
+		
 		re &= m_pC_sub_scroll_bar->MouseControl(message, _x-m_sub_rect.x, _y-m_sub_rect.y);
 		switch(message)
 		{
@@ -11910,13 +11759,13 @@ bool	C_VS_UI_SMS_MESSAGE::MouseControl(UINT message, int _x, int _y)
 			{
 				m_sub_selected.x = (_x - m_sub_rect.x-MARK_X)/14;
 				m_sub_selected.y = (_y - m_sub_rect.y-MARK_Y)/14+m_pC_sub_scroll_bar->GetScrollPos();
-				// 2004, 5, 10 sobeit add start - Ŭ�� ��ġ ����
+				
 				if(RACE_OUSTERS == g_eRaceInterface)
 				{
 					m_sub_selected.x -= 1;
 					m_sub_selected.y -= 1;
 				}
-				// 2004, 5, 10 sobeit add end - Ŭ�� ��ġ ����
+				
 				if(m_sub_selected.x < 0 || m_sub_selected.x > 8 || m_sub_selected.y < 0 || m_sub_selected.y >= MARK_MAX)
 					m_sub_selected.x = -1;
 				if(m_sub_selected.x != -1 )
@@ -13046,7 +12895,7 @@ void	C_VS_UI_SMS_RECORD::Run(id_t id)
 //------------------------------------------------------------------------------
 // C_VS_UI_NAMING
 //
-// ���̹� ����Ʈ
+
 //------------------------------------------------------------------------------
 C_VS_UI_NAMING::C_VS_UI_NAMING(std::vector<C_VS_UI_NicknameInfo*> &_NamingList)
 {	
@@ -13098,7 +12947,7 @@ C_VS_UI_NAMING::C_VS_UI_NAMING(std::vector<C_VS_UI_NicknameInfo*> &_NamingList)
 	int pin_x = w-24-20, pin_y = h-19;
 	int alpha_x = 6, alpha_y = h-21;
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::BUTTON_CLOSE), 
@@ -13408,9 +13257,9 @@ void	C_VS_UI_NAMING::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button)
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_NO_ALPHA_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_AUTO_HIDE_OFF].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_AUTO_HIDE_ON].GetString(),
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "Ŀ���� �г����� �����մϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_PLAYER_NICKNAME].GetString(),// = "���õ� �г������� �����մϴ�.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_HELP].GetString(),// = "������ ���ϴ�..";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_SELECT_PLAYER_NICKNAME].GetString(),
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_HELP].GetString(),
 	};
 	switch(p_button->GetID())
 	{
@@ -13538,7 +13387,7 @@ void	C_VS_UI_NAMING::Change_Custom_Naming(int nID, char* szName)
 //------------------------------------------------------------------------------
 // C_VS_UI_NAMING_CHANGE
 //
-// ���̹� ����Ʈ ü����
+
 //------------------------------------------------------------------------------
 C_VS_UI_NAMING_CHANGE::C_VS_UI_NAMING_CHANGE(MItem* pItem, char* szCustom)
 {	
@@ -13588,7 +13437,7 @@ C_VS_UI_NAMING_CHANGE::C_VS_UI_NAMING_CHANGE(MItem* pItem, char* szCustom)
 	int close_x = w-24, close_y = h-22;		
 	int select_x = w-120, select_y = h-45;		
 
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_info_spk->GetWidth(C_GLOBAL_RESOURCE::BUTTON_CLOSE), 
@@ -13782,9 +13631,9 @@ void	C_VS_UI_NAMING_CHANGE::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button
 	const static char* help_info_button_string[4]=
 	{
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_WINDOW].GetString(),
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),// = "���� ���� �г����� �����մϴ�.";.";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_ADD_PLAYER_NICKNAME].GetString(),// = "�г����� �߰� �մϴ�".";
-		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString(),// = "���� �г����� �����մϴ�.".";
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PLAYER_NICKNAME].GetString(),
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_ADD_PLAYER_NICKNAME].GetString(),
+		(*g_pGameStringTable)[UI_STRING_MESSAGE_CHANGE_PET_NICKNAME].GetString(),
 		
 
 	};
@@ -13796,9 +13645,9 @@ void	C_VS_UI_NAMING_CHANGE::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button
 	case CHANGE_ID:
 		if(m_PenItem)
 		{
-			if(m_PenItem->GetItemType() == 22 || m_PenItem->GetItemType() == 25) // �������̹� ���� ��
+			if(m_PenItem->GetItemType() == 22 || m_PenItem->GetItemType() == 25) 
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[1],0,0);
-			else if(m_PenItem->GetItemType() == 23)// �� ���̹� ���� ��
+			else if(m_PenItem->GetItemType() == 23)
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[3],0,0);
 			else if(m_PenItem->GetItemType() == 24)
 				g_descriptor_manager.Set(DID_INFO, p_button->x+x, p_button->y+y, (void *)help_info_button_string[2],0,0);
@@ -13910,8 +13759,8 @@ C_VS_UI_QUEST_MANAGER::C_VS_UI_QUEST_MANAGER()
 //	struct _GMissionInfo{
 //		std::string		szMissionTitle;
 //		BYTE			bStatus;
-//		BYTE			bCondition;	// ��� ���ǿ� �ִ°� 0 : Happen, 1 : Complete, 2 : Fail, 3 : Reward
-//		WORD			bIndex;		// �ش� ������ ���° element�ΰ�
+
+
 //	};
 
 		
@@ -13981,7 +13830,7 @@ C_VS_UI_QUEST_MANAGER::C_VS_UI_QUEST_MANAGER()
 	for(int TempCount = 0; TempCount< 13 ; TempCount++)
 	{
 		//----------------------------------------------------
-		// Item ���� --> �߰�
+		
 		//----------------------------------------------------
 		pItem = MItem::NewItem( ITEM_CLASS_GQUEST_ITEM );
 	//	pItem->SetID( 0 );
@@ -14014,37 +13863,42 @@ C_VS_UI_QUEST_MANAGER::~C_VS_UI_QUEST_MANAGER()
 	
 }
 
-// �ʿ��Ҷ����� �ε� �ؼ� ����...�ѹ� �ε��س��� ����..������..
-// �ϴ� ÷�� �ε��س��� ��~�� ����� �ڵ�^^;
-// ���� �غ��� �׶� �׶� �ε��ϴ°� ������ �ؼ� ����..����
-// ó�� ����Ʈ ���� �� �⺻ tree�� ��� ������ �ְ� �߰��߰� modify�Ҷ� �׶� �׶� �о� �´�.
+
+
+
+
 bool	C_VS_UI_QUEST_MANAGER::LoadQuestXML()
 {
 	m_Quest_XML_file.SetRAR(RPK_TUTORIAL_ETC, RPK_PASSWORD);
 	
-	m_Quest_XML_file.Open(QUEST_XML_FILE);
-
 	XMLParser	parser;
+	bool bLoaded = false;
 
-	// quest xml�� vector�� ����� �ؼ���..-_-;
-	parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
+	
+	if( m_Quest_XML_file.Open(QUEST_XML_FILE) )
+	{
+		parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
+		bLoaded = true;
+	}
 
 	m_Quest_XML_file.Release();
 	
 
-	m_Quest_XML_file.Open(QUEST_EVENT_XML_FILE);
-
-	parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
+	if( m_Quest_XML_file.Open(QUEST_EVENT_XML_FILE) )
+	{
+		parser.parse( (char *)m_Quest_XML_file.GetFilePointer(), &m_Quest_XML_Tree, true);
+		bLoaded = true;
+	}
 	
 	m_Quest_XML_file.Release();
 
-	return TRUE;
+	return bLoaded;
 }
 void	C_VS_UI_QUEST_MANAGER::ReleaseQuestXML()
 {
 	m_Quest_XML_Tree.Release();
 }
-// ����Ʈ ����/���� ��Ŷ ����
+
 void	C_VS_UI_QUEST_MANAGER::SendQuestIntention(bool bIntention)
 {
 	if(bIntention)
@@ -14056,7 +13910,7 @@ void	C_VS_UI_QUEST_MANAGER::SendQuestIntention(bool bIntention)
 		gpC_base->SendMessage(UI_GQUEST_GIVEUP, m_SelectedQuestID);
 	}
 }
-// detail, mission ������ �����Ѵ�.
+
 void	C_VS_UI_QUEST_MANAGER::SetSubWindowInfo(DWORD qID, bool bOpenSubWindows)
 {
 	if(bOpenSubWindows)
@@ -14089,7 +13943,7 @@ void	C_VS_UI_QUEST_MANAGER::SetSubWindowInfo(DWORD qID, bool bOpenSubWindows)
 		}
 	}
 }
-// Item ������ �����Ѵ�.
+
 void	C_VS_UI_QUEST_MANAGER::UpdateQuestItemInfo(std::vector<MItem*>& vItem)
 {
 	ClearQuestItem();
@@ -14120,29 +13974,29 @@ void	C_VS_UI_QUEST_MANAGER::DeleteQuestItem(int nSlot)
 	}
 	
 }
-// ����Ʈ ����Ʈ�� ������ �߰�(ó�� �ε��� ����´�)
+
 bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 {
 	_GQuestInfo * TempInfo = (_GQuestInfo*)pVoid;
 	if(NULL != TempInfo)
 	{
-		// string update �� �߰� - ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+		
 		const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( TempInfo->dwQuestID , "id");
 		if(NULL != pElement)
 		{
 			if( TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_ACCEPT ||
-				TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // ���� ���� �̸�
+				TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) 
 			{
 				RunQuestIcon();
 
-				// ���డ���̰� �ڵ� ���� ���� �϶�
+				
 				const XMLAttribute* _TempAttr = pElement->GetAttribute("autostart");
 				if(_TempAttr != NULL)
 				{
-					if(_TempAttr->ToInt()>0) // �ڵ� �����̸�
+					if(_TempAttr->ToInt()>0) 
 					{
 						m_SelectedQuestID = TempInfo->dwQuestID;
-						gC_vs_ui.SendQuestIntention(true); // �����ϰڴ� ��Ŷ�� ������.
+						gC_vs_ui.SendQuestIntention(true); 
 					}
 				}
 			}
@@ -14156,12 +14010,12 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 				const XMLTree * TempMissionElement = GetMissionElement(pElement,TempMission->bCondition);
 				if( NULL != TempMissionElement)
 				{
-					// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+					
 					const XMLTree *pChildElement2 = TempMissionElement->GetChildByAttr(TempMission->bIndex, "index");
 					if(NULL != pChildElement2)
 					{
 						TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // �ð� ������ �ִ� �̼��̸�
+						if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) 
 						{
 							TempMission->dwTimeLimit = timeGetTime();
 						}
@@ -14170,7 +14024,7 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 				}
 				//TempMission->szMissionTitle = GetMissionTitle(pElement, TempMission->bIndex, TempMission->bCondition);
 				
-				// modify start- condition�� fail(2)�϶� �����̸� ���з�, ���и� �������� �����޶�� �ؼ� ����..��..
+				
 				if(TempMission->bCondition == 2)
 				{
 					if(TempMission->bStatus == 2)
@@ -14192,7 +14046,7 @@ bool	C_VS_UI_QUEST_MANAGER::SetQuestManagerInfo(void* pVoid)
 	}
 	return false;
 }
-// ������ �ִ� ����Ʈ�� ����, ������ �߰�(���� �߰��� ����´�)
+
 bool	C_VS_UI_QUEST_MANAGER::ModifyQuestManagerInfo(void* pVoid, int nType)
 {
 	if(LoadQuestXML() == false)
@@ -14219,13 +14073,13 @@ bool	C_VS_UI_QUEST_MANAGER::ModifyQuestManagerInfo(void* pVoid, int nType)
 			}
 		}
 
-		SetSubWindowInfo(TempInfo->dwQuestID , false); // ���� �����츦 ���� ������ ���� â�� ���� �ʴ´�.
+		SetSubWindowInfo(TempInfo->dwQuestID , false); 
 		ReleaseQuestXML();
 		return true;
 	}
 	return false;
 }
-// ������ qid�� ������ ���� �����͸� QInfo�� �ٲ۴�.
+
 bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 {
 	if(NULL != QInfo)
@@ -14236,21 +14090,21 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 			_GQuestInfo* TempInfo = (*itr);
 			if(TempInfo->dwQuestID == QInfo->dwQuestID)
 			{
-				// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+				
 				const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( TempInfo->dwQuestID , "id");
 				if(pElement != NULL)
 				{
 					if( TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_ACCEPT ||
-						TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) // ���� ���� �̸�
+						TempInfo->bStatus == C_VS_UI_QUEST_LIST::CAN_REPLAY ) 
 					{
-						// ���డ���̰� �ڵ� ���� ���� �϶�
+						
 						const XMLAttribute* _TempAttr = pElement->GetAttribute("autostart");
 						if(_TempAttr != NULL)
 						{
-							if(_TempAttr->ToInt()>0) // �ڵ� �����̸�
+							if(_TempAttr->ToInt()>0) 
 							{
 								m_SelectedQuestID = TempInfo->dwQuestID;
-								gC_vs_ui.SendQuestIntention(true); // �����ϰڴ� ��Ŷ�� ������.
+								gC_vs_ui.SendQuestIntention(true); 
 							}
 						}
 					}
@@ -14264,12 +14118,12 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						const XMLTree * TempMissionElement = GetMissionElement(pElement,TempMission->bCondition);
 						if( NULL != TempMissionElement)
 						{
-							// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+							
 							const XMLTree *pChildElement2 = TempMissionElement->GetChildByAttr(TempMission->bIndex, "index");
 							if(NULL != pChildElement2)
 							{
 								TempMission->szMissionTitle =  (char*)pChildElement2->GetText().c_str();
-								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) // �ð� ������ �ִ� �̼��̸�
+								if(0 == stricmp(pChildElement2->GetName().c_str(),"Time")) 
 								{
 									TempMission->dwTimeLimit = timeGetTime();
 								}
@@ -14278,7 +14132,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						}
 						//TempMission->szMissionTitle = GetMissionTitle(pElement, TempMission->bIndex, TempMission->bCondition);
 
-						// modify start- condition�� fail(2)�϶� �����̸� ���з�, ���и� �������� �����޶�� �ؼ� ����..��..
+						
 						if(TempMission->bCondition == 2)
 						{
 							if(TempMission->bStatus == 2)
@@ -14292,7 +14146,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 						
 					(*itr) = QInfo;
 
-					if(nType == 0||nType == 1) // 0: ���� or 1:���� �϶� - ������ �߰�..-_-;
+					if(nType == 0||nType == 1) 
 					{
 						RunQuestFail_or_Sucess(pElement, nType);
 					}
@@ -14305,7 +14159,7 @@ bool	C_VS_UI_QUEST_MANAGER::UpdateQuestInfo(_GQuestInfo *QInfo, int nType)
 	}
 	return false;
 }
-// xml���� ����Ʈ�� title�� �����´�
+
 char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
 {
 	char* TempTitle = "";
@@ -14318,7 +14172,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetQuestTitle(const XMLTree *pElement)
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ�� description�� �����´�
+
 char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
 {
 	char* TempTitle = "";
@@ -14331,7 +14185,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetQuestDescription(const XMLTree *pElement)
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ ���� �̼� Ÿ��Ʋ�� �����´�.
+
 char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index, BYTE Condition)
 {
 	char* TempTitle = "";
@@ -14347,7 +14201,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index
 		const XMLTree *pChildElement = pElement->GetChild( szConditonType[ min(3, Condition)] );
 		if(NULL != pChildElement)
 		{
-			// �̼� ����Ʈ�� "index"�� ã�´�..����÷���.-_-;;;
+			
 			const XMLTree *pChildElement2 = pChildElement->GetChildByAttr(Index, "index");
 			if(NULL != pChildElement2)
 				return (char*)pChildElement2->GetText().c_str();
@@ -14355,7 +14209,7 @@ char*	C_VS_UI_QUEST_MANAGER::GetMissionTitle(const XMLTree *pElement, WORD Index
 	}
 	return TempTitle;
 }
-// xml���� ����Ʈ ���� �̼� Ÿ��Ʋ�� �����´�.
+
 const XMLTree *	C_VS_UI_QUEST_MANAGER::GetMissionElement(const XMLTree *pElement, BYTE Condition)
 {
 	if(NULL != pElement)
@@ -14374,7 +14228,7 @@ const XMLTree *	C_VS_UI_QUEST_MANAGER::GetMissionElement(const XMLTree *pElement
 	}
 	return NULL;
 }
-// ����Ʈ ����Ʈ�� ����
+
 void	C_VS_UI_QUEST_MANAGER::ClearQuestInfo()
 {
 	std::vector<_GQuestInfo*>::iterator itr = m_QuestListInfo.begin();
@@ -14386,7 +14240,7 @@ void	C_VS_UI_QUEST_MANAGER::ClearQuestInfo()
 	}
 	m_QuestListInfo.clear();
 }
-// ����Ʈ �������� ����
+
 void	C_VS_UI_QUEST_MANAGER::ClearQuestItem()
 {
 	std::vector<MItem*>::iterator itr = m_QuestItemInfo.begin();
@@ -14410,7 +14264,7 @@ void	C_VS_UI_QUEST_MANAGER::ClearExcuteElement()
 	}
 	m_QuestExcutElement.clear();
 }
-// sub �����찡 ���ִ��� �˻�
+
 bool	C_VS_UI_QUEST_MANAGER::IsAnyWindowOpened() const
 {
 	if( IsRunningQuestList()
@@ -14421,12 +14275,12 @@ bool	C_VS_UI_QUEST_MANAGER::IsAnyWindowOpened() const
 
 	return false;
 }
-// ���� ���� ��ü�� �ݾҴ� ������ �Ѵ�.
+
 void	C_VS_UI_QUEST_MANAGER::ToggleWindow() 
 {
-	if(IsAnyWindowOpened()) // �� ����Ʈ ������ �������� �ݴ´�
+	if(IsAnyWindowOpened()) 
 		CloseAllWinow();
-	else // ������ �ϳ��� ������ �� �����ش� ����
+	else 
 	{
 		//RunAllWinow();
 		RunQuestList();
@@ -14591,7 +14445,7 @@ void	C_VS_UI_QUEST_MANAGER::CloseQuestIcon(int JustClose)
 	
 	DeleteNew(m_Ui_Quest_Icon);
 	
-	if(JustClose>0) // �ٸ� â�� �����ش�
+	if(JustClose>0) 
 	{
 		RunQuestList();
 		if(IsRunningQuestList())
@@ -14612,12 +14466,12 @@ void	C_VS_UI_QUEST_MANAGER::CloseQuestIcon(int JustClose)
 //	if(IsAllWindowClosed())
 //		gpC_base->SendMessage(UI_CLOSE_QUEST_MANAGER);
 }
-// ����,������ npc dialog�� ����. nType == 0 : ����, nType == 1 : ����
+
 void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int nType)
 {
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		
 		const static char * szFail_or_Sucess[2] = {
 													"CompleteMessage",
 													"FailMessage",
@@ -14666,7 +14520,7 @@ void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int 
 			gC_vs_ui.SetQuestNpcDialog((void*)TempDialog);
 		}
 		
-		if(nType == 0) // ������ ��� ���� �̺�Ʈ�� ������� �Ѵٸ�
+		if(nType == 0) 
 		{
 			const XMLAttribute* _TempAttr = pElement->GetAttribute("ending");
 			if(NULL != _TempAttr)
@@ -14680,7 +14534,7 @@ void	C_VS_UI_QUEST_MANAGER::RunQuestFail_or_Sucess(const XMLTree *pElement, int 
 
 void	C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
-	if(0 == m_QuestExcutElement.size()) // ���ΰ� ������ �ٷ� ����
+	if(0 == m_QuestExcutElement.size()) 
 	{
 		RunGQuestExcuteElement(qID, bCondition, wIndex);
 	}
@@ -14693,7 +14547,7 @@ void	C_VS_UI_QUEST_MANAGER::PushGQuestExcuteElement(DWORD qID, BYTE bCondition, 
 }
 void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 {
-	if(m_QuestExcutElement.size()) // �ϴ� ������ üũ
+	if(m_QuestExcutElement.size()) 
 	{
 		std::vector<_GQuestExcuteElement*>::iterator itr = m_QuestExcutElement.begin();
 		C_VS_UI_QUEST_MANAGER::_GQuestExcuteElement * TempRun = NULL;
@@ -14718,17 +14572,17 @@ void	C_VS_UI_QUEST_MANAGER::RunNextGQuestExcuteElement()
 		}
 	}
 }
-// npc dialog Ȯ�� Ŭ�� �Ŀ� Ŭ���̾�Ʈ���� ���� ó���� �ൿ�� �ִ��� üũ...�ϵ��ڵ���.
+
 void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondition, WORD wIndex)
 {
 	if(LoadQuestXML() == false)
 		return ;
 	
-	// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+	
 	const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( qID , "id");
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		
 		const static char * szConditonType[4] = {	"Happen",
 													"Complete",
 													"Fail",
@@ -14746,7 +14600,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 				if(NULL != _TempAttr)
 				{
 					const char* TempAction = _TempAttr->ToString();
-					if(0 == strcmp(TempAction, "dead")) // g_pPlayer �״� ����
+					if(0 == strcmp(TempAction, "dead")) 
 					{
 						int TargetZoneID = 0;
 						const XMLAttribute* _TempAttr2 = pElement3->GetAttribute("warp");
@@ -14754,7 +14608,7 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 						{
 							TargetZoneID = _TempAttr2->ToInt();
 						}
-						// 1 : �״� �������� ����..-_-;
+						
 						gpC_base->SendMessage(UI_GQUEST_SET_ACTION, 1, TargetZoneID ); 
 					}
 				}
@@ -14763,17 +14617,17 @@ void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElementAction(DWORD qID, BYTE bCondit
 	}
 	ReleaseQuestXML();
 }
-// GCExcuteElement ���� ���� �� npc dialog�� ����.
+
 void	C_VS_UI_QUEST_MANAGER::RunGQuestExcuteElement(DWORD qID, BYTE bCondition, WORD wIndex)
 {
 	if(LoadQuestXML() == false)
 		return ;
 	
-	// ����Ʈ ����Ʈ�� id�� ã�´�..����÷���.-_-;;;
+	
 	const XMLTree *pElement = m_Quest_XML_Tree.GetChildByAttr( qID , "id");
 	if(pElement != NULL)
 	{
-		// ������ string ���� ã�´�..-_-
+		
 		const static char * szConditonType[4] = {	"Happen",
 													"Complete",
 													"Fail",
@@ -14875,7 +14729,7 @@ C_VS_UI_QUEST_LIST::C_VS_UI_QUEST_LIST(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-152 +m_OustersOffset;		
 	int alpha_x = 6, alpha_y = h-154 +m_OustersOffset;
 		
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -14898,12 +14752,12 @@ C_VS_UI_QUEST_LIST::C_VS_UI_QUEST_LIST(C_SPRITE_PACK* spr)
 //
 //	C_VS_UI_QUEST_MANAGER::_GQuestInfo* Test1 = new C_VS_UI_QUEST_MANAGER::_GQuestInfo;
 //	Test1->bStatus = CAN_ACCEPT;
-//	Test1->szQuestTitle = "���������������������������������Ͽ�����";
+
 //	Test1->dwQuestID = 1;
 //	m_QuestListInfo[0].push_back(Test1);
 //	C_VS_UI_QUEST_MANAGER::_GQuestInfo* Test2 = new C_VS_UI_QUEST_MANAGER::_GQuestInfo;
 //	Test2->bStatus = DOING;
-//	Test2->szQuestTitle = "���������������������������������̿�����";
+
 //	Test2->dwQuestID = 2;
 //	m_QuestListInfo[1].push_back(Test2);
 //	m_pC_scroll_bar->SetPosMax(1);
@@ -14992,13 +14846,13 @@ void	C_VS_UI_QUEST_LIST::Show()
 
 		const static char* szQuestStatus[7]=
 		{
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "����Ұ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_ACCEPT].GetString(),// = "���డ��";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "������";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_SUCCESS].GetString(),// = "����";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "�Ϸ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "����";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_REPLAY].GetString(),// = "����డ";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_ACCEPT].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_SUCCESS].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_REPLAY].GetString(),
 		};
 		for(int i =ScrPos; i< m_QuestListInfo[m_TabID].size(); i++)
 		{
@@ -15266,7 +15120,7 @@ void	C_VS_UI_QUEST_LIST::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ ����Ʈ�� �޾� �������� �Ͱ� �Ϸ�Ȱ͵� ���� ����Ʈ�� �����.
+
 void	C_VS_UI_QUEST_LIST::SetQuestListInfo(void* pVoid)
 {
 	if(m_QuestListInfo[0].size())
@@ -15299,19 +15153,19 @@ void	C_VS_UI_QUEST_LIST::SetQuestListInfo(void* pVoid)
 		C_VS_UI_QUEST_MANAGER::_GQuestInfo * TempInfo = (*itr);
 		if(TempInfo->bStatus == CAN_ACCEPT
 	     ||TempInfo->bStatus == DOING
-		 ||TempInfo->bStatus == SUCCESS ) // ������ ����Ʈ�� �߰�
+		 ||TempInfo->bStatus == SUCCESS ) 
 		 m_QuestListInfo[0].push_back(TempInfo);
 		else if(  TempInfo->bStatus == COMPLETE
 				||TempInfo->bStatus == FAIL
-				||TempInfo->bStatus == CAN_REPLAY ) // �Ϸ� ����Ʈ�� �߰�
+				||TempInfo->bStatus == CAN_REPLAY ) 
 		m_QuestListInfo[1].push_back(TempInfo);
 
 		itr++;
 	}
 
-	if(m_TabID == 0) // ���� ��
+	if(m_TabID == 0) 
 		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[0].size());
-	else if(m_TabID == 1) // �Ϸ� ��
+	else if(m_TabID == 1) 
 		m_pC_scroll_bar->SetPosMax(m_QuestListInfo[1].size());
 }
 //-----------------------------------------------------------------------------
@@ -15355,7 +15209,7 @@ C_VS_UI_QUEST_DETAIL::C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK* spr)
 	int alpha_x = 6, alpha_y = h-154+m_OustersOffset;
 	int accept_x = w-80, accept_y = h-36+m_OustersOffset;
 		
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -15377,7 +15231,7 @@ C_VS_UI_QUEST_DETAIL::C_VS_UI_QUEST_DETAIL(C_SPRITE_PACK* spr)
 		m_pImage_Spk->GetHeight(C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT),
 		ACCEPT_ID, this, C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT));
 #ifndef _LIB
-//	char* TempStr = "���̻�����ĥ�ȱ������̻�����ĥ�ȱ���";
+
 //	if(LoadDescFromString(TempStr, 44, 4, false)==true)
 //	{
 //		SetDesc(8, 50+m_OustersOffset, RGB_GRAY, gpC_base->m_chatting_pi);
@@ -15577,7 +15431,7 @@ void	C_VS_UI_QUEST_DETAIL::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 	}else
 	if(p_button->GetID() == ACCEPT_ID)
 	{
-		if(m_IsAbleRunQuest == 1)//����
+		if(m_IsAbleRunQuest == 1)
 		{
 			if(p_button->GetFocusState())
 			{
@@ -15591,7 +15445,7 @@ void	C_VS_UI_QUEST_DETAIL::ShowButtonWidget(C_VS_UI_EVENT_BUTTON * p_button)
 				m_pImage_Spk->BltLocked(x+p_button->x, y+p_button->y, C_VS_UI_QUEST_MANAGER::BUTTON_ACCEPT);
 			}
 		}
-		else if(m_IsAbleRunQuest == 2) // ����
+		else if(m_IsAbleRunQuest == 2) 
 		{
 			if(p_button->GetFocusState())
 			{
@@ -15711,7 +15565,7 @@ void	C_VS_UI_QUEST_DETAIL::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ�� Ÿ��Ʋ�� ��ũ��Ʈ, �׸��� ���డ�� ���¸� ���� �Ѵ�.
+
 void	C_VS_UI_QUEST_DETAIL::SetQuestDetailInfo(char* szTitle, char* szDescription, int Status)
 {
 	if(szDescription != NULL && strlen(szDescription)>0)
@@ -15729,7 +15583,7 @@ void	C_VS_UI_QUEST_DETAIL::SetQuestDetailInfo(char* szTitle, char* szDescription
 	}
 	if(szTitle != NULL&& strlen(szTitle)>0)
 		m_szTitle = szTitle;
-	// status�� C_VS_UI_QUEST_LIST�� QUEST_LIST_STATUS �̴�.
+	
 	if( Status == 1 || Status == 6)
 		m_IsAbleRunQuest = 1; // accept
 	else if( Status == 2 || Status == 3)
@@ -15777,7 +15631,7 @@ C_VS_UI_QUEST_MISSION::C_VS_UI_QUEST_MISSION(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-152+m_OustersOffset;		
 	int alpha_x = 6, alpha_y = h-154 +m_OustersOffset;
 		
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -15796,12 +15650,12 @@ C_VS_UI_QUEST_MISSION::C_VS_UI_QUEST_MISSION(C_SPRITE_PACK* spr)
 
 #ifndef _LIB
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
-	TempInfo->szMissionTitle = "���̻�����ĥ��%s:%d";
+	TempInfo->szMissionTitle = "%s:%d";
 	TempInfo->bStatus = CURRENT;
 	TempInfo->dwTimeLimit = timeGetTime() + (60000);
 	m_QuestMissionInfo.push_back(TempInfo);
 	C_VS_UI_QUEST_MANAGER::_GMissionInfo *TempInfo2 = new C_VS_UI_QUEST_MANAGER::_GMissionInfo ;
-	TempInfo2->szMissionTitle = "�ٺ��� ���϶�";
+	TempInfo2->szMissionTitle = " ";
 	TempInfo2->bStatus = SUCCESS;
 	m_QuestMissionInfo.push_back(TempInfo2);
 
@@ -15880,10 +15734,10 @@ void	C_VS_UI_QUEST_MISSION::Show()
 	{
 		const static char* szQuestStatus[4]=
 		{
-			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),// = "����Ұ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),// = "������";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),// = "�Ϸ�";
-			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),// = "����";
+			(*g_pGameStringTable)[UI_STRING_GQUEST_CAN_NOT].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_DOING].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_COMPLETE].GetString(),
+			(*g_pGameStringTable)[UI_STRING_GQUEST_FAIL].GetString(),
 		};
 		char szString[512];
 		char szString2[512];
@@ -15906,7 +15760,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 						TempValue = 0;
 					}
 
-					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) // ���� Ȥ�� ���� �϶�
+					if(TempInfo->bStatus == SUCCESS || TempInfo->bStatus == FAIL) 
 					{
 						TempInfo->dwTimeLimit = 0;
 						TempInfo->m_NumArg = 0;
@@ -15926,7 +15780,7 @@ void	C_VS_UI_QUEST_MISSION::Show()
 					ReduceString2(szString2,36);
 				}
 				g_PrintColorStr(x+7, y+42 + (i-ScrPos)*17, szString2, gpC_base->m_chatting_pi, RGB_WHITE);
-				if(TempInfo->bStatus != 1 && TempInfo->bStatus<3) // ������..�̰� �������� ����� �ؼ�.����
+				if(TempInfo->bStatus != 1 && TempInfo->bStatus<3) 
 				{
 					sprintf(szString,"%s", szQuestStatus[TempInfo->bStatus]);
 					g_PrintColorStr(x+235, y+42 + (i-ScrPos)*17, szString, gpC_base->m_chatting_pi, RGB_YELLOW);
@@ -16156,7 +16010,7 @@ void	C_VS_UI_QUEST_MISSION::Process()
 	m_pC_button_group->Process();
 	ProcessHide();
 }
-// ����Ʈ �̼� ������ �����Ѵ�.
+
 void	C_VS_UI_QUEST_MISSION::SetQuestMissionInfo(std::vector<C_VS_UI_QUEST_MANAGER::_GMissionInfo*>& Info)
 {
 	m_QuestMissionInfo = Info;
@@ -16176,7 +16030,7 @@ void	C_VS_UI_QUEST_MISSION::SetQuestMissionInfo(std::vector<C_VS_UI_QUEST_MANAGE
 //	while(itr != TempInfo->end())
 //	{
 //		C_VS_UI_QUEST_MANAGER::_GMissionInfo * TempInfo = (*itr);
-//		if(TempInfo->bStatus != HIDE) // �������� ����
+
 //			m_QuestMissionInfo.push_back(TempInfo);
 //		
 //		itr++;
@@ -16223,7 +16077,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 	int close_x = w-20, close_y = h-252+m_OustersOffset;		
 	int alpha_x = 24, alpha_y = h-254+m_OustersOffset;
 		
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -16246,7 +16100,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	MItem*		pItem;
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_POTION );
 //	pItem->SetID( 0 );
@@ -16257,7 +16111,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 1 );
@@ -16267,7 +16121,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //	
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 2 );
@@ -16277,7 +16131,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 3 );
@@ -16287,7 +16141,7 @@ C_VS_UI_QUEST_ITEM::C_VS_UI_QUEST_ITEM(C_SPRITE_PACK* spr)
 //	m_QuestItemInfo.push_back(pItem);
 //
 //	//----------------------------------------------------
-//	// Item ���� --> �߰�
+
 //	//----------------------------------------------------
 //	pItem = MItem::NewItem( ITEM_CLASS_RING );
 //	pItem->SetID( 4 );
@@ -16382,13 +16236,13 @@ void	C_VS_UI_QUEST_ITEM::Show()
 				
 				int item_x = x+5 + ((i-ScrPos*2)/2)*SLOT_WIDTH;
 				
-				// �ٴۿ� ���̰� �Ѵ�.
+				
 				int item_y = y+ 124 + ((i&0x01)*SLOT_HEIGHT) -gpC_item->GetHeight(frame_id)-4 + m_OustersOffset;
 				
-				// item�� center�� �����.
+				
 				item_x += SLOT_WIDTH/2-gpC_item->GetWidth(frame_id)/2;
 				
-				// identify�� �������� ���.. by sigi
+				
 				if (p_item->IsIdentified())
 				{
 					if(p_item->IsQuestItem())
@@ -16401,7 +16255,7 @@ void	C_VS_UI_QUEST_ITEM::Show()
 				}
 				else
 				{
-					// identify �� �� ���� ������ ���
+					
 					CIndexSprite::SetUsingColorSet(378, 378);
 				}
 								
@@ -16455,7 +16309,7 @@ void	C_VS_UI_QUEST_ITEM::Show()
 					}
 				}
 
-//				// ������ ����ǥ��
+
 //				if(p_item->IsPileItem() || p_item->IsChargeItem())
 //				{
 //					RECT rt;
@@ -16951,7 +16805,7 @@ C_VS_UI_RANGER_CHAT::C_VS_UI_RANGER_CHAT()
 	int pin_x = 580, pin_y = h-22;
 	int alpha_x = 600, alpha_y = h-22;
 		
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(pin_x, pin_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_PUSHPIN), 
@@ -16965,7 +16819,7 @@ C_VS_UI_RANGER_CHAT::C_VS_UI_RANGER_CHAT()
 
 	
 #ifndef _LIB
-	m_Str = "a�����ٶ󸶹� �������īŸ���ϰ����ٶ󸶹ٻ������īŸ���ϰ����ٶ󸶹ٻ������īŸ���ϰ����ٶ󸶹ٻ��";
+	m_Str = "a ";
 #endif
 }
 
@@ -17143,7 +16997,7 @@ void	C_VS_UI_RANGER_CHAT::Process()
 //------------------------------------------------------------------------------
 // C_VS_UI_PERSNALSHOP_MESSAGE
 //
-// ���λ����� ���� �޼��� 
+
 //------------------------------------------------------------------------------
 C_VS_UI_PERSNALSHOP_MESSAGE::C_VS_UI_PERSNALSHOP_MESSAGE()
 {	
@@ -17257,7 +17111,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 			
 			char *sz_string2 = sz_string;
 			
-			while(*sz_string2 == ' ')		// ���� ��������
+			while(*sz_string2 == ' ')		
 			{
 				sz_string2++;
 				next++;
@@ -17270,7 +17124,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Show()
 			sz_string2[cut_pos] = NULL;
 			
 			char *return_char = NULL;
-			if((return_char = strchr(sz_string2, '\n')) != NULL)	// return ó��
+			if((return_char = strchr(sz_string2, '\n')) != NULL)	
 			{
 				cut_pos = return_char - sz_string2+1;
 				sz_string2[cut_pos-1] = NULL;
@@ -17456,7 +17310,7 @@ void	C_VS_UI_PERSNALSHOP_MESSAGE::Process()
 //------------------------------------------------------------------------------
 // C_VS_UI_POWER_JJANG
 //
-// �Ŀ�¯ -_-
+
 //------------------------------------------------------------------------------
 C_VS_UI_POWER_JJANG::C_VS_UI_POWER_JJANG()
 {	
@@ -17505,7 +17359,7 @@ C_VS_UI_POWER_JJANG::C_VS_UI_POWER_JJANG()
 	int pin_x = w-24-20, pin_y = h-19;
 	int alpha_x = 6, alpha_y = h-21;
 	int phone_x = w - 85, phone_y = h - 267;
-	//�����ư
+	
 	m_pC_button_group = new ButtonGroup(this);
 	m_pC_button_group->Add(new C_VS_UI_EVENT_BUTTON(close_x, close_y, 
 		gpC_global_resource->m_pC_assemble_box_button_spk->GetWidth(C_GLOBAL_RESOURCE::AB_BUTTON_CLOSE), 
@@ -17602,37 +17456,37 @@ void	C_VS_UI_POWER_JJANG::Show()
 
 	gpC_global_resource->DrawDialog(x, y, w, h, GetAttributes()->alpha);
 	
-	RECT rect2 = { x+20, y+190, x+215, y+310 }; // ������ ĭ
+	RECT rect2 = { x+20, y+190, x+215, y+310 }; 
 	Rect rt2(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	//gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 	
-	SetRect(&rect2, x+70, y+90, x+158, y+118 ); // �ڵ��� ĭ
+	SetRect(&rect2, x+70, y+90, x+158, y+118 ); 
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-//	RECT rect2 = { x+70, y+90, x+158, y+118 }; // �ڵ��� ĭ
+
 //	Rect rt2(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+20, y+65, x+230, y+125 ); //���� �ܰ�
+	SetRect(&rect2, x+20, y+65, x+230, y+125 ); 
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+168, y+128, x+222, y+152 ); // ���� ����Ʈ ĭ
-	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
-	gpC_global_resource->DrawOutBox(rt2);
-
-	SetRect(&rect2, x+20, y+125, x+230, y+155 ); // ���� ����Ʈ �ܰ�
-	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
-	gpC_global_resource->DrawOutBox(rt2);
-
-	SetRect(&rect2, x+168, y+158, x+222, y+182 ); // �׺� ����  ����Ʈ ĭ
+	SetRect(&rect2, x+168, y+128, x+222, y+152 ); 
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
 	gpC_global_resource->DrawOutBox(rt2);
 
-	SetRect(&rect2, x+20, y+155, x+230, y+185 ); // �׺� ���� ����Ʈ �ܰ�
+	SetRect(&rect2, x+20, y+125, x+230, y+155 ); 
+	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
+	gpC_global_resource->DrawOutBox(rt2);
+
+	SetRect(&rect2, x+168, y+158, x+222, y+182 ); 
+	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
+	gpC_base->m_p_DDSurface_back->FillRect(&rect2, 0);
+	gpC_global_resource->DrawOutBox(rt2);
+
+	SetRect(&rect2, x+20, y+155, x+230, y+185 ); 
 	rt2.Set(rect2.left, rect2.top, rect2.right - rect2.left, rect2.bottom - rect2.top );
 	gpC_global_resource->DrawOutBox(rt2);
 	
@@ -17678,13 +17532,13 @@ void	C_VS_UI_POWER_JJANG::Show()
 		}
 		BYTE TempPos = m_OutLinePositon%3;
 
-		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // �׺� ���� ����Ʈ �ܰ�
+		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); 
 		gpC_base->m_p_DDSurface_back->DrawRect(&rect2, YELLOW);
 	}
 	else if(m_SelectPos>=ScrPos && m_SelectPos <= ScrPos+2)
 	{
 		int TempPos = m_SelectPos - ScrPos;/*min(2, max(0, (m_SelectPos - ScrPos)));*/
-		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); // �׺� ���� ����Ʈ �ܰ�
+		SetRect(&rect2, x+29, y+197 + (TempPos)*35, x+205, y+230 + (TempPos)*35 ); 
 		gpC_base->m_p_DDSurface_back->DrawRect(&rect2, YELLOW);
 	}
 
@@ -17891,8 +17745,8 @@ void	C_VS_UI_POWER_JJANG::ShowButtonDescription(C_VS_UI_EVENT_BUTTON *p_button)
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_CLOSE_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_ALPHA_WINDOW].GetString(),
 		(*g_pGameStringTable)[UI_STRING_MESSAGE_SHOW_NO_ALPHA_WINDOW].GetString(),
-		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_GET_POINT_HELP].GetString(),//] = "�Ŀ�¯ ����Ʈ�� �����ɴϴ�.";
-		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_EXCHANGE_HELP].GetString(),//] = "�Ŀ�¯ ����Ʈ�� �������� ��ȯ�մϴ�.";
+		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_GET_POINT_HELP].GetString(),
+		(*g_pGameStringTable)[UI_STRING_POWER_JJANG_EXCHANGE_HELP].GetString(),
 	};
 	switch(p_button->GetID())
 	{
@@ -17987,7 +17841,7 @@ void	C_VS_UI_POWER_JJANG::SetItemList()
 {
 	ReleaseItemList();
 
-	// ����..Ŭ���� ����� ����Ÿ..
+	
 	BYTE MaxItem = 0;
 	std::string convertedPath = ConvertGamePath("data\\info\\PowerjjangItem.inf");
 	ifstream file(convertedPath.c_str(), ios::binary);
@@ -18030,7 +17884,7 @@ void	C_VS_UI_POWER_JJANG::PowerjjangGambleResult(BYTE bItemCode)
 	}
 }
 
-#ifdef __TEST_SUB_INVENTORY__   // add by Coffee 2007-8-9 ���Ӱ��а�
+#ifdef __TEST_SUB_INVENTORY__   
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::C_VS_UI_INVENTORY_SUB
 //
@@ -18350,9 +18204,9 @@ void C_VS_UI_INVENTORY_SUB::Run(id_t id)
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::AnyMatchWindowPixel
 //
-// Window image�� pixel�� (x, y) �� ���̶� ��ġ�ϸ� true�� �ƴϸ� false�� ��ȯ�Ѵ�.
+
 //
-// Item�� ��� ���� ������ 'item ��������Ʈ'�� ���� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_INVENTORY_SUB::AnyMatchWindowPixel(int _x, int _y) const
 {
@@ -18538,7 +18392,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			MItem * p_item = m_MultiPackItem->Get();
 			
 			
-			// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
+			
 			assert(p_item);
 
 			// frame id -> sprite id
@@ -18574,7 +18428,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 					break;
 				}				
 				
-				// Item�� �����ִ� ���� ǥ��
+				
 				for (int j = 0; j < p_item->GetGridHeight(); j++)
 				{
 					for (int i = 0; i < p_item->GetGridWidth(); i++)
@@ -18726,7 +18580,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 			
 		}
 		//
-		// Item�� ��� ������ grid ��ġ�� �̸� �� �� �ֵ��� �Ѵ�.
+		
 		//
 		if (gpC_mouse_pointer->GetPickUpItem() && 
 			m_focus_grid_x != NOT_SELECTED && 
@@ -18762,7 +18616,7 @@ void C_VS_UI_INVENTORY_SUB::Show()
 		gpC_base->m_p_DDSurface_back->Unlock();
 	}
 	//
-	// ������ ���� ǥ��
+	
 	//
 	int len = 0;
 	RECT rect[60];
@@ -18775,9 +18629,9 @@ void C_VS_UI_INVENTORY_SUB::Show()
 		
 		const MItem * p_item = m_MultiPackItem->Get();
 		
-		// p_item�� NULL�� �ݵ�� �ƴϴ�. �ֳ��ϸ� �����ϴ� �͸� Get()�ϱ� �����̴�.
 		
-				// ������ ����ǥ��
+		
+				
 
 		if( p_item == NULL )
 		{			
@@ -18894,7 +18748,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				
 				if (loop == ITEM_REF_POINT_COUNT)
 				{
-					// item�� grid ������ ������� ������ ������ ��ġ��Ų��.
+					
 					const MItem * p_pickup_item = gpC_mouse_pointer->GetPickUpItem();
 					int a, b;
 					switch (i)
@@ -18949,7 +18803,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 	case M_LEFTBUTTON_DOWN:
 	case M_LB_DOUBLECLICK:
 
-			if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange())// ���λ��� ���¸�� �̰ų� ��ȯâ�� �� ���� ��
+			if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange())
 			{
 				if (gpC_mouse_pointer->GetPickUpItem() == NULL && re && m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y) == NULL)
 					//TestGridRect(_x, _y) == false && re)
@@ -18960,7 +18814,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				}
 				
 				//
-				// Item�� ������ ���´�.
+				
 				//
 				{
 					bool ret = Click(m_grid_rect.x, m_grid_rect.y);
@@ -18976,7 +18830,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 		break;
 		
 	case M_RIGHTBUTTON_DOWN:
-		// ���� ���� ���, �ŷ� �� �ƴҶ�, ���콺�� �������� ������
+		
 		if(gC_vs_ui.inventory_mode != 1 && !gC_vs_ui.IsRunningExchange() && NULL == gpC_mouse_pointer->GetPickUpItem()) 
 		{
 			const MItem* p_cur_item = m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y);
@@ -19002,7 +18856,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 				}
 			}
 			else 
-			if(p_cur_item->GetItemClass() == ITEM_CLASS_PET_ITEM && p_cur_item->GetItemType() >2) // 2�� �� ��ȯ������ �̸�
+			if(p_cur_item->GetItemClass() == ITEM_CLASS_PET_ITEM && p_cur_item->GetItemType() >2) 
 			{
 				switch(g_eRaceInterface)
 				{
@@ -19016,7 +18870,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 //							g_char_slot_ingame.DOMAIN_ENCHANT	< 40 &&
 //							g_char_slot_ingame.DOMAIN_GUN		< 40 &&
 //							g_char_slot_ingame.DOMAIN_HEAL		< 40 &&
-//							g_char_slot_ingame.DOMAIN_SWORD) // �� 40 ���ϴ� �� ����.
+
 							{
 								gpC_base->SendMessage(UI_MESSAGE_BOX, UI_STRING_MESSAGE_CANNOT_SUMMON_2ND_PET, 0, 	NULL);
 								return true;
@@ -19051,7 +18905,7 @@ bool C_VS_UI_INVENTORY_SUB::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::ResetRect
 //
-// ��ü Grid rect�� �����Ѵ�. �̰��� Inventory�� �̵��� ���� ������ ����� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void C_VS_UI_INVENTORY_SUB::ResetRect()
 {
@@ -19064,13 +18918,13 @@ void C_VS_UI_INVENTORY_SUB::ResetRect()
 //-----------------------------------------------------------------------------
 // C_VS_UI_INVENTORY_SUB::Click
 //
-// ���� Item�� ��� ������ ������ ��ü�ϰ�, ��� ���� ������ Inventory�� �ִ�
-// ���� ���´�.
+
+
 //
-// ���� �ߴٸ� true��, �׷��������� false�� ��ȯ�Ѵ�.
+
 //
-// grid_start_x, grid_start_y�� inventory grid �������̴�. �̰��� �����Ͽ� item
-// (x, y)�� ���Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 {
@@ -19086,26 +18940,26 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 	const MItem* pMouseItem = gpC_mouse_pointer->GetPickUpItem();
 	
 	 
-	if (pMouseItem) // ��� �ִ°�?
+	if (pMouseItem) 
 	{
-//		if(pMouseItem->GetItemClass() == ITEM_CLASS_PET_ITEM ) // ��� �㿡 ����]
+
 //			return false;
-		// �߰��� �� ���� ���
-		// ������ �������� ��Ƽ�ѿ� �߰��� �� ����. by bezz
+		
+		
 		ITEM_CLASS ItemClass = pMouseItem->GetItemClass();
 		TYPE_ITEMTYPE ItemType = pMouseItem->GetItemType();
-		if ( ( ItemClass == ITEM_CLASS_RELIC )								// ����
-			|| ( ItemClass == ITEM_CLASS_BLOOD_BIBLE )						// ���� ����
-			|| ( ItemClass == ITEM_CLASS_CASTLE_SYMBOL )					// �� ��¡
-			|| ( ItemClass == ITEM_CLASS_WAR_ITEM )							// ���� ������/ �巡�� ����
-			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && ItemType == 27 )		// ���
+		if ( ( ItemClass == ITEM_CLASS_RELIC )								
+			|| ( ItemClass == ITEM_CLASS_BLOOD_BIBLE )						
+			|| ( ItemClass == ITEM_CLASS_CASTLE_SYMBOL )					
+			|| ( ItemClass == ITEM_CLASS_WAR_ITEM )							
+			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && ItemType == 27 )		
 
 			// sjheon 2004.04.28 add
-			|| ( ItemClass == ITEM_CLASS_EVENT_ETC && ItemType == 18 )		// �йи� ����
-			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && (ItemType >= 32 && ItemType <= 36) )		// ǳ�� �Ӹ��� 
+			|| ( ItemClass == ITEM_CLASS_EVENT_ETC && ItemType == 18 )		
+			|| ( ItemClass == ITEM_CLASS_EVENT_ITEM && (ItemType >= 32 && ItemType <= 36) )		
 			// sjheon 2004.04.28 add
 							
-			|| ( ItemClass == ITEM_CLASS_SWEEPER ) )						// ������
+			|| ( ItemClass == ITEM_CLASS_SWEEPER ) )						
 		{
 			return false;
 		}
@@ -19115,9 +18969,9 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 
 		MItem* p_old_item  = NULL;
 			
-		if (m_MultiPackItem->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		// �߰��� item
-			m_focus_grid_x, m_focus_grid_y,	// �߰��� ��ġ 
-			p_old_item))								// �����ִ� item
+		if (m_MultiPackItem->CanReplaceItem(gpC_mouse_pointer->GetPickUpItem(),		
+			m_focus_grid_x, m_focus_grid_y,	
+			p_old_item))								
 		{
 			
 			gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY_SUB, 
@@ -19133,10 +18987,10 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 	}
 	else
 	{
-		// ���´�.
+		
 		MItem * p_item = m_MultiPackItem->GetItem(m_focus_grid_x, m_focus_grid_y);
 		
-		if (p_item != NULL) // Item�� �ִ�.
+		if (p_item != NULL) 
 		{
 			int number = p_item->GetNumber();
 			
@@ -19168,26 +19022,26 @@ bool C_VS_UI_INVENTORY_SUB::Click(int grid_start_x, int grid_start_y)
 					{
 						const MItem* p_cur_item = g_pInventory->GetItem(point.x, point.y);
 						
-						// �ѿ� źâ�� ����� �Ͱ� ���� ���� insert item�̴�.
-						// ��ġ�� ������ ��ġ�Ұ�쿡�� �߰��Ѵ�.
+						
+						
 						if (p_item->IsInsertToItem( p_cur_item ) && p_cur_item->GetGridX() == point.x && p_cur_item->GetGridY() == point.y)
 						{
-							// ������ �ִ� item�� �߰��� �� �ִ� ���
 							
-							// ��� Item�� ��� �ִ�(�߰��� Item)�� Client���� �˾ƾ� �Ѵ�.
-							// ��� �ִ� Item�� Client���� access�� �� �����Ƿ� ��� Item�� ������.
+							
+							
+							
 							gpC_base->SendMessage(UI_ITEM_INSERT_FROM_INVENTORY,
 								point.x, point.y,
-								(void *)p_cur_item); // ��� Item
+								(void *)p_cur_item); 
 						}
 						else
 						{	
-							// �߰��� �� ���� ���
+							
 							MItem* p_old_item  = NULL;
 							
-							if (g_pInventory->CanReplaceItem((MItem *)p_item,		// �߰��� item
-								point.x, point.y,	// �߰��� ��ġ 
-								p_old_item))								// �����ִ� item
+							if (g_pInventory->CanReplaceItem((MItem *)p_item,		
+								point.x, point.y,	
+								p_old_item))								
 							{
 								
 								gpC_base->SendMessage(UI_ITEM_DROP_TO_INVENTORY, 

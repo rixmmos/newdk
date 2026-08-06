@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // ClientDef.h
 //-----------------------------------------------------------------------------
-// Client에 관련된 header file   - -;
+
 //-----------------------------------------------------------------------------
 
 
@@ -46,7 +46,7 @@ extern CSpriteSurface*			g_pLast;
 
 extern CMessageArray*				g_pSystemMessage;
 
-extern CMessageArray*				g_pPlayerMessage;  //鯤소斤口잚
+extern CMessageArray*				g_pPlayerMessage;  
 
 extern CMessageArray*				g_pGameMessage;
 
@@ -60,7 +60,7 @@ enum	CLIENT_MODE
 	MODE_NULL = 0,
 	MODE_OPENING,
 	MODE_MAINMENU,
-	MODE_CHANGE_OPTION,	// 3d가속 <--> 2d
+	MODE_CHANGE_OPTION,	
 	MODE_NEWUSER,
 	MODE_CREATECHARACTER,
 	MODE_WAIT_CREATEPCOK,
@@ -78,7 +78,7 @@ enum	CLIENT_MODE
 	MODE_WAIT_UPDATEINFO,
 	MODE_WAIT_SETPOSITION,		
 	MODE_WAIT_REGISTERPLAYEROK,
-	MODE_WAIT_RECONNECT_LOGIN,	// logout하고 자동 재접속
+	MODE_WAIT_RECONNECT_LOGIN,	
 	MODE_GAME,
 	MODE_QUIT
 };	
@@ -96,7 +96,7 @@ enum	CLIENT_UPDATE
 
 
 //-----------------------------------------------------------------------------
-// 현재의 Client Mode에 대한 설정..
+
 //-----------------------------------------------------------------------------
 extern enum CLIENT_MODE		g_Mode;
 extern enum CLIENT_MODE		g_ModeNext;
@@ -131,6 +131,7 @@ extern void		SetLightning(DWORD delay);
 //-----------------------------------------------------------------------------
 extern BOOL		LoadZone(int n);
 extern BOOL		LoadZoneInfo(int n);
+extern BOOL		LoadZoneUIInfo(int n);
 extern void		MoveZone(int n);
 extern BOOL		LoadCreature(int spriteType);
 extern BOOL		LoadCreatureType(int creatureType);

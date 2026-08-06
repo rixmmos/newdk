@@ -2,11 +2,11 @@
 // MAttachEffect.h
 //----------------------------------------------------------------------
 //
-// Effect중에서 Object에 붙어 있는 Effect를 의미한다.
+
 //
-// 매 Update마다 Object의 좌표를 체크해서 붙어야~ 한다.
+
 //
-// Object라고는 하지만 아마.. Creature밖에 없지 않을까.
+
 //
 //----------------------------------------------------------------------
 
@@ -29,14 +29,14 @@ class MAttachEffect : public MMovingEffect {
 		virtual EFFECT_TYPE		GetEffectType()	const	{ return EFFECT_ATTACH; }
 
 		//--------------------------------------------------------
-		// 목표 설정
+		
 		//--------------------------------------------------------
-		void					SetAttachCreatureID(TYPE_OBJECTID id);	// zone에서 찾는다.
-		bool					SetAttachCreature(MCreature* pCreature);		// 캐릭터의 좌표로 이동
+		void					SetAttachCreatureID(TYPE_OBJECTID id);	
+		bool					SetAttachCreature(MCreature* pCreature);		
 		TYPE_OBJECTID			GetAttachCreatureID()					{ return m_CreatureID; }
 
 		//--------------------------------------------------------
-		// 종류
+		
 		//--------------------------------------------------------
 		bool					IsEffectSprite() const	{ return m_bEffectSprite; }
 		bool					IsEffectColor() const	{ return !m_bEffectSprite; }
@@ -50,7 +50,7 @@ class MAttachEffect : public MMovingEffect {
 		WORD					GetEffectColor() const		{ return m_EffectColor; }		
 		
 		//--------------------------------------------------------
-		// 한 번의 Update에 호출될 함수..
+		
 		//--------------------------------------------------------
 		virtual bool			Update();
 
@@ -58,17 +58,17 @@ class MAttachEffect : public MMovingEffect {
 	protected :
 		TYPE_OBJECTID				m_CreatureID;
 
-		bool						m_bEffectSprite;		// 그림 종류를 사용하나?
+		bool						m_bEffectSprite;		
 
 		union {
-			TYPE_EFFECTSPRITETYPE	m_EffectSpriteType;		// 그림 종류
-			WORD					m_EffectColor;			// Effect 색깔
+			TYPE_EFFECTSPRITETYPE	m_EffectSpriteType;		
+			WORD					m_EffectColor;			
 		};
 
-		ADDON						m_bEffectColorPart;		// 색깔 바뀌는 위치
+		ADDON						m_bEffectColorPart;		
 };
 
-// list정의
+
 typedef	std::list<MAttachEffect*>	ATTACHEFFECT_LIST;
 
 #endif

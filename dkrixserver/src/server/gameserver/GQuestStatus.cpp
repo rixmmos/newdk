@@ -137,7 +137,7 @@ GQuestElement::ResultType GQuestStatus::checkElements(GQuestInfo::ElementType ty
     case GQuestInfo::OR:
         return checkElementsOR(type);
     default:
-        filelog("GQuestBug.log", "%u - GQuestStatus::checkElements(%u) : 잘못된 checkType : %d",
+        filelog("GQuestBug.log", "%u - GQuestStatus::checkElements(%u) :  checkType : %d",
                 m_pGQuestInfo->getQuestID(), type, m_pGQuestInfo->getCheckType(type));
         Assert(false);
     }
@@ -145,7 +145,7 @@ GQuestElement::ResultType GQuestStatus::checkElements(GQuestInfo::ElementType ty
     return GQuestElement::FAIL;
 }
 
-// element들을 순서대로 check해야 된다. 앞에꺼가 완결되어야 뒤에꺼를 체크한다.
+
 GQuestElement::ResultType GQuestStatus::checkElementsSEQ(GQuestInfo::ElementType type) {
     cout << "Checking SEQ : " << (int)type << endl;
     GQuestMission* pCurrentMission = m_MissionMap[m_ElementAdvance[type]];
@@ -198,7 +198,7 @@ GQuestElement::ResultType GQuestStatus::checkElementsSEQ(GQuestInfo::ElementType
     return GQuestElement::OK;
 }
 
-// 하나라도 success면 ok. FAIL 조건 체크할때 쓴다. ㅜ.ㅠ
+
 GQuestElement::ResultType GQuestStatus::checkElementsOR(GQuestInfo::ElementType type) {
     cout << "Checking OR : " << (int)type << endl;
 
@@ -210,12 +210,12 @@ GQuestElement::ResultType GQuestStatus::checkElementsOR(GQuestInfo::ElementType 
         if (pMission != NULL) {
             cout << "Checking Mission : " << pMission->getMissionName() << endl;
             if (pMission->m_Status == MissionInfo::SUCCESS) {
-                cout << "이미 성공한 미션임" << endl;
+                cout << "  " << endl;
                 return GQuestElement::OK;
             }
 
             if (pMission->m_Status == MissionInfo::FAIL) {
-                cout << "이미 실패한 미션임" << endl;
+                cout << "  " << endl;
             } else {
                 GQuestElement::ResultType result = (*itr)->checkMission(pMission);
                 cout << "Result : " << result << endl;
@@ -240,7 +240,7 @@ GQuestElement::ResultType GQuestStatus::checkElementsOR(GQuestInfo::ElementType 
                 cout << "Creating new mission..." << endl;
                 GQuestMission* pNewMission = (*itr)->makeInitMission(m_pOwner);
                 if (pNewMission == NULL) {
-                    cout << "미션 생성 실패!!!!" << endl;
+                    cout << "  !!!!" << endl;
                     ++itr;
                     continue;
                 }
@@ -271,7 +271,7 @@ GQuestElement::ResultType GQuestStatus::checkElementsOR(GQuestInfo::ElementType 
     return GQuestElement::FAIL;
 }
 
-// 모든 element를 한꺼번에 평가한다. 기다려야 되는것도 한꺼번에 기다린다.
+
 GQuestElement::ResultType GQuestStatus::checkElementsAND(GQuestInfo::ElementType type) {
     cout << "Checking AND : " << (int)type << endl;
 
@@ -285,10 +285,10 @@ GQuestElement::ResultType GQuestStatus::checkElementsAND(GQuestInfo::ElementType
         if (pMission != NULL) {
             cout << "Checking Mission : " << pMission->getMissionName() << endl;
             if (pMission->m_Status == MissionInfo::FAIL) {
-                cout << "이미 실패한 미션임" << endl;
+                cout << "  " << endl;
                 return GQuestElement::FAIL;
             } else if (pMission->m_Status == MissionInfo::SUCCESS) {
-                cout << "이미 성공한 미션임" << endl;
+                cout << "  " << endl;
             } else {
                 GQuestElement::ResultType result = (*itr)->checkMission(pMission);
                 cout << "Result : " << result << endl;
@@ -315,7 +315,7 @@ GQuestElement::ResultType GQuestStatus::checkElementsAND(GQuestInfo::ElementType
                 cout << "Creating new mission..." << endl;
                 GQuestMission* pNewMission = (*itr)->makeInitMission(m_pOwner);
                 if (pNewMission == NULL) {
-                    cout << "미션 생성 실패!!!!" << endl;
+                    cout << "  !!!!" << endl;
                     ++itr;
                     continue;
                 }

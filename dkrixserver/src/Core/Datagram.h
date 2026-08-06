@@ -29,8 +29,8 @@ class DatagramPacket;
 //
 // class Datagram;
 //
-// UDP �������κ��� �Է¹ްų� ����� ����Ÿ�� �����̴�.
-// �� Datagram�� ���� �� �Ǵ� ���� ���� �ּҸ� ������ �ִ�.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -146,7 +146,7 @@ public:
 
     string toString() const;
 
-    // �ж��Ƿ���udp����
+    
     bool isDatagram(PacketID_t packetID);
 
 private:

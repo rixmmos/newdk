@@ -664,7 +664,7 @@ bool Ousters::load()
         {
             m_Exp = pOustersEXPInfo->getAccumExp() - m_GoalExp;
 
-            char pField[80];
+            char pField[128];
             sprintf(pField, "Exp=%lu", m_Exp);
             tinysave(pField);
         }
@@ -681,7 +681,7 @@ bool Ousters::load()
         {
             m_RankExp = pRankEXPInfo->getAccumExp() - m_RankGoalExp;
 
-            char pField[80];
+            char pField[128];
             sprintf(pField, "RankExp=%lu", m_RankExp);
             tinysave(pField);
         }
@@ -973,18 +973,18 @@ void Ousters::wearItem(WearPart Part, Item* pItem)
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                char pField[80];
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                char pField[128];
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 addItemToExtraInventorySlot(pLeft);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             } else {
                 return;
             }
         } else {
-            char pField[80];
+            char pField[128];
 
             if (isWear(WEAR_RIGHTHAND)) {
                 pRight = getWearItem(WEAR_RIGHTHAND);
@@ -992,11 +992,11 @@ void Ousters::wearItem(WearPart Part, Item* pItem)
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 addItemToExtraInventorySlot(pRight);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
             } else if (isWear(WEAR_LEFTHAND)) {
                 pLeft = getWearItem(WEAR_LEFTHAND);
@@ -1004,18 +1004,18 @@ void Ousters::wearItem(WearPart Part, Item* pItem)
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 addItemToExtraInventorySlot(pLeft);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             } else {
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
             }
         }
@@ -1025,19 +1025,19 @@ void Ousters::wearItem(WearPart Part, Item* pItem)
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
-            char pField[80];
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            char pField[128];
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
             addItemToExtraInventorySlot(pPrevItem);
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
-            char pField[80];
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            char pField[128];
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
         }
     }
@@ -1084,7 +1084,7 @@ void Ousters::wearItem(WearPart Part)
     OUSTERS_RECORD prev;
     getOustersRecord(prev);
 
-    char pField[80];
+    char pField[128];
 
     if (isTwohandWeapon(pItem)) {
         if (isWear(WEAR_RIGHTHAND) && isWear(WEAR_LEFTHAND)) {
@@ -1097,12 +1097,12 @@ void Ousters::wearItem(WearPart Part)
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 deleteItemFromExtraInventorySlot();
                 addItemToExtraInventorySlot(pLeft);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
 
             } else {
@@ -1119,12 +1119,12 @@ void Ousters::wearItem(WearPart Part)
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 deleteItemFromExtraInventorySlot();
                 addItemToExtraInventorySlot(pRight);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
 
             } else if (isWear(WEAR_LEFTHAND)) {
@@ -1136,12 +1136,12 @@ void Ousters::wearItem(WearPart Part)
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 // by sigi. 2002.5.15
-                sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+                sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
                 deleteItemFromExtraInventorySlot();
                 addItemToExtraInventorySlot(pLeft);
-                sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+                sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             } else {
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
@@ -1158,20 +1158,20 @@ void Ousters::wearItem(WearPart Part)
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
             deleteItemFromExtraInventorySlot();
             addItemToExtraInventorySlot(pPrevItem);
 
-            sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
+            sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
             m_pWearItem[Part] = pItem;
             deleteItemFromExtraInventorySlot();
 
             // by sigi. 2002.5.15
-            sprintf(pField, "Storage=%d, X=%d", STORAGE_GEAR, Part);
+            sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
         }
     }
@@ -1280,8 +1280,8 @@ void Ousters::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
     //---------------------------------------------
     if (bAddOnMouse) {
         addItemToExtraInventorySlot(pItem);
-        char pField[80];
-        sprintf(pField, "Storage=%d, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
+        char pField[128];
+        sprintf(pField, "Storage=%d, StorageID=0, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
         pItem->tinysave(pField);
     }
 
@@ -1953,7 +1953,7 @@ void Ousters::setGoldEx(Gold_t gold)
     setGold(gold);
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "Gold=%ld", m_Gold);
     tinysave(pField);
 
@@ -2019,7 +2019,7 @@ void Ousters::saveSilverDamage(Silver_t damage)
     setSilverDamage(damage);
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "SilverDamage=%d", m_SilverDamage);
     tinysave(pField);
 
@@ -2163,7 +2163,7 @@ void Ousters::setResurrectZoneIDEx(ZoneID_t id)
     setResurrectZoneID(id);
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "ResurrectZone=%d", id);
     tinysave(pField);
 
@@ -2179,7 +2179,7 @@ void Ousters::saveAlignment(Alignment_t alignment)
     setAlignment(alignment);
 
     // by sigi. 2002.5.15
-    char pField[80];
+    char pField[128];
     sprintf(pField, "Alignment=%d", alignment);
     tinysave(pField);
 
@@ -2262,7 +2262,7 @@ void Ousters::saveGears(void) const
 {
     __BEGIN_TRY
 
-    char pField[80];
+    char pField[128];
 
     for (int i = 0; i < Ousters::OUSTERS_WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
@@ -2380,7 +2380,7 @@ void Ousters::saveInitialRank(void)
 
         setRankGoalExp(NextGoalExp);
     */
-    char pField[80];
+    char pField[128];
     sprintf(pField, "`Rank`=%d, RankExp=%lu, RankGoalExp=%lu", getRank(), getRankExp(), getRankGoalExp());
     tinysave(pField);
     setRankExpSaveCount(0);

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectProtectionFromAcid.cpp
 // Written by  : excel96
-// Description : ProtectionFromAcid에 의해서 생성되는 산성 데미지 약화 이펙트이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "EffectProtectionFromAcid.h"
@@ -73,7 +73,7 @@ void EffectProtectionFromAcid::unaffect()
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_PROTECTION_FROM_ACID);

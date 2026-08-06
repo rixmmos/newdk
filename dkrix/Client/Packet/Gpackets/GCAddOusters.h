@@ -7,24 +7,24 @@
 #ifndef __GC_ADD_OUSTERS_H__
 #define __GC_ADD_OUSTERS_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PCOustersInfo3.h"
-#include "EffectInfo.h"
-#include "PetInfo.h"
-#include "NicknameInfo.h"
-#include "StoreInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PCOustersInfo3.h"
+#include "../EffectInfo.h"
+#include "../PetInfo.h"
+#include "../NicknameInfo.h"
+#include "../StoreInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddOusters;
-// 로그인이나 포탈, 텔레포트 등으로 슬레이어가 존에 새로 들어갔을 경우, 또는 
-// 슬레이어가 존에서 이동할 경우,(1) 이미 이 슬레이어에 대한 정보를 갖고 있는 
-//(즉 이 슬레이어를 보고 있는..) 영역에 존재하는 PC들에게는 GCMove 패킷을 
-// 브로드캐스트한다. 그러나,(2) 이 슬레이어를 처음 보게 되는 영역에 존재하는 
-// PC들에게는 GCAddOusters 패킷을 브로드캐스트한다. 또한,(3) 이 슬레이어는 
-// 자신이 새로 개척한 시야(?) 안에 존재하는 슬레이어들의 정보를 GCAddOusters에 
-// 담아서 받게 된다.
-// 멍~~
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCAddOusters : public Packet 
@@ -62,9 +62,9 @@ public:
 	void		setStoreInfo(StoreInfo* pInfo) { pInfo->makeStoreOutlook(m_StoreOutlook); }
 
 private:
-	PCOustersInfo3  m_OustersInfo;  // 슬레이어의 외모 정보
-	EffectInfo*    m_pEffectInfo; // 걸려있는 이펙트 정보
-	PetInfo*    m_pPetInfo; // 걸려있는 이펙트 정보
+	PCOustersInfo3  m_OustersInfo;  
+	EffectInfo*    m_pEffectInfo; 
+	PetInfo*    m_pPetInfo; 
 	NicknameInfo*	m_pNicknameInfo;
 	StoreOutlook	m_StoreOutlook;
 };

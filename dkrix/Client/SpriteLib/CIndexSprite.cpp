@@ -25,7 +25,7 @@ WORD	CIndexSprite::s_Colorkey = 0;
 int		CIndexSprite::s_IndexValue[MAX_COLORSET_USE];
 
 //-----------------------------------------------------------------------------
-// Blt Color���� �⺻������ ����� ColorSet
+
 //-----------------------------------------------------------------------------
 const int defaultGradationColor = 384;
 
@@ -66,24 +66,7 @@ CIndexSprite::SetColorSet()
 	WORD color;
 
 
-	/*
-	static BYTE rgbPoint[MAX_COLORSET_SEED][3] = 
-	{
-		//                     �⺻��  :  ����,����,��ο�,
-		{ 16, 16, 16 },		// ���	
-		{ 31, 0, 0 },		// ����	
-		{ 31, 16, 0 },		// ��Ȳ	
-		{ 31, 31, 0 },		// ���	
-		{ 0, 31, 16 },		// ����	
-		{ 0, 31, 0 },		// �ʷ�	
-		{ 0, 0, 31 },		// �Ķ�	
-		{ 31, 0, 31 },		// ����	
-		{ 0, 31, 31 },		// �ϴ�	
-		{ 16, 0, 31 },		// ����	
-		{ 16, 16, 31 },		// £�� �ϴ�
-		{ 31, 16, 16 }		// ���		
-	};
-	*/
+	 
 
 	static BYTE rgbPoint[MAX_COLORSET_SEED][3] =
 	{
@@ -117,18 +100,18 @@ CIndexSprite::SetColorSet()
 		{ 31, 32, 31 },
 		{ 31, 63, 16 },
 
-		{ 16, 32, 16 }, // ȸ�� (gray) - G = 2x R/B for neutral gray
-		{ 24, 48, 24 }, // ���� ȸ�� (light gray) - G = 2x R/B
-		{ 8, 16, 8 },   // ��ο� ȸ�� (dark gray) - G = 2x R/B
+		{ 16, 32, 16 }, 
+		{ 24, 48, 24 }, 
+		{ 8, 16, 8 },   
 
-		{ 30, 48, 18 }, // ��� (skin tone) - G is 6-bit
-		{ 25, 30, 11 },	// ���� (brown) - G is 6-bit
+		{ 30, 48, 18 }, 
+		{ 25, 30, 11 },	
 		{ 21, 24, 11 },				// G is 6-bit
-		{ 19, 30, 13 }, // ������ (another skin tone) - G is 6-bit
+		{ 19, 30, 13 }, 
 
-		{ 21, 36, 11 }, // ���� ��� - G is 6-bit
+		{ 21, 36, 11 }, 
 
-		{ 22, 32, 9 } // ��� - G is 6-bit
+		{ 22, 32, 9 } 
 	};
 
 		
@@ -148,7 +131,7 @@ CIndexSprite::SetColorSet()
 		// MAX_COLORGRADATION_HALF ~ 1
 		for (j=MAX_COLORGRADATION_HALF; j>=1; j--)
 		{
-			// ù�ٸ�
+			
 			if (j==MAX_COLORGRADATION_HALF)
 			{
 				GetIndexColor(ColorSet[set], j,
@@ -209,7 +192,7 @@ CIndexSprite::SetColorSet()
 	}
 	
 	//----------------------------------------------------------------------
-	// GradationValue��
+	
 	//----------------------------------------------------------------------
 	for (j=0; j<MAX_COLORGRADATION; j++)
 	{
@@ -218,7 +201,7 @@ CIndexSprite::SetColorSet()
 	}
 
 	//----------------------------------------------------------------------
-	// Darkness���� �����Ѵ�.
+	
 	//----------------------------------------------------------------------
 	for (int i=0; i<MAX_COLORSET; i++)
 	{
@@ -227,7 +210,7 @@ CIndexSprite::SetColorSet()
 			color = ColorSet[i][j];
 			//GradationValue[j] = ColorDraw::Red(color) + ColorDraw::Green(color) + ColorDraw::Blue(color);
 
-			// Darkness�� ���� ����
+			
 			for (k=0; k<MAX_DARKBIT; k++)
 			{	
 				r = ((color >> ColorDraw::s_bSHIFT_R) >> k) << ColorDraw::s_bSHIFT_R;
@@ -247,7 +230,7 @@ CIndexSprite::SetColorSet()
 	}
 
 	//----------------------------------------------------------------------
-	// ���� �׽�Ʈ..
+	
 	//----------------------------------------------------------------------
 	/*
 	int colorSet = MAX_COLORSET-1;
@@ -274,7 +257,7 @@ CIndexSprite::SaveIndexTableToFile(std::ofstream& file)
 	int db = MAX_DARKBIT;
 
 	//----------------------------------------------------------------------
-	// ������ ���ڵ�..
+	
 	//----------------------------------------------------------------------
 	file.write((const char*)&cg, 4);
 	file.write((const char*)&cs, 4);
@@ -327,7 +310,7 @@ CIndexSprite::LoadIndexTableFromFile(std::ifstream& file)
 	int cg, cs, db;
 
 	//----------------------------------------------------------------------
-	// ������ ���ڵ�..
+	
 	//----------------------------------------------------------------------
 	file.read((char*)&cg, 4);
 	file.read((char*)&cs, 4);
@@ -377,7 +360,7 @@ CIndexSprite::LoadIndexTableFromFile(std::ifstream& file)
 }
 
 //----------------------------------------------------------------------
-// ��¿� ����� ColorSet�� �����Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CIndexSprite::SetUsingColorSet(int set1, int set2)
@@ -387,7 +370,7 @@ CIndexSprite::SetUsingColorSet(int set1, int set2)
 }
 
 //----------------------------------------------------------------------
-// ��¿� ����� ColorSet�� �����Ѵ�.
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::SetUsingColorSetOnly(BYTE setNumber, int colorSet)
@@ -397,8 +380,8 @@ CIndexSprite::SetUsingColorSetOnly(BYTE setNumber, int colorSet)
 
 
 //----------------------------------------------------------------------
-// (r0,g0,b0) ~ (r1,g1,b1) ������ step������ŭ�� ���ڸ�
-// pColor�� �־��ش�.
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::GetIndexColor(WORD* pColor, int step, 
@@ -462,7 +445,7 @@ CIndexSprite::~CIndexSprite()
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// m_Pixels�� memory�� �����Ѵ�.
+
 //----------------------------------------------------------------------
 void	
 CIndexSprite::Release()
@@ -496,26 +479,26 @@ CIndexSprite::Release()
 void
 CIndexSprite::operator = (const CIndexSprite& Sprite)
 {
-	// �޸� ����
+	
 	Release();
 
 	
-	// NULL�̸� �������� �ʴ´�.
+	
 	if (Sprite.m_Pixels==NULL || Sprite.m_Width==0 || Sprite.m_Height==0)
 		return;
 
-	// ũ�� ����
+	
 	m_Width = Sprite.m_Width;
 	m_Height = Sprite.m_Height;
 	
-	// ���� �� �� ����
+	
 	int index;	
 	register int i;
 	register int j;
 
 	int colorCount, transPair, indexCount;
 
-	// �޸� ���
+	
 	m_Pixels = new WORD* [m_Height];
 
 	//--------------------------------
@@ -523,33 +506,33 @@ CIndexSprite::operator = (const CIndexSprite& Sprite)
 	//--------------------------------
 	for (int i=0; i<m_Height; i++)
 	{
-		// �ݺ� ȸ���� 2 byte
+		
 		transPair = Sprite.m_Pixels[i][0];
 				
 		index	= 1;
 
-		// �� line���� byte���� ��� �����ؾ��Ѵ�.
+		
 		for (j=0; j<transPair; j++)
 		{			
 			// transCount = m_Pixels[i][index];
-			index++;	// ���� ��
-			indexCount = Sprite.m_Pixels[i][index++];	// indexPair ��
+			index++;	
+			indexCount = Sprite.m_Pixels[i][index++];	
 
-			index += indexCount;		// index���� ���� ���� �� ��ŭ
+			index += indexCount;		
 
-			// Normal�� ��
+			
 			colorCount = Sprite.m_Pixels[i][index++];
 
-			// Normal�� ����ŭ ����
+			
 			index	+= colorCount;
 		}
 
-		// �޸� ���
+		
 		m_Pixels[i] = new WORD [index];
 		memcpy(m_Pixels[i], Sprite.m_Pixels[i], index<<1);
 	}
 
-	// ���� �Ϸ�
+	
 	m_bInit = true;
 }
 
@@ -557,14 +540,14 @@ CIndexSprite::operator = (const CIndexSprite& Sprite)
 //-----------------------------------------------------------------------------
 // Get IndexColor
 //-----------------------------------------------------------------------------
-// ������ gradation�� ���ؼ�
-// color���� �����ϴ� ������ index��(���� ���� �ƴ� index��ȣ)�� ã���ش�.
+
+
 //-----------------------------------------------------------------------------
 BYTE
 CIndexSprite::GetIndexColor(WORD color)
 {
 	//-------------------------------------------------------
-	// Gradition��
+	
 	//-------------------------------------------------------
 	WORD spriteGradation = ColorDraw::Red(color) 
 						+ ColorDraw::Green(color) 
@@ -576,19 +559,19 @@ CIndexSprite::GetIndexColor(WORD color)
 //-----------------------------------------------------------------------------
 // GetColorToGradation
 //-----------------------------------------------------------------------------
-// color(0~93)���� gradation(0~MAX_GRADATION)������ �ٲ۴�.
+
 //-----------------------------------------------------------------------------
 BYTE
 CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 {
-	// 5:6:5���� code
+	
 	//WORD spriteGradation = (color >> 11) + ((color >> 6) & 0x1F) + (color & 0x1F);
-	// 5:5:5���� code
+	
 	//WORD spriteGradation = (color >> 10) + ((color >> 5) & 0x1F) + (color & 0x1F);
 
 	//-------------------------------------------------------
-	// spriteGradation���� ���� �����
-	// GradationValue�� ã�ƾ� �Ѵ�.
+	
+	
 	//-------------------------------------------------------
 	int g;
 	for (g=0; g<MAX_COLORGRADATION; g++)
@@ -599,17 +582,17 @@ CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 		}
 	}
 
-	// ���� ���� ������ ���
+	
 	if (g==0 || g==MAX_COLORGRADATION-1)
 	{
 		return g;
 	}
 
-	// ��� ����
+	
 	WORD value1 = GradationValue[g-1] - spriteGradation;
 	WORD value2 = spriteGradation - GradationValue[g-1];
 
-	// ���� ���� �����Ѵ�.
+	
 	if (value1 < value2)
 	{
 		return g-1;
@@ -619,31 +602,31 @@ CIndexSprite::GetColorToGradation(BYTE spriteGradation)
 		return g;
 	}
 
-	// ���� ����.. ??
+	
 	return g-1;
 }
 
 //-----------------------------------------------------------------------------
 // Set Pixel
 //-----------------------------------------------------------------------------
-// pixel����(pSource)��
-// �� ���� index ������ ������ 
-// IndexSprite�� �����Ѵ�.
+
+
+
 //
-// �켱 ColorInfo�� IndexInfo�� �����ϰ�..
-// GenerateFromIndex�� ȣ���Ѵ�..
+
+
 //
-// ȿ���� �� ���������� -_-; ����ȭ�ϱ� ������. reuse���.. 
-// ������ ���� �����߿��� ���� ���� �����ϱ�.. ����.. -_-;;;; 
+
+
 //-----------------------------------------------------------------------------
 void		
 CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch, 
-							 WORD* pIndex1, WORD indexPitch1,	// ù��° index
-							 WORD* pIndex2, WORD indexPitch2,	// �ι�° index
+							 WORD* pIndex1, WORD indexPitch1,	
+							 WORD* pIndex2, WORD indexPitch2,	
 							 WORD width, WORD height)
 {
 	//--------------------------------------------------
-	// ���̰� 0�϶�..
+	
 	//--------------------------------------------------
 	if (width==0 || height==0)
 	{
@@ -652,13 +635,13 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	}
 
 	WORD	*pSourceTemp, *pIndexTemp1, *pIndexTemp2;
-	WORD	transIndex1=0, transIndex2=0;	// default �������� 0��(����)
+	WORD	transIndex1=0, transIndex2=0;	
 
 	//--------------------------------------------------
-	// Index������ �ִ� surface�� �������� �����Ѵ�.
+	
 	//--------------------------------------------------
-	// pSource�� �������� �ִ� ��ġ��
-	// pIndex1, pIndex2������ �������̴�.
+	
+	
 	//--------------------------------------------------
 	WORD	*pSourceTemp2;
 	pSourceTemp = pSource;
@@ -669,10 +652,10 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 
 		for (register int j=0; j<width; j++)
 		{
-			// ������
+			
 			if (*pSourceTemp2==s_Colorkey)
 			{
-				// pIndex1�� pIndex2���� ���� �������� �����Ѵ�.
+				
 				if (pIndex1!=NULL)
 				{
 					transIndex1 = *(WORD*)((BYTE*)pIndex1 + i*indexPitch1 + (j<<1));
@@ -695,7 +678,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	
 
 	//--------------------------------------------------
-	// ���� ������ ���� �޸� ���
+	
 	//--------------------------------------------------
 	WORD** ppColor, **ppIndex;
 
@@ -703,18 +686,18 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 	ppIndex = new WORD* [height];
 
 	//--------------------------------------------------
-	// üũ üũ~
+	
 	//--------------------------------------------------
 	for (int i=0; i<height; i++)
 	{
 		//--------------------------------------------------
-		// 메모리 할당
+		
 		//--------------------------------------------------
 		ppColor[i] = new WORD [width];
 		ppIndex[i] = new WORD [width];
 
 		//--------------------------------------------------
-		// ù ��
+		
 		//--------------------------------------------------
 		pSourceTemp = pSource;
 
@@ -729,45 +712,45 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		}
 
 		//--------------------------------------------------
-		// �� ���� üũ..
+		
 		//--------------------------------------------------
 		for (register int j=0; j<width; j++)
 		{
 			//--------------------------------------------------
-			// �������̶��..
+			
 			//--------------------------------------------------
 			if (*pSourceTemp==s_Colorkey)
 			{
 				ppIndex[i][j] = INDEX_TRANS;
 			}
 			//--------------------------------------------------
-			// ���� Index�������� üũ�ϰ�, 
-			// �ƴϸ�, ���� ���� ����̴�.
+			
+			
 			//--------------------------------------------------
 			else
 			{
 				//--------------------------------------------------
-				// index1�� �ִ� ������ üũ�ؾ� �Ѵ�.
+				
 				//--------------------------------------------------
 				if (pIndex1!=NULL && *pIndexTemp1!=transIndex1)
 				{
 					ppIndex[i][j] = GetIndexColor( *pSourceTemp );	// (0<<8) | gradation;
 				}
 				//--------------------------------------------------
-				// index2�� �ִ� ������ üũ�ؾ� �Ѵ�.
+				
 				//--------------------------------------------------
 				else if (pIndex2!=NULL && *pIndexTemp2!=transIndex2)
 				{
 					ppIndex[i][j] = (1<<8) | GetIndexColor( *pSourceTemp );
 				}
 				//--------------------------------------------------
-				// �� �� ���� ��� = ���� ��
+				
 				//--------------------------------------------------
 				else
 				{
 					ppIndex[i][j] = INDEX_NULL;
 
-					// ���� ���� �����Ѵ�.
+					
 					ppColor[i][j] = *pSourceTemp;
 				}				
 			}
@@ -775,7 +758,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 			pSourceTemp++;
 
 			//--------------------------------------------------
-			// ���� ��
+			
 			//--------------------------------------------------
 			if (pIndex1!=NULL)
 			{
@@ -789,7 +772,7 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 		}
 
 		//--------------------------------------------------
-		// ���� ��
+		
 		//--------------------------------------------------
 		pSource = (WORD*)((BYTE*)pSource + sourcePitch);
 
@@ -806,14 +789,14 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 
 
 	//--------------------------------------------------
-	// ppColor�� ppIndex�� �ϼ��Ǿ����Ƿ�.. 
-	// IndexSprite����!
+	
+	
 	//--------------------------------------------------
 	GenerateFromIndex(ppColor, width, height, ppIndex);
 
 
 	//--------------------------------------------------
-	// ppColor와 ppIndex를 삭제한다.
+	
 	//--------------------------------------------------
 	for (int i=0; i<height; i++)
 	{
@@ -830,78 +813,78 @@ CIndexSprite::SetPixel(WORD* pSource, WORD sourcePitch,
 // Generate Index 2
 //-----------------------------------------------------------------------------
 // 
-// ppColor���� width*height��ŭ�� ���� �о Sprite�� ����µ�..
-// ������ ���൵ �ؾ��ϰ�...
-// Index Array�� ������ �����ؾ��Ѵ�.
+
+
+
 //
 //-----------------------------------------------------------------------------
-// - ���������� ������ ������ ����Ѵ�.
-// - IndexSet�� Gradation���򺰷� ����(?)�Ѵ�. (ȿ���� ���� ���� �� �ϴ�)
+
+
 //
 //
-// [ �� ���� ���� ]
+
 //
-// (����Pair�ݺ���) 
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
+
 //                              .     
 //                              .     
 //                              .     
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
+
 //    )
 //
-// WORD : �������� 
-// WORD : ��Pair�ݺ���
-// WORD : index����
-// WORD : indexSet��ȣ | gradation��ȣ --> BYTE | BYTE
-// WORD : �����Ȼ����
-// WORD*: �����Ȼ����
+
+
+
+
+
+
 //
-// �������� Gradation Index���� ������ ���� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
-// ppIndex���� �� 2byte�� 
-// ((IndexSet��ȣ<<8) | Gradation��ȣ)�� ����Ǿ� �־�� �Ѵ�.
+
+
 //-----------------------------------------------------------------------------
-// Index�� �˻��ϸ鼭.. 
-// �������� ���� ������ counter����..
-// �ƴϸ�.. IndexSet���� ���� Gradation���� ����..
+
+
+
 //-----------------------------------------------------------------------------
 void			
 CIndexSprite::GenerateFromIndex(WORD** ppColor,
 								WORD width, WORD height,
 								WORD** ppIndex)
 {
-	// memory����
+	
 	Release();
 
 	m_Width = width;
 	m_Height = height;
 
-	// �ϴ� memory�� ������ ��Ƶд�.	
+	
 	WORD*	data = new WORD[m_Width*8+10];
 
-	int	index;				// data�� index�� ���
+	int	index;				
 			
-	int	transPairCount,					// ����Pair ����
-			transColorCount,				// ������ ����			
-			indexColorCount,				// Index�� ����
-			normalColorCount;				// NormalColor ����
+	int	transPairCount,					
+			transColorCount,				
+			indexColorCount,				
+			normalColorCount;				
 
-	int	indexColorCountPosition,		// IndexColor���� ���� ��ġ
-			normalColorCountPosition;		// NormalColor���� ���� ��ġ
+	int	indexColorCountPosition,		
+			normalColorCountPosition;		
 
 	enum	COLORTYPE { COLORTYPE_TRANS, COLORTYPE_INDEX, COLORTYPE_NORMAL }
-			lastColorType;			// �ֱٿ� �˻��� ���� ����
+			lastColorType;			
 								
 
-	// height�� ��ŭ memory���
+	
 	m_Pixels = new WORD* [height];
 
 
@@ -919,25 +902,25 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 		lastColorType = COLORTYPE_TRANS;
 
 		//------------------------------------------------------------
-		// �� line�� ���ؼ� ����~
+		
 		//------------------------------------------------------------
 		for (register int  j=0; j<width; j++)
 		{
 			//--------------------------------------------------
-			// Index�� �������� ���
+			
 			//--------------------------------------------------
 			if ((ppIndex[i][j] & 0xFF)==INDEX_TRANS)
 			{
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� index���̾��ٸ�,
+				
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					
 					data[indexColorCountPosition] = indexColorCount;
 
-					// ' (��������,��Pair�ݺ���, (��Pair��....)) '�� �� set�� �������� �ǹ��ϹǷ�
-					// normal�� ���� 0�����ؼ� �����Ѵ�.
+					
+					
 					transPairCount++;
 					
 					data[index++] = 0;					
@@ -946,11 +929,11 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 					lastColorType = COLORTYPE_TRANS;
 				}
 				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� normal���̾��ٸ�
+				
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
@@ -964,70 +947,70 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				transColorCount++;				
 			}		
 			//--------------------------------------------------				
-			// Index ���� ���...
+			
 			//--------------------------------------------------
 			else if ((ppIndex[i][j] & 0xFF)!=INDEX_NULL)
 			{
 				//--------------------------------------------------
-				// ������ ���� �������̾��ٸ�..
+				
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{						
-					data[index++] = transColorCount;		// ���� byte�� �������� �ִ´�.
+					data[index++] = transColorCount;		
 					transColorCount = 0;
 					
-					// ���ο� index�� ���� ���� �ʱ�ȭ..
-					// index���� ������ ������ ��ġ
+					
+					
 					indexColorCountPosition = index++;
 					indexColorCount	= 0;
 					
 					lastColorType = COLORTYPE_INDEX;
 				}
 				//--------------------------------------------------
-				// ������ ���� �������ʴ� ���� ���
+				
 				//--------------------------------------------------
 				else if (lastColorType == COLORTYPE_NORMAL)
 				{
-					// ������ �ʴ� �� ��
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+					
+					
 					transPairCount++;
 					
 					data[normalColorCountPosition] = normalColorCount;
 					normalColorCount = 0;
 
-					// ������ ����.. - -;
+					
 					data[index++] = 0;
 
-					// index���� ������ ������ ��ġ
+					
 					indexColorCountPosition = index++;
 					indexColorCount	= 0;					
 
 					lastColorType = COLORTYPE_INDEX;						
 				}	
 				
-				// index�� ���� ����
+				
 				indexColorCount++;
 
-				// index�� ����				
+				
 				data[index++]	= ppIndex[i][j];
 			}
 			//--------------------------------------------------				
-			// ������ �ʴ� ���� ��� (INDEX_NULL)
+			
 			//--------------------------------------------------
 			else //if ((ppIndex[i][j] & 0xFF)==INDEX_NULL)
 			{	
 				//--------------------------------------------------
-				// ���� ������ �������̸�..
+				
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_TRANS)
 				{
 					data[index++] = transColorCount;
 					transColorCount = 0;
 						
-					// indexCount�� ����.
+					
 					data[index++] = 0;	
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
@@ -1035,62 +1018,62 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 				}
 				else
 				//--------------------------------------------------
-				// ���� ������ index���̸�..
+				
 				//--------------------------------------------------
 				if (lastColorType == COLORTYPE_INDEX)
 				{
-					// ���� index������ �����ؾ��Ѵ�.
+					
 					data[indexColorCountPosition] = indexColorCount;
 						
-					// ��������� �������Ƿ� �ʱ�ȭ.
+					
 					normalColorCountPosition = index++;
 					normalColorCount = 0;
 
 					lastColorType = COLORTYPE_NORMAL;						
 				}
 
-				data[index++] = ppColor[i][j];	// ���� ������ �����Ѵ�.
+				data[index++] = ppColor[i][j];	
 				normalColorCount++;
 			}
 		}
 		
 		//--------------------------------------------------
-		// �� ���� ������ ���� �������ΰ�?
+		
 		//--------------------------------------------------
 		if (lastColorType == COLORTYPE_TRANS)
 		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
+			
 		}	
 		//--------------------------------------------------
-		// ������ ���� index���� ��� - indexPair����..
+		
 		//--------------------------------------------------
 		else if (lastColorType == COLORTYPE_INDEX)
 		{		
-			// ���� index������ �����ؾ��Ѵ�.
+			
 			data[indexColorCountPosition] = indexColorCount;
 
-			// normal���� ����.
+			
 			data[index++] = 0;
 
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			
 			transPairCount++;			
 		}
 		//--------------------------------------------------
-		// ������ ���� normal���� ���
+		
 		//--------------------------------------------------
 		else 
 		{
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
+			
 			data[normalColorCountPosition] = normalColorCount;	
 
 			transPairCount++;		
 		}
 
-		// memory�� ��´�.
+		
 		m_Pixels[i] = new WORD [index+1];
 
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
+		
+		
 		m_Pixels[i][0] = transPairCount;
 		memcpy(m_Pixels[i]+1, data, index<<1);
 
@@ -1133,390 +1116,58 @@ CIndexSprite::GenerateFromIndex(WORD** ppColor,
 // Generate Index (Old version)
 //-----------------------------------------------------------------------------
 // 
-// ppColor���� width*height��ŭ�� ���� �о Sprite�� ����µ�..
-// ������ ���൵ �ؾ��ϰ�...
-// Index Array�� ������ �����ؾ��Ѵ�.
+
+
+
 //
 //-----------------------------------------------------------------------------
-// - ���������� ������ ������ ����Ѵ�.
-// - IndexSet�� Gradation���򺰷� ����(?)�Ѵ�. (ȿ���� ���� ���� �� �ϴ�)
+
+
 //
 //
-// [ �� ���� ���� ]
+
 //
-// (����Pair�ݺ���) 
-//    ( (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+
+
+
+
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
-//       (��������, IndexPair�ݺ���, 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
-//                 (index����, indexSet��ȣ, gradation��ȣ), 
+
+
+
+
 //                              .     
 //                              .     
 //                              .     
-//        �����Ȼ����, �����Ȼ����)
+
 //    )
 //
-// WORD : �������� 
-// WORD : ��Pair�ݺ���
-// WORD : index����
-// WORD : indexSet��ȣ | gradation��ȣ --> BYTE | BYTE
-// WORD : �����Ȼ����
-// WORD*: �����Ȼ����
+
+
+
+
+
+
 //
-// �������� Gradation Index���� ������ ���� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
-// ppIndex���� �� 2byte�� 
-// ((IndexSet��ȣ<<8) | Gradation��ȣ)�� ����Ǿ� �־�� �Ѵ�.
+
+
 //-----------------------------------------------------------------------------
-// Index�� �˻��ϸ鼭.. 
-// �������� ���� ������ counter����..
-// �ƴϸ�.. IndexSet���� ���� Gradation���� ����..
+
+
+
 //-----------------------------------------------------------------------------
-/*
-void			
-CIndexSprite::GenerateFromIndex(WORD** ppColor,
-								WORD width, WORD height,
-								WORD** ppIndex)
-{
-	// memory����
-	Release();
-
-	m_Width = width;
-	m_Height = height;
-
-	// �ϴ� memory�� ������ ��Ƶд�.	
-	WORD*	data = new WORD[m_Width*8];
-
-	WORD	index;				// data�� index�� ���
-			
-	WORD	transPairCount,					// ����Pair ����
-			transColorCount,				// ������ ����
-			indexColorPairCount,			// IndexPair����
-			indexColorCount,				// Index�� ����
-			normalColorCount;				// NormalColor ����
-
-	WORD	indexColorPairCountPosition,	// IndexPair���� ���� ��ġ
-			indexColorCountPosition,		// IndexColor���� ���� ��ġ
-			normalColorCountPosition;		// NormalColor���� ���� ��ġ
-
-	enum	COLORTYPE { COLORTYPE_TRANS, COLORTYPE_INDEX, COLORTYPE_NORMAL }
-			lastColorType;			// �ֱٿ� �˻��� ���� ����
-								
-	BYTE	lastIndexSet;		// �ֱٿ� �˻��� IndexSet
-	BYTE	lastIndexColor;		// �ֱٿ� �˻��� IndexGradation
-
-
-	// height�� ��ŭ memory���
-	m_Pixels = new WORD* [height];
-
-
-	// test code
-	//int* m_pLineIndex = new int [height];
-
-
-	for (register int  i=0; i<height; i++)
-	{
-		index = 0;
-		transPairCount = 0;
-		transColorCount = 0; 		
-		lastColorType = COLORTYPE_TRANS;
-
-		//------------------------------------------------------------
-		// �� line�� ���ؼ� ����~
-		//------------------------------------------------------------
-		for (register int  j=0; j<width; j++)
-		{
-			//--------------------------------------------------
-			// Index�� �������� ���
-			//--------------------------------------------------
-			if ((ppIndex[i][j] & 0xFF)==INDEX_TRANS)
-			{
-				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� index���̾��ٸ�,
-				//--------------------------------------------------
-				if (lastColorType == COLORTYPE_INDEX)
-				{
-					// ���� index������ �����ؾ��Ѵ�.
-					data[indexColorCountPosition] = indexColorCount;
-
-					// indexPair���� �ϳ� ����
-					indexColorPairCount++;
-
-					// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
-					data[indexColorPairCountPosition] = indexColorPairCount;
-					indexColorPairCount = 0;
-
-					// ' (��������,��Pair�ݺ���, (��Pair��....)) '�� �� set�� �������� �ǹ��ϹǷ�
-					// normal�� ���� 0�����ؼ� �����Ѵ�.
-					transPairCount++;
-					
-					data[index++] = 0;					
-
-					transColorCount = 0;
-					lastColorType = COLORTYPE_TRANS;
-				}
-				//--------------------------------------------------
-				// �ֱٿ� �˻��Ѱ� normal���̾��ٸ�
-				//--------------------------------------------------
-				else if (lastColorType == COLORTYPE_NORMAL)
-				{
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
-					transPairCount++;
-					
-					data[normalColorCountPosition] = normalColorCount;
-					normalColorCount = 0;
-
-					transColorCount = 0;
-					lastColorType = COLORTYPE_TRANS;
-				}
-
-				
-				transColorCount++;				
-			}		
-			//--------------------------------------------------				
-			// Index ���� ���...
-			//--------------------------------------------------
-			else if ((ppIndex[i][j] & 0xFF)!=INDEX_NULL)
-			{
-				//--------------------------------------------------
-				// ������ ���� �������̾��ٸ�..
-				//--------------------------------------------------
-				if (lastColorType == COLORTYPE_TRANS)
-				{						
-					data[index++] = transColorCount;		// ���� byte�� �������� �ִ´�.
-					transColorCount = 0;
-					
-					// ������ [IndexPair����]�� ���� ��ġ�� ���
-					indexColorPairCountPosition = index++;
-					indexColorPairCount = 0;		// index����
-
-					// ���ο� index�� ���� ���� �ʱ�ȭ..
-					// index���� ������ ������ ��ġ
-					indexColorCountPosition = index++;
-					indexColorCount	= 1;
-
-					// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
-					lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
-					lastIndexColor	= ppIndex[i][j] & 0xFF;	
-
-					// ����
-					data[index++]	= (lastIndexSet<<8) | lastIndexColor;
-					
-					lastColorType = COLORTYPE_INDEX;
-				}
-				//--------------------------------------------------
-				// ������ ���� �������ʴ� ���� ���
-				//--------------------------------------------------
-				else if (lastColorType == COLORTYPE_NORMAL)
-				{
-					// ������ �ʴ� �� ��
-					// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
-					transPairCount++;
-					
-					data[normalColorCountPosition] = normalColorCount;
-					normalColorCount = 0;
-
-					// ������ ����.. - -;
-					data[index++] = 0;
-
-					// ������ [IndexPair����]�� ���� ��ġ�� ���
-					indexColorPairCountPosition = index++;
-					indexColorPairCount = 0;		// index����
-
-					// index���� ������ ������ ��ġ
-					indexColorCountPosition = index++;
-					indexColorCount	= 1;
-
-					// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
-					lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
-					lastIndexColor	= ppIndex[i][j] & 0xFF;
-
-					// ����
-					data[index++]	= (lastIndexSet<<8) | lastIndexColor;
-
-					lastColorType = COLORTYPE_INDEX;						
-				}	
-				//--------------------------------------------------
-				// ������ ���� index���� ���
-				//--------------------------------------------------
-				else 			
-				{
-					//--------------------------------------------------
-					// ���� index���̶� Set���� Gradation���� ���� ���
-					//--------------------------------------------------
-					if (lastIndexSet == ((ppIndex[i][j]>>8) & 0xFF)
-						&& lastIndexColor == (ppIndex[i][j] & 0xFF))
-					{
-						// ���� index���̹Ƿ� count����
-						indexColorCount++;
-					}
-					//--------------------------------------------------
-					// �ٸ� index���� ��Ÿ����.
-					//--------------------------------------------------
-					else
-					{	
-						// ���� index������ �����ؾ��Ѵ�.
-						data[indexColorCountPosition] = indexColorCount;						
-
-						// indexPair���� �ϳ� ����
-						indexColorPairCount++;
-
-						// ���ο� index�� ���� ���� �ʱ�ȭ..
-						// index���� ������ ������ ��ġ
-						indexColorCountPosition = index++;
-						indexColorCount	= 1;
-
-						// index���� ó�� �����Ƿ�.. �ʱ�ȭ..
-						lastIndexSet	= (ppIndex[i][j]>>8) & 0xFF;
-						lastIndexColor	= ppIndex[i][j] & 0xFF;	
-
-						// ����
-						data[index++]	= (lastIndexSet<<8) | lastIndexColor;
-					}							
-				}
-			}
-			//--------------------------------------------------				
-			// ������ �ʴ� ���� ��� (INDEX_NULL)
-			//--------------------------------------------------
-			else //if ((ppIndex[i][j] & 0xFF)==INDEX_NULL)
-			{	
-				//--------------------------------------------------
-				// ���� ������ �������̸�..
-				//--------------------------------------------------
-				if (lastColorType == COLORTYPE_TRANS)
-				{
-					data[index++] = transColorCount;
-					transColorCount = 0;
-						
-					// indexPair�� ����.
-					data[index++] = 0;	
-						
-					// ��������� �������Ƿ� �ʱ�ȭ.
-					normalColorCountPosition = index++;
-					normalColorCount = 0;
-
-					lastColorType = COLORTYPE_NORMAL;	
-				}
-				else
-				//--------------------------------------------------
-				// ���� ������ index���̸�..
-				//--------------------------------------------------
-				if (lastColorType == COLORTYPE_INDEX)
-				{
-					// ���� index������ �����ؾ��Ѵ�.
-					data[indexColorCountPosition] = indexColorCount;
-
-					// indexPair���� �ϳ� ����
-					indexColorPairCount++;
-
-					// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
-					data[indexColorPairCountPosition] = indexColorPairCount;
-					indexColorPairCount = 0;
-
-						
-					// ��������� �������Ƿ� �ʱ�ȭ.
-					normalColorCountPosition = index++;
-					normalColorCount = 0;
-
-					lastColorType = COLORTYPE_NORMAL;						
-				}
-
-				data[index++] = ppColor[i][j];	// ���� ������ �����Ѵ�.
-				normalColorCount++;
-			}
-		}
-		
-		//--------------------------------------------------
-		// �� ���� ������ ���� �������ΰ�?
-		//--------------------------------------------------
-		if (lastColorType == COLORTYPE_TRANS)
-		{
-			// �������̸� ���ٸ� ó���� �����൵ �ɰ� ����.
-		}	
-		//--------------------------------------------------
-		// ������ ���� index���� ��� - indexPair����..
-		//--------------------------------------------------
-		else if (lastColorType == COLORTYPE_INDEX)
-		{		
-			// ���� index������ �����ؾ��Ѵ�.
-			data[indexColorCountPosition] = indexColorCount;
-
-			// indexPair���� �ϳ� ����
-			indexColorPairCount++;
-
-			// indexPair�� ��� �������Ƿ�.. �����ؾ��Ѵ�.
-			data[indexColorPairCountPosition] = indexColorPairCount;
-			indexColorPairCount = 0;
-
-			// normal���� ����.
-			data[index++] = 0;
-
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
-			transPairCount++;			
-		}
-		//--------------------------------------------------
-		// ������ ���� normal���� ���
-		//--------------------------------------------------
-		else 
-		{
-			// ' (��������,indexPair�ݺ���, (index�ݺ�), ��������)) '�� �� set�� �������� �ǹ��ϹǷ�
-			data[normalColorCountPosition] = normalColorCount;	
-
-			transPairCount++;		
-		}
-
-		// memory�� ��´�.
-		m_Pixels[i] = new WORD [index+1];
-
-		// m_Pixels[i]�� ���������Ƿ� data�� ��ü�Ѵ�.
-		// m_Pixels[i][0]���� count�� �־�� �Ѵ�.
-		m_Pixels[i][0] = transPairCount;
-		memcpy(m_Pixels[i]+1, data, index<<1);
-
-		//m_pLineIndex[i] = index+1;
-	}
-
-	delete [] data;
-
-
-	
-	//ofstream indexFile("index.txt");
-	//ofstream colorFile("color.txt");
-	//ofstream spriteFile("sprite.txt");
-
-	//for (int i=0; i<m_Height; i++)
-	//{
-		//for (int j=0; j<m_Width; j++)
-		//{
-			//indexFile << (int)ppIndex[i][j] << " ";
-			//colorFile << (int)ppColor[i][j] << " ";
-		//}
-		//indexFile << endl;
-		//colorFile << endl;
-
-		//for (j=0; j<m_pLineIndex[i]; j++)
-		//{
-			//spriteFile << (int)m_Pixels[i][j] << " ";
-		//}
-
-		//spriteFile << endl;
-	//}
-	//delete [] m_pLineIndex;
-	
-}
-*/
+ 
 
 
 //-----------------------------------------------------------------------------
 // Get IndexInfo
 //-----------------------------------------------------------------------------
-// ���� ����� m_Pixels�� ������ IndexInfo�� �����ؾ� �Ѵ�.
-// ppIndex���� ��� INDEX_TRANS���� �� �ִٰ� �����Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 void			
 CIndexSprite::GetIndexInfo(WORD**& ppIndex)
@@ -1541,18 +1192,18 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 		pPixels	= m_Pixels[i];
 		pDest	= ppIndex[i];
 
-		// (������,Index�ݺ�,�����)�� �ݺ� ��		
+		
 		transPair	= *pPixels++;
 		
- 		// �� �� ���
+ 		
 		if (transPair > 0)
 		{
 			j = transPair;
 			do {		
-				pDest += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;		// Index�ݺ� ��
+				pDest += *pPixels++;	
+				indexCount = *pPixels++;		
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -1568,10 +1219,10 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
-				// Normal ���� ����ŭ INDEX_NULL�� ���.
+				
 				for (l=0; l<colorCount; l++)
 				{					
 					*pDest++ = (INDEXSET_NULL<<8) | INDEX_NULL;
@@ -1586,29 +1237,29 @@ CIndexSprite::GetIndexInfo(WORD**& ppIndex)
 //----------------------------------------------------------------------
 // Is ColorPixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ �ִ°�?(�������� �ƴ� ���)
+
 //----------------------------------------------------------------------
 bool		
 CIndexSprite::IsColorPixel(short x, short y)
 {
-	// �ʱ�ȭ �� ���
+	
 	if (m_bInit)
 	{	
-		// Sprite�� ������ ����� false
+		
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return false;
 
-		// y��° ��
+		
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		
 		int	count = *pPixels++;
 
 		int	index = 0;
 
-		//    ( (��������, Index����, 
-		//                 (indexSet��ȣ, gradation��ȣ), 
-		//                 (indexSet��ȣ, gradation��ȣ), 
+		
+		
+		
 
 		register int i;
 
@@ -1618,31 +1269,31 @@ CIndexSprite::IsColorPixel(short x, short y)
 			do {
 				index += *pPixels++;
 
-				// �������������� ���� ���
+				
 				if (x < index)
 				{
 					return false;
 				}
 
-				// index������ŭ ����		
+				
 				index += *pPixels;
 
-				// index�� ������ŭ ����.
+				
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// ������ �������ŭ ����
+				
 				index += *pPixels;
 
-				// ������ ������ŭ ����.
+				
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// index+�������������� ���� ���
+				
 				if (x < index)
 				{
 					return true;
@@ -1657,29 +1308,29 @@ CIndexSprite::IsColorPixel(short x, short y)
 //----------------------------------------------------------------------
 // Get Pixel ?
 //----------------------------------------------------------------------
-// Sprite�ȿ��� (x,y)�� ������ ��´�.(�������� �ƴ� ���)
+
 //----------------------------------------------------------------------
 WORD		
 CIndexSprite::GetPixel(int x, int y) const
 {
-	// �ʱ�ȭ �� ���
+	
 	if (m_bInit)
 	{	
-		// Sprite�� ������ ����� false
+		
 		if (x<0 || y<0 || x>=m_Width || y>=m_Height)
 			return 0;
 
-		// y��° ��
+		
 		WORD	*pPixels = m_Pixels[y];
 
-		// y��° ���� �ݺ� ��
+		
 		int	count = *pPixels++;
 
 		int	index = 0;
 
-		//    ( (��������, Index����, 
-		//                 (indexSet��ȣ, gradation��ȣ), 
-		//                 (indexSet��ȣ, gradation��ȣ), 
+		
+		
+		
 
 		register int i;
 
@@ -1689,36 +1340,36 @@ CIndexSprite::GetPixel(int x, int y) const
 			do {
 				index += *pPixels++;
 
-				// �������������� ���� ���
+				
 				if (x < index)
 				{
 					return 0;
 				}
 
-				// index������ŭ ����		
+				
 				index += *pPixels;
 
-				// index�� ������ŭ ����.
+				
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// ������ �������ŭ ����
+				
 				index += *pPixels;
 
-				// ������ ������ŭ ����.
+				
 				pPixels += *pPixels;
 
 				pPixels++;
 
 
-				// index+�������������� ���� ���
+				
 				if (x < index)
 				{
 					// [ TEST CODE ]
-					// ���� �ϼ��Ȱ� �ƴϴ�.
-					// ������ IndexColor�� �����ؼ� ���� �Ѱ���� �Ѵ�?
+					
+					
 					return pPixels[x-index];
 				}
 			} while (--i);
@@ -1734,11 +1385,11 @@ CIndexSprite::GetPixel(int x, int y) const
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void
 CIndexSprite::Blt(WORD *pDest, WORD pitch)
@@ -1770,20 +1421,20 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���		
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do
 				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
-					// �� �� ���		
+					
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -1793,13 +1444,13 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 							
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1820,12 +1471,12 @@ CIndexSprite::Blt(WORD *pDest, WORD pitch)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -1834,7 +1485,7 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -1853,51 +1504,51 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -1907,13 +1558,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1921,22 +1572,22 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -1946,13 +1597,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -1960,55 +1611,55 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					memcpy(pDestTemp, pPixels+dist, colorCount2<<1);					
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2018,13 +1669,13 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2044,8 +1695,8 @@ CIndexSprite::BltClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -2054,7 +1705,7 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2076,52 +1727,52 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2130,7 +1781,7 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -2140,13 +1791,13 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2155,30 +1806,30 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				memcpy(pDestTemp, pPixels, colorCount<<1);
 
@@ -2198,13 +1849,13 @@ CIndexSprite::BltClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -2213,7 +1864,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2230,7 +1881,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2240,43 +1891,43 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2285,13 +1936,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2299,22 +1950,22 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2323,13 +1974,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2338,85 +1989,85 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					memcpy(pDestTemp, pPixels+dist, colorCount2<<1);					
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)		
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -2425,7 +2076,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -2435,13 +2086,13 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2450,30 +2101,30 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}		
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						memcpy(pDestTemp, pPixels, (rectRight - index)<<1);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					memcpy(pDestTemp, pPixels, colorCount<<1);
 
@@ -2492,7 +2143,7 @@ CIndexSprite::BltClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // Blt Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -2516,18 +2167,18 @@ CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2536,13 +2187,13 @@ CIndexSprite::BltClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
@@ -2590,18 +2241,18 @@ CIndexSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2610,13 +2261,13 @@ CIndexSprite::BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2643,7 +2294,7 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2660,7 +2311,7 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -2669,43 +2320,43 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2714,13 +2365,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2728,22 +2379,22 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2752,13 +2403,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2766,55 +2417,55 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -2823,13 +2474,13 @@ CIndexSprite::BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE Dar
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -2856,7 +2507,7 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -2877,52 +2528,52 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -2931,7 +2582,7 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -2941,13 +2592,13 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -2956,30 +2607,30 @@ CIndexSprite::BltDarknessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
@@ -3005,7 +2656,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3022,7 +2673,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3032,43 +2683,43 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3077,13 +2728,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3091,22 +2742,22 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3115,13 +2766,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3130,85 +2781,85 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -3217,7 +2868,7 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -3227,13 +2878,13 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3242,30 +2893,30 @@ CIndexSprite::BltDarknessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE Da
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
 
@@ -3307,18 +2958,18 @@ CIndexSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -3327,13 +2978,13 @@ CIndexSprite::BltDarknessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSetDarkness[DarkBits][s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyDarkness(pDestTemp, pPixels, colorCount);
@@ -3380,18 +3031,18 @@ CIndexSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {				
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3400,13 +3051,13 @@ CIndexSprite::BltAlpha(WORD *pDest, WORD pitch, BYTE alpha)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3434,7 +3085,7 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3451,7 +3102,7 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3460,43 +3111,43 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3505,13 +3156,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3519,22 +3170,22 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3543,13 +3194,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3557,54 +3208,54 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------		
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -3613,13 +3264,13 @@ CIndexSprite::BltAlphaClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3646,7 +3297,7 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3667,52 +3318,52 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3721,7 +3372,7 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
@@ -3731,13 +3382,13 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -3746,30 +3397,30 @@ CIndexSprite::BltAlphaClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 
@@ -3795,7 +3446,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -3812,7 +3463,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -3822,43 +3473,43 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3867,13 +3518,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3881,22 +3532,22 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -3905,13 +3556,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -3920,84 +3571,84 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -4006,7 +3657,7 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 									pDestTemp ++;
 								} while (--k);
@@ -4016,13 +3667,13 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4031,30 +3682,30 @@ CIndexSprite::BltAlphaClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 							pDestTemp ++;
 						} while (--k);
 					}		
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
 
@@ -4096,18 +3747,18 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {						
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -4116,13 +3767,13 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= CSpriteSurface::memcpyAlpha1Pixel(*pDestTemp, ColorSet[s_IndexValue[colorSet]][colorGradation]);
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyAlpha(pDestTemp, pPixels, colorCount);
@@ -4142,105 +3793,9 @@ CIndexSprite::BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alph
 //----------------------------------------------------------------------
 // BltWave
 //----------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+
 //----------------------------------------------------------------------
-/*
-void
-CIndexSprite::BltWave(WORD *pDest, WORD pitch)
-{
-	int	transPair,	
-			indexCount,			
-			colorCount;
-
-	int	colorSet,
-			colorGradation;
-
-	WORD	*pDestTemp,
-			*pPixels;
-
-	register int i;
-	register int j;
-	register int k;
-	int rectBottom = m_Height;	
-
-	
-	//for (int i=0; i<rectBottom; i++)	
-	if (rectBottom > 0)
-	{
-		i = rectBottom-1;
-		pDest = (WORD*)((BYTE*)pDest + i*pitch);
-
-		do
-		{			
-			pPixels		= m_Pixels[i];
-			pDestTemp	= pDest;
-
-			// (������,Index��,�����)�� �ݺ� ��		
-			transPair	= *pPixels++;
-			
- 			// �� �� ���		
-			if (transPair > 0)
-			{
-				j = transPair;
-				do
-				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
-
-					// indexCount����ŭ index������ ����Ѵ�.
-					// �� �� ���		
-					if (indexCount > 0)
-					{
-						k = indexCount;
-						do
-						{
-							colorSet		= (*pPixels >> 8) & 0xFF;						
-							colorGradation	= (*pPixels & 0xFF);			// gradation
-							pPixels++;
-
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
-							//*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
-
-							WORD color = GradationValue[s_IndexValue[colorSet]][colorGradation];//*pPixels;							
-							int change = color >> 4;	// 0~96 --> 0~6
-
-							*pDestTemp = *(pDestTemp + change);
-
-							
-							pDestTemp ++;
-						} while (--k);
-					}
-
-					// Normal ���� ��
-					colorCount = *pPixels++;
-					
-					//memcpy((void*)pDestTemp, (void*)pPixels, colorCount<<1);
-					// WAVE
-					for (int l=0; l<colorCount; l++)
-					{
-						WORD color = *pPixels;
-						BYTE r = ColorDraw::Red( color );
-						BYTE g = ColorDraw::Green( color );
-						BYTE b = ColorDraw::Blue( color );
-						int change = (r+g+b) >> 4;	// 0~96 --> 0~6
-
-						*pDestTemp = *(pDestTemp + change);
-
-						pDestTemp++;
-						pPixels++;
-					}
-
-					
-					//pDestTemp	+= colorCount;
-					//pPixels		+= colorCount;
-				} while (--j);
-			}
-
-			pDest = (WORD*)((BYTE*)pDest - pitch);
-		} while (i--);
-	}
-}
-*/
+ 
 
 
 
@@ -4277,18 +3832,18 @@ CIndexSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4298,14 +3853,14 @@ CIndexSprite::BltColor(WORD *pDest, WORD pitch, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);					
@@ -4332,7 +3887,7 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4349,7 +3904,7 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4358,43 +3913,43 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4403,14 +3958,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4418,22 +3973,22 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4442,14 +3997,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4457,55 +4012,55 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4514,14 +4069,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4542,14 +4097,14 @@ CIndexSprite::BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4570,52 +4125,52 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4624,7 +4179,7 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
@@ -4635,13 +4190,13 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -4650,31 +4205,31 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 
@@ -4694,14 +4249,14 @@ CIndexSprite::BltColorClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	
 	CSpriteSurface::s_Value1 = rgb;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -4718,7 +4273,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -4728,43 +4283,43 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4773,14 +4328,14 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4788,22 +4343,22 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -4812,14 +4367,14 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -4828,85 +4383,85 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -4915,7 +4470,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 									pDestTemp ++;
@@ -4926,13 +4481,13 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -4941,31 +4496,31 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						CSpriteSurface::memcpyColor(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
 
@@ -4986,7 +4541,7 @@ CIndexSprite::BltColorClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 void		
 CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 {
-	// rgb�� ����
+	
 	CSpriteSurface::s_Value1 = rgb;
 
 	int	count,
@@ -5008,18 +4563,18 @@ CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5028,14 +4583,14 @@ CIndexSprite::BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb)
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[defaultGradationColor][colorGradation]
 												& ColorDraw::s_wMASK_RGB[rgb];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyColor(pDestTemp, pPixels, colorCount);
@@ -5083,18 +4638,18 @@ CIndexSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5104,14 +4659,14 @@ CIndexSprite::BltColorSet(WORD *pDest, WORD pitch, WORD colorSet)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);					
@@ -5138,7 +4693,7 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5156,7 +4711,7 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 		colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5165,43 +4720,43 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5210,14 +4765,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5225,22 +4780,22 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5249,14 +4804,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5264,55 +4819,55 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5321,14 +4876,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5349,14 +4904,14 @@ CIndexSprite::BltColorSetClipLeft(WORD *pDest, WORD pitch, RECT* pRect, WORD col
 void		
 CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5378,52 +4933,52 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5432,7 +4987,7 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
@@ -5443,13 +4998,13 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5458,31 +5013,31 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 
@@ -5502,14 +5057,14 @@ CIndexSprite::BltColorSetClipRight(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 void		
 CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	
 	CSpriteSurface::s_Value1 = colorSet;
 
 	WORD	*pPixels,
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -5527,7 +5082,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -5537,43 +5092,43 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5582,14 +5137,14 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5597,22 +5152,22 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -5621,14 +5176,14 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5637,85 +5192,85 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -5724,7 +5279,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 									pDestTemp ++;
@@ -5735,13 +5290,13 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -5750,31 +5305,31 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
 
@@ -5795,7 +5350,7 @@ CIndexSprite::BltColorSetClipWidth(WORD *pDest, WORD pitch, RECT* pRect, WORD co
 void		
 CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD colorSet)
 {
-	// colorSet�� ����
+	
 	CSpriteSurface::s_Value1 = colorSet;
 
 	int	count,
@@ -5819,18 +5374,18 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -5839,14 +5394,14 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[colorSet][colorGradation];
 												//& ColorDraw::s_wMASK_RGB[colorSet];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyEffectGradation(pDestTemp, pPixels, colorCount);
@@ -5867,11 +5422,11 @@ CIndexSprite::BltColorSetClipHeight(WORD *pDest, WORD pitch, RECT* pRect, WORD c
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// Clipping���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void
 CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
@@ -5903,28 +5458,28 @@ CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���		
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do
 				{
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
 					if (indexCount > 0)
 					{
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						memcpyEffect( pDestTemp, pPixels, indexCount );
 
 						pDestTemp += indexCount;
 						pPixels += indexCount;
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					if (colorCount > 0)
@@ -5948,12 +5503,12 @@ CIndexSprite::BltEffect(WORD *pDest, WORD pitch)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
@@ -5962,7 +5517,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int		count,
 			transCount, 
@@ -5981,50 +5536,50 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 	int rectLeft = pRect->left;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	for (int i=pRect->top; i<rectBottom; i++)
 	{
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------		
 		if (count > 0)
 		{
 			j = count;
 			do
 			{
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6034,7 +5589,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6045,21 +5600,21 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;					
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6069,7 +5624,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6080,31 +5635,31 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					if (colorCount2 > 0)
 					{
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount2);
@@ -6112,26 +5667,26 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += colorCount;
 					}
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6140,7 +5695,7 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += indexCount;
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					if (colorCount > 0)
@@ -6163,8 +5718,8 @@ CIndexSprite::BltEffectClipLeft(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect ClipRight
 //----------------------------------------------------------------------
-// ������ clipping.  
-// rectRight�� ������ ���� pDest�� ����Ѵ�.
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
@@ -6173,7 +5728,7 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -6195,52 +5750,52 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6254,13 +5809,13 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6269,19 +5824,19 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 					pPixels += indexCount;
 				}
 
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					int tempCount = rectRight - index;
 					if (tempCount > 0)
 					{
@@ -6291,7 +5846,7 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				if (colorCount > 0)
 				{
@@ -6314,13 +5869,13 @@ CIndexSprite::BltEffectClipRight(WORD* pDest, WORD pitch, RECT* pRect)
 // s_Value1 - Main Color
 // s_Value2 - Sub Color
 //-----------------------------------------------------------------------------
-//    ( (��������, Index����, 
-//                 (indexSet��ȣ, gradation��ȣ), 
-//                 (indexSet��ȣ, gradation��ȣ), 
+
+
+
 //-----------------------------------------------------------------------------
-// ���� clipping.  
-// rectLeft���� ���� �ǳʶ� �������� pDest�� ����Ѵ�.
-// rectRight����..
+
+
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
@@ -6329,7 +5884,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -6346,7 +5901,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 	//int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -6356,42 +5911,42 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6401,7 +5956,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6412,21 +5967,21 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels		+= colorCount;					
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6435,7 +5990,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							pPixels += indexCount;
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						if (colorCount > 0)
@@ -6447,31 +6002,31 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 							index += colorCount;
 						}
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					if (colorCount2 > 0)
 					{
 						CSpriteSurface::memcpyEffect(pDestTemp, pPixels+dist, colorCount2);
@@ -6480,55 +6035,55 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 					pPixels += colorCount;
 					index += colorCount;					
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)		
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6542,13 +6097,13 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6557,19 +6112,19 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 						pPixels += indexCount;
 					}
 
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						int tempCount = rectRight - index;
 						if (tempCount > 0)
 						{
@@ -6579,7 +6134,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					if (colorCount > 0)
 					{
@@ -6601,7 +6156,7 @@ CIndexSprite::BltEffectClipWidth(WORD* pDest, WORD pitch, RECT* pRect)
 //----------------------------------------------------------------------
 // BltEffect Clip Height
 //----------------------------------------------------------------------
-// pRect->top, rectBottom��ŭ�� ����Ѵ�.
+
 //----------------------------------------------------------------------
 void
 CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
@@ -6625,18 +6180,18 @@ CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					memcpyEffect( pDestTemp, pPixels, indexCount );
@@ -6645,7 +6200,7 @@ CIndexSprite::BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect)
 					pPixels += indexCount;
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				if (colorCount > 0)
@@ -6743,7 +6298,7 @@ CIndexSprite::memcpyEffectSimpleOutline(WORD* pDest, WORD* pSource, WORD pixels)
 {
 	int colorSet, colorGradation;
 
-	// ù ��
+	
 	colorSet		= (*pSource >> 8) & 0xFF;						
 	colorGradation	= *pSource & 0xFF;			// gradation
 	*pDest			= ColorSet[s_IndexValue[colorSet]][colorGradation];
@@ -6753,7 +6308,7 @@ CIndexSprite::memcpyEffectSimpleOutline(WORD* pDest, WORD* pSource, WORD pixels)
 	pDest += pixels_1;
 	pSource += pixels_1;
 	
-	// �� ��
+	
 	colorSet		= (*pSource >> 8) & 0xFF;						
 	colorGradation	= *pSource & 0xFF;			// gradation
 	//*pDest			= ColorSet[s_IndexValue[colorSet]][colorGradation];
@@ -6771,12 +6326,12 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 	int drawPixels = (pixels - skipPixels)>>1;
 	int drawPixels2 = pixels - drawPixels - skipPixels;
 	
-	// [1] drawPixels��ŭ ����ϰ�..
-	// [2] skipPixels ��ŭ �ǳʶ��
-	// [3] drawPixels2��ŭ ���
+	
+	
+	
 	
 	//------------------------------------------------------------	
-	// drawPixels��ŭ ���
+	
 	//------------------------------------------------------------		
 	if (drawPixels > 0)
 	{
@@ -6786,20 +6341,20 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 			colorGradation	= *pSource & 0xFF;			// gradation
 			pSource++;
 
-			// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+			
 			*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 			pDest ++;
 		} while (--drawPixels);
 	}
 
 	//------------------------------------------------------------	
-	// skipPixels��ŭ �ǳʶ�
+	
 	//------------------------------------------------------------	
 	pDest += skipPixels;
 	pSource += skipPixels;
 
 	//------------------------------------------------------------	
-	// drawPixels2��ŭ ���
+	
 	//------------------------------------------------------------	
 	if (drawPixels2 > 0)
 	{
@@ -6809,7 +6364,7 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 			colorGradation	= *pSource & 0xFF;			// gradation
 			pSource++;
 
-			// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+			
 			*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 			pDest ++;
 		} while (--drawPixels2);
@@ -6822,24 +6377,24 @@ CIndexSprite::memcpyEffectWipeOut(WORD* pDest, WORD* pSource, WORD pixels)
 //----------------------------------------------------------------------
 // memcpy EffectNet
 //----------------------------------------------------------------------
-// �׹���
+
 //----------------------------------------------------------------------
 void		
 CIndexSprite::memcpyEffectNet(WORD* pDest, WORD* pSource, WORD pixels)
 {
-	// �����(1) + �ǳʶ����(s_Value1)
+	
 	register int i = pixels;
 	int skipPixels = 1 + CSpriteSurface::s_Value1;
 
 	int colorSet, colorGradation;	
 	
-	// ���� ��� , skipPixels��ŭ �ǳʶ��
+	
 	do
 	{
 		colorSet		= (*pSource >> 8) & 0xFF;						
 		colorGradation	= *pSource & 0xFF;			// gradation
 		
-		// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+		
 		*pDest		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 
 		pSource += skipPixels;
@@ -6930,18 +6485,18 @@ CIndexSprite::BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits)
 			pPixels		= m_Pixels[i];
 			pDestTemp	= pDest;
 
-			// (������,Index��,�����)�� �ݺ� ��		
+			
 			transPair	= *pPixels++;
 			
- 			// �� �� ���
+ 			
 			if (transPair > 0)
 			{
 				j = transPair;
 				do {
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -6950,14 +6505,14 @@ CIndexSprite::BltBrightness(WORD *pDest, WORD pitch, BYTE DarkBits)
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 						
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);					
@@ -6984,7 +6539,7 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7001,7 +6556,7 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7010,43 +6565,43 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {		
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7055,13 +6610,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7069,22 +6624,22 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7093,13 +6648,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7107,55 +6662,55 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �������ʹ� ��� ����Ѵ�.		
+			
 			//---------------------------------------------	
 			if (--j > 0)
 			{
 				do {		
-					pDestTemp += *pPixels++;	// ��������ŭ �ǳ� �ڴ�.
-					indexCount = *pPixels++;	// Index�ݺ� ��
+					pDestTemp += *pPixels++;	
+					indexCount = *pPixels++;	
 
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -7164,13 +6719,13 @@ CIndexSprite::BltBrightnessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE D
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7197,7 +6752,7 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7218,52 +6773,52 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 			
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-		// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+		
+		
 		//---------------------------------------------
-		// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����
+				
 				index += transCount;
 				
-				// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-				// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+				
+				
 
-				// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+				
 
 				//---------------------------------------------
-				// index������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+indexCount > rectRight)
 				{
-					// ������������ �� ����� �ʿ䰡 ���� ��
+					
 					if (index > rectRight)
 					{
 						break;
 					}
-					// ������ �ƴ� ���� ���� ����ؾ� �� ���
+					
 					else
 					{
 						pDestTemp += transCount;
 
-						// ���������� skip�Ǵ� ������ ���ش�.
+						
 						indexCount = rectRight - index;
 
-						// indexCount����ŭ index������ ����Ѵ�.
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7272,7 +6827,7 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
@@ -7282,13 +6837,13 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 					}
 				}
 
-				// ��������ŭ �ǳʶ��
+				
 				pDestTemp += transCount;
 
 				//-------------------------
-				// index�� ��� ���
+				
 				//-------------------------
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -7297,30 +6852,30 @@ CIndexSprite::BltBrightnessClipRight(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}		
-				// ����� indexCount��ŭ index����
+				
 				index += indexCount;
 				
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 
 				//---------------------------------------------
-				// normal������ ������ ������ �������� ���
+				
 				//---------------------------------------------			
 				if (index+colorCount > rectRight)
 				{
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, rectRight - index);
 					break;			
 				}			
 				
 				//--------------------
-				// normal�� ��� ���
+				
 				//--------------------
 				CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
 
@@ -7346,7 +6901,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 			*pDestTemp;
 
 	//--------------------------------------------
-	// pRect��ŭ�� ���� ����Ѵ�.
+	
 	//--------------------------------------------
 	int	count,
 			transCount, 
@@ -7363,7 +6918,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 	int colorSet, colorGradation;
 
 	//---------------------------------------------
-	// ����ؾ��ϴ� ��� �ٿ� ���ؼ�..
+	
 	//---------------------------------------------
 	int rectBottom = pRect->bottom;
 	int rectLeft = pRect->left;
@@ -7373,43 +6928,43 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 		pPixels = m_Pixels[i];
 		pDestTemp = pDest;		
 
-		// (������,�����,�����)�� �ݺ� ��
+		
 		count = *pPixels++;		
 
-		// �� �� ���		
+		
 		index = 0;
 		
 		//---------------------------------------------
-		// �� �ٸ��� Clipping�� ����� �ϴµ�...
-		// xxxxOOOOOOOOOOOOOO�� ����̹Ƿ�..
+		
+		
 		//---------------------------------------------
-		// xxxx�κб��� check���ִ� ��ƾ
+		
 		//---------------------------------------------
 		if (count > 0)
 		{
 			j = count;
 			do {
-				transCount = *pPixels++;		// ������ ��			
-				indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+				transCount = *pPixels++;		
+				indexCount = *pPixels++;		
 						
-				// ��������ŭ index����			
+				
 				index += transCount;			
 			
 				//---------------------------------------------
-				// index�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
 				//---------------------------------------------
 				if (index+indexCount > rectLeft)
 				{
 					//---------------------------------------------
-					// ������������ xxxx������ �Ѿ�� ���
+					
 					//---------------------------------------------
 					if (index > rectLeft)
 					{	
-						// �������κ� �ǳʶ�
+						
 						pDestTemp += index - rectLeft;
 
-						// index�� ��� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7418,13 +6973,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7432,22 +6987,22 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						pDestTemp	+= colorCount;
 						pPixels		+= colorCount;					
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 					//---------------------------------------------
-					// ������+�����ƴѻ��� �Ϻα��� ����ϸ� 
-					// xxxx������ �Ѿ�� �Ǵ� ���, index�Ϻ� ���
+					
+					
 					//---------------------------------------------
 					else
 					{					
-						dist = rectLeft - index;		// ���ʿ��� skip�Ǵ� ���� ��
+						dist = rectLeft - index;		
 						
 						pPixels += dist;
 						indexCount -= dist;
 						
-						// index�� �Ϻ� ���
-						// indexCount����ŭ index������ ����Ѵ�.
+						
+						
 						if (indexCount > 0)
 						{
 							k = indexCount;
@@ -7456,13 +7011,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 								colorGradation	= (*pPixels & 0xFF);			// gradation
 								pPixels++;
 
-								// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+								
 								*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 								pDestTemp ++;
 							} while (--k);
 						}
 
-						// Normal �� ��� ���
+						
 						colorCount = *pPixels++;
 						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
@@ -7471,85 +7026,85 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						pPixels		+= colorCount;
 						index += colorCount;
 
-						// �������ʹ� ��� ����Ѵ�.
+						
 						break;
 					}
 				}		
 
 				
-				// index������ŭ index����
+				
 				index += indexCount;
 
-				// index����ŭ skip
+				
 				pPixels += indexCount;
 
-				// normal ���� ��
+				
 				colorCount = *pPixels++;			
 				
 				//---------------------------------------------
-				// index�������ؼ��� xxxx������ �� �Ѿ��..
-				// normal�������ϸ� xxxx������ �Ѿ�� �Ǵ� ���
+				
+				
 				//---------------------------------------------
 				if (index+colorCount > rectLeft)
 				{
 					dist = rectLeft - index;				
 					colorCount2 = colorCount - dist;
 
-					// ������ �ƴ� ������ Surface�� ����Ѵ�.
+					
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels+dist, colorCount2);
 					pDestTemp += colorCount2;
 					pPixels += colorCount;
 					index += colorCount;
 
-					// �������ʹ� ��� ����Ѵ�.
+					
 					break;			
 				}		
 
-				// ������ �ƴ� ����ŭ index����				
+				
 				pPixels += colorCount;
 				index += colorCount;
 			} while (--j);
 		
 
 			//---------------------------------------------
-			// �� �ٸ��� Clipping�� ����� �ϴµ�...		
-			// OOOOOOOOOOOOOOxxxxx �̷� ����̴�.
+			
+			
 			//---------------------------------------------
-			// OOOOOOOOOOOOOO������ ������ָ� �ȴ�.
+			
 			//---------------------------------------------
 			if (--j > 0)
 			{
 				do {
-					transCount = *pPixels++;		// ������ ��			
-					indexCount = *pPixels++;		// ���� �ƴ� �� ��			
+					transCount = *pPixels++;		
+					indexCount = *pPixels++;		
 							
-					// ��������ŭ index����
+					
 					index += transCount;
 					
-					// ����ϰ� �ִٰ� �����ʺκк��� ������� ���ƾ� �� ��찡 �ִ�.
-					// ���� ����ϴ� ���� ��� ����� ���̹Ƿ� break�ؾ� �Ѵ�.
+					
+					
 
-					// ���������� ����ϴ°͸����� �� �̻� ����� �ʿ䰡 ���� ���
+					
 
 					//---------------------------------------------
-					// index������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+indexCount > rectRight)
 					{
-						// ������������ �� ����� �ʿ䰡 ���� ��
+						
 						if (index > rectRight)
 						{
 							break;
 						}
-						// ������ �ƴ� ���� ���� ����ؾ� �� ���
+						
 						else
 						{
 							pDestTemp += transCount;
 
-							// ���������� skip�Ǵ� ������ ���ش�.
+							
 							indexCount = rectRight - index;
 
-							// indexCount����ŭ index������ ����Ѵ�.
+							
 							if (indexCount > 0)
 							{
 								k = indexCount;
@@ -7558,7 +7113,7 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 									colorGradation	= (*pPixels & 0xFF);			// gradation
 									pPixels++;
 
-									// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+									
 									*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 									pDestTemp ++;
 								} while (--k);
@@ -7568,13 +7123,13 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 						}
 					}
 
-					// ��������ŭ �ǳʶ��
+					
 					pDestTemp += transCount;
 
 					//-------------------------
-					// index�� ��� ���
+					
 					//-------------------------
-					// indexCount����ŭ index������ ����Ѵ�.
+					
 					if (indexCount > 0)
 					{
 						k = indexCount;
@@ -7583,30 +7138,30 @@ CIndexSprite::BltBrightnessClipWidth(WORD *pDest, WORD pitch, RECT* pRect, BYTE 
 							colorGradation	= (*pPixels & 0xFF);			// gradation
 							pPixels++;
 
-							// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+							
 							*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 							pDestTemp ++;
 						} while (--k);
 					}
-					// ����� indexCount��ŭ index����
+					
 					index += indexCount;
 					
 
-					// Normal ���� ��
+					
 					colorCount = *pPixels++;
 
 					//---------------------------------------------
-					// normal������ ������ ������ �������� ���
+					
 					//---------------------------------------------			
 					if (index+colorCount > rectRight)
 					{
-						// ������ �ƴ� ������ Surface�� ����Ѵ�.
+						
 						CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, rectRight - index);
 						break;			
 					}			
 					
 					//--------------------
-					// normal�� ��� ���
+					
 					//--------------------
 					CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);
 
@@ -7648,18 +7203,18 @@ CIndexSprite::BltBrightnessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE
 		pPixels		= m_Pixels[i];
 		pDestTemp	= pDest;
 
-		// (������,�����,�����)�� �ݺ� ��		
+		
 		count	= *pPixels++;		
 
-		// �� �� ���
+		
 		if (count > 0)
 		{
 			j = count;
 			do {
-				pDestTemp += *pPixels++;		// ��������ŭ �ǳ� �ڴ�.
-				indexCount = *pPixels++;	// Index�ݺ� ��
+				pDestTemp += *pPixels++;		
+				indexCount = *pPixels++;	
 
-				// indexCount����ŭ index������ ����Ѵ�.
+				
 				if (indexCount > 0)
 				{
 					k = indexCount;
@@ -7668,13 +7223,13 @@ CIndexSprite::BltBrightnessClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE
 						colorGradation	= (*pPixels & 0xFF);			// gradation
 						pPixels++;
 
-						// s_IndexValue�� ���õ� ���� �����ؼ� ����Ѵ�.				
+						
 						*pDestTemp		= ColorSet[s_IndexValue[colorSet]][colorGradation];
 						pDestTemp ++;
 					} while (--k);
 				}
 
-				// Normal ���� ��
+				
 				colorCount = *pPixels++;
 				
 				CSpriteSurface::memcpyBrightness(pDestTemp, pPixels, colorCount);

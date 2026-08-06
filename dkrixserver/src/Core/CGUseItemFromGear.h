@@ -50,8 +50,8 @@ public:
     }
 
 private:
-    ObjectID_t m_ObjectID; // 아이템의 object id
-    BYTE m_Part;           // 아이템이 있는 slot
+    ObjectID_t m_ObjectID; 
+    BYTE m_Part;           
 };
 
 

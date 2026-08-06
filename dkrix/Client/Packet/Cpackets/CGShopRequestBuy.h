@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : CGShopRequestBuy.h 
-// Written By  : 김성민
+
 // Description : 
-// 플레이어가 상점 NPC의 진열창을 보고, 물건을 구입하고자 할 때
-// 보내는 패킷이다. 서버는 플레이어에게 충분한 돈과 인벤토리에 
-// 자리가 있는지 검증한 후, 플레이어에게 아이템을 넘긴다.
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_SHOP_REQUEST_BUY_H__
 #define __CG_SHOP_REQUEST_BUY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -57,7 +57,7 @@ private:
 	ShopRackType_t m_RackType;  // Rack type
 	BYTE           m_RackIndex; // Rack index
 	ItemNum_t      m_Num;       // Number of item
-	Coord_t        m_X;         // 플레이어 인벤토리 내의 좌표값
+	Coord_t        m_X;         
 	Coord_t        m_Y; 
 
 };

@@ -39,17 +39,17 @@ GameServerGroupInfoManager::~GameServerGroupInfoManager() noexcept {
 void GameServerGroupInfoManager::clear() noexcept(false) {
     __BEGIN_TRY
 
-    // hashmap ���� �� pair �� second, �� GameServerGroupInfo ��ü���� �����ϰ�
-    // pair ��ü�� �״�� �д�. (GameServerGroupInfo�� ���� �����Ǿ� �ִٴ� �Ϳ�
-    // �����϶�. �� �ʻ������ �ؾ� �Ѵ�. �ϱ�, GSIM�� destruct �ȴٴ� ����
-    // �α��� ������ �˴ٿ�ȴٴ� ���� �ǹ��ϴϱ�.. - -; )
+    
+    
+    
+    
     for (int i = 1; i < m_MaxWorldID; i++) {
         for (HashMapGameServerGroupInfo::iterator itr = m_GameServerGroupInfos[i].begin();
              itr != m_GameServerGroupInfos[i].end(); itr++) {
             SAFE_DELETE(itr->second);
         }
 
-        // ���� �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+        
         m_GameServerGroupInfos[i].clear();
     }
 
@@ -115,11 +115,11 @@ void GameServerGroupInfoManager::load() noexcept(false) {
             addGameServerGroupInfo(pGameServerGroupInfo, WorldID);
         }
 
-        // �ʻ� ����!
+        
         SAFE_DELETE(pStmt);
 
     } catch (SQLQueryException& sqe) {
-        // �ʻ� ����!
+        
         SAFE_DELETE(pStmt);
 
         throw Error(sqe.toString());
@@ -163,14 +163,14 @@ void GameServerGroupInfoManager::deleteGameServerGroupInfo(const ServerGroupID_t
     HashMapGameServerGroupInfo::iterator itr = m_GameServerGroupInfos[WorldID].find(GroupID);
 
     if (itr != m_GameServerGroupInfos[WorldID].end()) {
-        // GameServerGroupInfo �� �����Ѵ�.
+        
         delete itr->second;
 
-        // pair�� �����Ѵ�.
+        
         m_GameServerGroupInfos[WorldID].erase(itr);
 
     } else {
-        // �׷� ���Ӽ������� ��ü�� ã�� �� ���� ��
+        
         throw NoSuchElementException();
     }
 
@@ -185,7 +185,7 @@ GameServerGroupInfo* GameServerGroupInfoManager::getGameServerGroupInfo(const Se
     __BEGIN_TRY
 
     if (WorldID >= m_MaxWorldID) {
-        // �׷� ���Ӽ������� ��ü�� ã�� �� ������ ��
+        
         throw NoSuchElementException();
     }
 
@@ -196,7 +196,7 @@ GameServerGroupInfo* GameServerGroupInfoManager::getGameServerGroupInfo(const Se
     if (itr != m_GameServerGroupInfos[WorldID].end()) {
         pGameServerGroupInfo = itr->second;
     } else {
-        // �׷� ���Ӽ������� ��ü�� ã�� �� ������ ��
+        
         throw NoSuchElementException();
     }
 
@@ -223,7 +223,7 @@ string GameServerGroupInfoManager::toString() const noexcept(false) {
             //--------------------------------------------------
             // *OPTIMIZATION*
             //
-            // for_each()�� ����� ��
+            
             //--------------------------------------------------
             for (HashMapGameServerGroupInfo::const_iterator itr = m_GameServerGroupInfos[i].begin();
                  itr != m_GameServerGroupInfos[i].end(); itr++)

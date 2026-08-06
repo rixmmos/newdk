@@ -16,7 +16,7 @@
 //
 // class GCAddNPC;
 //
-// 시야 안에 NPC 가 들어왔을 경우, 이 패킷에 NPC 정보를 담아서 전송받는다.
+
 //
 //--------------------------------------------------------------------------------
 
@@ -24,10 +24,10 @@ class GCAddNPC : public Packet {
 public:
     GCAddNPC() {};
     ~GCAddNPC() {};
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -40,7 +40,7 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static GCAddNPCPacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketSize() const {
         return szObjectID + szBYTE + m_Name.size() + szNPCID + szSpriteType + szColor + szColor + szCoord + szCoord +
                szDir;
@@ -129,23 +129,23 @@ public:
     }
 
 private:
-    // 존 레벨에서 유니크한 아이디로 객체 구분을 위해서 사용한다.
+    
     ObjectID_t m_ObjectID;
 
-    // NPC의 이름
+    
     string m_Name;
 
-    // NPC의 아이디(오브젝트 아이디가 아니다.)
+    
     NPCID_t m_NPCID;
 
-    // 스프라이트 타입
+    
     SpriteType_t m_SpriteType;
 
-    // 색깔 정보
+    
     Color_t m_MainColor;
     Color_t m_SubColor;
 
-    // X, Y 및 방향
+    
     Coord_t m_X;
     Coord_t m_Y;
     Dir_t m_Dir;
@@ -179,7 +179,7 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static GCAddNPCPacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szObjectID + szBYTE + 40 + szNPCID + szSpriteType + szColor + szColor + szCoord + szCoord + szDir;
     }

@@ -29,7 +29,7 @@ throw ( ProtocolException , Error )
 		
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
@@ -56,8 +56,8 @@ throw ( ProtocolException , Error )
 	
 	if( skillID == MAGIC_UN_TRANSFORM)
 	{
-		// 아우스터즈는 summon sylph 에서 내릴떄 untransform 을 날려주는데 그에대한 검증으로 이게 날라온다-_-
-		// 고쳐야 하는데.. 일단 예외 처리로!
+		
+		
 		if(g_pPlayer->IsOusters())
 		{
 			g_pPlayer->SetWaitVerifyNULL();
@@ -84,10 +84,10 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------
-	// Delay Frame 설정
+	
 	//------------------------------------------------------------
 	DWORD delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
-	if(resultActionInfo == RESULT_SKILL_CONCEALMENT)				// 이펙트에 맞게 프레임을 적당히 조정해준다.
+	if(resultActionInfo == RESULT_SKILL_CONCEALMENT)				
 	{
 		int FrameSize = (*g_pActionInfoTable)[resultActionInfo][1].Count;
 		int RemainFrame = delayFrame % FrameSize;
@@ -102,7 +102,7 @@ throw ( ProtocolException , Error )
 
 	g_pPlayer->SetEffectDelayFrame(resultActionInfo, delayFrame );
 
-	// 소울 체인의 경우 기술 썼을때가 아니라 OK됐을때 delay세팅
+	
 	if(skillID == SKILL_SOUL_CHAIN)
 	{
 		if (skillID < MIN_RESULT_ACTIONINFO)
@@ -113,7 +113,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------
-	// Player가 기술을 성공했을때 모습..
+	
 	//------------------------------------------------------
 	g_pPlayer->PacketSpecialActionResult( 
 					resultActionInfo,
@@ -123,21 +123,21 @@ throw ( ProtocolException , Error )
 	);
 
 	//------------------------------------------------------------------
-	// Player가 Skill을 성공시킨 경우에 날아오는 Packet이므로
-	// 결과를 반영시켜야 한다.
+	
+	
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
 	//------------------------------------------------------------------
-	// effect status를 적용시킨다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetEFFECT_STAT()!=EFFECTSTATUS_NULL)
 	{
 		//int esDelayFrame = ConvertDurationToFrame( g_pPlayer->GetDURATION() );
 
-		// effect를 붙인다.
+		
 		g_pPlayer->AddEffectStatus((EFFECTSTATUS)g_pPlayer->GetEFFECT_STAT(), delayFrame);	
 		
 		g_pPlayer->SetStatus( MODIFY_EFFECT_STAT, EFFECTSTATUS_NULL );
@@ -145,7 +145,7 @@ throw ( ProtocolException , Error )
 	else
 	{
 		//------------------------------------------------------
-		// EffectStatus가 있다면 붙인다.
+		
 		//------------------------------------------------------
 		EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 
@@ -163,8 +163,8 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------------------
-	// UI에 보이는 것을 바꿔준다.
-	// 비교연산하는거보다 이게 더 빠르지 않을까.. 음.. - -;
+	
+	
 	//------------------------------------------------------------------
 	//UI_SetHP( g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP() );
 	//UI_SetMP( g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP() );
@@ -173,13 +173,13 @@ throw ( ProtocolException , Error )
 	
 	//------------------------------------------------------
 	//
-	// skill에 결과가 있으면 적용 시킨다.
+	
 	//
 	//------------------------------------------------------
 	MActionResultNode* pActionResultNode = CreateActionResultNode(g_pPlayer, skillID);
 
 	//------------------------------------------------------
-	// NULL이 아니면 실행
+	
 	//------------------------------------------------------
 	if (pActionResultNode!=NULL)
 	{

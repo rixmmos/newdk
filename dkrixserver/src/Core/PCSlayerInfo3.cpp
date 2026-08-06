@@ -61,7 +61,7 @@ void PCSlayerInfo3::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void PCSlayerInfo3::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
@@ -110,7 +110,7 @@ void PCSlayerInfo3::write(SocketOutputStream& oStream) const {
         oStream.write(m_Rank);
         oStream.write(m_AdvancementLevel);
 
-        // cout << "승직 레벨 : " << (int)m_AdvancementLevel << endl;
+        
     } catch (Throwable& t) {
         cout << t.toString() << endl;
     }

@@ -17,7 +17,7 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Peace::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -49,7 +49,7 @@ void Peace::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Peace::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -156,33 +156,33 @@ void Peace::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pS
                 Creature* pTargetCreature = (*itr);
                 Assert(pTargetCreature != NULL);
 
-                // 몬스터인 경우만 체크한다.
-                // 뱀파이어 마스터는 나중에 제외시켜야한다.
+                
+                
                 if (pTargetCreature->isMonster()) {
                     Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
                     Assert(pMonster != NULL);
 
-                    // 살아있고, 이미 Peace에 걸린 경우가 아닌 경우에 마법 건다.
+                    
                     if (pMonster->isAlive() && !pMonster->isFlag(Effect::EFFECT_CLASS_PEACE)) {
                         bool bHitRoll = HitRoll::isSuccessMagic(pSlayer, pSkillInfo, pSkillSlot);
 
                         if (bHitRoll) {
-                            // pMonster가 pSlayer를 먼저 공격하지 않는 Effect
+                            
                             EffectPeace* pEffectPeace = new EffectPeace(pMonster, pSlayer->getObjectID());
-                            // pEffectAftermath->setDeadline(150+pSlayer->getINT()); // (15+INT/10)초*10
-                            pEffectPeace->setDeadline(duration); // 150+pSlayer->getINT()); // (15+INT/10)초*10
+                            
+                            pEffectPeace->setDeadline(duration); 
                             pMonster->addEffect(pEffectPeace);
                             pMonster->setFlag(Effect::EFFECT_CLASS_PEACE);
 
-                            // 이미 때리고 있는 경우라면 제거..
+                            
                             pMonster->deleteEnemy(pSlayer->getObjectID());
 
-                            // cout << pMonster->getName().c_str() << "에게 Peace 걸었다." << endl;
+                            
                             // cList.push_back(pMonster);
 
                             bSuccess = true;
 
-                            // 타겟 list를 패킷에 추가한다.
+                            
 
                             _GCSkillToTileOK1.addCListElement(pMonster->getObjectID());
                             _GCSkillToTileOK2.addCListElement(pMonster->getObjectID());
@@ -198,10 +198,10 @@ void Peace::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pS
             }
 
             if (bSuccess) {
-                // 성공해야 마나를 떨어뜨린다.
+                
                 decreaseMana(pSlayer, RequiredMP, _GCSkillToTileOK1);
 
-                // 경험치를 올려준다. (일단 detect hidden에서 긁었다. -_-;)
+                
                 SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
                 Exp_t ExpUp = 10 * (Grade + 1) * 2;
 
@@ -252,52 +252,9 @@ void Peace::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, SkillSlot* pS
 
             // cList.push_back(pSlayer);
 
-            // 이 기술에 의해 영향을 받는 놈들에게 패킷을 보내줘야 한다.
-            // 몬스터라서 없다 - -;
-            /*
-            for(list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++)
-            {
-                Creature* pTargetCreature = *itr;
-                Assert(pTargetCreature != NULL);
-
-                if (pTargetCreature->isPC())
-                {
-                    _GCSkillToTileOK2.clearList();
-
-                    HP_t targetHP = 0;
-                    if (pTargetCreature->isSlayer())
-                    {
-                        targetHP = (dynamic_cast<Slayer*>(pTargetCreature))->getHP();
-                    }
-                    else if (pTargetCreature->isVampire())
-                    {
-                        targetHP = (dynamic_cast<Vampire*>(pTargetCreature))->getHP();
-                    }
-
-                    _GCSkillToTileOK2.addShortData(MODIFY_CURRENT_HP, targetHP);
-
-                    // 패킷을 보내준다.
-                    Player* pPlayer = pTargetCreature->getPlayer();
-                    Assert(pPlayer != NULL);
-                    pPlayer->sendPacket(&_GCSkillToTileOK2);
-
-                    // HP를 브로드캐스팅한다.
-                    GCStatusCurrentHP gcStatusCurrentHP;
-                    gcStatusCurrentHP.setObjectID(pTargetCreature->getObjectID());
-                    gcStatusCurrentHP.setCurrentHP (targetHP);
-                    pZone->broadcastPacket(pTargetCreature->getX(), pTargetCreature->getY(), &gcStatusCurrentHP);
-
-                }
-
-                cList = pZone->broadcastSkillPacket(myX, myY, X, Y, &_GCSkillToTileOK5, cList);
-
-                pZone->broadcastPacket(myX, myY,  &_GCSkillToTileOK3 , cList);
-                pZone->broadcastPacket(X, Y,  &_GCSkillToTileOK4 , cList);
-
-                pSkillSlot->setRunTime(param.Delay);
-                result.bSuccess = true;
-            }
-            */
+            
+            
+             
 
             cList = pZone->broadcastSkillPacket(myX, myY, X, Y, &_GCSkillToTileOK5, cList);
 

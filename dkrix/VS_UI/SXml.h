@@ -59,7 +59,7 @@ public:
 //class StrX
 //{
 //private:
-//	char* m_pCSTR; ///< ���� ���ڿ� ����
+
 //
 //public:
 //	StrX(const XMLCh* const toTranscode) { m_pCSTR = XMLString::transcode(toTranscode); }
@@ -104,14 +104,14 @@ private:
 	typedef map<string, XMLTree*> CHILDREN_MAP;
 	typedef vector<XMLTree *> CHILDREN_VECTOR;
 
-	string     m_Name;        ///< ����� �̸�
-	string     m_Text;        ///< ��忡 ���� �ؽ�Ʈ
-	XMLTree*   m_pParent;     ///< �θ� ����� ������
+	string     m_Name;        
+	string     m_Text;        
+	XMLTree*   m_pParent;     
 
-	ATTRIBUTES_MAP m_AttributesMap;  ///< ������ �ִ� �Ӽ�����
-	ATTRIBUTES_VECTOR m_AttributesVector;  ///< ������ �ִ� �Ӽ�����
-	CHILDREN_MAP   m_ChildrenMap;    ///< �ڽ� ����
-	CHILDREN_VECTOR   m_ChildrenVector;    ///< �ڽ� ����
+	ATTRIBUTES_MAP m_AttributesMap;  
+	ATTRIBUTES_VECTOR m_AttributesVector;  
+	CHILDREN_MAP   m_ChildrenMap;    
+	CHILDREN_VECTOR   m_ChildrenVector;    
 
 public:
 	XMLTree();
@@ -156,8 +156,8 @@ private:
 //class XMLTreeGenerator : public DefaultHandler
 //{
 //private:
-//	XMLTree* m_pRoot;   ///< �ֻ��� ���
-//	XMLTree* m_pBuffer; ///< XML �Ľ̿� �ӽ� ���
+
+
 //
 //
 //public:
@@ -201,10 +201,10 @@ public:
 
 
 public:
-	/// \brief ������ ��ġ�� �ִ� ���� �Ǵ� �� ������ �Ľ��Ѵ�.
+	
 //	void parseURL(const char* pURL);
 
-	/// \brief �μ��� �Ѱ����� ���ڿ��� XML ������ �����ϰ� �Ľ��Ѵ�.
+	
 	char* parse(char* buffer, XMLTree *pTree, bool IsUseOnlyVector = false);
 };
 

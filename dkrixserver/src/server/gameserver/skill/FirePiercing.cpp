@@ -15,7 +15,7 @@
 #include "ZoneUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void FirePiercing::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                            CEffectID_t CEffectID)
@@ -44,8 +44,8 @@ void FirePiercing::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ousters
         // Assert(pTargetCreature != NULL);
 
 
-        // NPC는 공격할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pOusters, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pOusters, getSkillType(), Grade);
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -64,7 +64,7 @@ void FirePiercing::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ousters
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 아우스터즈 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, OustersSkillSlot* pOustersSkillSlot,
                            CEffectID_t CEffectID)
@@ -118,7 +118,7 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
         SkillType_t SkillType = pOustersSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // 데미지와 지속 시간을 계산한다.
+        
         SkillInput input(pOusters, pOustersSkillSlot);
         SkillOutput output;
         computeOutput(input, output);
@@ -156,7 +156,7 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
 
                     Tile& tile = pZone->getTile(oX, oY);
 
-                    // 타일 안에 존재하는 오브젝트들을 검색한다.
+                    
                     const forward_list<Object*>& oList = tile.getObjectList();
                     forward_list<Object*>::const_iterator itr = oList.begin();
                     for (; itr != oList.end(); itr++) {
@@ -169,8 +169,8 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
                             Creature* pCreature = dynamic_cast<Creature*>(pObject);
                             Assert(pCreature != NULL);
 
-                            // 무적상태 체크. by sigi. 2002.9.5
-                            // 산 면역. by sigi. 2002.9.13
+                            
+                            
                             if (pCreature->getObjectID() == pOusters->getObjectID() ||
                                 !canAttack(pOusters, pCreature) || pCreature->isFlag(Effect::EFFECT_CLASS_COMA) ||
                                 !canHit(pOusters, pCreature, SKILL_FIRE_PIERCING, pOustersSkillSlot->getExpLevel())) {
@@ -178,7 +178,7 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
                             }
 
                             // 2003.1.10 by Sequoia
-                            // 안전지대 체크
+                            
                             if (!checkZoneLevelToHitTarget(pCreature))
                                 continue;
 
@@ -207,9 +207,9 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
                                     ::setDamage(pMonster, Damage, pOusters, SKILL_FIRE_PIERCING, NULL,
                                                 &_GCSkillToTileOK1);
                                 } else
-                                    continue; // 아우스터즈나 NPC 상대로... -_-
+                                    continue; 
 
-                                // 죽었으면 경험치준다. 음.....
+                                
                                 if (pOusters != NULL) {
                                     if (pCreature->isDead() && pOusters->isOusters()) {
                                         Ousters* pCastOusters = dynamic_cast<Ousters*>(pOusters);
@@ -238,7 +238,7 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
                 }
 
             if (bCritical) {
-                cout << "크리티컬 발동" << endl;
+                cout << " " << endl;
 
                 list<Creature*>::iterator itr = cList.begin();
                 list<Creature*>::iterator endItr = cList.end();
@@ -246,7 +246,7 @@ void FirePiercing::execute(Ousters* pOusters, ZoneCoord_t tX, ZoneCoord_t tY, Ou
                 for (; itr != endItr; ++itr) {
                     Creature* pTargetCreature = *itr;
                     if (pTargetCreature != NULL) {
-                        cout << pTargetCreature->getName() << " 낙백~" << endl;
+                        cout << pTargetCreature->getName() << " ~" << endl;
                         knockbackCreature(pZone, pTargetCreature, pOusters->getX(), pOusters->getY());
                     }
                 }

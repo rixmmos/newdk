@@ -2,7 +2,7 @@
 
 // Filename    : CGGetEventItem.h 
 
-// Written By  : 김성민
+
 
 // Description : 
 
@@ -16,15 +16,15 @@
 
 
 
-#include "Packet.h"
+#include "../Packet.h"
 
-#include "PacketFactory.h"
+#include "../PacketFactory.h"
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// 기부 종류
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,11 +32,11 @@ enum EventType
 
 {
 
-	EVENT_TYPE_200412_COMBACK_ITEM = 0,			// 돌아온 사용자 링 아이템 주기 이벤트
+	EVENT_TYPE_200412_COMBACK_ITEM = 0,			
 
-	EVENT_TYPE_200412_COMBACK_PREMIUM_ITEM,		// 돌아온 사용자 결제 시 아이템 주기 이벤트
+	EVENT_TYPE_200412_COMBACK_PREMIUM_ITEM,		
 
-	EVENT_TYPE_200412_COMBACK_RECOMMEND_ITEM,	// 돌아온 사용자 결제 시 추천 받은 자 아이템 주기 이벤트
+	EVENT_TYPE_200412_COMBACK_RECOMMEND_ITEM,	
 
 
 
@@ -90,7 +90,7 @@ public:
 
 private:
 
-	BYTE		m_EventType;		// 이벤트 종류
+	BYTE		m_EventType;		
 
 };
 

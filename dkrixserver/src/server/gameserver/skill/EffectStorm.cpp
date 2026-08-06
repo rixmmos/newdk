@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectStorm.cpp
-// Written by  : 장홍창
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -60,13 +60,13 @@ void EffectStorm::affect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // EffectStorm은 AcidStorm, PoisonStorm, BloodyStorm위를 지나갈때 붙는다.
-    // 이는 3번의 연속 데미지를 주고 사라진다.
+    
+    
 
     Damage_t StormDamage = m_Point;
 
     if (!(pZone->getZoneLevel() & COMPLETE_SAFE_ZONE)
-        // 무적상태 체크. by sigi. 2002.9.5
+        
         && canAttack(NULL, pCreature) && !pCreature->isFlag(Effect::EFFECT_CLASS_COMA) && !pCreature->isDead()) {
         if (pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -82,7 +82,7 @@ void EffectStorm::affect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pSlayer->getPlayer()->sendPacket(&gcMI);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pSlayer->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -102,7 +102,7 @@ void EffectStorm::affect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pVampire->getPlayer()->sendPacket(&gcMI);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pVampire->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -122,7 +122,7 @@ void EffectStorm::affect(Creature* pCreature)
                 gcMI.addShortData(MODIFY_CURRENT_HP, RemainHP);
                 pOusters->getPlayer()->sendPacket(&gcMI);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pOusters->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -138,7 +138,7 @@ void EffectStorm::affect(Creature* pCreature)
 
                 pMonster->setHP(RemainHP, ATTR_CURRENT);
 
-                // 변한 HP를 브로드캐스팅해준다.
+                
                 GCStatusCurrentHP pkt;
                 pkt.setObjectID(pMonster->getObjectID());
                 pkt.setCurrentHP(RemainHP);
@@ -147,7 +147,7 @@ void EffectStorm::affect(Creature* pCreature)
         }
 
 
-        // m_CasterName이 pCreature를 죽인 경우의 KillCount 처리
+        
         // by sigi. 2002.9.9
         if (pCreature->isDead()) {
             Creature* pAttacker = pZone->getCreature(m_CasterName);
@@ -188,7 +188,7 @@ void EffectStorm::unaffect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_STORM);

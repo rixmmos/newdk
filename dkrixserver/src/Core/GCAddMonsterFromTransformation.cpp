@@ -24,7 +24,7 @@ GCAddMonsterFromTransformation::GCAddMonsterFromTransformation()
 }
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddMonsterFromTransformation::read(SocketInputStream& iStream)
 
@@ -57,7 +57,7 @@ void GCAddMonsterFromTransformation::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddMonsterFromTransformation::write(SocketOutputStream& oStream) const
 

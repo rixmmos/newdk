@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttackCreatureEffectGenerator.h
 //----------------------------------------------------------------------
-// Creature추적
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACKCREATUREEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttackCreatureEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACK_CREATURE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

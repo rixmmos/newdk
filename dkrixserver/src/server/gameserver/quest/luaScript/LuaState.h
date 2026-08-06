@@ -29,7 +29,7 @@ public:
     LuaState();
     virtual ~LuaState();
 
-    // LuaState�� ���ؼ� ���� �ѹ��� init���ָ� �ȴ�.
+    
     virtual void init(int stackSize = defaultStateSize);
     virtual void release();
 

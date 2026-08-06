@@ -13,6 +13,7 @@
 #include "MActionInfoTable.h"
 #include "MSlayerGear.h"
 #include "Skilldef.h"
+#include "PacketFunction.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -26,17 +27,20 @@ throw ( ProtocolException , Error )
 
 	
 	// message
+	WriteCombatCrashMarker("GCAttackArmsOK1 target=%d skill=%d success=%d bullet=%d short=%d long=%d",
+		pPacket->getObjectID(), pPacket->getSkillType(), pPacket->getSkillSuccess(),
+		pPacket->getBullet(), pPacket->getShortCount(), pPacket->getLongCount());
 
 	//------------------------------------------------------------------
-	// Player가 Skill을 성공시킨 경우에 날아오는 Packet이므로
-	// 결과를 반영시켜야 한다.
+	
+	
 	//------------------------------------------------------------------
-	// 상태값을 바꾼다.
+	
 	//------------------------------------------------------------------
 	AffectModifyInfo(g_pPlayer, pPacket);
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
@@ -48,7 +52,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -56,34 +60,21 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
-		// Creature에게 Damage 입힘
-		/*
-		if (pCreature != NULL)
-		{
-			// 바로 맞는 동작
-			// SKILL_ATTACK_GUN1~4?에 대한 결과를 표현해준다.
-			pCreature->PacketSpecialActionResult( 
-				g_pPlayer->GetBasicActionInfo() + g_ActionInfoTable.GetMinResultActionInfo(),
-				g_pPlayer->GetID(),
-				g_pPlayer->GetX(),
-				g_pPlayer->GetY()
-			);
-			
-		}
-		*/
+		
+		 
 
 		//------------------------------------------------------
-		// 맞은 경우만 맞은 동작은 보인다.
+		
 		//------------------------------------------------------
 		if (pPacket->getSkillSuccess())
 		{
-			// action이 끝나고 맞는 동작
+			
 			if (pCreature!=NULL)
 			{
 				MActionResult* pResult = new MActionResult;
@@ -118,7 +109,7 @@ throw ( ProtocolException , Error )
 		}
 					
 		//------------------------------------------------------
-		// 총알 빼준다.
+		
 		//------------------------------------------------------
 		if (g_pCurrentMagazine==NULL)
 		{

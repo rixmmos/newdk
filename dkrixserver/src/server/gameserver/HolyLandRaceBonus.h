@@ -14,7 +14,7 @@ public:
         m_VampireOptionTypes.clear();
     }
 
-    // 아담의 성지에서의 종족보너스를 다시 설정한다.
+    
     void refresh();
 
     const list<OptionType_t>& getSlayerOptionTypeList() const {

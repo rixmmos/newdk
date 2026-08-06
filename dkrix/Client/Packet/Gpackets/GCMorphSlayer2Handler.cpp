@@ -23,7 +23,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -41,8 +41,8 @@ throw ( ProtocolException , Error )
 		MCreature* pCreature = g_pZone->GetCreature(si.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
-		// 복장이 있는 Creature이다.
+		
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -63,24 +63,24 @@ throw ( ProtocolException , Error )
 			pCreatureWear->SetCurrentDirection( si.getDir() );
 			pCreatureWear->SetAction( ACTION_STAND );
 
-			// 피부색
+			
 			pCreatureWear->SetBodyColor1( si.getSkinColor() );
 			
 			pCreatureWear->SetStatus( MODIFY_MAX_HP, si.getMaxHP() );
 			pCreatureWear->SetStatus( MODIFY_CURRENT_HP, si.getCurrentHP() );
 
-			// 이름
+			
 			pCreatureWear->SetName( si.getName().c_str() );
 
-			// 색깔 정보
+			
 
-			// 복장 정보 --> 일단 기본 옷을 입고 있게 한다.
+			
 			//----------------------------------------	
-			// 복장을 착용한다.
+			
 			//----------------------------------------	
 			SetAddonToSlayer( pCreatureWear, &si );
 
-			// 임시로
+			
 			pCreatureWear->SetGuildNumber( -1 );
 
 			
@@ -92,7 +92,7 @@ throw ( ProtocolException , Error )
 			}
 		}
 		//--------------------------------------------------
-		// 기존에 있던 Creature이면 정보 변경
+		
 		//--------------------------------------------------
 		else
 		{
@@ -105,7 +105,7 @@ throw ( ProtocolException , Error )
 				pCreatureWear->SetGroundCreature();
 				//pCreatureWear->SetID(si.getObjectID());
 
-				// 임시로
+				
 				pCreatureWear->SetGuildNumber( -1 );
 				
 				pCreatureWear->SetServerPosition( si.getX(), si.getY() );				
@@ -114,19 +114,19 @@ throw ( ProtocolException , Error )
 				//pCreatureWear->SetCurrentDirection( si.getDir() );
 				pCreatureWear->SetAction( ACTION_STAND );
 
-				// 피부색
+				
 				pCreatureWear->SetBodyColor1( si.getSkinColor() );
 			
 				pCreatureWear->SetStatus( MODIFY_MAX_HP, si.getMaxHP() );
 				pCreatureWear->SetStatus( MODIFY_CURRENT_HP, si.getCurrentHP() );
 
-				// 이름
+				
 				pCreatureWear->SetName( si.getName().c_str() );
 
-				// 색깔 정보
+				
 
 				//----------------------------------------	
-				// 복장을 착용한다.
+				
 				//----------------------------------------	
 				SetAddonToSlayer( pCreatureWear, &si );
 			}

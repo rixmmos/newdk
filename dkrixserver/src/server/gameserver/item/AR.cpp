@@ -99,7 +99,7 @@ void AR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream 없애기. by sigi. 2002.5.13
+        
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
         pStmt->executeQuery("INSERT INTO ARObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
@@ -511,7 +511,7 @@ void ARLoader::load(Creature* pCreature)
                     pInventory = pVampire->getInventory();
                     pStash = pVampire->getStash();
                 } else
-                    throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
+                    throw UnsupportedError("Monster,NPC     .");
 
                 switch (storage) {
                 case STORAGE_INVENTORY:
@@ -638,7 +638,7 @@ void ARLoader::load(Zone* pZone)
             case STORAGE_STASH:
             case STORAGE_CORPSE:
                 SAFE_DELETE(pStmt); // by sigi
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 SAFE_DELETE(pStmt); // by sigi

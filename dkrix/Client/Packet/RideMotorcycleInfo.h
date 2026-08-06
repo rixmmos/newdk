@@ -2,16 +2,16 @@
 // Filename    : RideMotorcycleInfo.h 
 // Written By  : elca@ewestsoft.com
 // Description : 
-// 타고 있는 모터사이클에 대한 정보를 가지고 있는 패킷이다.
-// 모터 사이클 자체에 관한 정보 외에도, 모터 사이클 내부에 있는
-// 인벤토리에 대한 정보도 같이 가지고 있다. 인벤토리 정보에 대한 것은
-// RideMotorcycleSlotInfo와 InventorySlotInfo를 참조하라.
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __RIDE_MOTORCYCLE_INFO_H__
 #define __RIDE_MOTORCYCLE_INFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "RideMotorcycleSlotInfo.h"
 #include "Packet.h"

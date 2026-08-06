@@ -18,7 +18,7 @@
 //
 // class GSAddGuild;
 //
-// 팀이 추가를 쉐어드 서버에 요청한다.
+
 //
 // *CAUTION*
 //
@@ -28,10 +28,10 @@ class GSAddGuild : public Packet {
 public:
     GSAddGuild() {};
     ~GSAddGuild() {};
-    // Stream 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // Stream 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -161,7 +161,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static LGIncomingConnectionPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBYTE +         // guild name length
                30 +             // guild name max length

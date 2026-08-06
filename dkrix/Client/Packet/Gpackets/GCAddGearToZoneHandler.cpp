@@ -24,7 +24,7 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 
 
 	//----------------------------------------------------------------------
-	// Slayer인 경우	
+	
 	//----------------------------------------------------------------------
 	switch(g_pPlayer->GetRace())
 	{
@@ -33,14 +33,14 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 				const MItem* pItem = g_pSlayerGear->GetItem( (MSlayerGear::GEAR_SLAYER)pPacket->getSlotID() );
 				
 				//----------------------------------------------------------------------
-				// 그런 id를 가진 item이 없는 경우
+				
 				//----------------------------------------------------------------------
 				if (pItem==NULL)
 				{
 					DEBUG_ADD_FORMAT("[Error] Item does not exist in SlayerGear! slot=%d", (int)pPacket->getSlotID());
 				}
 				//----------------------------------------------------------------------
-				// item이 있는 경우 --> Gear에서 제거해서 Zone에 추가한다.
+				
 				//----------------------------------------------------------------------
 				else
 				{
@@ -54,7 +54,7 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 					}
 					else
 					{
-						// 떨어뜨리는 모습으로 pItem을 Zone에 추가한다.
+						
 						g_pZone->AddItem( pRemovedItem, TRUE );
 					}
 				}
@@ -66,14 +66,14 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 				const MItem* pItem = g_pVampireGear->GetItem( (MVampireGear::GEAR_VAMPIRE)pPacket->getSlotID() );
 				
 				//----------------------------------------------------------------------
-				// 그런 id를 가진 item이 없는 경우
+				
 				//----------------------------------------------------------------------
 				if (pItem==NULL)
 				{
 					DEBUG_ADD_FORMAT("[Error] Item does not exist in VampireGear! slot=%d", (int)pPacket->getSlotID());
 				}
 				//----------------------------------------------------------------------
-				// item이 있는 경우 --> Gear에서 제거해서 Zone에 추가한다.
+				
 				//----------------------------------------------------------------------
 				else
 				{
@@ -87,7 +87,7 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 					}
 					else
 					{
-						// 떨어뜨리는 모습으로 pItem을 Zone에 추가한다.
+						
 						g_pZone->AddItem( pRemovedItem, TRUE );
 					}
 				}
@@ -100,14 +100,14 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 				const MItem* pItem = g_pOustersGear->GetItem( (MOustersGear::GEAR_OUSTERS)pPacket->getSlotID() );
 				
 				//----------------------------------------------------------------------
-				// 그런 id를 가진 item이 없는 경우
+				
 				//----------------------------------------------------------------------
 				if (pItem==NULL)
 				{
 					DEBUG_ADD_FORMAT("[Error] Item does not exist in OustersGear! slot=%d", (int)pPacket->getSlotID());
 				}
 				//----------------------------------------------------------------------
-				// item이 있는 경우 --> Gear에서 제거해서 Zone에 추가한다.
+				
 				//----------------------------------------------------------------------
 				else
 				{
@@ -121,7 +121,7 @@ void GCAddGearToZoneHandler::execute ( GCAddGearToZone * pPacket , Player * pPla
 					}
 					else
 					{
-						// 떨어뜨리는 모습으로 pItem을 Zone에 추가한다.
+						
 						g_pZone->AddItem( pRemovedItem, TRUE );
 					}
 				}

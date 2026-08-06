@@ -11,10 +11,10 @@
 #ifndef __VS_UI_WEBBROWSER_H__
 #define __VS_UI_WEBBROWSER_H__
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && defined(__has_include) && __has_include(<exdisp.h>) && __has_include(<atlbase.h>)
 //#include <ddraw.h>
-#include "EXDISP.H"
-#include "ATLBASE.H"
+#include <exdisp.h>
+#include <atlbase.h>
 
 //-----------------------------------------------------------------------------
 // MWEBBROWSER

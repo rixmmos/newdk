@@ -17,8 +17,8 @@
 //
 // class CLAgreement;
 //
-// 클라이언트가 로그인 서버에게 최초에 전송하는 패킷이다.
-// 아이디와 패스워드가 암호화되어 있다.
+
+
 //
 //--------------------------------------------------------------------------------
 
@@ -26,10 +26,10 @@ class CLAgreement : public Packet {
 public:
     CLAgreement() {};
     virtual ~CLAgreement() {};
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -54,7 +54,7 @@ public:
     string toString() const;
 
 public:
-    // get/set agreement 넷마블 사용자 약관 동의 여부
+    
     bool isAgree() const {
         return (m_Agree ? true : false);
     }
@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    // 넷마블 사용자 약관 동의 여부
+    
     BYTE m_Agree;
 };
 

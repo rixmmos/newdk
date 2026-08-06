@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // COpeningUpdate.cpp
 //---------------------------------------------------------------------------
-// Opening 동영상을 보여줄때의 loop
+
 //---------------------------------------------------------------------------
 #include "Client_PCH.h"
 #pragma warning(disable:4786)
@@ -23,10 +23,10 @@ COpeningUpdate*		g_pCOpeningUpdate;
 void
 COpeningUpdate::Init()
 {
-	// mouse event 처리
+	
 	g_pSDLInput->SetMouseEventReceiver( NULL );
 
-	// keyboard event 처리
+	
 	g_pSDLInput->SetKeyboardEventReceiver( NULL );
 }
 
@@ -61,7 +61,7 @@ COpeningUpdate::PlayMPG(char* filename)
 //-----------------------------------------------------------------------------
 // UpdateOpening
 //-----------------------------------------------------------------------------
-// 접속 전..
+
 //-----------------------------------------------------------------------------
 void		
 COpeningUpdate::Update()

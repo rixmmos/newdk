@@ -8,7 +8,7 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-#include "Properties.h"
+#include "Packet/Properties.h"
 ////
 //yckou added 2005.09.11
 //#define WINDOWS_SCREEN_DISPLAY

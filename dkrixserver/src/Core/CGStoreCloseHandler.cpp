@@ -37,13 +37,13 @@ void CGStoreCloseHandler::execute(CGStoreClose* pPacket, Player* pPlayer)
     Assert(pStore != NULL);
 
     if (!pStore->isOpen()) {
-        filelog("Store.log", "[%s:%s] 이미 상점이 닫혀있습니다..", pGamePlayer->getID().c_str(),
+        filelog("Store.log", "[%s:%s]   ..", pGamePlayer->getID().c_str(),
                 pPC->getName().c_str());
         return;
     }
 
     pStore->close();
-    cout << pPC->getName() << " 의 상점이 닫혔습니다닏." << endl;
+    cout << pPC->getName() << "   ." << endl;
 
     GCMyStoreInfo gcInfo;
     gcInfo.setStoreInfo(&(pStore->getStoreInfo()));

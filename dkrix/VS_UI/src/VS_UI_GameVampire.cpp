@@ -23,25 +23,7 @@ int		C_VS_UI_VAMPIRE_GEAR::m_slot_image[SLOT_SIZE] = {
 //
 // help string
 //
-/*static S_DEFAULT_HELP_STRING	g_help_string[9] = {
-	{"Inventory", "(아이템창)", "TAB"},
-	{"PartyManager", "(파티창)", "Ctrl+P"},
-	{"Character Info", "(캐릭터 정보)", "Ctrl+I"},
-	{"Magic Info", "(마법 정보)", "Ctrl+K"},
-	{"Help", "(도움말)", "Ctrl+H"},
-	{"Gear", "(장착창)", "Ctrl+TAB"},
-	{"Game Menu", "(게임 메뉴)", "ESC"},
-	{"Mini-Map", "(미니맵)", "Ctrl+M"},
-	{"Mark", "(특수문자)", "Ctrl+X"},
-};
-
-static S_DEFAULT_HELP_STRING	g_chat_help_string[5] = {
-	{"Extend Window", "(채팅창 확장)", "Ctrl+E"},
-	{"Chat", "(일반 채팅)", "Ctrl+C"},
-	{"Clan/Party Chat", "(클랜/파티 채팅)", "Ctrl+G"},
-	{"Whisper", "(귓속말)", "Ctrl+W"},
-	{"ZoneChat", "(외치기)", "Ctrl+Z"},
-};*/
+ 
 
 //----------------------------------------------------------------------------
 // Operations
@@ -340,97 +322,7 @@ void C_VS_UI_VAMPIRE::DrawMinimap()
 
 }
 */
-/*
-//-----------------------------------------------------------------------------
-// SetZone
-//
-
-//-----------------------------------------------------------------------------
-void C_VS_UI_VAMPIRE::SetZone(int zone_id)
-{
-	const int id_size = 39;
-	int id[id_size] = {11, 12, 13, 14, 21, 22, 23 ,24, 31, 32, 33, 34, 1001, 1002, 1003, 1004, 1005, 1006, 2000, 2001, 2002, 2003, 2004, 2010, 2011, 2012, 2013, 2014, 2020, 2021, 2022, 2023, 2024, 2101, 2102, 2103, 2104, 2105, 2106};
-	char map_name[id_size][20] =
-	{
-
-		"에슬라니아 NE", "에슬라니아 NW", "에슬라니아 SE", "에슬라니아 SW",
-		"림보성 NE", "림보성 NW", "림보성 SE", "림보성 SW",
-		"드로베타 NE", "드로베타 NW", "드로베타 SE", "드로베타 SW",
-
-
-		"지하 수련장", "에슬라니아 던전", "뱀파이어 마을", "림보성 던전", "이벤트 OX", "이벤트 경기장",
-
-
-		"군인 길드 B1", "군인 길드 1F", "군인 길드 2F", "군인 길드 3F", "군인 길드 옥상",
-		"성직자 길드 B1", "성직자 길드 1F", "성직자 길드 2F", "성직자 길드 3F", "성직자 길드 옥상",
-		"무사 길드 B1", "무사 길드 1F", "무사 길드 2F", "무사 길드 3F", "무사 길드 옥상",
-
-
-		"복도", "브리핑룸", "컴퓨터실", "무기점", "도서관", "헬기장",
-	};
-
-	int spk_id[id_size] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-							12, 13, 14, 13, 15, 27, 
-							26, 16, 17, 18, 24,
-							26, 28, 29, 30, 24,
-							26, 31, 32, 33, 24,
-							19, 20, 21, 22, 23, 25};
-
-	for(int i = 0; i < id_size; i++)
-		if(zone_id == id[i])break;
-
-	if(i == id_size)return;
-	m_zone_name = map_name[i];
-
-	CSpritePack		m_minimap_spk;
-	
-	ifstream	file(SPK_MINIMAP, ios::binary|ios::nocreate);
-	if (!file)
-		_Error(FILE_OPEN);
-	m_minimap_spk.LoadFromFile(file);
-	file.close();
-
-	POINT point = {0, 0};
-
-	m_minimap_surface.FillSurface(0x0000);
-	m_minimap_surface.SetTransparency( 0xffff );
-
-	m_minimap_surface.Lock();
-	m_minimap_surface.BltSprite(&point, &m_minimap_spk[spk_id[i]]);
-	m_minimap_surface.Unlock();
-
-	m_minimap_spk.Release();
-}
-
-//-----------------------------------------------------------------------------
-// SetSafetyZone
-//
-
-//-----------------------------------------------------------------------------
-void C_VS_UI_VAMPIRE::SetSafetyZone(RECT rect)
-{
-	m_minimap_surface.Lock();
-	WORD *mem = (WORD *)m_minimap_surface.GetSurfacePointer();
-	int pitch = m_minimap_surface.GetSurfacePitch();
-
-	int map_w = 200, map_h = 100;
-	if(m_map_w != m_map_h)
-	{
-		if(m_map_w > m_map_h)map_h = map_h * m_map_h / m_map_w;
-		if(m_map_h > m_map_w)map_w = map_w * m_map_w / m_map_h;
-	}
-	
-	for(int y = rect.top*map_h/m_map_h + (100 - map_h)/2; y <= rect.bottom*map_h/m_map_h + (100 - map_h)/2; y++)
-	{
-		for(int x = rect.left*map_w/m_map_w + (200 - map_w)/2; x <= rect.right*map_w/m_map_w + (200 - map_w)/2; x++)
-		{
-			mem[y*pitch/2+x] = mem[y*pitch/2+x] & CSDLGraphics::Get_G_Bitmask();
-		}
-	}
-
-	m_minimap_surface.Unlock();
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // C_VS_UI_VAMPIRE::GetGearWindow
@@ -549,13 +441,12 @@ void C_VS_UI_VAMPIRE::Show()
 		m_pC_common_button_group->Show();
 		
 		int sec = 0, min = 0, hour = 0;
-		char sz_temp[20];
-		strcpy(sz_temp, m_time.c_str());
-		sec = atoi(sz_temp+strlen(sz_temp)-2);
-		sz_temp[strlen(sz_temp)-3] = '\0';
-		min = atoi(sz_temp+strlen(sz_temp)-2);
-		sz_temp[strlen(sz_temp)-3] = '\0';
-		hour = atoi(sz_temp);
+		if (sscanf(m_time.c_str(), "%d:%d:%d", &hour, &min, &sec) != 3)
+		{
+			hour = 0;
+			min = 0;
+			sec = 0;
+		}
 		
 		const int icon_x = 88, icon_y = 35;
 		if(hour >= 8 && hour < 16)

@@ -37,7 +37,7 @@ bool EffectAcidStorm::affectCreature(Creature* pTargetCreature, bool bAffectByMo
 
     Assert(pTargetCreature != NULL);
 
-    // 상대에게 이미 poison 이펙트가 걸려져 있는 경우에는 걸리지 않는다.
+    
     if (pTargetCreature->isFlag(Effect::EFFECT_CLASS_STORM_ACID)) {
         // cout << "EffectAcidStorm " << "affectCreature End(Already Effected) " << endl;
         return false;
@@ -46,23 +46,23 @@ bool EffectAcidStorm::affectCreature(Creature* pTargetCreature, bool bAffectByMo
     Zone* pZone = pTargetCreature->getZone();
 
     Creature* pAttacker = pZone->getCreature(m_UserObjectID);
-    // 상대방에게 미칠 독 데미지를 계산한다.
+    
     int StormDamage = computeMagicDamage(pTargetCreature, m_Damage, SKILL_ACID_STORM, m_bVampire, pAttacker);
 
     if (StormDamage > 0) {
         // cout << "EffectAcidStorm(Damage:" << StormDamage << ") Affected" << endl;
-        //  포이즌 이펙트를 생성해서, 타겟 크리쳐에 붙이고, 플래그를 켜준다.
+        
         EffectStormAcid* pEffectStormAcid = new EffectStormAcid(pTargetCreature);
         pEffectStormAcid->setLevel(m_Level);
         pEffectStormAcid->setPoint(StormDamage / 3);
-        pEffectStormAcid->setDeadline(16); // 이부분 바꿔야 한다.
-        pEffectStormAcid->setTick(5);      // 이부분도 바꿔야 한다.
+        pEffectStormAcid->setDeadline(16); 
+        pEffectStormAcid->setTick(5);      
         pEffectStormAcid->setUserObjectID(m_UserObjectID);
         pEffectStormAcid->affect(pTargetCreature);
         pTargetCreature->addEffect(pEffectStormAcid);
         pTargetCreature->setFlag(Effect::EFFECT_CLASS_STORM_ACID);
 
-        // 이펙트가 붙었다고 주변에 알려준다.
+        
         GCAddEffect gcAddEffect;
         gcAddEffect.setObjectID(pTargetCreature->getObjectID());
         gcAddEffect.setEffectID(Effect::EFFECT_CLASS_STORM_ACID);

@@ -200,14 +200,14 @@ void CGAddZoneToInventoryHandler::execute(CGAddZoneToInventory* pPacket, Player*
 
                         // pPrevItem->save(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
                         //  Use tinysave for a lightweight update.
-                        char pField[80];
-                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d, X=%d, Y=%d", pPC->getName().c_str(),
+                        char pField[128];
+                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d, StorageID=0, X=%d, Y=%d", pPC->getName().c_str(),
                                 MaxStack, STORAGE_INVENTORY, InvenX, InvenY);
                         pPrevItem->tinysave(pField);
 
                         // pItem->save(pPC->getName(), STORAGE_EXTRASLOT, 0, 0, 0);
                         //  Use tinysave for a lightweight update.
-                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d", pPC->getName().c_str(), pItem->getNum(),
+                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d, StorageID=0", pPC->getName().c_str(), pItem->getNum(),
                                 STORAGE_EXTRASLOT);
                         pItem->tinysave(pField);
 
@@ -219,8 +219,8 @@ void CGAddZoneToInventoryHandler::execute(CGAddZoneToInventory* pPacket, Player*
 
                         // pPrevItem->save(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
                         //  Use tinysave for a lightweight update.
-                        char pField[80];
-                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d, X=%d, Y=%d", pPC->getName().c_str(),
+                        char pField[128];
+                        sprintf(pField, "OwnerID='%s', Num=%d, Storage=%d, StorageID=0, X=%d, Y=%d", pPC->getName().c_str(),
                                 pPrevItem->getNum(), STORAGE_INVENTORY, InvenX, InvenY);
                         pPrevItem->tinysave(pField);
 
@@ -271,8 +271,8 @@ void CGAddZoneToInventoryHandler::execute(CGAddZoneToInventory* pPacket, Player*
             pInventory->addItem(InvenX, InvenY, pItem);
             // pItem->save(pPC->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
             //  Use tinysave for a lightweight update.
-            char pField[80];
-            sprintf(pField, "OwnerID='%s', Storage=%d, X=%d, Y=%d", pPC->getName().c_str(), STORAGE_INVENTORY, InvenX,
+            char pField[128];
+            sprintf(pField, "OwnerID='%s', Storage=%d, StorageID=0, X=%d, Y=%d", pPC->getName().c_str(), STORAGE_INVENTORY, InvenX,
                     InvenY);
             pItem->tinysave(pField);
 

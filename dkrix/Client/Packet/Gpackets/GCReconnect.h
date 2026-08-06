@@ -10,16 +10,16 @@
 #define __GC_RECONNECT_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
 // class GCReconnect;
 //
-// 서버간 이동시, 이전 서버가 클라이언트에게 다음 서버로 연결하라고 
-// 하면서 접속을 끊도록 하는 패킷이다. 클라이언트는 이 패킷을 받으면,
-// 서버와의 연결을 끊고 패킷에 담긴 서버의 IP/Port 로 접속하면 된다.
+
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -27,10 +27,10 @@ class GCReconnect : public Packet {
 
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -42,10 +42,10 @@ public :
 	// get packet's body size
 	PacketSize_t getPacketSize () const throw () 
 	{ 
-		return szBYTE + m_Name.size() 		// 캐릭터 이름
-			+ szPCType 						// 슬레이어 or 뱀파이어?
-			+ szBYTE + m_ServerIP.size() 	// 새로 접속할 게임 서버 IP
-			+ szDWORD; 						// 인증 키
+		return szBYTE + m_Name.size() 		
+			+ szPCType 						
+			+ szBYTE + m_ServerIP.size() 	
+			+ szDWORD; 						
 	}
 
 	#ifdef __DEBUG_OUTPUT__
@@ -116,13 +116,13 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCReconnectPacketMaxSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw ()
 	{
-		return szBYTE + 20 		 		// 캐릭터 이름
-			+ szPCType 					// 슬레이어 or 뱀파이어?
-			+ szBYTE + 15			 	// 새로 접속할 게임 서버 IP
-			+ szDWORD; 					// 인증 키
+		return szBYTE + 20 		 		
+			+ szPCType 					
+			+ szBYTE + 15			 	
+			+ szDWORD; 					
 	}
 
 };

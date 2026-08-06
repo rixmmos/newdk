@@ -121,7 +121,7 @@ bool ResurrectLocationManager::getSlayerPosition(ZoneID_t id, ZONE_COORD& zoneCo
         // cerr << "ResurrectLocationManager::getPosition() : No Such ZoneID" << endl;
         // throw NoSuchElementException("ResurrectLocationManager::getPosition() : No Such ZoneID");
 
-        // NoSuch제거. by sigi. 2002.5.9
+        
         return false;
     }
 
@@ -160,7 +160,7 @@ bool ResurrectLocationManager::getVampirePosition(ZoneID_t id, ZONE_COORD& zoneC
 
     if (itr == m_VampirePosition.end()) {
         // cerr << "ResurrectLocationManager::getPosition() : No Such ZoneID" << endl;
-        //  NoSuch제거. by sigi. 2002.5.9
+        
         // throw NoSuchElementException("ResurrectLocationManager::getPosition() : No Such ZoneID");
         return false;
     }
@@ -269,7 +269,7 @@ bool ResurrectLocationManager::getPosition(PlayerCreature* pPC, ZONE_COORD& zone
             }
         }
 
-        // 종족 전쟁이 진행중에 .. 참가 인원 제한을 한다면
+        
         if (!bFindPosition && g_pWarSystem->hasActiveRaceWar() && g_pVariableManager->isActiveRaceWarLimiter()) {
             ZoneInfo* pResZoneInfo = NULL;
 
@@ -281,10 +281,10 @@ bool ResurrectLocationManager::getPosition(PlayerCreature* pPC, ZONE_COORD& zone
                 }
             }
 
-            // 아담의 성지로 들어가는 경우.. 전쟁 신청을 안 했다면..
+            
             if ((pResZoneInfo != NULL && pResZoneInfo->isHolyLand() || pPC->getZone()->isHolyLand()) &&
                 !pPC->isFlag(Effect::EFFECT_CLASS_RACE_WAR_JOIN_TICKET)) {
-                // 각 종족의 기본 부활위치로 보낸다.
+                
                 if (getRaceDefaultPosition(pPC->getRace(), zoneCoord)) {
                     bFindPosition = true;
                 } else {
@@ -308,22 +308,22 @@ bool ResurrectLocationManager::getPosition(PlayerCreature* pPC, ZONE_COORD& zone
         }
 
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-        // 유료존 체크
+        
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(zoneCoord.id);
         GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPC->getPlayer());
         Assert(pGamePlayer != NULL);
 
-        // 유료화 존이고 유료사용자가 아니면..
+        
         if (pZoneInfo != NULL && (pZoneInfo->isPayPlay() || pZoneInfo->isPremiumZone()) &&
             !pGamePlayer->isPayPlaying()) {
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            // 유료 서비스 사용이 가능한가?
+            
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 sendPayInfo(pGamePlayer);
             } else if (pZoneInfo->isPayPlay() && !pGamePlayer->isFamilyFreePass()) {
-                // 유료 서비스 사용 불가인 경우
-                // 각 종족의 default 존으로 설정한다.
+                
+                
                 if (!getRaceDefaultPosition(pPC->getRace(), zoneCoord))
                     throw Error("Critical Error : ResurrectInfo is not established!2");
             }
@@ -347,38 +347,38 @@ bool ResurrectLocationManager::getBasicPosition(PlayerCreature* pPC, ZONE_COORD&
 {
     __BEGIN_TRY
 
-    // 일단 PlayerCreature에 지정되어 있는 부활 위치를 가져온다.
+    
     if (pPC->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
         Assert(pSlayer != NULL);
 
-        // 초보자 이면 초보자존에 부활하도록 한다.
+        
         if (pSlayer->isNovice()) {
             pPC->setResurrectZoneID(SLAYER_NOVICE_ZONE_ID);
         }
 
         if (!getSlayerPosition(pPC->getResurrectZoneID(), zoneCoord)) {
-            // 만약 지정된 부활 존이 없다면 현재 있는 존의 부활 위치를 가져온다.
+            
             if (!getSlayerPosition(pPC->getZone()->getZoneID(), zoneCoord)) {
-                // 현재 존도 없다면 Default 다.
+                
                 if (!getSlayerPosition(SLAYER_DEFAULT_ZONE_ID, zoneCoord))
                     throw Error("Critical Error : ResurrectInfo is not established!2");
             }
         }
     } else if (pPC->isVampire()) {
         if (!getVampirePosition(pPC->getResurrectZoneID(), zoneCoord)) {
-            // 만약 지정된 부활 존이 없다면 현재 있는 존의 부활 위치를 가져온다.
+            
             if (!getVampirePosition(pPC->getZone()->getZoneID(), zoneCoord)) {
-                // 현재 존도 없다면 Default 다.
+                
                 if (!getVampirePosition(VAMPIRE_DEFAULT_ZONE_ID, zoneCoord))
                     throw Error("Critical Error : ResurrectInfo is not established!2");
             }
         }
     } else if (pPC->isOusters()) {
         if (!getOustersPosition(pPC->getResurrectZoneID(), zoneCoord)) {
-            // 만약 지정된 부활 존이 없다면 현재 있는 존의 부활 위치를 가져온다.
+            
             if (!getOustersPosition(pPC->getZone()->getZoneID(), zoneCoord)) {
-                // 현재 존도 없다면 Default 다.
+                
                 if (!getOustersPosition(OUSTERS_DEFAULT_ZONE_ID, zoneCoord))
                     throw Error("Critical Error : ResurrectInfo is not established!2");
             }

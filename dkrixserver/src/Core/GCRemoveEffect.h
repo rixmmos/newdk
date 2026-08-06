@@ -2,7 +2,7 @@
 //
 // Filename    : GCRemoveEffect.h
 // Written By  : crazydog
-// Description : Effect 제거.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -19,8 +19,8 @@
 //
 // class GCRemoveEffect;
 //
-// 게임서버에서 클라이언트로 자신의 변형된 데이터를 알려주기 위한 객채
-// RemoveEffectrmation, SkillToObjectOK 등에 실려서 날아간다.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -41,16 +41,16 @@ public:
     }
 
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
     // execute packet's handler
     void execute(Player* pPlayer);
 
     // get packet's body size
-    // 최적화시, 미리 계산된 정수를 사용한다.
+    
     PacketSize_t getPacketSize() const {
         return szObjectID + szBYTE + szEffectID * m_ListNum;
     }

@@ -184,7 +184,7 @@ MasterLairInfoManager::~MasterLairInfoManager()
         SAFE_DELETE(pInfo);
     }
 
-    // 해쉬맵안에 있는 모든 pair 들을 삭제한다.
+    
     m_MasterLairInfos.clear();
 
     __END_CATCH_NO_RETHROW
@@ -279,27 +279,27 @@ void MasterLairInfoManager::load()
 
                 // cout << pMasterLairInfo->toString().c_str() << endl;
 
-                // 체크 코드
-                // 마스터의 몬스터 정보가 있는지 체크한다.
+                
+                
                 try {
                     const MonsterInfo* pMonsterInfo =
                         g_pMonsterInfoManager->getMonsterInfo(pMasterLairInfo->getMasterMonsterType());
 
-                    if (pMonsterInfo == NULL) // 나중을 위해서. -_-;
+                    if (pMonsterInfo == NULL) 
                     {
-                        throw Error("마스터의 몬스터 정보가 없당.");
+                        throw Error("   .");
                     }
 
                     if (!pMonsterInfo->isMaster()) {
                         StringStream msg;
-                        msg << "몬스터 타잎[" << (int)pMasterLairInfo->getMasterMonsterType() << "]은 마스터가 아니다.";
+                        msg << " [" << (int)pMasterLairInfo->getMasterMonsterType() << "]  .";
 
                         throw Error(msg.toString());
                     }
 
                 } catch (Throwable& t) {
                     cout << t.toString().c_str() << endl;
-                    throw Error("마스터의 몬스터 정보가 없당.");
+                    throw Error("   .");
                 }
 
 #if defined(__THAILAND_SERVER__) || defined(__CHINA_SERVER__)
@@ -376,27 +376,27 @@ void MasterLairInfoManager::reload()
                 pMasterLairInfo->setMasterDeadVampireSay(pResult->getString(++i));
                 pMasterLairInfo->setMasterNotDeadSay(pResult->getString(++i));
 
-                // 체크 코드
-                // 마스터의 몬스터 정보가 있는지 체크한다.
+                
+                
                 try {
                     const MonsterInfo* pMonsterInfo =
                         g_pMonsterInfoManager->getMonsterInfo(pMasterLairInfo->getMasterMonsterType());
 
-                    if (pMonsterInfo == NULL) // 나중을 위해서. -_-;
+                    if (pMonsterInfo == NULL) 
                     {
-                        throw Error("마스터의 몬스터 정보가 없당.");
+                        throw Error("   .");
                     }
 
                     if (!pMonsterInfo->isMaster()) {
                         StringStream msg;
-                        msg << "몬스터 타잎[" << (int)pMasterLairInfo->getMasterMonsterType() << "]은 마스터가 아니다.";
+                        msg << " [" << (int)pMasterLairInfo->getMasterMonsterType() << "]  .";
 
                         throw Error(msg.toString());
                     }
 
                 } catch (Throwable& t) {
                     cout << t.toString().c_str() << endl;
-                    throw Error("마스터의 몬스터 정보가 없당.");
+                    throw Error("   .");
                 }
             }
         }
@@ -417,11 +417,11 @@ void MasterLairInfoManager::addMasterLairInfo(MasterLairInfo* pMasterLairInfo)
 {
     __BEGIN_TRY
 
-    // 일단 같은 아이디의 존이 있는지 체크해본다.
+    
     unordered_map<ZoneID_t, MasterLairInfo*>::iterator itr = m_MasterLairInfos.find(pMasterLairInfo->getZoneID());
 
     if (itr != m_MasterLairInfos.end())
-        // 똑같은 아이디가 이미 존재한다는 소리다. - -;
+        
         throw Error("duplicated zone id");
 
     m_MasterLairInfos[pMasterLairInfo->getZoneID()] = pMasterLairInfo;
@@ -439,13 +439,13 @@ void MasterLairInfoManager::deleteMasterLairInfo(ZoneID_t zoneID) {
     unordered_map<ZoneID_t, MasterLairInfo*>::iterator itr = m_MasterLairInfos.find(zoneID);
 
     if (itr != m_MasterLairInfos.end()) {
-        // 존을 삭제한다.
+        
         SAFE_DELETE(itr->second);
 
-        // pair를 삭제한다.
+        
         m_MasterLairInfos.erase(itr);
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         StringStream msg;
         msg << "ZoneID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -469,7 +469,7 @@ MasterLairInfo* MasterLairInfoManager::getMasterLairInfo(ZoneID_t zoneID) {
         pMasterLairInfo = itr->second;
 
     } else {
-        // 그런 존 아이디를 찾을 수 없었을 때
+        
         /*
         StringStream msg;
         msg << "ZoneID : " << zoneID;

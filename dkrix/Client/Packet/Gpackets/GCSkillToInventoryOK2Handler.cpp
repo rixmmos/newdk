@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,19 +32,19 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 			
-		// Creature가 casting동작 취함..
+		
 		if (pCreature != NULL)
 		{
 			int delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 
 			//------------------------------------------------------------
-			// Delay Frame 설정
+			
 			//------------------------------------------------------------
 			pCreature->SetEffectDelayFrame( pPacket->getSkillType(), delayFrame );
 

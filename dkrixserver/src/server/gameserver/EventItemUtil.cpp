@@ -79,7 +79,7 @@ Item* getCardItem(MoonCard card) {
     }
 
     if (putInDB) {
-        filelog("MoonCard.log", "아이템이 나왔습니다. : %d", (int)card);
+        filelog("MoonCard.log", " . : %d", (int)card);
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -163,7 +163,7 @@ Item* getLuckyBagItem(LuckyBag luckybag) {
     }
 
     if (putInDB) {
-        filelog("LuckyBag.log", "아이템이 나왔습니다. : %d", (int)luckybag);
+        filelog("LuckyBag.log", " . : %d", (int)luckybag);
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -249,7 +249,7 @@ Item* getGiftBoxItem(GiftBox giftbox) {
     }
 
     if (putInDB) {
-        filelog("GiftBox.log", "아이템이 나왔습니다. : %d", (int)giftbox + 1);
+        filelog("GiftBox.log", " . : %d", (int)giftbox + 1);
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -266,7 +266,7 @@ Item* getGiftBoxItem(GiftBox giftbox) {
 }
 
 int getBlackGiftBoxType(int t1, int t2) {
-    // 필살 하드코딩이다 -ㅠ-
+    
     int min = 0;
     int max = 0;
 

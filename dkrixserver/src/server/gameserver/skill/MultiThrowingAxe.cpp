@@ -17,7 +17,7 @@
 #include "RankBonus.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void MultiThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -56,23 +56,23 @@ void MultiThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
         ZoneCoord_t tX[3], tY[3];
 
-        // 원래 목표(3개중 가운데)
+        
         X = tX[0] = pMonster->getX() + dirMoveMask[dir].x * 7;
         Y = tY[0] = pMonster->getY() + dirMoveMask[dir].y * 7;
 
-        // 원래 목표의 왼쪽
+        
         tX[1] = pMonster->getX() + dirMoveMask[dir2].x * 7;
         tY[1] = pMonster->getY() + dirMoveMask[dir2].y * 7;
 
-        // 원래 목표의 오른쪽
+        
         tX[2] = pMonster->getX() + dirMoveMask[dir3].x * 7;
         tY[2] = pMonster->getY() + dirMoveMask[dir3].y * 7;
 
 
         if (bRangeCheck && bHitRoll && bTileCheck) {
-            Range_t Range = 1; // 항상 1이다.
+            Range_t Range = 1; 
 
-            // 데미지와 지속 시간을 계산한다.
+            
             SkillInput input(pMonster);
             input.SkillLevel = pMonster->getLevel();
             SkillOutput output;
@@ -83,7 +83,7 @@ void MultiThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                     continue;
                 Tile& tile = pZone->getTile(tX[i], tY[i]);
 
-                // 이펙트 오브젝트를 생성한다.
+                
                 EffectMeteorStrike* pEffect = new EffectMeteorStrike(pZone, tX[i], tY[i]);
                 pEffect->setNextTime(output.Duration);
                 pEffect->setUserObjectID(pMonster->getObjectID());
@@ -95,11 +95,11 @@ void MultiThrowingAxe::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                 pEffect->setSplashRatio(2, 50);
                 // pEffect->setLevel(pSkillInfo->getLevel()/2);
 
-                // 타일에 붙은 이펙트는 OID를 받아야 한다.
+                
                 ObjectRegistry& objectregister = pZone->getObjectRegistry();
                 objectregister.registerObject(pEffect);
 
-                // 존 및 타일에다가 이펙트를 추가한다.
+                
                 pZone->addEffect(pEffect);
                 tile.addEffect(pEffect);
             }

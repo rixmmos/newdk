@@ -24,7 +24,7 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,7 +33,7 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -41,7 +41,7 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 		
 		MCreature* pCreature = g_pZone->GetCreature(CreatureID);
 
-		// 성물보관대 얻어오기 위해서
+		
 		if (pCreature == NULL)
 		{
 			MItem *selectedItem = g_pZone->GetItem(CreatureID);
@@ -76,14 +76,14 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 				PlaySound( (*g_pEffectStatusTable)[ status ].SoundID );
 			}
 			
-			// 임시로...
-			// 둠이면 무시..
-			// extreme이면 무시...
+			
+			
+			
 			if (status == EFFECTSTATUS_BACK_STAB_3 || status == EFFECTSTATUS_ICE_OF_SOUL_STONE ||
 				status == EFFECTSTATUS_TRAP_TRIGGERED || status == EFFECTSTATUS_TRAPPED ||
 				status == EFFECTSTATUS_TRYING || status == EFFECTSTATUS_GROUND_ELEMENTAL_CENTER)
 			{
-				// 3단계는 관련 actioninfo 가 있다.
+				
 				TYPE_ACTIONINFO		ActionInfo = (*g_pEffectStatusTable)[ status ].ActionInfo;
 				if( ActionInfo != ACTIONINFO_NULL )
 				{
@@ -111,7 +111,7 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 			}
 			// 2004, 9, 3, sobeit add start
 			else
-			if(status == EFFECTSTATUS_TURRET_LASER && g_pPlayer) // 공성전 트랩중..공격측에 안보이는 광선
+			if(status == EFFECTSTATUS_TURRET_LASER && g_pPlayer) 
 			{
 				if(g_pPlayer->HasEffectStatus(EFFECTSTATUS_SIEGE_ATTACKER_1) || 
 					g_pPlayer->HasEffectStatus(EFFECTSTATUS_SIEGE_ATTACKER_2) || 
@@ -127,10 +127,10 @@ void GCAddEffectHandler::execute ( GCAddEffect * pPacket , Player * pPlayer )
 				//&& status!=EFFECTSTATUS_EXTREME
 				)
 			{
-				// delay계산
+				
 				DWORD delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 
-				// EffectStatus를 추가한다.
+				
 				pCreature->AddEffectStatus(status, delayFrame);
 			}
 			

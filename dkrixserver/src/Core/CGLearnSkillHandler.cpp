@@ -58,10 +58,10 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
     GCLearnSkillFailed failpkt;
 
-    // ÇöÀç ±¸ÇöµÇÁö ¾ÊÀº ±â¼úÀ» ¹è¿ì·Á´ÂÁö Ã¼Å©ÇÑ´Ù.
+    
     switch (targetSkillType) {
     ////////////////////////////////////////////////////////////
-    // Áö¿øµÇ´Â ±â¼ú
+    
     ////////////////////////////////////////////////////////////
     case SKILL_DOUBLE_IMPACT:
     case SKILL_TRIPLE_SLASHER:
@@ -165,7 +165,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
     case SKILL_TRIPLE_SHOT:
     case SKILL_THROW_BOMB:
     case SKILL_DEATH:
-    // 2002.6.18Ãß°¡
+    
     case SKILL_SHADOW_DANCING:
     case SKILL_SWORD_MASTERY:
     case SKILL_SHIELD_MASTERY:
@@ -182,7 +182,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
     case SKILL_TRANSFUSION:
     case SKILL_BLOODY_SPEAR:
     case SKILL_MEPHISTO:
-    // 2002.6.19 Ãß°¡
+    
     case SKILL_SUMMON_CASKET:
     case SKILL_MENTAL_SWORD:
     case SKILL_OBSERVING_EYE:
@@ -348,21 +348,21 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
     case SKILL_HARPOON_BOMB:
     case SKILL_PASSING_HEAL:
     case SKILL_ROTTEN_APPLE:
-    // add by coffee 2007-2-18  ÐÂ¼¼ÄÜ
-    case SKILL_BLLODY_SCARIFY:     // 374  ÑªÖ®ÀÓÓ¡  (ÎüÑª¹íÐÂ¼¼ÄÜ )
-    case SKILL_BLOOD_CURSE:        // 375  ÑªÖ®Ô{Öä
+    
+    case SKILL_BLLODY_SCARIFY:     
+    case SKILL_BLOOD_CURSE:        
                                    //////////////////////////////////////////////////////////////////////////
-                                   // ÈËÀà¼¼ÄÜ
-    case SKILL_SHINE_SWORD:        // 376  ÉÁÒ«Ö®½£
-    case SKILL_BOMB_CRASH_WALK:    // 377  ¾ÞÅÚºäÕ¨
-    case SKILL_SATELLITE_BOMB:     // 378  ÎÀÐÇºä»÷
-    case SKILL_ILLUSION_INVERSION: // 379  ¿Ö²À»Ã¾õ
-    case SKILL_HEAVEN_GROUND:      // 380  ÌìÉñ½µÁÙ
+                                   
+    case SKILL_SHINE_SWORD:        
+    case SKILL_BOMB_CRASH_WALK:    
+    case SKILL_SATELLITE_BOMB:     
+    case SKILL_ILLUSION_INVERSION: 
+    case SKILL_HEAVEN_GROUND:      
     // add by coffee 2007-3-3
-    case SKILL_DUMMY_DRAKE:       // 382 µÂÀ×¿Ë¿þÀÜ(»ð)
-    case SKILL_HYDRO_CONVERGENCE: // 383 ¸´ºÏË®ÁÆ(Ë®)
-    case SKILL_SUMMON_CLAY:       // 384 Õ³ÍÁÕÙ»½(ÍÁ)
-    case SKILL_HETER_CHAKRAM:     // 385 ÏÄ²¼Àû»ùÒò(Õ½Ê¿)
+    case SKILL_DUMMY_DRAKE:       
+    case SKILL_HYDRO_CONVERGENCE: 
+    case SKILL_SUMMON_CLAY:       
+    case SKILL_HETER_CHAKRAM:     
     case SKILL_Sky_Fire:
     case SKILL_Cut_Storm:
     case SKILL_XRL_Missile:
@@ -378,7 +378,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
 #endif
         break;
     ////////////////////////////////////////////////////////////
-    // Áö¿øµÇÁö ¾Ê´Â ±â¼ú
+    
     ////////////////////////////////////////////////////////////
     case SKILL_ARMAGEDDON:
     case SKILL_HOLY_BLAST:
@@ -415,9 +415,9 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
         return;
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ Á¤»óÀûÀÎ »óÅÂÀÎÁö¸¦ °Ë»çÇÑ´Ù.
+    
     if (pGamePlayer->getPlayerStatus() == GPS_NORMAL) {
-        // NPC°¡ °¡¸£ÃÄ ÁÙ ¼ö ÀÖ´ÂÁö °Ë»çÇÑ´Ù.
+        
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(targetSkillType);
         Assert(pSkillInfo != NULL);
 
@@ -428,24 +428,24 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
                 pPlayer->sendPacket(&failpkt);
                 return;
             }
-            // add by Coffee Ôö¼Ó¶Ô¶þ×ª¼¼ÄÜµÄÏÞÖÆ
+            
             switch (targetSkillType) {
             //////////////////////////////////////////////////////////////////////////
-            // 170 ¼¶¼¼ÄÜ
-            case SKILL_BLLODY_SCARIFY:     // 374  ÑªÖ®ÀÓÓ¡  (ÎüÑª¹íÐÂ¼¼ÄÜ )
-            case SKILL_BLOOD_CURSE:        // 375  ÑªÖ®Ô{Öä
+            
+            case SKILL_BLLODY_SCARIFY:     
+            case SKILL_BLOOD_CURSE:        
                                            //////////////////////////////////////////////////////////////////////////
-                                           // ÈËÀà¼¼ÄÜ
-            case SKILL_SHINE_SWORD:        // 376  ÉÁÒ«Ö®½£
-            case SKILL_BOMB_CRASH_WALK:    // 377  ¾ÞÅÚºäÕ¨
-            case SKILL_SATELLITE_BOMB:     // 378  ÎÀÐÇºä»÷
-            case SKILL_ILLUSION_INVERSION: // 379  ¿Ö²À»Ã¾õ
-            case SKILL_HEAVEN_GROUND:      // 380  ÌìÉñ½µÁÙ
+                                           
+            case SKILL_SHINE_SWORD:        
+            case SKILL_BOMB_CRASH_WALK:    
+            case SKILL_SATELLITE_BOMB:     
+            case SKILL_ILLUSION_INVERSION: 
+            case SKILL_HEAVEN_GROUND:      
                                            //  add by coffee 2007-3-3
-            case SKILL_DUMMY_DRAKE:        // 382 µÂÀ×¿Ë¿þÀÜ(»ð)
-            case SKILL_HYDRO_CONVERGENCE:  // 383 ¸´ºÏË®ÁÆ(Ë®)
-            case SKILL_SUMMON_CLAY:        // 384 Õ³ÍÁÕÙ»½(ÍÁ)
-            case SKILL_HETER_CHAKRAM:      // 385 ÏÄ²¼Àû»ùÒò(Õ½Ê¿)
+            case SKILL_DUMMY_DRAKE:        
+            case SKILL_HYDRO_CONVERGENCE:  
+            case SKILL_SUMMON_CLAY:        
+            case SKILL_HETER_CHAKRAM:      
             case SKILL_Sky_Fire:
             case SKILL_Cut_Storm:
             case SKILL_XRL_Missile:
@@ -486,7 +486,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
             }
         }
 
-        // ÇÃ·¹ÀÌ¾î°¡ ½½·¹ÀÌ¾îÀÎÁö ¹ìÆÄÀÌ¾îÀÎÁö ±¸ºÐ
+        
         if (pPC->isSlayer())
             executeSlayerSkill(pPacket, pPlayer);
         else if (pPC->isVampire())
@@ -504,7 +504,7 @@ void CGLearnSkillHandler::execute(CGLearnSkill* pPacket, Player* pPlayer)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ½½·¹ÀÌ¾î ±â¼ú ½ÀµæÀ» Ã³¸®
+
 //////////////////////////////////////////////////////////////////////////////
 void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPlayer)
 
@@ -513,7 +513,7 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
 
 #ifdef __GAME_SERVER__
 
-        // ÆÐÅ¶ Á¤º¸¸¦ »Ì¾Æ³½´Ù.
+        
         SkillType_t targetSkillType = pPacket->getSkillType();
     SkillDomainType_t targetDomainType = pPacket->getSkillDomainType();
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
@@ -521,8 +521,8 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
     Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
     bool bSuccess = false;
 
-    // ETC µµ¸ÞÀÎÀÇ °æ¿ì ¸ðµç µµ¸ÞÀÎ¿¡¼­ °ø¿ëÀ¸·Î ¾²ÀÌ´Â ±â¼úÀÌ´Ù.
-    // ETC µµ¸ÞÀÎ ±â¼ú¿¡ ´ëÇØ¼­´Â ½½·¹ÀÌ¾îÀÇ °¡Àå ³ôÀº µµ¸ÞÀÎ ·¹º§°ú ºñ±³ÇÑ´Ù.
+    
+    
     SkillDomainType_t actualDomainType = targetDomainType;
     if (actualDomainType == SKILL_DOMAIN_ETC)
         actualDomainType = pSlayer->getHighestSkillDomain();
@@ -536,7 +536,7 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
         return;
     }
 
-    // ±× ±â¼úÀ» ¹è¿ï ¼ö ÀÖ´Â ·¹º§ÀÌ ÇöÀç µµ¸ÞÀÎÀÇ ·¹º§ º¸´Ù ³·´Ù¸é ±â¼úÀ» ¹è¿ï ¼ö ÀÖ´Ù.
+    
     SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(targetSkillType);
 
     // check skill type ,modified by chengh 2006 06 14
@@ -557,8 +557,8 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
     if (pSkillInfo->getLevel() <= pSlayer->getSkillDomainLevel(actualDomainType))
         bSuccess = true;
 
-    // ±â¼úÀ» ¹è¿ï¼ö ÀÖ´Â °æÇèÄ¡°¡ ¾Æ´Ï¸é ¹è¿ï ¼ö ¾ø´Ù. ·¹º§ÀÌ ÀÌ»óÀÌ ÀÖÀ» °æ¿ì¸¦ ´ëºñÇØ °æÇèÄ¡µµ Ã¼Å©ÇÑ´Ù.
-    // ETC µµ¸ÞÀÎÀÏ °æ¿ì ¿¹¿Ü·Î Ã³¸®ÇÑ´Ù.
+    
+    
     if (targetDomainType != SKILL_DOMAIN_ETC)
         //		if (pSlayer->getSkillDomainExp(pSkillInfo->getDomainType())
         //				>= g_pSkillDomainInfoManager->getDomainInfo((SkillDomain)pSkillInfo->getDomainType(),
@@ -573,18 +573,18 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
     }
 
     else
-        // ¼º°ø ¿©ºÎ¸¦ Ã¼Å©ÇØ¼­ ¾Ë¸ÂÀº ÆÐÅ¶À» ³¯¸°´Ù.
+        
         if (bSuccess) {
-            // ±â¼úÀ» ´õÇÏ°í...
+            
             pSlayer->addSkill(targetSkillType);
 
-            // ±â¼ú ¹è¿ü´Ù°í ÆÐÅ¶ ³¯·ÁÁØ´Ù.
+            
             GCLearnSkillOK okpkt;
             okpkt.setSkillType(targetSkillType);
             okpkt.setSkillDomainType(targetDomainType);
             pPlayer->sendPacket(&okpkt);
 
-            // ÀÏºÎ ½ºÅ³µéÀº ´É·ÂÄ¡ °ü·Ã °ªµéÀÌ ¹Ù·Î º¯ÇÑ´Ù.
+            
             switch (targetSkillType) {
             case SKILL_SWORD_MASTERY:
             case SKILL_SHIELD_MASTERY:
@@ -621,7 +621,7 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ¹ìÆÄÀÌ¾î ±â¼ú ½ÀµæÀ» Ã³¸®
+
 //////////////////////////////////////////////////////////////////////////////
 void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPlayer)
 
@@ -630,17 +630,17 @@ void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPl
 
 #ifdef __GAME_SERVER__
 
-        // ÆÐÅ¶ Á¤º¸¸¦ »Ì¾Æ³½´Ù.
+        
         SkillType_t targetSkillType = pPacket->getSkillType();
     SkillDomainType_t targetDomainType = pPacket->getSkillDomainType();
 
-    // ÆÐÅ¶¿¡¼­ »Ì¾Æ³½ Á¤º¸¸¦ °¡°ø
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
     bool bSuccess = false;
 
-    // ±× ±â¼úÀ» ¹è¿ï ¼ö ÀÖ´Â ·¹º§ÀÌ ÇöÀç ·¹º§ º¸´Ù ³·´Ù¸é ±â¼úÀ» ¹è¿ï ¼ö ÀÖ´Ù.
+    
     SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(targetSkillType);
 
     // check skill type ,modified by chengh 2006 06 14
@@ -660,7 +660,7 @@ void CGLearnSkillHandler::executeVampireSkill(CGLearnSkill* pPacket, Player* pPl
     if (pSkillInfo->getLevel() <= pVampire->getLevel())
         bSuccess = true;
 
-    // ¼º°ø ¿©ºÎ¸¦ Ã¼Å©ÇØ¼­ ¾Ë¸ÂÀº ÆÐÅ¶À» ³¯¸°´Ù.
+    
     if (bSuccess) {
         pVampire->addSkill(targetSkillType);
 
@@ -701,11 +701,11 @@ void CGLearnSkillHandler::executeOustersSkill(CGLearnSkill* pPacket, Player* pPl
     __BEGIN_DEBUG_EX __BEGIN_TRY
 #ifdef __GAME_SERVER__
 
-        // ÆÐÅ¶ Á¤º¸¸¦ »Ì¾Æ³½´Ù.
+        
         SkillType_t targetSkillType = pPacket->getSkillType();
     SkillDomainType_t targetDomainType = pPacket->getSkillDomainType();
 
-    // ÆÐÅ¶¿¡¼­ »Ì¾Æ³½ Á¤º¸¸¦ °¡°ø
+    
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
@@ -740,7 +740,7 @@ void CGLearnSkillHandler::executeOustersSkill(CGLearnSkill* pPacket, Player* pPl
 
     if (pOustersSkillSlot != NULL) {
         ////////////////////////////////////////
-        // ½ºÅ³ÀÇ ·¹º§ ¾÷ÀÌ´Ù.
+        
         ////////////////////////////////////////
         int LevelUpPoint = pSkillInfo->getLevelUpPoint();
 
@@ -847,7 +847,7 @@ void CGLearnSkillHandler::executeOustersSkill(CGLearnSkill* pPacket, Player* pPl
 
 #ifdef __GAME_SERVER__
 
-// ¾Æ¿ì½ºÅÍÁîÀÇ ½ºÅ³¸Ê¿¡¼­ ÀÌ ½ºÅ³À» ¹è¿ì±â À§ÇØ ÇÊ¿äÇÑ ½ºÅ³À» Ã¼Å©ÇÑ´Ù.
+
 bool CheckRequiredSkill(SkillInfo* pSkillInfo, Ousters* pOusters, int domain) {
     if (pSkillInfo->getType() == SKILL_SOUL_CHAIN) {
         if (pOusters->getLevel() >= 100)
@@ -858,22 +858,22 @@ bool CheckRequiredSkill(SkillInfo* pSkillInfo, Ousters* pOusters, int domain) {
 
     const list<SkillType_t>& RequiredSkills = pSkillInfo->getRequireSkills();
 
-    // ÇÊ¿äÇÑ ½ºÅ³ÀÌ ¾øÀ¸¸é ¹«Á¶°Ç..
+    
     if (RequiredSkills.empty())
         return true;
 
     list<SkillType_t>::const_iterator itr = RequiredSkills.begin();
     list<SkillType_t>::const_iterator endItr = RequiredSkills.end();
 
-    // ÇÊ¿äÇÑ ½ºÅ³Áß¿¡ ÇÏ³ª¶óµµ ÀÖÀ¸¸é µÈ´Ù.
+    
     for (; itr != endItr; ++itr) {
-        // ÇÊ¿äÇÑ ½ºÅ³ÀÌ ETC µµ¸ÞÀÎÀÏ °æ¿ì, ¾î´ÀÂÊ ½ºÅ³¸Ê¿¡¼­ ¹è¿î°ÇÁö Ã¼Å©ÇØ¾ß ÇÑ´Ù.
+        
         SkillInfo* pParentSkillInfo = g_pSkillInfoManager->getSkillInfo(*itr);
         if (pParentSkillInfo->getElementalDomain() == ELEMENTAL_DOMAIN_ETC) {
             if (!CheckRequiredSkill(pParentSkillInfo, pOusters, domain))
                 continue;
         }
-        // ÇÊ¿äÇÑ ½ºÅ³ÀÌ ¹è¿ï ½ºÅ³°ú °°Àº ½ºÅ³ ¸Ê¿¡ ÀÖÁö ¾ÊÀ» °æ¿ì¿£ Ã¼Å©ÇØÁÖ¸é ¾ÈµÈ´Ù.
+        
         else if (domain != ELEMENTAL_DOMAIN_ETC &&
                  getSkillMapID((ElementalDomain)pParentSkillInfo->getElementalDomain()) !=
                      getSkillMapID((ElementalDomain)domain))

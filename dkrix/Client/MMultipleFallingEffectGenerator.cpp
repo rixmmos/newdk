@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MMultipleFallingEffectGenerator.cpp
 //----------------------------------------------------------------------
-// 4개의 Effect가 공중에서 떨어진다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MMultipleFallingEffectGenerator.h"
@@ -35,13 +35,13 @@ MMultipleFallingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	MLinearEffect*	pEffect;
 	int x, y, z;
 	int ez1 = egInfo.z1 - TILE_Y;
-	int zt = ez1;// + (TILE_Y<<1);	// 아래쪽에 떨어질 것들의 좌표
+	int zt = ez1;
 
 
 	MEffectTarget*	pEffectTarget2;
 	
 	//---------------------------------------------
-	// Effect 생성
+	
 	//---------------------------------------------
 	int numEffectPhase = 4;
 
@@ -76,10 +76,10 @@ MMultipleFallingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	int ez[numEffect];
 
 	int dropCount = egInfo.count;
-	const int phaseUpper = 150;	// 한 단계에서 위로 더 올라가는 좌표 보정
+	const int phaseUpper = 150;	
 	const int dropCountInc = phaseUpper / egInfo.step;
 
-	// numEffectPhase * numEffect 개의 effect를 생성한다.
+	
 	for (int i=0; i<numEffectPhase; i++)
 	{
 		int n = 0;
@@ -116,22 +116,22 @@ MMultipleFallingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 			
 			pEffect->SetFrameID( frameID, maxFrame );	
 
-			// 발사 위치 Pixel좌표	
+			
 			pEffect->SetPixelPosition( x, y, egInfo.z0+z );	
 
-			// 방향 설정
+			
 			pEffect->SetDirection( egInfo.direction );
 							
-			// 목표 위치 Pixel좌표
+			
 			pEffect->SetTarget( x, y, zt, egInfo.step );
 
-			// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+			
 			pEffect->SetCount( dropCount, egInfo.linkCount );
 
-			// 위력
+			
 			pEffect->SetPower(egInfo.power);
 
-			// Zone에 추가한다.
+			
 			if (g_pZone->AddEffect( pEffect ))
 			{
 				if (!bOK)
@@ -141,7 +141,7 @@ MMultipleFallingEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 				}
 				else
 				{
-					// 다음 Effect 생성 정보
+					
 					if (egInfo.pEffectTarget == NULL)
 					{
 						pEffect->SetLink( egInfo.nActionInfo, NULL );

@@ -14,9 +14,9 @@
 #include "UserInformation.h"
 
 //----------------------------------------------------------------------
-// 클라이언트가 게임 서버로부터 GCSkillInfo 패킷을 받게 되면,
-// 패킷 안의 데이터들을 클라이언트에 저장한 후, 데이터 로딩이
-// 끝이 나면 게임 서버로 CGReady 패킷을 보내면 된다.
+
+
+
 //----------------------------------------------------------------------
 void GCSkillInfoHandler::execute ( GCSkillInfo * pPacket , Player * pPlayer )
 	 
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 				
 	
 	//--------------------------------------------------
-	// 각각에 domain에 대한 정보를 설정한다.
+	
 	//--------------------------------------------------
 	int domainNum = pPacket->getListNum();
 
@@ -46,7 +46,7 @@ throw ( ProtocolException , Error )
 		PCSkillInfo* pSkillInfo = pPacket->popFrontListElement();
 
 		//--------------------------------------------------
-		// 종족에 따라서...
+		
 		//--------------------------------------------------
 		int i;
 
@@ -66,7 +66,7 @@ throw ( ProtocolException , Error )
 					int domainType = pSlayerSkillInfo->getDomainiType();
 
 					//--------------------------------------------------
-					// 배운 skill들 체크..
+					
 					//--------------------------------------------------
 					int num = pSlayerSkillInfo->getListNum();
 
@@ -89,7 +89,7 @@ throw ( ProtocolException , Error )
 //								bEnable = true;
 //							}
 
-							// Skill 배웠다는걸 체크한다.
+							
 
 							if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 							{
@@ -159,7 +159,7 @@ throw ( ProtocolException , Error )
 					}
 
 					//--------------------------------------------------
-					// 새로 배울 수 있는 skill이 있나?
+					
 					//--------------------------------------------------
 					if (pSlayerSkillInfo->isLearnNewSkill())
 					{
@@ -181,7 +181,7 @@ throw ( ProtocolException , Error )
 					int domainType = SKILLDOMAIN_VAMPIRE;
 
 					//--------------------------------------------------
-					// 배운 skill들 체크..
+					
 					//--------------------------------------------------
 					int num = pVampireSkillInfo->getListNum();
 
@@ -196,7 +196,7 @@ throw ( ProtocolException , Error )
 							DWORD delayTime = ConvertDurationToMillisecond( pInfo->getSkillTurn() );
 							int currentDelay = ConvertDurationToMillisecond( pInfo->getCastingTime() );							
 							
-							// Skill 배웠다는걸 체크한다.
+							
 							if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 							{
 								(*g_pSkillManager)[SKILL_DOMAIN_BLADE].SetNewSkill();
@@ -254,7 +254,7 @@ throw ( ProtocolException , Error )
 					}
 
 					//--------------------------------------------------
-					// 새로 배울 수 있는 skill이 있나?
+					
 					//--------------------------------------------------
 					if (pVampireSkillInfo->isLearnNewSkill())
 					{
@@ -275,7 +275,7 @@ throw ( ProtocolException , Error )
 						int domainType = SKILLDOMAIN_OUSTERS;
 						
 						//--------------------------------------------------
-						// 배운 skill들 체크..
+						
 						//--------------------------------------------------
 						int num = pOustersSkillInfo->getListNum();
 						
@@ -291,7 +291,7 @@ throw ( ProtocolException , Error )
 								int currentDelay = ConvertDurationToMillisecond( pInfo->getCastingTime() );							
 								int	expLevel	= pInfo->getExpLevel();
 
-								// Skill 배웠다는걸 체크한다.
+								
 								if((*g_pSkillInfoTable)[skillType].GetSkillStep() == SKILL_STEP_ETC)
 								{
 									(*g_pSkillManager)[SKILL_DOMAIN_BLADE].SetNewSkill();
@@ -336,7 +336,7 @@ throw ( ProtocolException , Error )
 						}
 						
 						//--------------------------------------------------
-						// 새로 배울 수 있는 skill이 있나?
+						
 						//--------------------------------------------------
 						if (pOustersSkillInfo->isLearnNewSkill())
 						{
@@ -351,7 +351,7 @@ throw ( ProtocolException , Error )
 	}
 
 	//--------------------------------------------------
-	// 홀리랜드 보너스 존이동 할때 reset
+	
 	//--------------------------------------------------
 //	for(int i = 0; i < HOLYLAND_BONUS_MAX; i++)
 //	{
@@ -362,7 +362,7 @@ throw ( ProtocolException , Error )
 		g_abSweeperBonusSkills[i] = false;
 
 	//--------------------------------------------------
-	// 현재 사용 가능한 skill들을 다시 체크한다.
+	
 	//--------------------------------------------------
 
 	g_pSkillAvailable->SetAvailableSkills();

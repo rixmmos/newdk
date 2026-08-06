@@ -21,7 +21,7 @@ public:
     virtual ~ItemInfo();
 
 
-    // 공통 정보
+    
 public:
     virtual Item::ItemClass getItemClass() const = 0;
     string getItemClassName() const {
@@ -134,7 +134,7 @@ public:
     virtual string toString() const = 0;
 
 
-    // 개별 정보. 편의상 베이스 클래스에 정의해준다.
+    
 public:
     virtual Durability_t getDurability() const {
         return 1;
@@ -203,7 +203,7 @@ public:
         return 0;
     }
 
-    // ItemType에 따른 기본 옵션
+    
     virtual void setDefaultOptions(const string& options);
     void addDefaultOptions(OptionType_t optionType);
     void clearDefaultOptions();
@@ -260,31 +260,31 @@ public:
 
     // member data
 protected:
-    ItemType_t m_ItemType;     // 아이템 타입
-    string m_Name;             // 이름
-    string m_EName;            // 영문 이름
-    Price_t m_Price;           // 가격
-    VolumeType_t m_VolumeType; // 부피
-    Weight_t m_Weight;         // 무게
-    Ratio_t m_Ratio;           // 아이템 등장 확률(갬블 확률)
-    string m_Description;      // 아이템 설명
-    Attr_t m_ReqSTR;           // 필요한 STR
-    Attr_t m_ReqDEX;           // 필요한 DEX
-    Attr_t m_ReqINT;           // 필요한 INT
-    Attr_t m_ReqSum;           // 필요한 능력치의 합
-    Level_t m_ReqLevel;        // 필요한 레벨
-    Level_t m_ReqAdvanceLevel; // 필요한 전직 레벨
-    Attr_t m_ReqGender;        // 필요한 성
+    ItemType_t m_ItemType;     
+    string m_Name;             
+    string m_EName;            
+    Price_t m_Price;           
+    VolumeType_t m_VolumeType; 
+    Weight_t m_Weight;         
+    Ratio_t m_Ratio;           
+    string m_Description;      
+    Attr_t m_ReqSTR;           
+    Attr_t m_ReqDEX;           
+    Attr_t m_ReqINT;           
+    Attr_t m_ReqSum;           
+    Level_t m_ReqLevel;        
+    Level_t m_ReqAdvanceLevel; 
+    Attr_t m_ReqGender;        
 
-    bool m_bDefaultOptions;              // 기본 옵션이 있나?
-    list<OptionType_t> m_DefaultOptions; // 기본 옵션
+    bool m_bDefaultOptions;              
+    list<OptionType_t> m_DefaultOptions; 
 
-    Ratio_t m_UpgradeRatio;    // enchant해서 성공할 확률
-    int m_UpgradeCrashPercent; // upgrade가 실패해서 부서질 확률 = m_UpgradeCrashPercent%
+    Ratio_t m_UpgradeRatio;    
+    int m_UpgradeCrashPercent; 
 
-    bool m_bUnique; // unique item 인가?
+    bool m_bUnique; 
 
-    Ratio_t m_NextOptionRatio; // 다른 옵션이 붙을 확률
+    Ratio_t m_NextOptionRatio; 
 
     ItemType_t m_NextItemType;
     Ratio_t m_DowngradeRatio;

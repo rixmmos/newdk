@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Filename    : GCShopSoldHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -35,7 +35,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -66,7 +66,7 @@ throw ( ProtocolException , Error )
 				else
 				{
 					//------------------------------------------------------
-					// Normal shelf가 아닌 경우에만 delete한다.
+					
 					//------------------------------------------------------
 					if (pPacket->getShopType()==SHOP_RACK_SPECIAL)
 					{
@@ -74,15 +74,15 @@ throw ( ProtocolException , Error )
 
 						if (pRemovedItem!=NULL)
 						{
-							// item정보 제거
+							
 							UI_RemoveDescriptor( (void*)pRemovedItem );
 
-							// 팔린 아이템 제거
+							
 							delete pRemovedItem;
 						}
 					}
 
-					// 새로운 버전 설정
+					
 					pShopShelf->SetVersion( pPacket->getShopVersion() );									
 				}
 			}

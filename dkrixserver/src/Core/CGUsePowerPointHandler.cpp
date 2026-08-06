@@ -26,15 +26,15 @@ struct POWER_POINT_ITEM_TEMPLATE {
     uint Ratio;
     string ItemName;
 };
-// edit by Coffee  2006-12-10  ÐÞ¸Ä²©²ÊÏµÍ³µÀ¾ß
+
 const POWER_POINT_ITEM_TEMPLATE PowerPointItemTemplate[7] = {
-    {GCUsePowerPointResult::CANDY, Item::ITEM_CLASS_EVENT_ETC, 14, 20, "Áéµ¤"},
-    {GCUsePowerPointResult::RESURRECTION_SCROLL, Item::ITEM_CLASS_RESURRECT_ITEM, 0, 20, "¸´»î¾íÖá"},
-    {GCUsePowerPointResult::ELIXIR_SCROLL, Item::ITEM_CLASS_RESURRECT_ITEM, 1, 20, "Á¶½ð¾íÖá"},
-    {GCUsePowerPointResult::MEGAPHONE, Item::ITEM_CLASS_EFFECT_ITEM, 0, 20, "¶Ô½²»ú1"},
-    {GCUsePowerPointResult::NAMING_PEN, Item::ITEM_CLASS_EVENT_GIFT_BOX, 22, 14, "êÇ³ÆÇ©Ãû±Ê"},
-    {GCUsePowerPointResult::SIGNPOST, Item::ITEM_CLASS_EVENT_STAR, 6, 1, "À¶±¦Ê¯(×ãÇò)"},
-    {GCUsePowerPointResult::BLACK_RICE_CAKE_SOUP, Item::ITEM_CLASS_EVENT_STAR, 11, 5, "ºÚÉ«×£¸£"}
+    {GCUsePowerPointResult::CANDY, Item::ITEM_CLASS_EVENT_ETC, 14, 20, ""},
+    {GCUsePowerPointResult::RESURRECTION_SCROLL, Item::ITEM_CLASS_RESURRECT_ITEM, 0, 20, ""},
+    {GCUsePowerPointResult::ELIXIR_SCROLL, Item::ITEM_CLASS_RESURRECT_ITEM, 1, 20, ""},
+    {GCUsePowerPointResult::MEGAPHONE, Item::ITEM_CLASS_EFFECT_ITEM, 0, 20, "1"},
+    {GCUsePowerPointResult::NAMING_PEN, Item::ITEM_CLASS_EVENT_GIFT_BOX, 22, 14, ""},
+    {GCUsePowerPointResult::SIGNPOST, Item::ITEM_CLASS_EVENT_STAR, 6, 1, "()"},
+    {GCUsePowerPointResult::BLACK_RICE_CAKE_SOUP, Item::ITEM_CLASS_EVENT_STAR, 11, 5, ""}
 
 };
 #endif
@@ -70,9 +70,9 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
 
     GCUsePowerPointResult gcUsePowerPointResult;
 
-    // ÆÄ¿ö Æ÷ÀÎÆ®°¡ ÀÖ´ÂÁö È®ÀÎ
+    
     if (pPC->getPowerPoint() < 300) {
-        // ÆÄ¿ö Æ÷ÀÎÆ®°¡ ºÎÁ·ÇÏ´Ù.
+        
         gcUsePowerPointResult.setErrorCode(GCUsePowerPointResult::NOT_ENOUGH_POWER_POINT);
 
         pGamePlayer->sendPacket(&gcUsePowerPointResult);
@@ -80,10 +80,10 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
         return;
     }
 
-    // ÀÎº¥Åä¸®¿¡ °ø°£ÀÌ ÀÖ´ÂÁö È®ÀÎÇÑ´Ù.
+    
     _TPOINT pt;
     if (!pPC->getInventory()->getEmptySlot(1, 2, pt)) {
-        // ÀÎº¥Åä¸®¿¡ °ø°£ÀÌ ºÎÁ·ÇÏ´Ù.
+        
         gcUsePowerPointResult.setErrorCode(GCUsePowerPointResult::NOT_ENOUGH_INVENTORY_SPACE);
 
         pGamePlayer->sendPacket(&gcUsePowerPointResult);
@@ -91,7 +91,7 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
         return;
     }
 
-    // ¾ÆÀÌÅÛ ·£´ý »ý¼º
+    
     int ratio = rand() % 100 + 1;
 
     GCUsePowerPointResult::ITEM_CODE itemCode;
@@ -114,20 +114,20 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
     }
 
     if (bFind) {
-        // ¾ÆÀÌÅÛ »ý¼º ¹× Ãß°¡
+        
         list<OptionType_t> nullOption;
         Item* pItem = g_pItemFactoryManager->createItem(itemClass, itemType, nullOption);
 
         pPC->getZone()->registerObject(pItem);
 
         if (pPC->getInventory()->addItem(pItem, pt)) {
-            // DB ¿¡ ¾ÆÀÌÅÛ »ý¼º
+            
             pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
 
-            // ItemTraceLog ¸¦ ¸¸±ä´Ù.
+            
             remainTraceLog(pItem, "Mofus", pPC->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
 
-            // °á°ú¸¦ Å¬¶óÀÌ¾ðÆ®¿¡ ¾Ë¸®±â
+            
             GCCreateItem gcCreateItem;
             gcCreateItem.setObjectID(pItem->getObjectID());
             gcCreateItem.setItemClass(pItem->getItemClass());
@@ -140,13 +140,13 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
 
             pPlayer->sendPacket(&gcCreateItem);
 
-            // ¾ÆÀÌÅÛ »ý¼º¿¡ ÇÊ¿äÇÑ ÆÄ¿öÂ¯ Æ÷ÀÎÆ®
+            
             static int RequirePowerPoint = -300;
 
-            // ÆÄ¿öÂ¯ Æ÷ÀÎÆ® ÀúÀå
+            
             pPC->setPowerPoint(savePowerPoint(pPC->getName(), RequirePowerPoint));
 
-            // °á°ú¸¦ Å¬¶óÀÌ¾ðÆ®¿¡ ¾Ë¸®±â
+            
             gcUsePowerPointResult.setErrorCode(GCUsePowerPointResult::NO_ERROR);
             gcUsePowerPointResult.setItemCode(itemCode);
             gcUsePowerPointResult.setPowerPoint(pPC->getPowerPoint());
@@ -161,10 +161,10 @@ void CGUsePowerPointHandler::execute(CGUsePowerPoint* pPacket, Player* pPlayer)
             filelog(MOFUS_LOG_FILE, "CREATE ITEM (name:%s,usepowerpoint:%d,createditem:%s", pPC->getName().c_str(),
                     RequirePowerPoint, itemName.c_str());
         } else {
-            cout << "ÀÎº¥Åä¸®¿¡ ³Ö±â ½ÇÆÐ" << endl;
+            cout << "  " << endl;
         }
     } else {
-        cout << "·£´ý ±¼¸®±â ½ÇÆÐ ratio : " << ratio << endl;
+        cout << "   ratio : " << ratio << endl;
     }
 
 #endif

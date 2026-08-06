@@ -62,7 +62,7 @@ bool GuildUnion::removeGuild(GuildID_t gID) {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE UnionID = %u and OwnerGuildID = %u", m_UnionID, gID);
         if (pStmt->getAffectedRowCount() < 1) {
-            filelog("GuildUnion.log", "[%u:%u] 탈퇴하려는데 해당 레코드가 없습니다.", m_UnionID, gID);
+            filelog("GuildUnion.log", "[%u:%u]    .", m_UnionID, gID);
         }
 
         SAFE_DELETE(pStmt);
@@ -145,7 +145,7 @@ void GuildUnionManager::sendModifyUnionInfo(uint gID) {
     ggCommand.setCommand(Msg);
 
 
-    // 각 server로 보낸다.
+    
     HashMapGameServerInfo** pGameServerInfos = g_pGameServerInfoManager->getGameServerInfos();
 
 
@@ -166,7 +166,7 @@ void GuildUnionManager::sendModifyUnionInfo(uint gID) {
                     GameServerInfo* pGameServerInfo = itr->second;
 
                     if (pGameServerInfo->getWorldID() == myWorldID) {
-                        // 현재 서버가 아닌 경우에만..(위에서 처리했으므로)
+                        
                         if (pGameServerInfo->getGroupID() == myServerID) {
                         } else {
                             g_pLoginServerManager->sendPacket(pGameServerInfo->getIP(), pGameServerInfo->getUDPPort(),
@@ -184,7 +184,7 @@ void GuildUnionManager::sendRefreshCommand() {
     ggCommand.setCommand("*refreshguildunion");
 
 
-    // 각 server로 보낸다.
+    
     HashMapGameServerInfo** pGameServerInfos = g_pGameServerInfoManager->getGameServerInfos();
 
 
@@ -205,7 +205,7 @@ void GuildUnionManager::sendRefreshCommand() {
                     GameServerInfo* pGameServerInfo = itr->second;
 
                     if (pGameServerInfo->getWorldID() == myWorldID) {
-                        // 현재 서버가 아닌 경우에만..(위에서 처리했으므로)
+                        
                         if (pGameServerInfo->getGroupID() == myServerID) {
                         } else {
                             g_pLoginServerManager->sendPacket(pGameServerInfo->getIP(), pGameServerInfo->getUDPPort(),
@@ -241,13 +241,13 @@ bool GuildUnionManager::addGuild(uint uID, GuildID_t gID) {
 bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
     __BEGIN_TRY
 
-    // 내가 길드연합장인데..내가 탈퇴한다면..
-    // 내가 속한 길드연합을 깨보자..
+    
+    
 
     GuildUnion* pUnion = m_GuildUnionMap[gID];
-    // 내가 마스터인 연합이 있다면 -> 내 연합에 소속된 모든 길드를 out시키고 내 연합을 깨버린다.
+    
     if (pUnion != NULL) {
-        uint uID = pUnion->getUnionID(); // 연합ID
+        uint uID = pUnion->getUnionID(); 
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -255,14 +255,14 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
             pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
             pResult = pStmt->executeQuery("SELECT OwnerGuildID FROM GuildUnionMember WHERE UnionID = %u", uID);
 
-            // 아무것도 없다면 이상한거다..
+            
             if (pResult->getRowCount() == 0) {
                 SAFE_DELETE(pStmt);
                 return false;
             }
 
             string unionMasterID = g_pGuildManager->getGuild(gID)->getMaster();
-            // 각각의 모든 길드들을 연합에서 탈퇴시킨다.	// 모두 지워지면 연합도 알아서 깨진다.
+            
             while (pResult->next()) {
                 if (pUnion->removeGuild(pResult->getInt(1))) {
                     m_GuildUnionMap[gID] = NULL;
@@ -281,7 +281,7 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
                     sendGCOtherModifyInfoGuildUnionByGuildID(pResult->getInt(1));
                 } // if
             } // while
-            // 모든 길드를 다 제거한다. 마지막에 남은 길드까지 깨끗히 청소하고 나면
+            
 
             Creature* pTargetCreature = NULL;
             __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -294,13 +294,13 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
             }
             __LEAVE_CRITICAL_SECTION((*g_pPCFinder))
 
-            // 연합마스터 바뀐정보를 보내줘보자..
+            
             sendGCOtherModifyInfoGuildUnionByGuildID(gID);
 
             sendRefreshCommand();
         }
         END_DB(pStmt);
-    } else // 내가 마스터인 연합이 없다면, 내가 어느연합의 멤버인지를 찾는다. 어느연합의 멤버인지 찾아서 연합에서 제외
+    } else 
     {
         Statement* pStmt = NULL;
         Statement* pStmt2 = NULL;
@@ -315,13 +315,13 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
             pResult =
                 pStmt->executeQuery("SELECT UnionID, OwnerGuildID FROM GuildUnionMember WHERE OwnerGuildID = %u", gID);
 
-            // 어디에도 소속되지 않았다면 그냥 나간다.
+            
             if (pResult->getRowCount() == 0) {
                 SAFE_DELETE(pStmt);
                 return false;
             }
 
-            // 어딘가에 속해있다면..
+            
             pResult->next();
 
             BEGIN_DB {
@@ -330,7 +330,7 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
                 pResult2 = pStmt->executeQuery("SELECT MasterGuildID FROM GuildUnionInfo WHERE UnionID = %u",
                                                pResult->getInt(1));
 
-                // 마스터길드의 ID를 찾으면..
+                
                 if (pResult2->getRowCount() != 0) {
                     pResult->next();
 
@@ -343,8 +343,8 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
             guildMasterID = g_pGuildManager->getGuild(gID)->getMaster();
 
             if (removeGuild(pResult->getInt(1), pResult->getInt(2))) {
-                Creature* pTargetCreature = NULL;  // 해당길드의 장
-                Creature* pTargetCreature2 = NULL; // 연합길드의 장
+                Creature* pTargetCreature = NULL;  
+                Creature* pTargetCreature2 = NULL; 
 
                 __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
@@ -364,12 +364,12 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
                 __LEAVE_CRITICAL_SECTION((*g_pPCFinder))
 
 
-                // 길드마스터 바뀐정보를 보내줘보자..
+                
                 sendGCOtherModifyInfoGuildUnionByGuildID(gID);
-                // 특정길드가 깨져서 연합에서 remove되었다면 연합마스터에게도 알려야 하겠다.
+                
                 sendGCOtherModifyInfoGuildUnionByGuildID(unionMasterGuildID);
 
-                // 길드를 제거 하였으니..다른 서버에도 알려줘야 하겠다.
+                
                 sendRefreshCommand();
             }
         }
@@ -512,14 +512,14 @@ uint GuildUnionOfferManager::offerJoin(GuildID_t gID, GuildID_t masterGID) {
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        // 과거 10일 이내에서 강제 탈퇴한 이력이 있는지 본다
+        
         Result* pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildUnionOffer WHERE OfferType='ESCAPE' and "
                                               "OwnerGuildID='%u' and OfferTime >= now() - interval 10 day",
                                               gID);
 
         pResult->next();
 
-        // 이력이 있으면 패뻐린다.
+        
         if (pResult->getInt(1) > 0) {
             SAFE_DELETE(pStmt);
             return YOU_HAVE_PENALTY;
@@ -534,7 +534,7 @@ uint GuildUnionOfferManager::offerJoin(GuildID_t gID, GuildID_t masterGID) {
             return NOT_ENOUGH_SLOT;
         }
 
-        // 10일이 넘은 데이타는 지워버린다.
+        
         pStmt->executeQuery(
             "DELETE FROM GuildUnionOffer WHERE OwnerGuildID='%u' and OfferTime < now() - interval 10 day", gID);
         pStmt->executeQuery(
@@ -593,7 +593,7 @@ bool GuildUnionOfferManager::makeOfferList(uint uID, GCUnionOfferList& offerList
                                               uID);
 
 
-        // cout << "연합길드 : " << uID << ", GuildUnionOffer return row : " << pResult->getRowCount() << endl;
+        
 
         if (pResult->getRowCount() == 0) {
             return false;

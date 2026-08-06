@@ -25,7 +25,7 @@ bool ConditionEnterCastleDungeon::isSatisfied(Creature* pCreature1, Creature* pC
     {
         return false;
     }*/
-    // 나중에 전쟁중인지 체크해야 된다
+    
 
     Assert(pCreature2 != NULL);
     Assert(pCreature2->isPC());
@@ -38,12 +38,12 @@ bool ConditionEnterCastleDungeon::isSatisfied(Creature* pCreature1, Creature* pC
     Assert(pGamePlayer != NULL);
 
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-    // 이미 유료존에 있는 경우라면... 관계없겠지.
-    // 패밀리 요금제 적용중일 경우
+    
+    
     if (pGamePlayer->isPayPlaying() || pGamePlayer->isFamilyFreePass()) {
         bPayPlay = true;
     } else {
-        // 일단 zone 요금 체크
+        
         string connectIP = pGamePlayer->getSocket()->getHost();
 
         if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
@@ -55,7 +55,7 @@ bool ConditionEnterCastleDungeon::isSatisfied(Creature* pCreature1, Creature* pC
     bPayPlay = true;
 #endif
 
-    // 돈 낸 사람만 castle 에 들어갈 수 있다.
+    
     if (bPayPlay) {
         bool hasGuildWar = g_pWarSystem->hasCastleActiveWar(m_CastleZoneID);
 
@@ -68,8 +68,8 @@ bool ConditionEnterCastleDungeon::isSatisfied(Creature* pCreature1, Creature* pC
         GuildID_t GuildID = pPC->getGuildID();
         GuildID_t OwnerGuildID = pCastleInfo->getGuildID();
 
-        // 전쟁이 없을 때 --> 성 소유 길드만 들어갈 수 있다.
-        // 길드 전쟁 중 --> 공격 길드도 들어갈 수 있다.
+        
+        
         if (OwnerGuildID != SlayerCommon && OwnerGuildID != VampireCommon && OwnerGuildID != OustersCommon &&
             GuildID == OwnerGuildID) {
             return true;

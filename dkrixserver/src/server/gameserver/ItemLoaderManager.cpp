@@ -219,10 +219,10 @@ void ItemLoaderManager::load(Slayer* pSlayer)
 {
     __BEGIN_TRY
 
-    // 모터사이클을 가장 먼저 로딩해야 한다.
+    
     g_pMotorcycleLoader->load(pSlayer);
 
-    // 그다음이 벨트이다.
+    
     g_pBeltLoader->load(pSlayer);
     g_pMagazineLoader->load(pSlayer);
     g_pPotionLoader->load(pSlayer);
@@ -305,8 +305,8 @@ void ItemLoaderManager::load(Vampire* pVampire)
 {
     __BEGIN_TRY
 
-    // 뱀파이어는 모터사이클이 없으므로, 모터사이클을 로딩할 필요가 없다.
-    // 그러나, 벨트는 로딩할 필요가 있다.
+    
+    
     g_pBeltLoader->load(pVampire);
 
     g_pARLoader->load(pVampire);
@@ -389,8 +389,8 @@ void ItemLoaderManager::load(Ousters* pOusters)
 {
     __BEGIN_TRY
 
-    // 암스밴드는 벨트다.
-    // 제일먼저 로딩해야 푸파나 콤포스메이가 들어갈 수 있다.
+    
+    
     g_pOustersArmsbandLoader->load(pOusters);
     g_pOustersBootsLoader->load(pOusters);
     g_pOustersChakramLoader->load(pOusters);

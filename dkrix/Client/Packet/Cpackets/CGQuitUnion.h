@@ -10,10 +10,10 @@
 #define __CG_QUIT_UNION_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -25,15 +25,15 @@ class CGQuitUnion : public Packet
 {
 public:
 	enum{
-		QUIT_NORMAL = 0,		// 절차에 따라 신청
-		QUIT_QUICK,				// 일방적으로 탈퇴
+		QUIT_NORMAL = 0,		
+		QUIT_QUICK,				
 		QUIT_MAX
 	};	
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler

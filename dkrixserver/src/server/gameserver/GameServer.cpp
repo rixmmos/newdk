@@ -100,7 +100,7 @@ GameServer::GameServer()
 
 //////////////////////////////////////////////////////////////////////////////
 // destructor
-// stop()을 거치지 않고 게임 서버가 종료되는 것을 체크해줘야 한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 GameServer::~GameServer()
@@ -143,46 +143,46 @@ void GameServer::init()
     sysinit();
     cout << "GameServer::init() : System Initialization Success..." << endl;
 
-    // gCurrentTime을 세팅한다.
+    
     setCurrentTime();
 
-    // 데이타베이스매니저를 초기화한다.
+    
     g_pDatabaseManager->init();
     cout << "GameServer::init() : DatabaseManager Initialization Success..." << endl;
 
-    // 데이타베이스매니저를 통해서 오브젝트매니저를 초기화한다.
+    
     g_pObjectManager->init();
     g_pObjectManager->load();
     cout << "GameServer::init() : ObjectManager Initialization Success..." << endl;
 
-    // 오브젝트 매니저를 기반으로 쓰레드매니저를 초기화한다.
-    // (특히 ZoneThreadPool은 ZoneGroupManager가 먼저 초기화되어야 한다.
+    
+    
     g_pThreadManager->init();
     cout << "GameServer::init() : ThreadManager Initialization Success..." << endl;
 
-    // 클라이언트매니저를 초기화하기 전에, 패킷팩토리매니저/패킷발리데이터를 초기화한다.
+    
     g_pPacketFactoryManager->init();
     cout << "GameServer::init() : PacketFactoryManager Initialization Success..." << endl;
 
     g_pPacketValidator->init();
     cout << "GameServer::init() : PacketValidator Initialization Success..." << endl;
 
-    // 이제 서버간 통신 준비에 들어간다.
+    
     g_pLoginServerManager->init();
     cout << "GameServer::init() : LoginServerManager Initialization Success..." << endl;
 
-    // shared server 와의 통신 준비에 들어간다.
+    
     g_pSharedServerManager->init();
     cout << "GameServer::init() : SharedServerManager Initialization Success..." << endl;
 
 #ifdef __CONNECT_BILLING_SYSTEM__
-    // shared server 와의 통신 준비에 들어간다.
+    
     g_pBillingPlayerManager->init();
     cout << "GameServer::init() : BillingPlayerManager Initialization Success..." << endl;
 #endif
 
 #ifdef __CONNECT_CBILLING_SYSTEM__
-    // china billing server 와의 통신 준비에 들어간다.
+    
     g_pCBillingPlayerManager->init();
     cout << "GameServer::init() : CBillingPlayerManager Initialization Success..." << endl;
 #endif
@@ -198,12 +198,12 @@ void GameServer::init()
     g_pGameServerInfoManager->init();
     cout << "GameServer::init() : GameServerInfoManager Initialization Success..." << endl;
 
-    // 만반의 준비가 끝이 나면 이제 클라이언트매니저를 초기화함으로써,
-    // 네트워킹에 대비한다.
+    
+    
     g_pClientManager->init();
     cout << "GameServer::init() : ClientManager Initialization Success..." << endl;
 
-    // 초기화가 끝이 나면, 콘솔 출력을 멈추고 백그라운드로 들어간다.
+    
     // goBackground();
 
     __END_CATCH
@@ -251,18 +251,18 @@ void GameServer::start()
     GDRLairManager::Instance().init();
     GDRLairManager::Instance().start();
 
-    // 클라이언트 매니저를 시작한다.
+    
     // *Reiot's Notes*
-    // 가장 나중에 실행되어야 한다. 왜냐하면 멀티쓰레드기반이 아닌
-    // 무한루프를 가진 함수이기 때문이다. 만일 이 다음에 다른 함수를
-    // 호출할 경우, 루프가 끝나지 않는한(즉 에러가 발생하지 않는한)
-    // 실행되지 않는다.
+    
+    
+    
+    
     cout << ">>> ALL INITIALIZATIONS ARE COMPLETED SUCCESSFULLY." << endl;
     cout << ">>> STARTING ClientManager->start() INFINITE LOOP..." << endl;
 
     log(LOG_SYSTEM, "", "", "Game Server Started");
 
-    // 테스트 by sigi. 2002.12.26
+    
     if (g_pTestConfig != NULL) {
         // testGameServer();
     }
@@ -281,11 +281,11 @@ void GameServer::start()
 //////////////////////////////////////////////////////////////////////////////
 // stop game server
 //
-// stop 순서에 유의하도록 하자. 가장 영향을 많이 주는 매니저부터
-// stop 시켜야 한다. 만일 반대의 순서로 stop 시킬 경우 null pointer
-// 같은 현상이 발생할 수 있다.
+
+
+
 //
-// 따라서, 쓰레드 관련 매니저부터 삭제해야 한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 void GameServer::stop()
@@ -296,25 +296,25 @@ void GameServer::stop()
     //
     // stop client manager
     //
-    // 가장 먼저 클라이언트 매니저를 삭제시킴으로써 더이상 새 접속을
-    // 받지 않도록 한다.
+    
+    
     //
     g_pClientManager->stop();
 
     //
     // stop thread manager
     //
-    // 그다음, 쓰레드매니저를 삭제함으로써 기존의 사용자들을 더이상 처리하지
-    // 않고 게임 서버에서 쫓아낸다. 이때 쓰레드 매니저의 하위 쓰레드풀에서
-    // stop을 실행할때 적절하게 잘 되어야 한다.
+    
+    
+    
     //
     g_pThreadManager->stop();
 
     //
     // stop object manager
     //
-    // 이제 모든 사용자들의 접속이 종료되었으므로, 남은 존 및 여러 가지 게임
-    // 환경들을 데이타베이스로 저장하도록 한다.
+    
+    
     //
     // g_pObjectManager->save();
 
@@ -323,7 +323,7 @@ void GameServer::stop()
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 시스템 레벨의 초기화
+
 //////////////////////////////////////////////////////////////////////////////
 
 void GameServer::sysinit()
@@ -331,20 +331,20 @@ void GameServer::sysinit()
 {
     __BEGIN_TRY
 
-    // rand() 를 위한 초기화
+    
     srand(time(0));
 
-    signal(SIGPIPE, SIG_IGN); // 이거는 종종 발생할 듯
-    signal(SIGALRM, SIG_IGN); // 알람 하는 경우는 엄따, 예의상
-    signal(SIGCHLD, SIG_IGN); // fork 하는 경우는 엄따, 예의상
+    signal(SIGPIPE, SIG_IGN); 
+    signal(SIGALRM, SIG_IGN); 
+    signal(SIGCHLD, SIG_IGN); 
 
     __END_CATCH
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 나중에 콘솔로 출력할 필요가 없어질 만큼 안정적이 되면,
-// 이 함수를 호출하도록 한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void GameServer::goBackground()

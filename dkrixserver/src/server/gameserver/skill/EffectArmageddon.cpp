@@ -56,8 +56,8 @@ void EffectArmageddon::affect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트를 건 크리쳐를 가져온다.
-    // !! 이미 존을 떠났을 수도 있으므로 NULL 이 될 수 있다.
+    
+    
     // by bezz. 2003.1.4
     // Creature* pCastCreature = pZone->getCreature( m_UserObjectID );
 
@@ -71,7 +71,7 @@ void EffectArmageddon::affect(Creature* pCreature)
 
     // cout << "EffectArmageddon affect damage :" << m_Damage << endl;
 
-    // 매초 데미지 주는거 잠시 막아놓음. by Sequoia
+    
     /*if ( pCreature->isSlayer() )
     {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -111,13 +111,13 @@ void EffectArmageddon::unaffect(Creature* pCreature)
 
     // cout << "EffectArmageddon unaffect.." << endl;
 
-    // 플래그를 끈다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_ARMAGEDDON);
 
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트를 삭제하라고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_ARMAGEDDON);
@@ -161,7 +161,7 @@ void EffectArmageddon::decreaseHP(Damage_t damage) throw() {
     HP_t RemainHP = max(0, m_HP - damage);
 
     setHP(RemainHP);
-    // 남은 HP가 0일 경우 다음 EffectManager::heartbeat() 에서 이펙트를 날려준다.
+    
     if (RemainHP == 0)
         setDeadline(0);
 }

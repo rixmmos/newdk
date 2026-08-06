@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MRisingEffectGenerator.h
 //----------------------------------------------------------------------
-// 공중으로 솟아오르는 Effect
+
 //----------------------------------------------------------------------
 
 #ifndef	__MRISINGEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MRisingEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_RISING; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

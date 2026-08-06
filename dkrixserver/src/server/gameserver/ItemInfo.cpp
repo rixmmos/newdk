@@ -122,25 +122,7 @@ void ItemInfo::setDefaultOptions(const string& options)
 
     makeOptionList(options, m_DefaultOptions);
 
-    /*do
-    {
-        b = options.find_first_of(',', a);
-
-        string  optionName = trim( options.substr(a, b-a) );
-
-        OptionType_t optionType;
-
-        try {
-            optionType = g_pOptionInfoManager->getOptionType(optionName);
-        } catch (NoSuchElementException&) {
-            throw Error("그런 옵션이 없단다.");
-        }
-
-        addDefaultOptions( optionType );
-
-        a = b+1;
-
-    } while (b!=string::npos && b < options.size() -1);*/
+     
 }
 
 
@@ -158,17 +140,17 @@ void ItemInfo::clearDefaultOptions()
     m_DefaultOptions.clear();
 }
 
-// 다음 단계의 옵션으로 upgrade가 성공했나?
+
 bool ItemInfo::isUpgradeSucceed() const {
-    // 0이 아니고
-    // 확률만큼 rand()했을때 특정한 한 값(0)이 나오는 경우가 성공이다.
+    
+    
     // return m_UpgradeRatio!=0 && (rand()%m_UpgradeRatio==0);
 
-    // 그런데.. 기획이 백분율로 나왔다. -_-;
+    
     return (rand() % 100 < (int)m_UpgradeRatio);
 }
 
-// 다음 단계의 옵션으로 upgrade 하다가 실패해서 item이 부서졌나?
+
 bool ItemInfo::isUpgradeCrash() const {
     return (rand() % 100 < m_UpgradeCrashPercent);
 }

@@ -10,7 +10,7 @@
 #include "SimpleTileMissileSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void DistanceBlitz::execute(Ousters* pOusters, ObjectID_t TargetObjectID, OustersSkillSlot* pOustersSkillSlot,
                             CEffectID_t CEffectID)
@@ -30,7 +30,7 @@ void DistanceBlitz::execute(Ousters* pOusters, ObjectID_t TargetObjectID, Ouster
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !canAttack(pOusters, pTargetCreature)) {
             executeSkillFailException(pOusters, getSkillType());
             return;

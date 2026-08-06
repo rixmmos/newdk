@@ -41,7 +41,7 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -49,7 +49,7 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
     GCGuildResponse gcGuildResponse;
 
     GuildUnion* pGuildUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());
-    // 자기가 속한 길드가 연합에 가입되어있는지 찾는다
+    
     if (pGuildUnion == NULL) {
         gcGuildResponse.setCode(GuildUnionOfferManager::NOT_IN_UNION);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -57,7 +57,7 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
         return;
     }
 
-    // Master 길드의 정보를 가져온다.
+    
     Guild* pGuild = g_pGuildManager->getGuild(pGuildUnion->getMasterGuildID());
 
     if (pGuild == NULL) {

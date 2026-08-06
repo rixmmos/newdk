@@ -36,19 +36,15 @@ void EventRefreshHolyLandPlayer::activate()
         unordered_map<ZoneID_t, Zone*>::const_iterator zItr = zones.begin();
 
         for (; zItr != zones.end(); ++zItr) {
-            //			cout << zItr->second->getZoneID() << " 존 update" << endl;
+            
             zItr->second->setRefreshHolyLandPlayer(true);
         }
     }
 
-    // 아담의 성지에 있는 플레이어들의 정보를 새로 계산한다.(피의 성서 보너스)
+    
     //	g_pHolyLandManager->refreshHolyLandPlayers();
 
-    /*	// 아담의 성지 전역에 피의 성서 보너스 정보를 뿌린다.
-        GCHolyLandBonusInfo gcHolyLandBonusInfo;
-        g_pBloodBibleBonusManager->makeHolyLandBonusInfo( gcHolyLandBonusInfo );
-        g_pHolyLandManager->broadcast( &gcHolyLandBonusInfo );
-    */
+     
     __END_CATCH
 }
 

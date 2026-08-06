@@ -27,7 +27,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -35,7 +35,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -43,7 +43,7 @@ throw ( ProtocolException , Error )
 		
 		MCreature* pCreature = g_pZone->GetCreature(CreatureID);
 
-		// 성물보관대 얻어오기 위해서
+		
 		if (pCreature == NULL)
 		{
 			MItem *selectedItem = g_pZone->GetItem(CreatureID);
@@ -94,7 +94,7 @@ throw ( ProtocolException , Error )
 				{
 					DEBUG_ADD_FORMAT("[Error] Failed to Remove EffectStatus %d", effectStatus);
 				}
-				if( g_pPlayer->GetID() == pCreature->GetID() ) // -_- 내 자신이면
+				if( g_pPlayer->GetID() == pCreature->GetID() ) 
 				{
 					ACTIONINFO actionInfo = (ACTIONINFO) (*g_pEffectStatusTable)[effectStatus].OriginalActionInfo;
 					switch(actionInfo)

@@ -2,26 +2,26 @@
 // CFrame.h
 //----------------------------------------------------------------------
 //
-// CFrame은 하나의 Sprite에 대한 정보를 가진다.
+
 //
 //----------------------------------------------------------------------
 //
-// m_ID는 임의로 지정한 SpritePack/SpriteSet에서의 Sprite ID이다.
+
 //
-// m_cX, m_cY는 좌표 보정값으로서 Sprite가 출력될때 상하좌우로 
-//           변화하는 값이다. 
-//           (예) 캐릭터에 안경을 씌울 때,
-//                캐릭터 Sprite는 m_cX=0, m_cY=0으로 한다면
-//                안경 Sprite는 m_cX=20, m_cY=10으로 할 수 있겠지.
+
+
+
+
+
 //
-// m_fEffect는 출력방법에 대한 정의이다.
-//        Mirror출력 가능.
+
+
 //----------------------------------------------------------------------
 
 #ifndef	__CFRAME_H__
 #define	__CFRAME_H__
 
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
 #include "../../basic/Platform.h"
@@ -32,7 +32,7 @@
 
 
 //----------------------------------------------------------------------
-// Frame을 출력하는데 있어서 효과를 주는 FLAG
+
 //----------------------------------------------------------------------
 //#define	FLAG_FRAME_MIRROR		0x01
 
@@ -88,18 +88,18 @@ class CFrame {
 
 
 	protected :
-		TYPE_SPRITEID	m_SpriteID;		// SpriteSurface의 번호(0~65535)		
+		TYPE_SPRITEID	m_SpriteID;		
 
-		// 좌표 보정값
+		
 		short	m_cX;			
 		short	m_cY;
 
-		//BYTE			m_fEffect;		// 출력방법에 대한 flag
+		
 };
 
 
 //----------------------------------------------------------------------
-// Effect를 위한 Frame
+
 //----------------------------------------------------------------------
 class CEffectFrame : public CFrame {
 	public :
@@ -137,14 +137,14 @@ class CEffectFrame : public CFrame {
 
 	
 	protected :
-		char		m_Light;		// 시야의 크기(빛의 밝기)
+		char		m_Light;		
 		bool		m_bBackground;
 };
 
 
 //----------------------------------------------------------------------
 //
-// Frame Array  data type 정의
+
 //
 //----------------------------------------------------------------------
 

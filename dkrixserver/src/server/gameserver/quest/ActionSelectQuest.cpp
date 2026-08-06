@@ -38,7 +38,7 @@ void ActionSelectQuest::read(PropertyBuffer& propertyBuffer)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionSelectQuest::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -61,7 +61,7 @@ void ActionSelectQuest::execute(Creature* pCreature1, Creature* pCreature2)
     Assert(pPlayer != NULL);
 
 #ifdef __CHINA_SERVER__
-    // 중국에는 막아놓기다.
+    
     GCNPCResponse gcNPCResponse;
     gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
     pPlayer->sendPacket(&gcNPCResponse);

@@ -38,7 +38,7 @@ void EffectConcealment::unaffect(Creature* pCreature)
     Assert(pCreature != NULL);
     Assert(pCreature->isSlayer());
 
-    // 플래그를 끈다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_CONCEALMENT);
 
     Zone* pZone = pCreature->getZone();
@@ -54,7 +54,7 @@ void EffectConcealment::unaffect(Creature* pCreature)
     pTargetSlayer->sendRealWearingInfo();
     pTargetSlayer->sendModifyInfo(prev);
 
-    // 이펙트를 삭제하라고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_CONCEALMENT);

@@ -38,7 +38,7 @@ void ActionAdvanceEventQuest::read(PropertyBuffer& propertyBuffer)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionAdvanceEventQuest::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -75,7 +75,7 @@ void ActionAdvanceEventQuest::execute(Creature* pCreature1, Creature* pCreature2
                     pPC->getQuestManager()->getEventQuestAdvanceManager()->save(m_QuestLevel);
                 else
                     filelog("EventBug.txt",
-                            "ActionAdvanceEventQuest : 어드밴스 해줬는데 왜 안되는거야아아아아아... %s:%d",
+                            "ActionAdvanceEventQuest :    ... %s:%d",
                             pPC->getName().c_str(), qID);
 
                 pPC->getQuestManager()->questRewarded(qID);

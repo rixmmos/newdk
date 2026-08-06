@@ -75,11 +75,11 @@ struct SOUNDBUF ;
 struct MP3
 {
 	MP3Header		Header ;
-	OFFSET			frameStart ;		// 프레임 데이타가 시작하는 Offset (SEEK_SET)
-	OFFSET			part2Start ;		// Sample Data가 시작되는 Offset
+	OFFSET			frameStart ;		
+	OFFSET			part2Start ;		
 	OFFSET			*offset ;
 	int				maxframes ;
-	int				curFrame ;			// 현재 연주하고 있는 프레임 Number
+	int				curFrame ;			
 	e_channels		which_ch ;
 	char			*Huffdec_path;
 	SOUNDBUF		*soundbuf ;

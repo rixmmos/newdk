@@ -33,7 +33,7 @@ ExecuteHelpEvent(HELP_EVENT he)
 }
 
 //---------------------------------------------------------------------------
-// ItemClass에 맞게 메모리를 잡아주는 class table을 설정..
+
 //---------------------------------------------------------------------------
 MHelpNode::FUNCTION_NEWNODE
 MHelpNode::s_NewNodeClassTable[MAX_NODE_TYPE] =
@@ -51,7 +51,7 @@ MHelpNode::s_NewNodeClassTable[MAX_NODE_TYPE] =
 //---------------------------------------------------------------------------
 // New Node
 //---------------------------------------------------------------------------
-// nodeType에 맞는 class의 객체를 생성해서(new) 넘겨준다.
+
 //---------------------------------------------------------------------------
 MHelpNode*		
 MHelpNode::NewNode(MHelpNode::NODE_TYPE nodeType)
@@ -76,8 +76,8 @@ MHelpNode::NewNode(MHelpNode::NODE_TYPE nodeType)
 MHelpNode*
 MCompareHelpNode::GetNext() const
 {
-	// 현재의 조건을 비교해서
-	// m_pTrue나 m_pFalse를 넘겨준다.
+	
+	
 
 #ifdef __GAME_CLIENT__
 	if (g_pCompareManager!=NULL 
@@ -125,7 +125,7 @@ void
 MCompareHelpNode::SaveToFile(std::ofstream& file)
 {
 	//---------------------------------------------------
-	// 검사해볼려는 조건
+	
 	//---------------------------------------------------
 	WORD compareType = m_pCompareType;			
 	file.write((const char*)&compareType, 2);
@@ -133,7 +133,7 @@ MCompareHelpNode::SaveToFile(std::ofstream& file)
 	BYTE classType;
 
 	//---------------------------------------------------
-	// 조건을 만족하는 경우
+	
 	//---------------------------------------------------
 	if (m_pTrue==NULL)
 	{
@@ -149,7 +149,7 @@ MCompareHelpNode::SaveToFile(std::ofstream& file)
 	}
 	
 	//---------------------------------------------------
-	// 조건을 만족하지 못하는 경우
+	
 	//---------------------------------------------------
 	if (m_pFalse==NULL)
 	{
@@ -172,7 +172,7 @@ void
 MCompareHelpNode::LoadFromFile(std::ifstream& file)
 {
 	//---------------------------------------------------
-	// 검사해볼려는 조건
+	
 	//---------------------------------------------------
 	WORD compareType;
 	file.read((char*)&compareType, 2);
@@ -181,13 +181,13 @@ MCompareHelpNode::LoadFromFile(std::ifstream& file)
 	BYTE classType;
 
 	//---------------------------------------------------
-	// 기존에 있던거 제거
+	
 	//---------------------------------------------------
 	if (m_pTrue!=NULL)	{ delete m_pTrue; }
 	if (m_pFalse!=NULL)	{ delete m_pFalse; }
 
 	//---------------------------------------------------
-	// 조건을 만족하는 경우
+	
 	//---------------------------------------------------
 	file.read((char*)&classType, 1);
 
@@ -199,7 +199,7 @@ MCompareHelpNode::LoadFromFile(std::ifstream& file)
 	}
 	
 	//---------------------------------------------------
-	// 조건을 만족하지 못하는 경우
+	
 	//---------------------------------------------------
 	file.read((char*)&classType, 1);
 
@@ -233,7 +233,7 @@ MOutputHelpNode::GetOutputType() const
 	
 	const_iterator	iID = begin();
 
-	// select번째 id를 선택한다.
+	
 	for (int i=0; i<select; i++)
 	{
 		iID++;
@@ -249,13 +249,13 @@ void
 MOutputHelpNode::SaveToFile(std::ofstream& file)
 {
 	//-----------------------------------------------
-	// ID 개수 저장
+	
 	//-----------------------------------------------
 	int numID = size();
 	file.write((const char*)&numID, 4);
 
 	//-----------------------------------------------
-	// 모든 OutputHelp ID저장
+	
 	//-----------------------------------------------
 	iterator iID = begin();
 	while (iID != end())
@@ -275,13 +275,13 @@ void
 MOutputHelpNode::LoadFromFile(std::ifstream& file)
 {
 	//-----------------------------------------------
-	// ID 개수 
+	
 	//-----------------------------------------------
 	int numID;
 	file.read((char*)&numID, 4);
 
 	//-----------------------------------------------
-	// 모든 OutputHelp ID로딩
+	
 	//-----------------------------------------------
 	WORD id;
 
@@ -321,12 +321,12 @@ MHelpManager::Init(int size)
 	CTypeTable<MHelpNode*>::Init( size );
 
 	//-------------------------------------------------------
-	// Event 발생 기록
+	
 	//-------------------------------------------------------
 	m_EventOccured.Init( size );
 
 	//-------------------------------------------------------
-	// 초기화
+	
 	//-------------------------------------------------------
 	for (int i=0; i<m_Size; i++)
 	{
@@ -377,16 +377,16 @@ void
 MHelpManager::SaveToFile(std::ofstream& file)
 {
 	//---------------------------------------------------------
-	// size 저장
+	
 	//---------------------------------------------------------
 	file.write((const char*)&m_Size, 4);
 
-	// 아무 것도 없는 경우
+	
 	if (m_pTypeInfo==NULL)
 		return;
 
 	//---------------------------------------------------------
-	// 각각의 정보 저장
+	
 	//---------------------------------------------------------
 	BYTE classType;
 
@@ -418,22 +418,22 @@ MHelpManager::LoadFromFile(std::ifstream& file)
 	int size;
 
 	//---------------------------------------------------------
-	// size 읽어오기
+	
 	//---------------------------------------------------------
 	file.read((char*)&size, 4);
 
-	// 현재 잡혀있는 메모리와 다르면 다시 메모리를 잡는다.
+	
 	if (m_Size != size)
 	{
-		// 메모리 해제
+		
 		Release();
 
-		// 메모리 잡기
+		
 		Init( size );
 	}
 
 	//---------------------------------------------------------
-	// file에서 각각의 정보를 읽어들인다.
+	
 	//---------------------------------------------------------
 	BYTE classType;
 	for (int i=0; i<m_Size; i++)
@@ -467,17 +467,17 @@ MHelpManager::ExecuteEvent(HELP_EVENT he)
 			switch (pHelpNode->GetType())
 			{
 				//------------------------------------------------------------
-				// 조건 비교 node
+				
 				//------------------------------------------------------------
 				case MHelpNode::TYPE_COMPARE :
 				{
-					// 조건비교해서.. 다음 node를 얻는다.
+					
 					pHelpNode = ((MCompareHelpNode*)pHelpNode)->GetNext();			
 				}
 				break;
 
 				//------------------------------------------------------------
-				// 도움말 출력 node
+				
 				//------------------------------------------------------------
 				case MHelpNode::TYPE_OUTPUT :
 				{
@@ -487,7 +487,7 @@ MHelpManager::ExecuteEvent(HELP_EVENT he)
 						g_pHelpDisplayer->OutputHelp( ho );					
 					#endif
 
-					pHelpNode = NULL;	// while loop를 빠지기 위해서.
+					pHelpNode = NULL;	
 				}
 				break;
 			}

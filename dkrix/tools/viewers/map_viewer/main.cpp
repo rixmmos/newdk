@@ -1,14 +1,4 @@
-/**
- * @file map_viewer.cpp
- * @brief Map Viewer - 浏览 zone 地图
- *
- * 功能：
- * - 加载并显示 .map zone 文件
- * - 渲染 tile 和 ImageObject
- * - 支持平移、缩放、拖拽
- * - 测试 CSpritePack 和 zone 解析
- * - 使用 TileRenderer 进行渲染（Phase 3 重构）
- */
+ 
 
 #include "Client/SpriteLib/CSpritePack.h"
 #include "Client/SpriteLib/CSpriteSurface.h"
@@ -20,15 +10,15 @@
 #include <cstring>
 #include <cstdint>
 
-// 默认配置
-// 注意：游戏中 TILE_X=48, TILE_Y=24（见 MViewDef.h）
-#define DEFAULT_CELL_PIXELS 48  // 使用正确的 TILE_X 尺寸
+
+
+#define DEFAULT_CELL_PIXELS 48  
 #define DEFAULT_WINDOW_WIDTH 800
 #define DEFAULT_WINDOW_HEIGHT 600
 
-// ImageObject 透明标志（来自 MImageObject.h）
-#define OBJECT_TRANS_FLAG  1  // 完全透明 - 跳过渲染
-#define OBJECT_HALF_FLAG   2  // 半透明 - 50% alpha
+
+#define OBJECT_TRANS_FLAG  1  
+#define OBJECT_HALF_FLAG   2  
 
 class MapViewer {
 public:
@@ -147,7 +137,7 @@ public:
             const ImageObjectData* firstObj = m_zoneLoader->GetImageObject(0);
             if (firstObj) {
                 // Center on first ImageObject
-                // pixelX/pixelY 已经是像素坐标，直接使用
+                
                 m_cameraX = firstObj->pixelX - windowWidth / 2;
                 m_cameraY = firstObj->pixelY - windowHeight / 2;
                 std::cout << "Centering camera on first ImageObject at pixel=("
@@ -416,28 +406,28 @@ private:
         if (m_showObjects && m_objPack) {
             const auto& imageObjects = m_zoneLoader->GetAllImageObjects();
 
-            // 创建索引列表并按深度排序（等轴测渲染顺序）
+            
             std::vector<size_t> sorted_indices;
             sorted_indices.reserve(imageObjects.size());
             for (size_t i = 0; i < imageObjects.size(); i++) {
                 sorted_indices.push_back(i);
             }
 
-            // 按 sectorY, sectorX 排序（画家算法：从上到下，从左到右）
+            
             std::sort(sorted_indices.begin(), sorted_indices.end(),
                       [&imageObjects](size_t a, size_t b) {
                           if (imageObjects[a].sectorY != imageObjects[b].sectorY) {
-                              return imageObjects[a].sectorY < imageObjects[b].sectorY;  // Y 轴优先
+                              return imageObjects[a].sectorY < imageObjects[b].sectorY;  
                           }
-                          return imageObjects[a].sectorX < imageObjects[b].sectorX;  // 同 Y 内按 X 排序
+                          return imageObjects[a].sectorX < imageObjects[b].sectorX;  
                       });
 
             int rendered = 0;
-            int renderedHalf = 0;      // 半透明对象计数
+            int renderedHalf = 0;      
             int skippedInvalid = 0;
             int skippedNoSprite = 0;
             int skippedOffScreen = 0;
-            int skippedTrans = 0;      // 完全透明对象计数
+            int skippedTrans = 0;      
 
             static bool debugPrinted = false;
             if (!debugPrinted && m_showObjects && m_objPack) {
@@ -449,7 +439,7 @@ private:
 
             for (size_t idx : sorted_indices) {
                 const auto& imgObj = imageObjects[idx];
-                // 跳过明显无效的对象
+                
                 if (imgObj.sectorX >= mapWidth || imgObj.sectorY >= mapHeight ||
                     imgObj.sectorX >= 10000 || imgObj.sectorY >= 10000) {
                     skippedInvalid++;
@@ -460,7 +450,7 @@ private:
                     continue;
                 }
 
-                // 检查完全透明标志
+                
                 if (imgObj.transFlags & OBJECT_TRANS_FLAG) {
                     skippedTrans++;
                     if (!debugPrinted) {
@@ -468,12 +458,12 @@ private:
                                   << " - FULLY TRANSPARENT (transFlags=0x"
                                   << std::hex << (int)imgObj.transFlags << std::dec << ")" << std::endl;
                     }
-                    continue;  // 跳过渲染
+                    continue;  
                 }
 
                 // Calculate screen position from pixel coordinates
-                // ImageObject 的 pixelX/pixelY 已经是像素坐标（线性映射，不是等轴测）
-                // 屏幕坐标 = 像素坐标 * 缩放 - 摄像机偏移
+                
+                
                 int screenX = static_cast<int>(imgObj.pixelX * m_zoom) - m_cameraX;
                 int screenY = static_cast<int>(imgObj.pixelY * m_zoom) - m_cameraY;
 
@@ -499,9 +489,9 @@ private:
                 if (sprite.IsInit()) {
                     POINT point = { screenX, screenY };
 
-                    // 检查半透明标志
+                    
                     if (imgObj.transFlags & OBJECT_HALF_FLAG) {
-                        // 使用 BltSpriteAlpha 实现 50% 半透明
+                        
                         m_screenSurface->BltSpriteAlpha(&point, &sprite, 128);
                         renderedHalf++;
                         if (!debugPrinted) {
@@ -510,7 +500,7 @@ private:
                                       << std::hex << (int)imgObj.transFlags << std::dec << ")" << std::endl;
                         }
                     } else {
-                        // 正常渲染
+                        
                         m_screenSurface->BltSprite(&point, &sprite);
                         rendered++;
                         if (!debugPrinted) {
@@ -531,7 +521,7 @@ private:
                 debugPrinted = true;
             }
 
-            // 每 30 帧输出一次统计
+            
             static int frameCount = 0;
             if (++frameCount % 30 == 0) {
                 std::cout << "\rNormal: " << rendered << " | Half-Trans: " << renderedHalf

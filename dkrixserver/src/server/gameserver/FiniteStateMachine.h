@@ -8,9 +8,7 @@
 #include "Types.h"
 #include "VSDateTime.h"
 
-/**
- * 기본 abstract class들
- **/
+ 
 class State {
 public:
     State() {}
@@ -18,7 +16,7 @@ public:
 
     virtual DWORD getStateType() const = 0;
 
-    // 다음 상태를 return 한다. StateType 0 은 상태가 변하지 않는다는 의미.
+    
     virtual DWORD heartbeat(Timeval currentTime) = 0;
 
     virtual void start() {}
@@ -64,12 +62,10 @@ protected:
     DWORD m_ResetState;
 };
 
-/**
- * 자주 사용될만한 기본 class들
- **/
+ 
 class TimerState : public State {
 public:
-    // 수명은 초단위이다.
+    
     TimerState(DWORD nState, Turn_t life) : m_TimeOutState(nState), m_LifeSpan(life) {}
     void start();
     DWORD heartbeat(Timeval currentTime);
@@ -103,8 +99,8 @@ private:
     Timeval m_Deadline;
 };
 
-// 그냥 모든 state를 갖고 있고 갖고 있는 객체를 넘겨준다.
-// 객체 안에 상태가 들어있을 경우 서로 다른 FSM에서 공유가 안되므로 주의
+
+
 class FlyweightStateFactory : public StateFactory {
 public:
     void registerState(State* pState) {

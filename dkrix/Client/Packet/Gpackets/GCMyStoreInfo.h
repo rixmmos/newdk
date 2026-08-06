@@ -7,9 +7,9 @@
 #ifndef __GC_MY_STORE_INFO_H__
 #define __GC_MY_STORE_INFO_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "StoreInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../StoreInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCMyStoreInfo;

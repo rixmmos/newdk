@@ -21,7 +21,7 @@ throw ( ProtocolException , Error )
 	
 #ifdef __GAME_CLIENT__
 	//------------------------------------------------------
-	// 검증
+	
 	//------------------------------------------------------
 	if ( g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_NPC_ASK )
 	{

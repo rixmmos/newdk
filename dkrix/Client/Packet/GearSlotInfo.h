@@ -7,14 +7,14 @@
 #ifndef __GEAR_SLOT_INFO_H__
 #define __GEAR_SLOT_INFO_H__
 
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "SocketInputStream.h"
 #include "SocketOutputStream.h"
 #include "PCItemInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Inventory 정보를 담고 있는 객체.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GearSlotInfo : public PCItemInfo 

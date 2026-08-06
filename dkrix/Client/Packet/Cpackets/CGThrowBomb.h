@@ -7,10 +7,10 @@
 #ifndef __CG_THROW_BOMB_H__
 #define __CG_THROW_BOMB_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGThrowBomb;

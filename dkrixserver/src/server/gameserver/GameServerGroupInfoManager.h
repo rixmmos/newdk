@@ -22,8 +22,8 @@ typedef unordered_map<ServerGroupID_t, GameServerGroupInfo*> HashMapGameServerGr
 //
 // class GameServerGroupInfoManager;
 //
-// 게임 서버의 ID 를 키값으로 하는 GameServerGroupInfo의 unordered_map 을
-// 내부에 가지고 있다.
+
+
 //
 //----------------------------------------------------------------------
 

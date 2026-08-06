@@ -144,7 +144,7 @@ public:
     int m_ItemTypeTotalRatio;
     vector<TreasureItemType*> m_TreasureItemTypes;
 
-    // Add By Sonic 2006.10.21  藤속寧몸딜괜橄昑離댕令긴좆
+    
     void setRndItemOptionMax(int Value = 2) {
         m_OptionRatioMax = Value;
     }
@@ -173,11 +173,11 @@ public:
     //	XMLTree*	makeXMLTree() const;
 
 public:
-    int m_ItemRatio;           // 아이템 자체가 나올 확률
-    int m_OptionRatio;         // 나온 아이템에 옵션이 붙을 확률
-    int m_ItemClassTotalRatio; // 모든 아이템 클래스의 확률의 합
+    int m_ItemRatio;           
+    int m_OptionRatio;         
+    int m_ItemClassTotalRatio; 
     vector<TreasureItemClass*> m_TreasureItemClasses;
-    // Add By Sonic 2006.10.21  藤속寧몸딜괜橄昑離댕令긴좆
+    
     void setRndItemOptionMax(int Value = 2) {
         m_OptionRatioMax = Value;
     }

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GamePlayer.h
 // Written by  : reiot@ewestsoft.com
-// Description : 게임 서버용 플레이어 클래스
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GAME_PLAYER_H__
@@ -31,23 +31,23 @@
 //////////////////////////////////////////////////////////////////////////////
 // class GamePlayer
 //
-// 게임 서버용 플레이어 클래스
+
 //
-// Player 클래스를 상속받아서, 게임 서버에서만 사용되는 Mutex 및
-// Creature 관련 데이터 및 메쏘드, PreviousPacket 관련 데이터 및
-// 메소드들을 추가했다.
+
+
+
 //
-// 특히 processOutput() 및 sendPacket()은 Race Condition 이 발생될 수
-// 있으므로, Mutex 로 보호되어야 한다.(MODE-IV의 경우이며, MODE-I, II
-// 의 경우에는 processInput(), processCommand() 모두 Mutex 로 보호해야
-// 한다.)
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class Creature;
 
 class GamePlayer : public Player, public PaySystem, public BillingPlayerInfo, public CBillingPlayerInfo {
 public:
-    // 저장해 놓을 이전 패킷의 개수
+    
     const static BYTE nPacketHistorySize = 10;
 
 public:
@@ -68,13 +68,13 @@ public:
     virtual void sendPacket(Packet* packet);
 
     // disconnect
-    // 정식 로그아웃의 경우 disconnect(LOGOUT)
+    
     virtual void disconnect(bool bDisconnected = DISCONNECTED);
 
     // get debug string
     virtual string toString() const;
 
-    // 스피드 체크
+    
     virtual bool verifySpeed(Packet* pPacket);
 
     // get creature pointer
@@ -91,11 +91,11 @@ public:
     }
 
     // return recent N-th packet
-    // 최근 전송된 N 번째 패킷을 리턴한다.
+    
     Packet* getOldPacket(uint prev = 0);
 
     // return recent packet which has packetID
-    // 특정 ID를 가진 패킷 중 가장 최근의 패킷을 리턴한다.
+    
     Packet* getOldPacket(PacketID_t packetID);
 
     // get player's status
@@ -113,7 +113,7 @@ public:
     Event* getEvent(Event::EventClass EClass);
     void deleteEvent(Event::EventClass EClass);
 
-    // 패널티 Status 관련 함수
+    
     // Set Flag
     void setPenaltyFlag(PenaltyType PenaltyFlag) {
         m_PenaltyFlag.set(PenaltyFlag);
@@ -139,7 +139,7 @@ public:
     void loadSpecialEventCount(void);
     void saveSpecialEventCount(void);
 
-public: // '이미 접속 중'인 경우. 강제 종료를 위해서. by sigi.
+public: 
     bool isKickForLogin() const {
         return m_bKickForLogin;
     }
@@ -162,7 +162,7 @@ public: // '이미 접속 중'인 경우. 강제 종료를 위해서. by sigi.
     }
 
 public:
-    // 쩝.
+    
     void setReconnectPacket(GCReconnectLogin* pPacket) {
         SAFE_DELETE(m_pReconnectPacket);
         m_pReconnectPacket = pPacket;
@@ -195,7 +195,7 @@ public:
 
     void sendCBillingPayInfo();
 
-    // 패킷 암호화 관련
+    
     // by sigi. 2002.11.27
     void setEncryptCode();
 
@@ -203,7 +203,7 @@ public:
     void kickPlayer(uint nSeconds, uint KickMessageType);
 
     //////////////////////////////////////////////////
-    // PaySystem 관련
+    
     //////////////////////////////////////////////////
 public:
     bool loginPayPlay(PayType payType, const string& PayPlayDate, int PayPlayHours, uint payPlayFlag, const string& ip,
@@ -272,7 +272,7 @@ private:
 
     BYTE m_VerifyCount;
 
-    // 시간 검증 타임.
+    
     Timeval m_SpeedVerify;
     Timeval m_MoveSpeedVerify;
     Timeval m_AttackSpeedVerify;
@@ -283,28 +283,28 @@ private:
 
     EventManager m_EventManager;
 
-    // 스페셜 이벤트 관련 카운터
-    // 해골 많이 줍기나, 뭐 그런 종류의 이벤트에 사용될 수 있는 카운터
+    
+    
     uint m_SpecialEventCount;
 
-    // '이미 접속 중'에서 강제 종료 시키는 경우
+    
     bool m_bKickForLogin;
     string m_KickRequestHost;
     uint m_KickRequestPort;
 
-    // GameServer --> LoginServer로 갈때 사용한다. 으헤헤. by sigi. 2002.6.19
+    
     GCReconnectLogin* m_pReconnectPacket;
 
     bool m_bFreePass;
 
-    // 빌링 시스템에 연결하지 않고 유료 플레이 하기
+    
     bool m_bMetroFreePlayer;
 
-    // 각 사용자별 아이템 획득 보너스 확률
+    
     int m_ItemRatioBonusPoint;
 
-    Timeval m_PCRoomLottoStartTime; // PC 방 복권 계산용. 적용시작 시간
-    uint m_PCRoomLottoSumTime;      // PC 방 복권 계산용. 누적시간. logoutPayPlay시 저장용
+    Timeval m_PCRoomLottoStartTime; 
+    uint m_PCRoomLottoSumTime;      
 
     string m_PacketLogFileName;
     bool m_bPacketLog;
@@ -318,7 +318,7 @@ private:
 #ifdef __THAILAND_SERVER__
     bool m_bPermission;
 #endif
-    // add by Coffee 2007-7-15 藤속룐관념죗쇱꿎
+    
 private:
     BYTE m_Sequence;
 };

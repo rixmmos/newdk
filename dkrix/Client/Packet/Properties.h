@@ -12,7 +12,7 @@
 #pragma warning(disable:4786)
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include <map>
 
@@ -29,9 +29,9 @@ public :
 //
 // class Properties;
 //
-// 파일로부터 (key,value) pair 를 읽어서 map 의 형태로 가지고 있는다.
-// 주로 환경이나 옵션등을 담은 파일에 사용한다. 객체를 생성해서 각종
-// 옵션을 설정하고 저장하면 새 파일이 만들어진다. 
+
+
+
 //
 // *Usage*
 //
@@ -88,7 +88,7 @@ public :
 	
 private :
 	
-	// key 가 string 이고, value 역시 string 인 map 이다.
+	
 	std::map< std::string , std::string , StringCompare > m_Properties;
 
 	// load/save target file's name

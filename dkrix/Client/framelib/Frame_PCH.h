@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
 #include "../../basic/Platform.h"

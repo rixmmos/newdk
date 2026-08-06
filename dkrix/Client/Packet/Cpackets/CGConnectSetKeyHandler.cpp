@@ -8,7 +8,7 @@
 #include "Client_PCH.h"
 #include "CGConnectSetKey.h"
 #include "Assert.h"
-#include "Player.h"
+#include "../Player.h"
 #ifdef __LOGIN_SERVER__
 #endif
 

@@ -12,7 +12,7 @@
 #pragma warning(disable:4786)
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include <list>
 #include <string>
 

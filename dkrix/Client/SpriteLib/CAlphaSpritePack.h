@@ -4,8 +4,8 @@
 // CAlphaSpritePack.h
 //----------------------------------------------------------------------
 //
-// SpritePack의 Sprite에 대한 File Pointer Index가 필요하다.
-// SpriteSet에서 읽기 위해서.
+
+
 //
 //----------------------------------------------------------------------
 
@@ -52,8 +52,8 @@ class CAlphaSpritePack {
 		CAlphaSprite&	operator [] (TYPE_SPRITEID n) { return m_pSprites[n]; }
 
 	protected :
-		TYPE_SPRITEID	m_nSprites;		// CAlphaSprite의 개수
-		CAlphaSprite*	m_pSprites;		// CAlphaSprite들을 저장해둔다.
+		TYPE_SPRITEID	m_nSprites;		
+		CAlphaSprite*	m_pSprites;		
 };
 
 #endif

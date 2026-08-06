@@ -18,7 +18,7 @@ MMoneyManager*		g_pMoneyManager = NULL;
 //-----------------------------------------------------------------------------
 MMoneyManager::MMoneyManager()
 {
-	m_MoneyLimit	= 2000000000;		// 20억
+	m_MoneyLimit	= 2000000000;		
 	m_Money			= 0;
 }
 
@@ -43,7 +43,7 @@ MMoneyManager::~MMoneyManager()
 bool
 MMoneyManager::SetMoney(int money)
 {
-	// 0이하거나 한계를 넘어가면 안된다.
+	
 	if (money<0 || money > m_MoneyLimit)
 	{
 		return false; 
@@ -51,7 +51,7 @@ MMoneyManager::SetMoney(int money)
 
 	m_Money = money;
 
-	// 2004, 5, 6, sobeit add start - 돈이 10 만이 넘으면 보관함 도움말
+	
 #ifdef __GAME_CLIENT__
 	static bool CanBuyStorage = false;
 	if( false == CanBuyStorage && m_Money>100000 )

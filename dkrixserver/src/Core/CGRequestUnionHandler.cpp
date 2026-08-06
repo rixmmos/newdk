@@ -43,7 +43,7 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -52,10 +52,10 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
 
     GCGuildResponse gcGuildResponse;
 
-    // 요청한놈이 지가 속한 길드의 마스터인가?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature)) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -68,7 +68,7 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
     pPlayer->sendPacket(&gcGuildResponse);
 
     if (result == GuildUnionOfferManager::OK) {
-        // 상대길드의 장이름을 구해서..찾아야 겠다.
+        
         Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
 
         if (pGuild != NULL) {

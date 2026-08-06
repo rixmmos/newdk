@@ -17,7 +17,7 @@ void GameServerExpTest::testRankExp() {
 
             RankExp_t rankExp1 = computeRankExp(myLevel, otherLevel);
             RankExp_t rankExp1_2 = rankExp1 * 2;
-            // CPPUNIT_ASSERT( rankExpGain==얼마 ); -_-;
+            
 
             if (myLevel == 0 || otherLevel == 0) {
                 CPPUNIT_ASSERT(rankExp1 == 0);

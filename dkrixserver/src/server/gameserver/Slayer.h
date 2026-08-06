@@ -47,9 +47,9 @@
 
 #define SLAYER_MAX_RANK 50
 #else
-// 슬레이어는 도메인 레벨이 BOUND_LEVEL에 도달하기 전까지는
-// 능력치가 BOUND_ATTR 이하로, 능력치 총합이 BOUND_ATTR_SUM 이하로 제한된다.
-// BOUND_LEVEL이 넘은 뒤에는 MAX_ATTR과 MAX_ATTR_SUM으로 제한된다.
+
+
+
 #define SLAYER_BOUND_LEVEL 100
 #define SLAYER_BOUND_ATTR 210
 #define SLAYER_BOUND_ATTR_SUM 330
@@ -68,8 +68,8 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-// 장비를 입고 벗을 때 장비 입고 벗기 전의 능력치를
-// 저장해 두기 위한 버퍼(?) 클래스.
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class SLAYER_RECORD {
@@ -92,7 +92,7 @@ public:
 //
 // Class Slayer;
 //
-// Creature 의 하위 클래스로 플레이어가 조종하는 PC 이당.
+
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +100,7 @@ class Motorcycle;
 
 class Slayer : public PlayerCreature {
     //////////////////////////////////////////////////////////////
-    // 클래스 내부 상수 선언
+    
     //////////////////////////////////////////////////////////////
 public:
     enum WearPart {
@@ -129,14 +129,14 @@ public:
     };
 
     //////////////////////////////////////////////////////////////
-    // 생성자/소멸자
+    
     //////////////////////////////////////////////////////////////
 public:
     Slayer();
     virtual ~Slayer();
 
     //////////////////////////////////////////////////////////////
-    // 하위 클래스 상속 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     virtual CreatureClass getCreatureClass() const {
@@ -171,14 +171,14 @@ public:
     }
 
     //////////////////////////////////////////////////////////////
-    // 시간제한 아이템 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     void checkItemTimeLimit();
     void updateEventItemTime(DWORD time);
 
     //////////////////////////////////////////////////////////////
-    // 상태 관련 함수(dead or alive)
+    
     //////////////////////////////////////////////////////////////
 public:
     virtual bool isDead() const {
@@ -189,7 +189,7 @@ public:
     }
 
     //////////////////////////////////////////////////////////////
-    // 겉모습 관련 함수(이름, 권한, 성별, 머리, 피부, 전화번호)
+    
     //////////////////////////////////////////////////////////////
 public:
     const string& getName() const {
@@ -262,7 +262,7 @@ public:
     }
 
     //////////////////////////////////////////////////////////////
-    // 전화 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     PhoneNumber_t getPhoneNumber() const {
@@ -280,7 +280,7 @@ public:
     bool isSlotByPhoneNumber(PhoneNumber_t PhoneNumber);
 
     //////////////////////////////////////////////////////////////
-    // 능력치 관련 함수(STR, DEX, INT)
+    
     //////////////////////////////////////////////////////////////
 public:
     Bonus_t getBonus() const {
@@ -290,7 +290,7 @@ public:
         m_AdvancedAttrBonus = bonus;
     }
 
-    // 성향
+    
     Alignment_t getAlignment() const {
         return m_Alignment;
     }
@@ -336,14 +336,14 @@ public:
 
     void divideAttrExp(AttrKind kind, Damage_t damage, ModifyInfo& ModifyInfo);
 
-    // 계급 추가. by sigi. 2002.8.30
-    // PlayerCreature로 옮김. 2004.1 by Sequoia
+    
+    
 
-    // 초보자인가? 순수 능력치 합이 40 이하
+    
     bool isNovice() const;
 
     //////////////////////////////////////////////////////////////
-    // 능력치 관련 함수(HP, MP)
+    
     //////////////////////////////////////////////////////////////
 public:
     HP_t getHP(AttrType attrType = ATTR_CURRENT) const {
@@ -370,7 +370,7 @@ public:
 
 
     //////////////////////////////////////////////////////////////
-    // 능력치 관련 함수(Damage, CC, Defense, ToHit)
+    
     //////////////////////////////////////////////////////////////
 public:
     Damage_t getDamage(AttrType attrType = ATTR_CURRENT) const {
@@ -391,7 +391,7 @@ public:
 
 
     //////////////////////////////////////////////////////////////
-    // 스킬 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     Exp_t getGoalExp(SkillDomainType_t Domain) const {
@@ -449,14 +449,14 @@ public:
         m_RifleBonusExp = RifleBonusExp;
     }
 
-    // 지정된 domain에서 가장 높은 level의 기술의 타입을 되돌린다.
+    
     // SkillType_t getMaxLevelSkillType(SkillDomainType_t domain) ;
     //	void setHotKey(BYTE pos, SkillType_t SkillType)  { m_HotKey[pos] = SkillType; }
     //	SkillType_t getHotKey(BYTE pos) const  { return m_HotKey[pos]; }
 
 
     //////////////////////////////////////////////////////////////
-    // 아이템 착/탈 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     bool isWear(WearPart Part) {
@@ -492,7 +492,7 @@ public:
     void getShapeInfo(DWORD& flag, Color_t color[PCSlayerInfo::SLAYER_COLOR_MAX]) const;
 
     //////////////////////////////////////////////////////////////
-    // 아이템 착/탈 시 능력치 수정 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     void initAllStat(int numPartyMember = -1);
@@ -509,7 +509,7 @@ private:
     void computeOptionClassStat(OptionClass OClass, int PlusPoint);
 
     //////////////////////////////////////////////////////////////
-    // 아이템 검색 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     virtual Item* findItemOID(ObjectID_t id) {
@@ -541,7 +541,7 @@ public:
     }
 
     //////////////////////////////////////////////////////////////
-    // 모터 사이클 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     Motorcycle* getMotorcycle() const {
@@ -557,7 +557,7 @@ public:
 
 
     //////////////////////////////////////////////////////////////
-    // 인포 관련 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     PCSlayerInfo2* getSlayerInfo2() const;
@@ -571,7 +571,7 @@ public:
     EffectInfo* getEffectInfo() const;
 
     //////////////////////////////////////////////////////////////
-    // 기타 함수
+    
     //////////////////////////////////////////////////////////////
 public:
     virtual Fame_t getFame() const {
@@ -727,12 +727,12 @@ private:
     // PC name
     string m_Name;
 
-    // 권한
+    
     BYTE m_Competence;
     BYTE m_CompetenceShape;
 
     // Sex(1bit), HairStyle(2bit)
-    // 나중에는 bit 연산을 해서 메모리를 줄이도록 하자.
+    
     Sex m_Sex;
     HairStyle m_HairStyle;
 
@@ -820,29 +820,29 @@ private:
 
     mutable Mutex m_Mutex;
 
-    // 슬레이어의 이전 능력치를 저장해 두는 버퍼 구조체
+    
     SLAYER_RECORD m_Record;
 
-    // 부활존 관련
+    
     ZoneID_t m_ResurrectZoneID;
 
-    // HP, MP 스틸
+    
     Steal_t m_HPStealAmount;
     Steal_t m_MPStealAmount;
     Steal_t m_HPStealRatio;
     Steal_t m_MPStealRatio;
 
-    // HP, MP 재생
+    
     Regen_t m_HPRegen;
     Regen_t m_MPRegen;
 
     // luck
     Luck_t m_Luck;
 
-    // Prayer와 Meditation과 관련된 timer
+    
     Timeval m_MPRegenTime;
 
-    // 각종 경험치 세이브 카운트
+    
     WORD m_DomainExpSaveCount;
     WORD m_AttrExpSaveCount;
     WORD m_SkillExpSaveCount;

@@ -76,8 +76,8 @@ public:
         m_Name = Name;
     }
 
-    // 사용가능할 경우 true
-    // 사용 불가능할 경우 false
+    
+    
     void setDisable() throw() {
         m_Enable = false;
     }
@@ -88,18 +88,18 @@ public:
         return m_Enable;
     }
 
-    // 다음 캐스팅이 가능할때까지 남은 시간
+    
     Turn_t getRemainTurn(Timeval currentTime) const throw();
 
 protected:
     string m_Name;
-    SkillType_t m_SkillType; // 마법, 기술의 종류
-    Exp_t m_Exp;             // 숙련도
-    ExpLevel_t m_ExpLevel;   // 숙련도 레벨
-    Turn_t m_Interval;       // 마법, 기술의 딜레이, 0.1 초 단위
-    Turn_t m_CastingTime;    // 캐스팅 타임... 0.1초 단위
-    Timeval m_runTime;       // 다음에 쓸 수 있는 시간
-    bool m_Enable;           // 사용 가능 한가 안한가
+    SkillType_t m_SkillType; 
+    Exp_t m_Exp;             
+    ExpLevel_t m_ExpLevel;   
+    Turn_t m_Interval;       
+    Turn_t m_CastingTime;    
+    Timeval m_runTime;       
+    bool m_Enable;           
 };
 
 #endif // __SKILL_SLOT_H__

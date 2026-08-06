@@ -14,14 +14,14 @@
 #include "ServerInfoFileParser.h"
 
 #ifdef __GAME_CLIENT__
-	#include "ClientPlayer.h"
-	#include "Cpackets/CGConnect.h"
-	#include "Cpackets/CGPortCheck.h"
+	#include "../ClientPlayer.h"
+	#include "../Cpackets/CGConnect.h"
+	#include "../Cpackets/CGPortCheck.h"
 	#include "UserInformation.h"
-	#include "Properties.h"
-	#include "ClientCommunicationManager.h"
+	#include "Packet/Properties.h"
+	#include "../ClientCommunicationManager.h"
 	//add by viva
-	#include "Cpackets/CGConnectSetKey.h"
+	#include "../Cpackets/CGConnectSetKey.h"
 	//end
 #endif
 
@@ -41,9 +41,14 @@
 extern int g_Dimension;
 extern bool		UpdateSocketOutput();
 extern BYTE g_macAddress[6];
+
+static void TraceGameEntryFlow(const char* step)
+{
+	(void)step;
+}
 //--------------------------------------------------------------------------------
-// 로그인서버로부터 게임 서버의 주소와 포트, 그리고 인증키를 받은 즉시
-// 게임 서버로 연결한 후, 인증키를 담은 CGConnect 패킷을 전송한다.
+
+
 //--------------------------------------------------------------------------------
 void LCReconnectHandler::execute ( LCReconnect * pPacket , Player * pPlayer )
 	 
@@ -51,46 +56,7 @@ throw ( ProtocolException , Error )
 {
 	__BEGIN_TRY
 
-		/*
-#ifdef __GAME_CLIENT__
-
-	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
-
-	// 로그인 서버와의 연결을 종료한다
-	// 이때 로그인 서버는 LCReconnect 패킷을 보내면서 연결을 종료한다는 사실에 유의하라.
-	cout << "Disconnecting from login server" << endl;
-	pClientPlayer->disconnect();
-
-	// LCReconnect 패킷에 들어있는 정보를 사용해서, 게임 서버로 연결한다.
-	cout << "Reconnecting to " << pPacket->getGameServerIP() << ":" << pPacket->getGameServerPort() << endl;
-
-	try {
-
-		pClientPlayer->getSocket()->reconnect( pPacket->getGameServerIP() , pPacket->getGameServerPort() );
-
-		// reconnect하게 되면 소켓이 새로 만들어지게 된다.
-		// 따라서, 이 소켓 역시 옵션을 새로 지정해줘야 한다.
-		pClientPlayer->getSocket()->setNonBlocking();
-		pClientPlayer->getSocket()->setLinger(0);
-
-	} catch ( ConnectException & ce ) {
-		throw Error(ce.toString());
-	}
-
-	// 연결이 이루어지면, 바로 CGConnect 패킷을 전송한다.
-	// 이전에 Select 한 PC의 타입과 이름을 클라이언트 플레이어 객체에 저장해둔다.
-	cout << "Sending CGConnect with Key(" << pPacket->getKey() << ")" << endl;
-
-	CGConnect cgConnect;
-	cgConnect.setKey( pPacket->getKey() );
-	cgConnect.setPCType( pClientPlayer->getPCType() );
-	cgConnect.setPCName( pClientPlayer->getPCName() );
-
-	pClientPlayer->sendPacket( &cgConnect );
-	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CG_CONNECT );
-
-#endif
- */
+		 
 #ifdef OUTPUT_DEBUG
 	FILE *fp = NULL;
 	DWORD tickCount = 0;
@@ -138,12 +104,12 @@ throw ( ProtocolException , Error )
 
 	ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 
-	// 로그인 서버와의 연결을 종료한다
-	// 이때 로그인 서버는 LCReconnect 패킷을 보내면서 연결을 종료한다는 사실에 유의하라.
+	
+	
 	
 	pClientPlayer->disconnect();
 
-	// LCReconnect 패킷에 들어있는 정보를 사용해서, 게임 서버로 연결한다.
+	
 	DEBUG_ADD_FORMAT("Reconnecting to %s:%d", 
 										pPacket->getGameServerIP().c_str(), 
 										pPacket->getGameServerPort());
@@ -153,11 +119,14 @@ throw ( ProtocolException , Error )
 		tickCount = timeGetTime();//GetTickCount();
 #endif
 		pClientPlayer->getSocket()->reconnect( pPacket->getGameServerIP() , pPacket->getGameServerPort() );
+		TraceGameEntryFlow("LCReconnectHandler reconnect OK");
+		pClientPlayer->resetStreams();
+		TraceGameEntryFlow("LCReconnectHandler reset streams");
 #ifdef OUTPUT_DEBUG
 		currentTempStruct.reconnectTickCount = timeGetTime()-tickCount;
 #endif
-		// reconnect하게 되면 소켓이 새로 만들어지게 된다.
-		// 따라서, 이 소켓 역시 옵션을 새로 지정해줘야 한다.
+		
+		
 		pClientPlayer->getSocket()->setNonBlocking();
 		pClientPlayer->getSocket()->setLinger(0);
 
@@ -165,8 +134,8 @@ throw ( ProtocolException , Error )
 		throw Error(ce.toString());
 	}
 
-	// 연결이 이루어지면, 바로 CGConnect 패킷을 전송한다.
-	// 이전에 Select 한 PC의 타입과 이름을 클라이언트 플레이어 객체에 저장해둔다.
+	
+	
 	DEBUG_ADD_FORMAT("Sending CGConnect with Key(%ld)", 
 												pPacket->getKey());
 
@@ -174,37 +143,53 @@ throw ( ProtocolException , Error )
 	CGConnectSetKey cgConnectSetKey;
 	cgConnectSetKey.setEncryptKey(rand());
 	cgConnectSetKey.setHashKey(rand());
-	pClientPlayer->delKey();
-	pClientPlayer->sendPacket(&cgConnectSetKey);
-	UpdateSocketOutput();
-	Sleep(500);
-	cgConnectSetKey.execute(pClientPlayer);
+	if (pPacket->getGameServerIP() != "127.0.0.1")
+	{
+		pClientPlayer->delKey();
+		pClientPlayer->resetStreams();
+		pClientPlayer->sendPacket(&cgConnectSetKey);
+		UpdateSocketOutput();
+		TraceGameEntryFlow("LCReconnectHandler sent CGConnectSetKey");
+		Sleep(500);
+		cgConnectSetKey.execute(pClientPlayer);
+	}
+	else
+	{
+		TraceGameEntryFlow("LCReconnectHandler skipped CGConnectSetKey for localhost");
+	}
 	//end
 
-	// 재접속..
+	
 	CGConnect cgConnect;
 	cgConnect.setKey( pPacket->getKey() );
 	cgConnect.setPCType( pClientPlayer->getPCType() );
 	cgConnect.setPCName( pClientPlayer->getPCName() );
 	cgConnect.setMacAddress( g_macAddress );
+	{
+		char traceBuffer[256];
+		sprintf(traceBuffer, "LCReconnectHandler CGConnect name=%s pcType=%d", pClientPlayer->getPCName().c_str(), pClientPlayer->getPCType());
+		TraceGameEntryFlow(traceBuffer);
+	}
 	
 #ifdef OUTPUT_DEBUG
 	tickCount = timeGetTime();
 #endif
 	pClientPlayer->sendPacket( &cgConnect );
 	pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CG_CONNECT );	
+	TraceGameEntryFlow("LCReconnectHandler sent CGConnect");
 
-	// 바로 보낸다.
+	
 //	EMBEDDED_BEGIN;
 	UpdateSocketOutput();
+	TraceGameEntryFlow("LCReconnectHandler flushed CGConnect");
 //	EMBEDDED_END;
 	
 #ifdef OUTPUT_DEBUG
 	currentTempStruct.sendCGConnectTickCount = timeGetTime()-tickCount;
 #endif
 	
-	// 2002.6.28 [UDP수정]
-	// 서버에 UDP port를 알려주기 위해서
+	
+	
 	CGPortCheck cgPortCheck;
 	cgPortCheck.setPCName( g_pUserInformation->CharacterID.GetString() );
 
@@ -215,7 +200,7 @@ throw ( ProtocolException , Error )
 	{
 		ServerAddress = g_pConfigKorean->getProperty("LoginServerAddress");
 		ServerPort = g_pConfigKorean->getPropertyInt("LoginServerCheckPort");
-		//add by sonic 2006.4.10 쇱꿎角뤠槨굶뒈뒈囹
+		
 	}
 	else
 	{
@@ -229,9 +214,8 @@ throw ( ProtocolException , Error )
 		ServerPort,
 		&cgPortCheck );
 
-	DEBUG_ADD("[ MODE ] START SETMODE MODE_WAIT_UPDATEINFO");
-	SetMode( MODE_WAIT_UPDATEINFO );
-	DEBUG_ADD("[ MODE ] END SETMODE MODE_WAIT_UPDATEINFO");
+	DEBUG_ADD("[ MODE ] SKIP SETMODE MODE_WAIT_UPDATEINFO");
+	TraceGameEntryFlow("LCReconnectHandler skipped MODE_WAIT_UPDATEINFO");
 
 #ifdef OUTPUT_DEBUG
  	fp = fopen("Log\\ConnectTime.txt", "wt");

@@ -11,16 +11,23 @@
 #include "CImm.h"
 #endif
 #include "UserOption.h"
+#include <typeinfo>
 
 #define STATCH_VALUE 10
 #define HIDE_GAP	4
 #define HIDE_SPEED	10
 extern RECT g_GameRect;
 
+static void TraceWindowManagerShow(const char* step, const Window* pWindow = NULL)
+{
+	(void)step;
+	(void)pWindow;
+}
+
 //----------------------------------------------------------------------------
 // Globals
 //----------------------------------------------------------------------------
-WindowManager *	gpC_window_manager; // App���� �Ҵ��Ѵ�.
+WindowManager *	gpC_window_manager; 
 
 //-----------------------------------------------------------------------------
 // Window
@@ -36,9 +43,9 @@ Window::Window(int _x, int _y, int _w, int _h) : Rect(_x, _y, _w, _h)
 	Init();
 
 	//
-	// constructor/destructor������ pure virtual�� �Ұ����ϴ�. �ֱ׷�������
-	// �𸣰ڴ�. �Ƹ� �׷����ϸ� instatance�� �Ұ����ϴٴ� ����... ��...
-	// �׷��� �� event�� �� ������δ� �Ұ����ϴ�.
+	
+	
+	
 	//
 	//WindowEventReceiver(EVENT_WINDOW_CREATE);
 }
@@ -75,29 +82,29 @@ Window::~Window()
 //-----------------------------------------------------------------------------
 // ShowWidget
 //
-// Window ���� ���̴� Widget���� ����Ѵ�.
+
 //
-// !�̰��� �ܺ��� Show() ��ƾ ���������� ����Ǿ� �Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::ShowWidget() const
 {
 	LineEditorVisual * data;
 	for (int i=0; i < m_sdl_lev.Size(); i++)
 		if (m_sdl_lev.Data(i, data))
-			data->Show(); // ���ο��� dc�� Get/Release �Ѵ�.
+			data->Show(); 
 }
 
 //-----------------------------------------------------------------------------
 // Attach
 //
-// p_lev�� Window�� ���δ�.
+
 //-----------------------------------------------------------------------------
 void Window::Attach(LineEditorVisual * p_lev)
 {
 	if (p_lev == NULL)
 		_Error(NULL_REF);
 
-	m_sdl_lev.Add(p_lev); // �̹� �����ϸ� �����̴�.
+	m_sdl_lev.Add(p_lev); 
 }
 
 //-----------------------------------------------------------------------------
@@ -119,7 +126,7 @@ void Window::InitAttributes()
 //-----------------------------------------------------------------------------
 // AttrTopmost
 //
-// topmost �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrTopmost(bool state)
 {
@@ -129,7 +136,7 @@ void Window::AttrTopmost(bool state)
 //-----------------------------------------------------------------------------
 // AttrKeyboardControl
 //
-// keyboard control �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrKeyboardControl(bool state)
 {
@@ -142,20 +149,20 @@ void Window::AttrKeyboardControl(bool state)
 //-----------------------------------------------------------------------------
 // AttrWindowMove
 //
-// Window �̵� �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrWindowMove(bool new_state)
 { 
 	m_attributes.window_move = new_state;
 
-	// move ready�� true�� �� �� window_move attr�� false�� �� �� �ִ�.
+	
 	m_bl_window_move_ready = false;
 }
 
 //-----------------------------------------------------------------------------
 // AttrAlpha
 //
-// Window �̵� �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrAlpha(bool new_state)
 { 
@@ -165,7 +172,7 @@ void Window::AttrAlpha(bool new_state)
 //-----------------------------------------------------------------------------
 // AttrStatch
 //
-// Window �̵� �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrStatch(bool new_state)
 { 
@@ -175,7 +182,7 @@ void Window::AttrStatch(bool new_state)
 //-----------------------------------------------------------------------------
 // AttrAutoHide
 //
-// Window �̵� �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::AttrAutoHide(ATTRIBUTES_HIDE new_state)
 { 
@@ -185,7 +192,7 @@ void Window::AttrAutoHide(ATTRIBUTES_HIDE new_state)
 //-----------------------------------------------------------------------------
 // ProcessHide
 //
-// Window �̵� �Ӽ��� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::ProcessHide(int gap, bool alpha_window)
 {
@@ -219,7 +226,7 @@ void Window::ProcessHide(int gap, bool alpha_window)
 	}
 
 	if(IsPixel(gpC_mouse_pointer->GetX(), gpC_mouse_pointer->GetY()) && (gpC_window_manager->GetMouseFocusedWindow() == this || alpha_window))
-	// ���콺�� ���� ������ ������.
+	
 	{
 		if(x < 0)
 		{
@@ -255,7 +262,7 @@ void Window::ProcessHide(int gap, bool alpha_window)
 		}
 	}
 	else
-	// �ƴϸ� �����簡-_-;
+	
 	{
 		if(!(GetAttributes()->autohide == ATTRIBUTES_HIDE_HEIGHT
 			&& (y <= 0 && y+h > gap || y+h >= g_GameRect.bottom && y < g_GameRect.bottom-gap))
@@ -278,7 +285,7 @@ void Window::ProcessHide(int gap, bool alpha_window)
 			}
 			else if(x+w < gap) x = gap-w;
 			else if(x > g_GameRect.right-gap)x = g_GameRect.right-gap;
-			// ������
+			
 			if(y < 0)
 			{
 				if(g_pUserOption->AutoHideSmoothScroll)
@@ -314,7 +321,7 @@ void Window::ProcessHide(int gap, bool alpha_window)
 			}
 			else if(y+h < gap) y = gap-h;
 			else if(y > g_GameRect.bottom-gap)y = g_GameRect.bottom-gap;
-			// ������
+			
 			if(x < 0)
 			{
 				if(g_pUserOption->AutoHideSmoothScroll)
@@ -339,17 +346,17 @@ void Window::ProcessHide(int gap, bool alpha_window)
 //-----------------------------------------------------------------------------
 // AttrPin
 //
-// Window�� pin�ȱ� ���θ� �����Ѵ�.
-// pin�� ������ pin�� ���� ���� Window(WindowManager::m_show_list)���� ���� 
-// �켱������ ���δ�. pin�� ���� Window(WindowManager::m_show_list_pinned_window)�� 
-// �׵鳢�� �켱������ �����Ѵ�.
+
+
+
+
 //-----------------------------------------------------------------------------
 void Window::AttrPin(bool new_state)
 {
 	if (gpC_window_manager->GetShowState(this) == true)
 	{
-		// Window�� �������� �ִ� �����̸� ���� ������ show_list�� �����ϰ� new_state��
-		// show_list�� �����Ѵ�.
+		
+		
 		gpC_window_manager->DisappearWindow(this);
 
 		m_attributes.pin = new_state;
@@ -357,8 +364,8 @@ void Window::AttrPin(bool new_state)
 	}
 	else
 	{
-		// �������� ���� ���� ���¸� �׳� attr�� �ٲ۴�. �̰��� ���� AppearWindow��
-		// ����Ǹ鼭 show_list�� ���������� ����� ���̴�.
+		
+		
 		m_attributes.pin = new_state;
 	}
 }
@@ -366,7 +373,7 @@ void Window::AttrPin(bool new_state)
 //-----------------------------------------------------------------------------
 // ClearInputState
 //
-// �ܺο��� Window�� �Է»��¸� clear�Ѵ�.
+
 //-----------------------------------------------------------------------------
 void Window::ClearInputState()
 {
@@ -403,7 +410,7 @@ MOUSE_STATE Window::GetMouseInputState()
 //-----------------------------------------------------------------------------
 // MoveReady
 //
-// Window�� �̵� �غ� �Ǿ����� �˸���. �̰��� �����ؾ� Move�� �� �� �ִ�.
+
 //-----------------------------------------------------------------------------
 void Window::MoveReady()
 {
@@ -416,7 +423,7 @@ void Window::MoveReady()
 //-----------------------------------------------------------------------------
 // MoveOk
 //
-// Window �̵��� ������.
+
 //-----------------------------------------------------------------------------
 void Window::MoveOk()
 {
@@ -426,10 +433,10 @@ void Window::MoveOk()
 //-----------------------------------------------------------------------------
 // SetOrigin
 //
-// �̵��߽ɼ���, �� ������ ��ġ�� �����Ѵ�.
-// � target�� ������ �̵������ν� �� target ��ü�� �̵��ϴ� ȿ���� �� �� �ִ�.
+
+
 //
-// 2���� ������ Window������ ������ (x, y)�� �������� ������ �� �ִ�.
+
 //-----------------------------------------------------------------------------
 void Window::SetOrigin(int ox, int oy)
 {
@@ -439,8 +446,8 @@ void Window::SetOrigin(int ox, int oy)
 //-----------------------------------------------------------------------------
 // Move
 //
-// Origin�� ��ȭ���� �����Ͽ� Window�� �̵���Ų��.
-// �̵��Ͽ����� true��, �ƴϸ� false�� ��ȯ�Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 bool Window::Move(int new_ox, int new_oy)
 {
@@ -483,8 +490,8 @@ bool Window::Move(int new_ox, int new_oy)
 //-----------------------------------------------------------------------------
 // MouseControl
 //
-// Window ���� Mouse control.
-// (x, y)�� �׻� Window ���ο� �ִ�.
+
+
 //-----------------------------------------------------------------------------
 bool Window::MouseControl(UINT message, int _x, int _y)
 {
@@ -494,7 +501,7 @@ bool Window::MouseControl(UINT message, int _x, int _y)
 			if (Move(_x, _y) == true)
 			{
 
-				// ���������� �̵��Ǿ���. ���� WindowManager���� �� ����� �˷��� �Ѵ�.
+				
 				m_u_mouse_state = MOUSE_MOVE;
 			}
 			break;
@@ -510,7 +517,7 @@ bool Window::MouseControl(UINT message, int _x, int _y)
 //-----------------------------------------------------------------------------
 // KeyboardControl
 //
-// Window ���� Keyboard control.
+
 //-----------------------------------------------------------------------------
 void Window::KeyboardControl(UINT message, UINT key, long extra)
 {
@@ -563,7 +570,7 @@ WindowManager::~WindowManager()
 //-----------------------------------------------------------------------------
 // SetKeyboardControlWindow
 //
-// window keyboard control attr�� �˻��Ͽ� m_pC_keyboard_control_window�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void WindowManager::SetKeyboardControlWindow(Window * p_window)
 {
@@ -618,11 +625,11 @@ void WindowManager::SetNextKeyboardControlWindow()
 //-----------------------------------------------------------------------------
 // SetNextTopmostWindow
 //
-// Window topmost attr�� �˻��Ͽ� m_pC_topmost_window�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void WindowManager::SetNextTopmostWindow()
 {
-	// ! topmost Window�̸� pinned Window�� �ƴϴ�!!!
+	
 
 	List::iterator itr;
 
@@ -644,10 +651,10 @@ void WindowManager::SetNextTopmostWindow()
 //-----------------------------------------------------------------------------
 // CancelPushStateOfCurrentPushedWindow
 //
-// ���� ���� Window(�̵��ϱ� ���ؼ���, ...)�� �������¸� �����Ѵ�.
-// �̰��� �ܺο��� pushed state�� �� ���� clear�ϱ� ���� ���̴�.
+
+
 //
-// ���� ���¿� �ִٸ� true�� ��ȯ�Ѵ�.
+
 //-----------------------------------------------------------------------------
 bool WindowManager::CancelPushStateOfCurrentPushedWindow()
 {
@@ -674,8 +681,8 @@ int WindowManager::ShowedWindowSize() const
 //-----------------------------------------------------------------------------
 // GetSequence
 //
-// p_this_window�� �켱������ ��ȯ�Ѵ�. 0�� �������� �켱������ ����.
-// �����ϸ�, -1�� ��ȯ�Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 int WindowManager::GetSequence(Window * p_this_window)
 {
@@ -726,8 +733,8 @@ void WindowManager::SendMouseMoveMessageToMouseFocusedWindow()
 //-----------------------------------------------------------------------------
 // GetFirstPriorityWindow
 //
-// �ֿ켱 Window�� ��ȯ�Ѵ�.
-// �������� Window�� ������ NULL�� ��ȯ�Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 Window * WindowManager::GetFirstPriorityWindow() const
 {
@@ -750,11 +757,11 @@ Window * WindowManager::GetFirstPriorityWindow() const
 //-----------------------------------------------------------------------------
 // GetMovingWindow
 //
-// ���� �̵����� Window�� pointer�� ��ȯ�Ѵ�. �̰��� � Window�� ���� �̵��ϰ�
-// �ִ��� �ܺο��� �˱����� ���̴�.
+
+
 //
-// !Window�� �� ������ �� �ϳ��� �̵��� �� ������ �װ��� '���̴�' ���̴�. ����
-// �װ��� �ֿ켱 Window�̴�.
+
+
 //-----------------------------------------------------------------------------
 Window * WindowManager::GetMovingWindow() const
 {
@@ -780,8 +787,8 @@ Window * WindowManager::GetMovingWindow() const
 //-----------------------------------------------------------------------------
 // FirstPriority
 //
-// p_this_window�� �ֿ켱������ �Ѵ�.
-// p_this_window�� list�� �������� ������ �ƹ��͵� ���� �ʴ´�.
+
+
 //-----------------------------------------------------------------------------
 void WindowManager::FirstPriority(Window * p_this_window)
 {
@@ -828,28 +835,47 @@ void WindowManager::FirstPriority(Window * p_this_window)
 //-----------------------------------------------------------------------------
 // Show
 //
-// m_show_list/m_show_list_pinned_window�� �ִ� Window�� Window::Show()�� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void WindowManager::Show()
 {
+	TraceWindowManagerShow("WindowManager::Show begin");
 	List::reverse_iterator itr;
 
 	itr = m_show_list.rbegin();
 	while (itr != m_show_list.rend())
 	{
-		if ((*itr)->GetAttributes()->topmost == false)
-			(*itr)->Show();
+		Window *pWindow = *itr;
+		if (pWindow == NULL)
+		{
+			itr++;
+			continue;
+		}
+
+		if (pWindow->GetAttributes()->topmost == false)
+		{
+			TraceWindowManagerShow("WindowManager::Show before normal window", pWindow);
+			pWindow->Show();
+			TraceWindowManagerShow("WindowManager::Show after normal window", pWindow);
+		}
 
 		itr++;
 	}
 
-	// pinned Window�� no pinned Window ���� ���� ����Ѵ�.
+	
 	itr = m_show_list_pinned_window.rbegin();
 	while (itr != m_show_list_pinned_window.rend())
 	{
 		Window *pWindow = *itr;
+		if (pWindow == NULL)
+		{
+			itr++;
+			continue;
+		}
 //		(*itr)->Show();
+		TraceWindowManagerShow("WindowManager::Show before pinned window", pWindow);
 		pWindow->Show();
+		TraceWindowManagerShow("WindowManager::Show after pinned window", pWindow);
 
 		itr++;
 	}
@@ -858,20 +884,32 @@ void WindowManager::Show()
 	itr = m_show_list.rbegin();
 	while (itr != m_show_list.rend())
 	{
-		if ((*itr)->GetAttributes()->topmost == true)
-			(*itr)->Show();
+		Window *pWindow = *itr;
+		if (pWindow == NULL)
+		{
+			itr++;
+			continue;
+		}
+
+		if (pWindow->GetAttributes()->topmost == true)
+		{
+			TraceWindowManagerShow("WindowManager::Show before topmost window", pWindow);
+			pWindow->Show();
+			TraceWindowManagerShow("WindowManager::Show after topmost window", pWindow);
+		}
 
 		itr++;
 	}
+	TraceWindowManagerShow("WindowManager::Show end");
 }
 
 //-----------------------------------------------------------------------------
 // AppearWindow
 //
-// p_this_window�� show list�� ����Ѵ�. �̹� �Ǿ� ������ ���� node�� delete�ϰ�
-// �ٽ� insert�Ѵ�.
+
+
 //
-// p_this_window�� ��ϵǾ� ���� ������ �ƹ��͵� ���� �ʴ´�.
+
 //-----------------------------------------------------------------------------
 void WindowManager::AppearWindow(Window * p_this_window)
 {
@@ -887,7 +925,7 @@ void WindowManager::AppearWindow(Window * p_this_window)
 	List::iterator itr;
 
 	//
-	// �̹� �����ϸ� �����Ѵ�.
+	
 	//
 
 	if (p_this_window->GetAttributes()->pin == true)
@@ -958,8 +996,8 @@ void WindowManager::AppearWindow(Window * p_this_window)
 //-----------------------------------------------------------------------------
 // DisappearWindow
 //
-// p_this_window�� show list���� delete�Ѵ�.
-// p_this_window�� Disappear�Ǿ����� true�� ��ȯ�Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 bool WindowManager::DisappearWindow(Window * p_this_window)
 {
@@ -1052,8 +1090,8 @@ bool WindowManager::DisappearWindow(Window * p_this_window)
 			p_first_window->AcquireFirstSequence();
 
 		//
-		// DisappearWindow�� �ƴ� ��쿡�� Ȯ���� SetKeyboardControlWindow�� keyboard control Window��
-		// ������ �� ������, Disappear �Ǵ� ��쿡�� ���������� �˻��Ͽ� �װ��� ã�ƾ� �Ѵ�.
+		
+		
 		//
 		SetNextKeyboardControlWindow();
 	}
@@ -1064,15 +1102,15 @@ bool WindowManager::DisappearWindow(Window * p_this_window)
 //-----------------------------------------------------------------------------
 // SetMouseMoveFocusedWindow
 //
-// �ֿ켱���� Window���� �˻��Ͽ� mouse (x, y)�� Window�� ��ġ�ϸ� move focused
-// Window�� �����Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 void WindowManager::SetMouseMoveFocusedWindow()
 {
 	List::iterator itr, endItr;
 
 	// topmost first
-	// "topmost Window�� pinned Window�� �ƴϴ�."
+	
 	itr = m_show_list.begin();
 	while (itr != m_show_list.end())
 	{
@@ -1124,15 +1162,15 @@ void WindowManager::SetMouseMoveFocusedWindow()
 //-----------------------------------------------------------------------------
 // GetFocusedWindow
 //
-// �ֿ켱���� Window���� �˻��Ͽ� mouse (x, y)�� Window�� ��ġ�ϸ� move focused
-// Window�� �����Ѵ�.
+
+
 //-----------------------------------------------------------------------------
 Window* WindowManager::GetFocusedWindow(int x, int y)
 {
 	List::iterator itr;
 
 	// topmost first
-	// "topmost Window�� pinned Window�� �ƴϴ�."
+	
 	itr = m_show_list.begin();
 	while (itr != m_show_list.end())
 	{
@@ -1176,12 +1214,12 @@ Window* WindowManager::GetFocusedWindow(int x, int y)
 //-----------------------------------------------------------------------------
 // MouseControl
 //
-// WindowManager::MouseControl�� App MouseControl�� Window::MouseControl��
-// �߰����̴�.
+
+
 //
-// > Mouse pointer move�� mouse pointer�� � Window�� ����Ű�� focus �����¿�
-//   ���� �Ѵ�. �̰��� �켱������ �������. ���� �켱������ ���� �ͺ���
-//   �˻��Ѵ�.
+
+
+
 //-----------------------------------------------------------------------------
 bool WindowManager::MouseControl(UINT message, int x, int y)
 {
@@ -1193,7 +1231,7 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 	//
 	if (message == M_MOVING)
 	{
-		// 이동중이면 move focused Window을 바꾸지 않는다.
+		
 #ifdef _WIN32
 		if (gpC_Imm && m_pC_mouse_focused_window != NULL && m_pC_mouse_focused_window->Moving())
 			gpC_Imm->ForceUI(CImm::FORCE_UI_DRAG);
@@ -1230,7 +1268,7 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 
 	//
 	// change Window priority
-	// topmost Window�� ���� ��쿡�� �켱������ ������ �� ����.
+	
 	//
 	if (message == M_LEFTBUTTON_DOWN || message == M_RIGHTBUTTON_DOWN)
 	{
@@ -1263,7 +1301,7 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 		}
 	}
 
-	// focused Window���� ��� �Է��� �ش�.
+	
 	if (m_pC_mouse_focused_window != NULL)
 	{
 		if (m_pC_topmost_window != NULL)
@@ -1275,7 +1313,7 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 		{
 			m_pC_mouse_focused_window->MouseControl(message, x, y);
 
-			//â���� statch
+			
 			if(message == M_MOVING && m_pC_mouse_focused_window->Moving())
 			{
 				if(m_pC_mouse_focused_window->GetAttributes()->statch)
@@ -1296,18 +1334,18 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 							
 							bool bl_statch = false;
 							
-							//���� ������ ������� ���Ե������� ���θ� ���ܼ� ���δ�
+							
 							if(m_pC_mouse_focused_window->y < p_searched_window->y+p_searched_window->h &&
 								m_pC_mouse_focused_window->y+m_pC_mouse_focused_window->h > p_searched_window->y)
 							{
-								//���ʿ� ������ �ֳ�?
+								
 								if (m_pC_mouse_focused_window->x > p_searched_window->x+p_searched_window->w-STATCH_VALUE &&
 									m_pC_mouse_focused_window->x < p_searched_window->x+p_searched_window->w+STATCH_VALUE)
 								{
 									m_pC_mouse_focused_window->x = p_searched_window->x+p_searched_window->w;
 									bl_statch = true;
 								}
-								else //�����ʿ� ������ �ֳ�?
+								else 
 									if (m_pC_mouse_focused_window->x+m_pC_mouse_focused_window->w > p_searched_window->x-STATCH_VALUE &&
 										m_pC_mouse_focused_window->x+m_pC_mouse_focused_window->w < p_searched_window->x+STATCH_VALUE)
 									{
@@ -1315,15 +1353,15 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 										bl_statch = true;
 									}
 									
-									if(bl_statch)	//��� �پ��ٸ� �� ���� ���� ���ϼ� �ֳ� ����
+									if(bl_statch)	
 									{
-										//������ ��ǥ�� ��������
+										
 										if(m_pC_mouse_focused_window->y > p_searched_window->y-STATCH_VALUE &&
 											m_pC_mouse_focused_window->y < p_searched_window->y+STATCH_VALUE)
 										{
 											m_pC_mouse_focused_window->y = p_searched_window->y;
 										}
-										else	//�Ʒ����� ��ǥ�� ��������
+										else	
 											if(m_pC_mouse_focused_window->y+m_pC_mouse_focused_window->h > p_searched_window->y+p_searched_window->h-STATCH_VALUE &&
 												m_pC_mouse_focused_window->y+m_pC_mouse_focused_window->h < p_searched_window->y+p_searched_window->h+STATCH_VALUE)
 											{
@@ -1334,18 +1372,18 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 							}
 							
 							bl_statch = false;
-							//���� ������ ������� ���Ե������� ���θ� ���ܼ� ���δ�
+							
 							if (m_pC_mouse_focused_window->x < p_searched_window->x+p_searched_window->w &&
 								m_pC_mouse_focused_window->x+m_pC_mouse_focused_window->w > p_searched_window->x)
 							{
-								//���ʿ� ������ �ֳ�?
+								
 								if (m_pC_mouse_focused_window->y > p_searched_window->y+p_searched_window->h-STATCH_VALUE &&
 									m_pC_mouse_focused_window->y < p_searched_window->y+p_searched_window->h+STATCH_VALUE)
 								{
 									m_pC_mouse_focused_window->y = p_searched_window->y+p_searched_window->h;
 									bl_statch = true;
 								}
-								else //�Ʒ��ʿ� ������ �ֳ�?
+								else 
 									if (m_pC_mouse_focused_window->y+m_pC_mouse_focused_window->h > p_searched_window->y-STATCH_VALUE &&
 										m_pC_mouse_focused_window->y+m_pC_mouse_focused_window->h < p_searched_window->y+STATCH_VALUE)
 									{
@@ -1353,15 +1391,15 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 										bl_statch = true;
 									}
 							}
-							if(bl_statch == true)	//��� �پ��ٸ� �� ���� ���� ���ϼ� �ֳ� ����
+							if(bl_statch == true)	
 							{
-								//������ ��ǥ�� ��������
+								
 								if(m_pC_mouse_focused_window->x > p_searched_window->x-STATCH_VALUE &&
 									m_pC_mouse_focused_window->x < p_searched_window->x+STATCH_VALUE)
 								{
 									m_pC_mouse_focused_window->x = p_searched_window->x;
 								}
-								else	//�������� ��ǥ�� ��������
+								else	
 									if(m_pC_mouse_focused_window->x+m_pC_mouse_focused_window->w > p_searched_window->x+p_searched_window->w-STATCH_VALUE &&
 										m_pC_mouse_focused_window->x+m_pC_mouse_focused_window->w < p_searched_window->x+p_searched_window->w+STATCH_VALUE)
 									{
@@ -1389,13 +1427,13 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 		 message == M_RIGHTBUTTON_UP)
 	{
 		//
-		// - ���� �ֿ켱Window���� push�� �� �ٸ� Window �Ǵ� background�� push up���� ���
-		//   push�� Window�� push up�� ����� �Ѵ�.
+		
+		
 		//
-		// - pinned Window�� no pinned Window�� �����Ƿ� pushed Window�� first priority���
-		//   ����� �� ����.
+		
+		
 
-		// mouse move focus�� Window priority�� �ٲٴ� ����̸� �ٸ��� ó���ؾ� �Ѵ�.
+		
 		//if (mouse_move_focus_change_window_priority?)
 		//{
 		//
@@ -1415,18 +1453,30 @@ bool WindowManager::MouseControl(UINT message, int x, int y)
 }
 
 #include "VS_UI.h"
+
+#ifndef WM_TEXTINPUT
+#define WM_TEXTINPUT (WM_USER + 0x500)
+#endif
+
+#ifndef WM_TEXTEDITING
+#define WM_TEXTEDITING (WM_USER + 0x501)
+#endif
+
 //-----------------------------------------------------------------------------
 // KeyboardControl
 //
-// WindowManager::KeyboardControl�� App KeyboardControl�� Window::KeyboardControl�� 
-// �߰����̴�.
+
+
 //-----------------------------------------------------------------------------
 void WindowManager::KeyboardControl(UINT message, UINT key, long extra)
 {
 //	static Window * m_pC_keydown_window;
 
-	if (message == WM_KEYDOWN || message == WM_CHAR ||
-	    message == WM_TEXTINPUT || message == WM_TEXTEDITING)// || message == WM_IME_STARTCOMPOSITION)
+	if (message == WM_KEYDOWN || message == WM_CHAR
+#if defined(USE_SDL_BACKEND) || defined(SPRITELIB_BACKEND_SDL) || defined(PLATFORM_MACOS)
+	    || message == WM_TEXTINPUT || message == WM_TEXTEDITING
+#endif
+		)// || message == WM_IME_STARTCOMPOSITION)
 	{
 		m_pC_keydown_window = NULL;
 		if (m_pC_topmost_window != NULL)// && m_pC_topmost_window->GetAttributes()->keyboard_control == true)
@@ -1436,7 +1486,7 @@ void WindowManager::KeyboardControl(UINT message, UINT key, long extra)
 	}
 
 	//
-	// �켱����, (1) topmost Window
+	
 	//			 	 (2) keyboard control Window
 	//
 	if (m_pC_topmost_window != NULL)
@@ -1457,13 +1507,13 @@ void WindowManager::KeyboardControl(UINT message, UINT key, long extra)
 			return;
 		}
 
-		//���Ӹ�尡 �ƴҶ��� �Ʒ��� ������ �ʿ䰡 ����
+		
 		if(!gC_vs_ui.IsGameMode())
 			return;
 		}
 	}
 
-	// topmost window�� ���������� ä�ø԰� �ϱ� ���ؼ�
+	
 	if (m_pC_keyboard_control_window != NULL && m_pC_keyboard_control_window != m_pC_topmost_window)
 		m_pC_keyboard_control_window->KeyboardControl(message, key, extra);
 
@@ -1497,7 +1547,7 @@ void WindowManager::KeyboardControl(UINT message, UINT key, long extra)
 //-----------------------------------------------------------------------------
 // AlreadyRegistered
 //
-// p_window�� ��ϵǾ��°�?
+
 //-----------------------------------------------------------------------------
 bool WindowManager::AlreadyRegistered(Window * p_window) const
 {
@@ -1545,8 +1595,8 @@ bool WindowManager::GetShowState(Window * p_window) const
 //-----------------------------------------------------------------------------
 // Register
 //
-// Window�� ����Ѵ�.
-// �̹� ��ϵǾ��°� �˻��� �ʿ䰡 ����.
+
+
 //-----------------------------------------------------------------------------
 void WindowManager::Register(Window * p_window)
 {
@@ -1559,15 +1609,17 @@ void WindowManager::Register(Window * p_window)
 //-----------------------------------------------------------------------------
 // Unregister
 //
-// Window ����� �����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void WindowManager::Unregister(Window * p_window)
 {
 	if (p_window == NULL)
 		_Error(NULL_REF);
 
-	if (Delete(p_window) == true)
-		DisappearWindow(p_window); // ������´� Ȯ���� �ʿ���� ������ disappear.
+	// Keep the visible lists clean even if the registration list is already
+	// out of sync. Stale windows here can survive into MODE_GAME and hang draw.
+	DisappearWindow(p_window);
+	Delete(p_window);
 
 	if (p_window == m_pC_pushed_window)
 		m_pC_pushed_window = NULL;
@@ -1585,7 +1637,7 @@ void WindowManager::Process()
 //-----------------------------------------------------------------------------
 // g_RegisterWindow
 //
-// Window�� Window Manager�� ����Ѵ�.
+
 //-----------------------------------------------------------------------------
 void g_RegisterWindow(Window * p_window)
 {
@@ -1600,7 +1652,7 @@ void g_RegisterWindow(Window * p_window)
 //-----------------------------------------------------------------------------
 // g_UnregisterWindow
 //
-// Window Manager���� Window�� ��������Ѵ�.
+
 //-----------------------------------------------------------------------------
 void g_UnregisterWindow(Window * p_window)
 {

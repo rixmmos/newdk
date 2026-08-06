@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
 // CMessageArray.h
 //----------------------------------------------------------------------
-// String Array이다.
+
 // 
-// 초기화 할 때 : Init(String수, 한String의 최대길이, log File);
+
 //
-// Init(...)할때 메모리를 다 잡아버린다.
-// filename을 써주면 자동으로 string이 추가될때 log한다.
+
+
 //----------------------------------------------------------------------
 
 #ifndef	__CMESSAGEARRAY_H__
@@ -34,10 +34,10 @@ class CMessageArray {
 		void		AddFormatVL(const char* format, va_list& vl);
 		const char*	operator [] (int i);
 
-		// 외부에서 편집..
+		
 		char*&		GetCurrent()		{ return m_ppMessage[m_Current]; }
 
-		// 다음 것
+		
 		void		Next();
 
 		// size
@@ -51,11 +51,11 @@ class CMessageArray {
 
 
 	protected :		
-		int			m_Length;		// Message 하나의 길이
-		int			m_Max;			// Message 개수
+		int			m_Length;		
+		int			m_Max;			
 
-		char**		m_ppMessage;	// 입력된 Message
-		int			m_Current;		// 입력할려는 Message 
+		char**		m_ppMessage;	
+		int			m_Current;		
 
 		// file Log
 		bool			m_bLog;

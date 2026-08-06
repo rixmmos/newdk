@@ -58,19 +58,19 @@ private:
     typedef unordered_map<string, XMLTree*> CHILDREN_MAP;
     typedef vector<XMLTree*> CHILDREN_VECTOR;
 
-    string m_Name;      ///< 노드의 이름
-    string m_Text;      ///< 노드에 속한 텍스트
-    XMLTree* m_pParent; ///< 부모 노드의 포인터
+    string m_Name;      
+    string m_Text;      
+    XMLTree* m_pParent; 
 
-    ATTRIBUTES_MAP m_AttributesMap;       ///< 가지고 있는 속성값들
-    ATTRIBUTES_VECTOR m_AttributesVector; ///< 가지고 있는 속성값들
-    CHILDREN_MAP m_ChildrenMap;           ///< 자식 노드들
-    CHILDREN_VECTOR m_ChildrenVector;     ///< 자식 노드들
+    ATTRIBUTES_MAP m_AttributesMap;       
+    ATTRIBUTES_VECTOR m_AttributesVector; 
+    CHILDREN_MAP m_ChildrenMap;           
+    CHILDREN_VECTOR m_ChildrenVector;     
 
 public:
     XMLTree();
     XMLTree(const string& name);
-    XMLTree(const XMLTree& xmlTree); // copy constructor : 깊은 복사
+    XMLTree(const XMLTree& xmlTree); 
     virtual ~XMLTree();
 
 public:

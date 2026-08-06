@@ -61,24 +61,7 @@ void EffectVampireRelic::affect(Creature* pCreature)
     // Timeval      deadLine   = getDeadline();
     // Turn_t       RemainTime = deadLine.tv_sec - nextTime.tv_sec;
 
-    /*
-        StringStream msg;
-
-        if (pCreature->isSlayer())
-        {
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-
-            msg << pSlayer->getName();
-        }
-        else
-        {
-            Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-
-            msg << pVampire->getName();
-        }
-
-        msg << " 님이 뱀파이어 성물을 가졌습니다.";
-    */
+     
 
     char msg[50];
     sprintf(msg, g_pStringPool->c_str(STRID_TAKE_VAMPIRE_RELIC), pCreature->getName().c_str());
@@ -93,7 +76,7 @@ void EffectVampireRelic::affect(Creature* pCreature)
     g_pZoneGroupManager->broadcast(&gcSystemMessage);
 
 
-    // Effect붙인다.
+    
     GCAddEffect gcAddEffect;
     gcAddEffect.setObjectID(pCreature->getObjectID());
     gcAddEffect.setEffectID(getSendEffectClass());
@@ -111,34 +94,7 @@ void EffectVampireRelic::affect(Item* pItem)
 {
     __BEGIN_TRY
 
-    /*
-//Timeval      nextTime   = getNextTime();
-//Timeval      deadLine   = getDeadline();
-//Turn_t       RemainTime = deadLine.tv_sec - nextTime.tv_sec;
-StringStream msg;
-
-if (pCreature->isSlayer())
-{
-    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
-
-    msg << pSlayer->getName() << " 님이 ";
-}
-else
-{
-    Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-
-    msg << pVampire->getName() << " 님이 ";
-}
-
-msg << " 뱀파이어 성물을 가지고 있습니다." << endl;
-
-GCSystemMessage gcSystemMessage;
-gcSystemMessage.setMessage(msg.toString());
-
-g_pZoneGroupManager->broadcast( &gcSystemMessage );
-
-setNextTime(m_Tick);
-*/
+     
 
     __END_CATCH
 }
@@ -180,8 +136,8 @@ void EffectVampireRelic::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_VAMPIRE_RELIC);
 
     Zone* pZone = pCreature->getZone();

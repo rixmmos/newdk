@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // MHelpDisplayer.h
 //---------------------------------------------------------------------------
-// 도움말 출력 담당..
+
 //---------------------------------------------------------------------------
 
 #ifndef __MHELPDISPLAYER_H__
@@ -20,7 +20,7 @@ class MHelpDisplayer {
 		void	OutputHelp(HELP_OUTPUT ho);
 		
 	protected :
-		DWORD	m_DelayTime;		// 최근에 출력한 시간
+		DWORD	m_DelayTime;		
 };
 
 extern MHelpDisplayer*		g_pHelpDisplayer;

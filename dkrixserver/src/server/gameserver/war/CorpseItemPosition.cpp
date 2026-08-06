@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// CorpseItemPosition 클래스 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "CorpseItemPosition.h"
@@ -44,7 +44,7 @@ Item* CorpseItemPosition::getItem_LOCKED(bool isDel)
     m_pZone = pZone;
 
     if (pZone == NULL) {
-        filelog("ItemError.log", "CorpseItemPosition:getItem() : ZoneID가 잘못되었습니다.");
+        filelog("ItemError.log", "CorpseItemPosition:getItem() : ZoneID .");
         return NULL;
     }
 
@@ -62,7 +62,7 @@ Item* CorpseItemPosition::getItem_UNLOCKED(bool isDel)
     m_pZone = pZone;
 
     if (pZone == NULL) {
-        filelog("ItemError.log", "CorpseItemPosition:getItem() : ZoneID가 잘못되었습니다.");
+        filelog("ItemError.log", "CorpseItemPosition:getItem() : ZoneID .");
         return NULL;
     }
 
@@ -88,7 +88,7 @@ Item* CorpseItemPosition::getItem_CORE(Zone* pZone, bool isDel)
     Item* pRet = NULL;
 
     if (pCorpse == NULL || pCorpse->getItemClass() != Item::ITEM_CLASS_CORPSE) {
-        filelog("ItemError.log", "CorpseItemPosition::getItem() : 해당하는 시체가 없습니다.");
+        filelog("ItemError.log", "CorpseItemPosition::getItem() :   .");
 
         return NULL;
     }
@@ -97,7 +97,7 @@ Item* CorpseItemPosition::getItem_CORE(Zone* pZone, bool isDel)
         pRet = pCorpse->popTreasure(m_ObjectID);
 
         if (pRet == NULL) {
-            filelog("ItemError.log", "CorpseItemPosition::getItem() : 해당 아이템이 시체 안에 없습니다.");
+            filelog("ItemError.log", "CorpseItemPosition::getItem() :     .");
 
             return NULL;
         }
@@ -127,7 +127,7 @@ Item* CorpseItemPosition::getItem_CORE(Zone* pZone, bool isDel)
                     gcAddEffectToTile.setObjectID(pMonsterCorpse->getObjectID());
                     gcAddEffectToTile.setEffectID(effectClass);
                     gcAddEffectToTile.setXY(pMonsterCorpse->getX(), pMonsterCorpse->getY());
-                    gcAddEffectToTile.setDuration(10); // 별 의미 없다 그냥 1초
+                    gcAddEffectToTile.setDuration(10); 
 
                     pZone->broadcastPacket(pMonsterCorpse->getX(), pMonsterCorpse->getY(), &gcAddEffectToTile);
                 }
@@ -137,7 +137,7 @@ Item* CorpseItemPosition::getItem_CORE(Zone* pZone, bool isDel)
         pRet = pCorpse->getTreasure(m_ObjectID);
 
     if (pRet == NULL) {
-        filelog("ItemError.log", "CorpseItemPosition::getItem() : 해당 아이템이 시체 안에 없습니다.");
+        filelog("ItemError.log", "CorpseItemPosition::getItem() :     .");
 
         return NULL;
     }

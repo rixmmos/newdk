@@ -19,6 +19,47 @@ extern int					g_nZoneLarge;
 extern int					g_nZoneSmall;
 extern bool					g_bZonePlayerInLarge;
 
+static int ResolveNPCTypeFromServerSprite(int npcID, int serverSpriteType, const char* serverName)
+{
+	if (g_pCreatureTable == NULL)
+		return serverSpriteType;
+
+	int creatureCount = g_pCreatureTable->GetSize();
+
+	if (npcID >= 0 && npcID < creatureCount)
+	{
+		CREATURETABLE_INFO& info = (*g_pCreatureTable)[npcID];
+		if (info.SpriteTypes.GetSize() > 0 && info.SpriteTypes[0] == serverSpriteType)
+			return npcID;
+	}
+
+	if (serverName != NULL && serverName[0] != '\0')
+	{
+		for (int i = 0; i < creatureCount; ++i)
+		{
+			CREATURETABLE_INFO& info = (*g_pCreatureTable)[i];
+			if (info.SpriteTypes.GetSize() > 0
+				&& info.SpriteTypes[0] == serverSpriteType
+				&& _stricmp(info.Name.GetString(), serverName) == 0)
+			{
+				return i;
+			}
+		}
+	}
+
+	if (serverSpriteType >= 0 && serverSpriteType < creatureCount)
+		return serverSpriteType;
+
+	for (int i = 0; i < creatureCount; ++i)
+	{
+		CREATURETABLE_INFO& info = (*g_pCreatureTable)[i];
+		if (info.SpriteTypes.GetSize() > 0 && info.SpriteTypes[0] == serverSpriteType)
+			return i;
+	}
+
+	return serverSpriteType;
+}
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
@@ -32,7 +73,7 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 	// message
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -41,14 +82,14 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature(pPacket->getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{			
@@ -60,8 +101,24 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 
 			int zoneID	= (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall);
 
-			// EVE 길드 마크
-			int creatureType = npcID;
+			
+			int creatureType = ResolveNPCTypeFromServerSprite(
+				npcID,
+				pPacket->getSpriteType(),
+				pPacket->getName().c_str());
+
+			if (creatureType < 0
+				|| creatureType >= g_pCreatureTable->GetSize()
+				|| (*g_pCreatureTable)[creatureType].SpriteTypes.GetSize() == 0)
+			{
+				DEBUG_ADD_FORMAT("[Error] Invalid NPC creature type. npcID=%d serverSprite=%d resolved=%d",
+					npcID,
+					pPacket->getSpriteType(),
+					creatureType);
+				delete pNPC;
+				return;
+			}
+
 			int spriteType = (*g_pCreatureTable)[creatureType].SpriteTypes[0];			
 			
 			CREATURESPRITETABLE_INFO& spriteInfo = (*g_pCreatureSpriteTable)[spriteType];
@@ -79,17 +136,17 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 			}
 			else if (zoneID==1007 || zoneID==1114 || zoneID==1115)
 			{
-				// 테페즈
+				
 				pNPC->SetGuildNumber( GUILDID_TEPEZ );
 			}
 			else
 			{
-				// 바토리
+				
 				pNPC->SetGuildNumber( GUILDID_BATHORY );
 			}
 
 			//pNPC->SetCreatureType( 0 );
-			pNPC->SetCreatureType( npcID );
+			pNPC->SetCreatureType( creatureType );
 			pNPC->SetGroundCreature();
 			pNPC->SetID(pPacket->getObjectID());
 			//pNPC->SetAction(ACTION_MOVE);
@@ -99,10 +156,7 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 			pNPC->SetCurrentDirection( pPacket->getDir() );
 			pNPC->SetAction( ACTION_STAND );
 
-			if(zoneID>= 1500 && zoneID<=1506)
-				pNPC->SetName( pPacket->getName().c_str() );
-			else
-				pNPC->SetName( (*g_pCreatureTable)[creatureType].Name );
+			pNPC->SetName( pPacket->getName().c_str() );
 
 			pNPC->SetBodyColor1( pPacket->getMainColor() );
 			pNPC->SetBodyColor2( pPacket->getSubColor() );
@@ -115,12 +169,12 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 
 //			_MinTrace("AddNPC : %s Dir:%d Pos(%d,%d) CreatureType : %d\n",pNPC->GetName(), pPacket->getDir(), pPacket->getX(), pPacket->getY(), pPacket->getNPCID() );
 			//------------------------------------------------------------
-			// 바토리인 경우.. 하드코딩(-_-);
+			
 			//------------------------------------------------------------
 			if (npcID==217)
 			{
 				pNPC->SetStatus( MODIFY_CURRENT_HP, 10 );
-				pNPC->SetStatus( MODIFY_ALIGNMENT, -10000 );	// 별 의미없다
+				pNPC->SetStatus( MODIFY_ALIGNMENT, -10000 );	
 			}
 			else
 			{
@@ -135,12 +189,12 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 			else
 			{			
 				//------------------------------------------------------------
-				// Slayer NPC인 경우 복장을 입힌다.
+				
 				//------------------------------------------------------------
-				SetAddonToSlayer( (MNPC*)pNPC, npcID );
+				SetAddonToSlayer( (MNPC*)pNPC, creatureType );
 
 				//------------------------------------------------------------
-				// Load되지 않았으면 load한다.
+				
 				//------------------------------------------------------------
 //				LoadCreatureType( pPacket->getNPCID() );
 
@@ -161,13 +215,13 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 			}
 		}
 		//--------------------------------------------------
-		// 이미 있던 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
 			if (pCreature->GetClassType()==MCreature::CLASS_NPC)
 			{
-				// 이미 있다..
+				
 				pCreature->SetGroundCreature();
 				
 				//pCreature->SetAction(ACTION_MOVE);
@@ -191,7 +245,7 @@ void GCAddNPCHandler::execute ( GCAddNPC * pPacket , Player * pPlayer )
 		}
 	}
 
-	// [도움말] NPC가 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_NPC );
 //	__END_HELP_EVENT

@@ -20,7 +20,7 @@
 
 extern int g_MorphCreatureType;
 
-// [새기술]
+
 void		SkillShadowDancing(MCreature* pUserCreature, MCreature* pTargetCreature, int skillID);
 
 //----------------------------------------------------------------------
@@ -63,12 +63,12 @@ MActionResultNodeActionInfo::Execute()
 
 
 	//--------------------------------------------------------
-	// 목표 위치 Pixel좌표
+	
 	//--------------------------------------------------------
 	MCreature*	pTargetCreature = g_pZone->GetCreature( m_TargetID );
 	MCreature*	pUserCreature	= g_pZone->GetCreature( m_UserID );
 
-	// 캐릭터가 없으면... 끝~
+	
 	if (pTargetCreature==NULL)// || pUserCreature==NULL)
 	{
 		//MItem* pItem = g_pZone->GetItem( m_TargetID );	
@@ -78,88 +78,15 @@ MActionResultNodeActionInfo::Execute()
 
 	TYPE_ACTIONINFO nUsedActionInfo = m_nActionInfo;
 
-/*
-	point = MTopView::MapToPixel(pTargetCreature->GetX(), pTargetCreature->GetY());
-
-	
-	if ((*g_pActionInfoTable)[nUsedActionInfo].GetSize()!=0)
-	{
-		//--------------------------------------------------------
-		//
-		//					Effect 목표 설정
-		//
-		//--------------------------------------------------------
-		MEffectTarget* pEffectTarget = new MEffectTarget( (*g_pActionInfoTable)[nUsedActionInfo].GetSize() );
-
-		pEffectTarget->Set( point.x, point.y, pTargetCreature->GetZ(), pTargetCreature->GetID() );		
-
-		//--------------------------------------------------------
-		//
-		//					시작 위치를 결정한다.
-		//
-		//--------------------------------------------------------
-		int x,y,z, direction;
-
-		//--------------------------------------------------------
-		// User 위치에서 시작하는 경우
-		//--------------------------------------------------------
-		if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartUser())
-		{
-			point = MTopView::MapToPixel(pUserCreature->GetX(), pUserCreature->GetY());
-
-			x			= point.x;
-			y			= point.y;
-			z			= pUserCreature->GetZ();//+60;
-		}
-		//--------------------------------------------------------
-		// Target 위치에서 시작하는 경우
-		//--------------------------------------------------------
-		else if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartTarget())
-		{
-			x			= point.x;
-			y			= point.y;
-			z			= pUserCreature->GetZ();//+60;			
-		}
-
-		//--------------------------------------------------------
-		// 공중에서 시작하는 경우
-		//--------------------------------------------------------
-		if ((*g_pActionInfoTable)[nUsedActionInfo].IsStartSky())
-		{
-			z	= pUserCreature->GetZ() + (*g_pActionInfoTable)[nUsedActionInfo].GetValue();
-
-			direction	= DIRECTION_DOWN;
-		}
-		//--------------------------------------------------------
-		// 지상에서 시작하는 경우
-		//--------------------------------------------------------
-		else
-		{
-			direction	= pUserCreature->GetDirection();
-		}
-
-		//--------------------------------------------------------
-		//
-		//                   Effect생성		
-		//
-		//--------------------------------------------------------
-		g_EffectGeneratorTable.Generate(
-				x,y,z,				// 시작 위치
-				direction, 			// 방향
-				1,					// power
-				nUsedActionInfo,	//	ActionInfoTable종류,
-				pEffectTarget		// 목표 정보
-		);
-	}
-	*/
+ 
 	//--------------------------------------------------------
-	// 대상이 되는 캐릭터는 특정한 Action을 취하게 된다.
+	
 	//--------------------------------------------------------
 	//pTargetCreature->SetStop();
 	//pTargetCreature->SetAction( (*g_pActionInfoTable)[nUsedActionInfo].GetAction() );
 
 	int resultActionInfo;
-	resultActionInfo = nUsedActionInfo + (*g_pActionInfoTable).GetMinResultActionInfo();	// 결과
+	resultActionInfo = nUsedActionInfo + (*g_pActionInfoTable).GetMinResultActionInfo();	
 
 	switch( nUsedActionInfo )
 	{
@@ -195,7 +122,7 @@ MActionResultNodeActionInfo::Execute()
 		}
 	#endif
 
-	// [새기술]
+	
 
 	
 	pTargetCreature->SetEffectDelayFrame(resultActionInfo, m_DelayFrame );
@@ -227,7 +154,7 @@ MActionResultNodeActionInfo::Execute()
 	}
 	
 	//--------------------------------------------------------
-	// 기술의 동작에 맞는 sound를 출력해준다.
+	
 	//--------------------------------------------------------
 	//g_Sound.Play( g_SoundTable[(*g_pActionInfoTable)[nUsedActionInfo].GetSoundID()].pDSBuffer );
 	//PlaySound( (*g_pActionInfoTable)[nUsedActionInfo].GetSoundID(),
@@ -236,20 +163,9 @@ MActionResultNodeActionInfo::Execute()
 	//			pTargetCreature->GetY());
 
 	//--------------------------------------------------------
-	// Effect붙이는 결과이면 ..
+	
 	//--------------------------------------------------------
-	/*
-	EFFECTSTATUS	status		= (*g_pActionInfoTable)[resultActionInfo].GetEffectStatus();
-
-	if (status!=EFFECTSTATUS_NULL)
-	{
-		// 시간이 남아 있는 경우에만...
-		if (m_DelayFrame > 0)
-		{
-			pTargetCreature->AddEffectStatus( status, m_DelayFrame );
-		}
-	}
-	*/
+	 
 }
 
 
@@ -278,7 +194,7 @@ MActionResultNodeChangePosition::Execute()
 	}
 
 	//-----------------------------------------------------------
-	// Player인 경우
+	
 	//-----------------------------------------------------------
 	if (m_UserID==g_pPlayer->GetID())
 	{
@@ -286,22 +202,22 @@ MActionResultNodeChangePosition::Execute()
 		g_pPlayer->SetServerPosition( m_X, m_Y );
 	}
 	//-----------------------------------------------------------
-	// 다른 애들인 경우
+	
 	//-----------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( m_UserID );
 
-		// player인 경우를 따로 체크해야 할까??
+		
 
 		if (pCreature!=NULL)
 		{
 			//------------------------------------------------
-			// 기존의 MoveBuffer를 다 제거시킨다.
+			
 			//------------------------------------------------
 			pCreature->ReleaseMoveBuffer();
 
-			// 좌표를 바꾼다.
+			
 			pCreature->MovePosition( m_X, m_Y );
 			pCreature->SetServerPosition( m_X, m_Y );
 			//pCreature->SetStop();
@@ -341,8 +257,8 @@ MActionResultNodeChangeStatus::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player만 MStatus를 가지고 있다.. - -;;
-	// 그렇다면.. m_TargetID는 필요없는데.. 음.. - -;; 
+	
+	
 	//---------------------------------------------------------
 	if (m_TargetID==g_pPlayer->GetID()
 		&& m_pStatus!=NULL)
@@ -364,21 +280,21 @@ MActionResultNodeCreatureDie::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{
 		g_pPlayer->SetDead();
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -386,7 +302,7 @@ MActionResultNodeCreatureDie::Execute()
 		}
 		
 		//---------------------------------------------------------
-		// 죽인다. - -;
+		
 		//---------------------------------------------------------		
 		pCreature->SetDead();	
 	}
@@ -405,27 +321,27 @@ MActionResultNodeCreatureBurrow::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{
-		// Underground Creature로 만든다.
+		
 		g_pPlayer->SetUndergroundCreature();
 
-		// [도움말] burrow
+		
 //		__BEGIN_HELP_EVENT
 //			ExecuteHelpEvent( HE_EFFECT_BURROW );
 //		__END_HELP_EVENT
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -433,7 +349,7 @@ MActionResultNodeCreatureBurrow::Execute()
 		}
 		
 		//---------------------------------------------------------
-		// 숨긴다. 
+		
 		//---------------------------------------------------------		
 		pCreature->SetUndergroundCreature();
 	}
@@ -452,27 +368,27 @@ MActionResultNodeCreatureInvisible::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{
-		// Underground Creature로 만든다.
+		
 		g_pPlayer->SetInvisible();
 
-		// [도움말] burrow
+		
 //		__BEGIN_HELP_EVENT
 //			ExecuteHelpEvent( HE_EFFECT_BURROW );
 //		__END_HELP_EVENT
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -499,27 +415,27 @@ MActionResultNodeCreatureVisible::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{
-		// Underground Creature로 만든다.
+		
 		g_pPlayer->SetVisible();
 
-		// [도움말] burrow
+		
 //		__BEGIN_HELP_EVENT
 //			//ExecuteHelpEvent( HE_EFFECT_BURROW );
 //		__END_HELP_EVENT
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -553,27 +469,27 @@ MActionResultNodeCreatureSnipping::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{		
 		g_pPlayer->AddEffectStatus( EFFECTSTATUS_SNIPPING_MODE, 0xFFFF );
 		g_pPlayer->SetInvisible();
 
-		// [도움말] burrow
+		
 //		__BEGIN_HELP_EVENT
 //			//ExecuteHelpEvent( HE_EFFECT_BURROW );
 //		__END_HELP_EVENT
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -601,22 +517,22 @@ MActionResultNodeCreatureTurning::Execute()
 	}
 
 	//---------------------------------------------------------
-	// Player 인 경우
+	
 	//---------------------------------------------------------
 	if (m_TargetID == g_pPlayer->GetID())
 	{
-		// Underground Creature로 만든다.
+		
 		g_pPlayer->SetTurning( m_TurnFrame );
 	}
 	//---------------------------------------------------------
-	// 다른 Creature인 경우
+	
 	//---------------------------------------------------------
 	else
 	{
 		MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 
 		//---------------------------------------------------------
-		// 캐릭터가 없으면... 의미없겠지..
+		
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -643,12 +559,12 @@ MActionResultNodeAddEffectStatus::Execute()
 
 	MCreature*	pTargetCreature = g_pZone->GetCreature( m_TargetID );
 
-	// 캐릭터가 없으면... 끝~
+	
 	if (pTargetCreature==NULL)// || pUserCreature==NULL)
 		return;
 
 	//--------------------------------------------------------
-	// EffectStatus를 붙인다.
+	
 	//--------------------------------------------------------
 	pTargetCreature->AddEffectStatus(m_EffectStatus, m_DelayFrame);	
 }
@@ -682,18 +598,18 @@ MActionResultNodeChangeCreatureType::Execute()
 
 	MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 	
-	// 캐릭터가 없으면... 끝~
+	
 	if (pCreature==NULL)
 		return;
 
 
 	if (pCreature->IsUndergroundCreature())
 	{
-		// 그냥 묻어둔다. - -;
+		
 	}
 	else
 	{
-		// 성별을 다시 설정해줘야 한다.
+		
 		bool bMale = pCreature->IsMale();
 		WORD cs1 = pCreature->GetBodyColor1();
 		WORD cs2 = pCreature->GetBodyColor2();
@@ -708,7 +624,7 @@ MActionResultNodeChangeCreatureType::Execute()
 
 		pCreature->SetBodyColor2( cs2 );
 
-		// 이동방법에 따라..
+		
 		if ((*g_pCreatureTable)[m_CreatureType].IsFlyingCreature())
 		{
 			pCreature->SetFlyingCreature();
@@ -719,7 +635,7 @@ MActionResultNodeChangeCreatureType::Execute()
 		}
 	}
 
-	// player인 경우는 skill취소
+	
 	if (m_TargetID == g_pPlayer->GetID())
 	{
 		int selectSkill = ACTIONINFO_NULL;
@@ -738,7 +654,7 @@ MActionResultNodeChangeCreatureType::Execute()
 				selectSkill = MAGIC_UN_TRANSFORM;
 			break;
 			
-			// 2004, 9, 13, sobeit add start - 총슬 130 skill
+			
 			case CREATURETYPE_INSTALL_TURRET:
 				selectSkill = MAGIC_UN_TRANSFORM;
 			break;
@@ -754,7 +670,7 @@ MActionResultNodeChangeCreatureType::Execute()
 			gC_vs_ui.UnselectSkill();
 		}
 
-		// 이전에 설정해둔거 없앤다.
+		
 //		if (g_MorphCreatureType==m_CreatureType)
 		{
 			g_MorphCreatureType = 0;
@@ -764,7 +680,7 @@ MActionResultNodeChangeCreatureType::Execute()
 
 
 //----------------------------------------------------------------------
-// [새기술]
+
 //----------------------------------------------------------------------
 MActionResultNodeSummonCasket::MActionResultNodeSummonCasket(TYPE_OBJECTID tid, int casketType)
 {
@@ -789,7 +705,7 @@ MActionResultNodeSummonCasket::Execute()
 
 	MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 	
-	// 캐릭터가 없으면... 끝~
+	
 	if (pCreature==NULL)
 		return;
 
@@ -815,7 +731,7 @@ MActionResultNodeOpenCasket::Execute()
 
 	MCreature*	pCreature = g_pZone->GetCreature( m_TargetID );
 	
-	// 캐릭터가 없으면... 끝~
+	
 	if (pCreature==NULL)
 		return;
 
@@ -884,7 +800,7 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 			if(pMouseItem->GetItemClass() == ITEM_CLASS_PET_ENCHANT_ITEM)
 			{
 				if(pMouseItem->GetItemType() == 13 ||
-					pMouseItem->GetItemType() == 14)	// 펫 부활 짜잔~
+					pMouseItem->GetItemType() == 14)	
 				{
 					bRevivalPet = true;
 				}
@@ -899,7 +815,7 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 			}
 
 			if(pMouseItem->GetItemClass() == ITEM_CLASS_EVENT_STAR &&
-				pMouseItem->GetItemType() == 23) // 옐로우 드롭
+				pMouseItem->GetItemType() == 23) 
 			{
 				bGradePlus = true;
 			}
@@ -907,7 +823,7 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 		}
 	}
 	
-	// 아이템이 없으면... 끝~
+	
 	if (pInvenItem==NULL)
 		return;
 
@@ -933,7 +849,7 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 		else
 		if(bSecondPetEnchant == false)
 		{
-			// 펫 1차 인첸트 필살! 속성 붙이기
+			
 			WORD AttrType = HIWORD(m_Type);
 			WORD AttrLevel = LOWORD(m_Type);
 			pInvenItem->SetEnchantLevel(AttrType);	// Attr Type
@@ -943,8 +859,8 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 		}
 		else
 		{
-			// 펫 2차 인첸트 옵션 붙이기, 아래 코드 그대로 써도 될거 같은데 양군이 쫄랐다.-ㅅ-
-			pInvenItem->ClearItemOption();	// 일단 머가 있을지 모르니 지우고 본다-0-
+			
+			pInvenItem->ClearItemOption();	
 			pInvenItem->AddItemOption(m_Type);
 			bSucces = true;
 		}
@@ -956,7 +872,7 @@ MActionResultNodeChangeItemOptionInInventory::Execute()
 	//	int Option2 = LOWORD(m_Type);
 
 	//	if(oriOption < newOption)
-		for(; Option != NULL; Option >>= 16)	// 2바이트 쉬프트 하면 LOWORD, HIWORD순으로 되나
+		for(; Option != NULL; Option >>= 16)	
 		{
 			int oriOption = (Option & 0xff00) >> 8;
 			int newOption = (Option & 0xff);
@@ -1022,12 +938,12 @@ MActionResult::~MActionResult()
 {
 	ACTIONRESULTNODE_LIST::iterator	iNode = m_List.begin();
 
-	// 모든 node를 delete해준다.
+	
 	while (iNode != m_List.end())
 	{
 		MActionResultNode* pResultNode = *iNode;
 		
-		// 결과 실행..
+		
 		//pResultNode->Execute();
 
 		delete pResultNode;
@@ -1051,7 +967,7 @@ MActionResult::Release()
 {
 	ACTIONRESULTNODE_LIST::iterator	iNode = m_List.begin();
 
-	// 모든 node를 delete해준다.
+	
 	while (iNode != m_List.end())
 	{
 		MActionResultNode* pResultNode = *iNode;
@@ -1065,7 +981,7 @@ MActionResult::Release()
 }
 
 //----------------------------------------------------------------------
-// Add : 결과 하나를 추가한다.
+
 //----------------------------------------------------------------------
 void		
 MActionResult::Add(MActionResultNode* pNode)
@@ -1073,20 +989,20 @@ MActionResult::Add(MActionResultNode* pNode)
 	if (pNode==NULL)
 		return;
 
-	// list에 추가
+	
 	m_List.push_back( pNode );
 }
 
 //----------------------------------------------------------------------
 // ExecuteResult
 //----------------------------------------------------------------------
-// ActionInfo(Effect)에 따른 결과를 실행한다.
+
 //----------------------------------------------------------------------
 void
 MActionResult::Execute()
 {
 	//------------------------------------------------
-	// 모두~~ 처리한다.
+	
 	//------------------------------------------------
 	while (!m_List.empty())
 	{	
@@ -1126,7 +1042,7 @@ MActionResultNodeChangeItemGenderInInventory::Execute()
 			delete pMouseItem;
 	}
 	
-	// 아이템이 없으면... 끝~
+	
 	if (pInvenItem==NULL)
 		return;
 

@@ -21,7 +21,7 @@
 #endif
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 
 #if defined(PLATFORM_WINDOWS)
@@ -46,9 +46,9 @@ static const int SOCKET_ERROR = -1;
 
 //////////////////////////////////////////////////
 //
-// Windows에서는 SOCKET과 INVALID_SOCKET을 unsigned int으로
-// 정의한다. 그러나 Windows에서 WinSock.h를 include하지 않으면
-// SOCKET과 INVALID_SOCKET이 정의되어 있지 않다.
+
+
+
 //
 //////////////////////////////////////////////////
 #if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)

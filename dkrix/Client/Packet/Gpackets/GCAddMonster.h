@@ -7,9 +7,9 @@
 #ifndef __GC_ADD_MONSTER_H__
 #define __GC_ADD_MONSTER_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "EffectInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../EffectInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddMonster;
@@ -97,7 +97,7 @@ private:
 	EffectInfo*   m_pEffectInfo;  // effects info on monster
 	HP_t          m_CurrentHP;    // current hp
 	HP_t          m_MaxHP;        // max hp
-	BYTE           m_FromFlag;    // 어디로부터인가? 정상일 경우에는 0, 포탈을 통했을 경우에는 1
+	BYTE           m_FromFlag;    
 };
 
 
@@ -120,7 +120,7 @@ public :
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddMonsterPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() 
 	{ 
 		return szObjectID +            // object id

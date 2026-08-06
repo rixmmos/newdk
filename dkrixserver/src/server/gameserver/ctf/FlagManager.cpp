@@ -106,10 +106,10 @@ void FlagManager::addPoleField(Zone* pZone, ZoneCoord_t left, ZoneCoord_t top, u
 
 void FlagManager::manualStart() {
     if (!isEmpty()) {
-        cout << "스케줄 땡기기.." << endl;
+        cout << " .." << endl;
         addSchedule(new Schedule(popRecentWork(), VSDateTime::currentDateTime()));
     } else {
-        cout << "스케줄 만들기.." << endl;
+        cout << " .." << endl;
         addSchedule(new Schedule(new FlagWar(), VSDateTime::currentDateTime()));
     }
 }
@@ -144,7 +144,7 @@ bool FlagManager::endFlagWar() {
     if (m_bHasFlagWar) {
         recordFlagWarHistory();
 
-        // script 돌리기 ㅡ.,ㅡ system 함수를 쓰게 될 줄이야 !_!
+        
         char cmd[100];
         sprintf(cmd, "/home/darkeden/vs/bin/script/recordFlagWarHistory.py %s %d %d %d %d %d %d %d ",
                 m_EndTime.toStringforWeb().c_str(), (int)getWinnerRace(), g_pConfig->getPropertyInt("Dimension"),
@@ -173,7 +173,7 @@ bool FlagManager::putFlag(PlayerCreature* pPC, MonsterCorpse* pFlagPole) {
     m_FlagCount[(RACEINDEX)(pPC->getRace())]++;
     m_StatusPacket.setFlagCount(pPC->getRace(), m_FlagCount[(RACEINDEX)(pPC->getRace())]);
     m_PutTime[pPC->getRace()] = VSDateTime::currentDateTime();
-    filelog("FlagWar.log", "%s 님이 깃발을 깃대에 꽂으셨습니당. S : %d, V : %d, O : %d", pPC->getName().c_str(),
+    filelog("FlagWar.log", "%s    . S : %d, V : %d, O : %d", pPC->getName().c_str(),
             m_FlagCount[SLAYER], m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
     unlock();
 
@@ -195,7 +195,7 @@ bool FlagManager::getFlag(PlayerCreature* pPC, MonsterCorpse* pFlagPole) {
     lock();
     m_FlagCount[(RACEINDEX)(m_FlagPoles[pFlagPole])]--;
     m_StatusPacket.setFlagCount(m_FlagPoles[pFlagPole], m_FlagCount[(RACEINDEX)(m_FlagPoles[pFlagPole])]);
-    filelog("FlagWar.log", "%s 님이 깃발을 뽑으셨습니당. S : %d, V : %d, O : %d", pPC->getName().c_str(),
+    filelog("FlagWar.log", "%s   . S : %d, V : %d, O : %d", pPC->getName().c_str(),
             m_FlagCount[SLAYER], m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
     unlock();
 
@@ -222,7 +222,7 @@ bool FlagManager::putFlag(PlayerCreature* pPC, Item* pItem, MonsterCorpse* pFlag
 
     Effect* pEffect = pPC->findEffect(Effect::EFFECT_CLASS_HAS_FLAG);
     if (pEffect != NULL) {
-        // cout << "이펙트도 없애주고.." << endl;
+        
         pEffect->setDeadline(0);
     }
 
@@ -276,8 +276,8 @@ void FlagManager::resetFlagCounts() {
     m_FlagCount[VAMPIRE] = 0;
     m_FlagCount[OUSTERS] = 0;
 
-    // 추적 실패한 깃발들을 지워주는 일이 필요한 거 같다
-    // 필드의 깃발들은 문제가 없지만 깃대에 꽂힌 깃발은 반드시 지워줘야 한다
+    
+    
     list<PoleFieldInfo>::iterator itr = m_PoleFields.begin();
     list<PoleFieldInfo>::iterator endItr = m_PoleFields.end();
     for (; itr != endItr; ++itr) {
@@ -307,7 +307,7 @@ void FlagManager::resetFlagCounts() {
             }
     }
 
-    // Reset 할 때 FlagWarStat 테이블을 정리한다
+    
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
@@ -341,7 +341,7 @@ void FlagManager::recordPutFlag(PlayerCreature* pPC, Item* pItem)
         pResult = pStmt->executeQuery("SELECT Name FROM FlagWarStat WHERE Name = '%s' AND ItemID = %d",
                                       pPC->getName().c_str(), pItem->getItemID());
 
-        // 있으면 무시 없으면 INSERT
+        
         if (!pResult->next()) {
             pResult = pStmt->executeQuery(
                 "INSERT INTO FlagWarStat (PlayerID, Name, Race, ServerID, ItemID) VALUES ('%s','%s',%d,%d,%d)",

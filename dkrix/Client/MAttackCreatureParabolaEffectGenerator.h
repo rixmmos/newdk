@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttackCreatureParabolaEffectGenerator.h
 //----------------------------------------------------------------------
-// 포물선으로 Creature 추적
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACKCREATUREPARABOLAEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttackCreatureParabolaEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACK_CREATURE_PARABOLA; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

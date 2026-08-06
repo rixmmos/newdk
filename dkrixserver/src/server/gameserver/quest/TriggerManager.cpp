@@ -45,7 +45,7 @@ TriggerManager::~TriggerManager()
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// NPC 이름을 파라미터로 주면, NPC와 관련된 트리거들을 DB에서 로딩한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void TriggerManager::load(const string& name)
 
@@ -100,7 +100,7 @@ void TriggerManager::load(const string& name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 존 좌표를 파라미터로 주면, 그 좌표와 관련된 트리거들을 DB에서 로딩한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void TriggerManager::load(ZoneID_t zoneid, int left, int top, int right, int bottom) {
     __BEGIN_TRY
@@ -146,7 +146,7 @@ void TriggerManager::load(ZoneID_t zoneid, int left, int top, int right, int bot
 void TriggerManager::refresh() {
     __BEGIN_TRY
 
-    // 소속된 모든 트리거들의 ConditionSet 을 m_ConditionSet 에 OR 연산한다.
+    
     for (list<Trigger*>::const_iterator itr = m_Triggers.begin(); itr != m_Triggers.end(); itr++) {
         m_ConditionSet |= (*itr)->getConditionSet();
     }
@@ -205,7 +205,7 @@ void TriggerManager::deleteTrigger(TriggerID_t triggerID) {
     // delete node
     m_Triggers.erase(itr);
 
-    // condition set 을 새로 구성한다.
+    
     refresh();
 
     __END_CATCH

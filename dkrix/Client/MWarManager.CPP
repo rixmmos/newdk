@@ -3,23 +3,23 @@
 #include "MZoneTable.h"
 #include "UserInformation.h"
 #include "UIFunction.h"
-#include "GuildWarInfo.h"
-#include "RaceWarInfo.h"
-#include "LevelWarInfo.h"
+#include "Packet/GuildWarInfo.h"
+#include "Packet/RaceWarInfo.h"
+#include "Packet/LevelWarInfo.h"
 #include "MZone.h"
 #include "MSkillManager.h"
 #include "RarFile.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 
 MWarManager *g_pWarManager = NULL;
 
 
 MWarManager::MWarManager()
 {
-//	// �ƴ��� ���� �� ���̵�.
-//	// �ƴ��� ���������� �ٸ� �� 4���� ������ ���� ����ȴ�.
-//	// �׷��Ƿ� WarInfo �� ���ö� �ƴ��� ���� �� ���̵� üũ�Ͽ� 4���� ���� �Ѱ��־�� �Ѵ�.
-//	// �� HardCoding ƽ������... -_-
+
+
+
+
 //
 //	HolyLandZone.clear();
 //
@@ -35,7 +35,7 @@ MWarManager::~MWarManager()
 	ClearWar();
 }
 
-// WarList �� ������ش�. ������ ������ left_time �� Update ���ش�.
+
 void			MWarManager::SetWar(WarInfo *info)
 {
 	if(info == NULL)
@@ -43,11 +43,11 @@ void			MWarManager::SetWar(WarInfo *info)
 
 	std::vector<WAR_INFO>::iterator itr = g_pUserInformation->WarInfo.begin();
 
-	switch(info->getWarType())	// ������
+	switch(info->getWarType())	
 	{
 	case WAR_RACE:
 		{
-			// ���� ������
+			
 			UI_RunNotice(6, info->getStartTime());
 			UI_DeleteNotice(5);
 			
@@ -64,7 +64,7 @@ void			MWarManager::SetWar(WarInfo *info)
 
 				while(itr != g_pUserInformation->WarInfo.end())
 				{
-					if(itr->zone_id == id && itr->war_type == WAR_RACE)		// ������ ������ ������Ʈ!
+					if(itr->zone_id == id && itr->war_type == WAR_RACE)		
 					{
 						itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
 						bUpdate = true;
@@ -96,7 +96,7 @@ void			MWarManager::SetWar(WarInfo *info)
 					UI_RunBloodBibleStatus();
 					
 					//--------------------------------------------------
-					// Ȧ������ ���ʽ� RaceWar �����Ҷ� reset
+					
 					//--------------------------------------------------
 					for(int i = 0; i < HOLYLAND_BONUS_MAX; i++)
 					{
@@ -104,7 +104,7 @@ void			MWarManager::SetWar(WarInfo *info)
 					}
 					
 					//--------------------------------------------------
-					// ���� ��� ������ skill���� �ٽ� üũ�Ѵ�.
+					
 					//--------------------------------------------------
 					g_pSkillAvailable->SetAvailableSkills();
 				}
@@ -126,7 +126,7 @@ void			MWarManager::SetWar(WarInfo *info)
 		
 			while(itr != g_pUserInformation->WarInfo.end())
 			{
-				if(itr->zone_id == pInfo->getCastleID() && itr->war_type == WAR_GUILD)		// ������ ������ ������Ʈ!
+				if(itr->zone_id == pInfo->getCastleID() && itr->war_type == WAR_GUILD)		
 				{
 					itr->left_time = pInfo->getRemainTime() + (timeGetTime()/1000);
 					return;
@@ -164,7 +164,7 @@ void			MWarManager::SetWar(WarInfo *info)
 }
 
 
-// �ش� ���� ���� ������ �����ش�.
+
 void			MWarManager::RemoveWar(ZoneID_t id)
 {
 	WarInfoMapItr	itr = m_WarInfo.find(id);
@@ -347,7 +347,7 @@ bool			MWarManager::IsExist(ZoneID_t id)
 	return true;
 }
 
-//// �ƴ��� ���� �ʵ���ΰ�?
+
 //bool			MWarManager::IsHolyLand(ZoneID_t id)
 //{
 //	list<ZoneID_t>::const_iterator itr = HolyLandZone.begin();

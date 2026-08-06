@@ -33,7 +33,7 @@ GCActiveGuildList::~GCActiveGuildList()
 }
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCActiveGuildList::read(SocketInputStream& iStream) {
     __BEGIN_TRY
@@ -52,7 +52,7 @@ void GCActiveGuildList::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCActiveGuildList::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
@@ -77,7 +77,7 @@ void GCActiveGuildList::clearGuildInfoList()
 {
     __BEGIN_TRY
 
-    // GuildInfoList �� �����Ѵ�
+    
     while (!m_GuildInfoList.empty()) {
         GuildInfo* pGuildInfo = m_GuildInfoList.front();
         m_GuildInfoList.pop_front();

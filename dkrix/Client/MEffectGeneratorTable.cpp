@@ -93,7 +93,7 @@ MEffectGeneratorTable::~MEffectGeneratorTable()
 //
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
-// Init - 한 번만 불려야 한다.
+
 //----------------------------------------------------------------------
 void
 MEffectGeneratorTable::Init()
@@ -167,17 +167,17 @@ MEffectGeneratorTable::Release()
 }
 
 //----------------------------------------------------------------------
-// m_pEffectGenerator에 MEffectGenerator*를 추가한다.
+
 //----------------------------------------------------------------------
 void
 MEffectGeneratorTable::AddEffectGenerator(MEffectGenerator* pEffectGenerator)
 {
-	// 없는 경우에 추가하고..
+	
 	if (m_pEffectGenerator[ pEffectGenerator->GetID() ] == NULL)
 	{
 		m_pEffectGenerator[ pEffectGenerator->GetID() ] = pEffectGenerator;
 	}
-	// 이미 다른게 있다면... 추가하지 않는다.
+	
 	else
 	{
 		delete pEffectGenerator;
@@ -188,7 +188,7 @@ MEffectGeneratorTable::AddEffectGenerator(MEffectGenerator* pEffectGenerator)
 //----------------------------------------------------------------------
 // Generate
 //----------------------------------------------------------------------
-// 최초 Effect생성 
+
 //----------------------------------------------------------------------
 void
 MEffectGeneratorTable::Generate(	
@@ -213,9 +213,9 @@ MEffectGeneratorTable::Generate(
 	}
 	
 	//------------------------------------------------------------
-	// EffectTarget이 없거나..
-	// 정보의 개수가 다르면...
-	// 뭔가(?) 잘못됐다는 얘기다..	
+	
+	
+	
 	//------------------------------------------------------------
 	if (pEffectTarget==NULL)
 	{
@@ -227,14 +227,14 @@ MEffectGeneratorTable::Generate(
 	}
 	else if ((*g_pActionInfoTable)[ nActionInfo ].GetSize()!=pEffectTarget->GetMaxPhase())
 	{
-		// 목표 완료시킨다.
+		
 		//while (!pEffectTarget->IsEnd())
 		//{
 		//	pEffectTarget->NextPhase();
 		//}
 
 		//------------------------------------------------------------
-		// 목표가 없는 Target이다.. 지운다.
+		
 		//------------------------------------------------------------
 		if (pEffectTarget->IsExistResult())
 		{
@@ -255,22 +255,22 @@ MEffectGeneratorTable::Generate(
 	#endif
 	
 	//------------------------------------------------------------
-	// Effect생성 정보가 없으면...
-	// 생성될 Effect가 없으니.. 결과를 바로 처리하면 된다.
+	
+	
 	//------------------------------------------------------------
 	bool bGenerated = false;
 	if ((*g_pActionInfoTable)[ nActionInfo ].GetSize()==0)
 	{
-		// 결과 바로 처리
+		
 		pEffectTarget->SetResultTime();
 	}	
 	else
 	{
 		//------------------------------------------------------------
-		// 현재 EFFECT_INFO_NODE 
+		
 		//------------------------------------------------------------
-		// 대체로 0이지만.. main node부터 시작하는 경우도 있다.
-		// 그러므로 --> pEffectTarget->GetCurrentPhase()
+		
+		
 		//------------------------------------------------------------
 		ACTION_INFO_NODE&			info	= (*g_pActionInfoTable)[ nActionInfo ][pEffectTarget->GetCurrentPhase()];
 		TYPE_EFFECTSPRITETYPE		EffectSpriteType = info.EffectSpriteType;
@@ -291,7 +291,7 @@ MEffectGeneratorTable::Generate(
 		}
 
 		//------------------------------------------------------------
-		// 첫번째 목표
+		
 		//------------------------------------------------------------
 		int targetX = pEffectTarget->GetX();
 		int targetY = pEffectTarget->GetY();
@@ -302,10 +302,10 @@ MEffectGeneratorTable::Generate(
 		DWORD count;
 		
 		//------------------------------------------------------------
-		// Effect의 이번 node의 지속 시간 결정
+		
 		//------------------------------------------------------------
-		// bDelayNode이고 설정된 delay가 있는 경우
-		//		//main node이고 pEffectTarget의 DelayFrame이 0이 아닌 경우
+		
+		
 		//------------------------------------------------------------
 		if (info.bDelayNode
 			//(*g_pActionInfoTable)[ nActionInfo ].HasMainNode()
@@ -321,24 +321,24 @@ MEffectGeneratorTable::Generate(
 
 
 		//------------------------------------------------------------
-		// 다음 목표
+		
 		//------------------------------------------------------------
 		pEffectTarget->NextPhase();
 
 		
 		//------------------------------------------------------------
-		// EffectGenerator가 생성되지 않은 경우
+		
 		//------------------------------------------------------------
 		if (info.EffectGeneratorID >= MAX_EFFECTGENERATORID
 			|| m_pEffectGenerator[ info.EffectGeneratorID ]==NULL)
 		{
-			// 목표 완료시킨다.
+			
 			//while (!pEffectTarget->IsEnd())
 			//{
 				//pEffectTarget->NextPhase();
 			//}
 			//------------------------------------------------------------
-			// 목표가 없는 Target이다.. 지운다.
+			
 			//------------------------------------------------------------
 			if (pEffectTarget->IsExistResult())
 			{
@@ -356,7 +356,7 @@ MEffectGeneratorTable::Generate(
 
 		//------------------------------------------------------------
 		//
-		// EffectGenerator에서 Effect를 생성하게 한다.
+		
 		//
 		//------------------------------------------------------------
 		EFFECTGENERATOR_INFO egInfo;
@@ -385,8 +385,8 @@ MEffectGeneratorTable::Generate(
 		#endif
 
 		//------------------------------------------------------------
-		// Generate의 return값은 egInfo.pEffectTarget이 
-		// 내부에서 다른 effect로 link되었는가를 의미한다.
+		
+		
 		//------------------------------------------------------------
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
 			DEBUG_ADD_FORMAT("Generate before. id=%d", info.EffectGeneratorID);
@@ -399,7 +399,7 @@ MEffectGeneratorTable::Generate(
 			#endif
 
 			//------------------------------------------------------------
-			// 기술의 단계에 맞는 sound를 출력해준다.
+			
 			//------------------------------------------------------------
 			if (info.SoundID != SOUNDID_NULL)
 			{
@@ -409,12 +409,12 @@ MEffectGeneratorTable::Generate(
 			}
 
 			//------------------------------------------------------------
-			// 결과를 처리해야하는 시점인가? 
+			
 			//------------------------------------------------------------
 			if (info.bResultTime)
 			{
-				// 결과 처리 시간이 지났다고 체크한다.
-				// 나중에 결과가 생기면 바로 처리하게 된다.
+				
+				
 				pEffectTarget->SetResultTime();
 			}
 
@@ -435,7 +435,7 @@ MEffectGeneratorTable::Generate(
 	}
 
 	//------------------------------------------------------------
-	// 결과 처리
+	
 	//------------------------------------------------------------
 	if (pEffectTarget->IsResultTime() || pEffectTarget->IsEnd())
 	{	
@@ -443,7 +443,7 @@ MEffectGeneratorTable::Generate(
 			DEBUG_ADD("Check Result");
 		#endif
 
-		// 결과가 있으면 처리해야 한다.
+		
 		if (pEffectTarget->IsExistResult())
 		{
 			MActionResult* pResult = pEffectTarget->GetResult();
@@ -453,10 +453,10 @@ MEffectGeneratorTable::Generate(
 				DEBUG_ADD_FORMAT("ExecuteResult. et=0x%X, targetID=%d, targetPhase4=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 			#endif
 
-			// 결과 실행
+			
 			pResult->Execute();
 			
-			// 메모리 제거
+			
 			delete pResult;			
 		}
 
@@ -470,9 +470,9 @@ MEffectGeneratorTable::Generate(
 		//------------------------------
 		// [ TEST CODE ]
 		//------------------------------
-		// Player의 진행중이던 EffectTarget은 끝났다고 설정한다.
-		// 왜 하필 Player인가?
-		// 다른 캐릭터도 이 함수(Generate)를 쓴다.
+		
+		
+		
 		g_pPlayer->RemoveEffectTarget( pEffectTarget->GetEffectID() );
 
 		//if (!bGenerated)
@@ -482,8 +482,8 @@ MEffectGeneratorTable::Generate(
 	}
 	
 	//------------------------------------------------------------
-	// 더 이상 목표가 필요없는 마지막 단계인 경우..
-	// effect가 사라질때 지워지게 한다.
+	
+	
 	//------------------------------------------------------------
 	if (//pEffectTarget->IsEnd() && 
 		!bGenerated || pEffectTarget->IsEnd() )
@@ -501,10 +501,10 @@ MEffectGeneratorTable::Generate(
 				DEBUG_ADD_FORMAT("ExecuteResult. et=0x%X, targetID=%d, targetPhase4=%d", pEffectTarget, (int)pEffectTarget->GetEffectID(), pEffectTarget->GetMaxPhase());
 #endif
 				
-				// 결과 실행
+				
 				pResult->Execute();
 				
-				// 메모리 제거
+				
 				delete pResult;			
 			}
 
@@ -520,7 +520,7 @@ MEffectGeneratorTable::Generate(
 //----------------------------------------------------------------------
 // GenerateNext
 //----------------------------------------------------------------------
-// 연결된 다음 Effect 생성
+
 //----------------------------------------------------------------------
 void	 
 MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
@@ -535,21 +535,21 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	}
 
 	//------------------------------------------------------------
-	// pEffect의 정보를 참고해서 Generate한다.
+	
 	//------------------------------------------------------------
 	MEffectTarget* pEffectTarget = pEffect->GetEffectTarget();
 	
 	//------------------------------------------------------------
-	// [ 필살!~ ] 다음 Effect로 Link가 된 Effect의 
-	//						EffectTarget을 제거한다.
+	
+	
 	//
-	// pEffectTarget는 Generate()에서 다음 Effect로 전달되거나
-	//							이번 loop에서 delete되어야 한다.
+	
+	
 	//------------------------------------------------------------
 	pEffect->SetEffectTargetNULL();
 
 	//------------------------------------------------------------
-	// 목표가 없으면..
+	
 	//------------------------------------------------------------
 	if (pEffectTarget==NULL)
 	{
@@ -561,15 +561,15 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	}
 
 	///*
-	// 으흠 - -;
-	// 완전히 끝난걸 의미한다.
+	
+	
 	if (pEffectTarget->IsEnd())
 	{
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
 			DEBUG_ADD("EffectTarget End - Check Result0");
 		#endif
 
-		// 결과가 있으면 처리해야 한다.
+		
  		if (pEffectTarget->IsExistResult())
 		{
 			MActionResult* pResult = pEffectTarget->GetResult();
@@ -580,10 +580,10 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 				DEBUG_ADD("Execute Result0");
 			#endif
 
-			// 결과 실행
+			
 			pResult->Execute();
 			
-			// 메모리 제거
+			
 			delete pResult;			
 		}
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
@@ -593,14 +593,14 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 			}
 		#endif
 		
-		// Player의 진행중이던 EffectTarget은 끝났다고 설정한다.
+		
 		g_pPlayer->RemoveEffectTarget( pEffectTarget->GetEffectID() );
 
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
 			DEBUG_ADD("delete EffectTarget0");
 		#endif
 
-		delete pEffectTarget;	// 음(!) 이게 맞나??
+		delete pEffectTarget;	
 		//pEffect->SetEffectTargetNULL();
 
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
@@ -612,7 +612,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	//*/
 
 
-	// 몇번째 Info냐 하면...
+	
 	int nActionInfoNode = pEffectTarget->GetCurrentPhase();		
 
 	
@@ -626,10 +626,10 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	DWORD count;
 	
 	//------------------------------------------------------------
-	// Effect의 이번 node의 지속 시간 결정
+	
 	//------------------------------------------------------------
-	// bDelayNode이고 설정된 delay가 있는 경우
-	//		//main node이고 pEffectTarget의 DelayFrame이 0이 아닌 경우
+	
+	
 	//------------------------------------------------------------
 	if (info.bDelayNode
 		//(*g_pActionInfoTable)[ nActionInfo ].HasMainNode()
@@ -644,12 +644,12 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	}
 
 	//------------------------------------------------------------
-	// 다음 목표
+	
 	//------------------------------------------------------------
 	pEffectTarget->NextPhase();
 
 	//------------------------------------------------------------
-	// EffectGenerator가 생성되지 않은 경우
+	
 	//------------------------------------------------------------
 	if (info.EffectGeneratorID >= MAX_EFFECTGENERATORID
 		|| m_pEffectGenerator[ info.EffectGeneratorID ]==NULL)
@@ -658,7 +658,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 			DEBUG_ADD_FORMAT("[Error] EGT-Generate id=%d, target=0x%X", info.EffectGeneratorID, pEffectTarget);
 		#endif	
 
-		// 목표 완료시킨다.
+		
 		//while (!pEffectTarget->IsEnd())
 		//{
 		//	pEffectTarget->NextPhase();
@@ -670,21 +670,21 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 		}
 
 		delete pEffectTarget;
-		//pEffect->SetEffectTargetNULL();	// 이거 주석 되었던 이유가 뭘까.. -> 위에서 해주네 - -;
+		
 
 		return;
 	}
 
 	//------------------------------------------------------------
 	//
-	// EffectGenerator에서 Effect를 생성하게 한다.
+	
 	//
 	//------------------------------------------------------------
 	EFFECTGENERATOR_INFO egInfo;
 
 	egInfo.nActionInfo			= pEffect->GetActionInfo();
 	
-	// 마지막꺼면 target을 넘겨주지 않는다.
+	
 	egInfo.pEffectTarget		= pEffectTarget->IsEnd()? NULL : pEffectTarget;
 
 	egInfo.effectSpriteType		= info.EffectSpriteType;
@@ -708,8 +708,8 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	bool bGenerated = false;
 
 	//------------------------------------------------------------
-	// Generate의 return값은 egInfo.pEffectTarget이 
-	// 내부에서 다른 effect로 link되었는가를 의미한다.
+	
+	
 	//------------------------------------------------------------
 	#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
 		DEBUG_ADD_FORMAT("Generate before. id=%d", info.EffectGeneratorID);
@@ -722,7 +722,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 		#endif	
 
 		//------------------------------------------------------------
-		// 기술의 단계에 맞는 sound를 출력해준다.
+		
 		//------------------------------------------------------------
 		if (info.SoundID != SOUNDID_NULL)
 		{
@@ -732,12 +732,12 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 		}
 
 		//------------------------------------------------------------
-		// 결과를 처리해야하는 시점인가? 
+		
 		//------------------------------------------------------------
 		if (info.bResultTime)
 		{
-			// 결과 처리 시간이 지났다고 체크한다.
-			// 나중에 결과가 생기면 바로 처리하게 된다.
+			
+			
 			pEffectTarget->SetResultTime();
 		}
 
@@ -753,7 +753,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	}
 
 	//------------------------------------------------------------
-	// 결과 처리
+	
 	//------------------------------------------------------------
 	if (pEffectTarget->IsResultTime() 
 		|| pEffectTarget->IsEnd()
@@ -763,7 +763,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 			DEBUG_ADD("Check Result");
 		#endif
 
-		// 결과가 있으면 처리해야 한다.
+		
  		if (pEffectTarget->IsExistResult())
 		{
 			MActionResult* pResult = pEffectTarget->GetResult();
@@ -774,10 +774,10 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 				DEBUG_ADD("Execute Result");
 			#endif
 
-			// 결과 실행
+			
 			pResult->Execute();
 			
-			// 메모리 제거
+			
 			delete pResult;
 			
 			//pEffectTarget
@@ -789,7 +789,7 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 			}
 		#endif
 		
-		// Player의 진행중이던 EffectTarget은 끝났다고 설정한다.
+		
 		g_pPlayer->RemoveEffectTarget( pEffectTarget->GetEffectID() );
 
 		//delete pEffectTarget;
@@ -797,10 +797,10 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 	}
 
 	//------------------------------------------------------------
-	// 더 이상 목표가 필요없는 마지막 단계인 경우..
+	
 	//------------------------------------------------------------
-	// end이면 Generate()에서 pEffectTarget을 넘겨주지 않으므로
-	// 여기서 지워야 한다.
+	
+	
 	if (pEffectTarget->IsEnd() || !bGenerated)
 	{
 		#ifdef OUTPUT_DEBUG_EFFECT_GENERATOR
@@ -817,10 +817,10 @@ MEffectGeneratorTable::GenerateNext( MEffect* pEffect )
 			DEBUG_ADD("Execute Result");
 #endif
 			
-			// 결과 실행
+			
 			pResult->Execute();
 			
-			// 메모리 제거
+			
 			delete pResult;
 		}
 

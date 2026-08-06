@@ -10,6 +10,7 @@ CAVI::CAVI()
 
 #include <Windows.h>
 #include <mmsystem.h>
+#include <digitalv.h>
 #pragma comment(lib, "winmm.lib")
 
 int CAVI::OpenMPG(HWND hwnd, LPSTR szName, int w, int h)
@@ -25,16 +26,16 @@ int CAVI::OpenMPG(HWND hwnd, LPSTR szName, int w, int h)
 					  MCI_OPEN_ELEMENT |
 					  MCI_OPEN_TYPE |
 					  MCI_DGV_OPEN_WS,
-					  (DWORD)&MciDgvOpenParms))
+					  (DWORD_PTR)&MciDgvOpenParms))
 	{
 		dwID=NULL;
 		return FALSE;
 	}
 	dwID = MciDgvOpenParms.wDeviceID;
 
-	// 위치 조정
+	
 	MCI_DGV_RECT_PARMS MciDgvRectParms;
-	// 추가정보
+	
 	RECT Rect;
 	GetClientRect(hwnd, &Rect);
 	int x = (Rect.right - w) / 2;
@@ -47,13 +48,13 @@ int CAVI::OpenMPG(HWND hwnd, LPSTR szName, int w, int h)
 
 	mciSendCommand(dwID, MCI_PUT,
 				   MCI_ANIM_PUT_DESTINATION | MCI_DGV_RECT,
-				   (DWORD)&MciDgvRectParms);
+				   (DWORD_PTR)&MciDgvRectParms);
 
 	MCI_DGV_WINDOW_PARMS MciDgvWindowParms;
 	MciDgvWindowParms.hWnd = hwnd;
 
 	mciSendCommand(dwID, MCI_WINDOW, MCI_ANIM_WINDOW_HWND,
-				   (DWORD)&MciDgvWindowParms);
+				   (DWORD_PTR)&MciDgvWindowParms);
 
 	return TRUE;
 }
@@ -71,16 +72,16 @@ int CAVI::OpenAVI(HWND hwnd, LPSTR szName, int w, int h)
 					  MCI_OPEN_ELEMENT |
 					  MCI_OPEN_TYPE |
 					  MCI_DGV_OPEN_WS,
-					  (DWORD)&MciDgvOpenParms))
+					  (DWORD_PTR)&MciDgvOpenParms))
 	{
 		dwID=NULL;
 		return FALSE;
 	}
 	dwID = MciDgvOpenParms.wDeviceID;
 
-	// 위치 조정
+	
 	MCI_DGV_RECT_PARMS MciDgvRectParms;
-	// 추가정보
+	
 	RECT Rect;
 	GetClientRect(hwnd, &Rect);
 	int x = (Rect.right - w) / 2;
@@ -93,13 +94,13 @@ int CAVI::OpenAVI(HWND hwnd, LPSTR szName, int w, int h)
 
 	mciSendCommand(dwID, MCI_PUT,
 				   MCI_ANIM_PUT_DESTINATION | MCI_DGV_RECT,
-				   (DWORD)&MciDgvRectParms);
+				   (DWORD_PTR)&MciDgvRectParms);
 
 	MCI_DGV_WINDOW_PARMS MciDgvWindowParms;
 	MciDgvWindowParms.hWnd = hwnd;
 
 	mciSendCommand(dwID, MCI_WINDOW, MCI_ANIM_WINDOW_HWND,
-				   (DWORD)&MciDgvWindowParms);
+				   (DWORD_PTR)&MciDgvWindowParms);
 
 	return TRUE;
 }
@@ -109,7 +110,7 @@ void CAVI::Close()
 	if(dwID!=NULL)
 	{
 		MCI_PLAY_PARMS MciPlayParms;
-		mciSendCommand(dwID, MCI_STOP, MCI_NOTIFY, (DWORD)&MciPlayParms);
+		mciSendCommand(dwID, MCI_STOP, MCI_NOTIFY, (DWORD_PTR)&MciPlayParms);
 		mciSendCommand(dwID, MCI_CLOSE, 0, NULL);
 		dwID=NULL;
 	}
@@ -120,9 +121,9 @@ int CAVI::Play()
 	if(dwID==NULL) return FALSE;
 
 	MCI_PLAY_PARMS MciPlayParms;
-	MciPlayParms.dwCallback=(DWORD)hwnd;
+	MciPlayParms.dwCallback=(DWORD_PTR)hwnd;
 	mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY,
-				   (DWORD)&MciPlayParms);
+				   (DWORD_PTR)&MciPlayParms);
 
 	return TRUE;
 }
@@ -132,7 +133,7 @@ void CAVI::Stop()
 	if(dwID!=NULL)
 	{
 		MCI_PLAY_PARMS MciPlayParms;
-		mciSendCommand(dwID, MCI_STOP, MCI_WAIT,(DWORD)&MciPlayParms);
+		mciSendCommand(dwID, MCI_STOP, MCI_WAIT,(DWORD_PTR)&MciPlayParms);
 	}
 }
 

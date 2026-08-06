@@ -95,7 +95,7 @@ void EffectHellFireToEnemy::unaffect(Creature* pCreature)
     Assert(pCreature != NULL);
     //	Assert(pCreature->isOusters());
 
-    // 플래그를 끈다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_HELLFIRE_TO_ENEMY);
 
     Zone* pZone = pCreature->getZone();
@@ -104,7 +104,7 @@ void EffectHellFireToEnemy::unaffect(Creature* pCreature)
     //	Ousters* pTargetOusters = dynamic_cast<Ousters*>(pCreature);
     //	Assert( pTargetOusters != NULL );
 
-    // 이펙트를 삭제하라고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_HELLFIRE_TO_ENEMY);

@@ -10,7 +10,7 @@ void EffectGDRLairClose::affect() {
     setNextTime(600);
 
     char msg[200];
-    sprintf(msg, "%d롸빈,쉥밑균훑댐흩契묵흙왯.", m_MinutesCount);
+    sprintf(msg, "%d,.", m_MinutesCount);
     GCSystemMessage gcSM;
     gcSM.setMessage(msg);
     g_pZoneGroupManager->broadcast(&gcSM);
@@ -20,11 +20,11 @@ void EffectGDRLairClose::affect() {
 void EffectGDRLairClose::unaffect() {
     __BEGIN_TRY
 
-    cout << "질드레 레어 닫습니다." << endl;
+    cout << "  ." << endl;
     GDRLairManager::Instance().close();
 
     GCSystemMessage gcSM;
-    gcSM.setMessage("훑댐흩契묵綠밑균.");
+    gcSM.setMessage(".");
     g_pZoneGroupManager->broadcast(&gcSM);
 
     __END_CATCH

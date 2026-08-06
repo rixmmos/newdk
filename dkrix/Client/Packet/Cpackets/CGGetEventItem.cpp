@@ -2,7 +2,7 @@
 
 // Filename    : CGGetEventItem.cpp 
 
-// Written By  : 김성민
+
 
 // Description : 
 

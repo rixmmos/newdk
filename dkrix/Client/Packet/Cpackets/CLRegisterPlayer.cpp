@@ -12,7 +12,7 @@
 
 
 //----------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //----------------------------------------------------------------------
 void CLRegisterPlayer::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -20,7 +20,7 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 	__BEGIN_TRY
 
 	//----------------------------------------------------------------------
-	// 플레이어 기본 정보 ( ID - Password )
+	
 	//----------------------------------------------------------------------
 	BYTE szID;
 	iStream.read( szID );
@@ -43,7 +43,7 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 	iStream.read( m_Password , szPassword );
 
 	//----------------------------------------------------------------------
-	// 플레이어 개인 정보 ( Name - Sex - SSN )
+	
 	//----------------------------------------------------------------------
 	BYTE szName;
 	iStream.read( szName );
@@ -66,7 +66,7 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 	iStream.read( m_SSN , szSSN );
 
 	//----------------------------------------------------------------------
-	// 플레이어 연락처 ( Telephone - Cellular - ZipCode - Address - Nation )
+	
 	//----------------------------------------------------------------------
 	BYTE szTelephone;
 	iStream.read( szTelephone );
@@ -105,7 +105,7 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 	m_Nation = (Nation)nation;
 
 	//----------------------------------------------------------------------
-	// 플레이어 전자 정보 ( Email - Homepage )
+	
 	//----------------------------------------------------------------------
 	BYTE szEmail;
 	iStream.read( szEmail );
@@ -124,7 +124,7 @@ void CLRegisterPlayer::read ( SocketInputStream & iStream )
 	iStream.read( m_Homepage , szHomepage );
 
 	//----------------------------------------------------------------------
-	// 기타 ( Profile - Public )
+	
 	//----------------------------------------------------------------------
 	BYTE szProfile;
 	iStream.read( szProfile );
@@ -148,7 +148,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 	__BEGIN_TRY
 
 	//----------------------------------------------------------------------
-	// 플레이어 기본 정보 ( ID - Password )
+	
 	//----------------------------------------------------------------------
 	BYTE szID = m_ID.size();
 	if ( szID == 0 )
@@ -171,7 +171,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_Password );
 
 	//----------------------------------------------------------------------
-	// 플레이어 개인 정보 ( Name - Sex - SSN )
+	
 	//----------------------------------------------------------------------
 	BYTE szName = m_Name.size();
 	if ( szName == 0 )
@@ -192,7 +192,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_SSN );
 
 	//----------------------------------------------------------------------
-	// 플레이어 연락처 ( Telephone - Cellular - ZipCode - Address - Nation )
+	
 	//----------------------------------------------------------------------
 	BYTE szTelephone = m_Telephone.size();
 	if ( szTelephone == 0 )
@@ -229,7 +229,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 	oStream.write( (BYTE)m_Nation );
 
 	//----------------------------------------------------------------------
-	// 플레이어 전자 정보 ( Email - Homepage )
+	
 	//----------------------------------------------------------------------
 	BYTE szEmail = m_Email.size();
 	if ( szEmail == 0 )
@@ -248,7 +248,7 @@ void CLRegisterPlayer::write ( SocketOutputStream & oStream ) const
 	oStream.write( m_Homepage );
 
 	//----------------------------------------------------------------------
-	// 기타 ( Profile - Public )
+	
 	//----------------------------------------------------------------------
 	BYTE szProfile = m_Profile.size();
 	if ( szProfile == 0 )

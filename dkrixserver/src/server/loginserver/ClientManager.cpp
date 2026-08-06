@@ -2,7 +2,7 @@
 //
 // Filename    : ClientManager.cpp
 // Written by  : reiot@ewestsoft.com
-// Description : 로그인 서버용 클라이언트 매니저
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -29,13 +29,13 @@
 //
 // constructor
 //
-// 하위 매니저 객체를 생성하는 곳이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 ClientManager::ClientManager() throw(Error) {
     __BEGIN_TRY
 
-    // 로그인 플레이어 매니저를 생성한다.
+    
     g_pLoginPlayerManager = new LoginPlayerManager();
 
     __END_CATCH
@@ -46,13 +46,13 @@ ClientManager::ClientManager() throw(Error) {
 //
 // destructor
 //
-// 하위 매니저 객체를 삭제하는 곳이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 ClientManager::~ClientManager() throw(Error) {
     __BEGIN_TRY
 
-    // 로그인 플레이어 매니저를 삭제한다.
+    
     if (g_pLoginPlayerManager != NULL) {
         delete g_pLoginPlayerManager;
         g_pLoginPlayerManager = NULL;
@@ -64,7 +64,7 @@ ClientManager::~ClientManager() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 하위 매니저 객체를 초기화하고, 자신을 초기화한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void ClientManager::init() throw(Error) {
@@ -78,13 +78,13 @@ void ClientManager::init() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 서비스를 시작한다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void ClientManager::start() throw(Error) {
     __BEGIN_TRY
 
-    run(); // 바로 run() 메쏘드를 호출한다. ^^;
+    run(); 
 
     __END_CATCH
 }
@@ -92,7 +92,7 @@ void ClientManager::start() throw(Error) {
 
 //////////////////////////////////////////////////////////////////////
 //
-// 자신의 서비스를 중단한 후, 하위 매니저 객체들의 서비스를 중단시킨다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void ClientManager::stop() throw(Error) {
@@ -105,7 +105,7 @@ void ClientManager::stop() throw(Error) {
 
 
 //////////////////////////////////////////////////////////////////////
-// 클라이언트 매니저의 메인 루프이다.
+
 //////////////////////////////////////////////////////////////////////
 void ClientManager::run() throw(Error) {
     __BEGIN_TRY
@@ -115,9 +115,9 @@ void ClientManager::run() throw(Error) {
     Timeval NextTime;
     getCurrentTime(NextTime);
 
-    // GameWorldInfo, GameServerInfo 새로 로드하는 시간
+    
     Timeval ReloadNextTime = NextTime;
-    // GameWorldInfo, GameServerInfo 새로 로드하는 시간 간격, 분 단위
+    
     int ReloadGap = g_pConfig->getPropertyInt("ServerInfoReloadTime") * 60;
     ReloadNextTime.tv_sec += ReloadGap;
 
@@ -127,7 +127,7 @@ void ClientManager::run() throw(Error) {
     getCurrentTime(dummyQueryTime);
 
     while (true) {
-        usleep(1000); // FIX: 降低 CPU 占用率，从 100 微秒改为 1000 微秒（1ms）
+        usleep(1000); 
 
         beginProfileEx("LS_MAIN");
 
@@ -167,8 +167,8 @@ void ClientManager::run() throw(Error) {
             NextTime.tv_sec = currentTime.tv_sec + 10;
             NextTime.tv_usec = currentTime.tv_usec;
 
-            // 매턴마다 프로파일 데이터를 초기화해준다.
-            // 누적 데이터보다는 시간대에 따른 시간을 측정하기 위해서...
+            
+            
             initProfileEx();
 
             // g_PacketProfileManager.outputResultToFile("PacketProfile.txt");
@@ -187,7 +187,7 @@ void ClientManager::run() throw(Error) {
             ReloadNextTime.tv_sec += ReloadGap;
         }
 
-        // DB connection 이 timeout 으로 끊어지지 않게 가끔씩 의미없는 쿼리함해준다.
+        
         // by bezz. 2003.04.21
         if (dummyQueryTime < currentTime) {
             g_pDatabaseManager->executeDummyQuery(g_pDatabaseManager->getConnection("DARKEDEN"));

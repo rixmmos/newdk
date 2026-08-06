@@ -67,7 +67,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
             string RecvItemDate = pResult->getString(1);
 
             if (RecvItemDate == "0000-00-00") {
-                // 아이템 주자~
+                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -88,7 +88,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 Grade_t iGrade = 6;
                 list<OptionType_t> optionType;
 
-                // 옵션 결정
+                
                 i = i ^ 1;
                 if (i) {
                     optionType.push_back(50);  // DAM+3
@@ -98,7 +98,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                     optionType.push_back(184); // ATTR+2
                 }
 
-                // 종족
+                
                 if (race == RACE_SLAYER) {
                     iClass = Item::ITEM_CLASS_RING;
                 } else if (race == RACE_VAMPIRE) {
@@ -109,7 +109,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                     Assert(false);
                 }
 
-                // 레벨
+                
                 if (level <= 30) {
                     iType = 3;
                 } else if (level <= 60) {
@@ -141,7 +141,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
 
                 pItem->setGrade(iGrade);
 
-                // 빈공간 확인
+                
                 _TPOINT tp;
                 if (!pInventory->getEmptySlot(pItem, tp)) {
                     SAFE_DELETE(pItem);
@@ -181,17 +181,17 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 pPlayer->sendPacket(&gcCI);
 
 
-                // 가져갔다고 DB 에 기록한다.
+                
                 pStmt->executeQuery("UPDATE Event200501Main SET RecvItemDate = now() WHERE PlayerID = '%s'",
                                     pGamePlayer->getID().c_str());
 
-                // 클라이언트에 수령했다는 메시지를 보낸다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
 
-                // 닉네임을 추가하고 클라이언트에 패킷을 보낸다.
+                
                 NicknameBook* pNicknameBook = pPC->getNicknameBook();
                 Assert(pNicknameBook != NULL);
 
@@ -200,7 +200,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 pGamePlayer->sendPacket(pNicknamePacket);
                 SAFE_DELETE(pNicknamePacket);
             } else {
-                // 이미 아이템을 받아갔다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -208,7 +208,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 return;
             }
         } else {
-            // 대상 자가 아니다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);
@@ -249,7 +249,7 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
             }
 
             if (RecvItemDate == "0000-00-00") {
-                // 아이템 주자~
+                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -266,43 +266,43 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                 Item* pItem[5] = {NULL, NULL, NULL, NULL, NULL};
 
-                // 옵션 DAM_3
+                
                 list<OptionType_t> optionType;
                 optionType.push_back(50); // DAM+3
 
                 if (race == RACE_SLAYER) {
                     pItem[0] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_NECKLACE, 8, optionType); // 블러드 크로스
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_NECKLACE, 8, optionType); 
                     pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8,
-                                                                 optionType); // 크로스 브레이슬릿
+                                                                 optionType); 
                     pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8,
-                                                                 optionType); // 크로스 브레이슬릿
+                                                                 optionType); 
                     pItem[3] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); // 플레티넘 스파이럴
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); 
                     pItem[4] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); // 플레티넘 스파이럴
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); 
                 } else if (race == RACE_VAMPIRE) {
                     pItem[0] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 8,
-                                                                 optionType); // 블랙 앵크
+                                                                 optionType); 
                     pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_BRACELET, 7,
-                                                                 optionType); // 바이퍼 브레이슬릿
+                                                                 optionType); 
                     pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_RING, 8,
-                                                                 optionType); // 링 오브 스컬즈
+                                                                 optionType); 
                     pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_EARRING, 8,
-                                                                 optionType); // 더 캐츠 아이
+                                                                 optionType); 
                     pItem[4] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_AMULET, 8, optionType); // 오달
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_AMULET, 8, optionType); 
                 } else if (race == RACE_OUSTERS) {
                     pItem[0] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); // 메크쟌의 링
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); 
                     pItem[1] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); // 메크쟌의 링
+                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); 
                     pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); // 메크쟌의 링
+                                                                 optionType); 
                     pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); // 피어리 펜던트
+                                                                 optionType); 
                     pItem[4] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); // 피어리 펜던트
+                                                                 optionType); 
                 } else {
                     GCNPCResponse response;
                     response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
@@ -329,10 +329,10 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                 _TPOINT tp[5];
                 for (int i = 0; i < 5; ++i) {
-                    // 빈공간 확인
+                    
 
                     if (!pInventory->getEmptySlot(pItem[i], tp[i])) {
-                        // 클리어. 롤백
+                        
                         for (int j = 0; j < i; ++j) {
                             pInventory->deleteItem(pItem[j]->getObjectID());
                         }
@@ -356,7 +356,7 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                     }
 
                     if (!pInventory->addItem(pItem[i], tp[i])) {
-                        // 클리어. 롤백
+                        
                         for (int j = 0; j < i; ++j) {
                             pInventory->deleteItem(pItem[j]->getObjectID());
                         }
@@ -373,8 +373,8 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                     }
                 }
 
-                // DB 에 생성 및 로그 남기고 클라이언트에 보내기
-                // 시간 제한 추가
+                
+                
                 for (int i = 0; i < 5; ++i) {
                     pItem[i]->create(pPC->getName(), STORAGE_INVENTORY, 0, tp[i].x, tp[i].y);
 
@@ -386,23 +386,23 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                     pPlayer->sendPacket(&gcCI);
 
-                    // 시간제한
+                    
                     pPC->addTimeLimitItem(pItem[i], 7 * 24 * 60 * 60);
                 }
 
                 pPC->sendTimeLimitItemInfo();
 
-                // 가져갔다고 DB 에 기록한다.
+                
                 pStmt->executeQuery("UPDATE Event200501Main SET RecvPremiumItemDate = now() WHERE PlayerID = '%s'",
                                     pGamePlayer->getID().c_str());
 
-                // 클라이언트에 수령했다는 메시지를 보낸다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
             } else {
-                // 이미 아이템을 받아갔다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -410,7 +410,7 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                 return;
             }
         } else {
-            // 대상 자가 아니다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);
@@ -445,7 +445,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
             string RecvItemDate = pResult->getString(2);
 
             if (RecvItemDate == "0000-00-00") {
-                // 아이템 주자~
+                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -466,7 +466,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                 Grade_t iGrade = 6;
                 list<OptionType_t> optionType;
 
-                // 옵션 결정
+                
                 i = i ^ 1;
                 if (i) {
                     optionType.push_back(50);  // DAM+3
@@ -476,7 +476,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                     optionType.push_back(184); // ATTR+2
                 }
 
-                // 종족
+                
                 if (race == RACE_SLAYER) {
                     iClass = Item::ITEM_CLASS_RING;
                 } else if (race == RACE_VAMPIRE) {
@@ -487,7 +487,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                     Assert(false);
                 }
 
-                // 레벨
+                
                 if (level <= 30) {
                     iType = 3;
                 } else if (level <= 60) {
@@ -519,7 +519,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
 
                 pItem->setGrade(iGrade);
 
-                // 빈공간 확인
+                
                 _TPOINT tp;
                 if (!pInventory->getEmptySlot(pItem, tp)) {
                     SAFE_DELETE(pItem);
@@ -558,17 +558,17 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
 
                 pPlayer->sendPacket(&gcCI);
 
-                // 가져갔다고 DB 에 기록한다.
+                
                 pStmt->executeQuery("UPDATE Event200501Recommend SET RecvItemDate = now() WHERE UniqueID = '%d'",
                                     UniqueID);
 
-                // 클라이언트에 수령했다는 메시지를 보낸다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
             } else {
-                // 이미 아이템을 받아갔다.
+                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -576,7 +576,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                 return;
             }
         } else {
-            // 대상 자가 아니다.
+            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);

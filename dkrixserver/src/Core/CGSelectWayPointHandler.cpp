@@ -55,13 +55,13 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
             executeEnterQuestZone(pPacket, pPlayer, targetDynamicZoneType);
         }
 
-        // 게임 플레이어의 상태가 정상이 아니라면 걍 리턴한다.
+        
         GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
         Assert(pGamePlayer != NULL);
         if (pGamePlayer->getPlayerStatus() != GPS_NORMAL)
             return;
 
-        // 크리쳐가 슬레이어가 아니라면 리턴한다.
+        
         Creature* pCreature = pGamePlayer->getCreature();
         Assert(pCreature != NULL);
 
@@ -73,11 +73,11 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
         if (pCreature->hasRelicItem())
             return;
 
-        // 크리쳐가 죽었으면 리턴
+        
         if (pCreature->isDead())
             return;
 
-        // 초보존으로 들어가는 경우엔 종족 상관없이 보내준다.
+        
         if (pPacket->getZoneID() == 1122) {
             ZONE_COORD pos(1122);
 
@@ -96,21 +96,21 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
             if (!canEnterBeginnerZone(pCreature))
                 return;
 
-            // 초보존이 유료존일수도 있을라나...?
+            
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
             ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(pos.id);
 
-            // 유료존인데 유료사용자가 아니면...
+            
             if (pZoneInfo == NULL || ((pZoneInfo->isPayPlay() || pZoneInfo->isPremiumZone()) &&
                                       (!pGamePlayer->isPayPlaying() && !pGamePlayer->isFamilyFreePass()))) {
                 // Statement* pStmt = NULL;
                 string connectIP = pGamePlayer->getSocket()->getHost();
 
-                // 유료 서비스 사용이 가능한가?
+                
                 if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                     sendPayInfo(pGamePlayer);
                 } else if (pZoneInfo->isPayPlay()) {
-                    // 유료 서비스 사용 불가인 경우
+                    
                     GCSystemMessage gcSystemMessage;
 
                     if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
@@ -152,7 +152,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
                         }
             */
 
-            // 크리쳐 정보 보고 알아서 튕겨주자 =_=;;
+            
             ZONE_COORD pos(g_pLevelWarZoneInfoManager->getCreatureZoneID(pCreature));
 
             if (g_pSweeperBonusManager->isAble(g_pLevelWarZoneInfoManager->getCreatureZoneID(pCreature))) {
@@ -217,7 +217,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
                         }
             */
 
-            // 크리쳐 정보 보고 알아서 튕겨주자 =_=;;
+            
             ZONE_COORD pos;
 
             if (pCreature->isSlayer()) {
@@ -233,42 +233,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
                 pos.x = 67;
                 pos.y = 165;
             }
-            /*#if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-                        ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(pos.id);
-
-                        // 유료존인데 유료사용자가 아니면...
-                        if (pZoneInfo==NULL
-                            || (pZoneInfo->isPayPlay() || pZoneInfo->isPremiumZone())
-                                && (!pGamePlayer->isPayPlaying() && !pGamePlayer->isFamilyFreePass() ))
-                        {
-                            //Statement* pStmt = NULL;
-                            string connectIP = pGamePlayer->getSocket()->getHost();
-
-                            // 유료 서비스 사용이 가능한가?
-                            if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID()))
-                            {
-                                sendPayInfo(pGamePlayer);
-                            }
-                            else if (pZoneInfo->isPayPlay())
-                            {
-                                // 유료 서비스 사용 불가인 경우
-                                GCSystemMessage gcSystemMessage;
-
-                                if (g_pConfig->getPropertyInt("IsNetMarble")==0)
-                                {
-                                    gcSystemMessage.setMessage(g_pStringPool->getString(STRID_CANNOT_ENTER ));
-                                }
-                                else
-                                {
-                                    gcSystemMessage.setMessage(g_pStringPool->getString(STRID_CANNOT_ENTER ));
-                                }
-
-                                pGamePlayer->sendPacket (&gcSystemMessage);
-
-                                return;
-                            }
-                        }
-            #endif*/
+             
             if (!g_pVariableManager->isActiveRaceWarLimiter() ||
                 pCreature->isFlag(Effect::EFFECT_CLASS_RACE_WAR_JOIN_TICKET)) {
                 pPC->getGQuestManager()->illegalWarp();
@@ -283,17 +248,17 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
         }
 
         if (!pCreature->isSlayer() && !pCreature->isOusters()) {
-            // 뭔가를 해야하지 않을까?
+            
             return;
         }
 
         if (pCreature->isFlag(Effect::EFFECT_CLASS_HAS_FLAG)) {
-            // 뭔가를 해야하지 않을까?
+            
             return;
         }
 
         if (pCreature->isFlag(Effect::EFFECT_CLASS_HAS_SWEEPER)) {
-            // 뭔가를 해야하지 않을까?
+            
             return;
         }
 
@@ -302,7 +267,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
 
         bool bCancel = false;
 
-        // 이펙트가 걸려있어야 정상적인 이동이다.
+        
         if (pCreature->isOusters() ||
             (pCreature->isSlayer() && pCreature->isFlag(Effect::EFFECT_CLASS_SLAYER_PORTAL))) {
             ZoneID_t id = pPacket->getZoneID();
@@ -312,15 +277,15 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
             if (id == 0 && x == 0 && y == 0) {
                 bCancel = true;
             } else {
-                // 석화 상태일 경우 생깐다.
+                
                 if (pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE)) {
                     bCancel = true;
                 }
 
-                // 웨이포인트 매니저를 통해서 클라이언트가 보내온
-                // 웨이포인트가 정상적인 웨이포인트인지를 검증한다.
+                
+                
                 if (!g_pWayPointManager->isValidWayPoint(id, x, y, pCreature->getRace())) {
-                    // 뭔가를 해야하지 않을까?
+                    
                     bCancel = true;
 
                     // return;
@@ -331,17 +296,17 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
                         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(id);
 
-                        // 유료존인데 유료사용자가 아니면...
+                        
                         if (pZoneInfo == NULL || ((pZoneInfo->isPayPlay() || pZoneInfo->isPremiumZone()) &&
                                                   (!pGamePlayer->isPayPlaying() && !pGamePlayer->isFamilyFreePass()))) {
                             // Statement* pStmt = NULL;
                             string connectIP = pGamePlayer->getSocket()->getHost();
 
-                            // 유료 서비스 사용이 가능한가?
+                            
                             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                                 sendPayInfo(pGamePlayer);
                             } else if (pZoneInfo->isPayPlay()) {
-                                // 유료 서비스 사용 불가인 경우
+                                
                                 GCSystemMessage gcSystemMessage;
 
                                 if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
@@ -358,7 +323,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
 #endif
 
                         if (!bCancel) {
-                            // 이동시키기 전에 이펙트를 삭제한다.
+                            
                             if (pCreature->isSlayer())
                                 pCreature->removeFlag(Effect::EFFECT_CLASS_SLAYER_PORTAL);
 
@@ -368,7 +333,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
 
                                 GCNoticeEvent gcNoticeEvent;
 
-                                // 대지정령의 뿔을 사용할라면 시오람과 계약을 맺었어야 한다.
+                                
                                 if (!pOusters->getFlagSet()->isOn(FLAGSET_GNOMES_HORN)) {
                                     gcNoticeEvent.setCode(NOTICE_EVENT_CONTRACT_GNOMES_HORN);
                                     pPlayer->sendPacket(&gcNoticeEvent);
@@ -400,7 +365,7 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
                                 }
                             }
 
-                            // 올바른 웨이포인트라면 슬레이어를 이동시켜준다.
+                            
                             pPC->getGQuestManager()->illegalWarp();
                             transportCreature(pCreature, id, x, y, false);
                         }
@@ -415,10 +380,10 @@ void CGSelectWayPointHandler::execute(CGSelectWayPoint* pPacket, Player* pPlayer
             Zone* pZone = pCreature->getZone();
             Assert(pZone != NULL);
 
-            // id, x, y가 모두 0일 경우 이동을 취소한다는 뜻이다.
+            
             pCreature->removeFlag(Effect::EFFECT_CLASS_SLAYER_PORTAL);
 
-            // 헬기를 제거하라고 뿌려준다.
+            
             GCAddHelicopter gcAddHelicopter;
             gcAddHelicopter.setObjectID(pCreature->getObjectID());
             gcAddHelicopter.setCode(1);

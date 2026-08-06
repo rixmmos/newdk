@@ -68,7 +68,7 @@ void EffectStriking::unaffect(Item* pItem)
 
     int damage = 0;
 
-    // 변화된 damage를 되돌린다.
+    
     if (pItem->getItemClass() == Item::ITEM_CLASS_SWORD) {
         Sword* pI = dynamic_cast<Sword*>(pItem);
         pI->setBonusDamage(pI->getBonusDamage() - m_incDamage);

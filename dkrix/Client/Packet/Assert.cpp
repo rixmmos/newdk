@@ -7,7 +7,7 @@
 
 // include files
 #include "Client_PCH.h"
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Assert.h"
 #include "Exception.h"
 #include <time.h>
@@ -16,7 +16,7 @@
 //
 // __assert__
 //
-// 이 함수에서는 __BEGIN_TRY , __END_CATCH로 wrapping할 필요가 없다.
+
 //
 //--------------------------------------------------------------------------------
 void __assert__ ( const char * file , uint line , const char * func , const char * expr )

@@ -22,7 +22,7 @@
 #include "ItemUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
@@ -42,15 +42,15 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        if (pTargetCreature == NULL // NoSuch제거 때문에.. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || !canAttack(pSlayer, pTargetCreature)) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayer)" << endl;
             return;
         }
 
-        // 패킷을 준비하고...
+        
         GCAttackArmsOK1 _GCAttackArmsOK1;
         GCAttackArmsOK2 _GCAttackArmsOK2;
         GCAttackArmsOK3 _GCAttackArmsOK3;
@@ -60,12 +60,12 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
         _GCAttackArmsOK5.setSkillSuccess(false);
         _GCAttackArmsOK1.setSkillSuccess(false);
 
-        // 스킬 슬랏을 받아온다.
+        
         SkillSlot* pSkillSlot = pSlayer->getSkill(SKILL_ATTACK_ARMS);
         Assert(pSkillSlot != NULL);
 
-        // 슬레이어가 쓰고 있는 아이템을 가져온다.
-        // 맨손이거나, 총 종류의 무기가 아니라면 에러다.
+        
+        
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || isArmsWeapon(pWeapon) == false) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -77,16 +77,16 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
         bool bBulletCheck = (getRemainBullet(pWeapon) > 0) ? true : false;
 
-        // 총알은 무조건 떨어뜨린다.
+        
         Bullet_t RemainBullet = 0;
         if (bBulletCheck) {
             decreaseBullet(pWeapon);
-            // 한발쓸때마다 저장할 필요 없다. by sigi. 2002.5.9
+            
             // pWeapon->save(pSlayer->getName(), STORAGE_GEAR, 0, Slayer::WEAR_RIGHTHAND, 0);
             RemainBullet = getRemainBullet(pWeapon);
         }
 
-        // 총에 총알이 남아있다면...
+        
         if (bBulletCheck) {
             SkillDomainType_t DomainType = SKILL_DOMAIN_GUN;
             int ToHitBonus = 0;
@@ -100,7 +100,7 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
             int Splash = computeArmsWeaponSplashSize(pWeapon, myX, myY, targetX, targetY);
 
             ////////////////////////////////////////////////////////////////////////////////
-            // SG가 아닌 다른 총의 일반 공격
+            
             ////////////////////////////////////////////////////////////////////////////////
             if (Splash == 0) {
                 ToHitBonus = computeArmsWeaponToHitBonus(pWeapon, myX, myY, targetX, targetY);
@@ -111,8 +111,8 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                 bool bRangeCheck = verifyDistance(pSlayer, pTargetCreature, pWeapon->getRange());
                 bool bPK = verifyPK(pSlayer, pTargetCreature);
 
-                // 공격자와 상대의 아이템 내구성 떨어트림.
-                // 밑에 있던걸 이쪽으로 옮겼다. by sigi. 2002.5.13
+                
+                
                 decreaseDurability(pSlayer, pTargetCreature, NULL, &_GCAttackArmsOK1, &_GCAttackArmsOK2);
 
                 if (bHitRoll && bTimeCheck && bRangeCheck && bPK) {
@@ -123,7 +123,7 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                     setDamage(pTargetCreature, Damage, pSlayer, getSkillType(), &_GCAttackArmsOK2, &_GCAttackArmsOK1);
                     computeAlignmentChange(pTargetCreature, Damage, pSlayer, &_GCAttackArmsOK2, &_GCAttackArmsOK1);
 
-                    // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                    
                     if (bCriticalHit) {
                         knockbackCreature(pZone, pTargetCreature, myX, myY);
                     }
@@ -173,11 +173,11 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                 pZone->broadcastPacket(targetX, targetY, &_GCAttackArmsOK4, cList);
             }
             ////////////////////////////////////////////////////////////////////////////////
-            // SG는 기본적으로 splash가 들어간다.
+            
             ////////////////////////////////////////////////////////////////////////////////
             else {
-                Damage_t Damage = 0; // 마지막으로 입힌 데미지를 저장하기 위한 변수.
-                bool bHit = false;   // 한 명이라도 맞았는가를 저장하기 위한 변수.
+                Damage_t Damage = 0; 
+                bool bHit = false;   
 
                 GCSkillToTileOK1 _GCSkillToTileOK1;
                 GCSkillToTileOK2 _GCSkillToTileOK2;
@@ -210,8 +210,8 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
                         Damage = computeDamage(pSlayer, pEnemy, 0, bCriticalHit);
 
-                        // 메인 타겟을 제외하고는, 스플래시 데미지를 입는데,
-                        // 스플래시 데미지는 일반 데미지의 50%이다.
+                        
+                        
                         if (pTargetCreature != pEnemy) {
                             Damage = Damage / 2;
                         }
@@ -227,12 +227,12 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
                         increaseAlignment(pSlayer, pEnemy, _GCSkillToTileOK1);
 
-                        // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+                        
                         if (bCriticalHit) {
                             knockbackCreature(pZone, pEnemy, myX, myY);
                         }
 
-                        // 타겟이 슬레이어가 아닐 경우에만 경험치를 올려준다.
+                        
                         if (!pTargetCreature->isSlayer()) {
                             bHit = true;
                             if (maxEnemyLevel < pTargetCreature->getLevel())
@@ -247,7 +247,7 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
                     increaseDomainExp(pSlayer, DomainType, 1, _GCSkillToTileOK1, maxEnemyLevel, EnemyNum);
                 }
 
-                // 총알 숫자를 줄이고, 총알 숫자를 저장하고, 남은 총알 숫자를 받은 다음에 내구력을 떨어뜨린다.
+                
                 _GCSkillToTileOK1.addShortData(MODIFY_BULLET, RemainBullet);
 
                 decreaseDurability(pSlayer, NULL, NULL, &_GCSkillToTileOK1, NULL);
@@ -286,7 +286,7 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 
                 pPlayer->sendPacket(&_GCSkillToTileOK1);
 
-                // 이 기술에 의해 영향을 받는 놈들에게 패킷을 보내줘야 한다.
+                
                 for (list<Creature*>::const_iterator itr = cList.begin(); itr != cList.end(); itr++) {
                     Creature* pVictim = *itr;
                     Assert(pVictim != NULL);
@@ -340,7 +340,7 @@ void AttackArms::execute(Slayer* pSlayer, ObjectID_t TargetObjectID)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void AttackArms::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -377,7 +377,7 @@ void AttackArms::execute(Monster* pMonster, Creature* pEnemy)
             Damage_t Damage = computeDamage(pMonster, pEnemy, 0, bCriticalHit);
             setDamage(pEnemy, Damage, pMonster, SKILL_ATTACK_ARMS, &_GCAttackArmsOK2, NULL);
 
-            // 크리티컬 히트라면 상대방을 뒤로 물러나게 한다.
+            
             if (bCriticalHit) {
                 knockbackCreature(pZone, pEnemy, pMonster->getX(), pMonster->getY());
             }
@@ -395,7 +395,7 @@ void AttackArms::execute(Monster* pMonster, Creature* pEnemy)
 
                 pTargetMonster->addEnemy(pMonster);
 
-                // 마스터는 딜레이없다.
+                
                 if (!pMonster->isMaster()
 #ifdef __UNDERWORLD__
                     && !pMonster->isUnderworld() && pMonster->getMonsterType() != 599
@@ -411,7 +411,7 @@ void AttackArms::execute(Monster* pMonster, Creature* pEnemy)
                 }
             }
 
-            // 공격자와 상대의 아이템 내구성 떨어트림.
+            
             decreaseDurability(pMonster, pEnemy, NULL, NULL, &_GCAttackArmsOK2);
 
             ZoneCoord_t targetX = pEnemy->getX();

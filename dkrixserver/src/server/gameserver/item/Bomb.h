@@ -79,13 +79,13 @@ public:
     }
 
 private:
-    ItemType_t m_ItemType; // 아이템 타입
+    ItemType_t m_ItemType; 
     Damage_t m_Damage;
     ItemNum_t m_Num;
     //	Dir_t m_Dir;
 
-    static Mutex m_Mutex;             // 아이템 ID 관련 락
-    static ItemID_t m_ItemIDRegistry; // 클래스별 고유 아이템 아이디 발급기
+    static Mutex m_Mutex;             
+    static ItemID_t m_ItemIDRegistry; 
 };
 
 
@@ -115,8 +115,8 @@ public:
     }
 
 private:
-    Damage_t m_MinDamage; // 최소 데미지
-    Damage_t m_MaxDamage; // 최대 데미지
+    Damage_t m_MinDamage; 
+    Damage_t m_MaxDamage; 
 };
 
 

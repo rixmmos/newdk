@@ -72,11 +72,11 @@ void NetmarbleGuildRegisterThread::run() throw(Error) {
         getCurrentTime(dummyQueryTime);
 
         while (true) {
-            // 길드 등록
+            
             registerGuild();
 
             // for context switch
-            usleep(1000); // FIX: 降低 CPU 占用率
+            usleep(1000); 
         }
     } catch (Throwable& t) {
         filelog("NetmarbleGuildRegisterThread.log", "%s", t.toString().c_str());
@@ -93,7 +93,7 @@ void NetmarbleGuildRegisterThread::run() throw(Error) {
     __END_DEBUG
 }
 
-// 넷마블에 등록할 길드 아이디를 쌓는다.
+
 void NetmarbleGuildRegisterThread::pushGuildID(GuildID_t guildID) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
@@ -102,7 +102,7 @@ void NetmarbleGuildRegisterThread::pushGuildID(GuildID_t guildID) {
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 }
 
-// 길드 정보를 넷마블 쪽으로 등록한다.
+
 void NetmarbleGuildRegisterThread::registerGuild() {
     GuildID_t guildID;
 

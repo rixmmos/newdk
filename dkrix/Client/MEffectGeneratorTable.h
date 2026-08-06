@@ -2,9 +2,9 @@
 // MEffectGeneratorTable.h
 //----------------------------------------------------------------------
 //
-//  = EffectGeneratorTable은 EffectGenerator의 Array이다.
+
 //
-//  = EffectGeneratorTableID로 EffectGenerator를 구분한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ class MEffectGeneratorTable {
 		void	Release();
 
 		//----------------------------------------------------
-		// 최초 Effect생성 
+		
 		//----------------------------------------------------
 		void	Generate(	int x0, int y0, int z0,
 							BYTE direction,																
@@ -39,7 +39,7 @@ class MEffectGeneratorTable {
 							TYPE_ACTIONINFO nActionInfo,
 							MEffectTarget* pEffectTarget, BYTE temp1 = 0, BYTE temp2 = 0);
 		//----------------------------------------------------
-		// 연결된 다음 Effect 생성
+		
 		//----------------------------------------------------
 		void	GenerateNext( MEffect* pEffect );
 

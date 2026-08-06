@@ -10,7 +10,7 @@
 #include "SimpleMeleeSkill.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void HandsOfWisdom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                             CEffectID_t CEffectID)
@@ -38,7 +38,7 @@ void HandsOfWisdom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
 
     SIMPLE_SKILL_OUTPUT result;
 
-    // Tiger Nail 이 있다면 데미지 10% 증가
+    
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_TIGER_NAIL)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_TIGER_NAIL);
         Assert(pRankBonus != NULL);
@@ -46,7 +46,7 @@ void HandsOfWisdom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
         param.SkillDamage += getPercentValue(param.SkillDamage, pRankBonus->getPoint());
     }
 
-    // Knowledge of Innate 가 있다면 hit bonus 가 있다.
+    
     int HitBonus = 0;
     if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE)) {
         RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_INNATE);
@@ -63,7 +63,7 @@ void HandsOfWisdom::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void HandsOfWisdom::execute(Monster* pMonster, Creature* pEnemy)
 

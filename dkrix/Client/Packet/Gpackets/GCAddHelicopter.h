@@ -2,16 +2,16 @@
 // Filename    : GCAddHelicopter.h 
 // Written By  : excel96
 // Description :
-// 슬레이어가 무전기를 사용해, 헬기를 호출했을 경우에 날아가는 패킷
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_ADD_HELICOPTER_H__
 #define __GC_ADD_HELICOPTER_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCAddHelicopter;
@@ -39,8 +39,8 @@ public:
 	void setCode(BYTE code) { m_Code = code; }
 	
 private:
-	ObjectID_t  m_ObjectID; // 헬기를 호출한 슬레이어의 오브젝트 ID
-	BYTE        m_Code;     // 0이 호출, 1이 제거
+	ObjectID_t  m_ObjectID; 
+	BYTE        m_Code;     
 };
 
 //////////////////////////////////////////////////////////////////////////////

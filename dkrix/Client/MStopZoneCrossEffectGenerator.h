@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneCrossEffectGenerator.h
 //----------------------------------------------------------------------
-// 십자가(+) 모양으로 생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONECROSSEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopZoneCrossEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_CROSS; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

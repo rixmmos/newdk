@@ -345,125 +345,12 @@ void SweeperLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        // Sweeper load할게 있다는것은..
-        // 현재로서는 이전에 서버다운이 되었다는 의미이다.
-        // 그래서, 지운다. by sigi
+        
+        
+        
         pStmt->executeQuery("DELETE FROM SweeperObject WHERE OwnerID = '%s'", pCreature->getName().c_str());
 
-        /*
-        Result* pResult = pStmt->executeQuery( "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType,
-        Durability, EnchantLevel FROM SweeperObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str() );
-
-
-        while (pResult->next())
-        {
-            uint i = 0;
-
-            Sweeper* pSweeper = new Sweeper();
-
-            pSweeper->setItemID(pResult->getDWORD(++i));
-            pSweeper->setObjectID(pResult->getDWORD(++i));
-            pSweeper->setItemType(pResult->getDWORD(++i));
-
-            Storage storage =(Storage)pResult->getInt(++i);
-            StorageID_t storageID = pResult->getDWORD(++i);
-            BYTE x = pResult->getBYTE(++i);
-            BYTE y = pResult->getBYTE(++i);
-
-            pSweeper->setOptionType(pResult->getInt(++i));
-            pSweeper->setDurability(pResult->getInt(++i));
-            pSweeper->setEnchantLevel(pResult->getInt(++i));
-
-            Inventory*  pInventory      = NULL;
-            Slayer*     pSlayer         = NULL;
-            Vampire*    pVampire        = NULL;
-            Motorcycle* pMotorcycle     = NULL;
-            Inventory*  pMotorInventory = NULL;
-            //Item*       pItem           = NULL;
-            Stash*      pStash          = NULL;
-            //Belt*       pBelt           = NULL;
-            //Inventory*  pBeltInventory  = NULL;
-
-            if (pCreature->isSlayer())
-            {
-                pSlayer     = dynamic_cast<Slayer*>(pCreature);
-                pInventory  = pSlayer->getInventory();
-                pStash      = pSlayer->getStash();
-                pMotorcycle = pSlayer->getMotorcycle();
-
-                if (pMotorcycle) pMotorInventory = pMotorcycle->getInventory();
-            }
-            else if (pCreature->isVampire())
-            {
-                pVampire   = dynamic_cast<Vampire*>(pCreature);
-                pInventory = pVampire->getInventory();
-                pStash     = pVampire->getStash();
-            }
-            else throw UnsupportedError("Monster,NPC 인벤토리의 저장은 아직 지원되지 않습니다.");
-
-            switch(storage)
-            {
-                case STORAGE_INVENTORY:
-                    if (pInventory->canAddingEx(x, y, pSweeper))
-                    {
-                        pInventory->addItemEx(x, y, pSweeper);
-                    }
-                    else
-                    {
-                        processItemBugEx(pCreature, pSweeper);
-                    }
-                    break;
-
-                case STORAGE_GEAR:
-                    if (pCreature->isSlayer())
-                    {
-                        if (!pSlayer->isWear((Slayer::WearPart)x))
-                        {
-                            pSlayer->wearItem((Slayer::WearPart)x, pSweeper);
-                        }
-                        else
-                        {
-                            processItemBugEx(pCreature, pSweeper);
-                        }
-                    }
-                    else if (pCreature->isVampire())
-                    {
-                        processItemBugEx(pCreature, pSweeper);
-                    }
-                    break;
-
-                case STORAGE_BELT :
-                    processItemBugEx(pCreature, pSweeper);
-                    break;
-
-                case STORAGE_EXTRASLOT :
-                    if (pCreature->isSlayer())       pSlayer->addItemToExtraInventorySlot(pSweeper);
-                    else if (pCreature->isVampire()) pVampire->addItemToExtraInventorySlot(pSweeper);
-                    break;
-
-                case STORAGE_MOTORCYCLE:
-                    processItemBugEx(pCreature, pSweeper);
-                    break;
-
-                case STORAGE_STASH:
-                    if (pStash->isExist(x, y))
-                    {
-                        processItemBugEx(pCreature, pSweeper);
-                    }
-                    else pStash->insert(x, y, pSweeper);
-                    break;
-
-                case STORAGE_GARBAGE:
-                    processItemBug(pCreature, pSweeper);
-                    break;
-
-                default :
-                    SAFE_DELETE(pStmt);	// by sigi
-                    throw Error("invalid storage or OwnerID must be NULL");
-            }
-        }
-        */
+         
 
         SAFE_DELETE(pStmt);
     }
@@ -522,7 +409,7 @@ void SweeperLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                throw UnsupportedError("상자 및 시체안의 아이템의 저장은 아직 지원되지 않습니다.");
+                throw UnsupportedError("       .");
 
             default:
                 throw Error("Storage must be STORAGE_ZONE");

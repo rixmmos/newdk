@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MNPC.h
 //----------------------------------------------------------------------
-// NPC는 상점을 가질 수 있다. - -;
+
 //----------------------------------------------------------------------
 
 #ifndef __MNPC_H__
@@ -35,7 +35,7 @@ class MNPC : public MCreatureWear {
 		//------------------------------------------------------
 		// Action
 		//------------------------------------------------------
-		virtual void	Action();			// 현재 행동을 취하도록 한다.
+		virtual void	Action();			
 
 		//------------------------------------------------------
 		// NPC ID
@@ -44,7 +44,7 @@ class MNPC : public MCreatureWear {
 		TYPE_OBJECTID		GetNPCID() const			{ return m_NPCID; }
 
 		//------------------------------------------------------
-		// NPC 정보
+		
 		//------------------------------------------------------
 		NPC_INFO*			GetNPCInfo(TYPE_OBJECTID id) const;
 
@@ -56,13 +56,13 @@ class MNPC : public MCreatureWear {
 		void				SetShop(MShop* pShop);
 
 		//------------------------------------------------------
-		// normal item 선반 생성
+		
 		//------------------------------------------------------
 		BOOL				CreateFixedShelf(bool bMysterious=false);
 
 	protected :
 		TYPE_OBJECTID		m_NPCID;		// NPC ID
-		MShop*				m_pShop;		// 상점
+		MShop*				m_pShop;		
 };
 
 #endif

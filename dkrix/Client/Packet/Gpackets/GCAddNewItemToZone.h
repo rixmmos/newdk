@@ -10,9 +10,9 @@
 #define __GC_ADD_NEW_ITEM_TO_ZONE_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include "GCAddItemToZone.h"
 
 
@@ -68,7 +68,7 @@ public :
 
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCAddNewItemToZonePacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize() const throw() { return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +(szObjectID + szBYTE + szItemType + szItemNum + szSlotID)* 12; }
 
 };

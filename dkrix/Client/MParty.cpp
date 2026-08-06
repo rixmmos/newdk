@@ -98,7 +98,7 @@ MParty::UnSetPlayerParty() const
 
 		if (pInfo!=NULL)
 		{
-			// party설정을 없앤다.
+			
 			if (g_pZone!=NULL)
 			{
 				MCreature* pCreature = g_pZone->GetCreature( g_pZone->GetCreatureID( pInfo->Name.GetString(), 1 ) );
@@ -121,14 +121,14 @@ MParty::UnSetPlayerParty() const
 bool		
 MParty::AddMember(PARTY_INFO* pInfo)
 {
-	// 값이 제대로 설정 안된 경우
+	
 	if (pInfo==NULL
 		|| pInfo->Name.GetString()==NULL && pInfo->ID==OBJECTID_NULL)
 	{
 		return false;
 	}
 
-	// party 꽉 찼당..
+	
 	if (GetSize() >= m_pInfo.capacity())
 	{
 		return false;
@@ -136,7 +136,7 @@ MParty::AddMember(PARTY_INFO* pInfo)
 
 	#ifdef __GAME_CLIENT__
 		
-		// 이름이나 ID가 값이 설정 안된 경우.. 값 넣어주기
+		
 		if (pInfo->Name.GetString()==NULL)
 		{		
 			MCreature* pCreature = g_pZone->GetCreature( pInfo->ID );

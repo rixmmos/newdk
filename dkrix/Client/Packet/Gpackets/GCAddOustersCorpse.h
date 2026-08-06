@@ -9,9 +9,9 @@
 #define __GC_ADD_OUSTERS_CORPSE_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PCOustersInfo3.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PCOustersInfo3.h"
 
 
 //----------------------------------------------------------------------
@@ -31,10 +31,10 @@ public :
 	
 public :
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream & iStream) throw(ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream & oStream) const throw(ProtocolException, Error);
 
 	// execute packet's handler

@@ -24,7 +24,7 @@ EffectGateWayMonster::EffectGateWayMonster(Creature* pCreature)
 
     setTarget(pCreature);
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -47,7 +47,7 @@ void EffectGateWayMonster::affect(Creature* pCreature)
     HP_t HPRecovery = 1;
 
     if (pCreature->isSlayer() || pCreature->isVampire() || pCreature->isOusters()) {
-        cout << "슬레이어나 뱀파이어는 이 이펙트가 붙지 않음" << endl;
+        cout << "     " << endl;
         return;
     }
 
@@ -67,11 +67,11 @@ void EffectGateWayMonster::affect(Creature* pCreature)
                 pkt.setCurrentHP(RemainHP);
                 pZone->broadcastPacket(pMonster->getX(), pMonster->getY(), &pkt);
             } else {
-                cout << "성물 보관함이 아니라면 이 이펙트가 붙지 못함" << endl;
+                cout << "      " << endl;
                 return;
             }
         } else {
-            cout << "몬스터가 아니라면 이펙트가 붙지 못함" << endl;
+            cout << "    " << endl;
             return 0;
         }
 
@@ -103,8 +103,8 @@ void EffectGateWayMonster::affect(Creature* pCreature)
 
         Assert(pCreature != NULL);
 
-        // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-        // initAllStat을 불러야 한다.
+        
+        
         pCreature->removeFlag(Effect::EFFECT_CLASS_GATEWAY_MONSTER);
 
         Zone* pZone = pCreature->getZone();

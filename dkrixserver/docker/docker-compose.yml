@@ -17,8 +17,8 @@ services:
     image: tiancaiamao/darkeden:latest
     build:
       context: ..
-      dockerfile: Dockerfile
-    command: ["sleep","infinity"]
+      dockerfile: Dockerfile.pub
+    command: ["/home/darkeden/vs/start-servers.sh"]
     ports:
       - "9999:9999"
       - "9998:9998"

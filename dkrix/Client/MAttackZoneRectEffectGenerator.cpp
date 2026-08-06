@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttackZoneRectEffectGenerator.cpp
 //----------------------------------------------------------------------
-// 가운데서부터 8방향으로 이동하게 만든다.
+
 //----------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "MAttackZoneRectEffectGenerator.h"
@@ -21,12 +21,12 @@ MAttackZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	int currentPhase = egInfo.pEffectTarget != NULL ?egInfo.pEffectTarget->GetCurrentPhase() : -1;
 	int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
 
-	// 시작 좌표
+	
 
 
 	if( currentPhase == 2 )
 	{
-		// 첫번째면 8방향을 생성한다.
+		
 		int sx = egInfo.x1;
 		int sy = egInfo.y1;
 		int sz = egInfo.z1;
@@ -73,7 +73,7 @@ MAttackZoneRectEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	} else
 	{
-		// 첫번째가 아니면
+		
 
 		int sx = egInfo.x0;
 		int sy = egInfo.y0;

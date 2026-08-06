@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : ActionGiveTestServerReward.cpp
-// Written By  : 장홍창
+
 // Description :
 ////////////////////////////////////////////////////////////////////////////////
 #include "ActionGiveTestServerReward.h"
@@ -89,7 +89,7 @@ void ActionGiveTestServerReward::read(PropertyBuffer& propertyBuffer)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 액션을 실행한다.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreature2)
 
@@ -122,7 +122,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
 
     Item* pItem;
 
-    // 이미 보상을 받을 수 있는지 체크
+    
     if (!(pGamePlayer->getSpecialEventCount() & SPECIAL_EVENT_TEST_SERVER_REWARD)) {
         GCNPCResponse response;
         response.setCode(NPC_RESPONSE_REWARD_FAIL);
@@ -139,7 +139,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
     string luaFileName;
 
     if (pPC->isSlayer()) {
-        // 루아에 슬레이어 능력치의 합을 set한다.
+        
         Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
         Assert(pSlayer != NULL);
 
@@ -150,7 +150,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
         luaFileName = m_SlayerFilename;
 
     } else if (pPC->isVampire()) {
-        // 루아에 뱀파이어의 레벨을 set한다.
+        
         Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
         Assert(pVampire != NULL);
 
@@ -160,7 +160,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
         luaFileName = m_VampireFilename;
     }
 
-    // 루아의 계산 결과를 받아 아이템을 생성한다.
+    
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);
@@ -183,7 +183,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
         return;
     }
 
-    // 선물(Item)을 만든다.
+    
     list<OptionType_t> optionTypeList;
     if (OptionType != 0)
         optionTypeList.push_back(OptionType);
@@ -191,7 +191,7 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
     pItem = g_pItemFactoryManager->createItem(ItemClass, ItemType, optionTypeList);
     Assert(pItem != NULL);
 
-    // 인벤토리에 아이템을 넣을 빈 자리를 받아온다.
+    
     TPOINT p;
 
     if (!pInventory->getEmptySlot(pItem, p)) {
@@ -208,27 +208,27 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
         return;
     }
 
-    // 선물을 인벤토리에 추가한다.
+    
     pZone->getObjectRegistry().registerObject(pItem);
     pInventory->addItem(p.x, p.y, pItem);
     pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, p.x, p.y);
 
-    // ItemTraceLog 를 남긴다
+    
     if (pItem != NULL && pItem->isTraceItem()) {
         remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
     }
 
-    // 클라이언트에 선물이 추가되었음을 알린다.
+    
     GCCreateItem gcCreateItem;
     makeGCCreateItem(&gcCreateItem, pItem, p.x, p.y);
     pPlayer->sendPacket(&gcCreateItem);
 
-    // 선물을 받았다고 Flag 를 끈다.
+    
     pGamePlayer->setSpecialEventCount(pGamePlayer->getSpecialEventCount() & ~(SPECIAL_EVENT_TEST_SERVER_REWARD));
-    // Flag 를 저장한다.
+    
     pGamePlayer->saveSpecialEventCount();
 
-    // 보상을 받았다고 클라이언트에 보낸다.
+    
     GCNPCResponse response;
     response.setCode(NPC_RESPONSE_REWARD_OK);
     pPlayer->sendPacket(&response);

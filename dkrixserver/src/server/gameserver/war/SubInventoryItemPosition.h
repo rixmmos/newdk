@@ -67,7 +67,7 @@ private:
     CoordInven_t m_InvenX;
     CoordInven_t m_InvenY;
 
-    // getZone 을 위한......
+    
     Zone* m_pZone;
     bool m_bSetZone;
 };

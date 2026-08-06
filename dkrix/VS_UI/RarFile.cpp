@@ -82,7 +82,7 @@ void CRarFile::SetRAR(const char *rar_filename, const char *pass)
 	m_password = pass;  // Store password but don't use it (not needed for extracted files)
 
 	// Convert RAR file path to directory path
-	// Example: "Data/Ui/txt/Item.rpk" → "Data/Ui/txt/Item/"
+	
 	m_base_dir = rar_filename;
 
 	// Remove .rpk or .rar extension (case-insensitive)
@@ -123,8 +123,33 @@ bool CRarFile::Open(const char *in_filename)
 	// Build full path by combining base directory with filename
 	std::string fullPath = m_base_dir + in_filename;
 
-	// Open the file
+	// Open the file from the extracted package directory first. Some legacy
+	// data sets keep small info files next to the .rpk instead of under an
+	// extracted subdirectory, so fall back to the requested path directly.
 	FILE* file = fopen(fullPath.c_str(), "rb");
+	if (file == NULL)
+	{
+		file = fopen(in_filename, "rb");
+		if (file != NULL)
+		{
+			fullPath = in_filename;
+		}
+	}
+	if (file == NULL && !m_rar_filename.empty())
+	{
+		std::string packageDir = m_rar_filename;
+		size_t slash = packageDir.find_last_of("/\\");
+		if (slash != std::string::npos)
+		{
+			packageDir = packageDir.substr(0, slash + 1);
+			std::string siblingPath = packageDir + in_filename;
+			file = fopen(siblingPath.c_str(), "rb");
+			if (file != NULL)
+			{
+				fullPath = siblingPath;
+			}
+		}
+	}
 	if (file == NULL)
 	{
 		// Log detailed error information

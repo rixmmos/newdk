@@ -15,7 +15,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -36,7 +36,7 @@ void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NoSuch제거. by sigi. 2002.5.2
+        
         if (pTargetCreature == NULL || !pTargetCreature->isSlayer()) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " end " << endl;
@@ -59,23 +59,23 @@ void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
         bool bEffected = pTargetCreature->isFlag(Effect::EFFECT_CLASS_LIGHTNESS);
 
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
-            // 마나를 줄인다.
+            
             decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToObjectOK1);
             increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToObjectOK1);
             increaseSkillExp(pSlayer, DomainType, pSkillSlot, pSkillInfo, _GCSkillToObjectOK1);
 
-            // 이펙트의 효과와 지속시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             input.TargetType = SkillInput::TARGET_OTHER;
             computeOutput(input, output);
 
-            // 이펙트를 생성해서 붙인다.
+            
             EffectLightness* pLightness = new EffectLightness(pTargetCreature);
             Assert(pLightness != NULL);
             pLightness->setDeadline(output.Duration);
@@ -91,7 +91,7 @@ void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
                 _GCSkillToObjectOK2.addShortData(MODIFY_VISION, newSight);
             }
 
-            // 패킷을 준비해서 보낸다.
+            
             _GCSkillToObjectOK1.setSkillType(SkillType);
             _GCSkillToObjectOK1.setCEffectID(CEffectID);
             _GCSkillToObjectOK1.setTargetObjectID(TargetObjectID);
@@ -121,7 +121,7 @@ void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
 
             pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &_GCSkillToObjectOK5, cList);
 
-            // 이펙트가 붙었다고 알려준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pTargetCreature->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_LIGHTNESS);
@@ -142,7 +142,7 @@ void Lightness::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* p
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Lightness::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -175,20 +175,20 @@ void Lightness::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToSelfOK1);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToSelfOK1);
             increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToSelfOK1);
             increaseSkillExp(pSlayer, DomainType, pSkillSlot, pSkillInfo, _GCSkillToSelfOK1);
 
-            // 이펙트의 효과와 지속시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             input.TargetType = SkillInput::TARGET_SELF;
             computeOutput(input, output);
 
-            // 이펙트를 생성해서 붙인다
+            
             EffectLightness* pLightness = new EffectLightness(pSlayer);
             pLightness->setDeadline(output.Duration);
             pSlayer->addEffect(pLightness);
@@ -203,7 +203,7 @@ void Lightness::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
                 _GCSkillToSelfOK1.addShortData(MODIFY_VISION, newSight);
             }
 
-            // 패킷을 준비해서 보낸다.
+            
             ZoneCoord_t myX = pSlayer->getX();
             ZoneCoord_t myY = pSlayer->getY();
 
@@ -218,7 +218,7 @@ void Lightness::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEff
             pPlayer->sendPacket(&_GCSkillToSelfOK1);
             pZone->broadcastPacket(myX, myY, &_GCSkillToSelfOK2, pSlayer);
 
-            // 이펙트가 붙었다고 알려준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pSlayer->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_LIGHTNESS);

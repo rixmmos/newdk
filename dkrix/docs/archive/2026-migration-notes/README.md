@@ -1,14 +1,14 @@
 # 2026 Migration Notes (archived)
 
 This folder contains client-repo status and planning documents produced
-during the 2024–2026 DirectX→SDL2 / Win32→cross-platform migration. They
-are preserved for historical context only — **do not treat anything in
+during the 20242026 DirectXSDL2 / Win32cross-platform migration. They
+are preserved for historical context only  **do not treat anything in
 here as the current state of the project.**
 
 The live modernization plan lives in the sibling repo:
 
 - `../../../docs/MODERNIZATION.md` (relative to this file:
-  `opendarkeden/docs/MODERNIZATION.md`) — single source of truth for
+  `opendarkeden/docs/MODERNIZATION.md`)  single source of truth for
   what is done, in progress, and planned.
 
 ## Why these were archived

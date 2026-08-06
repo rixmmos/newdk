@@ -12,7 +12,7 @@
 #include "Client_PCH.h"
 
 #include "SocketAPI.h"
-#if __WINDOWS__
+#if defined(PLATFORM_WINDOWS)
 #elif __LINUX__
 #include <sys/types.h>			// for accept()
 #include <sys/socket.h>
@@ -75,7 +75,7 @@ SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -138,7 +138,7 @@ void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EADDRINUSE :
-			throw BindException("The address is already in use. kill another server or use another port. 소켓의 주소 혹은 포트가 이미 사용중입니다. 기존의 서버 소켓을 종료하거나, 다른 포트를 사용하시기 바랍니다.");
+			throw BindException("The address is already in use. kill another server or use another port.      .    ,    .");
 		case EINVAL : 
 			throw BindException("The socket is already bound to an address , or the addr_len was wrong, or the socket was not in the AF_UNIX family.");
 		case EACCES : 
@@ -164,7 +164,7 @@ void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -250,7 +250,7 @@ void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addr
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -285,7 +285,7 @@ void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addr
 		case WSAETIMEDOUT : 
 			throw ConnectException("Attempt to connect timed out without establishing a connection.");
 		case WSAEWOULDBLOCK  : 
-			// 외부에서 이게 catch가 안되는 경우가 있고 별 의미 없어서..  
+			
 			// 2002.3.15
 			//throw NonBlockingIOException("The socket is marked as nonblocking and the connection cannot be completed immediately.");
 			throw ConnectException("WSAEWOULDBLOCK");
@@ -334,7 +334,7 @@ void SocketAPI::listen_ex ( SOCKET s , uint backlog )
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -395,7 +395,7 @@ SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	SOCKET client = accept( s , addr , addrlen );
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	SOCKET client = accept( s , addr , (int*)addrlen );
 #endif
 	
@@ -415,7 +415,7 @@ SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this FUNCTION.");
@@ -491,7 +491,7 @@ void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optv
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
 	}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	if ( getsockopt( s , level , optname , (char*)optval , (int*)optlen ) == SOCKET_ERROR ) {
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
@@ -559,7 +559,7 @@ void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void 
 				throw UnknownError(strerror(errno),errno);
 		}//end of switch
 	}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	if ( setsockopt( s , level , optname , (char*)optval , optlen ) == SOCKET_ERROR ) {
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
@@ -621,7 +621,7 @@ uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nSent = send(s,buf,len,flags);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int nSent = send(s,(const char *)buf,len,flags);
 #endif
 
@@ -643,11 +643,11 @@ uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
 		case ECONNRESET :
 			throw ConnectException("connection reset by peer.");
 		case EPIPE :
-			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled. 상대 호스트가 셧다운되었거나 연결이 불가능하게 되어 소켓연결이 파괴되었습니다.");
+			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled.        .");
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -710,7 +710,7 @@ uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nSent = sendto(s,buf,len,flags,to,tolen);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int nSent = sendto(s,(const char *)buf,len,flags,to,tolen);
 #endif
 
@@ -732,11 +732,11 @@ uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int
 		case ECONNRESET :
 			throw ConnectException("connection reset by peer.");
 		case EPIPE :
-			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled. 상대 호스트가 셧다운되었거나 연결이 불가능하게 되어 소켓연결이 파괴되었습니다.");
+			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled.        .");
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}	
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 #endif
 	}
 
@@ -777,7 +777,7 @@ uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nrecv = recv(s,buf,len,flags);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int nrecv = recv(s,(char*)buf,len,flags);
 #endif
 
@@ -799,11 +799,11 @@ uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
 		case ECONNRESET :
 			throw ConnectException("connection reset by peer.");
 		case EPIPE :
-			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled. 상대 호스트가 셧다운되었거나 연결이 불가능하게 되어 소켓연결이 파괴되었습니다.");
+			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled.        .");
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -860,7 +860,7 @@ uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , str
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nReceived = recvfrom(s,buf,len,flags,from,fromlen);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int nReceived = recvfrom(s,(char*)buf,len,flags,from,(int*)fromlen);
 #endif
 
@@ -882,11 +882,11 @@ uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , str
 		case ECONNRESET :
 			throw ConnectException("connection reset by peer.");
 		case EPIPE :
-			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled. 상대 호스트가 셧다운되었거나 연결이 불가능하게 되어 소켓연결이 파괴되었습니다.");
+			throw ConnectException("pipe broken. may be peer host has shut down or has been disabled.        .");
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	/*
 	#ifdef OUTPUT_DEBUG
 		switch (WSAGetLastError())
@@ -975,7 +975,7 @@ void SocketAPI::closesocket_ex ( SOCKET s )
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	// using close_ex()
 	FileAPI::close_ex(s);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	if ( closesocket(s) == SOCKET_ERROR ) {
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
@@ -1015,7 +1015,7 @@ void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	throw UnsupportedError();
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	if ( ioctlsocket(s,cmd,argp) == SOCKET_ERROR ) {
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
@@ -1062,7 +1062,7 @@ bool SocketAPI::getsocketnonblocking_ex ( SOCKET s )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	return FileAPI::getfilenonblocking_ex(s);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 	
@@ -1095,7 +1095,7 @@ void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	FileAPI::setfilenonblocking_ex(s,on);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	ulong argp = ( on == true ) ? 1 : 0;
 	ioctlsocket_ex(s,FIONBIO,&argp);
 #endif
@@ -1127,7 +1127,7 @@ uint SocketAPI::availablesocket_ex ( SOCKET s )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	return availablefile_ex(s);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	ulong argp = 0;
 	ioctlsocket_ex(s,FIONREAD,&argp);
 	return argp;
@@ -1172,7 +1172,7 @@ void SocketAPI::shutdown_ex ( SOCKET s , uint how )
 		default : 
 			throw UnknownError(strerror(errno),errno);
 		}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 		switch ( WSAGetLastError() ) {
 		case WSANOTINITIALISED : 
 			throw Error("A successful WSAStartup must occur before using this function.");
@@ -1203,11 +1203,11 @@ void SocketAPI::shutdown_ex ( SOCKET s , uint how )
 // system call for I/O multiplexing
 //
 // Parameters
-//     maxfdp1   - 테스트할 파일 디스크립터중 가장 큰 값 + 1
-//     readset   - 입력이 들어왔는지 테스트할 파일 디스크립터의 집합
-//     writeset  - 출력을 할 수 있는지 테스트할 파일 디스크립터의 집합
-//     exceptset - OOB 데이타가 들어왔는지 테스트할 파일 디스크립터의 집합
-//     timeout   - 얼마나 기다릴 것인가? 
+
+
+
+
+
 //
 // Return
 //     positive count of ready descriptors
@@ -1247,7 +1247,7 @@ int SocketAPI::select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , 
 
 	return result;
 
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 
 	throw UnsupportedError();
 

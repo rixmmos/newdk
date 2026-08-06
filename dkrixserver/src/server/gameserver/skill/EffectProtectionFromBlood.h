@@ -2,7 +2,7 @@
 // Filename    : EffectProtectionFromBlood.h
 // Written by  : excel96
 // Description :
-// ProtectionFromBlood에 의해서 생성되는 산성 데미지 약화 이펙트이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EFFECT_PROTECTION_FROM_BLOOD__

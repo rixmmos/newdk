@@ -35,7 +35,7 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
 
         Assert(pPacket != NULL);
 
-    // 현재 길드의 맥스 ID + 1 을 길드 ID 로 하고 맥스 ID 를 증가 시킨다
+    
     GuildID_t GuildID = Guild::getMaxGuildID() + 1;
     Guild::setMaxGuildID(GuildID);
 
@@ -43,7 +43,7 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
 
     // cout << pPacket->toString().c_str() << endl;
 
-    // 맥스 존 ID 를 구한다.
+    
     if (pPacket->getGuildRace() == Guild::GUILD_RACE_SLAYER) {
         zoneID = Guild::getMaxSlayerZoneID();
         Guild::setMaxSlayerZoneID(zoneID + 1);
@@ -57,7 +57,7 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    // Guild Object 를 만든다
+    
     Guild* pGuild = new Guild();
     pGuild->setID(GuildID);
     pGuild->setName(pPacket->getGuildName());
@@ -68,25 +68,25 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
     pGuild->setMaster(pPacket->getGuildMaster());
     pGuild->setIntro(pPacket->getGuildIntro());
 
-    // 만든 길드를 디비에 넣는다
+    
     pGuild->create();
 
-    // 길드 매니저에 추가한다.
+    
     g_pGuildManager->addGuild(pGuild);
 
-    // 마스터를 길드 멤버로 추가한다.
+    
     GuildMember* pGuildMember = new GuildMember();
     pGuildMember->setGuildID(pGuild->getID());
     pGuildMember->setName(pGuild->getMaster());
     pGuildMember->setRank(GuildMember::GUILDMEMBER_RANK_MASTER);
 
-    // DB 에 Guild Member 를 저장한다.
+    
     pGuildMember->create();
 
-    // 길드에 추가한다.
+    
     pGuild->addMember(pGuildMember);
 
-    // 게임 서버로 보낼 패킷을 만든다.
+    
     SGAddGuildOK sgAddGuildOK;
     sgAddGuildOK.setGuildID(pGuild->getID());
     sgAddGuildOK.setGuildName(pGuild->getName());
@@ -97,7 +97,7 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
     sgAddGuildOK.setGuildMaster(pGuild->getMaster());
     sgAddGuildOK.setGuildIntro(pGuild->getIntro());
 
-    // 게임 서버로 패킷을 보낸다.
+    
     g_pGameServerManager->broadcast(&sgAddGuildOK);
 
     SGAddGuildMemberOK sgAddGuildMemberOK;
@@ -106,7 +106,7 @@ void GSAddGuildHandler::execute(GSAddGuild* pPacket, Player* pPlayer)
     sgAddGuildMemberOK.setGuildMemberRank(pGuildMember->getRank());
     sgAddGuildMemberOK.setServerGroupID(pPacket->getServerGroupID());
 
-    // 게임 서버로 패킷을 보낸다.
+    
     g_pGameServerManager->broadcast(&sgAddGuildMemberOK);
 
 #endif

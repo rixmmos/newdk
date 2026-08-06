@@ -60,7 +60,7 @@ void BurningSolLaunch::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Sk
     int offset = 2;
     //	if ( pEffect->getLevel() >= 2 ) offset = 2;
 
-    // 목표위치+4방향
+    
     for (int i = -offset; i <= offset; ++i)
         for (int j = -offset; j <= offset; ++j)
             param.addMask(i, j, 100);
@@ -85,7 +85,7 @@ void BurningSolLaunch::execute(Slayer* pSlayer, ZoneCoord_t X, ZoneCoord_t Y, Sk
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void BurningSolLaunch::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 

@@ -17,12 +17,12 @@ public:
 	NicknameInfo();
 	enum
 	{
-		NICK_NONE = 0,		// 닉네임 없음
-		NICK_BUILT_IN,		// 일반적으로 자동으로 주어지는 닉네임 (인덱스)
-		NICK_QUEST,			// 퀘스트 클리어한 뒤 받는 닉네임 (인덱스)
-		NICK_FORCED,		// 강제로 붙여진 닉네임 (인덱스)
-		NICK_CUSTOM_FORCED,	// 강제로 붙여진 닉네임 (스트링)
-		NICK_CUSTOM,		// 유저가 자유롭게 넣은 닉네임 (스트링)
+		NICK_NONE = 0,		
+		NICK_BUILT_IN,		
+		NICK_QUEST,			
+		NICK_FORCED,		
+		NICK_CUSTOM_FORCED,	
+		NICK_CUSTOM,		
 	};
 
 	PacketSize_t		getSize() const;
@@ -46,7 +46,7 @@ private:
 	WORD	m_NicknameID;
 	BYTE	m_NicknameType;
 	string	m_Nickname;
-	WORD	m_NicknameIndex;	// 스트링 또는 인덱스 하나만 사용된다.
+	WORD	m_NicknameIndex;	
 };
 
 #endif

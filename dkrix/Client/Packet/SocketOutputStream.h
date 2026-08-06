@@ -10,7 +10,7 @@
 #define __SOCKET_OUTPUT_STREAM_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 #include "Socket.h"
 
@@ -47,10 +47,10 @@ public :
 	
 	// write data to stream (output buffer)
 	// *CAUTION*
-	// string 을 버퍼에 writing 할 때, 자동으로 size 를 앞에 붙일 수도 있다.
-	// 그러나, string 의 크기를 BYTE/WORD 중 어느 것으로 할 건지는 의문이다.
-	// 패킷의 크기는 작을 수록 좋다는 정책하에서 필요에 따라서 string size 값을
-	// BYTE 또는 WORD 를 수동으로 사용하도록 한다.
+	
+	
+	
+	
 	uint write ( const char * buf , uint len ) throw ( ProtocolException , Error );
 	uint write ( const std::string & buf ) throw ( ProtocolException , Error ) { return write(buf.c_str(),buf.size()); }
 	void write ( const Packet * pPacket ) throw ( ProtocolException , Error );
@@ -95,8 +95,16 @@ public :
 <<")";
         return msg.toString();
     }
-	// 놓迦뺏룐관埼죗
+	
 	void InitSeq(){ m_Sequence =0;}
+	virtual void resetState () throw ()
+	{
+		m_Head = 0;
+		m_Tail = 0;
+		m_Sequence = 0;
+		m_EncryptKey = 0;
+		m_HashTable = NULL;
+	}
 //////////////////////////////////////////////////
 // attributes
 //////////////////////////////////////////////////
@@ -114,7 +122,7 @@ private :
 	// buffer head/tail
 	uint m_Head;
 	uint m_Tail;
-	// 룐관埼죗
+	
 	BYTE m_Sequence;
 //add by viva 2008-12-31
 public :

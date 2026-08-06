@@ -23,9 +23,9 @@ throw ( ProtocolException , Error )
 		
 #ifdef __GAME_CLIENT__
 
-	// Creature를 생성해서 MCorpse에 추가해서 Zone에 넣는다.
+	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,30 +33,30 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{		
 		const PCSlayerInfo3 & si = pPacket->getSlayerInfo();	
 			
 		//----------------------------------------	
-		// 이미 있는 Creature인가?
+		
 		//----------------------------------------	
 		MCreature* pCreature = g_pZone->GetCreatureOnly( si.getObjectID() );
 		
 		//---------------------------------------------------------
 		//
-		//					Zone에 없는 경우
+		
 		//
 		//---------------------------------------------------------
 		if (pCreature==NULL)
 		{
-			// 이미 시체가 있나?
+			
 			MItem* pItem = g_pZone->GetItem( si.getObjectID() );
 
 			//---------------------------------------------------------
 			//
-			// 새로운 시체를 생성
+			
 			//
 			//---------------------------------------------------------
 			if (pItem==NULL)
@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 				
 				//----------------------------------------	
 				//
-				// 죽은 Creature를 생성한다.
+				
 				//
 				//----------------------------------------	
 				MCreatureWear*	pDeadCreature = new MCreatureWear;
@@ -75,7 +75,7 @@ throw ( ProtocolException , Error )
 				pDeadCreature->SetZone( g_pZone );
 				
 				//----------------------------------------	
-				// 복장을 착용한다.
+				
 				//----------------------------------------					
 				if (si.getCompetence()==0)
 				{
@@ -90,7 +90,7 @@ throw ( ProtocolException , Error )
 
 				pDeadCreature->SetGuildNumber( si.getGuildID() );
 
-				// creatureType이 Slayer남자면 0, Slayer여자면 1 
+				
 				pDeadCreature->SetGroundCreature();
 				pDeadCreature->SetID( si.getObjectID() );
 				pDeadCreature->SetPosition( si.getX(), si.getY() );
@@ -98,7 +98,7 @@ throw ( ProtocolException , Error )
 				pDeadCreature->SetDirection( si.getDir() );
 				pDeadCreature->SetCurrentDirection( si.getDir() );
 
-				// 피부색
+				
 				pDeadCreature->SetBodyColor1( si.getSkinColor() );
 
 				pDeadCreature->SetStatus( MODIFY_MAX_HP, si.getMaxHP() );
@@ -106,13 +106,13 @@ throw ( ProtocolException , Error )
 				
 				SetAddonToSlayer( pDeadCreature, &si );	
 
-				// 시체로 바꾼다.
+				
 				pDeadCreature->SetCorpse();
 				pDeadCreature->SetName( si.getName().c_str() );				
 
 				//----------------------------------------	
 				//
-				// 시체item을 생성한다.
+				
 				//
 				//----------------------------------------	
 				MCorpse* pCorpse = (MCorpse*)MItem::NewItem( ITEM_CLASS_CORPSE );
@@ -124,15 +124,15 @@ throw ( ProtocolException , Error )
 				pCorpse->SetNumber( pPacket->getTreasureCount() );
 
 				//----------------------------------------
-				// Zone에 Item추가
+				
 				//----------------------------------------
 				if (!g_pZone->AddItem( pCorpse ))
 				{
 					DEBUG_ADD("[Error] Can't Add to Zone.");
 					
 					//---------------------------------------------------------
-					// 추가가 안된 경우
-					// 이미 있는 Item을 제거하고 다시 추가한다.
+					
+					
 					//---------------------------------------------------------
 					TYPE_OBJECTID oldItemID = g_pZone->GetItemID( si.getX(), si.getY() );
 
@@ -140,7 +140,7 @@ throw ( ProtocolException , Error )
 						
 					if (g_pZone->RemoveItem( oldItemID ))				
 					{
-						// 다시 추가한다.
+						
 						if (!g_pZone->AddItem( pCorpse ))
 						{
 							DEBUG_ADD_FORMAT("[Error] Can't add Corpse to Zone, too. id=%d, xy=(%d, %d)", si.getObjectID(), si.getX(), si.getY());
@@ -150,7 +150,7 @@ throw ( ProtocolException , Error )
 					}
 					else
 					{
-						// 이미 있는 item을 제거할 수 없는 경우
+						
 						DEBUG_ADD_FORMAT("[Error] Can't remove old Item. id=%d, xy=(%d, %d)", oldItemID, si.getX(), si.getY());
 						
 						delete pCorpse;
@@ -159,7 +159,7 @@ throw ( ProtocolException , Error )
 			}
 			//---------------------------------------------------------
 			//
-			// 이미 시체가 있는 경우 
+			
 			//
 			//---------------------------------------------------------
 			else
@@ -169,8 +169,8 @@ throw ( ProtocolException , Error )
 				if (pItem->GetItemClass()==ITEM_CLASS_CORPSE)
 				{
 					//---------------------------------------------------------					
-					// 시체가 이미 있는 경우
-					// 시체에 들어있는 Item 개수 설정
+					
+					
 					//---------------------------------------------------------
 					pItem->SetNumber( pPacket->getTreasureCount() );
 				}
@@ -182,7 +182,7 @@ throw ( ProtocolException , Error )
 		}
 		//---------------------------------------------------------
 		//
-		//				Zone에 이미 있는 경우
+		
 		//
 		//---------------------------------------------------------		
 		else
@@ -222,7 +222,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_CURRENT_HP, 0 );
 
 			//---------------------------------------------------------
-			// Creature를 죽여야 한다.
+			
 			//---------------------------------------------------------
 			if (!pCreature->IsDead())
 			{

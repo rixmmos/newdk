@@ -16,8 +16,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // class ScriptManager
 //
-// 모든 NPC들이 공유하는 public script 또는 특정 NPC 만이 사용하는 private script db
-// 를 나타내는 script manager 이다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class XMLTree;
@@ -35,7 +35,7 @@ public:
 
     string toString() const;
 
-    // 갖다 쓰지 마세요.
+    
     XMLTree* getXML(const string& owner) {
         return m_XMLS[owner];
     }

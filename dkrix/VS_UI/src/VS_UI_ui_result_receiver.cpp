@@ -33,10 +33,7 @@ void C_VS_UI_UI_RESULT_RECEIVER::SetResultReceiver(void (*fp)(DWORD, int, int, v
 	m_fp_result_receiver = fp;
 }
 
-/*-----------------------------------------------------------------------------
-- SendMessage
-- Message queue에 message를 넣는다.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, int left, int right, 
 															 void *void_ptr)
 {
@@ -52,10 +49,7 @@ void C_VS_UI_UI_RESULT_RECEIVER::_SendMessage(DWORD message, int left, int right
 	m_message_queue.Add(msg);
 }
 
-/*-----------------------------------------------------------------------------
-- DispatchMessage
-- 가장 빨리 저장된 message를 한 개 보낸다. 그리고 그것을 queue에서 삭제한다.
------------------------------------------------------------------------------*/
+ 
 void C_VS_UI_UI_RESULT_RECEIVER::_DispatchMessage()
 {
 	if (m_fp_result_receiver != NULL)

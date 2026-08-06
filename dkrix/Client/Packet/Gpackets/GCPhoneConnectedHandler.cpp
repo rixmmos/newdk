@@ -24,11 +24,11 @@ throw ( ProtocolException , Error )
 	int pcsNumber = pPacket->getPhoneNumber();
 	int slot = pPacket->getSlotID();
 
-	// 번호를 저장해 둔다.
+	
 	g_pUserInformation->OtherPCSNumber[ slot ] = pcsNumber;
 	g_pUserInformation->PCSUserName[ slot ] = pPacket->getName().c_str();
 
-	// PCS를 띄운다.
+	
 	char pName[128];
 	strcpy(pName, pPacket->getName().c_str());
 

@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    ZONE_COORD m_ZoneCoord; // 포탈의 목표 존 ID 및 좌표
+    ZONE_COORD m_ZoneCoord; 
 };
 
 #endif // __EFFECT_TILE_PORTAL__

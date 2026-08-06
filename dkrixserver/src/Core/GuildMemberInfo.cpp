@@ -27,7 +27,7 @@ GuildMemberInfo::~GuildMemberInfo() noexcept = default;
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GuildMemberInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
@@ -49,7 +49,7 @@ void GuildMemberInfo::read(SocketInputStream& iStream) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GuildMemberInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY

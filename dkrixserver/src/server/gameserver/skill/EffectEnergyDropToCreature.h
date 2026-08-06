@@ -1,20 +1,20 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectEnergyDropToCreature.h
-// Written by  : 장홍창
+
 // Date        : 2002. 3. 28
 //
-// Description : EffectEnergyDropToCreature는 상대방에게 3번의 연속 타격을
-//               주는 이펙트이다.
-//               Effect 시리즈는 Tick과 deadline을 사용해서 임의의 동작을
-//               할 수 있도록 구현되었기 때문에 다른 기술의 Effect
-//               글 그대로 가져와서 사용할 수 있다.
-//               실제 EffectEnergyDropToCreature도 EffectPoison과 같은 형태로
-//               되어 있다.
+
+
+
+
+
+
+
 //
-//               EffectEnergyDropToCreature가 사용되기 위해서는
-//               Effect.h 파일에
+
+
 //                EFFECT_CLASS_ENERGY_DROP_TO_CREATURE
-//               가 정의되어 있어야 한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __EFFECT_ENERGY_DROP_TO_CREATURE__

@@ -10,9 +10,9 @@
 #include "PCInfo.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// Ousters 정보를 담고 있는 객체.
-// GCPCList 패킷에 담겨서 클라이언트에게 전송된다.
-// 아이템이나 걸려있는 마법 같은 정보는 담겨있지 않다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 class PCOustersInfo : public PCInfo 
@@ -36,43 +36,43 @@ public:
 
 	uint getSize () const throw ()
 	{
-		return szBYTE					// 이름길이
-			+ m_Name.size() 			// 아우스터스 이름
-			+ szSlot					// 슬롯
-			+ szAlignment				// 성향
-			+ szSex						// 성별
-			+ szColor * OUSTERS_COLOR_MAX	// 색상
-			+ szBYTE 					// 옷, 무기 타입
-			+ szAttr* 3 				// 능력치
+		return szBYTE					
+			+ m_Name.size() 			
+			+ szSlot					
+			+ szAlignment				
+			+ szSex						
+			+ szColor * OUSTERS_COLOR_MAX	
+			+ szBYTE 					
+			+ szAttr* 3 				
 			+ szHP* 2					// HP
 			+ szMP* 2					// MP
-			+ szRank					// 계급
-			+ szExp						// 경험치
-			+ szLevel					// 레벨
-			+ szFame					// 명성
-			+ szBonus					// 보너스 포인트
-			+ szSkillBonus				// 스킬보너스 포인트
+			+ szRank					
+			+ szExp						
+			+ szLevel					
+			+ szFame					
+			+ szBonus					
+			+ szSkillBonus				
 			+ szLevel;
 	}
 
 	// get max size of object
 	static uint getMaxSize () throw ()
 	{
-		return szBYTE + 20				// 아우스터스 이름
-			+ szSlot					// 슬롯
-			+ szAlignment				// 성향
-			+ szSex						// 성별
-			+ szColor* OUSTERS_COLOR_MAX	// 색상
-			+ szBYTE 					// 옷, 무기 타입
-			+ szAttr* 3	 				// 능력치
+		return szBYTE + 20				
+			+ szSlot					
+			+ szAlignment				
+			+ szSex						
+			+ szColor* OUSTERS_COLOR_MAX	
+			+ szBYTE 					
+			+ szAttr* 3	 				
 			+ szHP* 2					// HP
 			+ szMP* 2					// MP
-			+ szRank					// 계급
-			+ szExp						// 경험치
-			+ szFame					// 명성치
-			+ szLevel					// 레벨
-			+ szBonus					// 보너스 포인트
-			+ szSkillBonus				// 스킬 보너스 포인트
+			+ szRank					
+			+ szExp						
+			+ szFame					
+			+ szLevel					
+			+ szBonus					
+			+ szSkillBonus				
 			+ szLevel;
 	}
 
@@ -170,7 +170,7 @@ private:
 	// PC name
 	std::string m_Name;
 
-	// PC 슬롯
+	
 	Slot m_Slot;
 
 	// Alignment
@@ -189,7 +189,7 @@ private:
 	OustersCoatType m_CoatType;
 	OustersArmType m_ArmType;
 
-	// 계급
+	
 	Rank_t m_Rank;
 
 	// Exp

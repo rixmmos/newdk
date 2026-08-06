@@ -14,7 +14,7 @@
 #include "Assert.h"
 
 
-#if __WINDOWS__
+#ifdef PLATFORM_WINDOWS
 #include <io.h>			// for _open()
 #include <fcntl.h>		// for _open()/_close()/_read()/_write()...
 #include <string.h>		// for memcpy()
@@ -44,7 +44,7 @@ int FileAPI::open_ex ( const char * filename , int flags )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int fd = open(filename,flags);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int fd = _open(filename,flags);
 #endif
 	if ( fd < 0 ) {
@@ -86,7 +86,7 @@ int FileAPI::open_ex ( const char * filename , int flags )
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	// ...
 #endif
 	}
@@ -105,7 +105,7 @@ int FileAPI::open_ex ( const char * filename , int flags , int mode )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int fd = open(filename,flags,mode);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int fd = _open(filename,flags,mode);
 #endif
 
@@ -147,7 +147,7 @@ int FileAPI::open_ex ( const char * filename , int flags , int mode )
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	// ...
 #endif
 	}
@@ -184,7 +184,7 @@ uint FileAPI::read_ex ( int fd , void * buf , uint len )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = read ( fd , buf , len );
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int result = _read ( fd , buf , len );
 #endif
 
@@ -211,7 +211,7 @@ uint FileAPI::read_ex ( int fd , void * buf , uint len )
 			default : 
 				throw UnknownError(strerror(errno),errno);
 		}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	// ...
 #endif
 	} else if ( result == 0 ) {
@@ -249,7 +249,7 @@ uint FileAPI::write_ex ( int fd , const void * buf , uint len )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = write ( fd , buf , len );
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int result = _write ( fd , buf , len );
 #endif
 
@@ -278,7 +278,7 @@ uint FileAPI::write_ex ( int fd , const void * buf , uint len )
 			default : 
 				throw UnknownError(strerror(errno),errno);
 		}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	//...
 #endif
 	}
@@ -312,7 +312,13 @@ void FileAPI::close_ex ( int fd )
 {
 	__BEGIN_TRY
 
-	if ( close(fd) < 0 ) {
+	if (
+#ifdef PLATFORM_WINDOWS
+		_close(fd)
+#else
+		close(fd)
+#endif
+		< 0 ) {
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 			case EBADF : 
@@ -320,7 +326,7 @@ void FileAPI::close_ex ( int fd )
 			default :
 				throw UnknownError(strerror(errno),errno);
 		}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 #endif
 	}
 
@@ -371,7 +377,7 @@ int FileAPI::fcntl_ex ( int fd , int cmd )
 		}
 	}
 	return result;
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -425,7 +431,7 @@ int FileAPI::fcntl_ex ( int fd , int cmd , long arg )
 		}
 	}
 	return result;
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -458,7 +464,7 @@ bool FileAPI::getfilenonblocking_ex ( int fd )
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int flags = fcntl_ex( fd , F_GETFL , 0 );
 	return flags | O_NONBLOCK;
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -499,7 +505,7 @@ void FileAPI::setfilenonblocking_ex ( int fd , bool on )
 		flags &= ~O_NONBLOCK;
 
 	fcntl_ex( fd , F_SETFL , flags );
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -543,7 +549,7 @@ void FileAPI::ioctl_ex ( int fd , int request , void * argp )
 			throw UnknownError(strerror(errno),errno);
 		}
 	}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -578,7 +584,7 @@ void FileAPI::setfilenonblocking_ex2 ( int fd , bool on )
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	ulong arg = ( on == true ? 1 : 0 );
 	ioctl_ex(fd,FIONBIO,&arg);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -609,12 +615,12 @@ uint FileAPI::availablefile_ex ( int fd )
 	__BEGIN_TRY
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
-	// 실수로 FIONBIO 파라미터를 주는 바람에 프로그램이 개가 되었다.
-	// 값을 받아오므로 0 으로 초기화시켜주면 훨씬 안전할 것 같다.
+	
+	
 	uint arg = 0;
 	ioctl_ex(fd,FIONREAD,&arg);
 	return arg;
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 
@@ -635,7 +641,7 @@ int FileAPI::dup_ex ( int fd )
 
 #if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int newfd = dup(fd);
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	int newfd = _dup(fd);
 #endif
 
@@ -649,7 +655,7 @@ int FileAPI::dup_ex ( int fd )
 		default :
 			throw UnknownError(strerror(errno),errno);
 		}//end of switch
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 #endif
 	}
 
@@ -684,7 +690,7 @@ long FileAPI::lseek_ex ( int fd , long offset , int whence )
 			throw UnknownError(strerror(errno),errno);
 		}
 	}
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	long result = _lseek(fd,offset,whence);
 	if ( result < 0 ) {
 	}

@@ -18,8 +18,8 @@
 //
 // class GLKickVerify;
 //
-// '이미 접속 중' 문제를 해결하기 위한...
-// LGKickCharacter에 대응하는 결과 패킷이다.
+
+
 //
 //----------------------------------------------------------------------
 
@@ -27,10 +27,10 @@ class GLKickVerify : public DatagramPacket {
 public:
     GLKickVerify() {};
     ~GLKickVerify() {};
-    // Datagram 객체에서부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(Datagram& iDatagram);
 
-    // Datagram 객체로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(Datagram& oDatagram) const;
 
     // execute packet's handler
@@ -116,7 +116,7 @@ public:
 
     // get packet's max body size
     // *OPTIMIZATION HINT*
-    // const static GLKickVerifyPacketMaxSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szBYTE + szBYTE + 20 + szuint;
     }

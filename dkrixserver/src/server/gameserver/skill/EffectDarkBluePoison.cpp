@@ -56,7 +56,7 @@ void EffectDarkBluePoison::affect(Creature* pCreature)
     Assert(pCreature != NULL);
 
     if (canAttack(NULL, pCreature)) {
-        // 슬레이어일 경우에만 독 데미지가 존재한다.
+        
         if (pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
             Assert(pSlayer != NULL);
@@ -80,7 +80,7 @@ void EffectDarkBluePoison::affect(Creature* pCreature)
 
             // int PoisonDamage = computeMagicDamage(pOusters, m_Damage, SKILL_DARKBLUE_POISON);
 
-            // 아우스터즈는 1/2만 깎인다.
+            
             MP_t CurrentMP = pOusters->getMP(ATTR_CURRENT);
             MP_t RemainMP = max(0, (int)CurrentMP - (m_Damage / 2));
 
@@ -123,7 +123,7 @@ void EffectDarkBluePoison::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 크리쳐에게서 플래그를 제거한다.
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_DARKBLUE_POISON);
 
     Zone* pZone = pCreature->getZone();

@@ -90,8 +90,8 @@ void QuestBoard::regenerate(int num) throw(Error) {
 //--------------------------------------------------------------------------------
 // add( pQuest )
 //--------------------------------------------------------------------------------
-// questID를 추가한다.
-// ID가 duplicate인 경우는 return false
+
+
 //--------------------------------------------------------------------------------
 bool QuestBoard::add(Quest* pQuest) throw(Error) {
     __BEGIN_TRY
@@ -114,8 +114,8 @@ bool QuestBoard::add(Quest* pQuest) throw(Error) {
 //--------------------------------------------------------------------------------
 // remove( questID )
 //--------------------------------------------------------------------------------
-// questID의 Quest*를 찾아서 return한다.
-// 없으면 NULL
+
+
 //--------------------------------------------------------------------------------
 Quest* QuestBoard::remove(QuestID_t qid) throw(Error) {
     __BEGIN_TRY
@@ -137,7 +137,7 @@ Quest* QuestBoard::remove(QuestID_t qid) throw(Error) {
 //--------------------------------------------------------------------------------
 // makeNPCAskPacket( GCNPCAskDynamic& )
 //--------------------------------------------------------------------------------
-// QuestBoard에 들어있는 모든 Quest들의 내용을 GCNPCAskDynamic packet으로 만든다.
+
 //--------------------------------------------------------------------------------
 void QuestBoard::setScript(Script* pScript) const throw(Error) {
     __BEGIN_TRY
@@ -162,7 +162,7 @@ void QuestBoard::setScript(Script* pScript) const throw(Error) {
 //--------------------------------------------------------------------------------
 // makeNPCAskPacket( GCNPCAskDynamic& )
 //--------------------------------------------------------------------------------
-// QuestBoard에 들어있는 모든 Quest들의 내용을 GCNPCAskDynamic packet으로 만든다.
+
 //--------------------------------------------------------------------------------
 /*
 void

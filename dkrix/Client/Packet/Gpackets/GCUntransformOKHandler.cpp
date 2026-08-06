@@ -28,7 +28,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------------------
-	// Player가 기다리던 skill의 성공유무를 검증받았다.
+	
 	//------------------------------------------------------------------
 	if (g_pPlayer->GetWaitVerify()==MPlayer::WAIT_VERIFY_SKILL_SUCCESS)
 	{		
@@ -70,22 +70,22 @@ throw ( ProtocolException , Error )
 	pResult->Add( new MActionResultNodeChangeCreatureType( g_pPlayer->GetID(), creatureType ) );
 
 	//--------------------------------------------------
-	// 뱀파로 돌아간다.
+	
 	//--------------------------------------------------								
 	ExecuteActionInfoFromMainNode(
-		RESULT_MAGIC_UN_TRANSFORM,										// 사용 기술 번호
+		RESULT_MAGIC_UN_TRANSFORM,										
 	
 		x, y, 0,
 		dir,
 		
-		OBJECTID_NULL,												// 목표에 대한 정보
+		OBJECTID_NULL,												
 		x, y, 0, 
 		
-		0,													// 기술의 (남은) 지속 시간		
+		0,													
 		
 		pResult, //NULL,
 		
-		false);			// 기술 첨부터 시작한다.
+		false);			
 
 	g_pPlayer->SetDelay( 1000 );
 

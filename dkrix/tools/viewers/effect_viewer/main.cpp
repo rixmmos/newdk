@@ -205,7 +205,7 @@ public:
             std::cout << "Effect " << effectType << " -> BltType=" << (int)bltType
                       << " (" << bltTypeName << ") from EffectSpriteType table" << std::endl;
         } else {
-            std::cout << "⚠️  EffectSpriteType table not loaded, using BLT_EFFECT as default" << std::endl;
+            std::cout << "  EffectSpriteType table not loaded, using BLT_EFFECT as default" << std::endl;
         }
 
         // Create new effect with dependency injection
@@ -338,9 +338,9 @@ public:
             std::cout << "  Table index: " << tableIndex;
 
             if (m_effectSpriteTypeTable->IsValidIndex(tableIndex)) {
-                std::cout << " ✅ OK" << std::endl;
+                std::cout << "  OK" << std::endl;
             } else {
-                std::cout << " ❌ OUT OF BOUNDS!" << std::endl;
+                std::cout << "  OUT OF BOUNDS!" << std::endl;
                 std::cout << "  --> This would cause heap-buffer-overflow!" << std::endl;
             }
             std::cout << std::endl;
@@ -361,10 +361,10 @@ public:
         std::cout << "Table size: " << m_effectSpriteTypeTable->GetSize() << std::endl;
 
         if (worstCaseIndex >= m_effectSpriteTypeTable->GetSize()) {
-            std::cout << "❌ PANIC: Highest EffectID would cause overflow!" << std::endl;
+            std::cout << " PANIC: Highest EffectID would cause overflow!" << std::endl;
             std::cout << "   Overflow by: " << (worstCaseIndex - m_effectSpriteTypeTable->GetSize() + 1) << " entries" << std::endl;
         } else {
-            std::cout << "✅ Safe: All EffectIDs within bounds" << std::endl;
+            std::cout << " Safe: All EffectIDs within bounds" << std::endl;
         }
 
         std::cout << "========================================" << std::endl;
@@ -529,14 +529,14 @@ public:
 
                 // Check if this would cause a panic
                 if (!m_effectSpriteTypeTable->IsValidIndex(tableIndex)) {
-                    std::cout << "  ⚠️  WARNING: This index is OUT OF BOUNDS!" << std::endl;
+                    std::cout << "    WARNING: This index is OUT OF BOUNDS!" << std::endl;
                     std::cout << "  Table size: " << m_effectSpriteTypeTable->GetSize() << std::endl;
                     std::cout << "  This would cause heap-buffer-overflow in the game!" << std::endl;
 
                     // Show full debug info
                     m_effectSpriteTypeTable->DebugAccess(tableIndex, "EffectViewer::Render");
                 } else {
-                    std::cout << "  ✅ Index is valid (table size: " << m_effectSpriteTypeTable->GetSize() << ")" << std::endl;
+                    std::cout << "   Index is valid (table size: " << m_effectSpriteTypeTable->GetSize() << ")" << std::endl;
                 }
                 std::cout << "---------------------------------------\n" << std::endl;
             }
@@ -604,7 +604,7 @@ public:
             } else {
                 // Effect frame not found - show error indicator
                 if (m_frameCount <= 3) {
-                    std::cout << "\n⚠️  EffectFrame NOT FOUND:" << std::endl;
+                    std::cout << "\n  EffectFrame NOT FOUND:" << std::endl;
                     std::cout << "   EffectID=" << m_effectType
                               << " | FrameID=" << frameID
                               << " | Frame=" << (int)frame
@@ -648,7 +648,7 @@ public:
 
         if (!pSprite) {
             if (m_frameCount <= 3) {
-                std::cout << "  ❌ Failed to get AlphaSprite ID=" << spriteID << std::endl;
+                std::cout << "   Failed to get AlphaSprite ID=" << spriteID << std::endl;
                 std::cout << "     Total alpha sprites available: "
                           << m_resources->m_EffectAlphaSPK.GetSize() << std::endl;
             }
@@ -658,7 +658,7 @@ public:
         // Check if sprite is initialized
         if (!pSprite->IsInit()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ⚠️  AlphaSprite ID=" << spriteID << " not initialized" << std::endl;
+                std::cout << "    AlphaSprite ID=" << spriteID << " not initialized" << std::endl;
             }
             return;
         }
@@ -678,12 +678,12 @@ public:
 
         if (!pPalette) {
             if (m_frameCount <= 3) {
-                std::cout << "  ❌ Failed to get palette for FrameID=" << frameID << std::endl;
+                std::cout << "   Failed to get palette for FrameID=" << frameID << std::endl;
             }
         } else {
             // Log successful render
             if (m_frameCount <= 3) {
-                std::cout << "  ✅ Rendering AlphaSprite ID=" << spriteID
+                std::cout << "   Rendering AlphaSprite ID=" << spriteID
                           << " at (" << x << "," << y << ")" << std::endl;
                 std::cout << "     Palette FrameID=" << frameID
                           << " | Pitch=" << m_surface->w << std::endl;
@@ -706,7 +706,7 @@ public:
         // Boundary check
         if (spriteID >= spritePack.GetSize()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ❌ Sprite ID " << spriteID << " out of range (size="
+                std::cout << "   Sprite ID " << spriteID << " out of range (size="
                           << spritePack.GetSize() << ")" << std::endl;
             }
             return;
@@ -717,7 +717,7 @@ public:
 
         if (!sprite.IsInit()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ⚠️  NormalSprite ID=" << spriteID << " not initialized" << std::endl;
+                std::cout << "    NormalSprite ID=" << spriteID << " not initialized" << std::endl;
             }
             return;
         }
@@ -733,7 +733,7 @@ public:
 
         // Log successful render
         if (m_frameCount <= 3) {
-            std::cout << "  ✅ Rendering NormalSprite ID=" << spriteID
+            std::cout << "   Rendering NormalSprite ID=" << spriteID
                       << " at (" << x << "," << y << ")" << std::endl;
             std::cout << "     Size=" << sprite.GetWidth() << "x" << sprite.GetHeight()
                       << " | Pitch=" << m_surface->w << std::endl;
@@ -755,7 +755,7 @@ public:
         // Boundary check
         if (spriteID >= spritePack.GetSize()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ❌ ScreenSprite ID " << spriteID << " out of range (size="
+                std::cout << "   ScreenSprite ID " << spriteID << " out of range (size="
                           << spritePack.GetSize() << ")" << std::endl;
             }
             return;
@@ -766,7 +766,7 @@ public:
 
         if (!sprite.IsInit()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ⚠️  ScreenSprite ID=" << spriteID << " not initialized" << std::endl;
+                std::cout << "    ScreenSprite ID=" << spriteID << " not initialized" << std::endl;
             }
             return;
         }
@@ -786,7 +786,7 @@ public:
 
         // Log successful render
         if (m_frameCount <= 3) {
-            std::cout << "  ✅ Rendering ScreenSprite ID=" << spriteID
+            std::cout << "   Rendering ScreenSprite ID=" << spriteID
                       << " at (" << x << "," << y << ")" << std::endl;
             std::cout << "     Size=" << sprite.GetWidth() << "x" << sprite.GetHeight()
                       << " | Pitch=" << m_surface->w << std::endl;
@@ -810,7 +810,7 @@ public:
         // Boundary check
         if (spriteID >= spritePack.GetSize()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ❌ ShadowSprite ID " << spriteID << " out of range (size="
+                std::cout << "   ShadowSprite ID " << spriteID << " out of range (size="
                           << spritePack.GetSize() << ")" << std::endl;
             }
             return;
@@ -821,7 +821,7 @@ public:
 
         if (!sprite.IsInit()) {
             if (m_frameCount <= 3) {
-                std::cout << "  ⚠️  ShadowSprite ID=" << spriteID << " not initialized" << std::endl;
+                std::cout << "    ShadowSprite ID=" << spriteID << " not initialized" << std::endl;
             }
             return;
         }
@@ -837,7 +837,7 @@ public:
 
         // Log successful render
         if (m_frameCount <= 3) {
-            std::cout << "  ✅ Rendering ShadowSprite ID=" << spriteID
+            std::cout << "   Rendering ShadowSprite ID=" << spriteID
                       << " at (" << x << "," << y << ")" << std::endl;
             std::cout << "     Size=" << sprite.GetWidth() << "x" << sprite.GetHeight()
                       << " | Pitch=" << m_surface->w << std::endl;

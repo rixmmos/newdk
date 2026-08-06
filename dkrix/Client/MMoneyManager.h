@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // MMoneyManager.h
 //-----------------------------------------------------------------------------
-// Money는 MoneyLimit를 넘으면 안된다.
+
 //-----------------------------------------------------------------------------
 
 #ifndef __MMONEYMANAGER_H__
@@ -23,7 +23,7 @@ class MMoneyManager {
 		bool		AddMoney(int money);
 		bool		UseMoney(int money);
 
-		// money만큼 돈을 add/use할 수 있나?
+		
 		bool		CanAddMoney(int money);
 		bool		CanUseMoney(int money);
 
@@ -35,8 +35,8 @@ class MMoneyManager {
 		int			GetMaxAddMoney() const		{ return m_MoneyLimit - m_Money; }
 
 	protected :
-		int			m_MoneyLimit;	// 가질 수 있는 돈의 한계
-		int			m_Money;		// 돈 - -;
+		int			m_MoneyLimit;	
+		int			m_Money;		
 };
 
 extern MMoneyManager*		g_pMoneyManager;

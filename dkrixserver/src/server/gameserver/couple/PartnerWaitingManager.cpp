@@ -17,7 +17,7 @@ PartnerWaitInfo::PartnerWaitInfo(PlayerCreature* pWaitingPC, string RequestedPCN
     m_RequestedPCName = RequestedPCName;
     m_WaitingPCOID = pWaitingPC->getObjectID();
 
-    // 제한시간 1분
+    
     Timeval currentTime;
     getCurrentTime(currentTime);
     m_Deadline = currentTime;
@@ -70,7 +70,7 @@ PartnerWaitingManager::~PartnerWaitingManager() {
     m_WaitInfos.clear();
 }
 
-// 새로운 PartnerWaitInfo를 만들고 등록한다.
+
 uint PartnerWaitingManager::waitForPartner(PlayerCreature* pWaitingPC, string RequestedPCName) {
     __BEGIN_TRY
 
@@ -101,7 +101,7 @@ uint PartnerWaitingManager::waitForPartner(PlayerCreature* pWaitingPC, string Re
     if (pTargetPC == NULL)
         return COUPLE_MESSAGE_LOGOFF;
 
-    // PartnerWaitInfo 의 FactoryMethod 로 새로운 PartnerWaitInfo 의 객체를 만든다. WaitForMeet or WaitForApart
+    
     PartnerWaitInfo* pPartnerWaitInfo = PartnerWaitInfo::getPartnerWaitInfo(pWaitingPC, RequestedPCName, getWaitType());
     Assert(pPartnerWaitInfo != NULL);
 
@@ -118,7 +118,7 @@ uint PartnerWaitingManager::waitForPartner(PlayerCreature* pWaitingPC, string Re
     __END_CATCH
 }
 
-// 해당하는 PC가 기다리고 있는 파트너 요청을 찾아서 지운다.
+
 bool PartnerWaitingManager::stopWaitForPartner(PlayerCreature* pWaitingPC) {
     __BEGIN_TRY
 
@@ -148,7 +148,7 @@ uint PartnerWaitingManager::acceptPartner(PlayerCreature* pRequestedPC) {
     Assert(pRequestedPC != NULL);
 
     WaitInfoHashMap::iterator itr = m_WaitInfos.find(pRequestedPC->getName());
-    // 이 사람을 기다리는 자가 없다.
+    
     if (itr == m_WaitInfos.end())
         return COUPLE_MESSAGE_NO_WAITING;
 
@@ -159,13 +159,13 @@ uint PartnerWaitingManager::acceptPartner(PlayerCreature* pRequestedPC) {
     if (pWaitingPC == NULL)
         return COUPLE_MESSAGE_LOGOFF;
 
-    // 성별이 같으면 성사될 수 없다.
+    
     if (pWaitingPC->getSex() == pRequestedPC->getSex())
         return COUPLE_MESSAGE_SAME_SEX;
 
     uint result = pPartnerWaitInfo->acceptPartner(pRequestedPC);
 
-    // 성사된 이후엔 지워준다.
+    
     SAFE_DELETE(pPartnerWaitInfo);
     m_WaitInfos.erase(itr);
 
@@ -211,7 +211,7 @@ void PartnerWaitingManager::heartbeat() {
             WaitInfoHashMap::iterator delitr = itr;
             itr++;
 
-            // 데드라인이 지났다!
+            
             pPartnerWaitInfo->timeExpired();
             SAFE_DELETE(pPartnerWaitInfo);
             m_WaitInfos.erase(delitr);

@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------
 // ClientCommunicationManager.h
 //--------------------------------------------------------------------------------
-// 다른 클라이언트로부터의 정보를 받아들어 
+
 //--------------------------------------------------------------------------------
 #include "Client_PCH.h"
 #include "ClientCommunicationManager.h"
@@ -11,6 +11,14 @@
 #include "PacketValidator.h"
 #include "DebugInfo.h"
 #include "MTestDef.h"
+
+#ifndef __BEGIN_DEBUG
+#define __BEGIN_DEBUG
+#endif
+
+#ifndef __END_DEBUG
+#define __END_DEBUG
+#endif
 
 //--------------------------------------------------------------------------------
 // Global
@@ -25,8 +33,6 @@ void	SendBugReport(const char *bug, ...);
 ClientCommunicationManager::ClientCommunicationManager ()
 : m_pDatagramSocket(NULL)
 {
-    __BEGIN_TRY
-
 	try {
 		// create datagram server socket
 		m_pDatagramSocket = new DatagramSocket( g_pClientConfig->CLIENT_COMMUNICATION_UDP_PORT );
@@ -39,14 +45,10 @@ ClientCommunicationManager::ClientCommunicationManager ()
 		// Note: Socket creation may fail if port is in use, continue without P2P communication
 		m_pDatagramSocket = NULL;
 	}
-
-    // Note: Use empty statement instead of __END_CATCH to avoid re-throwing exceptions
-    // P2P communication is optional, client can function without it
-    }
-
-    catch (...) {
-        // Catch-all to prevent constructor from propagating exceptions
-    }
+	catch (...) {
+		// P2P communication is optional; client can function without it.
+		m_pDatagramSocket = NULL;
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -79,7 +81,7 @@ void ClientCommunicationManager::sendDatagram ( Datagram * pDatagram )
     }
     catch ( ConnectException )
     {
-		throw ConnectException( "ClientCommunicationManager::sendDatagram 상위로 던진다");
+		throw ConnectException( "ClientCommunicationManager::sendDatagram  ");
     }
 
     __END_CATCH
@@ -103,16 +105,16 @@ void ClientCommunicationManager::sendPacket ( const std::string& host , uint por
 
     try {
 
-        // 데이터그램 객체를 하나 두고, 전송할 peer 의 호스트와 포트를 지정한다.
+        
         Datagram datagram;
 
 		datagram.setHost(host);
         datagram.setPort(port);
 
-        // 데이터그램 패킷을 데이터그램에 집어넣는다.
+        
         datagram.write(pPacket);
 
-        // 데이터그램 소켓을 통해서 데이터그램을 전송한다.
+        
         m_pDatagramSocket->send( &datagram );
 
 		#ifdef __METROTECH_TEST__
@@ -125,7 +127,7 @@ void ClientCommunicationManager::sendPacket ( const std::string& host , uint por
 		#endif
 
     } catch ( Throwable & t ) {
-		// -_- 어차피 튕기니까 스트링으로
+		
 		if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 			if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
 				SendBugReport( t.toString().c_str() );
@@ -154,7 +156,7 @@ ClientCommunicationManager::Update()
 	
 		try
 		{
-			// 데이터그램 객체를 끄집어낸다.
+			
 			pDatagram = m_pDatagramSocket->receive();
 
 			if (pDatagram==NULL)
@@ -162,7 +164,7 @@ ClientCommunicationManager::Update()
 
 			DEBUG_ADD("[CCM-Update] something");
 			
-			// 데이터그램 패킷 객체를 끄집어낸다.
+			
 			pDatagram->read( pDatagramPacket );
 
 			#ifdef __METROTECH_TEST__
@@ -175,13 +177,13 @@ ClientCommunicationManager::Update()
 					DEBUG_ADD_FORMAT("[RECEIVE] %s", pDatagramPacket->toString().c_str());
 				#endif
 
-				// 걍 한번 체크..
+				
 				if ( !g_pPacketValidator->isValidPacketID( CPS_CLIENT_COMMUNICATION_NORMAL, pDatagramPacket->getPacketID() ))
 				{
 					throw InvalidProtocolException("invalid packet ORDER");
 				}			
 
-				// 끄집어낸 데이터그램 패킷 객체를 실행한다.
+				
 				DEBUG_ADD_FORMAT("[From] %s(%d)", pDatagramPacket->getHost().c_str(),
 													pDatagramPacket->getPort());
 
@@ -191,17 +193,17 @@ ClientCommunicationManager::Update()
 					g_UDPTest.UDPPacketExecute ++;
 				#endif
 
-				// 데이터그램 패킷 객체를 삭제한다.
+				
 				delete pDatagramPacket;
 			}
 
-			// 데이터그램 객체를 삭제한다.
+			
 			delete pDatagram;
 			
 		}
 		catch ( Throwable & t )
 		{
-			// -_- 어차피 튕기니까 스트링으로
+			
 			if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 				if( !strstr( t.toString().c_str(), "(datagram)" ) == NULL )
 					SendBugReport( t.toString().c_str() );

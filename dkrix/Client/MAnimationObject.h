@@ -2,19 +2,19 @@
 // MAnimationObject.h
 //----------------------------------------------------------------------
 //
-// 하나의 그림+애니Frame에 대한 정보
+
 // 
 //----------------------------------------------------------------------
 //
-// MImageObject는 단순히 하나의 Sprite로만 표현된다.
-// 때로는 Animation이 되는 ImageObject도 있으면 좋지 싶어서.. *_*;
+
+
 //
-//    SpriteID + FrameID 로써 Animation되는 Object를 표현한다.
-//    여기서.. SpriteID는 기본 Frame이 되고.. 
-//             FrameID는 애니 Frame이 된다.
+
+
+
 //    
-//  즉, 출력할때.. 늘 SpriteID는 출력되고.. 
-//                 FrameID의 현재 SpriteID가 하나 출력된다는 것이다.
+
+
 //
 //----------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ class MAnimationObject : public MImageObject, public CAnimationFrame, public Sho
 		static DWORD	LoopFrameCount;
 		BYTE			m_Direction;
 
-		BYTE			m_SoundFrame;	// 소리가 출력되는 frame
+		BYTE			m_SoundFrame;	
 		TYPE_SOUNDID	m_SoundID;
 };
 

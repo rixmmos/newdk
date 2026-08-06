@@ -22,6 +22,8 @@ extern "C" {
 	bool gbl_show_item = true;
 }
 
+bool g_bRunning = true;
+
 //-----------------------------------------------------------------------------
 // Print Functions
 //-----------------------------------------------------------------------------
@@ -31,11 +33,13 @@ extern "C" {
 // Platform-Specific Functions (Windows-specific)
 //-----------------------------------------------------------------------------
 
-// CheckMacScreenMode - Check Mac screen mode (Windows-specific stub)
+// CheckMacScreenMode - only needed as a stub on non-Windows builds.
+#ifndef PLATFORM_WINDOWS
 void CheckMacScreenMode()
 {
-	// Stub implementation - Windows-specific function
+	// Stub implementation for non-Windows builds.
 }
+#endif
 
 // GetNMClipData - Get Netmarble clipboard data (Windows-specific)
 bool GetNMClipData(char* pBuffer, unsigned int bufferSize, const char* pURL, bool bUseHTML)

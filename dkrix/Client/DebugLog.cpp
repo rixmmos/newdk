@@ -10,7 +10,7 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	#include <windows.h>
 	#include <sys/timeb.h>
 #else
@@ -18,7 +18,7 @@
 #endif
 
 // Platform-specific includes
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	#define PLATFORM_LOCK_INITIALIZED 1
 #else
 	#include "../../basic/Platform.h"
@@ -82,7 +82,7 @@ static const char* get_level_string(LogLevel level) {
 // Get timestamp with milliseconds
 // Format: "2024-01-20 23:45:12.123"
 static void get_timestamp(char *buffer, size_t size) {
-#ifdef PLATFORM_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 	struct _timeb timebuf;
 	_ftime(&timebuf);
 	struct tm *tm_info = localtime(&timebuf.time);
@@ -97,8 +97,10 @@ static void get_timestamp(char *buffer, size_t size) {
 #else
 	struct timeval tv;
 	struct tm *tm_info;
+	time_t seconds;
 	gettimeofday(&tv, NULL);
-	tm_info = localtime(&tv.tv_sec);
+	seconds = (time_t)tv.tv_sec;
+	tm_info = localtime(&seconds);
 	snprintf(buffer, size, "%04d-%02d-%02d %02d:%02d:%02d.%03ld",
 			 tm_info->tm_year + 1900,
 			 tm_info->tm_mon + 1,

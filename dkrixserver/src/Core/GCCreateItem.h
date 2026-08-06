@@ -29,17 +29,17 @@ public:
         return PACKET_GC_CREATE_ITEM;
     }
     PacketSize_t getPacketSize() const {
-        return szObjectID +                   // 아이템 오브젝트 ID
-               szBYTE +                       // 아이템 클래스
-               szItemType +                   // 아이템 타입
-               szBYTE + m_OptionType.size() + // 아이템 옵션
-               szDurability +                 // 아이템 내구도
-               szSilver +                     // 아이템 은 도금량
-               szGrade +                      // 아이템 등급
-               szEnchantLevel +               // 아이템 인챈트 레벨
-               szItemNum +                    // 아이템 숫자
-               szCoordInven +                 // 아이템 X 좌표
-               szCoordInven;                  // 아이템 Y 좌표
+        return szObjectID +                   
+               szBYTE +                       
+               szItemType +                   
+               szBYTE + m_OptionType.size() + 
+               szDurability +                 
+               szSilver +                     
+               szGrade +                      
+               szEnchantLevel +               
+               szItemNum +                    
+               szCoordInven +                 
+               szCoordInven;                  
     }
     string getPacketName() const {
         return "GCCreateItem";
@@ -138,17 +138,17 @@ public:
     }
 
 private:
-    ObjectID_t m_ObjectID;           // 오브젝트 ID
-    BYTE m_ItemClass;                // 아이템 클래스
-    ItemType_t m_ItemType;           // 아이템 타입
-    list<OptionType_t> m_OptionType; // 옵션 타입
-    Durability_t m_Durability;       // 내구성
-    Silver_t m_Silver;               // 은 도금량
-    Grade_t m_Grade;                 // 아이템 등급
-    EnchantLevel_t m_EnchantLevel;   // 인챈트 레벨
-    ItemNum_t m_ItemNum;             // 아이템의 숫자
-    CoordInven_t m_InvenX;           // 인벤토리 X 좌표
-    CoordInven_t m_InvenY;           // 인벤토리 Y 좌표
+    ObjectID_t m_ObjectID;           
+    BYTE m_ItemClass;                
+    ItemType_t m_ItemType;           
+    list<OptionType_t> m_OptionType; 
+    Durability_t m_Durability;       
+    Silver_t m_Silver;               
+    Grade_t m_Grade;                 
+    EnchantLevel_t m_EnchantLevel;   
+    ItemNum_t m_ItemNum;             
+    CoordInven_t m_InvenX;           
+    CoordInven_t m_InvenY;           
 };
 
 
@@ -168,17 +168,17 @@ public:
         return Packet::PACKET_GC_CREATE_ITEM;
     }
     PacketSize_t getPacketMaxSize() const {
-        return szObjectID +     // 아이템 오브젝트 ID
-               szBYTE +         // 아이템 클래스
-               szItemType +     // 아이템 타입
-               szBYTE + 255 +   // 아이템 옵션
-               szDurability +   // 아이템 내구도
-               szSilver +       // 아이템 은 도금량
-               szGrade +        // 아이템 등급
-               szEnchantLevel + // 아이템 인챈트 레벨
-               szItemNum +      // 아이템 숫자
-               szCoordInven +   // 아이템 X 좌표
-               szCoordInven;    // 아이템 Y 좌표
+        return szObjectID +     
+               szBYTE +         
+               szItemType +     
+               szBYTE + 255 +   
+               szDurability +   
+               szSilver +       
+               szGrade +        
+               szEnchantLevel + 
+               szItemNum +      
+               szCoordInven +   
+               szCoordInven;    
     }
 };
 

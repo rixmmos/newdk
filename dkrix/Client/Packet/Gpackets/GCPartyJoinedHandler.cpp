@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCPartyJoinedHandler.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -8,12 +8,12 @@
 #include "GCPartyJoined.h"
 #include "MParty.h"
 #include "UserInformation.h"
-#include "RequestClientPlayerManager.h"
+#include "../RequestClientPlayerManager.h"
 #include "ProfileManager.h"
 #include "RequestUserManager.h"
 #include "TempInformation.h"
 
-#include "Cpackets/CGRequestIP.h"
+#include "../Cpackets/CGRequestIP.h"
 #include "ClientDef.h"
 #include "UIFunction.h"
 
@@ -82,7 +82,7 @@ throw ( ProtocolException , Error )
 				pNewInfo->IP		= inet_ntoa( sa );
 
 				//---------------------------------------------------------
-				// 얼굴 받아오기
+				
 				//---------------------------------------------------------
 				const char* pName = pInfo->name.c_str();
 
@@ -99,7 +99,7 @@ throw ( ProtocolException , Error )
 				}
 
 				//---------------------------------------------------------
-				// 이전 파티 정보에 있는지 ..
+				
 				//---------------------------------------------------------
 				PARTY_INFO* pOldInfo = pOldParty->GetMemberInfo( pInfo->name.c_str() );
 					
@@ -114,7 +114,7 @@ throw ( ProtocolException , Error )
 				}			
 
 				//---------------------------------------------------------
-				// 현재 zone에 있는지 체크
+				
 				//---------------------------------------------------------
 				if (g_pZone!=NULL)
 				{
@@ -173,15 +173,15 @@ throw ( ProtocolException , Error )
 		UI_RunParty();
 	}	
 
-	// 이전에 아무도 없었는데 파티원들이 생긴다면
-	// 내가 파티에 들어간거다.
+	
+	
 	if (previousSize==0)
 	{
 		g_pParty->SetJoinTime();
 	}
 
 	//---------------------------------------------------------------
-	// 내 정보를 보내준다.
+	
 	//---------------------------------------------------------------
 	SendCharacterInfoToParty();
 	SendPositionInfoToParty();
@@ -190,33 +190,9 @@ throw ( ProtocolException , Error )
 	delete pOldParty;
 
 	//---------------------------------------------------------------
-	// 파티원들에 대한 접속을 체크한다.
+	
 	//---------------------------------------------------------------
-	/*
-	int num = g_pParty->GetSize();
-
-	for (i=0; i<num; i++)
-	{
-		PARTY_INFO*	pInfo = g_pParty->GetMemberInfo(i);
-
-		if (pInfo!=NULL)
-		{
-			// 상대에 대한 접속이 없다면 IP를 요청해야 한다.
-			if (!g_pRequestClientPlayerManager->HasConnection( pInfo->Name.GetString() ))
-			{
-				CGRequestIP _CGRequestIP;
-
-				_CGRequestIP.setName( pInfo->Name.GetString() );
-
-//				pPlayer->sendPacket( &_CGRequestIP );
-				#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
-					if (g_pGameMessage!=NULL)
-						g_pGameMessage->AddFormat("RequestIP for %s", pInfo->Name.GetString());
-				#endif
-			}
-		}
-	}
-	*/
+	 
 	
 #endif
 

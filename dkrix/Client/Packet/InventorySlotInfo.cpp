@@ -15,10 +15,10 @@ void InventorySlotInfo::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
-	// 먼저 하위 클래스에서 읽어들인다.
+	
 	PCItemInfo::read(iStream);
 
-	// 이 클래스에 해당하는 데이터를 읽어들인다.
+	
 	iStream.read( m_InvenX );
 	iStream.read( m_InvenY );
 
@@ -33,10 +33,10 @@ void InventorySlotInfo::write ( SocketOutputStream & oStream ) const
 {
 	__BEGIN_TRY
 	
-	// 먼저 하위 클래스에서 쓴다.
+	
 	PCItemInfo::write(oStream);
 
-	// 이 클래스에 해당하는 데이터를 쓴다.
+	
 	oStream.write( m_InvenX );
 	oStream.write( m_InvenY );
 

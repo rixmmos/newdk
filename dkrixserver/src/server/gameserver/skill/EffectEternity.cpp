@@ -72,7 +72,7 @@ void EffectEternity::unaffect(Creature* pCreature)
     if (!pSlayer->isFlag(Effect::EFFECT_CLASS_COMA))
         return;
 
-    // 타일에다가 이펙트를 붙여준다.
+    
     GCAddEffectToTile gcAddEffect;
     gcAddEffect.setEffectID(Effect::EFFECT_CLASS_ETERNITY);
     gcAddEffect.setXY(pSlayer->getX(), pSlayer->getY());
@@ -88,7 +88,7 @@ void EffectEternity::unaffect(Creature* pCreature)
 
     pSlayer->setHP(NewHP);
 
-    // 코마 이펙트가 날아갔다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pSlayer->getObjectID());
     gcRemoveEffect.addEffectList((EffectID_t)Effect::EFFECT_CLASS_COMA);
@@ -99,7 +99,7 @@ void EffectEternity::unaffect(Creature* pCreature)
     gcHP.setCurrentHP(pSlayer->getHP());
     pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcHP);
 
-    // 이펙트들을 다시 보내준다.
+    
     pSlayer->getEffectManager()->sendEffectInfo(pSlayer, pZone, pSlayer->getX(), pSlayer->getY());
 
     addSimpleCreatureEffect(pSlayer, Effect::EFFECT_CLASS_NO_DAMAGE, 30, false);

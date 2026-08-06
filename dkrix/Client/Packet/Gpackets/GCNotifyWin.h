@@ -7,12 +7,12 @@
 #ifndef __GC_NOTIFY_WIN_H__
 #define __GC_NOTIFY_WIN_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCNotifyWin;
-// NPC 의 대사를 주변의 PC 들에게 전송한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCNotifyWin : public Packet 

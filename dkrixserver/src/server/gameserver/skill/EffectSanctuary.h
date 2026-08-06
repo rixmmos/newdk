@@ -85,13 +85,13 @@ public:
     void unaffectObject(Object*, bool bUnaffectByMove);
 
 private:
-    // effect의 중심좌표
+    
     ZoneCoord_t m_CenterX;
     ZoneCoord_t m_CenterY;
 
     Attr_t m_Level;
     Duration_t m_Duration;
-    Timeval m_StartTime; // 기술이 시작된 시간.
+    Timeval m_StartTime; 
 };
 
 #endif // __EFFECT_SANCTUARY__

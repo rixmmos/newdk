@@ -31,12 +31,12 @@ DatabaseManager::DatabaseManager() {
 }
 
 DatabaseManager::~DatabaseManager() {
-    // ��� Connection �� �����ؾ� �Ѵ�.
+    
     unordered_map<int, Connection*>::iterator itr = m_Connections.begin();
     for (; itr != m_Connections.end(); itr++)
         SAFE_DELETE(itr->second);
 
-    // �ؽ��ʾȿ� �ִ� ��� pair ���� �����Ѵ�.
+    
     m_Connections.clear();
 
     SAFE_DELETE(m_pDefaultConnection);
@@ -94,7 +94,7 @@ void DatabaseManager::init() {
             double dbDiff = difftime(tSYSTime, tDBTime);
 
             if ((int)dbDiff > 3600) {
-                // ������ ���̽��� �������� �ð����̰� 1�ð� �̻��̴�.
+                
                 cout << "======================================================" << endl;
                 cout << "!!! Time Check Error !!!" << endl;
                 cout << "DB time is " << tDBTime << "and server time is " << tSYSTime << endl;
@@ -204,7 +204,7 @@ void DatabaseManager::addConnection(int TID, Connection* pConnection) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Potion �� Thread Connection�� ���� �κ�
+
 ////////////////////////////////////////////////////////////////////////////
 void DatabaseManager::addDistConnection(int TID, Connection* pConnection) {
     __BEGIN_TRY
@@ -230,7 +230,7 @@ void DatabaseManager::addDistConnection(int TID, Connection* pConnection) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// China Billing log ������ ���� DB ���� �߰�
+
 ////////////////////////////////////////////////////////////////////////////
 void DatabaseManager::addCBillingConnection(int TID, Connection* pConnection) {
     __BEGIN_TRY
@@ -255,36 +255,7 @@ void DatabaseManager::addCBillingConnection(int TID, Connection* pConnection) {
     __END_CATCH
 }
 
-/*
-////////////////////////////////////////////////////////////////////////////////
-// PC �� ���� Connection ����
-////////////////////////////////////////////////////////////////////////////////
-void DatabaseManager::addPCRoomConnection ( int TID,  Connection * pConnection )
-
-{
-    __BEGIN_TRY
-
-    cout << "Adding TID connection BEGIN" << endl;
-
-    __ENTER_CRITICAL_SECTION(m_Mutex)
-
-    unordered_map< int , Connection * >::iterator itr = m_PCRoomConnections.find( TID );
-
-    if ( itr != m_Connections.end() )
-    {
-        cout << "duplicated connection info id" << endl;
-        throw DuplicatedException("duplicated connection info id");
-    }
-
-    m_PCRoomConnections[ TID ] = pConnection;
-
-    __LEAVE_CRITICAL_SECTION(m_Mutex)
-
-    cout << "Adding TID connection END" << endl;
-
-    __END_CATCH
-}
-*/
+ 
 
 Connection* DatabaseManager::getDistConnection(const string& connName)
 
@@ -321,7 +292,7 @@ Connection* DatabaseManager::getConnection(const string& connName)
 
     unordered_map<int, Connection*>::iterator itr;
 
-    // connName�� ���ؼ� ���� �ٸ� DB Server�� �б��ϵ��� �Ѵ�.
+    
     // if(connName == "DIST_DARKEDEN")
     //{
     //	itr = m_DistConnections.find(Thread::self());
@@ -369,38 +340,7 @@ Connection* DatabaseManager::getCBillingConnection(const string& connName)
 
     __END_CATCH
 }
-/*
-////////////////////////////////////////////////////////////////////////////
-// PC �� ���տ� Connection ��������
-////////////////////////////////////////////////////////////////////////////
-Connection * DatabaseManager::getPCRoomConnection ( const string& connName )
-
-{
-    __BEGIN_TRY
-
-    Connection * pTempConnection = NULL;
-
-    unordered_map<int, Connection*>::iterator itr;
-
-    itr = m_PCRoomConnections.find(Thread::self());
-
-    #ifdef __LOGIN_SERVER__
-
-        return m_pPCRoomConnection;
-
-    #else
-
-        Assert( itr != m_PCRoomConnections.end() );
-
-        pTempConnection = itr->second;
-
-        return pTempConnection;
-
-    #endif
-
-    __END_CATCH
-}
-*/
+ 
 /*
 void DatabaseManager::addConnection ( WorldID_t WorldID,  Connection * pConnection )
 

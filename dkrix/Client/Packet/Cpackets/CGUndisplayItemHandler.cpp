@@ -40,7 +40,7 @@ void CGUndisplayItemHandler::execute (CGUndisplayItem* pPacket , Player* pPlayer
 
 	if ( pPacket->getIndex() > MAX_ITEM_NUM )
 	{
-		filelog("Store.log", "[%s:%s] (%u) 잘못된 인덱스입니다.",
+		filelog("Store.log", "[%s:%s] (%u)  .",
 				pGamePlayer->getID().c_str(), pPC->getName().c_str(), pPacket->getIndex());
 		return;
 	}
@@ -48,7 +48,7 @@ void CGUndisplayItemHandler::execute (CGUndisplayItem* pPacket , Player* pPlayer
 	BYTE result = pStore->removeStoreItem( pPacket->getIndex() );
 	if ( result != 0 )
 	{
-		filelog("Store.log", "[%s:%s] (%u) 아이템을 뺄 수 없습니다.",
+		filelog("Store.log", "[%s:%s] (%u)    .",
 				pGamePlayer->getID().c_str(), pPC->getName().c_str(), result);
 		return;
 	}

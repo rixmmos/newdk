@@ -1,19 +1,4 @@
-/**
- * @file shadow_spritepack.c
- * @brief ShadowSpritePack implementation
- * 
- * Requirements: 2.1, 2.2
- * 
- * File format:
- * 
- * .sspk (pack file):
- *   [size: 2 bytes] - Number of sprites
- *   [sprite data...] - Sequential sprite data
- * 
- * .sspki (index file):
- *   [size: 2 bytes] - Number of sprites
- *   [offset: 4 bytes] × size - File offsets for each sprite
- */
+ 
 
 #include "shadow_spritepack.h"
 #include <stdlib.h>

@@ -9,8 +9,8 @@
 #define __GC_CHANGE_DARK_LIGHT_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 
 //--------------------------------------------------------------------------------
@@ -23,10 +23,10 @@ class GCChangeDarkLight : public Packet {
 
 public :
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -37,7 +37,7 @@ public :
 	
 	// get packet's body size
 	// *OPTIMIZATION HINT*
-	// const static GCChangeDarkLightPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketSize () const throw () { return szDarkLevel + szLightLevel; }
 
 	#ifdef __DEBUG_OUTPUT__
@@ -61,10 +61,10 @@ public :
 
 public :
 
-	// 존의 어둡기 ( 0 - 15 )
+	
 	DarkLevel_t m_DarkLevel;
 
-	// 존의 빛의 크기 ( 1 - 13 )
+	
 	LightLevel_t m_LightLevel;
 
 };
@@ -95,7 +95,7 @@ public :
 
 	// get packet's max body size
 	// *OPTIMIZATION HINT*
-	// const static GCChangeDarkLightPacketSize 를 정의, 리턴하라.
+	
 	PacketSize_t getPacketMaxSize () const throw () { return szDarkLevel + szLightLevel; }
 
 };

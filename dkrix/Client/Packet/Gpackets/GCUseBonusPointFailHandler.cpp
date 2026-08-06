@@ -25,7 +25,7 @@ void GCUseBonusPointFailHandler::execute ( GCUseBonusPointFail* pPacket , Player
 
 
 	//------------------------------------------------------------
-	// mode 제거
+	
 	//------------------------------------------------------------
 	g_pTempInformation->SetMode(TempInformation::MODE_NULL);
 

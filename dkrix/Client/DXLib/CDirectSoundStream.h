@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // CDirectSoundStream.h
 //----------------------------------------------------------------------
-// 우헤헤..
-// DirectX 샘플을 긁어서 급조된 필살 허접 class.. - -;
+
+
 //----------------------------------------------------------------------
 
 #ifndef __CSDLSTREAM_H__
@@ -27,6 +27,12 @@ typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
 #endif
 typedef struct IDirectSoundNotify* LPDIRECTSOUNDNOTIFY;
 
+struct SDL_POSITION_NOTIFY {
+	DWORD dwFlags;
+	DWORD dwOffset;
+	DWORD dwCallback;
+};
+
 class CSDLStream {
 	public :
 		CSDLStream();
@@ -46,7 +52,7 @@ class CSDLStream {
 		void					SetVolumeLimit(LONG volume);
 		LONG					GetVolumeLimit() const	{ return m_MaxVolume; }
 
-		// main loop에서 돌려줘야 한다.
+		
 		void					Update();
 
 		// get
@@ -70,11 +76,11 @@ class CSDLStream {
 		LPDIRECTSOUNDBUFFER		m_pDSBuffer;
 		LPDIRECTSOUNDNOTIFY		m_pDSNotify;
 
-		DSBPOSITIONNOTIFY		m_aPosNotify[ NUM_PLAY_NOTIFICATIONS + 1 ];
+		SDL_POSITION_NOTIFY		m_aPosNotify[ NUM_PLAY_NOTIFICATIONS + 1 ];
 
 		HANDLE					m_hNotificationEvents[2];
 
-		// 음헤헤...
+		
 		DWORD					m_dwBufferSize;
 		DWORD					m_dwNotifySize;
 		DWORD					m_dwNextWriteOffset;
@@ -82,13 +88,13 @@ class CSDLStream {
 		DWORD					m_dwLastPos;
 		BOOL					m_bFoundEnd;
 
-		// 가장 최근에 load한 Wav에 대한 정보
+		
 		WAVEFORMATEX			m_wavefmt;        // Pointer to WAVEFORMATEX structure
 		HMMIO					m_hmmioIn;     // MM I/O handle for the WAVE
 		MMCKINFO				m_ckIn;        // Multimedia RIFF chunk
 		MMCKINFO				m_ckInRiff;    // Use in opening a WAVE file
 
-		LONG					m_MaxVolume;		// 현재의 최대 소리 크기
+		LONG					m_MaxVolume;		
 };
 
 #endif

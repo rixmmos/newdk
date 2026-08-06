@@ -9,13 +9,13 @@
 #define __ASSERT_H__
 
 // include files
-#include "Types.h"
+#include "Packet/Types.h"
 #include "Exception.h"
 
 //--------------------------------------------------------------------------------
 //
-// Config.h 에 NDEBUG 가 정의되면, 모든 Assert를 무시한다.
-// 그렇지 않은 경우 Assert가 실패하면 파일에 로그를 한후, AssertError를 리턴한다.
+
+
 //
 //--------------------------------------------------------------------------------
 void __assert__ ( const char * file , uint line , const char * func , const char * expr ) throw ( AssertionError );

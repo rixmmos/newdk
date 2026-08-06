@@ -26,7 +26,7 @@ MEffectTarget::MEffectTarget(const MEffectTarget& target)
 		*this = target; 
 	}
 
-	// 객체 ID를 할당한다.
+	
 	//m_InstanceID = s_InstanceID++;
 	m_EffectID = target.m_EffectID;
 	
@@ -40,11 +40,11 @@ MEffectTarget::MEffectTarget(BYTE max)
 	m_MaxPhase		= max;
 	m_CurrentPhase	= 0;
 
-	// 결과
+	
 	//m_nResultActionInfo = ACTIONINFO_NULL;
 	m_pResult		= NULL;
 
-	// 객체 ID를 할당한다.
+	
 	//m_InstanceID = s_InstanceID++;
 	m_EffectID = 0;
 
@@ -65,7 +65,7 @@ MEffectTarget::~MEffectTarget()
 
 	DEBUG_ADD("del res");
 
-	// 죽음의 코드 - -;
+	
 	if (g_pPlayer!=NULL)
 	{
 		g_pPlayer->RemoveEffectTarget( m_EffectID );

@@ -18,15 +18,15 @@
 //
 // class GCAddVampireFromTransformation;
 //
-// �α����̳� ��Ż, �ڷ���Ʈ ������ �����̾ ���� ����
-// ���� ���, �Ǵ�
-// �����̾ ������ �̵��� ���,(1) �̹� �� �����̾
-// ���� ������ ���� �ִ�
-//(�� �� �����̾ ���� �ִ�..) ������ �����ϴ� PC�鿡�Դ�
-// GCMove ��Ŷ��
-// ��ε�ĳ��Ʈ�Ѵ�. �׷���,(2) �� �����̾ ó�� ���� �Ǵ�
-// ������ �����ϴ� PC�鿡�Դ� GCAddVampireFromTransformation ��Ŷ�� ��ε�ĳ��Ʈ�Ѵ�. ����,(3) �� �����̾�� �ڽ��� ���� ��ô�� �þ�(?)
-// �ȿ� �����ϴ� �����̾���� ������ GCAddVampireFromTransformation�� ��Ƽ� �ް� �ȴ�.
+
+
+
+
+
+
+
+
+
 //
 //----------------------------------------------------------------------
 
@@ -41,11 +41,11 @@ public:
 
 
 public:
-    // �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ��
-    // �ʱ�ȭ�Ѵ�.
+    
+    
     void read(SocketInputStream& iStream);
 
-    // ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -92,10 +92,10 @@ public:
 
 
 private:
-    // �����̾� �ܸ� ����
+    
     PCVampireInfo3 m_VampireInfo;
 
-    // ����Ʈ ����
+    
     EffectInfo* m_pEffectInfo;
 };
 

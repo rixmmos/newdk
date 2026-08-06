@@ -40,12 +40,12 @@ bool ConditionEnterMasterLair::isSatisfied(Creature* pCreature1, Creature* pCrea
     Assert(pGamePlayer != NULL);
 
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-    // 이미 유료존에 있는 경우라면... 관계없겠지.
-    // 패밀리 요금 적용중일 경우
+    
+    
     if (pGamePlayer->isPayPlaying() || pGamePlayer->isFamilyFreePass()) {
         bPayPlay = true;
     } else {
-        // 일단 zone 요금 체크
+        
         string connectIP = pGamePlayer->getSocket()->getHost();
 
         if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
@@ -57,13 +57,13 @@ bool ConditionEnterMasterLair::isSatisfied(Creature* pCreature1, Creature* pCrea
     bPayPlay = true;
 #endif
 
-    // 돈 낸 사람만 마스터 레어에 들어갈 수 있다.
+    
     if (bPayPlay) {
-        // 존을 찾는다.
+        
         Zone* pZone = getZoneByZoneID(m_TargetZoneID);
         Assert(pZone != NULL);
 
-        // 마스터 레어가 아니면 체크할 필요가 없는거다.
+        
         if (!pZone->isMasterLair()) {
             return true;
         }
@@ -72,7 +72,7 @@ bool ConditionEnterMasterLair::isSatisfied(Creature* pCreature1, Creature* pCrea
         Assert(pMasterLairManager != NULL);
 
         if (pMasterLairManager->enterCreature(pCreature2)) {
-            // 출입 가능
+            
             return true;
         }
     }

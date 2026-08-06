@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -32,7 +32,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -50,16 +50,16 @@ throw ( ProtocolException , Error )
 		
 			MCreature* pTargetCreature = g_pZone->GetCreature( pPacket->getTargetObjectID() );		
 
-		// TargetCreature에게 결과 표현
+		
 		if (pTargetCreature != NULL)
 		{
-			// delay frame수 계산
+			
 			DWORD delayFrame = ConvertDurationToFrame( pPacket->getDuration() );
 
-			// effect delay설정
+			
 			pTargetCreature->SetEffectDelayFrame( pPacket->getSkillType(), delayFrame );
 
-			// 바로 결과 표현
+			
 			pTargetCreature->PacketSpecialActionResult( 
 										skillID + (*g_pActionInfoTable).GetMinResultActionInfo(), 
 										pTargetCreature->GetID(),
@@ -68,7 +68,7 @@ throw ( ProtocolException , Error )
 			);
 
 			//------------------------------------------------------
-			// EffectStatus가 있다면 붙인다.
+			
 			//------------------------------------------------------
 			EFFECTSTATUS es = (*g_pActionInfoTable)[skillID].GetEffectStatus();
 			

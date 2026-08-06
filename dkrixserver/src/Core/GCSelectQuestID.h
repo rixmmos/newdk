@@ -25,7 +25,7 @@ const BYTE maxQuestNum = 255;
 class GCSelectQuestID : public Packet {
 public:
 #ifdef __GAME_SERVER__
-    // inItr은 container<QuestID_t>::input_iterator 여야 한다.
+    
     template <class inItr> explicit GCSelectQuestID(inItr b, inItr e) {
         copy(b, e, back_inserter(m_QuestIDList));
     }

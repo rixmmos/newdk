@@ -11,7 +11,7 @@
 #include "GCOtherStoreInfo.h"
 #include "MStorage.h"
 #include "MPlayer.h"
-#include "PCItemInfo.h"
+#include "../PCItemInfo.h"
 #include "DebugInfo.h"
 #include "UIDialog.h"
 #include "MGameStringTable.h"
@@ -20,7 +20,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// 클라이언트에서 서버로부터 메시지를 받았을때 실행되는 메쏘드이다.
+
 //
 //////////////////////////////////////////////////////////////////////
 void GCOtherStoreInfoHandler::execute ( GCOtherStoreInfo * pPacket , Player * pPlayer )
@@ -61,16 +61,16 @@ throw ( ProtocolException , Error )
 		if(strlen(pPacket->getStoreInfo()->getSign().c_str())>0 && pCreature->IsNPC() == false)
 			pCreature->SetPersnalShopMessage(pPacket->getStoreInfo()->getSign().c_str());
 
-		if(false == pPacket->isRequested()) // 내가 선택해서 상점이 열리는 경우가 아니고 그냥 열렸다고 알림 일때
+		if(false == pPacket->isRequested()) 
 			return;
 
 
-		// 내가 선택해서 개인상점이 열리는 경우 아래쪽 처리
+		
 		if (g_pStorage2!=NULL) 
 			delete g_pStorage2;
 
 		g_pStorage2 = new MStorage;
-		g_pStorage2->Init( 1 ); //STASH_RACK_MAX );	// 쩝.. 3개일까?? 
+		g_pStorage2->Init( 1 ); 
 		g_pStorage2->SetCurrent( 0 );
 		pPacket->getStoreInfo()->getSign();
 		g_pStorage2->SetCuropenid(pPacket->getObjectID());
@@ -78,7 +78,7 @@ throw ( ProtocolException , Error )
 		for (int rack=0; rack<1; rack++)
 		{
 			//------------------------------------------------------------
-			// 접근하는 Storage를 지정한다.
+			
 			//------------------------------------------------------------
 			//int numitem = pPacket->getStoreInfo().getItems().size();
 			int numitem = pPacket->getStoreInfo()->getItems().size();
@@ -91,7 +91,7 @@ throw ( ProtocolException , Error )
 				{
 					
 					//------------------------------------------------------------
-					// item을 생성한다.
+					
 					//------------------------------------------------------------
 					MItem* pItem = MItem::NewItem( (ITEM_CLASS)item.getItemClass() );
 
@@ -104,18 +104,18 @@ throw ( ProtocolException , Error )
 					pItem->SetNumber(pPacket->getStoreInfo()->getStoreItemInfo(index).getItemNum());
 					
 					//------------------------------------------
-					// 개수
+					
 					//------------------------------------------
-					// 총인 경우
+					
 					//------------------------------------------
 					if (pItem->IsGunItem())
 					{
 						MMagazine* pMagazine = (MMagazine*)MItem::NewItem( (ITEM_CLASS)ITEM_CLASS_MAGAZINE );
 
-						// 의미 없음 - -;
+						
 						pMagazine->SetID( 0 );
 
-						// 이거는 총에 맞춰서 해줘야된다.
+						
 						for (int j=0; j<(*g_pItemTable)[ITEM_CLASS_MAGAZINE].GetSize(); j++)			
 						{
 							pMagazine->SetItemType(	j );
@@ -126,18 +126,18 @@ throw ( ProtocolException , Error )
 							}
 						}
 
-						// 의미 없음
+						
 						pMagazine->ClearItemOption();
 					
 
 						//------------------------------------
-						// 탄창 설정
+						
 						//------------------------------------
 						MGunItem* pGunItem = (MGunItem*)pItem;
 						pGunItem->SetMagazine( pMagazine );
 					}		
 					//------------------------------------------
-					// 총이 아닌 경우
+					
 					//------------------------------------------
 					else
 					{
@@ -148,7 +148,7 @@ throw ( ProtocolException , Error )
 					pItem->SetEnchantLevel( item.getEnchantLevel() );
 
 					//------------------------------------------------------------
-					// Sub Item이 있으면 생성한다.
+					
 					//------------------------------------------------------------
 
 					int subNum =item.getListNum();
@@ -156,7 +156,7 @@ throw ( ProtocolException , Error )
 					if (subNum!=0)
 					{
 						//------------------------------------------------------------
-						// Belt인 경우
+						
 						//------------------------------------------------------------
 						if (pItem->GetItemClass()==ITEM_CLASS_BELT)
 						{
@@ -165,7 +165,7 @@ throw ( ProtocolException , Error )
 							std::list<SubItemInfo*>::const_iterator iItem = listSubItem.begin();
 
 							//------------------------------------------------------------
-							// 각각의 sub item을 설정한다.
+							
 							//------------------------------------------------------------
 							while (iItem != listSubItem.end())
 							{
@@ -174,7 +174,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -203,7 +203,7 @@ throw ( ProtocolException , Error )
 							std::list<SubItemInfo*>::const_iterator iItem = listSubItem.begin();
 
 							//------------------------------------------------------------
-							// 각각의 sub item을 설정한다.
+							
 							//------------------------------------------------------------
 							while (iItem != listSubItem.end())
 							{
@@ -212,7 +212,7 @@ throw ( ProtocolException , Error )
 								if (pItemInfo!=NULL)
 								{
 									//------------------------------------------------------------
-									// sub item을 생성한다.
+									
 									//------------------------------------------------------------
 									MItem* pSubItem = MItem::NewItem( (ITEM_CLASS)pItemInfo->getItemClass() );
 
@@ -239,11 +239,11 @@ throw ( ProtocolException , Error )
 					}
 					
 					//------------------------------------------------------------
-					// Storage에 item 설정
+					
 					//------------------------------------------------------------
 					if (!g_pStorage2->SetItem( index, pItem ))
 					{
-						// 뭐지..
+						
 						delete pItem;
 						
 						DEBUG_ADD_FORMAT("[Error] Can't Add Item to Storage. rack=%d, slot=%d", rack, index);

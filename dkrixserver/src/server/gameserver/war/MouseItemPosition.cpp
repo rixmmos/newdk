@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////
-// MouseItemPosition 클래스 구현
+
 ///////////////////////////////////////////////////////////////////
 
 #include "MouseItemPosition.h"
@@ -82,11 +82,11 @@ Zone* MouseItemPosition::getZone()
 {
     __BEGIN_TRY
 
-    // 구해놓은게 있으면 그걸로 리턴한다.
+    
     if (m_bSetZone)
         return m_pZone;
 
-    // 구해놓은게 없으면 새로 구한다.
+    
     Creature* pTargetCreature = findCreature();
 
     return getZoneByCreature(pTargetCreature);
@@ -102,7 +102,7 @@ Item* MouseItemPosition::popItem_CORE(PlayerCreature* pPC)
     Item* pItem;
 
     if (pPC->getExtraInventorySlotItem() == NULL) {
-        filelog("ItemError.log", "InventoryItemPosition:getItem() : 해당하는 위치에 아이템이 없습니다.");
+        filelog("ItemError.log", "InventoryItemPosition:getItem() :    .");
 
         return NULL;
     }
@@ -153,7 +153,7 @@ Creature* MouseItemPosition::findCreature()
 
     pTargetCreature = g_pPCFinder->getCreature_LOCKED(m_OwnerName);
     if (pTargetCreature == NULL) {
-        filelog("ItemError.log", "InventoryItemPosition:getItem() : 해당하는 Creature가 없습니다.");
+        filelog("ItemError.log", "InventoryItemPosition:getItem() :  Creature .");
 
         g_pPCFinder->unlock();
         return NULL;

@@ -40,7 +40,7 @@ EffectRecallMotorcycle::EffectRecallMotorcycle(Zone* pZone, ZoneCoord_t sx, Zone
     m_StartX = sx;
     m_StartY = sy;
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -72,27 +72,27 @@ void EffectRecallMotorcycle::unaffect()
     ZoneCoord_t x = m_X;
     ZoneCoord_t y = m_Y;
 
-    // 올바른 좌표이어야 한다.
+    
     if (isValidZoneCoord(pZone, m_StartX, m_StartY)) {
         // Assert(isValidZoneCoord(pZone, m_StartX, m_StartY));
 
-        // TempItem 변수를 잡는다.
+        
         Item* pTempItem = NULL;
 
-        // 여기서는 지정 아이템이 없을 수 있으며, 또 다른 아이템이 놓여 있을 수도 있다.
-        // 이 경우는 오리지널 아이템과 지금 현재 바닥에 있는 아이템을 비교하여 삭제해야 한다.
-        // 없을 경우는 무시하면 된다.
+        
+        
+        
         Tile& tile = pZone->getTile(m_StartX, m_StartY);
 
         if (tile.hasItem()) {
             pTempItem = tile.getItem();
 
             if (pTempItem != NULL) {
-                // ObjectID가 같다는 말은 같은 아이템이란 말이다.
+                
                 if (pTempItem->getObjectID() == m_ObjectID) {
                     pZone->deleteItem(pTempItem, m_StartX, m_StartY);
 
-                    // 아이템이 사라졌다는 패킷을 날린다.
+                    
                     GCDeleteObject gcDeleteObject;
                     gcDeleteObject.setObjectID(m_ObjectID);
 

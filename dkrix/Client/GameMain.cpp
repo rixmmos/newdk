@@ -12,6 +12,7 @@
 #include <process.h>
 #include <io.h>
 #include <direct.h>
+#include <fcntl.h>
 #else
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,7 +25,7 @@
 #include "Client.h"
 #include "UIFunction.h"
 //#include "MFileDef.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 #include "GameObject.h"
 #include "ServerInfo.h"
 #include "DebugInfo.h"
@@ -55,9 +56,9 @@
 #include "MZoneSound.h"
 #include "MZoneSoundManager.h"
 #include "SoundDef.h"
-#include "RequestServerPlayerManager.h"
-#include "RequestClientPlayerManager.h"
-#include "ClientCommunicationManager.h"
+#include "Packet/RequestServerPlayerManager.h"
+#include "Packet/RequestClientPlayerManager.h"
+#include "Packet/ClientCommunicationManager.h"
 #include "RequestUserManager.h"
 #include "WhisperManager.h"
 #include "RequestFileManager.h"
@@ -70,7 +71,7 @@
 #include "MNpc.h"
 #include "UtilityFunction.h"
 
-// 2002.6.28 [UDP¼öÁ¤]
+
 
 #include "MWarManager.h"
 #include "MTimeItemManager.h"
@@ -99,25 +100,25 @@ bool  g_bCheckHack = true;
 #define MAX_INVALID_PROCESS 20
 std::string g_strBadProcessList[MAX_INVALID_PROCESS]=
 {
-	"±äËÙ",
-	"¼ÓËÙ",
+	"",
+	"",
 	"fpe",
-	"½ðÉ½ÓÎÏÀ",
+	"",
 	"game master",
 	"gameice",
 	"gamehack",
-	"ÓÎÏ·ÐÞ¸Ä´óÊ¦",
-	"¶«·½²»°Ü",
+	"",
+	"",
 	"accelerat",
 	"wpe",
 	"winsock expert",
 	"a speeder",
-	"²ÊÔÆ",
-	"Áãµã",
-	"À¶ÔÂ",
-	"Ê±¿ÕÓÎÏÀ",
-	"Ê±¿ÕÓÎÏÀ±ê×¼°æ",
-	"À¶¡ùÔÂ",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
 	"flyodbg",
 };
 
@@ -134,7 +135,7 @@ extern CSoundPartManager*	g_pSoundManager;
 extern bool g_bGoodFPS;
 
 
-// Çï±âÀå ÇÁ·ÎÆç·¯ ¼Ò¸®.. - -;
+
 extern BOOL g_bPlayPropeller;
 
 #ifdef OUTPUT_DEBUG
@@ -170,7 +171,7 @@ BOOL				g_bLButtonDown = FALSE;
 BOOL				g_bRButtonDown = FALSE;
 BOOL				g_bCButtonDown = FALSE;
 BOOL				g_bUIInput		= FALSE;
-//Edit by sonic 2006.7.27  ÐÞ¸Ä¼ÓËÙµØÖ·
+
 //g_UpdateDelay		= DELAY_UPDATE_GAME
 
 int					g_UpdateDelay		= 0;
@@ -208,11 +209,11 @@ int						g_SoundPerSecond = 0;
 	CMessageArray*		g_pDebugMessage = NULL;
 #endif
 
-bool				g_bPutMessage = false;		// È­¸é¿¡ debug¸Þ¼¼Áö¸¦ Ãâ·ÂÇÒ±î?
+bool				g_bPutMessage = false;		
 
-bool				g_bNewDraw = false;			// È­¸éÀ» ´Ù½Ã ±×·È´Â°¡? (Ä¿¼­ Á¦¿Ü)
-bool				g_bSmoothCursor = false;	// ºÎµå·¯¿î(?) cursor¸¦ Ãâ·ÂÇÒ ¼ö ÀÖ³ª?
-bool				g_bNetStatusGood = true;		// ³×Æ®¿÷ »óÅÂ°¡ ÁÁÀº°¡?
+bool				g_bNewDraw = false;			
+bool				g_bSmoothCursor = false;	
+bool				g_bNetStatusGood = true;		
 
 CMessageArray*		g_pSystemMessage = NULL;
 CMessageArray*		g_pPlayerMessage = NULL;
@@ -240,7 +241,7 @@ bool				g_bMusicSW		= true;
 extern int			g_MorphCreatureType;
 
 //--------------------------------------------
-// ÇöÀçÀÇ Client Mode¿¡ ´ëÇÑ ¼³Á¤..
+
 //--------------------------------------------
 enum CLIENT_MODE	g_Mode = MODE_NULL;
 enum CLIENT_MODE	g_ModeNext = MODE_NULL;
@@ -250,6 +251,11 @@ CWinUpdate*				g_pUpdate = NULL;
 extern MCreature*		AddClientCreature();
 extern void Add_GDR_Effect(int nEffect, bool bAppearBossMonster);
 extern void Add_GDR_Potal_Effect(int nMapID);
+
+static void TraceLoginFlowEvent(const char* step)
+{
+	(void)step;
+}
 //---------------------------------------------------------------------------
 // Update Socket Input
 //---------------------------------------------------------------------------
@@ -269,6 +275,8 @@ UpdateSocketInput()
 		}
 
 	} catch (Throwable &t) 	{
+		TraceLoginFlowEvent(t.toString().c_str());
+		TraceLoginFlowEvent("[Error] UpdateSocketInput");
 
 		if( strstr( t.toString().c_str(), "InvalidProtocolException") != NULL )
 		{
@@ -280,7 +288,7 @@ UpdateSocketInput()
 		LOG_ERROR("[Error] UpdateSocketInput");			
 		LOG_ERROR(t.toString().c_str());
 		
-		//InitFail("Server¿ÍÀÇ Á¢¼ÓÀÌ ²÷¾îÁ³½À´Ï´Ù.");
+		
 		SetMode( MODE_MAINMENU );
 		UpdateDisconnected();
 
@@ -290,7 +298,7 @@ UpdateSocketInput()
 
 
 	//----------------------------------------------------------------
-	// RequestServerPlayerManagerµµ Ã³¸®ÇÑ´Ù.
+	
 	//----------------------------------------------------------------
 	static DWORD nextTime = g_CurrentTime;
 
@@ -392,7 +400,7 @@ UpdateSocketInput()
 			#endif
 		}
 
-		// ÃÊ´ç 3¹ø updateÇÑ´Ù.
+		
 		nextTime = g_CurrentTime + 330;
 	}
 
@@ -429,7 +437,7 @@ UpdateSocketOutput()
 		DEBUG_ADD_ERR("[Error] UpdateSocketInput");
 		DEBUG_ADD(t.toString().c_str());
 		
-		//InitFail("Server¿ÍÀÇ Á¢¼ÓÀÌ ²÷¾îÁ³½À´Ï´Ù.");
+		
 		SetMode( MODE_MAINMENU );
 		UpdateDisconnected();
 
@@ -446,7 +454,7 @@ UpdateSocketOutput()
 //---------------------------------------------------------------------------
 // Check Time
 //---------------------------------------------------------------------------
-// speedhackÃ¼Å©¸¦ À§ÇØ¼­ 1ºÐ¸¶´Ù ÇÑ¹ø¾¿ ÆÐÅ¶À» º¸³½´Ù.
+
 //---------------------------------------------------------------------------
 void
 CheckTime()
@@ -456,25 +464,10 @@ CheckTime()
 	
 	if (g_pSocket!=NULL)
 	{
-		/*
-		static DWORD nextTime = g_CurrentTime + 60000;
-		
-		//------------------------------------------------------------------
-		// 1ºÐ ¸¶´Ù ÇÑ¹ø¾¿ garbarge packetÀ» º¸³½´Ù.
-		//------------------------------------------------------------------
-		if (g_CurrentTime > nextTime)		// 60 * 1000
-		{
-			CGVerifyTime _CGVerifyTime;
-			
-			g_pSocket->sendPacket( &_CGVerifyTime );					
-			
-			nextTime = timeGetTime() + 60000;//g_CurrentTime;
-			
-		}
-		*/
+		 
 		
 		
-		//ÒÔÏÂ¿ªÊ¼¼ÓËÙµÄ¼ì²é¹¤×÷	
+		
 		SYSTEMTIME curTime;
 		DWORD dTimer;
 		
@@ -487,7 +480,7 @@ CheckTime()
 		
 		if ( (g_dSHCurrentTime > nextHackTime) && g_bCheckHack)
 		{
-			//ÒÔÏÂÕâ¶Î¼ì²âÊ±¼äÆ¬
+			
 			DWORD dCount,dCount1;
 			dCount = timeGetTime();
 			dCount1 = GetTickCount();
@@ -504,7 +497,7 @@ CheckTime()
 				if (g_iSHFakeCount > 4)
 				{
 					g_bCheckHack = false;
-//					MessageBox(g_hWnd,"ÄúÊ¹ÓÃÁË²»ºÏÊÊµÄÍâ¹Ò³ÌÐò,Óë·þÎñÆ÷¶Ï¿ªÁ¬½Ó!",NULL,MB_OK);
+
 //					ExecuteLogout();
 					g_bNeedUpdate = TRUE;
 					SetMode(MODE_QUIT);
@@ -520,7 +513,7 @@ CheckTime()
 			nextHackTime = g_dSHCurrentTime + 1000;
 
 #ifdef PLATFORM_WINDOWS
-			//ÒÔÏÂÕâ¶Î¼ì²â·Ç·¨½ø³Ì (Windows-specific anti-cheat check)
+			
 			if (g_bCheckHack)
 			{
 				HWND hCurrentWindow;
@@ -544,7 +537,7 @@ CheckTime()
 								g_bCheckHack = false;
 								//yckou
 //								abort();
-//								MessageBox(g_hWnd,"ÄúÊ¹ÓÃÁË²»ºÏÊÊµÄÍâ¹Ò³ÌÐò,½«Óë·þÎñÆ÷¶Ï¿ªÁ¬½Ó!",NULL,MB_OK);
+
 //								ExecuteLogout();
 								g_bNeedUpdate = TRUE;
 								SetMode(MODE_QUIT);
@@ -558,12 +551,12 @@ CheckTime()
 								(strTemp.find("microsoft internet explorer") == -1) &&
 								(strTemp.find("myie") == -1) &&
 								(strTemp.find("dudu") == -1) &&
-								(strTemp.find("ÏÂÔØ") == -1) )
+								(strTemp.find("") == -1) )
 							{
 								g_bCheckHack = false;
 								//yckou
 //								abort();
-//								MessageBox(g_hWnd,"ÄúÊ¹ÓÃÁË²»ºÏÊÊµÄÍâ¹Ò³ÌÐò,½«Óë·þÎñÆ÷¶Ï¿ªÁ¬½Ó!",NULL,MB_OK);
+
 //								ExecuteLogout();
 								g_bNeedUpdate = TRUE;
 								SetMode(MODE_QUIT);
@@ -581,11 +574,11 @@ CheckTime()
 	}
 }
 
-//¼ì²â·Ç·¨½ø³Ì yckou
+
 bool CheckInvalidProcess()
 {
 #ifdef PLATFORM_WINDOWS
-	//ÒÔÏÂÕâ¶Î¼ì²â·Ç·¨½ø³Ì (Windows-specific anti-cheat check)
+	
 	if (g_bCheckHack)
 	{
 		HWND hCurrentWindow;
@@ -610,13 +603,13 @@ bool CheckInvalidProcess()
 						(strTemp.find("microsoft internet explorer") == -1) &&
 						(strTemp.find("myie") == -1) &&
 						(strTemp.find("dudu") == -1) &&
-						(strTemp.find("ÏÂÔØ") == -1) )
+						(strTemp.find("") == -1) )
 					{
 						g_bCheckHack = false;
-//						MessageBox(g_hWnd,"ÄúÊ¹ÓÃÁË²»ºÏÊÊµÄÍâ¹Ò³ÌÐò,½«Óë·þÎñÆ÷¶Ï¿ªÁ¬½Ó!",NULL,MB_OK);
+
 //						ExecuteLogout();
 //						abort();
-						// client¸¦ updateÇØ¾ßÇÑ´Ù.
+						
 						g_bNeedUpdate = TRUE;
 						SetMode(MODE_QUIT);
 						g_ModeNext = MODE_QUIT;
@@ -636,19 +629,19 @@ bool CheckInvalidProcess()
 }
 
 //-----------------------------------------------------------------------------
-// ClientÀÇ ½ÇÇà Mode¸¦ ¼³Á¤ÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
-// game »óÅÂ º¯°æ°ú 
-// UIÀÇ modeº¯°æÀ» Ã³¸®ÇÑ´Ù.
+
+
 //
-// (!)´Ù¸¥ °÷~¿¡¼­´Â game»óÅÂº¯°æÀÌ³ª UI modeº¯°æÀ» Ã³¸®ÇÏÁö ¾Êµµ·Ï ÇØ¾ßÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 void		
 SetMode(enum CLIENT_MODE mode)
 {
 	g_Mode = mode;
 
-	// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
+	
 	if (g_pSDLInput!=NULL)
 	{
 		g_pSDLInput->UpdateInput();
@@ -657,7 +650,7 @@ SetMode(enum CLIENT_MODE mode)
 		// acquire
 		g_pSDLInput->SetAcquire(true);			
 		
-		// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
+		
 		g_pSDLInput->Clear();
 	}
 
@@ -669,25 +662,25 @@ SetMode(enum CLIENT_MODE mode)
 	switch (g_Mode)
 	{
 		//------------------------------------------------------
-		// ÃÊ±â È­¸é
+		
 		//------------------------------------------------------
 		case MODE_OPENING :
 			// Debug Message
 			DEBUG_ADD("[ SetMode ]  OPENING");
 			
-			UnInitSound();		// Àá½Ã Sound ÁßÁö
+			UnInitSound();		
 
 			g_pCOpeningUpdate->PlayMPG("test.mpg");
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_pUpdate = g_pCOpeningUpdate;
 			g_pCOpeningUpdate->Init();
 		break;
 
 		//------------------------------------------------------
-		// ¹º°¡ optionÀ» ¹Ù²Û´Ù. - -;
+		
 		//------------------------------------------------------
 		case MODE_CHANGE_OPTION :
 			//if (g_pTopView!=NULL)
@@ -696,7 +689,7 @@ SetMode(enum CLIENT_MODE mode)
 			//	g_pTopView = NULL;
 			}
 			//--------------------------------------------------
-			// À½¾Ç ¸ØÃá´Ù.
+			
 			//--------------------------------------------------
 			if (g_pUserOption->PlayWaveMusic)
 			{
@@ -722,7 +715,7 @@ SetMode(enum CLIENT_MODE mode)
 			InitSurface();
 
 			//-----------------------------------------------------------------
-			// Àá½Ã ±â´Ù·Á ´Þ¶ó°í Ãâ·Â..
+			
 			//-----------------------------------------------------------------
 			g_pUIDialog->PopupFreeMessageDlg( (*g_pGameStringTable)[STRING_MESSAGE_WAIT].GetString(), -1, -1, 0 );
 
@@ -730,7 +723,7 @@ SetMode(enum CLIENT_MODE mode)
 			gC_vs_ui.Show();
 
 			//-----------------------------------------------------------------
-			// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+			
 			//-----------------------------------------------------------------
 			{
 				POINT point = { 0, 0 };
@@ -742,7 +735,7 @@ SetMode(enum CLIENT_MODE mode)
 			CSDLGraphics::Flip();
 
 			//-----------------------------------------------------------------
-			// g_pTopView : 2D <--> 3D ¹Ù²ð¶§..
+			
 			//-----------------------------------------------------------------
 			if (g_pTopView!=NULL)
 			{
@@ -751,12 +744,12 @@ SetMode(enum CLIENT_MODE mode)
 
 			g_pUIDialog->CloseMessageDlg();
 
-			// ¹Ù·Î ´ÙÀ½¿¡ MAINMENU·Î.. - -;
+			
 			SetMode( MODE_MAINMENU );
 		break;
 
 		//------------------------------------------------------
-		// Login »óÅÂ ¼³Á¤..
+		
 		//------------------------------------------------------
 		case MODE_MAINMENU :
 			// Debug Message
@@ -767,16 +760,16 @@ SetMode(enum CLIENT_MODE mode)
 
 
 			//------------------------------------------------------
-			// Socket ÇØÁ¦..
+			
 			//------------------------------------------------------
 			if(NULL == g_pUserInformation->pLogInClientPlayer &&
-				true == g_pUserInformation->IsAutoLogIn)// À¥ ·Î±äÀÌ°í ÇÑ¹øµµ ·Î±×ÀÎ ÇÏÁö ¾Ê¾ÒÀ»°æ¿ì
+				true == g_pUserInformation->IsAutoLogIn)
 				ReleaseSocket();
 
 
 			//------------------------------------------------------
 			// [ TEST CODE ]
-			// ¿©±â¼­ sound¸¦ ÃÊ±âÈ­ÇØµµ µÇ³²??
+			
 			//------------------------------------------------------
 			InitSound();			
 
@@ -791,12 +784,12 @@ SetMode(enum CLIENT_MODE mode)
 
 
 			//------------------------------------------------------
-			// ¸ðµÎ ´ëÈ­ Çã¿ë
+			
 			//------------------------------------------------------
 			g_pChatManager->ClearID();
 			g_pChatManager->SetAcceptMode();
 
-			// TitleÈ­¸é UI½ÃÀÛ
+			
 			//gC_vs_ui.EndTitle();
 			gC_vs_ui.StartTitle();	
 		
@@ -804,17 +797,17 @@ SetMode(enum CLIENT_MODE mode)
 
 			g_bUIInput = FALSE;			
 
-			// ±Ó¼Ó¸» ¾È ¹ÞÀ»·Á°í... ³È -- ;
+			
 			if (g_pUserInformation!=NULL)
 			{
-				// ±Ó¼Ó¸» ´ë»óÀ» Áö¿öÁØ´Ù.
+				
 				g_pUserInformation->WhisperID.Release();
 
 				g_pUserInformation->CharacterID.Release();
 			}
 
 			//----------------------------------------------
-			// message Á¦°Å
+			
 			//----------------------------------------------
 			g_pSystemMessage->Clear();
 			g_pPlayerMessage->Clear();
@@ -824,7 +817,7 @@ SetMode(enum CLIENT_MODE mode)
 			//UpdateDisconnected();
 
 			//------------------------------------------------------
-			// À½¾Ç ½ÃÀÛ
+			
 			//------------------------------------------------------
 			if (g_pUserOption->PlayWaveMusic)
 			// Music playback - use SDL_mixer (cross-platform)
@@ -849,7 +842,7 @@ SetMode(enum CLIENT_MODE mode)
 			//g_SDLMusic.Play( (*g_pMusicTable)[ g_pClientConfig->MUSIC_THEME ].Filename );
 		
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
 			g_pUpdate = g_pCWaitUIUpdate;
@@ -857,7 +850,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PC¸¦ ¼±ÅÃÇÏ±â À§ÇÑ Á¤º¸¸¦ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------
 		case MODE_NEWUSER :
 		{
@@ -865,12 +858,12 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_NEWUSER");
 			
 			//----------------------------------------------
-			// PlayerÀÇ Á¤º¸ ÃÊ±âÈ­
+			
 			//----------------------------------------------
 			//g_pPlayer->SetCreatureType( 0 );			
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
 			g_pUpdate = g_pCWaitUIUpdate;
@@ -879,10 +872,10 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// LoginÀÌ ¼º°øµÇ±â¸¦ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------
-		// (ID, Password)¸¦ º¸³»°í
-		// LoginÀÌ ¼º°ø µÇ±â¸¦ ±â´Ù¸°´Ù.
+		
+		
 		//------------------------------------------------------
 		case MODE_WAIT_LOGINOK :
 		{
@@ -890,12 +883,12 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_LOGINOK");
 			
 			//------------------------------------------------------
-			// Loading ÁßÁö
+			
 			//------------------------------------------------------
 			//StopFileThread();
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;			
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -913,7 +906,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_WORLD_LIST");
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;			
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -933,7 +926,7 @@ SetMode(enum CLIENT_MODE mode)
 			g_pUserInformation->KeepConnection = FALSE;			
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
 			g_pUpdate = g_pCWaitUIUpdate;
@@ -950,7 +943,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_SERVER_LIST");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;			
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -970,7 +963,7 @@ SetMode(enum CLIENT_MODE mode)
 			g_pUserInformation->KeepConnection = FALSE;			
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
 			g_pUpdate = g_pCWaitUIUpdate;
@@ -980,50 +973,25 @@ SetMode(enum CLIENT_MODE mode)
 
 		
 		//------------------------------------------------------
-		// Àß¸ø ÀÔ·ÂÇÑ °æ¿ìÀÌ´Ù.
+		
 		//------------------------------------------------------
 		case MODE_LOGIN_WRONG :
 		{
 			//gC_vs_ui.InvalidIdPasswordMessage();
 
-			/*
-			//InitFail("Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.");
-			//InitFail("Server¿ÍÀÇ Á¢¼ÓÀÌ ²÷¾îÁ³½À´Ï´Ù.");
-			// g_pBack->GDI_Text(101,201, "ID³ª Password°¡ Æ²·È½À´Ï´Ù.", RGB(0,0,0));
-			TextSystem::TextService::RenderText(101, 201, "ID³ª Password°¡ Æ²·È½À´Ï´Ù.");
-			// g_pBack->GDI_Text(100,200, "ID³ª Password°¡ Æ²·È½À´Ï´Ù.", RGB(220,220,220));
-			TextSystem::TextService::RenderText(100, 200, "ID³ª Password°¡ Æ²·È½À´Ï´Ù.");
-
-			// g_pBack->GDI_Text(101,221, "[ESC]¸¦ ´©¸£¼¼¿ä.", RGB(0,0,0));
-			TextSystem::TextService::RenderText(101, 221, "[ESC]¸¦ ´©¸£¼¼¿ä.");
-			// g_pBack->GDI_Text(100,220, "[ESC]¸¦ ´©¸£¼¼¿ä.", RGB(220,220,220));
-			TextSystem::TextService::RenderText(100, 220, "[ESC]¸¦ ´©¸£¼¼¿ä.");
-
-			CSDLGraphics::Flip();
-
-			// returnÀ» ´©¸¦ ¶§±îÁö...
-			while (1)
-			{
-				UpdateInput();
-				
-				if (g_pSDLInput->KeyDown(DIK_ESCAPE))
-				{
-					break;
-				}
-			}
-			*/
+			 
 			
-			// ´Ù½Ã mainmenu·Î..
+			
 
 			g_Mode = MODE_MAINMENU;
 
 			//-----------------------
-			// Socket ÇØÁ¦..
+			
 			//-----------------------
 			ReleaseSocket();
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
 			g_pUpdate = g_pCWaitUIUpdate;
@@ -1032,7 +1000,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// RegisterµÇ±â¸¦ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------		
 		case MODE_WAIT_REGISTERPLAYEROK :
 		{
@@ -1040,7 +1008,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_REGISTERPLAYEROK");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;			
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1050,7 +1018,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PC¸¦ ¼±ÅÃÇÏ±â À§ÇÑ Á¤º¸¸¦ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------
 		case MODE_WAIT_PCLIST :
 		{			
@@ -1058,15 +1026,15 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_PCLIST");				
 			
 			//------------------------------------------------------------
-			// Characer ¼±ÅÃ Ã¢À» ¶ç¿ö¾ß ÇÑ´Ù.
+			
 			//------------------------------------------------------------
-			// LCPCListHandler¿¡¼­ ÇÏ°Ô Çß´Ù.
+			
 			//UI_StartCharacterManager();				
 
 			g_ZoneRandomSoundTime = g_CurrentTime;
 
 			//------------------------------------------------------------
-			// server name ¼³Á¤
+			
 			//------------------------------------------------------------
 			/*
 			int serverID = g_pServerInformation->GetServerGroupID();
@@ -1088,7 +1056,7 @@ SetMode(enum CLIENT_MODE mode)
 			*/
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1098,7 +1066,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PC¸¦ ¼±ÅÃÇÏ±â À§ÇÑ Á¤º¸¸¦ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------
 		case MODE_WAIT_SELECTPC :
 		{
@@ -1106,7 +1074,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_SELECTPC");
 			
 			//----------------------------------------------
-			// PlayerÀÇ Á¤º¸ ÃÊ±âÈ­
+			
 			//----------------------------------------------
 			//g_pPlayer->SetCreatureType( 0 );	
 			g_pUserInformation->KeepConnection = FALSE;
@@ -1116,7 +1084,7 @@ SetMode(enum CLIENT_MODE mode)
 			SelectLastSelectedCharacter();
 
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_MorphCreatureType = 0;
 			g_UpdateDelay = DELAY_UPDATE_LOGIN;	
@@ -1126,7 +1094,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PC°¡ Á¦´ë·Î »ý¼ºµÇ¾ú³ª?
+		
 		//------------------------------------------------------
 		case MODE_WAIT_CREATEPCOK :
 		{
@@ -1134,7 +1102,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_CREATEPCOK");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1144,7 +1112,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PC°¡ Á¦´ë·Î »ý¼ºµÇ¾ú³ª?
+		
 		//------------------------------------------------------
 		case MODE_WAIT_DELETEPCOK :
 		{
@@ -1152,7 +1120,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_DELETEPCOK");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1162,7 +1130,7 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// GameServer·Î Á¢¼ÓÇÏ±â À§ÇØ¼­...
+		
 		//------------------------------------------------------
 		case MODE_WAIT_RECONNECT :
 		{				
@@ -1170,7 +1138,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_RECONNECT");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1180,21 +1148,21 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// GameServer¿¡¼­ LoginServer·Î ÀçÁ¢¼ÓÇÏ±â À§ÇØ¼­...
+		
 		//------------------------------------------------------
 		case MODE_WAIT_RECONNECT_LOGIN :
 		{				
 			// Debug Message
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_RECONNECT_LOGIN");
 
-			// ±Ó¼Ó¸» ¾È ¹ÞÀ»·Á°í... ³È -- ;
+			
 			if (g_pUserInformation!=NULL)
 			{
 				g_pUserInformation->CharacterID.Release();
 			}
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1204,12 +1172,12 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// UpdateInfo¸¦ ¹Þ´Â´Ù.
+		
 		//------------------------------------------------------
 		case MODE_WAIT_UPDATEINFO :
 		{	
 			//--------------------------------------------------
-			// Player ÃÊ±âÈ­
+			
 			//--------------------------------------------------
 			if (g_pPlayer!=NULL)
 			{
@@ -1223,19 +1191,19 @@ SetMode(enum CLIENT_MODE mode)
 			}
 
 			//--------------------------------------------------
-			// Á¤´ç¹æÀ§ ÃÊ±âÈ­
+			
 			//--------------------------------------------------
 			g_pJusticeAttackManager->Release();
 
 			//--------------------------------------------------
 			//
-			// Skill Tree ÃÊ±âÈ­ - ÀÓ½Ã·Î.. - -;;
+			
 			//
 			//--------------------------------------------------
 			g_pSkillManager->Init();
 
 			//------------------------------
-			// °ÔÀÓ UI ¸¦ ½ÃÀÛÇÑ´Ù.
+			
 			//------------------------------
 			UI_SetCharInfoName(g_pUserInformation->CharacterID);
 			DEBUG_ADD("[ SetMode ] SET CHARINFO");
@@ -1249,7 +1217,7 @@ SetMode(enum CLIENT_MODE mode)
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_UPDATEINFO");
 			
 			//----------------------------------------------
-			// update ÇÔ¼ö ¼³Á¤
+			
 			//----------------------------------------------
 			g_UpdateDelay = DELAY_UPDATE_WAITING;		
 			g_pUpdate = g_pCWaitPacketUpdate;
@@ -1259,26 +1227,27 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// PlayerÀÇ ÁÂÇ¥¸¦ ¹Þ±â À§ÇØ¼­ ±â´Ù¸°´Ù.
+		
 		//------------------------------------------------------
 		case MODE_WAIT_SETPOSITION :
 		{
 			// Debug Message
 			DEBUG_ADD("[ SetMode ]  MODE_WAIT_SETPOSITION");
+			TraceLoginFlowEvent("GameMain SetMode MODE_WAIT_SETPOSITION");
 			
 			//--------------------------------------------------
-			// Option ÀúÀå
+			
 			//--------------------------------------------------
 			if (g_pUserOption!=NULL)
 			{
 				g_pUserOption->SaveToFile( g_pFileDef->getProperty("FILE_INFO_USEROPTION").c_str());
 			}
 			
-			// Á¤Áö..
+			
 			g_pPlayer->SetStop();
 			g_pPlayer->SetAction( ACTION_STAND );
 
-			// Å° ÀÔ·Â Á¦°Å
+			
 			g_pSDLInput->Clear();
 
 			g_bLButtonDown = FALSE;
@@ -1296,17 +1265,19 @@ SetMode(enum CLIENT_MODE mode)
 			}
 
 			//--------------------------------------------------
-			// °ÔÀÓ ¼­¹ö·Î CGReady ÆÐÅ¶À» º¸³½´Ù.
+			
 			//--------------------------------------------------
 				CGReady cgReady;
 				g_pSocket->sendPacket( &cgReady );
 				g_pSocket->setPlayerStatus( CPS_WAITING_FOR_GC_SET_POSITION );
+				TraceLoginFlowEvent("GameMain sent CGReady");
 
-				// ¹Ù·Î º¸³½´Ù.
+				
 				UpdateSocketOutput();
+				TraceLoginFlowEvent("GameMain flushed CGReady");
 
-				// 2002.6.28 [UDP¼öÁ¤]
-				// ¼­¹ö¿¡ UDP port¸¦ ¾Ë·ÁÁÖ±â À§ÇØ¼­
+				
+				
 //				CGPortCheck cgPortCheck;
 //				cgPortCheck.setPCName( g_pUserInformation->CharacterID.GetString() );
 //				
@@ -1329,7 +1300,7 @@ SetMode(enum CLIENT_MODE mode)
 				g_pTopView->SetSelectedNULL();
 			}
 		
-			// update ÇÔ¼ö
+			
 			g_UpdateDelay = DELAY_UPDATE_WAITING;			
 			g_pUpdate = g_pCWaitPacketUpdate;
 			g_pCWaitPacketUpdate->SetDelay( g_pClientConfig->MAX_WAIT_PACKET );
@@ -1338,59 +1309,79 @@ SetMode(enum CLIENT_MODE mode)
 		break;
 
 		//------------------------------------------------------
-		// °ÔÀÓÀ» ½ÃÀÛÇÑ´Ù.
+		
 		//------------------------------------------------------
 		case MODE_GAME :
+			TraceLoginFlowEvent("SetMode MODE_GAME begin");
 			DEBUG_ADD("---------- Start Game ---------- ");
+
+			if (!gC_vs_ui.IsGameMode())
+			{
+				TraceLoginFlowEvent("SetMode MODE_GAME starting game UI");
+				UI_StartGame();
+				TraceLoginFlowEvent("SetMode MODE_GAME after game UI start");
+			}
 
 			DEBUG_ADD("CSDLGraphics::RestoreAllSurfaces()");
 			CSDLGraphics::RestoreAllSurfaces();
+			TraceLoginFlowEvent("SetMode MODE_GAME after RestoreAllSurfaces");
 
 			DEBUG_ADD("CDirect3D::Restore() - removed (SDL2)");
 
 			DEBUG_ADD("TempInformation");
 
 			//-----------------------------------------------------------
-			// temp informationÁ¦°Å
+			
 			//-----------------------------------------------------------
-			g_pTempInformation->SetMode(TempInformation::MODE_NULL);
+			if (g_pTempInformation != NULL)
+				g_pTempInformation->SetMode(TempInformation::MODE_NULL);
+			else
+				TraceLoginFlowEvent("SetMode MODE_GAME WARN g_pTempInformation NULL");
+			TraceLoginFlowEvent("SetMode MODE_GAME after TempInformation");
 
 			DEBUG_ADD("UserInformation");
 			//-----------------------------------------------------------
-			// Logout ½Ã°£ Á¦°Å
+			
 			//-----------------------------------------------------------
-			g_pUserInformation->LogoutTime = 0;
-		
+			if (g_pUserInformation != NULL)
+				g_pUserInformation->LogoutTime = 0;
+			else
+				TraceLoginFlowEvent("SetMode MODE_GAME WARN g_pUserInformation NULL");
+			TraceLoginFlowEvent("SetMode MODE_GAME after UserInformation");
+
 			//-----------------------------------------------------------
-			// hot key¸¦ ÀúÀåÇÑ´Ù.
+			
 			//-----------------------------------------------------------
 			DEBUG_ADD("SaveHotKey");
-			UI_SaveHotKeyToServer();			
+			UI_SaveHotKeyToServer();
+			TraceLoginFlowEvent("SetMode MODE_GAME after SaveHotKey");
 
 			//-----------------------------------------
-			// Button ÃÊ±âÈ­
+			
 			//-----------------------------------------
 			g_bLButtonDown = FALSE;
 			g_bRButtonDown = FALSE;
 			g_bCButtonDown = FALSE;
 
 			//-----------------------------------------
-			// UI Dialog¿¡¼­ ÀÔ·Â ¸·Àº°Å Ç®¾îÁÜ..
+			
 			//-----------------------------------------
 			DEBUG_ADD("UIDialog");
 			UIDialog::UnSetLockInputPCTalk();
 			UIDialog::UnSetLockInputMessage();
+			TraceLoginFlowEvent("SetMode MODE_GAME after UIDialog unlock");
 
-			// ºÎÈ° ¹öÆ° ¾ø¾Ö±â
-			// ÀÌ°Å´Â GCUpdateInfoHandler¿¡¼­ ÇØ¾ßÇÏ´Âµ¥.. ÀÏ´Ü. - -;
+			
+			
 			DEBUG_ADD("FinishRequestDie");
 			gC_vs_ui.FinishRequestDie();
 			gC_vs_ui.FinishRequestResurrect();
 			gC_vs_ui.CloseRequestShrineMinimap();
+			TraceLoginFlowEvent("SetMode MODE_GAME after FinishRequestDie");
 
 
 //			//-----------------------------------------
-//			// ÀÚÅ© µµ¿ò¸»..
+
 //			//-----------------------------------------
 //			if (g_pPlayer!=NULL
 //				&& g_pPlayer->IsSlayer()
@@ -1404,18 +1395,26 @@ SetMode(enum CLIENT_MODE mode)
 //											(*g_pGameStringTable)[UI_STRING_MESSAGE_HELP_MESSAGE].GetString(), 
 //											CLD_INFO, RGB(130, 230, 230));
 //			}
-//Edit by sonic 2006.7.27  ÐÞ¸Ä¼ÓËÙµØÖ·
+
 			//g_UpdateDelay = DELAY_UPDATE_GAME;
 			g_UpdateDelay = 100 ^ 90;
-			
+			TraceLoginFlowEvent("MODE_GAME TRACE after UpdateDelay");
+
 			DEBUG_ADD("SetUpdate");
-g_pUpdate = g_pCGameUpdate;
-		g_pCGameUpdate->Init();
+			g_pUpdate = g_pCGameUpdate;
+			TraceLoginFlowEvent("MODE_GAME TRACE before g_pCGameUpdate->Init");
+			g_pCGameUpdate->Init();
+			TraceLoginFlowEvent("MODE_GAME TRACE after g_pCGameUpdate->Init");
 
-		// Ensure input is enabled after start game
-		CheckActivate(TRUE);
+			// Ensure input is enabled after start game
+			TraceLoginFlowEvent("MODE_GAME TRACE before CheckActivate");
+			CheckActivate(TRUE);
+			TraceLoginFlowEvent("MODE_GAME TRACE after CheckActivate");
 
-		ExecuteHelpEvent( HELP_EVENT_INTERFACE );
+			TraceLoginFlowEvent("MODE_GAME TRACE before ExecuteHelpEvent");
+			ExecuteHelpEvent( HELP_EVENT_INTERFACE );
+			TraceLoginFlowEvent("MODE_GAME TRACE after ExecuteHelpEvent");
+			TraceLoginFlowEvent("MODE_GAME TRACE end");
 //			if(!g_pUserInformation->IsNetmarble)
 //			{
 //				ExecuteHelpEvent( HELP_EVENT_CAMPAIGN );
@@ -1426,19 +1425,19 @@ g_pUpdate = g_pCGameUpdate;
 
 		
 		//------------------------------------------------------
-		// ProgramÀ» ³¡³½´Ù.
+		
 		//------------------------------------------------------
 		case MODE_QUIT :
-			// LogoutÀ» º¸³½´Ù.
+			
 				if (g_pSocket!=NULL)
 				{
 					//--------------------------------------------------
-					// updateÇÒ·Á°í Á¾·áÇÏ´Â °æ¿ì´Â CLLogoutÀ» º¸³½´Ù.
+					
 					//--------------------------------------------------
 					if (g_bNeedUpdate)
 					{
 						//--------------------------------------------------
-						// Login ¼­¹ö·Î CLLogout ÆÐÅ¶À» º¸³½´Ù.
+						
 						//--------------------------------------------------
 							CLLogout clLogout;
 						
@@ -1447,7 +1446,7 @@ g_pUpdate = g_pCGameUpdate;
 
 					}
 					//--------------------------------------------------
-					// gameÁß¿¡ Á¾·áÇÏ´Â °æ¿ì.. CG Logout
+					
 					//--------------------------------------------------
 					else
 					{
@@ -1462,16 +1461,16 @@ g_pUpdate = g_pCGameUpdate;
 				}
 
 			//--------------------------------------------------
-			// Thread Loading Á¾·á..
+			
 			//--------------------------------------------------
 			StopLoadingThread();
 
-			// UpdateÇÔ¼ö ¼³Á¤
+			
 			g_pUpdate = NULL;
 
 			g_bUIInput = FALSE;
 
-			// window ´Ý±â
+			
 			g_bActiveApp = FALSE;
 #ifdef PLATFORM_WINDOWS
 			PostMessage(g_hWnd, WM_CLOSE, 0, 0);
@@ -1483,15 +1482,15 @@ g_pUpdate = g_pCGameUpdate;
 		break;
 	}
 
-	// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
+	
 	g_pSDLInput->Clear();
 }
 
 //-----------------------------------------------------------------------------
 // Check Activate
 //-----------------------------------------------------------------------------
-// ÇÁ·Î±×·¥ÀÌ ½ÇÇàÁßÀÎÁö ¾Æ´ÑÁö¿¡ µû¶ó¼­ Ã³¸®..
-// ALT + TAB °ú °ü·ÃÀÌ ±í´Ù. - -;
+
+
 //-----------------------------------------------------------------------------
 void
 CheckActivate(BOOL bActiveGame)
@@ -1531,12 +1530,12 @@ CheckActivate(BOOL bActiveGame)
 		// acquire
 		g_pSDLInput->SetAcquire(bActiveGame==TRUE);			
 		
-		// ÀÔ·ÂÀ» ÃÊ±âÈ­ÇÑ´Ù.
+		
 		g_pSDLInput->Clear();
 	}
 	
 	//----------------------------------------------------
-	// ÇÁ·Î±×·¥ ÁøÇà..
+	
 	//----------------------------------------------------
 	g_bActiveGame = FALSE;
 
@@ -1575,11 +1574,11 @@ CheckActivate(BOOL bActiveGame)
 				DEBUG_ADD("FullScreen : Before DD::SetDisplayMode()");
 				if(g_MyFull)
 				{
-					CSDLGraphics::SetDisplayMode(1024, 768, 16, 0, 0);
+					CSDLGraphics::SetDisplayMode(g_GameRect.right, g_GameRect.bottom, 16, 0, 0);
 				}
 				else
 				{
-					CSDLGraphics::SetDisplayMode(800, 600, 16, 0, 0);
+					CSDLGraphics::SetDisplayMode(g_GameRect.right, g_GameRect.bottom, 16, 0, 0);
 				}
 			}
 
@@ -1603,7 +1602,7 @@ CheckActivate(BOOL bActiveGame)
 			}
 
 			//--------------------------------------------------------
-			// °¨¸¶°ª Àç ¼³Á¤
+			
 			//--------------------------------------------------------
 			if (g_pUserOption!=NULL
 				&& g_pClientConfig!=NULL)				
@@ -1615,7 +1614,7 @@ CheckActivate(BOOL bActiveGame)
 				}
 				
 				//------------------------------------
-				// ¿¬ÁÖÁßÀÌ¸é.. Áß´Ü..
+				
 				//------------------------------------
 				// Music playback - use SDL_mixer (cross-platform)
 				if (g_pUserOption->PlayMusic)
@@ -1640,7 +1639,7 @@ CheckActivate(BOOL bActiveGame)
 					}
 				}
 				//------------------------------------
-				// ¿¬ÁÖÁßÀÌ ¾Æ´Ñ °æ¿ì
+				
 				//------------------------------------
 				else
 				{
@@ -1654,7 +1653,7 @@ CheckActivate(BOOL bActiveGame)
 			}
 
 			//--------------------------------
-			// mouse ¹öÆ° ´­¸° »óÅÂ Á¦°Å
+			
 			//--------------------------------
 			g_bLButtonDown = FALSE;
 			g_bRButtonDown = FALSE;
@@ -1666,7 +1665,7 @@ CheckActivate(BOOL bActiveGame)
 			}
 
 			
-			// UI¿¡¼­ alt+tabÃ³¸®
+			
 			DEBUG_ADD("UI_RestoreWhenActivateGame");
 
 			gC_vs_ui.RestoreWhenActivateGame();
@@ -1674,7 +1673,7 @@ CheckActivate(BOOL bActiveGame)
 			DEBUG_ADD("UI_Restore_ok");
 		}
 		//----------------------------------------------------
-		// ¸ØÃã..
+		
 		//----------------------------------------------------
 		else
 		{
@@ -1699,7 +1698,7 @@ CheckActivate(BOOL bActiveGame)
 				g_SDLAudio.SetMute();			
 			}
 			
-			// ¹Ýº¹ µ¿ÀÛ ÁßÁö
+			
 			if (g_pPlayer!=NULL)
 			{
 				g_pPlayer->UnSetRepeatAction();
@@ -1712,222 +1711,17 @@ CheckActivate(BOOL bActiveGame)
 //-----------------------------------------------------------------------------
 // File Thread Proc
 //-----------------------------------------------------------------------------
-/*
-LONG
-FileThreadProc(LPVOID lpParameter)
-{
-	std::ifstream file;
-
-	while ( 1 )
-	{		
-		WaitForSingleObject(g_hFileEvent, INFINITE);
-
-		#ifdef OUTPUT_DEBUG
-			//		DEBUG_ADD("[Thread Job] Start");
-		#endif
-	
-		bool bLoad = true;
-			
-		switch (g_ThreadJob)
-		{
-			//--------------------------------------------------------
-			// Large ZoneÀÇ ImageObject¸¦ LoadingÇÑ´Ù.
-			//--------------------------------------------------------
-			case THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE :	
-				g_bZoneLargeLoadImage = false;
-				file.open((*g_pZoneTable).Get(g_nZoneLarge)->Filename, ios::binary);
-
-				// Tile Loading
-				if (g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE)
-				{
-					#ifdef OUTPUT_DEBUG
-						//DEBUG_ADD("[Thread Job] Load Tile LargeZone");
-					#endif
-					file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
-					if (!g_pTopView->LoadFromFileTileSPKLargeZone( file ))	// tile¸¸ load
-					{
-						#ifdef OUTPUT_DEBUG
-						//		DEBUG_ADD("[Thread Job] Stop Loading Tile");
-						#endif
-						file.close();
-						break;
-					}
-				}
-			
-				// ImageObject Loading
-				if (bLoad && g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE)
-				{
-					#ifdef OUTPUT_DEBUG
-						//	DEBUG_ADD("[Thread Job] Load Imageobject LargeZone");
-					#endif
-					file.seekg(g_pZone->GetImageObjectFilePosition(), ios::beg);				
-					// ¸ðµÎ loadÇÑ °æ¿ìÀÌ¸é..
-					if (g_pTopView->LoadFromFileImageObjectSPKLargeZone( file ))
-					{
-						#ifdef OUTPUT_DEBUG
-							//	DEBUG_ADD("[Thread Job] Stop Loading ImageObject");
-						#endif
-						file.close();
-						break;
-					}
-				}
-
-				if (bLoad && g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE)
-				{
-					#ifdef OUTPUT_DEBUG
-						//	DEBUG_ADD("[Thread Job] Complete Load");
-					#endif
-					g_bZoneLargeLoadImage = true;
-				}
-
-				file.close();
-			break;
-
-			//--------------------------------------------------------
-			// Small ZoneÀÇ ImageObject¸¦ LoadingÇÑ´Ù.
-			//--------------------------------------------------------
-			case THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE :
-				g_bZoneSmallLoadImage = false;
-				file.open((*g_pZoneTable).Get(g_nZoneSmall)->Filename, ios::binary);
-
-				// Tile Loading
-				if (g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE)
-				{
-					#ifdef OUTPUT_DEBUG
-					//		DEBUG_ADD("[Thread Job] Load Tile SmallZone");
-					#endif
-
-					file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
-					if (!g_pTopView->LoadFromFileTileSPKLargeZone( file ))	// tile¸¸ load
-					{
-						#ifdef OUTPUT_DEBUG
-								//DEBUG_ADD("[Thread Job] Stop Loading Tile");
-						#endif
-						file.close();
-						break;
-					}
-				}
-			
-
-				// ImageObject Loading
-				if (bLoad && g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE)
-				{
-					#ifdef OUTPUT_DEBUG
-						//	DEBUG_ADD("[Thread Job] Load ImageObject SmallZone");
-					#endif
-					file.seekg(g_pZone->GetImageObjectFilePosition(), ios::beg);
-					if (!g_pTopView->LoadFromFileImageObjectSPKSmallZone( file ))
-					{
-						#ifdef OUTPUT_DEBUG
-							//	DEBUG_ADD("[Thread Job] Stop Loading ImageObject");
-						#endif
-						file.close();
-						break;
-					}
-				}
-
-				if (bLoad && g_ThreadJob==THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE)
-				{
-					g_bZoneSmallLoadImage = true;
-				}
-
-				file.close();
-			break;
-
-			//--------------------------------------------------------
-			// Creature¸¦ LoadingÇÑ´Ù.
-			//--------------------------------------------------------
-			case THREADJOB_LOAD_CREATURE :
-				g_pTopView->LoadFromFileCreatureSPK( 0 );
-				g_pTopView->LoadFromFileCreatureSPK( 1 );
-			break;
-		}
-
-		#ifdef OUTPUT_DEBUG
-			//	DEBUG_ADD("[Thread Job] End");
-		#endif
-
-		ResetEvent(g_hFileEvent);
-	}
-
-	return 0L;
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // Stop File Thread
 //-----------------------------------------------------------------------------
-/*
-void
-StopFileThread()
-{	
-	#ifdef OUTPUT_DEBUG
-	//		DEBUG_ADD("[Thread Job] StopFileThread");
-	#endif
-
-	switch (g_ThreadJob)
-	{
-		case THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE :
-			//g_nZoneLarge = ZONEID_NULL;
-
-			// ImageObject LoadingÀ» Áß´ÜÇÑ´Ù.
-			g_pTopView->StopLoadTileSPK();
-			g_pTopView->StopLoadImageObjectSPK();
-			g_bZoneLargeLoadImage = false;
-			
-			// ¿ì¼± ¼øÀ§¸¦ ³ô°Ô Àâ°í...
-			SetThreadPriority(g_hFileThread, 
-								THREAD_PRIORITY_HIGHEST);
-		break;
-		
-		case THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE :
-			//g_nZoneSmall = ZONEID_NULL;
-
-			// ImageObject LoadingÀ» Áß´ÜÇÑ´Ù.
-			g_pTopView->StopLoadTileSPK();
-			g_pTopView->StopLoadImageObjectSPK();	
-			g_bZoneSmallLoadImage = false;
-
-			// ¿ì¼± ¼øÀ§¸¦ ³ô°Ô Àâ°í...
-			SetThreadPriority(g_hFileThread, 
-								THREAD_PRIORITY_HIGHEST);
-		break;
-		
-		case THREADJOB_LOAD_CREATURE :
-
-			//g_pTopView->StopLoadCreature();
-
-			// Ä³¸¯ÅÍ ±×¸² LoadÁßÀÎ°¡?
-			// ¿ì¼± ¼øÀ§¸¦ ³ô°Ô Àâ°í...
-			SetThreadPriority(g_hFileThread, 
-								THREAD_PRIORITY_HIGHEST);
-		break;
-	}
-
-	g_ThreadJob = THREADJOB_NONE;
-
-	#ifdef OUTPUT_DEBUG
-	//		DEBUG_ADD("[Thread Job] Wait for Stopping thread");
-	#endif
-
-	while (WaitForSingleObject(g_hFileEvent, 0) == WAIT_OBJECT_0);
-
-		// Thread°¡ ÇÏ´Â LoadingÀÌ ³¡³¯¶§±îÁö ±â´Ù¸°´Ù.
-	#ifdef OUTPUT_DEBUG
-	//		DEBUG_ADD("[Thread Job] Stop File Thread");
-	#endif
-	
-
-	// ¼øÀ§¸¦ Á» ³·Ãá´Ù.
-	SetThreadPriority(g_hFileThread, 
-						THREAD_PRIORITY_BELOW_NORMAL);
-}
-*/
+ 
 
 //-----------------------------------------------------------------------------
 // Load Creature
 //-----------------------------------------------------------------------------
-// n¹øÂ° Creature Type IDÀÇ Sprite¸¦ loadÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 BOOL
 LoadCreature(int spriteType)
@@ -1943,7 +1737,7 @@ LoadCreature(int spriteType)
 //-----------------------------------------------------------------------------
 // Load CreatureType
 //-----------------------------------------------------------------------------
-// creature typeÀ» º¸°í sprite¸¦ loadÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 BOOL
 LoadCreatureType(int creatureType)
@@ -1984,13 +1778,13 @@ ReleaseUselessCreatureSPKExcept(const COrderedList<int>& listUse)
 //-----------------------------------------------------------------------------
 // Release GameObject
 //-----------------------------------------------------------------------------
-// game¿¡ °ü·ÃµÈ objectµéÀ» Á¦°Å½ÃÅ²´Ù.
+
 //-----------------------------------------------------------------------------
 void
 ReleaseGameObject()
 {
 	//------------------------------------------------------
-	// ³¯¾¾ Á¦°Å
+	
 	//------------------------------------------------------
 	g_pWeather->Release();
 
@@ -2001,7 +1795,7 @@ ReleaseGameObject()
 	g_pTimeItemManager->clear();
 
 	//------------------------------------------------------
-	// Zone¿¡¼­ PlayerÁ¦°Å / Zone Á¦°Å
+	
 	//------------------------------------------------------
 	if (g_pZone!=NULL)
 	{
@@ -2024,7 +1818,7 @@ ReleaseGameObject()
 	}
 
 	//------------------------------------------------------
-	// Small Zone Á¦°Å
+	
 	//------------------------------------------------------
 	/*
 	if (g_pZoneSmall != NULL)
@@ -2038,7 +1832,7 @@ ReleaseGameObject()
 	*/
 
 	//------------------------------------------------------
-	// Large Zone Á¦°Å
+	
 	//------------------------------------------------------
 	/*
 	if (g_pZoneLarge != NULL)
@@ -2052,7 +1846,7 @@ ReleaseGameObject()
 	*/
 
 	//------------------------------------------------------
-	// playerÁ¦°Å
+	
 	//------------------------------------------------------
 	if (g_pPlayer!=NULL)
 	{
@@ -2092,16 +1886,21 @@ ReleaseGameObject()
 //-----------------------------------------------------------------------------
 // Load Zone
 //-----------------------------------------------------------------------------
-// n¹øÂ° zoneÀ» loadÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 BOOL
 LoadZone(int n)
 {	
+	auto TraceLoadZoneFlow = [](const char* step)
+	{
+		(void)step;
+	};
+	TraceLoadZoneFlow("LoadZone begin");
 	//------------------------------------------------
-	// ZoneÀÇ Á¾·ù(size)¿¡ µû¸¥ Ã³	¸®
+	
 	//------------------------------------------------
 	// 
-	// °°Àº Á¾·ù(size)¿¡ µû¸¥ Zone¿¡ Load¸¦ ÇØ¾ßÇÑ´Ù.
+	
 	//
 	//------------------------------------------------
 	ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get( n );
@@ -2109,12 +1908,14 @@ LoadZone(int n)
 	if (pZoneInfo==NULL)
 	{
 		DEBUG_ADD_FORMAT("[Error] Wrong Zone ID=%d", n);	
+		TraceLoadZoneFlow("LoadZone invalid zone id");
 		
 		return FALSE;
 	}
+	TraceLoadZoneFlow("LoadZone zone info ready");
 
 	//------------------------------------------------
-	// ¸ðµç »ç¿îµå¸¦ Á¤ÁöÇØ¹ö¸°´Ù.
+	
 	//------------------------------------------------
 	if (g_pSoundManager!=NULL)
 	{
@@ -2122,13 +1923,14 @@ LoadZone(int n)
 		g_bPlayPropeller = FALSE;
 	}
 	g_SDLAudio.ReleaseDuplicateBuffer();
+	TraceLoadZoneFlow("LoadZone after stop sound");
 
 
 	// Debug Message
 	DEBUG_ADD_FORMAT("LoadZone : ID=%d, Filename=%s", pZoneInfo->ID, pZoneInfo->Filename.GetString());		
 	
 	//------------------------------------------------
-	// Music Á¤Áö...
+	
 	//------------------------------------------------
 	//BOOL bMusicPause = g_SDLMusic.IsPause();
 	//g_SDLMusic.Stop();
@@ -2159,36 +1961,23 @@ LoadZone(int n)
 	}
 	else
 	{
+		TraceLoadZoneFlow("LoadZone large zone branch");
 		g_Music.Stop();
 	}
 
 	//------------------------------------------------
-	// Fade Out Àû¿ë
+	
 	//------------------------------------------------
-		/*
-	if (g_pZone!=NULL && g_Mode==MODE_GAME )
-	{
-		g_pTopView->SetFadeOut(6);
-
-		while(g_pTopView->IsFade())
-		{
-			g_CurrentTime = timeGetTime();
-			g_pUpdate->Update();
-		}
-
-		// À½¾Ç ÁßÁö
-		//g_Music.Stop();
-	}
-	*/
+		 
 
 	//------------------------------------------------
-	// Fade In ¼³Á¤
+	
 	//------------------------------------------------
 	//g_pTopView->SetFadeIn(10);
 
 
 	//------------------------------------------------
-	// ¾ÆÁ÷ ´Ù¸¥ ZoneÀ» LoadingÁßÀÌ¶ó¸é
+	
 	//------------------------------------------------
 	/*
 	if  (WaitForSingleObject(g_hFileEvent, 0) == WAIT_OBJECT_0)
@@ -2199,11 +1988,12 @@ LoadZone(int n)
 	//g_pLoadingThread->Remove( 1 );
 
 	//-------------------------------------------------------------
-	// Loading ÁßÀÌ´ø°Í ¸ðµÎ Á¦°Å
+	
 	//-------------------------------------------------------------
 	StopLoadingThread();
+	TraceLoadZoneFlow("LoadZone after StopLoadingThread");
 
-	// priority¸¦ ÃÖ´ëÇÑ ³·Ãá´Ù.
+	
 	if (g_pLoadingThread!=NULL)
 	{
 		// Thread priority is platform-specific - currently implemented for Windows only
@@ -2213,17 +2003,34 @@ LoadZone(int n)
 	}
 
 	//----------------------------------------------------------------------
-	// ÇöÀç ZoneÀÇ objectµé Á¦°Å
+	
 	//----------------------------------------------------------------------
 	if (g_pZone!=NULL)
 	{
 		g_pZone->ReleaseObject();
 	}
+	TraceLoadZoneFlow("LoadZone after ReleaseObject");
 
 	//----------------------------------------------------------------------
-	// ¹Ù·Î Àü¿¡ ÀÖ´ø zoneÀÇ Á¤º¸
+	
 	//----------------------------------------------------------------------
 	ZONETABLE_INFO* pPreviousZoneInfo = (*g_pZoneTable).Get( (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall) );		
+	TraceLoadZoneFlow("LoadZone after previous zone lookup");
+
+	char loadZoneTrace[256];
+	sprintf(
+		loadZoneTrace,
+		"LoadZone state target=%d small=%d large=%d inLarge=%d zoneInfo=%p prevZone=%p",
+		n,
+		g_nZoneSmall,
+		g_nZoneLarge,
+		g_bZonePlayerInLarge ? 1 : 0,
+		pZoneInfo,
+		pPreviousZoneInfo);
+	TraceLoadZoneFlow(loadZoneTrace);
+
+	sprintf(loadZoneTrace, "LoadZone property value=%u", (unsigned int)pZoneInfo->Property);
+	TraceLoadZoneFlow(loadZoneTrace);
 
 	//----------------------------------------------------------------------
 	//
@@ -2232,11 +2039,12 @@ LoadZone(int n)
 	//----------------------------------------------------------------------
 	if (pZoneInfo->Property & FLAG_ZONESIZE_SMALL)
 	{	
+		TraceLoadZoneFlow("LoadZone small zone branch");
 		//ZONETABLE_INFO* pOldZoneInfo = (*g_pZoneTable).Get( g_nZoneSmall );
 
 		//-------------------------------------------
-		// ÀÌÀü¿¡ LargeZone¿¡ ÀÖ¾ú´Ù¸é.. 
-		// ±×¸²ÀÚ ´Ù½Ã »ý¼º
+		
+		
 		//-------------------------------------------
 		if (g_bZonePlayerInLarge)
 		{
@@ -2244,47 +2052,43 @@ LoadZone(int n)
 		}
 		
 		//-------------------------------------------
-		// ´Ù½Ã loadÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+		
 		//-------------------------------------------
 		if (g_nZoneSmall==n && g_pZoneSmall!=NULL)
 		{
+			TraceLoadZoneFlow("LoadZone reuse existing small zone");
 			DEBUG_ADD("ReleaseObject in SmallZone");
 			
-			// objectµé Á¦°Å
+			
 			g_pZoneSmall->ReleaseObject();
 
 			DEBUG_ADD("OK");
 			
-			// ±×¸²ÀÌ LoadµÇÁö ¾ÊÀº »óÅÂ¸é..
-			/*
-			if (!g_bZoneSmallLoadImage)
-			{
-				// Thread°¡ ÇÒÀÏÀ» ÁöÁ¤				
-				g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE;				
-				SetEvent(g_hFileEvent);
-			}
-			*/
+			
+			 
 
-			// SmallZoneÀÇ pointer¸¦ ´ëÀÔ
+			
 			g_pZone	= g_pZoneSmall;
 
 			UI_DrawProgress( 95 );
+			TraceLoadZoneFlow("LoadZone reused small zone ready");
 		}
 		//-------------------------------------------
-		// ´Ù½Ã LoadÇØ¾ßµÉ °æ¿ì
+		
 		//-------------------------------------------
 		else
 		{
-			// LoadÇÒ ZoneÀÇ Á¾·ù(size)¸¦ ±â¾ï
+			TraceLoadZoneFlow("LoadZone create new small zone");
+			
 			g_nZoneSmall = n;	
 
 			DEBUG_ADD("[Load Zone] Release Old Tile&ImageObject SPK");
 			
-			// ÀÌÀü Zone¿¡ ÀÖ´ø SpriteµéÀ» Áö¿öÁØ´Ù.
+			
 			g_pTopView->ReleaseTileSPKSmallZone();		
 			g_pTopView->ReleaseImageObjectSPKSmallZone();	
 			
-			// SmallZoneÀ» ÃÊ±âÈ­ÇÑ´Ù.
+			
 			if (g_pZoneSmall != NULL)
 			{
 				DEBUG_ADD( "Delete old ZoneSmall");
@@ -2296,10 +2100,10 @@ LoadZone(int n)
 			
 			g_pZoneSmall = new MZone;
 
-			// SmallZoneÀÇ pointer¸¦ ´ëÀÔ
+			
 			g_pZone	= g_pZoneSmall;
 
-			// Æ¾¹öÀüÀÎ°æ¿ì Æ¾¹öÀü¿ë ¸ÊÆÄÀÏ ·Îµù
+			
 			MString filename = pZoneInfo->Filename;
 			if(g_pUserInformation->GoreLevel == false)
 			{
@@ -2308,9 +2112,14 @@ LoadZone(int n)
 			}
 
 			std::ifstream file;
+			TraceLoadZoneFlow("LoadZone before large FileOpenBinary");
+			TraceLoadZoneFlow("LoadZone before large FileOpenBinary");
+			TraceLoadZoneFlow("LoadZone before large FileOpenBinary");
 			if (!FileOpenBinary(filename, file))
 			{
-				// priority¸¦ Á¤»óÀ¸·Î
+				TraceLoadZoneFlow("LoadZone large FileOpenBinary failed");
+				TraceLoadZoneFlow("LoadZone FileOpenBinary failed");
+				
 				if (g_pLoadingThread!=NULL)
 				{
 					g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
@@ -2319,16 +2128,24 @@ LoadZone(int n)
 				return FALSE; 
 			}
 
+			TraceLoadZoneFlow("LoadZone large file opened");
+			TraceLoadZoneFlow("LoadZone large file opened");
 			DEBUG_ADD("[Load Zone] Load Zone Data");
+			TraceLoadZoneFlow("LoadZone before zone LoadFromFile");
 			
 			UI_DrawProgress( 80 );
+			TraceLoadZoneFlow("LoadZone before large LoadFromFile");
+			TraceLoadZoneFlow("LoadZone before large LoadFromFile");
 
-			// Zone loading ½ÇÆÐ?
+			
 			if (!g_pZone->LoadFromFile( file ))
 			{
+				TraceLoadZoneFlow("LoadZone large LoadFromFile failed");
+				TraceLoadZoneFlow("LoadZone large LoadFromFile failed");
+				TraceLoadZoneFlow("LoadZone LoadFromFile failed");
 				SetMode( MODE_QUIT );
 
-				// priority¸¦ Á¤»óÀ¸·Î
+				
 				if (g_pLoadingThread!=NULL)
 				{
 					g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
@@ -2337,36 +2154,45 @@ LoadZone(int n)
 			}
 
 			g_pZone->SetCurrentZoneID( n );
+			TraceLoadZoneFlow("LoadZone after zone LoadFromFile");
 		
-			//g_pTopView->LoadFromFileTileSPKLargeZone( file );	// tile¸¸ load
+			
 			//g_pTopView->LoadFromFileImageObjectSPKLargeZone( file );
-			file.close();			
+			file.close();
+			TraceLoadZoneFlow("LoadZone after close large map file");
 			
 			
 			
 			UI_DrawProgress( 90 );
+			TraceLoadZoneFlow("LoadZone after large progress90");
+			TraceLoadZoneFlow("LoadZone after progress90");
 
 			//-------------------------------------------------------
-			// PlayerÀÇ ÁÂÇ¥ ±ÙÃ³ÀÇ SpriteµéÀ» LoadÇÑ´Ù.
+			
 			//-------------------------------------------------------
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID");
+			TraceLoadZoneFlow("LoadZone before large GetNearSpriteSet");
+			TraceLoadZoneFlow("LoadZone before GetNearSpriteSet");
 			
 			CSpriteSetManager TileSSM;
 			CSpriteSetManager ImageObjectSSM;
 			g_pZone->GetNearSpriteSet(TileSSM, ImageObjectSSM, g_pPlayer->GetX(), g_pPlayer->GetY());
+			TraceLoadZoneFlow("LoadZone after GetNearSpriteSet");
 			g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM);
+			TraceLoadZoneFlow("LoadZone after LoadFromFileTileAndImageObjectSet");
 
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID.. OK");
 			
 			UI_DrawProgress( 95 );
+			TraceLoadZoneFlow("LoadZone new small zone ready");
 		}
 		
 		//-------------------------------------------------------
-		// LoadingThread°¡ ÇÒÀÏÀ» ÁöÁ¤			
+		
 		//-------------------------------------------------------
 		//g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE;				
 		//SetEvent(g_hFileEvent);
-		// Æ¾¹öÀüÀÎ°æ¿ì Æ¾¹öÀü¿ë ¸ÊÆÄÀÏ ·Îµù
+		
 		MString filename = (*g_pZoneTable).Get(g_nZoneSmall)->Filename;
 		if(g_pUserInformation->GoreLevel == false)
 		{
@@ -2376,12 +2202,14 @@ LoadZone(int n)
 
 		std::ifstream file;
 		file.open(filename, ios::binary);
+		TraceLoadZoneFlow("LoadZone before small tile/image spk load");
 
 		file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
 		g_pTopView->LoadFromFileTileSPKSmallZone( file );
 
 		file.seekg(g_pZone->GetImageObjectFilePosition(), ios::beg);				
 		g_pTopView->LoadFromFileImageObjectSPKSmallZone( file );
+		TraceLoadZoneFlow("LoadZone after small tile/image spk load");
 
 		file.close();		
 		
@@ -2392,43 +2220,9 @@ LoadZone(int n)
 		DEBUG_ADD("[Load Zone] Before Music Play");
 		
 		//------------------------------------------
-		// À½¾Ç ¿¬ÁÖÇØ¾ß µÇ´Â °æ¿ìÀÌ¸é
+		
 		//------------------------------------------
-		/*
-		if (g_pUserOption->PlayMusic)
-		{
-			//------------------------------------------
-			// Á¾Á·¿¡ µû¶ó¼­ À½¾ÇÀÌ ´Þ¶óÁø´Ù.
-			//------------------------------------------
-			TYPE_MUSICID	newMusicID = 0;
-
-			if (g_pPlayer!=NULL && g_pPlayer->IsSlayer())
-			{		
-				newMusicID = pZoneInfo->MusicIDSlayer;
-			}
-			else
-			{
-				newMusicID = pZoneInfo->MusicIDVampire;
-			}
-
-			//g_SDLMusic.SetOriginalTempo();
-			//g_SDLMusic.Play( (*g_pMusicTable)[ newMusicID ].Filename );			
-			int musicID = newMusicID;
-
-			if (musicID!=MUSICID_NULL)
-			{
-				if (g_pUserOption->PlayWaveMusic)
-				{
-					g_pSDLStream->Load( (*g_pMusicTable)[ musicID ].FilenameWav );
-					g_pSDLStream->Play( TRUE );
-				}
-				else
-				{
-					g_Music.Play( (*g_pMusicTable)[ musicID ].Filename );
-				}
-			}
-		}
-		*/
+		 
 	
 		/*
 		if (g_pMP3 != NULL)
@@ -2442,6 +2236,7 @@ LoadZone(int n)
 		*/
 					
 		g_bZonePlayerInLarge = false;
+		TraceLoadZoneFlow("LoadZone small zone branch done");
 	}
 
 	//----------------------------------------------------------------------
@@ -2451,11 +2246,12 @@ LoadZone(int n)
 	//----------------------------------------------------------------------
 	else
 	{
+		TraceLoadZoneFlow("LoadZone large zone branch");
 		//ZONETABLE_INFO* pOldZoneInfo = (*g_pZoneTable).Get( g_nZoneLarge );
 
 		//-------------------------------------------
-		// ÀÌÀü¿¡ SmallZone¿¡ ÀÖ¾ú´Ù¸é.. 
-		// ±×¸²ÀÚ ´Ù½Ã »ý¼º
+		
+		
 		//-------------------------------------------
 		if (!g_bZonePlayerInLarge)
 		{
@@ -2463,47 +2259,44 @@ LoadZone(int n)
 		}
 
 		//-----------------------------------------------
-		// ´Ù½Ã LoadÇØ¾ßÇÒ ÇÊ¿ä°¡ ¾ø´Â °æ¿ì
+		
 		//-----------------------------------------------
 		if (g_nZoneLarge==n && g_pZoneLarge!=NULL)
 		{
+			TraceLoadZoneFlow("LoadZone reuse existing large zone");
 			DEBUG_ADD("ReleaseObject in LargeZone");
 			
-			// objectµé Á¦°Å
+			
 			g_pZoneLarge->ReleaseObject();
 			
 			DEBUG_ADD("OK");
 			
-			// ±×¸²ÀÌ LoadµÇÁö ¾ÊÀº »óÅÂ¸é..
-			/*
-			if (!g_bZoneLargeLoadImage)
-			{
-				// Thread°¡ ÇÒÀÏÀ» ÁöÁ¤				
-				g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_LARGEZONE;				
-				SetEvent(g_hFileEvent);
-			}
-			*/
+			
+			 
 
-			// LargeZoneÀÇ pointer¸¦ ´ëÀÔ
+			
 			g_pZone	= g_pZoneLarge;
+			TraceLoadZoneFlow("LoadZone reused large zone ready");
 
 			UI_DrawProgress( 95 );
 		}
 		//-----------------------------------------------
-		// ´Ù½Ã LoadÇØ¾ßµÉ °æ¿ì
+		
 		//-----------------------------------------------
 		else
 		{
-			// LoadÇÒ ZoneÀÇ Á¾·ù(size)¸¦ ±â¾ï
+			TraceLoadZoneFlow("LoadZone create new large zone");
+			
 			g_nZoneLarge = n;	
 
 			DEBUG_ADD("[Load Zone] Release Old Tile&ImageObject SPK");
 			
-			// ÀÌÀü Zone¿¡ ÀÖ´ø SpriteµéÀ» Áö¿öÁØ´Ù.
+			
 			g_pTopView->ReleaseTileSPKLargeZone();		
 			g_pTopView->ReleaseImageObjectSPKLargeZone();	
+			TraceLoadZoneFlow("LoadZone after release large zone spk");
 			
-			// LargeZoneÀ» ÃÊ±âÈ­ÇÑ´Ù.
+			
 			if (g_pZoneLarge != NULL)
 			{
 				DEBUG_ADD( "Delete old ZoneLarge");
@@ -2514,11 +2307,13 @@ LoadZone(int n)
 			DEBUG_ADD( "New ZoneLarge");
 			
 			g_pZoneLarge = new MZone;
+			TraceLoadZoneFlow("LoadZone allocated large zone");
 
-			// LargeZoneÀÇ pointer¸¦ ´ëÀÔ
-			g_pZone	= g_pZoneLarge;			
 			
-			// Æ¾¹öÀüÀÎ°æ¿ì Æ¾¹öÀü¿ë ¸ÊÆÄÀÏ ·Îµù
+			g_pZone	= g_pZoneLarge;			
+			TraceLoadZoneFlow("LoadZone assigned g_pZone large");
+			
+			
 			MString filename = pZoneInfo->Filename;
 			if(g_pUserInformation->GoreLevel == false)
 			{
@@ -2529,7 +2324,7 @@ LoadZone(int n)
 			std::ifstream file;
 			if (!FileOpenBinary(filename, file))
 			{
-				// priority¸¦ Á¤»óÀ¸·Î
+				
 				if (g_pLoadingThread!=NULL)
 				{
 					g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
@@ -2542,12 +2337,12 @@ LoadZone(int n)
 			
 			UI_DrawProgress( 80 );
 
-			// Zone loading ½ÇÆÐ?
+			
 			if (!g_pZone->LoadFromFile( file ))
 			{
 				SetMode( MODE_QUIT );
 
-				// priority¸¦ Á¤»óÀ¸·Î
+				
 				if (g_pLoadingThread!=NULL)
 				{
 					g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
@@ -2556,49 +2351,107 @@ LoadZone(int n)
 				return FALSE;
 			}
 
-			//g_pTopView->LoadFromFileTileSPKLargeZone( file );	// Tile¸¸ load
+			
 			//g_pTopView->LoadFromFileImageObjectSPKLargeZone( file );
 			file.close();
 
 			UI_DrawProgress( 90 );
 			
 			//-------------------------------------------------------
-			// PlayerÀÇ ÁÂÇ¥ ±ÙÃ³ÀÇ SpriteµéÀ» LoadÇÑ´Ù.
+			
 			//-------------------------------------------------------
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID");
 			
 			CSpriteSetManager TileSSM;
 			CSpriteSetManager ImageObjectSSM;
 			g_pZone->GetNearSpriteSet(TileSSM, ImageObjectSSM, g_pPlayer->GetX(), g_pPlayer->GetY());
+			TraceLoadZoneFlow("LoadZone after large GetNearSpriteSet");
 			g_pTopView->LoadFromFileTileAndImageObjectSet(TileSSM, ImageObjectSSM);
+			TraceLoadZoneFlow("LoadZone after large LoadFromFileTileAndImageObjectSet");
 			
 			DEBUG_ADD("[Load Zone] Find Tile&ImageObject ID.. OK");
 				
 			UI_DrawProgress( 95 );
+			TraceLoadZoneFlow("LoadZone new large zone ready");
 		}
 
 		//-------------------------------------------------------
-		// LoadingThread°¡ ÇÒÀÏÀ» ÁöÁ¤			
+		
 		//-------------------------------------------------------
-		//g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE;				
+		//g_ThreadJob = THREADJOB_LOAD_IMAGEOBJECT_SMALLZONE;
 		//SetEvent(g_hFileEvent);
-		MString filename = (*g_pZoneTable).Get(g_nZoneLarge)->TeenFilename;
-		if(g_pUserInformation->GoreLevel == false)
+		TraceLoadZoneFlow("LoadZone before large re-lookup zone info");
 		{
+			ZONETABLE_INFO* pZoneInfoLookup = (*g_pZoneTable).Get(g_nZoneLarge);
+			if (pZoneInfoLookup == NULL)
+			{
+				TraceLoadZoneFlow("LoadZone ERROR pZoneInfoLookup NULL");
+			}
+			else
+			{
+				char msg[256];
+				const char* baseFn = (const char*)pZoneInfoLookup->Filename;
+				const char* teenFn = (const char*)pZoneInfoLookup->TeenFilename;
+				sprintf(msg, "LoadZone re-lookup OK baseFn=%s teenFn=%s teenLen=%d",
+					(baseFn ? baseFn : "(null)"),
+					(teenFn ? teenFn : "(null)"),
+					(int)pZoneInfoLookup->TeenFilename.GetLength());
+				TraceLoadZoneFlow(msg);
+			}
+		}
+
+		MString filename = (*g_pZoneTable).Get(g_nZoneLarge)->Filename;
+		TraceLoadZoneFlow("LoadZone after filename copy");
+
+		if(g_pUserInformation == NULL)
+		{
+			TraceLoadZoneFlow("LoadZone ERROR g_pUserInformation NULL");
+		}
+		else if(g_pUserInformation->GoreLevel == false)
+		{
+			TraceLoadZoneFlow("LoadZone GoreLevel false enter");
 			if((*g_pZoneTable).Get(g_nZoneLarge)->TeenFilename.GetLength() > 0)
+			{
+				TraceLoadZoneFlow("LoadZone switching to TeenFilename");
 				filename = (*g_pZoneTable).Get(g_nZoneLarge)->TeenFilename;
+			}
+			TraceLoadZoneFlow("LoadZone GoreLevel false exit");
+		}
+		else
+		{
+			TraceLoadZoneFlow("LoadZone GoreLevel true");
+		}
+
+		{
+			const char* finalFn = (const char*)filename;
+			char msg[256];
+			sprintf(msg, "LoadZone about to open large map filename=%s len=%d",
+				(finalFn ? finalFn : "(null)"),
+				(int)filename.GetLength());
+			TraceLoadZoneFlow(msg);
 		}
 
 		std::ifstream file;
+		TraceLoadZoneFlow("LoadZone after ifstream default ctor");
 		file.open(filename, ios::binary);
+		TraceLoadZoneFlow("LoadZone before large tile/image spk load");
+		if (!file.is_open())
+		{
+			TraceLoadZoneFlow("LoadZone ERROR large map file failed to open");
+			SetMode( MODE_QUIT );
+			return FALSE;
+		}
 
 		file.seekg(g_pZone->GetTileFilePosition(), ios::beg);
 		g_pTopView->LoadFromFileTileSPKLargeZone( file );
+		TraceLoadZoneFlow("LoadZone after large tile spk load");
 
 		file.seekg(g_pZone->GetImageObjectFilePosition(), ios::beg);				
 		g_pTopView->LoadFromFileImageObjectSPKLargeZone( file );
+		TraceLoadZoneFlow("LoadZone after large image object spk load");
 
 		file.close();		
+		TraceLoadZoneFlow("LoadZone after close large tile/image file");
 
 		
 		BOOL NeedMusicLoad = TRUE;
@@ -2607,47 +2460,9 @@ LoadZone(int n)
 		DEBUG_ADD("[Load Zone] Before Music Play");
 		
 		//------------------------------------------
-		// À½¾Ç ¿¬ÁÖÇØ¾ß µÇ´Â °æ¿ìÀÌ¸é
+		
 		//------------------------------------------
-		/*
-		if (g_pUserOption->PlayMusic)
-		{
-			//------------------------------------------
-			// Á¾Á·¿¡ µû¶ó¼­ À½¾ÇÀÌ ´Þ¶óÁø´Ù.
-			//------------------------------------------
-			//TYPE_MUSICID	oldMusicID = 0;
-			TYPE_MUSICID	newMusicID = 0;
-
-			DEBUG_ADD("[Load Zone] Before Music Check");
-			
-			if (g_pPlayer!=NULL && g_pPlayer->IsSlayer())
-			{		
-				newMusicID = pZoneInfo->MusicIDSlayer;
-			}
-			else
-			{
-				newMusicID = pZoneInfo->MusicIDVampire;
-			}
-
-			//g_SDLMusic.SetOriginalTempo();
-			//g_SDLMusic.Play( (*g_pMusicTable)[ newMusicID ].Filename );			
-
-			int musicID = newMusicID;
-
-			if (musicID!=MUSICID_NULL)
-			{
-				if (g_pUserOption->PlayWaveMusic)
-				{
-					g_pSDLStream->Load( (*g_pMusicTable)[ musicID ].FilenameWav );
-					g_pSDLStream->Play( TRUE );
-				}
-				else
-				{
-					g_Music.Play( (*g_pMusicTable)[ musicID ].Filename );
-				}
-			}
-		}
-		*/
+		 
 	
 		/*
 		if (g_pMP3 != NULL)
@@ -2667,7 +2482,7 @@ LoadZone(int n)
 	DEBUG_ADD("[Load Zone] Before Minimap Loading");
 	
 	//------------------------------------------------
-	// UI¿¡ zone¼³Á¤..
+	
 	//------------------------------------------------
 	SIZE zoneSize = { g_pZone->GetWidth(), g_pZone->GetHeight() };
 
@@ -2687,14 +2502,24 @@ LoadZone(int n)
 #endif
 	
 	LoadZoneInfo( n );
+	if (n == 12)
+	{
+		RECT rect;
+		SetRect(&rect, 115, 106, 119, 113);
+		gC_vs_ui.SetPortal(rect, 2011);
+		SetRect(&rect, 72, 147, 76, 155);
+		gC_vs_ui.SetPortal(rect, 2021);
+		SetRect(&rect, 115, 190, 119, 198);
+		gC_vs_ui.SetPortal(rect, 2001);
+	}
 	g_pZone->SetCurrentZoneID( n );
 
-	// 2004, 6, 22 sobeit add start - Áúµå·¹ ÄÚ¾î °ü·Ã
+	
 	Add_GDR_Ghost(n);
 	Add_GDR_Effect(1,false);
 	Add_GDR_Effect(2,false);
 	Add_GDR_Potal_Effect(n);
-	// 2005, 1, 18, sobeit add start-Äù½ºÆ® ¶«¿¡ - bDisableTileImage==false°¡ ´ëºÎºÐÀÌ¹Ç·Î..
+	
 	if(n == 4001)
 	{
 		for (int i=0; i<g_pZone->GetHeight(); i++)
@@ -2706,7 +2531,7 @@ LoadZone(int n)
 		}
 	}
 	// 2005, 1, 18, sobeit add end
-	// 2004, 9, 21, sobeit add start - ¾Æ´ã ºÏ ±¸¸§
+	
 	else if(n == 74)
 	{
 		if(g_pPlayer->GetY()<60)
@@ -2716,13 +2541,13 @@ LoadZone(int n)
 	}
 	// 2004, 9, 21, sobeit add end
 //	BYTE PkType = g_pZone->GetPKType();
-//	if(PkType != PK_TYPE_NULL)	// ±×³É ÀÏ¹Ý ¸Ê
+
 //	{
-//		if(PkType == PK_TYPE_DISABLE)		// ´Ù ¿ì¸®Æí..-_-; pk ±ÝÁö
+
 //			g_pPlayer->SetAttackModePeace();
-//		else if(PkType == PK_TYPE_ALL)		// ³ª »©°í ´Ù Àû
+
 //			g_pPlayer->SetAttackModeAggress();
-//		else if(PkType == PK_TYPE_GUILD)	// ¿ì¸® ±æµå »©°í ´Ù Àû..
+
 //		{
 //			int myGuildID = g_pPlayer->GetGuildNumber();	
 //			int OtherGuildID = pCreature->GetGuildNumber();	
@@ -2731,11 +2556,11 @@ LoadZone(int n)
 //				myGuildID		== GUILDID_OUSTERS_DEFAULT ||
 //				OtherGuildID	== GUILDID_VAMPIRE_DEFAULT ||
 //				OtherGuildID	== GUILDID_SLAYER_DEFAULT ||
-//				OtherGuildID	== GUILDID_OUSTERS_DEFAULT ) // ±æµå°¡ ¾ø´Â ³à¼® µéÀº..
-//				return TRUE; // È¥ÀÚ ½Î¿ö¶ó..-_-;
+
+
 //
 //			if(myGuildID == OtherGuildID)
-//				return FALSE; // ¿ì¸® ±æµå...
+
 //			else
 //				return TRUE;
 //		}
@@ -2745,20 +2570,20 @@ LoadZone(int n)
 
 	// 2004, 6, 22 sobeit add end
 	//------------------------------------------------
-	// minimap ±×¸² ¼³Á¤
+	
 	//------------------------------------------------
 	//g_pTopView->LoadMinimap( pZoneInfo->MinimapFilename );	
 	
 	//------------------------------------------------
-	// Random SoundID ½Ã°£ ¼³Á¤
+	
 	//------------------------------------------------
-	g_ZoneRandomSoundTime = g_CurrentTime + ((rand()%5)+10)*1000;	// 10~15ÃÊÈÄ..
+	g_ZoneRandomSoundTime = g_CurrentTime + ((rand()%5)+10)*1000;	
 	
 	
 
 
 	//---------------------------------------------------------------
-	// ÇÏ³ªÀÇ ¼Ò¸®¿¡ ´ëÇÑ Á¤º¸
+	
 	//---------------------------------------------------------------
 	/*
 	ZONESOUND_INFO* pSoundInfo	= new ZONESOUND_INFO;
@@ -2778,7 +2603,7 @@ LoadZone(int n)
 	
 
 	//------------------------------------------------
-	// ÀÌ Zone¿¡¼­ µîÀåÇÏ´Â Creature¿¡ ´ëÇÑ Spriteµé
+	
 	//------------------------------------------------
 	//g_pTopView->LoadFromFileCreatureSPK( 0 );
 	//g_pTopView->LoadFromFileCreatureSPK( 1 );
@@ -2786,16 +2611,16 @@ LoadZone(int n)
 	
 
 	//------------------------------------------------
-	// View¿¡°Ô Ãâ·ÂÇØ¾ßÇÒ ZoneÀ» ÁöÁ¤ÇÑ´Ù.
+	
 	//------------------------------------------------
-	// ÀÌÀü¿¡ Ãâ·ÂµÈ creatureµéÀ» ¾ø¾Ø´Ù.
+	
 	g_pTopView->SetZone(g_pZone);	
 
 	// Debug Message
 	DEBUG_ADD_FORMAT("LoadZone OK : size=(%d, %d)", g_pZone->GetWidth(), g_pZone->GetHeight());			
 		
 
-	// priority¸¦ Á¤»óÀ¸·Î
+	
 	if (g_pLoadingThread!=NULL)
 	{
 		g_pLoadingThread->SetPriority( THREAD_PRIORITY_LOWEST );
@@ -2850,13 +2675,13 @@ LoadZone(int n)
 //-----------------------------------------------------------------------------
 // Move Zone 
 //-----------------------------------------------------------------------------
-// ZoneÀ» ÀÌµ¿ÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 void
 MoveZone(int n)
 {
 	//------------------------------------------------
-	// Zone¿¡¼­ Player¸¦ »©³½´Ù.
+	
 	//------------------------------------------------
 	if (g_pZone != NULL)
 	{
@@ -2867,8 +2692,13 @@ MoveZone(int n)
 		g_pZone->RemovePlayer();
 	}
 	
-	// n ZoneÀ» loadÇÑ´Ù.
-	LoadZone( n );
+	
+	if (!LoadZone( n ) || g_pZone == NULL)
+	{
+		DEBUG_ADD("MoveZone ERROR LoadZone failed");
+		SetMode( MODE_QUIT );
+		return;
+	}
 
 	g_pPlayer->SetZone(g_pZone);
 	g_pZone->SetPlayer();//&g_pPlayer->;	
@@ -2908,35 +2738,28 @@ LoadZoneInfo(int n)
 	std::ifstream zoneInfoFile(pZoneInfo->InfoFilename.GetString(), ios::binary);
 
 	//------------------------------------------------
-	// FileÀÌ ÀÖ´Â °æ¿ì¸¸ loadingÇÑ´Ù.
+	
 	//------------------------------------------------
 	if (zoneInfoFile.is_open())
 	{
 		DEBUG_ADD("[Load Zone] Load MinimapInfo");
 		
-		/*
-		zoneInfo.LoadFromFile( zoneInfoFile );		
-
-		//------------------------------------------------
-		// minimap¿¡ ¾ÈÀüÁö´ë¸¦ Ç¥½ÃÇÑ´Ù.
-		//------------------------------------------------
-		g_pTopView->LoadMinimap( pZoneInfo->MinimapFilename, &zoneInfo );	
-		*/
+		 
 		WORD width, height;
 		
 		zoneInfoFile.read((char*)&width, 2);
 		zoneInfoFile.read((char*)&height, 2);
 
 		//------------------------------------------------
-		// size Ã¼Å©
+		
 		//------------------------------------------------
 		if (width==g_pZone->GetWidth() && height==g_pZone->GetHeight())
 		{		
 			DEBUG_ADD("[Load Zone] Load PortalInfo");
 			
 			//------------------------------------------------
-			// Æ÷Å» Á¤º¸¸¦ loadingÇÑ´Ù.
-			// ³»ºÎ¿¡¼­ ÇØÁÖ´Â°Ô ÁÁÁö¸¸... ÀÏ´Ü..
+			
+			
 			//------------------------------------------------
 			int numPortal;
 			
@@ -2970,7 +2793,7 @@ LoadZoneInfo(int n)
 				}
 
 				//------------------------------------------------
-				// UI¿¡ ¼³Á¤ÇÑ´Ù.
+				
 				//------------------------------------------------
 				if (numZoneID==1)
 				{					
@@ -2982,7 +2805,7 @@ LoadZoneInfo(int n)
 				{
 					DEBUG_ADD("UI SetPortal - 60001");
 
-					// ¸ÖÆ¼ Æ÷Å»ÀÎ °æ¿ì.. ¤»¤».. _-_;
+					
 					gC_vs_ui.SetPortal( rect, 60001 );
 				}
 			}
@@ -2990,7 +2813,7 @@ LoadZoneInfo(int n)
 			DEBUG_ADD("PortalInfo OK");
 
 			//------------------------------------------------
-			// ¾ÈÀüÁö´ë Á¤º¸
+			
 			//------------------------------------------------
 			int numSafe;
 			
@@ -3044,7 +2867,7 @@ LoadZoneInfo(int n)
 					
 					g_pZone->SetSafeSector( safeRect, fSafe );
 
-					// ³»°¡ ¾ÈÀüÇÑ À§Ä¡ÀÎ°¡?
+					
 
 					if(MyRace == RACE_OUSTERS && ( rect2.flag & FLAG_MIP_SAFE_OUSTERS ) ||
 						MyRace == RACE_VAMPIRE && ( rect2.flag & FLAG_MIP_SAFE_VAMPIRE) ||
@@ -3053,7 +2876,7 @@ LoadZoneInfo(int n)
 					{
 						gC_vs_ui.SetSafetyZone( safeRect, true );						
 					}
-					// ´Ù¸¥ Á¾Á·ÀÌ ¾ÈÀüÇÑ À§Ä¡ÀÎ°¡?
+					
 					else
 					{
 						gC_vs_ui.SetSafetyZone( safeRect, false );
@@ -3067,7 +2890,7 @@ LoadZoneInfo(int n)
 			DEBUG_ADD("zoneinfoclose OK");
 			
 			DEBUG_ADD("Horn Setting Start");
-			// ousters hornÀ» ¸Ê¿¡ ½É´Â´Ù
+			
 			UI_PORTAL_LIST portalList;
 
 			for(int i = 0; i < g_pZone->GetHorn().size(); i++)
@@ -3102,8 +2925,8 @@ LoadZoneInfo(int n)
 						pNPC->SetGroundCreature();
 						pNPC->SetID(MFakeCreature::GetFakeID());
 						//pNPC->SetAction(ACTION_MOVE);
-						// Edit By Sonic 2006.10.1  ÐÞÕýÄ§ÁéÅäÖù×ÓÎ»ÖÃ
-						//Ô­Î»ÖÃ 62  x=39 y=30  ÐÞÕýÎ»ÖÃ x=7 y=11
+						
+						
 						if(itr->zone_id==62)
 						{
 							pNPC->SetPosition( 7, 11 );
@@ -3150,68 +2973,7 @@ LoadZoneInfo(int n)
 			{
 				SetWeather(WEATHER_SPOT, 2);
 			}
-/*
-			//---------------------------------------------------------------
-			//
-			//  ZoneÀÇ È¯°æ »ç¿îµå ¼³Á¤
-			//
-			//---------------------------------------------------------------
-			long fpCurrent = zoneInfoFile.tellg();
-			zoneInfoFile.seekg( 0, ios::end );
-			long fpEof = zoneInfoFile.tellg();
-				
-			if (!zoneInfoFile.eof()	// ¿Ö ÀÌ°Ô Á¦´ë·Î ¾ÈµÇÁö- -;
-				&& fpCurrent!=fpEof)
-			{
-				zoneInfoFile.seekg( fpCurrent, ios::beg );
-			
-				if (g_pZoneSoundTable)
-				{
-					DEBUG_ADD("Delete ZoneSoundTable");
-					
-					delete g_pZoneSoundTable;
-				}
-
-				if (g_pZoneSoundManager)
-				{		
-					DEBUG_ADD("Delete ZoneSoundManager");
-					
-					delete g_pZoneSoundManager;
-				}
-
-				DEBUG_ADD("New ZoneSoundTable");
-				
-				// ZoneÀÇ »ç¿îµå¸¦ ¾î¶»°Ô ³¾±î?¿¡ ´ëÇÑ Á¤º¸
-				g_pZoneSoundTable = new MZoneSoundTable;
-
-				DEBUG_ADD("Delete ZoneSoundManager");
-				
-				// Zone¿¡ ÀÖ´Â »ç¿îµå ÀÚÃ¼¿¡ ´ëÇÑ Á¤º¸
-				g_pZoneSoundManager = new MZoneSoundManager;
-
-				
-				DEBUG_ADD("Load SectorSound");
-				
-				//---------------------------------------------------------------
-				// Sector¿¡ »ç¿îµå Á¤º¸¸¦ LoadingÇÑ´Ù.
-				//---------------------------------------------------------------
-				g_pZone->LoadFromFileSectorSound( zoneInfoFile );
-				
-				//---------------------------------------------------------------
-				// ZoneSoundTable¿¡ 
-				// ÇöÀç Map¿¡ ´ëÇÑ »ç¿îµå Á¤º¸¸¦ LoadingÇÑ´Ù.
-				//---------------------------------------------------------------
-				DEBUG_ADD("Load ZoneSoundTable");	
-				
-				g_pZoneSoundTable->LoadFromFile( zoneInfoFile );
-
-				DEBUG_ADD("Load ZoneSoundTable OK");
-			}
-			else
-			{
-				DEBUG_ADD("No ZoneSound Info");
-			}			
-*/
+ 
 		}
 		else
 		{			
@@ -3234,6 +2996,101 @@ LoadZoneInfo(int n)
 	return TRUE;
 }
 
+BOOL
+LoadZoneUIInfo(int n)
+{
+	ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get(n);
+	if(pZoneInfo == NULL || g_pZone == NULL)
+		return FALSE;
+
+	std::ifstream zoneInfoFile(pZoneInfo->InfoFilename.GetString(), ios::binary);
+	if(!zoneInfoFile.is_open())
+		return FALSE;
+
+	WORD width, height;
+	zoneInfoFile.read((char*)&width, 2);
+	zoneInfoFile.read((char*)&height, 2);
+
+	if(width != g_pZone->GetWidth() || height != g_pZone->GetHeight())
+	{
+		zoneInfoFile.close();
+		return FALSE;
+	}
+
+	int numPortal;
+	zoneInfoFile.read((char*)&numPortal, 4);
+
+	MPortal portal;
+	RECT rect;
+	for(int i = 0; i < numPortal; i++)
+	{
+		portal.LoadFromFile(zoneInfoFile);
+		const std::vector<WORD>& zoneID = portal.GetZoneID();
+		int numZoneID = zoneID.size();
+
+		rect.left = portal.GetLeft();
+		rect.top = portal.GetTop();
+		rect.right = portal.GetRight();
+		rect.bottom = portal.GetBottom();
+
+		if(numZoneID == 1)
+		{
+			gC_vs_ui.SetPortal(rect, zoneID[0]);
+		}
+		else
+		{
+			gC_vs_ui.SetPortal(rect, 60001);
+		}
+	}
+
+	int numSafe;
+	zoneInfoFile.read((char*)&numSafe, 4);
+
+	B_RECT rect2;
+	Race myRace = g_pPlayer != NULL ? g_pPlayer->GetRace() : g_eRaceInterface;
+	for(int i = 0; i < numSafe; i++)
+	{
+		zoneInfoFile.read((char*)&rect2, SIZE_B_RECT);
+
+		RECT safeRect =
+		{
+			rect2.left,
+			rect2.top,
+			rect2.right,
+			rect2.bottom
+		};
+
+		if(rect2.flag != 0)
+		{
+			if((myRace == RACE_OUSTERS && (rect2.flag & FLAG_MIP_SAFE_OUSTERS)) ||
+				(myRace == RACE_VAMPIRE && (rect2.flag & FLAG_MIP_SAFE_VAMPIRE)) ||
+				(myRace == RACE_SLAYER && (rect2.flag & FLAG_MIP_SAFE_SLAYER)) ||
+				(rect2.flag & FLAG_MIP_SAFE_COMMON))
+			{
+				gC_vs_ui.SetSafetyZone(safeRect, true);
+			}
+			else
+			{
+				gC_vs_ui.SetSafetyZone(safeRect, false);
+			}
+		}
+	}
+
+	zoneInfoFile.close();
+
+	if(n == 12)
+	{
+		SetRect(&rect, 115, 106, 119, 113);
+		gC_vs_ui.SetPortal(rect, 2011);
+		SetRect(&rect, 72, 147, 76, 155);
+		gC_vs_ui.SetPortal(rect, 2021);
+		SetRect(&rect, 115, 190, 119, 198);
+		gC_vs_ui.SetPortal(rect, 2001);
+	}
+
+	return TRUE;
+}
+
 //-----------------------------------------------------------------------------
 // Init Player
 //-----------------------------------------------------------------------------
@@ -3244,7 +3101,7 @@ InitPlayer(int x, int y, int dir)
 	DEBUG_ADD_FORMAT("InitPlayer : (%d,%d) Dir=%d", x, y, dir);			
 	
 	//------------------------------------------------
-	// CreatureÀÇ Á¾·ù
+	
 	//------------------------------------------------
 	//g_pPlayer->SetCreatureType( 0 );
 
@@ -3254,12 +3111,12 @@ InitPlayer(int x, int y, int dir)
 	g_pPlayer->ClearChatString();
 
 	//------------------------------------------------
-	// »ì¾ÆÀÖ°Ô ÇÑ´Ù. È®ÀÎ¿ë...
+	
 	//------------------------------------------------
 	g_pTopView->SetFadeEnd();
 
 	//------------------------------------------------
-	// À§Ä¡ ¼³Á¤
+	
 	//------------------------------------------------
 	//g_pPlayer->SetPosition(x, y);	
 	g_pPlayer->SetStop();
@@ -3277,29 +3134,29 @@ InitPlayer(int x, int y, int dir)
 	g_pPlayer->SetZone(g_pZone);
 
 	//------------------------------------------------
-	// ½Ã¾ß È®ÀÎ..
+	
 	//------------------------------------------------
 	//#ifdef CONNECT_SERVER
 	//	g_pZone->KeepObjectInSight(x, y, g_pPlayer->GetSight());
 	//#endif
 
 	//------------------------------------------------
-	// »óÅÂ°ª
+	
 	//------------------------------------------------
 	//g_pPlayer->SetStatus(MODIFY_HP, 100);
 	//g_pPlayer->SetStatus(MODIFY_MP, 100);
 	
 	//------------------------------------------------
-	// ¿Ê ÀÔÈ÷±â	
+	
 	//------------------------------------------------
 	///*
-	//g_pPlayer->SetAddonEnable(ADDON_HAIR);		// ¸Ó¸®
-	//g_pPlayer->SetAddonEnable(ADDON_COAT);		// »óÀÇ
-	//g_pPlayer->SetAddonEnable(ADDON_TROUSER);	// ÇÏÀÇ
-	//g_pPlayer->SetAddonEnable(ADDON_HELM);		// ¸ðÀÚ
-	//g_pPlayer->SetAddonEnable(ADDON_LEFTHAND);	// ¿Þ¼Õ 
-	//g_pPlayer->SetAddonEnable(ADDON_RIGHTHAND);	// ¿À¸¥¼Õ	
-	//g_pPlayer->SetAddonEnable(ADDON_MOTOR);		// ¿ÀÅä¹ÙÀÌ
+	
+	
+	
+	
+	
+	
+	
 	
 	//g_pPlayer->SetAddon(ADDON_COAT, ADDONID_COAT1_MALE);	
 	//g_pPlayer->SetAddon(ADDON_TROUSER, ADDONID_TROUSER1_MALE);
@@ -3310,24 +3167,24 @@ InitPlayer(int x, int y, int dir)
 	//*/
 
 	//------------------------------------------------
-	// ½Ã¾ß ¼³Á¤
+	
 	//------------------------------------------------
-	//g_pPlayer->SetLightSight( 12 );	// ºûÀÇ Å©±â
-	//g_pPlayer->SetSight( 12 );		// Ä³¸¯ÅÍÀÇ ½Ã¾ß
+	
+	
 
 	//------------------------------------------------
-	// °ø°Ý, ±â¼ú °ü·Ã
+	
 	//------------------------------------------------
-	// °ø°Ý
+	
 	//g_pPlayer->SetBasicActionInfo( SKILL_ATTACK_MELEE );
 	
-	// °ø°Ý °¡´É°Å¸® ¼³Á¤
+	
 	//g_pPlayer->SetBasicAttackDistance( 1 );
 
-	// Æ¯¼ö °ø°Ý
+	
 	//g_pPlayer->SetSpecialActionInfo( MAGIC_BLESS );
 
-	// Á¤Áö µ¿ÀÛ
+	
 	if (g_pPlayer->IsAlive())
 	{
 		g_pPlayer->SetAction( ACTION_STAND );
@@ -3337,18 +3194,18 @@ InitPlayer(int x, int y, int dir)
 		g_pPlayer->SetAction( ACTION_DIE );
 	}
 
-	// ¿òÁ÷ÀÌ´Â ¹æ¹ý
+	
 	//g_pPlayer->SetMoveDevice( MCreature::MOVE_DEVICE_WALK );
 
 	//-------------------------------------------------------
-	// UI¿¡ »óÅÂ Àû¿ë
+	
 	//-------------------------------------------------------
 	//gC_vs_ui.SetHP(g_pPlayer->GetHP(), g_pPlayer->GetMAX_HP());
 	//gC_vs_ui.SetMP(g_pPlayer->GetMP(), g_pPlayer->GetMAX_MP());
 
 	//-------------------------------------------------------
-	// Server·Î º¸³½ move packet °³¼ö¸¦ Áö¿ì°í
-	// Ã³À½ºÎÅÍ~~ ´Ù½Ã moveÇÏ°Ô ÇÑ´Ù.
+	
+	
 	//-------------------------------------------------------
 	g_pPlayer->ResetSendMove();
 
@@ -3360,32 +3217,13 @@ InitPlayer(int x, int y, int dir)
 
 	//-------------------------------------------------------
 	//
-	//				»ç¿ëÇÒ ¼ö ÀÖ´Â ±â¼ú
+	
 	//
 	//-------------------------------------------------------
-	/*
-	(*g_pSkillManager).Init( MAX_SKILLDOMAIN );
+	 
 
 	//---------------------------------------------------------------------
-	// ±âº» ±â¼ú·ÎºÎÅÍ skill tree¸¦ ÃÊ±âÈ­ÇÑ´Ù.
-	//---------------------------------------------------------------------
-	(*g_pSkillManager)[SKILLDOMAIN_BLADE].SetRootSkill( SKILL_SINGLE_BLOW );
-	(*g_pSkillManager)[SKILLDOMAIN_SWORD].SetRootSkill( SKILL_DOUBLE_IMPACT );
-	(*g_pSkillManager)[SKILLDOMAIN_GUN].SetRootSkill( SKILL_SNIPPING );
-	(*g_pSkillManager)[SKILLDOMAIN_GUN].SetRootSkill( SKILL_SHARP_SHOOTING );
-	(*g_pSkillManager)[SKILLDOMAIN_ENCHANT].SetRootSkill( MAGIC_CREATE_HOLY_WATER );
-	(*g_pSkillManager)[SKILLDOMAIN_HEAL].SetRootSkill( MAGIC_CURE_POISON );
-	(*g_pSkillManager)[SKILLDOMAIN_VAMPIRE].SetRootSkill( MAGIC_HIDE );	
-
-	MSkillDomain& bladeDomain = (*g_pSkillManager)[SKILLDOMAIN_BLADE];
-	MSkillDomain& swordDomain = (*g_pSkillManager)[SKILLDOMAIN_SWORD];
-	MSkillDomain& gunDomain = (*g_pSkillManager)[SKILLDOMAIN_GUN];
-	MSkillDomain& enchantDomain = (*g_pSkillManager)[SKILLDOMAIN_ENCHANT];
-	MSkillDomain& healDomain = (*g_pSkillManager)[SKILLDOMAIN_HEAL];
-	*/
-
-	//---------------------------------------------------------------------
-	// ¸î°¡Áö skillÀ» ¹è¿ü´Ù°í Ç¥½ÃÇÑ´Ù.
+	
 	//---------------------------------------------------------------------
 	/*
 	swordDomain.LearnSkill( SKILL_DOUBLE_IMPACT );
@@ -3426,41 +3264,27 @@ InitPlayer(int x, int y, int dir)
 	//g_SkillAvailable.AddSkill( MAGIC_CURE_PARALYSIS );
 
 	//-------------------------------------------------------
-	// ±â¼ú °ËÁõ »óÅÂ..
+	
 	//-------------------------------------------------------
 	g_pPlayer->SetWaitVerifyNULL();
 
 	//-------------------------------------------------------
 	//
-	//						Item °ü·Ã
+	
 	//
 	//-------------------------------------------------------
 	//------------------------------------------------
-	// ItemCheckBuffer»óÅÂ
+	
 	//------------------------------------------------
 	g_pPlayer->ClearItemCheckBuffer();
 	
 	//------------------------------------------------
-	// Gear ÃÊ±âÈ­
+	
 	//------------------------------------------------
-	/*
-	if (g_pPlayer->IsSlayer())
-	{
-		g_SlayerGear.Init();
-	}
-	else
-	{
-		g_VampireGear.Init();
-	}
+	 
 
 	//------------------------------------------------
-	//  Inventory ÃÊ±âÈ­
-	//------------------------------------------------
-	g_Inventory.Init(10,6);
-	*/
-
-	//------------------------------------------------
-	// Á¤º¸Ã¢¿¡ º¸¿©ÁÖ´Â Á¤º¸..
+	
 	//------------------------------------------------
 	g_char_slot_ingame.Race = g_pPlayer->GetRace();
 	g_char_slot_ingame.bl_female = !g_pPlayer->IsMale();
@@ -3471,7 +3295,7 @@ InitPlayer(int x, int y, int dir)
 //-----------------------------------------------------------------------------
 // Make ScreenShot
 //-----------------------------------------------------------------------------
-// ÇöÀç È­¸éÀÇ ScreenShotÀ» ÀúÀåÇÑ´Ù.
+
 //-----------------------------------------------------------------------------
 void	
 MakeScreenShot()
@@ -3489,7 +3313,7 @@ MakeScreenShot()
 #else
 	mkdir("ScreenShot", 0755);
 #endif // PLATFORM_WINDOWS
-	// MAX_SCREENSHOT°³ÀÇ ScreenCapture¸¸ °¡´ÉÇÏ´Ù.
+	
 	for (; g_ScreenShotNumber<maxScreenShot; g_ScreenShotNumber++)
 	{
 		sprintf(str, "%s%03d.jpg", g_pFileDef->getProperty("PATH_SCREENSHOT").c_str(), g_ScreenShotNumber);
@@ -3500,7 +3324,7 @@ MakeScreenShot()
 		int fd = open( str, O_RDONLY );
 #endif // PLATFORM_WINDOWS
 
-		// fileÀÌ ¾ø´Â °æ¿ì¿¡ saveÇÏ±â À§ÇØ¼­..
+		
 		if( fd == -1 )
 		{
 			// Save
@@ -3568,9 +3392,9 @@ MakeScreenShot()
 //-----------------------------------------------------------------------------
 // PlaySound
 //-----------------------------------------------------------------------------
-// (*g_pSoundTable)¿¡¼­ÀÇ soundID¿Í °ü·ÃµÇ´Â FilenameÀ» PlayÇÏ¸é µÈ´Ù.
-// (*g_pSoundManager)¿¡ ÀÖÀ¸¸é ¹Ù·Î playÇÏ¸é µÇ°í.. 
-// ¾øÀ¸¸é Wav¸¦ LoadÇØ¼­ playÇÏ¸é µÈ´Ù.
+
+
+
 //-----------------------------------------------------------------------------
 void	
 PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
@@ -3584,7 +3408,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 	//static int reuse	= 0;
 
 	//-----------------------------------------------------------
-	// Á¤ÀÇµÇÁö ¾Ê´Â sound IDÀÏ °æ¿ì..
+	
 	//-----------------------------------------------------------
 	if (!g_SDLAudio.IsInit() || soundID >= (*g_pSoundTable).GetSize()
 		|| !g_pUserOption->PlaySound)
@@ -3594,7 +3418,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 	}
 
 	//-----------------------------------------------------------
-	// ÃÊ´ç ¼Ò¸®³¾ ¼ö ÀÖ´Â °³¼ö Á¦ÇÑ
+	
 	//-----------------------------------------------------------
 	if (!repeat 
 		&& g_SoundPerSecond > g_pClientConfig->MAX_SOUND_PER_SECOND)
@@ -3609,11 +3433,11 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 	int dist = max(abs(gapX), abs(gapY));				
 
 
-	// °Å¸®°¡ ¾î´À Á¤µµ ÀÌ»óÀÌ¸é ¼Ò¸®¸¦ Ãâ·ÂÇÏÁö ¾Ê¾Æ¾ß ÇÑ´Ù.
+	
 	if (dist < 25)
 	{			
 		//-----------------------------------------------------------
-		// ¾øÀ¸¸é --> Load & Play
+		
 		//-----------------------------------------------------------
 		if ((*g_pSoundManager).IsDataNULL(soundID))
 		{
@@ -3632,7 +3456,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
 			//-----------------------------------------------------------
-			// Loading ½ÇÆÐ
+			
 			//-----------------------------------------------------------
 			if (pBuffer==NULL)
 			{
@@ -3646,7 +3470,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			}
 			else
 			//-----------------------------------------------------------
-			// Load¿¡ ¼º°ø ÇßÀ¸¸é...
+			
 			//-----------------------------------------------------------
 			{
 #ifdef PLATFORM_WINDOWS
@@ -3677,7 +3501,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 				}			
 
 				
-				// ¿ÀÅä¹ÙÀÌ ¼Ò¸® Á» ÁÙÀÌ±â ÇÏµåÄÚµù. - -;
+				
 				if (soundID==SOUND_WORLD_BIKE_GO
 					|| soundID==SOUND_WORLD_BIKE_STOP)
 				{
@@ -3705,7 +3529,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 			}
 		}
 		//-----------------------------------------------------------
-		// ÀÖ´Â °æ¿ì --> Play
+		
 		//-----------------------------------------------------------
 		else
 		{
@@ -3726,7 +3550,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 					g_SDLAudio.CenterPan( pBuffer );
 				}
 
-				// ¿ÀÅä¹ÙÀÌ ¼Ò¸® Á» ÁÙÀÌ±â ÇÏµåÄÚµù. - -;
+				
 				if (soundID==SOUND_WORLD_BIKE_GO
 					|| soundID==SOUND_WORLD_BIKE_STOP)
 				{
@@ -3773,7 +3597,7 @@ PlaySound(TYPE_SOUNDID soundID, bool repeat, int x, int y)
 //-----------------------------------------------------------------------------
 // PlaySound
 //-----------------------------------------------------------------------------
-// ¼Ò¸®³ª´Â À§Ä¡°¡ ´Ã playerÀÇ À§Ä¡..
+
 // CenterPan & MaxVolume
 //-----------------------------------------------------------------------------
 void	
@@ -3785,7 +3609,7 @@ PlaySound(TYPE_SOUNDID soundID)
 	__BEGIN_PROFILE("PlaySound2")
 
 	//-----------------------------------------------------------
-	// Á¤ÀÇµÇÁö ¾Ê´Â sound IDÀÏ °æ¿ì..
+	
 	//-----------------------------------------------------------
 	if (!g_SDLAudio.IsInit() || soundID >= (*g_pSoundTable).GetSize()
 		|| !g_pUserOption->PlaySound)
@@ -3795,9 +3619,9 @@ PlaySound(TYPE_SOUNDID soundID)
 	}
 
 	//-----------------------------------------------------------
-	// ÃÊ´ç ¼Ò¸®³¾ ¼ö ÀÖ´Â °³¼ö Á¦ÇÑ
+	
 	//-----------------------------------------------------------
-	// playerÀÇ ¼Ò¸®´Â Á¦ÇÑÇÒ ÇÊ¿ä°¡ ¾ø´Ù.
+	
 	//if (g_SoundPerSecond > g_pClientConfig->MAX_SOUND_PER_SECOND)
 	//{
 	//	__END_PROFILE("PlaySound2")
@@ -3805,7 +3629,7 @@ PlaySound(TYPE_SOUNDID soundID)
 	//}
 
 	//-----------------------------------------------------------
-	// ¾øÀ¸¸é --> Load & Play
+	
 	//-----------------------------------------------------------
 	if ((*g_pSoundManager).IsDataNULL(soundID))
 	{
@@ -3823,7 +3647,7 @@ PlaySound(TYPE_SOUNDID soundID)
 		//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
 		//-----------------------------------------------------------
-		// Loading ½ÇÆÐ
+		
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
@@ -3835,12 +3659,12 @@ PlaySound(TYPE_SOUNDID soundID)
 #endif // PLATFORM_WINDOWS
 		}
 		//-----------------------------------------------------------
-		// Load¿¡ ¼º°ø ÇßÀ¸¸é...
+		
 		//-----------------------------------------------------------
 		else
 		{
 #ifdef PLATFORM_WINDOWS
-			// ReplaceµÆÀ¸¸é ¿ø·¡°ÍÀ» ¸Þ¸ð¸®¿¡¼­ Áö¿î´Ù.
+			
 			LPDIRECTSOUNDBUFFER pOld;
 			if ((*g_pSoundManager).SetData( soundID, pBuffer, pOld )!=0xFFFF)
 			{
@@ -3873,7 +3697,7 @@ PlaySound(TYPE_SOUNDID soundID)
 		}
 	}
 	//-----------------------------------------------------------
-	// ÀÖ´Â °æ¿ì --> Play
+	
 	//-----------------------------------------------------------
 	else
 	{
@@ -3916,7 +3740,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 	__BEGIN_PROFILE("PlaySound2")
 
 	//-----------------------------------------------------------
-	// Á¤ÀÇµÇÁö ¾Ê´Â sound IDÀÏ °æ¿ì..
+	
 	//-----------------------------------------------------------
 	if (!g_SDLAudio.IsInit() || soundID >= (*g_pSoundTable).GetSize()
 		)
@@ -3926,9 +3750,9 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 	}
 
 	//-----------------------------------------------------------
-	// ÃÊ´ç ¼Ò¸®³¾ ¼ö ÀÖ´Â °³¼ö Á¦ÇÑ
+	
 	//-----------------------------------------------------------
-	// playerÀÇ ¼Ò¸®´Â Á¦ÇÑÇÒ ÇÊ¿ä°¡ ¾ø´Ù.
+	
 	//if (g_SoundPerSecond > g_pClientConfig->MAX_SOUND_PER_SECOND)
 	//{
 	//	__END_PROFILE("PlaySound2")
@@ -3936,7 +3760,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 	//}
 
 	//-----------------------------------------------------------
-	// ¾øÀ¸¸é --> Load & Play
+	
 	//-----------------------------------------------------------
 	if ((*g_pSoundManager).IsDataNULL(soundID))
 	{
@@ -3954,7 +3778,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		//LPDIRECTSOUNDBUFFER	pBuffer = g_pWavePackFileManager->LoadFromFileData(soundID);
 
 		//-----------------------------------------------------------
-		// Loading ½ÇÆÐ
+		
 		//-----------------------------------------------------------
 		if (pBuffer==NULL)
 		{
@@ -3967,12 +3791,12 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 #endif // PLATFORM_WINDOWS
 		}
 		//-----------------------------------------------------------
-		// Load¿¡ ¼º°ø ÇßÀ¸¸é...
+		
 		//-----------------------------------------------------------
 		else
 		{
 #ifdef PLATFORM_WINDOWS
-			// ReplaceµÆÀ¸¸é ¿ø·¡°ÍÀ» ¸Þ¸ð¸®¿¡¼­ Áö¿î´Ù.
+			
 			LPDIRECTSOUNDBUFFER pOld;
 			if ((*g_pSoundManager).SetData( soundID, pBuffer, pOld )!=0xFFFF)
 			{
@@ -4005,7 +3829,7 @@ void PlaySoundForce(TYPE_SOUNDID soundID)
 		}
 	}
 	//-----------------------------------------------------------
-	// ÀÖ´Â °æ¿ì --> Play
+	
 	//-----------------------------------------------------------
 	else
 	{
@@ -4050,19 +3874,19 @@ void
 StopSound(TYPE_SOUNDID soundID)
 {
 	//-----------------------------------------------------------
-	// Á¤ÀÇµÇÁö ¾Ê´Â sound IDÀÏ °æ¿ì..
+	
 	//-----------------------------------------------------------
 	if (!g_SDLAudio.IsInit() || soundID == SOUNDID_NULL)
 		return;
 
 	//-----------------------------------------------------------
-	// Á¤ÀÇµÇÁö ¾Ê´Â sound IDÀÏ °æ¿ì..
+	
 	//-----------------------------------------------------------
 	if (soundID == SOUNDID_NULL)
 		return;
 
 	//-----------------------------------------------------------
-	// ¾øÀ¸¸é --> ±×³É return
+	
 	//-----------------------------------------------------------
 	if (soundID < g_pSoundManager->GetMaxIndex())
 	{
@@ -4071,7 +3895,7 @@ StopSound(TYPE_SOUNDID soundID)
 			return;
 		}
 		//-----------------------------------------------------------
-		// ÀÖ´Â °æ¿ì --> Stop
+		
 		//-----------------------------------------------------------
 		else
 		{
@@ -4087,12 +3911,12 @@ StopSound(TYPE_SOUNDID soundID)
 //---------------------------------------------------------------------------
 // Play Music Current Zone
 //---------------------------------------------------------------------------
-// ³¯¾¾¸¦ ¹Ù²Û´Ù.
+
 //---------------------------------------------------------------------------
 void		
 PlayMusicCurrentZone()
 {
-	// ½Ã°£¿¡ µû¶ó play
+	
 	if(g_pEventManager->GetEventByFlag(EVENTFLAG_NOT_PLAY_SOUND))
 		return;
 	
@@ -4113,7 +3937,7 @@ PlayMusicCurrentZone()
 	};
 
 
-	// ½Ã°£¿¡ µû¶ó play
+	
 	const MUSIC_ID musicByTimeXmas[] = 
 	{
 		MUSIC_XMAS_SILENTNIGHT,
@@ -4140,14 +3964,14 @@ PlayMusicCurrentZone()
 		MUSIC_QUARTUS,
 	};
 
-	// Å©¸®½º¸¶½º ÀÌº¥Æ® ³¯Â¥ Ã¼Å©
+	
 //	SYSTEMTIME st;
 //	GetLocalTime( &st ); 
 	
-	// Å©¸®½º¸¶½º¸é Å©¸®½º¸¶½º ³ë·¡¸¦ Æ²¾îÁØ´Ù.
+	
 	int newMusicID;
 
-	// ¾ÈÀüÁö´ëÀÎ°¡?
+	
 	int zoneID	= (g_bZonePlayerInLarge?g_nZoneLarge : g_nZoneSmall);
 	ZONETABLE_INFO* pZoneInfo = g_pZoneTable->Get( zoneID );	
 	bool bSafetyZone = (pZoneInfo!=NULL && pZoneInfo->Safety);
@@ -4203,7 +4027,7 @@ PlayMusicCurrentZone()
 	{
 		newMusicID = musicByTime[ (g_pGameTime->GetHour() / 2) % 12 ];
 	}	
-	// 2004, 7, 6 sobeit add start - Áúµå·¹ ·¹¾î ¹è°æÀ½ - bgmÀ» info¿¡¼­ ÂüÁ¶ ÇÏÁö ¾Ê´Â°ÇÁö..
+	
 	if(zoneID == 1410 || zoneID == 1411)
 		newMusicID = MUSIC_ILLUSIONS_WAY;
 	else if(zoneID == 1412 || zoneID == 1413)
@@ -4219,7 +4043,7 @@ PlayMusicCurrentZone()
 		//if (pZoneInfo!=NULL)
 		{
 			//------------------------------------------
-			// Á¾Á·¿¡ µû¶ó¼­ À½¾ÇÀÌ ´Þ¶óÁø´Ù.
+			
 			//------------------------------------------
 			//TYPE_MUSICID	newMusicID = 0;
 
@@ -4260,16 +4084,16 @@ PlayMusicCurrentZone()
 						g_oggfile = fopen( (*g_pMusicTable)[ musicID ].FilenameWav, "rb");
 						if( g_oggfile != NULL )
 						{
-							// 2004, 11, 8, sobeit add start - ±×³É ¿¡·¯ Ã¼Å©
-							if(SOUND_ERR_OK == g_pOGG->streamLoad( g_oggfile, NULL ))
+							
+							if(g_pOGG->streamLoad( g_oggfile, NULL ))
 							{
-								if(SOUND_ERR_OK == g_pOGG->streamPlay( SOUND_PLAY_ONCE ))
+								if(g_pOGG->streamPlay( 0 ))
 								{
 									int volume = (g_pUserOption->VolumeMusic - 15) * 250;
 									g_pOGG->streamVolume( max( -10000, min( -1, volume ) ) );
 								}
 							}
-							// 2004, 11, 8, sobeit add end - ±×³É ¿¡·¯ Ã¼Å©
+							
 						}
 					}
 #endif // PLATFORM_WINDOWS
@@ -4287,7 +4111,7 @@ PlayMusicCurrentZone()
 //---------------------------------------------------------------------------
 // Set Weather
 //---------------------------------------------------------------------------
-// ³¯¾¾¸¦ ¹Ù²Û´Ù.
+
 //---------------------------------------------------------------------------
 void		
 SetWeather(int weather, int level)
@@ -4295,7 +4119,7 @@ SetWeather(int weather, int level)
 	static int previousWeather = weather;
 
 	//---------------------------------------------
-	// ÀÌÀüÀÇ ³¯¾¾¿Í °ü·ÃµÈ Sound¸¦ ¾ø¾Ø´Ù.
+	
 	//---------------------------------------------
 	StopSound( g_previousSoundID );
 	
@@ -4303,7 +4127,7 @@ SetWeather(int weather, int level)
 	DEBUG_ADD_FORMAT("[Set Weather] %d, %d", weather, level);
 	
 	//---------------------------------------------
-	// ³¯¾¾ Á¾·ù¿¡ µû¶ó¼­...
+	
 	//---------------------------------------------
 	if(previousWeather == WEATHER_SPOT)
 		g_pWeather->Release();
@@ -4311,10 +4135,10 @@ SetWeather(int weather, int level)
 	switch (weather)
 	{
 		//------------------------------
-		// ¸¼Àº ³¯¾¾
+		
 		//------------------------------
 		case WEATHER_CLEAR :	
-			// ÀÌÀü¿¡ ºñ°¡ ¿À´ø ³¯¾¾¿´À¸¸é...
+			
 			if (previousWeather==WEATHER_RAINY)
 			{
 				if (g_pTopView!=NULL && g_pTopView->IsInit())
@@ -4328,10 +4152,10 @@ SetWeather(int weather, int level)
 		break;
 
 		//------------------------------
-		// ºñ
+		
 		//------------------------------
 		case WEATHER_RAINY :
-			// ÀÌÀü¿¡ ¸¼Àº ³¯¾¾¿´´Ù¸é...
+			
 			if (previousWeather!=WEATHER_RAINY)
 			{
 				if (g_pTopView!=NULL && g_pTopView->IsInit())
@@ -4342,20 +4166,20 @@ SetWeather(int weather, int level)
 
 			g_pWeather->SetRain( level<<3 );
 
-			// 2´Â ºñ°¡ ´õ ¸¹ÀÌ ¿Ã¶§ÀÇ ¼Ò¸®
+			
 			g_previousSoundID = (level>=15)? SOUND_WORLD_WEATHER_RAIN_2 : SOUND_WORLD_WEATHER_RAIN_1; 
 			
-			// ¹Ýº¹ÇØ¼­ ºñ ¼Ò¸® ³»±â...
+			
 			PlaySound( g_previousSoundID , 
 						true, 
 						g_pPlayer->GetX(), g_pPlayer->GetY() );
 		break;
 
 		//------------------------------
-		// ´«
+		
 		//------------------------------
 		case WEATHER_SNOWY  :
-			// ÀÌÀü¿¡ ºñ°¡ ¿À´ø ³¯¾¾¿´À¸¸é...
+			
 			if (previousWeather==WEATHER_RAINY)
 			{
 				if (g_pTopView!=NULL && g_pTopView->IsInit())
@@ -4372,7 +4196,7 @@ SetWeather(int weather, int level)
 		// Spot
 		//------------------------------
 		case WEATHER_SPOT  :
-			// ÀÌÀü¿¡ ºñ°¡ ¿À´ø ³¯¾¾¿´À¸¸é...
+			
 			if (previousWeather==WEATHER_RAINY)
 			{
 				if (g_pTopView!=NULL && g_pTopView->IsInit())
@@ -4400,18 +4224,18 @@ SetLightning(DWORD delay)
 	DEBUG_ADD("[Set Lightning]");
 	
 	//---------------------------------------------
-	// ¹ø°³ Ç¥Çö..
+	
 	//---------------------------------------------
 	if (g_pTopView!=NULL && g_pTopView->IsInit())
 	{
 		g_pTopView->SetFadeStart(1, 31, 10, 31,31,31);
 	}
 
-	// 1ÃÊ ¾ÈÀÇ °Å¸®¿¡ ÀÖÀ¸¸é.. THUNDER1
-	// ´õ ¸Ö¸é THUNDER2
+	
+	
 	TYPE_SOUNDID sid = (delay<=1000)? SOUND_WORLD_WEATHER_THUNDER_1 : SOUND_WORLD_WEATHER_THUNDER_2;
 
-	// sound¸¦ ±â¾ïÇØµ×´Ù°¡ ³ªÁß¿¡ Ãâ·ÂÇÑ´Ù.
+	
 	SOUND_NODE* pNode = new SOUND_NODE( sid, delay, g_pPlayer->GetX(), g_pPlayer->GetY() );
 
 	g_pZone->AddSound( pNode );
@@ -4478,65 +4302,7 @@ UpdateInput()
 	// mouse
 	//
 	//---------------------------------------------------		
-	/*
-	static int xSign = 0;
-	static int ySign = 0;
-	static int mouseStep = 1;
-	
-	// ºÎÈ£ °áÁ¤
-	int xSignNew = 0;
-	int ySignNew = 0;
-
-	if (g_pSDLInput->m_mouse_x)
-	{
-		xSignNew = (g_pSDLInput->m_mouse_xdata > 0)? 1: -1;
-	}
-
-	if (g_pSDLInput->m_mouse_y)
-	{
-		ySignNew = (g_pSDLInput->m_mouse_ydata > 0)? 1: -1;
-	}
-
-	//------------------------------------------------------
-	// Á¤ÁöµÈ »óÅÂ
-	//------------------------------------------------------
-	if (xSignNew==0 && ySignNew==0)
-	{		
-		mouseStep = 6;
-	}
-	//------------------------------------------------------
-	// ¿òÁ÷ÀÎ °æ¿ì
-	//------------------------------------------------------
-	else
-	{
-		//------------------------------------------------------
-		// °°Àº ¹æÇâÀ¸·Î ÀÌµ¿ÇÏ¸é..
-		//------------------------------------------------------
-		if (xSignNew==xSign && ySignNew==ySign)
-		{
-			// ÃÖ´ë mouse ÀÌµ¿ pixel¼³Á¤
-			if (abs(mouseStep) < 20)
-			{
-				mouseStep ++;
-			}
-		}
-		//------------------------------------------------------
-		// ´Ù¸¥ ¹æÇâÀ¸·Î ÀÌµ¿ÇÏ´Â °æ¿ì
-		//------------------------------------------------------
-		else
-		{
-			mouseStep = 6;			
-		}
-
-		xSign = xSignNew;
-		ySign = ySignNew;
-
-		// Ä¿¼­¸¦ ¿òÁ÷¿© ÁØ´Ù.
-		int step = mouseStep >> 1;
-		if (g_pSDLInput->m_mouse_x) g_x += g_pSDLInput->m_mouse_xdata * (step? step : 1);
-		if (g_pSDLInput->m_mouse_y) g_y += g_pSDLInput->m_mouse_ydata * (step? step : 1);
-	}
-	*/
+	 
 
 	
 
@@ -4547,27 +4313,13 @@ UpdateInput()
 	//if (g_pSDLInput->m_mouse_x) g_x += g_pSDLInput->m_mouse_xdata*3;
 	//if (g_pSDLInput->m_mouse_y) g_y += g_pSDLInput->m_mouse_ydata*3;	
 
-	// CursorÀÇ positionÀ» ¾ò¾î³½´Ù.
-	/*
-	POINT point;
-	GetCursorPos(&point);
-	g_x = point.x;
-	g_y = point.y;
-
-
-	//-----------------------------------------------
-	// Mouse Cursor°¡ ¹ÛÀ¸·Î ³ª°¡Áö ¾Êµµ·Ï ÇÑ´Ù.
-	//-----------------------------------------------
-	if (g_x<0) g_x=0;
-	else if (g_x>=SURFACE_WIDTH) g_x=SURFACE_WIDTH-1;
-	if (g_y<0) g_y=0;
-	else if (g_y>=SURFACE_HEIGHT) g_y=SURFACE_HEIGHT-1;
-	*/
+	
+	 
 	// - -;;
 	//g_pSDLInput->SetMousePosition( g_x, g_y );
 
 	//-----------------------------------------------
-	// »õ·Î ÀÔ·ÂµÈ °ÍÀ» CInputManager¿¡ ÀúÀå
+	
 	//-----------------------------------------------
 	/*
 	g_InputManager.SetPosition( g_x, g_y );
@@ -4584,7 +4336,7 @@ UpdateInput()
 void
 UpdateMouse()
 {
-	// CursorÀÇ positionÀ» ¾ò¾î³½´Ù.
+	
 	POINT point;
 	GetCursorPos(&point);
 	// add by svi
@@ -4597,7 +4349,7 @@ UpdateMouse()
 
 
 	//-----------------------------------------------
-	// Mouse Cursor°¡ ¹ÛÀ¸·Î ³ª°¡Áö ¾Êµµ·Ï ÇÑ´Ù.
+	
 	//-----------------------------------------------
 	if (g_x<0) g_x=0;
 	else if (g_x>=g_GameRect.right) g_x=g_GameRect.right-1;
@@ -4612,35 +4364,7 @@ UpdateMouse()
 void
 KeepConnection()
 {
-	/*
-	// CGVerifyTimeÀÌ ÀÖÀ¸¹Ç·Î ÀÌÁ¦ ÇÊ¿ä¾ø´Ù.
-	#ifdef CONNECT_SERVER	
-		if (
-			#ifndef _DEBUG		// debug¹öÀü¿¡¼­´Â ¹«Á¶°Ç KeepConnectionÀÌ´Ù.
-				(g_pUserInformation->KeepConnection || g_pUserInformation->IsMaster)
-				&&				
-			#endif
-			g_pSocket!=NULL)
-	
-		{
-			static DWORD lastTime = g_CurrentTime;
-
-			//------------------------------------------------------------------
-			// 3ºÐ ¸¶´Ù ÇÑ¹ø¾¿ garbarge packetÀ» º¸³½´Ù.
-			//------------------------------------------------------------------
-			if (g_CurrentTime - lastTime > 180000)		// 3 * 60 * 1000
-			{
-				#ifdef	CONNECT_SERVER			
-					CGSay _CGSay;
-					_CGSay.setMessage( "*" );
-					g_pSocket->sendPacket( &_CGSay );			
-				#endif
-
-				lastTime = g_CurrentTime;
-			}
-		}
-	#endif
-	*/
+	 
 }
 
 //---------------------------------------------------------------------------
@@ -4652,18 +4376,18 @@ UpdateDisconnected()
 	DEBUG_ADD("UpdateDisconnected : Start Process");
 	
 	//--------------------------------------------------
-	// socketÁ¦°Å
+	
 	//--------------------------------------------------
 	ReleaseSocket();
 
 	//--------------------------------------------------
-	// ¼Ò¸® ÁßÁö
+	
 	//--------------------------------------------------
 	StopSound( g_previousSoundID );
 	StopSound( SOUND_WORLD_PROPELLER );
 
 	//--------------------------------------------------
-	// À½¾Ç ¸ØÃá´Ù.
+	
 	//--------------------------------------------------
 	if (g_pUserOption->PlayWaveMusic)
 	{
@@ -4685,21 +4409,21 @@ UpdateDisconnected()
 	DEBUG_ADD("UpdateDisconnected : Stop Music OK");
 	
 	//--------------------------------------------------
-	// Thread Loading Á¾·á..
+	
 	//--------------------------------------------------
 	StopLoadingThread();
 
 	DEBUG_ADD("UpdateDisconnected : Stop Thread OK");
 	
 	//--------------------------------------------------
-	// game objectµé Á¦°Å
+	
 	//--------------------------------------------------
 	ReleaseGameObject();
 
 	DEBUG_ADD("UpdateDisconnected : Release GameObject OK");
 	
 	//------------------------------------------------------
-	// dialogµé ´Ù ´Ý±â.
+	
 	//------------------------------------------------------
 	gC_vs_ui.CloseOption();
 //	gC_vs_ui.CloseInfo();
@@ -4721,9 +4445,9 @@ UpdateDisconnected()
 	
 
 	//--------------------------------------------------
-	// Á¢¼Ó ²÷°å´Ù´Â dialog
+	
 	//--------------------------------------------------
-	// ÇÊ»ì~ ÀÓ½Ã ÄÚµå..
+	
 	CSpritePack		SPK;
 	CFileIndexTable	FIT;
 	
@@ -4733,7 +4457,7 @@ UpdateDisconnected()
 
 	SPK.Init( FIT.GetSize() );
 	
-	// returnÀ» ´©¸¦ ¶§±îÁö...
+	
 	CSprite* pSpriteDisconected = &SPK[ SPRITEID_DISCONNECTED ];
 	CSprite* pSpriteDisconectedCloseFocused = &SPK[ SPRITEID_DISCONNECTED_CLOSE_FOCUSED ];
 	CSprite* pSpriteDisconectedClosePushed = &SPK[ SPRITEID_DISCONNECTED_CLOSE_PUSHED ];
@@ -4768,7 +4492,7 @@ UpdateDisconnected()
 	DEBUG_ADD("UpdateDisconnected : Load Disconnected Dialog OK");
 	
 	//--------------------------------------------------
-	// Á¢¼Ó ²÷°å´Ù´Â °É ¸ÕÀú ÇÑ¹ø ¶ç¿öÁØ´Ù.
+	
 	//--------------------------------------------------
 //	if (true)
 //	{
@@ -4831,7 +4555,7 @@ UpdateDisconnected()
 		//gC_vs_ui.DrawMousePointer();
 
 		//-----------------------------------------------------------------
-		// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+		
 		//-----------------------------------------------------------------
 		point.x = 0;
 		point.y = 0;
@@ -4846,14 +4570,14 @@ UpdateDisconnected()
 	
 	
 	//------------------------------------------------------
-	// Main È­¸é..
+	
 	//------------------------------------------------------
 //	gC_vs_ui.StartTitle();
 	
 	DEBUG_ADD("UpdateDisconnected : UI Start Title OK");
 	
 	//------------------------------------------------------
-	// ALT + TAB »óÅÂ°¡ ¾Æ´Ò ¶§
+	
 	//------------------------------------------------------
 	extern bool	g_bTestMode;
 	if (g_bActiveGame
@@ -4875,7 +4599,7 @@ UpdateDisconnected()
 
 		while (1)
 		{
-			// UI·ÎÀÇ ÀÔ·ÂÀ» ¸·¾Æ¾ß µÇ´Âµ¥...
+			
 			if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 			{	
 				if (!GetMessage(&msg, NULL, 0, 0))
@@ -5042,7 +4766,7 @@ UpdateDisconnected()
 				gC_vs_ui.DrawMousePointer();
 
 				//-----------------------------------------------------------------
-				// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+				
 				//-----------------------------------------------------------------
 				point.x = 0;
 				point.y = 0;
@@ -5063,8 +4787,8 @@ UpdateDisconnected()
 		pSpriteDisconectedCloseFocused->Release();
 		pSpriteDisconectedClosePushed->Release();
 
-		// 2004, 07, 19 sobeit add start - ¼­¹ö¿Í ¿¬°áÇÒ¼ö ¾ø½À´Ï´Ù. È®ÀÎ ´©¸£¸é °ÔÀÓ Á¾·áÇÏ°Ô ¼öÁ¤
-		if(true == g_pUserInformation->IsAutoLogIn) // À¥ ÀÚµ¿ ·Î±ä¸ðµå ÀÏ ¶§¸¸
+		
+		if(true == g_pUserInformation->IsAutoLogIn) 
 			SetMode(MODE_QUIT);
 		// 2004, 07, 19 sobeit add end
 
@@ -5098,7 +4822,7 @@ UpdateDisconnected()
 			gC_vs_ui.DrawMousePointer();
 
 			//-----------------------------------------------------------------
-			// Last¸¦ BackÀ¸·Î copy - 3D HALÀÌ ¾Æ´Ñ °æ¿ì¸¸..
+			
 			//-----------------------------------------------------------------
 			point.x = 0;
 			point.y = 0;
@@ -5116,41 +4840,10 @@ UpdateDisconnected()
 
 	DEBUG_ADD("UpdateDisconnected : OK");
 	
-	/*
-	//InitFail("Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.");
-	//InitFail("Server¿ÍÀÇ Á¢¼ÓÀÌ ²÷¾îÁ³½À´Ï´Ù.");
-	// g_pBack->GDI_Text(101,201, "Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.", RGB(0,0,0));
-	TextSystem::TextService::RenderText(101, 201, "Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.");
-	// g_pBack->GDI_Text(100,200, "Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.", RGB(220,220,220));
-	TextSystem::TextService::RenderText(100, 200, "Server°¡ ÀÀ´äÇÏÁö ¾Ê½À´Ï´Ù.");
-
-	// g_pBack->GDI_Text(101,221, "[ESC]¸¦ ´©¸£¼¼¿ä.", RGB(0,0,0));
-	TextSystem::TextService::RenderText(101, 221, "[ESC]¸¦ ´©¸£¼¼¿ä.");
-	// g_pBack->GDI_Text(100,220, "[ESC]¸¦ ´©¸£¼¼¿ä.", RGB(220,220,220));
-	TextSystem::TextService::RenderText(100, 220, "[ESC]¸¦ ´©¸£¼¼¿ä.");
-
-	CSDLGraphics::Flip();
-
-	// returnÀ» ´©¸¦ ¶§±îÁö...
-	while (1)
-	{
-		UpdateInput();
-		
-		if (g_pSDLInput->KeyDown(DIK_ESCAPE))
-		{
-			break;
-		}
-	}
-
-	// TitleÈ­¸é UI½ÃÀÛ
-	//gC_vs_ui.StartTitle();
-
-	//g_pBack->GDI_Text(101,201, "Àá½Ã ±â´Ù·Á ÁÖ¼¼¿ä.", RGB(0,0,0));
-	//g_pBack->GDI_Text(100,200, "Àá½Ã ±â´Ù·Á ÁÖ¼¼¿ä.", RGB(220,220,220));
-	*/
+	 
 }
 
-// ok¸¦ ´©¸¥ µÚ ½ÇÇàµÇ´Â °Í.
+
 void RunAfterServerDisconnect()
 {
 
@@ -5159,7 +4852,7 @@ void RunAfterServerDisconnect()
 //-----------------------------------------------------------------------------
 // Select LastSelected Character
 //-----------------------------------------------------------------------------
-// ÀÌÀü¿¡ ¼±ÅÃÇÑ Ä³¸¯ÅÍ¸¦ ¼±ÅÃÇÏ±â
+
 //-----------------------------------------------------------------------------
 void
 SelectLastSelectedCharacter()
@@ -5202,7 +4895,7 @@ SelectLastSelectedCharacter()
 //-----------------------------------------------------------------------------
 // Select LastSelected Character
 //-----------------------------------------------------------------------------
-// ÇöÀç ¼±ÅÃÇÑ Ä³¸¯ÅÍ¸¦ ÀúÀåÇÏ±â
+
 //-----------------------------------------------------------------------------
 void
 SaveLastSelectedCharacter(int slot)
@@ -5223,7 +4916,7 @@ SaveLastSelectedCharacter(int slot)
 
 		if (pPCTable==NULL)
 		{
-			// worldID°¡ ¾øÀ¸¸é »ý¼ºÇØ¼­ Ãß°¡
+			
 			pPCTable = new PlayerConfigTable;
 
 			g_pWorldPlayerConfigTable->AddPlayerConfigTable( worldID, pPCTable );
@@ -5236,7 +4929,7 @@ SaveLastSelectedCharacter(int slot)
 		{
 			bNewPlayer = true;
 
-			// playerID°¡ ¾øÀ¸¸é »ý¼ºÇØ¼­ Ãß°¡
+			
 			pConfig = new PlayerConfig;
 			if( playerID != NULL && strlen( playerID ) < 15 )
 				pConfig->SetPlayerID( playerID );
@@ -5248,7 +4941,7 @@ SaveLastSelectedCharacter(int slot)
 
 		int oldSlot = pConfig->GetLastSlot();
 
-		// Ç×»ó ÀúÀåÇÏ°Ô ÇÏÀÚ..
+		
 		//if (oldSlot != slot || bNewPlayer)
 		{
 			pConfig->SetLastSlot( slot );		
@@ -5261,15 +4954,15 @@ SaveLastSelectedCharacter(int slot)
 //-----------------------------------------------------------------------------
 // Set WatchMode ( true || false )
 //-----------------------------------------------------------------------------
-// ±¸°æÇÏ´Â mode..
+
 //-----------------------------------------------------------------------------
 void	
 SetWatchMode(bool active)
 {
 	//-------------------------------------------------------------------
-	// Player¸¦ Zone¿¡¼­ Á¦°Å
-	// UI ÀÛµ¿ ¸øÇÏ°Ô ¼³Á¤?
-	// ÀÌµ¿ ¹æ½Ä º¯°æ
+	
+	
+	
 	//-------------------------------------------------------------------
 	if (active)
 	{
@@ -5400,7 +5093,7 @@ AddClientCreature()
 	int x, y;
 
 	//-----------------------------------
-	// ¿Ê ÀÔ´Â Creature
+	
 	//-----------------------------------
 	if (0)//rand()%2)
 	{
@@ -5408,10 +5101,10 @@ AddClientCreature()
 
 		pCreature->SetZone(g_pZone);
 
-		// (*g_pCreatureTable)ÀÇ Á¤º¸µé ÁßÀÇ ÇÏ³ª..
+		
 		pCreature->SetCreatureType( rand()%2 );
 
-		// Move Á¾·ù¸¦ ´Ù¸£°Ô ÇÑ´Ù.
+		
 		switch (0)//rand()%2)//rand()%3)
 		{
 			case 0 :
@@ -5464,7 +5157,7 @@ AddClientCreature()
 		
 		pCreature->SetID( creatureID );
 
-		// ÀÌ¸§ ¼³Á¤ - ÀÏ´ÜÀº ID·Î
+		
 		//char str[80];
 		//sprintf(str, "ID=%d", pCreature->GetID());
 		//pCreature->SetName( str );
@@ -5502,7 +5195,7 @@ AddClientCreature()
 		return pCreature;
 	}
 	//-----------------------------------
-	// ¿Ê ¾ø´Â Creature
+	
 	//-----------------------------------
 	else
 	{				
@@ -5527,14 +5220,14 @@ AddClientCreature()
 			pCreature->SetCreatureType( cType );//11+rand()%(23-11+1) );
 		}
 
-		// Á¸ÀçÇÏ´Â ZoneÀ» ¼³Á¤ÇÑ´Ù.
+		
 		pCreature->SetZone(g_pZone);
 
-		// (*g_pCreatureTable)ÀÇ Á¤º¸µé ÁßÀÇ ÇÏ³ª..
+		
 		//pCreature->SetCreatureType( (rand()%((*g_pCreatureTable).GetSize()-4))+4 );				
 		
 		//------------------------------------------------------------
-		// ¹ÙÅä¸®ÀÎ °æ¿ì.. ÇÏµåÄÚµù(-_-);
+		
 		//------------------------------------------------------------
 		pCreature->SetStatus( MODIFY_MAX_HP, 100 );
 		if (cType==217)
@@ -5624,7 +5317,7 @@ AddClientCreature()
 		}
 		
 
-		// Move Á¾·ù¸¦ ´Ù¸£°Ô ÇÑ´Ù.
+		
 		switch (0)//rand()%2)//rand()%3)
 		{
 			case 0 :
@@ -5680,14 +5373,14 @@ AddClientCreature()
 		pCreature->SetID( creatureID );
 
 				
-		// ÀÌ¸§ ¼³Á¤ - ÀÏ´ÜÀº ID·Î
+		
 		//if (pCreature->IsVampire())
 		{
 			//char str[80];
 			//sprintf(str, "ID=%d, Type=%d", pCreature->GetID(), pCreature->GetCreatureType());
 			pCreature->SetName( (*g_pCreatureTable)[pCreature->GetCreatureType()].Name.GetString() );
 
-			// ÇÔ¼öÀÚÃ¼°¡ Å¬¶óÀÌ¾ðÆ® Àü¿ë-.-;;; ·£´ý-_-;
+			
 			if ((pCreature->GetID() & 0x00000007)==7)
 			{
 				pCreature->SetPlayerParty();
@@ -5744,7 +5437,7 @@ AddClientCreature()
 		// [ TEST CODE ]
 		//pCreature->SetChatString( "1234567890abcdefgijklmnopqrstuvwxyz");
 		
-		// ÀÓÀÇÀÇ frameÀ¸·Î ½ÃÀÛÇÑ´Ù.
+		
 		//int end = rand()%20;
 		//for (int a=0; a<end; a++)
 		//{
@@ -5763,20 +5456,20 @@ AddClientCreature()
 // GetMakeItemFitPosition
 //-----------------------------------------------------------------------------
 //
-// ¼º¼ö¸¸µé±â, ÆøÅº/Áö·Ú ¸¸µé±â.. µî¿¡¼­ »ç¿ëµÈ´Ù.
+
 //
-// pItemÀ¸·Î ÀÎÇØ¼­ »ý¼ºµÇ´Â item(itemClass, itemType)ÀÌ µé¾î°¥ À§Ä¡¸¦
-// fitPoint¸¦ ÅëÇØ¼­ ¾òÀ» ¼ö ÀÖ´Ù.
+
+
 //
-// return trueÀÎ °æ¿ì¸¸ fitPoint¿¡ µé¾î°¥ ¼ö ÀÖ´Â À§Ä¡°¡ ÀúÀåµÈ´Ù.
-// return falseÀÌ¸é µé¾î°¥ À§Ä¡°¡ ¾ø´Ù´Â ÀÇ¹ÌÀÌ´Ù.
+
+
 //-----------------------------------------------------------------------------
 bool
 GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& fitPoint)
 {
-	bool bFindPos = false;	// ÀÚ¸®°¡ ÀÖ³ª?
+	bool bFindPos = false;	
 	
-	// ÀÓ½Ã·Î ¼º¼ö¸¦ ¸¸µé¾î¼­ µé¾î°¥ ÀÚ¸®¸¦ Ã£´Â´Ù.
+	
 	MItem* pResultItem = MItem::NewItem( itemClass );
 	pResultItem->SetItemType( itemType );
 
@@ -5786,9 +5479,9 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 
 		MItem* pOldItem = g_pInventory->GetItem(fitPoint.x, fitPoint.y);
 
-		// ºó °÷¿¡ Ãß°¡ÇÒ·Á°í ÇÏ°í..
-		// ÇÏ³ª¸¸ ³²¾ÆÀÖ´Ù¸é.. 
-		// ÇöÀç À§Ä¡¿¡¼­ ±×´ë·Î ¹Ù²Û´Ù.
+		
+		
+		
 		if (pOldItem==NULL
 			&& pItem->GetNumber()==1)
 		{
@@ -5800,8 +5493,8 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 	}
 	else
 	{
-		// ºó ÀÚ¸®°¡ ¾ø´Â °æ¿ì¿¡
-		// ÇÏ³ª¸¸ ³²¾ÆÀÖ´Ù¸é.. ±× ÀÚ¸®¿¡¼­ ¹Ù²Ù¸é µÈ´Ù.
+		
+		
 		if (pItem->GetNumber()==1)
 		{
 			fitPoint.x = pItem->GetGridX();
@@ -5811,16 +5504,16 @@ GetMakeItemFitPosition(MItem* pItem, ITEM_CLASS itemClass, int itemType, POINT& 
 		}
 	}
 
-	// ÀÓ½Ã·Î ¸¸µç°Í Á¦°Å
+	
 	delete pResultItem;
 
 	return bFindPos;
 }
-// 2004, 03, 29 sobeit add start - Áúµå·¹ ¸Ê °í½ºÆ® Ãß°¡
+
 void 
 Add_GDR_Ghost(int ZoneID)
 {
-	if(1412 != ZoneID && 1413 != ZoneID) // Áúµå·¹ ·¹¾î, Áúµå·¹ ÇÏµå
+	if(1412 != ZoneID && 1413 != ZoneID) 
 		return;
 	CRarFile GhostFile;
 	GhostFile.SetRAR("data\\ui\\txt\\TutorialEtc.rpk", "darkeden");

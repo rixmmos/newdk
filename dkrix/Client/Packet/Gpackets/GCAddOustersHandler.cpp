@@ -26,7 +26,7 @@ throw ( ProtocolException , Error )
 		
 	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -35,7 +35,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -44,7 +44,7 @@ throw ( ProtocolException , Error )
 		MCreature* pCreature = g_pZone->GetCreature(oi.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -57,7 +57,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetName( oi.getName().c_str() );
 
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			ItemType_t coatType = oi.getCoatType();
 
@@ -79,7 +79,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetCurrentDirection( oi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( oi.getHairColor() );
 			pCreature->SetBodyColor2( oi.getCoatColor() );
 	
@@ -89,7 +89,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -108,11 +108,11 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_RANK, oi.getRank() );
 
 			//oi.getName()
-			// 색상 정보
+			
 
 			pCreature->SetWeaponSpeed( oi.getAttackSpeed() );
 			
-			// 임시로
+			
 			pCreature->SetGuildNumber( oi.getGuildID() );
 			pCreature->SetUnionGuildID( oi.getUnionID() );
 			if(pCreature->IsNPC() == false)
@@ -134,12 +134,12 @@ throw ( ProtocolException , Error )
 			
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			ItemType_t coatType = oi.getCoatType();
 
@@ -153,7 +153,7 @@ throw ( ProtocolException , Error )
 				pCreature->SetCreatureType( GetOustersCreatureType( coatType ) );
 			}
 
-			// 임시로
+			
 			pCreature->SetStatus( MODIFY_ADVANCEMENT_CLASS_LEVEL, oi.getAdvancementLevel() );
 			pCreature->SetGuildNumber( oi.getGuildID() );
 			pCreature->SetUnionGuildID( oi.getUnionID() );
@@ -165,7 +165,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetCurrentDirection( oi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			pCreature->SetBodyColor1( oi.getHairColor() );
 			pCreature->SetBodyColor2( oi.getCoatColor() );
 			pCreature->SetMasterEffectType( oi.getMasterEffectColor() );
@@ -174,7 +174,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -214,13 +214,13 @@ throw ( ProtocolException , Error )
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
 			
 			SetAddonToOusters( (MCreatureWear*)pCreature, &oi );			
 
-			// 펫 처리
+			
 			if(pPacket->getPetInfo() != NULL)
 				SetPetInfo(pPacket->getPetInfo(), pCreature->GetID());
 
@@ -229,16 +229,21 @@ throw ( ProtocolException , Error )
 			NicknameInfo* _tempNick = pPacket->getNicknameInfo();
 			if(_tempNick != NULL)
 			{
-				// 커스텀 닉네임 일때
+				
 				if(_tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM_FORCED ||
 				   _tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM)
 				{
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)_tempNick->getNickname().c_str());
 					
 				}
-				else // 닉네임 인덱스가 있을 때
+				else 
 				{
 					int TempIndex = _tempNick->getNicknameIndex();
+					if(g_pNickNameStringTable == NULL || g_pNickNameStringTable->GetSize() == 0)
+					{
+						pCreature->SetNickName(_tempNick->getNicknameType(), (char*)"No Title");
+						return;
+					}
 					if(TempIndex >= g_pNickNameStringTable->GetSize())
 						TempIndex = 0;
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)(*g_pNickNameStringTable)[TempIndex].GetString());

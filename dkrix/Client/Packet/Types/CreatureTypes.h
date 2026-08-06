@@ -30,7 +30,7 @@ const std::string PCType2String [] =
 const uint szPCType = szBYTE;
 
 //////////////////////////////////////////////////////////////////////////////
-// 권한
+
 //////////////////////////////////////////////////////////////////////////////
 enum Competence 
 {
@@ -41,7 +41,7 @@ enum Competence
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// 클라이언트와 복장 공유를 위한...
+
 //////////////////////////////////////////////////////////////////////////////
 const std::string HelmetType2String[] = 
 { 
@@ -135,7 +135,7 @@ const std::string OustersSylphType2String[] =
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 성별
+
 //////////////////////////////////////////////////////////////////////////////
 enum Sex 
 { 
@@ -151,7 +151,7 @@ const uint szSex = szBYTE;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 헤어스타일
+
 //////////////////////////////////////////////////////////////////////////////
 enum HairStyle 
 { 
@@ -188,7 +188,7 @@ const uint szSlot = szBYTE;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 색상 정보 
+
 //////////////////////////////////////////////////////////////////////////////
 typedef WORD Color_t;
 const uint szColor = sizeof(Color_t);
@@ -221,9 +221,9 @@ enum AttrType
 typedef WORD Attr_t;
 const uint szAttr = sizeof(Attr_t);
 
-// 능력치 오버로 서버 다운이 가끔 있어서..
-// 둘다 350으로 돼있던걸 2000으로 수정한당. 
-// (!) 이건 적당한 수준에 잡아두고 Error를 catch해서 log만 남기는게 더 좋겠지만...
+
+
+
 // by sigi. 2002.9.16
 const uint maxSlayerAttr = 2000;
 const uint maxVampireAttr = 2000;
@@ -235,15 +235,15 @@ const uint szHP = sizeof(HP_t);
 typedef WORD MP_t;
 const uint szMP = sizeof(MP_t);
 
-// 방어력
+
 typedef WORD Defense_t;
 const uint szDefense = sizeof(Defense_t);
 
-// 프로텍션
+
 typedef WORD Protection_t;
 const uint szProtection = sizeof(Protection_t);
 
-// 명중률
+
 typedef WORD ToHit_t;
 const uint szToHit = sizeof(ToHit_t);
 
@@ -256,8 +256,8 @@ const uint szSkillPoint = sizeof(SkillPoint_t);
 
 //////////////////////////////////////////////////////////////////////////////
 // defines for MODIFY bit flag //abcd
-// 기본치수 str, int, dex등의 변화에 따라서 변화된 값들이 어떤 값인가를 
-// 나타냄
+
+
 //////////////////////////////////////////////////////////////////////////////
 #define MF_STR          0x01
 #define MF_DEX          0x02
@@ -286,13 +286,13 @@ enum Attribute
 };
 	 
 //////////////////////////////////////////////////////////////////////////////
-// Skill 관련
+
 //////////////////////////////////////////////////////////////////////////////
-// Skill의 Type 갯수.
+
 typedef WORD SkillType_t;
 const uint szSkillType = sizeof(SkillType_t);
 
-// Client 에서 날려주는 EffectID.
+
 typedef WORD CEffectID_t;
 const uint szCEffectID = sizeof(CEffectID_t);
 
@@ -300,7 +300,7 @@ const uint szCEffectID = sizeof(CEffectID_t);
 typedef WORD EffectID_t;
 const uint szEffectID = sizeof(EffectID_t);
 
-// Slot의 갯수
+
 typedef BYTE SlotID_t;
 const uint szSlotID = sizeof(SlotID_t);
 
@@ -328,7 +328,7 @@ enum SkillDomain
 	SKILL_DOMAIN_VAMPIRE,   // 6
 	SKILL_DOMAIN_OUSTERS,   // 6
 	SKILL_DOMAIN_MAX        // 7
-//	SKILL_DOMAIN_RIFLE ,    // 2...3번은 쓰이지 않쥐...
+
 };
 
 enum SkillGrade 
@@ -360,14 +360,14 @@ const std::string SkillDomain2String [] =
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// NPC로부터 기술을 배울 때 쓰이는 상수이다.
-// 모든 레벨의 기술을 다 배워서 더 이상 배울 수 없음을 나타날 때
-// 패킷에다 넣어서 보내는 상수이다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 const SkillLevel_t ALL_SKILL_LEARNED = 100;
 
 //////////////////////////////////////////////////////////////////////////////
-// PC 기타 정보 타입
+
 //////////////////////////////////////////////////////////////////////////////
 typedef DWORD Fame_t;
 const uint szFame = sizeof(Fame_t);
@@ -390,7 +390,7 @@ const uint szGold = sizeof(Gold_t);
 const Gold_t MAX_MONEY = 2000000000;
 
 //////////////////////////////////////////////////////////////////////////////
-// 좌표와 방향
+
 //////////////////////////////////////////////////////////////////////////////
 typedef BYTE Coord_t;
 const uint szCoord = sizeof(Coord_t);
@@ -425,26 +425,26 @@ const std::string Dir2String [] =
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 시야 관련
+
 //////////////////////////////////////////////////////////////////////////////
 
 typedef BYTE Vision_t;
 const uint szVision = sizeof(Vision_t);
 
-// 캐릭터의 가로/세로 시야 범위의 최대값. 시야 범위는 상하가 비대칭이다.
+
 //const Coord_t maxViewportWidth  = 9;
 //const Coord_t maxViewportUpperHeight = 10;
 //const Coord_t maxViewportLowerHeight = 10;
 //
-const Coord_t maxViewportWidth  = 12;
-const Coord_t maxViewportUpperHeight = 13;
-const Coord_t maxViewportLowerHeight = 13;
+const Coord_t maxViewportWidth  = 17;
+const Coord_t maxViewportUpperHeight = 24;
+const Coord_t maxViewportLowerHeight = 24;
 
-// 시야사각형(vision)의 가로/세로 크기
+
 const Coord_t maxVisionWidth = maxViewportWidth * 2 + 1;
 const Coord_t maxVisionHeight = maxViewportUpperHeight + maxViewportLowerHeight + 1;
 
-// 시야 레벨
+
 typedef BYTE Sight_t;
 const uint szSight = sizeof(Sight_t); 
 const Sight_t minSight = 0;
@@ -452,14 +452,14 @@ const Sight_t maxSight = 13;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 게임 내에서의 턴(0.1초)을 계산할 때 사용한다.
+
 //////////////////////////////////////////////////////////////////////////////
 typedef DWORD Turn_t;
 const uint szTurn = sizeof(Turn_t);
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터
+
 //////////////////////////////////////////////////////////////////////////////
 typedef WORD MonsterType_t;
 const uint szMonsterType = sizeof(MonsterType_t);
@@ -481,7 +481,7 @@ typedef WORD NPCID_t;
 const uint szNPCID = sizeof(NPCID_t);
 
 //////////////////////////////////////////////////////////////////////////////
-// 핸드폰&슬랏 관련
+
 //////////////////////////////////////////////////////////////////////////////
 #define MAX_PHONE_SLOT  3
 typedef DWORD PhoneNumber_t;
@@ -514,29 +514,29 @@ typedef short Luck_t;
 const uint szLuck = sizeof(Luck_t);
 
 //////////////////////////////////////////////////////////////////////////////
-// 마법 저항력
+
 //////////////////////////////////////////////////////////////////////////////
 typedef short Resist_t;
 const uint szResist = sizeof(Resist_t);
 
 enum MagicDomain
 {
-	MAGIC_DOMAIN_NO_DOMAIN = 0, // 무속성 마법
-	MAGIC_DOMAIN_POISON    = 1, // 독 계열 마법
-	MAGIC_DOMAIN_ACID      = 2, // 산 계열 마법
-	MAGIC_DOMAIN_CURSE     = 3, // 저주 계열 마법
-	MAGIC_DOMAIN_BLOOD     = 4, // 피 계열 마법
+	MAGIC_DOMAIN_NO_DOMAIN = 0, 
+	MAGIC_DOMAIN_POISON    = 1, 
+	MAGIC_DOMAIN_ACID      = 2, 
+	MAGIC_DOMAIN_CURSE     = 3, 
+	MAGIC_DOMAIN_BLOOD     = 4, 
 
 	MAGIC_DOMAIN_MAX
 };
 
 const std::string MagicDomain2String[] = 
 {
-	"NO_DOMAIN", // 무속성 마법
-	"POISON",    // 독 계열 마법
-	"ACID",      // 산 계열 마법
-	"CURSE",     // 저주 계열 마법
-	"BLOOD",     // 피 계열 마법
+	"NO_DOMAIN", 
+	"POISON",    
+	"ACID",      
+	"CURSE",     
+	"BLOOD",     
 	"MAGIC_DOMAIN_MAX"
 };
 
@@ -556,21 +556,21 @@ enum Shape
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// 기술의 타겟 타입
-// 비트 플래그로써, 맞출 수 있는 타입을 결정한다.
+
+
 //////////////////////////////////////////////////////////////////////////////
 const uint TARGET_UNDERGROUND = 0x01;
 const uint TARGET_GROUND      = 0x02;
 const uint TARGET_AIR         = 0x04;
 
 //////////////////////////////////////////////////////////////////////////////
-// 클랜 타입
+
 //////////////////////////////////////////////////////////////////////////////
-typedef WORD ClanType_t;	// BYTE에서 WORD로 바꿈. by sigi. 2002.12.27
+typedef WORD ClanType_t;	
 const uint szClanType = sizeof(ClanType_t);
 
 //////////////////////////////////////////////////////////////////////////////
-// 경험치 관련 세이브 주기
+
 //////////////////////////////////////////////////////////////////////////////
 const WORD ATTR_EXP_SAVE_PERIOD    = 100;
 const WORD DOMAIN_EXP_SAVE_PERIOD  = 100;

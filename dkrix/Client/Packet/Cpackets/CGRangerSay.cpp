@@ -11,7 +11,7 @@ void CGRangerSay::read (SocketInputStream & iStream)
 {
 	__BEGIN_TRY
 		
-	// 메세지 읽기
+	
 	BYTE szMessage;
 
 	iStream.read(szMessage);
@@ -32,7 +32,7 @@ void CGRangerSay::write (SocketOutputStream & oStream) const
 {
 	__BEGIN_TRY
 		
-	// 메세지 쓰기
+	
 	BYTE szMessage = m_Message.size();
 
 	if (szMessage == 0)

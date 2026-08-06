@@ -23,7 +23,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,7 +31,7 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -51,9 +51,9 @@ throw ( ProtocolException , Error )
 		}
 		gC_vs_ui.UpdateQuestItemInfo(QuestItemList); 
 
-	// 아이템 리스트 받아서 아이템을 생성한후 UI에 넘겨주자..
-	// 나중에 퀘스트 아이템 추가 되믄 작업하자
-	//gC_vs_ui.UpdateQuestItemInfo(아이템 리스트)
+	
+	
+	
 
 
 

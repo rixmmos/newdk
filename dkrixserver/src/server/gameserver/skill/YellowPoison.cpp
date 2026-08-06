@@ -86,7 +86,7 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
         SkillType_t SkillType = pVampireSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // Knowledge of Poison 이 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_POISON)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_POISON);
@@ -107,7 +107,7 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
             Tile& tile = pZone->getTile(X, Y);
             if (tile.canAddEffect())
                 bTileCheck = true;
-            // add by Coffee 2007-5-8 藤속뚤SummonClay침쥣세콘돨쇱꿎
+            
             if (tile.getEffect(Effect::EFFECT_CLASS_SUMMON_CLAY))
                 bTileCheck = false;
             // end by Coffee
@@ -120,7 +120,7 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
             Tile& tile = pZone->getTile(X, Y);
             Range_t Range = 1;
 
-            // 같은 이펙트가 있으면 지운다.
+            
             Effect* pOldEffect = NULL;
             if ((pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_YELLOW_POISON))) {
                 ObjectID_t effectID = pOldEffect->getObjectID();
@@ -131,22 +131,22 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectYellowPoison* pEffect = new EffectYellowPoison(pZone, X, Y);
             pEffect->setVampire();
             pEffect->setDeadline(output.Duration);
             pEffect->setDuration(output.Duration);
             pEffect->setLevel(pSkillInfo->getLevel());
 
-            // 타일에 붙이는 Effect는 OID를 등록받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // tile위에 creature가 있다면 바로 영향을 주도록 한다.
+            
             bool bEffected = false;
             Creature* pTargetCreature = NULL;
 
@@ -160,12 +160,12 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
                 if (pEffect->affectCreature(pTargetCreature, false) == true) {
                     bEffected = true;
 
-                    // 윗부분에서 슬레이어인가를 검사하기 때문에,
-                    // 이 부분의 if가 항상 참이 될 것은 분명하다.
-                    // 하지만 나중에 YellowPoison이 뱀파이어나 몬스터에게도
-                    // 걸리게 변경된다면, 윗부분의 isSlayer 검사 항목이 빠지게
-                    // 될 것이므로, 미리 이 부분에서 Monster일 경우 에러가 나지 않게
-                    // isPC() 검사하는 부분을 집어넣어 둔다.
+                    
+                    
+                    
+                    
+                    
+                    
                     if (pTargetCreature->isPC()) {
                         Player* pTargetPlayer = pTargetCreature->getPlayer();
                         bool bCanSee = canSee(pTargetCreature, pVampire);
@@ -248,7 +248,7 @@ void YellowPoison::execute(Vampire* pVampire, ZoneCoord_t X, ZoneCoord_t Y, Vamp
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void YellowPoison::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -264,7 +264,7 @@ void YellowPoison::execute(Monster* pMonster, Creature* pEnemy)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 타일 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void YellowPoison::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -312,7 +312,7 @@ void YellowPoison::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             Tile& tile = pZone->getTile(X, Y);
             Range_t Range = 1;
 
-            // 같은 이펙트가 이미 존재한다면 삭제한다.
+            
             Effect* pOldEffect = NULL;
             if ((pOldEffect = tile.getEffect(Effect::EFFECT_CLASS_YELLOW_POISON))) {
                 ObjectID_t effectID = pOldEffect->getObjectID();
@@ -323,21 +323,21 @@ void YellowPoison::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트 오브젝트를 생성한다.
+            
             EffectYellowPoison* pEffect = new EffectYellowPoison(pZone, X, Y);
             pEffect->setDeadline(output.Duration);
             pEffect->setDuration(output.Duration);
             pEffect->setLevel(pSkillInfo->getLevel() / 2);
 
-            // 타일에 붙이는 Effect는 ObjectID를 등록받아야 한다.
+            
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            // 존 및 타일에다가 이펙트를 추가한다.
+            
             pZone->addEffect(pEffect);
             tile.addEffect(pEffect);
 
-            // tile위에 creature가 있다면 바로 영향을 주도록 한다.
+            
             bool bEffected = false;
             Creature* pTargetCreature = NULL;
 
@@ -351,12 +351,12 @@ void YellowPoison::execute(Monster* pMonster, ZoneCoord_t X, ZoneCoord_t Y)
                 if (pEffect->affectCreature(pTargetCreature, false) == true) {
                     bEffected = true;
 
-                    // 윗부분에서 슬레이어인가를 검사하기 때문에,
-                    // 이 부분의 if가 항상 참이 될 것은 분명하다.
-                    // 하지만 나중에 YellowPoison이 뱀파이어나 몬스터에게도
-                    // 걸리게 변경된다면, 윗부분의 isSlayer 검사 항목이 빠지게
-                    // 될 것이므로, 미리 이 부분에서 Monster일 경우 에러가 나지 않게
-                    // isPC() 검사하는 부분을 집어넣어 둔다.
+                    
+                    
+                    
+                    
+                    
+                    
                     if (pTargetCreature->isPC()) {
                         Player* pTargetPlayer = pTargetCreature->getPlayer();
                         bool bCanSee = canSee(pTargetCreature, pMonster);

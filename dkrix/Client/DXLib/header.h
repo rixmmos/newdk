@@ -8,8 +8,8 @@
 
 struct MP3Header
 {
-	e_mode	Mode;										// 연주 방식 
-	UINT	ModeExt ;									// 확장 연주 방식 
+	e_mode	Mode;										
+	UINT	ModeExt ;									
 	UINT	ProtectionBit ;								
 	UINT	BitrateIndex ;
 	UINT	padding_bit ;

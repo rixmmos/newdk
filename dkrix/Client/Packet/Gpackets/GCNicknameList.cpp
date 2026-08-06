@@ -2,8 +2,8 @@
 // 
 // Filename	: GCNicknameList.cpp 
 // Written By  : elca@ewestsoft.com
-// Description : 자신에게 쓰는 기술의 성공을 알리기 위한 패킷 클래스의
-//			   멤버 정의.
+
+
 // 
 //////////////////////////////////////////////////////////////////////
 
@@ -31,11 +31,17 @@ GCNicknameList::~GCNicknameList ()
 	throw ()
 {
 	__BEGIN_TRY
+	std::vector<NicknameInfo*>::iterator itr = m_Nicknames.begin();
+	for ( ; itr != m_Nicknames.end(); ++itr )
+	{
+		delete *itr;
+	}
+	m_Nicknames.clear();
 	__END_CATCH
 }
 
 //////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////
 void GCNicknameList::read ( SocketInputStream & iStream ) 
 	 throw ( ProtocolException , Error )
@@ -46,6 +52,8 @@ void GCNicknameList::read ( SocketInputStream & iStream )
 
 	BYTE Num;
 	iStream.read(Num);
+	if (Num > MAX_NICKNAME_NUM)
+		Num = MAX_NICKNAME_NUM;
 
 	for ( int i=0; i<Num; ++i )
 	{
@@ -59,7 +67,7 @@ void GCNicknameList::read ( SocketInputStream & iStream )
 
 			
 //////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void GCNicknameList::write ( SocketOutputStream & oStream ) 
 	 const throw ( ProtocolException , Error )

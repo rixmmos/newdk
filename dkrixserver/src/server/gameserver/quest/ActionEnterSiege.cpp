@@ -46,7 +46,7 @@ void ActionEnterSiege::read(PropertyBuffer& pb)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// ¾×¼ÇÀ» ½ÇÇàÇÑ´Ù.
+
 ////////////////////////////////////////////////////////////////////////////////
 void ActionEnterSiege::execute(Creature* pNPC, Creature* pCreature)
 
@@ -60,7 +60,7 @@ void ActionEnterSiege::execute(Creature* pNPC, Creature* pCreature)
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
     if (!g_pWarSystem->hasCastleActiveWar(m_ZoneID)) {
         GCSystemMessage gcSM;
-        gcSM.setMessage("Ö»ÄÜÔÚ½øÐÐ¹¥³ÇÕ½ÖÐ½øÈë.");
+        gcSM.setMessage(".");
         pGamePlayer->sendPacket(&gcSM);
         return;
     }
@@ -87,7 +87,7 @@ void ActionEnterSiege::execute(Creature* pNPC, Creature* pCreature)
     SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(g_pWarSystem->getActiveWar(m_ZoneID));
     if (pSiegeWar == NULL) {
         GCSystemMessage gcSM;
-        gcSM.setMessage("µÚ1¸ö·þÎñÆ÷·¢Éú¹ÊÕÏ£¬ÇëÓëÔËÓªÉÌÁªÏµ.");
+        gcSM.setMessage("1.");
         pGamePlayer->sendPacket(&gcSM);
         return;
     }
@@ -95,21 +95,21 @@ void ActionEnterSiege::execute(Creature* pNPC, Creature* pCreature)
     int side = pSiegeWar->getGuildSide(pPC->getGuildID());
     if (side == 0) {
         GCSystemMessage gcSM;
-        gcSM.setMessage("²»ÊÇÉêÇëÕ½¶·µÄÐÐ»á.");
+        gcSM.setMessage(".");
         pGamePlayer->sendPacket(&gcSM);
         return;
     }
 
     if (!g_pGuildManager->isGuildMaster(pPC->getGuildID(), pPC)) {
         GCSystemMessage gcSM;
-        gcSM.setMessage("Ö»ÓÐÐÐ»á»á³¤,²Å¿ÉÒÔ½øÐÐÉêÇë.");
+        gcSM.setMessage(",.");
         pGamePlayer->sendPacket(&gcSM);
         return;
     }
 
     static TPOINT targetPos[7] = {{172, 38}, {172, 38}, {20, 232}, {20, 232}, {20, 232}, {20, 232}, {20, 232}};
 
-    // ¼ÒÈ¯ÀÚÀÇ Á¸°ú ÁÂÇ¥.
+    
     ZoneID_t ZoneNum = siegeZoneID;
     Coord_t ZoneX = targetPos[side - 1].x;
     Coord_t ZoneY = targetPos[side - 1].y;

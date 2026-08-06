@@ -1,15 +1,15 @@
 //----------------------------------------------------------------------
 // MCreatureTable.h
 //----------------------------------------------------------------------
-// Creature의 종류에 따른 정보를 저장하는 class
+
 //----------------------------------------------------------------------
 //
-// [ 종류별로 있는 정보 ] 
+
 //
-// - 동작 FrameID
+
 // - Sprite FilePosition
 // - First SpriteID
-// - 이름... 등등...
+
 // 
 //----------------------------------------------------------------------
 
@@ -28,16 +28,16 @@
 using namespace std;
 
 //----------------------------------------------------------------------
-// Creature의 종족
+
 //----------------------------------------------------------------------
 enum CREATURETRIBE
 {	
-	CREATURETRIBE_SLAYER,			// 슬레이어
-	CREATURETRIBE_VAMPIRE,			// 뱀파이어
+	CREATURETRIBE_SLAYER,			
+	CREATURETRIBE_VAMPIRE,			
 	CREATURETRIBE_NPC,				// NPC
-	CREATURETRIBE_SLAYER_NPC,		// 슬레이어 스프라이트를 사용하는 NPC
+	CREATURETRIBE_SLAYER_NPC,		
 	CREATURETRIBE_OUSTERS,
-	CREATURETRIBE_OUSTERS_NPC,		// 아우스터즈 스프라이트를 사용하는 NPC
+	CREATURETRIBE_OUSTERS_NPC,		
 	MAX_CREATURETRIBE
 };
 
@@ -55,7 +55,7 @@ enum CREATURETRIBE
 
 #define	CREATURETYPE_VAMPIRE_MALE3		558
 #define	CREATURETYPE_VAMPIRE_FEMALE3	559
-// add by Coffee 2006.11.24  藤속뱁痢饑쮸近蹶
+
 #define	CREATURETYPE_VAMPIRE_MALE4		807
 #define	CREATURETYPE_VAMPIRE_FEMALE4	808
 //add by viva  195
@@ -79,7 +79,7 @@ enum CREATURETRIBE
 #define CREATURETYPE_ROCKET_LUNCHER		767
 #define CREATURETYPE_WILD_WOLF			787
 //----------------------------------------------------------------------
-// 슬레이어 NPC의 복장에 대한 정보
+
 //----------------------------------------------------------------------
 class ITEM_WEARINFO
 {
@@ -112,31 +112,31 @@ class ITEM_WEARINFO
 
 //----------------------------------------------------------------------
 //
-// 한 종류의 Creature에 대한 정보
+
 //
 //----------------------------------------------------------------------
 class CREATURETABLE_INFO {
 	public :		
-		MString					Name;					// 캐릭터 이름
-		CTypeTable<int>			SpriteTypes;			// SpriteTable에서의 ID
-		bool					bMale;					// 남자인가?		
-		BYTE					MoveTimes;				// 이동 회수
-		BYTE					MoveRatio;				// Frame수/이동 회수... 그림은 12frame이라도 6번만 이동할 수도 있다.
-		BYTE					MoveTimesMotor;			// 오토바이 탔을 때 이동 회수
-		int						Height;					// 키 (채팅 출력 위치를 위해서)
-		int						DeadHeight;				// 죽었을때의 키
-		TYPE_ACTIONINFO			DeadActionInfo;			// 죽을때의 actionInfo
-		int						ColorSet;				// 바뀌는 색깔 번호
-		bool					bFlyingCreature;		// 날아다니는 캐릭인가?
-		int						FlyingHeight;			// 날아다니는 높이
-		bool					bHeadCut;				// 머리 잘리는가? -_-;
-		int						HPBarWidth;				// HP bar 크기
-		ITEM_WEARINFO*			pItemWearInfo;			// 슬레이어 NPC인 경우
-		WORD					ChangeColorSet;			// 캐릭터 전체가 바뀌는 경우
-		int						ShadowCount;			// 늘 따라다니는 몸의 잔상 개수
+		MString					Name;					
+		CTypeTable<int>			SpriteTypes;			
+		bool					bMale;					
+		BYTE					MoveTimes;				
+		BYTE					MoveRatio;				
+		BYTE					MoveTimesMotor;			
+		int						Height;					
+		int						DeadHeight;				
+		TYPE_ACTIONINFO			DeadActionInfo;			
+		int						ColorSet;				
+		bool					bFlyingCreature;		
+		int						FlyingHeight;			
+		bool					bHeadCut;				
+		int						HPBarWidth;				
+		ITEM_WEARINFO*			pItemWearInfo;			
+		WORD					ChangeColorSet;			
+		int						ShadowCount;			
 
 	protected :
-		CREATURETRIBE			m_CreatureTribe;		// 종족
+		CREATURETRIBE			m_CreatureTribe;		
 		TYPE_SOUNDID*			m_pActionSound;			// Sound ID
 		int*					m_pActionCount;			// Action Count
 		int						m_nMaxAction;			// Max Action count (for boundary checking)
@@ -182,11 +182,11 @@ class CREATURETABLE_INFO {
 //----------------------------------------------------------------------
 // CreatureSpriteTypeMapper
 //----------------------------------------------------------------------
-// SpriteID로 CreatureType을 찾는 경우에 사용
+
 //----------------------------------------------------------------------
 class CreatureSpriteTypeMapper {
 	public :
-		typedef std::vector<WORD>				CREATURE_TYPES;		// WORD.. 귀차나..
+		typedef std::vector<WORD>				CREATURE_TYPES;		
 		typedef std::vector<CREATURE_TYPES*>	CREATURE_SPRITE_TYPES;
 
 	public :

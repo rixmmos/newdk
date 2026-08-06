@@ -65,7 +65,7 @@ void EffectBombCrashWalkToEnemy::affect(Creature* pCreature)
 
     if (!(pZone->getZoneLevel() & COMPLETE_SAFE_ZONE) && !pCreature->isDead() &&
         !pCreature->isFlag(Effect::EFFECT_CLASS_COMA)
-        // ¹«Àû»óÅÂ Ã¼Å©. by sigi. 2002.9.5
+        
         && canAttack(pAttacker, pCreature)) {
         GCModifyInformation gcMI, gcAttackerMI;
         setDamage(pCreature, m_Point, pAttacker, SKILL_DIVINE_GUIDANCE, &gcMI, &gcAttackerMI);
@@ -89,7 +89,7 @@ void EffectBombCrashWalkToEnemy::affect(Creature* pCreature)
             }
         }
     }
-    // Èç¹û½ÇÉ«ËÀÍö È¥³ýÐ§¹û
+    
     if (pCreature->isDead()) {
         setDeadline(0);
         setNextTime(0);

@@ -14,7 +14,7 @@
 #include "PacketUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void PotentialExplosion::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -34,7 +34,7 @@ void PotentialExplosion::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffect
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, 도가 아니라면 사용할 수 없다.
+        
         Item* pItem = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_BLADE) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -65,7 +65,7 @@ void PotentialExplosion::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffect
             SkillOutput output;
             computeOutput(input, output);
 
-            // HP가 반보다 작을 때는 약간 더 올라간다.
+            
             // by sigi. 2002.12.3
             if (pSlayer->getHP(ATTR_CURRENT) < (pSlayer->getHP(ATTR_MAX) / 2)) {
                 // output.Damage += 4;
@@ -84,21 +84,21 @@ void PotentialExplosion::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffect
             pSlayer->addEffect(pEffect);
             pSlayer->setFlag(Effect::EFFECT_CLASS_POTENTIAL_EXPLOSION);
 
-            // 이로 인하여 바뀌는 능력치를 보낸다.
+            
             SLAYER_RECORD prev;
             pSlayer->getSlayerRecord(prev);
             pSlayer->initAllStat();
             pSlayer->sendRealWearingInfo();
             pSlayer->sendModifyInfo(prev);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 8, 1, 1, _GCSkillToSelfOK1);
             increaseDomainExp(pSlayer, DomainType, pSkillInfo->getPoint(), _GCSkillToSelfOK1);
             // increaseSkillExp(pSlayer, DomainType,  pSkillSlot, pSkillInfo, _GCSkillToSelfOK1);
 
-            // 패킷을 보내준다.
+            
             _GCSkillToSelfOK1.setSkillType(SkillType);
             _GCSkillToSelfOK1.setCEffectID(CEffectID);
             _GCSkillToSelfOK1.setDuration(output.Duration);
@@ -110,7 +110,7 @@ void PotentialExplosion::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffect
             pPlayer->sendPacket(&_GCSkillToSelfOK1);
             pZone->broadcastPacket(X, Y, &_GCSkillToSelfOK2, pSlayer);
 
-            // 이펙트가 붙었다고 알려준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pSlayer->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_POTENTIAL_EXPLOSION);

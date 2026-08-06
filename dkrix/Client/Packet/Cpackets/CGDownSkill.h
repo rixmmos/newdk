@@ -7,10 +7,10 @@
 #ifndef __CG_DOWN_SKILL_H__
 #define __CG_DOWN_SKILL_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGDownSkill;
@@ -34,7 +34,7 @@ public:
 	void setSkillType(SkillType_t SkillType) throw() { m_SkillType = SkillType; }
 
 private:
-	SkillType_t       m_SkillType;  // 기술의 종류
+	SkillType_t       m_SkillType;  
 };
 
 //////////////////////////////////////////////////////////////////////

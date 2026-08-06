@@ -9,17 +9,17 @@
 #define __GC_MORPH_SLAYER2_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "PCSlayerInfo3.h"
-#include "PCVampireInfo3.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../PCSlayerInfo3.h"
+#include "../PCVampireInfo3.h"
 
 
 //----------------------------------------------------------------------
 //
 // class GCMorphSlayer2;
 //
-// slayer등이 vampire로 변신하는 걸 지켜보는 분들에게 보낸다.
+
 //----------------------------------------------------------------------
 
 class GCMorphSlayer2 : public Packet {
@@ -32,10 +32,10 @@ public :
 	
 public :
 
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read ( SocketInputStream & iStream ) throw ( ProtocolException , Error );
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write ( SocketOutputStream & oStream ) const throw ( ProtocolException , Error );
 
 	// execute packet's handler
@@ -65,7 +65,7 @@ public :
 
 private :
 	
-	// 외모 정보
+	
 	PCSlayerInfo3 m_SlayerInfo3;
 	
 };

@@ -29,7 +29,7 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	TYPE_FRAMEID	frameID	= (*g_pEffectSpriteTypeTable)[egInfo.effectSpriteType].FrameID;
 
 	//---------------------------------------------
-	// pixel좌표를 Map의 좌표로 바꿔준다.
+	
 	//---------------------------------------------
 	TYPE_SECTORPOSITION	sX, sY;
 	sX = g_pTopView->PixelToMapX(egInfo.x0);
@@ -41,7 +41,7 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	MEffect*	pEffect;
 	//---------------------------------------------
-	// Effect 생성 - Left Up
+	
 	//---------------------------------------------
 	x = sX - (rand()%3 + 1);
 	y = sY - (rand()%3 + 1);
@@ -49,32 +49,32 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(x, y);		// Sector 좌표		
+	pEffect->SetPosition(x, y);		
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.
-	pEffect->SetCount( egInfo.count, egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count, egInfo.linkCount );			
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 	bOK = g_pZone->AddEffect( pEffect );
 
 	if (bOK)
 	{
-		// 다음 Effect 생성 정보
+		
 		pEffect->SetLink( egInfo.nActionInfo, egInfo.pEffectTarget );	
 	}
 
 	MEffectTarget*	pEffectTarget2;
 	//---------------------------------------------
-	// Effect 생성 - Right Up
+	
 	//---------------------------------------------
 	x = sX + (rand()%3 + 1);
 	y = sY - (rand()%3 + 1);
@@ -83,24 +83,24 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(x, y);		// Sector 좌표	
+	pEffect->SetPosition(x, y);		
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.	
-	pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 	if (g_pZone->AddEffect( pEffect ))
 	{
-		// 다음 Effect 생성 정보
+		
 		if (egInfo.pEffectTarget == NULL)
 		{
 			pEffect->SetLink( egInfo.nActionInfo, NULL );
@@ -115,7 +115,7 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 
 	//---------------------------------------------
-	// Effect 생성 - Right Down
+	
 	//---------------------------------------------
 	x = sX + (rand()%3 + 1);
 	y = sY + (rand()%3 + 1);
@@ -124,24 +124,24 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(x, y);		// Sector 좌표						
+	pEffect->SetPosition(x, y);		
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.	
-	pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 	if (g_pZone->AddEffect( pEffect ))
 	{
-		// 다음 Effect 생성 정보
+		
 		if (egInfo.pEffectTarget == NULL)
 		{
 			pEffect->SetLink( egInfo.nActionInfo, NULL );
@@ -155,7 +155,7 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	}
 
 	//---------------------------------------------
-	// Effect 생성 - Left Down
+	
 	//---------------------------------------------
 	x = sX - (rand()%3 + 1);
 	y = sY + (rand()%3 + 1);
@@ -165,24 +165,24 @@ MStopZoneRandomEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 	pEffect->SetFrameID( frameID, maxFrame );	
 
-	pEffect->SetPosition(x, y);		// Sector 좌표						
+	pEffect->SetPosition(x, y);		
 	pEffect->SetZ(egInfo.z0);			
-	pEffect->SetStepPixel(egInfo.step);		// 실제로 움직이지는 않지만, 다음 Effect를 위해서 대입해준다.	
-	pEffect->SetCount( egInfo.count , egInfo.linkCount );			// 지속되는 Frame
+	pEffect->SetStepPixel(egInfo.step);		
+	pEffect->SetCount( egInfo.count , egInfo.linkCount );			
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
-	// Zone에 추가한다.
+	
 	if (g_pZone->AddEffect( pEffect ))
 	{
-		// 다음 Effect 생성 정보
+		
 		if (egInfo.pEffectTarget == NULL)
 		{
 			pEffect->SetLink( egInfo.nActionInfo, NULL );

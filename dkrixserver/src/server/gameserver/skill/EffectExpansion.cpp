@@ -90,13 +90,13 @@ void EffectExpansion::unaffect(Creature* pCreature)
     pSlayer->sendRealWearingInfo();
     pSlayer->sendModifyInfo(prev);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pSlayer->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_EXPANSION);
     pZone->broadcastPacket(pSlayer->getX(), pSlayer->getY(), &gcRemoveEffect);
 
-    // 현재 남아있는 체력이 최대 체력보다 크다면, 줄여야 한다.
+    
     if (pSlayer->getHP(ATTR_CURRENT) > pSlayer->getHP(ATTR_MAX)) {
         pSlayer->setHP(pSlayer->getHP(ATTR_MAX), ATTR_CURRENT);
     }

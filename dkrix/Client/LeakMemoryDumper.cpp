@@ -10,8 +10,8 @@
 #ifdef _DEBUG
 
 typedef struct {
-	DWORD	address;
-	DWORD	size;
+	std::uintptr_t	address;
+	std::size_t	size;
 	char	file[64];
 	DWORD	line;
 } ALLOC_INFO;      
@@ -19,7 +19,7 @@ typedef struct {
 typedef std::list<ALLOC_INFO*> AllocList;      
 AllocList allocList;      
 
-void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
+void AddTrack(std::uintptr_t addr, std::size_t asize, const char *fname, DWORD lnum)
 {
 	ALLOC_INFO *info;	      
 //	if(!allocList) 
@@ -34,7 +34,7 @@ void AddTrack(DWORD addr,  DWORD asize,  const char *fname, DWORD lnum)
 	allocList.insert(allocList.begin(), info);
 }
   
-void RemoveTrack(DWORD addr)
+void RemoveTrack(std::uintptr_t addr)
 {
 	AllocList::iterator i;	      
 	
@@ -51,19 +51,19 @@ void RemoveTrack(DWORD addr)
 void DumpUnfreed()
 {
 	AllocList::iterator i;
-	DWORD totalSize = 0;
+	std::size_t totalSize = 0;
 	char buf[1024];	      
 
 	for(i = allocList.begin(); i != allocList.end(); i++) 
 	{
-		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %d\t%d unfreed\n",
-			(*i)->file, (*i)->line, (*i)->address, (*i)->size);
+		sprintf(buf, "%-50s:\t\tLINE %d,\t\tADDRESS %p\t%zu unfreed\n",
+			(*i)->file, (*i)->line, (void*)(*i)->address, (*i)->size);
 		OutputDebugString(buf);
 		totalSize += (*i)->size;
 	}
 	sprintf(buf, "-----------------------------------------------------------\n");
 	OutputDebugString(buf);
-	sprintf(buf, "Total Unfreed: %d bytes\n", totalSize);
+	sprintf(buf, "Total Unfreed: %zu bytes\n", totalSize);
 	OutputDebugString(buf);
 }
 

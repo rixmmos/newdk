@@ -24,10 +24,10 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	
-		// -_- 패배
+		
 //	switch( pPacket->getEffectID() )
 //	{
-//	case EFFECTSTATUS_BLOOD_BIBLE_ARMEGA :         // 199			// 타일에 붙는 이펙트
+
 //	case EFFECTSTATUS_BLOOD_BIBLE_MIHOLE :       // 200
 //	case EFFECTSTATUS_BLOOD_BIBLE_KIRO :         // 201
 //	case EFFECTSTATUS_BLOOD_BIBLE_INI :         // 202

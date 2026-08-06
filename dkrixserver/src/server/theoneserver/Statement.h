@@ -2,7 +2,7 @@
 //
 // File Name 	: Statement.h
 // Written by	: Gday29@ewestsoft.com
-// Description	: SQL ¹®À» ¸¸µç´Ù..
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ class Result;
 //
 // class Statement;
 //
-// SQL¹®À» ¸¸µé¾î µðºñ¿¡ Äõ¸®ÇÑ´Ù.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -37,10 +37,10 @@ public:
     ~Statement() throw();
 
 public:
-    // »çÀü¿¡ ÁöÁ¤µÈ SQL ¹®À» °¡Áö°í Äõ¸®ÇÑ´Ù.
+    
     Result* executeQuery() throw(SQLQueryException, Error);
 
-    // SQL ¹®À» ¹Þ¾Æ¼­ Äõ¸®ÇÑ´Ù.
+    
     Result* executeQuery(char*, ...) throw(SQLQueryException, Error);
     Result* executeQuery(const string& sqlStatement) throw(SQLQueryException, Error);
 
@@ -49,7 +49,7 @@ public:
         return m_Statement;
     }
 
-    // SQL ¹®À» ÁöÁ¤ÇÑ´Ù.
+    
     void setStatement(char* fmt, ...) throw(Error);
 
     // get connection object
@@ -77,13 +77,13 @@ private:
     // Connection
     Connection* m_pConnection;
 
-    // SQL Statement¹
+    
     string m_Statement;
 
     // Query Result
     Result* m_pResult;
 
-    // insert, update, delete ÇßÀ» ¶§ ¿µÇâÀ» ¹ÞÀº row ÀÇ °³¼ö
+    
     uint m_nAffectedRows;
 };
 

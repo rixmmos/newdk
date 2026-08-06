@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectLightness.cpp
 // Written by  : excel96
-// Description : Lightness에 의해서 생성되는 산성 데미지 약화 이펙트이다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "EffectLightness.h"
@@ -49,7 +49,7 @@ void EffectLightness::unaffect()
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    // 이펙트가 사라졌다고 알려준다.
+    
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_LIGHTNESS);

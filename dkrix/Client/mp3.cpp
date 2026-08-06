@@ -16,7 +16,7 @@
 
 static BYTE	MP3_buffer[MP3BUFSIZE] ;
 
-// 프레임 단위로 이동할 수 있도록 Offset을 만들어 둔다.
+
 static int*	Offset = NULL ;
 
 UINT MP3_Calc_FrameSize (MP3* mp3)
@@ -78,7 +78,7 @@ int MP3_ReadFrame(MP3* mp3)
 	DEBUG_ADD("[MP3_ReadFrame] 3");
 		size = MP3_Calc_FrameSize(mp3) ;
 	DEBUG_ADD_FORMAT("[MP3_ReadFrame] 4 Calc_FrameSize %d", size);
-		// 프레임 데이타 부분을 읽어버린다.
+		
 		if ( ReadBytes( MP3_buffer, size) < 0 )
 		{
 			mp3->maxframes = i;
@@ -87,10 +87,10 @@ int MP3_ReadFrame(MP3* mp3)
 		}
 	DEBUG_ADD("[MP3_ReadFrame] 5");
 
-		// CRC 체크를 한다.
+		
 		if (!mp3->Header.ProtectionBit)
 		{
-			// CRC는 단순히 읽어들이기만 하자
+			
 			WORD CheckSum ;
 	DEBUG_ADD("[MP3_ReadFrame] 6");
 			ReadWords(&CheckSum, 1) ;
@@ -110,7 +110,7 @@ LPDIRECTSOUNDBUFFER	MP3_CreateDSBuffer(MP3* mp3)
 	int nFrames = MinFrames(mp3) ;
 	int size = nFrames * 0x1200 ;
 
-	DEBUG_ADD("MP3_CreateDSBuffer가 시작합니다.") ;
+	DEBUG_ADD("MP3_CreateDSBuffer .") ;
 
 	BYTE *dataBuff = new BYTE[size] ;
 
@@ -120,44 +120,44 @@ LPDIRECTSOUNDBUFFER	MP3_CreateDSBuffer(MP3* mp3)
 	DEBUG_ADD("MP3_CreateDSBuffer MP3_ReadFrame OK") ;
 
 	mp3->soundbuf = CreateSoundBuf(mp3, nFrames) ;
-	DEBUG_ADD("사운드 버퍼를 생성했습니다.") ;
+	DEBUG_ADD("  .") ;
 
 	LPSOUNDBUF lpsb = mp3->soundbuf ;
 	DEBUG_ADD_FORMAT("nFrames : %d frame");
 
 	for ( int i = 0 ; i < nFrames ; i++ )
 	{
-		DEBUG_ADD_FORMAT("%d번째 프레임 작업 시작", i ) ;
+		DEBUG_ADD_FORMAT("%d   ", i ) ;
 		if( SeekFrame(mp3, i) == -1)
 		{
 			DEBUG_ADD("SeekFrame return -1");
 			return NULL;
 		}
-		DEBUG_ADD_FORMAT("%d번째 프레임 헤더 읽기", i ) ;
+		DEBUG_ADD_FORMAT("%d   ", i ) ;
 		if( MP3_ReadHeader(&mp3->Header) == -1)
 		{
 			DEBUG_ADD("MP3_ReadHeader return -1");
 			return NULL;
 		}
-		DEBUG_ADD_FORMAT("%d번째 프레임 사이즈 정보 얻기", i ) ;
-		MP3_Calc_FrameSize(mp3) ;	// 슬롯 수를 얻어오기 위해 
-		DEBUG_ADD_FORMAT("%d번째 프레임 디코딩", i ) ;
+		DEBUG_ADD_FORMAT("%d    ", i ) ;
+		MP3_Calc_FrameSize(mp3) ;	
+		DEBUG_ADD_FORMAT("%d  ", i ) ;
 		MP3_Decode(mp3) ;
-		DEBUG_ADD_FORMAT("%d번째 프레임의 디코딩 정보를 dataBuff에 복사", i ) ;
+		DEBUG_ADD_FORMAT("%d    dataBuff ", i ) ;
 		memcpy ( &dataBuff[i*0x1200], mp3->soundbuf->databuf, 0x1200 ) ;
 		lpsb->nPushedFrames++ ;
 		lpsb->offWrite += lpsb->bufSize ;
 		lpsb->offWrite %= lpsb->bufSize*lpsb->nPushedFrames ;
-		DEBUG_ADD_FORMAT("%d번째 프레임 Reset", i ) ;
+		DEBUG_ADD_FORMAT("%d  Reset", i ) ;
 		Reset(lpsb) ;
-		DEBUG_ADD_FORMAT("%d번째 프레임 작업 종료", i ) ;
+		DEBUG_ADD_FORMAT("%d   ", i ) ;
 		mp3->curFrame++ ;
 	}
 
 	static const int samplefrequencies[3] = { 44100, 48000, 32000 };
 
 	//@@@@@@@@@@@@@@@
-	// 버퍼 생성 루틴
+	
 	
 	WAVEFORMATEX wfx ;
 	wfx.wFormatTag		= WAVE_FORMAT_PCM;
@@ -189,7 +189,7 @@ MP3* MP3_Load (LPSTR pathname)
 	MP3*	mp3 = new MP3 ;
 	memset( mp3, 0, sizeof(MP3) ) ;
 
-//	DispDebugMsg("MP3 파일 %s의 헤더 정보를 읽으려 합니다.", pathname ) ;
+
 	if(	MP3_ReadHeader(&mp3->Header) == -1)
 		return NULL;
 
@@ -216,7 +216,7 @@ MP3* MP3_Load (LPSTR pathname)
 				mp3->prevblck[i][j][k] = 0.f ;
 
 	e_mode mode = mp3->Header.Mode ;
-	// channel수를 구한다.
+	
 	if (mode == single_channel )
 	{ mp3->channels = 1 ; }
 	else
@@ -234,13 +234,13 @@ void hybrid(MP3 *mp3, int ch, int gr, int sb) ;
 
 int MP3_Decode(MP3* mp3)
 {
-//	if ( mp3 == NULL ) DispDebugMsg("MP3_Decode의 인자로 NULL값이 들어왔습니다.") ;
+
 	MP3Header *header = &mp3->Header ;
 	int		nSlots = header->nSlots ;
 	int channel ;
 
 	e_mode mode = mp3->Header.Mode ;
-	// channel수를 구한다.
+	
 	if (mode == single_channel )
 	{channel = 1 ; mp3->channels = 1 ;}
 	else
@@ -249,7 +249,7 @@ int MP3_Decode(MP3* mp3)
 
 	int offset = GetCurOffset() ;
 
-	ReadSideInfo(channel, &mp3->si ) ;	// side info 를 읽어온다.
+	ReadSideInfo(channel, &mp3->si ) ;	
 
 	Bit_Reserve*	br = mp3->br ;
 	for ( ; nSlots > 0 ; nSlots-- )
@@ -281,19 +281,19 @@ int MP3_Decode(MP3* mp3)
 	if ( bytes_to_discard < 0 )
 		return -1;
 
-	//초과된 데이타를 방출한다.
+	
 	for ( ; bytes_to_discard > 0 ; bytes_to_discard-- ) br->hgetbits(8) ;
 
 
-//	DispDebugMsg("MP3 파일 디코딩 중") ;
+
 	for ( int gr = 0 ; gr < 2 ; gr++ )
 	{
-//		DispDebugMsg("%d번 그룹을 디코딩합니다.", gr) ;
+
 		for ( int ch = 0 ; ch < channel ; ch++ )
 		{
 			mp3->part2Start = br->hsstell() ;
 
-			// 실제 샘플의 압축을 푸는 부분 ///////////////////////////////////
+			
 			get_scale_factors(mp3, ch, gr) ;
 			hufman_decode(mp3, ch, gr) ;
 			dequntize_sample(mp3, mp3->ro[ch], ch, gr) ;
@@ -337,7 +337,7 @@ int MP3_Decode(MP3* mp3)
 
 
 	}	// granule
-//	DispDebugMsg("MP3 파일 디코딩 완료") ;
+
 	return 0 ;
 }
 
@@ -347,15 +347,15 @@ int	MP3_WriteToBuffer(MP3* mp3, int num, HANDLE event)
 //	DispDebugMsg("MP3_WriteToBuffer") ;
 	SeekFrame(mp3, num) ;
 
-//	DispDebugMsg("%d번 프레임 부분을 찾았습니다.", num) ;
+
 	MP3_ReadHeader(&mp3->Header) ;
-//	DispDebugMsg("헤더 정보를 읽어왔습니다.") ;
-	MP3_Calc_FrameSize(mp3) ;	// 슬롯 수를 얻어오기 위해 
-//	DispDebugMsg("프레임 사이즈를 계산했습니다..") ;
+
+	MP3_Calc_FrameSize(mp3) ;	
+
 	MP3_Decode(mp3) ;
-//	DispDebugMsg("MP3파일 디코딩합니다.") ;
+
 	OutputData(mp3->soundbuf) ;
-//	DispDebugMsg("디코딩 된 내용을 버퍼에 기록했습니다.") ;
+
 	return 0 ;
 }
 

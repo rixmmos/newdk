@@ -2,8 +2,8 @@
 //
 // Filename    : SlayerSkillInfo.cpp
 // Written By  : elca@ewestsoft.com
-// Description : �ڽſ��� ���� ����� ������ �˸��� ���� ��Ŷ Ŭ������
-//               ��� ����.
+
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ SlayerSkillInfo::SlayerSkillInfo() {
 // destructor
 //////////////////////////////////////////////////////////////////////
 SlayerSkillInfo::~SlayerSkillInfo() noexcept {
-    // �Ҽӵ� ��� ��ü���� �����Ѵ�.
+    
     while (!m_SubSlayerSkillInfoList.empty()) {
         SubSlayerSkillInfo* pSubSlayerSkillInfo = m_SubSlayerSkillInfoList.front();
         SAFE_DELETE(pSubSlayerSkillInfo);
@@ -42,12 +42,12 @@ SlayerSkillInfo::~SlayerSkillInfo() noexcept {
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void SlayerSkillInfo::read(SocketInputStream& iStream) {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_bLearnNewSkill);
     iStream.read(m_DomainType);
     iStream.read(m_ListNum);
@@ -63,12 +63,12 @@ void SlayerSkillInfo::read(SocketInputStream& iStream) {
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void SlayerSkillInfo::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_bLearnNewSkill);
     oStream.write(m_DomainType);
     oStream.write(m_ListNum);

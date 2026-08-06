@@ -10,8 +10,8 @@
 #define __CG_SMS_SEND_H__
 
 // include files
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 #include <list>
 #include <string>

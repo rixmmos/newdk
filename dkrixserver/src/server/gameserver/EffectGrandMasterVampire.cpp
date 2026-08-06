@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : EffectGrandMasterVampire.cpp
-// Written by  : 쉭
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +64,7 @@ void EffectGrandMasterVampire::affect(Creature* pCreature)
 
     pCreature->setFlag(Effect::EFFECT_CLASS_GRAND_MASTER_VAMPIRE);
 
-    // 주위에 뿌려준다.
+    
     GCAddEffect gcAddEffect;
     gcAddEffect.setObjectID(pCreature->getObjectID());
     gcAddEffect.setEffectID(getSendEffectClass());
@@ -97,8 +97,8 @@ void EffectGrandMasterVampire::unaffect(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
+    
+    
     pCreature->removeFlag(Effect::EFFECT_CLASS_GRAND_MASTER_VAMPIRE);
 
     Zone* pZone = pCreature->getZone();

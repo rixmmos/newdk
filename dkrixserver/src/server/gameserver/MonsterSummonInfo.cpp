@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : MonsterSummonInfo.cpp
-// Written By  : 쉭
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -21,13 +21,13 @@
 //	int             Num;
 //
 //        a        b   c
-// ex1>  "(데드바디, 20)"		// 데드바디 20마리
+
 //
 //        0 2   6
 //        a b   c
-// ex2>  "(5, 10)"				// SpriteType 5번(데드바디) 10마리
+
 //
-// ex3>  "({34}, 20)"		// 이 경우{}는 MonsterType을 사용한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void MonsterCollectionInfo::parseString(const string& text) {
     SpriteType = 0;
@@ -76,7 +76,7 @@ void MonsterCollectionInfo::parseString(const string& text) {
         }
 
         if (SpriteType == 0 && MonsterType == 0) {
-            cout << "[Error] MonsterSummonInfo에 알 수 없는 몬스터 : " << name.c_str() << endl;
+            cout << "[Error] MonsterSummonInfo     : " << name.c_str() << endl;
             Assert(false);
         }
     }
@@ -102,7 +102,7 @@ string MonsterCollectionInfo::toString() const {
 // list<MonsterCollectionInfo> Infos;
 //
 //      a          bc a          b
-// ex> "(데드바디,5), (터닝데드,3)"      // 데드바디 5마리 + 터닝데드 3마리
+
 //////////////////////////////////////////////////////////////////////////////
 void MonsterCollection::parseString(const string& text) {
     Infos.clear();
@@ -128,7 +128,7 @@ void MonsterCollection::parseString(const string& text) {
         if (c == string::npos)
             break;
 
-        c++; // 큰 상관은 없지만..
+        c++; 
     }
 }
 
@@ -173,16 +173,16 @@ const MonsterCollection* MonsterSummonStep::getRandomMonsterCollection() const {
 //////////////////////////////////////////////////////////////////////////////
 //	vector<MonsterCollection>  Collections;
 //
-// ex>  // 데드바디5+터닝데드3 or 데드바디10+터닝데드1
+
 //
 //       a                        b c a                         b
-//     "[(데드바디,5), (터닝데드,3) / (데드바디,10), (터닝데드,1)]"
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void MonsterSummonStep::parseString(const string& text) {
     Collections.clear();
 
-    // 개수 알아내기
+    
     size_t l = text.find_first_of('[');
     size_t r = text.find_first_of(']');
 
@@ -259,17 +259,17 @@ bool MonsterSummonInfo::hasNextMonsterCollection(int step) const {
 //////////////////////////////////////////////////////////////////////////////
 // vector<MonsterSummonStep>  Steps;
 //
-// ex>  // 1단계: 데드바디5+터닝데드3 or 데드바디10+터닝데드1
-//      // 2단계: 터닝데드8+키드2 or 터닝데드3+솔져3
+
+
 
 //      a                                                        b
-//     "[(데드바디,5), (터닝데드,3) / (데드바디,10), (터닝데드,1)]
+
 //      a                                               b
-//      [(터닝데드,8), (키드,2) / (터닝데드,3), (솔져,3)]"
+
 //
 //////////////////////////////////////////////////////////////////////////////
 void MonsterSummonInfo::parseString(const string& text) {
-    // 개수 알아내기
+    
     size_t a, b = 0;
     while (1) {
         a = text.find_first_of('[', b);

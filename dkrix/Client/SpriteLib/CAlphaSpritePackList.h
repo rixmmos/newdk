@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 // CAlphaSpritePackList.h
 //----------------------------------------------------------------------
-// 내부적으로 stl의 list를 사용했다.
+
 //----------------------------------------------------------------------
 
 #ifndef	__CALPHASPRITEPACKLIST_H__
@@ -41,7 +41,7 @@ class CAlphaSpritePackList {
 		CAlphaSprite*	GetSprite(TYPE_SPRITEID n) const;
 
 		//---------------------------------------------------
-		// 첫번째 위치의 List Iterater를 넘겨준다.
+		
 		//---------------------------------------------------
 		ALPHASPRITE_LIST::const_iterator	GetIterator() const	{ return m_listSprite.begin(); }
 		ALPHASPRITE_LIST* GetListPtr() { return &m_listSprite; }
@@ -58,7 +58,7 @@ class CAlphaSpritePackList {
 		virtual void		LoadFromFile(std::ifstream& file) = 0;
 
 	protected :		
-		ALPHASPRITE_LIST		m_listSprite;		// CAlphaSprite들을 저장해둔다.
+		ALPHASPRITE_LIST		m_listSprite;		
 };
 
 #endif

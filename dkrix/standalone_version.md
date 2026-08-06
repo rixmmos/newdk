@@ -1,39 +1,39 @@
 
-## 下载客户端
+## 
 
 
-1. 客户端数据文件
+1. 
 
-百度网盘 https://pan.baidu.com/s/1-DufSEmnydMbOtTwOo_h8A 提取码 6bcl
+ https://pan.baidu.com/s/1-DufSEmnydMbOtTwOo_h8A  6bcl
 
-或者 Mediafire https://www.mediafire.com/file/017bif66kyieviw/DARKEDEN.zip/file
+ Mediafire https://www.mediafire.com/file/017bif66kyieviw/DARKEDEN.zip/file
 
-2. 修改 `DARKEDEN/Data/Info/GameClient.inf` 文件内容，单机版里应该是 `127.0.0.1`
+2.  `DARKEDEN/Data/Info/GameClient.inf`  `127.0.0.1`
 
-3. DARKEDEN 目录下有几个 bat 文件，点击运行，将以 '窗口模式' 或者 '全屏模式' 启动游戏
+3. DARKEDEN  bat  ''  '' 
 
-## 安装服务端
+## 
 
-下载并安装 Docker Desktop
+ Docker Desktop
 
 https://docs.docker.com/desktop/install/windows-install/
 
 
-下载打包好的服务端 docker 镜像
+ docker 
 
 
 ```
 docker pull tiancaiamao/darkeden
 ```
 
-下载 mysql 的 docker 镜像
+ mysql  docker 
 
 
 ```
 docker pull mysql/mysql-server:5.7
 ```
 
-将下面内容保存为 docker-compose.yml 文件
+ docker-compose.yml 
 
 
 ```
@@ -71,20 +71,20 @@ networks:
 ```
 
 
-启动 docker 镜像
+ docker 
 
 
 ```
 docker-compose -f docker-compose.yml up -d
 ```
 
-启动服务器
+
 
 ```
 docker exec -it docker_odk-server_1  ./start.sh
 ```
 
-如何关闭
+
 
 
 ```sh

@@ -1,15 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : GCTradeAddItem.h 
-// Written By  : 김성민
+
 // Description : 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_TRADE_ADD_ITEM_H__
 #define __GC_TRADE_ADD_ITEM_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "SubItemInfo.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../SubItemInfo.h"
 #include <list>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,20 +114,20 @@ public:
 	}
 
 private:
-	ObjectID_t         m_TargetObjectID;  // 교환을 하고 있는 상대방의 OID
-	ObjectID_t         m_ItemObjectID;    // 아이템 OID
-	CoordInven_t       m_X;               // 인벤토리에서의 X 좌표
-	CoordInven_t       m_Y;               // 인벤토리에서의 Y 좌표
-	BYTE               m_ItemClass;       // 아이템 클래스
-	ItemType_t         m_ItemType;        // 아이템 타입
-	std::list<OptionType_t> m_OptionType;      // 옵션 타입
-	Durability_t       m_Durability;      // 내구도
-	ItemNum_t          m_ItemNum;         // 아이템 숫자
+	ObjectID_t         m_TargetObjectID;  
+	ObjectID_t         m_ItemObjectID;    
+	CoordInven_t       m_X;               
+	CoordInven_t       m_Y;               
+	BYTE               m_ItemClass;       
+	ItemType_t         m_ItemType;        
+	std::list<OptionType_t> m_OptionType;      
+	Durability_t       m_Durability;      
+	ItemNum_t          m_ItemNum;         
 	Silver_t           m_Silver;          // silver coating amount
 	Grade_t            m_Grade;           // grade
 	EnchantLevel_t     m_EnchantLevel;    // enchant level
-	BYTE               m_ListNum;         // 벨트일 경우, 안에 있는 아이템의 숫자
-	std::list<SubItemInfo*> m_InfoList;        // 벨트일 경우, 안에 있는 아이템의 정보
+	BYTE               m_ListNum;         
+	std::list<SubItemInfo*> m_InfoList;        
 
 };
 

@@ -27,7 +27,7 @@ GCNPCAskVariable::~GCNPCAskVariable()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCNPCAskVariable::read(SocketInputStream& iStream)
 
@@ -49,7 +49,7 @@ void GCNPCAskVariable::read(SocketInputStream& iStream)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCNPCAskVariable::write(SocketOutputStream& oStream) const
 
@@ -107,8 +107,8 @@ string GCNPCAskVariable::getValue(const string& name) const {
     HashMapScriptParameterConstItor itr = m_ScriptParameters.find(name);
 
     if (itr == m_ScriptParameters.end()) {
-        // name �� ���� ����. NoSuchElement �� �������ϳ�
-        // �� name �� �����ֵ��� �Ѵ�.
+        
+        
         return name;
     }
 

@@ -25,7 +25,7 @@
 #include "Vampire.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pVampireSkillSlot,
                        CEffectID_t CEffectID)
@@ -47,9 +47,9 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         SkillType_t SkillType = pVampireSkillSlot->getSkillType();
 
-        // NPC는 공격할 수가 없다.
-        // 면역이거나. by sigi. 2002.9.13
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
+        
         if (pTargetCreature == NULL || pTargetCreature->isFlag(Effect::EFFECT_CLASS_IMMUNE_TO_PARALYZE) ||
             !canAttack(pVampire, pTargetCreature) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
@@ -66,7 +66,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
 
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
 
-        // Knowledge of Curse 가 있다면 hit bonus 10
+        
         int HitBonus = 0;
         if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_CURSE)) {
             RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_KNOWLEDGE_OF_CURSE);
@@ -105,7 +105,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
             SkillOutput output;
             computeOutput(input, output);
 
-            // Wisdom of Silence 이 있다면 지속시간 20% 증가
+            
             if (pVampire->hasRankBonus(RankBonus::RANK_BONUS_WISDOM_OF_SILENCE)) {
                 RankBonus* pRankBonus = pVampire->getRankBonus(RankBonus::RANK_BONUS_WISDOM_OF_SILENCE);
                 Assert(pRankBonus != NULL);
@@ -113,7 +113,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
                 output.Duration += getPercentValue(output.Duration, pRankBonus->getPoint());
             }
 
-            // pTargetCreature가 저주마법을 반사하는 경우
+            
             if (CheckReflection(pVampire, pTargetCreature, getSkillType())) {
                 pTargetCreature = (Creature*)pVampire;
                 TargetObjectID = pVampire->getObjectID();
@@ -127,7 +127,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
             if (output.Duration < 20)
                 output.Duration = 20;
 
-            // 이펙트 오브젝트를 생성해서 붙인다.
+            
             EffectParalyze* pEffectParalyze = new EffectParalyze(pTargetCreature);
             pEffectParalyze->setLevel(pSkillInfo->getLevel() / 2);
             //			pEffectParalyze->setDefensePenalty(output.Damage);
@@ -141,8 +141,8 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
                     pEffect->setDeadline(0);
             }
 
-            // 저주에 걸리면 디펜스가 떨어진다.
-            // 디펜스 페널티가 없어짐. 2002.05.09 - by bezz
+            
+            
             /*			if (pTargetCreature->isSlayer())
                         {
                             Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
@@ -166,7 +166,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
                         }
                         else Assert(false);
             */
-            // 이펙트가 붙었다는 것을 브로드캐스팅해준다.
+            
             GCAddEffect gcAddEffect;
             gcAddEffect.setObjectID(pTargetCreature->getObjectID());
             gcAddEffect.setEffectID(Effect::EFFECT_CLASS_PARALYZE);
@@ -198,10 +198,10 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
             _GCSkillToObjectOK6.setSkillType(SkillType);
             _GCSkillToObjectOK6.setDuration(output.Duration);
 
-            if (bCanSeeCaster) // 10은 땜빵 수치다.
+            if (bCanSeeCaster) 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
-            } else // 10은 땜빵 수치다.
+            } else 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK6, &_GCSkillToObjectOK1);
             }
@@ -244,7 +244,7 @@ void Paralyze::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkil
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Paralyze::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -272,7 +272,7 @@ void Paralyze::execute(Monster* pMonster, Creature* pEnemy)
         if (pMonster->isMaster()) {
             int x = pMonster->getX();
             int y = pMonster->getY();
-            int Splash = 3 + rand() % 5; // 3~7 마리
+            int Splash = 3 + rand() % 5; 
             int range = 2;               // 5x5
             list<Creature*> creatureList;
             getSplashVictims(pMonster->getZone(), x, y, Creature::CREATURE_CLASS_MAX, creatureList, Splash, range);
@@ -334,7 +334,7 @@ void Paralyze::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         SkillOutput output;
         computeOutput(input, output);
 
-        // pTargetCreature가 저주마법을 반사하는 경우
+        
         if (CheckReflection(pMonster, pEnemy, getSkillType())) {
             pEnemy = (Creature*)pMonster;
         }
@@ -347,7 +347,7 @@ void Paralyze::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         if (output.Duration < 20)
             output.Duration = 20;
 
-        // 이펙트 오브젝트를 생성해서 붙인다.
+        
         EffectParalyze* pEffectParalyze = new EffectParalyze(pEnemy);
         pEffectParalyze->setLevel(pSkillInfo->getLevel() / 2);
         // pEffectParalyze->setDefensePenalty(output.Damage);
@@ -355,7 +355,7 @@ void Paralyze::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         pEnemy->addEffect(pEffectParalyze);
         pEnemy->setFlag(Effect::EFFECT_CLASS_PARALYZE);
 
-        // 저주에 걸리면 디펜스가 떨어진다.
+        
         if (pEnemy->isSlayer()) {
             Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pEnemy);
             SLAYER_RECORD prev;
@@ -380,7 +380,7 @@ void Paralyze::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEnemy)
         } else
             Assert(false);
 
-        // 이펙트가 붙었다는 것을 브로드캐스팅해준다.
+        
         GCAddEffect gcAddEffect;
         gcAddEffect.setObjectID(pEnemy->getObjectID());
         gcAddEffect.setEffectID(Effect::EFFECT_CLASS_PARALYZE);

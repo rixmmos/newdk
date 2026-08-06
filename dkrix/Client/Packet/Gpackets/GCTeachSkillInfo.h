@@ -1,17 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCTeachSkillInfo.h 
-// Written By  : 김성민
+
 // Description : 
-// NPC가 플레이어에게 스킬을 가르쳐 줄 때 제일 먼저 플레이어에게
-// 전송되는 패킷이다. NPC가 가르쳐 줄 수 있는 기술의 범위를 기술하는 
-// 데 쓰이는 패킷이다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_TEACH_SKILL_INFO_H__
 #define __GC_TEACH_SKILL_INFO_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCTeachSkillInfo;
@@ -36,8 +36,8 @@ public :
 	void setTargetLevel(SkillLevel_t level) throw() { m_TargetLevel = level;}
 
 private:
-	SkillDomainType_t m_DomainType;  // NPC가 가르쳐주는 기술의 도메인 타입
-	SkillLevel_t      m_TargetLevel; // 플레이어가 이제 배울 기술 레벨
+	SkillDomainType_t m_DomainType;  
+	SkillLevel_t      m_TargetLevel; 
 };
 
 //////////////////////////////////////////////////////////////////////////////

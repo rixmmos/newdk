@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // MHelicopterManager.h
 //----------------------------------------------------------------------
-// MHelicopter는 한 Player를 쫓아가는 Effect로 표현된다.
-// MHelicopterManager는 화면상에 존재하는 MHelicopter를 다 처리한다.
+
+
 //----------------------------------------------------------------------
 
 #ifndef __MHELICOPTERMANAGER_H__
@@ -30,13 +30,13 @@ class MHelicopter {
 		void			UpdateSound(int x, int y);
 
 	protected :
-		TYPE_OBJECTID			m_CreatureID;	// 호출한 사람의 id
-		TYPE_OBJECTID			m_EffectID;		// 헬기 그림자 Effect의 ID
-		ZONESOUND_NODE*			m_pSound;		// 헬기 소리
+		TYPE_OBJECTID			m_CreatureID;	
+		TYPE_OBJECTID			m_EffectID;		
+		ZONESOUND_NODE*			m_pSound;		
 };
 
 //----------------------------------------------------------------------
-// MHelicopterManager - MHelicopter*의 map
+
 //----------------------------------------------------------------------
 class MHelicopterManager : private CTypeMap2<MHelicopter> {
 	public :

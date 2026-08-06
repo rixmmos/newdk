@@ -83,7 +83,7 @@ void PCFinder::deleteCreature(const string& name)
     if (itr == m_PCs.end()) {
         // cerr << "PCFinder::deleteCreature() : NoSuchElementException" << endl;
         // throw NoSuchElementException();
-        //  NoSuch제거. by sigi. 2002.5.2
+        
 
         m_Mutex.unlock();
         return;
@@ -102,7 +102,7 @@ void PCFinder::deleteCreature(const string& name)
     if (itr != m_IDs.end()) {
         m_IDs.erase(itr2);
     }
-    // 요기까지 2002.11.18
+    
 
     /*	if ( pCreature->isPC() )
         {
@@ -144,7 +144,7 @@ Creature* PCFinder::getCreature_LOCKED(const string& name) const
         // m_Mutex.unlock();
 
         // throw NoSuchElementException();
-        //  NoSuch제거. by sigi. 2002.5.2
+        
         return NULL;
     }
 
@@ -174,7 +174,7 @@ Creature* PCFinder::getCreatureByID_LOCKED(const string& ID) const
         // m_Mutex.unlock();
 
         // throw NoSuchElementException();
-        //  NoSuch제거. by sigi. 2002.5.2
+        
         return NULL;
     }
 
@@ -205,7 +205,7 @@ Creature* PCFinder::getCreature(const string& name) const
         m_Mutex.unlock();
 
         // throw NoSuchElementException();
-        //  NoSuch제거. by sigi. 2002.5.2
+        
         return NULL;
     }
 
@@ -235,7 +235,7 @@ Creature* PCFinder::getCreatureByID(const string& ID) const
         m_Mutex.unlock();
 
         // throw NoSuchElementException();
-        //  NoSuch제거. by sigi. 2002.5.2
+        
         return NULL;
     }
 
@@ -296,86 +296,7 @@ list<Creature*> PCFinder::getGuildCreatures(GuildID_t gID, uint Num) {
     return ret;
 }
 
-/*
-// get creature with PC-name
-bool PCFinder::sendPacket (const string& name, Packet* pPacket) const
-    //NoSuchElementException , Error)
-{
-    __BEGIN_TRY
-
-    unordered_map< string , Creature* >::const_iterator itr;
-
-    __ENTER_CRITICAL_SECTION(m_Mutex)
-
-    itr = m_PCs.find(name);
-
-    if (itr == m_PCs.end())
-    {
-        m_Mutex.unlock();
-
-        return false;
-    }
-
-    // sendPacket
-    try {
-        Creature* pCreature = itr->second;
-        Player* pPlayer = pCreature->getPlayer();
-        pPlayer->sendPacket( pPacket );
-    } catch (Throwable& ) {
-        // 그냥 무시한다.
-    }
-
-    __LEAVE_CRITICAL_SECTION(m_Mutex)
-
-    __END_CATCH
-
-    return true;
-}
-
-// kick
-bool PCFinder::setKickCharacter (const string & name, const string& host, uint port) const
-    //NoSuchElementException , Error)
-{
-    __BEGIN_TRY
-
-    unordered_map< string , Creature* >::const_iterator itr;
-
-    __ENTER_CRITICAL_SECTION(m_Mutex)
-
-    itr = m_PCs.find(name);
-
-    if (itr == m_PCs.end())
-    {
-        //cerr << "PCFinder::getCreature() : NoSuchElementException" << endl;
-        //cerr << "PCFinder::getCreature() : NoSuchCreature" << endl;
-        m_Mutex.unlock();
-
-        //throw NoSuchElementException();
-        // NoSuch제거. by sigi. 2002.5.2
-        return false;
-    }
-
-    Creature* pCreature = itr->second;
-    Player* pPlayer = pCreature->getPlayer();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>( pPlayer );
-    Assert(pGamePlayer!=NULL);
-
-    // 강제 종료 시킨다.
-    pGamePlayer->setPenaltyFlag(PENALTY_TYPE_KICKED);
-    pGamePlayer->setKickForLogin(true);
-
-    // 접속 해제 후, 응답을 보내줄 곳..
-    pGamePlayer->setKickRequestHost( host );
-    pGamePlayer->setKickRequestPort( port );
-
-
-    __LEAVE_CRITICAL_SECTION(m_Mutex)
-
-    __END_CATCH
-
-    return true;
-}
-*/
+ 
 
 void PCFinder::addNPC(NPC* pNPC) {
     __BEGIN_TRY
@@ -404,7 +325,7 @@ void PCFinder::addNPC(NPC* pNPC) {
 void PCFinder::deleteNPC(const string& name)
 
 {
-    // 실제로 사용 안 할 함수라고 생각함 그래도 그냥 add 랑 쌍을 맞추기 위해 =_=
+    
     __BEGIN_TRY
 
     __ENTER_CRITICAL_SECTION(m_Mutex)

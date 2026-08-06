@@ -27,6 +27,12 @@ extern CMessageStringTable g_MessageStringTable;
 extern BOOL g_bMsgOutPutFlag;
 extern BOOL g_bMsgDetailFlag;
 extern BOOL g_bMsgContentFlag;
+extern void WriteCombatCrashMarker(const char* format, ...);
+
+static void TraceGameEntryFlow(const char* step)
+{
+	(void)step;
+}
 
 extern void PrintMessageDetail(ofstream file, char *strMsg, int length);
 
@@ -80,8 +86,8 @@ ClientPlayer::~ClientPlayer ()
 {
 	__BEGIN_TRY
 		
-	// 그 어떤 플레이어 객체가 삭제될 때에도, 그 상태는 로그아웃이어야 한다.
-	// 즉 어떤 플레이어를 접속 종료 시키려면, 그 상태를 로그아웃으로 만들어야 한다.
+	
+	
 	Assert( m_PlayerStatus == CPS_END_SESSION );
 
 	// delete all previous packets
@@ -115,38 +121,47 @@ void ClientPlayer::processCommand ()
 	try {
 		try {
 
-			// 헤더를 임시저장할 버퍼 생성
+			
 			char header[szPacketHeader];
 			PacketID_t packetID = 0;
 			PacketSize_t packetSize = 0;		
 			pPacket = NULL;
 
 			//---------------------------------------------------------
-			// 이번 Loop에서 처리한 packet의 개수
+			
 			//---------------------------------------------------------
-			// packet이 너무 많은 경우.. 
-			// 다 처리하다보면 .. 시간이 많이 걸려서 client가 안 돌아간다
-			// 그래서 일정 개수만 처리한다.
+			
+			
+			
 			//---------------------------------------------------------
 			int maxProcessPacket = g_pClientConfig->MAX_PROCESS_PACKET;
 			int processedPacket = 0;
  
-			// 입력버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
+			
 			while ( true ) {
 			
-				// 입력스트림에서 패킷헤더크기만큼 읽어본다.
-				// 만약 지정한 크기만큼 스트림에서 읽을 수 없다면,
-				// Insufficient 예외가 발생하고, 루프를 빠져나간다.
+				
+				
+				
 				if (m_pInputStream->peek( header , szPacketHeader ) == false) {
 					break;
 				}
 
-				// 패킷아이디 및 패킷크기를 알아낸다.
-				// 이때 패킷크기는 헤더를 포함한다.
+				
+				
 
 				memcpy( &packetID   , &header[0] , szPacketID );
 				memcpy( &packetSize , &header[szPacketID] , szPacketSize );
 				BYTE seq = header[szPacketID+szPacketSize];
+				if (getPlayerStatus() == CPS_AFTER_SENDING_CG_CONNECT ||
+					getPlayerStatus() == CPS_WAITING_FOR_LOADING ||
+					getPlayerStatus() == CPS_WAITING_FOR_GC_SET_POSITION)
+				{
+					char trace[160];
+					sprintf(trace, "ClientPlayer recv packet id=%u size=%u seq=%u status=%d",
+						packetID, packetSize, seq, (int)getPlayerStatus());
+					TraceGameEntryFlow(trace);
+				}
 
 #ifdef __DEBUG_OUTPUT__
 				ofstream file("packetID.log", ios::out | ios::app);
@@ -189,7 +204,7 @@ void ClientPlayer::processCommand ()
 					//	DEBUG_ADD_FORMAT("ID=%d, size=%d", packetID, packetSize);
 				//#endif
 
-				// 패킷 아이디가 이상하면 프로토콜 에러로 간주한다.
+				
 
 
 				if ( packetID >= Packet::PACKET_MAX ) 
@@ -215,24 +230,25 @@ void ClientPlayer::processCommand ()
 					if ( ! g_pPacketValidator->isValidPacketID( getPlayerStatus() , packetID ) )
 					{
 						//---------------------------------------------------------------
-						// Logout해서 캐릭터 선택화면으로 가는 경우
+						
 						//---------------------------------------------------------------
 						if (getPlayerStatus()==CPS_WAITING_FOR_GC_RECONNECT_LOGIN)
 						{
 							DEBUG_ADD_ERR("[PacketError] ignore Packet when RECONNECT");
 
-							// 읽어내고 execute는 하지 않는다.
+							
 							bExecute = FALSE;
 							
-							// 으헤헤.. 무한~~ -_-;
+							
 							maxProcessPacket = 0xFFFF;
 						}
 						//---------------------------------------------------------------
-						// 일반적인 경우는 접속을 끊는다.
+						
 						//---------------------------------------------------------------
 						else
 						{
 							DEBUG_ADD_FORMAT("[PacketError] invalid packet ORDER %d", getPlayerStatus());
+							TraceGameEntryFlow("ClientPlayer invalid packet order after CGConnect");
 							throw InvalidProtocolException("invalid packet ORDER");
 						}				
 					}
@@ -252,16 +268,17 @@ void ClientPlayer::processCommand ()
 				}
 
 //				DEBUG_ADD_FORMAT_ERR("*** RECEIVED Read OK0 PacketID=%u, Size=%d",  packetID, packetSize);
-				// 패킷 크기가 너무 크면 프로토콜 에러로 간주한다.
+				
 				if ( packetSize > g_pPacketFactoryManager->getPacketMaxSize( packetID ) )
 				{
 					DEBUG_ADD_FORMAT_ERR("[PacketError] too large packet SIZE: %d/%d", packetSize, g_pPacketFactoryManager->getPacketMaxSize( packetID ));		
 					SendBugReport("too large PacketSize ID)%d %d/%d", packetID, packetSize, g_pPacketFactoryManager->getPacketMaxSize( packetID ) );
+					TraceGameEntryFlow("ClientPlayer packet too large after CGConnect");
 					throw InvalidProtocolException("too large packet SIZE");
 				}
 				
-				// 입력버퍼내에 패킷크기만큼의 데이타가 들어있는지 확인한다.
-				// 최적화시 break 를 사용하면 된다. (여기서는 일단 exception을 쓸 것이다.)
+				
+				
 				if ( m_pInputStream->length() < szPacketHeader + packetSize )
 				{
 					DEBUG_ADD_FORMAT_ERR("[PacketError] InsufficientDataException: %d/%d", m_pInputStream->length(), szPacketHeader + packetSize);
@@ -269,18 +286,18 @@ void ClientPlayer::processCommand ()
 					throw InsufficientDataException();
 				}
 				
-				// 여기까지 왔다면 입력버퍼에는 완전한 패킷 하나 이상이 들어있다는 뜻이다.
-				// 패킷팩토리매니저로부터 패킷아이디를 사용해서 패킷 스트럭처를 생성하면 된다.
-				// 패킷아이디가 잘못될 경우는 패킷팩토리매니저에서 처리한다.
+				
+				
+				
 				pPacket = g_pPacketFactoryManager->createPacket( packetID );
 
-				// 이제 이 패킷스트럭처를 초기화한다.
-				// 패킷하위클래스에 정의된 read()가 virtual 메커니즘에 의해서 호출되어
-				// 자동적으로 초기화된다.
+				
+				
+				
 				m_pInputStream->read( pPacket );
 
-				// 이제 이 패킷스트럭처를 가지고 패킷핸들러를 수행하면 된다.
-				// 패킷아이디가 잘못될 경우는 패킷핸들러매니저에서 처리한다.			
+				
+				
 
 				if (bExecute)
 				{
@@ -290,18 +307,21 @@ void ClientPlayer::processCommand ()
 
 //					_MinTrace("Incomming Packet ID : %d\n",pPacket->getPacketID());
 
+					WriteCombatCrashMarker("dispatch before id=%u size=%d status=%d",
+						packetID, packetSize, getPlayerStatus());
 					pPacket->execute( this );
+					WriteCombatCrashMarker("dispatch after id=%u", packetID);
 
 					//DEBUG_ADD_FORMAT("[Executed] %s", pPacket->toString().c_str());
 					DEBUG_ADD("[PacketExecute OK1]");				
 				}
 				
 				
-				// 현재 패킷을 패킷 히스토리의 맨 뒤에 넣는다.
+				
 				m_PacketHistory.push_back(pPacket);
 				pPacket = NULL;
 
-				// 패킷을 nPacketHistory 개만큼만 저장한다.
+				
 				while ( m_PacketHistory.size() > nPacketHistory ) {
 					Packet * oldPacket = m_PacketHistory.front();
 					delete oldPacket;
@@ -310,8 +330,8 @@ void ClientPlayer::processCommand ()
 				DEBUG_ADD("[PacketExecute OK2]");
 				
 				//---------------------------------------------------------	
-				// 한번에 처리하는 packet의 한계 개수를 넘어간 경우
-				// 나머지는 다음 turn에 처리한다.
+				
+				
 				//---------------------------------------------------------
 				if (++processedPacket > maxProcessPacket)
 				{
@@ -324,7 +344,7 @@ void ClientPlayer::processCommand ()
 
 		} catch ( InsufficientDataException& ) {
 
-			// 단지 루프의 탈출 조건일 뿐이다. 상위로 전달할 필요는 없다.
+			
 		}
 
 	} catch (Throwable&)	{
@@ -352,11 +372,11 @@ void ClientPlayer::disconnect ( bool bDisconnected )
 
 	if ( bDisconnected == UNDISCONNECTED ) {
 
-		// 클라이언트에게 GCDisconnect 패킷을 전송한다.
+		
 		//GCDisconnect gcDisconnect;
 		//sendPacket( gcDisconnect );
 
-		// 출력 버퍼에 남아있는 데이타를 전송한다.
+		
 		try {
 			m_pOutputStream->flush();
 		} catch (ConnectException& t)	{
@@ -367,16 +387,16 @@ void ClientPlayer::disconnect ( bool bDisconnected )
 
 	}
 
-	// 소켓 연결을 닫는다.
+	
 	try {
 		m_pSocket->close();
 	} catch (Throwable& ) {
-		// 그냥 무시
+		
 	}
 
-	// 플레이어의 상태를 로그아웃으로 만든다.
+	
 	//cout<< "PlayerStatus : " << (int)m_PlayerStatus << endl;
-	// 2001.10.5 주석처리 ..으흠..
+	
 	//Assert( m_PlayerStatus != CPS_END_SESSION );
 	m_PlayerStatus = CPS_END_SESSION;
 	// add by Coffee 2007-7-15
@@ -387,11 +407,11 @@ void ClientPlayer::disconnect ( bool bDisconnected )
 
 //--------------------------------------------------------------------------------
 //
-// 최근 N 번째의 패킷을 리턴한다.
+
 // 
-// N == 0 일 경우, 가장 최근의 패킷을 리턴하게 된다.
+
 //
-// 최대 nPacketHistory - 1 까지 지정할 수 있다. 
+
 //
 //--------------------------------------------------------------------------------
 Packet * ClientPlayer::getOldPacket ( uint prev )
@@ -417,7 +437,7 @@ Packet * ClientPlayer::getOldPacket ( uint prev )
 
 //--------------------------------------------------------------------------------
 //
-// 특정 패킷아이디를 가진 가장 최근의 패킷을 리턴한다.
+
 //
 //--------------------------------------------------------------------------------
 Packet * ClientPlayer::getOldPacket ( PacketID_t packetID )
@@ -458,7 +478,7 @@ std::string ClientPlayer::toString () const
 	StringStream msg;
 	
 	msg << "ClientPlayer("
-		<< "SocketID:" << m_pSocket->getSOCKET() 
+		<< "SocketID:" << (int)m_pSocket->getSOCKET() 
 		<< ",Host:" << m_pSocket->getHost() 
 		<< ")" ;
 
@@ -469,7 +489,7 @@ std::string ClientPlayer::toString () const
 
 
 
-// 암호화 코드를 설정한다.
+
 
 void ClientPlayer::setEncryptCode()
 	throw( Error )
@@ -480,7 +500,7 @@ void ClientPlayer::setEncryptCode()
 //	Assert(g_pPlayer!=NULL);
 	Assert(g_pZone!=NULL);
 
-	// 일단은 ObjectID를 이용한다.
+	
 //	ObjectID_t objectID = g_pPlayer->GetID();
 	ZoneID_t zoneID = g_pZone->GetID();
 	int serverID = g_pUserInformation->ServerID;

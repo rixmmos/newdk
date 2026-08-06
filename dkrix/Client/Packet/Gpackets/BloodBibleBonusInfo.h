@@ -12,9 +12,9 @@
 #pragma warning(disable:4786)
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
 #include <list>
 
 
@@ -40,10 +40,10 @@ public :
 public :
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read (SocketInputStream & iStream) throw (ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
 
 	// get packet's body size

@@ -2,7 +2,7 @@
 //
 // Filename    : GCChangeInventoryItemNum.h
 // Written By  : elca@ewestsoft.com
-// Description : 기술이 성공했을때 보내는 패킷을 위한 클래스 정의
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -19,7 +19,7 @@
 //
 // class GCChangeInventoryItemNum;
 //
-// 게임서버에서 클라이언트로 자신의 기술이 성공을 알려주기 위한 클래스
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -33,10 +33,10 @@ public:
 
 
 public:
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     PacketSize_t getPacketSize() const {
@@ -80,9 +80,9 @@ protected:
     // List Element Number
     BYTE m_ChangedItemListNum;
 
-    // 수량등이 변경된 Inventory내의 Item List
-    list<ObjectID_t> m_ChangedItemList;   // 변경될 Item object id
-    list<ItemNum_t> m_ChangedItemNumList; // 변경될 Item object id의 변경 수량.
+    
+    list<ObjectID_t> m_ChangedItemList;   
+    list<ItemNum_t> m_ChangedItemNumList; 
 };
 
 #endif

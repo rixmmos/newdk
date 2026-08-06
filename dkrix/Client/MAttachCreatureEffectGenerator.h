@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachCreatureEffectGenerator.h
 //----------------------------------------------------------------------
-// Creature에 붙어버리는 Effect
+
 //----------------------------------------------------------------------
 
 #ifndef	__MATTACHCREATUREEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MAttachCreatureEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_ATTACH_CREATURE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

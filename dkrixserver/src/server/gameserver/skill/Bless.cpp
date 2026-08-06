@@ -19,7 +19,7 @@
 #include "PacketUtil.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -40,8 +40,8 @@ void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // 슬레이어가 아니라면 사용할 수가 없다.
-        if (pTargetCreature == NULL // NoSuch 제거. by sigi. 2002.5.2
+        
+        if (pTargetCreature == NULL 
             || pTargetCreature->isSlayer() == false) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End(slayerobject)" << endl;
@@ -70,7 +70,7 @@ void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToObjectOK1);
 
-            // 기술의 효과치 및 지속시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             input.TargetType = SkillInput::TARGET_OTHER;
             SkillOutput output;
@@ -78,7 +78,7 @@ void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
 
             uint AttrBonus = output.Damage;
 
-            // 이펙트를 만들어 붙인다.
+            
             EffectBless* pEffect = new EffectBless(pTargetCreature);
             pEffect->setDeadline(output.Duration);
             pEffect->setSTRBonus(AttrBonus);
@@ -86,14 +86,14 @@ void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
             pTargetCreature->setFlag(Effect::EFFECT_CLASS_BLESS);
             pTargetCreature->addEffect(pEffect);
 
-            // 이펙트를 붙였으니, 능력치를 재계산한다.
+            
             SLAYER_RECORD prev;
             pTargetSlayer->getSlayerRecord(prev);
             pTargetSlayer->initAllStat();
             pTargetSlayer->sendRealWearingInfo();
             pTargetSlayer->addModifyInfo(prev, _GCSkillToObjectOK2);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToObjectOK1);
@@ -173,7 +173,7 @@ void Bless::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSkil
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Bless::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -216,7 +216,7 @@ void Bless::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectI
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이펙트를 만들어 붙인다.
+            
             EffectBless* pEffect = new EffectBless(pSlayer);
             pEffect->setDeadline(output.Duration);
             pEffect->setSTRBonus(output.Damage);
@@ -224,14 +224,14 @@ void Bless::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectI
             pSlayer->setFlag(Effect::EFFECT_CLASS_BLESS);
             pSlayer->addEffect(pEffect);
 
-            // 이펙트를 붙였으니, 능력치를 재계산한다.
+            
             SLAYER_RECORD prev;
             pSlayer->getSlayerRecord(prev);
             pSlayer->initAllStat();
             pSlayer->sendRealWearingInfo();
             pSlayer->addModifyInfo(prev, _GCSkillToSelfOK1);
 
-            // 경험치를 올려준다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             shareAttrExp(pSlayer, ExpUp, 1, 1, 8, _GCSkillToSelfOK1);

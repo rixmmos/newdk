@@ -78,7 +78,7 @@ void SBillingPlayerManager::run() throw() {
             usleep(100);
 
             for (int i = 0; i < m_SBillingPlayers; ++i) {
-                // 연결 되어 있지 않다면 연결을 시도한다.
+                
                 if (m_pSBillingPlayer[i] == NULL) {
                     Socket* pSocket = NULL;
 
@@ -106,7 +106,7 @@ void SBillingPlayerManager::run() throw() {
                         filelog(LOGFILE_CBILLING_PLAYER, "----- connection established(%s:%d) -----",
                                 SBillingServerIP.c_str(), SBillingServerPort);
 
-                        // interval validation packet 을 보낸다.
+                        
                         sendIntervalValidation(i);
                     } catch (Throwable& t) {
                         cout << "connect to china billing server fail - " << SBillingServerIP.c_str() << ":"
@@ -128,12 +128,12 @@ void SBillingPlayerManager::run() throw() {
                         }
                         __LEAVE_CRITICAL_SECTION(m_Mutex[i])
 
-                        // 다음 접속 시도 시간
-                        usleep(1000000); // 1초
+                        
+                        usleep(1000000); 
                     }
                 }
 
-                // 소켓이 연결되어 있다면 입출력을 처리한다.
+                
                 __ENTER_CRITICAL_SECTION(m_Mutex[i])
 
                 if (m_pSBillingPlayer[i] != NULL) {
@@ -194,7 +194,7 @@ void SBillingPlayerManager::sendIntervalValidation(int i) throw(ProtocolExceptio
     if (m_pSBillingPlayer[i] != NULL) {
         m_pSBillingPlayer[i]->sendIntervalValidation();
 
-        // 바로 보내버린다.
+        
         m_pSBillingPlayer[i]->processOutput();
     }
 

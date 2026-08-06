@@ -46,14 +46,14 @@ void CGRequestGuildListHandler::execute(CGRequestGuildList* pPacket, Player* pPl
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
 
     GuildType_t tmpGuildType = pPacket->getGuildType();
 
-    // 대기길드 이면
+    
     if (tmpGuildType == CGRequestGuildList::GUILDTYPE_WAIT) {
         GCWaitGuildList gcWaitGuildList;
 
@@ -72,7 +72,7 @@ void CGRequestGuildListHandler::execute(CGRequestGuildList* pPacket, Player* pPl
         pPlayer->sendPacket(&gcWaitGuildList);
 
     }
-    // 일반길드 이면
+    
     else if (tmpGuildType == CGRequestGuildList::GUILDTYPE_NORMAL) {
         GCActiveGuildList gcActiveGuildList;
 

@@ -45,7 +45,7 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
 
 #ifdef __OLD_GUILD_WAR__
     GCSystemMessage gcSM;
-    gcSM.setMessage("아직 지원되지 않는 기능입니다.");
+    gcSM.setMessage("   .");
     pGamePlayer->sendPacket(&gcSM);
     return;
 #endif
@@ -62,11 +62,11 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         return;
     }
 
-    // 요청한놈이 지가 속한 길드의 마스터인가? || 연합의 마스터길드가 내 길드가 맞나?
+    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        // GC_GUILD_RESPONSE 날려준다.
-        // 내용 : 길드 마스터가 아니자녀 -.-+
+        
+        
 
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -89,7 +89,7 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         string TargetGuildMaster = pGuild->getMaster();
 
 
-        // cout << "가입이 거부되었다. 통보받을 유저는 : " << TargetGuildMaster.c_str() << endl;
+        
 
 
         Statement* pStmt = NULL;
@@ -99,13 +99,13 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
             pStmt->executeQuery("INSERT INTO `Messages` (`Receiver`, `Message`) values ('%s','%s')",
                                 TargetGuildMaster.c_str(), g_pStringPool->c_str(374));
 
-            // 거부한뒤에 나 혼자 남아있다면?
+            
             Result* pResult = pStmt->executeQuery("SELECT count(*) FROM `GuildUnionMember` WHERE `UnionID`='%u'",
                                                   pUnion->getUnionID());
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                // cout << "가입을 거부했는데..내가 계속 연합장이면 안되니까..지워버린다" << endl;
+                
                 pStmt->executeQuery("DELETE FROM `GuildUnionInfo` WHERE `UnionID`='%u'", pUnion->getUnionID());
 
                 GuildUnionManager::Instance().reload();
@@ -126,7 +126,7 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
 
         pPlayer->sendPacket(&gcModifyInformation);
 
-        // 통보받을 유저에게 길드Union정보를 다시 보낸다
+        
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -145,7 +145,7 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
-        // 다른 서버에 있는 놈들에게 변경사항을 알린다.
+        
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
     }

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MStopZoneMultipleEffectGenerator.h
 //----------------------------------------------------------------------
-// 십자가(+) 모양으로 생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSTOPZONEMULTIPLEEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MStopZoneMultipleEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_STOP_ZONE_MULTIPLE; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

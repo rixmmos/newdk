@@ -16,7 +16,11 @@
 
 
 //
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 LPDIRECTDRAWSURFACE7	gpC_fl2_surface = NULL;
+#else
+void* gpC_fl2_surface = NULL;
+#endif
 HDC gh_FL2_DC = NULL;
 
 //-----------------------------------------------------------------------------
@@ -24,10 +28,17 @@ HDC gh_FL2_DC = NULL;
 //
 // 
 //-----------------------------------------------------------------------------
+#if defined(PLATFORM_WINDOWS) && !defined(SPRITELIB_BACKEND_SDL)
 void g_SetFL2Surface(LPDIRECTDRAWSURFACE7 surface)
 {
 	gpC_fl2_surface = surface;
 }
+#else
+void g_SetFL2Surface(void* surface)
+{
+	gpC_fl2_surface = surface;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // g_PossibleStringCut
@@ -215,7 +226,8 @@ int	g_GetByteLenth(const char_t * p_dbcs, int dbcs_len)
 	if (p_dbcs == NULL || dbcs_len <= 0)
 		return 0;
 	// convert
-	for (int i=0, c=0; i < dbcs_len; i++)
+	int c = 0;
+	for (int i=0; i < dbcs_len; i++)
 	{
 		// check high byte
 		if ((p_dbcs[i]&0xFF00) != 0)
@@ -575,7 +587,7 @@ std::string g_GetStringByMoney(DWORD dwMoney)
 		TempMoney = dwMoney / 100000000;
 		if(TempMoney)
 		{
-			wsprintf(TempBuffer, "%d억", TempMoney);
+			wsprintf(TempBuffer, "%d", TempMoney);
 			sstr+= TempBuffer;
 		}
 	}
@@ -584,7 +596,7 @@ std::string g_GetStringByMoney(DWORD dwMoney)
 		TempMoney = (dwMoney%100000000) / 10000;
 		if(TempMoney)
 		{
-			wsprintf(TempBuffer, "%d만", TempMoney);
+			wsprintf(TempBuffer, "%d", TempMoney);
 			sstr+= TempBuffer;
 		}
 	}

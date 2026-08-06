@@ -17,7 +17,7 @@ CFileIndexTable::CFileIndexTable()
 
 CFileIndexTable::~CFileIndexTable()
 {
-	// array를 메모리에서 제거한다.
+	
 	Release();
 }
 
@@ -33,14 +33,14 @@ CFileIndexTable::~CFileIndexTable()
 void
 CFileIndexTable::Init(WORD count)
 {
-	// 개수가 없을 경우 
+	
 	if (count==0) 
 		return;
 
-	// 일단 해제
+	
 	Release();
 
-	// 메모리 잡기
+	
 	m_Size = count;
 
 	m_pIndex = new long [m_Size];
@@ -55,7 +55,7 @@ CFileIndexTable::Release()
 {
 	if (m_pIndex != NULL)
 	{
-		// 모든 index를 지운다.
+		
 		delete [] m_pIndex;
 		m_pIndex = NULL;
 
@@ -70,14 +70,14 @@ bool
 CFileIndexTable::LoadFromFile(ifstream& indexFile)
 {
 	//------------------------------------------------------
-	// index개수를 읽어들인다.
+	
 	//------------------------------------------------------
 	indexFile.read((char*)&m_Size, 2);
 
 	Init(m_Size);
 
 	//------------------------------------------------------
-	// IndexFile을 모두 읽어들인다.
+	
 	//------------------------------------------------------
 	for (int i=0; i<m_Size; i++)
 	{

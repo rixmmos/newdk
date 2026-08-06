@@ -58,11 +58,11 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
 
     Assert(pCastCreature != NULL);
 
-    // 이펙트 플레그가 없다면 죽었다거나 하는 문제로 transport 하지 않겠다는걸 의미한다.
+    
     if (!pCastCreature->isFlag(Effect::EFFECT_CLASS_SKILL_SATELLITE_BOMB_AIM))
         return;
 
-    // Effect를 없애고 알린다.
+    
     pCastCreature->removeFlag(Effect::EFFECT_CLASS_SKILL_SATELLITE_BOMB_AIM);
 
     GCRemoveEffect gcRemoveEffect;
@@ -71,7 +71,7 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
 
     m_pZone->broadcastPacket(pCastCreature->getX(), pCastCreature->getY(), &gcRemoveEffect);
 
-    VSRect rect(0, 0, m_pZone->getWidth() - 1, m_pZone->getHeight() - 1); // -1 추가 by sigi. 2003.1.10
+    VSRect rect(0, 0, m_pZone->getWidth() - 1, m_pZone->getHeight() - 1); 
 
     bool bHit = false;
     Damage_t maxDamage = 0;
@@ -90,7 +90,7 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
             if (!rect.ptInRect(X, Y))
                 continue;
 
-            // 타일안에 존재하는 오브젝트를 가져온다.
+            
             Tile& tile = m_pZone->getTile(X, Y);
             const forward_list<Object*>& oList = tile.getObjectList();
             forward_list<Object*>::const_iterator itr = oList.begin();
@@ -106,7 +106,7 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
                     Creature* pCreature = dynamic_cast<Creature*>(pObject);
                     Assert(pCreature != NULL);
 
-                    // 자신은 맞지 않는다. 무적도 안 맞는다. 슬레이어는 맞지 않는다.
+                    
                     if (pCreature == m_pTarget || !canAttack(pCastCreature, pCreature) ||
                         pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) {
                         continue;
@@ -134,7 +134,7 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
                     bool bHitRoll = HitRoll::isSuccess(pCastCreature, pCreature, bonus);
 
                     if (bPK && bZoneLevelCheck && bHitRoll) {
-                        // 원래 데미지와 스킬 데미지 보너스를 더한 최종 데미지를 구한다.
+                        
                         Damage_t FinalDamage = 0;
                         FinalDamage = computeDamage(pCastCreature, pCreature);
                         FinalDamage += Damage;
@@ -144,12 +144,12 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
 
                             GCModifyInformation gcMI;
                             ::setDamage(pCreature, FinalDamage, pCastCreature, SKILL_SATELLITE_BOMB,
-                                        &gcMI); // ::추가 by Sequoia
+                                        &gcMI); 
 
                             pCreature->getPlayer()->sendPacket(&gcMI);
 
-                            // 맞는 동작을 보여준다.
-                            gcSkillToObjectOK2.setObjectID(1); // 의미 없다.
+                            
+                            gcSkillToObjectOK2.setObjectID(1); 
                             gcSkillToObjectOK2.setSkillType(SKILL_ATTACK_MELEE);
                             gcSkillToObjectOK2.setDuration(0);
                             pCreature->getPlayer()->sendPacket(&gcSkillToObjectOK2);
@@ -159,7 +159,7 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
                             Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
                             ::setDamage(pMonster, FinalDamage, pCastCreature,
-                                        SKILL_SATELLITE_BOMB); // ::추가 by Sequoia
+                                        SKILL_SATELLITE_BOMB); 
 
                             pMonster->addEnemy(pCastCreature);
                             bHit = true;
@@ -203,12 +203,12 @@ void EffectSatelliteBombAim::unaffect(Creature* pCastCreature)
         }
     }
 
-    // 포격 이펙트를 보여주도록 한다.
+    
     GCAddEffectToTile gcAddEffectToTile;
     gcAddEffectToTile.setObjectID(pCastCreature->getObjectID());
     gcAddEffectToTile.setEffectID(Effect::EFFECT_CLASS_SKILL_SATELLITE_BOMB_FIRE);
     gcAddEffectToTile.setXY(m_X, m_Y);
-    gcAddEffectToTile.setDuration(10); // 별 의미없다. 걍 1초
+    gcAddEffectToTile.setDuration(10); 
 
     m_pZone->broadcastPacket(m_X, m_Y, &gcAddEffectToTile);
 
@@ -229,8 +229,8 @@ void EffectSatelliteBombAim::unaffect()
     if (m_pZone != NULL && m_pZone == pCreature->getZone()) {
         unaffect(pCreature);
     } else {
-        // 조준 도중 죽었거나 이동했다는 의미이므로 이펙트를 없애고 브로드캐스팅한다.
-        // Effect를 없애고 알린다.
+        
+        
         Zone* pZone = pCreature->getZone();
         Assert(pZone != NULL);
 

@@ -80,21 +80,21 @@ void NPCManager::load(ZoneID_t zoneID, int race)
 
                 pNPC->setTaxingCastleZoneID(pResult->getInt(++i));
 
-                //				cout << pNPC->getName() << "은 " << pNPC->getTaxingCastleZoneID() << " 존에서 세금
-                // 매깁니다." << endl;
-                filelog("NPC.log", "%s는 %u존에서 세금 매깁니다.", pNPC->getName().c_str(),
+                
+                
+                filelog("NPC.log", "%s %u  .", pNPC->getName().c_str(),
                         pNPC->getTaxingCastleZoneID());
 
                 printf("NPC[%s] loading begin >> ", pNPC->getName().c_str());
                 pNPC->init();
                 printf("loading end\n");
-                // NPC trace 를 위해 by DEW 2003. 04. 16
+                
                 g_pPCFinder->addNPC(pNPC);
 
-                // NPC->init() 에서 NPC 의 Trigger 를 로드하고,
-                // CONDITION_AT_FIRST 를 찾아서 실행하는데
-                // 이때 ACTION_SET_POSITION 이 실행되면서 Zone에 NPC 를 추가한다.
-                // 만일 NPC 의 CONDITION_AT_FIRST 가 ACTION_SET_POSITION 이 아니라면 문제가 생길듯
+                
+                
+                
+                
                 // addCreature(pNPC);
             }
         }

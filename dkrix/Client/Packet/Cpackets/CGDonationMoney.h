@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename    : CGDonationMoney.h 
-// Written By  : 김성민
+
 // Description : 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CG_DONATION_MONEY_H__
 #define __CG_DONATION_MONEY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-// 기부 종류
+
 ////////////////////////////////////////////////////////////////////////////////
 enum DonationType
 {
@@ -48,8 +48,8 @@ public:
 	void setDonationType( BYTE donationType ) { m_DonationType = donationType; }
 
 private:
-	Gold_t		m_Gold;				// 기부 금액
-	BYTE		m_DonationType;		// 기부 종류
+	Gold_t		m_Gold;				
+	BYTE		m_DonationType;		
 };
 
 

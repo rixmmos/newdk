@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 // class C_VS_UI_DESC_DIALOG
 //
-// Item �Ǵ� Skill����
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_DESC_DIALOG : public Window, public C_VS_UI_DESC, public Exec, public ButtonVisual
@@ -83,7 +83,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_FILE_DIALOG
 //
-// file ����
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_FILE_DIALOG : public Window, public Exec, public ButtonVisual
@@ -150,9 +150,9 @@ public:
 		MODE_SENDFILE_SELECT,
 	};
 
-	// �ش� ��ȣ�� ���� ���� ����
+	
 	static const std::string GetFileNameInString(char *str,int n);
-	// �����̸����� ������ �� ����
+	
 	static int GetSizeFileInString(char *str);
 
 	C_VS_UI_FILE_DIALOG(MODE Mode = MODE_PROFILE_SELECT);
@@ -186,9 +186,9 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_EDIT_DIALOG
 //
-// Dialog box���� ��(digit only)�� �Է��� �� �ִ� dialog box�̴�.
+
 //
-// ! �������� ������ ���ǻ�� �������� ����.
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_EDIT_DIALOG : public C_VS_UI_DIALOG
 {
@@ -255,7 +255,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_MONEY_DIALOG
 //
-// ���� ������ dialog box�̴�.
+
 //-----------------------------------------------------------------------------
 class C_VS_UI_MONEY_DIALOG : public C_VS_UI_DIALOG
 {
@@ -287,8 +287,8 @@ private:
 
 	Point							m_money_dialog_pt;
 
-	//static char *				m_sz_question_msg[1];	// �ּ�ó�� by sigi
-	//static char *				m_sz_question_msg_for_storage[1];	// �ּ�ó�� by sigi
+	
+	
 	char *					m_sz_question_msg[MAX_MONEY_DIALOG_TYPE][1];		// by sigi
 
 	TYPE_MONEY_DIALOG		m_type;	// dialog type	 by sigi
@@ -296,7 +296,7 @@ private:
 	void	ScrollButton(bool up);
 
 public:
-	C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type); // type �߰�  by sigi
+	C_VS_UI_MONEY_DIALOG(int _x, int _y, int center_x, int center_y, void (*exec_fp)(C_VS_UI_DIALOG *, id_t), WORD dd_button, int digit_count, TYPE_MONEY_DIALOG type); 
 	~C_VS_UI_MONEY_DIALOG();
 
 	void	Start();
@@ -310,7 +310,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_ASK_DIALOG
 //
-// message������ OK/NO�� �����ϴ� dialog
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_ASK_DIALOG : public C_VS_UI_DIALOG
@@ -331,11 +331,11 @@ public :
 		ASK_BRINGFEE_LIMIT,
 		ASK_TRANS_ITEM,
 		ASK_USE_PET_FOOD,
-		ASK_KEEP_PETITEM,		// ���� ���� �Ͻðڽ��ϱ�?
-		ASK_GET_KEEP_PETITEM,	// "%s ���� ã���ðڽ��ϱ�?";
-		ASK_USE_SMSITEM,		// sms item �� ����Ͻðڽ��ϱ�?
-		ASK_USE_NAMINGITEM,		// ���̹� �������� ��� �ϰڽ��ϱ�?
-		ASK_GET_EVENT_ITEM,		// �̺�Ʈ �������� �����ðڽ��ϱ�?
+		ASK_KEEP_PETITEM,		
+		ASK_GET_KEEP_PETITEM,	
+		ASK_USE_SMSITEM,		
+		ASK_USE_NAMINGITEM,		
+		ASK_GET_EVENT_ITEM,		
 		//add by viva : ask_friend_request
 		ASK_FRIEND_REQUEST,
 		ASK_FRIEND_REFUSE,
@@ -374,7 +374,7 @@ public:
 //-----------------------------------------------------------------------------
 // class C_VS_UI_NPC_DIALOG
 //
-// DIALOG�� ������ NPC�� ������ ������ �ִ�.
+
 //
 //-----------------------------------------------------------------------------
 class C_VS_UI_NPC_DIALOG : public C_VS_UI_DIALOG

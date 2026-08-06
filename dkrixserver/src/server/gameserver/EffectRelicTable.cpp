@@ -75,32 +75,14 @@ void EffectRelicTable::unaffect(Item* pItem)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    /*
-    //cout << "EffectRelicTable" << "unaffect BEGIN" << endl;
-
-    Assert(pItem != NULL);
-
-    // 능력치를 정상적으로 되돌리기 위해서는 플래그를 끄고,
-    // initAllStat을 불러야 한다.
-    pItem->removeFlag(Effect::EFFECT_CLASS_HAS_SLAYER_RELIC);
-
-    Zone* pZone = pItem->getZone();
-    Assert(pZone != NULL);
-
-    GCRemoveEffect gcRemoveEffect;
-    gcRemoveEffect.setObjectID(pItem->getObjectID());
-    gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_HAS_SLAYER_RELIC);
-    pZone->broadcastPacket(pItem->getX(), pItem->getY(), &gcRemoveEffect);
-
-    //cout << "EffectRelicTable" << "unaffect END" << endl;
-    */
+     
     pItem->removeFlag(getEffectClass());
 
     __END_DEBUG
     __END_CATCH
 }
 
-// SafeTime 이 지나지 않았으면 성물을 꺼낼 수 없다.
+
 bool EffectRelicTable::isSafeTime() const {
     Timeval currentTime;
     getCurrentTime(currentTime);
@@ -108,7 +90,7 @@ bool EffectRelicTable::isSafeTime() const {
     return currentTime > m_SafeTime;
 }
 
-// LockTime 동안은 성물을 꺼낼 수 없다.
+
 bool EffectRelicTable::isLockTime() const {
     Timeval currentTime;
     getCurrentTime(currentTime);

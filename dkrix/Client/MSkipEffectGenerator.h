@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // MAttachZoneEffectGenerator.h
 //----------------------------------------------------------------------
-// Zone의 한 지점에서  생성
+
 //----------------------------------------------------------------------
 
 #ifndef	__MSKIPEFFECTGENERATOR_H__
@@ -16,7 +16,7 @@ class MSkipEffectGenerator : public MEffectGenerator {
 
 		TYPE_EFFECTGENERATORID		GetID()		{ return EFFECTGENERATORID_SKIP_DRAW; }
 
-		// Effect생성
+		
 		bool	Generate( const EFFECTGENERATOR_INFO& egInfo );
 };
 

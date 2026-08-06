@@ -8,7 +8,7 @@
 
 #include "DebugInfo.h"
 //#include "MFileDef.h"
-#include "Properties.h"
+#include "Packet/Properties.h"
 //#define	new			DEBUG_NEW
 //#define	delete		DEBUG_DELETE
 
@@ -49,11 +49,11 @@ CSpriteTexturePartManager::~CSpriteTexturePartManager()
 //----------------------------------------------------------------------
 // Init(spkFilename, indexFilename)
 //----------------------------------------------------------------------
-// spkFilename은 AlphaSpritePack이다.
-// indexFilename은 AlphaSpritePack Index이다.
+
+
 //
-// spkFilename은 화일을 열어서 나중에 읽을 수 있도록 해두고
-// indexFilename은 모두 읽어서 기억해둔다.
+
+
 //----------------------------------------------------------------------
 void
 //CSpriteTexturePartManager::Init(CAlphaSpritePack* pSPK, WORD partSize)
@@ -62,14 +62,14 @@ CSpriteTexturePartManager::Init(const char* spkFilename, WORD partSize)
 	Release();
 
 	///*
-	// Index File을 Load한다.
+	
 //	std::ifstream indexFile(indexFilename, ios::binary);
 //	m_SPKIndex.LoadFromFile( indexFile );
 //	indexFile.close();
 //
-//	// SPK를 초기화 한다. (개수만큼..)
+
 //
-//	// SPK File을 열어둔다.
+
 //	m_SPKFile.open(spkFilename, ios::binary);
 //	
 //	TYPE_SPRITEID size;
@@ -85,11 +85,11 @@ CSpriteTexturePartManager::Init(const char* spkFilename, WORD partSize)
 
 	//int allSize = pSPK->GetSize();
 
-	// Base class의 Init를 이용해서..
-	// ( 전체 개수, 메모리 허용 개수 ) 
+	
+	
 	CPartManager<WORD, WORD, CSpriteSurface*>::Init( allSize, partSize );
 	
-	// NULL로 초기화
+	
 	for (int i=0; i<m_nPart; i++)
 	{
 		m_pData[i] = NULL;
@@ -105,74 +105,7 @@ CSpriteTexturePartManager::Init(const char* spkFilename, WORD partSize)
 		m_pHeight[i] = 0;
 	}
 
-	/*
-	int spWidth, spHeight;
-	int width, height;
-
-	if (false)
-	{
-		for (int i=0; i<allSize; i++)
-		{
-			if ((*pSPK)[i].IsInit())
-			{
-				spWidth = (*pSPK)[i].GetWidth();
-				spHeight = (*pSPK)[i].GetHeight();
-				width = 1;
-				height = 1;
-
-				// width와 height는 spWidth와 spHeight보다 커야 한다.
-				// square로 맞춰준다.
-				while (width < spWidth || height < spHeight)
-				{
-					width <<= 1;
-					height <<= 1;
-				}
-
-				m_pWidth[i] = width;
-				m_pHeight[i] = height;
-			}
-			else
-			{
-				m_pWidth[i] = 0;
-				m_pHeight[i] = 0;
-			}
-		}
-	}
-	else
-	{
-		for (int i=0; i<allSize; i++)
-		{
-			if ((*pSPK)[i].IsInit())
-			{
-				spWidth = (*pSPK)[i].GetWidth();
-				spHeight = (*pSPK)[i].GetHeight();
-				width = spWidth;
-				height = spHeight;
-
-				// 큰 크기로 맞추어서 Square로 만든다.
-				if (false)
-				{				
-					if (width > height)
-					{
-						height = width;				
-					}
-					else if (width < height)
-					{
-						width = height;				
-					}	
-				}
-
-				m_pWidth[i] = width;
-				m_pHeight[i] = height;
-			}
-			else
-			{
-				m_pWidth[i] = 0;
-				m_pHeight[i] = 0;
-			}
-		}
-	}
-	*/
+	 
 
 // 	m_bOpen = true;
 	m_EffectScreenPPK.LoadFromFile( g_pFileDef->getProperty("FILE_PALETTE_SCREENEFFECT").c_str() );
@@ -181,7 +114,7 @@ CSpriteTexturePartManager::Init(const char* spkFilename, WORD partSize)
 //----------------------------------------------------------------------
 // Release
 //----------------------------------------------------------------------
-// 열려진 SPK file을 닫는다.
+
 //----------------------------------------------------------------------
 void	
 CSpriteTexturePartManager::Release()
@@ -223,7 +156,7 @@ CSpriteTexturePartManager::Release()
 //----------------------------------------------------------------------
 // Delete Removed
 //----------------------------------------------------------------------
-// 지워야 할 것들
+
 //----------------------------------------------------------------------
 void				
 CSpriteTexturePartManager::DeleteRemoved()
@@ -245,15 +178,15 @@ CSpriteTexturePartManager::DeleteRemoved()
 //----------------------------------------------------------------------
 // Clear
 //----------------------------------------------------------------------
-// Video Memory의 내용은 clear한다.
-// 실제로는... 다 날려버리는 것이다.
+
+
 //----------------------------------------------------------------------
 void
 CSpriteTexturePartManager::Clear()
 {	
 	DeleteRemoved();
 
-	// video memory를 날려~준다.
+	
 	for (int i=0; i<m_nPart; i++)
 	{
 		if (m_pData[i] != NULL)			
@@ -264,11 +197,11 @@ CSpriteTexturePartManager::Clear()
 		}
 	}
 
-	// Base class의 Init를 이용해서..
-	// ( 전체 개수, 메모리 허용 개수 ) 
+	
+	
 	CPartManager<WORD, WORD, CSpriteSurface*>::Init( m_nIndex, m_nPart );
 
-	// NULL로 초기화
+	
 	for (int i=0; i<m_nPart; i++)
 	{
 		m_pData[i] = NULL;
@@ -279,14 +212,14 @@ CSpriteTexturePartManager::Clear()
 //----------------------------------------------------------------------
 // GetTexture( id )
 //----------------------------------------------------------------------
-// SPK에서 ID가 id인 AlphaSprite가 Load된 Surface를 넘겨줘야 하는데,
+
 //
-// Load되지 않았으면,
-// Index를 참고해서 열려진 SPK File에서 
-// id에 해당하는 AlphaSprite를 Load해서 Surface를 하나 생성하고
-// 그 Surface에 AlphaSprite를 출력해준다.
+
+
+
+
 //
-// 이 부분에서 속도가 상당히 느려지지 않을까... 
+
 //----------------------------------------------------------------------
 CSpriteSurface*		
 CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
@@ -295,7 +228,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 	//static int reuse	= 0;
 
 	//-----------------------------------------------------------
-	// 없으면 --> Load & return
+	
 	//-----------------------------------------------------------
 	if (IsDataNotNULL(id) && GetUsedPalette( id ) == index)
 	{
@@ -334,29 +267,29 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		CSpritePal* pSprite = &m_SPK[id];
 		//CAlphaSprite* pSprite = &(*m_pSPK)[id];
 
-		//// 다 Load되어 있다고 가정한다..
+		
 		///*
 		//----------------------------------------
-		// 이미 Load된 것이면..
+		
 		//----------------------------------------
 //		if (pSprite->IsInit())
 //		{
 //		}
 //		//----------------------------------------
-//		// Load해야 되는 경우
+
 //		//----------------------------------------
 //		else
 //		{
 //			//-----------------------------------------------------------
-//			// AlphaSprite를 Load한다.
+
 //			//-----------------------------------------------------------
-//			// id에 맞는 적절한 FilePointer로 이동해서
+
 //			int temp = m_SPKIndex[id];
 //			m_SPKFile.seekg(m_SPKIndex[id], ios::beg);
 //			pSprite->LoadFromFile( m_SPKFile );
 //		}
 		//*/
-		// Texture의 Size를 결정한다.
+		
 		int spWidth, spHeight;
 		int width, height;
 		BYTE smallShift = 0;
@@ -365,7 +298,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		spHeight = pSprite->GetHeight();
 
 		//-----------------------------------------------------
-		// 길이가 0인 경우..
+		
 		//-----------------------------------------------------
 		if (spWidth==0 || spHeight==0)
 		{
@@ -373,7 +306,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		}
 
 		//-----------------------------------------------------------
-		// (다시) 생성한다.
+		
 		//-----------------------------------------------------------
 		CSpriteSurface* pTextureSurface = new CSpriteSurface;
 	
@@ -384,7 +317,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		bool bDifferentSize = false;
 
 		//---------------------------------------------------
-		// TextureSurface 생성
+		
 		//---------------------------------------------------		
 		pTextureSurface->InitTextureSurface(width, height, 0, nullptr);
 
@@ -401,12 +334,12 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		int i;
 
 		//---------------------------------------------------
-		// 검게 칠하는 부분..
+		
 		//---------------------------------------------------
 		//if (bDifferentSize)
 		{
 			//---------------------------------------------------
-			// Texture Surface 초기화
+			
 			//---------------------------------------------------
 			WORD *pSurface = (WORD*)pTextureSurface->GetSurfacePointer();
 					//,	*pSurfaceTemp;
@@ -420,42 +353,13 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 				pSurface = (WORD*)((BYTE*)pSurface + pitch);
 			}
 			
-			/*
-			// Sprite가 차지하는 영역을 제외한 부분을 검게~~
-			DWORD width2 = (width - spWidth) << 1;	// *2 
-			pSurface += spWidth;
-
-			// 오른쪽 옆부분
-			if (width2 > 0)
-			{
-				i = spHeight;		
-				do
-				{			
-					memset(pSurface, 0, width2);
-					pSurface = (WORD*)((BYTE*)pSurface + pitch);
-				} while (--i);
-			}
-
-			// 아래쪽
-			pSurface -= spWidth;
-			width2 = width << 1;
-			i = height - spHeight;
-
-			if (i>0)
-			{
-				do
-				{			
-					memset(pSurface, 0, width2);
-					pSurface = (WORD*)((BYTE*)pSurface + pitch);
-				} while (--i);
-			}
-			*/
+			 
 		}
 
 		//---------------------------------------------------
-		// AlphaSprite출력
+		
 		//---------------------------------------------------
-		// Effect의 크기를 고려해서..
+		
 		if (smallShift==0)
 		{
 			//pTextureSurface->BltAlphaSprite4444NotTrans(&point, pSprite);
@@ -470,9 +374,9 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 
 
 		//-----------------------------------------------------------
-		// 출력할때 사용할 크기
+		
 		//-----------------------------------------------------------
-		// 이전에 출력할 Texture Size가 정해져 있지 않은 경우
+		
 		//-----------------------------------------------------------
 		if (m_pWidth[id]==0 || m_pHeight[id]==0)
 		{
@@ -481,14 +385,14 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 			
 			if (false)
 			{	
-				// texture에서 출력되는 size를 구한다.
+				
 				for (int i=0; i<smallShift; i++)
 				{
 					spWidth >>= 1;
 					spHeight >>= 1;
 				}
 
-				// 실제 크기
+				
 				width = width * pSprite->GetWidth() / spWidth;
 				height = height * pSprite->GetHeight() / spHeight;		
 			}
@@ -497,7 +401,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 				width = spWidth;
 				height = spHeight;
 
-				// 큰 크기로 맞추어서 Square로 만든다.
+				
 				if (false)
 				{				
 					if (width > height)
@@ -516,7 +420,7 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 		}
 		
 		//---------------------------------------------------
-		// Replace됐으면 원래것을 메모리에서 지운다.
+		
 		//---------------------------------------------------
 		CSpriteSurface* pOld = NULL;
 		WORD oldIndex = SetData( id, pTextureSurface, pOld );
@@ -527,16 +431,16 @@ CSpriteTexturePartManager::GetTexture(TYPE_SPRITEID id, int index)
 			if (pOld != NULL)
 			{
 				//------------------------------------------------------------
-				// D3D의 Texture는 바로 사용되지 않는 경우도 있다.
-				// BeginScene() ~ EndScene() 까지 Surface는 살아있어야 하므로
-				// 여기서 지우면 안된다.
+				
+				
+				
 				//------------------------------------------------------------
 				//delete pOld;
 				//------------------------------------------------------------
 				m_listRemoved.push_back( pOld );
 			}
 
-			// loading되어 있던 sprite를 제거한다... 메모리 때문에..
+			
 			//m_SPK[oldIndex].Release();
 		}
 

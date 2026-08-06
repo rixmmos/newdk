@@ -11,7 +11,7 @@
 #include "SkillDef.h"
 
 //----------------------------------------------------------------------
-// max값 정의
+
 //----------------------------------------------------------------------
 #define SLAYER_MAX_HP            500
 #define SLAYER_MAX_MP            500
@@ -91,14 +91,14 @@ MStatusManager::GetTOHIT()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 		case MAX_SKILLDOMAIN :
 			value = min(m_DEX/2, SLAYER_MAX_TOHIT);
 		break;
 
 		//---------------------------------------------------
-		// 검 / 도
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_SWORD :
 		case SKILLDOMAIN_BLADE :
@@ -108,7 +108,7 @@ MStatusManager::GetTOHIT()
 		break;		
 		
 		//---------------------------------------------------
-		// 메이스 / 십자가
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_HEAL :
 		case SKILLDOMAIN_ENCHANT :
@@ -117,7 +117,7 @@ MStatusManager::GetTOHIT()
 		break;
 
 		//---------------------------------------------------
-		// 아우스터즈
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS :
 			value = (int)(m_DEX/2 + m_DomainLevel);
@@ -125,7 +125,7 @@ MStatusManager::GetTOHIT()
 			break;
 			
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :
 			value = (int)(m_DEX + m_DomainLevel/2.5);
@@ -151,14 +151,14 @@ MStatusManager::GetDefense()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 //		case MAX_SKILLDOMAIN :
 //			value = m_DEX/2;
 //		break;
 
 		//---------------------------------------------------
-		// 아우스터즈
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS :
 			value = (int)(m_DEX/2 + m_DomainLevel/5);
@@ -166,7 +166,7 @@ MStatusManager::GetDefense()
 			break;
 			
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :
 			value = (int)(m_DEX/2 + m_DomainLevel/5);
@@ -174,7 +174,7 @@ MStatusManager::GetDefense()
 		break;
 
 		//---------------------------------------------------
-		// 슬레이어
+		
 		//---------------------------------------------------
 		default :
 			value = min(m_DEX/2, SLAYER_MAX_DEFENSE);
@@ -197,14 +197,14 @@ MStatusManager::GetProtection()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 		case MAX_SKILLDOMAIN :
 //			value = m_STR/15;
 		break;
 
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS :
 			value = (int)(m_STR + m_DomainLevel/10);
@@ -212,7 +212,7 @@ MStatusManager::GetProtection()
 		break;
 			
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :
 			value = (int)(m_STR + m_DomainLevel/5);
@@ -220,7 +220,7 @@ MStatusManager::GetProtection()
 		break;
 
 		//---------------------------------------------------
-		// 슬레이어
+		
 		//---------------------------------------------------
 		default :	
 //			value = (int)(m_STR/15);
@@ -233,7 +233,7 @@ MStatusManager::GetProtection()
 
 
 //----------------------------------------------------------------------
-// Min Damage 계산
+
 //----------------------------------------------------------------------
 //	Sword  Slayer : STR/15
 //	Blade  Slayer : STR/15
@@ -249,14 +249,14 @@ MStatusManager::GetMinDAM()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 		case MAX_SKILLDOMAIN :
 			value = 1;
 		break;
 
 		//---------------------------------------------------
-		// 아우스터즈
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS :
 			value = max(1, (int)(m_STR/10 + m_DomainLevel/10));
@@ -264,7 +264,7 @@ MStatusManager::GetMinDAM()
 			break;
 			
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :
 			value = max(1, (int)(m_STR/6 + m_DomainLevel/5));
@@ -272,14 +272,14 @@ MStatusManager::GetMinDAM()
 		break;
 
 		//---------------------------------------------------
-		// 총
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_GUN :			
 			value = 1;
 		break;
 
 		//---------------------------------------------------
-		// 검 / 도 / 십자가
+		
 		//---------------------------------------------------
 		default :
 //			value = (int)(m_STR/15);
@@ -292,7 +292,7 @@ MStatusManager::GetMinDAM()
 }
 
 //----------------------------------------------------------------------
-// Max Damage 계산
+
 //----------------------------------------------------------------------
 //	Sword Slayer  : STR/5
 //	Blade Slayer  : STR/5
@@ -308,7 +308,7 @@ MStatusManager::GetMaxDAM()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 		case MAX_SKILLDOMAIN :
 //			value = m_STR/10;
@@ -316,14 +316,14 @@ MStatusManager::GetMaxDAM()
 		break;
 
 		//---------------------------------------------------
-		// 총
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_GUN :			
 			value = 2;
 		break;
 		
 		//---------------------------------------------------
-		// 아우스터즈
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS :			
 			value = max(1, m_STR/6 + m_DomainLevel/6);
@@ -331,7 +331,7 @@ MStatusManager::GetMaxDAM()
 			break;
 			
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :			
 			value = max(1, m_STR/4 + m_DomainLevel/5);
@@ -339,7 +339,7 @@ MStatusManager::GetMaxDAM()
 		break;
 
 		//---------------------------------------------------
-		// 검 / 도 / 십자가
+		
 		//---------------------------------------------------
 		default :
 //			value = (int)(m_STR / 5);
@@ -369,7 +369,7 @@ MStatusManager::GetAttackSpeed()
 	switch (m_Domain)
 	{
 		//---------------------------------------------------
-		// 맨손
+		
 		//---------------------------------------------------
 		case MAX_SKILLDOMAIN :
 //			value = m_STR/10;
@@ -377,7 +377,7 @@ MStatusManager::GetAttackSpeed()
 		break;
 
 		//---------------------------------------------------
-		// 아우스터즈
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_OUSTERS:
 			value = (int)((m_DEX+m_DomainLevel)/10);
@@ -385,7 +385,7 @@ MStatusManager::GetAttackSpeed()
 			break;
 
 		//---------------------------------------------------
-		// 뱀파이어
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_VAMPIRE :
 			value = (int)(m_DEX / 10 + 10);
@@ -393,7 +393,7 @@ MStatusManager::GetAttackSpeed()
 		break;
 
 		//---------------------------------------------------
-		// 메이스 / 십자가
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_HEAL :
 		case SKILLDOMAIN_ENCHANT :
@@ -402,7 +402,7 @@ MStatusManager::GetAttackSpeed()
 		break;
 
 		//---------------------------------------------------
-		// 총
+		
 		//---------------------------------------------------
 		case SKILLDOMAIN_GUN :
 //			value = (int)(m_DEX/10 + m_DomainLevel/5);
@@ -410,7 +410,7 @@ MStatusManager::GetAttackSpeed()
 		break;
 
 		//---------------------------------------------------
-		// 검 / 도 
+		
 		//---------------------------------------------------
 		default :
 //			value = (int)(m_STR/10 + m_DomainLevel/5);
@@ -433,8 +433,8 @@ MStatusManager::Set(int str, int dex, int intel)
 
 
 //--------------------------------------------------------------
-// 현재 사용하는 무기의 domain level을 설정한다.
-// Vampire는 domain level을 설정한다.
+
+
 //--------------------------------------------------------------
 void
 MStatusManager::SetCurrentWeaponDomain(int domain, int level)

@@ -17,7 +17,7 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// DB 로부터 특정 플레이어 아이디를 찾아서 그 여부를 클라이언트로 리턴해준다.
+
 //////////////////////////////////////////////////////////////////////////////
 void CLQueryPlayerIDHandler::execute(CLQueryPlayerID* pPacket, Player* pPlayer)
 
@@ -58,9 +58,9 @@ void CLQueryPlayerIDHandler::execute(CLQueryPlayerID* pPacket, Player* pPlayer)
 
         pLoginPlayer->sendPacket(&lcQueryResultPlayerID);
 
-        // 쿼리가 여러 번 올 수 있으므로, 여전히 LWFRP 이다.
-        // 문제는 누군가가 프로그램을 짜서 DOS 공격을 할 수 있으므로,
-        // 최소 시간을 둬야 한다는 점이다.
+        
+        
+        
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
 
         SAFE_DELETE(pStmt);

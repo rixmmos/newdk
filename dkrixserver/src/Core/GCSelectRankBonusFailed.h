@@ -2,7 +2,7 @@
 //
 // Filename    :  GCSelectRankBonusFailed.h
 // Written By  :  elca@ewestsoft.com
-// Description :  Å
+
 //
 //
 //////////////////////////////////////////////////////////////////////
@@ -29,10 +29,10 @@ public:
 
 
 public:
-    // ÀÔ·Â½ºÆ®¸²(¹öÆÛ)À¸·ÎºÎÅÍ µ¥ÀÌÅ¸¸¦ ÀÐ¾î¼­ ÆÐÅ¶À» ÃÊ±âÈ­ÇÑ´Ù.
+    
     void read(SocketInputStream& iStream);
 
-    // Ãâ·Â½ºÆ®¸²(¹öÆÛ)À¸·Î ÆÐÅ¶ÀÇ ¹ÙÀÌ³Ê¸® ÀÌ¹ÌÁö¸¦ º¸³½´Ù.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -74,7 +74,7 @@ public:
 
 private:
     DWORD m_RankBonusType;
-    BYTE m_Desc; // ½ÇÆÐÄÚµå
+    BYTE m_Desc; 
 };
 
 

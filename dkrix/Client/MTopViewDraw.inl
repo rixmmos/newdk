@@ -3,10 +3,10 @@
 extern RECT g_GameRect;
 //----------------------------------------------------------------------
 //
-// Define Function��
+
 //
 //----------------------------------------------------------------------
-// ó��.. - -;;
+
 //----------------------------------------------------------------------
 // DRAW_ALPHASPRITE
 //----------------------------------------------------------------------
@@ -347,7 +347,7 @@ extern RECT g_GameRect;
 // DRAW_CHAT_BOX_OUTLINE
 //----------------------------------------------------------------------
 #define	MIN_CHAT_BOX_WIDTH	60
-#define CHAT_BOX_TAIL_X		29				// ä�� ����ǥ �ٴ� x��ġ
+#define CHAT_BOX_TAIL_X		29				
 #define MIN_CHAT_LARGE_BOX_WIDTH	90
 
 #define DRAW_CHAT_BOX_OUTLINE( rect, color )					\
@@ -382,7 +382,7 @@ extern RECT g_GameRect;
 
 
 //----------------------------------------------------------------------
-// DRAW_CHAT_BOX_TAIL ( ���� �ڽ�, ���� )
+
 //----------------------------------------------------------------------
 #define DRAW_CHAT_BOX_TAIL_LOCKED( rect, color )					\
 		{															\
@@ -440,8 +440,8 @@ extern RECT g_GameRect;
 //----------------------------------------------------------------------
 // Affect Orbit Position
 //----------------------------------------------------------------------
-// pEffect�� AttachOrbitEffect���..
-// point�� orbitPosition�� �����ش�.
+
+
 //----------------------------------------------------------------------
 #define AFFECT_ORBIT_EFFECT_POSITION( pEffect, point )					\
 		if (pEffect->GetEffectType()==MEffect::EFFECT_ATTACH_ORBIT)		\
@@ -454,8 +454,8 @@ extern RECT g_GameRect;
 //----------------------------------------------------------------------
 // Is BackGround Orbit Position
 //----------------------------------------------------------------------
-// pEffect�� AttachOrbitEffect���..
-// point�� y��ǥ�� ���� Back, Fore�� �����Ѵ�.
+
+
 //----------------------------------------------------------------------
 #define AFFECT_ORBIT_EFFECT_BACKGROUND( pEffect, bBackground )					\
 		if (pEffect->GetEffectType()==MEffect::EFFECT_ATTACH_ORBIT)		\

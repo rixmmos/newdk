@@ -4,10 +4,10 @@
 // Written By  : Resource Management Tool
 // Description : Resource integrity deep validation tool
 //
-// 功能:
-//   1. 加载 VS_UI_filepath.inf
-//   2. 对每个资源文件进行深度验证
-//   3. 报告缺失/损坏的资源
+
+
+
+
 //
 //--------------------------------------------------------------------------------
 

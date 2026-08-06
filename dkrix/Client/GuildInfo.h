@@ -10,15 +10,15 @@
 #define __GUILD_INFO_H__
 
 // include files
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
+#include "Packet/Types.h"
+#include "Packet/Exception.h"
+#include "Packet/Packet.h"
 
 //////////////////////////////////////////////////////////////////////
 //
 // class GuildInfo;
 //
-// 클라이언트에 길드 리스트를 보낸다.
+
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -35,14 +35,14 @@ public :
 public :
 	
 	
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read (SocketInputStream & iStream) throw (ProtocolException, Error);
 		    
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write (SocketOutputStream & oStream) const throw (ProtocolException, Error);
 
 	// get packet's body size
-	// 최적화시, 미리 계산된 정수를 사용한다.
+	
 	PacketSize_t getSize () throw ();
 
 	static uint getMaxSize() throw() {
@@ -76,19 +76,19 @@ public :
 
 private :
 
-	// 길드 아이디
+	
 	GuildID_t m_GuildID;
 
-	// 길드 이름
+	
 	std::string m_GuildName;
 
-	// 길드 마스터
+	
 	std::string m_GuildMaster;
 
-	// 길드 멤버 카운트
+	
 	BYTE m_GuildMemberCount;
 
-	// 길드 Expire Date
+	
 	std::string m_GuildExpireDate;
 
 };

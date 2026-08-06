@@ -19,7 +19,7 @@
 //
 // class CLCreatePC;
 //
-// 슬레이어 캐릭터를 새로 만들 경우, 이 패킷에 정보를 담아서 서버로 전송한다.
+
 //
 //----------------------------------------------------------------------
 
@@ -41,10 +41,10 @@ public:
 public:
     CLCreatePC() {};
     virtual ~CLCreatePC() {};
-    // 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+    
     void read(SocketInputStream& iStream);
 
-    // 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+    
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -57,12 +57,12 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static CLCreatePCPacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketSize() const {
-        return szBYTE + m_Name.size()                     // 이름
-               + szSlot                                   // 슬랏
-               + szBYTE                                   // 슬레이어 플래그(3 bit)
-               + szAttr * 3 + szColor * SLAYER_COLOR_MAX; // 색깔 정보
+        return szBYTE + m_Name.size()                     
+               + szSlot                                   
+               + szBYTE                                   
+               + szAttr * 3 + szColor * SLAYER_COLOR_MAX; 
     }
 
     // get packet's name
@@ -174,16 +174,16 @@ public:
 
 
 private:
-    // PC의 이름
+    
     string m_Name;
 
-    // 슬랏
+    
     Slot m_Slot;
 
-    // 슬레이어 플래그
+    
     bitset<SLAYER_BIT_MAX> m_BitSet;
 
-    // 슬레이어 색깔 정보
+    
     Color_t m_Colors[SLAYER_COLOR_MAX];
 
     // STR, DEX, INTE
@@ -191,7 +191,7 @@ private:
     Attr_t m_DEX;
     Attr_t m_INT;
 
-    // 종족
+    
     Race_t m_Race;
 };
 
@@ -223,13 +223,13 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static CLCreatePCPacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
-        return szBYTE + 20                                           // 이름
-               + szSlot                                              // 슬랏
-               + szBYTE                                              // 슬레이어 플래그(3 bit)
-               + szAttr * 3 + szColor * CLCreatePC::SLAYER_COLOR_MAX // 색깔 정보
-               + szRace;                                             // 종족
+        return szBYTE + 20                                           
+               + szSlot                                              
+               + szBYTE                                              
+               + szAttr * 3 + szColor * CLCreatePC::SLAYER_COLOR_MAX 
+               + szRace;                                             
     }
 };
 

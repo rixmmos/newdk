@@ -17,8 +17,8 @@ public:
         ACTION_SAY,
         ACTION_WALK,
         ACTION_EFFECT,
-        ACTION_HOLLYWOOD, // -_- 시뮬레이션 액션
-        ACTION_WARP,      // 애들 다 데리고 지정 위치로 워프한다
+        ACTION_HOLLYWOOD, 
+        ACTION_WARP,      
     };
 
     class Action {
@@ -32,7 +32,7 @@ public:
         Action(Monster* pTarget) : m_pTarget(pTarget) {}
         virtual ~Action() {}
         virtual ActionType getActionType() const = 0;
-        // 다 했으면 0을 리턴. 아니면 다음번 execute할때까지 시간을 리턴
+        
         virtual Turn_t execute() = 0;
     };
 
@@ -136,7 +136,7 @@ protected:
 
 public:
     GDRScene(DWORD nState) : m_NextState(nState) {}
-    // 하위 클래스에서는 반드시 세팅을 끝낸 뒤에 이 start 를 불러줘야 된다.
+    
     void start();
     DWORD heartbeat(Timeval currentTime);
 };

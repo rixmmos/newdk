@@ -1,4 +1,4 @@
-// 마지막 업데이트 2003.3.5 19:00
+
 
 #ifndef ___MIN_TRACE___
 #define ___MIN_TRACE___
@@ -12,45 +12,41 @@
 #include <string.h>
 #endif
 #include <stdio.h>
-/* 
-   이 값이 1이면 MinTrace가 적용되고
-   0으로 하면 Visual C 의 기본 TRACE가 사용된다.
-   MinTrace가 TRACE로 바뀐다는 말이다.
-*/
+ 
 
 #define MIN_TRACE_ON        1      
 
 //-----------------------------
-// 명령어 리스트 (Command List)
+
 //-----------------------------
 
-#define MIN_CLRSCR			1		// 트레이스화면 지우기
+#define MIN_CLRSCR			1		
 
-#define MIN_TRANSPARENTWND	2		// 트레이스창을 투명하게  CmdMinTrace(MIN_TRANSPARENTWND, "60"); 
-									// "60" 부분이 투명도인데 20~100 사이의 값을 주면 된다. 100일경우 완전불투명
+#define MIN_TRANSPARENTWND	2		
+									
 
-#define MIN_HIDEWND			3		// 트레이스창을 사라지게함.
-#define MIN_SHOWWND			4		// 트레이스창을 나타나게함.
+#define MIN_HIDEWND			3		
+#define MIN_SHOWWND			4		
 
-#define MIN_TIME			5		// TIME은	  "12:34:43"			시간을 출력할때..
-#define MIN_TIMELN			6		// DATE는	  "2003/02/34"			날짜를 출력할때..
-#define MIN_DATE			7		// DATETIME은 "2003/02/32 12:12:12" 날짜와시간을 모두 출력할때..
+#define MIN_TIME			5		
+#define MIN_TIMELN			6		
+#define MIN_DATE			7		
 #define MIN_DATELN			8
 #define MIN_DATETIME		9        
-#define MIN_DATETIMELN		10      // 뒤에 LN을 붙이면 LineFeed가 적용된다.
+#define MIN_DATETIMELN		10      
 									
-									// 예를들면 CmdMinTrace( MIN_TIME, "시간보이냐?" ); 이렇게하면 
+									
                                     // 12:12:12
-									// 시간보이냐?              ' 이렇게 출력되고
+									
 
-									// CmdMinTrace( MIN_TIMELN, "시간보이냐?" ); 이렇게하면
-									// 12:12:12 시간보이냐?     ' 이렇게 출력된다.
+									
+									
 
-#define MIN_TOPMOST			11		// 트레이스창을 제일 꼭대기로 올린다.
-#define MIN_NOTOPMOST		12		// 꼭대기로 올린거 해제한다.
+#define MIN_TOPMOST			11		
+#define MIN_NOTOPMOST		12		
 
-#define MIN_STOP            13      // 트레이스를 중지한다.
-#define MIN_RUN             14      // 트레이스를 시작한다.
+#define MIN_STOP            13      
+#define MIN_RUN             14      
 
 
 
@@ -71,7 +67,7 @@ static const char* g_pszMinTraceClassName = "__MinTrace Window__";
 #define MIN_WAR			0x0044
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceA
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceA(LPCSTR p)
@@ -95,7 +91,7 @@ inline void _MinTraceA(LPCSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceW (유니코드)
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceW(LPCWSTR p)
@@ -119,7 +115,7 @@ inline void _MinTraceW(LPCWSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : 일반 트레이스
+
 //-----------------------------------------------------------------------------
 inline void _MinTrace(LPCTSTR pFormat, ...)
 {
@@ -140,7 +136,7 @@ inline void _MinTrace(LPCTSTR pFormat, ...)
 }
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceErrA 
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceErrA(LPCSTR p)
@@ -154,6 +150,7 @@ inline void _MinTraceErrA(LPCSTR p)
         cd.lpData = (void *)p; 
         ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
     } 
+}
 #else
 inline void _MinTraceErrA(LPCSTR p)
 {
@@ -162,7 +159,7 @@ inline void _MinTraceErrA(LPCSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceErrW (유니코드) 
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceErrW(LPCWSTR p)
@@ -176,6 +173,7 @@ inline void _MinTraceErrW(LPCWSTR p)
         cd.lpData = (void *)p; 
         ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
     } 
+}
 #else
 inline void _MinTraceErrW(LPCWSTR p)
 {
@@ -186,7 +184,7 @@ inline void _MinTraceErrW(LPCWSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : 에러 트레이스
+
 //-----------------------------------------------------------------------------
 inline void _MinTraceErr(LPCTSTR pFormat, ...)
 {
@@ -207,7 +205,7 @@ inline void _MinTraceErr(LPCTSTR pFormat, ...)
 }
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceWarA 
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceWarA(LPCSTR p)
@@ -221,6 +219,7 @@ inline void _MinTraceWarA(LPCSTR p)
         cd.lpData = (void *)p; 
         ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
     } 
+}
 #else
 inline void _MinTraceWarA(LPCSTR p)
 {
@@ -229,7 +228,7 @@ inline void _MinTraceWarA(LPCSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _MinTraceWarW (유니코드) 
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _MinTraceWarW(LPCWSTR p)
@@ -243,6 +242,7 @@ inline void _MinTraceWarW(LPCWSTR p)
         cd.lpData = (void *)p; 
         ::SendMessage (hWnd, WM_COPYDATA, 0, (LPARAM)&cd);  
     } 
+}
 #else
 inline void _MinTraceWarW(LPCWSTR p)
 {
@@ -252,7 +252,7 @@ inline void _MinTraceWarW(LPCWSTR p)
 }
 #endif
 //-----------------------------------------------------------------------------
-// 설명 : 일반 트레이스
+
 //-----------------------------------------------------------------------------
 inline void _MinTraceWar(LPCTSTR pFormat, ...)
 {
@@ -273,7 +273,7 @@ inline void _MinTraceWar(LPCTSTR pFormat, ...)
 }
 
 //-----------------------------------------------------------------------------
-// 설명 : _ClMinTraceA
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _ClMinTraceA(COLORREF col, LPCSTR p)
@@ -293,7 +293,7 @@ inline void _ClMinTraceA(COLORREF col, LPCSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _ClMinTraceW
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _ClMinTraceW(COLORREF col, LPCWSTR p)
@@ -315,7 +315,7 @@ inline void _ClMinTraceW(COLORREF col, LPCWSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : 컬러 트레이스
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _ClMinTrace(COLORREF col, LPCTSTR pFormat, ...)
@@ -341,7 +341,7 @@ inline void _ClMinTrace(COLORREF col, LPCTSTR pFormat, ...) { (void)col; (void)p
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _CmdMinTraceA
+
 //-----------------------------------------------------------------------------
 #ifdef PLATFORM_WINDOWS
 inline void _CmdMinTraceA(int nCmd, LPCSTR p)
@@ -366,7 +366,7 @@ inline void _CmdMinTraceA(int nCmd, LPCSTR p)
 #endif
 
 //-----------------------------------------------------------------------------
-// 설명 : _CmdMinTraceW
+
 //-----------------------------------------------------------------------------
 inline void _CmdMinTraceW(int nCmd, LPCWSTR p)
 {
@@ -386,7 +386,7 @@ inline void _CmdMinTraceW(int nCmd, LPCWSTR p)
 }
 
 //-----------------------------------------------------------------------------
-// 설명 : 명령 트레이스
+
 //-----------------------------------------------------------------------------
 inline void _CmdMinTrace(int nCmd, LPCTSTR pFormat, ...)
 {

@@ -21,6 +21,7 @@ public:
 	virtual bool GetGlyphMetrics(FontHandle font, uint32_t codepoint, GlyphMetrics& outMetrics) = 0;
 	virtual const Glyph* GetGlyph(FontHandle font, uint32_t codepoint, const Color& color) = 0;
 	virtual void DrawGlyph(RenderTarget& target, const Glyph& glyph, int x, int y, uint8_t alpha) = 0;
+	virtual bool DrawTextLine(RenderTarget& target, FontHandle font, const char* text, int x, int y, const Color& color, uint8_t alpha) = 0;
 };
 
 } // namespace TextSystem

@@ -21,33 +21,33 @@ std::ifstream;
 
 
 //----------------------------------------------------------------------
-// width * height��ŭ�� pixel�� �����صд�.
+
 //----------------------------------------------------------------------
-// �� pixel�� �����ϴ� ����� ������ ����.
+
 //
 //    [1] 5:5:5 --> 2 bytes
 //    [2] 5:6:5 --> 2 bytes
 //    [3] R,G,B --> 3 bytes
 //
-// [3]�� �뷮�� Ŀ�� �������Ƿ� [2]�� ����� ����ؼ�
-// 5:5:5�� ���� ������� ����ǵ��� �Ѵ�.
+
+
 //
-// Memory�� 5:5:5�� 5:6:5�� ���������
-// disk���� 5:6:5�� ����ȴ�.
+
+
 //
-// ��, 5:5:5�� ����ϴ� system������ 
-//    File(5:6:5) ---(5:5:5�� ��ȯ)--> Memory(5:5:5)
-//    File(5:6:5) <--(5:6:5�� ��ȯ)--- Memory(5:5:5)  �̷��� �ؾߵȴ�.
+
+
+
 //
 //----------------------------------------------------------------------
-// ���������� 0�� ������ ����Ѵ�.
+
 //
-// = �� ���� ����
+
 //
-// (�ݺ�ȸ��) (������, �����, �����(alpha,����,alpha,����...)) (������, �����, �����(alpha,����,alpha,����...)...) ..
+
 //
 //
-// Alpha���� ������ ���� �����Ѵ�.
+
 //----------------------------------------------------------------------
 
 class CAlphaSprite
@@ -62,18 +62,18 @@ class CAlphaSprite
 		void		operator = (const CAlphaSprite& Sprite);
 
 		//---------------------------------------------------------
-		// m_Pixels�� memory�� Release�Ѵ�.		
+		
 		//---------------------------------------------------------
 		void		Release();
 
 		//---------------------------------------------------------
-		// ���� Color 
+		
 		//---------------------------------------------------------
 		static void	SetColorkey(WORD color)			{ s_Colorkey = color; }
 		static WORD	GetColorkey() 					{ return s_Colorkey; }
 
 		//---------------------------------------------------------
-		// fstream���� save/load�� �Ѵ�.
+		
 		//---------------------------------------------------------
 		virtual bool		SaveToFile(std::ofstream& file) = 0;
 		virtual bool		LoadFromFile(std::ifstream& file) = 0;		
@@ -81,13 +81,13 @@ class CAlphaSprite
 		//void		LoadFromBuffer();
 			
 		//---------------------------------------------------------
-		// CDirectDrawSurface�� ������ �о m_Pixels�� �����Ѵ�.
+		
 		//---------------------------------------------------------
 		void		SetPixel(WORD* pSource, WORD sourcePitch, 
 							 WORD* pFilter, WORD filterPitch, 
 							 WORD width, WORD height);
 
-		// (x,y)�� sprite�� ���� �κ��ΰ�?
+		
 		bool		IsColorPixel(short x, short y);
 
 		//---------------------------------------------------------
@@ -113,7 +113,7 @@ class CAlphaSprite
 		//---------------------------------------------------------
 
 		//---------------------------------------------------------
-		// �������� Blt
+		
 		//---------------------------------------------------------
 		void		Blt(WORD *pDest, WORD pitch);				
 		void		BltClip(WORD* pDest, WORD pitch, RECT* pRect);
@@ -132,7 +132,7 @@ class CAlphaSprite
 		void		Blt4444ClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// Blt 4444 NotTrans for Texture (�����κе� �˰� ĥ�Ѵ�)
+		
 		//---------------------------------------------------------
 		void		Blt4444NotTrans(WORD *pDest, WORD pitch);				
 		void		Blt4444NotTransClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -141,17 +141,17 @@ class CAlphaSprite
 		void		Blt4444NotTransClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// shift��ŭ shift�ؼ� ũ�⸦ �۰� ��½�Ų��.
+		
 		//---------------------------------------------------------
 		void		Blt4444SmallNotTrans(WORD *pDest, WORD pitch, BYTE shift);
 
 		//---------------------------------------------------------
-		// �¿� �ٲ�
+		
 		//---------------------------------------------------------
 	
 
 		//---------------------------------------------------------
-		// ������
+		
 		//---------------------------------------------------------
 		//void		BltHalf(WORD *pDest, WORD pitch);		
 		//void		BltHalfClipLeft(WORD *pDest, WORD pitch, RECT* pRect);
@@ -168,7 +168,7 @@ class CAlphaSprite
 		void		BltAlphaClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE alpha);
 
 		//---------------------------------------------------------
-		// RGB�� �ٲ�
+		
 		//---------------------------------------------------------
 		//void		BltColor(WORD *pDest, WORD pitch, BYTE rgb);		
 		//void		BltColorClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
@@ -176,7 +176,7 @@ class CAlphaSprite
 		//void		BltColorClipHeight(WORD *pDest, WORD pitch, RECT* pRect, BYTE rgb);
 
 		//---------------------------------------------------------
-		// ��Ӱ� �ϱ�
+		
 		//---------------------------------------------------------
 		//void		BltDarkness(WORD *pDest, WORD pitch, BYTE DarkBits);		
 		//void		BltDarknessClipLeft(WORD *pDest, WORD pitch, RECT* pRect, BYTE DarkBits);
@@ -192,7 +192,7 @@ class CAlphaSprite
 		//void		BltEffectClipHeight(WORD *pDest, WORD pitch, RECT* pRect);
 
 		//---------------------------------------------------------
-		// AlphaChannel Filter�� �̿��� ���
+		
 		//---------------------------------------------------------
 		//void		BltAlphaFilter(WORD *pDest, WORD pitch, CFilter* pFilter);		
 
@@ -224,10 +224,10 @@ class CAlphaSprite
 
 
 	protected :
-		WORD			m_Width;		// ���� pixel��
-		WORD			m_Height;		// ���� pixel��
+		WORD			m_Width;		
+		WORD			m_Height;		
 		WORD**			m_Pixels;		// pixels
-		bool			m_bInit;		// data�� �ִ°�?
+		bool			m_bInit;		
 
 #ifdef SPRITELIB_BACKEND_SDL
 		spritectl_sprite_t	m_backend_sprite;	// Backend sprite handle

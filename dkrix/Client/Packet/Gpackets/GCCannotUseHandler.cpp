@@ -65,7 +65,7 @@ throw ( ProtocolException , Error )
 		return;
 	}
 	//----------------------------------------------------
-	// 검증받을려는 Item을 읽어온다.
+	
 	//----------------------------------------------------
 	MItem* pItem = g_pPlayer->GetItemCheckBuffer();
 
@@ -74,7 +74,7 @@ throw ( ProtocolException , Error )
 		MPlayer::ITEM_CHECK_BUFFER status =	g_pPlayer->GetItemCheckBufferStatus();
 
 		//----------------------------------------------------
-		// Item 사용하는걸 검증받는 경우가 맞다면..
+		
 		//----------------------------------------------------
 		if( status == MPlayer::ITEM_CHECK_BUFFER_ITEM_TO_ITEM )
 		{			
@@ -99,7 +99,7 @@ throw ( ProtocolException , Error )
 
 			if(pItem->GetItemClass() == ITEM_CLASS_DYE_POTION && pItem->GetItemType() == 48)
 			{
-				// 1:뭐 입고있다, 2:커플이라 안된다. , 3:이상한에러
+				
 				switch( pPacket->getObjectID() )
 				{
 				case 1 :
@@ -114,29 +114,29 @@ throw ( ProtocolException , Error )
 				}
 			}
 
-			// Item Check Buffer만 지운다.
+			
 			g_pPlayer->ClearItemCheckBuffer();			
 		}
 		else if (status==MPlayer::ITEM_CHECK_BUFFER_USE_FROM_QUICKSLOT)
 		{
-			// Item Check Buffer만 지운다.
+			
 			g_pPlayer->ClearItemCheckBuffer();
 
 			//----------------------------------------------------
-			// 벨트 못 없애도록 한거.. 취소
+			
 			//----------------------------------------------------
 			UI_UnlockGear();
 		}
 		//----------------------------------------------------
-		// 다른 상태??
+		
 		//----------------------------------------------------
 		else if(status == MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GEAR)
 		{
 			g_pPlayer->ClearItemCheckBuffer();			
 
-			// UNDONE : OK나서 WAIT하는 경우에는 여기까지 안들어 온다.
-			// OK나서 이미 CHECK_BUFFER의 내용이 사라졌기 때문에 위의 pItem != NULL에 걸리지 않는다
-			// 이부분은 WAIT_VERIFY_LOVE_CHAIN을 체크해서 ObjectID를 비교한뒤 아래의 과정을 수행한다
+			
+			
+			
 			if( pItem->GetItemClass() == ITEM_CLASS_COUPLE_RING ||
 				pItem->GetItemClass() == ITEM_CLASS_VAMPIRE_COUPLE_RING)
 			{
@@ -145,13 +145,13 @@ throw ( ProtocolException , Error )
 //				g_pPlayer->RemoveEffectStatus( EFFECTSTATUS_LOVE_CHAIN );
 			}
 		}
-		// 2004, 9, 13, sobeit add start - 퀘스트 인벤 아이템 사용 실패
+		
 		else if(status == MPlayer::ITEM_CHECK_BUFFER_USE_FROM_GQUEST_INVENTORY)
 		{
 			g_pPlayer->ClearItemCheckBuffer();
 		}
-		// 2004, 9, 13, sobeit add end - 퀘스트 인벤 아이템 사용 실패
-		// 2004, 12, 13, sobeit add start - 강아지 꼬실때 실패 했을때..인벤이 꽉 차 있었으면 락이 안풀렸었다...-_-
+		
+		
 		else if(status == MPlayer::ITEM_CHECK_BUFFER_DROP_TO_CREATURE)
 		{
 			g_pPlayer->ClearItemCheckBuffer();
@@ -164,7 +164,7 @@ throw ( ProtocolException , Error )
 
 	}
 	//----------------------------------------------------
-	// item이 없는 경우.. - -;;
+	
 	//----------------------------------------------------
 	else
 	{

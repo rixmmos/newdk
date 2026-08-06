@@ -2,7 +2,7 @@
 // Filename    : WayPoint.cpp
 // Written by  : excel96
 // Description :
-// 슬레이어용 개인 포탈을 위한 웨이포인트의 집합을 관리하는 클래스 모듈
+
 //////////////////////////////////////////////////////////////////////////////
 
 #include "WayPoint.h"
@@ -88,7 +88,7 @@ void WayPointManager::load(void)
 
             addWayPoint(pWayPoint);
 
-            // 아우스터즈 웨이포인트는 블럭해줘야 된다.
+            
             if (Race == RACE_OUSTERS) {
                 Zone* pZone = getZoneByZoneID(ZID);
                 Tile& rTile = pZone->getTile(ZX, ZY);
@@ -136,7 +136,7 @@ void WayPointManager::addWayPoint(WayPoint* pWayPoint)
 
     if (itr != end()) {
         cerr << "WayPointManager::addWayPoint() : Duplicated WayPoint" << endl;
-        cerr << "아마 헬기랑 대지정령뿔이랑 좌표가 겹쳤을지도...ㅋㅋㅋ.즐~" << endl;
+        cerr << "    ....~" << endl;
         throw("WayPointManager::addWayPoint() : Duplicated WayPoint");
     }
 

@@ -22,7 +22,7 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -30,14 +30,14 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 
 
-		// Creature가 Tile에 뭔가를?...
+		
 		if (pCreature != NULL)
 		{	
 			int skillID = pPacket->getSkillType();
@@ -62,17 +62,17 @@ throw ( ProtocolException , Error )
 									skillID : (*g_pActionInfoTable)[skillID].GetActionStep( pPacket->getGrade() - 1);
 
 			//------------------------------------------------------
-			// Creature가 행동하는 모습
+			
 			//------------------------------------------------------
 			//Duration_t	m_Duration;
 			pCreature->PacketSpecialActionToSector(
 								skillID, 
 								pPacket->getX(), 
 								pPacket->getY(),
-								NULL		// 결과
+								NULL		
 			);		
 
-			// 방향 보기
+			
 			pCreature->SetDirectionToPosition(pPacket->getX(), pPacket->getY());		
 		}
 		else

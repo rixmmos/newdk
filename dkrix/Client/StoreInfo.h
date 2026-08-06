@@ -1,12 +1,11 @@
 #ifndef __STORE_INFO_H__
 #define __STORE_INFO_H__
 
-#include "Types.h"
-#include "Packet.h"
-
-#include "SocketInputStream.h"
-#include "SocketOutputStream.h"
-#include "PCItemInfo.h"
+#include "Packet/Types.h"
+#include "Packet/Packet.h"
+#include "Packet/SocketInputStream.h"
+#include "Packet/SocketOutputStream.h"
+#include "Packet/PCItemInfo.h"
 
 #include <string>
 #include <vector>

@@ -10,6 +10,7 @@
 #include "ExchangeDB.h"
 #include <string>
 #include <vector>
+#include <cstdint>
 
 using namespace std;
 

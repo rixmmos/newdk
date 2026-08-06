@@ -24,7 +24,7 @@ GCRequestPowerPointResult::~GCRequestPowerPointResult()
 {}
 
 //--------------------------------------------------------------------------------
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //--------------------------------------------------------------------------------
 void GCRequestPowerPointResult::read(SocketInputStream& iStream)
 
@@ -34,10 +34,10 @@ void GCRequestPowerPointResult::read(SocketInputStream& iStream)
     // Error code
     iStream.read(m_ErrorCode);
 
-    // 현재 누적된 파워짱 포인트
+    
     iStream.read(m_SumPowerPoint);
 
-    // 요청으로 가져온 파워짱 포인트
+    
     iStream.read(m_RequestPowerPoint);
 
     __END_CATCH
@@ -45,7 +45,7 @@ void GCRequestPowerPointResult::read(SocketInputStream& iStream)
 
 
 //--------------------------------------------------------------------------------
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //--------------------------------------------------------------------------------
 void GCRequestPowerPointResult::write(SocketOutputStream& oStream) const
 
@@ -55,10 +55,10 @@ void GCRequestPowerPointResult::write(SocketOutputStream& oStream) const
     // Error code
     oStream.write(m_ErrorCode);
 
-    // 현재 누적된 파워짱 포인트
+    
     oStream.write(m_SumPowerPoint);
 
-    // 요청으로 가져온 파워짱 포인트
+    
     oStream.write(m_RequestPowerPoint);
 
     __END_CATCH

@@ -7,16 +7,16 @@
 #ifndef __GC_WAR_SCHEDULE_LIST_H__
 #define __GC_WAR_SCHEDULE_LIST_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
-#include "Types.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
+#include "../Types.h"
 #include <list>
 
 #define MAX_WAR_NUM 20
 
 struct WarScheduleInfo
 {
-	BYTE warType;		// 0 : 동족간 1 : 종족간
+	BYTE warType;		
 	WORD year;
 	BYTE month;
 	BYTE day;

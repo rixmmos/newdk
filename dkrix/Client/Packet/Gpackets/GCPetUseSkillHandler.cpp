@@ -32,13 +32,13 @@ throw ( ProtocolException , Error )
 
 	if( pAttackerCreature == NULL )
 	{
-		DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] 어태커(%d) 없음-_-;", attackerID);
+		DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] (%d) -_-;", attackerID);
 	}
 	else
 	{
 		if( pTargetCreature == NULL )
 		{
-			DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] 타겟(%d) 없음-_-;", targetID);
+			DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] (%d) -_-;", targetID);
 		}
 		else
 		{
@@ -48,7 +48,7 @@ throw ( ProtocolException , Error )
 			
 			if( pPet == NULL )
 			{
-				DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] 펫(%d) 없음-_-;", pAttackerCreature->GetPetID());
+				DEBUG_ADD_FORMAT("[GCPetUseSkillHandler] (%d) -_-;", pAttackerCreature->GetPetID());
 			}
 			else
 			{
@@ -72,19 +72,19 @@ throw ( ProtocolException , Error )
 
 					switch(petItemType)
 					{
-					// 탱크-_-;
+					
 					case 3:
 						{
 							ExecuteActionInfoFromMainNode(
-								SKILL_CLIENT_TANK_ATTACKED,										// 사용 기술 번호
+								SKILL_CLIENT_TANK_ATTACKED,										
 								
 								0, 0, 0,
-								DIRECTION_DOWN, // 사용 방향
+								DIRECTION_DOWN, 
 								
-								pTargetCreature->GetID(),												// 목표에 대한 정보
+								pTargetCreature->GetID(),												
 								0, 0, 0, 
 								
-								0,													// 기술의 (남은) 지속 시간		
+								0,													
 								
 								NULL,
 								
@@ -112,15 +112,15 @@ throw ( ProtocolException , Error )
 						
 						{
 							ExecuteActionInfoFromMainNode(
-								skillID,										// 사용 기술 번호
+								skillID,										
 								
 								0, 0, 0,
-								DIRECTION_DOWN, // 사용 방향
+								DIRECTION_DOWN, 
 								
-								pTargetCreature->GetID(),												// 목표에 대한 정보
+								pTargetCreature->GetID(),												
 								0, 0, 0, 
 								
-								0,													// 기술의 (남은) 지속 시간		
+								0,													
 								
 								NULL,
 								
@@ -140,15 +140,15 @@ throw ( ProtocolException , Error )
 							skillID = SKILL_CLIENT_PIXIE_ABSORB_SOUL_5;
 
 						ExecuteActionInfoFromMainNode(
-							skillID,										// 사용 기술 번호
+							skillID,										
 							
 							0, 0, 0,
-							DIRECTION_DOWN, // 사용 방향
+							DIRECTION_DOWN, 
 							
-							pTargetCreature->GetID(),												// 목표에 대한 정보
+							pTargetCreature->GetID(),												
 							0, 0, 0, 
 							
-							0,													// 기술의 (남은) 지속 시간		
+							0,													
 							
 							NULL,
 							
@@ -162,7 +162,7 @@ throw ( ProtocolException , Error )
 				int sx = 0, sy = 0;
 				BYTE petDirect = pPet->GetDirectionToPosition(pTargetCreature->GetX(), pTargetCreature->GetY());
 
-				// 2004, 12, 21, sobeit add start - 센타우로 터렛위치 세팅
+				
 				if( pPet->GetCreatureType() == 702 || pPet->GetCreatureType() == 703 || pPet->GetCreatureType() == 704 )
 					pPet->SetTurretFinalDirection(petDirect);
 				// 2004, 12, 21, sobeit add end
@@ -171,28 +171,28 @@ throw ( ProtocolException , Error )
 				{
 					POINT pointGap[8] = 
 					{
-						{ 11, 6 },	// 좌
-						{ 8, 2 },	// 좌하
-						{ 0, 0 },	// 하
-						{ -7, 2 },	// 우하
-						{ -10, 6 },	// 우
-						{ -7, 10 },	// 우상
-						{ 0, 12 },	// 상
-						{ 8, 10 },	// 좌상
+						{ 11, 6 },	
+						{ 8, 2 },	
+						{ 0, 0 },	
+						{ -7, 2 },	
+						{ -10, 6 },	
+						{ -7, 10 },	
+						{ 0, 12 },	
+						{ 8, 10 },	
 					};
 					sx = pointGap[pPet->GetDirection()].x-pointGap[petDirect].x;
 					sy = pointGap[pPet->GetDirection()].y-pointGap[petDirect].y;
 				}
 				ExecuteActionInfoFromMainNode(
-					skillID,										// 사용 기술 번호
+					skillID,										
 					
 					pPet->GetX(), pPet->GetY(), 0,
-					petDirect, // 사용 방향
+					petDirect, 
 					
-					pPet->GetID(),												// 목표에 대한 정보
+					pPet->GetID(),												
 					pPet->GetX(), pPet->GetY(), 0, 
 					
-					0,													// 기술의 (남은) 지속 시간		
+					0,													
 					
 					NULL,
 					

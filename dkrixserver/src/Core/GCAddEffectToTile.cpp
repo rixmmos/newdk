@@ -28,14 +28,14 @@ GCAddEffectToTile::~GCAddEffectToTile() noexcept {}
 
 
 //////////////////////////////////////////////////////////////////////
-// �Է½�Ʈ��(����)���κ��� ����Ÿ�� �о ��Ŷ�� �ʱ�ȭ�Ѵ�.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddEffectToTile::read(SocketInputStream& iStream)
 
 {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     iStream.read(m_ObjectID);
     iStream.read(m_X);
     iStream.read(m_Y);
@@ -47,12 +47,12 @@ void GCAddEffectToTile::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////
-// ��½�Ʈ��(����)���� ��Ŷ�� ���̳ʸ� �̹����� ������.
+
 //////////////////////////////////////////////////////////////////////
 void GCAddEffectToTile::write(SocketOutputStream& oStream) const {
     __BEGIN_TRY
 
-    // ����ȭ �۾��� ���� ũ�⸦ �����ϵ��� �Ѵ�.
+    
     oStream.write(m_ObjectID);
     oStream.write(m_X);
     oStream.write(m_Y);

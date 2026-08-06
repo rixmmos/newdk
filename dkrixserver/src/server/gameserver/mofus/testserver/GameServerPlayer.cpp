@@ -86,7 +86,7 @@ void GameServerPlayer::processOutput() throw(IOException, Error) {
     try {
         m_pOutputStream->flush();
     } catch (InvalidProtocolException&) {
-        throw DisconnectException("이상한 패킷임");
+        throw DisconnectException(" ");
     }
 
     __END_CATCH
@@ -102,9 +102,9 @@ void GameServerPlayer::processCommand() throw(IOException, Error) {
     __BEGIN_TRY
 
     try {
-        // 입력 버퍼에 들어있는 완전한 패킷들을 모조리 처리한다.
+        
         while (true) {
-            // 일단 패킷의 사이즈와 ID 를 읽어온다.
+            
             char header[szMPacketHeader];
             MPacketSize_t packetSize;
             MPacketID_t packetID;
@@ -118,34 +118,34 @@ void GameServerPlayer::processCommand() throw(IOException, Error) {
             // packetSize = ntohl( packetSize );
             // packetID = ntohl( packetID );
 
-            // 패킷 아이디가 이상하면 프로토콜 에러
+            
             if (!g_pMPacketManager->hasHandler(packetID)) {
                 filelog(MOFUS_ERROR_FILE, "Invalid PacketID : %d", packetID);
                 throw ProtocolException("Invalid PacketID");
             }
 
-            // 패킷 사이즈 확인
+            
             if (g_pMPacketManager->getPacketSize(packetID) != packetSize) {
                 filelog(MOFUS_ERROR_FILE, "Invalid PacketSize : %d, expected size : %d", packetSize,
                         g_pMPacketManager->getPacketSize(packetID));
                 throw ProtocolException("Invalid PacketSize");
             }
 
-            // 완전한 하나의 패킷이 들어있는지 확인
+            
             if (m_pInputStream->length() < (unsigned int)(packetSize + szMPacketSize))
                 return;
 
-            // 패킷을 생성
+            
             MPacket* pPacket = g_pMPacketManager->createPacket(packetID);
 
-            // 패킷 객체에 읽은 내용을 채운다.
+            
             pPacket->read(*m_pInputStream);
 
-            // 패킷의 해당 핸들러를 실행한다.
+            
             g_pMPacketManager->execute(this, pPacket);
         }
     } catch (InsufficientDataException) {
-        // 무시
+        
     }
 
     __END_CATCH
@@ -177,9 +177,9 @@ void GameServerPlayer::disconnect(bool bDisconnected) throw(InvalidProtocolExcep
     __BEGIN_TRY
 
     try {
-        // 정당하게 로그아웃한 경우에는 출력 버퍼를 플러시할 수 있다.
-        // 그러나, 불법적인 디스를 걸었다면 소켓이 닫겼으므로
-        // 플러시할 경우 SIG_PIPE 을 받게 된다.
+        
+        
+        
         if (bDisconnected == UNDISCONNECTED) {
             m_pOutputStream->flush();
         }
@@ -189,7 +189,7 @@ void GameServerPlayer::disconnect(bool bDisconnected) throw(InvalidProtocolExcep
         cerr << "GameServerPlayer::disconnect Exception Check!!" << endl;
         cerr << t.toString() << endl;
         m_pSocket->close();
-        // throw Error("씨바...");
+        
     }
 
     __END_CATCH

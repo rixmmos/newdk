@@ -35,21 +35,21 @@ class MString {
 		// get
 		//----------------------------------------------------
 		size_t		GetLength()	const		{ return m_Length; }
-		char*		GetString() const		{ return m_pString; }
-		operator const char*() const		{ return m_pString; }
-		operator	char*() const		{ return m_pString; }		
+		char*		GetString() const		{ return m_pString != NULL ? m_pString : s_EmptyString; }
+		operator const char*() const		{ return m_pString != NULL ? m_pString : s_EmptyString; }
+		operator	char*() const		{ return m_pString != NULL ? m_pString : s_EmptyString; }		
 
 		//----------------------------------------------------
 		// other operator
 		//----------------------------------------------------
-		bool		operator == (const char* str)		{ return strcmp(m_pString, str)==0; }
-		bool		operator == (const MString& str)	{ return strcmp(m_pString, str.m_pString)==0; }
-		bool		operator >	(const char* str)		{ return strcmp(m_pString, str)>0; }
-		bool		operator >	(const MString& str)	{ return strcmp(m_pString, str.m_pString)>0; }
-		bool		operator <	(const char* str)		{ return strcmp(m_pString, str)<0; }
-		bool		operator <	(const MString& str)	{ return strcmp(m_pString, str.m_pString)<0; }
-		bool		operator != (const char* str)		{ return strcmp(m_pString, str)!=0; }
-		bool		operator != (const MString& str)	{ return strcmp(m_pString, str.m_pString)!=0; }
+		bool		operator == (const char* str)		{ return strcmp(GetString(), str != NULL ? str : s_EmptyString)==0; }
+		bool		operator == (const MString& str)	{ return strcmp(GetString(), str.GetString())==0; }
+		bool		operator >	(const char* str)		{ return strcmp(GetString(), str != NULL ? str : s_EmptyString)>0; }
+		bool		operator >	(const MString& str)	{ return strcmp(GetString(), str.GetString())>0; }
+		bool		operator <	(const char* str)		{ return strcmp(GetString(), str != NULL ? str : s_EmptyString)<0; }
+		bool		operator <	(const MString& str)	{ return strcmp(GetString(), str.GetString())<0; }
+		bool		operator != (const char* str)		{ return strcmp(GetString(), str != NULL ? str : s_EmptyString)!=0; }
+		bool		operator != (const MString& str)	{ return strcmp(GetString(), str.GetString())!=0; }
 
 		//----------------------------------------------------
 		// File I/O
@@ -66,7 +66,8 @@ class MString {
 		size_t	m_Length;
 		char*	m_pString;
 
-		static	char		s_pBuffer[MAX_BUFFER_LENGTH];    
+		static	char		s_pBuffer[MAX_BUFFER_LENGTH];
+		static	char		s_EmptyString[1];
 };
 
 

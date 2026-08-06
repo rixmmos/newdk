@@ -34,12 +34,12 @@ MAttackZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 	
 	int maxFrame = g_pTopView->GetMaxEffectFrame(bltType, frameID);
 
-	// 시작 좌표
+	
 	int sx = egInfo.x0;
 	int sy = egInfo.y0;
 	int sz = egInfo.z0;
 
-	// 목표 좌표
+	
 	int tx = egInfo.x1; 
 	int ty = egInfo.y1;
 	int tz = egInfo.z1;
@@ -72,13 +72,13 @@ MAttackZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		}
 	}
 	//------------------------------------------------------------
-	// 하드코딩.. ㅋㅋ
+	
 	//------------------------------------------------------------
 	if (est==EFFECTSPRITETYPE_WIND_DIVIDER_1
 		|| est==EFFECTSPRITETYPE_WIND_DIVIDER_2
 		|| est==EFFECTSPRITETYPE_WIND_DIVIDER_3)
 	{
-		// 목표까지가는게 아니라.. 일정한 pixel수 만큼 가야한다?
+		
 		int movePixel = egInfo.step * egInfo.count;
 
 		int cx = sx-tx;
@@ -87,25 +87,25 @@ MAttackZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 		if (cx==0 || cy==0)
 		{
 			//---------------------------------------------
-			// pixel좌표를 Map의 좌표로 바꿔준다.
+			
 			//---------------------------------------------
 			TYPE_SECTORPOSITION	sX, sY;
 			sX = g_pTopView->PixelToMapX( sx );
 			sY = g_pTopView->PixelToMapY( sy );
 
 			//---------------------------------------------
-			// 나가는 방향으로 다음 좌표를 정한다.	
+			
 			//---------------------------------------------
 			TYPE_SECTORPOSITION x=sX, y=sY;
 			MCreature::GetPositionToDirection(x,y, egInfo.direction);
 
 			//---------------------------------------------
-			// (x,y)를 다시 pixel좌표로 바꾼다.
+			
 			//---------------------------------------------
 			tx = g_pTopView->MapToPixelX( x );
 			ty = g_pTopView->MapToPixelY( y );
 
-			// 다시 계산..
+			
 			cx = sx - tx;
 			cy = sy - ty;
 		}
@@ -135,24 +135,24 @@ MAttackZoneEffectGenerator::Generate( const EFFECTGENERATOR_INFO& egInfo )
 
 
 
-	pEffect->SetFrameID( frameID, maxFrame );		// 0번 Effect, Max 3 Frame					
+	pEffect->SetFrameID( frameID, maxFrame );		
 
-	// 발사 위치 Pixel좌표	
+	
 	pEffect->SetPixelPosition( sx, sy, sz );	
 
-	// 목표 위치 Pixel좌표
+	
 	pEffect->SetTarget( tx, ty, tz, egInfo.step );	
 
-	// 방향 설정
+	
 	pEffect->SetDirection( egInfo.direction );					
 	
-	// 지속되는 Frame (목표가 있다면 별로 관계 없음 - -;)
+	
 	pEffect->SetCount( egInfo.count, egInfo.linkCount );
 
-	// 위력
+	
 	pEffect->SetPower(egInfo.power);
 
-	// 빛의 밝기
+	
 	//pEffect->SetLight( light );
 
 	if (g_pZone->AddEffect( pEffect ))

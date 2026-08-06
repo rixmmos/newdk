@@ -23,7 +23,7 @@ throw ( ProtocolException , Error )
 
 	
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -31,13 +31,13 @@ throw ( ProtocolException , Error )
 		DEBUG_ADD("[Error] Zone is Not Init.. yet.");			
 	}
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
 		MCreature* pUserCreature = g_pZone->GetCreature( pPacket->getObjectID() );
 		
-		// Creature에게 Damage 입힘
+		
 		if (pUserCreature != NULL)
 		{
 			int skillID = pPacket->getSkillType();
@@ -50,7 +50,7 @@ throw ( ProtocolException , Error )
 			}
 
 
-			// 현재 무기의 적용을 받는 기술이면..
+			
 			if ((*g_pActionInfoTable)[skillID].IsAffectCurrentWeaponAction())
 			{
 				skillID = pUserCreature->GetBasicActionInfo();
@@ -64,10 +64,10 @@ throw ( ProtocolException , Error )
 			if( (*g_pActionInfoTable)[skillID].IsUseActionStep() && pPacket->getGrade() > 0)
 				skillID = (*g_pActionInfoTable)[skillID].GetActionStep( pPacket->getGrade() - 1);
 	
-			// 서로 바라보기
+			
 			pUserCreature->SetDirectionToPosition(pPacket->getTargetX(), pPacket->getTargetY());
 			
-			// 그 방향으로 기술 사용하는 모습만 보여주기..
+			
 			pUserCreature->PacketSpecialActionToNobody(
 								skillID, 
 								pPacket->getTargetX(),

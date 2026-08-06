@@ -8,7 +8,7 @@ SystemAvailabilitiesManager *g_pSystemAvailableManager = NULL;
 
 SystemAvailabilitiesManager::SystemAvailabilitiesManager()
 {
-	// Default 로 모두 가능 상태로 되어있다.
+	
 	for(int i = 0; i < m_Flag.size(); i++ )
 		m_Flag.set(i);
 
@@ -32,7 +32,7 @@ bool	SystemAvailabilitiesManager::ScriptFiltering(int scriptid, int answerid)
 		if( Filter.empty() )
 			continue;
 
-		if( CheckScript( Filter, scriptid, answerid ) == false )		// 해당 스크립트를 사용할 수 없으면 false 를 리턴
+		if( CheckScript( Filter, scriptid, answerid ) == false )		
 			return false;
 	}	
 
@@ -94,7 +94,7 @@ bool	SystemAvailabilitiesManager::CheckScript( const std::list<FilterScript>& Li
 
 		itr++;
 	}
-	return true;			// 리스트에 없으면 사용 가능
+	return true;			
 }
 
 bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
@@ -126,7 +126,7 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 
 	while( rarfile.GetString( szLine, 512 ) )
 	{
-		// * 는 key, ; 는 주석
+		
 		if( strlen( szLine ) <= 0 )
 			continue;
 		
@@ -135,7 +135,7 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 
 		if( szLine[0] == '*' )
 		{
-			sscanf(szLine+1,"%d %d",&key,&count);		// key 는 enum(SystemKind) 값.
+			sscanf(szLine+1,"%d %d",&key,&count);		
 			ScriptList.clear();
 			count--;
 			Kind = SCRIPT_PARSE;
@@ -144,7 +144,7 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 
 		if( szLine[0] == 'Z' )
 		{
-			sscanf(szLine+1,"%d",&key);					// key 는 회차
+			sscanf(szLine+1,"%d",&key);					
 			ZoneList.clear();
 			Kind = ZONE_PARSE;
 			continue;
@@ -152,7 +152,7 @@ bool	SystemAvailabilitiesManager::LoadFromFile(const char *szFileName)
 		
 		if( szLine[0] == 'S' )
 		{
-			sscanf(szLine+1,"%d %d",&key,&count);		// key 는 무효-_-
+			sscanf(szLine+1,"%d %d",&key,&count);		
 			ScriptListByDegree.clear();
 			count--;
 			Kind = DEGREE_SCRIPT_PARSE;

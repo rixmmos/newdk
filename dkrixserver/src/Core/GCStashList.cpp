@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCStashList.cpp
-// Written By  : 김성민
+
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +59,7 @@ GCStashList::~GCStashList()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// 입력스트림(버퍼)으로부터 데이타를 읽어서 패킷을 초기화한다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCStashList::read(SocketInputStream& iStream)
 
@@ -71,13 +71,13 @@ void GCStashList::read(SocketInputStream& iStream)
     BYTE rack = 0;
     BYTE index = 0;
 
-    // 보관함의 갯수를 읽어들인다.
+    
     iStream.read(m_StashNum);
 
-    // 총 아이템의 숫자를 읽어들인다.
+    
     iStream.read(nTotal);
 
-    // 각 아이템의 정보를 읽어들인다.
+    
     for (i = 0; i < nTotal; i++) {
         iStream.read(rack);
         iStream.read(index);
@@ -100,7 +100,7 @@ void GCStashList::read(SocketInputStream& iStream)
         iStream.read(item.grade);
         iStream.read(item.enchantLevel);
 
-        // sub 아이템 정보를 읽어들인다.
+        
         iStream.read(m_SubItemsCount[rack][index]);
         for (int s = 0; s < m_SubItemsCount[rack][index]; s++) {
             SubItemInfo* pSubItemInfo = new SubItemInfo();
@@ -111,7 +111,7 @@ void GCStashList::read(SocketInputStream& iStream)
         m_bExist[rack][index] = true;
     }
 
-    // 돈의 양을 읽어들인다.
+    
     iStream.read(m_StashGold);
 
     __END_CATCH
@@ -119,7 +119,7 @@ void GCStashList::read(SocketInputStream& iStream)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 출력스트림(버퍼)으로 패킷의 바이너리 이미지를 보낸다.
+
 //////////////////////////////////////////////////////////////////////////////
 void GCStashList::write(SocketOutputStream& oStream) const
 
@@ -131,16 +131,16 @@ void GCStashList::write(SocketOutputStream& oStream) const
     BYTE i = 0;
     BYTE nTotal = 0;
 
-    // 총 아이템의 숫자를 계산한다.
+    
     for (r = 0; r < STASH_RACK_MAX; r++)
         for (i = 0; i < STASH_INDEX_MAX; i++)
             if (m_bExist[r][i])
                 nTotal++;
 
-    // 보관함의 갯수를 날려준다.
+    
     oStream.write(m_StashNum);
 
-    // 총 아이템의 숫자를 날려준다
+    
     oStream.write(nTotal);
 
     // write each item info
@@ -168,7 +168,7 @@ void GCStashList::write(SocketOutputStream& oStream) const
                 oStream.write(item.grade);
                 oStream.write(item.enchantLevel);
 
-                // sub 아이템 정보를 쓴다.
+                
                 oStream.write(m_SubItemsCount[r][i]);
 
                 list<SubItemInfo*>::const_iterator itr = m_pSubItems[r][i].begin();
@@ -180,7 +180,7 @@ void GCStashList::write(SocketOutputStream& oStream) const
         }
     }
 
-    // 돈의 양을 써준다.
+    
     oStream.write(m_StashGold);
 
     __END_DEBUG
@@ -210,17 +210,17 @@ PacketSize_t GCStashList::getPacketSize() const
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    PacketSize_t size = szBYTE; // 보관함의 갯수
+    PacketSize_t size = szBYTE; 
 
-    size += szBYTE; // 총 아이템 숫자
+    size += szBYTE; 
 
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             if (m_bExist[r][i]) {
-                // rack과 인덱스
+                
                 size += szBYTE * 2;
 
-                // 실제 정보
+                
                 /*
                 size += szObjectID;
                 size += szBYTE;
@@ -233,16 +233,16 @@ PacketSize_t GCStashList::getPacketSize() const
                 */
                 size += m_pItems[r][i].getPacketSize();
 
-                // 벨트에 들어있는 아이템의 숫자
+                
                 size += szBYTE;
 
-                // 벨트에 들어 있는 아이템의 크기
+                
                 size += SubItemInfo::getSize() * m_SubItemsCount[r][i];
             }
         }
     }
 
-    size += szGold; // 보관함에 들어있는 돈
+    size += szGold; 
 
     return size;
 
@@ -390,8 +390,8 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
         m_pItems[rack][index].grade = pItem->getGrade();
         m_pItems[rack][index].enchantLevel = pItem->getEnchantLevel();
 
-        // 벨트일 경우에는 안에 있는 아이템까지 함께 세팅해줘야한다.
-        // 아, 씨바 졸라 귀찮네.
+        
+        
         pBelt = dynamic_cast<Belt*>(pItem);
         pItemInfo = g_pItemInfoManager->getItemInfo(pBelt->getItemClass(), pBelt->getItemType());
         pocketCount = dynamic_cast<BeltInfo*>(pItemInfo)->getPocketCount();
@@ -399,7 +399,7 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
 
         for (i = 0; i < pocketCount; i++) {
             Item* pBeltItem = pBeltInventory->getItem((int)i, 0);
-            // 슬랏에 아이템이 있다면...
+            
             if (pBeltItem != NULL) {
                 SubItemInfo* pSubItemInfo = new SubItemInfo;
                 Assert(pSubItemInfo != NULL);
@@ -410,14 +410,14 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
                 pSubItemInfo->setItemNum(pBeltItem->getNum());
                 pSubItemInfo->setSlotID(i);
 
-                // 만든 정보를 해당하는 리스트에다가 더한다.
+                
                 m_pSubItems[rack][index].push_back(pSubItemInfo);
 
-                // 카운트를 올려주고
+                
                 subItemCount++;
             }
         }
-        // 리스트에 몇개나 들어있는지 세팅해 준다.
+        
         m_SubItemsCount[rack][index] = subItemCount;
 
         break;
@@ -432,8 +432,8 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
         m_pItems[rack][index].grade = pItem->getGrade();
         m_pItems[rack][index].enchantLevel = pItem->getEnchantLevel();
 
-        // 벨트일 경우에는 안에 있는 아이템까지 함께 세팅해줘야한다.
-        // 아, 씨바 졸라 귀찮네.
+        
+        
         pOustersArmsband = dynamic_cast<OustersArmsband*>(pItem);
         pItemInfo = g_pItemInfoManager->getItemInfo(pOustersArmsband->getItemClass(), pOustersArmsband->getItemType());
         pocketCount = dynamic_cast<OustersArmsbandInfo*>(pItemInfo)->getPocketCount();
@@ -441,7 +441,7 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
 
         for (i = 0; i < pocketCount; i++) {
             Item* pOustersArmsbandItem = pOustersArmsbandInventory->getItem((int)i, 0);
-            // 슬랏에 아이템이 있다면...
+            
             if (pOustersArmsbandItem != NULL) {
                 SubItemInfo* pSubItemInfo = new SubItemInfo;
                 Assert(pSubItemInfo != NULL);
@@ -452,14 +452,14 @@ void GCStashList::setStashItem(BYTE rack, BYTE index, Item* pItem)
                 pSubItemInfo->setItemNum(pOustersArmsbandItem->getNum());
                 pSubItemInfo->setSlotID(i);
 
-                // 만든 정보를 해당하는 리스트에다가 더한다.
+                
                 m_pSubItems[rack][index].push_back(pSubItemInfo);
 
-                // 카운트를 올려주고
+                
                 subItemCount++;
             }
         }
-        // 리스트에 몇개나 들어있는지 세팅해 준다.
+        
         m_SubItemsCount[rack][index] = subItemCount;
 
         break;

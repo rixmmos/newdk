@@ -19,7 +19,7 @@
 #include "Reflection.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 뱀파이어 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Hallucination::execute(Vampire* pVampire, ObjectID_t TargetObjectID, VampireSkillSlot* pSkillSlot,
                             CEffectID_t CEffectID)
@@ -41,8 +41,8 @@ void Hallucination::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
         Creature* pTargetCreature = pZone->getCreature(TargetObjectID);
         // Assert(pTargetCreature != NULL);
 
-        // NPC는 공격할 수 없다.
-        // NoSuch제거. by sigi. 2002.5.2
+        
+        
         if (pTargetCreature == NULL || !canAttack(pVampire, pTargetCreature) ||
             pTargetCreature->isFlag(Effect::EFFECT_CLASS_IMMUNE_TO_HALLUCINATION) || pTargetCreature->isNPC()) {
             executeSkillFailException(pVampire, getSkillType());
@@ -85,13 +85,13 @@ void Hallucination::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
             SkillOutput output;
             computeOutput(input, output);
 
-            // pTargetCreature가 저주마법을 반사하는 경우
+            
             if (CheckReflection(pVampire, pTargetCreature, getSkillType())) {
                 pTargetCreature = (Creature*)pVampire;
                 TargetObjectID = pVampire->getObjectID();
             }
 
-            // 이펙트 오브젝트를 생성해 붙인다.
+            
             EffectHallucination* pEffect = new EffectHallucination(pTargetCreature);
             pEffect->setDeadline(output.Duration);
             pEffect->setLevel(pSkillInfo->getLevel() / 2);
@@ -124,10 +124,10 @@ void Hallucination::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
             _GCSkillToObjectOK6.setSkillType(SkillType);
             _GCSkillToObjectOK6.setDuration(output.Duration);
 
-            if (bCanSeeCaster) // 10은 땜빵 수치다.
+            if (bCanSeeCaster) 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK2, &_GCSkillToObjectOK1);
-            } else // 10은 땜빵 수치다.
+            } else 
             {
                 computeAlignmentChange(pTargetCreature, 10, pVampire, &_GCSkillToObjectOK6, &_GCSkillToObjectOK1);
             }
@@ -180,7 +180,7 @@ void Hallucination::execute(Vampire* pVampire, ObjectID_t TargetObjectID, Vampir
 
 
 //////////////////////////////////////////////////////////////////////////////
-// 몬스터 오브젝트 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void Hallucination::execute(Monster* pMonster, Creature* pEnemy)
 
@@ -207,7 +207,7 @@ void Hallucination::execute(Monster* pMonster, Creature* pEnemy)
         if (pMonster->isMaster()) {
             int x = pMonster->getX();
             int y = pMonster->getY();
-            int Splash = 3 + rand() % 5; // 3~7 마리
+            int Splash = 3 + rand() % 5; 
             int range = 2;               // 5x5
             list<Creature*> creatureList;
             getSplashVictims(pMonster->getZone(), x, y, Creature::CREATURE_CLASS_MAX, creatureList, Splash, range);
@@ -270,13 +270,13 @@ void Hallucination::executeMonster(Zone* pZone, Monster* pMonster, Creature* pEn
         SkillOutput output;
         computeOutput(input, output);
 
-        // pTargetCreature가 저주마법을 반사하는 경우
+        
         if (CheckReflection(pMonster, pEnemy, getSkillType())) {
             pEnemy = (Creature*)pMonster;
         }
 
 
-        // 이펙트 오브젝트를 생성해 붙인다.
+        
         EffectHallucination* pEffect = new EffectHallucination(pEnemy);
         pEffect->setDeadline(output.Duration);
         pEffect->setLevel(pSkillInfo->getLevel() / 2);

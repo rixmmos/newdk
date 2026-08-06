@@ -12,7 +12,7 @@
 #include "GCSkillToSelfOK2.h"
 
 //////////////////////////////////////////////////////////////////////////////
-// 슬레이어 셀프 핸들러
+
 //////////////////////////////////////////////////////////////////////////////
 void SharpShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CEffectID)
 
@@ -31,7 +31,7 @@ void SharpShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
         Assert(pPlayer != NULL);
         Assert(pZone != NULL);
 
-        // 무장하고 있는 무기가 널이거나, 검이 아니라면 기술을 쓸 수 없다.
+        
         Item* pWeapon = pSlayer->getWearItem(Slayer::WEAR_RIGHTHAND);
         if (pWeapon == NULL || pWeapon->getItemClass() != Item::ITEM_CLASS_SWORD) {
             executeSkillFailException(pSlayer, getSkillType());
@@ -58,12 +58,12 @@ void SharpShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
         if (bManaCheck && bTimeCheck && bRangeCheck && bHitRoll && !bEffected) {
             decreaseMana(pSlayer, RequiredMP, _GCSkillToSelfOK1);
 
-            // 지속 시간을 계산한다.
+            
             SkillInput input(pSlayer, pSkillSlot);
             SkillOutput output;
             computeOutput(input, output);
 
-            // 이팩트 클래스를 만들어 붙인다.
+            
             EffectSharpShield* pEffect = new EffectSharpShield(pSlayer);
             pEffect->setDeadline(output.Duration);
             pEffect->setLevel(SkillLevel);
@@ -71,7 +71,7 @@ void SharpShield::execute(Slayer* pSlayer, SkillSlot* pSkillSlot, CEffectID_t CE
             pSlayer->addEffect(pEffect);
             pSlayer->setFlag(Effect::EFFECT_CLASS_SHARP_SHIELD_1);
 
-            // 경험치를 올린다.
+            
             SkillGrade Grade = g_pSkillInfoManager->getGradeByDomainLevel(pSlayer->getSkillDomainLevel(DomainType));
             Exp_t ExpUp = 10 * (Grade + 1);
             if (bIncreaseDomainExp) {

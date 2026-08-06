@@ -7,10 +7,10 @@
 #ifndef __CG_GQUEST_CANCEL_H__
 #define __CG_GQUEST_CANCEL_H__
 
-#include "Types.h"
-#include "Exception.h"
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Types.h"
+#include "../Exception.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class CGGQuestCancel;
@@ -33,7 +33,7 @@ public:
 	void setQuestID(DWORD QuestID) throw() { m_QuestID = QuestID; }
 
 private:
-	DWORD       m_QuestID;  // 기술의 종류
+	DWORD       m_QuestID;  
 };
 
 //////////////////////////////////////////////////////////////////////

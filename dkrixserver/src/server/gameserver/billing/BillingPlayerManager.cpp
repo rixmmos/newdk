@@ -80,7 +80,7 @@ void BillingPlayerManager::stop() {
 void BillingPlayerManager::run() {
     __BEGIN_TRY
     try {
-        // Player DB에 Connection을 하나 연결시켜 둔다.
+        
         string host = g_pConfig->getProperty("UI_DB_HOST");
         string db = "DARKEDEN";
         string user = g_pConfig->getProperty("UI_DB_USER");
@@ -110,7 +110,7 @@ void BillingPlayerManager::run() {
         while (true) {
             usleep(100);
 
-            // 연결되어 있지 않다면 연결을 시도한다.
+            
             if (m_pBillingPlayer == NULL) {
                 Socket* pSocket = NULL;
 
@@ -133,7 +133,7 @@ void BillingPlayerManager::run() {
 
                     pSocket = NULL;
 
-                    // 최초의 접속인 경우 Init packet을 보낸다.
+                    
                     if (bFirstConnection) {
 #ifdef __GAME_SERVER__
                         sendPayInit();
@@ -166,12 +166,12 @@ void BillingPlayerManager::run() {
                     }
                     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
-                    // 다음 접속시도시간
-                    usleep(1000000); // 1초
+                    
+                    usleep(1000000); 
                 }
             }
 
-            // 소켓이 연결되어 있다면 입출력을 처리한다.
+            
             __ENTER_CRITICAL_SECTION(m_Mutex)
 
             if (m_pBillingPlayer != NULL) {
@@ -201,8 +201,8 @@ void BillingPlayerManager::run() {
             if (dummyQueryTime < currentTime) {
                 g_pDatabaseManager->executeDummyQuery(pDistConnection);
 
-                // 1시간 ~ 1시간 30분 사이에서 dummy query 시간을 설정한다.
-                // timeout이 되지 않게 하기 위해서이다.
+                
+                
                 dummyQueryTime.tv_sec += (60 + rand() % 30) * 60;
             }
 
@@ -210,7 +210,7 @@ void BillingPlayerManager::run() {
                 if (disconnectCheckTime < currentTime) {
                     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-                    // 1분 동안 2번째 이상의 retry 가 30명이 넘으면 짜른다.
+                    
                     if (m_pBillingPlayer->getRetryCount() > 30)
                         m_bForceDisconnect = true;
 
@@ -260,7 +260,7 @@ void BillingPlayerManager::sendPacket(Packet* pPacket) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// 게임 서버가 처음 뜰 때 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void BillingPlayerManager::sendPayInit() {
     __BEGIN_BILLING_TRY
@@ -269,7 +269,7 @@ void BillingPlayerManager::sendPayInit() {
     if (m_pBillingPlayer != NULL) {
         m_pBillingPlayer->sendPayInit();
 
-        // 바로 보내버린다.
+        
         m_pBillingPlayer->processOutput();
     }
 
@@ -278,7 +278,7 @@ void BillingPlayerManager::sendPayInit() {
 }
 
 //////////////////////////////////////////////////////////////////////
-// 캐릭터의 접속 상태를 보낸다.
+
 //////////////////////////////////////////////////////////////////////
 void BillingPlayerManager::sendPayCheck(CommonBillingPacket* pPacket) {
     __BEGIN_BILLING_TRY
@@ -291,7 +291,7 @@ void BillingPlayerManager::sendPayCheck(CommonBillingPacket* pPacket) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// 캐릭터가 게임에 처음 접속할때 보내는것
+
 //////////////////////////////////////////////////////////////////////
 void BillingPlayerManager::sendPayLogin(Player* pPlayer) {
     __BEGIN_BILLING_TRY
@@ -306,7 +306,7 @@ void BillingPlayerManager::sendPayLogin(Player* pPlayer) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// 캐릭터가 게임에서 나갈때 보내는것
+
 //////////////////////////////////////////////////////////////////////
 void BillingPlayerManager::sendPayLogout(Player* pPlayer) {
     __BEGIN_BILLING_TRY

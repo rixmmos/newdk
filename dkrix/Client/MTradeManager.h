@@ -1,19 +1,19 @@
 //-----------------------------------------------------------------------------
 // MTradeManager.h
 //-----------------------------------------------------------------------------
-// 교환 담당~
+
 //
-// Init하면 한 쌍의 (inventory와 moneymanager)를 생성한다.
+
 // 
-// 하나는 내꺼.. 하나는 남꺼..
+
 //
-// * Get .... () 해서 외부에서 처리하고..
+
 //
-// item이 add/remove되거나.. money가 바뀌면 .. AcceptTrade를 제거해야한다.
+
 //
-// MyAcceptTrade && OtherAcceptTrade인 경우만 trade 가능하다.
+
 //
-// CanTrade()로 체크해보고 trade가능하면 Trade()한다.
+
 //-----------------------------------------------------------------------------
 
 #ifndef __MTRADEMANAGER_H__
@@ -34,13 +34,13 @@ class MTradeManager {
 		void				Release();
 
 		//-------------------------------------------------------
-		// inventory 얻기
+		
 		//-------------------------------------------------------
 		MInventory*			GetMyInventory() const			{ return m_pMyInventory; }
 		MInventory*			GetOtherInventory() const		{ return m_pOtherInventory; }
 
 		//-------------------------------------------------------
-		// money manager 얻기
+		
 		//-------------------------------------------------------
 		MMoneyManager*		GetMyMoneyManager() const		{ return m_pMyMoney; }
 		MMoneyManager*		GetOtherMoneyManager() const	{ return m_pOtherMoney; }
@@ -49,7 +49,7 @@ class MTradeManager {
 		// Trade OK ?
 		//-------------------------------------------------------
 		bool				IsAcceptTime() const;
-		void				SetNextAcceptTime();		// 다음 교환 가능한 시간 설정
+		void				SetNextAcceptTime();		
 
 		bool				IsAcceptMyTrade() const				{ return m_bAcceptMyTrade; }
 		bool				IsAcceptOtherTrade() const			{ return m_bAcceptOtherTrade; }
@@ -63,12 +63,12 @@ class MTradeManager {
 		//-------------------------------------------------------
 		// Trade
 		//-------------------------------------------------------
-		bool				CanTrade() const;		// trade 가능한가?
-		bool				Trade();				// 교환!
-		bool				CancelTrade();			// 교환 거절
+		bool				CanTrade() const;		
+		bool				Trade();				
+		bool				CancelTrade();			
 
 		//-------------------------------------------------------
-		// 교환할려는 사람의 정보
+		
 		//-------------------------------------------------------
 		void				SetOtherID(TYPE_OBJECTID otherID)	{ m_OtherID = otherID; }
 		TYPE_OBJECTID		GetOtherID() const					{ return m_OtherID; }
@@ -76,19 +76,19 @@ class MTradeManager {
 		const char*			GetOtherName() const				{ return m_OtherName.GetString(); }
 
 	protected :
-		TYPE_OBJECTID		m_OtherID;				// 다른 사람 ID
-		MString				m_OtherName;			// 다른 사람 이름
+		TYPE_OBJECTID		m_OtherID;				
+		MString				m_OtherName;			
 
-		MInventory*			m_pMyInventory;			// 내꺼
-		MInventory*			m_pOtherInventory;		// 남꺼
+		MInventory*			m_pMyInventory;			
+		MInventory*			m_pOtherInventory;		
 
-		MMoneyManager*		m_pMyMoney;				// 내 돈
-		MMoneyManager*		m_pOtherMoney;			// 남 돈
+		MMoneyManager*		m_pMyMoney;				
+		MMoneyManager*		m_pOtherMoney;			
 
-		bool				m_bAcceptMyTrade;			// 나의 교환확인
-		bool				m_bAcceptOtherTrade;		// 남의 교한확인
+		bool				m_bAcceptMyTrade;			
+		bool				m_bAcceptOtherTrade;		
 
-		DWORD				m_NextAcceptTime;		// OK 누를 수 있는 시간
+		DWORD				m_NextAcceptTime;		
 };
 
 extern MTradeManager*		g_pTradeManager;

@@ -24,8 +24,8 @@
 //
 // LGKickCharacterHander::execute()
 //
-// 게임 서버가 로그인 서버로부터 LGKickCharacter 패킷을 받게 되면,
-// ConnectionInfo를 새로 추가하게 된다.
+
+
 //
 //----------------------------------------------------------------------
 void LGKickCharacterHandler::execute(LGKickCharacter* pPacket)
@@ -34,7 +34,7 @@ void LGKickCharacterHandler::execute(LGKickCharacter* pPacket)
     __BEGIN_TRY __BEGIN_DEBUG_EX
 #ifdef __GAME_SERVER__
 
-        // 냐햐햐
+        
         /*
         if (!g_pPCFinder->setKickCharacter(pPacket->getPCName(), pPacket->getHost(), pPacket->getPort() ))
         {
@@ -56,10 +56,10 @@ void LGKickCharacterHandler::execute(LGKickCharacter* pPacket)
 
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
-        // 이름으로 사용자를 찾아온다.
+        
         Creature* pCreature = g_pPCFinder->getCreature_LOCKED(pPacket->getPCName());
 
-        // 캐릭터가 없는 경우에는 GLKickVerify(false)를 보낸다.
+        
         if (pCreature == NULL) {
             GLKickVerify glKickVerify;
             glKickVerify.setKicked(false);
@@ -81,14 +81,14 @@ void LGKickCharacterHandler::execute(LGKickCharacter* pPacket)
         try {
             pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
         } catch (Throwable& t) {
-            // pCreature->getPlayer()안에서 Assert(m_pPlayer!=NULL)때문이다.
+            
             // filelog("kickCharacterAssert.txt", "%s", t.toString().c_str());
             g_pPCFinder->unlock();
             return;
         }
 
         // Assert(pGamePlayer!=NULL);
-        if (pGamePlayer == NULL) // 어떻게 가능할까? -_-;
+        if (pGamePlayer == NULL) 
         {
             g_pPCFinder->unlock();
             return;
@@ -103,12 +103,12 @@ void LGKickCharacterHandler::execute(LGKickCharacter* pPacket)
                                     (pSocket == NULL ? "NULL" : pSocket->getHost().c_str()));
 
 
-        // 강제 종료 시킨다.
+        
         pGamePlayer->setPenaltyFlag(PENALTY_TYPE_KICKED);
         pGamePlayer->setItemRatioBonusPoint(4);
         pGamePlayer->setKickForLogin(true);
 
-        // 접속 해제 후, 응답을 보내줄 곳..
+        
         pGamePlayer->setKickRequestHost(pPacket->getHost());
         pGamePlayer->setKickRequestPort(pPacket->getPort());
 

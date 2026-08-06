@@ -59,7 +59,7 @@ public:
     static void initMonsterTypeInfos();
 
 private:
-    typedef vector<MonsterSelector> MonsterTypeInfos; // 레벨에 따른 몬스터 종류
+    typedef vector<MonsterSelector> MonsterTypeInfos; 
 
     static MonsterTypeInfos m_MonsterTypeInfos;
 };

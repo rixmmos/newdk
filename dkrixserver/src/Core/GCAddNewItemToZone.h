@@ -72,7 +72,7 @@ public:
 
     // get packet's body size
     // *OPTIMIZATION HINT*
-    // const static GCAddNewItemToZonePacketSize 를 정의, 리턴하라.
+    
     PacketSize_t getPacketMaxSize() const {
         return szObjectID + szCoord + szCoord + szBYTE + szItemType + szBYTE + 255 + szDurability + szItemNum + szBYTE +
                (szObjectID + szBYTE + szItemType + szItemNum + szSlotID) * 12;

@@ -1,17 +1,17 @@
 //////////////////////////////////////////////////////////////////////////////
 // Filename    : GCShopListMysterious.h 
-// Written By  : 김성민
+
 // Description : 
-// 플레이어가 가진 상점 버전이 서버에 있는 것과 다를 경우,
-// 플레이어는 서버에 상점에 있는 상품 목록을 요구하게 된다.
-// 이 패킷은 그 때 플레이어에게 전달하게 되는 패킷이다.
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GC_SHOP_LIST_MYSTERIOUS_H__
 #define __GC_SHOP_LIST_MYSTERIOUS_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // buffer structure
@@ -75,7 +75,7 @@ private:
 	ShopVersion_t           m_Version;                      // Shop version
 	ShopRackType_t          m_RackType;                     // rack type
 	SHOPLISTITEM_MYSTERIOUS m_pBuffer[SHOP_RACK_INDEX_MAX]; // buffer for i/o
-	MarketCond_t            m_MarketCondBuy;                // 시장 시세
+	MarketCond_t            m_MarketCondBuy;                
 	MarketCond_t            m_MarketCondSell;
 
 };

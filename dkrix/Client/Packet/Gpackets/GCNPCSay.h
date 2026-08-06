@@ -7,12 +7,12 @@
 #ifndef __GC_NPC_SAY_H__
 #define __GC_NPC_SAY_H__
 
-#include "Packet.h"
-#include "PacketFactory.h"
+#include "../Packet.h"
+#include "../PacketFactory.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // class GCNPCSay;
-// NPC 의 대사를 주변의 PC 들에게 전송한다.
+
 //////////////////////////////////////////////////////////////////////////////
 
 class GCNPCSay : public Packet 

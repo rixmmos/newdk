@@ -24,7 +24,7 @@ throw ( ProtocolException , Error )
 		
 
 	//------------------------------------------------------
-	// Zone이 아직 생성되지 않은 경우
+	
 	//------------------------------------------------------
 	if (g_pZone==NULL)
 	{
@@ -33,7 +33,7 @@ throw ( ProtocolException , Error )
 		
 	}	
 	//------------------------------------------------------
-	// 정상.. 
+	
 	//------------------------------------------------------
 	else
 	{
@@ -42,7 +42,7 @@ throw ( ProtocolException , Error )
 		MCreature* pCreature = g_pZone->GetCreature(vi.getObjectID());
 
 		//--------------------------------------------------
-		// 새로운 Creature이면 추가
+		
 		//--------------------------------------------------
 		if (pCreature==NULL)
 		{
@@ -54,7 +54,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetName( vi.getName().c_str() );
 
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			Shape_t shape	= vi.getShape();
 			bool bMale		= vi.getSex()==MALE;
@@ -90,7 +90,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetCurrentDirection( vi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
  
-			// 색깔
+			
 			
 			if( pCreature->GetCreatureType() == CREATURETYPE_WER_WOLF )
 			{
@@ -107,7 +107,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -126,11 +126,11 @@ throw ( ProtocolException , Error )
 			pCreature->SetStatus( MODIFY_RANK, vi.getRank() );
 
 			//vi.getName()
-			// 색상 정보
+			
 
 			pCreature->SetWeaponSpeed( vi.getAttackSpeed() );
 			
-			// 임시로
+			
 			pCreature->SetGuildNumber( vi.getGuildID() );
 			pCreature->SetUnionGuildID( vi.getUnionID() );
 			if( vi.getBatColor() != 0 )
@@ -157,13 +157,13 @@ throw ( ProtocolException , Error )
 
 		}
 		//--------------------------------------------------
-		// 이미 있는 Creature인 경우
+		
 		//--------------------------------------------------
 		else
 		{
 			pCreature->SetStatus( MODIFY_ADVANCEMENT_CLASS_LEVEL, vi.getAdvancementLevel() );
 			//--------------------------------------------------
-			// CreatureType 설정
+			
 			//--------------------------------------------------
 			Shape_t shape	= vi.getShape();
 			bool bMale		= vi.getSex()==MALE;
@@ -192,7 +192,7 @@ throw ( ProtocolException , Error )
 			}
 			//pCreature->SetGroundCreature();
 
-			// 임시로
+			
 			pCreature->SetGuildNumber( vi.getGuildID() );
 			pCreature->SetUnionGuildID( vi.getUnionID() );
 			
@@ -203,7 +203,7 @@ throw ( ProtocolException , Error )
 			pCreature->SetCurrentDirection( vi.getDir() );
 			pCreature->SetAction( ACTION_STAND );
 
-			// 색깔
+			
 			if( pCreature->GetCreatureType() == CREATURETYPE_WER_WOLF )
 			{
 				pCreature->SetBodyColor1( vi.getCoatColor() );
@@ -220,7 +220,7 @@ throw ( ProtocolException , Error )
 			//--------------------------------------------------
 			// [ TEST CODE ]
 			//--------------------------------------------------
-			// 옷 색깔 설정하기
+			
 			//--------------------------------------------------
 			/*
 			if (pCreature->IsMale())
@@ -260,34 +260,39 @@ throw ( ProtocolException , Error )
 		if (pCreature!=NULL)
 		{
 			//--------------------------------------------------
-			// Effect 붙이기..
+			
 			//--------------------------------------------------
 			SetEffectInfo( pCreature, pPacket->getEffectInfo() );
 			
 			//--------------------------------------------------
-			// 정상일 경우에는 0, 포탈을 통했을 경우에는 1
+			
 			//--------------------------------------------------
 			if (pPacket->getFromFlag()==1)
 			{
 				ComeFromPortal( pCreature );
 			}
 			
-			// 펫 처리
+			
 			if(pPacket->getPetInfo() != NULL)
 				SetPetInfo(pPacket->getPetInfo(), pCreature->GetID());
 			NicknameInfo* _tempNick = pPacket->getNicknameInfo();
 			if(_tempNick != NULL)
 			{
-				// 커스텀 닉네임 일때
+				
 				if(_tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM_FORCED ||
 				   _tempNick->getNicknameType() == NicknameInfo::NICK_CUSTOM)
 				{
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)_tempNick->getNickname().c_str());
 					
 				}
-				else // 닉네임 인덱스가 있을 때
+				else 
 				{
 					int TempIndex = _tempNick->getNicknameIndex();
+					if(g_pNickNameStringTable == NULL || g_pNickNameStringTable->GetSize() == 0)
+					{
+						pCreature->SetNickName(_tempNick->getNicknameType(), (char*)"No Title");
+						return;
+					}
 					if(TempIndex >= g_pNickNameStringTable->GetSize())
 						TempIndex = 0;
 					pCreature->SetNickName(_tempNick->getNicknameType(), (char*)(*g_pNickNameStringTable)[TempIndex].GetString());
@@ -296,7 +301,7 @@ throw ( ProtocolException , Error )
 		}
 	}
 
-	// [도움말] Vampire가 나타날때
+	
 //	__BEGIN_HELP_EVENT
 ////		ExecuteHelpEvent( HE_CREATURE_APPEAR_VAMPIRE );
 //	__END_HELP_EVENT

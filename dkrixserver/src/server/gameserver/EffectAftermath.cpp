@@ -19,7 +19,7 @@ EffectAftermath::EffectAftermath(Creature* pCreature)
 {
     __BEGIN_TRY
 
-    // 서버 전용 Effect이다. by sigi. 2002.11.14
+    
     m_bBroadcastingEffect = false;
 
     setTarget(pCreature);
@@ -131,7 +131,7 @@ void EffectAftermath::create(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("INSERT INTO EffectAftermath (OwnerID , YearTime, DayTime) VALUES('%s', %ld, %ld)",
                             ownerID.c_str(), currentYearTime, m_Deadline.tv_sec);
 
@@ -160,7 +160,7 @@ void EffectAftermath::destroy(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("DELETE FROM EffectAftermath WHERE OwnerID = '%s'", ownerID.c_str());
 
         SAFE_DELETE(pStmt);
@@ -195,7 +195,7 @@ void EffectAftermath::save(const string& ownerID)
             << " WHERE OwnerID = '" << ownerID << "'";
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         pStmt->executeQuery("UPDATE EffectAftermath SET YearTime = %ld, DayTime = %ld WHERE OwnerID = '%s'",
                             currentYearTime, m_Deadline.tv_sec, ownerID.c_str());
 
@@ -229,7 +229,7 @@ void EffectAftermathLoader::load(Creature* pCreature)
     __BEGIN_TRY
 
     if (pCreature == NULL || (!pCreature->isSlayer() && !pCreature->isOusters())) {
-        // cout << "EffectAftermathLoader : 크리쳐가 널입니다." << endl;
+        
         return;
     }
 
@@ -248,7 +248,7 @@ void EffectAftermathLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        // StringStream제거. by sigi. 2002.5.8
+        
         Result* pResult = pStmt->executeQuery("SELECT DayTime FROM EffectAftermath WHERE OwnerID = '%s'",
                                               pCreature->getName().c_str());
 

@@ -1,14 +1,14 @@
 //----------------------------------------------------------------------
 // MZoneTable.h
 //----------------------------------------------------------------------
-// Zone Loading시에 Zone마다 필요한 정보를 저장하는 class
+
 //----------------------------------------------------------------------
 //
-// [ Zone별로 Loadind에 필요한 정보 ] 
+
 //
 // - ZoneID
-// - Zone크기Type (Large or Small)
-// - file이름
+
+
 // 
 //----------------------------------------------------------------------
 
@@ -30,16 +30,16 @@ using namespace std;
 #define	FLAG_ZONESIZE_SMALL		0x01
 
 
-// 2004, 5, 14 sobeit add start - pk zone 관련
-#define PK_TYPE_NULL			0			// 그냥 default map
-#define PK_TYPE_DISABLE			0x01		// 다 우리편..-_-; pk 금지
-#define PK_TYPE_ALL				0x02		// 나 빼고 다 적
-#define PK_TYPE_GUILD			0x03		// 우리 길드 빼고 다 적..
-#define PK_TYPE_SIEGE			0x04		// Siege 맵 // effect status에따라 적
-// 2004, 5, 14 sobeit add end - pk zone 관련
+
+#define PK_TYPE_NULL			0			
+#define PK_TYPE_DISABLE			0x01		
+#define PK_TYPE_ALL				0x02		
+#define PK_TYPE_GUILD			0x03		
+#define PK_TYPE_SIEGE			0x04		
+
 //----------------------------------------------------------------------
 //
-// 한 종류의 Zone에 대한 정보
+
 //
 //----------------------------------------------------------------------
 class ZONETABLE_INFO {
@@ -49,23 +49,23 @@ class ZONETABLE_INFO {
 	
 	public :
 		TYPE_ZONEID				ID;						// Zone ID
-		MString					Name;					// Zone 이름
-		BYTE					Property;				// Zone의 속성
-		MString					Filename;				// Zone File이름
-		MString					InfoFilename;			// ZoneInfo File이름
-		MString					TeenFilename;			// Minimap File이름
-		TYPE_MUSICID			MusicIDSlayer;			// Music종류		
-		TYPE_MUSICID			MusicIDVampire;			// Music종류		
-		SOUNDID_LIST			SoundIDList;			// random하게 나는 소리들..
-		WORD					CreatureColorSet;		// Zone 전체의 몹 색깔 바꾸기
+		MString					Name;					
+		BYTE					Property;				
+		MString					Filename;				
+		MString					InfoFilename;			
+		MString					TeenFilename;			
+		TYPE_MUSICID			MusicIDSlayer;			
+		TYPE_MUSICID			MusicIDVampire;			
+		SOUNDID_LIST			SoundIDList;			
+		WORD					CreatureColorSet;		
 		bool					Safety;
-		unsigned short			MinimapSpriteID;		// 미니맵의 스프라이트 아이디
-		bool					HolyLand;				// 아담의 성지인가
-		bool					ChatMaskByRace;			// 종족에 따라 채팅내용에 마스크를 씌우는가
-		bool					CannotAttackInSafe;		// 안전지대에서 공격할 수 없는가
-		bool					CannotUseSpecialItem;	// 변신이나 소환 금지 여부
+		unsigned short			MinimapSpriteID;		
+		bool					HolyLand;				
+		bool					ChatMaskByRace;			
+		bool					CannotAttackInSafe;		
+		bool					CannotUseSpecialItem;	
 		bool					CompetenceZone;
-		BYTE					PKType;					// 자유 PK 지역인가?
+		BYTE					PKType;					
 		
 	public :
 		ZONETABLE_INFO();
@@ -81,7 +81,7 @@ class ZONETABLE_INFO {
 
 //----------------------------------------------------------------------
 //
-// 전체 Zone에 대한 정보
+
 //
 //----------------------------------------------------------------------
 class CZoneTable {
@@ -98,7 +98,7 @@ class CZoneTable {
 		void				Release();
 
 		//-------------------------------------------------------
-		// zoneID가 id인 zone의 정보를 얻는다.
+		
 		//-------------------------------------------------------
 		bool				Add(ZONETABLE_INFO* pZoneInfo);
 		ZONETABLE_INFO*		Get(TYPE_ZONEID id);
@@ -112,7 +112,7 @@ class CZoneTable {
 		void				LoadFromFile(std::ifstream& file);
 	
 	protected :
-		ZONEINFO_MAP		m_mapZoneInfo;		// zone정보 map
+		ZONEINFO_MAP		m_mapZoneInfo;		
 };
 
 extern CZoneTable*		g_pZoneTable;

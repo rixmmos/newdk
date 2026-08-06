@@ -53,8 +53,8 @@ public:
 private:
     InfoClassManager* m_InfoClassManagers[Item::ITEM_CLASS_MAX];
 
-    uint m_ItemIDSuccessor; // ItemID를 발급받을 때의 증가치(서버의 숫자)
-    uint m_ItemIDBase;      // 각 서버마다 다른 베이스
+    uint m_ItemIDSuccessor; 
+    uint m_ItemIDBase;      
 };
 
 extern ItemInfoManager* g_pItemInfoManager;
