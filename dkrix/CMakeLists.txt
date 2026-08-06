@@ -192,7 +192,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Exclude Windows-specific files
 	if(WIN32)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WebBrowser.*")
 		if(USE_SDL_BACKEND)
 			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
 			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/Imm/CImm\\.cpp")
@@ -205,6 +204,11 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	endif()
 
 	if(NOT WIN32)
+		# VS_UI_WebBrowser.cpp implements the real COM/ActiveX C_VS_UI_WEBBROWSER
+		# (VS_UI_WebBrowser.h guards it behind PLATFORM_WINDOWS + <exdisp.h>/<atlbase.h>
+		# and falls back to an inline stub class otherwise) - Windows-only, and the
+		# only platform where VS_UI_Game.cpp's calls into it need a real definition.
+		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WebBrowser.*")
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*Imm.*")
 		# Exclude Windows-specific Korean input method files (except macOS stub)
 		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")

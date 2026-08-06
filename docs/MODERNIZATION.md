@@ -61,10 +61,17 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > phases this file lists as delegable-once-green — 1, 2, 3, 7, 10 — are
 > delegable for the server as of now.
 >
-> **The client is still unverified.** It has never compiled under CI; run #3
-> died at configure on a stale generator pin before reaching any project code
-> (`21a9172`). Treat every client claim below as unverified, and every server
-> claim as backed by a build.
+> **The client is still unverified, but CI reached the linker for the first
+> time on 2026-08-06.** Run #4 (`21a9172`) got past *configure* and through
+> 23m of compilation, then failed at *link*: 5 unresolved externals, all
+> `C_VS_UI_WEBBROWSER` methods referenced from `VS_UI_Game.cpp`. Root cause:
+> `dkrix/CMakeLists.txt` excluded `VS_UI_WebBrowser.cpp` — the file with the
+> real COM/ActiveX implementation — specifically `if(WIN32)`, backwards from
+> what `VS_UI_WebBrowser.h` expects (real class on Windows, inline stub
+> elsewhere). Fixed by moving the exclusion to the `if(NOT WIN32)` block.
+> **Not yet re-verified by a CI run** — this fix is unproven until run #5.
+> Treat every other client claim below as unverified, and every server claim
+> as backed by a build.
 
 **No claim in this document has been confirmed by a compile.** ~~The client~~
 *(Superseded for the server — see the box above. Still true of the client.)*
@@ -272,12 +279,15 @@ routine phase work be delegated rather than hand-held.
         libmysqlclient / lua5.1 / xerces-c / **libnsl**. All three binaries
         (`gameserver`, `loginserver`, `sharedserver`) produced and verified.
         `clang-format` job green and genuinely inspecting files.
-  - [ ] **client — still red.** `cmake --build` on `windows-latest` with
-        vcpkg. Run #3 failed at *configure*: the pinned generator
-        `-G "Visual Studio 17 2022"` no longer matches the runner image,
-        though vcpkg had just built SDL2 successfully, so MSVC was present.
-        Pin removed in `21a9172`; not yet re-run. **No client code has been
-        compiled by CI yet.**
+  - [ ] **client — still red, but progressing.** `cmake --build` on
+        `windows-latest` with vcpkg. Run #3 failed at *configure* (stale
+        generator pin, fixed in `21a9172`). Run #4 got past configure and
+        23m of compilation, then failed at **link**: `VS_UI/CMakeLists.txt`
+        source-exclusion for `VS_UI_WebBrowser.cpp` was inverted (`if(WIN32)`
+        instead of `if(NOT WIN32)`), dropping the one file with a real
+        `C_VS_UI_WEBBROWSER` implementation on the one platform that needs
+        it. Fixed in the same change that added this note — **unverified
+        until run #5.**
 - Success: a change can be proposed, built, and judged without a human
   manually running two toolchains. **Achieved for `dkrixserver/`.**
 
