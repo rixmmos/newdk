@@ -97,9 +97,15 @@ jobs:
     name: Viewers and validators
     runs-on: windows-latest
     timeout-minutes: 120
-    # Non-blocking for now: the viewer binaries depend on the second sprite
-    # system in tools/engine/sprite/, which Phase 4 is expected to remove or
-    # merge. Flip continue-on-error off once Phase 4 lands.
+    # Non-blocking: the viewer binaries depend on the second sprite system in
+    # tools/engine/sprite/, which the game client does not link.
+    #
+    # [updated 2026-08-06] The original note said to flip this off "once Phase 4
+    # lands". Phase 4 was re-scoped — see docs/adr/0001-sprite-pipeline.md — and
+    # tools/engine/sprite/ is now expected to STAY as the viewers' library
+    # rather than be removed. So the right trigger is different: flip this off
+    # once the viewer targets are known to build, which nothing has established
+    # yet because this workflow has never run.
     continue-on-error: true
 
     steps:

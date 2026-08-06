@@ -17,15 +17,21 @@ on:
       - ".github/workflows/server.yml"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: dkrixserver
+# NOTE: working-directory is set per-job, NOT at workflow level. A workflow-level
+# default also applies to the `format` job, where it silently breaks the check:
+# `git diff --name-only` always prints repo-relative paths (dkrixserver/src/...),
+# so the subsequent `[ -f "$f" ]` test runs from inside dkrixserver/ and looks for
+# dkrixserver/dkrixserver/src/... — never found, every file skipped via `continue`,
+# and the job passes green having checked nothing.
 
 jobs:
   build:
     name: make debug (ubuntu)
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: dkrixserver
 
     steps:
       - uses: actions/checkout@v4
@@ -99,12 +105,27 @@ jobs:
             exit 0
           fi
 
+          checked=0
           failed=0
           for f in $changed; do
-            [ -f "$f" ] || continue
+            if [ ! -f "$f" ]; then
+              echo "::warning file=$f::listed as changed but not present in the worktree; skipped"
+              continue
+            fi
+            checked=$((checked + 1))
             if ! diff -q "$f" <(clang-format "$f") >/dev/null; then
               echo "::error file=$f::Not clang-format clean. Run 'make fmt' in dkrixserver/."
               failed=1
             fi
           done
+
+          # Guard against the failure mode this job had before: if every file is
+          # skipped, the loop body never runs and the job passes green having
+          # verified nothing. A non-empty change list that checks zero files is
+          # a bug in this workflow, not a passing format check.
+          echo "Checked $checked of $(echo "$changed" | wc -l) changed file(s)."
+          if [ "$checked" -eq 0 ]; then
+            echo "::error::Change list was non-empty but no file was readable — path resolution is wrong in this workflow."
+            exit 1
+          fi
           exit $failed
