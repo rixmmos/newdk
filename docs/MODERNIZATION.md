@@ -61,15 +61,25 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > phases this file lists as delegable-once-green — 1, 2, 3, 7, 10 — are
 > delegable for the server as of now.
 >
-> **The client is still unverified, but CI reached the linker for the first
-> time on 2026-08-06.** Run #4 (`21a9172`) got past *configure* and through
-> 23m of compilation, then failed at *link*: 5 unresolved externals, all
-> `C_VS_UI_WEBBROWSER` methods referenced from `VS_UI_Game.cpp`. Root cause:
-> `dkrix/CMakeLists.txt` excluded `VS_UI_WebBrowser.cpp` — the file with the
-> real COM/ActiveX implementation — specifically `if(WIN32)`, backwards from
-> what `VS_UI_WebBrowser.h` expects (real class on Windows, inline stub
+> **The client is still unverified, but CI reached real client code for the
+> first time on 2026-08-06, and each run has found a genuine bug.** Run #4
+> (`21a9172`) got past *configure* and through 23m of compilation, then
+> failed at *link*: 5 unresolved externals, all `C_VS_UI_WEBBROWSER` methods
+> referenced from `VS_UI_Game.cpp`. Root cause: `dkrix/CMakeLists.txt`
+> excluded `VS_UI_WebBrowser.cpp` — the file with the real COM/ActiveX
+> implementation — specifically `if(WIN32)`, backwards from what
+> `VS_UI_WebBrowser.h` expects (real class on Windows, inline stub
 > elsewhere). Fixed by moving the exclusion to the `if(NOT WIN32)` block.
-> **Not yet re-verified by a CI run** — this fix is unproven until run #5.
+>
+> Run #5 (manually dispatched against that fix) got further — `.cpp` now
+> compiles — and failed in 10m at a genuine **compile** error instead:
+> `VS_UI_WebBrowser.cpp:61` passed `(LONG*)` where
+> `IWebBrowserApp::get_HWND` wants `SHANDLE_PTR*` (pointer-sized; `LONG` is
+> 4 bytes even on x64). Classic VC6/32-bit-era code, never built as x64
+> until now. Fixed: cast to `(SHANDLE_PTR*)` instead, matching the real
+> `HWND` size of `m_hWnd_Explorer`.
+>
+> **Not yet re-verified by a CI run** — this fix is unproven until run #6.
 > Treat every other client claim below as unverified, and every server claim
 > as backed by a build.
 
@@ -279,15 +289,19 @@ routine phase work be delegated rather than hand-held.
         libmysqlclient / lua5.1 / xerces-c / **libnsl**. All three binaries
         (`gameserver`, `loginserver`, `sharedserver`) produced and verified.
         `clang-format` job green and genuinely inspecting files.
-  - [ ] **client — still red, but progressing.** `cmake --build` on
-        `windows-latest` with vcpkg. Run #3 failed at *configure* (stale
-        generator pin, fixed in `21a9172`). Run #4 got past configure and
-        23m of compilation, then failed at **link**: `VS_UI/CMakeLists.txt`
-        source-exclusion for `VS_UI_WebBrowser.cpp` was inverted (`if(WIN32)`
-        instead of `if(NOT WIN32)`), dropping the one file with a real
-        `C_VS_UI_WEBBROWSER` implementation on the one platform that needs
-        it. Fixed in the same change that added this note — **unverified
-        until run #5.**
+  - [ ] **client — still red, but progressing one bug per run.** `cmake
+        --build` on `windows-latest` with vcpkg. Run #3 failed at
+        *configure* (stale generator pin, fixed in `21a9172`). Run #4 got
+        past configure and 23m of compilation, then failed at **link**:
+        `CMakeLists.txt` source-exclusion for `VS_UI_WebBrowser.cpp` was
+        inverted (`if(WIN32)` instead of `if(NOT WIN32)`), dropping the one
+        file with a real `C_VS_UI_WEBBROWSER` implementation on the one
+        platform that needs it — fixed in `84f2e5a`. Run #5 (manual
+        dispatch) got past that and into compiling the file itself, then
+        failed at **compile**: `VS_UI_WebBrowser.cpp:61` cast a `HWND*` to
+        `(LONG*)` instead of `(SHANDLE_PTR*)` for
+        `IWebBrowserApp::get_HWND` — harmless on 32-bit, wrong on x64.
+        Fixed. **Unverified until run #6.**
 - Success: a change can be proposed, built, and judged without a human
   manually running two toolchains. **Achieved for `dkrixserver/`.**
 
