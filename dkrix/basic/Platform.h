@@ -478,11 +478,10 @@ typedef WORD			char_t;
 		#define _L(x)		x
 	#endif
 
-	/* TCHAR and related types */
+	/* TCHAR and related types. _tcscpy/_tcscat shims removed here (2026-08):
+	   zero callers anywhere in dkrix, verified by tree-wide grep. */
 	#ifndef UNICODE
 		typedef char			TCHAR;
-		#define _tcscat		strcat
-		#define _tcscpy		strcpy
 		#define _tcslen		strlen
 		#define _tcschr		strchr
 		#define _tcsrchr		strrchr
@@ -491,8 +490,6 @@ typedef WORD			char_t;
 		#define _tmain		main
 	#else
 		typedef wchar_t		TCHAR;
-		#define _tcscat		wcscat
-		#define _tcscpy		wcscpy
 		#define _tcslen		wcslen
 		#define _tcschr		wcschr
 		#define _tcsrchr		wcsrchr
