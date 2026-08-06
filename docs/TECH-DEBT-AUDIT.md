@@ -161,7 +161,7 @@ Windows builds, some helpers include `sys/time.h`.
 > because it reads as evidence. Anything added here should be tested against a
 > case it is supposed to reject before it is trusted.
 
-### 20. Dead `__LINUX__` / `__WINDOWS__` conditionals — Priority 16
+### 20. Dead `__LINUX__` / `__WINDOWS__` conditionals — Priority 20
 
 **[measured 2026-08-06]** 66 `#if __LINUX__` / `#elif __WINDOWS__` directives
 across 16 files, mostly under `Client/Packet/`. **Neither macro is defined
@@ -246,7 +246,7 @@ Every new file silently joins the build. Converting to explicit source lists —
 `dkrixserver/` already does — removes a whole class of surprise and is the structural
 fix that makes item #6 unnecessary.
 
-### 7 (detail). Which exclusions are actually load-bearing
+#### 7a. Which exclusions are actually load-bearing
 
 **[measured 2026-08-06]** Each `FILTER`/`REMOVE_ITEM` line was evaluated against
 the real file tree by expanding the same globs the build uses and testing every
@@ -358,48 +358,61 @@ Total `.git` is 46 MB, which is healthy.
 
 Sequenced so that nothing requiring a build lands before a build exists.
 
-### Now — no build required (items 2, 3, 5, 14, 16, 17)
+### Now — no build required — **all done 2026-08-06**
 
-Judgeable by reading. Roughly a day.
-
-1. [ ] Correct `SPRITELIB_BACKEND_README.md` — drop the false `engine/sprite`
-       attribution and the "Production Ready / tests passing" claims
-2. [ ] Correct the Phase 4 section of `MODERNIZATION.md`; link ADR-0001
-3. [ ] Fix `docs/README.md`'s three-repo description
-4. [ ] Gitignore `compile_commands.json`; untrack both copies
-5. [ ] Delete the 8 dead `*PackList555/565` files and drop lines 103, 104, 118,
-       119 from `Client/SpriteLib/CMakeLists.txt` — see item 19 for the evidence.
+1. [x] ~~Correct `SPRITELIB_BACKEND_README.md`~~ — dropped the false
+       `engine/sprite` attribution, the "Production Ready / tests passing"
+       claims, and a Testing section citing three binaries that never existed
+2. [x] ~~Correct the Phase 4 section of `MODERNIZATION.md`~~; ADR-0001 linked
+3. [x] ~~Fix `docs/README.md`'s three-repo description~~
+4. [x] ~~Untrack both `compile_commands.json`~~ (6.6 MB)
+5. [x] ~~Delete the 8 dead `*PackList555/565` files~~ and the 4 header lines in
+       `Client/SpriteLib/CMakeLists.txt`.
        ~~Delete `Client/WinLib/`~~ — **retracted, see item 16. Do not.**
-6. [ ] **Resolve the branch question** and push
+6. [x] ~~Resolve the branch question~~ — local promoted to `main`, the
+       modernization line parked at tag `archive/modernization-phases-1-17`.
+       See `BRANCH-RECONCILIATION.md`.
+7. [x] ~~Land the `${VAR}` secrets mechanism~~ (item 4, half) — provable no-op
+       on the current deployment
+8. [x] ~~Fix the CI format job~~ — it passed green without inspecting anything
+9. [x] ~~Lift the smoke-test runbook onto `main`~~ — `docs/smoke-test/`
 
 ### Next — the gate (item 1)
 
-7. [ ] Iterate CI to green on both trees. Expect portability failures first.
-8. [ ] Add `engine/sprite`'s 11 test files to the server/tools CI job — first real
-       automated signal this project has ever had
+10. [ ] Iterate CI to green on both trees. **Not** the portability debt this
+        document used to predict — that claim was false, see the note under
+        item 1. Cause unknown until the first run.
+11. [ ] Add `engine/sprite`'s 11 test files to the CI job — first real
+        automated signal this project has ever had
 
-*Everything below this line stays blocked until step 7 is green.*
+*Everything below this line stays blocked until step 10 is green.*
 
-### Then — cheap and mechanical (items 4, 6, 11)
+### Then — cheap and mechanical (items 4, 6, 11, 20)
 
-9. [ ] Extract the 34 conf passwords to environment variables; document in the
-       server runbook
-10. [ ] Resolve the two genuine duplicate-path files; let the linker confirm the
-        other seven
-11. [ ] Archive the 10 dead server `main.cpp` entry points (Phase 7)
+12. [ ] **Finish the secrets rotation** — the mechanism landed; the plaintext
+        is still in the tracked confs and in git history. Needs a running
+        server: `.template` → `.conf` on the host, export the 16 `DKRIX_*`
+        vars, restart, confirm it connects.
+13. [ ] Resolve the two genuine duplicate-path files; let the linker confirm
+        the other seven
+14. [ ] Archive the 10 dead server `main.cpp` entry points (Phase 7)
+15. [ ] Replace the 66 dead `__LINUX__`/`__WINDOWS__` directives with the
+        `PLATFORM_*` macros `SocketAPI.h` establishes (item 20)
 
 ### Then — structural (items 7, 9, 12, 13)
 
-12. [ ] Replace `file(GLOB)` with explicit source lists, mirroring `dkrixserver/`
-13. [ ] Collapse the two SDL2 backends (ADR-0001, step 4b)
-14. [ ] Shrink `Platform.h` toward 600 lines
-15. [ ] Retire `DXLib/`'s 46-file shim
+16. [ ] Replace `file(GLOB)` with explicit source lists, mirroring
+        `dkrixserver/`. 17 exclusions currently hide real files — see 7a.
+17. [ ] Collapse the two SDL2 backends (ADR-0001, step 4b)
+18. [ ] Shrink `Platform.h` toward 600 lines
+19. [ ] Retire `DXLib/`'s 46-file shim
 
 ### Deferred — needs evidence or a rendering harness (items 15, 18, and Phase 4c)
 
-16. [ ] Re-scope the SQL work off the confirmed 26 sites, not the phantom 87
-17. [ ] Audit shipped SPK assets for real pixel encodings before touching the
-        555/565 serializers
+20. [ ] Re-scope the SQL work off the confirmed 26 sites, not the phantom 87
+21. [ ] Audit shipped SPK assets for real pixel encodings before touching the
+        555/565 serializers. If Phase 4 is revived, port `ebcfe52` from the
+        parked tag rather than re-deriving it.
 18. [ ] `CSpriteSurface.cpp` — needs a rendering test harness first; do not start
         without one
 
