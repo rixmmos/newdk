@@ -1,0 +1,131 @@
+name: Client (dkrix)
+
+# Builds the Windows client. This is the primary validation target per
+# C:\newdk\CLAUDE.md, and the one that cannot be reproduced on Linux --
+# MSVC is Windows-only, so this workflow is the only way anyone other than
+# the workstation owner can tell whether the client still compiles.
+#
+# The runner mirrors the documented local command:
+#   cmake -S dkrix -B dkrix/build -G "Visual Studio 17 2022" -A x64 \
+#         -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake
+#
+# windows-latest ships vcpkg preinstalled and exports VCPKG_INSTALLATION_ROOT,
+# so no third-party action is needed.
+
+on:
+  push:
+    branches: [main, "modernize/**"]
+    paths:
+      - "dkrix/**"
+      - ".github/workflows/client.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "dkrix/**"
+      - ".github/workflows/client.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: MSVC x64 (${{ matrix.config }})
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Debug]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache vcpkg binary packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ runner.os }}-sdl2-v1
+          restore-keys: vcpkg-${{ runner.os }}-
+
+      - name: Install SDL2 dependencies via vcpkg
+        shell: pwsh
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install `
+              sdl2 sdl2-image sdl2-ttf sdl2-mixer libjpeg-turbo `
+              --triplet x64-windows
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg install failed" }
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          cmake -S dkrix -B dkrix/build `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
+          if ($LASTEXITCODE -ne 0) { throw "configure failed" }
+
+      # Build the game client target specifically. The tree also defines
+      # viewer/validator executables; those are built separately below so a
+      # broken viewer does not mask a broken client (or vice versa).
+      - name: Build DarkEden
+        shell: pwsh
+        run: |
+          cmake --build dkrix/build --config ${{ matrix.config }} --target DarkEden -- /m /v:minimal
+          if ($LASTEXITCODE -ne 0) { throw "DarkEden build failed" }
+
+      - name: Verify executable exists
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path dkrix/build -Recurse -Filter Darkeden.exe -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+          if (-not $exe) { throw "Darkeden.exe was not produced" }
+          Write-Host "ok: $($exe.FullName)  ($([math]::Round($exe.Length/1MB,1)) MB)"
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-build-logs-${{ matrix.config }}
+          path: |
+            dkrix/build/**/*.log
+            dkrix/build/CMakeFiles/CMakeConfigureLog.yaml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  tools:
+    name: Viewers and validators
+    runs-on: windows-latest
+    timeout-minutes: 120
+    # Non-blocking for now: the viewer binaries depend on the second sprite
+    # system in tools/engine/sprite/, which Phase 4 is expected to remove or
+    # merge. Flip continue-on-error off once Phase 4 lands.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache vcpkg binary packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg_cache
+          key: vcpkg-${{ runner.os }}-sdl2-v1
+          restore-keys: vcpkg-${{ runner.os }}-
+
+      - name: Install SDL2 dependencies via vcpkg
+        shell: pwsh
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install `
+              sdl2 sdl2-image sdl2-ttf sdl2-mixer libjpeg-turbo `
+              --triplet x64-windows
+
+      - name: Configure and build all targets
+        shell: pwsh
+        run: |
+          cmake -S dkrix -B dkrix/build-tools `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
+          cmake --build dkrix/build-tools --config Debug -- /m /v:minimal

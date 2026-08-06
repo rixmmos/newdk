@@ -1,0 +1,110 @@
+name: Server (dkrixserver)
+
+# Builds the Linux server tree. This is the authoritative server
+# verification path from C:\newdk\CLAUDE.md, run on every push instead of
+# only on this workstation.
+
+on:
+  push:
+    branches: [main, "modernize/**"]
+    paths:
+      - "dkrixserver/**"
+      - ".github/workflows/server.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "dkrixserver/**"
+      - ".github/workflows/server.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: dkrixserver
+
+jobs:
+  build:
+    name: make debug (ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libmysqlclient-dev \
+            liblua5.1-0-dev \
+            libxerces-c-dev
+
+      - name: Show toolchain
+        run: |
+          cmake --version
+          g++ --version
+          pkg-config --modversion xerces-c || true
+
+      - name: Cache build tree
+        uses: actions/cache@v4
+        with:
+          path: dkrixserver/build
+          key: server-build-${{ runner.os }}-${{ hashFiles('dkrixserver/**/CMakeLists.txt') }}
+          restore-keys: server-build-${{ runner.os }}-
+
+      # The Makefile wraps CMake: `make debug` == cmake -B build
+      # -DCMAKE_BUILD_TYPE=Debug && cmake --build build.
+      - name: Build (Debug)
+        run: make debug
+
+      - name: Verify binaries exist
+        run: |
+          set -e
+          for b in gameserver loginserver sharedserver; do
+            if [ ! -f "bin/$b" ]; then
+              echo "::error::Expected binary bin/$b was not produced"
+              exit 1
+            fi
+            echo "ok: bin/$b"
+          done
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      # Only checks files this change actually touched, so the existing
+      # unformatted backlog does not block every PR.
+      - name: Check changed C++ files
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"; fi
+
+          changed=$(git diff --name-only --diff-filter=ACM "$base" HEAD \
+            | grep -E '^dkrixserver/.*\.(cpp|h|hpp)$' || true)
+
+          if [ -z "$changed" ]; then
+            echo "No server C++ files changed."
+            exit 0
+          fi
+
+          failed=0
+          for f in $changed; do
+            [ -f "$f" ] || continue
+            if ! diff -q "$f" <(clang-format "$f") >/dev/null; then
+              echo "::error file=$f::Not clang-format clean. Run 'make fmt' in dkrixserver/."
+              failed=1
+            fi
+          done
+          exit $failed
