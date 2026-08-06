@@ -1,7 +1,7 @@
 name: Server (dkrixserver)
 
 # Builds the Linux server tree. This is the authoritative server
-# verification path from C:\newdk\CLAUDE.md, run on every push instead of
+# verification path from the workspace-root CLAUDE.md, run on every push instead of
 # only on this workstation.
 
 on:

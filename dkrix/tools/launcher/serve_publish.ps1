@@ -1,5 +1,6 @@
 param(
-    [string]$PublishDir = "C:\newdk\dkrix\publish\client",
+    # Resolve from this script's location (dkrix\tools\launcher\ -> dkrix root).
+    [string]$PublishDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\publish\client')),
     [string]$Prefix = "http://127.0.0.1:8765/"
 )
 

@@ -1,7 +1,7 @@
 name: Client (dkrix)
 
 # Builds the Windows client. This is the primary validation target per
-# C:\newdk\CLAUDE.md, and the one that cannot be reproduced on Linux --
+# the workspace-root CLAUDE.md, and the one that cannot be reproduced on Linux --
 # MSVC is Windows-only, so this workflow is the only way anyone other than
 # the workstation owner can tell whether the client still compiles.
 #

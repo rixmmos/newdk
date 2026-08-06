@@ -4,7 +4,7 @@ The Dark Eden game client: an isometric MMORPG with Slayer, Vampire, and Ouster
 player races. Legacy C++11 under active modernization.
 
 Workspace-level layout, the release pipeline, and DB rules live in
-`C:\newdk\CLAUDE.md`. Migration status is tracked in
+`../CLAUDE.md` at the workspace root. Migration status is tracked in
 `../docs/MODERNIZATION.md` — that is the single source of truth. Do not add new
 status documents here.
 
@@ -13,13 +13,13 @@ status documents here.
 Primary validation path on this workstation is a native Windows build:
 
 ```powershell
-cmake -S C:\newdk\dkrix -B C:\newdk\dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
-cmake --build C:\newdk\dkrix\build --config Debug
+cmake -S dkrix -B dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build dkrix\build --config Debug
 ```
 
-Release builds are normally produced by `C:\newdk\PUBLISH_RELEASE.cmd` rather
+Release builds are normally produced by `PUBLISH_RELEASE.cmd` rather
 than invoked by hand; it builds the `DarkEden` target in Release and stages the
-result into `C:\newdk\Darkeden`.
+result into `Darkeden`.
 
 Dependencies: CMake 3.20+, SDL2, SDL2_image, SDL2_ttf, SDL2_mixer (optional but
 recommended), Visual Studio 2022 or Build Tools 2022 with MSVC C++.
@@ -63,8 +63,9 @@ Defer to `../docs/MODERNIZATION.md` for the authoritative roadmap.
 
 ## Running the game
 
-The live install lives at `C:\newdk\Darkeden` (not inside this repo). To test a
-fresh build, run `C:\newdk\PUBLISH_RELEASE.cmd`, then launch from there:
+The live install lives at `Darkeden/` under the workspace root (not inside this
+client tree). To test a fresh build, run `PUBLISH_RELEASE.cmd` from the
+workspace root, then launch from there:
 
 - `RUN_LOCAL_CLIENT.cmd` — clears trace logs, connects to `127.0.0.1:9999`
 - `RUN_TEST_CLIENT.cmd` — clears trace logs, uses the configured server
@@ -88,9 +89,11 @@ be removed from the source once the bug they were added for is confirmed fixed.
 `tools/launcher/package_client.ps1` builds a static update package under
 `publish/client/`. For quick LAN testing directly from this repo:
 
+The scripts resolve their own paths, so the defaults are correct from anywhere:
+
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\newdk\dkrix\tools\launcher\package_client.ps1 -BuildBin C:\newdk\dkrix\build\bin\Debug -PublishDir C:\newdk\dkrix\publish\client -Version dev-001
-powershell -ExecutionPolicy Bypass -File C:\newdk\dkrix\tools\launcher\serve_publish.ps1 -PublishDir C:\newdk\dkrix\publish\client -Prefix http://127.0.0.1:8765/
+powershell -ExecutionPolicy Bypass -File dkrix\tools\launcher\package_client.ps1 -Version dev-001
+powershell -ExecutionPolicy Bypass -File dkrix\tools\launcher\serve_publish.ps1 -Prefix http://127.0.0.1:8765/
 ```
 
 Use `-Prefix http://+:8765/` from an Administrator PowerShell to expose it on
@@ -111,10 +114,10 @@ For real tester releases use the root pipeline instead
   fix the abstraction rather than adding more conditional hacks.
 - Packet definitions are shared with the server; wire-format changes must land
   in `dkrixserver` at the same time.
-- `C:\newdk\Darkeden__quarantine\` holds the original pre-modernization
+- `Darkeden__quarantine/` holds the original pre-modernization
   binaries. Reference only — never build from or ship out of it.
 
 ## Related
 
-- Server tree: `C:\newdk\dkrixserver` (upstream: https://github.com/opendarkeden/server)
+- Server tree: `dkrixserver` (upstream: https://github.com/opendarkeden/server)
 - Upstream client: https://github.com/opendarkeden/client

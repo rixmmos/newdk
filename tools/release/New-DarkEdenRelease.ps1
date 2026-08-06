@@ -1,10 +1,12 @@
+# Paths resolve from this script's location (tools\release\ -> repo root),
+# so the tree works at any path. Override any of them explicitly if needed.
 param(
-    [string]$SourceDir = "C:\newdk\Darkeden",
-    [string]$OutputDir = "C:\newdk\release_site\darkeden",
+    [string]$SourceDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\Darkeden')),
+    [string]$OutputDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\release_site\darkeden')),
     [string]$Version = (Get-Date -Format "yyyy.MM.dd.HHmm"),
     [string]$FilesBaseUrl = "files/",
     [string]$Entrypoint = "Darkeden.exe",
-    [string]$ChangelogPath = "C:\newdk\CHANGELOG.md",
+    [string]$ChangelogPath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\CHANGELOG.md')),
     [string]$ReleaseNotes = ""
 )
 

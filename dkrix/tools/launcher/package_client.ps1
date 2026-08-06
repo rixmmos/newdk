@@ -1,6 +1,7 @@
 param(
-    [string]$BuildBin = "C:\newdk\dkrix\build\bin\Debug",
-    [string]$PublishDir = "C:\newdk\dkrix\publish\client",
+    # Resolve from this script's location (dkrix\tools\launcher\ -> dkrix root).
+    [string]$BuildBin = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\build\bin\Debug')),
+    [string]$PublishDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\publish\client')),
     [string]$Version = "",
     [string[]]$IncludePaths = @(),
     [string[]]$ExtraExecutables = @(),

@@ -1,5 +1,6 @@
+# RootDir resolves from this script's location (tools\release\ -> repo root).
 param(
-    [string]$RootDir = "C:\newdk\release_site",
+    [string]$RootDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\release_site')),
     [int]$Port = 8080,
     [string[]]$AllowedIP = @("127.0.0.1", "::1")
 )

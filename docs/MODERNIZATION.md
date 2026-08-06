@@ -10,7 +10,7 @@ change that made it stale — not after the fact.
 
 > **Path note (2026-08):** earlier revisions of this file referred to
 > `client/` and `server/`. The real directories are `dkrix/` (client) and
-> `dkrixserver/` (server). See `C:\newdk\CLAUDE.md` for the full layout.
+> `dkrixserver/` (server). See `../CLAUDE.md` for the full layout.
 
 ## Verification status — read this first
 
@@ -146,7 +146,7 @@ per-area status doc, this file wins.
   describes "three sibling working trees, each a separate repository,
   checked out side by side." That is wrong: `dkrix/` and `dkrixserver/` are
   folders inside the single `newdk` repo. Fix in the next docs pass.
-- **[measured] The workspace-level spec now lives at `C:\newdk\CLAUDE.md`**,
+- **[measured] The workspace-level spec now lives at `../CLAUDE.md`**,
   not here. `docs/CLAUDE.md` is the engineering-principles document.
 - **[measured] The ten superseded client status docs are archived** at
   `dkrix/docs/archive/2026-migration-notes/`. Phase 0 is genuinely complete.
@@ -174,7 +174,7 @@ routine phase work be delegated rather than hand-held.
       on top of it.
 - [ ] Reconcile `modernize/phase-4-sprite` with
       `origin/modernize/phase4-sprite`.
-- [ ] Add a root `.gitignore` (see `C:\newdk\CLAUDE.md` → Repo hygiene).
+- [x] Add a root `.gitignore` (see `../CLAUDE.md` → Repo hygiene). **Done.**
 - [ ] Stand up GitHub Actions on `rixmmos/newdk`:
       - server: `make debug` on Ubuntu with libmysqlclient / lua5.1 /
         xerces-c;
@@ -411,7 +411,7 @@ and cannot compile any of them.
   in this area were resolution-dependent and invisible to a compiler.
 - Phase 8's secret migration and Phase 9's Lua sandboxing — both change
   runtime behavior of a live server.
-- Any release: `PUBLISH_RELEASE.cmd` writes into `C:\newdk\Darkeden` and
+- Any release: `PUBLISH_RELEASE.cmd` writes into `Darkeden` and
   ships to real testers.
 
 **The honest summary:** the ceiling on unsupervised work is set by Phase -1.
@@ -447,8 +447,8 @@ For current client work on this workstation, the primary smoke test is a native
 Windows build:
 
 ```powershell
-cmake -S C:\newdk\dkrix -B C:\newdk\dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
-cmake --build C:\newdk\dkrix\build --config Debug
+cmake -S dkrix -B dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build dkrix\build --config Debug
 ```
 
 Treat older macOS `make debug-asan` references as historical migration notes
@@ -460,7 +460,7 @@ unless the branch explicitly says otherwise.
 > at the workspace root — `PUBLISH_RELEASE.cmd` → `MAKE_DARKEDEN_RELEASE.cmd`
 > → `START_DARKEDEN_UPDATE_SERVER.cmd`, backed by `tools/release/*.ps1`,
 > publishing to `release_site/darkeden/` and served on port 8080. Testers run
-> `Darkeden/DarkEdenLauncher.cmd`. See `C:\newdk\CLAUDE.md`. The
+> `Darkeden/DarkEdenLauncher.cmd`. See `../CLAUDE.md`. The
 > `dkrix/tools/launcher/` scripts below still work and remain useful for
 > quick LAN tests from the client repo, but they are no longer the shipping
 > path.

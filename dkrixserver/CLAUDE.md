@@ -1,8 +1,8 @@
 # DarkEden Server (`dkrixserver`)
 
 Guidance for working in the server tree. Workspace-level layout, the client
-release pipeline, and DB backup rules live in `C:\newdk\CLAUDE.md`; engineering
-principles live in `C:\newdk\docs\CLAUDE.md`.
+release pipeline, and DB backup rules live in `../CLAUDE.md` at the workspace
+root; engineering principles live in `../docs/CLAUDE.md`.
 
 ## Build Commands
 
@@ -128,7 +128,7 @@ Each packet type typically has two files:
 - `PacketName.cpp` - Packet class definition
 - `PacketNameHandler.cpp` - Handler that processes the packet
 
-Packet definitions are mirrored in the client tree (`C:\newdk\dkrix`). Any
+Packet definitions are mirrored in the client tree (`dkrix`). Any
 wire-format change must land on both sides in the same change, or every
 existing client build breaks.
 
@@ -248,6 +248,6 @@ Start servers in this order:
 - Lua scripting is integrated for quest systems (see `quest/luaScript/`)
 - Exchange system in `gameserver/exchange/` handles player trading
 - Run `make fmt` before committing; format is enforced in CI
-- Server stdout captured during debugging lands in `C:\newdk\_server_logs_tmp\`
+- Server stdout captured during debugging lands in `_server_logs_tmp/`
   — that folder is scratch and safe to clear
 - Do not commit `build*/`, `bin/`, `lib/`, or generated CMake files

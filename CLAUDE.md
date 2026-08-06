@@ -1,9 +1,14 @@
 # CLAUDE.md — Workspace Root
 
-Top-level guidance for the whole `C:\newdk` workspace. It applies across every
-subtree and takes precedence over `dkrix/CLAUDE.md` and `dkrixserver/CLAUDE.md`
-when there is a conflict. Engineering principles live in `docs/CLAUDE.md`; the
-running modernization plan lives in `docs/MODERNIZATION.md`.
+Top-level guidance for this workspace. It applies across every subtree and takes
+precedence over `dkrix/CLAUDE.md` and `dkrixserver/CLAUDE.md` when there is a
+conflict. Engineering principles live in `docs/CLAUDE.md`; the running
+modernization plan lives in `docs/MODERNIZATION.md`.
+
+**Paths in this file are relative to the workspace root** — the folder holding
+this `CLAUDE.md`. Commands are written to be run from there. Nothing in the tree
+hardcodes an absolute path any more, so the workspace can live anywhere;
+`C:\dev\newdk` is the intended home.
 
 This is a private DarkEden-like MMORPG project: a C++11 server, a C++11
 isometric client mid-migration from Win32/DirectX to SDL2, plus the release,
@@ -39,13 +44,14 @@ The authoritative verification paths on this workstation:
 
 ```powershell
 # Client — native Windows, Visual Studio 2022 + CMake + vcpkg
-cmake -S C:\newdk\dkrix -B C:\newdk\dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
-cmake --build C:\newdk\dkrix\build --config Debug
+cmake -S dkrix -B dkrix\build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build dkrix\build --config Debug
 ```
 
 ```bash
 # Server — CMake via the Makefile wrapper (WSL or Docker)
-cd /mnt/c/newdk/dkrixserver && make debug
+# From the workspace root, in WSL (e.g. /mnt/c/dev/newdk):
+cd dkrixserver && make debug
 ```
 
 Older `make debug-asan` / macOS notes are historical. They are useful as
@@ -57,11 +63,11 @@ Windows client build or a broken Linux server build as a real blocker.
 The normal end-to-end flow for shipping a client build to testers:
 
 1. `PUBLISH_RELEASE.cmd` — builds `dkrix` in **Release**, copies `Darkeden.exe`,
-   required DLLs, and the MSVC CRT into `C:\newdk\Darkeden`, strips debug and
+   required DLLs, and the MSVC CRT into `Darkeden`, strips debug and
    runtime-log leftovers, then invokes the manifest step. Pass `-SkipBuild` to
    package an already-built tree. Build log lands in `publish_release.log`.
-2. `MAKE_DARKEDEN_RELEASE.cmd` — hashes `C:\newdk\Darkeden` into
-   `C:\newdk\release_site\darkeden` (`manifest.json` + `files/`), stamps a
+2. `MAKE_DARKEDEN_RELEASE.cmd` — hashes `Darkeden` into
+   `release_site/darkeden` (`manifest.json` + `files/`), stamps a
    `yyyy.MM.dd.HHmm` version, and prepends an entry to `CHANGELOG.md`.
    Always pass meaningful `-ReleaseNotes`; the changelog is what testers read.
 3. `START_DARKEDEN_UPDATE_SERVER.cmd` — serves `release_site/` over HTTP on
@@ -84,7 +90,7 @@ every tester's launcher.
 
 ## Running the client locally
 
-From `C:\newdk\Darkeden`:
+From `Darkeden`:
 
 - `RUN_LOCAL_CLIENT.cmd` — clears trace logs, connects to `127.0.0.1:9999`.
 - `RUN_TEST_CLIENT.cmd` — clears trace logs, uses the configured server.

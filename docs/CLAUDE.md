@@ -1,9 +1,8 @@
 # CLAUDE.md — Engineering Principles
 
-Layout, build commands, release pipeline, and operational workflow live in the
-workspace root file: `C:\newdk\CLAUDE.md`. That file wins on any factual
-conflict. This one covers *how to make changes* — the judgment calls, not the
-paths.
+Layout, build commands, release pipeline, and operational workflow live in
+`../CLAUDE.md` at the workspace root. That file wins on any factual conflict.
+This one covers *how to make changes* — the judgment calls, not the paths.
 
 The running plan lives in `docs/MODERNIZATION.md` and is the single source of
 truth for migration status.

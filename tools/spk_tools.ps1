@@ -154,11 +154,16 @@ function Write-Spk($Path, [System.Collections.Generic.List[System.Drawing.Bitmap
     Move-Item -LiteralPath $tmpIndex -Destination ($Path + "i") -Force
 }
 
-function Export-SpkSprites($Path, [int[]]$Ids, $Prefix) {
+function Export-SpkSprites($Path, [int[]]$Ids, $Prefix, $OutDir) {
+    # Defaults to the repo root (tools\ -> repo root). Pass -OutDir to redirect;
+    # note the repo root .gitignore excludes *.png, so dumps stay untracked.
+    if (-not $OutDir) {
+        $OutDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+    }
     $sprites = Read-Spk $Path
     try {
         foreach ($id in $Ids) {
-            $out = "C:\newdk\${Prefix}_${id}.png"
+            $out = Join-Path $OutDir "${Prefix}_${id}.png"
             $sprites[$id].Save($out, [System.Drawing.Imaging.ImageFormat]::Png)
             Write-Output "$out $($sprites[$id].Width)x$($sprites[$id].Height)"
         }

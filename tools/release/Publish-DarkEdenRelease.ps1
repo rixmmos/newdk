@@ -1,12 +1,17 @@
+# Paths resolve from this script's location (tools\release\ -> repo root),
+# so the tree works at any path. Override any of them explicitly if needed.
 param(
-    [string]$RepoDir = "C:\newdk\dkrix",
-    [string]$InstallDir = "C:\newdk\Darkeden",
+    [string]$RepoDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\dkrix')),
+    [string]$InstallDir = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\Darkeden')),
     [string]$Version = (Get-Date -Format "yyyy.MM.dd.HHmm"),
     [string]$ReleaseNotes = "",
     [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
+
+# Repo root, derived once and reused below.
+$RepoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 
 function Resolve-RequiredPath {
     param([string]$Path)
@@ -45,7 +50,7 @@ $repoPath = Resolve-RequiredPath $RepoDir
 $installPath = Resolve-RequiredPath $InstallDir
 $buildDir = Resolve-RequiredPath (Join-Path $repoPath "build")
 $releaseBin = Join-Path $buildDir "bin\Release"
-$publishLog = "C:\newdk\publish_release.log"
+$publishLog = Join-Path $RepoRoot "publish_release.log"
 
 if (-not $SkipBuild) {
     Write-Host "Building Release..."
@@ -132,7 +137,7 @@ foreach ($debugNeedle in @('ucrtbased', 'VCRUNTIME140D', 'MSVCP140D', 'SDL2d.dll
 }
 
 Write-Host "Generating launcher release manifest..."
-$newRelease = Join-Path "C:\newdk\tools\release" "New-DarkEdenRelease.ps1"
+$newRelease = Join-Path $PSScriptRoot "New-DarkEdenRelease.ps1"
 & powershell -NoProfile -ExecutionPolicy Bypass -File $newRelease -SourceDir $installPath -Version $Version -ReleaseNotes $ReleaseNotes
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
@@ -141,4 +146,4 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Publish complete."
 Write-Host "  Version: $Version"
 Write-Host "  Install: $installPath"
-Write-Host "  Release site: C:\newdk\release_site\darkeden"
+Write-Host "  Release site: $(Join-Path $RepoRoot 'release_site\darkeden')"
