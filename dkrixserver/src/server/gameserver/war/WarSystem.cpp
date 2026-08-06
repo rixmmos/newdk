@@ -210,11 +210,7 @@ bool WarSystem::addWar(War* pWar)
     
     
     if (pWar->getWarType() == WAR_GUILD) {
-#ifndef __OLD_GUILD_WAR__
         SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
-#else
-        GuildWar* pSiegeWar = dynamic_cast<GuildWar*>(pWar);
-#endif
         Assert(pSiegeWar != NULL);
 
         
@@ -397,11 +393,7 @@ Work* WarSystem::heartbeat()
 
         
         if (pWar->getWarType() == WAR_GUILD) {
-#ifndef __OLD_GUILD_WAR__
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
-#else
-            GuildWar* pSiegeWar = dynamic_cast<GuildWar*>(pWar);
-#endif
             Assert(pSiegeWar != NULL);
 
             
@@ -559,11 +551,7 @@ WarSchedule* WarSystem::getActiveWarSchedule_LOCKED(ZoneID_t zoneID)
         }
 
         if (pWar->getWarType() == WAR_GUILD) {
-#ifndef __OLD_GUILD_WAR__
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
-#else
-            GuildWar* pSiegeWar = dynamic_cast<GuildWar*>(pWar);
-#endif
             Assert(pSiegeWar != NULL);
 
             if (pSiegeWar->getCastleZoneID() == zoneID) {
@@ -593,11 +581,7 @@ War* WarSystem::getActiveWar(ZoneID_t zoneID) const
             continue;
 
         if (pWar->getWarType() == WAR_GUILD) {
-#ifndef __OLD_GUILD_WAR__
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
-#else
-            GuildWar* pSiegeWar = dynamic_cast<GuildWar*>(pWar);
-#endif
             Assert(pSiegeWar != NULL);
 
             if (pSiegeWar->getCastleZoneID() == zoneID) {

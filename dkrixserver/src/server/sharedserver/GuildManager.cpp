@@ -617,16 +617,11 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-#ifndef __OLD_GUILD_WAR__
         Result* pResult =
             pStmt->executeQuery("SELECT count(*) FROM WarScheduleInfo WHERE "
                                 "(AttackGuildID = %d OR AttackGuildID2 = %d OR AttackGuildID3 = %d OR AttackGuildID4 = "
                                 "%d OR AttackGuildID5 = %d) AND Status in ('WAIT', 'START')",
                                 (int)guildID, (int)guildID, (int)guildID, (int)guildID, (int)guildID);
-#else
-        Result* pResult = pStmt->executeQuery(
-            "SELECT count(*) FROM WarScheduleInfo WHERE AttackGuildID = %d AND Status<>'END'", (int)guildID);
-#endif
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
@@ -636,7 +631,6 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
             }
         }
 
-#ifndef __OLD_GUILD_WAR__
         pResult = pStmt->executeQuery(
             "SELECT count(*) FROM ReinforceRegisterInfo, WarScheduleInfo WHERE ReinforceRegisterInfo.WarID = "
             "WarScheduleInfo.WarID AND WarScheduleInfo.Status in ('WAIT', 'START') AND "
@@ -650,7 +644,6 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
                 bHasWarSchedule = true;
             }
         }
-#endif
 
         SAFE_DELETE(pStmt);
     }

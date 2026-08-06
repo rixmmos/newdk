@@ -44,13 +44,6 @@ void CGRequestGuildListHandler::execute(CGRequestGuildList* pPacket, Player* pPl
     Creature* pCreature = pGamePlayer->getCreature();
     Assert(pCreature != NULL);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("   .");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
-
     GuildType_t tmpGuildType = pPacket->getGuildType();
 
     

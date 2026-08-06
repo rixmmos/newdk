@@ -34,13 +34,6 @@ void CGModifyTaxRatioHandler::execute(CGModifyTaxRatio* pPacket, Player* pPlayer
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
     Assert(pPC != NULL);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("   .");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
-
     GuildID_t guildID = pPC->getGuildID();
 
     list<CastleInfo*> pCastleInfoList = g_pCastleInfoManager->getGuildCastleInfos(guildID);
