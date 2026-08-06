@@ -59,6 +59,9 @@ login_decoded.bmp
 *.dsp
 *.dsw
 
+# ─── Claude Code local settings ───────────────────────────────────────────────
+.claude/settings.local.json
+
 # ─── Notes ────────────────────────────────────────────────────────────────────
 # Database backup .sql files under dkrixserver/ are deliberately NOT ignored.
 # They are the record required by the DB-change discipline in CLAUDE.md.
