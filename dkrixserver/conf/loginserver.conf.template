@@ -1,0 +1,101 @@
+# TEMPLATE - generated 2026-08-06 from loginserver.conf
+#
+# Copy to loginserver.conf on the target host and export the DKRIX_* variables
+# below before starting the server. Properties::load() resolves ${VAR}
+# against the environment; an unset variable leaves the literal in place
+# and warns on stderr, so a missing export fails loudly at first DB
+# connect rather than silently using a wrong value.
+#
+# Only credentials and host/IP values are templated. Ports, paths,
+# WorldID and feature flags stay plaintext - they are not secrets.
+#
+# Variables referenced by this file:
+#   DKRIX_BILLING_SERVER_IP
+#   DKRIX_DB_HOST
+#   DKRIX_DB_PASSWORD
+#   DKRIX_DB_USER
+#   DKRIX_DIST_DB_HOST
+#   DKRIX_DIST_DB_PASSWORD
+#   DKRIX_DIST_DB_USER
+#   DKRIX_LOG_SERVER_IP
+#   DKRIX_UI_DB_HOST
+#   DKRIX_UI_DB_PASSWORD
+#   DKRIX_UI_DB_USER
+#
+
+#
+#
+# Filename    : reiot-loginserver.conf
+# Written By  : Reiot
+#
+#--------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------
+# User Section
+#--------------------------------------------------------------------------------
+
+User : excel96
+HomePath : /home/genius/project/opendarkeden/server
+LoginServerPort : 9999
+LoginServerUDPPort : 9996
+LoginServerBasePort : 9900
+LoginServerBaseUDPPort : 9800
+GameServerUDPPort : 9997
+
+#--------------------------------------------------
+# BillingSystem Server
+#--------------------------------------------------
+BillingServerIP : ${DKRIX_BILLING_SERVER_IP}
+BillingServerPort : 3001
+
+# 
+BillingGameNo : 1
+
+# 
+FreePlaySlayerSum : 30
+FreePlayVampireLevel : 30
+
+# WorldInfo, GameServerGroupInfo 
+ServerInfoReloadTime : 1
+
+#--------------------------------------------------
+# DB connection
+#--------------------------------------------------
+DB_HOST : ${DKRIX_DB_HOST}
+DB_PORT : 3306
+DB_DB : DARKEDEN
+DB_USER : ${DKRIX_DB_USER}
+DB_PASSWORD : ${DKRIX_DB_PASSWORD}
+
+UI_DB_HOST : ${DKRIX_UI_DB_HOST}
+DB_PORT : 3306
+UI_DB_DB : USERINFO
+UI_DB_USER : ${DKRIX_UI_DB_USER}
+UI_DB_PASSWORD : ${DKRIX_UI_DB_PASSWORD}
+
+DIST_DB_HOST : ${DKRIX_DIST_DB_HOST}
+DB_PORT : 3306
+DIST_DB_DB : DARKEDEN
+DIST_DB_USER : ${DKRIX_DIST_DB_USER}
+DIST_DB_PASSWORD : ${DKRIX_DIST_DB_PASSWORD}
+
+#--------------------------------------------------------------------------------
+# LogThread Section
+#--------------------------------------------------------------------------------
+
+# 
+LogServerIP : ${DKRIX_LOG_SERVER_IP}
+
+#
+LogServerPort : 5000
+
+#
+LogLevel : 2999
+
+
+LoginServerID : 0
+LoginServerBaseID : 100
+
+# 
+IsNetMarble : 0
+
