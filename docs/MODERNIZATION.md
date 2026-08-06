@@ -61,35 +61,46 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > phases this file lists as delegable-once-green — 1, 2, 3, 7, 10 — are
 > delegable for the server as of now.
 >
-> **The client is still unverified, but CI reached real client code for the
-> first time on 2026-08-06, and each run has found a genuine bug.** Run #4
-> (`21a9172`) got past *configure* and through 23m of compilation, then
-> failed at *link*: 5 unresolved externals, all `C_VS_UI_WEBBROWSER` methods
-> referenced from `VS_UI_Game.cpp`. Root cause: `dkrix/CMakeLists.txt`
-> excluded `VS_UI_WebBrowser.cpp` — the file with the real COM/ActiveX
-> implementation — specifically `if(WIN32)`, backwards from what
-> `VS_UI_WebBrowser.h` expects (real class on Windows, inline stub
-> elsewhere). Fixed by moving the exclusion to the `if(NOT WIN32)` block.
+> **[2026-08-06, later] THE CLIENT BUILD IS GREEN TOO.** CI reached real
+> client code for the first time today, and found two genuine bugs — never
+> caught before because nothing had ever compiled `dkrix/` as x64 CI:
 >
-> Run #5 (manually dispatched against that fix) got further — `.cpp` now
-> compiles — and failed in 10m at a genuine **compile** error instead:
-> `VS_UI_WebBrowser.cpp:61` passed `(LONG*)` where
-> `IWebBrowserApp::get_HWND` wants `SHANDLE_PTR*` (pointer-sized; `LONG` is
-> 4 bytes even on x64). Classic VC6/32-bit-era code, never built as x64
-> until now. Fixed: cast to `(SHANDLE_PTR*)` instead, matching the real
-> `HWND` size of `m_hWnd_Explorer`.
+> - Run #4 (`21a9172`) got past *configure* and through 23m of compilation,
+>   then failed at **link**: 5 unresolved externals, all `C_VS_UI_WEBBROWSER`
+>   methods referenced from `VS_UI_Game.cpp`. Root cause: `dkrix/CMakeLists.txt`
+>   excluded `VS_UI_WebBrowser.cpp` — the file with the real COM/ActiveX
+>   implementation — specifically `if(WIN32)`, backwards from what
+>   `VS_UI_WebBrowser.h` expects (real class on Windows, inline stub
+>   elsewhere). Fixed in `84f2e5a` by moving the exclusion to `if(NOT WIN32)`.
+> - Run #5 (manual dispatch against that fix) got further — the `.cpp` now
+>   compiled — and failed in 10m at a genuine **compile** error instead:
+>   `VS_UI_WebBrowser.cpp:61` passed `(LONG*)` where
+>   `IWebBrowserApp::get_HWND` wants `SHANDLE_PTR*` (pointer-sized; `LONG` is
+>   4 bytes even on x64). Classic VC6/32-bit-era code, never built as x64
+>   until now. Fixed in `90f6106`: cast to `(SHANDLE_PTR*)` instead, matching
+>   the real `HWND` size of `m_hWnd_Explorer`.
+> - **Run #6 (manual dispatch, `90f6106`) — Status: Success, 28m23s.** Only
+>   Node.js-runner deprecation warnings. Run #7, dispatched automatically
+>   against `84f2e5a` alone (fix #1 without fix #2), **failed** with the same
+>   `SHANDLE_PTR` compile error as run #5 — cross-confirms both fixes were
+>   independently necessary.
 >
-> **Not yet re-verified by a CI run** — this fix is unproven until run #6.
-> Treat every other client claim below as unverified, and every server claim
-> as backed by a build.
+> **What this changes.** Both toolchains are now judged by machine. A change
+> to `dkrix/` or `dkrixserver/` can be proposed by anyone and verified without
+> the workstation owner. Every phase this file lists as delegable-once-green
+> is now delegable for both trees.
+>
+> **Caveat:** GitHub's push-triggered runs lagged their push by 20+ minutes
+> both times today (runs #4 and #7) — manual `workflow_dispatch` returned
+> results in seconds. If a push-triggered run seems to be missing, that's
+> most likely why; it is not evidence the push failed to register.
 
-**No claim in this document has been confirmed by a compile.** ~~The client~~
-*(Superseded for the server — see the box above. Still true of the client.)*
-The client
-requires Windows + Visual Studio 2022 + vcpkg; the server requires Linux with
-libmysqlclient, lua5.1, and xerces-c. Neither toolchain is available to an
-agent session. Until a CI pipeline exists (Phase 10), "the tree still builds"
-is a statement only a human on this workstation can make.
+**No claim in this document has been confirmed by a compile** — except what
+run #6 (client) and the server's green run (above) actually verified: this
+one commit, on this one run, on `main`. Everything else below is still either
+`[measured]` by direct file inspection or `[unverified]`, and a green CI run
+today does not retroactively verify a change made tomorrow — re-run CI to
+trust it.
 
 ### Open blockers
 
@@ -103,8 +114,10 @@ is a statement only a human on this workstation can make.
    same branch. The local line is now `main`; the old name was retired to
    `retired/phase-4-sprite-misnomer`; the remote line is parked at tag
    `archive/modernization-phases-1-17`. See the branch decision above.
-3. **No CI, no tests, no client `.clang-format`.** There is no automated
-   signal that any change is safe.
+3. ~~**No CI, no tests, no client `.clang-format`.**~~ — **CI resolved
+   2026-08-06** for both trees (see box above). Tests and a client
+   `.clang-format` are still absent — there is still no automated signal
+   for *correctness*, only for *does it build*.
 
 ## Ground truth (re-measured 2026-08-06)
 
@@ -271,7 +284,7 @@ interleave once P0 is done.
 > 4 are untouched despite the active branch being named for Phase 4; and
 > Phase 2's target file *grew*. Treat the ordering as intent, not history.
 
-### Phase -1 — Make the work verifiable (3.5 of 4 done — server green, client outstanding)
+### Phase -1 — Make the work verifiable (done — both trees green 2026-08-06)
 
 This did not exist in earlier revisions and it should have. Nothing below
 can be trusted without it, and it is the single change that would let
@@ -289,21 +302,21 @@ routine phase work be delegated rather than hand-held.
         libmysqlclient / lua5.1 / xerces-c / **libnsl**. All three binaries
         (`gameserver`, `loginserver`, `sharedserver`) produced and verified.
         `clang-format` job green and genuinely inspecting files.
-  - [ ] **client — still red, but progressing one bug per run.** `cmake
-        --build` on `windows-latest` with vcpkg. Run #3 failed at
-        *configure* (stale generator pin, fixed in `21a9172`). Run #4 got
-        past configure and 23m of compilation, then failed at **link**:
-        `CMakeLists.txt` source-exclusion for `VS_UI_WebBrowser.cpp` was
-        inverted (`if(WIN32)` instead of `if(NOT WIN32)`), dropping the one
-        file with a real `C_VS_UI_WEBBROWSER` implementation on the one
-        platform that needs it — fixed in `84f2e5a`. Run #5 (manual
-        dispatch) got past that and into compiling the file itself, then
-        failed at **compile**: `VS_UI_WebBrowser.cpp:61` cast a `HWND*` to
-        `(LONG*)` instead of `(SHANDLE_PTR*)` for
-        `IWebBrowserApp::get_HWND` — harmless on 32-bit, wrong on x64.
-        Fixed. **Unverified until run #6.**
+  - [x] **client — GREEN 2026-08-06 (run #6, `90f6106`, 28m23s).** `cmake
+        --build` on `windows-latest` with vcpkg. Three real bugs found and
+        fixed on the way, none previously catchable because no x64 build
+        had ever run in CI: Run #3 failed at *configure* (stale generator
+        pin, fixed in `21a9172`). Run #4 failed at **link** — an inverted
+        `if(WIN32)`/`if(NOT WIN32)` source exclusion dropped
+        `VS_UI_WebBrowser.cpp`'s real implementation on Windows, fixed in
+        `84f2e5a`. Run #5 failed at **compile** — a VC6-era `(LONG*)` cast
+        where `IWebBrowserApp::get_HWND` wants pointer-sized `SHANDLE_PTR*`,
+        fixed in `90f6106`. Run #7 (auto-triggered on `84f2e5a` alone, i.e.
+        fix #1 without fix #2) failed with the same compile error as run
+        #5, cross-confirming both fixes were independently required.
 - Success: a change can be proposed, built, and judged without a human
-  manually running two toolchains. **Achieved for `dkrixserver/`.**
+  manually running two toolchains. **Achieved for both `dkrixserver/` and
+  `dkrix/`.**
 
 ### Phase 0 — Reset the narrative (done 2026-04-17)
 - [x] Create project-wide `docs/CLAUDE.md`.
