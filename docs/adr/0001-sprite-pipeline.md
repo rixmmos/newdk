@@ -5,26 +5,34 @@
 **Deciders:** Enrico (sole maintainer)
 **Supersedes:** the unwritten Phase 4 premise in `docs/MODERNIZATION.md`
 
-> ## ⚠️ This ADR may be redundant
+> ## ⚠️ There is a known-good implementation of this — use it
 >
-> Discovered after this document was written: `origin/modernize/phase4-sprite`
-> — 106 commits ahead of this branch, dated 2026-04-17 to 04-22 — **has already
-> completed Phase 4**. On that branch `Client/SpriteLib/` contains **zero**
-> 555/565 variant files (this branch has 12), `Client/DXLib/` is **empty** (this
-> branch has 46 files), `Client/Platform/` **exists with 20 files** (this branch
-> has none), and `dkrix/docs/archive/2026-engine-sprite/` records the
-> engine/sprite disposition.
+> The parked tag `archive/modernization-phases-1-17` **already completed
+> Phase 4**, and did it correctly. Commit `ebcfe52` does not merely delete the
+> 555/565 classes — the failure mode Finding 3 below warns about. It **folds
+> their `SaveToFile`/`LoadFromFile` into the base classes** (+115 lines in
+> `CAlphaSprite.cpp`, +111 in `CIndexSprite.cpp`, under the comment
+> *"folded from CAlphaSprite565 in Phase 4A"*), picks 565 as the single on-disk
+> format, and migrates callers in the same commit:
 >
-> The analysis below was derived independently against a tree that predates all
-> of that. Its *findings about this branch* stand — the serializer/renderer
-> correction in Finding 3 in particular is worth checking against whatever that
-> branch did, since deleting the 555/565 classes is exactly what it appears to
-> have done, and this ADR argues that is unsafe without asset evidence.
+> ```diff
+> -#include "CSprite565.h"
+> +#include "CSprite.h"
+> -  pSprite = new CSprite565;
+> +  pSprite = new CSprite;
+> ```
 >
-> **Before implementing anything here:** read that branch's Phase 4 work and
-> determine whether it (a) solved this correctly, (b) hit the asset-format
-> problem described in Finding 3, or (c) has never been run either. See
-> `../TECH-DEBT-AUDIT.md` for the full branch comparison.
+> An end-to-end login→gameplay smoke test passed two days later, so the approach
+> is validated by a running game — the asset evidence this ADR said was required.
+>
+> **If Phase 4 is ever done on this line, port that commit rather than
+> re-deriving it:**
+> `git show archive/modernization-phases-1-17 ebcfe52`
+>
+> The analysis below stands as the reasoning for *why* the naive deletion is
+> unsafe, which is worth keeping. Findings 1 and 2 (three sprite paths;
+> `SpriteLibBackendSDL.cpp` independent of `engine/sprite`) describe this line
+> and remain accurate.
 
 ---
 

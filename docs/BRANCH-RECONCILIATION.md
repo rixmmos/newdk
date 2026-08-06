@@ -1,6 +1,46 @@
 # Branch reconciliation — 2026-08-06
 
-## Verdict
+## DECISION (2026-08-06): the local line continues; the trunk is parked
+
+Enrico's call, made with the analysis below in hand.
+
+**The local operational tree is the line of record.** It is now `main`. It is
+newer by date — it shipped a tester release on 2026-04-30, eight days after the
+other line's last commit — and it is the tree that actually builds, runs the
+live server, and ships to testers.
+
+**The modernization work is parked, not lost.** It is preserved three ways:
+
+- tag **`archive/modernization-phases-1-17`** → `1c861f5`
+- branch `origin/modernize/phase4-sprite` on GitHub, untouched
+- this document
+
+Nothing was merged. `main` does not contain Phases 1–17.
+
+### What this costs, stated plainly
+
+The parked line holds work that `main` does not have and will need eventually:
+DXLib removal, `shared/Packets/` (which dissolves the client/server packet
+duplication), the Lua sandbox whitelist, the SQL-injection ratchet, CI build
+matrices, `.clang-format`, `PreparedStatement`, and — most valuable — a
+**repeatable end-to-end smoke-test runbook** at `docs/archive/smoke-test/` that
+got a client and server to login→gameplay.
+
+The cost of retrieving it grows as `main` drifts. If any of it is wanted later,
+take it **one phase at a time** with a build after each, not as a merge; the
+parked commits are cleanly structured for exactly that (pin plan → implement →
+close out). Do not attempt the 4,132-file merge.
+
+### Why this is a defensible call
+
+The parked line was agent-driven and its CI results were never confirmed. The
+local line has something stronger in the only sense that matters commercially:
+it is in testers' hands. Choosing the tree that ships over the tree that is
+tidier is a reasonable trade for a solo maintainer with no automated safety net.
+
+---
+
+## Verdict (analysis as written before the decision)
 
 **`origin/modernize/phase4-sprite` is the real trunk of this project. The branch
 you are on is not.**
@@ -127,30 +167,40 @@ remote never received:
 
 ---
 
-## Recommended order
+## Recommended order — SUPERSEDED
 
-1. **Do not push this branch to `origin/modernize/phase4-sprite`.** A force-push
-   or a careless merge here destroys 106 commits including the only end-to-end
-   validation this project has. Back up first:
-   `git branch backup/local-checkpoint-20260806`.
-2. **Confirm the remote branch's CI actually ran.** Four workflows exist there
-   and the branch is pushed, so GitHub Actions should have results — that cannot
-   be checked from a sandbox. Open the Actions tab for `rixmmos/newdk`. If those
-   runs are green, the "no build has ever verified anything" premise that framed
-   all of today's work is simply false, and Phase -1 is already closed.
-3. **Branch from the trunk**, not from here:
-   `git checkout -b integrate/release-tooling origin/modernize/phase4-sprite`
-4. **Cherry-pick the local-only work onto it**, smallest first — the release
-   tooling and DB fix scripts are additive and should apply cleanly, since the
-   remote has no competing versions of those paths.
-5. **Re-run the smoke test** (`docs/archive/smoke-test/` has the full runbook:
-   `STEP1_MYSQL.md`, `STEP2_SERVER.md`, `STEP3_CLIENT.md`, plus
-   `start_servers.sh`, `client_smoke.sh`, `extract_rpks.sh`) before trusting
-   the merged tree.
-6. **Then reconcile the two `MODERNIZATION.md` files.** The trunk's copy is
-   authoritative and knows about Phases 11–17. This branch's copy — including
-   today's Phase 4 rewrite — is a fork of an obsolete revision.
-7. **Retire this branch** once its unique commits are transplanted.
+*The sequence that was recommended here assumed reconciliation. The decision at
+the top of this document overrides it: the local line continues and the
+modernization work is parked. It is left below for the record.*
+
+<details>
+<summary>Original recommendation (not followed)</summary>
+
+1. Do not push this branch to `origin/modernize/phase4-sprite`.
+2. Confirm the remote branch's CI actually ran.
+3. Branch from the trunk, not from here.
+4. Cherry-pick the local-only work onto it, smallest first.
+5. Re-run the smoke test before trusting the merged tree.
+6. Reconcile the two `MODERNIZATION.md` files.
+7. Retire the local branch once its unique commits are transplanted.
+
+</details>
+
+## What was actually done
+
+1. Tagged the parked line: `archive/modernization-phases-1-17` → `1c861f5`.
+2. Promoted the local line to **`main`** — a clean fast-forward, since local was
+   already a strict descendant of `origin/main`.
+3. Renamed the local branch `modernize/phase-4-sprite` →
+   `retired/phase-4-sprite-misnomer`. That name described work this line never
+   did, and its near-collision with `origin/modernize/phase4-sprite` was an
+   accident waiting to happen.
+4. Kept `backup/local-checkpoint-20260806` as a second copy of the local tip.
+
+**If any of the parked work is wanted later**, retrieve it one phase at a time
+against a build, starting from the tag. The smoke-test runbook at
+`docs/archive/smoke-test/` on that tag is the single highest-value thing there
+and is largely independent of the code changes — it could be lifted on its own.
 
 ---
 

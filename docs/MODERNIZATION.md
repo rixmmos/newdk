@@ -12,6 +12,27 @@ change that made it stale — not after the fact.
 > `client/` and `server/`. The real directories are `dkrix/` (client) and
 > `dkrixserver/` (server). See `../CLAUDE.md` for the full layout.
 
+## Branch decision — 2026-08-06
+
+This plan describes the **local operational line**, now `main`. It is the tree
+that builds, runs the live server, and ships to testers (last release
+2026-04-30).
+
+A parallel agent-driven line took this same plan through **Phases 1–17** between
+2026-04-17 and 04-22 and reached an end-to-end login→gameplay smoke test. It was
+never merged here and has been **parked**, not deleted:
+
+- tag `archive/modernization-phases-1-17` (`1c861f5`)
+- branch `origin/modernize/phase4-sprite` on GitHub
+
+**Consequence for this document:** the phase statuses below describe *this*
+line only. Where a phase is marked "not started" here, it may well be finished
+on the parked tag. Before starting any phase, check what the tag did with it —
+`git log archive/modernization-phases-1-17 --oneline --grep "Phase N"` — and
+lift the approach even if you don't lift the commits.
+
+Rationale and the full comparison: `BRANCH-RECONCILIATION.md`.
+
 ## Verification status — read this first
 
 Every "done" claim below is either **[measured]** (re-verified against the
@@ -26,14 +47,16 @@ is a statement only a human on this workstation can make.
 
 ### Open blockers
 
-1. **~6,825 files are modified and uncommitted** in the working tree
-   (2,382 of them under `dkrix/`, +661k/−675k lines). Nothing in this plan
-   can be safely reasoned about until that delta is either committed,
-   branched, or discarded. Any measurement below describes the *working
-   tree*, not any commit.
-2. **Branch name mismatch**: local `modernize/phase-4-sprite` vs remote
-   `origin/modernize/phase4-sprite` (hyphen). Confirm these are the same
-   intended branch before pushing.
+1. ~~**~6,825 files are modified and uncommitted**~~ — **resolved 2026-08-06.**
+   Committed as checkpoint `067087f`. The working tree is clean; everything
+   source-like is tracked. What remains untracked is only build output
+   (`dkrixserver/bin/`, `lib/*.a`), game data (`Darkeden/`, `release_site/`),
+   and generated manifests — all correctly excluded per `../CLAUDE.md`.
+   Measurements below now describe a commit, not a floating working tree.
+2. ~~**Branch name mismatch**~~ — **resolved 2026-08-06.** They were never the
+   same branch. The local line is now `main`; the old name was retired to
+   `retired/phase-4-sprite-misnomer`; the remote line is parked at tag
+   `archive/modernization-phases-1-17`. See the branch decision above.
 3. **No CI, no tests, no client `.clang-format`.** There is no automated
    signal that any change is safe.
 
@@ -169,17 +192,18 @@ interleave once P0 is done.
 > 4 are untouched despite the active branch being named for Phase 4; and
 > Phase 2's target file *grew*. Treat the ordering as intent, not history.
 
-### Phase -1 — Make the work verifiable (NEW, blocking, not started)
+### Phase -1 — Make the work verifiable (blocking, 2 of 4 done)
 
 This did not exist in earlier revisions and it should have. Nothing below
 can be trusted without it, and it is the single change that would let
 routine phase work be delegated rather than hand-held.
 
-- [ ] Resolve the ~6,825-file uncommitted delta: commit it to a branch,
-      stash it, or discard it. Decide deliberately — do not keep working
-      on top of it.
-- [ ] Reconcile `modernize/phase-4-sprite` with
-      `origin/modernize/phase4-sprite`.
+- [x] ~~Resolve the ~6,825-file uncommitted delta.~~ **Done 2026-08-06** —
+      committed as checkpoint `067087f`; tree is clean.
+- [x] ~~Reconcile `modernize/phase-4-sprite` with
+      `origin/modernize/phase4-sprite`.~~ **Done 2026-08-06** — they were
+      never the same branch. Local promoted to `main`, remote parked at
+      tag `archive/modernization-phases-1-17`. See `BRANCH-RECONCILIATION.md`.
 - [x] Add a root `.gitignore` (see `../CLAUDE.md` → Repo hygiene). **Done.**
 - [ ] Stand up GitHub Actions on `rixmmos/newdk`:
       - server: `make debug` on Ubuntu with libmysqlclient / lua5.1 /

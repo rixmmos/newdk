@@ -2,7 +2,20 @@
 
 > ## ⚠️ Read this before acting on anything below
 >
-> This audit measures the **local** branch `modernize/phase-4-sprite`, which is
+> **Decision 2026-08-06:** the local line continues as `main`; the modernization
+> line is parked at tag `archive/modernization-phases-1-17`. That makes this
+> audit **valid again** — it measures the tree that is now the line of record.
+>
+> The caveat that remains: for most items below, the parked tag already contains
+> a finished implementation. Before starting any of them, look at how it was done
+> there and lift the approach. `git show archive/modernization-phases-1-17:docs/MODERNIZATION.md`
+> has the phase-by-phase record. The comparison table below is retained for that
+> purpose.
+>
+> ---
+>
+> This audit measures the **local** branch (then named `modernize/phase-4-sprite`,
+> now `main`), which is
 > `origin/main` + a checkpoint. `origin/main` has only **4 commits** and ends
 > 2026-04-17 — it is the initial import, not a trunk.
 >
@@ -29,16 +42,8 @@
 > branch; 622 exist only here, and most of those are files the remote branch
 > **deleted as dead code**.
 >
-> **Consequence:** items 7, 9, 12, 13, 16, 19 below, and most of ADR-0001, are
-> measurements of a tree that is ~106 commits behind the real work. They are
-> accurate *about this branch* and largely moot if the remote branch is adopted.
-> Resolve the branch question (item 3) **before** spending effort on anything
-> else here.
->
-> Not everything is behind: this branch has unique work from 2026-04-23 to 04-30
-> that the remote branch never received — the NPC/zone/pet DB fixes and their
-> backups, `tools/release/`, and `tools/spk_tools.ps1`. Neither line is a
-> superset. This is a merge, not a choice.
+> **Item 3 (the branch question) is now closed** — resolved in favour of this
+> line. Every other item stands as written and is real work still to do here.
 
 Measured against the working tree at `f19c4d3`, branch `modernize/phase-4-sprite`.
 Every figure below was re-derived by direct inspection; commands are in the appendix.
