@@ -111,7 +111,22 @@ Server IP for the client lives in `Darkeden/Data/Info/GameClient.inf`.
   the DB `WorldDBInfo` / `GameServerInfo` tables must agree with them.
 - Docker: `dkrixserver/docker/docker-compose.yml` brings up MySQL 5.7 plus the
   server image; `start-servers.sh` launches login → shared → game in order and
-  exits if any one dies. Ports 9999/9998/9997 (TCP) and 9997/UDP.
+  exits if any one dies.
+
+Ports, **[measured 2026-08-06] against `conf/*.conf`** — an earlier revision of
+this file said "9999/9998/9997 (TCP) and 9997/UDP", which conflated the
+gameserver's UDP port with the sharedserver's TCP port and got the latter wrong:
+
+| Server | TCP | UDP |
+| --- | --- | --- |
+| loginserver | 9999 (`LoginServerPort`), base 9900 | 9996, base 9800 |
+| gameserver | 9998 (`TCPPort`) | 9997 (`GameServerUDPPort`) |
+| sharedserver | **9977** (`TCPPort`) | — |
+
+Every `SharedServerPort` entry in `conf/` — `gameserver.conf`,
+`excel96-gameserver{,2}.conf`, `.new`, and the `backup/` copy — agrees on 9977.
+The smoke-test runbook (`docs/smoke-test/`) also uses 9977; it was right and
+this file was wrong.
 - Build trees are separated per environment: `build/`, `build-wsl/`,
   `build-docker/`, `build-docker20/`. Don't cross-contaminate them.
 

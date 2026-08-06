@@ -41,10 +41,12 @@ because that is exactly where the two lines differ.
   *"Branch to test: `modernize/phase4-sprite` at tip `7ee8618`"* and assumes the
   repo sits at `~/work/dkrix-upstream/`. Read those as historical. You are
   testing `main` at whatever it is now.
-- **Port numbers are inconsistent with `../../CLAUDE.md`.** The scripts use
-  sharedserver **9977**; the workspace doc says **9997**. Both appear in the
-  archived material (9977 ×17, 9997 ×1). Resolve against
-  `dkrixserver/conf/*.conf` before trusting either.
+- ~~Port numbers are inconsistent with `../../CLAUDE.md`.~~ **Resolved
+  2026-08-06 — the scripts were right.** `conf/sharedserver.conf:18` sets
+  `TCPPort : 9977`, and every `SharedServerPort` entry in `conf/` agrees.
+  `../../CLAUDE.md` had conflated the gameserver's UDP 9997 with the
+  sharedserver's TCP port; it has been corrected with the full port table.
+  Nothing to change in these scripts.
 - **The build steps assume Ubuntu 22.04** and the parked line's CMake layout.
   `main`'s client build is the Windows/VS2022/vcpkg path per `../../CLAUDE.md`;
   the Linux client build here was a smoke-test convenience, not the shipping
