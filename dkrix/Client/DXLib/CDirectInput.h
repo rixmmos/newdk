@@ -105,7 +105,7 @@ public:
 
 	void		Clear();
 	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
-	HRESULT		SetAcquire(bool active_app);
+	void		SetAcquire(bool active_app);
 	void		SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int));
 	void		SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD));
 	void		SetMouseMoveLimit(int x, int y);

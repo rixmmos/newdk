@@ -207,12 +207,13 @@ void CSDLInput::UpdateInput()
 	}
 }
 
-/* Set acquire (SDL backend - no-op) */
-HRESULT CSDLInput::SetAcquire(bool active_app)
+/* Set acquire (SDL backend - no-op). Previously returned HRESULT
+   (S_OK / S_FALSE); every call site (WinMain.cpp, hangul/Ci.cpp,
+   GameInit.cpp, GameMain.cpp) discards the return value, so it carried
+   no observable behavior - changed to void. */
+void CSDLInput::SetAcquire(bool active_app)
 {
-	if (!m_pMouse || !m_pKeyboard)
-		return S_FALSE;
-	return S_OK;
+	(void)active_app;
 }
 
 /* Set mouse position (SDL backend) */
