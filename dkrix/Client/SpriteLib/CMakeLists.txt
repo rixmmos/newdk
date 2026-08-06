@@ -100,8 +100,6 @@ set(SPRITELIB_HEADERS
 	CSpriteSurface.h
 	CSpritePack.h
 	CSpritePackList.h
-	CSpritePackList555.h
-	CSpritePackList565.h
 	CSpriteDef.h
 	CSpritePal.h
 	CSpritePalBase.h
@@ -115,8 +113,6 @@ set(SPRITELIB_HEADERS
 	CAlphaSprite565.h
 	CAlphaSpritePack.h
 	CAlphaSpritePackList.h
-	CAlphaSpritePackList555.h
-	CAlphaSpritePackList565.h
 	CAlphaSpritePal.h
 
 	# Index sprites
