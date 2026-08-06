@@ -82,6 +82,7 @@ maintainer.
 | 15 | 26 `sprintf(query, …)` SQL construction sites | Security | 2 | 4 | 4 | **12** |
 | 16 | ~~`WinLib/` — 3 files, zero callers~~ **retracted, see below** | Code | — | — | — | **—** |
 | 19 | 8 dead `*PackList555/565` files, not in the build | Code | 1 | 1 | 1 | **10** |
+| 20 | 66 dead `__LINUX__`/`__WINDOWS__` directives in 16 files | Code | 2 | 3 | 2 | **20** |
 | 17 | `docs/README.md` describes a three-repo layout that doesn't exist | Documentation | 1 | 1 | 1 | **10** |
 | 18 | `CSpriteSurface.cpp` at 13,644 lines | Code | 4 | 3 | 5 | **7** |
 
@@ -159,6 +160,30 @@ Windows builds, some helpers include `sys/time.h`.
 > Worth generalising: **a CI job that cannot fail is worse than no CI job**,
 > because it reads as evidence. Anything added here should be tested against a
 > case it is supposed to reject before it is trusted.
+
+### 20. Dead `__LINUX__` / `__WINDOWS__` conditionals — Priority 16
+
+**[measured 2026-08-06]** 66 `#if __LINUX__` / `#elif __WINDOWS__` directives
+across 16 files, mostly under `Client/Packet/`. **Neither macro is defined
+anywhere** — not by CMake, not by any header, not by any compiler. Both arms
+evaluate false on every platform, so every one of those blocks is inert.
+
+The tree builds regardless because `Client/Packet/SocketAPI.h:12-21` performs
+real platform detection from `_WIN32` / `__APPLE__` / `__linux__`, defines
+`PLATFORM_WINDOWS` / `PLATFORM_LINUX` / `PLATFORM_MACOS`, and includes the right
+socket headers. Everything else picks them up transitively.
+
+Impact is low today (I=2) but the trap is sharp (R=3): an include or declaration
+added to an `#elif __WINDOWS__` arm is silently dropped, and the failure looks
+like a missing symbol far from the cause. Effort is low (E=2) — the fix is to
+replace them with the `PLATFORM_*` macros `SocketAPI.h` already establishes.
+
+**Do not do it before CI is green.** Activating 66 never-compiled branches
+without a build is how a working tree stops working.
+
+Files: `Client/Packet/{Assert.h, Assert1.h, Datagram.h, Exception.h, FileAPI.cpp,
+SocketAPI.cpp, SocketImpl.cpp, SocketInputStream.cpp}` plus eight
+`Gpackets/`/`Lpackets/` handlers.
 
 ### 3. Branch has no upstream — Priority 32
 

@@ -129,10 +129,41 @@ per-area status doc, this file wins.
   targets are stubbed `TODO`s. Format is not enforced.
 - Sanitizer builds (`make debug-asan`, `make debug-tsan`) are real and
   wired up correctly.
-- Current Windows failures are portability debt in the code, not missing
-  tooling: `basic/Platform.h` still drags `pthread.h` into Windows
-  builds, and some helper files still include POSIX-only headers such as
-  `sys/time.h`.
+- **[measured 2026-08-06] The "Windows portability debt" claim is false.** This
+  file previously asserted that `basic/Platform.h` "still drags `pthread.h` into
+  Windows builds" and that helpers "still include POSIX-only headers such as
+  `sys/time.h`". Neither survives inspection. Every POSIX include in `dkrix/` is
+  inside a platform guard:
+  - `basic/Platform.h:221` — `pthread.h` is inside
+    `#if !defined(_WIN32) && !defined(_WIN64)`.
+  - `Client/DebugLog.cpp:17`, `Client/GlobalVariables.cpp:45` — `sys/time.h` is
+    in the `#else` arm of a `_WIN32 || _WIN64` test.
+  - All remaining hits (`unistd.h`, `sys/socket.h`, `netinet/in.h`,
+    `arpa/inet.h`, `netdb.h`, `sys/ioctl.h`) sit under `PLATFORM_WINDOWS`,
+    `_WIN32`, or `__LINUX__` guards.
+
+  Method: every `#include` of a POSIX-only header was located, then its
+  enclosing preprocessor stack was resolved by scanning backwards for the
+  nearest unmatched `#if`. Zero unconditional POSIX includes remain. The first
+  Windows CI failure, when it comes, will be something else — do not go looking
+  here first.
+
+- **[measured 2026-08-06] `__LINUX__` and `__WINDOWS__` are never defined —
+  66 preprocessor directives across 16 files are dead.** `#if __LINUX__` and
+  `#elif __WINDOWS__` appear throughout `Client/Packet/`, but neither macro is
+  defined by CMake, by any header in the tree, or by any compiler. Both arms
+  evaluate false, so those blocks contribute nothing on any platform.
+
+  It builds anyway because `Client/Packet/SocketAPI.h:12-21` does the real
+  platform detection from compiler-provided macros (`_WIN32`, `__APPLE__`,
+  `__linux__`) and defines `PLATFORM_WINDOWS` / `PLATFORM_LINUX` /
+  `PLATFORM_MACOS` itself, then includes the correct socket headers. Everything
+  else gets them transitively.
+
+  This is a trap rather than a live bug: a Windows-only include added to an
+  `#elif __WINDOWS__` arm would be silently ignored. **Do not "fix" it before CI
+  is green** — replacing the dead macros with real ones activates code paths
+  that have never been compiled.
 
 ### Server (`dkrixserver/`)
 - C++11, CMake, explicit source lists (no GLOB), `.clang-format`
