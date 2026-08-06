@@ -1,9 +1,30 @@
 # ADR-0001: Sprite pipeline consolidation (Phase 4)
 
-**Status:** Proposed
+**Status:** Proposed — **but see the branch warning below before acting**
 **Date:** 2026-08-06
 **Deciders:** Enrico (sole maintainer)
 **Supersedes:** the unwritten Phase 4 premise in `docs/MODERNIZATION.md`
+
+> ## ⚠️ This ADR may be redundant
+>
+> Discovered after this document was written: `origin/modernize/phase4-sprite`
+> — 106 commits ahead of this branch, dated 2026-04-17 to 04-22 — **has already
+> completed Phase 4**. On that branch `Client/SpriteLib/` contains **zero**
+> 555/565 variant files (this branch has 12), `Client/DXLib/` is **empty** (this
+> branch has 46 files), `Client/Platform/` **exists with 20 files** (this branch
+> has none), and `dkrix/docs/archive/2026-engine-sprite/` records the
+> engine/sprite disposition.
+>
+> The analysis below was derived independently against a tree that predates all
+> of that. Its *findings about this branch* stand — the serializer/renderer
+> correction in Finding 3 in particular is worth checking against whatever that
+> branch did, since deleting the 555/565 classes is exactly what it appears to
+> have done, and this ADR argues that is unsafe without asset evidence.
+>
+> **Before implementing anything here:** read that branch's Phase 4 work and
+> determine whether it (a) solved this correctly, (b) hit the asset-format
+> problem described in Finding 3, or (c) has never been run either. See
+> `../TECH-DEBT-AUDIT.md` for the full branch comparison.
 
 ---
 

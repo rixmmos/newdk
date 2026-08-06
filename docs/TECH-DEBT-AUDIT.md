@@ -1,5 +1,45 @@
 # Tech Debt Audit — 2026-08-06
 
+> ## ⚠️ Read this before acting on anything below
+>
+> This audit measures the **local** branch `modernize/phase-4-sprite`, which is
+> `origin/main` + a checkpoint. `origin/main` has only **4 commits** and ends
+> 2026-04-17 — it is the initial import, not a trunk.
+>
+> `origin/modernize/phase4-sprite` (no hyphen) has **110 commits** and contains
+> 106 commits of modernization work from 2026-04-17 to 04-22 that this branch
+> does not have. It is **far ahead** on exactly the items ranked below:
+>
+> | | this branch | `origin/modernize/phase4-sprite` |
+> |---|---|---|
+> | `Client/DXLib/` files | 46 | **0** — Phase 3 done |
+> | `Client/Platform/` files | 0 | **20** — the replacement exists |
+> | SpriteLib 555/565 variants | 12 | **0** — Phase 4 done |
+> | `basic/Platform.h` lines | 1,996 | 1,951 |
+> | `dkrix/.clang-format` | absent | **present** |
+> | `conf/*.conf.template` | absent | **present** |
+> | SQL-injection / packet / socket ratchet scripts | absent | **present, with baselines** |
+> | CI workflow files | 2, written today | **4**, incl. `ratchets.yml` |
+>
+> That branch also carries `docs/archive/2026-engine-sprite/`, meaning the
+> Phase 4 sprite decision was already made and acted on there — before
+> `ADR-0001` in this tree re-derived it from scratch.
+>
+> 4,132 files differ between the two branches. 99 files exist only on the remote
+> branch; 622 exist only here, and most of those are files the remote branch
+> **deleted as dead code**.
+>
+> **Consequence:** items 7, 9, 12, 13, 16, 19 below, and most of ADR-0001, are
+> measurements of a tree that is ~106 commits behind the real work. They are
+> accurate *about this branch* and largely moot if the remote branch is adopted.
+> Resolve the branch question (item 3) **before** spending effort on anything
+> else here.
+>
+> Not everything is behind: this branch has unique work from 2026-04-23 to 04-30
+> that the remote branch never received — the NPC/zone/pet DB fixes and their
+> backups, `tools/release/`, and `tools/spk_tools.ps1`. Neither line is a
+> superset. This is a merge, not a choice.
+
 Measured against the working tree at `f19c4d3`, branch `modernize/phase-4-sprite`.
 Every figure below was re-derived by direct inspection; commands are in the appendix.
 **No figure has been confirmed by a compile** — no CI run exists for this repo.
