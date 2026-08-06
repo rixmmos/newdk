@@ -246,6 +246,41 @@ Every new file silently joins the build. Converting to explicit source lists —
 `dkrixserver/` already does — removes a whole class of surprise and is the structural
 fix that makes item #6 unnecessary.
 
+### 7 (detail). Which exclusions are actually load-bearing
+
+**[measured 2026-08-06]** Each `FILTER`/`REMOVE_ITEM` line was evaluated against
+the real file tree by expanding the same globs the build uses and testing every
+regex against the result.
+
+Of 25 pattern-based exclusions, **8 match nothing** — they exclude files that no
+longer exist:
+
+| Line | Pattern | Why it is dead |
+|---|---|---|
+| 576 | `.*Imm.*` | no matching client source |
+| 577 | `.*D3D.*` | `Client/D3DLib/` was deleted |
+| 578 | `.*Direct3.*` | same |
+| 580 | `.*EXECryptor.*` | gone |
+| 582 | `.*\.bak.*` | defensive; nothing matches |
+| 583 | `.*_bak-.*` | `MItemTable_bak-2007-5-7.cpp` deleted in Phase 1 |
+| 598 | `.*VolumeOut.*\.cpp` | gone |
+| 601 | `WinLib/CWinMain\.cpp` | no such file |
+
+The other 17 are live and genuinely suppress files.
+
+All 10 explicit `REMOVE_ITEM` entries (line 546) still resolve to existing
+files, so that block is entirely load-bearing.
+
+**Deliberately not "cleaned up."** Removing a filter that matches nothing is a
+no-op today, so it buys nothing, and two of the eight (`.bak`, `_bak-`) are
+defensive against files reappearing. The real fix is the one item 7 already
+names — explicit source lists, as `dkrixserver/` uses — which makes the whole
+category disappear rather than trimming it. Doing that needs a build.
+
+The value of this measurement is knowing that **17 exclusions are hiding real
+files** from a glob. That is the actual fragility: the build's contents depend
+on regexes evaluated against whatever happens to be on disk.
+
 ### 8. Test debt — Priority 18
 
 `tools/engine/sprite/tests/` holds 11 test files (3,898 lines). That is the **entire
