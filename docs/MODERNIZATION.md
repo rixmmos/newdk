@@ -52,8 +52,14 @@ per-area status doc, this file wins.
   source of truth for day-to-day client bring-up.
 - `Client/D3DLib/` has been removed. The references to it in the client's
   `CLAUDE.md` are stale.
-- `Client/WinLib/` still exists but is effectively dead: `CWinUpdate` has
-  no subclasses and no live callers.
+- **[measured 2026-08-06] `Client/WinLib/` is NOT dead — this file's earlier
+  claim that "`CWinUpdate` has no subclasses and no live callers" is false.**
+  `Client/CGameUpdate.h:13` declares `class CGameUpdate : public CWinUpdate`,
+  `Client/Client.h:34` includes `WinLib/WinLib.h`, and `Client/Client.cpp:3417`
+  holds a live `CWinUpdate*`. 14 references outside `Client/WinLib/` in total.
+  `dkrix/CMakeLists.txt:531` globs `Client/WinLib/*.cpp` into the build.
+  Do not delete it. Retiring it is a real refactor of the update path, not a
+  deletion.
 - `Client/DXLib/` still carries a double layer: `CDirect{Input,Sound,
   Music,Draw}*` plus matching `_Adapter.cpp` files that wrap the real
   `CSDL*` implementations. The shim is vestigial; callers already bypass
@@ -211,8 +217,11 @@ routine phase work be delegated rather than hand-held.
       ~1,609 lines; these are server-side handlers).
 - [ ] Remove the matching `REMOVE_ITEM` / `FILTER EXCLUDE` lines from
       `CMakeLists.txt`.
-- [ ] Delete `Client/WinLib/` (3 files, all dead). **[measured] Still
-      present.**
+- [ ] ~~Delete `Client/WinLib/` (3 files, all dead).~~ **Withdrawn
+      2026-08-06 — the "all dead" premise is false.** `CGameUpdate`
+      subclasses `CWinUpdate` and the client holds live pointers to it.
+      See the Ground-truth note above. Reclassify as a refactor of the
+      update path and re-file under Phase 3 or later.
 - [ ] Add `build/`, `compile_commands.json`, `*.dsp`, `*.dsw`,
       `*_bak-*.cpp`, `*.bak` to `.gitignore`.
 - Success: tree is ~24k lines lighter; the Windows client build is still
@@ -250,22 +259,59 @@ routine phase work be delegated rather than hand-held.
 - [ ] Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
       `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`.
 
-### Phase 4 — One sprite pipeline (client, branch open, no code changed)
+### Phase 4 — One sprite pipeline (client, re-scoped 2026-08-06)
 
-> **[measured 2026-08-06]** The active branch is
-> `modernize/phase-4-sprite`, but all 20 pixel-format variant files are
-> still in `Client/SpriteLib/` and the decision below is still unwritten.
-> The branch exists; the phase does not. Start by making the decision.
+> **Re-scoped by [ADR-0001](adr/0001-sprite-pipeline.md).** The original
+> framing of this phase was wrong on three counts. Read the ADR before
+> touching sprite code.
+>
+> 1. **There are three sprite code paths, not two.**
+>    `Client/SpriteLib/` (53,566 LOC C++), `SpriteLibBackendSDL.cpp`
+>    (1,371 LOC, a C ABI over SDL2 that the game calls directly from
+>    `Client.cpp` / `SDLMain.cpp` / `ClientFunction.cpp`), and
+>    `tools/engine/sprite/` (7,749 LOC **C**, built only under
+>    `BUILD_ENGINE`, used only by `tools/viewers/`).
+>    `SpriteLibBackendSDL.cpp` includes only `stdlib/string/stdio` — it has
+>    **zero** references to `engine/sprite`. They are two independent SDL2
+>    implementations.
+> 2. **This phase was mis-sized by ~35×.** The 20 variant files total
+>    **1,500 lines** against SpriteLib's 53,566. The real mass is
+>    `CSpriteSurface.cpp` (13,644), `CSprite.cpp` (9,593),
+>    `CIndexSprite.cpp` (7,244).
+> 3. **The variant classes are serializers, not renderers.** `CSprite565`
+>    overrides only `SaveToFile`/`LoadFromFile` — they decode SPK asset
+>    data. "SDL converts pixel formats natively" does not make them
+>    deletable; SDL converts in memory, it does not read a 5:5:5-encoded
+>    sprite off disk. Deleting them is a silent-failure change.
 
-- [ ] Decide here, in writing, whether `tools/engine/sprite/` absorbs
-      `Client/SpriteLib/` or the other way around. Update this file
-      with the decision before touching code.
-- [ ] Delete the 555/565/4444 format-variant classes in
-      `Client/SpriteLib/` (`CSprite555`, `CSprite565`,
-      `CAlphaSprite{555,565}`, `CAlphaSpritePackList{555,565}`,
-      `CIndexSprite{555,565}`, `CSpritePackList{555,565}`).
-- [ ] Delete `CAlphaSprite::Blt4444*` methods.
-- [ ] Ensure viewer binaries and the main client share one sprite lib.
+Safe now (judgeable by reading):
+
+- [ ] Correct `Client/SpriteLib/SPRITELIB_BACKEND_README.md` — its diagram
+      attributes the SDL2 backend to `engine/sprite` and it is stamped
+      "Production Ready / integration tests passing". Both false.
+- [ ] Delete 8 dead files (312 lines): `CAlphaSpritePackList{555,565}.{cpp,h}`
+      and `CSpritePackList{555,565}.{cpp,h}`. None of the four `.cpp` are in
+      `SPRITELIB_SOURCES` (so none is compiled) and every external reference
+      to `CSpritePackList555/565` is commented out. Also drop lines 103, 104,
+      118, 119 of `Client/SpriteLib/CMakeLists.txt`.
+
+Blocked on green CI (Phase -1):
+
+- [ ] **4b** — collapse the two SDL2 backends. `SpriteLibBackendSDL.cpp`
+      survives (it is what the game calls); `tools/engine/sprite/` is
+      demoted to what it already is, the viewer tools' library.
+- [ ] Wire `engine/sprite`'s 11 test files (3,898 lines) into CI — the only
+      automated tests in this repo.
+- [ ] **4c** — audit shipped SPK assets in `Darkeden/` for the pixel
+      encodings actually in use. That evidence, not the class count,
+      decides the fate of the 555/565 serializers.
+- [ ] `CAlphaSprite::Blt4444*` methods — re-check against asset evidence.
+
+Explicitly **rejected**: porting the client onto `tools/engine/sprite/`.
+It is the better-structured artifact and holds the only tests, but it has
+never rendered a frame of the game, and this would be a multi-month
+rewrite of the highest-risk subsystem with no test coverage. See ADR-0001
+Option B.
 
 ### Phase 5 — One text pipeline (client, mostly done — landed out of order)
 

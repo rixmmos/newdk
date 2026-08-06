@@ -4,42 +4,60 @@
 
 SpriteLib SDL2 Backend provides cross-platform sprite rendering for the Dark Eden game client. It replaces the Windows-specific DirectDraw implementation with SDL2, enabling the client to run on macOS, Linux, and other platforms.
 
-**Status**:  **Production Ready**
-- All phases completed (Phases 1-6)
-- Integration tests passing
-- Backend API fully functional
-- Example programs working
+**Status**: **Unverified.** Corrected 2026-08-06.
+
+> An earlier revision of this file claimed "Production Ready — All phases
+> completed (Phases 1-6), Integration tests passing." That claim was never
+> substantiated. **No CI run exists for this repository**, so nothing in this
+> document has been confirmed by a compile, and there is no integration test
+> suite for this backend. The API described below is real and is called by the
+> game; its correctness is untested.
+>
+> The architecture diagram was also wrong: it attributed the SDL2 backend to
+> `tools/engine/sprite/`. It does not. See the corrected diagram below.
+>
+> Background: [`docs/adr/0001-sprite-pipeline.md`](../../../docs/adr/0001-sprite-pipeline.md).
 
 ---
 
 ## Architecture
 
 ```
-
-           Game Code (MTopView, MCreature, etc.)      
-              Uses original CSprite* APIs             
-
-                         
-
-            SpriteLib Adapter Layer                   
-  CSpriteSurface_Adapter.cpp  (Preserves API)        
-  CSprite_SDL.cpp (Backend management)               
-
-                         
-
-         SpriteLibBackend.h (C Interface)             
-  - spritectl_create_surface()                        
-  - spritectl_create_sprite()                         
-  - spritectl_blt_sprite()                            
-
-                         
-         
-                                        
-          
-  Windows Backend               SDL2 Backend    
-  (DirectDraw)                 (engine/sprite)  
-          
+   Game Code (MTopView, MCreature, MGuildMarkManager, ...)
+   Uses original CSprite* APIs
+                    |
+                    v
+   SpriteLib Adapter Layer
+     CSpriteSurface_Adapter.cpp   (preserves the C++ API)
+     CSprite_SDL.cpp              (backend handle management)
+                    |
+                    v
+   SpriteLibBackend.h  (C interface)
+     spritectl_create_surface()
+     spritectl_create_sprite()
+     spritectl_blt_sprite()
+                    |
+                    v
+   SpriteLibBackendSDL.cpp  (1,371 LOC)
+     The one and only implementation behind this interface.
+     Self-contained: includes SpriteLibBackendSDL.h, stdlib.h,
+     string.h, stdio.h — and nothing else.
 ```
+
+**`SpriteLibBackendSDL.cpp` does not use `tools/engine/sprite/`.** It contains
+zero references to it. `engine/sprite` is a separate 7,749-line **C** library,
+compiled only under `BUILD_ENGINE`, and linked only by `tools/viewers/`
+(`item_viewer`, `map_viewer`). Two independent SDL2 implementations exist in
+this repository; only this one renders the game.
+
+The "Windows Backend (DirectDraw)" branch shown in the old diagram is also gone
+— `USE_SDL_BACKEND` is forced `ON` in `CMakeLists.txt` and
+`basic/PlatformWindows.cpp` has been deleted. SDL2 is the only backend on every
+platform.
+
+Callers of `spritectl_*` in the game: `Client/Client.cpp`,
+`Client/SDLMain.cpp`, `Client/ClientFunction.cpp`, plus handle storage in
+`CAlphaSprite` and `CIndexSprite` (`m_backend_sprite`).
 
 ---
 
@@ -47,20 +65,21 @@ SpriteLib SDL2 Backend provides cross-platform sprite rendering for the Dark Ede
 
 ### 1. Build the Backend
 
-```bash
-cd /path/to/opendarkeden/client/build
-cmake .. -DUSE_SDL_BACKEND=ON
-make SpriteLib
+`USE_SDL_BACKEND` is forced `ON` in `CMakeLists.txt`, so the backend is built
+as part of the normal client build. From the workspace root (`newdk/`), on
+this project's authoritative Windows path:
+
+```powershell
+cmake -S dkrix -B dkrix\build -G "Visual Studio 17 2022" -A x64 `
+      -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build dkrix\build --config Debug
 ```
 
-### 2. Run Example Program
+> The old instructions here read `cd /path/to/opendarkeden/client/build` and
+> `make SpriteLib`. That path layout does not exist — there is no `client/`
+> directory and no separate `opendarkeden` checkout. See `docs/README.md`.
 
-```bash
-cd /path/to/opendarkeden/client/build/bin
-./sprite_backend_example
-```
-
-### 3. Use in Your Code
+### 2. Use in Your Code
 
 ```cpp
 #include "SpriteLibBackend.h"
@@ -304,35 +323,21 @@ When integrating SpriteLib backend into your project:
 
 ## Testing
 
-### Run Integration Tests
+**There are no tests for this backend.**
 
-```bash
-cd /path/to/opendarkeden/client/build
+An earlier revision of this section documented three binaries —
+`test_spritelib_backend`, `test_sprite_rendering`, and
+`sprite_backend_example` — along with their expected output. **None of the
+three exists.** Searching the entire `dkrix/` tree for those names returns no
+source file, no CMake target, and no reference of any kind. The "Expected
+Output" block was describing a program that was never in this repository.
 
-# Backend API test
-./bin/test_spritelib_backend
+The only automated tests anywhere in `dkrix/` are the 11 files (3,898 lines)
+under `tools/engine/sprite/tests/`, and they cover the *other* sprite library
+— the one the game client does not link.
 
-# Rendering test (requires display)
-./bin/test_sprite_rendering
-
-# Full example (requires display)
-./bin/sprite_backend_example
-```
-
-### Expected Output
-
-**test_spritelib_backend**:
-```
- All tests passed!
- SpriteLib backend infrastructure is working correctly
- Backend API is available and linked
-```
-
-**sprite_backend_example**:
-- Opens window showing animated sprites
-- Renders 4 different test sprites
-- Demonstrates sprite creation and blitting
-- Exits on ESC or window close
+If you are adding test coverage here, that gap is the highest-value place to
+start; see `docs/TECH-DEBT-AUDIT.md` item 8.
 
 ---
 
@@ -474,11 +479,14 @@ cd /path/to/opendarkeden/client/build
 - Modernizing existing sprite-based games
 
 **For questions or issues**, refer to:
-- Example programs in `examples/`
-- Test programs in `tests/`
 - This README for API reference
+- `docs/adr/0001-sprite-pipeline.md` for why this backend is the survivor
+- `docs/TECH-DEBT-AUDIT.md` for the measured state of the sprite code
+
+> The old text here pointed at "Example programs in `examples/`" and "Test
+> programs in `tests/`". Neither directory exists under `Client/SpriteLib/`.
 
 ---
 
-*Last Updated: 2025-01-15*
-*Version: 1.0 - Production Ready*
+*Last updated: 2026-08-06 — corrected against the working tree at `f19c4d3`.*
+*Status: unverified. No CI run exists; nothing here has been compiled.*

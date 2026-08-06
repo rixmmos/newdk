@@ -1,36 +1,53 @@
-# OpenDarkEden — docs
+# docs
 
-Cross-cutting documentation for the OpenDarkEden project. The project
-spans three sibling working trees, each a separate repository, expected
-to be checked out side by side:
+Cross-cutting documentation for the project. Everything lives in **one
+repository** (`newdk`, GitHub `rixmmos/newdk`). Earlier revisions of this
+file described three sibling repositories checked out side by side —
+that layout never existed here and the paths it gave (`client/`,
+`server/`) are wrong. The real tree is:
 
 ```
-opendarkeden/
-├── client/   # The C++ game client (mid-migration from Win32+DirectX to SDL2).
-├── server/   # The C++11 game/login/shared servers (MySQL + Lua + xerces-c).
-└── docs/     # This repo — project-wide plans, guidelines, and notes.
+newdk/
+├── dkrix/        # The C++11 game client (mid-migration from Win32+DirectX to SDL2).
+├── dkrixserver/  # The C++11 game/login/shared servers (MySQL + Lua + xerces-c).
+├── docs/         # This folder — project-wide plans, guidelines, and notes.
+├── tools/        # Release, publish, and update-server scripts; SPK helpers.
+├── Darkeden/     # The live installed client. Build output is copied here.
+└── release_site/ # Static update site served to testers.
 ```
 
 ## Start here
 
-- `CLAUDE.md` — project-wide working guidelines. Applies across client,
-  server, and docs. Takes precedence over the per-repo `CLAUDE.md` files
-  when there is any conflict.
+- `../CLAUDE.md` — workspace-root guidelines. Applies across every
+  subtree and takes precedence over `dkrix/CLAUDE.md` and
+  `dkrixserver/CLAUDE.md` when there is a conflict.
+- `CLAUDE.md` (this folder) — engineering principles.
 - `MODERNIZATION.md` — the single authoritative, living modernization
   plan. What is done, what is in progress, and what is next. Update this
   file as part of the change that makes the work real.
+- `TECH-DEBT-AUDIT.md` — prioritized debt backlog, measured 2026-08-06.
+  Each figure has the command that produced it in the appendix.
+- `adr/` — architecture decision records. `adr/0001-sprite-pipeline.md`
+  re-scopes Phase 4.
 
-## Per-repo docs
+## Per-subtree docs
 
-- `../client/CLAUDE.md` — client-specific guidance (build flags, key
+- `../dkrix/CLAUDE.md` — client-specific guidance (build flags, key
   modules, SDL migration summary).
-- `../server/CLAUDE.md` — server-specific guidance (build, packets,
+- `../dkrixserver/CLAUDE.md` — server-specific guidance (build, packets,
   zone/thread model, config).
+
+## A standing caveat
+
+No claim in any document here has been confirmed by a compile. CI
+workflows exist at `.github/workflows/` but have never executed. Treat
+`[measured]` annotations as "verified by reading the tree", never as
+"verified by building it".
 
 ## Archived status documents
 
 Historical client migration status documents live under
-`../client/docs/archive/2026-migration-notes/`. They contradicted each
+`../dkrix/docs/archive/2026-migration-notes/`. They contradicted each
 other and are preserved only for forensic context. **Do not use them as
 a source of truth**; use `MODERNIZATION.md`.
 
