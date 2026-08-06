@@ -44,7 +44,14 @@ jobs:
             cmake \
             libmysqlclient-dev \
             liblua5.1-0-dev \
-            libxerces-c-dev
+            libxerces-c-dev \
+            libnsl-dev
+        # libnsl-dev: all three server targets link -lnsl
+        # (src/server/{gameserver,loginserver,sharedserver}/CMakeLists.txt,
+        # EXTRA_LIBS under the elseif(UNIX) branch). libnsl was split out of
+        # glibc in 2.32 and is NOT preinstalled on ubuntu-latest, so the link
+        # step failed with "ld: cannot find -lnsl" after compiling to 86%.
+        # First real CI failure, 2026-08-06.
 
       - name: Show toolchain
         run: |
