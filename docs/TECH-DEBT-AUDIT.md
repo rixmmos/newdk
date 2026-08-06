@@ -147,6 +147,19 @@ a change that only Enrico can judge, one at a time, by hand. Fix this and items
 fail on portability debt already documented — `Platform.h` drags `pthread.h` into
 Windows builds, some helpers include `sys/time.h`.
 
+> **[2026-08-06] One workflow bug found and fixed before the first run.**
+> `server.yml` set `working-directory: dkrixserver` at workflow level, which also
+> applied to the `format` job. `git diff --name-only` emits repo-relative paths,
+> so `[ -f "$f" ]` looked for `dkrixserver/dkrixserver/src/…`, skipped every
+> file, and the job exited green having checked nothing. Reproduced both ways in
+> a scratch repo (old: `checked=0`, exit 0; new: `checked=1`, exit 1) and fixed
+> in `60f4c35`, which also adds a guard that fails when a non-empty change list
+> inspects zero files.
+>
+> Worth generalising: **a CI job that cannot fail is worse than no CI job**,
+> because it reads as evidence. Anything added here should be tested against a
+> case it is supposed to reject before it is trusted.
+
 ### 3. Branch has no upstream — Priority 32
 
 | Comparison | Result |
