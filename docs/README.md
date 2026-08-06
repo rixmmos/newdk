@@ -1,10 +1,20 @@
 # docs
 
-Cross-cutting documentation for the project. Everything lives in **one
-repository** (`newdk`, GitHub `rixmmos/newdk`). Earlier revisions of this
-file described three sibling repositories checked out side by side —
-that layout never existed here and the paths it gave (`client/`,
-`server/`) are wrong. The real tree is:
+Cross-cutting documentation for the project. Everything now lives in **one
+repository** — `newdk`, GitHub `rixmmos/newdk` (private).
+
+Earlier revisions of this file described three sibling repositories checked out
+side by side. **That was true once and is no longer.** `rixmmos` still hosts the
+three original forks of `opendarkeden` — `dkrix`, `dkrixserver`, and `docs`, all
+public — and they are what this file was written against. The consolidated
+`newdk` repo superseded them; the loose paths that revision gave (`client/`,
+`server/`) never matched the fork names either way.
+
+If you are looking for this project on GitHub and see only those three public
+repos, you are on the public profile view. `newdk` is private and will not
+appear there — go directly to `github.com/rixmmos/newdk` while signed in.
+
+The real tree:
 
 ```
 newdk/
