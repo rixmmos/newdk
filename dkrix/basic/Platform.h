@@ -147,13 +147,16 @@ typedef uint64_t		QWORD;
 typedef void*			ADDRESS_MODE;
 #endif
 
-	/* Define id_t for cross-platform compatibility */
+	/* Define id_t for cross-platform compatibility. Windows keeps the real
+	   SDK's DWORD (matches the real windows.h now pulled in above); other
+	   platforms get a plain fixed-width type. Guarded so this is the single
+	   definition point - see the removed duplicate further down. */
 	#ifndef PLATFORM_ID_T_DEFINED
 	#define PLATFORM_ID_T_DEFINED
 	#ifdef PLATFORM_WINDOWS
 	typedef DWORD			id_t;
 	#else
-	typedef unsigned int	id_t;
+	typedef uint32_t		id_t;
 	#endif
 	#endif
 #ifndef TRUE
@@ -398,8 +401,7 @@ typedef WORD			char_t;
 #ifndef PLATFORM_WINDOWS
 	/* Windows-compatible type definitions for non-Windows platforms */
 	typedef int				BOOL;
-	/* Define id_t for cross-platform compatibility (unsigned int on all platforms) */
-	typedef unsigned int   id_t;
+	/* id_t is already defined above (single definition point). */
 	#ifndef TRUE
 		#define TRUE	1
 	#endif
