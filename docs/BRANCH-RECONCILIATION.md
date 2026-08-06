@@ -161,15 +161,39 @@ behind the real work. Their *measurements of this branch* are correct and were
 double-checked. Their *recommendations* are largely obsolete: they propose doing
 work that was completed in April.
 
-Two findings survive independent of the branch question and are worth carrying
-forward:
+Both were checked against the trunk on 2026-08-06. Results:
 
-- **`Client/WinLib/` is not dead.** `CGameUpdate` subclasses `CWinUpdate`.
-  Both branches still contain `Client/WinLib/` (3 files each), so this
-  correction applies to the trunk too.
-- **The `SPRITELIB_BACKEND_README.md` claims were false** on this branch. Check
-  whether the trunk's copy carries the same "Production Ready / integration
-  tests passing" text and the same non-existent test binaries.
+**1. WinLib — the trunk already caught this, and caught it better.** Its
+`MODERNIZATION.md` Phase 1 entry reads:
+
+> `[!]` Delete `Client/WinLib/` (3 files). **Deferred** — the "no subclasses,
+> no live callers" claim was stale: `CWinUpdate` is actively subclassed by
+> `CWaitUIUpdate` […] Removing `WinLib/` here would require restructuring the
+> update-state hierarchy, which is bigger than "delete the unambiguously dead."
+
+Today's independent rediscovery found one subclass. The trunk found more —
+there are **four**: `CGameUpdate`, `COpeningUpdate`, `CWaitPacketUpdate`,
+`CWaitUIUpdate`. Nothing to carry forward; the trunk is ahead here too.
+
+One small defect worth fixing there: the trunk's *Ground truth* section still
+carries the original stale line ("`CWinUpdate` has no subclasses and no live
+callers") while its Phase 1 section retracts it. The document contradicts
+itself.
+
+**2. The `SPRITELIB_BACKEND_README.md` correction is worth carrying forward —
+it is the one piece of today's work that improves the trunk.** The trunk still
+ships the file verbatim, including `**Status**: ✅ **Production Ready**`,
+"Integration tests passing", `./bin/test_spritelib_backend`, and the diagram
+attributing the SDL2 backend to `engine/sprite`.
+
+On the trunk that last one is **doubly wrong**: Phase 4D deleted
+`tools/engine/sprite/` outright (0 files remain; it was archived to
+`dkrix/docs/archive/2026-engine-sprite/`). The README's architecture diagram
+now points at a directory that does not exist, and its "Files" section lists
+`tests/test_spritelib_backend.cpp`, which never existed on either branch.
+
+Port this branch's rewrite of that file to the trunk, adjusting the
+`engine/sprite` paragraph to say it was archived rather than merely unused.
 
 The process lesson is the expensive one: **this session spent its entire budget
 auditing a branch without first checking whether it was the branch the work was
