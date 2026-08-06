@@ -132,7 +132,27 @@ close.
 
 ## Detail on the top items
 
-### 1. CI has never executed — Priority 40
+### 1. CI has never executed — Priority 40 → **partially closed 2026-08-06**
+
+> **It executed.** First real run: the server build reached **86%** on a clean
+> Ubuntu runner, then failed at link — `ld: cannot find -lnsl`, a missing runner
+> package rather than a code defect. Fixed by adding `libnsl-dev` (`b8c24f0`).
+> The `clang-format` job passed, and did so meaningfully now that `60f4c35`
+> fixed its path bug.
+>
+> This is the first compiler evidence of anything in this repository. What it
+> buys: the server half of the "no automated signal" problem is nearly solved,
+> and the phases this document lists as delegable-once-green (1, 2, 3, 7, 10)
+> become delegable for the server as soon as the next run is clean.
+>
+> **The client still has zero evidence.** It has never been compiled by CI.
+> Priority stays at 40 until both are green.
+>
+> Prediction check: this document previously expected the first failure to be
+> Windows portability debt. It was not — that claim was measured and found false
+> (see the Ground-truth note in `MODERNIZATION.md`), and the actual cause was an
+> absent system library. Worth remembering the next time a plausible-sounding
+> cause is written down without being tested.
 
 `.github/workflows/client.yml` and `server.yml` exist (committed in `53ac594`) but
 have never run, because the branch has never been pushed. Consequence: **not one

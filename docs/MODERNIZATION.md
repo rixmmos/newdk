@@ -39,6 +39,17 @@ Every "done" claim below is either **[measured]** (re-verified against the
 working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 (asserted by a previous pass, not re-checked, and not confirmed by a build).
 
+> **[2026-08-06] This changed today. The server tree compiles.** The first real
+> CI run reached **86%** on a clean Ubuntu runner before failing at link with
+> `ld: cannot find -lnsl` — a missing runner package (`libnsl-dev`; libnsl left
+> glibc in 2.32), not a code defect. Fixed in `b8c24f0`. The `clang-format` job
+> passed, and passed meaningfully — `60f4c35` had just fixed the path bug that
+> made it skip every file.
+>
+> So the blanket statement below is no longer true of the **server**. It remains
+> true of the client, which has never been compiled by CI. Treat server claims
+> as provisionally supported and client claims as unverified.
+
 **No claim in this document has been confirmed by a compile.** The client
 requires Windows + Visual Studio 2022 + vcpkg; the server requires Linux with
 libmysqlclient, lua5.1, and xerces-c. Neither toolchain is available to an
