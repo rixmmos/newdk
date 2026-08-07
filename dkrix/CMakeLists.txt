@@ -343,7 +343,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		Client/MPlayer.cpp
 		Client/MCreatureTable.cpp
 		Client/MFakeCreature.cpp
-		Client/MNpcTable.cpp
 		Client/MNPCTable.cpp
 
 		# Social System
@@ -373,7 +372,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		# Events & Time
 		Client/MEventManager.cpp
 		Client/MGameTime.cpp
-		Client/MTimeItemManager.cpp
+		Client/MTimeItemManager.CPP
 
 		# UI Support
 		Client/MHelpMessageManager.cpp
@@ -642,8 +641,23 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	)
 
 	# Add additional source files
+	#
+	# The four below (BIT_RES/MAttachZoneAroundEffectGenerator/
+	# MBloodyBreakerEffectGenerator/MWarManager), plus COGGSTREAM, share the
+	# same bug: real, live, uppercase-extension .CPP files under Client/ that
+	# the case-sensitive `Client/*.cpp` glob above silently drops on Linux.
+	# On Windows/NTFS the glob matched them anyway (case-insensitive
+	# filesystem), so they built into every Windows binary without anyone
+	# noticing they were never explicitly listed. Found via a full
+	# case-sensitive sweep of Client/ for *.CPP (2026-08-08); all four are
+	# referenced from live callers (MEffectGeneratorTable.cpp, MPlayer.cpp,
+	# GameMain.cpp, huffman.cpp, etc.) - not dead code.
 	list(APPEND CLIENT_MAIN_SOURCES
-		Client/COGGSTREAM.cpp
+		Client/COGGSTREAM.CPP
+		Client/BIT_RES.CPP
+		Client/MAttachZoneAroundEffectGenerator.CPP
+		Client/MBloodyBreakerEffectGenerator.CPP
+		Client/MWarManager.CPP
 		# Time functions extracted from PacketFunction.cpp (which has Windows-specific networking code)
 		Client/ClientTimeFunctions.cpp
 		# ActionFunctions.cpp excluded - functions now in PacketFunction.cpp
