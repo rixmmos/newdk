@@ -31,9 +31,57 @@ set(WARNING_FLAGS
 )
 add_compile_options(${WARNING_FLAGS})
 
-# Debug 
+# Debug
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+
+# ============================================================================
+# Sanitizer configuration (Phase 10 bullet 3, 2026-08-07)
+# ============================================================================
+# Mirrors the client block at dkrix/CMakeLists.txt:37-65 so both trees
+# expose the same -DUSE_<SAN>=ON switches. Wired here (rather than in
+# per-target properties) because the server build is effectively
+# monolithic — a single CMAKE_CXX/C_FLAGS fold-in covers all three
+# executables (gameserver/loginserver/sharedserver) and Core.
+option(USE_ASAN "Enable AddressSanitizer for memory error detection" OFF)
+option(USE_TSAN "Enable ThreadSanitizer for race condition detection" OFF)
+option(USE_UBSAN "Enable UndefinedBehaviorSanitizer for undefined behavior detection" OFF)
+
+# ASan and TSan instrument memory access differently (shadow memory vs.
+# interceptor-based happens-before tracking) and cannot be linked into
+# the same binary. UBSan is a separate, compatible check and may be
+# combined with either.
+if(USE_ASAN AND USE_TSAN)
+    message(FATAL_ERROR "USE_ASAN and USE_TSAN are mutually exclusive — enable only one at a time (UBSAN may combine with either).")
+endif()
+
+if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        set(SANITIZER_FLAGS "")
+
+        if(USE_ASAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+        endif()
+
+        if(USE_TSAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=thread")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
+        endif()
+
+        if(USE_UBSAN)
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=undefined")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+        endif()
+
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+
+        message(STATUS "Sanitizer flags: ${SANITIZER_FLAGS}")
+    else()
+        message(WARNING "Sanitizers requested but compiler is not GCC/Clang — flags not applied")
+    endif()
+endif()
 
 # ============================================================================
 
