@@ -512,22 +512,76 @@ Option B.
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
-### Phase 7 — Server: retire dead binaries (not started)
+### Phase 7 — Server: retire dead binaries — done 2026-08-06
 
-> **[measured 2026-08-06]** All of `cacheserver/`, `chinabilling/`,
-> `theoneserver/`, `updateserver/`, `gameserver/mofus/testserver/`, and
-> `gameserver/testAlone/` are still present, as is one `.old.cpp` under
-> `src/server/database/`.
+> **Correction to the original wording:** `chinabilling/` top-level is
+> **not** dead — `src/server/chinabilling/CMakeLists.txt` builds it into
+> the `GameServerCBilling` and `LoginServerCBilling` static libs, which
+> `gameserver` and `loginserver` link. Only its two subdirs (`stress/`,
+> `testserver/`) were dead. "All three subdirs" in the earlier wording
+> was wrong on both count and contents — there are two.
 
-- [ ] Archive or delete `cacheserver/`, `chinabilling/` (all three
-      subdirs), `theoneserver/`, `updateserver/`,
-      `gameserver/mofus/testserver/`. Verify CMake isn't building
-      them.
-- [ ] Replace the stub `testAlone/Mutex.h` with a real primitive or
-      delete `testAlone/` outright.
-- [ ] Retire `__OLD_GUILD_WAR__` `#ifdef` gates — either delete the
-      branches or move to a runtime config flag.
-- [ ] Delete `.old.cpp` files in `server/database/`.
+- [x] Delete `cacheserver/`, `theoneserver/`, `updateserver/`,
+      `chinabilling/stress/`, `chinabilling/testserver/`,
+      `gameserver/mofus/testserver/`. Verified with a repo-wide grep
+      of every `CMakeLists.txt` for each directory name (zero hits)
+      before deleting, and confirmed with a CMake configure pass
+      (MSVC generator; this workstation lacks the Linux toolchain
+      for a real `make debug` at grep time) that reached the
+      `find_package` stage without any `add_subdirectory` path
+      errors. The only remaining references anywhere in the tree are
+      the legacy `src/**/Makefile` files, already superseded by
+      CMake — `dkrixserver/Makefile`'s `make`/`make debug` targets
+      only invoke CMake, never touch them. Left in place; cleaning up
+      stale Makefiles is a separate build-hygiene pass, out of scope
+      here.
+- [x] Delete `gameserver/testAlone/` outright (including a stray
+      326 KB prebuilt `testAlone` binary that had been committed
+      alongside the sources) rather than upgrading `testAlone/Mutex.h`
+      to a real primitive — nothing outside the directory referenced
+      it (repo-wide grep for `testAlone` turned up only the
+      directory's own Makefile), so there was no live caller left to
+      benefit from a real mutex.
+- [x] Retire `__OLD_GUILD_WAR__` `#ifdef` gates. 41 occurrences
+      across 26 files (40 live directives + one already-commented-out
+      `#define` in `Core/Types.h`). `__OLD_GUILD_WAR__` is never
+      defined anywhere — no `CMakeLists.txt`, no
+      `target_compile_definitions`, no conf file, and the one
+      `#define` was commented out. Deleted the dead branch of every
+      gate, kept the branch that was actually live (the "new guild
+      war" / `SiegeWar` path), and removed the pointless directives.
+      No behavior change — every deleted line was preprocessor-dead.
+      Verified with a per-file `#if`/`#ifdef`/`#ifndef` vs `#endif`
+      balance check across all 25 touched files (all balanced) plus
+      the CMake configure pass below.
+- [x] Delete `.old.cpp` files in `server/database/` —
+      `DatabaseManager.old.cpp`, single file, not in
+      `CMakeLists.txt`'s source list.
+
+**Build verification — [measured 2026-08-06], not just grep.** This
+workstation has a full Linux toolchain via WSL (`Ubuntu`, with
+`libmysqlclient-dev`, `liblua5.1-dev`, `libxerces-c-dev`,
+`libnsl-dev` already installed). Ran the actual authoritative command
+— `cd dkrixserver && make debug` — from `/mnt/c/dev/newdk/...` against
+every change in this phase (all four commits below). **It exited 0**
+and produced all three binaries fresh: `bin/gameserver` (403 MB
+debug), `bin/loginserver` (17 MB), `bin/sharedserver` (9.8 MB) — the
+last build target reached and linked was `gameserver`, which is the
+binary that actually contains every `__OLD_GUILD_WAR__` edit (`Guild.h`
+×2, `GuildManager.cpp` ×2, `war/*`, `quest/Action*Reinforce/Siege.cpp`)
+plus the deleted-directory and `.old.cpp` changes. Only warnings
+(`-Wdeprecated-declarations` on `std::binary_function`,
+`-Wsign-compare`), no errors. This supersedes the CMake-configure-only
+check recorded in the per-item notes above, which was a weaker signal
+taken before a Linux toolchain was confirmed available in this
+environment. `clang-format` is not installed in this WSL image, so
+`make fmt` could not be run; formatting was matched by hand to the
+surrounding style in each edit.
+
+**Outcome (2026-08-06):** one commit per checklist item —
+`__OLD_GUILD_WAR__` gates, dead binary trees, `testAlone/`, and
+`DatabaseManager.old.cpp` — landed on a review branch, not `main`,
+and now have a green `make debug` behind them.
 
 ### Phase 8 — Server: SQL and secrets (split; secrets half in progress)
 

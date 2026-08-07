@@ -39,13 +39,6 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
     Assert(pPlayerCreature != NULL);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("   .");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
-
     GCGuildResponse gcGuildResponse;
 
     GuildUnion* pGuildUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());

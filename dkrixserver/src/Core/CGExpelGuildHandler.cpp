@@ -45,13 +45,6 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
 
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("   .");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
-
     GCGuildResponse gcGuildResponse;
 
     GuildUnion* pUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());

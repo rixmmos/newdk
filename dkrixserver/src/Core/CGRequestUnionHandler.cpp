@@ -41,13 +41,6 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
     Assert(pPlayerCreature != NULL);
 
-#ifdef __OLD_GUILD_WAR__
-    GCSystemMessage gcSM;
-    gcSM.setMessage("   .");
-    pGamePlayer->sendPacket(&gcSM);
-    return;
-#endif
-
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
     GCGuildResponse gcGuildResponse;
