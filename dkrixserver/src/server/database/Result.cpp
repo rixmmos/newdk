@@ -16,15 +16,36 @@
 Result::Result(T_RESULT* pResult, const string& statement) {
     __BEGIN_TRY
 
+    m_BackendType = BACKEND_MYSQL_RES;
     m_pResult = pResult;
     m_pRow = NULL;
+    m_CurrentRowIndex = -1;
 
     Assert(m_pResult != NULL);
 
-    
+
     m_RowCount = mysql_num_rows(m_pResult);
     m_FieldCount = mysql_num_fields(m_pResult);
 
+    m_Statement = statement;
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// constructor for materialized (prepared-statement) results
+//////////////////////////////////////////////////////////////////////////////
+
+Result::Result(const std::vector<std::vector<FieldValue>>& rows, const string& statement) {
+    __BEGIN_TRY
+
+    m_BackendType = BACKEND_MATERIALIZED;
+    m_pResult = NULL;
+    m_pRow = NULL;
+    m_CurrentRowIndex = -1;
+    m_Rows = rows;
+    m_RowCount = m_Rows.size();
+    m_FieldCount = (m_RowCount == 0) ? 0 : m_Rows[0].size();
     m_Statement = statement;
 
     __END_CATCH
@@ -37,7 +58,7 @@ Result::Result(T_RESULT* pResult, const string& statement) {
 Result::~Result() throw() {
     __BEGIN_TRY
 
-    if (m_pResult != NULL) {
+    if (m_BackendType == BACKEND_MYSQL_RES && m_pResult != NULL) {
         // If the result set is empty, don't call mysql_free_result
         // otherwise when you call malloc later you might run into
         // some nasty debugging issues.
@@ -66,9 +87,16 @@ Result::~Result() throw() {
 bool Result::next() {
     __BEGIN_TRY
 
-    Assert(m_pResult != NULL);
+    if (m_BackendType == BACKEND_MYSQL_RES) {
+        Assert(m_pResult != NULL);
+        return (m_pRow = mysql_fetch_row(m_pResult)) != NULL;
+    }
 
-    return (m_pRow = mysql_fetch_row(m_pResult)) != NULL;
+    if (m_CurrentRowIndex + 1 >= (int)m_Rows.size()) {
+        return false;
+    }
+    ++m_CurrentRowIndex;
+    return true;
 
     __END_CATCH
 }
@@ -82,13 +110,6 @@ bool Result::next() {
 char* Result::getField(uint index) {
     __BEGIN_TRY
 
-    if (m_pRow == NULL) {
-        StringStream msg;
-        msg << "Result::getField() : CALL Result::next() - Statement[" << m_Statement << "]";
-        filelog("ResultBug.log", "%s", msg.toString().c_str());
-        throw Error(msg.toString());
-    }
-
     if (index == 0 || index > m_FieldCount) {
         StringStream msg;
         msg << "Result::getField() : Out of Bound! - Statement[" << m_Statement << "]";
@@ -96,7 +117,28 @@ char* Result::getField(uint index) {
         throw OutOfBoundException(msg.toString());
     }
 
-    return m_pRow[index - 1];
+    if (m_BackendType == BACKEND_MYSQL_RES) {
+        if (m_pRow == NULL) {
+            StringStream msg;
+            msg << "Result::getField() : CALL Result::next() - Statement[" << m_Statement << "]";
+            filelog("ResultBug.log", "%s", msg.toString().c_str());
+            throw Error(msg.toString());
+        }
+
+        return m_pRow[index - 1];
+    }
+
+    if (m_CurrentRowIndex < 0 || m_CurrentRowIndex >= (int)m_Rows.size()) {
+        StringStream msg;
+        msg << "Result::getField() : CALL Result::next() - Statement[" << m_Statement << "]";
+        throw Error(msg.toString());
+    }
+
+    const FieldValue& field = m_Rows[m_CurrentRowIndex][index - 1];
+    if (field.isNull) {
+        return NULL;
+    }
+    return const_cast<char*>(field.value.c_str());
 
     __END_CATCH
 }

@@ -7,6 +7,8 @@
 #ifndef __RESULT_H__
 #define __RESULT_H__
 
+#include <vector>
+
 #include <mysql/mysql.h>
 #include <sys/time.h>
 
@@ -28,14 +30,25 @@ class Statement;
 
 class Result {
 public:
+    // Field cell for materialized (prepared-statement) results: value plus an
+    // explicit NULL flag, because stmt-mode fetches don't produce a MYSQL_ROW.
+    struct FieldValue {
+        bool isNull;
+        string value;
+
+        FieldValue() : isNull(true) {}
+        FieldValue(const string& v) : isNull(false), value(v) {}
+    };
+
+public:
     Result(T_RESULT*, const string& statement);
+    Result(const std::vector<std::vector<FieldValue>>& rows, const string& statement);
     ~Result();
 
 public:
-    
     bool next();
 
-    
+
     char* getField(uint index);
     char getChar(uint index) {
         return (getField(index))[0];
@@ -57,7 +70,7 @@ public:
     }
     const char* getString(uint index);
 
-    
+
     uint getRowCount() const {
         return m_RowCount;
     }
@@ -70,11 +83,19 @@ public:
     }
 
 private:
-    T_RESULT* m_pResult; 
-    MYSQL_ROW m_pRow;    
-    uint m_RowCount;     
+    enum BackendType {
+        BACKEND_MYSQL_RES,   // classic mysql_store_result path (Statement)
+        BACKEND_MATERIALIZED // rows copied out of a prepared-stmt fetch
+    };
+
+    BackendType m_BackendType;
+    T_RESULT* m_pResult;
+    MYSQL_ROW m_pRow;
+    uint m_RowCount;
     uint m_FieldCount;
-    string m_Statement; 
+    string m_Statement;
+    std::vector<std::vector<FieldValue>> m_Rows;
+    int m_CurrentRowIndex;
 };
 
 #endif // __RESULT_H__

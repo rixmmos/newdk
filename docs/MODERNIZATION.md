@@ -360,8 +360,10 @@ In order; each independently shippable:
    filling PORTING-NOTE's verification table as you go). Workstation + WSL
    + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
    — it needs eyes on a running client anyway.
-3. **Phase 8 SQL half, via Phase 11.** Lift the parked `PreparedStatement`
-   design (its 11.1). ~~Ratchet~~ done 2026-08-07 — Phase 16, baseline 542.
+3. **Phase 8 SQL half, via Phase 11.** ~~Lift the parked `PreparedStatement`
+   design.~~ **11.1 landed 2026-08-07** (API only, zero call sites; compile
+   gate = next server CI run). Next: 11.2 migrations, user-string sites
+   first, measured by the Phase 16 ratchet (542 → down).
 4. **Phase 3 items 2–3, then 4b/4c.** All CI-gated now. Item 2's liveness
    audit is done and its 4-step execution order is written into Phase 3.
    Phase 17's re-run is also done — Phase 12 sizing is refined.
@@ -1135,14 +1137,28 @@ numbers are kept so `git log archive/modernization-phases-1-17 --oneline
 --grep "Phase N"` keeps working. For each: read what the tag did first,
 lift the approach one phase at a time against a build — never as a merge.
 
-### Phase 11 — SQL injection remediation (not started here; parked: 11.1 done)
-The executable half of Phase 8's SQL side. **11.1** — `PreparedStatement`
-wrapper API: designed, shipped, and build-verified on the parked line;
-`main` has nothing (`docs/smoke-test/PORTING-NOTE.md` already warns that
-`server_build_fix.sh` references `PreparedStatement.{h,cpp}`, which does
-not exist here — that gap closes when this lands). **11.2** — migrate the
-598 format-specifier `executeQuery` sites: ongoing, ratchet-driven
-(Phase 16), explicitly never a one-phase close-out.
+### Phase 11 — SQL injection remediation (11.1 lifted onto main 2026-08-07; 11.2 ongoing)
+**11.1 — done.** `PreparedStatement.{h,cpp}` lifted at tag-tip content
+(which includes the parked line's later SELECT-materialization work)
+into `src/server/database/`, added to `DATABASE_SOURCES` so all five
+library flavors build it. Required companion, applied by hand rather
+than file-copy (the tag's files carry fmt/encoding churn): an additive
+materialized backend on `Result` — `FieldValue`, a rows-vector
+constructor, and a `BackendType` branch in `next()`/`getField()`/dtor.
+The existing `MYSQL_RES` path is preserved line-for-line. **Zero call
+sites migrated** — the API lands alone, exactly like the parked 11B;
+the SQL ratchet stays at 542. Verified in-session by API cross-check
+against main's database layer (`Connection::getMYSQL()` present;
+`SQLException`/`SQLQueryException`/`OutOfBoundException` present in
+`Core/Exception.h`) and the pinned clang-format gate; **compile
+verification is the next server CI run / WSL `make debug`** — this
+sandbox has no server toolchain (apt is sealed). PORTING-NOTE's
+`server_build_fix.sh` warning is now half-obsolete: the files exist,
+the script still isn't runnable here.
+**11.2** — migrate the 542 ratcheted sites: ongoing, ratchet-driven
+(Phase 16), never a one-phase close-out. Parked priority order stands:
+user-string interpolation first (chat, say, whisper, pet names, custom
+options), operator-trusted second, constant/numeric hygiene last.
 
 ### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:

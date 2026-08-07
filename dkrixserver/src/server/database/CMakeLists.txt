@@ -5,6 +5,7 @@
 set(DATABASE_SOURCES
     Connection.cpp
     Statement.cpp
+    PreparedStatement.cpp
     Result.cpp
     DatabaseManager.cpp
 )
