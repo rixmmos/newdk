@@ -92,10 +92,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install clang-format
+      # Pinned 2026-08-07. Unpinned apt made this gate nondeterministic:
+      # the runner image's clang-format is 18.1.3, which formats two
+      # CJK-comment quest files differently from every later version
+      # (18.1.8 / 19.1.7 / 20.1.7 / 22.1.8 all agree with each other and
+      # accept the tree as committed — measured, runs #6/#7/#9). Match it
+      # locally with: pip install clang-format==18.1.8
+      - name: Install clang-format (pinned)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format
+          sudo pip install --break-system-packages clang-format==18.1.8
+          which clang-format
+          clang-format --version
 
       # Only checks files this change actually touched, so the existing
       # unformatted backlog does not block every PR.

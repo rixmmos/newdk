@@ -122,8 +122,19 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 >   Failure status came entirely from the 27s `clang-format` job
 >   (5 files); zero build errors in its annotations. The server wave is
 >   build-verified twice over (WSL pre-merge + CI post-merge).
-> - Run #9 (`8f4ca50`, the fmt pass) was in progress when this was
->   written — the remaining confirmation, expected green on both jobs.
+> - **Run #9 (`8f4ca50`): `make debug` green; `clang-format` red again**,
+>   on 2 of the 28 just-formatted files (`ActionRegisterSiege.cpp`,
+>   `ActionRegisterReinforce.cpp`). Root cause measured, not guessed: the
+>   workflow's unpinned `apt-get install clang-format` yields **18.1.3**
+>   on the current runner image, and 18.1.3 is the only version tested
+>   that flags those two files — 18.1.8, 19.1.7, 20.1.7, and 22.1.8 all
+>   accept every wave file byte-for-byte as committed. (The trigger is
+>   CJK-width handling in the Korean-comment quest files; 18.1.3 also
+>   flags two siblings the wave never touched.) An unpinned formatter is
+>   a nondeterministic gate. Fixed in the commit carrying this note:
+>   `server.yml` now pins `clang-format==18.1.8` via pip and prints the
+>   version into the log. Match it locally with
+>   `pip install clang-format==18.1.8`. No source file needed changing.
 
 **No claim in this document has been confirmed by a compile** — except what
 the green runs actually verified (client #6 and #8, server `make debug` in
@@ -340,9 +351,11 @@ In order; each independently shippable:
 1. **CI on the merged tip — resolved 2026-08-07, one tail open.** Client
    run #8 (tip `5ca240a`): SUCCESS, 28m30s — the client wave compiles.
    Server run #6 (same tip): `make debug` green in 21m32s; only the
-   `clang-format` job was red, fixed by the fmt pass. Remaining: run #9
-   (`8f4ca50`) completing green, expected. The wave is a result now, not
-   a proposal — item 2 below is the new top item.
+   `clang-format` job was red, fixed by the fmt pass. Run #9 (`8f4ca50`):
+   `make debug` green again; fmt red on formatter-version skew, fixed by
+   pinning `clang-format==18.1.8` in `server.yml` (see box). Remaining:
+   the next push's run completing green — now deterministic. The wave is
+   a result, not a proposal — item 2 below is the new top item.
 2. **Phase 18 — run the smoke test against `main`** (`docs/smoke-test/`,
    filling PORTING-NOTE's verification table as you go). Workstation + WSL
    + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
