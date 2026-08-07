@@ -34,7 +34,7 @@ RECT								CSDLGraphics::m_rcWindow;
 RECT								CSDLGraphics::m_rcScreen;
 RECT								CSDLGraphics::m_rcViewport;
 
-// Note: Color mask static members are defined in CDirectDraw_StaticMembers.cpp
+// Note: Color mask static members are defined in CSDLGraphics_StaticMembers.cpp
 
 //-----------------------------------------------------------------------------
 // Constructor/Destructor (stub - not implemented)
