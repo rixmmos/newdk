@@ -16,6 +16,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SGDeleteGuildOK.h"
 #include "SGExpelGuildMemberOK.h"
@@ -58,17 +59,21 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
     ///////////////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-            pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement guildIdStmt(pConn, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+            guildIdStmt.bindString(1, pGuildMember->getName());
+            guildIdStmt.execute();
         } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-            pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement guildIdStmt(pConn, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+            guildIdStmt.bindString(1, pGuildMember->getName());
+            guildIdStmt.execute();
         } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-            pStmt->executeQuery("UPDATE Ousters SET GuildID = 66 WHERE Name = '%s'", pGuildMember->getName().c_str());
+            PreparedStatement guildIdStmt(pConn, "UPDATE Ousters SET GuildID = 66 WHERE Name = ?");
+            guildIdStmt.bindString(1, pGuildMember->getName());
+            guildIdStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -98,35 +103,36 @@ void GSExpelGuildMemberHandler::execute(GSExpelGuildMember* pPacket, Player* pPl
         HashMapGuildMemberItor itr = Members.begin();
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
             for (; itr != Members.end(); itr++) {
                 GuildMember* pGuildMember = itr->second;
 
                 ///////////////////////////////////////////////////////////////////
-                
+
                 ///////////////////////////////////////////////////////////////////
                 if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                    pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement guildIdStmt(pConn, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+                    guildIdStmt.bindString(1, pGuildMember->getName());
+                    guildIdStmt.execute();
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                    pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement guildIdStmt(pConn, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+                    guildIdStmt.bindString(1, pGuildMember->getName());
+                    guildIdStmt.execute();
                 } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                    pStmt->executeQuery("UPDATE Ousters SET GuildID = 66 WHERE Name = '%s'",
-                                        pGuildMember->getName().c_str());
+                    PreparedStatement guildIdStmt(pConn, "UPDATE Ousters SET GuildID = 66 WHERE Name = ?");
+                    guildIdStmt.bindString(1, pGuildMember->getName());
+                    guildIdStmt.execute();
                 }
 
-                
+
                 pGuildMember->expire();
-                
+
                 // pGuildMember->destroy();
 
-                
+
                 SAFE_DELETE(pGuildMember);
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
 

@@ -16,6 +16,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SGDeleteGuildOK.h"
 #include "SGQuitGuildOK.h"
@@ -69,20 +70,21 @@ void GSQuitGuildHandler::execute(GSQuitGuild* pPacket, Player* pPlayer)
 
         
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'",
-                                    pGuildMember->getName().c_str());
+                PreparedStatement guildIdStmt(pConn, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+                guildIdStmt.bindString(1, pGuildMember->getName());
+                guildIdStmt.execute();
             } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'",
-                                    pGuildMember->getName().c_str());
+                PreparedStatement guildIdStmt(pConn, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+                guildIdStmt.bindString(1, pGuildMember->getName());
+                guildIdStmt.execute();
             } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                pStmt->executeQuery("UPDATE Ousters SET GuildID = 66 WHERE Name = '%s'",
-                                    pGuildMember->getName().c_str());
+                PreparedStatement guildIdStmt(pConn, "UPDATE Ousters SET GuildID = 66 WHERE Name = ?");
+                guildIdStmt.bindString(1, pGuildMember->getName());
+                guildIdStmt.execute();
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
 
@@ -111,36 +113,46 @@ void GSQuitGuildHandler::execute(GSQuitGuild* pPacket, Player* pPlayer)
             HashMapGuildMemberItor itr = Members.begin();
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
                 for (; itr != Members.end(); itr++) {
                     GuildMember* pGuildMember = itr->second;
 
                     if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                        pStmt->executeQuery("UPDATE Slayer SET GuildID = 99 WHERE Name = '%s'",
-                                            pGuildMember->getName().c_str());
-                        pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                            pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_TEAM_BROKEN));
+                        PreparedStatement guildIdStmt(pConn, "UPDATE Slayer SET GuildID = 99 WHERE Name = ?");
+                        guildIdStmt.bindString(1, pGuildMember->getName());
+                        guildIdStmt.execute();
+
+                        PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                        msgStmt.bindString(1, pGuildMember->getName());
+                        msgStmt.bindString(2, g_pStringPool->c_str(STRID_TEAM_BROKEN));
+                        msgStmt.execute();
                     } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                        pStmt->executeQuery("UPDATE Vampire SET GuildID = 0 WHERE Name = '%s'",
-                                            pGuildMember->getName().c_str());
-                        pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                            pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_BROKEN));
+                        PreparedStatement guildIdStmt(pConn, "UPDATE Vampire SET GuildID = 0 WHERE Name = ?");
+                        guildIdStmt.bindString(1, pGuildMember->getName());
+                        guildIdStmt.execute();
+
+                        PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                        msgStmt.bindString(1, pGuildMember->getName());
+                        msgStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_BROKEN));
+                        msgStmt.execute();
                     } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                        pStmt->executeQuery("UPDATE Ousters SET GuildID = 0 WHERE Name = '%s'",
-                                            pGuildMember->getName().c_str());
-                        pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                            pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_BROKEN));
+                        PreparedStatement guildIdStmt(pConn, "UPDATE Ousters SET GuildID = 0 WHERE Name = ?");
+                        guildIdStmt.bindString(1, pGuildMember->getName());
+                        guildIdStmt.execute();
+
+                        PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                        msgStmt.bindString(1, pGuildMember->getName());
+                        msgStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_BROKEN));
+                        msgStmt.execute();
                     }
 
-                    
+
                     pGuildMember->expire();
 
-                    
+
                     SAFE_DELETE(pGuildMember);
                 }
-
-                SAFE_DELETE(pStmt);
             }
             END_DB(pStmt)
 
@@ -169,7 +181,7 @@ void GSQuitGuildHandler::execute(GSQuitGuild* pPacket, Player* pPlayer)
             HashMapGuildMemberItor itr = Members.begin();
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
                 for (; itr != Members.end(); itr++) {
                     GuildMember* pGuildMember = itr->second;
@@ -194,24 +206,26 @@ void GSQuitGuildHandler::execute(GSQuitGuild* pPacket, Player* pPlayer)
                         Gold = RETURN_SLAYER_SUBMASTER_GOLD;
 
                     if (!Table.empty() && !Message.empty() && Gold != 0) {
-                        
-                        pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                            pGuildMember->getName().c_str(), Message.c_str());
+                        PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                        msgStmt.bindString(1, pGuildMember->getName());
+                        msgStmt.bindString(2, Message);
+                        msgStmt.execute();
 
-                        
-                        
-                        pStmt->executeQuery("UPDATE %s SET Gold = Gold + %d WHERE Name = '%s'", Table.c_str(),
-                                            (int)Gold, pGuildMember->getName().c_str());
+                        // Table is one of the three fixed literals assigned above, never
+                        // user-controlled, so it is safe to splice into the SQL text; Gold
+                        // and Name remain bound parameters.
+                        PreparedStatement goldStmt(pConn, "UPDATE " + Table + " SET Gold = Gold + ? WHERE Name = ?");
+                        goldStmt.bindInt(1, (int)Gold);
+                        goldStmt.bindString(2, pGuildMember->getName());
+                        goldStmt.execute();
                     }
 
-                    
+
                     pGuildMember->expire();
 
-                    
+
                     SAFE_DELETE(pGuildMember);
                 }
-
-                SAFE_DELETE(pStmt);
             }
             END_DB(pStmt)
 

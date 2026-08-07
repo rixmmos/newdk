@@ -18,6 +18,7 @@
 #include "GameServerManager.h"
 #include "Guild.h"
 #include "GuildManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SGModifyGuildMemberOK.h"
 #include "StringPool.h"
@@ -64,26 +65,39 @@ void GSModifyGuildMemberHandler::execute(GSModifyGuildMember* pPacket, Player* p
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
             if (pGuild->getRace() == Guild::GUILD_RACE_SLAYER) {
-                pStmt->executeQuery("UPDATE Slayer SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_TEAM_JOIN_ACCEPT));
-            } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
-                pStmt->executeQuery("UPDATE Vampire SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
-            } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
-                pStmt->executeQuery("UPDATE Ousters SET GuildID = %d WHERE Name = '%s'", pGuild->getID(),
-                                    pGuildMember->getName().c_str());
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message ) VALUES ('%s', '%s' )",
-                                    pGuildMember->getName().c_str(), g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
-            }
+                PreparedStatement guildIdStmt(pConn, "UPDATE Slayer SET GuildID = ? WHERE Name = ?");
+                guildIdStmt.bindInt(1, pGuild->getID());
+                guildIdStmt.bindString(2, pGuildMember->getName());
+                guildIdStmt.execute();
 
-            SAFE_DELETE(pStmt);
+                PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                msgStmt.bindString(1, pGuildMember->getName());
+                msgStmt.bindString(2, g_pStringPool->c_str(STRID_TEAM_JOIN_ACCEPT));
+                msgStmt.execute();
+            } else if (pGuild->getRace() == Guild::GUILD_RACE_VAMPIRE) {
+                PreparedStatement guildIdStmt(pConn, "UPDATE Vampire SET GuildID = ? WHERE Name = ?");
+                guildIdStmt.bindInt(1, pGuild->getID());
+                guildIdStmt.bindString(2, pGuildMember->getName());
+                guildIdStmt.execute();
+
+                PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                msgStmt.bindString(1, pGuildMember->getName());
+                msgStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                msgStmt.execute();
+            } else if (pGuild->getRace() == Guild::GUILD_RACE_OUSTERS) {
+                PreparedStatement guildIdStmt(pConn, "UPDATE Ousters SET GuildID = ? WHERE Name = ?");
+                guildIdStmt.bindInt(1, pGuild->getID());
+                guildIdStmt.bindString(2, pGuildMember->getName());
+                guildIdStmt.execute();
+
+                PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message ) VALUES (?, ? )");
+                msgStmt.bindString(1, pGuildMember->getName());
+                msgStmt.bindString(2, g_pStringPool->c_str(STRID_CLAN_JOIN_ACCEPT));
+                msgStmt.execute();
+            }
         }
         END_DB(pStmt)
 
