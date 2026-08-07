@@ -790,6 +790,15 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/basic
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
+		# Phase 12: shared/Packets/*.h use quoted #include "Packet.h" /
+		# "PacketFactory.h". Previously resolved only because Cpackets/*.h
+		# was #included from Client/Packet/PacketFactoryManager.cpp, and
+		# MSVC's quoted-include search walks the #include stack up to that
+		# includer's directory. shared/Packets/*.cpp is now a standalone
+		# translation unit (target_sources on shared_packets, not #included
+		# from anywhere) with no such stack to walk, so Client/Packet must
+		# be an explicit /I path here.
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
