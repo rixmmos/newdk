@@ -112,15 +112,22 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > clang-format 18 (what the workflow's `apt-get install clang-format`
 > yields on ubuntu-latest), verified against the workflow's exact check;
 > zero `#include` lines moved and the whitespace-stripped byte stream of
-> every file is identical — formatting only. A green fmt job is still
-> not a build. First
-> action: check Actions for build runs on the current tip; if the
-> push-triggered runs didn't fire (see caveat above), `workflow_dispatch`
-> both.
+> every file is identical — formatting only.
+>
+> **[2026-08-07, later] The build verdicts are in (read off Actions):**
+> - **Client run #8, at the wave tip `5ca240a` — SUCCESS, 28m30s.** The
+>   client-side lifts (Phases 1, 2 partial, 3.1, 4 safe items) are now
+>   compile-verified, not just grep-verified.
+> - **Server run #6, same tip — `make debug` GREEN, 21m32s.** The run's
+>   Failure status came entirely from the 27s `clang-format` job
+>   (5 files); zero build errors in its annotations. The server wave is
+>   build-verified twice over (WSL pre-merge + CI post-merge).
+> - Run #9 (`8f4ca50`, the fmt pass) was in progress when this was
+>   written — the remaining confirmation, expected green on both jobs.
 
 **No claim in this document has been confirmed by a compile** — except what
-run #6 (client) and the server's green run (above) actually verified: this
-one commit, on this one run, on `main`. Everything else below is still either
+the green runs actually verified (client #6 and #8, server `make debug` in
+runs #5 and #6): those commits, on those runs, on `main`. Everything else below is still either
 `[measured]` by direct file inspection or `[unverified]`, and a green CI run
 today does not retroactively verify a change made tomorrow — re-run CI to
 trust it.
@@ -330,13 +337,12 @@ interleave once P0 is done.
 
 In order; each independently shippable:
 
-1. **CI on the merged tip.** The `clang-format` job is confirmed to have
-   run against the wave and failed twice; fixed by the fmt pass (box
-   above). The **build** jobs remain unconfirmed — that's the open item.
-   Check Actions; if the push-triggered runs are missing, `workflow_dispatch`
-   both (both workflows have the trigger). The client half of the wave
-   (Phases 1, 2, 3.1, 4) has never been compiled — run #6 predates all of
-   it. Until this is green, the wave is a proposal, not a result.
+1. **CI on the merged tip — resolved 2026-08-07, one tail open.** Client
+   run #8 (tip `5ca240a`): SUCCESS, 28m30s — the client wave compiles.
+   Server run #6 (same tip): `make debug` green in 21m32s; only the
+   `clang-format` job was red, fixed by the fmt pass. Remaining: run #9
+   (`8f4ca50`) completing green, expected. The wave is a result now, not
+   a proposal — item 2 below is the new top item.
 2. **Phase 18 — run the smoke test against `main`** (`docs/smoke-test/`,
    filling PORTING-NOTE's verification table as you go). Workstation + WSL
    + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
@@ -399,7 +405,7 @@ routine phase work be delegated rather than hand-held.
 - [x] Add `docs/README.md` explaining the three-repo layout and
       routing readers to `CLAUDE.md` / `MODERNIZATION.md`.
 
-### Phase 1 — Delete the unambiguously dead (client, done except build verification)
+### Phase 1 — Delete the unambiguously dead (client, done — build-verified 2026-08-07)
 - [x] Delete `Client/MItemTable_bak-2007-5-7.cpp` (14,965 lines).
       **[measured 2026-08-06] Confirmed gone.**
 - [x] Delete the nine CMake-excluded duplicate `.cpp` files
@@ -452,14 +458,12 @@ routine phase work be delegated rather than hand-held.
       `git check-ignore -v` against representative paths in each pattern.
       No edit needed; this was already done in the Phase -1 pass.
 - Success: tree is ~9.2k lines lighter from this phase (~24k including the
-  `_bak` file from the prior pass). **Not build-verified** — no compiler
-  available to this session (client needs Windows+VS2022+vcpkg). This is
-  confidence by grep-based inspection of every deleted symbol's call sites,
-  per the delegation model below, not confidence by green build. The next
-  native Windows build of `dkrix` is the actual gate; if it's not green,
-  treat that as a Phase 1 regression to bisect against the commits in this
-  pass (three commits: the nine duplicate files, the 35 Cpackets handlers,
-  the CMakeLists.txt cleanup).
+  `_bak` file from the prior pass). ~~Not build-verified~~ —
+  **build-verified 2026-08-07:** client CI run #8 compiled the merged tip
+  `5ca240a` with every Phase 1 deletion in it — SUCCESS, 28m30s. The
+  grep-based confidence held. (If a later regression ever points here,
+  the pass was three commits: the nine duplicate files, the 35 Cpackets
+  handlers, the CMakeLists.txt cleanup.)
 
 ### Phase 2 — Shrink `basic/Platform.h` (client, partially done 2026-08-06)
 
@@ -619,10 +623,11 @@ back to a single unconditional typedef.
         Adapter's ctor did) — pre-existing, unrelated to this item;
         `InputManager::s_KeyName` / `GetKeyName()` has no definition and no
         callers anywhere — pre-existing dead code, harmless while unused.
-      - Not build-verified — no compiler toolchain in this environment (see
-        `CLAUDE.md`). Verification was grep-based call-site tracing plus
-        reading every file in the duplicate/shim set end to end, not a
-        compile.
+      - ~~Not build-verified~~ — **build-verified 2026-08-07** by client
+        CI run #8 at the merged tip (`5ca240a`, SUCCESS, 28m30s), which
+        compiled the renames and deletions. Original verification was
+        grep-based call-site tracing plus reading every file in the
+        duplicate/shim set end to end.
 - [ ] **Item 2** — Delete `CDirectSetup*`, `CDirectDrawSurface*`, `BIT_RES.*`,
       `CDirectDraw_StaticMembers.cpp`. Not started. Note from item 1 (checked
       independently, not just carried over from the parked branch):
