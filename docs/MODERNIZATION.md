@@ -161,10 +161,16 @@ per-area status doc, this file wins.
     `lf.lfHeight`. The GDI *stubs* in `Platform.h` are therefore still
     load-bearing as a data structure, even though no GDI *call* remains.
     Removing them is a signature change across callers, not a deletion.
-- **[measured] `basic/Platform.h` is 1,996 lines — it grew by 28.** The
-  target is under 600. `id_t` appears 5 times, `HRESULT` 4 times, and the
-  `_T` / `_tcscpy` shims are still present, as are `DeleteObject` (line 263),
-  `LOGFONT` (line 281), and `CreateFontIndirect` (line 366).
+- **[measured 2026-08-06] `basic/Platform.h` is 1,995 lines.** The growth
+  from the 1,968 baseline was a real Windows-compile-error fix, not drift —
+  see Phase 2 below for the `git log -p` finding. Phase 2's safe sub-items
+  (duplicate `id_t`, dead `_tcscpy`/`_tcscat` shims, one unchecked-HRESULT
+  signature) are done; the two items that would actually move this number —
+  mutex primitive unification and a full HRESULT-machinery audit — need a
+  compiler to do safely and are reported as scoped-out, not attempted. `_T`
+  and `stricmp` turned out to have live callers (doc was wrong to call them
+  dead); `_itoa` was never in this file. `DeleteObject`, `LOGFONT`, and
+  `CreateFontIndirect` are untouched, deferred to Phase 5 per instructions.
 - **[measured] The client build is still held together by
   `file(GLOB …) + FILTER EXCLUDE`** — 34 `FILTER`/`REMOVE_ITEM` lines remain
   in `CMakeLists.txt`. All nine duplicate-symbol `.cpp` files still exist
@@ -394,27 +400,112 @@ routine phase work be delegated rather than hand-held.
   pass (three commits: the nine duplicate files, the 35 Cpackets handlers,
   the CMakeLists.txt cleanup).
 
-### Phase 2 — Shrink `basic/Platform.h` (client, not started — file grew)
-- [ ] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
-      371; collapse to a single `using id_t = std::uint32_t;`.
-- [ ] Delete the dead `_T`, `_tcscpy`, `_tcscat`, `stricmp`, `_itoa`
-      macro shims (no callers).
-- [ ] Delete the fake `HRESULT`/`S_OK`/`S_FALSE` machinery; update the
-      DXLib adapters that return it but never have it checked.
-- [ ] Either define `platform_get_scan_code()` or delete the
-      `SCAN_CODE()` macro that claims to call it.
-- [ ] Pick one mutex primitive (`SDL_mutex *` or `std::mutex`); remove
-      the `CRITICAL_SECTION` → pthread shim and its 20-odd callers.
-- [ ] Defer the GDI stubs (`DeleteObject`, `CreateFontIndirect`,
-      `LOGFONT`) to Phase 5. **Superseded — see the Phase 5 note below.
-      `VS_UI_Base.cpp` has already stopped *calling* them, but `LOGFONT`
-      is still a parameter type in `Base::SetFont`, so this is now a
-      signature change rather than a deletion.**
+### Phase 2 — Shrink `basic/Platform.h` (client, partially done 2026-08-06)
+
+**Why the file grew (checked `git log -p` before touching anything):**
+the 1,968 → 1,996 growth was not scope creep. The single growth commit
+(`067067f`) added `#include <windows.h>` for real on `PLATFORM_WINDOWS`
+and then guarded the repo-local `BYTE`/`WORD`/`DWORD`/... typedefs and
+the old unconditional `typedef DWORD id_t;` behind `#ifndef
+PLATFORM_WINDOWS` / `#ifndef PLATFORM_ID_T_DEFINED`. Before that fix,
+Windows would hit a hard typedef-redefinition conflict: an unconditional
+`typedef unsigned int id_t;` followed by an unconditional `typedef DWORD
+id_t;` under `#ifdef PLATFORM_WINDOWS`, two different types with the
+same name in the same scope. **The growth was a real bug fix that made
+the file bigger, not drift to reverse.** Any future shrink work must
+keep the Windows/non-Windows split it introduced rather than collapsing
+back to a single unconditional typedef.
+
+- [x] `id_t` duplicate typedefs. Found 5 occurrences (matches the
+      2026-08-06 measurement), not at the doc's old line numbers
+      (128/130/358/371 had already shifted). One was a properly guarded,
+      platform-conditional single definition (Windows → real SDK
+      `DWORD`, else → `unsigned int`) — correct and, per the above, load
+      bearing. The other was a dead unconditional duplicate 250 lines
+      later, identical on non-Windows, a silent redefinition-conflict
+      risk if the guard around it were ever removed. Deleted the
+      duplicate; kept the single guarded definition, changed its
+      non-Windows arm from `unsigned int` to `uint32_t` for consistency
+      with the rest of the file's stdint-based typedefs. **Deliberately
+      did not collapse to a single unconditional `using id_t =
+      std::uint32_t;`** as the doc's old wording said — that would
+      revert the Windows fix above. Commit `cdf82ef`.
+- [x] Dead macro shims — audited each name individually instead of
+      deleting the group:
+      - `_tcscpy`, `_tcscat`: zero callers anywhere in `dkrix/` (grepped
+        both `.h` and `.cpp`). Deleted. Commit `a36c0d3`.
+      - `_T`: live callers (`VS_UI/src/vs_ui_gamecommon2.cpp`,
+        `Client/MinTr.h`, `Client/GetWinVer.h`). **Kept — doc's "no
+        callers" claim was wrong.**
+      - `stricmp`: live callers in 5 files (`VS_UI_GameCommon.cpp`,
+        `PacketFunction.cpp`, `GCAddNPCHandler.cpp`, `CGameUpdate.cpp`,
+        `vs_ui_gamecommon2.cpp`). **Kept — doc's claim was wrong.**
+      - `_itoa`: does not exist anywhere in `Platform.h` or the rest of
+        `dkrix/`. **Nothing to delete — doc's claim was moot.**
+- [~] Fake `HRESULT`/`S_OK`/`S_FALSE` machinery — partially done.
+      Changed `CSDLInput::SetAcquire()` from `HRESULT` to `void`: it's a
+      documented no-op on the SDL backend, and all 7 call sites
+      (`WinMain.cpp`, `hangul/Ci.cpp`, `GameInit.cpp`, `GameMain.cpp` ×3)
+      discard the return value as a bare statement. Commit `8725860`.
+      **Did not delete the machinery itself.** `HRESULT`/`S_OK`/`S_FALSE`/
+      `SUCCEEDED`/`FAILED` appear in ~20 files tree-wide; some are
+      Windows-only (`VS_UI_WebBrowser.cpp`, `Imm/*`, `Client.cpp`,
+      `WavePackFileManager.cpp` are excluded from the non-Windows CMake
+      source list, so they always get the real SDK `HRESULT` and don't
+      depend on the Platform.h shim), but others aren't provably so
+      without a build. Also found `CDirectSoundStream.cpp` and
+      `CDirectSoundStream_Adapter.cpp` both fully implement
+      `CSDLStream::WaveReadFile` (and are both unconditionally in
+      `DXLIB_SOURCES` when `HAVE_SDL2_MIXER` is on) — a likely duplicate-
+      symbol linker error, and squarely the "delete the `_Adapter.cpp`
+      twins" work already scoped to Phase 3. Left alone here to avoid
+      colliding with that.
+- [x] `SCAN_CODE()` / `platform_get_scan_code()` — **doc's premise was
+      stale, nothing to do.** `SCAN_CODE` isn't in `Platform.h` at all;
+      it's defined in `basic/PlatformUtil.h` (`#ifdef PLATFORM_WINDOWS`
+      → `LOBYTE(HIWORD(x))`, else → `platform_get_scan_code(x)`), has
+      live callers (`VS_UI_Game.cpp`, `VS_UI_Title.cpp`), and
+      `platform_get_scan_code()` is genuinely implemented in
+      `PlatformSDL.cpp:312`. No dead macro, no missing function.
+- [ ] Mutex primitive unification — **not attempted; scope reported
+      instead of a partial fix, per instructions.** ~16 call sites of
+      `Enter/Leave/Initialize/DeleteCriticalSection` across 11 files, not
+      a uniform mechanical pattern:
+      - A global `CRITICAL_SECTION g_Lock` (defined in
+        `CMessageArray.cpp`, `extern`-declared in `Client.cpp`,
+        `GameInit.cpp`, `RequestServerPlayerManager.cpp`) is
+        `InitializeCriticalSection`'d once and `DeleteCriticalSection`'d
+        at **6 different early-return points** scattered through the
+        ~1,300-line `WinMain()` in `Client.cpp`. Safe to reason about
+        (all 6 are alternate exits of one call, not repeated re-init),
+        but a real cross-TU refactor, not a search-and-replace.
+      - `MWorkThread.h`'s `m_csDeque`/`m_csCurrent` are **never
+        Initialize/DeleteCriticalSection'd anywhere** — a latent bug,
+        currently inert only because `LockDeque`/`UnlockDeque`/
+        `LockCurrent`/`UnlockCurrent` have zero callers.
+      - `ProfileManager.h` has a `static_assert(sizeof(CRITICAL_SECTION)
+        >= ...)` that encodes assumptions about the shim's layout and
+        would need rework for any replacement primitive.
+      - 5 other classes (`RequestUserManager`, `WhisperManager`,
+        `RequestClientPlayerManager`, `RequestServerPlayerManager`'s own
+        `m_Lock`, `ProfileManager`) follow the simple
+        member-Init-in-ctor/Delete-in-dtor pattern and would be
+        mechanical on their own.
+      This needs a working Windows build to verify (std::mutex isn't
+      copyable, so anywhere one of these structs is copied/memset would
+      only surface at compile time) and is sizeable enough to be its own
+      follow-up, not a Phase 2 sub-item done blind.
+- [ ] GDI stubs — skipped entirely per instructions (Phase 5 territory,
+      `LOGFONT` is now a live parameter type in `Base::SetFont`).
 - Target: `Platform.h` shrinks to under 600 lines.
-      **[measured 2026-08-06] Currently 1,996 lines — it has grown by 28
-      since the 1,968 baseline. `id_t` × 5, `HRESULT` × 4, `_T`/`_tcscpy`
-      shims still present.** Whatever is adding to this file is working
-      against the phase; find it before starting.
+      **[measured 2026-08-06] 1,995 lines** (was 1,996 at session start;
+      1,968 baseline). The two safely-completed Platform.h items nearly
+      net out — comments explaining *why* the Windows/non-Windows split
+      must stay cost about as many lines as the dead code removal saved.
+      The real mass reduction available here is the mutex unification
+      (~major structural item, deferred above) and a full HRESULT-
+      machinery audit across ~20 files (also deferred) — neither is safe
+      to do blind without a compiler.
 
 ### Phase 3 — Collapse DXLib into a thin SDL facade (client, item 1 done 2026-08-07)
 - [x] **Item 1 — Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
