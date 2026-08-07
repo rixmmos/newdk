@@ -17,6 +17,7 @@
 #include "LogNameManager.h"
 #include "LoginServerManager.h"
 #include "PCFinder.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 
 #endif
@@ -42,14 +43,13 @@ void CGWhisperHandler::execute(CGWhisper* pPacket, Player* pPlayer)
 
         bool Success = false;
 
-        
+
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
 
         Creature* pTargetCreature = g_pPCFinder->getCreature_LOCKED(pPacket->getName());
 
-        
+
         if (pTargetCreature != NULL) {
-            
             if (LogNameManager::getInstance().isExist(pCreature->getName())) {
                 filelog("chatLog.txt", "[Whisper] %s --> %s> %s", pCreature->getName().c_str(),
                         pTargetCreature->getName().c_str(), pPacket->getMessage().c_str());
@@ -63,14 +63,13 @@ void CGWhisperHandler::execute(CGWhisper* pPacket, Player* pPlayer)
                 Success = false;
             }
 
-            
+
             if (Success) {
                 if (((GamePlayer*)pTargetPlayer)->getPlayerStatus() == GPS_NORMAL) {
                     if (pCreature != NULL && pTargetCreature != NULL) {
-                        
                         GCWhisper gcWhisper;
 
-                        
+
                         gcWhisper.setName(pCreature->getName());
                         gcWhisper.setColor(pPacket->getColor());
                         gcWhisper.setMessage(pPacket->getMessage());
@@ -84,10 +83,10 @@ void CGWhisperHandler::execute(CGWhisper* pPacket, Player* pPlayer)
                 }
             }
 
-            
+
         } else {
             /*inthesky*/
-             
+
             Statement* pStmt = NULL;
             Result* pResult = NULL;
 
@@ -98,43 +97,30 @@ void CGWhisperHandler::execute(CGWhisper* pPacket, Player* pPlayer)
 
             try {
                 BEGIN_DB {
-                    pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-                    
-                    pResult =
-                        pStmt->executeQuery("SELECT PlayerID FROM Slayer WHERE Name='%s'", pPacket->getName().c_str());
+                    PreparedStatement nameStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                               "SELECT PlayerID FROM Slayer WHERE Name=?");
+                    nameStmt.bindString(1, pPacket->getName());
+                    pResult = nameStmt.execute();
 
                     if (pResult->next()) {
                         PlayerID = pResult->getString(1);
-                        SAFE_DELETE(pStmt);
 
-                        
-                        pStmt = g_pDatabaseManager->getDistConnection("USERINFO")->createStatement();
-                        pResult = pStmt->executeQuery(
-                            "SELECT CurrentServerGroupID, LogOn FROM Player WHERE PlayerID='%s'", PlayerID.c_str());
+                        PreparedStatement playerStmt(g_pDatabaseManager->getDistConnection("USERINFO"),
+                                                     "SELECT CurrentServerGroupID, LogOn FROM Player WHERE PlayerID=?");
+                        playerStmt.bindString(1, PlayerID);
+                        pResult = playerStmt.execute();
 
-                        
                         if (pResult->next()) {
                             CurrentServerGroupID = pResult->getInt(1);
                             LogOn = pResult->getString(2);
 
-                            
                             if (LogOn == "GAME") {
                                 bServerFind = true;
-                                SAFE_DELETE(pStmt);
                             }
-                        } else {
-                            SAFE_DELETE(pStmt);
                         }
-                    } else {
-                        SAFE_DELETE(pStmt);
                     }
 
-                    if (bServerFind) 
-                    {
-                         
-
-
+                    if (bServerFind) {
                         GameServerInfo* pGameServerInfo = g_pGameServerInfoManager->getGameServerInfo(
                             1, CurrentServerGroupID, g_pConfig->getPropertyInt("WorldID"));
                         if (pGameServerInfo != NULL) {

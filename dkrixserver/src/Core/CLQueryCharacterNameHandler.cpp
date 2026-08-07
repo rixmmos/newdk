@@ -13,8 +13,8 @@
 #include "GameWorldInfoManager.h"
 #include "LCQueryResultCharacterName.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "Result.h"
-#include "Statement.h"
 #endif
 
 bool isAvailableID(const char* pID);
@@ -36,54 +36,40 @@ void CLQueryCharacterNameHandler::execute(CLQueryCharacterName* pPacket, Player*
 
     Assert(WorldID <= g_pGameWorldInfoManager->getSize());
 
-    Statement* pStmt = NULL;
+    PreparedStatement nameStmt(g_pDatabaseManager->getConnection(WorldID), "SELECT Name FROM Slayer WHERE Name = ?");
+    nameStmt.bindString(1, pPacket->getCharacterName());
+    Result* pResult = nameStmt.execute();
 
-    try {
-        pStmt = g_pDatabaseManager->getConnection(WorldID)->createStatement();
+    LCQueryResultCharacterName lcQueryResultCharacterName;
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT Name FROM Slayer WHERE Name = '%s'", pPacket->getCharacterName().c_str());
+    // cout << "Query Result : " << pPacket->getCharacterName() << " is ";
 
-        LCQueryResultCharacterName lcQueryResultCharacterName;
+    lcQueryResultCharacterName.setCharacterName(pPacket->getCharacterName());
 
-        // cout << "Query Result : " << pPacket->getCharacterName() << " is ";
+    if (pResult->getRowCount() == 0) {
+        lcQueryResultCharacterName.setExist(false);
 
-        lcQueryResultCharacterName.setCharacterName(pPacket->getCharacterName());
+        // cout << "not ";
 
-        if (pResult->getRowCount() == 0) {
-            lcQueryResultCharacterName.setExist(false);
-
-            // cout << "not ";
-
-        } else {
-            lcQueryResultCharacterName.setExist(true);
-        }
-
-        //--------------------------------------------------------------------------------
-        
-        //--------------------------------------------------------------------------------
-        // by sigi
-        if (!isAvailableID(pPacket->getCharacterName().c_str())) {
-            lcQueryResultCharacterName.setExist(true);
-        }
-
-         
-
-        // cout << "exist..." << endl;
-
-        pLoginPlayer->sendPacket(&lcQueryResultCharacterName);
-
-        
-        
-        
-        pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
-
-        SAFE_DELETE(pStmt);
-        // delete pStmt;		// 2002.1.16 by sigi
-    } catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
-        throw;
+    } else {
+        lcQueryResultCharacterName.setExist(true);
     }
+
+    //--------------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------------
+    // by sigi
+    if (!isAvailableID(pPacket->getCharacterName().c_str())) {
+        lcQueryResultCharacterName.setExist(true);
+    }
+
+
+    // cout << "exist..." << endl;
+
+    pLoginPlayer->sendPacket(&lcQueryResultCharacterName);
+
+
+    pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
 #endif
 

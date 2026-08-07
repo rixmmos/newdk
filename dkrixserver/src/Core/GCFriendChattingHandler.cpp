@@ -11,6 +11,7 @@
 #include "GCFriendChatting.h"
 #include "GamePlayer.h"
 #include "PCFinder.h"
+#include "PreparedStatement.h"
 
 void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
@@ -32,15 +33,15 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO FriendList (Friend_Name, Owner_Name) VALUES "
-                                "('%s', '%s')",
-                                pCreature->getName().c_str(), pPacket->getPlayerName().c_str());
-            pStmt->executeQuery("INSERT INTO FriendList (Friend_Name, Owner_Name) VALUES "
-                                "('%s', '%s')",
-                                pPacket->getPlayerName().c_str(), pCreature->getName().c_str());
+            PreparedStatement insertStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                         "INSERT INTO FriendList (Friend_Name, Owner_Name) VALUES (?, ?)");
+            insertStmt.bindString(1, pCreature->getName());
+            insertStmt.bindString(2, pPacket->getPlayerName());
+            insertStmt.execute();
 
-            SAFE_DELETE(pStmt);
+            insertStmt.bindString(1, pPacket->getPlayerName());
+            insertStmt.bindString(2, pCreature->getName());
+            insertStmt.execute();
         }
         END_DB(pStmt)
 
@@ -87,11 +88,13 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
             Result* pResult = NULL;
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
                 ////////////////////GC_ADD_FRIEND_EXIST//////////////////
-                pResult = pStmt->executeQuery(
-                    "SELECT Friend_Name, IsBlack FROM FriendList WHERE Owner_Name = '%s' and Friend_Name='%s'",
-                    pCreature->getName().c_str(), pPacket->getPlayerName().c_str());
+                PreparedStatement existStmt(
+                    g_pDatabaseManager->getConnection("DARKEDEN"),
+                    "SELECT Friend_Name, IsBlack FROM FriendList WHERE Owner_Name = ? and Friend_Name=?");
+                existStmt.bindString(1, pCreature->getName());
+                existStmt.bindString(2, pPacket->getPlayerName());
+                pResult = existStmt.execute();
                 if (pResult->next()) {
                     blResult = false;
                     GCFriendChatting gcFriend3;
@@ -100,9 +103,12 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
                     pGamePlayer->sendPacket(&gcFriend3);
                 }
                 /////////////////GC_ADD_FRIEND_BLACK///////////////////////
-                pResult = pStmt->executeQuery(
-                    "SELECT IsBlack FROM FriendList WHERE Owner_Name='%s' and Friend_Name='%s' and IsBlack=1",
-                    pPacket->getPlayerName().c_str(), pCreature->getName().c_str());
+                PreparedStatement blackStmt(
+                    g_pDatabaseManager->getConnection("DARKEDEN"),
+                    "SELECT IsBlack FROM FriendList WHERE Owner_Name=? and Friend_Name=? and IsBlack=1");
+                blackStmt.bindString(1, pPacket->getPlayerName());
+                blackStmt.bindString(2, pCreature->getName());
+                pResult = blackStmt.execute();
                 if (pResult->next()) {
                     blResult = false;
                     GCFriendChatting gcFriend4;
@@ -110,7 +116,6 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
                     gcFriend4.setPlayerName(pPacket->getPlayerName());
                     pGamePlayer->sendPacket(&gcFriend4);
                 }
-                SAFE_DELETE(pStmt);
             }
             END_DB(pStmt)
 
@@ -150,13 +155,13 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
         } else {
             Statement* pStmt = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery("INSERT INTO FriendHistory(HistoryMessage, Owner_Name, Friend_Name) VALUES "
-                                    "('%s', '%s', '%s')",
-                                    pPacket->getMessage().c_str(), pPacket->getPlayerName().c_str(),
-                                    pCreature->getName().c_str());
-
-                SAFE_DELETE(pStmt);
+                PreparedStatement historyStmt(
+                    g_pDatabaseManager->getConnection("DARKEDEN"),
+                    "INSERT INTO FriendHistory(HistoryMessage, Owner_Name, Friend_Name) VALUES (?, ?, ?)");
+                historyStmt.bindString(1, pPacket->getMessage());
+                historyStmt.bindString(2, pPacket->getPlayerName());
+                historyStmt.bindString(3, pCreature->getName());
+                historyStmt.execute();
             }
             END_DB(pStmt)
         }
@@ -169,9 +174,10 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
         Result* pResult = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult = pStmt->executeQuery("SELECT Friend_Name, IsBlack FROM FriendList WHERE Owner_Name = '%s'",
-                                          pCreature->getName().c_str());
+            PreparedStatement listStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                       "SELECT Friend_Name, IsBlack FROM FriendList WHERE Owner_Name = ?");
+            listStmt.bindString(1, pCreature->getName());
+            pResult = listStmt.execute();
             while (pResult->next()) {
                 GCFriendChatting gcFriend;
                 gcFriend.setCommand(GC_UPDATE);
@@ -191,9 +197,10 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
                 pGamePlayer->sendPacket(&gcFriend);
             }
 
-            pResult =
-                pStmt->executeQuery("SELECT HistoryMessage,Friend_Name FROM FriendHistory WHERE Owner_Name = '%s'",
-                                    pCreature->getName().c_str());
+            PreparedStatement historyStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                          "SELECT HistoryMessage,Friend_Name FROM FriendHistory WHERE Owner_Name = ?");
+            historyStmt.bindString(1, pCreature->getName());
+            pResult = historyStmt.execute();
             bool IsHave = false;
             while (pResult->next()) {
                 IsHave = true;
@@ -204,10 +211,12 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
 
                 pGamePlayer->sendPacket(&gcFriend2);
             }
-            if (IsHave)
-                pStmt->executeQuery("DELETE FROM FriendHistory WHERE Owner_Name='%s'", pCreature->getName().c_str());
-
-            SAFE_DELETE(pStmt);
+            if (IsHave) {
+                PreparedStatement clearStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                            "DELETE FROM FriendHistory WHERE Owner_Name=?");
+                clearStmt.bindString(1, pCreature->getName());
+                clearStmt.execute();
+            }
         }
         END_DB(pStmt)
 
@@ -242,12 +251,12 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
     case CG_ADD_FRIEND_BLACK: {
         Statement* pStmt = NULL;
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO FriendList (Friend_Name, Owner_Name, IsBlack) VALUES "
-                                "('%s', '%s', 1)",
-                                pPacket->getPlayerName().c_str(), pCreature->getName().c_str());
-
-            SAFE_DELETE(pStmt);
+            PreparedStatement blackInsertStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                              "INSERT INTO FriendList (Friend_Name, Owner_Name, IsBlack) VALUES "
+                                              "(?, ?, 1)");
+            blackInsertStmt.bindString(1, pPacket->getPlayerName());
+            blackInsertStmt.bindString(2, pCreature->getName());
+            blackInsertStmt.execute();
         }
         END_DB(pStmt)
 
@@ -278,12 +287,15 @@ void GCFriendChattingHandler::execute(GCFriendChatting* pPacket, Player* pPlayer
     case CG_FRIEND_DELETE: {
         Statement* pStmt = NULL;
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("DELETE FROM FriendList WHERE Owner_Name='%s' and Friend_Name='%s'",
-                                pCreature->getName().c_str(), pPacket->getPlayerName().c_str());
-            pStmt->executeQuery("DELETE FROM FriendList WHERE Owner_Name='%s' and Friend_Name='%s'",
-                                pPacket->getPlayerName().c_str(), pCreature->getName().c_str());
-            SAFE_DELETE(pStmt);
+            PreparedStatement deleteStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                         "DELETE FROM FriendList WHERE Owner_Name=? and Friend_Name=?");
+            deleteStmt.bindString(1, pCreature->getName());
+            deleteStmt.bindString(2, pPacket->getPlayerName());
+            deleteStmt.execute();
+
+            deleteStmt.bindString(1, pPacket->getPlayerName());
+            deleteStmt.bindString(2, pCreature->getName());
+            deleteStmt.execute();
         }
         END_DB(pStmt)
 
