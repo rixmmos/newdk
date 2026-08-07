@@ -420,7 +420,6 @@ target_link_libraries(gameserver PRIVATE
     Items
     Quest
     Mofus
-    GameServerDatabase
     ServerCore
     GameServerPackets
     Skill
@@ -432,6 +431,7 @@ target_link_libraries(gameserver PRIVATE
     Mission
     CTF
     GameServerCBilling
+    GameServerDatabase
     ${MYSQL_LIBRARY}
     ${LUA51_LIBRARIES}
     ${XERCES_LIBRARY}

@@ -37,10 +37,10 @@ elseif(UNIX)
 endif()
 
 target_link_libraries(sharedserver PRIVATE
-    Database
     SharedServerPackets
     ServerCore
     Core
+    Database
     ${MYSQL_LIBRARY}
     Threads::Threads
     ${EXTRA_LIBS}

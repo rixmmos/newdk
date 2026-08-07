@@ -39,12 +39,12 @@ elseif(UNIX)
 endif()
 
 target_link_libraries(loginserver PRIVATE
-    LoginServerDatabase
     LoginServerPackets
     ServerCore
     Core
     LoginServerBilling
     LoginServerCBilling
+    LoginServerDatabase
     ${MYSQL_LIBRARY}
     Threads::Threads
     ${EXTRA_LIBS}
