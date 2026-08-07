@@ -1248,20 +1248,26 @@ to `main` at authoring time, each independently green under
       CMake — done 2026-08-07. Lifted the parked line's Phase 14 approach
       (`4670b06`/`ed23fea`) against `main`'s current tree, not copied
       literally (Phase 3 item 3 moved `DXLib/` to `Platform/` since the
-      tag diverged). `VS_UI_SRC_SOURCES`: explicit 56-file `set()`,
-      regenerated from `find VS_UI -name "*.cpp" | sort` — identical
-      count and file set to the parked line's list, confirming the
-      directory hasn't drifted. `CLIENT_MAIN_SOURCES`: kept as
-      `file(GLOB … CONFIGURE_DEPENDS)` (bumped
+      tag diverged). `VS_UI_SRC_SOURCES`: explicit `set()`, regenerated
+      from `find VS_UI -iname "*.cpp" | sort`. `CLIENT_MAIN_SOURCES`:
+      kept as `file(GLOB … CONFIGURE_DEPENDS)` (bumped
       `cmake_minimum_required` 3.10 → 3.12), matching the parked line's
       reasoning — the glob still covers ~1,045 files (242 `Client/` +
       66 `Client/Packet/` root + 735 one level under `Packet/` + 1
       `SXml/` + 1 `WinLib/`), confirmed no third-level `Packet/`
-      nesting the non-recursive `**` pattern would miss. [measured — no
-      CMake in this sandbox]: verified by diffing the explicit VS_UI
-      list against `find`'s output (byte-identical) and confirming
-      every listed file exists on disk with no drops/dupes; the real
-      compile gate is client CI on `main` after this lands.
+      nesting the non-recursive `**` pattern would miss.
+      **CI red 2026-08-07 (run #11, `eb9fd2d`), fixed same day
+      (`19c99c0`):** the first pass's verification used a plain
+      `-name "*.cpp"`, case-sensitive, which silently dropped
+      `VS_UI_TITLE_SHOWCHAR.CPP` — a real, live, uppercase-extension
+      file defining six `C_VS_UI_NEWCHAR::_ShowCharacter*` methods.
+      The file(GLOB) it replaced had matched it fine only because
+      CMake's glob ran on case-insensitive Windows/NTFS in CI, not the
+      case-sensitive sandbox that generated the replacement list —
+      `LNK2019`/`LNK1120` on MSVC once that safety net was gone. One
+      file added; the list is now [measured] byte-identical to
+      `find -iname` (57/57, diffed directly, not just counted).
+      **Compile-verified 2026-08-07**, run pending on `19c99c0`.
 - [x] CI build matrix (`make debug-asan` on Linux) — done 2026-08-07.
       `USE_ASAN`/`USE_TSAN`/`USE_UBSAN` CMake options + `debug-asan`/
       `debug-tsan`/`debug-ubsan` Makefile targets in both trees
