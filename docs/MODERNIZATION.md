@@ -95,6 +95,17 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > results in seconds. If a push-triggered run seems to be missing, that's
 > most likely why; it is not evidence the push failed to register.
 
+> **[2026-08-07] The merge wave landed.** Six merges this morning brought the
+> first lifted phases onto `main` (tip `5ca240a`): Phase 1, Phase 2 (safe
+> items), Phase 3 item 1, Phase 4 safe items, Phase 7, Phase 9 mechanical
+> items, plus a 4/5/7 follow-up bundle. Verification is uneven by design:
+> the server-side work (7, 9) was compile-verified with `make debug` in WSL
+> on its review branches before merging; the client-side work (1, 2, 3, 4)
+> is grep-verified only — run #6 predates all of it. **No CI run against the
+> merged tip has been confirmed.** First action: check Actions for runs on
+> `5ca240a`; if the push-triggered runs didn't fire (see caveat above),
+> `workflow_dispatch` both.
+
 **No claim in this document has been confirmed by a compile** — except what
 run #6 (client) and the server's green run (above) actually verified: this
 one commit, on this one run, on `main`. Everything else below is still either
@@ -142,10 +153,12 @@ per-area status doc, this file wins.
   `dkrix/CMakeLists.txt:531` globs `Client/WinLib/*.cpp` into the build.
   Do not delete it. Retiring it is a real refactor of the update path, not a
   deletion.
-- `Client/DXLib/` still carries a double layer: `CDirect{Input,Sound,
-  Music,Draw}*` plus matching `_Adapter.cpp` files that wrap the real
-  `CSDL*` implementations. The shim is vestigial; callers already bypass
-  it in several places.
+- **[re-measured 2026-08-07]** `Client/DXLib/`'s double layer is half gone:
+  Phase 3 item 1 renamed `CSDLInput`→`InputManager` / `CSDLAudio`→
+  `AudioManager` and deleted the dead `_Adapter.cpp` twins and shadow
+  headers. 11 `CDirect*` files remain (`CDirectDraw*`, `CDirectMusic`,
+  `CDirectSoundStream`, `CDirectSetup*`, plus `BIT_RES.*` alongside) —
+  Phase 3 items 2–3 territory.
 - `Client/SpriteLib/` still contains the 555/565/4444 pixel-format
   class explosion even though SDL handles pixel-format conversion
   natively. The `*_SDL.cpp` backend files are mostly stubs; actual
@@ -171,24 +184,24 @@ per-area status doc, this file wins.
   and `stricmp` turned out to have live callers (doc was wrong to call them
   dead); `_itoa` was never in this file. `DeleteObject`, `LOGFONT`, and
   `CreateFontIndirect` are untouched, deferred to Phase 5 per instructions.
-- **[measured] The client build is still held together by
-  `file(GLOB …) + FILTER EXCLUDE`** — 34 `FILTER`/`REMOVE_ITEM` lines remain
-  in `CMakeLists.txt`. All nine duplicate-symbol `.cpp` files still exist
-  (`GlobalVariables`, `MissingGlobals`, `GameHelpers`, `GameFunctions`,
-  `GamePacketFunctions`, `ActionFunctions`, `MitemTableinit2`,
-  `GCNotifyWinHandler`, `GCNotifyWin`), as do all 35
-  `Client/Packet/Cpackets/*Handler.cpp` files.
+- **[re-measured 2026-08-07] The client build still uses
+  `file(GLOB …) + FILTER EXCLUDE`** — 33 `FILTER`/`REMOVE_ITEM` lines in
+  `CMakeLists.txt` (was 34). But the nine duplicate-symbol `.cpp` files and
+  all 35 `Client/Packet/Cpackets/*Handler.cpp` files are **gone** (Phase 1,
+  merged `04d3820`) — zero `*Handler.cpp` remain under `Cpackets/`.
 - **[measured] `MItemTable_bak-2007-5-7.cpp` is gone** (14,965 lines). This
   is the one Phase 1 item that has actually landed.
 - **[measured] `Client/WinLib/` still exists** — `CWinUpdate.cpp`,
   `CWinUpdate.h`, `WinLib.h`.
-- **[measured] `Client/DXLib/` still holds 46 files**, including the full
-  `CDirect{Draw,Input,Music,Sound}` set, their `_Adapter.cpp` twins,
-  `CDirectDraw_StaticMembers.cpp`, `CDirectSetupGetVersion.cpp`, and
-  `BIT_RES.*`. `Client/Platform/` does not exist yet.
-- **[measured] `Client/SpriteLib/` still holds 20 pixel-format variant
-  files** (the `555` / `565` / `4444` class explosion), untouched — despite
-  the current branch being named `modernize/phase-4-sprite`.
+- **[re-measured 2026-08-07] `Client/DXLib/` holds 42 files** (was 46) —
+  the `_Adapter.cpp` twins and dead `CDirectInput.cpp` went in Phase 3
+  item 1. `CDirectDraw*`, `CDirectDraw_StaticMembers.cpp`,
+  `CDirectSetupGetVersion.cpp`, and `BIT_RES.*` remain.
+  `Client/Platform/` does not exist yet.
+- **[re-measured 2026-08-07] `Client/SpriteLib/` holds 12 pixel-format
+  variant files** (was 20 — the 8 dead PackList files went in `76f13e1`).
+  The survivors are serializers, not renderers; their fate rests on the
+  Phase 4c asset audit, not on the class count.
 - **[measured] No `.clang-format` in `dkrix/`.** Format is still unenforced.
 - Client has no `.clang-format`; the `fmt` and `fmt-check` Makefile
   targets are stubbed `TODO`s. Format is not enforced.
@@ -251,15 +264,23 @@ per-area status doc, this file wins.
 - Database access is libmysqlclient through a thin wrapper. No
   prepared-statement abstraction. `DatabaseManager` is thread-local,
   not pooled.
-  - **[measured] The "~87 `sprintf(query, …)` sites" figure does not
-    reproduce.** Current counts: 26 matches for `sprintf(query`, and 425
-    `sprintf` calls overall under `src/server/`. Whichever measurement
-    produced 87 is unrecorded. Re-derive the real number and write the
-    exact grep used into this file before starting Phase 8 — sizing that
-    phase off an unreproducible figure is how it stalls.
-- Lua 5.1 / LuaJIT is embedded via the C API. `luaL_openlibs()` is
-  called, so quest scripts can `io.open` the filesystem. Enum values
-  are pulled via `lua_tonumber` with no range check.
+  - **[re-measured 2026-08-07] The SQL surface, with the greps recorded
+    this time.** (The old "~87" never reproduced; the 08-06 count of 26
+    is also stale — Phase 7's tree deletions took most of it.)
+    `sprintf(query` is down to **9** hits:
+    `grep -rn 'sprintf(query' src/server --include='*.cpp' --include='*.h'`.
+    But the parked line's audit showed that metric misses the real path:
+    `Statement::executeQuery(fmt, …)` → `vsprintf` → `mysql_real_query`.
+    On `main` today: **1,456** `executeQuery(` sites, **598** of them with
+    `%s`/`%d` format specifiers — under `dkrixserver/src`,
+    `grep -rnE 'executeQuery[[:space:]]*\('` and
+    `grep -rnE 'executeQuery[[:space:]]*\(\s*"[^"]*%[sd]'`.
+    Size Phase 8's SQL half off 598, not 9.
+- Lua 5.1 / LuaJIT is embedded via the C API. **[2026-08-07]** The
+  `luaL_openlibs()` hole is closed: `LuaState::init()` now whitelists
+  `base`/`math`/`string` only (`b204ebd`), and the four enum-cast sites
+  go through range-checked `lua_toboundedenum<T>` (`9b1756f`). See
+  Phase 9 for the build verification.
 - `conf/gameserver.conf` contains plaintext `DB_PASSWORD: elca110`,
   dev IPs (`192.168.0.16`), and double-encoded Chinese comments from
   a prior encoding migration.
@@ -285,10 +306,36 @@ Phases are ordered for least-risk-first and for unblocking downstream
 work. "P0" is a prerequisite for everything else; the others can
 interleave once P0 is done.
 
-> **Status reality check (2026-08-06).** The phase order below has not been
-> followed. Phase 5 (text) landed first; Phase 1 is ~1/5 done; Phases 2, 3,
-> 4 are untouched despite the active branch being named for Phase 4; and
-> Phase 2's target file *grew*. Treat the ordering as intent, not history.
+> **Status reality check (2026-08-07).** The phase order was never followed,
+> and after the 08-06/07 wave it no longer needs to be: 1 done, 2 partial
+> (two compiler-gated items left, now CI-schedulable), 3 item 1 of 3, 4 safe
+> items (4b/4c open), 5 main item (glyph check open), 7 done, 9 mechanical
+> items done. Still untouched on this line: 3.2–3.3, 4b/4c, 8's SQL half,
+> 10 — and everything the parked line numbered 11–18, now booked below.
+> Treat the ordering as intent, not history.
+
+### Current next steps (audit 2026-08-07)
+
+In order; each independently shippable:
+
+1. **CI on the merged tip.** No run has been confirmed against `5ca240a`.
+   Check Actions; if the push-triggered runs are missing, `workflow_dispatch`
+   both (both workflows have the trigger). The client half of the wave
+   (Phases 1, 2, 3.1, 4) has never been compiled — run #6 predates all of
+   it. Until this is green, the wave is a proposal, not a result.
+2. **Phase 18 — run the smoke test against `main`** (`docs/smoke-test/`,
+   filling PORTING-NOTE's verification table as you go). Workstation + WSL
+   + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
+   — it needs eyes on a running client anyway.
+3. **Phase 8 SQL half, via Phase 11.** Lift the parked `PreparedStatement`
+   design (its 11.1) and the `check-sql-injection.sh` ratchet (its 16);
+   re-baseline at today's 598.
+4. **Phase 3 items 2–3, then 4b/4c.** All CI-gated now. Item 2 starts with
+   the `CDirectDrawSurface` liveness question already flagged in Phase 3.
+5. **Phase 10 (+ parked 14/15/16).** Client `.clang-format` + fmt targets
+   (lift `a760899`), explicit source lists, asan matrix, ratchet wiring.
+6. **Phase 8 secrets step 2** — deployment change; needs a live-server
+   window, config backups, and Enrico at the wheel.
 
 ### Phase -1 — Make the work verifiable (done — both trees green 2026-08-06)
 
@@ -504,8 +551,9 @@ back to a single unconditional typedef.
       must stay cost about as many lines as the dead code removal saved.
       The real mass reduction available here is the mutex unification
       (~major structural item, deferred above) and a full HRESULT-
-      machinery audit across ~20 files (also deferred) — neither is safe
-      to do blind without a compiler.
+      machinery audit across ~20 files (also deferred). Neither was safe
+      blind — but client CI has been green since 2026-08-06, so both are
+      now schedulable as ordinary CI-gated changes.
 
 ### Phase 3 — Collapse DXLib into a thin SDL facade (client, item 1 done 2026-08-07)
 - [x] **Item 1 — Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
@@ -622,7 +670,7 @@ Safe now (judgeable by reading) — both done 2026-08-07:
       (`VS_UI/src/VS_UI_Item.cpp:280,282`, `VS_UI/src/VS_UI_util.cpp:686,688`),
       and the matching `SPRITELIB_HEADERS` lines were removed with the files.
 
-Blocked on green CI (Phase -1):
+Unblocked 2026-08-06 (CI green), not started:
 
 - [ ] **4b** — collapse the two SDL2 backends. `SpriteLibBackendSDL.cpp`
       survives (it is what the game calls); `tools/engine/sprite/` is
@@ -871,16 +919,28 @@ to `main` at authoring time, each independently green under
 > the tracked conf files and in git history. Rotating to the template flow
 > (copy `.template` → `.conf` on the host, export `DKRIX_*` in the service
 > unit) is a deployment change and needs a running server to validate.
-- [ ] Introduce a `PreparedStatement` wrapper over `mysql_stmt_*`.
-- [ ] Migrate the ~87 `sprintf(query, ...)` sites module by module,
-      starting with user-string call sites (chat, pet names, custom
-      options).
-- [ ] Add a CI grep-gate that fails on new `sprintf(query,` call
-      sites in `src/server/`.
-- [ ] Move `DB_PASSWORD`, `DB_HOST`, `LoginServerIP`,
-      `SharedServerIP`, `LogServerIP` from `conf/*.conf` into
-      environment variables. Keep `*.conf` as a template with
-      `${VAR}` placeholders.
+- [ ] Introduce a `PreparedStatement` wrapper. **Not a refactor — a
+      from-scratch API:** zero `mysql_stmt_*` usage exists anywhere; the
+      live path is `Statement::executeQuery(fmt, …)` → `vsprintf` →
+      `mysql_real_query` (parked line's audit, still true here). The
+      parked line designed, shipped, and build-verified exactly this as
+      its Phase 11.1 — lift that design. See Phase 11 below.
+- [ ] Migrate call sites module by module, starting with user-string
+      sites (chat, pet names, custom options). Real size on `main`
+      **[measured 2026-08-07]: 598** `executeQuery` sites with `%s`/`%d`
+      format specifiers (not "~87", and not the 9 surviving
+      `sprintf(query` hits — exact greps in Ground truth above).
+      Ratchet-driven, never a single big-bang close-out.
+- [ ] Add the CI ratchet: lift the parked line's
+      `scripts/check-sql-injection.sh` (its baseline was 567; re-baseline
+      at 598 for this tree) and wire it into `server.yml` — parked
+      Phase 16 has the wiring. Gate on *no increase*, not on the count.
+- [x] ~~Move credentials/hosts from `conf/*.conf` into environment
+      variables with `${VAR}` templates.~~ **Step 1 shipped** —
+      `Properties::load()` expansion + `DKRIX_*` templates (see the note
+      above). Step 2 — rotate the real deployment onto the templates and
+      purge plaintext from tracked conf — is open, needs a live-server
+      window, and is a do-not-delegate item.
 
 ### Phase 9 — Server: Lua sandbox and packet schema (mechanical items done 2026-08-07)
 
@@ -972,6 +1032,13 @@ to `main` at authoring time, each independently green under
       "promote `dkrixserver/src/Core/` packet headers to a submodule,
       point `dkrix/Client/Packet/` at it, delete the client copies" —
       multi-day, not a single commit.
+      **Caveat found after that proposal was written — the parked line's
+      own later audit (its Phase 17) invalidated the "differs only in
+      whitespace" spot-check:** across the 326 name-matched pairs,
+      **0 files are bit-identical and only 7 are cosmetic-only
+      divergent**. The submodule promotion is still the right shape, but
+      it is a per-file reconciliation, not a `git mv`. Read the tag's
+      Phase 17 before sizing. Booked as Phase 12 below.
 - [x] Add endian-safe read/write primitives in
       `SocketInputStream` / `SocketOutputStream`. **Scope check:**
       zero `ntoh*`/`hton*`/`htole*`/`le*toh` calls anywhere near these
@@ -995,15 +1062,81 @@ to `main` at authoring time, each independently green under
       protocol's default is a coordinated client+server change and is
       out of scope here.
 
-### Phase 10 — Build hygiene & CI
-- [ ] Add `.clang-format` to `client/`; implement
-      `make fmt` / `fmt-check` (remove the TODO stubs).
-- [ ] Replace `file(GLOB …)` with explicit source lists in the
-      client CMake.
-- [ ] Add a GitHub Actions matrix that runs `make debug-asan` on
-      Linux and macOS.
-- [ ] Both trees: `.gitignore` for `build/`,
-      `compile_commands.json`, editor detritus.
+### Phase 10 — Build hygiene & CI (not started here; parked line finished it as its 10+14+15)
+- [ ] Add `.clang-format` to `dkrix/` plus a client `Makefile` with
+      `fmt` / `fmt-check` targets. (No actual TODO stubs exist — the
+      parked line's audit found that phrasing aspirational. Lift its
+      `a760899`: server `.clang-format` copied over + matching targets.)
+- [ ] Replace `file(GLOB …)` with explicit source lists in the client
+      CMake. The parked line did this as its Phase 14: two GLOB sites
+      covering ~1,100 `.cpp`; explicit 56-file VS_UI list first,
+      `CONFIGURE_DEPENDS` as interim elsewhere. Lift the approach.
+- [ ] CI build matrix (`make debug-asan` on Linux). Parked Phase 15 has
+      the working matrix and the dependency list — and confirmed there is
+      **no Boost dep**, contrary to older notes.
+- [x] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
+      editor detritus — **already done on this line** (Phase -1/Phase 1
+      passes, verified with `git check-ignore -v`).
+
+### Phases 11–18 — booked 2026-08-07 from the parked line (none started here)
+
+The parked line continued past this plan's original horizon. Its phase
+numbers are kept so `git log archive/modernization-phases-1-17 --oneline
+--grep "Phase N"` keeps working. For each: read what the tag did first,
+lift the approach one phase at a time against a build — never as a merge.
+
+### Phase 11 — SQL injection remediation (not started here; parked: 11.1 done)
+The executable half of Phase 8's SQL side. **11.1** — `PreparedStatement`
+wrapper API: designed, shipped, and build-verified on the parked line;
+`main` has nothing (`docs/smoke-test/PORTING-NOTE.md` already warns that
+`server_build_fix.sh` references `PreparedStatement.{h,cpp}`, which does
+not exist here — that gap closes when this lands). **11.2** — migrate the
+598 format-specifier `executeQuery` sites: ongoing, ratchet-driven
+(Phase 16), explicitly never a one-phase close-out.
+
+### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
+Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
+**920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
+516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
+**326** pairs in `dkrix/Client/Packet/Cpackets/` (CG 294 + CL 32 only:
+the client decodes receive-side packets inline, so only the send-side
+families are duplicated). **Apply the Phase 17 caveat before sizing** —
+the pairs are not whitespace-identical.
+
+### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
+`main` already has the server side: opt-in `readLE`/`writeLE`
+(`56e59cc`). Remaining: `dkrix/Client/Packet/SocketInputStream` /
+`SocketOutputStream` duplicate the server's raw-cast stream files.
+Phase 12 folds the two copies together — do the client half there,
+not twice.
+
+### Phase 14 — Deterministic CMake source lists — folded into Phase 10, bullet 2.
+
+### Phase 15 — CI build matrix — folded into Phase 10, bullet 3.
+
+### Phase 16 — CI ratchet activation (not started here; parked: scripts exist, unwired)
+Two ratchet scripts on the parked line, neither wired into a workflow
+even there, and neither present on `main` (`dkrixserver/scripts/` does
+not exist): `check-sql-injection.sh` (baseline 567 there → 598 here) and
+`check-packet-duplicates.sh` (baseline 326). Lift both, re-baseline
+against `main`, wire into `server.yml`. Small and high-leverage: every
+later migration PR gets judged by machine instead of by recount.
+
+### Phase 17 — Packet divergence audit (not started here; parked: done, finding stands)
+Read-only input to Phase 12. The parked full-tree sweep found **0 of 326**
+name-matched files bit-identical and only **7** cosmetic-only divergent —
+the "whitespace-only" assumption is dead. Re-running the audit against
+`main` is safe-to-delegate work (read-only, no build needed) and should
+precede any Phase 12 file moves.
+
+### Phase 18 — End-to-end runtime smoke test against `main` (not run)
+The validation gate for the whole 08-06/07 wave, and the top open item
+after CI-on-tip. The runbook is already lifted to `docs/smoke-test/`
+(2026-08-06, paths derived at runtime); **nothing in it has been run
+against `main`**. Its output is a runtime-bug list — the parked run's
+Phase 18 kept finding bugs (PP, QQ, …) in a tree where phases 1–17 all
+compiled clean, which is exactly why a green build does not close this.
+Fold Phase 5's glyph check into the same session. Workstation only.
 
 ## Explicit non-goals
 
@@ -1043,7 +1176,10 @@ Added 2026-08-06 to answer directly: *how much of this can be handed off?*
 The constraint is not judgment, it is **verification**. An agent session has
 no cmake, no MSVC, no SDL2, no libmysqlclient, and no xerces-c, and cannot
 reach the live MySQL instance. It can read and edit every file in the repo
-and cannot compile any of them.
+and cannot compile any of them. **Two things changed on 2026-08-06/07:**
+CI is green on both trees, and sessions running on the workstation have
+WSL with the full server toolchain (`make debug` verified Phases 7 and 9
+there before merge). Verification is no longer the bottleneck; review is.
 
 **Safe to delegate now** (no build required to judge correctness):
 - Documentation, this plan, changelog prose, release notes.
@@ -1069,11 +1205,12 @@ and cannot compile any of them.
 - Any release: `PUBLISH_RELEASE.cmd` writes into `Darkeden` and
   ships to real testers.
 
-**The honest summary:** the ceiling on unsupervised work is set by Phase -1.
-Until CI exists, every code change is a proposal that a human must build and
-judge, so "start the project and walk away" is not available. Once CI is
-green on both trees, Phases 1, 2, 3, 7 and 10 become genuinely delegable in
-sequence, and the interference drops to reviewing pull requests.
+**The honest summary (updated 2026-08-07):** Phase -1 is done and the gate
+is real — the 08-06/07 wave was produced this way. Delegable with a CI gate
+now: Phase 2's two deferred items, Phase 3 items 2–3, Phase 4b, Phase 10,
+Phases 11.1, 16, and 17, and Phase 12's file reconciliation. Still human-
+only: the do-not-delegate list above, unchanged — plus confirming CI on the
+merged tip and the Phase 18 smoke run, which only the workstation can do.
 
 ## Living index of superseded docs
 

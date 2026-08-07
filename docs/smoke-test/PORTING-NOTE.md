@@ -10,8 +10,11 @@ and `main` did not have it.
 
 ## Status: inherited, not yet verified on this line
 
-**Nothing here has been run against `main`.** It was written against a tree that
-had Phases 1–17 applied. `main` has none of them. Treat every step as a
+**Nothing here has been run against `main`.** It was written against a tree
+that had Phases 1–17 applied. When lifted (2026-08-06), `main` had none of
+them; as of 2026-08-07 `main` carries Phases 1, 2 (partial), 3.1, 4 (safe
+items), 7, and 9 (mechanical), so the build-step divergence risk below has
+shrunk — but it is not gone, and nothing is verified. Treat every step as a
 hypothesis until you run it.
 
 The runbook is far more portable than the code was — the environment setup
