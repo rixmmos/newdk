@@ -1,23 +1,30 @@
 //----------------------------------------------------------------------
-// CDirectSound.cpp
+// AudioManager.cpp
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectSound implementation removed - using SDL2_mixer on all platforms
-// NOTE: This class is deprecated. Use SDL_mixer functions directly instead.
+// NOTE: This class is a stub. Use SDL_mixer functions directly instead.
+// (CDirectSound_Adapter.cpp, a duplicate implementation that called into
+// DXLibBackend's dxlib_sound_* functions, was deleted in Phase 3 item 1: it
+// never compiled — its ctor/dtor were named CDirectSound() instead of
+// AudioManager(), and its global instance was declared with the undeclared
+// type `CDirectSound`. It also duplicated every symbol below whenever
+// HAVE_SDL2_MIXER was on, which would have been a link error even after
+// fixing the names. This file was always the one actually built.)
 //----------------------------------------------------------------------
 
-#include "CDirectSound.h"
+#include "AudioManager.h"
 
 //-----------------------------------------------------------------------------
 // Global instance
 //-----------------------------------------------------------------------------
-CSDLAudio g_SDLAudio;
+AudioManager g_SDLAudio;
 
 //-----------------------------------------------------------------------------
 // Constructor/Destructor
 //-----------------------------------------------------------------------------
 
-CSDLAudio::CSDLAudio()
+AudioManager::AudioManager()
 {
 	m_pDS = NULL;
 	m_bInit = false;
@@ -25,7 +32,7 @@ CSDLAudio::CSDLAudio()
 	m_MaxVolume = 0;
 }
 
-CSDLAudio::~CSDLAudio()
+AudioManager::~AudioManager()
 {
 	// Stub - SDL mixer is managed elsewhere
 }
@@ -34,19 +41,19 @@ CSDLAudio::~CSDLAudio()
 // Initialization
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::Init(HWND hwnd)
+bool AudioManager::Init(HWND hwnd)
 {
 	// Not implemented - use Mix_OpenAudio() from SDL_mixer instead
 	(void)hwnd;
 	return false;
 }
 
-void CSDLAudio::Release()
+void AudioManager::Release()
 {
 	// Not implemented - use Mix_CloseAudio() from SDL_mixer instead
 }
 
-bool CSDLAudio::IsInit() const
+bool AudioManager::IsInit() const
 {
 	return m_bInit;
 }
@@ -55,17 +62,17 @@ bool CSDLAudio::IsInit() const
 // Mute Control
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::IsMute() const
+bool AudioManager::IsMute() const
 {
 	return m_bMute;
 }
 
-void CSDLAudio::SetMute()
+void AudioManager::SetMute()
 {
 	m_bMute = true;
 }
 
-void CSDLAudio::UnSetMute()
+void AudioManager::UnSetMute()
 {
 	m_bMute = false;
 }
@@ -74,32 +81,24 @@ void CSDLAudio::UnSetMute()
 // Volume Control
 //-----------------------------------------------------------------------------
 
-LONG CSDLAudio::GetVolumeLimit() const
+LONG AudioManager::GetVolumeLimit() const
 {
 	return m_MaxVolume;
 }
 
-void CSDLAudio::SetVolumeLimit(LONG volume)
+void AudioManager::SetVolumeLimit(LONG volume)
 {
 	m_MaxVolume = volume;
 }
 
-bool CSDLAudio::SetMaxVolume(LPDIRECTSOUNDBUFFER buffer)
+bool AudioManager::SetMaxVolume(LPDIRECTSOUNDBUFFER buffer)
 {
 	// Not implemented - use Mix_Volume() from SDL_mixer instead
 	(void)buffer;
 	return false;
 }
 
-bool CSDLAudio::AddVolume(LPDIRECTSOUNDBUFFER buffer, int step)
-{
-	// Not implemented - use Mix_Volume() from SDL_mixer instead
-	(void)buffer;
-	(void)step;
-	return false;
-}
-
-bool CSDLAudio::SubVolume(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::AddVolume(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - use Mix_Volume() from SDL_mixer instead
 	(void)buffer;
@@ -107,7 +106,15 @@ bool CSDLAudio::SubVolume(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::SubVolumeFromMax(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::SubVolume(LPDIRECTSOUNDBUFFER buffer, int step)
+{
+	// Not implemented - use Mix_Volume() from SDL_mixer instead
+	(void)buffer;
+	(void)step;
+	return false;
+}
+
+bool AudioManager::SubVolumeFromMax(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - use Mix_Volume() from SDL_mixer instead
 	(void)buffer;
@@ -119,7 +126,7 @@ bool CSDLAudio::SubVolumeFromMax(LPDIRECTSOUNDBUFFER buffer, int step)
 // Frequency Control
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time frequency changes
 	(void)buffer;
@@ -127,7 +134,7 @@ bool CSDLAudio::AddFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::SubFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::SubFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time frequency changes
 	(void)buffer;
@@ -139,7 +146,7 @@ bool CSDLAudio::SubFrequency(LPDIRECTSOUNDBUFFER buffer, int step)
 // Pan Control
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::RightPan(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::RightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
@@ -147,7 +154,7 @@ bool CSDLAudio::RightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::LeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::LeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
@@ -155,7 +162,7 @@ bool CSDLAudio::LeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::CenterToRightPan(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::CenterToRightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
@@ -163,7 +170,7 @@ bool CSDLAudio::CenterToRightPan(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::CenterToLeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
+bool AudioManager::CenterToLeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
@@ -171,14 +178,14 @@ bool CSDLAudio::CenterToLeftPan(LPDIRECTSOUNDBUFFER buffer, int step)
 	return false;
 }
 
-bool CSDLAudio::CenterPan(LPDIRECTSOUNDBUFFER buffer)
+bool AudioManager::CenterPan(LPDIRECTSOUNDBUFFER buffer)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
 	return false;
 }
 
-bool CSDLAudio::ChangePan(LPDIRECTSOUNDBUFFER buffer, int pan)
+bool AudioManager::ChangePan(LPDIRECTSOUNDBUFFER buffer, int pan)
 {
 	// Not implemented - SDL_mixer doesn't support real-time panning
 	(void)buffer;
@@ -190,14 +197,14 @@ bool CSDLAudio::ChangePan(LPDIRECTSOUNDBUFFER buffer, int pan)
 // Sound Buffer Operations
 //-----------------------------------------------------------------------------
 
-LPDIRECTSOUNDBUFFER CSDLAudio::LoadWav(LPSTR filename)
+LPDIRECTSOUNDBUFFER AudioManager::LoadWav(LPSTR filename)
 {
 	// Not implemented - use Mix_LoadWAV() from SDL_mixer instead
 	(void)filename;
 	return NULL;
 }
 
-LPDIRECTSOUNDBUFFER CSDLAudio::CreateBuffer(LPVOID sdat, DWORD size, DWORD caps, LPWAVEFORMATEX wfx)
+LPDIRECTSOUNDBUFFER AudioManager::CreateBuffer(LPVOID sdat, DWORD size, DWORD caps, LPWAVEFORMATEX wfx)
 {
 	// Not implemented - use SDL_mixer sound functions instead
 	(void)sdat;
@@ -207,13 +214,13 @@ LPDIRECTSOUNDBUFFER CSDLAudio::CreateBuffer(LPVOID sdat, DWORD size, DWORD caps,
 	return NULL;
 }
 
-void CSDLAudio::Release(LPDIRECTSOUNDBUFFER buffer)
+void AudioManager::Release(LPDIRECTSOUNDBUFFER buffer)
 {
 	// Not implemented - use Mix_FreeChunk() from SDL_mixer instead
 	(void)buffer;
 }
 
-LPDIRECTSOUNDBUFFER CSDLAudio::DuplicateSoundBuffer(LPDIRECTSOUNDBUFFER buffer, bool bAutoRelease)
+LPDIRECTSOUNDBUFFER AudioManager::DuplicateSoundBuffer(LPDIRECTSOUNDBUFFER buffer, bool bAutoRelease)
 {
 	// Not implemented - SDL_mixer doesn't need buffer duplication
 	(void)buffer;
@@ -221,12 +228,12 @@ LPDIRECTSOUNDBUFFER CSDLAudio::DuplicateSoundBuffer(LPDIRECTSOUNDBUFFER buffer, 
 	return NULL;
 }
 
-void CSDLAudio::ReleaseDuplicateBuffer()
+void AudioManager::ReleaseDuplicateBuffer()
 {
 	// Not implemented - not needed with SDL_mixer
 }
 
-void CSDLAudio::ReleaseTerminatedDuplicateBuffer()
+void AudioManager::ReleaseTerminatedDuplicateBuffer()
 {
 	// Not implemented - not needed with SDL_mixer
 }
@@ -235,14 +242,14 @@ void CSDLAudio::ReleaseTerminatedDuplicateBuffer()
 // Playback Control
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::IsPlay(LPDIRECTSOUNDBUFFER buffer) const
+bool AudioManager::IsPlay(LPDIRECTSOUNDBUFFER buffer) const
 {
 	// Not implemented - use Mix_Playing() from SDL_mixer instead
 	(void)buffer;
 	return false;
 }
 
-bool CSDLAudio::NewPlay(LPDIRECTSOUNDBUFFER buffer, bool loop)
+bool AudioManager::NewPlay(LPDIRECTSOUNDBUFFER buffer, bool loop)
 {
 	// Not implemented - use Mix_PlayChannel() from SDL_mixer instead
 	(void)buffer;
@@ -250,7 +257,7 @@ bool CSDLAudio::NewPlay(LPDIRECTSOUNDBUFFER buffer, bool loop)
 	return false;
 }
 
-bool CSDLAudio::Play(LPDIRECTSOUNDBUFFER buffer, bool loop, bool duplicate)
+bool AudioManager::Play(LPDIRECTSOUNDBUFFER buffer, bool loop, bool duplicate)
 {
 	// Not implemented - use Mix_PlayChannel() from SDL_mixer instead
 	(void)buffer;
@@ -259,7 +266,7 @@ bool CSDLAudio::Play(LPDIRECTSOUNDBUFFER buffer, bool loop, bool duplicate)
 	return false;
 }
 
-bool CSDLAudio::Stop(LPDIRECTSOUNDBUFFER buffer)
+bool AudioManager::Stop(LPDIRECTSOUNDBUFFER buffer)
 {
 	// Not implemented - use Mix_HaltChannel() from SDL_mixer instead
 	(void)buffer;
@@ -270,7 +277,7 @@ bool CSDLAudio::Stop(LPDIRECTSOUNDBUFFER buffer)
 // DirectSound Access
 //-----------------------------------------------------------------------------
 
-LPDIRECTSOUND CSDLAudio::GetDS() const
+LPDIRECTSOUND AudioManager::GetDS() const
 {
 	return m_pDS;
 }
@@ -279,7 +286,7 @@ LPDIRECTSOUND CSDLAudio::GetDS() const
 // Error Handling
 //-----------------------------------------------------------------------------
 
-bool CSDLAudio::DirectSoundFailed(const char* str)
+bool AudioManager::DirectSoundFailed(const char* str)
 {
 	// Not implemented - log error to console instead
 	(void)str;

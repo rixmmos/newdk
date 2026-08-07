@@ -792,7 +792,7 @@ InitInput()
 
 	if (g_pSDLInput==NULL)
 	{
-		g_pSDLInput = new CSDLInput;
+		g_pSDLInput = new InputManager;
 	}
 
 	//----------------------------
@@ -803,7 +803,7 @@ InitInput()
 //	g_pSDLInput->InitJoyDevice(g_hWnd);
 	//g_pSDLInput->InitMouseDevice(g_hWnd);
 
-	if (!g_pSDLInput->Init( g_hWnd, g_hInstance, CSDLInput::NONEXCLUSIVE ))
+	if (!g_pSDLInput->Init( g_hWnd, g_hInstance, InputManager::NONEXCLUSIVE ))
 	{
 		InitFail("DirectInput Error!");
 		return false;

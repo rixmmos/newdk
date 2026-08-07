@@ -22,8 +22,8 @@ class CWaitUIUpdate : public CWinUpdate {
 	protected :
 		void		ProcessInput();
 		void		UpdateDraw();
-		static void DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z);
-		static void	DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT, DWORD);
+		static void DXMouseEvent(InputManager::E_MOUSE_EVENT event, int x, int y, int z);
+		static void	DXKeyboardEvent(InputManager::E_KEYBOARD_EVENT, DWORD);
 		static void	SDLTextInputEvent(const char* text, int* window_coords);
 		static void	SDLTextEditingEvent(const char* text, int start, int length, int* window_coords);
 };

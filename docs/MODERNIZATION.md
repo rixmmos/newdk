@@ -416,14 +416,74 @@ routine phase work be delegated rather than hand-held.
       shims still present.** Whatever is adding to this file is working
       against the phase; find it before starting.
 
-### Phase 3 — Collapse DXLib into a thin SDL facade (client)
-- [ ] Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
-      `AudioManager`; delete `CDirect{Input,Sound,Music,Draw}` shims
-      and their `_Adapter.cpp` twins; grep-replace callers.
-- [ ] Delete `CDirectSetup*`, `CDirectDrawSurface*`, `BIT_RES.*`,
-      `CDirectDraw_StaticMembers.cpp`.
-- [ ] Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
-      `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`.
+### Phase 3 — Collapse DXLib into a thin SDL facade (client, item 1 done 2026-08-07)
+- [x] **Item 1 — Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
+      `AudioManager`; delete the dead/duplicate shim files and grep-replace
+      callers.** `git mv CDirectInput.{h,cpp→_Adapter.cpp} →
+      InputManager.{h,cpp}` and `CDirectSound.{h,cpp} → AudioManager.{h,cpp}`,
+      word-bounded rename of the two class names across every caller
+      (`git grep` before/after confirms zero remaining `CSDLInput`/`CSDLAudio`
+      hits, including a `CDirectInput` straggler in `VS_UI/WinMain.cpp` from
+      an earlier incomplete rename). Deleted four files, verified dead/broken
+      first, not just grep-flagged:
+      - `Client/DXLib/CDirectInput.cpp` — excluded from `DXLIB_SOURCES`
+        entirely (dead; the code that actually ships was always
+        `CDirectInput_Adapter.cpp`, now `InputManager.cpp`).
+      - `Client/DXLib/CDirectSound_Adapter.cpp` and
+        `CDirectSoundStream_Adapter.cpp` — the flagged lead was right about a
+        duplicate-symbol risk but understated it: both files fail to
+        **compile**, not just link. Their ctor/dtor were still named after
+        the pre-rename class (`AudioManager::CDirectSound()`,
+        `CSDLStream::CDirectSoundStream()` — not valid member names for
+        either class), and `CDirectSound_Adapter.cpp` declared its global
+        instance with the type `CDirectSound`, which doesn't exist anywhere
+        in the tree. Neither file could ever have built.
+      - `Client/DXLib/CDirectMusic_Adapter.cpp` — compiles standalone but
+        duplicates every symbol in `CDirectMusic.cpp` (ctor/dtor, global
+        `g_SDLMusic`, all ten methods); guaranteed link failure whenever
+        `HAVE_SDL2_MIXER` is on, which is the recommended/default config.
+      - Also deleted two shadow header forwarders at `Client/CDirectInput.h`
+        / `Client/CDirectSound.h` (`#include "DXLib/CDirect....h"` one-liners
+        that shadowed the real headers for some callers depending on
+        `-I` order) and repointed their ~7 consumers straight at
+        `DXLib/InputManager.h` / `DXLib/AudioManager.h`.
+      - `CDirectMusic` and `CDirectSoundStream` keep their existing names —
+        not in the explicit rename list — only their dead `_Adapter.cpp`
+        twin was removed in each case.
+      - Net effect: `DXLIB_SOURCES` in `Client/DXLib/CMakeLists.txt` no
+        longer branches on `HAVE_SDL2_MIXER` to add the adapters; it's one
+        unconditional list with exactly one implementation per class. This
+        was previously a guaranteed compile/link failure on the
+        recommended build config (SDL2_mixer present) and is now fixed.
+      - Left alone, found but out of scope for item 1: `WinMain.cpp:95-96`
+        (`CDirectDraw gC_DD; CSpriteSurface gC_DDSurface;`) references types
+        that don't exist under those names either (item 2 territory —
+        `CDirectDraw` is `CSDLGraphics` now); `Client/GlobalVariables.cpp:199`
+        declares an unrelated global `bool g_SDLAudio = false;` that
+        collides by name (not type) with the real `AudioManager g_SDLAudio;`
+        — a pre-existing bug, not touched; `CDirectMusic.cpp`'s constructor
+        never initializes `m_OriginalTempo`/`m_CurrentTempo` (the deleted
+        Adapter's ctor did) — pre-existing, unrelated to this item;
+        `InputManager::s_KeyName` / `GetKeyName()` has no definition and no
+        callers anywhere — pre-existing dead code, harmless while unused.
+      - Not build-verified — no compiler toolchain in this environment (see
+        `CLAUDE.md`). Verification was grep-based call-site tracing plus
+        reading every file in the duplicate/shim set end to end, not a
+        compile.
+- [ ] **Item 2** — Delete `CDirectSetup*`, `CDirectDrawSurface*`, `BIT_RES.*`,
+      `CDirectDraw_StaticMembers.cpp`. Not started. Note from item 1 (checked
+      independently, not just carried over from the parked branch):
+      `CDirectDrawSurface` is not dead — `Client/SpriteLib/CSpriteSurface.cpp`
+      / `.h` reference it and are themselves pulled in by
+      `MEventManager`, `MGuildMarkManager`, `MTopView`, `ProfileManager`,
+      `UIMessageManager`, `UtilityFunction`, and two `VS_UI` headers.
+      Confirm exactly what's live vs. dead in that surface before deleting —
+      this may need to become a rename instead, same as item 1's
+      `CDirectDraw` → `CSDLGraphics`.
+- [ ] **Item 3** — Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
+      `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`. Not
+      started; update `dkrix/CMakeLists.txt` include paths and source globs
+      to match.
 
 ### Phase 4 — One sprite pipeline (client, re-scoped 2026-08-06)
 

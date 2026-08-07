@@ -1,21 +1,20 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectInput_Adapter.cpp
+	InputManager.cpp
 
-	DirectInput adapter using DXLibBackend.
-	This file provides SDL2 backend support for CDirectInput class.
+	Input manager, implemented on top of DXLibBackend (SDL2).
 
 	2025.01.14
 
 -----------------------------------------------------------------------------*/
 
-#include "CDirectInput.h"
+#include "InputManager.h"
 #include "DXLibBackend.h"
 
 #define MSB		0x80
 
 /* Global instance */
-CSDLInput*	g_pSDLInput = NULL;
+InputManager*	g_pSDLInput = NULL;
 
 /* Keep the original key name table - it's defined in the header */
 
@@ -26,7 +25,7 @@ CSDLInput*	g_pSDLInput = NULL;
 #ifdef DXLIB_BACKEND_SDL
 
 /* Constructor */
-CSDLInput::CSDLInput()
+InputManager::InputManager()
 {
 	m_pDI				= NULL;
 	m_pMouse			= NULL;
@@ -47,13 +46,13 @@ CSDLInput::CSDLInput()
 }
 
 /* Destructor */
-CSDLInput::~CSDLInput()
+InputManager::~InputManager()
 {
 	FreeDirectInput();
 }
 
 /* Clear input state */
-void CSDLInput::Clear()
+void InputManager::Clear()
 {
 	for (int i=0; i<256; i++)
 	{
@@ -72,7 +71,7 @@ void CSDLInput::Clear()
 }
 
 /* Initialize using SDL backend */
-BOOL CSDLInput::Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
+BOOL InputManager::Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 {
 	// Initialize SDL backend
 	if (dxlib_input_init(hWnd) != 0) {
@@ -88,7 +87,7 @@ BOOL CSDLInput::Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 }
 
 /* Release SDL backend */
-void CSDLInput::FreeDirectInput()
+void InputManager::FreeDirectInput()
 {
 	dxlib_input_release();
 
@@ -98,7 +97,7 @@ void CSDLInput::FreeDirectInput()
 }
 
 /* Update input using SDL backend */
-void CSDLInput::UpdateInput()
+void InputManager::UpdateInput()
 {
 	// Update backend
 	dxlib_input_update();
@@ -208,7 +207,7 @@ void CSDLInput::UpdateInput()
 }
 
 /* Set acquire (SDL backend - no-op) */
-HRESULT CSDLInput::SetAcquire(bool active_app)
+HRESULT InputManager::SetAcquire(bool active_app)
 {
 	if (!m_pMouse || !m_pKeyboard)
 		return S_FALSE;
@@ -216,7 +215,7 @@ HRESULT CSDLInput::SetAcquire(bool active_app)
 }
 
 /* Set mouse position (SDL backend) */
-void CSDLInput::SetMousePosition(int x, int y)
+void InputManager::SetMousePosition(int x, int y)
 {
 	m_mouse_x = x;
 	m_mouse_y = y;
@@ -224,19 +223,19 @@ void CSDLInput::SetMousePosition(int x, int y)
 }
 
 /* Set mouse speed (SDL backend - stub) */
-void CSDLInput::SetMouseSpeed()
+void InputManager::SetMouseSpeed()
 {
 	// SDL backend uses system mouse settings
 }
 
 /* Get mouse acceleration (not applicable for SDL) */
-int CSDLInput::GetMouseAcceleration(int value)
+int InputManager::GetMouseAcceleration(int value)
 {
 	return value;
 }
 
 /* Set mouse move limit */
-void CSDLInput::SetMouseMoveLimit(int x, int y)
+void InputManager::SetMouseMoveLimit(int x, int y)
 {
 	m_mouse_x = 0;
 	m_mouse_y = 0;
@@ -247,20 +246,20 @@ void CSDLInput::SetMouseMoveLimit(int x, int y)
 }
 
 /* Set event receivers */
-void CSDLInput::SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int))
+void InputManager::SetMouseEventReceiver(void (*fp_receiver)(E_MOUSE_EVENT, int, int, int))
 {
 	m_fp_mouse_event_receiver = fp_receiver;
 }
 
-void CSDLInput::SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD))
+void InputManager::SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT, DWORD))
 {
 	m_fp_keyboard_event_receiver = fp_receiver;
 }
 
 /* Stub implementations for unused methods */
-void CSDLInput::OnMouseInput() { /* Handled in UpdateInput */ }
-void CSDLInput::OnKeyboardInput() { /* Handled in UpdateInput */ }
-HRESULT CSDLInput::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) { 
+void InputManager::OnMouseInput() { /* Handled in UpdateInput */ }
+void InputManager::OnKeyboardInput() { /* Handled in UpdateInput */ }
+HRESULT InputManager::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) { 
 	return Init(hWnd, hInst, ex) ? S_OK : S_FALSE; 
 }
 

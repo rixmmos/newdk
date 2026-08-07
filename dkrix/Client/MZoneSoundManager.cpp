@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "MZoneSoundManager.h"
 #include "UserOption.h"
-#include "CDirectSound.h"
+#include "DXLib/AudioManager.h"
 #include "MSoundTable.h"
 #include "DebugInfo.h"
 #include "MTestDef.h"

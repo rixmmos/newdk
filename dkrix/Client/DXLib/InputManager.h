@@ -1,8 +1,8 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectInput.h
+	InputManager.h
 
-	Direct Input Class library.
+	Input Manager class library (SDL2-backed).
 
 	2000.3.2. KJTINC
 
@@ -11,8 +11,8 @@
 /* Include Platform.h first for type definitions (outside header guard) */
 #include "../basic/Platform.h"
 
-#ifndef __CSDLINPUT_H__
-#define __CSDLINPUT_H__
+#ifndef __INPUTMANAGER_H__
+#define __INPUTMANAGER_H__
 
 /* Include platform-independent key codes (SDL-based) */
 #include "../../basic/InputCodes.h"
@@ -27,7 +27,7 @@ struct IDirectInputDevice;
 /*-----------------------------------------------------------------------------
   Class Direct Input
 -----------------------------------------------------------------------------*/
-class CSDLInput
+class InputManager
 {
 private:
 	IDirectInput *          m_pDI;
@@ -100,8 +100,8 @@ private:
 	void		(*m_fp_keyboard_event_receiver)(E_KEYBOARD_EVENT event, DWORD scan_code);
 
 public:
-	CSDLInput();
-	~CSDLInput();
+	InputManager();
+	~InputManager();
 
 	void		Clear();
 	BOOL		Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex=EXCLUSIVE);
@@ -122,6 +122,6 @@ public:
 };
 
 
-extern	CSDLInput*	g_pSDLInput;
+extern	InputManager*	g_pSDLInput;
 
 #endif

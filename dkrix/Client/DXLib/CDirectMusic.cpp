@@ -6,7 +6,7 @@
 // NOTE: This class is deprecated. Use Mix_PlayMusic() from SDL_mixer instead.
 //----------------------------------------------------------------------
 
-#include "CDirectSound.h"
+#include "AudioManager.h"
 #include "CDirectMusic.h"
 
 //-----------------------------------------------------------------------------

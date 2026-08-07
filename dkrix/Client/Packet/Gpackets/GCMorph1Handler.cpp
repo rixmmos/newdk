@@ -9,7 +9,7 @@
 #include "Client_PCH.h"
 #include "GCMorph1.h"
 #include "ClientDef.h"
-#include "CDirectSound.h"
+#include "DXLib/AudioManager.h"
 #include "MQuickSlot.h"
 #include "SkillDef.h"
 

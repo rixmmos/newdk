@@ -21,7 +21,7 @@
 #include "assert.h"
 #include "MHelpDef.h"
 #include "../../basic/timer2.h"
-#include "CDirectInput.h"
+#include "DXLib/InputManager.h"
 
 static void TraceVSUIStartup(const char* step)
 {
@@ -763,7 +763,7 @@ bool C_VS_UI::MouseControl(UINT message, int x, int y)
 	return ret;
 }
 
-void C_VS_UI::DIKeyboardControl(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
+void C_VS_UI::DIKeyboardControl(InputManager::E_KEYBOARD_EVENT event, DWORD scan_code)
 {
 #ifdef OUTPUT_DEBUG
 //	DEBUG_ADD("[C_VS_UI] DIKeyboardControl");

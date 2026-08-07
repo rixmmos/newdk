@@ -11,7 +11,7 @@
 
 #include "MPriceManager.h"
 #include "MCreatureTable.h"
-#include "CDirectInput.h"
+#include "DXLib/InputManager.h"
 #include "MNPCTable.h"
 #include "MParty.h"
 #include "VS_UI_Title.h"
@@ -63,7 +63,7 @@ extern BOOL g_bLButtonDown;
 bool					gbl_mine_progress = false;
 DWORD					gi_mine_progress;
 
-extern CSDLInput*			g_pSDLInput;
+extern InputManager*			g_pSDLInput;
 extern MStorage*				g_pStorageTemp;
 
 extern BOOL g_bActiveGame;

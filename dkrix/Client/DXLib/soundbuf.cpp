@@ -13,7 +13,7 @@
 //#include "dslib.h"
 #include <stdio.h>
 //#include "debug.h"
-#include "CDirectSound.h"
+#include "AudioManager.h"
 
 const UINT frequencies[3] = { 44100, 48000, 32000 };
 

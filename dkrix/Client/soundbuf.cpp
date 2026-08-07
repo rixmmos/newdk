@@ -5,7 +5,7 @@
 #include "mp3.h"
 //#include "dslib.h"
 //#include "debug.h"
-#include "DXLib/CDirectSound.h"
+#include "DXLib/AudioManager.h"
 
 const UINT frequencies[3] = { 44100, 48000, 32000 };
 
