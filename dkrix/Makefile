@@ -26,7 +26,12 @@
 # destroy diffability against upstream:
 #   Client/JpegLib/            IJG libjpeg public headers
 #   Client/{zlib,zconf,...}.h  zlib 1.1.x, vendored flat into Client/
-#   Client/Platform/{ogg,...}.h Xiph ogg/vorbis API headers (moved from DXLib/, Phase 3 item 3)
+#
+# The Xiph ogg/vorbis API headers that lived here (ogg.h, vorbisenc.h,
+# vorbisfile.h) were deleted as dead code — same evidence standard as
+# a107d63 (no CMake source-list membership, zero external includers,
+# self-referencing cluster only). See git history for the exclude
+# entries this comment used to describe.
 
 .PHONY: fmt fmt-check fmt-check-all help \
         debug-asan debug-tsan debug-ubsan clean-sanitizers
@@ -51,10 +56,7 @@ FMT_EXCLUDES := \
 	':(exclude)Client/trees.h' \
 	':(exclude)Client/zconf.h' \
 	':(exclude)Client/zlib.h' \
-	':(exclude)Client/zutil.h' \
-	':(exclude)Client/Platform/ogg.h' \
-	':(exclude)Client/Platform/vorbisenc.h' \
-	':(exclude)Client/Platform/vorbisfile.h'
+	':(exclude)Client/zutil.h'
 
 # One pathspec set drives every target below.
 FMT_PATHSPECS := '*.cpp' '*.h' '*.CPP' '*.H' $(FMT_EXCLUDES)
