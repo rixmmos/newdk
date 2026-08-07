@@ -557,22 +557,61 @@ Option B.
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
-### Phase 7 — Server: retire dead binaries (not started)
+### Phase 7 — Server: retire dead binaries (in progress)
 
 > **[measured 2026-08-06]** All of `cacheserver/`, `chinabilling/`,
 > `theoneserver/`, `updateserver/`, `gameserver/mofus/testserver/`, and
 > `gameserver/testAlone/` are still present, as is one `.old.cpp` under
 > `src/server/database/`.
+>
+> **[measured 2026-08-07]** `cacheserver/`, `theoneserver/`, `updateserver/`,
+> `gameserver/testAlone/`, `gameserver/mofus/testserver/`, and the
+> `chinabilling/stress` and `chinabilling/testserver` subdirs are all
+> **still present on disk** as of this pass — none of them has actually
+> been deleted in this tree yet, despite that having been the stated
+> premise going into this pass. Do not trust a "deleted" claim for these
+> without re-running the checks below; they were re-verified false here.
+> Three narrower items *are* now done:
+> - **Legacy Makefile references — done.** `src/Makefile`,
+>   `src/server/Makefile`, and `src/Core/Makefile` no longer invoke
+>   `theoneserver`/`updateserver`/`TOpackets`/`Upackets` from any target
+>   (`alltheoneserver`, `cleanbin`, `clean`, `cleanall`,
+>   `cleangameserver`, `cleanloginserver`, `cleansharedserver`,
+>   `allloginserver`, `allgameserver`, `allsharedserver`). Confirmed first
+>   that `dkrixserver/Makefile`'s real `make`/`make debug` targets only
+>   invoke CMake and never touch any `src/**/Makefile` — these legacy
+>   files are dead weight regardless, but the stale directory references
+>   inside them are now gone too. `chinabilling` references were left
+>   alone (it has a live `CMakeLists.txt` and is part of the real build).
+> - **`src/Core/TOpackets/`, `src/Core/Upackets/` — deleted.** Both were
+>   Makefile-only (`TOpackets/Makefile` built against `theoneserver/`,
+>   `Upackets/Makefile` against `updateserver/`+`updateclient/`); grepped
+>   every `CMakeLists.txt` in `dkrixserver/` for `TOpackets`/`Upackets` —
+>   zero hits, so neither was ever part of the real build.
+> - **`gameserver/skill/EffectStriking.old.cpp`/`.old.h` — deleted.**
+>   Same dead-code shape as `DatabaseManager.old.cpp`: the live
+>   `EffectStriking.cpp` (operating on `Creature*`) is the one listed in
+>   `gameserver/skill/CMakeLists.txt:370`; the `.old.*` pair (operating on
+>   the older `Item*` signature) appeared nowhere in any `CMakeLists.txt`
+>   and had no includer outside itself.
+>
+> Verified by build: `cd dkrixserver && make debug` under WSL still
+> configures, compiles, and links all three binaries after these three
+> changes — see the appendix note below for the run.
 
 - [ ] Archive or delete `cacheserver/`, `chinabilling/` (all three
       subdirs), `theoneserver/`, `updateserver/`,
       `gameserver/mofus/testserver/`. Verify CMake isn't building
-      them.
+      them. **Still not started** — confirmed still present 2026-08-07;
+      see above.
 - [ ] Replace the stub `testAlone/Mutex.h` with a real primitive or
-      delete `testAlone/` outright.
+      delete `testAlone/` outright. **Still not started.**
 - [ ] Retire `__OLD_GUILD_WAR__` `#ifdef` gates — either delete the
       branches or move to a runtime config flag.
-- [ ] Delete `.old.cpp` files in `server/database/`.
+- [ ] Delete `.old.cpp` files in `server/database/`. **`DatabaseManager.old.cpp`
+      still present 2026-08-07** — not touched by this pass; only
+      `gameserver/skill/EffectStriking.old.{cpp,h}` (a separate file, same
+      pattern) was in scope and is done, see above.
 
 ### Phase 8 — Server: SQL and secrets (split; secrets half in progress)
 
