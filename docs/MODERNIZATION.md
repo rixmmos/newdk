@@ -361,12 +361,12 @@ In order; each independently shippable:
    + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
    — it needs eyes on a running client anyway.
 3. **Phase 8 SQL half, via Phase 11.** Lift the parked `PreparedStatement`
-   design (its 11.1) and the `check-sql-injection.sh` ratchet (its 16);
-   re-baseline at today's 598.
-4. **Phase 3 items 2–3, then 4b/4c.** All CI-gated now. Item 2 starts with
-   the `CDirectDrawSurface` liveness question already flagged in Phase 3.
-5. **Phase 10 (+ parked 14/15/16).** Client `.clang-format` + fmt targets
-   (lift `a760899`), explicit source lists, asan matrix, ratchet wiring.
+   design (its 11.1). ~~Ratchet~~ done 2026-08-07 — Phase 16, baseline 542.
+4. **Phase 3 items 2–3, then 4b/4c.** All CI-gated now. Item 2's liveness
+   audit is done and its 4-step execution order is written into Phase 3.
+   Phase 17's re-run is also done — Phase 12 sizing is refined.
+5. **Phase 10 (+ parked 14/15).** Client `.clang-format` + fmt targets
+   (lift `a760899`), explicit source lists, asan matrix.
 6. **Phase 8 secrets step 2** — deployment change; needs a live-server
    window, config backups, and Enrico at the wheel.
 
@@ -641,16 +641,27 @@ back to a single unconditional typedef.
         compiled the renames and deletions. Original verification was
         grep-based call-site tracing plus reading every file in the
         duplicate/shim set end to end.
-- [ ] **Item 2** — Delete `CDirectSetup*`, `CDirectDrawSurface*`, `BIT_RES.*`,
-      `CDirectDraw_StaticMembers.cpp`. Not started. Note from item 1 (checked
-      independently, not just carried over from the parked branch):
-      `CDirectDrawSurface` is not dead — `Client/SpriteLib/CSpriteSurface.cpp`
-      / `.h` reference it and are themselves pulled in by
-      `MEventManager`, `MGuildMarkManager`, `MTopView`, `ProfileManager`,
-      `UIMessageManager`, `UtilityFunction`, and two `VS_UI` headers.
-      Confirm exactly what's live vs. dead in that surface before deleting —
-      this may need to become a rename instead, same as item 1's
-      `CDirectDraw` → `CSDLGraphics`.
+- [ ] **Item 2 — audited 2026-08-07, ready to execute.** Evidence with
+      file:line for every claim: `docs/phase3-item2-liveness-2026-08-07.md`.
+      Safe-first order:
+      1. DELETE `CDirectSetup.h` + `CDirectSetupGetVersion.cpp` — in no
+         CMake source list; both umbrella includes commented out.
+      2. DELETE `DXLib/BIT_RES.{CPP,H}` — dead 2-line-diff twin of the
+         **live** `Client/BIT_RES.CPP` (item-1's duplication pattern;
+         six more dead DXLib MP3-decoder twins flagged for follow-up).
+      3. RENAME `CDirectDraw.{cpp,h}` + `CDirectDraw_StaticMembers.cpp`
+         → `CSDLGraphics*`: the class inside already IS `CSDLGraphics`
+         (`CDirectDraw.h:171`; guard is `__CSDLGRAPHICS_H__`), and no
+         `CDirectDraw` type exists anywhere. 2 CMake lines + 5 includes.
+      4. STOP — `CDirectDrawSurface.{h,cpp}` stay: live class (value
+         members, `new` sites, map values across MEventManager/
+         MGuildMark/Profile/UIMessage/VS_UI), bridged to SpriteLib's
+         *standalone* `CSpriteSurface` by `reinterpret_cast`
+         (`MTopView.cpp:10952,17706`). That bridge is Phase-4-adjacent
+         refactor territory, not an item-2 deletion.
+      Also surfaced: `VS_UI/WinMain.cpp` is filtered out on WIN32 (its
+      `CDirectDraw gC_DD;` resolves to nothing) but unfiltered on
+      non-WIN32 — latent breakage for any future Linux client build.
 - [ ] **Item 3** — Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
       `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`. Not
       started; update `dkrix/CMakeLists.txt` include paths and source globs
@@ -963,10 +974,12 @@ to `main` at authoring time, each independently green under
       format specifiers (not "~87", and not the 9 surviving
       `sprintf(query` hits — exact greps in Ground truth above).
       Ratchet-driven, never a single big-bang close-out.
-- [ ] Add the CI ratchet: lift the parked line's
-      `scripts/check-sql-injection.sh` (its baseline was 567; re-baseline
-      at 598 for this tree) and wire it into `server.yml` — parked
-      Phase 16 has the wiring. Gate on *no increase*, not on the count.
+- [x] ~~Add the CI ratchet.~~ **Done 2026-08-07 (Phase 16):**
+      `scripts/check-sql-injection.sh` lifted and re-baselined at **542**
+      by its own, broader metric (`executeQuery`/`setStatement`/
+      `Statement` with `%[sdluxc]`; the 598 above is `executeQuery`-only
+      — both recorded, the script's count is what the gate enforces),
+      wired into `server.yml` as the `ratchets` job.
 - [x] ~~Move credentials/hosts from `conf/*.conf` into environment
       variables with `${VAR}` templates.~~ **Step 1 shipped** —
       `Properties::load()` expansion + `DKRIX_*` templates (see the note
@@ -1133,7 +1146,11 @@ Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **326** pairs in `dkrix/Client/Packet/Cpackets/` (CG 294 + CL 32 only:
 the client decodes receive-side packets inline, so only the send-side
 families are duplicated). **Apply the Phase 17 caveat before sizing** —
-the pairs are not whitespace-identical.
+the pairs are not whitespace-identical. **Sizing refined 2026-08-07** by
+the Phase 17 re-run: one scripted style-normalization pass over the ~160
+twin pairs plus targeted manual protocol review of the CL login/account
+family — not 163 independent manual merges. Details:
+`docs/packet-divergence-2026-08-07.md`.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
@@ -1146,20 +1163,42 @@ not twice.
 
 ### Phase 15 — CI build matrix — folded into Phase 10, bullet 3.
 
-### Phase 16 — CI ratchet activation (not started here; parked: scripts exist, unwired)
-Two ratchet scripts on the parked line, neither wired into a workflow
-even there, and neither present on `main` (`dkrixserver/scripts/` does
-not exist): `check-sql-injection.sh` (baseline 567 there → 598 here) and
-`check-packet-duplicates.sh` (baseline 326). Lift both, re-baseline
-against `main`, wire into `server.yml`. Small and high-leverage: every
-later migration PR gets judged by machine instead of by recount.
+### Phase 16 — CI ratchet activation (done on this line 2026-08-07)
+Both scripts lifted verbatim from the tag into `dkrixserver/scripts/`,
+re-baselined against `main` via each script's own `--update` mode, wired
+as a third `ratchets` job in `server.yml`, and verified both ways: exit 0
+on the current tree, exit 1 with the baseline set one below the measured
+count.
 
-### Phase 17 — Packet divergence audit (not started here; parked: done, finding stands)
-Read-only input to Phase 12. The parked full-tree sweep found **0 of 326**
-name-matched files bit-identical and only **7** cosmetic-only divergent —
-the "whitespace-only" assumption is dead. Re-running the audit against
-`main` is safe-to-delegate work (read-only, no build needed) and should
-precede any Phase 12 file moves.
+- `check-sql-injection.sh` — counts `executeQuery`/`setStatement`/
+  `Statement` calls carrying a `%[sdluxc]` format spec. **Baseline 542.**
+  (Parked line: 567 at introduction, 540 at its tip — after Phase 11
+  migrations `main` never ran.) The 598 in Ground truth is a narrower
+  `executeQuery`-only grep; both are recorded, and the script's own
+  count is what the gate enforces.
+- `check-packet-duplicates.sh` — same-named packet files present in both
+  `dkrixserver/src/Core/` and `dkrix/Client/Packet/Cpackets/`.
+  **Baseline 326** — every client packet file has a server sibling.
+- CI invokes them via `sh script.sh`, not the shebang: the exec bit
+  doesn't survive commits from this workstation (every tracked `*.sh`
+  is 100644; `Dockerfile.pub` re-chmods for the same reason).
+- **Trigger gap found and fixed in the same change:** the duplicates
+  ratchet reads a `dkrix/` directory that `server.yml`'s path filter
+  didn't watch; `dkrix/Client/Packet/Cpackets/**` added to `paths`.
+
+### Phase 17 — Packet divergence audit (re-run against `main` 2026-08-07)
+Done — `docs/packet-divergence-2026-08-07.md`. Headline: 326 files /
+163 class pairs, all matched, **0 bit-identical, 0 cosmetic-only** under
+a stricter normalizer; every pair differs by >20 normalized lines
+(median 157, max `CLRegisterPlayer` at 747). The parked line's own
+script, re-run unmodified, reproduces its pair-level result exactly —
+nothing has drifted since April. The refinement that matters for
+Phase 12: almost every pair is a style/inlining/PCH-guard twin with
+**identical field sets** — reconcilable as one scripted normalization
+pass — but the CL login/account family (`CLLogin` above all) carries
+server-only fields and a client `write()` that hardcodes a login-mode
+value: a real wire-shape gap needing manual protocol review, not
+reformatting.
 
 ### Phase 18 — End-to-end runtime smoke test against `main` (not run)
 The validation gate for the whole 08-06/07 wave, and the top open item
