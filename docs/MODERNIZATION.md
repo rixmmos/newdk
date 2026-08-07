@@ -1223,10 +1223,24 @@ to `main` at authoring time, each independently green under
       source reformatted; no CI gate wired yet — proposed job +
       sequencing in the stream-② manifest
       (`_incoming/phase10/MANIFEST.md`).
-- [ ] Replace `file(GLOB …)` with explicit source lists in the client
-      CMake. The parked line did this as its Phase 14: two GLOB sites
-      covering ~1,100 `.cpp`; explicit 56-file VS_UI list first,
-      `CONFIGURE_DEPENDS` as interim elsewhere. Lift the approach.
+- [x] Replace `file(GLOB …)` with explicit source lists in the client
+      CMake — done 2026-08-07. Lifted the parked line's Phase 14 approach
+      (`4670b06`/`ed23fea`) against `main`'s current tree, not copied
+      literally (Phase 3 item 3 moved `DXLib/` to `Platform/` since the
+      tag diverged). `VS_UI_SRC_SOURCES`: explicit 56-file `set()`,
+      regenerated from `find VS_UI -name "*.cpp" | sort` — identical
+      count and file set to the parked line's list, confirming the
+      directory hasn't drifted. `CLIENT_MAIN_SOURCES`: kept as
+      `file(GLOB … CONFIGURE_DEPENDS)` (bumped
+      `cmake_minimum_required` 3.10 → 3.12), matching the parked line's
+      reasoning — the glob still covers ~1,045 files (242 `Client/` +
+      66 `Client/Packet/` root + 735 one level under `Packet/` + 1
+      `SXml/` + 1 `WinLib/`), confirmed no third-level `Packet/`
+      nesting the non-recursive `**` pattern would miss. [measured — no
+      CMake in this sandbox]: verified by diffing the explicit VS_UI
+      list against `find`'s output (byte-identical) and confirming
+      every listed file exists on disk with no drops/dupes; the real
+      compile gate is client CI on `main` after this lands.
 - [ ] CI build matrix (`make debug-asan` on Linux). Parked Phase 15 has
       the working matrix and the dependency list — and confirmed there is
       **no Boost dep**, contrary to older notes.

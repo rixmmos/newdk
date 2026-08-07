@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.10)
+# CMake 3.12+ required for file(GLOB ... CONFIGURE_DEPENDS) support -
+# see the CLIENT_MAIN_SOURCES glob below. 3.12 shipped 2018-07, so every
+# mainstream distro (Ubuntu 20.04+, Debian 11+, macOS Homebrew, etc.)
+# has it; only Ubuntu 18.04 LTS with system cmake (3.10) needs an
+# upgrade. Phase 10 bullet 2 (2026-08-07).
+cmake_minimum_required(VERSION 3.12)
 
 # Set SDL2 include path before project() for it to take effect
 if(EXISTS "/opt/homebrew/include/SDL2")
@@ -183,10 +188,77 @@ endif()
 # VS_UI Library - UI System ( Client )
 # ============================================================
 if(USE_SDL_BACKEND OR NOT WIN32)
-	# VS_UI source files
-	file(GLOB_RECURSE VS_UI_SRC_SOURCES
-		VS_UI/src/*.cpp
-		VS_UI/*.cpp  # Include VS_UI root directory for RarFile.cpp
+	# VS_UI source files - explicit list (Phase 10 bullet 2, 2026-08-07).
+	# Replaces file(GLOB_RECURSE VS_UI_SRC_SOURCES VS_UI/src/*.cpp VS_UI/*.cpp)
+	# because CMake globs are not re-evaluated on incremental builds:
+	# adding a new .cpp under VS_UI/ silently failed to compile until the
+	# next `cmake` reconfigure. See docs/MODERNIZATION.md Phase 10.
+	#
+	# Regenerate with:
+	#   cd dkrix && find VS_UI -name "*.cpp" | sort
+	#
+	# Generated 2026-08-07: 56 files (6 root + 50 under src/).
+	set(VS_UI_SRC_SOURCES
+		# VS_UI root (6 files)
+		VS_UI/Client_PCH.cpp
+		VS_UI/DebugInfo.cpp
+		VS_UI/MitemTableInit.cpp
+		VS_UI/RarFile.cpp
+		VS_UI/SXml.cpp
+		VS_UI/WinMain.cpp
+		# VS_UI/src (44 flat files)
+		VS_UI/src/AcceleratorDef.cpp
+		VS_UI/src/AcceleratorManager.cpp
+		VS_UI/src/Imm/CImm.cpp
+		VS_UI/src/InputFocusManager.cpp
+		VS_UI/src/KeyAccelerator.cpp
+		VS_UI/src/SkinManager.cpp
+		VS_UI/src/VS_UI_BBS.cpp
+		VS_UI/src/VS_UI_Base.cpp
+		VS_UI/src/VS_UI_DESC.cpp
+		VS_UI/src/VS_UI_Description.cpp
+		VS_UI/src/VS_UI_Descriptor.cpp
+		VS_UI/src/VS_UI_Dialog.cpp
+		VS_UI/src/VS_UI_ELEVATOR.cpp
+		VS_UI/src/VS_UI_Exception.cpp
+		VS_UI/src/VS_UI_Exchange.cpp
+		VS_UI/src/VS_UI_ExtraDialog.cpp
+		VS_UI/src/VS_UI_Game.cpp
+		VS_UI/src/VS_UI_GameCommon.cpp
+		VS_UI/src/VS_UI_GameOusters.cpp
+		VS_UI/src/VS_UI_GameSlayer.cpp
+		VS_UI/src/VS_UI_GameVampire.cpp
+		VS_UI/src/VS_UI_GlobalResource.cpp
+		VS_UI/src/VS_UI_Helper.cpp
+		VS_UI/src/VS_UI_Item.cpp
+		VS_UI/src/VS_UI_Message.cpp
+		VS_UI/src/VS_UI_PetStorage.cpp
+		VS_UI/src/VS_UI_PointExchange.cpp
+		VS_UI/src/VS_UI_SKILL_VIEW.cpp
+		VS_UI/src/VS_UI_Shop.cpp
+		VS_UI/src/VS_UI_Storage.cpp
+		VS_UI/src/VS_UI_Title.cpp
+		VS_UI/src/VS_UI_Tutorial.cpp
+		VS_UI/src/VS_UI_WebBrowser.cpp
+		VS_UI/src/VS_UI_mouse_pointer.cpp
+		VS_UI/src/VS_UI_progress.cpp
+		VS_UI/src/VS_UI_skill_tree.cpp
+		VS_UI/src/VS_UI_ui_result_receiver.cpp
+		VS_UI/src/VS_UI_util.cpp
+		VS_UI/src/VS_UI_widget.cpp
+		VS_UI/src/Vs_ui.cpp
+		VS_UI/src/vs_ui_gamecommon2.cpp
+		# VS_UI/src/hangul (3 files)
+		VS_UI/src/hangul/Ci.cpp
+		VS_UI/src/hangul/Ci_macOS.cpp
+		VS_UI/src/hangul/FL2.cpp
+		# VS_UI/src/widget (6 files)
+		VS_UI/src/widget/U_edit.cpp
+		VS_UI/src/widget/mother.cpp
+		VS_UI/src/widget/pi_core.cpp
+		VS_UI/src/widget/u_button.cpp
+		VS_UI/src/widget/u_scrollbar.cpp
+		VS_UI/src/widget/u_window.cpp
 	)
 
 	# Exclude Windows-specific files
@@ -526,8 +598,26 @@ endif()
 
 # Dark Eden Client Executable
 if(USE_SDL_BACKEND OR NOT WIN32)
-	# Collect remaining Client source files (excluding those already in VS_UI)
-	file(GLOB CLIENT_MAIN_SOURCES
+	# Collect remaining Client source files (excluding those already in VS_UI).
+	#
+	# Phase 10 bullet 2 (2026-08-07): CONFIGURE_DEPENDS added so CMake
+	# re-evaluates the glob on every build instead of caching the file
+	# list at initial configure time. Covers ~1045 .cpp files across
+	# Client/ root (242), Client/Packet/ root (66) + one level of
+	# sub-packages (735), Client/SXml/ (1), Client/WinLib/ (1).
+	#
+	# Why a glob + CONFIGURE_DEPENDS instead of an explicit list: the
+	# Packet tree alone is 801 files across dozens of sub-packages; an
+	# explicit enumeration would add ~1050 lines of CMake and require a
+	# CMake edit for every new packet added to Client/Packet/.
+	# CONFIGURE_DEPENDS (CMake 3.12+) solves the exact problem the
+	# explicit-list approach would solve - "adding a new source file
+	# silently fails to compile until the next cmake reconfigure" -
+	# without the maintenance cost. VS_UI (above) keeps its explicit
+	# list because it's small (56 files) and stable; the tradeoff only
+	# works the other way for a tree this size. See docs/MODERNIZATION.md
+	# Phase 10.
+	file(GLOB CLIENT_MAIN_SOURCES CONFIGURE_DEPENDS
 		Client/*.cpp
 		Client/Packet/*.cpp
 		Client/Packet/**/*.cpp
