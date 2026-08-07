@@ -473,6 +473,80 @@ Option B.
       `TextSystem` font-spec struct and updating every caller — a real
       refactor, not a deletion. Size it before scheduling.
 
+      **[measured 2026-08-07] Sized, ready to schedule — no code changed.**
+      Grepped `dkrix/` for `SetFont(`, `LOGFONT`, `DeleteObject`, and
+      `CreateFontIndirect`; every hit is accounted for below.
+
+      *The stub in `basic/Platform.h`.* `DeleteObject`, the `LOGFONT`
+      typedef, and `CreateFontIndirect` all live inside one
+      `#ifndef PLATFORM_WINDOWS` block (`Platform.h:262-372`). On the
+      primary Windows build this code is never compiled at all — real
+      `windows.h` supplies the genuine `LOGFONT`/`DeleteObject`/
+      `CreateFontIndirect`, field-compatible with the stub by design. The
+      stub only exists for the secondary macOS/Linux path. So "delete the
+      stub" really means: stop needing a `LOGFONT`-shaped type on *any*
+      platform, not just patch the non-Windows fallback.
+
+      *`Base::SetFont` itself already only reads two of `LOGFONT`'s 13
+      fields* — `lf.lfFaceName` (matched by `strcmp` against two literal
+      strings, `"Cormorant Garamond"` / `"UnifrakturCook"`, to pick a
+      `TextSystem::FontFamily*` enum value) and `lf.lfHeight` (passed
+      straight through to `TextSystem::EncodeFontHandle`). Callers also set
+      `lf.lfWeight` and `lf.lfItalic`, but `SetFont` never reads them —
+      those two fields are already dead as far as this call chain goes.
+      A replacement struct therefore needs exactly two fields: a font
+      family selector (enum or face-name string) and an integer size.
+      Something like:
+      ```cpp
+      struct FontSpec { TextSystem::FontFamily family; int height; };
+      ```
+
+      *Callers of `Base::SetFont`, exhaustively — zero outside one file.*
+      `SetFont` appears in exactly four files in `dkrix/`:
+      `VS_UI/src/header/VS_UI_Base.h` (the declaration),
+      `VS_UI/src/VS_UI_Base.cpp` (the definition and every call site), and
+      two archived docs under `dkrix/docs/archive/2026-migration-notes/`
+      (`GDI_USAGE_ANALYSIS.md`, `TEXT_MIGRATION.md` — reference material,
+      not code). There is no caller anywhere else in the client — no other
+      `.cpp` file, no subclass, calls `Base::SetFont`. Inside
+      `VS_UI_Base.cpp` there are 20 live call sites plus 1 commented-out
+      call (`:281`), **all inside the single function `Base::InitFont()`**
+      (`VS_UI_Base.cpp:166-333`). Each follows the identical pattern:
+      `SetDefaultLogfont(lf)` → mutate 2-4 `lf.*` fields → `SetFont(pi_member,
+      lf, color, ...)`. `SetDefaultLogfont` (`VS_UI_Base.cpp:82-99`) has the
+      same one-file, one-function blast radius and would be rewritten
+      alongside it (it currently zero-initializes all 13 `LOGFONT` fields;
+      the replacement only needs to default the 2 that matter).
+
+      *Blast radius:* **3 files** need real changes —
+      `basic/Platform.h` (delete the stub block), `VS_UI/src/header/VS_UI_Base.h`
+      (change the `SetFont`/`SetDefaultLogfont` signatures from `LOGFONT &lf`
+      to `FontSpec &spec`), `VS_UI/src/VS_UI_Base.cpp` (rewrite the two
+      function bodies plus all 20 call sites — mechanical, same pattern
+      each time, all in one ~170-line function). Two archived `.md` files
+      would go stale but need no edit (they're explicitly historical).
+
+      *A separate, unrelated snag in the same stub block:* `DeleteObject`
+      (also deleted by this same change) has exactly two live callers
+      outside `Platform.h` — `VS_UI/src/VS_UI_WebBrowser.cpp:220` and
+      `Client/Client.cpp:3564` — and neither is about fonts. Both pass an
+      `IWebBrowser2*` COM pointer to `DeleteObject()` immediately after
+      calling `->Release()` on it, which is a pre-existing correctness
+      question (COM objects are released, not GDI-deleted) independent of
+      this refactor. Removing the stub forces a decision on those two call
+      sites — most likely deleting the now-redundant `DeleteObject()` call
+      entirely, since `Release()` already ran — but that is a second,
+      separable finding, not part of the font-spec work. `CreateFontIndirect`
+      has zero live callers anywhere (only comments and the two archived
+      docs), so deleting it is a pure no-op.
+
+      *Estimate:* small — 3 files, ~25 call sites, all mechanical and
+      concentrated in one function, plus a 2-call-site side-cleanup that
+      isn't about fonts at all. Ready to schedule; still gated on Phase 5's
+      other open item (Korean/Chinese glyph verification) landing first, or
+      at least not regressing, since this touches the same call chain that
+      builds every font handle in the UI.
+
 ### Phase 6 — Modern C++ as we touch it (ongoing)
 - Rule of thumb when a file is already being modified for another
   reason:
