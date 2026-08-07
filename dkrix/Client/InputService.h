@@ -19,7 +19,7 @@
 // Forward declaration for input service class
 class InputManager;
 
-// Global input service instance (defined in DXLib/InputManager.cpp)
+// Global input service instance (defined in Platform/InputManager.cpp)
 extern InputManager* g_pSDLInput;
 
 #endif // __INPUTSERVICE_H__

@@ -149,7 +149,7 @@ target_include_directories(SpriteLib
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/..  # For client_PCH.h
 		${CMAKE_SOURCE_DIR}/basic
-		${CMAKE_SOURCE_DIR}/Client/DXLib
+		${CMAKE_SOURCE_DIR}/Client/Platform
 )
 
 # Add SDL2 include if using SDL backend

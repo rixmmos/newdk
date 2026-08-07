@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
-# DXLib Library - DirectX abstraction with backend selection
-# Supports both Windows DirectX and SDL2 backends
+# Platform layer — formerly Client/DXLib/, moved here by Phase 3 item 3
+# (2026-08). SDL2-backed graphics/sound/music/input behind legacy
+# DirectX-shaped APIs. The library target keeps its historical name
+# "dxlib"; renaming the target/define/dxlib_* API is a separate item.
 
 project(dxlib)
 

@@ -4,7 +4,7 @@
 #include "Client_PCH.h"
 #include "WavePackFileManager.h"
 #include <MMSystem.h>
-#include "DXLib/AudioManager.h"
+#include "Platform/AudioManager.h"
 #include "Profiler.h"
 
 //--------------------------------------------------------------------------

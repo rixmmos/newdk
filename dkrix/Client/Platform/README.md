@@ -1,3 +1,9 @@
+> **Moved 2026-08 (Phase 3 item 3):** this directory was `Client/DXLib/`.
+> Files kept their names and the library target is still `dxlib`. The
+> `#include` examples below were updated to the `Platform/` path; the rest
+> of this document predates the move (including mentions of the
+> never-ported Windows-DirectX backend).
+
 # DXLib 
 
 ## 
@@ -86,7 +92,7 @@ cmake --build build
 ### 
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 
 dxlib_input_init(window_handle);
@@ -120,7 +126,7 @@ dxlib_input_release();
 ### 
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 
 dxlib_sound_init(window_handle);
@@ -147,7 +153,7 @@ dxlib_sound_release();
 ### 
 
 ```cpp
-#include "DXLib/DXLibBackend.h"
+#include "Platform/DXLibBackend.h"
 
 
 dxlib_music_init(window_handle);

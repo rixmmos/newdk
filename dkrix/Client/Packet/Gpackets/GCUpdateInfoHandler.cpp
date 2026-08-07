@@ -17,7 +17,7 @@
 #include "MEffectStatusDef.h"
 #include "MSkillManager.h"
 #include "MMoneyManager.h"
-#include "DXLib/AudioManager.h"
+#include "Platform/AudioManager.h"
 #include "COrderedList.h"
 #include "MZoneTable.h"
 #include "UIDialog.h"

@@ -15,9 +15,9 @@
 #include "CSDLGraphics.h"
 #endif
 #include "CDirectDrawSurface.h"
-#include "DXLib/AudioManager.h"
+#include "Platform/AudioManager.h"
 #include "CDirectSoundStream.h"
 #include "CDirectMusic.h"  // Now CSDLMusic
-#include "DXLib/InputManager.h"
+#include "Platform/InputManager.h"
 
 #endif

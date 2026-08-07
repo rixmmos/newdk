@@ -21,7 +21,7 @@
 #include "assert.h"
 #include "MHelpDef.h"
 #include "../../basic/timer2.h"
-#include "DXLib/InputManager.h"
+#include "Platform/InputManager.h"
 
 static void TraceVSUIStartup(const char* step)
 {

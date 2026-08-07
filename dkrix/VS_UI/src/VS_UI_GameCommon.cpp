@@ -11,7 +11,7 @@
 
 #include "MPriceManager.h"
 #include "MCreatureTable.h"
-#include "DXLib/InputManager.h"
+#include "Platform/InputManager.h"
 #include "MNPCTable.h"
 #include "MParty.h"
 #include "VS_UI_Title.h"

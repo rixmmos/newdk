@@ -1,5 +1,5 @@
 #include "COGGSTREAM.h"
-#include "DXLib/AudioManager.h"
+#include "Platform/AudioManager.h"
 #include "basic/Platform.h"
 
 COGGSTREAM::COGGSTREAM(void* pDirectSound, CDirectSoundBuffer* pBuffer,

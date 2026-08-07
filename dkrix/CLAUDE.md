@@ -32,7 +32,8 @@ mentioning it are archaeology only.
 ## Repository structure
 
 - `Client/` — main game client code
-- `Client/DXLib/` — SDL-backed input/sound/music behind legacy DirectX-shaped APIs
+- `Client/Platform/` — SDL-backed graphics/input/sound/music behind legacy
+  DirectX-shaped APIs (was `Client/DXLib/` until Phase 3 item 3, 2026-08)
 - `Client/SpriteLib/` — sprite rendering and pack management
 - `Client/TextSystem/` — SDL2 + freetype text rendering
 - `Client/framelib/` — frame handling
@@ -48,7 +49,9 @@ mentioning it are archaeology only.
 ## Current technical shape
 
 - `D3DLib/` has been deleted.
-- `DXLib/` still exposes some DirectX-shaped interfaces backed by SDL.
+- `Client/Platform/` (the former `DXLib/`; moved and renamed by Phase 3
+  item 3, 2026-08, keeping file names and the `dxlib` target name) still
+  exposes some DirectX-shaped interfaces backed by SDL.
   **[2026-08] Phase 3 item 1**: the input and audio classes were renamed to
   `InputManager` / `AudioManager` (files `InputManager.{h,cpp}` /
   `AudioManager.{h,cpp}`), and the `CDirectSound_Adapter.cpp` /

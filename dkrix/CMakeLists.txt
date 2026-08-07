@@ -134,7 +134,7 @@ endif()
 
 # Subdirectories
 add_subdirectory(basic)
-add_subdirectory(Client/DXLib)
+add_subdirectory(Client/Platform)
 add_subdirectory(Client/SpriteLib)
 
 # Additional libraries from VC6 project
@@ -155,7 +155,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	target_include_directories(TextSystem PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/basic
 		${SDL2_INCLUDE_DIRS}
@@ -309,7 +309,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 		${CMAKE_CURRENT_SOURCE_DIR}
 	)
@@ -373,7 +373,7 @@ add_executable(sprite_viewer
 target_include_directories(sprite_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 )
 
 target_link_libraries(sprite_viewer PRIVATE
@@ -408,7 +408,7 @@ add_executable(item_viewer
 target_include_directories(item_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 )
 
 target_link_libraries(item_viewer PRIVATE
@@ -431,7 +431,7 @@ add_executable(creature_viewer
 target_include_directories(creature_viewer PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-	${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+	${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 	${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 )
 
@@ -460,7 +460,7 @@ if(NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
 	)
 
@@ -491,7 +491,7 @@ if(NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 		${CMAKE_CURRENT_SOURCE_DIR}/basic
 	)
@@ -639,7 +639,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/basic
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/DXLib
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 #		${CMAKE_CURRENT_SOURCE_DIR}/tools/engine/sprite/include
