@@ -411,16 +411,26 @@ routine phase work be delegated rather than hand-held.
 >    deletable; SDL converts in memory, it does not read a 5:5:5-encoded
 >    sprite off disk. Deleting them is a silent-failure change.
 
-Safe now (judgeable by reading):
+Safe now (judgeable by reading) — both done 2026-08-07:
 
-- [ ] Correct `Client/SpriteLib/SPRITELIB_BACKEND_README.md` — its diagram
-      attributes the SDL2 backend to `engine/sprite` and it is stamped
-      "Production Ready / integration tests passing". Both false.
-- [ ] Delete 8 dead files (312 lines): `CAlphaSpritePackList{555,565}.{cpp,h}`
-      and `CSpritePackList{555,565}.{cpp,h}`. None of the four `.cpp` are in
-      `SPRITELIB_SOURCES` (so none is compiled) and every external reference
-      to `CSpritePackList555/565` is commented out. Also drop lines 103, 104,
-      118, 119 of `Client/SpriteLib/CMakeLists.txt`.
+- [x] Correct `Client/SpriteLib/SPRITELIB_BACKEND_README.md` — its diagram
+      attributed the SDL2 backend to `engine/sprite` and it was stamped
+      "Production Ready / integration tests passing". Both false. The
+      2026-08-06 pass (`31493fb`) fixed the top-of-file status stamp and the
+      architecture diagram but missed two holdouts further down: the
+      "Platform Support" table still claimed macOS "Fully Supported" and
+      Windows "Can use DirectDraw or SDL2 backend" (DirectDraw is gone), and
+      the closing "Summary" section still said "production-ready!" with
+      "API tested and verified" / "Examples working". Also removed a
+      "See Examples" snippet pointing at `./bin/sprite_backend_example`, a
+      binary that has never existed in this repo. All now read "unverified".
+- [x] Delete 8 dead files (312 lines): `CAlphaSpritePackList{555,565}.{cpp,h}`
+      and `CSpritePackList{555,565}.{cpp,h}`. **Already done** — commit
+      `76f13e1`, 2026-08-06: none of the four `.cpp` files were in
+      `SPRITELIB_SOURCES`, every external reference to
+      `CSpritePackList555/565` was commented out
+      (`VS_UI/src/VS_UI_Item.cpp:280,282`, `VS_UI/src/VS_UI_util.cpp:686,688`),
+      and the matching `SPRITELIB_HEADERS` lines were removed with the files.
 
 Blocked on green CI (Phase -1):
 
