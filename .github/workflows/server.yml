@@ -10,11 +10,15 @@ on:
     paths:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
+      # The packet-duplicates ratchet reads this client dir too; without
+      # this filter a client-side packet add would skip the gate.
+      - "dkrix/Client/Packet/Cpackets/**"
   pull_request:
     branches: [main]
     paths:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
+      - "dkrix/Client/Packet/Cpackets/**"
   workflow_dispatch:
 
 # NOTE: working-directory is set per-job, NOT at workflow level. A workflow-level
@@ -143,3 +147,49 @@ jobs:
             exit 1
           fi
           exit $failed
+
+  ratchets:
+    name: ratchets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Lifted from the parked line's Phase 8C / Phase 12.0 gates
+    # (archive/modernization-phases-1-17, dkrixserver/scripts/) and
+    # re-baselined against this tree, which never ran the migrations
+    # that lowered the parked baselines. Both are grep-based ratchets:
+    # today's count is frozen in a sibling `.{name}-baseline` file and
+    # the job fails only if a change pushes the count ABOVE it.
+    # Lowering the count (migrating sites away) is always allowed and
+    # should be followed by re-running the script with --update.
+    steps:
+      - uses: actions/checkout@v4
+        # No fetch-depth override: both scripts grep the working tree
+        # as checked out and never walk git history, so the default
+        # shallow (depth 1) checkout is sufficient.
+
+      # Run via `sh`, not executed directly off the shebang. This repo
+      # is authored on a Windows workstation with core.fileMode=false,
+      # so the executable bit does not reliably survive `git add` —
+      # every other *.sh file already in this tree (e.g.
+      # dkrixserver/docker/start-servers.sh, which its own Dockerfile
+      # re-chmods after COPY) is 100644 in HEAD despite being run as a
+      # script. `sh script.sh` works regardless of the stored mode.
+
+      # Phase 8C ratchet. Counts variadic/format-string SQL API call
+      # sites (executeQuery/setStatement/Statement with a %[sdluxc]
+      # format spec) in compiled server sources. Baseline 542, measured
+      # fresh for this tree — the parked line's own baseline (567 at
+      # introduction, 540 by the tag tip) reflects PreparedStatement
+      # migrations (Phase 11) that do not exist here.
+      - name: SQL-injection ratchet
+        run: sh dkrixserver/scripts/check-sql-injection.sh
+
+      # Phase 12.0 ratchet. Counts filename-identical packet classes
+      # duplicated between dkrixserver/src/Core/ and
+      # dkrix/Client/Packet/Cpackets/. Baseline 326, measured fresh for
+      # this tree — every packet file in Cpackets currently has a
+      # same-named server-side sibling, since the shared/Packets/
+      # migrations (Phase 12) that drove the parked line's baseline
+      # toward 0 do not exist here.
+      - name: Packet-duplicates ratchet
+        run: sh dkrixserver/scripts/check-packet-duplicates.sh
