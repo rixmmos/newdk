@@ -154,6 +154,12 @@ add_subdirectory(Client/SpriteLib)
 # Additional libraries from VC6 project
 add_subdirectory(Client/framelib)
 
+# Phase 12: canonical packet-class tree lives in ../shared/Packets (sibling
+# to dkrix/ and dkrixserver/). Defines the shared_packets INTERFACE target
+# that DarkEden links below. See shared/Packets/README.md and
+# docs/MODERNIZATION.md's Phase 12 section.
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/Packets ${CMAKE_BINARY_DIR}/shared_packets_build)
+
 # ============================================================
 # TextSystem - New SDL-based Text System (Abstracted)
 # ============================================================

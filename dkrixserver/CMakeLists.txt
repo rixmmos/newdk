@@ -175,6 +175,11 @@ endif()
 # ============================================================================
 
 # ============================================================================
+# Phase 12: canonical packet-class tree lives in ../shared/Packets (sibling
+# to dkrix/ and dkrixserver/). Must exist before src/Core's packet library
+# targets can reference the shared_packets INTERFACE target. See
+# shared/Packets/README.md and docs/MODERNIZATION.md's Phase 12 section.
+add_subdirectory(${CMAKE_SOURCE_DIR}/../shared/Packets ${CMAKE_BINARY_DIR}/shared_packets_build)
 add_subdirectory(src/Core)
 add_subdirectory(src/server)
 
