@@ -78,7 +78,9 @@
 #include "Cpackets/CLGetServerList.h"
 #include "Cpackets/CLChangeServer.h"
 #include "Cpackets/CLReconnectLogin.h"
-#include "Cpackets/CLGetWorldList.h"
+// Phase 12: CLGetWorldList migrated to shared/Packets/; resolved via
+// shared_packets INTERFACE include path.
+#include "CLGetWorldList.h"
 #include "Cpackets/CLSelectWorld.h"
 #include "Cpackets/CLSelectServer.h"
 

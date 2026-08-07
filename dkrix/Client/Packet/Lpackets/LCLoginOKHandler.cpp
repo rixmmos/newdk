@@ -14,7 +14,9 @@
 
 	#include "../ClientPlayer.h"
 	//#include "../Cpackets/CLGetPCList.h"
-	#include "../Cpackets/CLGetWorldList.h"
+	// Phase 12: CLGetWorldList migrated to shared/Packets/; resolved via
+	// shared_packets INTERFACE include path.
+	#include "CLGetWorldList.h"
 	#include "UserInformation.h"
 	#include "MGameStringTable.h"
 	#include "UIDialog.h"

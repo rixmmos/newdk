@@ -520,7 +520,8 @@ set(CL_PACKET_SOURCES
     CLDeletePC.cpp CLDeletePCHandler.cpp
     CLGetPCList.cpp CLGetPCListHandler.cpp
     CLGetServerList.cpp CLGetServerListHandler.cpp
-    CLGetWorldList.cpp CLGetWorldListHandler.cpp
+    # CLGetWorldList.cpp moved to shared/Packets/ — Phase 12 migration.
+    CLGetWorldListHandler.cpp
     CLLogin.cpp CLLoginHandler.cpp
     CLLogout.cpp CLLogoutHandler.cpp
     CLQueryCharacterName.cpp CLQueryCharacterNameHandler.cpp
@@ -642,6 +643,15 @@ target_include_directories(GameServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/item
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/skill
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
+    # Phase 12: PacketFactoryManager.cpp (in PACKET_COMMON_SOURCES, compiled
+    # into all three server packet libraries) unconditionally #includes
+    # every migrated packet's header, including CL family headers like
+    # CLGetWorldList.h even though its addFactory() call is guarded to
+    # __LOGIN_SERVER__ only. Include-only — do NOT link shared_packets here,
+    # or this target would also absorb CLGetWorldList.cpp as a source and
+    # fail to link (CLGetWorldListHandler::execute is only ever defined in
+    # LoginServerPackets).
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 # ============================================================================
@@ -663,6 +673,12 @@ target_include_directories(LoginServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/loginserver
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
 )
+# Phase 12: this is the owning target for the CL family — links
+# shared_packets so it absorbs CLGetWorldList.cpp as a source, compiled
+# with __LOGIN_SERVER__ applied. CLGetWorldListHandler::execute (defined
+# in CLGetWorldListHandler.cpp, still in this directory — handlers never
+# move) is only ever called from here.
+target_link_libraries(LoginServerPackets PRIVATE shared_packets)
 
 # ============================================================================
 # SharedServerPackets  -  __SHARED_SERVER__ 
@@ -680,4 +696,6 @@ target_include_directories(SharedServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/database
     ${CMAKE_SOURCE_DIR}/src/server/sharedserver
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
+    # Phase 12: see GameServerPackets note above — include-only, no link.
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )

@@ -24,6 +24,10 @@ void CLGetWorldList::execute(Player* pPlayer)
 
 {
     __BEGIN_TRY
+    // Server-only dispatch; see the matching guard on
+    // CLGetWorldListHandler's declaration in CLGetWorldList.h.
+#ifndef __GAME_CLIENT__
     CLGetWorldListHandler::execute(this, pPlayer);
+#endif
     __END_CATCH
 }

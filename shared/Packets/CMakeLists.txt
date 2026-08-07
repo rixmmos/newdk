@@ -1,5 +1,5 @@
 # ============================================================================
-# shared/Packets — canonical packet-class tree (Phase 12 scaffolding)
+# shared/Packets — canonical packet-class tree (Phase 12)
 # ============================================================================
 #
 # Neutral third top-level directory that dkrix/ and dkrixserver/ both reach
@@ -14,9 +14,10 @@
 # A plain STATIC library would only ever get one set of defines baked in —
 # wrong for every consumer but the first to link it.
 #
-# Empty at this commit on purpose (scaffolding only): no packet class has
-# moved here yet. The pilot-pair migration in the following commit shows
-# the wiring end to end.
+# CLGetWorldList is the pilot pair (first class migrated through this
+# mechanism on main). The rest of the ~62 style-only pairs land in later,
+# separately-reviewed batches per docs/MODERNIZATION.md's Phase 12 plan —
+# this file is not meant to gain many entries per commit.
 # ============================================================================
 
 # Force CMP0076 NEW (absolute-path target_sources() on INTERFACE targets)
@@ -45,7 +46,9 @@ endif()
 # ----------------------------------------------------------------------
 set(_SHARED_PACKETS_CG_SOURCES) # Client -> Game
 set(_SHARED_PACKETS_GC_SOURCES) # Game -> Client
-set(_SHARED_PACKETS_CL_SOURCES) # Client -> Login
+set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
+    CLGetWorldList.cpp
+)
 set(_SHARED_PACKETS_LC_SOURCES) # Login -> Client
 
 set(_SHARED_PACKETS_SOURCES

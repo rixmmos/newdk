@@ -67,22 +67,28 @@ private:
 class CLGetWorldListFactory : public PacketFactory {
 public:
     // create packet
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; the override must be at least as strict or C++11
+    // rejects it as a looser exception specification. Keep throw() (not
+    // noexcept) to match the rest of the codebase until a sweep bumps
+    // everything. The server tree's base PacketFactory is unconstrained,
+    // so throw() here is a legal narrowing on that side too.
+    Packet* createPacket() throw() {
         return new CLGetWorldList();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CLGetWorldList";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CL_GET_WORLD_LIST;
     }
 
     // get packet's max body size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return 0;
     }
 };
@@ -94,10 +100,17 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CLGetWorldListHandler::execute has no client-side
+// definition or use. Guarded (not unconditional, unlike CGStoreOpen's
+// migrated header) because the client Cpackets copy already guarded it
+// this way and no CGHandlersStub.cpp-style client stub exists for the CL
+// family — keeping the guard avoids needing to add one.
+#ifndef __GAME_CLIENT__
 class CLGetWorldListHandler {
 public:
     // execute packet's handler
     static void execute(CLGetWorldList* pPacket, Player* player);
 };
+#endif
 
 #endif

@@ -1419,7 +1419,7 @@ assignment re-checked directly against `GSQuitGuildHandler.cpp`, no
 other value ever reaches `Table`. **Compile gate: next server CI run
 [unverified]** — landed after the last green run (#14, `421088e`).
 
-### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed here 2026-08-08; Wave 1 batches not started)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -1495,6 +1495,59 @@ proof-of-mechanism blast radius minimal. Both-tree CI must go green on
 the pilot before Wave 1 batches resume. This unblocks the batch plan
 above; it does not pre-approve doing all 62 pairs in one pass — that
 stays batched per the plan (~20 at a time, CI green per batch).
+
+**12.1 landed 2026-08-08 (worktree, not yet on `main`): scaffolding +
+one pilot pair.** `shared/Packets/README.md` and `CMakeLists.txt` (a
+`shared_packets` CMake INTERFACE target, absolute-path `target_sources`
+under a locally-forced `cmake_minimum_required(VERSION 3.13)` since
+dkrix's own floor is 3.12) landed first, wired into both root
+CMakeLists via `add_subdirectory`, with every packet family's source
+list empty — no build-observable change. **Pilot: `CLGetWorldList`**,
+chosen by client `#include` site count across the confirmed-style-only
+62 (re-verified against the current tree, unchanged from the
+2026-08-07 sample doc): 3 real include sites (`GameUI.cpp`,
+`Packet/PacketFactoryManager.cpp`,
+`Packet/Lpackets/LCLoginOKHandler.cpp`) vs. 4 for `CLLogout` /
+`CLVersionCheck` and 6 for `CGReady`. Reconciliation: the server file
+was already at canonical style (no `throw()` specs, unconditional
+`getPacketName()`/`toString()`); the only real merge was keeping the
+`#ifndef __GAME_CLIENT__` guard around `CLGetWorldListHandler` (present
+in the client's Cpackets copy, absent from the server's) so the client
+build doesn't need a stub definition, and adding `throw()` back to the
+four `CLGetWorldListFactory` overrides (`createPacket`,
+`getPacketName`, `getPacketID`, `getPacketMaxSize`) to satisfy the
+client tree's `PacketFactory` base, which declares them `throw()` —
+narrowing an override's exception spec is always legal, so this is
+also fine against the server's unconstrained base. Per-target wiring:
+`LoginServerPackets` links `shared_packets` (owns the family, absorbs
+`CLGetWorldList.cpp` with `__LOGIN_SERVER__`); `GameServerPackets` and
+`SharedServerPackets` get `shared/Packets` on their include path only,
+no link — `PacketFactoryManager.cpp` (built into all three) `#include`s
+every packet header unconditionally regardless of which family's
+`addFactory()` calls are guarded to which server type, so linking
+`shared_packets` there too would try to absorb `CLGetWorldList.cpp` as
+a source in a binary with no `CLGetWorldListHandler::execute` symbol —
+a link error. `DarkEden` links `shared_packets` directly. Ratchet:
+`check-packet-duplicates.sh --count` 326 → 324 (one class pair, `.h` +
+`.cpp`), baseline file updated in the same change.
+
+**Not build-verified — no compiler in the environment that did this
+work** (neither MSVC/vcpkg for the client nor the Linux server
+toolchain). Verified by reading: every `#include` site naming the old
+`Cpackets/CLGetWorldList.h` path is gone (`git grep`, excluding the
+orphaned, non-authoritative `Client.vcxproj.filters` — there is no
+matching `.vcxproj`, so it isn't part of any real build); the moved
+files exist only at `shared/Packets/`, not in either old location; the
+normalizer's wire-signature check (`normalize-packet-style.py --pair
+CLGetWorldList`) showed `residual: 0` / verdict `style-only` before the
+move. **Both-tree CI is the actual gate** — per `docs/CLAUDE.md`, this
+client+server change lands as one unit because it jointly defines the
+wire format, and this exact family of bug (case-sensitive `find` vs.
+case-insensitive Windows glob, a file silently dropped from a CMake
+source list) has caused three CI-red incidents in this tree in one day.
+Wave 1 proper (batches of ~20 of the remaining 61 style-only pairs)
+stays gated on this pilot going green on both trees' CI, per the plan
+above — nothing here pre-approves it.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`

@@ -84,7 +84,9 @@
 	#include <io.h>
 #endif
 
-#include "packet/Cpackets/CLGetWorldList.h"
+// Phase 12: CLGetWorldList migrated to shared/Packets/; resolved via
+// shared_packets INTERFACE include path.
+#include "CLGetWorldList.h"
 
 extern Race g_eRaceInterface;
 extern BOOL g_MyFull;

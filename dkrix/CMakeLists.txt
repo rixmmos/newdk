@@ -757,6 +757,10 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI
 		basic
 		TextSystem
+		# Phase 12: absorbs shared/Packets/ sources (e.g. CLGetWorldList.cpp)
+		# into this target's own compilation units, with __GAME_CLIENT__=1
+		# applied below (no __GAME_SERVER__/__LOGIN_SERVER__ defines).
+		shared_packets
 		SDL2::SDL2
 	)
 
