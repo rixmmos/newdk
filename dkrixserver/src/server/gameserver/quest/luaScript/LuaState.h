@@ -5,10 +5,10 @@
 #ifndef __LUA_STATE_H__
 #define __LUA_STATE_H__
 
+#include <sstream>
+
 #include "Exception.h"
 #include "Types.h"
-
-#include <sstream>
 
 extern "C" {
 #if defined(__APPLE__)

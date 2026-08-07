@@ -10,12 +10,13 @@
 #define __SOCKET_OUTPUT_STREAM_H__
 
 // include files
+#include <algorithm>
+
+#include <type_traits>
+
 #include "Exception.h"
 #include "Socket.h"
 #include "Types.h"
-
-#include <algorithm>
-#include <type_traits>
 
 // constant definitions
 const unsigned int DefaultSocketOutputBufferSize = 81920;
