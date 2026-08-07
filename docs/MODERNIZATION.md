@@ -430,12 +430,15 @@ In order; each independently shippable:
    See Phase 10 above for detail and compile-gate caveats.
 6. **Phase 8 secrets step 2** — deployment change; needs a live-server
    window, config backups, and Enrico at the wheel.
-7. **Phase 12 Wave 1** — blocked, not a live next-step yet. See Phase
-   12 above: the simple "point client at the server file" approach is
-   structurally broken (include-resolution pulls in the wrong
-   `Packet.h`); the working alternative (`shared/Packets/`, proven on
-   the parked line) is a real structural decision, not a first-batch
-   backfill. Needs an explicit go/no-go before any pair is touched.
+7. **Phase 12.1 — build `shared/Packets/` infrastructure + one pilot
+   pair.** Decided 2026-08-08 (see Phase 12 above): the simple "point
+   client at the server file" approach is structurally broken
+   (include-resolution pulls in the wrong `Packet.h`); building
+   `shared/Packets/` — proven on the parked line — is approved as its
+   own scoped, CI-gated change, sized against `main`'s current tree.
+   Land the directory + `shared_packets` CMake target + exactly one
+   migrated pair first; both-tree CI green on the pilot gates resuming
+   the batch plan (Wave 1 proper, ~20 pairs at a time).
 
 > **2026-08-07 five-stream agent wave (cloud session):** items 3–5 above
 > advanced in one parallel pass — 11.2 batch 1 (ratchet 542→529), Phase 3
@@ -616,13 +619,13 @@ back to a single unconditional typedef.
       `WavePackFileManager.cpp` are excluded from the non-Windows CMake
       source list, so they always get the real SDK `HRESULT` and don't
       depend on the Platform.h shim), but others aren't provably so
-      without a build. Also found `CDirectSoundStream.cpp` and
+      without a build. ~~Also found `CDirectSoundStream.cpp` and
       `CDirectSoundStream_Adapter.cpp` both fully implement
-      `CSDLStream::WaveReadFile` (and are both unconditionally in
-      `DXLIB_SOURCES` when `HAVE_SDL2_MIXER` is on) — a likely duplicate-
-      symbol linker error, and squarely the "delete the `_Adapter.cpp`
-      twins" work already scoped to Phase 3. Left alone here to avoid
-      colliding with that.
+      `CSDLStream::WaveReadFile`... a likely duplicate-symbol linker
+      error~~ — **resolved by Phase 3 item 1** (2026-08-07): the
+      `_Adapter.cpp` twin is deleted; only `CDirectSoundStream.cpp`
+      remains [measured — `find` confirms no `_Adapter` file under
+      `Client/Platform/`]. This note was stale.
 - [x] `SCAN_CODE()` / `platform_get_scan_code()` — **doc's premise was
       stale, nothing to do.** `SCAN_CODE` isn't in `Platform.h` at all;
       it's defined in `basic/PlatformUtil.h` (`#ifdef PLATFORM_WINDOWS`
@@ -1421,10 +1424,30 @@ pair alone [measured, re-derived for the six Wave-1 candidates]. That
 is the scope Wave 1 would actually require — the "bigger restructuring"
 this section's batch plan explicitly reserved for a deliberate,
 separately-recorded decision, not something a first small batch should
-back into silently. **Open decision, blocking any Wave 1 attempt:**
-build `shared/Packets/` (proven — it reached a working end-to-end
-smoke test on the parked line) as its own scoped change, sized against
-`main`'s current tree, before migrating any pair.
+back into silently.
+
+**Decided 2026-08-08: build `shared/Packets/`.** It is the only
+approach that has ever actually worked here — proven by the parked
+line's own end-to-end login→gameplay smoke test, not merely by
+argument — and both toolchains are now CI-gated on every push, which
+is the safety net the parked line didn't have when it built this the
+first time. Rejected alternative: staying blocked indefinitely on
+Phase 12 is not actually lower-risk — the packet-duplicates ratchet
+(326) sits un-movable, and every subsequent `PreparedStatement`-style
+change to a packet handler keeps widening the gap between the two
+trees' copies. **Scope of the first change, deliberately small — not
+all 62 pairs at once:** stand up the `shared/Packets/` directory and a
+`shared_packets` CMake INTERFACE target (lift the mechanism from
+`archive/modernization-phases-1-17`'s `shared/Packets/README.md`, sized
+against `main`'s current tree, not copied file-for-file), then migrate
+exactly **one pilot pair** through it end to end — the parked line's
+own first migration (`CGStoreOpen`, `5805e37`) is not necessarily the
+right pilot for `main`'s current tree; pick whichever of the confirmed
+style-only 62 has the fewest client include sites, to keep the first
+proof-of-mechanism blast radius minimal. Both-tree CI must go green on
+the pilot before Wave 1 batches resume. This unblocks the batch plan
+above; it does not pre-approve doing all 62 pairs in one pass — that
+stays batched per the plan (~20 at a time, CI green per batch).
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
