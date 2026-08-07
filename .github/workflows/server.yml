@@ -86,6 +86,77 @@ jobs:
             echo "ok: bin/$b"
           done
 
+  sanitizers:
+    # Additive leg, does not replace the plain `build` job above — same
+    # dependency set, invoking the debug-asan / debug-ubsan Makefile
+    # targets added alongside the CMakeLists.txt USE_<SAN> options
+    # (Phase 10 bullet 3, 2026-08-07). TSan is deliberately excluded
+    # from the matrix, same rationale as the parked line's Phase 15D
+    # (archive/modernization-phases-1-17, 56f4165): the server's thread
+    # model has not been audited and TSan on un-audited code produces
+    # more false-positive noise than signal until real races are
+    # addressed. `make debug-tsan` still works locally.
+    #
+    # This sanitizer matrix has never been run against this tree before
+    # — CI is the actual gate for whether -fsanitize=address/undefined
+    # compiles and links clean here, not this review.
+    name: build (${{ matrix.sanitizer }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: dkrixserver
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [asan, ubsan]
+        include:
+          - sanitizer: asan
+            make_target: debug-asan
+          - sanitizer: ubsan
+            make_target: debug-ubsan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same dependency set as the `build` job above.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libmysqlclient-dev \
+            liblua5.1-0-dev \
+            libxerces-c-dev \
+            libnsl-dev
+
+      - name: Show toolchain
+        run: |
+          cmake --version
+          g++ --version
+
+      - name: Build (${{ matrix.make_target }})
+        run: make ${{ matrix.make_target }}
+
+      # NOTE: CMAKE_RUNTIME_OUTPUT_DIRECTORY is pinned to
+      # ${CMAKE_SOURCE_DIR}/bin in CMakeLists.txt — i.e. always
+      # dkrixserver/bin/, regardless of which build-* directory
+      # configured it. Each matrix leg gets a fresh runner/checkout, so
+      # there's no cross-leg clobbering, but the binary path itself
+      # does NOT vary by sanitizer the way the build-<san> dir does.
+      - name: Verify binaries exist
+        run: |
+          set -e
+          for b in gameserver loginserver sharedserver; do
+            if [ ! -f "bin/$b" ]; then
+              echo "::error::Expected binary bin/$b was not produced"
+              exit 1
+            fi
+            echo "ok: bin/$b"
+          done
+
   format:
     name: clang-format
     runs-on: ubuntu-latest

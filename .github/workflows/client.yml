@@ -170,3 +170,86 @@ jobs:
             -A x64 `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
           cmake --build dkrix/build-tools --config Debug -- /m /v:minimal
+
+  sanitizers-linux:
+    name: Linux sanitizer (${{ matrix.sanitizer }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Non-blocking, same as the `tools` job above: this leg has never
+    # been run against this tree before. Windows/MSVC is this repo's
+    # authoritative client build (dkrix/CLAUDE.md); Linux is documented
+    # there only as "a secondary portability target", and the USE_ASAN/
+    # USE_UBSAN CMake options only take effect under GNU/Clang (a no-op
+    # warning under MSVC, per CMakeLists.txt), so a sanitizer leg can't
+    # be added to the existing Windows job at all — it needs its own
+    # Linux toolchain and SDL2 dep install, hence a separate job here
+    # rather than a matrix leg bolted onto `build`.
+    #
+    # Deliberately does not include macOS: dkrix/CLAUDE.md calls macOS
+    # sanitizer support merely "historical", while Linux is the current
+    # (if secondary) portability claim — narrower scope than the parked
+    # line's Phase 15E (9832499), which ran ubuntu+macos x3 sanitizers
+    # against a tree whose client CI had no Windows job at all. TSan is
+    # excluded from the matrix for the same reason as the server leg in
+    # server.yml: the client's thread model is unaudited, and the
+    # Makefile's `debug-tsan` target still exists for local use.
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: dkrix
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [asan, ubsan]
+        include:
+          - sanitizer: asan
+            make_target: debug-asan
+          - sanitizer: ubsan
+            make_target: debug-ubsan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # See CMakeLists.txt find_package(SDL2/SDL2_image/SDL2_ttf
+      # REQUIRED). SDL2_mixer is optional (graceful-degrade audio path)
+      # but installed anyway for parity with the dep set noted in
+      # dkrix/CLAUDE.md.
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            pkg-config \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-ttf-dev \
+            libsdl2-mixer-dev \
+            libjpeg-dev
+
+      - name: Show toolchain versions
+        run: |
+          cc --version | head -1
+          c++ --version | head -1
+          cmake --version | head -1
+
+      # Invokes the Makefile target added alongside the CMakeLists.txt
+      # USE_<SAN>=ON options (Phase 10 bullet 3, 2026-08-07) — same
+      # recipe as local dev.
+      - name: Build (${{ matrix.make_target }})
+        run: make ${{ matrix.make_target }}
+
+      # CMAKE_RUNTIME_OUTPUT_DIRECTORY is ${CMAKE_BINARY_DIR}/bin, so
+      # unlike the server tree this DOES vary per build-<san> directory.
+      - name: Verify binary
+        run: |
+          binary="build-${{ matrix.sanitizer }}/bin/DarkEden"
+          if [ -x "$binary" ]; then
+            echo "Built: $binary"
+            ls -la "$binary"
+          else
+            echo "ERROR: expected binary $binary was not produced"
+            ls -la "build-${{ matrix.sanitizer }}/bin/" 2>/dev/null || echo "(no build-${{ matrix.sanitizer }}/bin/)"
+            exit 1
+          fi
