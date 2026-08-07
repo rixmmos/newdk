@@ -61,6 +61,8 @@ login_decoded.bmp
 
 # ─── Claude Code local settings ───────────────────────────────────────────────
 .claude/settings.local.json
+# Agent-session worktrees — full working copies, never repo content.
+.claude/worktrees/
 
 # ─── Notes ────────────────────────────────────────────────────────────────────
 # Database backup .sql files under dkrixserver/ are deliberately NOT ignored.
