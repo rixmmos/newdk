@@ -526,16 +526,118 @@ Option B.
       environment variables. Keep `*.conf` as a template with
       `${VAR}` placeholders.
 
-### Phase 9 — Server: Lua sandbox and packet schema
-- [ ] Replace `luaL_openlibs()` with a whitelist (`base`, `math`,
-      `string`); drop `io`.
-- [ ] Wrap every `lua_to*` → enum cast in a range-checked helper.
+### Phase 9 — Server: Lua sandbox and packet schema (mechanical items done 2026-08-07)
+
+> **[measured 2026-08-07]** All three mechanical items below were
+> verified with `cd dkrixserver && make debug` in WSL (gcc 13,
+> `liblua5.1-0-dev`) — a real compile and link of all three binaries
+> (`bin/{gameserver,loginserver,sharedserver}`), not just a grep. This
+> is stronger evidence than the syntax-only checks the parked line
+> (`archive/modernization-phases-1-17`) could do without a toolchain.
+> The fourth item (packet schema sharing) is untouched — see the
+> proposal note below it.
+>
+> **Scope audit — single call site, matches the parked line's finding.**
+> `luaL_openlibs()` is called exactly once, in
+> `dkrixserver/src/server/gameserver/quest/luaScript/LuaState.cpp:init()`.
+> Grepped every real `*.lua` under the repo
+> (`dkrixserver/data/lua/**`, `quest/luaScript/test/*.lua`, 18 files
+> total; excludes `quest/luaScript/test/lt`, which is a leftover
+> compiled ELF binary, not a script) for `io.`, `os.`, `debug.`,
+> `require`/`package.`, `table.`, `string.`, `math.` — **zero
+> matches** in any of them. `io` is confirmed unused; dropping it is
+> not a behavior change.
+>
+> **`table` is also dropped, not just `io`/`os`/`debug`/`package`,
+> matching this file's original `base`/`math`/`string` spec** (the
+> parked line's Phase 9 additionally kept `table` — that was not
+> re-verified here). Two scripts (`xmasEventCommon.lua` and its
+> siblings) call bare `random(...)` and `getn(...)` — old Lua
+> 4.x/5.0-era globals, not `math.random`/`table.getn`. Built a
+> throwaway C harness against this WSL image's actual
+> `liblua5.1-0-dev` (`/usr/include/lua5.1/luaconf.h` has
+> `#undef LUA_COMPAT_GETN`) and confirmed **both `random` and `getn`
+> are already `nil` globals even with the old, unrestricted
+> `luaL_openlibs()`** — i.e. `selectOne()` in those scripts already
+> throws "attempt to call a nil value" today, on `main`, independent
+> of this change. Dropping `table` from the whitelist does not make
+> this any more broken than it already was. Not fixed here — Lua
+> version drift in event-script content is a separate, pre-existing
+> issue, not a Phase 9 mechanical item.
+>
+> **Also discovered, not fixed:** `LuaState::randomseed()` calls
+> `luaL_dostring(m_pState, "randomseed(1234)")`, and `randomseed` is
+> the same kind of missing 4.x/5.0-era global — this call has been
+> silently failing (return value unchecked) on every `LuaState::init()`
+> under the old `luaL_openlibs()` too. Pre-existing, unrelated to the
+> whitelist change; flagging per the "call out as you find them"
+> house rule rather than fixing it blind.
+
+- [x] Replace `luaL_openlibs()` with a whitelist (`base`, `math`,
+      `string`); drop `io`. **Shipped:** whitelist implemented via the
+      `luaopen_base`/`luaopen_string`/`luaopen_math` +
+      `lua_pushcfunction`/`lua_call` idiom (mirrors Lua 5.1's own
+      `linit.c`) in `LuaState::init()`. `io`/`os`/`debug`/`package`/
+      `table` all dropped — see scope audit above for why `table`
+      does not break any currently-working script.
+- [x] Wrap every `lua_to*` → enum cast in a range-checked helper.
+      **Scope audit:** exactly four call sites, all in
+      `LuaSelectItem.cpp::executeFile()` (`ItemClass`, `ItemType`,
+      `OptionType`, `OptionType2`, read via `lua_tonumber` + C-style
+      cast) — matches the parked line's finding. **Shipped:** new
+      `template<T> lua_toboundedenum(lua_State*, int idx, long min,
+      long max)` in `LuaState.h`, throwing `InvalidProtocolException`
+      (slot index + observed value + legal range) on a non-numeric
+      slot or an out-of-range value. Migrated all four sites in
+      `LuaSelectItem.cpp` (`ItemClass`: `0..ITEM_CLASS_MAX-1`;
+      `ItemType_t`/`OptionType_t`: `0..0xFFFF`/`0..0xFF`, their
+      natural `WORD`/`BYTE` ceilings).
 - [ ] Share packet definitions between client and server: either a
       git submodule of `src/Core/Packets/` consumed by both, or a
       generated file from a small schema (pick when we get there,
-      record the decision here).
-- [ ] Add endian-safe read/write primitives in
-      `SocketInputStream` / `SocketOutputStream`.
+      record the decision here). **Not attempted — architectural
+      decision, deliberately out of scope for the mechanical pass.**
+      **Proposal, not a decision:** the parked line's 2026-04-19 scope
+      audit (`archive/modernization-phases-1-17`, now Phase 12 there)
+      found ~149 `.cpp/.h` under `dkrix/Client/Packet/` plus ~326
+      under `dkrix/Client/Packet/Cpackets/`, near-duplicated against
+      ~800 files under `dkrixserver/src/Core/` (`CG*`/`GC*`/`CL*`/
+      `LC*`/`GS*`/`SG*`/`GT*`/`TG*`), differing from their server
+      counterparts only in whitespace/exception-spec/comments — wire
+      format identical on the pairs spot-checked. A git submodule of
+      `src/Core/Packets/` consumed by both trees is the lower-risk of
+      the two options: it requires no new tooling (a codegen schema
+      would need a generator, a template language, and a migration
+      of ~1,100 files' worth of hand-written parsing quirks), and the
+      packet classes are already near-identical, so promoting one
+      side to canonical is mostly a `git mv` + include-path exercise
+      per file rather than a rewrite. Recommend booking this as its
+      own phase (the parked line called it Phase 12) sized around
+      "promote `dkrixserver/src/Core/` packet headers to a submodule,
+      point `dkrix/Client/Packet/` at it, delete the client copies" —
+      multi-day, not a single commit.
+- [x] Add endian-safe read/write primitives in
+      `SocketInputStream` / `SocketOutputStream`. **Scope check:**
+      zero `ntoh*`/`hton*`/`htole*`/`le*toh` calls anywhere near these
+      two classes; the existing `template<T> read(T&)` /
+      `template<T> write(T)` do a raw host-order memory cast
+      (`buf = *(T*)(m_Buffer + m_Head)`), which is the wire format
+      every existing client/server build already speaks (both build
+      for x86/x86-64, i.e. little-endian) — confirmed by the
+      unrelated `ntohs`/`ntohl` usage that *does* exist elsewhere
+      (`Datagram.h`, `chinabilling/CBillingPacketHeader.cpp`), which
+      is a different protocol, not this one. **Shipped as new opt-in
+      methods, not a replacement:** `template<T> readLE(T&)` on
+      `SocketInputStream` and `template<T> writeLE(T)` on
+      `SocketOutputStream`, restricted to arithmetic `T` via
+      `static_assert`. Both decode/encode explicit little-endian byte
+      order via a runtime host-endianness probe + `std::reverse`, so
+      they are byte-for-byte identical to `read<T>`/`write<T>` on
+      every host this project ships on today, but would still be
+      correct on a big-endian target. Existing `read<T>`/`write<T>`
+      and every packet call site are untouched — changing the wire
+      protocol's default is a coordinated client+server change and is
+      out of scope here.
 
 ### Phase 10 — Build hygiene & CI
 - [ ] Add `.clang-format` to `client/`; implement
