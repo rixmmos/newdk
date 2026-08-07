@@ -18,7 +18,6 @@
 #include "DXLib/AudioManager.h"
 #include "CDirectSoundStream.h"
 #include "CDirectMusic.h"  // Now CSDLMusic
-//#include "CDirectSetup.h"
 #include "DXLib/InputManager.h"
 
 #endif

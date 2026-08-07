@@ -16,7 +16,6 @@
 #include "AudioManager.h"
 #include "CDirectSoundStream.h"
 #include "CDirectMusic.h"
-//#include "CDirectSetup.h"
 #include "InputManager.h"
 
 #endif
