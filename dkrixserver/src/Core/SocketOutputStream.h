@@ -14,6 +14,9 @@
 #include "Socket.h"
 #include "Types.h"
 
+#include <algorithm>
+#include <type_traits>
+
 // constant definitions
 const unsigned int DefaultSocketOutputBufferSize = 81920;
 
@@ -54,6 +57,20 @@ public:
     void writePacket(const Packet* pPacket);
 
     template <typename T> uint write(T buf);
+
+    // Phase 9 (2026-08-07): endian-safe write primitive. Opt-in only --
+    // write<T>() above is untouched and still does a raw host-order
+    // memory cast, matching what every existing packet on the wire was
+    // written with (both server and client build for x86/x86-64, i.e.
+    // little-endian). writeLE<T>() encodes the value as explicit
+    // little-endian regardless of host byte order, so it is
+    // byte-for-byte identical to write<T>() on every host this project
+    // ships on today, but would still encode correctly if a TU were
+    // ever built for a big-endian target. Not wired into any packet
+    // path -- callers opt in explicitly. Restricted to arithmetic
+    // types: byte-order only makes sense per scalar field, not for a
+    // struct reinterpreted as a blob.
+    template <typename T> uint writeLE(T buf);
     /*	uint write (bool   buf)  { return write((const char*)&buf, szbool  ); }
         uint write (char   buf)  { return write((const char*)&buf, szchar  ); }
         uint write (uchar  buf)  { return write((const char*)&buf, szuchar ); }
@@ -195,6 +212,30 @@ template <typename T> uint SocketOutputStream::write(T buf) {
     m_Tail = (m_Tail + len) % m_BufferLen;
 
     return len;
+
+    __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// write data to output buffer, explicit little-endian wire order
+// (Phase 9, 2026-08-07 -- see declaration above)
+//
+//////////////////////////////////////////////////////////////////////
+template <typename T> uint SocketOutputStream::writeLE(T buf) {
+    __BEGIN_TRY
+
+    static_assert(std::is_arithmetic<T>::value, "writeLE<T> requires an arithmetic type");
+
+    unsigned char tmp[sizeof(T)];
+    memcpy(tmp, &buf, sizeof(T));
+
+    static const unsigned short kEndianProbe = 0x0001;
+    bool hostIsLittleEndian = (*reinterpret_cast<const unsigned char*>(&kEndianProbe) == 0x01);
+    if (!hostIsLittleEndian)
+        std::reverse(tmp, tmp + sizeof(T));
+
+    return write((const char*)tmp, (uint)sizeof(T));
 
     __END_CATCH
 }

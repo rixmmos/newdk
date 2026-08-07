@@ -20,18 +20,58 @@ LuaState::~LuaState() {
 //--------------------------------------------------------------------------------
 // init
 //--------------------------------------------------------------------------------
+//
+// Phase 9 (2026-08-07): Lua sandbox whitelist.
+//
+// Quest scripts run untrusted Lua loaded from disk (data/lua/*.lua).
+// luaL_openlibs() used to register every standard library, including
+// io (filesystem read/write), os (os.execute, os.remove, os.getenv),
+// debug (VM reflection), and package (require/loadlib, dynamic C
+// module loading). Any one of those lets a malicious or buggy quest
+// file read config, exfiltrate credentials, shell out, or patch the
+// running VM.
+//
+// Only the libraries quest scripts actually use are loaded:
+//
+//   base    (print, tostring, pairs, ipairs, type, unpack, etc.)
+//   math    (math.random, math.floor, math.sin, math.pi, etc.)
+//   string  (string.format, string.sub, string.find, string.gsub)
+//
+// Scope audit (2026-08-07): grepped every *.lua under the repo
+// (dkrixserver/data/lua/**, quest/luaScript/test/**) for io./os./
+// debug./require|package./table./string./math. -- none of the real
+// quest scripts call io/os/debug/package, and none call table.* or
+// math.*/string.* via dotted form either (they use bare `random`/
+// `getn`, which are Lua 4.x/5.0 compat globals). Verified against
+// the actual liblua5.1 shipped here (WSL, liblua5.1-0-dev) that
+// LUA_COMPAT_GETN is #undef'd and no compat global for `random`
+// exists in stock Lua 5.1 at all -- so `randomseed()` below and any
+// script calling bare `random`/`getn` already fails with "attempt
+// to call a nil value" under the old luaL_openlibs() too. Dropping
+// `table` from the whitelist does not change that pre-existing
+// behavior; io is unambiguously unused and safe to drop.
+//
+// Pattern mirrors luaL_openlibs()'s own implementation in Lua 5.1
+// linit.c: push the luaopen_* function, push its library name, call
+// with one arg. luaopen_base uses "" for its name by 5.1 convention.
+//
 void LuaState::init(int stackSize) {
     open(stackSize);
 
-    // load all libs.
-    luaL_openlibs(m_pState);
-
-    // This is the old lua4.x API
-    // lua5.1 doesn't need the following lines, otherwise it get PANIC: unprotected error in call to Lua API
-    // baselibopen();
-    // mathlibopen();
-    // strlibopen();
-    // iolibopen();
+    // Whitelisted standard libs only -- io/os/debug/package/table
+    // deliberately excluded to prevent filesystem / process /
+    // reflection / require escape from untrusted quest scripts.
+    static const luaL_Reg kAllowedLibs[] = {
+        {"", luaopen_base},
+        {LUA_STRLIBNAME, luaopen_string},
+        {LUA_MATHLIBNAME, luaopen_math},
+        {NULL, NULL}
+    };
+    for (const luaL_Reg* lib = kAllowedLibs; lib->func; ++lib) {
+        lua_pushcfunction(m_pState, lib->func);
+        lua_pushstring(m_pState, lib->name);
+        lua_call(m_pState, 1, 0);
+    }
 
     randomseed();
 }
