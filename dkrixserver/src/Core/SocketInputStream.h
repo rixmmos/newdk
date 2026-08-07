@@ -26,6 +26,9 @@
 #include "Socket.h"
 #include "Types.h"
 
+#include <algorithm>
+#include <type_traits>
+
 // constant definitions
 const uint DefaultSocketInputBufferSize = 81920;
 
@@ -60,6 +63,20 @@ public:
     void readPacket(Packet* p);
 
     template <typename T> uint read(T& buf);
+
+    // Phase 9 (2026-08-07): endian-safe read primitive. Opt-in only --
+    // read<T>() above is untouched and still does a raw host-order
+    // memory cast, which is what every existing packet on the wire
+    // was written with (both server and client build for x86/x86-64,
+    // i.e. little-endian). readLE<T>() decodes the wire bytes as
+    // explicit little-endian regardless of host byte order, so it is
+    // byte-for-byte identical to read<T>() on every host this project
+    // ships on today, but would still decode correctly if a TU were
+    // ever built for a big-endian target. Not wired into any packet
+    // path -- callers opt in explicitly. Restricted to arithmetic
+    // types: byte-order only makes sense per scalar field, not for a
+    // struct reinterpreted as a blob.
+    template <typename T> uint readLE(T& buf);
 
     /*	uint read (bool   & buf)  { return read((char*)&buf, szbool  ); }
         uint read (char   & buf)  { return read((char*)&buf, szchar  ); }
@@ -179,6 +196,27 @@ template <typename T> uint SocketInputStream::read(T& buf) {
     return len;
 
     //	__END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// read data from input buffer, explicit little-endian wire order
+// (Phase 9, 2026-08-07 -- see declaration above)
+//
+//////////////////////////////////////////////////////////////////////
+template <typename T> uint SocketInputStream::readLE(T& buf) {
+    static_assert(std::is_arithmetic<T>::value, "readLE<T> requires an arithmetic type");
+
+    unsigned char tmp[sizeof(T)];
+    uint n = read((char*)tmp, (uint)sizeof(T));
+
+    static const unsigned short kEndianProbe = 0x0001;
+    bool hostIsLittleEndian = (*reinterpret_cast<const unsigned char*>(&kEndianProbe) == 0x01);
+    if (!hostIsLittleEndian)
+        std::reverse(tmp, tmp + sizeof(T));
+
+    memcpy(&buf, tmp, sizeof(T));
+    return n;
 }
 
 #endif
