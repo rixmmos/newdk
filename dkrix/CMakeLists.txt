@@ -43,6 +43,15 @@ option(USE_ASAN "Enable AddressSanitizer for memory error detection" OFF)
 option(USE_TSAN "Enable ThreadSanitizer for race condition detection" OFF)
 option(USE_UBSAN "Enable UndefinedBehaviorSanitizer for undefined behavior detection" OFF)
 
+# ASan and TSan instrument memory access differently (shadow memory vs.
+# interceptor-based happens-before tracking) and cannot be linked into
+# the same binary. UBSan is a separate, compatible check and may be
+# combined with either. (Phase 10 bullet 3, 2026-08-07 — mirrors the
+# same guard added to dkrixserver/CMakeLists.txt.)
+if(USE_ASAN AND USE_TSAN)
+    message(FATAL_ERROR "USE_ASAN and USE_TSAN are mutually exclusive — enable only one at a time (UBSAN may combine with either).")
+endif()
+
 if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         set(SANITIZER_FLAGS "")
