@@ -8,11 +8,6 @@
 
 #include "CDirectSoundStream.h"
 
-// Define E_FAIL for compatibility (Windows HRESULT value)
-#ifndef E_FAIL
-#define E_FAIL 0x80004005L
-#endif
-
 //-----------------------------------------------------------------------------
 // Constructor/Destructor
 //-----------------------------------------------------------------------------
@@ -85,16 +80,18 @@ BOOL CSDLStream::Reset()
 	return FALSE;
 }
 
-HRESULT CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
+void CSDLStream::WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest,
 	MMCKINFO* pckIn, UINT* cbActualRead)
 {
-	// Not implemented - Windows multimedia API only
+	// Not implemented - Windows multimedia API only. No caller anywhere in
+	// the tree inspects a return value (there are no callers at all - this
+	// stub is unreachable dead code kept for interface parity), so this
+	// used to unconditionally return the fake HRESULT E_FAIL.
 	(void)hmmioIn;
 	(void)cbRead;
 	(void)pbDest;
 	(void)pckIn;
 	(void)cbActualRead;
-	return E_FAIL;
 }
 
 //-----------------------------------------------------------------------------

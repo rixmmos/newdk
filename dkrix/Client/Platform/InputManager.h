@@ -89,7 +89,7 @@ private:
 	int							m_limit_x; 
 	int							m_limit_y; 
 
-	HRESULT	InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex);
+	bool	InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex);
 	void		FreeDirectInput();
 	void		OnMouseInput();
 	void		OnKeyboardInput();

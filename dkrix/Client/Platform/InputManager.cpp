@@ -260,8 +260,11 @@ void InputManager::SetKeyboardEventReceiver(void (*fp_receiver)(E_KEYBOARD_EVENT
 /* Stub implementations for unused methods */
 void InputManager::OnMouseInput() { /* Handled in UpdateInput */ }
 void InputManager::OnKeyboardInput() { /* Handled in UpdateInput */ }
-HRESULT InputManager::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) { 
-	return Init(hWnd, hInst, ex) ? S_OK : S_FALSE; 
+/* Unused private stub (no callers anywhere in the tree); previously mapped
+   Init()'s BOOL onto a fake HRESULT (S_OK/S_FALSE). bool carries the same
+   success/failure meaning without the shim. */
+bool InputManager::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) {
+	return Init(hWnd, hInst, ex) != FALSE;
 }
 
 #endif /* DXLIB_BACKEND_SDL */

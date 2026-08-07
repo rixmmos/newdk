@@ -409,23 +409,8 @@ typedef WORD			char_t;
 		#define FALSE	0
 	#endif
 
-	typedef int32_t			HRESULT;
 	typedef intptr_t		LRESULT;
 	typedef uintptr_t		UINT_PTR;
-	#ifndef S_OK
-		#define S_OK		0
-	#endif
-	#ifndef S_FALSE
-		#define S_FALSE		1
-	#endif
-
-	/* HRESULT macros */
-	#ifndef SUCCEEDED
-		#define SUCCEEDED(hr)	(((HRESULT)(hr)) >= 0)
-	#endif
-	#ifndef FAILED
-		#define FAILED(hr)		(((HRESULT)(hr)) < 0)
-	#endif
 
 	/* VOID type */
 	#ifndef VOID

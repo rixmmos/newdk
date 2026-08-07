@@ -66,7 +66,7 @@ class CSDLStream {
 		BOOL					RestoreBuffers( BOOL bLooped );
 
 		BOOL					Reset();
-		HRESULT					WaveReadFile( HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pckIn, UINT* cbActualRead );
+		void					WaveReadFile( HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pckIn, UINT* cbActualRead );
 
 	protected :
 		BOOL					m_bLoad;

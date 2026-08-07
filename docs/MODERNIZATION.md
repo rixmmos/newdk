@@ -608,24 +608,71 @@ back to a single unconditional typedef.
         `vs_ui_gamecommon2.cpp`). **Kept — doc's claim was wrong.**
       - `_itoa`: does not exist anywhere in `Platform.h` or the rest of
         `dkrix/`. **Nothing to delete — doc's claim was moot.**
-- [~] Fake `HRESULT`/`S_OK`/`S_FALSE` machinery — partially done.
-      Changed `CSDLInput::SetAcquire()` from `HRESULT` to `void`: it's a
-      documented no-op on the SDL backend, and all 7 call sites
-      (`WinMain.cpp`, `hangul/Ci.cpp`, `GameInit.cpp`, `GameMain.cpp` ×3)
-      discard the return value as a bare statement. Commit `8725860`.
-      **Did not delete the machinery itself.** `HRESULT`/`S_OK`/`S_FALSE`/
-      `SUCCEEDED`/`FAILED` appear in ~20 files tree-wide; some are
-      Windows-only (`VS_UI_WebBrowser.cpp`, `Imm/*`, `Client.cpp`,
-      `WavePackFileManager.cpp` are excluded from the non-Windows CMake
-      source list, so they always get the real SDK `HRESULT` and don't
-      depend on the Platform.h shim), but others aren't provably so
-      without a build. ~~Also found `CDirectSoundStream.cpp` and
-      `CDirectSoundStream_Adapter.cpp` both fully implement
-      `CSDLStream::WaveReadFile`... a likely duplicate-symbol linker
-      error~~ — **resolved by Phase 3 item 1** (2026-08-07): the
-      `_Adapter.cpp` twin is deleted; only `CDirectSoundStream.cpp`
-      remains [measured — `find` confirms no `_Adapter` file under
-      `Client/Platform/`]. This note was stale.
+- [x] Fake `HRESULT`/`S_OK`/`S_FALSE` machinery — **done 2026-08-08.**
+      Re-ran the census tree-wide (word-boundary grep, `.h`/`.cpp`): 31
+      files matched `HRESULT`/`S_OK`/`S_FALSE`/`SUCCEEDED`/`FAILED`
+      before this pass — most were false positives from the plain
+      substring search (`ITEM_STATUS_OK`, `BS_OK`, `*_ARMS_OK_*`,
+      `*_RANK_BONUS_OK` etc. all contain `S_OK` as a substring; excluding
+      those, only ~14 files carried a genuine token). Classified
+      per-file, not by pattern:
+      - **Windows-only, left alone** (excluded from the non-Windows CMake
+        source list — verified against the current exclusion regexes):
+        `VS_UI_WebBrowser.cpp`, `Imm/*` (5 files), `Client.cpp`,
+        `WavePackFileManager.cpp`. `VS_UI/WinMain.cpp` added to this
+        bucket after reading it: unconditionally `#include <windows.h>`
+        with 3000+ lines of unguarded WinMain/COM code (real
+        `CoCreateInstance`/`IWebBrowser2` `HRESULT`), and — a CMake
+        oddity worth flagging separately — it's excluded from the
+        *Windows* source list (`if(WIN32) ... EXCLUDE REGEX
+        ".*WinMain.*"`, always taken since `USE_SDL_BACKEND` is
+        `FORCE`d `ON`), not the non-Windows one; the real cross-platform
+        entry point is `Client/SDLMain.cpp` (`#ifndef PLATFORM_WINDOWS`
+        guarded). `WinMain.cpp` looks like dead/superseded legacy
+        residue — candidate for outright deletion in a future pass, but
+        that's out of scope here.
+      - **Migrated off the shim** (all callers read first; every one
+        discarded the return value as a bare statement, matching
+        `8725860`'s pattern):
+        - `Client::InitFail()` (`Client.h`/`Client.cpp`): `HRESULT` →
+          `void`. 3 live call sites (`GameInit.cpp` ×2, `GameMain.cpp`
+          ×1), all bare statements.
+        - `CSDLStream::WaveReadFile()` (`Platform/CDirectSoundStream.h`/
+          `.cpp`): `HRESULT` → `void`. Zero callers anywhere in the
+          tree (protected, unused stub on an already-deprecated class);
+          the local `E_FAIL` compat `#define` it existed for is deleted
+          too.
+        - `InputManager::InitDI()` (`Platform/InputManager.h`/`.cpp`):
+          `HRESULT` → `bool`, not `void` — it maps `Init()`'s `BOOL`
+          onto success/failure via `S_OK`/`S_FALSE`, a real (if unused —
+          zero callers, private) success signal, unlike `SetAcquire`'s
+          pure no-op.
+      - **Left as-is, provably inert** (four remaining token hits, all
+        inside dead/never-taken code — confirmed by checking what gates
+        them, not assumed): `CShadowPartManager.cpp:404` (inside a
+        `/* */` block, lines 396–432 — not code, never parsed past
+        translation phase 3); `GameInit.cpp:1317` (inside
+        `#if defined(PLATFORM_WINDOWS) && !defined(USE_SDL_BACKEND)`,
+        and `USE_SDL_BACKEND` is unconditionally `target_compile_
+        definitions`'d for the `DarkEden` target — branch never taken);
+        `MTopView.cpp:467,8233` (inside `#ifdef OUTPUT_DEBUG`, and
+        `OUTPUT_DEBUG` — distinct from the `OUTPUT_DEBUG_*` sub-flags —
+        is never `#define`d anywhere in the tree); `CWaitUIUpdate.cpp:539`
+        is a commented-out `//HRESULT hr;` line. None of these require
+        the shim to exist for the current build graph to compile
+        (inactive preprocessor branches and comments are discarded
+        before semantic analysis ever sees them), so none blocked
+        deleting it.
+      - The `CDirectSoundStream.cpp`/`_Adapter.cpp` duplicate-symbol
+        concern the old note flagged here is stale — resolved by Phase 3
+        item 1 (2026-08-07), see below; not re-litigated in this pass.
+      **Shim block deleted** from `basic/Platform.h` (`typedef int32_t
+      HRESULT`, `S_OK`/`S_FALSE`/`SUCCEEDED`/`FAILED`, ~15 lines);
+      `LRESULT`/`UINT_PTR` and the rest of the `#ifndef PLATFORM_WINDOWS`
+      block are unrelated and kept. Since the shim only ever existed
+      inside `#ifndef PLATFORM_WINDOWS`, the Windows build was never
+      affected by any of this — compile gate is the client CI build, not
+      run in this sandbox.
 - [x] `SCAN_CODE()` / `platform_get_scan_code()` — **doc's premise was
       stale, nothing to do.** `SCAN_CODE` isn't in `Platform.h` at all;
       it's defined in `basic/PlatformUtil.h` (`#ifdef PLATFORM_WINDOWS`
