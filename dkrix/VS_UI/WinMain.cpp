@@ -75,8 +75,8 @@ void InitSound();
 /*-----------------------------------------------------------------------------
   PROTOTYPE
 -----------------------------------------------------------------------------*/
-void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z);
-void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code);
+void MouseEventReceiver(InputManager::E_MOUSE_EVENT event, int x, int y, int z);
+void KeyboardEventReceiver(InputManager::E_KEYBOARD_EVENT event, DWORD scan_code);
 void UI_ResultReceiver(DWORD message, int dw_left, int dw_right, void *void_ptr);
 void ProgramLoop();
 
@@ -94,7 +94,7 @@ extern EventButton *g_EventButton;
 bool						gbl_active; // Is application active?
 CDirectDraw				gC_DD;
 CSpriteSurface			gC_DDSurface;
-extern CDirectInput*			g_pSDLInput;// = new CDirectInput;
+extern InputManager*			g_pSDLInput;// = new InputManager;
 
 static DWORD			g_double_click_time;
 int						g_mouse_x, g_mouse_y;
@@ -121,7 +121,7 @@ IWebBrowser2*			g_pWebBrowser = NULL;
 - KeyboardEventReceiver
 -
 -----------------------------------------------------------------------------*/
-void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
+void KeyboardEventReceiver(InputManager::E_KEYBOARD_EVENT event, DWORD scan_code)
 {
 	static hp;
 	static WORD progress;
@@ -133,7 +133,7 @@ void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 
 	switch (event)
 	{
-		case CSDLInput::KEYDOWN:
+		case InputManager::KEYDOWN:
 			gC_vs_ui.DIKeyboardControl(event, scan_code);
 			switch (scan_code)
 			{
@@ -1000,7 +1000,7 @@ void KeyboardEventReceiver(CSDLInput::E_KEYBOARD_EVENT event, DWORD scan_code)
 			}
 			break;
 
-		case CSDLInput::KEYUP:
+		case InputManager::KEYUP:
 			switch (scan_code)
 			{
 				case DIK_LCONTROL:
@@ -1018,7 +1018,7 @@ BOOL g_bLButtonDown = false;
 - MouseEventReceiver
 -
 -----------------------------------------------------------------------------*/
-void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
+void MouseEventReceiver(InputManager::E_MOUSE_EVENT event, int x, int y, int z)
 {
 	static DWORD	last_click_time;
 	static int		double_click_x, double_click_y;
@@ -1049,12 +1049,12 @@ void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 
 	switch (event)
 	{
-		case CSDLInput::MOVE:
+		case InputManager::MOVE:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_MOVING, x, y);
 //			gC_vs_ui.MouseControlExtra(M_MOVING, x, y);
 			break;
 
-		case CSDLInput::LEFTDOWN:
+		case InputManager::LEFTDOWN:
 			//  double-click interval?
 			if ((DWORD)abs(GetTickCount() - last_click_time) <= g_double_click_time)
 			{
@@ -1077,33 +1077,33 @@ void MouseEventReceiver(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 
 			break;
 
-		case CSDLInput::LEFTUP:
+		case InputManager::LEFTUP:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_LEFTBUTTON_UP, x, y);
 			g_bLButtonDown = FALSE;
 			break;
 
-		case CSDLInput::RIGHTDOWN:
+		case InputManager::RIGHTDOWN:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_RIGHTBUTTON_DOWN, x, y);
 			break;
 
-		case CSDLInput::RIGHTUP:
+		case InputManager::RIGHTUP:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_RIGHTBUTTON_UP, x, y);
 			if(gbl_ui_input_state == false)g_EventButton = NULL;
 			break;
 
-		case CSDLInput::CENTERDOWN:
+		case InputManager::CENTERDOWN:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_CENTERBUTTON_DOWN, x, y);
 			break;
 
-		case CSDLInput::CENTERUP:
+		case InputManager::CENTERUP:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_CENTERBUTTON_UP, x, y);
 			break;
 
-		case CSDLInput::WHEELDOWN:
+		case InputManager::WHEELDOWN:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_WHEEL_DOWN, x, y);
 			break;
 
-		case CSDLInput::WHEELUP:
+		case InputManager::WHEELUP:
 			gbl_ui_input_state = gC_vs_ui.MouseControl(M_WHEEL_UP, x, y);
 			break;
 	}
@@ -3263,7 +3263,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 	g_pPriceManager = new MPriceManager;
 
 
-	g_pSDLInput = new CDirectInput;
+	g_pSDLInput = new InputManager;
 
 	g_pParty = new MParty;
 
@@ -3480,9 +3480,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWi
 #endif
 
 #if _DEBUGGING
-	g_pSDLInput->Init(hwnd, hInst, CSDLInput::NONEXCLUSIVE);
+	g_pSDLInput->Init(hwnd, hInst, InputManager::NONEXCLUSIVE);
 #else
-	g_pSDLInput->Init(hwnd, hInst, CSDLInput::EXCLUSIVE);
+	g_pSDLInput->Init(hwnd, hInst, InputManager::EXCLUSIVE);
 #endif
 
 	gC_ci = new CI_ENGLISH;

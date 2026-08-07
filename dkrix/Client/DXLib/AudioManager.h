@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
-// CDirectSound.h
+// AudioManager.h
 //----------------------------------------------------------------------
 
-#ifndef __CDirectSound_H__
-#define __CDirectSound_H__
+#ifndef __AUDIOMANAGER_H__
+#define __AUDIOMANAGER_H__
 
 #pragma warning(disable:4786)
 
@@ -21,12 +21,12 @@ typedef struct IDirectSoundBuffer* LPDIRECTSOUNDBUFFER;
 #endif
 typedef std::list<LPDIRECTSOUNDBUFFER>	LPDIRECTSOUNDBUFFER_LIST;
 
-class CSDLAudio
+class AudioManager
 {
 
 	public:		
-		CSDLAudio();
-		~CSDLAudio();
+		AudioManager();
+		~AudioManager();
 
 		//---------------------------------------------------------
 		// Init / Release
@@ -110,6 +110,6 @@ class CSDLAudio
 	friend class CSDLStream;
 };
 
-extern	CSDLAudio		g_SDLAudio;
+extern	AudioManager		g_SDLAudio;
 
 #endif

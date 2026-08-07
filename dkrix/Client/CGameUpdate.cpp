@@ -36,7 +36,7 @@
 #include "ClientFunction.h"
 #include "MMusic.h"
 #include "InputService.h"  // For DIK_* key code definitions
-#include "DXLib/CDirectInput.h"
+#include "DXLib/InputManager.h"
 #include "MZoneSoundManager.h"
 #include "TempInformation.h"
 #include "MFakeCreature.h"
@@ -241,7 +241,7 @@ CGameUpdate::Init()
 // DXMouseEvent
 //-----------------------------------------------------------------------------
 void		
-CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
+CGameUpdate::DXMouseEvent(InputManager::E_MOUSE_EVENT event, int x, int y, int z)
 {
 	POINT point;
 
@@ -256,7 +256,7 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 	
 	switch (event)
 	{
-			case CSDLInput::LEFTDOWN :
+			case InputManager::LEFTDOWN :
 //				if ((DWORD)abs(GetTickCount() - last_click_time) <= g_double_click_time)
 //				{
 //					if (g_x>= double_click_x-1 && g_x <= double_click_x+1 &&
@@ -301,14 +301,14 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 				#endif
 			break;
 
-			case CSDLInput::RIGHTUP :
+			case InputManager::RIGHTUP :
 				
 				gC_vs_ui.EndInstallMineProgress();
 				//gC_vs_ui.EndCreateMineProgress();
 				//gC_vs_ui.EndCreateBombProgress();
 			break;
 
-			//case CSDLInput::RIGHTDOWN :
+			//case InputManager::RIGHTDOWN :
 				//---------------------------------------------------------
 				
 				//---------------------------------------------------------
@@ -317,12 +317,12 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 			//break;
 
 
-		case CSDLInput::WHEELDOWN:
+		case InputManager::WHEELDOWN:
 			gC_vs_ui.MouseControl(M_WHEEL_DOWN, g_x, g_y);
 			///gC_vs_ui.ChatMouseControlExtra( M_WHEEL_DOWN, g_x, g_y );
 			break;
 
-		case CSDLInput::WHEELUP:
+		case InputManager::WHEELUP:
 			gC_vs_ui.MouseControl(M_WHEEL_UP, g_x, g_y);
 //			gC_vs_ui.ChatMouseControlExtra( M_WHEEL_UP, g_x, g_y );
 			break;
@@ -335,14 +335,14 @@ CGameUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 // DXKeyboardEvent
 //-----------------------------------------------------------------------------
 void	
-CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
+CGameUpdate::DXKeyboardEvent(InputManager::E_KEYBOARD_EVENT event, DWORD key)
 {
 	if(g_pEventManager->GetEventByFlag(EVENTFLAG_DENY_INPUT_KEYBOARD))
 	{
 		return;
 	}
 
-	if (event==CSDLInput::KEYDOWN)
+	if (event==InputManager::KEYDOWN)
 	{
 		if(key == 0xcc) return;		
 
@@ -2122,7 +2122,7 @@ CGameUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
 			#endif			
 		}
 	}
-	else // if (event==CSDLInput::KEYUP)
+	else // if (event==InputManager::KEYUP)
 	{
 	}
 }

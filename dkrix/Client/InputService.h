@@ -17,9 +17,9 @@
 #include "basic/InputCodes.h"
 
 // Forward declaration for input service class
-class CSDLInput;
+class InputManager;
 
-// Global input service instance (defined in DXLib/CDirectInput.cpp)
-extern CSDLInput* g_pSDLInput;
+// Global input service instance (defined in DXLib/InputManager.cpp)
+extern InputManager* g_pSDLInput;
 
 #endif // __INPUTSERVICE_H__

@@ -11,7 +11,7 @@
 #include "reader.h"
 #include "huffman.h"
 #include "soundbuf.h"
-#include "CDirectSound.h"
+#include "AudioManager.h"
 #include "debuginfo.h"
 #include <math.h>
 

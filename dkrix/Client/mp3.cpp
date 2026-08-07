@@ -5,9 +5,9 @@
 #include "huffman.h"
 #include "soundbuf.h"
 #ifdef PLATFORM_WINDOWS
-#include "DXLib\CDirectSound.h"
+#include "DXLib\AudioManager.h"
 #else
-#include "DXLib/CDirectSound.h"
+#include "DXLib/AudioManager.h"
 #endif
 #include "debuginfo.h"
 #include <math.h>

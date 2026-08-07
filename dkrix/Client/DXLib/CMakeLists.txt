@@ -55,25 +55,27 @@ set(DXLIB_SOURCES
 	# Core DirectDraw/Sound/Music implementations
 	CDirectDraw.cpp
 	CDirectDrawSurface.cpp
-	CDirectSound.cpp
+	AudioManager.cpp
 	CDirectMusic.cpp
 	CDirectSoundStream.cpp
 
 	# Static member definitions for CDirectDraw
 	CDirectDraw_StaticMembers.cpp
 
-	# Adapter layers - Input (always available)
-	CDirectInput_Adapter.cpp
+	# Input manager (SDL2-backed)
+	InputManager.cpp
 )
 
-# Add audio adapters only if SDL2_mixer is available
-if(HAVE_SDL2_MIXER)
-	list(APPEND DXLIB_SOURCES
-		CDirectSound_Adapter.cpp
-		CDirectMusic_Adapter.cpp
-		CDirectSoundStream_Adapter.cpp
-	)
-endif()
+# Phase 3 item 1 (2026-08): the CDirect{Sound,Music,SoundStream}_Adapter.cpp
+# files formerly appended here were duplicate implementations of the same
+# classes as AudioManager.cpp / CDirectMusic.cpp / CDirectSoundStream.cpp.
+# They landed in DXLIB_SOURCES whenever HAVE_SDL2_MIXER was on, which never
+# actually built: CDirectSound_Adapter.cpp and CDirectSoundStream_Adapter.cpp
+# had ctor/dtor names left over from before a rename (e.g.
+# `AudioManager::CDirectSound()`, not a valid member of that class), and
+# CDirectMusic_Adapter.cpp duplicated every symbol in CDirectMusic.cpp,
+# which would have been a link error even after fixing the names. Deleted;
+# see docs/MODERNIZATION.md Phase 3.
 
 # Add Windows-specific sources if using Windows backend
 if(WIN32 AND NOT USE_SDL_BACKEND)
@@ -135,8 +137,8 @@ install(TARGETS dxlib
 install(FILES
 	DXLibBackend.h
 	DXLib.h
-	CDirectInput.h
-	CDirectSound.h
+	InputManager.h
+	AudioManager.h
 	CDirectMusic.h
 	CDirectSoundStream.h
 	DESTINATION include/dxlib

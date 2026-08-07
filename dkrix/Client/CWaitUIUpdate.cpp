@@ -90,9 +90,9 @@ CWaitUIUpdate::Init()
 // DXKeyboardEvent
 //-----------------------------------------------------------------------------
 void	
-CWaitUIUpdate::DXKeyboardEvent(CSDLInput::E_KEYBOARD_EVENT event, DWORD key)
+CWaitUIUpdate::DXKeyboardEvent(InputManager::E_KEYBOARD_EVENT event, DWORD key)
 {
-		if (event==CSDLInput::KEYDOWN)
+		if (event==InputManager::KEYDOWN)
 		{
 			// Convert DIK scan codes to VK virtual key codes for control keys
 			// These keys need WM_KEYDOWN messages for text editing to work
@@ -227,14 +227,14 @@ void CWaitUIUpdate::SDLTextEditingEvent(const char* text, int start, int length,
 // DXMouseEvent
 //-----------------------------------------------------------------------------
 void		
-CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
+CWaitUIUpdate::DXMouseEvent(InputManager::E_MOUSE_EVENT event, int x, int y, int z)
 {
 	static DWORD	last_click_time;
 	static int		double_click_x, double_click_y;
 
 	switch (event)
 	{
-		case CSDLInput::LEFTDOWN:
+		case InputManager::LEFTDOWN:
 			//  double-click interval?
 			if ((DWORD)labs((long)(GetTickCount() - last_click_time)) <= g_double_click_time)
 			{
@@ -262,11 +262,11 @@ CWaitUIUpdate::DXMouseEvent(CSDLInput::E_MOUSE_EVENT event, int x, int y, int z)
 			double_click_y = g_y;
 		break;
 
-		case CSDLInput::WHEELDOWN:
+		case InputManager::WHEELDOWN:
 			gC_vs_ui.MouseControl(M_WHEEL_DOWN, x, y);
 			break;
 
-		case CSDLInput::WHEELUP:
+		case InputManager::WHEELUP:
 			gC_vs_ui.MouseControl(M_WHEEL_UP, x, y);
 			break;
 	}

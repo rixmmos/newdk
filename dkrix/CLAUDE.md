@@ -48,8 +48,16 @@ mentioning it are archaeology only.
 ## Current technical shape
 
 - `D3DLib/` has been deleted.
-- `DXLib/` still exposes DirectX-shaped interfaces backed by SDL; the
-  `*_Adapter.cpp` shim layer is vestigial and already bypassed in places.
+- `DXLib/` still exposes some DirectX-shaped interfaces backed by SDL.
+  **[2026-08] Phase 3 item 1**: the input and audio classes were renamed to
+  `InputManager` / `AudioManager` (files `InputManager.{h,cpp}` /
+  `AudioManager.{h,cpp}`), and the `CDirectSound_Adapter.cpp` /
+  `CDirectMusic_Adapter.cpp` / `CDirectSoundStream_Adapter.cpp` shim twins
+  were deleted — they duplicated symbols already defined in the base
+  `.cpp` files whenever `HAVE_SDL2_MIXER` was on, and two of the three
+  didn't even compile (leftover pre-rename ctor/dtor names). `CDirectMusic`
+  and `CDirectSoundStream` keep their names; only their dead `_Adapter.cpp`
+  twin was removed. See `docs/MODERNIZATION.md` Phase 3.
 - `SpriteLib/` still carries 555/565/4444 pixel-format variants that SDL could
   handle natively; consolidation is in progress.
 - `VS_UI/src/VS_UI_Base.cpp` still uses a Windows GDI text path that should be

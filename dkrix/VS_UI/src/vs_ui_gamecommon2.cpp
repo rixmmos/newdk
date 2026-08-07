@@ -11,7 +11,7 @@
 #include "VS_UI.h"
 #include "MPriceManager.h"
 //#include "MCreatureTable.h"
-#include "CDirectInput.h"
+#include "DXLib/InputManager.h"
 #include "MParty.h"
 #include "VS_UI_Title.h"
 #include "ExperienceTable.h"
@@ -75,7 +75,7 @@ extern RECT g_GameRect;
 #define LINEWIDTH						20
 
 
-extern CSDLInput*			g_pSDLInput;
+extern InputManager*			g_pSDLInput;
 extern BOOL g_bActiveGame;
 int			g_CurrentSkillID = 0xFFFFFFFF;
 

@@ -2,10 +2,10 @@
 #include "Client_PCH.h"
 #ifdef PLATFORM_WINDOWS
 #include <Windows.h>
-#include "dxlib/CDirectSound.h"
+#include "dxlib/AudioManager.h"
 #else
 #include "../../basic/Platform.h"
-#include "DXLib/CDirectSound.h"
+#include "DXLib/AudioManager.h"
 #endif
 #include "CMP3.h"
 #include "DebugInfo.h"

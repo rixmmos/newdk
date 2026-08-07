@@ -5,7 +5,7 @@
 #include "client_PCH.h"
 #include <fstream>
 #include "KeyAccelerator.h"
-#include "DXLib/CDirectInput.h"
+#include "DXLib/InputManager.h"
 #include <cstdio>
 //----------------------------------------------------------------------
 // define functions
