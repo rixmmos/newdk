@@ -772,6 +772,36 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		target_link_libraries(DarkEden PRIVATE ws2_32 netapi32 comctl32 wininet shlwapi)
 	endif()
 
+	# Phase 12: shared/Packets/*.h use quoted #include "Packet.h" /
+	# "PacketFactory.h" (both live in Client/Packet/, not shared/Packets/).
+	# Previously resolved only because Cpackets/*.h was #included from
+	# Client/Packet/PacketFactoryManager.cpp, and MSVC's quoted-include
+	# search walks the #include stack up to that includer's directory.
+	# shared/Packets/*.cpp is now a standalone translation unit
+	# (target_sources on shared_packets, not #included from anywhere) with
+	# no such stack to walk.
+	#
+	# Do NOT add Client/Packet to DarkEden's target-wide include dirs above
+	# -- tried that first, and it broke the build worse: Client/Packet/
+	# has generically named headers (FileAPI.h chief among them) that, once
+	# on every one of DarkEden's ~1000 translation units' /I path, shadow
+	# the real Windows SDK <fileapi.h> (case-insensitive match) ahead of
+	# the toolchain's own Windows Kits include path -- CreateFile,
+	# DeleteFile, FindFirstFile, ReadFile, GetFileSize etc. all vanish from
+	# the global namespace and winbase.h itself fails to parse
+	# (STREAM_INFO_LEVELS) wherever <windows.h> is later pulled in (ATL
+	# headers, VS_UI_WebBrowser.cpp's COM code, ...). Scope the extra
+	# include path to only the shared_packets source files instead, via
+	# the per-source-file INCLUDE_DIRECTORIES property (additive, not a
+	# replacement) -- it does not touch any other translation unit.
+	get_target_property(_shared_packets_srcs shared_packets INTERFACE_SOURCES)
+	if(_shared_packets_srcs)
+		set_source_files_properties(${_shared_packets_srcs} PROPERTIES
+			INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet"
+		)
+	endif()
+	unset(_shared_packets_srcs)
+
 	# Link iconv only on platforms that actually use it.
 	if(NOT EMSCRIPTEN AND NOT WIN32)
 		target_link_libraries(DarkEden PRIVATE iconv)
@@ -790,15 +820,6 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/basic
 		${CMAKE_CURRENT_SOURCE_DIR}/Client
-		# Phase 12: shared/Packets/*.h use quoted #include "Packet.h" /
-		# "PacketFactory.h". Previously resolved only because Cpackets/*.h
-		# was #included from Client/Packet/PacketFactoryManager.cpp, and
-		# MSVC's quoted-include search walks the #include stack up to that
-		# includer's directory. shared/Packets/*.cpp is now a standalone
-		# translation unit (target_sources on shared_packets, not #included
-		# from anywhere) with no such stack to walk, so Client/Packet must
-		# be an explicit /I path here.
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/TextSystem
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/SpriteLib
