@@ -390,9 +390,9 @@ start; see `docs/TECH-DEBT-AUDIT.md` item 8.
 
 | Platform | Status | Notes |
 |----------|--------|-------|
-| macOS |  Fully Supported | Primary development platform |
-| Linux |  Supported | Requires SDL2 development packages |
-| Windows |  Supported | Can use DirectDraw or SDL2 backend |
+| macOS | Unverified | SDL2 backend only; no CI run exists |
+| Linux | Unverified | SDL2 backend only; requires SDL2 development packages |
+| Windows | Unverified | SDL2 backend only — `USE_SDL_BACKEND` is forced `ON`; DirectDraw is gone |
 
 ---
 
@@ -416,9 +416,8 @@ start; see `docs/TECH-DEBT-AUDIT.md` item 8.
 - `Client/SpriteLib/CIndexSprite.cpp` - Backend initialization/cleanup
 
 ### Tests and Examples
-- `tests/test_spritelib_backend.cpp` - Backend API tests
-- `tests/test_sprite_rendering.cpp` - Rendering tests
-- `examples/sprite_backend_example.cpp` - Complete usage example
+
+None exist. See "Testing" above.
 
 ---
 
@@ -436,11 +435,6 @@ start; see `docs/TECH-DEBT-AUDIT.md` item 8.
    ```cpp
    #include "CSprite565.h"
    // Backend support is automatic
-   ```
-
-3. **See Examples**
-   ```bash
-   ./bin/sprite_backend_example
    ```
 
 ### For Contributors
@@ -464,19 +458,19 @@ start; see `docs/TECH-DEBT-AUDIT.md` item 8.
 
 ## Summary
 
- **SpriteLib SDL2 Backend is production-ready!**
+**SpriteLib SDL2 Backend is unverified, not production-ready.**
 
-**Completed**:
-- Backend infrastructure fully implemented
-- All sprite types support backend
-- API tested and verified
-- Examples working
-- Documentation complete
+**In place**:
+- Backend infrastructure implemented (`SpriteLibBackendSDL.cpp`, 1,371 LOC)
+- All sprite types (`CSprite`, `CAlphaSprite`, `CShadowSprite`, `CIndexSprite`)
+  carry backend handle fields
 
-**Ready to use** for:
-- Cross-platform game development
-- Sprite rendering in new projects
-- Modernizing existing sprite-based games
+**Not done**:
+- No compile has ever confirmed this code — no CI run exists for this repo
+- No automated tests cover it (the only tests in `dkrix/` exercise the
+  unrelated `tools/engine/sprite/` library — see "Testing" above)
+- No example programs exist despite being referenced by earlier revisions of
+  this document
 
 **For questions or issues**, refer to:
 - This README for API reference
@@ -488,5 +482,7 @@ start; see `docs/TECH-DEBT-AUDIT.md` item 8.
 
 ---
 
-*Last updated: 2026-08-06 — corrected against the working tree at `f19c4d3`.*
+*Last updated: 2026-08-07 — removed the remaining "production-ready" claims*
+*(Summary section, Platform Support table, phantom example binary) left over*
+*from the 2026-08-06 pass.*
 *Status: unverified. No CI run exists; nothing here has been compiled.*

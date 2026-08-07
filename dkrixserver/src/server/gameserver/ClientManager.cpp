@@ -25,7 +25,9 @@
 #include "LocalIP.h"
 #include "LoginServerManager.h"
 #include "ParkingCenter.h"
+#if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__)
 #include "TOpackets/GTOAcknowledgement.h"
+#endif
 #include "WarSystem.h"
 #include "ctf/FlagManager.h"
 

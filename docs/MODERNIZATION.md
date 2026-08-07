@@ -601,16 +601,26 @@ back to a single unconditional typedef.
 >    deletable; SDL converts in memory, it does not read a 5:5:5-encoded
 >    sprite off disk. Deleting them is a silent-failure change.
 
-Safe now (judgeable by reading):
+Safe now (judgeable by reading) — both done 2026-08-07:
 
-- [ ] Correct `Client/SpriteLib/SPRITELIB_BACKEND_README.md` — its diagram
-      attributes the SDL2 backend to `engine/sprite` and it is stamped
-      "Production Ready / integration tests passing". Both false.
-- [ ] Delete 8 dead files (312 lines): `CAlphaSpritePackList{555,565}.{cpp,h}`
-      and `CSpritePackList{555,565}.{cpp,h}`. None of the four `.cpp` are in
-      `SPRITELIB_SOURCES` (so none is compiled) and every external reference
-      to `CSpritePackList555/565` is commented out. Also drop lines 103, 104,
-      118, 119 of `Client/SpriteLib/CMakeLists.txt`.
+- [x] Correct `Client/SpriteLib/SPRITELIB_BACKEND_README.md` — its diagram
+      attributed the SDL2 backend to `engine/sprite` and it was stamped
+      "Production Ready / integration tests passing". Both false. The
+      2026-08-06 pass (`31493fb`) fixed the top-of-file status stamp and the
+      architecture diagram but missed two holdouts further down: the
+      "Platform Support" table still claimed macOS "Fully Supported" and
+      Windows "Can use DirectDraw or SDL2 backend" (DirectDraw is gone), and
+      the closing "Summary" section still said "production-ready!" with
+      "API tested and verified" / "Examples working". Also removed a
+      "See Examples" snippet pointing at `./bin/sprite_backend_example`, a
+      binary that has never existed in this repo. All now read "unverified".
+- [x] Delete 8 dead files (312 lines): `CAlphaSpritePackList{555,565}.{cpp,h}`
+      and `CSpritePackList{555,565}.{cpp,h}`. **Already done** — commit
+      `76f13e1`, 2026-08-06: none of the four `.cpp` files were in
+      `SPRITELIB_SOURCES`, every external reference to
+      `CSpritePackList555/565` was commented out
+      (`VS_UI/src/VS_UI_Item.cpp:280,282`, `VS_UI/src/VS_UI_util.cpp:686,688`),
+      and the matching `SPRITELIB_HEADERS` lines were removed with the files.
 
 Blocked on green CI (Phase -1):
 
@@ -653,6 +663,80 @@ Option B.
       `TextSystem` font-spec struct and updating every caller — a real
       refactor, not a deletion. Size it before scheduling.
 
+      **[measured 2026-08-07] Sized, ready to schedule — no code changed.**
+      Grepped `dkrix/` for `SetFont(`, `LOGFONT`, `DeleteObject`, and
+      `CreateFontIndirect`; every hit is accounted for below.
+
+      *The stub in `basic/Platform.h`.* `DeleteObject`, the `LOGFONT`
+      typedef, and `CreateFontIndirect` all live inside one
+      `#ifndef PLATFORM_WINDOWS` block (`Platform.h:262-372`). On the
+      primary Windows build this code is never compiled at all — real
+      `windows.h` supplies the genuine `LOGFONT`/`DeleteObject`/
+      `CreateFontIndirect`, field-compatible with the stub by design. The
+      stub only exists for the secondary macOS/Linux path. So "delete the
+      stub" really means: stop needing a `LOGFONT`-shaped type on *any*
+      platform, not just patch the non-Windows fallback.
+
+      *`Base::SetFont` itself already only reads two of `LOGFONT`'s 13
+      fields* — `lf.lfFaceName` (matched by `strcmp` against two literal
+      strings, `"Cormorant Garamond"` / `"UnifrakturCook"`, to pick a
+      `TextSystem::FontFamily*` enum value) and `lf.lfHeight` (passed
+      straight through to `TextSystem::EncodeFontHandle`). Callers also set
+      `lf.lfWeight` and `lf.lfItalic`, but `SetFont` never reads them —
+      those two fields are already dead as far as this call chain goes.
+      A replacement struct therefore needs exactly two fields: a font
+      family selector (enum or face-name string) and an integer size.
+      Something like:
+      ```cpp
+      struct FontSpec { TextSystem::FontFamily family; int height; };
+      ```
+
+      *Callers of `Base::SetFont`, exhaustively — zero outside one file.*
+      `SetFont` appears in exactly four files in `dkrix/`:
+      `VS_UI/src/header/VS_UI_Base.h` (the declaration),
+      `VS_UI/src/VS_UI_Base.cpp` (the definition and every call site), and
+      two archived docs under `dkrix/docs/archive/2026-migration-notes/`
+      (`GDI_USAGE_ANALYSIS.md`, `TEXT_MIGRATION.md` — reference material,
+      not code). There is no caller anywhere else in the client — no other
+      `.cpp` file, no subclass, calls `Base::SetFont`. Inside
+      `VS_UI_Base.cpp` there are 20 live call sites plus 1 commented-out
+      call (`:281`), **all inside the single function `Base::InitFont()`**
+      (`VS_UI_Base.cpp:166-333`). Each follows the identical pattern:
+      `SetDefaultLogfont(lf)` → mutate 2-4 `lf.*` fields → `SetFont(pi_member,
+      lf, color, ...)`. `SetDefaultLogfont` (`VS_UI_Base.cpp:82-99`) has the
+      same one-file, one-function blast radius and would be rewritten
+      alongside it (it currently zero-initializes all 13 `LOGFONT` fields;
+      the replacement only needs to default the 2 that matter).
+
+      *Blast radius:* **3 files** need real changes —
+      `basic/Platform.h` (delete the stub block), `VS_UI/src/header/VS_UI_Base.h`
+      (change the `SetFont`/`SetDefaultLogfont` signatures from `LOGFONT &lf`
+      to `FontSpec &spec`), `VS_UI/src/VS_UI_Base.cpp` (rewrite the two
+      function bodies plus all 20 call sites — mechanical, same pattern
+      each time, all in one ~170-line function). Two archived `.md` files
+      would go stale but need no edit (they're explicitly historical).
+
+      *A separate, unrelated snag in the same stub block:* `DeleteObject`
+      (also deleted by this same change) has exactly two live callers
+      outside `Platform.h` — `VS_UI/src/VS_UI_WebBrowser.cpp:220` and
+      `Client/Client.cpp:3564` — and neither is about fonts. Both pass an
+      `IWebBrowser2*` COM pointer to `DeleteObject()` immediately after
+      calling `->Release()` on it, which is a pre-existing correctness
+      question (COM objects are released, not GDI-deleted) independent of
+      this refactor. Removing the stub forces a decision on those two call
+      sites — most likely deleting the now-redundant `DeleteObject()` call
+      entirely, since `Release()` already ran — but that is a second,
+      separable finding, not part of the font-spec work. `CreateFontIndirect`
+      has zero live callers anywhere (only comments and the two archived
+      docs), so deleting it is a pure no-op.
+
+      *Estimate:* small — 3 files, ~25 call sites, all mechanical and
+      concentrated in one function, plus a 2-call-site side-cleanup that
+      isn't about fonts at all. Ready to schedule; still gated on Phase 5's
+      other open item (Korean/Chinese glyph verification) landing first, or
+      at least not regressing, since this touches the same call chain that
+      builds every font handle in the UI.
+
 ### Phase 6 — Modern C++ as we touch it (ongoing)
 - Rule of thumb when a file is already being modified for another
   reason:
@@ -663,7 +747,7 @@ Option B.
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
-### Phase 7 — Server: retire dead binaries — done 2026-08-06
+### Phase 7 — Server: retire dead binaries — done 2026-08-06/07
 
 > **Correction to the original wording:** `chinabilling/` top-level is
 > **not** dead — `src/server/chinabilling/CMakeLists.txt` builds it into
@@ -671,6 +755,17 @@ Option B.
 > `gameserver` and `loginserver` link. Only its two subdirs (`stress/`,
 > `testserver/`) were dead. "All three subdirs" in the earlier wording
 > was wrong on both count and contents — there are two.
+>
+> **Landed in two passes on two independent review branches, merged
+> together 2026-08-07.** The first pass (below) did the directory
+> deletions, `__OLD_GUILD_WAR__`, and `DatabaseManager.old.cpp`. A
+> second, parallel pass branched from `main` *before* the first pass
+> merged, so it independently re-measured this section and (correctly,
+> from its own branch's point of view) found the dead trees still
+> present — see its findings folded in below. Both passes verified
+> clean with `make debug` under WSL; merging them together does not
+> require re-verification of either individually, since neither
+> touched a file the other did.
 
 - [x] Delete `cacheserver/`, `theoneserver/`, `updateserver/`,
       `chinabilling/stress/`, `chinabilling/testserver/`,
@@ -680,12 +775,7 @@ Option B.
       (MSVC generator; this workstation lacks the Linux toolchain
       for a real `make debug` at grep time) that reached the
       `find_package` stage without any `add_subdirectory` path
-      errors. The only remaining references anywhere in the tree are
-      the legacy `src/**/Makefile` files, already superseded by
-      CMake — `dkrixserver/Makefile`'s `make`/`make debug` targets
-      only invoke CMake, never touch them. Left in place; cleaning up
-      stale Makefiles is a separate build-hygiene pass, out of scope
-      here.
+      errors.
 - [x] Delete `gameserver/testAlone/` outright (including a stray
       326 KB prebuilt `testAlone` binary that had been committed
       alongside the sources) rather than upgrading `testAlone/Mutex.h`
@@ -708,31 +798,53 @@ Option B.
 - [x] Delete `.old.cpp` files in `server/database/` —
       `DatabaseManager.old.cpp`, single file, not in
       `CMakeLists.txt`'s source list.
+- [x] **Follow-up pass (2026-08-07), Makefile/packet-dir cleanup:**
+  - Legacy Makefile references to the now-deleted trees removed from
+    `src/Makefile`, `src/server/Makefile`, `src/Core/Makefile` (no
+    target — `alltheoneserver`, `cleanbin`, `clean`, `cleanall`,
+    `cleangameserver`, `cleanloginserver`, `cleansharedserver`,
+    `allloginserver`, `allgameserver`, `allsharedserver` — still
+    invokes `theoneserver`/`updateserver`/`TOpackets`/`Upackets`).
+    `chinabilling` references were correctly left alone — it has a
+    live `CMakeLists.txt` and is part of the real build, per the
+    correction above.
+  - `src/Core/TOpackets/`, `src/Core/Upackets/` deleted — both
+    Makefile-only (`TOpackets/Makefile` built against `theoneserver/`,
+    `Upackets/Makefile` against `updateserver/`+`updateclient/`),
+    zero references in any `CMakeLists.txt`.
+  - `gameserver/skill/EffectStriking.old.cpp`/`.old.h` deleted — same
+    dead-code shape as `DatabaseManager.old.cpp`: the live
+    `EffectStriking.cpp` (operating on `Creature*`) is the one listed
+    in `gameserver/skill/CMakeLists.txt:370`; the `.old.*` pair
+    (operating on the older `Item*` signature) appeared nowhere in any
+    `CMakeLists.txt` and had no includer outside itself.
+  - **Caught a real break before it shipped:** deleting `TOpackets/`
+    would have broken the build via an unconditional
+    `#include "TOpackets/GTOAcknowledgement.h"` in
+    `gameserver/ClientManager.cpp`, whose only use was already gated
+    behind a dead `#if defined(__CHINA_SERVER__) || defined(__THAILAND_SERVER__)`
+    (both macros undefined everywhere). Guarded the include to match.
 
-**Build verification — [measured 2026-08-06], not just grep.** This
+**Build verification — [measured 2026-08-06/07], not just grep.** This
 workstation has a full Linux toolchain via WSL (`Ubuntu`, with
 `libmysqlclient-dev`, `liblua5.1-dev`, `libxerces-c-dev`,
 `libnsl-dev` already installed). Ran the actual authoritative command
-— `cd dkrixserver && make debug` — from `/mnt/c/dev/newdk/...` against
-every change in this phase (all four commits below). **It exited 0**
-and produced all three binaries fresh: `bin/gameserver` (403 MB
-debug), `bin/loginserver` (17 MB), `bin/sharedserver` (9.8 MB) — the
-last build target reached and linked was `gameserver`, which is the
-binary that actually contains every `__OLD_GUILD_WAR__` edit (`Guild.h`
-×2, `GuildManager.cpp` ×2, `war/*`, `quest/Action*Reinforce/Siege.cpp`)
-plus the deleted-directory and `.old.cpp` changes. Only warnings
+— `cd dkrixserver && make debug` — from two separate worktrees against
+each pass's changes independently. **Both exited 0** and produced all
+three binaries fresh: `bin/gameserver` (403 MB debug), `bin/loginserver`
+(17 MB), `bin/sharedserver` (9.8 MB) — the last build target reached
+and linked was `gameserver`, which is the binary that actually contains
+every `__OLD_GUILD_WAR__` edit (`Guild.h` ×2, `GuildManager.cpp` ×2,
+`war/*`, `quest/Action*Reinforce/Siege.cpp`) plus the deleted-directory,
+`.old.cpp`, and follow-up-pass changes. Only pre-existing warnings
 (`-Wdeprecated-declarations` on `std::binary_function`,
-`-Wsign-compare`), no errors. This supersedes the CMake-configure-only
-check recorded in the per-item notes above, which was a weaker signal
-taken before a Linux toolchain was confirmed available in this
-environment. `clang-format` is not installed in this WSL image, so
-`make fmt` could not be run; formatting was matched by hand to the
-surrounding style in each edit.
+`-Wsign-compare`), no errors. `clang-format` is not installed in this
+WSL image, so `make fmt` could not be run in either pass; formatting
+was matched by hand to the surrounding style in each edit.
 
-**Outcome (2026-08-06):** one commit per checklist item —
-`__OLD_GUILD_WAR__` gates, dead binary trees, `testAlone/`, and
-`DatabaseManager.old.cpp` — landed on a review branch, not `main`,
-and now have a green `make debug` behind them.
+**Outcome:** landed as two review branches, neither pushed nor merged
+to `main` at authoring time, each independently green under
+`make debug`; merged together into `main` 2026-08-07.
 
 ### Phase 8 — Server: SQL and secrets (split; secrets half in progress)
 
