@@ -83,7 +83,6 @@ void ActionRegisterReinforce::execute(Creature* pCreature1, Creature* pCreature2
     WarScheduler* pWarScheduler = pZone->getWarScheduler();
     Assert(pWarScheduler != NULL);
 
-     
 
     //	ServerID_t serverID;
     //	ZoneID_t zoneID;
@@ -100,14 +99,14 @@ void ActionRegisterReinforce::execute(Creature* pCreature1, Creature* pCreature2
         return;
     }
 
-    
+
     if (g_pGuildManager->hasWarSchedule(guildID)) {
         gcNPCResponse.setCode(NPC_RESPONSE_WAR_ALREADY_REGISTERED);
         pPC->getPlayer()->sendPacket(&gcNPCResponse);
         return;
     }
 
-    
+
     /*	if ( !pWarScheduler->canAddWar( WAR_GUILD ) )
         {
             gcNPCResponse.setCode( NPC_RESPONSE_WAR_SCHEDULE_FULL );

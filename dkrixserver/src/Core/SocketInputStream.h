@@ -10,9 +10,7 @@
 //
 
 
-
 //
-
 
 
 //
@@ -159,11 +157,7 @@ public:
 template <typename T> uint SocketInputStream::read(T& buf) {
     uint len = (uint)sizeof(T);
 
-    
-    
-    
-    
-    
+
     if (len > length())
         throw InsufficientDataException(len - length());
 

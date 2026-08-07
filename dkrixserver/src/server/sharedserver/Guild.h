@@ -114,12 +114,12 @@ public:
 
 public:
     enum GuildRank {
-        GUILDMEMBER_RANK_NORMAL = 0, 
-        GUILDMEMBER_RANK_MASTER,     
-        GUILDMEMBER_RANK_SUBMASTER,  
-        GUILDMEMBER_RANK_WAIT,       
-        GUILDMEMBER_RANK_DENY,       
-        GUILDMEMBER_RANK_LEAVE,      
+        GUILDMEMBER_RANK_NORMAL = 0,
+        GUILDMEMBER_RANK_MASTER,
+        GUILDMEMBER_RANK_SUBMASTER,
+        GUILDMEMBER_RANK_WAIT,
+        GUILDMEMBER_RANK_DENY,
+        GUILDMEMBER_RANK_LEAVE,
 
         GUILDMEMBER_RANK_MAX
     };
@@ -155,7 +155,7 @@ public: // identity methods
     GuildMemberRank_t getRank() const noexcept {
         return m_Rank;
     }
-    void setRank(GuildMemberRank_t rank) noexcept(false); 
+    void setRank(GuildMemberRank_t rank) noexcept(false);
 
     bool getLogOn() const noexcept {
         return m_bLogOn;
@@ -191,12 +191,12 @@ public:
     ///// Member data /////
 
 protected:
-    GuildID_t m_GuildID;          
-    string m_Name;                
-    GuildMemberRank_t m_Rank;     
-    VSDateTime m_RequestDateTime; 
-    bool m_bLogOn;                
-    ServerID_t m_ServerID;        
+    GuildID_t m_GuildID;
+    string m_Name;
+    GuildMemberRank_t m_Rank;
+    VSDateTime m_RequestDateTime;
+    bool m_bLogOn;
+    ServerID_t m_ServerID;
 };
 
 
@@ -226,26 +226,26 @@ class Guild {
 
 public:
     enum GuildTypes {
-        GUILD_TYPE_NORMAL = 0, 
-        GUILD_TYPE_JUDGE,      
-        GUILD_TYPE_ASSASSIN,   
+        GUILD_TYPE_NORMAL = 0,
+        GUILD_TYPE_JUDGE,
+        GUILD_TYPE_ASSASSIN,
 
         GUILD_TYPE_MAX
     };
 
     enum GuildState {
-        GUILD_STATE_ACTIVE = 0, 
-        GUILD_STATE_WAIT,       
-        GUILD_STATE_CANCEL,     
-        GUILD_STATE_BROKEN,     
+        GUILD_STATE_ACTIVE = 0,
+        GUILD_STATE_WAIT,
+        GUILD_STATE_CANCEL,
+        GUILD_STATE_BROKEN,
 
         GUILD_STATE_MAX
     };
 
     enum GuildRace {
-        GUILD_RACE_SLAYER = 0, 
-        GUILD_RACE_VAMPIRE,    
-        GUILD_RACE_OUSTERS,    
+        GUILD_RACE_SLAYER = 0,
+        GUILD_RACE_VAMPIRE,
+        GUILD_RACE_OUSTERS,
 
         GUILD_RACE_MAX
     };
@@ -415,30 +415,30 @@ public: // debug
     ///// Member data /////
 
 protected:
-    GuildID_t m_ID;                  
-    string m_Name;                   
-    GuildType_t m_Type;              
-    GuildRace_t m_Race;              
-    GuildState_t m_State;            
-    ServerGroupID_t m_ServerGroupID; 
-    ZoneID_t m_ZoneID;               
-    string m_Master;                 
-    string m_Date;                   
-    string m_Intro;                  
+    GuildID_t m_ID;
+    string m_Name;
+    GuildType_t m_Type;
+    GuildRace_t m_Race;
+    GuildState_t m_State;
+    ServerGroupID_t m_ServerGroupID;
+    ZoneID_t m_ZoneID;
+    string m_Master;
+    string m_Date;
+    string m_Intro;
 
-    HashMapGuildMember m_Members; 
-    int m_ActiveMemberCount;      // Active Member Count
-    int m_WaitMemberCount;        // Wait Member Count
+    HashMapGuildMember m_Members;
+    int m_ActiveMemberCount; // Active Member Count
+    int m_WaitMemberCount;   // Wait Member Count
 
-    static GuildID_t m_MaxGuildID;      
-    static ZoneID_t m_MaxSlayerZoneID;  
-    static ZoneID_t m_MaxVampireZoneID; 
-    static ZoneID_t m_MaxOustersZoneID; 
+    static GuildID_t m_MaxGuildID;
+    static ZoneID_t m_MaxSlayerZoneID;
+    static ZoneID_t m_MaxVampireZoneID;
+    static ZoneID_t m_MaxOustersZoneID;
 
     mutable Mutex m_Mutex; // Mutex for Guild
 
 #ifdef __GAME_SERVER__
-    list<string> m_CurrentMembers; 
+    list<string> m_CurrentMembers;
 #endif
 };
 

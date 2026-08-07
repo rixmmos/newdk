@@ -42,7 +42,7 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
     GCGuildResponse gcGuildResponse;
 
     GuildUnion* pGuildUnion = GuildUnionManager::Instance().getGuildUnion(pPlayerCreature->getGuildID());
-    
+
     if (pGuildUnion == NULL) {
         gcGuildResponse.setCode(GuildUnionOfferManager::NOT_IN_UNION);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -50,7 +50,7 @@ void CGRequestUnionInfoHandler::execute(CGRequestUnionInfo* pPacket, Player* pPl
         return;
     }
 
-    
+
     Guild* pGuild = g_pGuildManager->getGuild(pGuildUnion->getMasterGuildID());
 
     if (pGuild == NULL) {

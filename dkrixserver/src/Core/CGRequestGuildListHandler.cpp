@@ -46,7 +46,7 @@ void CGRequestGuildListHandler::execute(CGRequestGuildList* pPacket, Player* pPl
 
     GuildType_t tmpGuildType = pPacket->getGuildType();
 
-    
+
     if (tmpGuildType == CGRequestGuildList::GUILDTYPE_WAIT) {
         GCWaitGuildList gcWaitGuildList;
 
@@ -65,7 +65,7 @@ void CGRequestGuildListHandler::execute(CGRequestGuildList* pPacket, Player* pPl
         pPlayer->sendPacket(&gcWaitGuildList);
 
     }
-    
+
     else if (tmpGuildType == CGRequestGuildList::GUILDTYPE_NORMAL) {
         GCActiveGuildList gcActiveGuildList;
 

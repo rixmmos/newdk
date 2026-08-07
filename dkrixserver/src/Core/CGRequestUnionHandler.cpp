@@ -45,11 +45,8 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
 
     GCGuildResponse gcGuildResponse;
 
-    
-    if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature)) {
-        
-        
 
+    if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature)) {
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
         return;
@@ -61,7 +58,6 @@ void CGRequestUnionHandler::execute(CGRequestUnion* pPacket, Player* pPlayer)
     pPlayer->sendPacket(&gcGuildResponse);
 
     if (result == GuildUnionOfferManager::OK) {
-        
         Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
 
         if (pGuild != NULL) {

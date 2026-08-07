@@ -55,7 +55,7 @@ void WarSchedule::makeWarInfo(WarInfo* pWarInfo) const
     Assert(pWar != NULL);
 
     //---------------------------------------------------
-    
+
     //---------------------------------------------------
     VSDateTime dt(VSDateTime::currentDateTime());
     int endHour = m_ScheduledTime.time().hour();
@@ -80,7 +80,7 @@ void WarSchedule::makeWarInfo(WarInfo* pWarInfo) const
     //	cout << "startTime : " << startTime << endl;
 
     //---------------------------------------------------
-    
+
     //---------------------------------------------------
     pWar->makeWarInfo(pWarInfo);
     pWarInfo->setRemainTime(remainSec);
@@ -187,8 +187,6 @@ void WarSchedule::tinysave(const string& query)
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pStmt->executeQuery("UPDATE WarScheduleInfo SET %s WHERE WarID = %d AND ServerID = %d", query.c_str(),
                             pWar->getWarID(), g_pConfig->getPropertyInt("ServerID"));
-
-         
     }
     END_DB(pStmt)
 
@@ -203,7 +201,6 @@ bool WarSchedule::heartbeat()
     __BEGIN_TRY
 
     if (Schedule::heartbeat()) {
-        
         if (m_pWork != NULL) {
             War* pWar = dynamic_cast<War*>(m_pWork);
             Assert(pWar != NULL);

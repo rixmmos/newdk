@@ -58,32 +58,29 @@ void CGRelicToObjectHandler::execute(CGRelicToObject* pPacket, Player* pPlayer)
 #ifdef __GAME_SERVER__
 
         //	cout << "CGRelicToObject start" << endl;
-        
-        
+
 
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    
+
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
 
-    
-    
+
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
     if (pPlayerCreature == NULL) {
         throw DisconnectException("CGRelicToObject : ");
         return;
     }
 
-    
+
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
 
     if (pItem != NULL && pItem->getItemClass() == Item::ITEM_CLASS_EVENT_ITEM && pItem->getItemType() == 31) {
         static map<string, string> scripts;
         if (scripts.empty()) {
-            
             scripts[""] = ".   ";
             scripts[""] = "   . .";
             scripts[""] = ".  .";
@@ -107,7 +104,7 @@ void CGRelicToObjectHandler::execute(CGRelicToObject* pPacket, Player* pPlayer)
             GCCannotAdd _GCCannotAdd;
             _GCCannotAdd.setObjectID(pPacket->getObjectID());
             pPlayer->sendPacket(&_GCCannotAdd);
-            
+
 
             return;
         }
@@ -120,7 +117,7 @@ void CGRelicToObjectHandler::execute(CGRelicToObject* pPacket, Player* pPlayer)
             _GCCannotAdd.setObjectID(pPacket->getObjectID());
             pPlayer->sendPacket(&_GCCannotAdd);
 
-            
+
             // pMonster->getName() << endl;
 
             return;
@@ -164,7 +161,6 @@ void CGRelicToObjectHandler::execute(CGRelicToObject* pPacket, Player* pPlayer)
     } else if (pItem->getItemClass() == Item::ITEM_CLASS_CASTLE_SYMBOL) {
         executeCastleSymbol(pPacket, pPlayer);
     } else if (pItem->isFlagItem()) {
-        
         executeFlag(pPacket, pPlayer);
     } else if (pItem->getItemClass() == Item::ITEM_CLASS_SWEEPER) {
         executeSweeper(pPacket, pPlayer);
@@ -184,15 +180,14 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
 
 #ifdef __GAME_SERVER__
 
-    
+
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
 
-    
-    
+
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
 
-    
+
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
 
@@ -204,9 +199,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
 
     Item* pTableItem = pZone->getItem(pPacket->getObjectID());
 
-    
-    
-    
+
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
         pTableItem->getItemType() != MONSTER_CORPSE) {
         GCCannotAdd _GCCannotAdd;
@@ -217,11 +210,11 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         return;
     }
 
-    
+
     MonsterCorpse* pCorpse = dynamic_cast<MonsterCorpse*>(pTableItem);
     Assert(pCorpse != NULL);
 
-    
+
     if (!verifyDistance(pCreature, pCorpse->getX(), pCorpse->getY(), 2)) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -231,7 +224,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         return;
     }
 
-    
+
     bool bPlayerHasSlayerRelic = pCreature->isFlag(Effect::EFFECT_CLASS_HAS_SLAYER_RELIC);
     bool bPlayerHasVampireRelic = pCreature->isFlag(Effect::EFFECT_CLASS_HAS_VAMPIRE_RELIC);
     bool bTableHasSlayerRelic = pCorpse->isFlag(Effect::EFFECT_CLASS_SLAYER_RELIC);
@@ -239,10 +232,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
     bool bSlayerRelicTable = pCorpse->isFlag(Effect::EFFECT_CLASS_SLAYER_RELIC_TABLE);
     bool bVampireRelicTable = pCorpse->isFlag(Effect::EFFECT_CLASS_VAMPIRE_RELIC_TABLE);
 
-    
-    
-    
-    
+
     if ((bTableHasSlayerRelic && bTableHasVampireRelic) || (!bPlayerHasSlayerRelic && !bPlayerHasVampireRelic) ||
         pItem == NULL || pItem->getItemClass() != Item::ITEM_CLASS_RELIC) {
         GCCannotAdd _GCCannotAdd;
@@ -255,7 +245,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
 
     ItemType_t relicIndex = pItem->getItemType();
 
-    
+
     const RelicInfo* pRelicInfo = dynamic_cast<RelicInfo*>(g_pRelicInfoManager->getItemInfo(relicIndex));
 
     if (pRelicInfo == NULL) {
@@ -271,10 +261,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
     bool bSlayer = pCreature->isSlayer();
     bool bVampire = pCreature->isVampire();
 
-    
-    
-    
-    
+
     if (pItem->getObjectID() != pPacket->getItemObjectID() || (bSlayer && bVampireRelicTable) ||
         (bVampire && bSlayerRelicTable) || (bTableHasSlayerRelic && pRelicInfo->relicType == RELIC_TYPE_SLAYER) ||
         (bTableHasVampireRelic && pRelicInfo->relicType == RELIC_TYPE_VAMPIRE)) {
@@ -286,14 +273,12 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         return;
     }
 
-    
-    
+
     if (bSlayer) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
-        
+
         if (!pSlayer->hasRideMotorcycle() && !pSlayer->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE)) {
-            
             Success = true;
         }
     } else if (bVampire) {
@@ -305,15 +290,13 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         }
     }
 
-    
+
     if (Success) {
-        
         pPlayerCreature->deleteItemFromExtraInventorySlot();
 
-        
+
         pCorpse->addTreasure(pItem);
 
-         
 
         char msg[100];
         sprintf(msg, g_pStringPool->c_str(STRID_PUT_RELIC_TO_RELIC_TABLE), pPlayerCreature->getName().c_str(),
@@ -326,7 +309,7 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         Effect::EffectClass effectClass;
         Effect::EffectClass effectClassTable;
 
-        
+
         if (pRelicInfo->relicType == RELIC_TYPE_SLAYER) {
             effectClass = Effect::EFFECT_CLASS_HAS_SLAYER_RELIC;
             effectClassTable = Effect::EFFECT_CLASS_SLAYER_RELIC;
@@ -338,12 +321,11 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         Effect* pEffect = pCreature->findEffect(effectClass);
         Assert(pEffect != NULL);
 
-        
-        
+
         pEffect->unaffect();
         pCreature->deleteEffect(effectClass);
 
-        
+
         if (pRelicInfo->relicType == RELIC_TYPE_SLAYER) {
             EffectSlayerRelic* pEffect = new EffectSlayerRelic(pCorpse);
 
@@ -358,14 +340,14 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
             pEffect->affect(pCorpse);
         }
 
-        
+
         GCAddEffect gcAddEffect;
         gcAddEffect.setObjectID(pCorpse->getObjectID());
         gcAddEffect.setEffectID(effectClassTable);
         gcAddEffect.setDuration(65000);
         pZone->broadcastPacket(pCorpse->getX(), pCorpse->getY(), &gcAddEffect);
 
-        
+
         GCDeleteObject gcDeleteObject;
         gcDeleteObject.setObjectID(pItem->getObjectID());
         pPlayer->sendPacket(&gcDeleteObject);
@@ -373,20 +355,18 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
         // RelicTable
         EffectRelicTable* pTableEffect = NULL;
         if (bSlayer) {
-            
             g_pCombatInfoManager->setRelicOwner(relicIndex, CombatInfoManager::RELIC_OWNER_SLAYER);
 
-            
+
             Effect* pEffect = pCorpse->getEffectManager().findEffect(Effect::EFFECT_CLASS_SLAYER_RELIC_TABLE);
             Assert(pEffect != NULL);
 
             pTableEffect = dynamic_cast<EffectSlayerRelicTable*>(pEffect);
             Assert(pTableEffect != NULL);
         } else {
-            
             g_pCombatInfoManager->setRelicOwner(relicIndex, CombatInfoManager::RELIC_OWNER_VAMPIRE);
 
-            
+
             Effect* pEffect = pCorpse->getEffectManager().findEffect(Effect::EFFECT_CLASS_VAMPIRE_RELIC_TABLE);
             Assert(pEffect != NULL);
 
@@ -394,25 +374,22 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
             Assert(pTableEffect != NULL);
         }
 
-        
-        
+
         Timeval lockTime;
         getCurrentTime(lockTime);
         lockTime.tv_sec += 10;
         pTableEffect->setLockTime(lockTime);
 
 
-        
         if ((bTableHasSlayerRelic && pRelicInfo->relicType == RELIC_TYPE_VAMPIRE) ||
             (bTableHasVampireRelic && pRelicInfo->relicType == RELIC_TYPE_SLAYER))
 
         {
-            
             Timeval safeTime;
             getCurrentTime(safeTime);
             safeTime.tv_sec += g_pVariableManager->getCombatBonusTime() * 60;
 
-            
+
             GCSystemMessage gcSystemMessage;
 
             pTableEffect->setSafeTime(safeTime);
@@ -425,10 +402,10 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
                 g_pCombatInfoManager->setRelicOwner(relicIndex, CombatInfoManager::RELIC_OWNER_VAMPIRE);
             }
 
-            
+
             g_pCombatInfoManager->setCombat(false);
 
-            
+
             g_pZoneGroupManager->broadcast(&gcSystemMessage);
 
             g_pCombatInfoManager->computeModify();
@@ -457,20 +434,15 @@ void CGRelicToObjectHandler::executeBloodBible(CGRelicToObject* pPacket, Player*
     Assert(pZone != NULL);
 
 
-    
-    
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
 
-    
+
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
 
     Item* pTableItem = pZone->getItem(pPacket->getObjectID());
 
-    
-    
-    
-    
+
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
         pTableItem->getItemType() != MONSTER_CORPSE ||
         (!pTableItem->isFlag(Effect::EFFECT_CLASS_SHRINE_GUARD) &&
@@ -483,12 +455,11 @@ void CGRelicToObjectHandler::executeBloodBible(CGRelicToObject* pPacket, Player*
         return;
     }
 
-    
+
     MonsterCorpse* pCorpse = dynamic_cast<MonsterCorpse*>(pTableItem);
     Assert(pCorpse != NULL);
 
-    
-    
+
     if (!verifyDistance(pCreature, pCorpse->getX(), pCorpse->getY(), 2) || !pCorpse->isShrine()) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -499,7 +470,6 @@ void CGRelicToObjectHandler::executeBloodBible(CGRelicToObject* pPacket, Player*
     }
 
     if (g_pShrineInfoManager->putBloodBible(pPlayerCreature, pItem, pCorpse)) {
-        
     }
 
 #endif
@@ -519,11 +489,10 @@ void CGRelicToObjectHandler::executeCastleSymbol(CGRelicToObject* pPacket, Playe
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    
-    
+
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
 
-    
+
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
 
@@ -532,10 +501,7 @@ void CGRelicToObjectHandler::executeCastleSymbol(CGRelicToObject* pPacket, Playe
 
     //	cout << "executeCastleSymbol" << endl;
 
-    
-    
-    
-    
+
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
         pTableItem->getItemType() != MONSTER_CORPSE ||
         (!pTableItem->isFlag(Effect::EFFECT_CLASS_CASTLE_SHRINE_GUARD) &&
@@ -548,12 +514,11 @@ void CGRelicToObjectHandler::executeCastleSymbol(CGRelicToObject* pPacket, Playe
         return;
     }
 
-    
+
     MonsterCorpse* pCorpse = dynamic_cast<MonsterCorpse*>(pTableItem);
     Assert(pCorpse != NULL);
 
-    
-    
+
     if (!verifyDistance(pCreature, pCorpse->getX(), pCorpse->getY(), 2) || !pCorpse->isShrine()) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -568,7 +533,7 @@ void CGRelicToObjectHandler::executeCastleSymbol(CGRelicToObject* pPacket, Playe
     cout << "siegeManager Call" << endl;
     SiegeManager::Instance().putItem(pPlayerCreature, pCorpse, pItem);
     return;
-//	}
+    //	}
 
 #endif
 
@@ -590,20 +555,16 @@ void CGRelicToObjectHandler::executeFlag(CGRelicToObject* pPacket, Player* pPlay
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    
-    
+
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
 
-    
+
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
 
     Item* pTableItem = pZone->getItem(pPacket->getObjectID());
 
-    
-    
-    
-    
+
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
         pTableItem->getItemType() != MONSTER_CORPSE ||
         !g_pFlagManager->isFlagPole(dynamic_cast<MonsterCorpse*>(pTableItem))) {
@@ -615,12 +576,11 @@ void CGRelicToObjectHandler::executeFlag(CGRelicToObject* pPacket, Player* pPlay
         return;
     }
 
-    
+
     MonsterCorpse* pCorpse = dynamic_cast<MonsterCorpse*>(pTableItem);
     Assert(pCorpse != NULL);
 
-    
-    
+
     if (!verifyDistance(pCreature, pCorpse->getX(), pCorpse->getY(), 2) || !pCorpse->isShrine()) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -631,8 +591,6 @@ void CGRelicToObjectHandler::executeFlag(CGRelicToObject* pPacket, Player* pPlay
     }
 
     if (g_pFlagManager->putFlag(pPlayerCreature, pItem, pCorpse)) {
-        
-        
     } else {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -675,10 +633,7 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
     const SweeperInfo* pSweeperInfo =
         dynamic_cast<SweeperInfo*>(g_pSweeperInfoManager->getItemInfo(pItem->getItemType()));
 
-    
-    
-    
-    
+
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||
         pTableItem->getItemType() != MONSTER_CORPSE ||
         !pLevelWarManager->isSafe(dynamic_cast<MonsterCorpse*>(pTableItem))) {
@@ -690,12 +645,11 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
         return;
     }
 
-    
+
     MonsterCorpse* pCorpse = dynamic_cast<MonsterCorpse*>(pTableItem);
     Assert(pCorpse != NULL);
 
-    
-    
+
     if (!verifyDistance(pCreature, pCorpse->getX(), pCorpse->getY(), 2)) {
         GCCannotAdd _GCCannotAdd;
         _GCCannotAdd.setObjectID(pPacket->getObjectID());
@@ -706,7 +660,6 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
     }
 
     if (pLevelWarManager->putSweeper(pPlayerCreature, pItem, pCorpse)) {
-        
         pPlayerCreature->deleteItemFromExtraInventorySlot();
         GCDeleteInventoryItem gcDeleteInventoryItem;
         gcDeleteInventoryItem.setObjectID(pPacket->getItemObjectID());
@@ -717,7 +670,7 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
             pEffect->setDeadline(0);
         }
 
-        
+
         char race[15];
         if (pCreature->isSlayer()) {
             sprintf(race, g_pStringPool->c_str(STRID_SLAYER));

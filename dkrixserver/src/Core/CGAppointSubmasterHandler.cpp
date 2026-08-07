@@ -41,8 +41,6 @@ void CGAppointSubmasterHandler::execute(CGAppointSubmaster* pPacket, Player* pPl
     SYSTEM_ASSERT(SYSTEM_GUILD);
 
     if (!g_pGuildManager->isGuildMaster(pPacket->getGuildID(), pPlayerCreature)) {
-        
-        
         GCGuildResponse gcGR;
         gcGR.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGR);

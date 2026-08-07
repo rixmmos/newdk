@@ -55,12 +55,9 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        
-        
-
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
 
@@ -82,9 +79,6 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         string TargetGuildMaster = pGuild->getMaster();
 
 
-        
-
-
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -92,13 +86,12 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
             pStmt->executeQuery("INSERT INTO `Messages` (`Receiver`, `Message`) values ('%s','%s')",
                                 TargetGuildMaster.c_str(), g_pStringPool->c_str(374));
 
-            
+
             Result* pResult = pStmt->executeQuery("SELECT count(*) FROM `GuildUnionMember` WHERE `UnionID`='%u'",
                                                   pUnion->getUnionID());
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                
                 pStmt->executeQuery("DELETE FROM `GuildUnionInfo` WHERE `UnionID`='%u'", pUnion->getUnionID());
 
                 GuildUnionManager::Instance().reload();
@@ -119,7 +112,6 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
 
         pPlayer->sendPacket(&gcModifyInformation);
 
-        
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -138,7 +130,7 @@ void CGDenyUnionHandler::execute(CGDenyUnion* pPacket, Player* pPlayer)
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
-        
+
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
     }

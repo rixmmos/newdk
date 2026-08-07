@@ -49,8 +49,7 @@ extern "C" {
 //   m_ItemClass = lua_toboundedenum<Item::ItemClass>(
 //                     L, 1, 0, Item::ITEM_CLASS_MAX - 1);
 //--------------------------------------------------------------------------------
-template <typename T>
-inline T lua_toboundedenum(lua_State* L, int idx, long minValue, long maxValue) {
+template <typename T> inline T lua_toboundedenum(lua_State* L, int idx, long minValue, long maxValue) {
     if (!lua_isnumber(L, idx)) {
         std::ostringstream msg;
         msg << "lua_toboundedenum: stack slot " << idx << " is not a number (Lua type=" << lua_type(L, idx) << ")";
@@ -75,7 +74,7 @@ public:
     LuaState();
     virtual ~LuaState();
 
-    
+
     virtual void init(int stackSize = defaultStateSize);
     virtual void release();
 

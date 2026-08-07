@@ -73,15 +73,14 @@ void WarSystem::prepareRaceWar() {
 
     SAFE_DELETE(m_pRaceWarSchedule);
 
-    
+
     VSDateTime warStartTime = WarScheduler::getNextWarDateTime(WAR_RACE, VSDateTime::currentDateTime());
 
     War* pRaceWar = new RaceWar(War::WAR_STATE_WAIT);
     pRaceWar->setWarStartTime(warStartTime);
     m_pRaceWarSchedule = new Schedule(pRaceWar, warStartTime);
 
-    filelog("WarLog.txt", "[WarID=%d,Time=%s]   .", (int)pRaceWar->getWarID(),
-            warStartTime.toString().c_str());
+    filelog("WarLog.txt", "[WarID=%d,Time=%s]   .", (int)pRaceWar->getWarID(), warStartTime.toString().c_str());
 
     //	m_RaceWarTimeParam = ((DWORD)((DWORD)warStartTime.date().month() << 24)) |
     //((DWORD)((DWORD)warStartTime.date().day() << 16)) | ((DWORD)((DWORD)warStartTime.time().hour() << 8));
@@ -101,21 +100,17 @@ void WarSystem::load()
 
     {__BEGIN_TRY
 
-         
-
-         
 
          __END_CATCH}
 
 VSDateTime WarSystem::getWarEndTime(WarType_t warType) const {
     int seconds = 0;
     switch (warType) {
-    
     case WAR_GUILD:
         seconds = g_pVariableManager->getVariable(GUILD_WAR_TIME);
         break;
 
-    
+
     case WAR_RACE:
         seconds = g_pVariableManager->getVariable(RACE_WAR_TIME);
         break;
@@ -191,7 +186,7 @@ bool WarSystem::addWar(War* pWar)
 
     addSchedule(pWarSchedule);
 
-    
+
     if (makeGCWarList_LOCKED()) {
         GCWarList gcWarList;
 
@@ -204,16 +199,15 @@ bool WarSystem::addWar(War* pWar)
         g_pZoneGroupManager->broadcast(&gcWarList);
     }
 
-    
+
     // pWarSchedule->create();
 
-    
-    
+
     if (pWar->getWarType() == WAR_GUILD) {
         SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
         Assert(pSiegeWar != NULL);
 
-        
+
         EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
         pEvent->setDeadline(0);
         g_pClientManager->addEvent(pEvent);
@@ -226,15 +220,15 @@ bool WarSystem::addWar(War* pWar)
     } else if (pWar->getWarType() == WAR_RACE) {
         m_bHasRaceWar = true;
 
-        
+
         EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
         pEvent->setDeadline(0);
         g_pClientManager->addEvent(pEvent);
 
-        
+
         g_pShrineInfoManager->broadcastBloodBibleStatus();
 
-        
+
         g_pHolyLandManager->remainRaceWarPlayers();
     }
 
@@ -348,11 +342,11 @@ Work* WarSystem::heartbeat()
         War* pWar = dynamic_cast<War*>(pSchedule->getWork());
         if (pWar != NULL && pWar->getWarType() == WAR_RACE) {
             int lastSec = VSDateTime::currentDateTime().secsTo(pSchedule->getScheduledTime());
-            
+
             if (lastSec < 20 * 60 && !m_b20Minutes) {
                 m_b20Minutes = true;
 
-                
+
                 EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
                 pEvent->setDeadline(0);
                 g_pClientManager->addEvent(pEvent);
@@ -387,16 +381,15 @@ Work* WarSystem::heartbeat()
     pWork = Scheduler::heartbeat();
 
     if (pWork != NULL) {
-        
         War* pWar = dynamic_cast<War*>(pWork);
         Assert(pWar != NULL);
 
-        
+
         if (pWar->getWarType() == WAR_GUILD) {
             SiegeWar* pSiegeWar = dynamic_cast<SiegeWar*>(pWar);
             Assert(pSiegeWar != NULL);
 
-            
+
             __ENTER_CRITICAL_SECTION(m_MutexActiveWars)
 
             list<ActiveWarInfo>::iterator itr =
@@ -409,7 +402,7 @@ Work* WarSystem::heartbeat()
         } else if (pWar->getWarType() == WAR_RACE) {
             m_bHasRaceWar = false;
 
-            
+
             EventRefreshHolyLandPlayer* pEvent = new EventRefreshHolyLandPlayer(NULL);
             pEvent->setDeadline(0);
             g_pClientManager->addEvent(pEvent);
@@ -420,13 +413,13 @@ Work* WarSystem::heartbeat()
         SAFE_DELETE(pWork);
     }
 
-    
+
     if (m_pRaceWarSchedule != NULL && !m_bHasRaceWar && g_pVariableManager->isAutoStartRaceWar()) {
         checkStartRaceWar();
         m_bRaceWarToday = VSDateTime::currentDateTime().daysTo(m_pRaceWarSchedule->getScheduledTime()) <= 4;
     }
 
-    
+
     static Timeval nextTime = {0, 0};
     Timeval currentTime;
     getCurrentTime(currentTime);
@@ -506,7 +499,6 @@ bool WarSystem::hasCastleActiveWar(ZoneID_t zoneID) const
 
     __LEAVE_CRITICAL_SECTION(m_MutexActiveWars)
 
-     
 
     return bHasCastleActiveWar;
 
@@ -606,7 +598,7 @@ bool WarSystem::isEndCondition(Item* pItem, MonsterCorpse* pMonsterCorpse)
     Assert(pItem != NULL);
     Assert(pMonsterCorpse != NULL);
 
-    
+
     // return pBloodBibleItem->getBibleMonsterType()==pMonsterCorpse->getMonter()->getMonsterType()
 
     return true;
@@ -649,10 +641,9 @@ bool WarSystem::endWar(PlayerCreature* pPC, ZoneID_t castleZoneID)
         Assert(pWar != NULL);
 
         if (pWar->endWar(pPC)) {
-            
             pWarSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-            
+
             m_RecentSchedules.arrange();
 
             bEndWar = true;
@@ -679,10 +670,9 @@ bool WarSystem::removeWar(ZoneID_t castleZoneID)
     WarSchedule* pWarSchedule = getActiveWarSchedule_LOCKED(castleZoneID);
 
     if (pWarSchedule != NULL) {
-        
         pWarSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-        
+
         m_RecentSchedules.arrange();
 
         bRemoved = true;
@@ -715,10 +705,9 @@ bool WarSystem::removeRaceWar()
             continue;
 
         if (pWar->getWarType() == WAR_RACE) {
-            
             pSchedule->setScheduledTime(VSDateTime::currentDateTime());
 
-            
+
             m_RecentSchedules.arrange();
 
             bRemoved = true;
@@ -765,7 +754,6 @@ void WarSystem::broadcastWarList(GamePlayer* pGamePlayer) const
 
         warExist = true;
 
-         
 
         char msg[100];
         sprintf(msg, g_pStringPool->c_str(STRID_WAR_STATUS), pWar->getWarName().c_str(),

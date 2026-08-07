@@ -51,12 +51,9 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        
-        
-
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
 
@@ -76,8 +73,6 @@ void CGQuitUnionDenyHandler::execute(CGQuitUnionDeny* pPacket, Player* pPlayer)
         return;
     }
     string TargetGuildMaster = pGuild->getMaster();
-
-    
 
 
     Statement* pStmt = NULL;

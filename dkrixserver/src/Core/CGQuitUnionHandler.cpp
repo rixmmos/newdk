@@ -59,13 +59,9 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
     uint tempUnionID = pUnion->getUnionID();
 
 
-    
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature)
         //|| pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()
     ) {
-        
-        
-
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
 
@@ -76,7 +72,7 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
     // cout << "CGQuitUnion - Guild : " << pPacket->getGuildID() << ", Method : " << (int)pPacket->getQuitMethod() <<
     // endl;
 
-    
+
     if (pPacket->getQuitMethod() == CGQuitUnion::QUIT_NORMAL) {
         uint result = GuildUnionOfferManager::Instance().offerQuit(pPlayerCreature->getGuildID());
 
@@ -84,16 +80,15 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
         pPlayer->sendPacket(&gcGuildResponse);
         // cout << "normal send quit result : " << result << endl;
     }
-    
+
     else if (pPacket->getQuitMethod() == CGQuitUnion::QUIT_QUICK) {
-        
         string TargetGuildMaster = g_pGuildManager->getGuild(pUnion->getMasterGuildID())->getMaster();
 
         if (GuildUnionManager::Instance().removeGuild(pUnion->getUnionID(), pPlayerCreature->getGuildID())) {
             gcGuildResponse.setCode(GuildUnionOfferManager::OK);
             pPlayer->sendPacket(&gcGuildResponse);
 
-             
+
             Statement* pStmt = NULL;
             BEGIN_DB {
                 pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
@@ -107,13 +102,12 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
                 pStmt->executeQuery("INSERT INTO GuildUnionOffer values('%u','ESCAPE','%u',now())", tempUnionID,
                                     pPacket->getGuildID());
 
-                
+
                 Result* pResult =
                     pStmt->executeQuery("SELECT count(*) FROM GuildUnionMember WHERE UnionID='%u'", tempUnionID);
                 pResult->next();
 
                 if (pResult->getInt(1) == 0) {
-                    
                     // (int)tempUnionID << endl;
                     pStmt->executeQuery("DELETE FROM GuildUnionInfo WHERE UnionID='%u'", tempUnionID);
                     pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')",
@@ -158,7 +152,7 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
             sendGCOtherModifyInfoGuildUnion(pTargetCreature);
             sendGCOtherModifyInfoGuildUnion(pCreature);
 
-            
+
             GuildUnionManager::Instance().sendModifyUnionInfo(
                 dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
             GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());

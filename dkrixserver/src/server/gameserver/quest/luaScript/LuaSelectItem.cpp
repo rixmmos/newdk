@@ -16,7 +16,7 @@ int LuaSelectItem::executeFile(const string& filename)
     lua_getglobal(m_pState->getState(), "ItemClass");
     lua_getglobal(m_pState->getState(), "ItemType");
     lua_getglobal(m_pState->getState(), "OptionType");
-    lua_getglobal(m_pState->getState(), "OptionType2"); 
+    lua_getglobal(m_pState->getState(), "OptionType2");
 
     // Phase 9: range-checked enum casts. lua_toboundedenum throws
     // InvalidProtocolException if the stack slot is non-numeric or out

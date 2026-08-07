@@ -56,9 +56,7 @@ void CGModifyTaxRatioHandler::execute(CGModifyTaxRatio* pPacket, Player* pPlayer
         }
     }
 
-    if (!g_pGuildManager->isGuildMaster(guildID, pPC) 
-        || !bOwner                                    
-        || pPacket->getRatio() > 10) {
+    if (!g_pGuildManager->isGuildMaster(guildID, pPC) || !bOwner || pPacket->getRatio() > 10) {
         GCNPCResponse fail;
         fail.setCode(NPC_RESPONSE_MODIFY_TAX_RATIO_FAIL);
 

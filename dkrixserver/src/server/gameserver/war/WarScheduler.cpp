@@ -14,30 +14,24 @@
 #include "Zone.h"
 
 
+const int NextWarDay[2][8] = {{0, 1, 7, 6, 5, 4, 3, 2},
 
-const int NextWarDay[2][8] = {
-    {0, 1, 7, 6, 5, 4, 3, 2}, 
-    
-    {0, 6, 5, 4, 3, 2, 1, 0} 
-};
+                              {0, 6, 5, 4, 3, 2, 1, 0}};
 
 
 const int NextWarHour[2][24] = {
     //                               *     *              *     *
     // 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18  19  20  21  22  23
-    {10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 2, 1, 5, 4, 3, 2, 1, 2, 1, 15, 14, 13, 12, 11}, 
+    {10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 2, 1, 5, 4, 3, 2, 1, 2, 1, 15, 14, 13, 12, 11},
 
     //                                           *                          *
     // 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18  19  20  21  22  23
-    {14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3, 2, 1, 16, 15} 
-};
+    {14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3, 2, 1, 16, 15}};
 
 
 WarScheduler::WarScheduler(Zone* pZone)
 
     : m_pZone(pZone) {
-    
-    
     m_Mutex.setName("WarSheduler");
 }
 
@@ -65,7 +59,7 @@ bool WarScheduler::makeGCWarScheduleList(GCWarScheduleList* pGCWarScheduleList) 
         pGCWarScheduleList->addWarScheduleInfo(pWSI);
     }
 
-    
+
     if (g_pVariableManager->isAutoStartRaceWar()) {
         WarScheduleInfo* pWSI = new WarScheduleInfo;
         if (g_pWarSystem->addRaceWarScheduleInfo(pWSI)) {
@@ -95,9 +89,6 @@ Work* WarScheduler::heartbeat()
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
-
-    
-     
 
     return pWork;
 
@@ -161,7 +152,7 @@ void WarScheduler::load()
                 dateTemp = pResult->getString(++i);
                 warStartTime = VSDateTime(dateTemp);
 
-                
+
                 if (warStartTime < currentDateTime) {
                     warStartTime = currentDateTime;
                 }
@@ -195,8 +186,6 @@ void WarScheduler::load()
     }
     END_DB(pStmt)
 
-    
-     
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
@@ -289,16 +278,15 @@ VSDateTime WarScheduler::getNextWarDateTime(WarType_t warType, const VSDateTime&
     VSDateTime nextWarDateTime;
     VSTime nextWarTime;
 
-    if (g_pVariableManager->isWarPeriodWeek()) 
-    {
+    if (g_pVariableManager->isWarPeriodWeek()) {
         switch (warType) {
         case WAR_GUILD:
-            
+
             startHour = 20;
             break;
 
         case WAR_RACE:
-            
+
             startHour = 19;
             break;
         }
@@ -349,8 +337,8 @@ bool WarScheduler::addWar(War* pWar)
 
     addSchedule(pWarSchedule);
 
-    filelog("WarLog.txt", "[%d][WarID=%d] %s    .", (int)m_pZone->getZoneID(),
-            (int)pWar->getWarID(), (pWar->getWarType() == WAR_GUILD ? "" : ""));
+    filelog("WarLog.txt", "[%d][WarID=%d] %s    .", (int)m_pZone->getZoneID(), (int)pWar->getWarID(),
+            (pWar->getWarType() == WAR_GUILD ? "" : ""));
 
     pWarSchedule->create();
 
@@ -391,7 +379,7 @@ void WarScheduler::cancelGuildSchedules()
     }
     END_DB(pStmt)
 
-    
+
     load();
 
     __END_CATCH

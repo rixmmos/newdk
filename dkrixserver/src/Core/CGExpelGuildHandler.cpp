@@ -55,19 +55,16 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        
-        
-
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
 
         return;
     }
 
-    
+
     if (pUnion->getMasterGuildID() == pPacket->getGuildID()) {
         gcGuildResponse.setCode(GuildUnionOfferManager::MASTER_CANNOT_QUIT);
         pPlayer->sendPacket(&gcGuildResponse);
@@ -87,8 +84,6 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         }
         string TargetGuildMaster = pGuild->getMaster();
 
-        
-
 
         Statement* pStmt = NULL;
 
@@ -102,7 +97,6 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                
                 pStmt->executeQuery("DELETE FROM `GuildUnionInfo` WHERE `UnionID`='%u'", pUnion->getUnionID());
                 GuildUnionManager::Instance().reload();
             }
@@ -122,7 +116,6 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
 
         pPlayer->sendPacket(&gcModifyInformation);
 
-        
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -141,7 +134,7 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
-        
+
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
 

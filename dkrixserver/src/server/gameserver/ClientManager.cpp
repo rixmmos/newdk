@@ -135,7 +135,7 @@ void ClientManager::run()
         // Sleep 1ms to reduce CPU usage.
         try {
             // I/O Multiplexing
-            usleep(1000); 
+            usleep(1000);
             // g_pIncomingPlayerManager->copyPlayers();
 
             // game global time setting

@@ -62,11 +62,7 @@ void LuaState::init(int stackSize) {
     // deliberately excluded to prevent filesystem / process /
     // reflection / require escape from untrusted quest scripts.
     static const luaL_Reg kAllowedLibs[] = {
-        {"", luaopen_base},
-        {LUA_STRLIBNAME, luaopen_string},
-        {LUA_MATHLIBNAME, luaopen_math},
-        {NULL, NULL}
-    };
+        {"", luaopen_base}, {LUA_STRLIBNAME, luaopen_string}, {LUA_MATHLIBNAME, luaopen_math}, {NULL, NULL}};
     for (const luaL_Reg* lib = kAllowedLibs; lib->func; ++lib) {
         lua_pushcfunction(m_pState, lib->func);
         lua_pushstring(m_pState, lib->name);

@@ -48,9 +48,8 @@ public:
 public:
     // write data to stream (output buffer)
     // *CAUTION*
-    
-    
-    
+
+
     uint write(const char* buf, uint len);
     uint write(const string& buf) {
         return write(buf.c_str(), buf.size());
@@ -133,7 +132,7 @@ private:
     uint m_Head;
     uint m_Tail;
 
-    
+
     BYTE m_Sequence;
     // add by viva 2008-12-31
 public:
@@ -166,16 +165,11 @@ template <typename T> uint SocketOutputStream::write(T buf) {
 
     uint len = sizeof(T);
 
-    
-    
-    
-    
-    
-    
+
     uint nFree = ((m_Head <= m_Tail) ? m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1);
     // m_Tail - m_Head - 1 );
 
-    
+
     if (len >= nFree)
         resize(len - nFree + 1);
 

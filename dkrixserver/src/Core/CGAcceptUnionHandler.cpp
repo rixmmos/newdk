@@ -59,12 +59,9 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     if (!g_pGuildManager->isGuildMaster(pPlayerCreature->getGuildID(), pPlayerCreature) ||
         pUnion->getMasterGuildID() != pPlayerCreature->getGuildID()) {
-        
-        
-
         gcGuildResponse.setCode(GuildUnionOfferManager::SOURCE_IS_NOT_MASTER);
         pPlayer->sendPacket(&gcGuildResponse);
 
@@ -87,8 +84,6 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         }
         string TargetGuildMaster = pGuild->getMaster();
 
-        
-
 
         Statement* pStmt = NULL;
 
@@ -101,7 +96,6 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         END_DB(pStmt)
 
 
-        
         Creature* pCreature = NULL;
         pCreature = pGamePlayer->getCreature();
 
@@ -114,9 +108,8 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         pPlayer->sendPacket(&gcModifyInformation);
 
 
-        
         //
-        
+
 
         Creature* pTargetCreature = NULL;
         __ENTER_CRITICAL_SECTION((*g_pPCFinder))
@@ -135,20 +128,12 @@ void CGAcceptUnionHandler::execute(CGAcceptUnion* pPacket, Player* pPlayer)
         //////////////////////////////
 
 
-        
         sendGCOtherModifyInfoGuildUnion(pTargetCreature);
         sendGCOtherModifyInfoGuildUnion(pCreature);
 
 
-        
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pTargetCreature)->getGuildID());
         GuildUnionManager::Instance().sendModifyUnionInfo(dynamic_cast<PlayerCreature*>(pCreature)->getGuildID());
-
-
-        
-        
-        
-        
     }
 
 #endif // __GAME_SERVER__

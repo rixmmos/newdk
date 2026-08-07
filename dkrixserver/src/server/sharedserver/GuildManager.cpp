@@ -49,7 +49,7 @@ GuildManager::~GuildManager() noexcept {
     try {
         __ENTER_CRITICAL_SECTION(m_Mutex)
 
-        
+
         unordered_map<GuildID_t, Guild*>::iterator itr = m_Guilds.begin();
         for (; itr != m_Guilds.end(); itr++) {
             Guild* pGuild = itr->second;
@@ -76,14 +76,10 @@ void GuildManager::init() noexcept(false) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        
-        
-        
-
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildInfo");
 
-        
+
         pResult->next();
 
         if (pResult->getInt(1) == 0) {
@@ -158,7 +154,6 @@ void GuildManager::load() noexcept(false) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
         pResult = pStmt->executeQuery("SELECT GuildID, GuildName, GuildType, GuildRace, GuildState, ServerGroupID, "
                                       "GuildZoneID, Master, Date, Intro FROM GuildInfo WHERE GuildState IN ( %d, %d )",
@@ -167,7 +162,7 @@ void GuildManager::load() noexcept(false) {
         while (pResult->next()) {
             GuildState_t state = pResult->getInt(5);
 
-            
+
             if (state == Guild::GUILD_STATE_WAIT || state == Guild::GUILD_STATE_ACTIVE) {
                 Guild* pGuild = new Guild();
 
@@ -183,11 +178,10 @@ void GuildManager::load() noexcept(false) {
                 pGuild->setIntro(pResult->getString(10));
 
                 addGuild_NOBLOCKED(pGuild);
-                 
             }
         }
 
-        
+
         pResult = pStmt->executeQuery(
             "SELECT GuildID, Name, `Rank`, RequestDateTime, LogOn FROM GuildMember WHERE `Rank` IN ( 0, 1, 2, 3 )");
 
@@ -265,7 +259,6 @@ void GuildManager::deleteGuild(GuildID_t id) noexcept(false) {
     list<CastleInfo*> pGuildCastleInfoList = g_pCastleInfoManager->getGuildCastleInfos(id);
 
     if (!pGuildCastleInfoList.empty()) {
-        
         list<CastleInfo*>::iterator itr = pGuildCastleInfoList.begin();
         for (; itr != pGuildCastleInfoList.end(); itr++) {
             if ((*itr)->getRace() == RACE_SLAYER)
@@ -294,7 +287,7 @@ void GuildManager::deleteGuild(GuildID_t id) noexcept(false) {
         }
     }
 
-    
+
 /*	{
 
         // UnionManager->deleteGuild(xx);
@@ -311,13 +304,13 @@ void GuildManager::deleteGuild(GuildID_t id) noexcept(false) {
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        
+
         pStmt->executeQuery("DELETE FROM GuildInfo WHERE GuildID=%d", id);
 
-        
+
         pStmt->executeQuery("DELETE FROM GuildMember WHERE GuildID=%d", id);
 
-        
+
         pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE OwnerGuildID=%d", id);
 
         pStmt->executeQuery("UPDATE WarScheduleInfo SET Status='CANCEL' WHERE AttackGuildID=%d", id);
@@ -336,7 +329,7 @@ void GuildManager::deleteGuild(GuildID_t id) noexcept(false) {
 Guild* GuildManager::getGuild(GuildID_t id) noexcept(false) {
     __BEGIN_TRY
 
-    
+
     Guild* pGuild;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -362,7 +355,7 @@ Guild* GuildManager::getGuild(GuildID_t id) noexcept(false) {
 Guild* GuildManager::getGuild_NOBLOCKED(GuildID_t id) noexcept(false) {
     __BEGIN_TRY
 
-    
+
     Guild* pGuild;
 
     unordered_map<GuildID_t, Guild*>::iterator itr = m_Guilds.find(id);
@@ -479,7 +472,7 @@ void GuildManager::heartbeat() noexcept(false) {
     getCurrentTime(currentTime);
 
     ////////////////////////////////////////////////////////
-    
+
     ////////////////////////////////////////////////////////
     if (currentTime > m_WaitMemberClearTime) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -497,7 +490,6 @@ void GuildManager::heartbeat() noexcept(false) {
             list<string>::const_iterator itr2 = mList.begin();
 
             for (; itr2 != mList.end(); itr2++) {
-                
                 SGExpelGuildMemberOK sgExpelGuildMemberOK;
                 sgExpelGuildMemberOK.setGuildID(pGuild->getID());
                 sgExpelGuildMemberOK.setName(*itr2);
@@ -507,7 +499,7 @@ void GuildManager::heartbeat() noexcept(false) {
             }
         }
 
-        m_WaitMemberClearTime.tv_sec = currentTime.tv_sec + 3600; 
+        m_WaitMemberClearTime.tv_sec = currentTime.tv_sec + 3600;
 
         __LEAVE_CRITICAL_SECTION(m_Mutex)
     }
@@ -667,7 +659,6 @@ bool GuildManager::hasActiveWar(GuildID_t guildID) noexcept(false) {
     ZoneID_t zoneID;
 
     if (hasCastle(guildID, serverID, zoneID)) {
-        
         Statement* pStmt = NULL;
 
         BEGIN_DB {
@@ -688,8 +679,6 @@ bool GuildManager::hasActiveWar(GuildID_t guildID) noexcept(false) {
         }
         END_DB(pStmt)
     } else {
-        
-        
         Statement* pStmt = NULL;
 
         BEGIN_DB {
