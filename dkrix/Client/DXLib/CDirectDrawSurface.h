@@ -28,7 +28,7 @@
 #define	__CDIRECTDRAWSURFACE_H__
 
 
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 
 /*-----------------------------------------------------------------------------
   Class DirectDraw Surface

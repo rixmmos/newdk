@@ -7,7 +7,7 @@
 -----------------------------------------------------------------------------*/
 
 #include "../../basic/Typedef.h"
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 
 // Static member definitions
 BYTE CSDLGraphics::s_bSHIFT_R = 11;

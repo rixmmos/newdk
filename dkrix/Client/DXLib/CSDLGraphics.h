@@ -1,6 +1,6 @@
 /*-----------------------------------------------------------------------------
 
-	CDirectDraw.h
+	CSDLGraphics.h  (renamed from CDirectDraw.h, Phase 3 item 2)
 
 	SDL2 Implementation (Cross-platform)
 	Windows DirectDraw implementation removed - using SDL2 on all platforms

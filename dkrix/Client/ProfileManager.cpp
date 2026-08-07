@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <sys/dir.h>
 #endif
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 #include "CDirectDrawSurface.h"
 #include "CSpritePack.h"
 #include "UserInformation.h"

@@ -641,9 +641,14 @@ back to a single unconditional typedef.
         compiled the renames and deletions. Original verification was
         grep-based call-site tracing plus reading every file in the
         duplicate/shim set end to end.
-- [ ] **Item 2 — audited 2026-08-07, ready to execute.** Evidence with
-      file:line for every claim: `docs/phase3-item2-liveness-2026-08-07.md`.
-      Safe-first order:
+- [x] **Item 2 — executed 2026-08-07** (three commits, one per step, per
+      the audit in `docs/phase3-item2-liveness-2026-08-07.md`). One delta
+      found at execution time: a second dead `CDirectSetup.h` twin at
+      `Client/` level the audit missed — same zero-reference evidence,
+      deleted in step 1. Grep-verified zero dangling references to every
+      deleted/renamed name; **not compile-verified in this session** —
+      the push-triggered client CI run is the gate, same as item 1
+      (which run #8 then confirmed). The executed plan:
       1. DELETE `CDirectSetup.h` + `CDirectSetupGetVersion.cpp` — in no
          CMake source list; both umbrella includes commented out.
       2. DELETE `DXLib/BIT_RES.{CPP,H}` — dead 2-line-diff twin of the

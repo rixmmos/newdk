@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
-// CDirectDraw.cpp
+// CSDLGraphics.cpp  (renamed from CDirectDraw.cpp, Phase 3 item 2)
 //
 // SDL2 Implementation (Cross-platform)
 // Windows DirectX implementation removed - using SDL2 on all platforms
-// NOTE: Static member definitions are in CDirectDraw_StaticMembers.cpp
+// NOTE: Static member definitions are in CSDLGraphics_StaticMembers.cpp
 //----------------------------------------------------------------------
 
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 
 //-----------------------------------------------------------------------------
 // Static member initialization for DirectDraw objects

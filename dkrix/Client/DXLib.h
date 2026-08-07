@@ -12,7 +12,7 @@
 #define __DX_LIBRARY_H__
 
 #ifdef PLATFORM_WINDOWS
-#include "CDirectDraw.h"
+#include "CSDLGraphics.h"
 #endif
 #include "CDirectDrawSurface.h"
 #include "DXLib/AudioManager.h"
