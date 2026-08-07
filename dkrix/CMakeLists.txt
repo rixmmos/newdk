@@ -781,26 +781,34 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# (target_sources on shared_packets, not #included from anywhere) with
 	# no such stack to walk.
 	#
-	# Do NOT add Client/Packet to DarkEden's target-wide include dirs above
-	# -- tried that first, and it broke the build worse: Client/Packet/
-	# has generically named headers (FileAPI.h chief among them) that, once
-	# on every one of DarkEden's ~1000 translation units' /I path, shadow
-	# the real Windows SDK <fileapi.h> (case-insensitive match) ahead of
-	# the toolchain's own Windows Kits include path -- CreateFile,
-	# DeleteFile, FindFirstFile, ReadFile, GetFileSize etc. all vanish from
-	# the global namespace and winbase.h itself fails to parse
-	# (STREAM_INFO_LEVELS) wherever <windows.h> is later pulled in (ATL
-	# headers, VS_UI_WebBrowser.cpp's COM code, ...). Scope the extra
-	# include path to only the shared_packets source files instead, via
-	# the per-source-file INCLUDE_DIRECTORIES property (additive, not a
-	# replacement) -- it does not touch any other translation unit.
-	get_target_property(_shared_packets_srcs shared_packets INTERFACE_SOURCES)
-	if(_shared_packets_srcs)
-		set_source_files_properties(${_shared_packets_srcs} PROPERTIES
-			INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet"
-		)
-	endif()
-	unset(_shared_packets_srcs)
+	# Two things already tried and reverted, kept here so the next person
+	# doesn't repeat them:
+	#  1. Adding Client/Packet to DarkEden's target-wide include dirs --
+	#     broke the build worse. Client/Packet/ has generically named
+	#     headers (FileAPI.h chief among them) that, once on every one of
+	#     DarkEden's ~1000 translation units' /I path, shadow the real
+	#     Windows SDK <fileapi.h> (case-insensitive match) ahead of the
+	#     toolchain's own Windows Kits include path -- CreateFile,
+	#     DeleteFile, FindFirstFile, ReadFile, GetFileSize etc. all vanish
+	#     from the global namespace and winbase.h itself fails to parse
+	#     (STREAM_INFO_LEVELS) wherever <windows.h> is later pulled in
+	#     (ATL headers, VS_UI_WebBrowser.cpp's COM code, ...).
+	#  2. Scoping it to just the shared_packets sources via the
+	#     per-source-file INCLUDE_DIRECTORIES property -- didn't take
+	#     effect at all (CI still hit the original Packet.h-not-found
+	#     error), most likely a Visual Studio generator / CMP0118 quirk
+	#     for sources absorbed into a target via a linked INTERFACE
+	#     library's target_sources rather than added directly.
+	#
+	# Fix: a two-file forwarding shim (Client/Packet/SharedPacketsShim/)
+	# containing only Packet.h/PacketFactory.h, each a one-line
+	# #include "../Packet.h" / "../PacketFactory.h". Safe to add
+	# target-wide -- it holds nothing else, so it cannot shadow anything,
+	# and any other file that happened to quoted-include "Packet.h" would
+	# just get correctly forwarded, not broken.
+	target_include_directories(DarkEden PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SharedPacketsShim
+	)
 
 	# Link iconv only on platforms that actually use it.
 	if(NOT EMSCRIPTEN AND NOT WIN32)
