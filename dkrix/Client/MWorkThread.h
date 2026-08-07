@@ -53,6 +53,8 @@
 
 #include "../basic/Platform.h"
 
+#include <mutex>
+
 // Type definitions for thread function pointer (Windows API compatibility)
 typedef DWORD (*LPTHREAD_START_ROUTINE)(void* lpParameter);
 
@@ -141,20 +143,20 @@ class MWorkThread {
 		// Lock Deque
 		//---------------------------------------------------
 		 
-		void				LockDeque()					{ EnterCriticalSection(&m_csDeque); }
-		void				UnlockDeque()				{ LeaveCriticalSection(&m_csDeque); }
+		void				LockDeque()					{ m_csDeque.lock(); }
+		void				UnlockDeque()				{ m_csDeque.unlock(); }
 
-		CRITICAL_SECTION	m_csDeque;					
+		std::mutex	m_csDeque;					
 
 
 		//---------------------------------------------------
 		// Lock Current
 		//---------------------------------------------------
 		 
-		void				LockCurrent()					{ EnterCriticalSection(&m_csCurrent); }
-		void				UnlockCurrent()					{ LeaveCriticalSection(&m_csCurrent); }
+		void				LockCurrent()					{ m_csCurrent.lock(); }
+		void				UnlockCurrent()					{ m_csCurrent.unlock(); }
 
-		CRITICAL_SECTION	m_csCurrent;					
+		std::mutex	m_csCurrent;					
 
 	protected :
 		HANDLE				m_hWorkThread;

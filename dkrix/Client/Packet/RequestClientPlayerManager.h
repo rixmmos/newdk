@@ -27,6 +27,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <mutex>
 #include "RequestClientPlayer.h"
 #include "Packet.h"
 
@@ -100,8 +101,8 @@ class RequestClientPlayerManager {
 		//----------------------------------------------------------------------
 		// Lock / Unlock
 		//----------------------------------------------------------------------
-		void		Lock()					{ EnterCriticalSection(&m_Lock); }
-		void		Unlock()				{ LeaveCriticalSection(&m_Lock); }
+		void		Lock()					{ m_Lock.lock(); }
+		void		Unlock()				{ m_Lock.unlock(); }
 
 		//----------------------------------------------------------------------
 		
@@ -116,7 +117,7 @@ class RequestClientPlayerManager {
 	protected :
 		HANDLE_LIST						m_listConnectionThread;
 		
-		CRITICAL_SECTION				m_Lock;
+		std::mutex				m_Lock;
 
 		REQUESTCLIENTPLAYER_MAP			m_mapRequestClientPlayer;
 

@@ -103,14 +103,12 @@ LONG					RequestConnectionThreadProc(LPVOID lpParameter);
 //--------------------------------------------------------------------------------
 RequestClientPlayerManager::RequestClientPlayerManager()
 {
-	InitializeCriticalSection(&m_Lock);
 }
 
 RequestClientPlayerManager::~RequestClientPlayerManager()
 {
 	Release();
 
-	DeleteCriticalSection(&m_Lock);
 }
 
 //--------------------------------------------------------------------------------

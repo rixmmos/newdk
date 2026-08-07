@@ -62,14 +62,12 @@ WhisperInfo::SendToGameServer() const
 //----------------------------------------------------------------------
 WhisperManager::WhisperManager()
 {
-	InitializeCriticalSection(&m_Lock);
 }
 
 WhisperManager::~WhisperManager()
 {
 	Release();
 
-	DeleteCriticalSection(&m_Lock);
 }
 
 //----------------------------------------------------------------------

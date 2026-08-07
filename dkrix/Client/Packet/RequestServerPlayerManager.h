@@ -24,6 +24,7 @@
 #include "../../basic/Platform.h"
 #endif
 #include <list>
+#include <mutex>
 #include "RequestServerPlayer.h"
 #include "ServerSocket.h"
 
@@ -72,8 +73,8 @@ class RequestServerPlayerManager {
 		//----------------------------------------------------------------------
 		// Lock / Unlock
 		//----------------------------------------------------------------------
-		void		Lock()					{ EnterCriticalSection(&m_Lock); }
-		void		Unlock()				{ LeaveCriticalSection(&m_Lock); }
+		void		Lock()					{ m_Lock.lock(); }
+		void		Unlock()				{ m_Lock.unlock(); }
 
 		//----------------------------------------------------------------------
 		// RequestServerPlayer
@@ -92,7 +93,7 @@ class RequestServerPlayerManager {
 		HANDLE					m_hRequestThread;
 		bool					m_bThreadRunning;
 
-		CRITICAL_SECTION		m_Lock;
+		std::mutex		m_Lock;
 		RequestServerPlayer_LIST		m_listRequestServerPlayer;
 };
 

@@ -71,7 +71,7 @@
 #endif
 
 #ifdef OUTPUT_DEBUG
-	extern CRITICAL_SECTION			g_Lock;
+	extern std::recursive_mutex			g_Lock;
 #endif
 
 
@@ -93,14 +93,12 @@ RequestServerPlayerManager::RequestServerPlayerManager()
 	m_hRequestThread	= NULL;
 	m_bThreadRunning	= false;
 
-	InitializeCriticalSection(&m_Lock);
 }
 
 RequestServerPlayerManager::~RequestServerPlayerManager()
 {
 	Release();
 
-	DeleteCriticalSection(&m_Lock);
 }
 
 //--------------------------------------------------------------------------------
@@ -181,7 +179,7 @@ RequestServerPlayerManager::AddRequestServerPlayer(RequestServerPlayer* pRequest
 
 			#if defined(_DEBUG) && defined(OUTPUT_DEBUG)
 			
-				EnterCriticalSection(&g_Lock);
+				g_Lock.lock();
 	
 				if (g_pGameMessage!=NULL)
 				{
@@ -198,7 +196,7 @@ RequestServerPlayerManager::AddRequestServerPlayer(RequestServerPlayer* pRequest
 					}
 				}
 
-				LeaveCriticalSection(&g_Lock);
+				g_Lock.unlock();
 			#endif
 
 			Unlock();

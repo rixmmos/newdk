@@ -16,14 +16,12 @@ RequestUserManager*		g_pRequestUserManager = NULL;
 //----------------------------------------------------------------------
 RequestUserManager::RequestUserManager()
 {
-	InitializeCriticalSection(&m_Lock);
 }
 
 RequestUserManager::~RequestUserManager()
 {
 	Release();
 
-	DeleteCriticalSection(&m_Lock);
 }
 
 //----------------------------------------------------------------------

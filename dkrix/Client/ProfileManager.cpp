@@ -50,14 +50,12 @@ ProfileManager*		g_pProfileManager = NULL;
 //----------------------------------------------------------------------
 ProfileManager::ProfileManager()
 {
-	InitializeCriticalSection(&m_Lock);
 }
 
 ProfileManager::~ProfileManager()
 {
 	Release();
 
-	DeleteCriticalSection(&m_Lock);
 }
 
 //----------------------------------------------------------------------

@@ -5,6 +5,8 @@
 #include "CMessageArray.h"
 #include "DebugInfo.h"
 
+#include <mutex>
+
 #ifdef OUTPUT_DEBUG
 	//#define OUTPUT_FILE_LOG
 #endif
@@ -43,10 +45,13 @@
 #endif
 
 #if defined(OUTPUT_DEBUG) && defined(__GAME_CLIENT__)
-	CRITICAL_SECTION			g_Lock;
+	// std::recursive_mutex, not std::mutex: RequestServerPlayerManager::
+	// AddRequestServerPlayer() holds g_Lock across g_pGameMessage->AddFormat(),
+	// which takes g_Lock again (CRITICAL_SECTION allowed that re-entry).
+	std::recursive_mutex		g_Lock;
 
-	#define __BEGIN_LOCK	EnterCriticalSection(&g_Lock);
-	#define __END_LOCK		LeaveCriticalSection(&g_Lock);
+	#define __BEGIN_LOCK	g_Lock.lock();
+	#define __END_LOCK		g_Lock.unlock();
 #else
 	#define __BEGIN_LOCK	((void)0);
 	#define __END_LOCK		((void)0);

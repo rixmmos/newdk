@@ -160,7 +160,6 @@ void CSDLGraphics::Flip()
 
 #ifdef OUTPUT_DEBUG
 	extern bool					g_bSlideScreenShot;
-	extern CRITICAL_SECTION		g_Lock;
 #endif
 
 #ifdef OUTPUT_DEBUG
@@ -2346,9 +2345,6 @@ WinMain(HINSTANCE hInstance,
 	*/
 		
 	
-	#ifdef OUTPUT_DEBUG
-		InitializeCriticalSection(&g_Lock);
-	#endif	
 
 	
 	//----------------------------------------------------------
@@ -2383,9 +2379,6 @@ WinMain(HINSTANCE hInstance,
 
 		ReleaseMutex( hMutex );
 
-		#ifdef OUTPUT_DEBUG
-			DeleteCriticalSection(&g_Lock);
-		#endif
 
 		#ifndef _DEBUG
 			return -1;
@@ -2757,9 +2750,6 @@ WinMain(HINSTANCE hInstance,
 			ReleaseAllObjects();			
 			
 
-			#ifdef OUTPUT_DEBUG
-				DeleteCriticalSection(&g_Lock);
-			#endif
 
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);
@@ -2816,9 +2806,6 @@ WinMain(HINSTANCE hInstance,
 			ReleaseAllObjects();
 
 			
-			#ifdef OUTPUT_DEBUG
-				DeleteCriticalSection(&g_Lock);
-			#endif
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
@@ -2961,9 +2948,6 @@ WinMain(HINSTANCE hInstance,
 
 			//bCheck = false;
 			
-			#ifdef OUTPUT_DEBUG
-				DeleteCriticalSection(&g_Lock);
-			#endif
 
 			//_spawnl(_P_NOWAIT, "Updater.exe", "Updater.exe", NULL);	
 			_chdir( g_CWD );
@@ -3073,9 +3057,6 @@ WinMain(HINSTANCE hInstance,
 		ReleaseMutex( hMutex );
 #endif
 
-		#ifdef OUTPUT_DEBUG
-			DeleteCriticalSection(&g_Lock);
-		#endif
 
 		return 0;
 	}
@@ -3605,9 +3586,6 @@ _APICheck.init();
 	ReleaseMutex( hMutex );
 #endif
 
-	#ifdef OUTPUT_DEBUG
-		DeleteCriticalSection(&g_Lock);
-	#endif
 	
 	//----------------------------------------------------------------
 	

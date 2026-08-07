@@ -267,9 +267,6 @@ static void DrawStartupSplashSurface(CSpriteSurface* target, int alpha)
 extern char g_FutecIP[20];
 extern unsigned int g_FutecPort;
 
-#ifdef OUTPUT_DEBUG
-	extern CRITICAL_SECTION		g_Lock;
-#endif
 
 //----------------------------------------------------------------------
 

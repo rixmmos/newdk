@@ -33,6 +33,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 
 //----------------------------------------------------------------------
 // ProfileManager
@@ -98,27 +99,17 @@ class ProfileManager {
 		//----------------------------------------------------------------------
 		// Lock / Unlock
 		//----------------------------------------------------------------------
-		void		Lock()					{ EnterCriticalSection(&m_Lock); }
-		void		Unlock()				{ LeaveCriticalSection(&m_Lock); }
+		void		Lock()					{ m_Lock.lock(); }
+		void		Unlock()				{ m_Lock.unlock(); }
 
 	private :
 		PROFILE_MAP		m_Profiles;
 
 		REQUIRE_MAP		m_Requires;
 
-		CRITICAL_SECTION		m_Lock;
+		std::mutex		m_Lock;
 };
 
-// Compile-time check to ensure CRITICAL_SECTION is fully defined
-// Windows: sizeof(CRITICAL_SECTION) >= 68 bytes
-// POSIX/Emscripten: sizeof(CRITICAL_SECTION) = sizeof(pthread_mutex_t) + sizeof(int)
- #ifdef PLATFORM_WINDOWS
-	static_assert(sizeof(CRITICAL_SECTION) >= sizeof(void*), "CRITICAL_SECTION is incomplete");
-#else
-	// For POSIX systems (including Emscripten), the size may vary
-	// Just ensure it contains the mutex (basic sanity check)
-	static_assert(sizeof(CRITICAL_SECTION) >= sizeof(int), "CRITICAL_SECTION is incomplete");
-#endif
 
 extern ProfileManager*		g_pProfileManager;
 

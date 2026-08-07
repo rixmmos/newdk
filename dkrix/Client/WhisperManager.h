@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <list>
+#include <mutex>
 
 struct WHISPER_MESSAGE
 {
@@ -86,11 +87,11 @@ class WhisperManager {
 		//----------------------------------------------------------------------
 		// Lock / Unlock
 		//----------------------------------------------------------------------
-		void		Lock()					{ EnterCriticalSection(&m_Lock); }
-		void		Unlock()				{ LeaveCriticalSection(&m_Lock); }
+		void		Lock()					{ m_Lock.lock(); }
+		void		Unlock()				{ m_Lock.unlock(); }
 
 	private :
-		CRITICAL_SECTION		m_Lock;
+		std::mutex		m_Lock;
 
 		WHISPER_INFO_MAP		m_WhisperInfos;
 };
