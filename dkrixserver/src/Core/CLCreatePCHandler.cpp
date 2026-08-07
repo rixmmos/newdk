@@ -18,6 +18,7 @@
 #include "LCCreatePCOK.h"
 #include "LoginPlayer.h"
 #include "PCSlayerInfo.h"
+#include "PreparedStatement.h"
 #include "chinabilling/CBillingInfo.h"
 #endif
 
@@ -74,7 +75,8 @@ void CLCreatePCHandler::execute(CLCreatePC* pPacket, Player* pPlayer) {
 #endif
 
     try {
-        pStmt = g_pDatabaseManager->getConnection(WorldID)->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection(WorldID);
+        pStmt = pConn->createStatement();
 
         
         // NONE, ZONE***, INV***, QUICK...
@@ -103,17 +105,21 @@ void CLCreatePCHandler::execute(CLCreatePC* pPacket, Player* pPlayer) {
 #endif
 
 
-        
+
         ///*
-        pResult = pStmt->executeQuery("SELECT Name FROM Slayer WHERE Name = '%s'", pPacket->getName().c_str());
+        PreparedStatement nameStmt(pConn, "SELECT Name FROM Slayer WHERE Name = ?");
+        nameStmt.bindString(1, pPacket->getName());
+        pResult = nameStmt.execute();
         if (pResult->getRowCount() != 0) {
             lcCreatePCError.setErrorID(ALREADY_REGISTER_ID);
             throw DuplicatedException("  .");
         }
 
-        
-        pResult = pStmt->executeQuery("SELECT Name FROM Slayer WHERE PlayerID ='%s' and Slot ='%s' AND Active='ACTIVE'",
-                                      pLoginPlayer->getID().c_str(), Slot2String[pPacket->getSlot()].c_str());
+
+        PreparedStatement slotStmt(pConn, "SELECT Name FROM Slayer WHERE PlayerID =? and Slot =? AND Active='ACTIVE'");
+        slotStmt.bindString(1, pLoginPlayer->getID());
+        slotStmt.bindString(2, Slot2String[pPacket->getSlot()]);
+        pResult = slotStmt.execute();
         if (pResult->getRowCount() != 0) {
             lcCreatePCError.setErrorID(ALREADY_REGISTER_ID);
             throw DuplicatedException("  .");
@@ -253,42 +259,54 @@ void CLCreatePCHandler::execute(CLCreatePC* pPacket, Player* pPlayer) {
 
         nSTRGoalExp = STRGoalExp[nSTR];
         if (nSTRGoalExp == 0) {
-            pResult = pStmt->executeQuery("SELECT GoalExp FROM STRBalanceInfo WHERE Level = %d", nSTR);
+            PreparedStatement strGoalStmt(pConn, "SELECT GoalExp FROM STRBalanceInfo WHERE Level = ?");
+            strGoalStmt.bindInt(1, nSTR);
+            pResult = strGoalStmt.execute();
             if (pResult->next())
                 nSTRGoalExp = STRGoalExp[nSTR] = pResult->getInt(1);
         }
 
         nSTRExp = STRAccumExp[nSTR - 1];
         if (nSTRExp == 0) {
-            pResult = pStmt->executeQuery("SELECT AccumExp FROM STRBalanceInfo WHERE Level = %d", nSTR - 1);
+            PreparedStatement strAccumStmt(pConn, "SELECT AccumExp FROM STRBalanceInfo WHERE Level = ?");
+            strAccumStmt.bindInt(1, nSTR - 1);
+            pResult = strAccumStmt.execute();
             if (pResult->next())
                 nSTRExp = STRAccumExp[nSTR - 1] = pResult->getInt(1);
         }
 
         nDEXGoalExp = DEXGoalExp[nDEX];
         if (nDEXGoalExp == 0) {
-            pResult = pStmt->executeQuery("SELECT GoalExp FROM DEXBalanceInfo WHERE Level = %d", nDEX);
+            PreparedStatement dexGoalStmt(pConn, "SELECT GoalExp FROM DEXBalanceInfo WHERE Level = ?");
+            dexGoalStmt.bindInt(1, nDEX);
+            pResult = dexGoalStmt.execute();
             if (pResult->next())
                 nDEXGoalExp = DEXGoalExp[nDEX] = pResult->getInt(1);
         }
 
         nDEXExp = DEXAccumExp[nDEX - 1];
         if (nDEXExp == 0) {
-            pResult = pStmt->executeQuery("SELECT AccumExp FROM DEXBalanceInfo WHERE Level = %d", nDEX - 1);
+            PreparedStatement dexAccumStmt(pConn, "SELECT AccumExp FROM DEXBalanceInfo WHERE Level = ?");
+            dexAccumStmt.bindInt(1, nDEX - 1);
+            pResult = dexAccumStmt.execute();
             if (pResult->next())
                 nDEXExp = DEXAccumExp[nDEX - 1] = pResult->getInt(1);
         }
 
         nINTGoalExp = INTGoalExp[nINT];
         if (nINTGoalExp == 0) {
-            pResult = pStmt->executeQuery("SELECT GoalExp FROM INTBalanceInfo WHERE Level = %d", nINT);
+            PreparedStatement intGoalStmt(pConn, "SELECT GoalExp FROM INTBalanceInfo WHERE Level = ?");
+            intGoalStmt.bindInt(1, nINT);
+            pResult = intGoalStmt.execute();
             if (pResult->next())
                 nINTGoalExp = INTGoalExp[nINT] = pResult->getInt(1);
         }
 
         nINTExp = INTAccumExp[nINT - 1];
         if (nINTExp == 0) {
-            pResult = pStmt->executeQuery("SELECT AccumExp FROM INTBalanceInfo WHERE Level = %d", nINT - 1);
+            PreparedStatement intAccumStmt(pConn, "SELECT AccumExp FROM INTBalanceInfo WHERE Level = ?");
+            intAccumStmt.bindInt(1, nINT - 1);
+            pResult = intAccumStmt.execute();
             if (pResult->next())
                 nINTExp = INTAccumExp[nINT - 1] = pResult->getInt(1);
         }
@@ -391,54 +409,97 @@ void CLCreatePCHandler::execute(CLCreatePC* pPacket, Player* pPlayer) {
             return;
         }
 
-        pStmt->executeQuery(
+        PreparedStatement slayerInsertStmt(
+            pConn,
             "INSERT INTO Slayer (Race, Name, PlayerID, Slot, ServerGroupID, Active, Sex, HairStyle, HairColor, "
             "SkinColor, Phone, STR, STRExp, STRGoalExp, DEX, DEXExp, DEXGoalExp, INTE, INTExp, INTGoalExp, `Rank`, "
             "RankExp, RankGoalExp, HP, CurrentHP, MP, CurrentMP, ZoneID, XCoord, YCoord, Sight, Gold, Alignment, "
-            "Shape, HelmetColor, JacketColor, PantsColor, WeaponColor, ShieldColor, creation_date) VALUES ('%s', '%s', "
-            "'%s', '%s', %d, 'ACTIVE', '%s', '%s', %d, %d, 0, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
-            "%d, %d, 12, 237, 138, 13, 0, 7500, %d, %d, %d, %d, %d, %d, now())",
-            race.c_str(), pPacket->getName().c_str(), pLoginPlayer->getID().c_str(),
-            Slot2String[pPacket->getSlot()].c_str(), (int)CurrentServerGroupID, Sex2String[pPacket->getSex()].c_str(),
-            HairStyle2String[pPacket->getHairStyle()].c_str(), (int)pPacket->getHairColor(),
-            (int)pPacket->getSkinColor(), (int)pPacket->getSTR(), nSTRExp, nSTRGoalExp, (int)pPacket->getDEX(), nDEXExp,
-            nDEXGoalExp, (int)pPacket->getINT(), nINTExp, nINTGoalExp, 1, 0, RankGoalExpSlayer,
-            (int)pPacket->getSTR() * 2, (int)pPacket->getSTR() * 2, (int)pPacket->getINT() * 2,
-            (int)pPacket->getINT() * 2, slayerShape, (int)HelmetColor, (int)JacketColor, (int)PantsColor,
-            (int)WeaponColor, (int)ShieldColor);
+            "Shape, HelmetColor, JacketColor, PantsColor, WeaponColor, ShieldColor, creation_date) VALUES (?, ?, "
+            "?, ?, ?, 'ACTIVE', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            "?, ?, 12, 237, 138, 13, 0, 7500, ?, ?, ?, ?, ?, ?, now())");
+        slayerInsertStmt.bindString(1, race);
+        slayerInsertStmt.bindString(2, pPacket->getName());
+        slayerInsertStmt.bindString(3, pLoginPlayer->getID());
+        slayerInsertStmt.bindString(4, Slot2String[pPacket->getSlot()]);
+        slayerInsertStmt.bindInt(5, (int)CurrentServerGroupID);
+        slayerInsertStmt.bindString(6, Sex2String[pPacket->getSex()]);
+        slayerInsertStmt.bindString(7, HairStyle2String[pPacket->getHairStyle()]);
+        slayerInsertStmt.bindInt(8, (int)pPacket->getHairColor());
+        slayerInsertStmt.bindInt(9, (int)pPacket->getSkinColor());
+        slayerInsertStmt.bindInt(10, (int)pPacket->getSTR());
+        slayerInsertStmt.bindInt(11, nSTRExp);
+        slayerInsertStmt.bindInt(12, nSTRGoalExp);
+        slayerInsertStmt.bindInt(13, (int)pPacket->getDEX());
+        slayerInsertStmt.bindInt(14, nDEXExp);
+        slayerInsertStmt.bindInt(15, nDEXGoalExp);
+        slayerInsertStmt.bindInt(16, (int)pPacket->getINT());
+        slayerInsertStmt.bindInt(17, nINTExp);
+        slayerInsertStmt.bindInt(18, nINTGoalExp);
+        slayerInsertStmt.bindInt(19, 1);
+        slayerInsertStmt.bindInt(20, 0);
+        slayerInsertStmt.bindInt(21, RankGoalExpSlayer);
+        slayerInsertStmt.bindInt(22, (int)pPacket->getSTR() * 2);
+        slayerInsertStmt.bindInt(23, (int)pPacket->getSTR() * 2);
+        slayerInsertStmt.bindInt(24, (int)pPacket->getINT() * 2);
+        slayerInsertStmt.bindInt(25, (int)pPacket->getINT() * 2);
+        slayerInsertStmt.bindInt(26, slayerShape);
+        slayerInsertStmt.bindInt(27, (int)HelmetColor);
+        slayerInsertStmt.bindInt(28, (int)JacketColor);
+        slayerInsertStmt.bindInt(29, (int)PantsColor);
+        slayerInsertStmt.bindInt(30, (int)WeaponColor);
+        slayerInsertStmt.bindInt(31, (int)ShieldColor);
+        slayerInsertStmt.execute();
 
         
         
         
         
         if (pPacket->getRace() == RACE_VAMPIRE) {
-            pStmt->executeQuery(
+            PreparedStatement vampireInsertStmt(
+                pConn,
                 "INSERT INTO Vampire ( Name, PlayerID, Slot, ServerGroupID, Active, Sex, SkinColor, STR, DEX, INTE, "
                 "HP, CurrentHP, ZoneID, XCoord, YCoord, Sight, Alignment, Exp, GoalExp, `Rank`, RankExp, RankGoalExp, "
-                "Shape, CoatColor) VALUES ( '%s', '%s', '%s', %d, 'ACTIVE', '%s', %d, 20, 20, 20, 50, 50, 1003, 62, "
-                "64, 13, 7500, 0, %d, 1, 0, %d, %d, 377 )",
-                pPacket->getName().c_str(), pLoginPlayer->getID().c_str(), Slot2String[pPacket->getSlot()].c_str(),
-                (int)CurrentServerGroupID, Sex2String[pPacket->getSex()].c_str(), (int)pPacket->getSkinColor(),
-                GoalExpVampire, // by sigi. 2002.12.20
-                RankGoalExpVampire, vampireShape);
+                "Shape, CoatColor) VALUES ( ?, ?, ?, ?, 'ACTIVE', ?, ?, 20, 20, 20, 50, 50, 1003, 62, "
+                "64, 13, 7500, 0, ?, 1, 0, ?, ?, 377 )");
+            vampireInsertStmt.bindString(1, pPacket->getName());
+            vampireInsertStmt.bindString(2, pLoginPlayer->getID());
+            vampireInsertStmt.bindString(3, Slot2String[pPacket->getSlot()]);
+            vampireInsertStmt.bindInt(4, (int)CurrentServerGroupID);
+            vampireInsertStmt.bindString(5, Sex2String[pPacket->getSex()]);
+            vampireInsertStmt.bindInt(6, (int)pPacket->getSkinColor());
+            vampireInsertStmt.bindInt(7, GoalExpVampire); // by sigi. 2002.12.20
+            vampireInsertStmt.bindInt(8, RankGoalExpVampire);
+            vampireInsertStmt.bindInt(9, vampireShape);
+            vampireInsertStmt.execute();
         } else if (pPacket->getRace() == RACE_OUSTERS) {
-            pStmt->executeQuery("INSERT INTO Ousters ( Name, PlayerID, Slot, ServerGroupID, Active, Sex, STR, DEX, "
-                                "INTE, BONUS, HP, CurrentHP, MP, CurrentMP, ZoneID, XCoord, YCoord, Sight, Alignment, "
-                                "Exp, GoalExp, `Rank`, RankExp, RankGoalExp, CoatColor, HairColor, ArmColor, "
-                                "BootsColor ) Values ( '%s', '%s', '%s', %d, 'ACTIVE', 'FEMALE', %d, %d, %d, 0, 50, "
-                                "50, 50, 50, 1311, 24, 73, 13, 7500, 0, %d, 1, 0,	%d, 377, %d, 377, 377 )",
-                                pPacket->getName().c_str(), pLoginPlayer->getID().c_str(),
-                                Slot2String[pPacket->getSlot()].c_str(), (int)CurrentServerGroupID,
-                                (int)pPacket->getSTR(), (int)pPacket->getDEX(), (int)pPacket->getINT(), GoalExpOusters,
-                                RankGoalExpOusters, (int)pPacket->getHairColor());
+            PreparedStatement oustersInsertStmt(
+                pConn,
+                "INSERT INTO Ousters ( Name, PlayerID, Slot, ServerGroupID, Active, Sex, STR, DEX, "
+                "INTE, BONUS, HP, CurrentHP, MP, CurrentMP, ZoneID, XCoord, YCoord, Sight, Alignment, "
+                "Exp, GoalExp, `Rank`, RankExp, RankGoalExp, CoatColor, HairColor, ArmColor, "
+                "BootsColor ) Values ( ?, ?, ?, ?, 'ACTIVE', 'FEMALE', ?, ?, ?, 0, 50, "
+                "50, 50, 50, 1311, 24, 73, 13, 7500, 0, ?, 1, 0,	?, 377, ?, 377, 377 )");
+            oustersInsertStmt.bindString(1, pPacket->getName());
+            oustersInsertStmt.bindString(2, pLoginPlayer->getID());
+            oustersInsertStmt.bindString(3, Slot2String[pPacket->getSlot()]);
+            oustersInsertStmt.bindInt(4, (int)CurrentServerGroupID);
+            oustersInsertStmt.bindInt(5, (int)pPacket->getSTR());
+            oustersInsertStmt.bindInt(6, (int)pPacket->getDEX());
+            oustersInsertStmt.bindInt(7, (int)pPacket->getINT());
+            oustersInsertStmt.bindInt(8, GoalExpOusters);
+            oustersInsertStmt.bindInt(9, RankGoalExpOusters);
+            oustersInsertStmt.bindInt(10, (int)pPacket->getHairColor());
+            oustersInsertStmt.execute();
         }
 
         if (pPacket->getRace() == RACE_SLAYER) {
-            pStmt->executeQuery("INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES ('%s','11110010001')",
-                                pPacket->getName().c_str());
+            PreparedStatement flagSetStmt(pConn, "INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES (?,'11110010001')");
+            flagSetStmt.bindString(1, pPacket->getName());
+            flagSetStmt.execute();
         } else {
-            pStmt->executeQuery("INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES ('%s','00000000001')",
-                                pPacket->getName().c_str());
+            PreparedStatement flagSetStmt(pConn, "INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES (?,'00000000001')");
+            flagSetStmt.bindString(1, pPacket->getName());
+            flagSetStmt.execute();
         }
 
         

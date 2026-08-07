@@ -42,6 +42,7 @@
 #include "PKZoneInfoManager.h"
 #include "PacketUtil.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "ResurrectLocationManager.h"
 #include "SharedServerManager.h"
@@ -221,11 +222,12 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
 
     try {
-        
-        
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult =
-            pStmt->executeQuery("SELECT PlayerID,Race FROM Slayer WHERE Name = '%s'", pPacket->getPCName().c_str());
+
+
+        PreparedStatement nameStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                   "SELECT PlayerID,Race FROM Slayer WHERE Name = ?");
+        nameStmt.bindString(1, pPacket->getPCName());
+        pResult = nameStmt.execute();
 
 
         if (pResult->getRowCount() != 1) {
@@ -235,7 +237,6 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
             filelog("connectDB_BUG.txt", "%s", msg.toString().c_str());
 
-            SAFE_DELETE(pStmt);
             throw ProtocolException(msg.toString().c_str());
         }
 
@@ -256,7 +257,6 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
                 filelog("connectDB_BUG.txt", "%s", msg.toString().c_str());
 
-                SAFE_DELETE(pStmt);
                 throw ProtocolException(msg.toString().c_str());
             }
 
@@ -268,29 +268,27 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
                 filelog("connectDB_BUG.txt", "%s", msg.toString().c_str());
 
-                SAFE_DELETE(pStmt);
                 throw ProtocolException(msg.toString().c_str());
             }
         }
 
-        SAFE_DELETE(pStmt);
-
-        // pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-
 #ifdef __THAILAND_SERVER__
 
-        pResult = pStmt->executeQuery(
-            "SELECT PlayerID, CurrentServerGroupID, LogOn, SpecialEventCount, PayType, PayPlayDate, PayPlayHours, "
-            "PayPlayFlag, BillingUserKey, FamilyPayPlayDate, Birthday FROM Player WHERE PlayerID = '%s'",
-            pGamePlayer->getID().c_str());
+        PreparedStatement playerStmt(g_pDatabaseManager->getDistConnection("PLAYER_DB"),
+                                     "SELECT PlayerID, CurrentServerGroupID, LogOn, SpecialEventCount, PayType, "
+                                     "PayPlayDate, PayPlayHours, PayPlayFlag, BillingUserKey, FamilyPayPlayDate, "
+                                     "Birthday FROM Player WHERE PlayerID = ?");
+        playerStmt.bindString(1, pGamePlayer->getID());
+        pResult = playerStmt.execute();
 
 #else
 
-        pResult = pStmt->executeQuery(
-            "SELECT PlayerID, CurrentServerGroupID, LogOn, SpecialEventCount, PayType, PayPlayDate, PayPlayHours, "
-            "PayPlayFlag, BillingUserKey, FamilyPayPlayDate FROM Player WHERE PlayerID = '%s'",
-            pGamePlayer->getID().c_str());
+        PreparedStatement playerStmt(g_pDatabaseManager->getDistConnection("PLAYER_DB"),
+                                     "SELECT PlayerID, CurrentServerGroupID, LogOn, SpecialEventCount, PayType, "
+                                     "PayPlayDate, PayPlayHours, PayPlayFlag, BillingUserKey, FamilyPayPlayDate "
+                                     "FROM Player WHERE PlayerID = ?");
+        playerStmt.bindString(1, pGamePlayer->getID());
+        pResult = playerStmt.execute();
 
 #endif
         if (pResult->getRowCount() != 1) {
@@ -299,7 +297,6 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
             filelog("connectDB_BUG.txt", "%s", msg.toString().c_str());
 
-            SAFE_DELETE(pStmt);
             throw ProtocolException(msg.toString().c_str());
         }
 
@@ -329,18 +326,18 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
         pGamePlayer->setBillingUserKey(billingUserKey);
 
         if (logon != "LOGOFF") {
-            SAFE_DELETE(pStmt);
             char str[80];
             sprintf(str, "Already connected player ID: %s, %s", playerID.c_str(), logon.c_str());
             throw ProtocolException(str);
         }
 
-        pStmt->executeQuery("UPDATE Player SET LogOn='GAME' WHERE PlayerID = '%s' AND LogOn='LOGOFF'",
-                            playerID.c_str());
+        PreparedStatement gameLogonStmt(g_pDatabaseManager->getDistConnection("PLAYER_DB"),
+                                        "UPDATE Player SET LogOn='GAME' WHERE PlayerID = ? AND LogOn='LOGOFF'");
+        gameLogonStmt.bindString(1, playerID);
+        gameLogonStmt.execute();
 
-        
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+
+        if (gameLogonStmt.getAffectedRowCount() == 0) {
             char str[80];
             sprintf(str, "Already connected player ID2: %s, %s", playerID.c_str(), logon.c_str());
             throw ProtocolException(str);
@@ -348,7 +345,7 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
         string connectIP = pGamePlayer->getSocket()->getHost();
 
-        
+
 #if defined(__CONNECT_BILLING_SYSTEM__)
         if (payType == PAY_TYPE_FREE) {
             pGamePlayer->setMetroFreePlayer();
@@ -357,7 +354,6 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
         if (pGamePlayer->loginPayPlay(payType, payPlayDate, payPlayHours, payPlayFlag, connectIP, playerID)) {
             sendPayInfo(pGamePlayer);
         } else {
-            SAFE_DELETE(pStmt);
             throw ProtocolException("no pay account");
         }
 
@@ -369,10 +365,7 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
         pGamePlayer->setPayPlayValue(payType, payPlayDate, payPlayHours, payPlayFlag, familyPayPlayDate);
 #endif
 
-
-        SAFE_DELETE(pStmt);
     } catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
         throw Error(sqe.toString());
     }
 
@@ -447,9 +440,10 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 1 WHERE Name = '%s'",
-                                                pSlayer->getName().c_str());
+                            PreparedStatement logOnStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                                        "UPDATE GuildMember SET LogOn = 1 WHERE Name = ?");
+                            logOnStmt.bindString(1, pSlayer->getName());
+                            logOnStmt.execute();
                         }
                         END_DB(pStmt)
 
@@ -513,9 +507,10 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 1 WHERE Name = '%s'",
-                                                pVampire->getName().c_str());
+                            PreparedStatement logOnStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                                        "UPDATE GuildMember SET LogOn = 1 WHERE Name = ?");
+                            logOnStmt.bindString(1, pVampire->getName());
+                            logOnStmt.execute();
                         }
                         END_DB(pStmt)
                     } catch (DuplicatedException& t) {
@@ -581,9 +576,10 @@ void CGConnectHandler::execute(CGConnect* pPacket, Player* pPlayer)
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 1 WHERE Name = '%s'",
-                                                pOusters->getName().c_str());
+                            PreparedStatement logOnStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                                        "UPDATE GuildMember SET LogOn = 1 WHERE Name = ?");
+                            logOnStmt.bindString(1, pOusters->getName());
+                            logOnStmt.execute();
                         }
                         END_DB(pStmt)
                     } catch (DuplicatedException& t) {
