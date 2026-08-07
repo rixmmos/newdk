@@ -549,31 +549,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Remove files that are already compiled in VS_UI library
 	list(REMOVE_ITEM CLIENT_MAIN_SOURCES
 		${VS_UI_CLIENT_SOURCES}
-		# Explicitly remove files that duplicate globals in Client.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GlobalVariables.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWinHandler.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GCNotifyWin.cpp
-		# Exclude MitemTableinit2.cpp - duplicates InitItem2() from MitemTableInit.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MitemTableinit2.cpp
-		# Exclude MissingGlobals.cpp - duplicates globals with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/MissingGlobals.cpp
-		# Exclude GameHelpers.cpp - duplicates many functions with GamePacketFunctions.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameHelpers.cpp
-		# Exclude GameFunctions.cpp - duplicates functions with GameMain.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GameFunctions.cpp
-		# Exclude GamePacketFunctions.cpp - all functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/GamePacketFunctions.cpp
-		# Exclude ActionFunctions.cpp - functions now in PacketFunction.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/Client/ActionFunctions.cpp
 		# Exclude legacy Client sprite implementation; SpriteLib already provides it
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/CSpritePal.cpp
 	)
 
-	# Note: Cpackets contains CG (Client to Game) handlers
-	# These are server-side handlers that shouldn't be compiled in the client
-	# The client-side packet handling is done through different mechanisms
-	list(FILTER CLIENT_MAIN_SOURCES EXCLUDE REGEX ".*Cpackets/.*Handler\\.cpp")
-
+	# Note: Client/Packet/Cpackets/*Handler.cpp (CG server-side packet handlers)
+	# and nine duplicate Client/*.cpp files (GlobalVariables, MissingGlobals,
+	# GameHelpers, GameFunctions, GamePacketFunctions, ActionFunctions,
+	# MitemTableinit2, GCNotifyWinHandler, GCNotifyWin) used to be excluded here.
+	# They were deleted outright in Phase 1 of docs/MODERNIZATION.md
+	# (2026-08-06) instead of just being excluded from the glob.
 
 	# Exclude Windows-specific files
 	if(NOT WIN32)

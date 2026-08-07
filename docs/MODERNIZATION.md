@@ -332,28 +332,67 @@ routine phase work be delegated rather than hand-held.
 - [x] Add `docs/README.md` explaining the three-repo layout and
       routing readers to `CLAUDE.md` / `MODERNIZATION.md`.
 
-### Phase 1 — Delete the unambiguously dead (client, ~1/5 done)
+### Phase 1 — Delete the unambiguously dead (client, done except build verification)
 - [x] Delete `Client/MItemTable_bak-2007-5-7.cpp` (14,965 lines).
       **[measured 2026-08-06] Confirmed gone.**
-- [ ] Delete the nine CMake-excluded duplicate `.cpp` files
+- [x] Delete the nine CMake-excluded duplicate `.cpp` files
       (`GlobalVariables`, `MissingGlobals`, `GameHelpers`,
       `GameFunctions`, `GamePacketFunctions`, `ActionFunctions`,
       `MitemTableinit2`, `GCNotifyWinHandler`, `GCNotifyWin`) —
-      ~7,550 lines.
-- [ ] Delete `Client/Packet/Cpackets/*Handler.cpp` (35 files,
-      ~1,609 lines; these are server-side handlers).
-- [ ] Remove the matching `REMOVE_ITEM` / `FILTER EXCLUDE` lines from
-      `CMakeLists.txt`.
+      7,550 lines. **[measured 2026-08-06, by grep, not by build — no
+      compiler available in this session.** Each file's CMake exclusion
+      comment claims it duplicates a live file; spot-checked representative
+      symbols from every file (`SetPetInfo`, `InitPlayer`,
+      `ExecuteActionInfoFromMainNode`, `AffectModifyInfo`,
+      `CreateActionResultNode`, `CheckItemForSkillIcon`, the `Skill*`
+      family, `InitItem2`, `g_BasicException`, and the `g_x`/
+      `g_pSystemMessage`/`g_pSocket`/`g_pZoneLarge` globals) and confirmed a
+      real definition exists in a file that IS compiled (`GameMain.cpp`,
+      `PacketFunction.cpp`, `SDLMain.cpp`, `BasicException.cpp`,
+      `MitemTableInit.cpp`). Confirmed no file `#include`s any of the nine
+      `.cpp` files as text, and no legacy `.dsp`/`.vcxproj` references
+      them.**
+- [x] Delete `Client/Packet/Cpackets/*Handler.cpp` (35 files, 1,605 lines
+      per `git diff --stat`; these are server-side handlers).
+      **[measured 2026-08-06, by grep.**
+      21 of the 35 are called only inside `#ifndef __GAME_CLIENT__`
+      (`__GAME_CLIENT__=1` is a real compile definition for this target,
+      `CMakeLists.txt:678`), so the call site compiles out of the client
+      build entirely. The other 14 are called unconditionally from their
+      packet's `::execute()`, but `Client/CGHandlersStub.cpp` (kept, still
+      compiled) already supplies an empty-body definition of each one's
+      `::execute` for exactly this reason — its own header comment says
+      "Stub implementations ... because the actual handler implementations
+      are server-side." Deleting the excluded files removes no symbol the
+      client links against. One handler, `CGRangerSayHandler`, turned out
+      to be declared but never called anywhere (`CGRangerSay.cpp` calls
+      `CGWhisperHandler::execute` instead — a pre-existing oddity, left
+      as-is).**
+- [x] Remove the matching `REMOVE_ITEM` / `FILTER EXCLUDE` lines from
+      `CMakeLists.txt`. **[measured 2026-08-06]** Left `${VS_UI_CLIENT_SOURCES}`
+      and the unrelated `CSpritePal.cpp` exclusion in place.
 - [ ] ~~Delete `Client/WinLib/` (3 files, all dead).~~ **Withdrawn
       2026-08-06 — the "all dead" premise is false.** `CGameUpdate`
       subclasses `CWinUpdate` and the client holds live pointers to it.
       See the Ground-truth note above. Reclassify as a refactor of the
       update path and re-file under Phase 3 or later.
-- [ ] Add `build/`, `compile_commands.json`, `*.dsp`, `*.dsw`,
-      `*_bak-*.cpp`, `*.bak` to `.gitignore`.
-- Success: tree is ~24k lines lighter; the Windows client build is still
-  green. (The old success criterion named `make debug-asan`, a macOS path
-  that is no longer authoritative.)
+- [x] Add `build/`, `compile_commands.json`, `*.dsp`, `*.dsw`,
+      `*_bak-*.cpp`, `*.bak` to `.gitignore`. **[measured 2026-08-06] Already
+      present** — root `.gitignore` has `build/` (plus per-environment
+      variants and `dkrix/build/`), `compile_commands.json`, `*.dsp`,
+      `*.dsw`, `*.bak`, and `*_bak*` (covers `*_bak-*.cpp`); `dkrix/.gitignore`
+      also has `build/`, `*.bak`, `*_bak*`. Verified with
+      `git check-ignore -v` against representative paths in each pattern.
+      No edit needed; this was already done in the Phase -1 pass.
+- Success: tree is ~9.2k lines lighter from this phase (~24k including the
+  `_bak` file from the prior pass). **Not build-verified** — no compiler
+  available to this session (client needs Windows+VS2022+vcpkg). This is
+  confidence by grep-based inspection of every deleted symbol's call sites,
+  per the delegation model below, not confidence by green build. The next
+  native Windows build of `dkrix` is the actual gate; if it's not green,
+  treat that as a Phase 1 regression to bisect against the commits in this
+  pass (three commits: the nine duplicate files, the 35 Cpackets handlers,
+  the CMakeLists.txt cleanup).
 
 ### Phase 2 — Shrink `basic/Platform.h` (client, not started — file grew)
 - [ ] Fix the duplicate `id_t` typedefs at Platform.h:128, 130, 358,
