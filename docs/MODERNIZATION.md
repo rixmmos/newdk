@@ -372,6 +372,15 @@ In order; each independently shippable:
 6. **Phase 8 secrets step 2** — deployment change; needs a live-server
    window, config backups, and Enrico at the wheel.
 
+> **2026-08-07 five-stream agent wave (cloud session):** items 3–5 above
+> advanced in one parallel pass — 11.2 batch 1 (ratchet 542→529), Phase 3
+> item 3 (DXLib/ dissolved), Phase 2 mutex unification (47→12 sites),
+> Phase 10 bullet 1 (client fmt infra + census), and the Phase 12
+> normalizer (163 pairs verdicted: 62 style-only, 9 real-divergence, 7 of
+> those newly machine-found). All grep/script-verified only — the push
+> carrying the wave is the compile gate for every stream. Patches,
+> manifests, and per-stream decision lists: `C:\dev\_incoming\<stream>\`.
+
 ### Phase -1 — Make the work verifiable (done — both trees green 2026-08-06)
 
 This did not exist in earlier revisions and it should have. Nothing below
@@ -547,34 +556,44 @@ back to a single unconditional typedef.
       live callers (`VS_UI_Game.cpp`, `VS_UI_Title.cpp`), and
       `platform_get_scan_code()` is genuinely implemented in
       `PlatformSDL.cpp:312`. No dead macro, no missing function.
-- [ ] Mutex primitive unification — **not attempted; scope reported
-      instead of a partial fix, per instructions.** ~16 call sites of
-      `Enter/Leave/Initialize/DeleteCriticalSection` across 11 files, not
-      a uniform mechanical pattern:
-      - A global `CRITICAL_SECTION g_Lock` (defined in
-        `CMessageArray.cpp`, `extern`-declared in `Client.cpp`,
-        `GameInit.cpp`, `RequestServerPlayerManager.cpp`) is
-        `InitializeCriticalSection`'d once and `DeleteCriticalSection`'d
-        at **6 different early-return points** scattered through the
-        ~1,300-line `WinMain()` in `Client.cpp`. Safe to reason about
-        (all 6 are alternate exits of one call, not repeated re-init),
-        but a real cross-TU refactor, not a search-and-replace.
-      - `MWorkThread.h`'s `m_csDeque`/`m_csCurrent` are **never
-        Initialize/DeleteCriticalSection'd anywhere** — a latent bug,
-        currently inert only because `LockDeque`/`UnlockDeque`/
-        `LockCurrent`/`UnlockCurrent` have zero callers.
-      - `ProfileManager.h` has a `static_assert(sizeof(CRITICAL_SECTION)
-        >= ...)` that encodes assumptions about the shim's layout and
-        would need rework for any replacement primitive.
-      - 5 other classes (`RequestUserManager`, `WhisperManager`,
-        `RequestClientPlayerManager`, `RequestServerPlayerManager`'s own
-        `m_Lock`, `ProfileManager`) follow the simple
-        member-Init-in-ctor/Delete-in-dtor pattern and would be
-        mechanical on their own.
-      This needs a working Windows build to verify (std::mutex isn't
-      copyable, so anywhere one of these structs is copied/memset would
-      only surface at compile time) and is sizeable enough to be its own
-      follow-up, not a Phase 2 sub-item done blind.
+- [x] Mutex primitive unification — **done 2026-08-07, branch
+      `agent/phase2-mutex` (3 commits: fcc3799, 232b4bf, 1377a25),
+      pending client CI.** Re-measured before the change: 47
+      Enter/Leave/Initialize/DeleteCriticalSection sites across 14
+      client files, not ~16/11 (DebugLog.cpp alone holds 12). After:
+      12 sites, all DebugLog.cpp's g_log_lock — outside the scoped
+      clusters, deliberately left; trivial follow-up.
+      - The five member-lock classes (RequestUserManager,
+        WhisperManager, RequestClientPlayerManager,
+        RequestServerPlayerManager's m_Lock, ProfileManager) hold
+        std::mutex; Lock()/Unlock() bodies call .lock()/.unlock();
+        ctor/dtor init/delete removed. Copyability gate passed for all
+        five [measured]: heap-only singletons, no copies/memset;
+        re-entrancy gate passed [measured]: no locked region calls a
+        sibling locking method. ProfileManager's
+        static_assert(sizeof(CRITICAL_SECTION)…) removed — it guarded
+        completeness of the shim typedef under PCH include-order
+        variance, which a std::mutex member declaration enforces by
+        itself.
+      - g_Lock became std::recursive_mutex, not std::mutex:
+        AddRequestServerPlayer holds g_Lock across
+        g_pGameMessage->AddFormat(), which re-locks it
+        (CMessageArray.cpp:326) [measured]; CRITICAL_SECTION allowed
+        that re-entry, a plain mutex would deadlock. Init + all 6
+        WinMain exit-path deletes removed (all verified alternate exits
+        of one call; one was doubly dead inside a comment). Caveat: the
+        whole g_Lock arm is preprocessor-dead — OUTPUT_DEBUG is never
+        defined (DebugInfo.h's define block is commented out) — so CI
+        does not compile it; that commit is inspection-verified only
+        [unverified by compiler].
+      - MWorkThread.h m_csDeque/m_csCurrent migrated, fixing their
+        never-initialized latent bug (both facts re-verified [measured]:
+        zero init sites, zero callers of the four accessors).
+      Residual CRITICAL_SECTION users: DebugLog.cpp (live, 12 sites),
+      comments in DebugLog.h:11 / GameInitInfo.cpp:11 (latter now
+      stale), Packet/Exception.h's __ENTER/__LEAVE_CRITICAL_SECTION
+      macros (name collision — they wrap a passed-in mutex object). The
+      Platform.h CRITICAL_SECTION shim stays for DebugLog.cpp.
 - [ ] GDI stubs — skipped entirely per instructions (Phase 5 territory,
       `LOGFONT` is now a live parameter type in `Base::SetFont`).
 - Target: `Platform.h` shrinks to under 600 lines.
@@ -583,12 +602,12 @@ back to a single unconditional typedef.
       net out — comments explaining *why* the Windows/non-Windows split
       must stay cost about as many lines as the dead code removal saved.
       The real mass reduction available here is the mutex unification
-      (~major structural item, deferred above) and a full HRESULT-
-      machinery audit across ~20 files (also deferred). Neither was safe
+      (done 2026-08-07 — see the item above; client CI pending) and a full
+      HRESULT-machinery audit across ~20 files (still open). Neither was safe
       blind — but client CI has been green since 2026-08-06, so both are
       now schedulable as ordinary CI-gated changes.
 
-### Phase 3 — Collapse DXLib into a thin SDL facade (client, item 1 done 2026-08-07)
+### Phase 3 — Collapse DXLib into a thin SDL facade (client, items 1–3 done 2026-08-07)
 - [x] **Item 1 — Rename `CSDLInput` → `InputManager`, `CSDLAudio` →
       `AudioManager`; delete the dead/duplicate shim files and grep-replace
       callers.** `git mv CDirectInput.{h,cpp→_Adapter.cpp} →
@@ -669,10 +688,27 @@ back to a single unconditional typedef.
       Also surfaced: `VS_UI/WinMain.cpp` is filtered out on WIN32 (its
       `CDirectDraw gC_DD;` resolves to nothing) but unfiltered on
       non-WIN32 — latent breakage for any future Linux client build.
-- [ ] **Item 3** — Move the surviving `CSDL*` + `DXLibBackendSDL.cpp` out of
-      `Client/DXLib/` into `Client/Platform/`. Delete `Client/DXLib/`. Not
-      started; update `dkrix/CMakeLists.txt` include paths and source globs
-      to match.
+- [x] **Item 3 — executed 2026-08-07** (two commits: delete + move).
+      Deleted the ten files of the six dead DXLib MP3-decoder twin
+      modules item 2 flagged (mp3/huffman/reader/soundbuf/subdecoder/
+      synfilt — in no CMake list, zero external includers, live twins
+      in Client/; DXLib/mp3.h even still included the bit_res.h item 2
+      deleted). git mv'd the remaining 28 files to Client/Platform/,
+      names kept, and deleted Client/DXLib/. Rewired: add_subdirectory
+      + 8 parent include-dir lines (in place — -I order preserved) +
+      the ${CMAKE_SOURCE_DIR} variant in SpriteLib/CMakeLists.txt:152;
+      25 "DXLib/…"→"Platform/…" include lines across 22 files, incl.
+      two nonstandard-spelling stragglers ("dxlib/…" in CMP3.cpp,
+      "DXLib\…" in mp3.cpp) that only compiled on case-insensitive
+      filesystems. Deliberately kept: the dxlib target/project name,
+      DXLIB_* var/define, dxlib_* C API, DXLib*.{h,cpp} filenames, and
+      Client/DXLib.h (the Client-level umbrella) — renaming the dxlib
+      build/API identity is a follow-up item, as is deleting the moved
+      dead leftovers (header.{cpp,h}, l3types.h, common.h + the six
+      orphaned ogg/vorbis headers, same evidence as the deleted six).
+      Grep-verified zero DXLib-dir references in build files and
+      includes; **not compile-verified in this session** — the client
+      CI run is the gate, same as items 1 and 2.
 
 ### Phase 4 — One sprite pipeline (client, re-scoped 2026-08-06)
 
@@ -1115,10 +1151,25 @@ to `main` at authoring time, each independently green under
       out of scope here.
 
 ### Phase 10 — Build hygiene & CI (not started here; parked line finished it as its 10+14+15)
-- [ ] Add `.clang-format` to `dkrix/` plus a client `Makefile` with
-      `fmt` / `fmt-check` targets. (No actual TODO stubs exist — the
-      parked line's audit found that phrasing aspirational. Lift its
-      `a760899`: server `.clang-format` copied over + matching targets.)
+- [x] Add `.clang-format` to `dkrix/` plus a client `Makefile` with
+      `fmt` / `fmt-check` targets — done 2026-08-07 (`cb9cbae`; adjust
+      SHA if applied with `--reset-author`). Premise correction: the
+      `a760899` pointer above is dangling [measured — `git cat-file -t`
+      fails]; the parked line's real commit is `52b141c` (its 10B),
+      whose `.clang-format` is byte-identical to `dkrixserver/`'s —
+      that file was copied verbatim. Mechanism improves on 10B: file
+      set from `git ls-files` (never `find`), 21 vendored files
+      excluded (`Client/JpegLib/`, the flat zlib 1.1.x headers in
+      `Client/`, the Xiph headers — at `Client/Platform/` after Phase 3
+      item 3), and `fmt-check` uses `git diff --relative` — without it
+      every path is repo-root-relative and silently skipped from
+      `dkrix/` (the server's own `fmt-check` has that latent bug; its
+      CI job is unaffected). [measured] Census at pinned 18.1.8:
+      **2,199 of 2,227** in-scope files unformatted, ~946k diff lines;
+      0 clang-format errors, 0 non-UTF-8 files, 0 in-repo CRLF. No
+      source reformatted; no CI gate wired yet — proposed job +
+      sequencing in the stream-② manifest
+      (`_incoming/phase10/MANIFEST.md`).
 - [ ] Replace `file(GLOB …)` with explicit source lists in the client
       CMake. The parked line did this as its Phase 14: two GLOB sites
       covering ~1,100 `.cpp`; explicit 56-file VS_UI list first,
@@ -1159,6 +1210,24 @@ the script still isn't runnable here.
 (Phase 16), never a one-phase close-out. Parked priority order stands:
 user-string interpolation first (chat, say, whisper, pet names, custom
 options), operator-trusted second, constant/numeric hygiene last.
+**11.2 batch 1 (2026-08-07, agent stream):** 21 user-string sites migrated
+to `PreparedStatement` across the chat/name subsystems —
+`GCFriendChattingHandler` (11: friend list/history, incl. the raw
+chat-message INSERT), `CGWhisperHandler` (2: offline-target cross-server
+lookup), `CGSayHandler` (7: changeGuildMaster's three race branches,
+opdeny, opfind, RemoveNick), loginserver's `CLQueryCharacterNameHandler`
+(1: the creation-time name check, binding the not-yet-validated candidate
+name). SQL text, literals, and connection choices preserved; stack
+statements also close several early-return Statement leaks. **Ratchet
+542 → 529** [measured], re-baselined via `--update`. Two caveats: only 13
+of the 21 sites were counted — multi-line format strings are invisible to
+the script's single-line grep, so the baseline understates real sites; and
+the plan's "pet names" priority item is empty on `main` (no pet-name SQL
+exists; Pet* files carry only tier-2 OwnerID strings plus a non-bindable
+`SET %s` fragment). PreparedStatement's ctor throws base `SQLException`,
+which `END_DB` does not catch — prepare-time failures skip DBError.log
+(execute-time errors unchanged). Compile gate: next server CI run
+[unverified].
 
 ### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
@@ -1172,6 +1241,20 @@ the Phase 17 re-run: one scripted style-normalization pass over the ~160
 twin pairs plus targeted manual protocol review of the CL login/account
 family — not 163 independent manual merges. Details:
 `docs/packet-divergence-2026-08-07.md`.
+**Normalizer built + validated 2026-08-07** (`agent/phase12-script`):
+`dkrixserver/scripts/normalize-packet-style.py` normalizes both sides of a
+pair to the canonical style (server clang-format layout, no throw-specs,
+std::string, folded PCH/guard/dispatch lines) and issues a wire-signature
+verdict per pair. Full run [measured, text-level]: **62 style-only / 44
+residual ≤5 / 48 residual >5 / 9 real-divergence** of 163. The 9 (CLLogin,
+CLCreatePC, CGMove, CGGuildChat, CGModifyNickname, CGSkillToInventory,
+CGUseItemFromInventory, CGExchangeBuy, CGExchangeList) are the
+protocol-review queue — two show the *server* header stale (size
+formulas), so "pick server version" is not a safe default; the streams are
+the authority. Batch plan and evidence:
+`docs/packet-normalization-sample-2026-08-07.md`. The packet-duplicates
+ratchet (326) is the scoreboard for the actual migration, stepping down as
+pairs unify.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
