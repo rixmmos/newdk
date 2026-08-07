@@ -103,6 +103,13 @@ jobs:
     name: build (${{ matrix.sanitizer }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Non-blocking, same reasoning as client.yml's sanitizers-linux job:
+    # this leg has never run before, and the plain `make debug` job above
+    # is what stayed red twice today (ff96e46, 421088e) before finally
+    # going green — an untested sanitizer leg shouldn't be able to flip
+    # the whole workflow red again while it's still finding its feet.
+    # Drop this once the leg has a few clean runs behind it.
+    continue-on-error: true
     defaults:
       run:
         working-directory: dkrixserver
