@@ -136,6 +136,50 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 >   version into the log. Match it locally with
 >   `pip install clang-format==18.1.8`. No source file needed changing.
 
+> **[2026-08-07, later still] The "now deterministic" prediction above was
+> wrong — two more red runs before green.** The very next push (`19f41c4`,
+> run #12) failed `make debug (ubuntu)`: `undefined reference to
+> PreparedStatement::execute()/bindString()/~PreparedStatement()` from
+> `GCFriendChattingHandler.cpp` and `CGWhisperHandler.cpp`, linking
+> `gameserver`.
+>
+> - **Root cause 1 — static-link order.** `gameserver`/`loginserver`/
+>   `sharedserver` each listed their `*Database` static library *before*
+>   the `*Packets`/`Core` libraries that consume it. GNU ld only pulls
+>   symbols from a static archive to satisfy undefined references that
+>   exist at the point the archive is processed — it never revisits an
+>   earlier archive. Latent since `PreparedStatement` was introduced,
+>   surfaced only when 11.2 batch 1 (`ab67704`) added the first
+>   `PreparedStatement` call sites inside packet handlers. Fixed in
+>   `ff96e46` — pure reordering (`*Database` moved after
+>   `*Packets`/`Core`/etc.) in all three executables' `CMakeLists.txt`,
+>   no logic change.
+> - **Root cause 2 — the mirror-image bug.** Run #13 (`ff96e46`) got
+>   `gameserver`/`loginserver` linking; `sharedserver` then failed with
+>   the opposite-direction error: `libDatabase.a(Statement.cpp.o):
+>   undefined reference to g_ProfileSampleManager /
+>   ProfileSampleManager::getProfileSampleSet() /
+>   ProfileSampleSet::beginProfile()/endProfile()`. `Statement.cpp` calls
+>   into `Profile.cpp`'s query-profiling hooks, which are compiled into
+>   `ServerCore` — but `sharedserver` links plain `Database` *after*
+>   `ServerCore`. Rather than hand-tune the flat link-order list again
+>   (it can't satisfy "*Packets before *Database" and "*Database before
+>   ServerCore" at once without the full transitive graph), `421088e`
+>   declares the real dependency instead: `target_link_libraries(Database
+>   PUBLIC ServerCore)` (and the same for `GameServerDatabase` /
+>   `LoginServerDatabase` / `SharedServerDatabase` /
+>   `UpdateServerDatabase`) in `src/server/database/CMakeLists.txt`,
+>   letting CMake's own transitive link-ordering resolve it instead of a
+>   fragile manual list.
+> - **Run #14 (`421088e`) — GREEN.** `make debug (ubuntu)` succeeded
+>   (17m50s-class), `clang-format` and `ratchets` jobs also green, 21m39s
+>   total. Confirmed by opening the run in GitHub Actions
+>   (`rixmmos/newdk`, `server.yml`) and reading the job summary directly.
+>
+> This is also the first compile verification of 11.2 batch 1
+> (`ab67704`) — both failures were link-order problems, not defects in
+> the migrated call sites themselves, which compiled clean throughout.
+
 **No claim in this document has been confirmed by a compile** — except what
 the green runs actually verified (client #6 and #8, server `make debug` in
 runs #5 and #6): those commits, on those runs, on `main`. Everything else below is still either
@@ -348,14 +392,23 @@ interleave once P0 is done.
 
 In order; each independently shippable:
 
-1. **CI on the merged tip — resolved 2026-08-07, one tail open.** Client
-   run #8 (tip `5ca240a`): SUCCESS, 28m30s — the client wave compiles.
-   Server run #6 (same tip): `make debug` green in 21m32s; only the
-   `clang-format` job was red, fixed by the fmt pass. Run #9 (`8f4ca50`):
-   `make debug` green again; fmt red on formatter-version skew, fixed by
-   pinning `clang-format==18.1.8` in `server.yml` (see box). Remaining:
-   the next push's run completing green — now deterministic. The wave is
-   a result, not a proposal — item 2 below is the new top item.
+1. ~~**CI on the merged tip — one tail open.**~~ — **fully resolved
+   2026-08-07.** Client run #8 (tip `5ca240a`): SUCCESS, 28m30s — the
+   client wave compiles. Server run #6 (same tip): `make debug` green in
+   21m32s; only the `clang-format` job was red, fixed by the fmt pass.
+   Run #9 (`8f4ca50`): `make debug` green again; fmt red on
+   formatter-version skew, fixed by pinning `clang-format==18.1.8` in
+   `server.yml`. **The "now deterministic" call here was wrong**: the
+   next push (`19f41c4`, run #12) went RED on a static-link-order bug in
+   the three server executables (`*Database` before `*Packets`/`Core`),
+   latent since `PreparedStatement` was introduced and surfaced by 11.2
+   batch 1's first call sites. Fixed in `ff96e46`; run #13 then surfaced
+   a second, opposite-direction ordering bug in `sharedserver`
+   (`Database` linked after `ServerCore`), fixed properly in `421088e`
+   via `target_link_libraries(Database PUBLIC ServerCore)` rather than
+   more manual list-tuning. **Run #14 (`421088e`) — GREEN**, 21m39s, all
+   three jobs. Full detail in the verification-status box above. Item 2
+   below is now genuinely the top item.
 2. **Phase 18 — run the smoke test against `main`** (`docs/smoke-test/`,
    filling PORTING-NOTE's verification table as you go). Workstation + WSL
    + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
@@ -1201,9 +1254,12 @@ sites migrated** — the API lands alone, exactly like the parked 11B;
 the SQL ratchet stays at 542. Verified in-session by API cross-check
 against main's database layer (`Connection::getMYSQL()` present;
 `SQLException`/`SQLQueryException`/`OutOfBoundException` present in
-`Core/Exception.h`) and the pinned clang-format gate; **compile
-verification is the next server CI run / WSL `make debug`** — this
-sandbox has no server toolchain (apt is sealed). PORTING-NOTE's
+`Core/Exception.h`) and the pinned clang-format gate. **Compile-verified
+2026-08-07** on CI run #14 (`421088e`) — GREEN, after two link-order
+regressions (`ff96e46`, `421088e`; see the verification-status box
+above) had to be fixed first. This sandbox has no server toolchain (apt
+is sealed), so in-session work still can't self-verify; CI remains the
+gate for the next change here too. PORTING-NOTE's
 `server_build_fix.sh` warning is now half-obsolete: the files exist,
 the script still isn't runnable here.
 **11.2** — migrate the 542 ratcheted sites: ongoing, ratchet-driven
@@ -1226,8 +1282,11 @@ the plan's "pet names" priority item is empty on `main` (no pet-name SQL
 exists; Pet* files carry only tier-2 OwnerID strings plus a non-bindable
 `SET %s` fragment). PreparedStatement's ctor throws base `SQLException`,
 which `END_DB` does not catch — prepare-time failures skip DBError.log
-(execute-time errors unchanged). Compile gate: next server CI run
-[unverified].
+(execute-time errors unchanged). **Compile-verified 2026-08-07**: CI run
+#14 (`421088e`) went GREEN after two link-order bugs were fixed
+(`ff96e46`, `421088e` — see the verification-status box above); both
+failures were link-order problems in the surrounding `CMakeLists.txt`,
+not in these 21 call sites, which compiled clean throughout.
 
 ### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:

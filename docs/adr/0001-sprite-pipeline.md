@@ -276,7 +276,10 @@ Safe now (judgeable by reading, no build required):
        which is set and never used). See `../TECH-DEBT-AUDIT.md` item 19.
 2. [ ] Rewrite `SPRITELIB_BACKEND_README.md`: remove the `engine/sprite` attribution from the diagram, drop "Production Ready" and "Integration tests passing"
 3. [ ] Correct the Phase 4 section of `docs/MODERNIZATION.md` with Findings 1–3 and link this ADR
-4. [ ] Resolve the branch question — `modernize/phase-4-sprite` is `origin/main`+4 with no upstream, while `origin/modernize/phase4-sprite` holds 106 unrelated commits
+4. [x] Resolve the branch question — resolved in favor of `main`; the parked
+       line is tag `archive/modernization-phases-1-17`, and the stale
+       `modernize/*` remotes/locals named here have since been deleted. See
+       `../BRANCH-RECONCILIATION.md`.
 
 Blocked on green CI (Phase -1):
 

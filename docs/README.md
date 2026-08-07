@@ -49,10 +49,12 @@ newdk/
 
 ## A standing caveat
 
-No claim in any document here has been confirmed by a compile. CI
-workflows exist at `.github/workflows/` but have never executed. Treat
-`[measured]` annotations as "verified by reading the tree", never as
-"verified by building it".
+CI is no longer hypothetical: the server build (`make debug` + `clang-format`
++ `ratchets`) and the client build have both run green on `main` — see
+`MODERNIZATION.md` and `BRANCH-RECONCILIATION.md` for current run numbers and
+commits. That still doesn't make every `[measured]` claim in this folder
+compiler-verified — most predate the first green run. Treat `[measured]` as
+"verified by reading the tree" unless the specific claim cites a CI run.
 
 ## Archived status documents
 

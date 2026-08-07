@@ -65,7 +65,7 @@ maintainer.
 
 | # | Item | Type | I | R | E | **Pri** |
 |---|---|---|---|---|---|---|
-| 1 | ~~CI has never executed~~ → **server GREEN**; client still unbuilt | Infrastructure | 4 | 4 | 2 | **32** |
+| 1 | ~~CI has never executed~~ → **server and client both GREEN** (see `MODERNIZATION.md` for current run numbers) | Infrastructure | 4 | 4 | 2 | **32** |
 | 2 | `SPRITELIB_BACKEND_README.md` claims "Production Ready" falsely | Documentation | 3 | 4 | 1 | **35** |
 | 3 | Branch has no upstream; 106-commit divergence | Infrastructure | 4 | 4 | 2 | **32** |
 | 4 | 34 plaintext DB passwords in 13 tracked conf files | Security | 2 | 5 | 2 | **28** |
@@ -152,9 +152,10 @@ close.
 > checkable by machine on the server side, and the phases `MODERNIZATION.md`
 > lists as delegable-once-green (1, 2, 3, 7, 10) are delegable there today.
 >
-> **The client remains at zero evidence** and is now the whole of this item.
-> Run #3 died at *configure* on a stale generator pin without reaching any
-> project code. Fix pushed (`21a9172`), not yet re-run.
+> **[Update] The client is green too.** Run #3 died at *configure* on a stale
+> generator pin; that and two further fixes (see `MODERNIZATION.md`) got
+> client CI to a verified green run. Both toolchains now have real CI signal —
+> this item is closed. Left in place for the history of how it got there.
 >
 > Rescored on the client alone: **I=4, R=4, E=2 → 32.** Lower than the original
 > 40 because half the original scope is delivered and the remaining half has a

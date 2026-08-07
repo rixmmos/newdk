@@ -17,6 +17,17 @@ live server, and ships to testers.
 
 Nothing was merged. `main` does not contain Phases 1–17.
 
+**Update, 2026-08-07:** `origin/modernize/phase4-sprite` was deleted. It is no
+longer one of the three preservation mechanisms above — see "Branch cleanup —
+2026-08-07" below for why that's safe: `git cat-file -p` on the annotated tag
+object showed its `object` field is literally `b46106d`, and that commit *is*
+the branch's tip — not an ancestor, the identical commit reached by two refs.
+The tag's annotation message ("106 commits, 2026-04-17..04-22, on
+origin/modernize/phase4-sprite") already carries the branch's provenance, so
+the tag is strictly better for archival: same permanence against GC, plus a
+human-readable record the bare branch ref never had. Nothing was lost. The two
+remaining preservation mechanisms are the tag and this document.
+
 ### What this costs, stated plainly
 
 The parked line holds work that `main` does not have and will need eventually:
@@ -195,12 +206,70 @@ modernization work is parked. It is left below for the record.*
    `retired/phase-4-sprite-misnomer`. That name described work this line never
    did, and its near-collision with `origin/modernize/phase4-sprite` was an
    accident waiting to happen.
+   **Update, 2026-08-07:** this branch (was `629b220`) was deleted after
+   `git rev-list --left-right --count main...retired/phase-4-sprite-misnomer`
+   showed 0 commits ahead of `main` — fully merged, nothing lost. See "Branch
+   cleanup — 2026-08-07" below.
 4. Kept `backup/local-checkpoint-20260806` as a second copy of the local tip.
+   **Update, 2026-08-07:** this branch (was `7c433ec`) was deleted on the same
+   basis — 0 commits ahead of `main`. See "Branch cleanup — 2026-08-07" below.
 
 **If any of the parked work is wanted later**, retrieve it one phase at a time
 against a build, starting from the tag. The smoke-test runbook at
 `docs/archive/smoke-test/` on that tag is the single highest-value thing there
 and is largely independent of the code changes — it could be lifted on its own.
+
+---
+
+## Branch cleanup — 2026-08-07
+
+All branches below were deleted only after independently confirming each was
+fully merged into `main` or exactly duplicated by the tag — evidence first,
+then delete.
+
+**Remote (`origin`), 3 branches:**
+
+- `origin/modernize/phase1-dead-code` (5 commits) — every commit's effect
+  independently verified already present on `main` via separately-authored
+  equivalent commits (merge `04d3820`), build-verified at client CI tip
+  `5ca240a`.
+- `origin/modernize/phase2-platform-h` (10 commits, includes the 5
+  phase1-dead-code commits as its base) — every commit superseded on `main`.
+  One commit, `f6a939a` (collapsing `id_t` to a single unconditional typedef),
+  was actually a **regression** that `main` deliberately avoided: `main`'s
+  `cdf82ef` kept a Windows/non-Windows split because `id_t` must be `DWORD` on
+  Windows — confirmed via `067067f`, the commit that originally added that
+  split to fix a real conflict.
+- `origin/modernize/phase4-sprite` (106 commits) — confirmed via
+  `git cat-file -p` on the annotated tag object plus `git merge-base` that this
+  branch's tip (`b46106d`) is the exact same commit
+  `archive/modernization-phases-1-17` points to. Not divergent, not an
+  ancestor — one commit, two refs. Deleting the branch loses nothing; the tag
+  alone fully preserves the history (detail above, top of this document).
+
+**Local, 8 branches**, all confirmed 0 commits ahead of `main` via
+`git rev-list --left-right --count main...<branch>` before deletion (fully
+merged, nothing lost):
+
+- `retired/phase-4-sprite-misnomer` (was `629b220`) — see item 3 above.
+- `backup/local-checkpoint-20260806` (was `7c433ec`) — see item 4 above.
+- Six `worktree-agent-*` branches, each a per-agent `.claude/worktrees/`
+  checkout from an earlier Claude Code session doing the individual phase-lift
+  work later merged into `main` (the "six merges" `19f41c4` and related docs
+  refer to): `worktree-agent-a01a043650329f9ac` (was `00bcf15`),
+  `worktree-agent-a0d4bd634db7d102e` (was `d246cc8`),
+  `worktree-agent-a2ec84efae774d3f2` (was `33f4ded`),
+  `worktree-agent-a622ee8ebab7f9ed5` (was `72a6f96`),
+  `worktree-agent-aa07096ac261df78d` (was `751753d`),
+  `worktree-agent-af5d245662d6219f6` (was `ab363b8`). Worktrees were removed
+  via `git worktree remove` (all confirmed clean, no uncommitted changes) and
+  branches deleted with `git branch -d` — which itself refuses to delete an
+  unmerged branch, a second independent confirmation these were fully merged.
+
+**Net result:** `git branch -a` now shows only `main` locally and
+`origin/main` (plus `origin/HEAD`) remotely. The tag
+`archive/modernization-phases-1-17` is untouched and is now, alongside this
+document, the sole preservation mechanism for the parked Phase 1–17 line.
 
 ---
 

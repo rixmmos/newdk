@@ -75,11 +75,13 @@ respect for its history but without sentimentality.
 
 ## Contents of this folder
 
-`MODERNIZATION.md` is current and maintained. Everything else here —
-`howto/`, `client_source_overview/`, and the Korean/Chinese `.txt` notes
-(GM commands, item codes, monster tables, DB setup walkthroughs) — is inherited
-legacy reference. It is often useful for archaeology and often out of date.
-Verify against the code before acting on it.
+`MODERNIZATION.md` and `BRANCH-RECONCILIATION.md` are current and maintained,
+as are the dated working docs (`TECH-DEBT-AUDIT.md`, `adr/`,
+`phase3-item2-liveness-2026-08-07.md`, `packet-divergence-2026-08-07.md`,
+`packet-normalization-sample-2026-08-07.md`). `howto/`, `client_source_overview/`,
+and the Korean/Chinese `.txt` notes (GM commands, item codes, monster tables, DB
+setup walkthroughs) are inherited legacy reference — useful for archaeology,
+often out of date. Verify against the code before acting on it.
 
 ## When in doubt
 
