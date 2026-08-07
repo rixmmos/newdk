@@ -277,9 +277,31 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI/src/widget/u_window.cpp
 	)
 
+	# VS_UI/WinMain.cpp is a standalone circa-2000 "VS UI Tester" dev harness
+	# (see its own file header comment) with a genuine Win32 entry point -
+	# `int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)` - meaningless as
+	# an OS entry point outside Win32. It is NOT the non-Windows client entry
+	# point: that is Client/SDLMain.cpp's `int main()`, whose own header says
+	# it is "Based on WinMain from Client.cpp" and which is gated on
+	# `#ifndef PLATFORM_WINDOWS`. This file used to be excluded only
+	# `if(WIN32)`, so non-Windows was the only platform where it ever
+	# actually compiled, and there it:
+	#   (a) declared `CDirectDraw gC_DD;` at file scope - a type Phase 3
+	#       item 3 (2026-08-07) renamed to CSDLGraphics, so it failed to
+	#       compile at all (first bug hit by the sanitizers-linux CI leg);
+	#   (b) would have collided at link time regardless, since it redefines
+	#       globals Client/Client.cpp already defines unconditionally into
+	#       the same VS_UI static library on every platform via
+	#       VS_UI_CLIENT_SOURCES - e.g. both declare `HWND g_hWnd;`.
+	# Fixing (a) alone (CDirectDraw -> CSDLGraphics) would only trade one
+	# build failure for another, so exclude the file unconditionally rather
+	# than patch a type it was never meant to use here. Nothing outside this
+	# file references its other globals/functions (gC_DD, gC_DDSurface,
+	# ProgramLoop, InitSound, MouseEventReceiver, ...) - verified by grep.
+	list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
+
 	# Exclude Windows-specific files
 	if(WIN32)
-		list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX ".*WinMain.*")
 		if(USE_SDL_BACKEND)
 			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/hangul/Ci\\.cpp")
 			list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX "VS_UI/src/Imm/CImm\\.cpp")
