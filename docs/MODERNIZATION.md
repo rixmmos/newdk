@@ -415,15 +415,27 @@ In order; each independently shippable:
    — it needs eyes on a running client anyway.
 3. **Phase 8 SQL half, via Phase 11.** ~~Lift the parked `PreparedStatement`
    design.~~ **11.1 landed 2026-08-07** (API only, zero call sites; compile
-   gate = next server CI run). Next: 11.2 migrations, user-string sites
-   first, measured by the Phase 16 ratchet (542 → down).
-4. **Phase 3 items 2–3, then 4b/4c.** All CI-gated now. Item 2's liveness
-   audit is done and its 4-step execution order is written into Phase 3.
-   Phase 17's re-run is also done — Phase 12 sizing is refined.
-5. **Phase 10 (+ parked 14/15).** Client `.clang-format` + fmt targets
-   (lift `a760899`), explicit source lists, asan matrix.
+   gate = next server CI run). 11.2 batch 1 done (542→529); **batch 2
+   done 2026-08-07** (529→510, guild-membership subsystem). Ongoing —
+   ~510 sites remain, ratchet-driven.
+4. ~~**Phase 3 items 2–3, then 4b/4c.**~~ **Items 2–3 done 2026-08-07**
+   (see Phase 3 above). 4b/4c remain and are explicitly **not
+   delegable** — Phase 4 sprite consolidation changes rendering with no
+   automated test coverage; needs eyes on a running client (folds into
+   item 2's Phase 18 session).
+5. ~~**Phase 10 (+ parked 14/15).**~~ **All three bullets done
+   2026-08-07**: `.clang-format` + fmt infra (bullet 1, census only, no
+   source reformatted), explicit source lists / `CONFIGURE_DEPENDS`
+   (bullet 2), `USE_ASAN/TSAN/UBSAN` + CI sanitizer matrix (bullet 3).
+   See Phase 10 above for detail and compile-gate caveats.
 6. **Phase 8 secrets step 2** — deployment change; needs a live-server
    window, config backups, and Enrico at the wheel.
+7. **Phase 12 Wave 1** — blocked, not a live next-step yet. See Phase
+   12 above: the simple "point client at the server file" approach is
+   structurally broken (include-resolution pulls in the wrong
+   `Packet.h`); the working alternative (`shared/Packets/`, proven on
+   the parked line) is a real structural decision, not a first-batch
+   backfill. Needs an explicit go/no-go before any pair is touched.
 
 > **2026-08-07 five-stream agent wave (cloud session):** items 3–5 above
 > advanced in one parallel pass — 11.2 batch 1 (ratchet 542→529), Phase 3
@@ -433,6 +445,15 @@ In order; each independently shippable:
 > those newly machine-found). All grep/script-verified only — the push
 > carrying the wave is the compile gate for every stream. Patches,
 > manifests, and per-stream decision lists: `C:\dev\_incoming\<stream>\`.
+
+> **2026-08-07, later — four-agent wave (worktree-isolated).** Three of
+> four workstreams landed: 11.2 batch 2 (529→510), Phase 10 bullet 2
+> (explicit/CONFIGURE_DEPENDS source lists), Phase 10 bullet 3
+> (sanitizer options + non-blocking CI legs). The fourth, Phase 12 Wave
+> 1, found the include-resolution blocker above and correctly landed
+> nothing rather than force a broken approach — see Phase 12. All
+> grep/script-verified only; the push carrying this wave is the compile
+> gate for the three that landed.
 
 ### Phase -1 — Make the work verifiable (done — both trees green 2026-08-06)
 
@@ -1241,9 +1262,26 @@ to `main` at authoring time, each independently green under
       list against `find`'s output (byte-identical) and confirming
       every listed file exists on disk with no drops/dupes; the real
       compile gate is client CI on `main` after this lands.
-- [ ] CI build matrix (`make debug-asan` on Linux). Parked Phase 15 has
-      the working matrix and the dependency list — and confirmed there is
-      **no Boost dep**, contrary to older notes.
+- [x] CI build matrix (`make debug-asan` on Linux) — done 2026-08-07.
+      `USE_ASAN`/`USE_TSAN`/`USE_UBSAN` CMake options + `debug-asan`/
+      `debug-tsan`/`debug-ubsan` Makefile targets in both trees
+      (server: `dkrixserver/CMakeLists.txt` + `Makefile`; client:
+      `dkrix/CMakeLists.txt` + `Makefile`, Linux/macOS-only — Windows/
+      MSVC stays the authoritative client build and the options are a
+      no-op there). Confirmed **no Boost dep**, per parked Phase 15.
+      TSan deliberately left out of both CI matrices (unaudited thread
+      models produce noise, not signal); still available locally via
+      `make debug-tsan`. New CI legs are additive — `sanitizers` in
+      `server.yml`, `sanitizers-linux` in `client.yml` — neither
+      touches the existing green jobs. Both marked
+      `continue-on-error: true` (server leg added in a follow-up
+      commit): this matrix has never run against the tree before, and
+      the plain build job already went red twice today (`ff96e46`,
+      `421088e`) before landing green — an unproven leg shouldn't be
+      able to flip the whole workflow red while it finds its feet.
+      **Compile gate: next CI run on `main` [unverified]** — no
+      compiler in this sandbox to check `-fsanitize=...` actually
+      links clean here.
 - [x] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
       editor detritus — **already done on this line** (Phase -1/Phase 1
       passes, verified with `git check-ignore -v`).
@@ -1302,6 +1340,29 @@ which `END_DB` does not catch — prepare-time failures skip DBError.log
 failures were link-order problems in the surrounding `CMakeLists.txt`,
 not in these 21 call sites, which compiled clean throughout.
 
+**11.2 batch 2 (2026-08-07, agent stream):** 19 counted sites migrated
+across the guild-membership subsystem — `GSAddGuildMemberHandler` (3:
+per-race `GuildID` UPDATE on activation), `GSExpelGuildMemberHandler`
+(6: single-member expel + guild-broken mass-update), `GSModifyGuildMemberHandler`
+(3: per-race `GuildID` UPDATE on rank promotion), `GSQuitGuildHandler`
+(7: single-member quit, guild-broken mass loop, guild-cancel mass loop
+with Gold refund). **Ratchet 529 → 510** [measured]. A third
+invisibility mode found alongside batch 1's multi-line-format-string
+case: 14 further sites in these same files use `'%s'` but were
+invisible to the ratchet's single-line grep because the SQL text
+itself contains a `)` — from `now()` or `( Receiver, Message )` —
+before the first `%s`, tripping the script's `[^)]*` pattern. Migrated
+alongside the counted sites rather than left inconsistent within the
+same `BEGIN_DB` block. One non-mechanical exception: the guild-cancel
+path builds its target table name (`Slayer`/`Vampire`/`Ousters`) from
+a fixed literal assigned by `pGuild->getRace()` three lines earlier,
+never packet input — `PreparedStatement` can't bind an identifier, so
+the table name stays spliced into the SQL text (commented inline);
+`Gold` and `Name` are bound. Verified [measured]: the three-literal
+assignment re-checked directly against `GSQuitGuildHandler.cpp`, no
+other value ever reaches `Table`. **Compile gate: next server CI run
+[unverified]** — landed after the last green run (#14, `421088e`).
+
 ### Phase 12 — Packet schema unification (not started here; parked: 12.0 scaffolding done)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
@@ -1328,6 +1389,36 @@ the authority. Batch plan and evidence:
 `docs/packet-normalization-sample-2026-08-07.md`. The packet-duplicates
 ratchet (326) is the scoreboard for the actual migration, stepping down as
 pairs unify.
+
+**Wave 1 attempt, 2026-08-07 — blocked, nothing landed.** The sample
+doc's batch plan ("adopt the server file... update client build
+lists") assumes the client can point its CMake source list straight at
+the physical file under `dkrixserver/src/Core/`. It can't: `#include
+"Packet.h"`/`"PacketFactory.h"` resolution always checks the directory
+containing the including file first, ahead of any `-I` path — fixed by
+each pair's `.cpp`'s physical location, not by which target compiles
+it. `dkrixserver/src/Core/` and `dkrix/Client/Packet/Cpackets/` each
+have their own `Packet.h`/`PacketFactory.h`/`SocketInputStream.h`, and
+they are **not** reconciled (`PacketFactory.h` diffs 44 lines,
+`SocketInputStream.h` diffs 303, between the trees) [measured]. A
+client translation unit compiling the physical server-tree file would
+silently pull in the server's incompatible base classes — a structural
+break, not a style nit. The parked line's own `shared/Packets/README.md`
+(on `archive/modernization-phases-1-17`) reached the same conclusion
+independently: it built a genuinely neutral third top-level directory
+plus a `shared_packets` CMake INTERFACE target, wired into three
+server library targets and the client target with per-target defines.
+Its first real migration (`CGStoreOpen`, commit `5805e37`) touched
+four CMakeLists.txt across both trees plus 28 client
+`#include "Packet/Cpackets/X.h"` sites across 11 files for that one
+pair alone [measured, re-derived for the six Wave-1 candidates]. That
+is the scope Wave 1 would actually require — the "bigger restructuring"
+this section's batch plan explicitly reserved for a deliberate,
+separately-recorded decision, not something a first small batch should
+back into silently. **Open decision, blocking any Wave 1 attempt:**
+build `shared/Packets/` (proven — it reached a working end-to-end
+smoke test on the parked line) as its own scoped change, sized against
+`main`'s current tree, before migrating any pair.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
