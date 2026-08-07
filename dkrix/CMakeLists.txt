@@ -203,10 +203,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# adding a new .cpp under VS_UI/ silently failed to compile until the
 	# next `cmake` reconfigure. See docs/MODERNIZATION.md Phase 10.
 	#
-	# Regenerate with:
-	#   cd dkrix && find VS_UI -name "*.cpp" | sort
+	# Regenerate with (case-INsensitive -iname: VS_UI_TITLE_SHOWCHAR.CPP
+	# is a real, live, uppercase-extension source file that a plain
+	# `-name "*.cpp"` silently drops on a case-sensitive filesystem -
+	# it built fine under the old glob only because that ran through
+	# CMake on case-insensitive Windows/NTFS. Cost one red CI run to
+	# find; verify against this exact list, not `-name`, next time):
+	#   cd dkrix && find VS_UI -iname "*.cpp" | sort
 	#
-	# Generated 2026-08-07: 56 files (6 root + 50 under src/).
+	# Generated 2026-08-07, corrected same day: 57 files (6 root + 51
+	# under src/, incl. the one uppercase-extension file above).
 	set(VS_UI_SRC_SOURCES
 		# VS_UI root (6 files)
 		VS_UI/Client_PCH.cpp
@@ -215,7 +221,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI/RarFile.cpp
 		VS_UI/SXml.cpp
 		VS_UI/WinMain.cpp
-		# VS_UI/src (44 flat files)
+		# VS_UI/src (45 flat files)
 		VS_UI/src/AcceleratorDef.cpp
 		VS_UI/src/AcceleratorManager.cpp
 		VS_UI/src/Imm/CImm.cpp
@@ -247,6 +253,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI/src/VS_UI_Shop.cpp
 		VS_UI/src/VS_UI_Storage.cpp
 		VS_UI/src/VS_UI_Title.cpp
+		VS_UI/src/VS_UI_TITLE_SHOWCHAR.CPP
 		VS_UI/src/VS_UI_Tutorial.cpp
 		VS_UI/src/VS_UI_WebBrowser.cpp
 		VS_UI/src/VS_UI_mouse_pointer.cpp
