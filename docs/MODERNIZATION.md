@@ -101,10 +101,14 @@ working tree on 2026-08-06 by direct file inspection) or **[unverified]**
 > items, plus a 4/5/7 follow-up bundle. Verification is uneven by design:
 > the server-side work (7, 9) was compile-verified with `make debug` in WSL
 > on its review branches before merging; the client-side work (1, 2, 3, 4)
-> is grep-verified only — run #6 predates all of it. **No CI run against the
-> merged tip has been confirmed.** First action: check Actions for runs on
-> `5ca240a`; if the push-triggered runs didn't fire (see caveat above),
-> `workflow_dispatch` both.
+> is grep-verified only — run #6 predates all of it. **No full CI build
+> against the merged tip has been confirmed.** The tip moved once already
+> while this audit was in flight: `3117d21` (10:00, include-order fmt fix
+> to the three Phase 9 files) suggests the `clang-format` gate was
+> exercised against the wave — but a fmt pass is not a build. First
+> action: check Actions for build runs on the current tip; if the
+> push-triggered runs didn't fire (see caveat above), `workflow_dispatch`
+> both.
 
 **No claim in this document has been confirmed by a compile** — except what
 run #6 (client) and the server's green run (above) actually verified: this
@@ -318,7 +322,8 @@ interleave once P0 is done.
 
 In order; each independently shippable:
 
-1. **CI on the merged tip.** No run has been confirmed against `5ca240a`.
+1. **CI on the merged tip.** No build run has been confirmed against the
+   wave (tip was `5ca240a`; the fmt fix `3117d21` landed on top mid-audit).
    Check Actions; if the push-triggered runs are missing, `workflow_dispatch`
    both (both workflows have the trigger). The client half of the wave
    (Phases 1, 2, 3.1, 4) has never been compiled — run #6 predates all of
