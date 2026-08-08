@@ -84,23 +84,27 @@ public:
 
 
 public:
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
     // create packet
-    Packet* createPacket() {
+    Packet* createPacket() throw() {
         return new CGModifyTaxRatio();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGModifyTaxRatio";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_MODIFY_TAX_RATIO;
     }
 
     // get Packet Max Size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szuint;
     }
 };
@@ -112,10 +116,16 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CGModifyTaxRatioHandler::execute has no client-side
+// definition or use. Guarded (matching the client Cpackets copy's
+// existing guard) since no CGHandlersStub.cpp-style client stub exists
+// for this family.
+#ifndef __GAME_CLIENT__
 class CGModifyTaxRatioHandler {
 public:
     // execute packet's handler
     static void execute(CGModifyTaxRatio* pCGModifyTaxRatio, Player* pPlayer);
 };
+#endif
 
 #endif

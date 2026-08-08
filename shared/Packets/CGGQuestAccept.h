@@ -52,16 +52,20 @@ private:
 
 class CGGQuestAcceptFactory : public PacketFactory {
 public:
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGGQuestAccept();
     }
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGGQuestAccept";
     }
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_GQUEST_ACCEPT;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szDWORD;
     }
 };
@@ -71,6 +75,13 @@ public:
 // class CGGQuestAcceptHandler;
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CGGQuestAcceptHandler::execute has no client-side
+// definition or use. No CGHandlersStub.cpp-style client stub exists for
+// this family, but unlike CGAuthKey the client's own pre-migration copy
+// left this class declaration itself unguarded (only the .cpp's dispatch
+// call is guarded) — a static method that is declared but never
+// ODR-used under __GAME_CLIENT__ needs no definition, so this matches
+// the client tree's existing behavior exactly.
 class CGGQuestAcceptHandler {
 public:
     static void execute(CGGQuestAccept* pCGGQuestAccept, Player* pPlayer);

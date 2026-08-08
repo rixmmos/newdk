@@ -51,16 +51,20 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 class CGSelectRegenZoneFactory : public PacketFactory {
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGSelectRegenZone();
     }
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGSelectRegenZone";
     }
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_SELECT_REGEN_ZONE;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szBYTE;
     }
 };
@@ -69,6 +73,12 @@ class CGSelectRegenZoneFactory : public PacketFactory {
 // class CGSelectRegenZoneHandler;
 //////////////////////////////////////////////////////////////////////////////
 
+// Unlike most Phase 12 pairs, this Handler class is NOT guarded by
+// #ifndef __GAME_CLIENT__: dkrix/Client/CGHandlersStub.cpp already
+// provides an empty-body client-side definition of
+// CGSelectRegenZoneHandler::execute (the "CGStoreOpen precedent").
+// Keeping it unconditional here means CGHandlersStub.cpp needs no
+// structural change — only its #include and exception spec were updated.
 class CGSelectRegenZoneHandler {
 public:
     static void execute(CGSelectRegenZone* pCGSelectRegenZone, Player* pPlayer);

@@ -31,7 +31,9 @@ void CGGQuestAccept::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGGQuestAcceptHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

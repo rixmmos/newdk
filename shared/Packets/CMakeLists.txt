@@ -68,10 +68,23 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGAddItemToItem.cpp
     CGAuthKey.cpp
     CGBuyStoreItem.cpp
+    CGDisplayItem.cpp
+    CGGQuestAccept.cpp
+    CGGQuestCancel.cpp
     CGGlobalChat.cpp
     CGLogout.cpp
+    CGLotterySelect.cpp
+    CGModifyTaxRatio.cpp
     CGRequestInfo.cpp
+    CGRequestStoreInfo.cpp
     CGResurrect.cpp
+    CGSelectBloodBible.cpp
+    CGSelectQuest.cpp
+    CGSelectRegenZone.cpp
+    CGStoreClose.cpp
+    CGStoreOpen.cpp
+    CGStoreSign.cpp
+    CGUndisplayItem.cpp
     CGUseItemFromGQuestInventory.cpp
     CGWithdrawPet.cpp
 )

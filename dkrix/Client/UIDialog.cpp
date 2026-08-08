@@ -17,8 +17,8 @@
 #include "TextSystem/TextSanitizer.h"
 //#include <string>
 
-#include "Packet/Cpackets/CGSelectQuest.h"
-#include "Packet/Cpackets/CGSelectBloodBible.h"
+#include "CGSelectQuest.h"
+#include "CGSelectBloodBible.h"
 
 #ifdef OUTPUT_DEBUG
 	#include "MZone.h"

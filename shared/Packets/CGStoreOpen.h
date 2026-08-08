@@ -72,23 +72,27 @@ public:
 
 
 public:
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
     // create packet
-    Packet* createPacket() {
+    Packet* createPacket() throw() {
         return new CGStoreOpen();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGStoreOpen";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_STORE_OPEN;
     }
 
     // get Packet Max Size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return 0;
     }
 };
@@ -100,6 +104,13 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Unlike most Phase 12 pairs, this Handler class is NOT guarded by
+// #ifndef __GAME_CLIENT__: dkrix/Client/CGHandlersStub.cpp already
+// provides an empty-body client-side definition of
+// CGStoreOpenHandler::execute (the "CGStoreOpen precedent" — this pair's
+// own namesake). Keeping it unconditional here means CGHandlersStub.cpp
+// needs no structural change — only its #include and exception spec
+// were updated.
 class CGStoreOpenHandler {
 public:
     // execute packet's handler

@@ -52,16 +52,20 @@ private:
 
 class CGGQuestCancelFactory : public PacketFactory {
 public:
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGGQuestCancel();
     }
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGGQuestCancel";
     }
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_GQUEST_CANCEL;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szDWORD;
     }
 };
@@ -71,9 +75,15 @@ public:
 // class CGGQuestCancelHandler;
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CGGQuestCancelHandler::execute has no client-side
+// definition or use. Guarded (matching the client Cpackets copy's
+// existing guard) since no CGHandlersStub.cpp-style client stub exists
+// for this family.
+#ifndef __GAME_CLIENT__
 class CGGQuestCancelHandler {
 public:
     static void execute(CGGQuestCancel* pCGGQuestCancel, Player* pPlayer);
 };
+#endif
 
 #endif

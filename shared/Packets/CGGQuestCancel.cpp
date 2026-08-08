@@ -31,7 +31,9 @@ void CGGQuestCancel::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGGQuestCancelHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

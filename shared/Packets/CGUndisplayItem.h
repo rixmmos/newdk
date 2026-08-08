@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////
 //
-// Filename    : CGDisplayItem.h
+// Filename    : CGUndisplayItem.h
 // Written By  :
 // Description :
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef __CG_DISPLAY_ITEM_H__
-#define __CG_DISPLAY_ITEM_H__
+#ifndef __CG_UNDISPLAY_ITEM_H__
+#define __CG_UNDISPLAY_ITEM_H__
 
 // include files
 #include "Exception.h"
@@ -17,14 +17,14 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// class CGDisplayItem;
+// class CGUndisplayItem;
 //
 //////////////////////////////////////////////////////////////////////
 
-class CGDisplayItem : public Packet {
+class CGUndisplayItem : public Packet {
 public:
-    CGDisplayItem() {};
-    ~CGDisplayItem() {};
+    CGUndisplayItem() {};
+    virtual ~CGUndisplayItem() {};
     
     void read(SocketInputStream& iStream);
 
@@ -36,17 +36,17 @@ public:
 
     // get packet id
     PacketID_t getPacketID() const {
-        return PACKET_CG_DISPLAY_ITEM;
+        return PACKET_CG_UNDISPLAY_ITEM;
     }
 
     // get packet's body size
     PacketSize_t getPacketSize() const {
-        return szCoordInven + szCoordInven + szObjectID + szGold + szBYTE;
+        return szCoordInven + szCoordInven + szObjectID + szBYTE;
     }
 
     // get packet name
     string getPacketName() const {
-        return "CGDisplayItem";
+        return "CGUndisplayItem";
     }
 
     // get packet's debug string
@@ -70,13 +70,6 @@ public:
         m_ItemObjectID = oid;
     }
 
-    Gold_t getPrice() const {
-        return m_Price;
-    }
-    void setPrice(Gold_t price) {
-        m_Price = price;
-    }
-
     BYTE getIndex() const {
         return m_Index;
     }
@@ -87,61 +80,70 @@ public:
 private:
     CoordInven_t m_X, m_Y;
     ObjectID_t m_ItemObjectID;
-    Gold_t m_Price;
     BYTE m_Index;
 };
 
 
 //////////////////////////////////////////////////////////////////////
 //
-// class CGDisplayItemFactory;
+// class CGUndisplayItemFactory;
 //
-// Factory for CGDisplayItem
+// Factory for CGUndisplayItem
 //
 //////////////////////////////////////////////////////////////////////
 
-class CGDisplayItemFactory : public PacketFactory {
+class CGUndisplayItemFactory : public PacketFactory {
 public:
     // constructor
-    CGDisplayItemFactory() {}
+    CGUndisplayItemFactory() {}
 
     // destructor
-    virtual ~CGDisplayItemFactory() {}
+    virtual ~CGUndisplayItemFactory() {}
 
 
 public:
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
     // create packet
-    Packet* createPacket() {
-        return new CGDisplayItem();
+    Packet* createPacket() throw() {
+        return new CGUndisplayItem();
     }
 
     // get packet name
-    string getPacketName() const {
-        return "CGDisplayItem";
+    string getPacketName() const throw() {
+        return "CGUndisplayItem";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
-        return Packet::PACKET_CG_DISPLAY_ITEM;
+    PacketID_t getPacketID() const throw() {
+        return Packet::PACKET_CG_UNDISPLAY_ITEM;
     }
 
     // get Packet Max Size
-    PacketSize_t getPacketMaxSize() const {
-        return szCoordInven + szCoordInven + szObjectID + szGold + szBYTE;
+    PacketSize_t getPacketMaxSize() const throw() {
+        return szCoordInven + szCoordInven + szObjectID + szBYTE;
     }
 };
 
 
 //////////////////////////////////////////////////////////////////////
 //
-// class CGDisplayItemHandler;
+// class CGUndisplayItemHandler;
 //
 //////////////////////////////////////////////////////////////////////
 
-class CGDisplayItemHandler {
+// Unlike most Phase 12 pairs, this Handler class is NOT guarded by
+// #ifndef __GAME_CLIENT__: dkrix/Client/CGHandlersStub.cpp already
+// provides an empty-body client-side definition of
+// CGUndisplayItemHandler::execute (the "CGStoreOpen precedent"). Keeping
+// it unconditional here means CGHandlersStub.cpp needs no structural
+// change — only its #include and exception spec were updated.
+class CGUndisplayItemHandler {
 public:
     // execute packet's handler
-    static void execute(CGDisplayItem* pCGDisplayItem, Player* pPlayer);
+    static void execute(CGUndisplayItem* pCGUndisplayItem, Player* pPlayer);
 };
 
 #endif

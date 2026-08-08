@@ -1527,7 +1527,7 @@ assignment re-checked directly against `GSQuitGuildHandler.cpp`, no
 other value ever reaches `Table`. **Compile gate: next server CI run
 [unverified]** — landed after the last green run (#14, `421088e`).
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batch 1 landed here 2026-08-08)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -1871,6 +1871,103 @@ target that might compile a file referencing the migrated headers, not
 just the "obvious" owning target — `git grep` for each migrated name
 across the whole tree (not just `src/Core`/`Client/Packet/Cpackets`)
 before assuming the existing shim/include-dir wiring is sufficient.
+
+**Wave 1 batch 2 landed 2026-08-08 (worktree, not yet on `main`): 13
+more CG-family pairs.** `normalize-packet-style.py --all --tsv` re-run
+confirmed 51 style-only pairs (unchanged since batch 1, all CG/CL).
+Excluded the same instructed families, plus `CGExpelGuild`,
+`CGQuitUnionAccept`, `CGDenyUnion`, `CGQuitUnion` — confirmed via `git
+show --stat` on the same day's `1ebedbe` (Phase 11.2 batch 4,
+guild-formation/union `PreparedStatement` migration) to be the exact
+files that parallel workstream touches. Ranked the remaining 44
+candidates by case-insensitive client include-site count; the two
+pairs batch 1 flagged as messier (`CGPortCheck` — `DatagramPacket.h`
+second local include; `CGNPCAskAnswer` — `SocketEncryptInputStream.h`
+path/`Assert1.h` filename divergence) were skipped again for the same
+reasons. Final 13, all confirmed `residual: 0` / `style-only`
+individually via `--pair`, all case-insensitive include count 1–3:
+**CGDisplayItem, CGLotterySelect, CGRequestStoreInfo, CGSelectQuest,
+CGSelectRegenZone, CGStoreClose, CGStoreOpen, CGStoreSign,
+CGUndisplayItem, CGSelectBloodBible, CGGQuestAccept, CGGQuestCancel,
+CGModifyTaxRatio**. None touch SQL (`executeQuery`/`PreparedStatement`
+grep on each `*Handler.cpp` — 0 hits), confirming no overlap with the
+parallel Phase 11.2 workstream beyond the four names above.
+
+The first 9 already had `dkrix/Client/CGHandlersStub.cpp` stubs (the
+"CGStoreOpen precedent" — `CGStoreOpen`, `CGStoreClose`, `CGStoreSign`
+are literally that stub file's own store-related entries), so their
+merged headers keep the Handler class fully unconditional, exactly
+like `CGBuyStoreItem`/`CGWithdrawPet` in batch 1; `CGHandlersStub.cpp`
+dropped their `throw(ProtocolException, Error)` specs and repointed 9
+`#include` lines off `Cpackets/`. The other 4
+(`CGSelectBloodBible`, `CGGQuestAccept`, `CGGQuestCancel`,
+`CGModifyTaxRatio`) have no stub, so kept a guard — but the client's
+own pre-migration copies were inconsistent about *what* they guarded:
+`CGGQuestCancel` and `CGModifyTaxRatio` wrapped the `<Name>Handler`
+class declaration itself in `#ifndef __GAME_CLIENT__` (the `CGAuthKey`
+pattern); `CGSelectBloodBible` and `CGGQuestAccept` left the class
+declaration unguarded and relied on the `.cpp`'s dispatch-call guard
+alone (a declared-but-never-ODR-used static method needs no
+definition). Each pair's merged header replicates its own pre-existing
+choice exactly rather than normalizing the two styles, since either is
+behaviorally identical to what already shipped.
+
+**New finding, beyond what batch 1's CI fixes were checked to
+cover:** all 13 of this batch's original headers carry explicit
+`#include "Exception.h"` / `#include "Types.h"` (client side as
+`"../Exception.h"` / `"../Types.h"`) — unlike the pilot and all 10
+batch-1 pairs, none of which ever included them explicitly (they rely
+on `Packet.h` pulling both in transitively). Keeping the server's
+canonical bare form in the merged header is correct for the server
+build (`shared/Packets` sits alongside `src/Core` on every consuming
+target's include path already), but would not resolve on the client:
+`Client/Packet/Exception.h` and `Client/Packet/Types.h` exist only in
+the broad `Client/Packet/` directory, which is deliberately kept off
+`DarkEden`'s and `VS_UI`'s include paths (the pilot's fix-attempt-1
+saga — `Client/Packet/FileAPI.h` shadowing the Windows SDK's
+`fileapi.h`). Fixed the same way the pilot fixed the equivalent
+`Packet.h`/`PacketFactory.h` gap: two more one-line forwarders,
+`dkrix/Client/Packet/SharedPacketsShim/Exception.h` and `Types.h`,
+dropped into the existing shim directory — no CMakeLists.txt change,
+since that directory is already on `DarkEden`'s and `VS_UI`'s include
+paths from the pilot and the `e75eb67` fix. Confirmed only one
+`Exception.h` and one `Types.h` exist under `dkrix/Client/` (no
+resolution ambiguity the shim could introduce).
+
+Separately, `git grep` for all 13 names across the whole tree (per the
+Wave 2+ lesson above) found two more instances of batch 1's *other*
+gap class — server executables' own direct sources reaching a migrated
+header without going through the owning `*ServerPackets` library:
+`dkrixserver/src/server/gameserver/quest/ActionGiveLotto.cpp`
+(`CGLotterySelect.h`) and `.../gameserver/Item.cpp`
+(`CGRequestStoreInfo.h`), both bare `#include`s. **No new wiring was
+needed** — `b84723f`'s fix (added `shared/Packets` to all three server
+executables' own include dirs) was already family-agnostic, not
+CG-batch-1-specific, so it already covers these. Confirmed by reading:
+`gameserver`'s `target_include_directories` already lists
+`shared/Packets` unconditionally. This is the one piece of positive
+evidence this batch adds that the existing wiring generalizes as
+claimed — everywhere else it was checked, it held; only the
+Exception.h/Types.h gap above was genuinely new, and it was a header
+the pilot/batch-1 pairs never needed, not a hole in the CG-family
+target wiring itself.
+
+Ratchet: `check-packet-duplicates.sh --count` 304 → 278 (13 pairs × 2
+files), baseline updated via `--update`.
+`normalize-packet-style.py --all --tsv`: 152 → 139 pairs, 51 → 38
+style-only.
+
+**Not build-verified — no compiler in this environment**, same caveat
+as every prior step. Verified by reading: `git grep -i` (all case
+variants) for every old `Cpackets/<Name>.h` path returns nothing under
+`dkrix/`; the 13 pairs' files exist only at `shared/Packets/`,
+confirmed absent from both old locations (`normalize-packet-style.py
+--pair <Name>` now reports "not a complete pair" for each, the same
+signal batch 1 used); `dkrixserver/src/Core/CMakeLists.txt`'s
+`CG_PACKET_SOURCES` no longer names any of the 13 `.cpp` files but
+still names all 13 `*Handler.cpp`; `shared/Packets/CMakeLists.txt`
+names each of the 13 exactly once under `_SHARED_PACKETS_CG_SOURCES`.
+Both-tree CI remains the real gate per `docs/CLAUDE.md`.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
