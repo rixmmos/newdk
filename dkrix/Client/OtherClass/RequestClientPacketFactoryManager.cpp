@@ -38,7 +38,7 @@
 #include "Cpackets/CGNPCAskAnswer.h"
 #include "Cpackets/CGNPCTalk.h"
 #include "Cpackets/CGPickupMoney.h"
-#include "Cpackets/CGReady.h"
+#include "CGReady.h"
 #include "Cpackets/CGReloadFromInventory.h"
 #include "Cpackets/CGReloadFromQuickSlot.h"
 #include "Cpackets/CGRideMotorCycle.h"
@@ -47,7 +47,7 @@
 #include "Cpackets/CGShopRequestList.h"
 #include "Cpackets/CGShopRequestSell.h"
 #include "Cpackets/CGSkillToInventory.h"
-#include "Cpackets/CGThrowBomb.h"
+#include "CGThrowBomb.h"
 #include "Gpackets/GCThrowBombOK1.h"
 #include "Gpackets/GCThrowBombOK2.h"
 #include "Gpackets/GCThrowBombOK3.h"
@@ -272,8 +272,8 @@
 #include "Gpackets/GCStatusCurrentHP.h"
 
 // added by elca 2000-12-09
-#include "Cpackets/CGSetSlayerHotKey.h"
-#include "Cpackets/CGSetVampireHotKey.h"
+#include "CGSetSlayerHotKey.h"
+#include "CGSetVampireHotKey.h"
 
 
 // added by elca 2001-06-26
@@ -306,7 +306,7 @@
 #include "Cpackets/CGSkillToSelf.h"
 #include "Cpackets/CGSkillToTile.h"
 
-#include "Cpackets/CGSilverCoating.h"
+#include "CGSilverCoating.h"
 #include "Gpackets/GCNPCResponse.h"
 
 #include "Gpackets/GCNPCSayDynamic.h"
@@ -318,7 +318,7 @@
 #include "Gpackets/GCAddVampirePortal.h"
 #include "Gpackets/GCEnterVampirePortal.h"
 
-#include "Cpackets/CGSelectTileEffect.h"
+#include "CGSelectTileEffect.h"
 
 #include "Cpackets/CGPartyInvite.h"
 #include "Cpackets/CGPartyLeave.h"

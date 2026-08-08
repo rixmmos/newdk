@@ -75,15 +75,29 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGLogout.cpp
     CGLotterySelect.cpp
     CGModifyTaxRatio.cpp
+    CGQuitUnionDeny.cpp
+    CGReady.cpp
+    CGRequestGuildList.cpp
+    CGRequestGuildMemberList.cpp
     CGRequestInfo.cpp
     CGRequestStoreInfo.cpp
+    CGRequestUnion.cpp
     CGResurrect.cpp
+    CGSMSAddressList.cpp
     CGSelectBloodBible.cpp
+    CGSelectGuild.cpp
+    CGSelectGuildMember.cpp
+    CGSelectNickname.cpp
     CGSelectQuest.cpp
     CGSelectRegenZone.cpp
+    CGSelectTileEffect.cpp
+    CGSetSlayerHotKey.cpp
+    CGSetVampireHotKey.cpp
+    CGSilverCoating.cpp
     CGStoreClose.cpp
     CGStoreOpen.cpp
     CGStoreSign.cpp
+    CGThrowBomb.cpp
     CGUndisplayItem.cpp
     CGUseItemFromGQuestInventory.cpp
     CGWithdrawPet.cpp

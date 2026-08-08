@@ -37,7 +37,7 @@
 #include "Cpackets/CGNPCAskAnswer.h"
 #include "Cpackets/CGNPCTalk.h"
 #include "Cpackets/CGPickupMoney.h"
-#include "Cpackets/CGReady.h"
+#include "CGReady.h"
 #include "Cpackets/CGReloadFromInventory.h"
 #include "Cpackets/CGReloadFromQuickSlot.h"
 #include "Cpackets/CGRideMotorCycle.h"
@@ -49,7 +49,7 @@
 #include "Cpackets/CGShopRequestList.h"
 #include "Cpackets/CGShopRequestSell.h"
 #include "Cpackets/CGSkillToInventory.h"
-#include "Cpackets/CGThrowBomb.h"
+#include "CGThrowBomb.h"
 #include "Gpackets/GCThrowBombOK1.h"
 #include "Gpackets/GCThrowBombOK2.h"
 #include "Gpackets/GCThrowBombOK3.h"
@@ -297,8 +297,8 @@
 #include "Gpackets/GCStatusCurrentHP.h"
 
 // added by elca 2000-12-09
-#include "Cpackets/CGSetSlayerHotKey.h"
-#include "Cpackets/CGSetVampireHotKey.h"
+#include "CGSetSlayerHotKey.h"
+#include "CGSetVampireHotKey.h"
 
 
 // added by elca 2001-06-26
@@ -331,7 +331,7 @@
 #include "Cpackets/CGSkillToSelf.h"
 #include "Cpackets/CGSkillToTile.h"
 
-#include "Cpackets/CGSilverCoating.h"
+#include "CGSilverCoating.h"
 #include "Gpackets/GCNPCResponse.h"
 
 #include "Gpackets/GCNPCSayDynamic.h"
@@ -343,7 +343,7 @@
 #include "Gpackets/GCAddVampirePortal.h"
 #include "Gpackets/GCEnterVampirePortal.h"
 
-#include "Cpackets/CGSelectTileEffect.h"
+#include "CGSelectTileEffect.h"
 
 #include "Cpackets/CGPartyInvite.h"
 #include "Cpackets/CGPartyLeave.h"
@@ -387,15 +387,15 @@
 #include "Gpackets/GCWaitGuildList.h"
 #include "Gpackets/GCShowWaitGuildInfo.h"
 #include "Gpackets/GCShowGuildInfo.h"
-#include "Cpackets/CGSelectGuild.h"
+#include "CGSelectGuild.h"
 #include "Cpackets/CGTryJoinGuild.h"
 #include "Gpackets/GCShowGuildJoin.h"
 #include "Cpackets/CGJoinGuild.h"
 #include "Gpackets/GCShowMessageBox.h"
 //#include "Gpackets/GCModifyMoney.h"
 //#include "Cpackets/CGQuitGuild.h"
-#include "Cpackets/CGRequestGuildMemberList.h"
-#include "Cpackets/CGSelectGuildMember.h"
+#include "CGRequestGuildMemberList.h"
+#include "CGSelectGuildMember.h"
 //#include "Cpackets/CGExpelGuildMember.h"
 #include "Cpackets/CGModifyGuildMember.h"
 #include "Gpackets/GCActiveGuildList.h"
@@ -509,14 +509,14 @@
 #include "Cpackets/CGSMSSend.h"
 #include "Cpackets/CGAddSMSAddress.h"
 #include "Cpackets/CGDeleteSMSAddress.h"
-#include "Cpackets/CGSMSAddressList.h"
+#include "CGSMSAddressList.h"
 #include "Gpackets/GCSMSAddressList.h"
 #include "Gpackets/GCAddressListVerify.h"
 
 #include "Gpackets/GCNicknameList.h"
 #include "Gpackets/GCAddNickname.h"
 #include "Cpackets/CGModifyNickname.h"
-#include "Cpackets/CGSelectNickname.h"
+#include "CGSelectNickname.h"
 #include "Gpackets/GCNicknameVerify.h"
 #include "Gpackets/GCModifyNickname.h"
 
@@ -541,9 +541,9 @@
 #include "Cpackets/CGExpelGuild.h"
 #include "Cpackets/CGQuitUnion.h"
 #include "Cpackets/CGQuitUnionAccept.h"
-#include "Cpackets/CGQuitUnionDeny.h"
-#include "Cpackets/CGRequestGuildList.h"
-#include "Cpackets/CGRequestUnion.h"
+#include "CGQuitUnionDeny.h"
+#include "CGRequestGuildList.h"
+#include "CGRequestUnion.h"
 #include "Cpackets/CGRequestUnionInfo.h"
 #include "Gpackets/GCGuildResponse.h"
 #include "Gpackets/GCUnionOfferList.h"

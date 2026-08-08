@@ -32,7 +32,7 @@
 // connect
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGConnect.h"
-#include "Packet/Cpackets/CGReady.h"
+#include "CGReady.h"
 #include "Packet/Cpackets/CGMove.h"
 #include "CGLogout.h"
 
@@ -63,7 +63,7 @@
 #include "Packet/Cpackets/CGUnburrow.h"
 #include "Packet/Cpackets/CGBloodDrain.h"
 
-#include "Packet/Cpackets/CGThrowBomb.h"
+#include "CGThrowBomb.h"
 #include "Packet/Cpackets/CGUntransform.h"
 #include "Packet/Cpackets/CGVisible.h"
 #include "Packet/Cpackets/CGAbsorbSoul.h"
@@ -73,8 +73,8 @@
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGLearnSkill.h"
 #include "Packet/Cpackets/CGUseBonusPoint.h"		// for vampire lev up
-#include "Packet/Cpackets/CGSetSlayerHotKey.h"
-#include "Packet/Cpackets/CGSetVampireHotKey.h"
+#include "CGSetSlayerHotKey.h"
+#include "CGSetVampireHotKey.h"
 
 
 //-----------------------------------------------------------------------------

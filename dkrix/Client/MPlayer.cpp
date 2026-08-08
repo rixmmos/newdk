@@ -40,7 +40,7 @@
 #include "MObjectSelector.h"
 #include "SoundDef.h"
 #include "MItemFinder.h"
-#include "Packet/Cpackets/CGSelectTileEffect.h"
+#include "CGSelectTileEffect.h"
 #include "Packet/Cpackets/CGPartyInvite.h"
 #include "EffectSpriteTypeDef.h"
 #include "ModifyStatusManager.h"

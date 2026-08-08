@@ -43,7 +43,7 @@
 	#include "../PCSlayerInfo2.h"
 	#include "../PCVampireInfo2.h"
 	#include "../PCOustersInfo2.h"
-	#include "../Cpackets/CGReady.h"
+	#include "CGReady.h"
 	#include "VS_UI_GameCommon2.h"
 	#include "MGameStringTable.h"
 #endif

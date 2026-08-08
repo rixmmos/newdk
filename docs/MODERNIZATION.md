@@ -1667,7 +1667,7 @@ the same date-format directive it always received. **Compile gate:
 next server CI run [unverified]** — this sandbox has no server
 toolchain; landed after the last known-green run referenced above.
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 landed here 2026-08-08)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 and Wave 2 batch B landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -2108,6 +2108,159 @@ signal batch 1 used); `dkrixserver/src/Core/CMakeLists.txt`'s
 still names all 13 `*Handler.cpp`; `shared/Packets/CMakeLists.txt`
 names each of the 13 exactly once under `_SHARED_PACKETS_CG_SOURCES`.
 Both-tree CI remains the real gate per `docs/CLAUDE.md`.
+
+**Wave 2 batch B landed 2026-08-08 (worktree, not yet on `main`): 14 more
+CG-family pairs, run in parallel with a sibling "batch A" agent on a
+different, non-overlapping set of 14 in its own worktree.** Pairs
+assigned up front rather than re-derived by ranking:
+**CGQuitUnionDeny, CGReady, CGRequestGuildList,
+CGRequestGuildMemberList, CGRequestUnion, CGSMSAddressList,
+CGSelectGuild, CGSelectGuildMember, CGSelectNickname,
+CGSelectTileEffect, CGSetSlayerHotKey, CGSetVampireHotKey,
+CGSilverCoating, CGThrowBomb**. Re-verified individually via
+`normalize-packet-style.py --pair <Name>` before touching any file: all
+14 confirmed `residual: 0` / `style-only` against this worktree's tree
+state (a fresh `--all --tsv` run also showed 139 pairs / 38 style-only
+going in, unchanged from batch 2's own tally — batch A's parallel work
+lives in a separate worktree and isn't visible here). None overlap the
+SQL-migration-adjacent exclusion list or batch A's set.
+
+Reconciliation followed the established recipe for all 14: adopt the
+server's canonical style, add `throw()` back to the four
+`<Name>Factory` overrides (with the pilot-precedent comment), and guard
+`<Name>Handler` per each pair's own pre-existing client behavior. 13 of
+14 wrap the Handler class itself in `#ifndef __GAME_CLIENT__` (the
+`CGAuthKey` pattern, confirmed individually — none of the 14 have a
+`CGHandlersStub.cpp` entry, so all needed a guard of some form); the
+14th, **`CGSMSAddressList`**, matches the `CGGQuestAccept`/batch-2
+precedent instead — its client copy left the Handler class declaration
+unguarded and relied solely on the `.cpp` dispatch call's guard, so the
+merged header replicates that exactly. Two more pairs
+(**`CGRequestGuildList`, `CGRequestGuildMemberList`**) carry a `virtual`
+destructor on the packet class itself (`virtual ~CGRequestGuildList()
+{};`) where the client's pre-migration copy simply omitted the
+destructor entirely — the normalizer's empty-ctor/dtor equivalence rule
+already covers this, and the merged header keeps the server's `virtual`
+form. Ten of the 14 (`CGQuitUnionDeny`, `CGRequestGuildList`,
+`CGRequestGuildMemberList`, `CGRequestUnion`, `CGSMSAddressList`,
+`CGSelectGuild`, `CGSelectGuildMember`, `CGSelectNickname`,
+`CGSelectTileEffect`, `CGThrowBomb`) explicitly `#include
+"Exception.h"`/`"Types.h"`, resolved via the existing
+`SharedPacketsShim` (no new shim files needed — batch 2 already added
+`Exception.h`/`Types.h` forwarders there). One pre-existing bug carried
+forward unchanged, per this repo's "preserve gameplay logic" rule:
+`CGSetVampireHotKey::toString()` indexes `m_HotKey[8]` into an 8-element
+array (`SkillType_t m_HotKey[8]`, valid indices 0–7) — present
+identically in both the server and client pre-migration copies, debug-
+output-only (not part of the wire signature the normalizer checks), and
+not this batch's to fix.
+
+**New guard variant found, beyond the pilot's/batch-1's/batch-2's
+established set:** six pairs (`CGReady`, `CGSelectTileEffect`,
+`CGSetSlayerHotKey`, `CGSetVampireHotKey`, `CGSilverCoating`,
+`CGThrowBomb`) wrap their entire `<Name>Factory` class — not just
+`getPacketName()`/`toString()` as in every prior batch — in `#ifdef
+__DEBUG_OUTPUT__` on the client side (the client never needs a factory
+to decode its own outgoing CG packets, only for debug tooling that
+isn't compiled into real builds). This generalizes the same
+reconciliation rule already in use (adopt the server's unconditional
+canonical style) rather than requiring a new one: the Factory class has
+no side effects, so making it unconditionally compiled is behaviorally
+neutral, it just becomes buildable in configurations where it
+previously wasn't. `CGSelectTileEffect` additionally has
+`createPacket()`/`getPacketName()`/`getPacketID()`/`getPacketMaxSize()`
+declared `private` (no `public:` label before them) in *both*
+pre-migration copies — preserved as-is; a derived class narrowing
+access on an override doesn't affect dispatch through the
+`PacketFactory` base pointer, so this is an existing quirk, not a bug
+introduced or fixed here.
+
+**Indirect-consumer sweep (the Wave 2+ lesson from batch 1's CI
+saga):** `git grep -i` for all 14 old paths across the whole tree
+before touching anything, not just `src/Core`/`Cpackets`, found
+consumers beyond the already-known DarkEden/VS_UI/server-executable/
+Quest set — but none needed new CMake wiring, only include-line
+repoints, because all of them already resolve through include paths
+Wave 1 established:
+- `dkrix/Client/OtherClass/RequestServerPacketFactoryManager.cpp` and
+  `RequestClientPacketFactoryManager.cpp` (6 of the 14 names each) —
+  confirmed **not part of any real build**: neither file appears in
+  `dkrix/CMakeLists.txt`'s globs (`Client/*.cpp` is one level deep only;
+  `OtherClass/` is a subdirectory) nor in any `.vcxproj` (only the
+  orphaned `Client.vcxproj.filters`, same non-authoritative status the
+  pilot already established for that file). Includes repointed anyway
+  for consistency, matching batch 1's treatment of the same two files
+  for its own migrated names — no CMake change needed since nothing
+  compiles them.
+- `dkrix/Client/Packet/Gpackets/GCNPCInfoHandler.cpp` and
+  `GCUpdateInfoHandler.cpp` (`CGReady`, both client and server copies)
+  — real consumers, guarded `#ifdef __GAME_CLIENT__` (client copy,
+  compiled into `DarkEden` via the `Client/Packet/**/*.cpp` glob,
+  already covered) or `#ifdef __GAME_CLIENT__` again on the server copy
+  (never true there — dead code on the server side, matching the
+  client file's shape by design, not a new gap).
+- `dkrix/Client/SizeOfObjects.cpp` (`CGSilverCoating`, `CGSelectGuild`,
+  `CGSelectGuildMember`, `CGRequestGuildMemberList`) — real consumer,
+  part of `Client/*.cpp`, compiled into `DarkEden`, already covered.
+  **Found in passing, out of this batch's scope:** this file still has
+  a stale `#include "packet\Cpackets\CGResurrect.h"` (mixed-case,
+  backslash-separated) left over from Wave 1 batch 1 — that batch's own
+  grep evidently didn't match the backslash form, so `CGResurrect.h` no
+  longer exists at that path. Not touched here (`CGResurrect` isn't one
+  of this batch's 14 pairs); flagged for the next batch or a follow-up
+  fix, since if `SizeOfObjects.cpp` is genuinely compiled this is a
+  live break the “both trees green” claim for batch 1 didn't catch.
+- `dkrix/Client/MPlayer.cpp` (`CGSelectTileEffect`) and
+  `dkrix/Client/PacketDef.h` (`CGReady`, `CGThrowBomb`,
+  `CGSetSlayerHotKey`, `CGSetVampireHotKey`, included transitively by
+  `MPlayer.cpp`/`MTradeManager.cpp`) — both `VS_UI` sources, already
+  covered by the `e75eb67` fix (`shared/Packets` +
+  `SharedPacketsShim` on `VS_UI`'s own `target_include_directories`).
+- `dkrix/Client/Packet/PacketFactoryManager.cpp` and
+  `dkrix/Client/UIMessageManager.cpp` (all 14 names, several via two
+  `#include` sites each in `UIMessageManager.cpp`) — both part of
+  `Client/*.cpp`/`Client/Packet/*.cpp`, compiled into `DarkEden`,
+  already covered.
+- Server side: `dkrixserver/src/Core/PacketFactoryManager.cpp` and each
+  pair's own `*Handler.cpp` (all bare, same-directory includes, no
+  `Cpackets/`-style prefix to fix) — part of `GameServerPackets`, which
+  already links `shared_packets_cg` (Wave 1 batch 1). `git grep` across
+  every subdirectory library under `dkrixserver/src/server/gameserver/`
+  (skill, item, billing, war, couple, mission, ctf, quest, mofus) and
+  the three server executables found **zero** direct references to any
+  of the 14 names outside `src/Core` — this batch does not hit the
+  Quest-library gap class the pre-batch fix (`377ff47`) found for
+  `CGLotterySelect`.
+
+No new `target_include_directories`/`target_link_libraries` changes were
+needed anywhere — every real consumer found already sat on an include
+path Wave 1 (pilot, batch 1's `e75eb67`/`b84723f`, batch 2's
+`Exception.h`/`Types.h` shim) had already generalized. The only
+non-mechanical finding this batch contributes is the whole-class
+`__DEBUG_OUTPUT__`-guarded Factory variant above, and the stale
+`CGResurrect.h` reference flagged for follow-up.
+
+Ratchet: `check-packet-duplicates.sh --count` 278 → 250 (14 pairs × 2
+files), baseline updated via `--update`.
+`normalize-packet-style.py --all --tsv`: 139 → 125 pairs, 38 → 24
+style-only (both exactly −14, confirmed against the script's own
+summary line rather than raw `wc -l`, since the TSV's header/summary
+rows otherwise throw off a naive line count).
+
+**Not build-verified — no compiler in this environment**, same caveat
+as every prior step. Verified by reading: `git grep -i` (all case
+variants) for every old `Cpackets/<Name>.h` path returns nothing under
+`dkrix/` except the orphaned, non-authoritative `Client.vcxproj.filters`
+(no matching `.vcxproj`, same status the pilot already established);
+the 14 pairs' files exist only at `shared/Packets/`
+(`normalize-packet-style.py --pair <Name>` now reports "not a complete
+pair" for each); `dkrixserver/src/Core/CMakeLists.txt`'s
+`CG_PACKET_SOURCES` no longer names any of the 14 `.cpp` files but
+still names all 14 `*Handler.cpp`; `shared/Packets/CMakeLists.txt`
+names each of the 14 exactly once under `_SHARED_PACKETS_CG_SOURCES`.
+Both-tree CI remains the real gate per `docs/CLAUDE.md`; this batch and
+the sibling batch A agent's parallel 14 pairs are expected to be
+reviewed and cherry-picked onto `main` separately.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`

@@ -1,0 +1,118 @@
+//////////////////////////////////////////////////////////////////////
+//
+// Filename    : CGReady.h
+// Written By  : Reiot
+// Description :
+//
+//////////////////////////////////////////////////////////////////////
+
+#ifndef __CG_READY_H__
+#define __CG_READY_H__
+
+// include files
+#include "Packet.h"
+#include "PacketFactory.h"
+
+//////////////////////////////////////////////////////////////////////
+//
+// class CGReady;
+//
+//////////////////////////////////////////////////////////////////////
+
+class CGReady : public Packet {
+public:
+    CGReady() {};
+    ~CGReady() {};
+
+    void read(SocketInputStream& iStream);
+
+
+    void write(SocketOutputStream& oStream) const;
+
+    // execute packet's handler
+    void execute(Player* pPlayer);
+
+    // get packet id
+    PacketID_t getPacketID() const {
+        return PACKET_CG_READY;
+    }
+
+    // get packet body size
+    // *OPTIMIZATION HINT*
+
+    PacketSize_t getPacketSize() const {
+        return 0;
+    }
+
+    // get packet's name
+    string getPacketName() const {
+        return "CGReady";
+    }
+
+    // get packet's debug string
+    string toString() const {
+        return "CGReady";
+    }
+};
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// class CGReadyFactory;
+//
+// Factory for CGReady
+//
+//////////////////////////////////////////////////////////////////////
+
+// Client Cpackets copy wrapped this whole class in
+// #ifdef __DEBUG_OUTPUT__ (the client never needs a factory to decode
+// its own outgoing CG packets, only to build debug tooling); adopting
+// the server's unconditional canonical style here per Phase 12's
+// reconciliation rules is behaviorally neutral -- the class has no
+// side effects, it just becomes compilable in more configurations.
+class CGReadyFactory : public PacketFactory {
+public:
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    // create packet
+    Packet* createPacket() throw() {
+        return new CGReady();
+    }
+
+    // get packet name
+    string getPacketName() const throw() {
+        return "CGReady";
+    }
+
+    // get packet id
+    PacketID_t getPacketID() const throw() {
+        return Packet::PACKET_CG_READY;
+    }
+
+    // get packet's max body size
+    PacketSize_t getPacketMaxSize() const throw() {
+        return 0;
+    }
+};
+
+
+//////////////////////////////////////////////////////////////////////
+//
+// class CGReadyHandler;
+//
+//////////////////////////////////////////////////////////////////////
+
+// Server-only: CGReadyHandler::execute has no client-side definition
+// or use. Guarded (matching the client Cpackets copy's existing guard)
+// since no CGHandlersStub.cpp-style client stub exists for this family.
+#ifndef __GAME_CLIENT__
+class CGReadyHandler {
+public:
+    // execute packet's handler
+    static void execute(CGReady* pPacket, Player* pPlayer);
+};
+#endif
+
+#endif
