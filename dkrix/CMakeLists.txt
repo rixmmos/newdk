@@ -196,6 +196,15 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 endif()
 
 if(BUILD_ENGINE)
+	# enable_testing() must be called in the top-level CMakeLists.txt (this
+	# file) for `ctest` run from the build directory root to discover the
+	# add_test() calls tools/engine/sprite/CMakeLists.txt adds below — a
+	# CTestTestfile.cmake only lands in the top build dir if enable_testing()
+	# was reached from here. No add_test() calls exist anywhere else in this
+	# tree yet (Phase 4, 2026-08-08: wiring engine/sprite's 11-file test
+	# suite into CI, the only automated tests in this repo), so this is
+	# scoped to the same BUILD_ENGINE guard rather than called unconditionally.
+	enable_testing()
 	add_subdirectory(tools/engine/sprite)
 endif()
 

@@ -905,8 +905,31 @@ Unblocked 2026-08-06 (CI green), not started:
 - [ ] **4b** — collapse the two SDL2 backends. `SpriteLibBackendSDL.cpp`
       survives (it is what the game calls); `tools/engine/sprite/` is
       demoted to what it already is, the viewer tools' library.
-- [ ] Wire `engine/sprite`'s 11 test files (3,898 lines) into CI — the only
-      automated tests in this repo.
+- [x] Wire `engine/sprite`'s 11 test files (3,898 lines) into CI — the only
+      automated tests in this repo. **[2026-08-08]** `tools/engine/sprite/CMakeLists.txt`
+      now defines two CTest targets: `sprite_tests` (test_main.c's shared
+      PASS/FAIL runner + the 9 other files it drives — test_color.c,
+      test_animation.c, test_frame.c, test_framepack.c, test_index_sprite.c,
+      test_sdl_framework.c, test_shadow_sprite.c, test_sprite.c,
+      test_spritepack.c — linked against the `sprite` library) and
+      `sprite_test_zone` (test_zone.c alone — it `#include`s `zone.c`
+      directly and owns its own `main()`, so linking it against `sprite`
+      would duplicate every `zone_*` symbol at link time). `enable_testing()`
+      was added to the root `dkrix/CMakeLists.txt` inside the `BUILD_ENGINE`
+      guard, since nothing in the tree called it before. Fixed a real bug
+      found while wiring this up: `test_zone.c`'s `main()` called
+      `test_zone_run_all()` but discarded its return value, so the binary
+      always exited 0 regardless of failures — it now returns that result.
+      `test_main.c`'s own runner already returned a correct nonzero exit
+      code. Wired into `.github/workflows/client.yml`'s `sanitizers-linux`
+      job (`ctest --test-dir build-<sanitizer>`) — the only leg where
+      `BUILD_ENGINE` is ON; the Windows `build` job has it OFF by design, so
+      nothing to run there. **Unverified**: no compiler in the sandbox that
+      made this change, and `sanitizers-linux` has never gotten past a
+      separate, in-progress `min`/`max` macro bug affecting every libstdc++
+      include on Linux — so this is CTest-correct by inspection only, not by
+      a passing run, until that bug lands and a subsequent CI run exercises
+      this job end to end.
 - [x] **4c** — audit shipped SPK assets in `Darkeden/` for the pixel
       encodings actually in use. That evidence, not the class count,
       decides the fate of the 555/565 serializers.

@@ -141,5 +141,9 @@ int test_zone_run_all(void) {
 }
 
 int main(void) {
-    test_zone_run_all();
+    /* test_zone_run_all() returns the failure count; propagate it as the
+     * process exit code (0 = all passed) so a CI runner can detect
+     * failures. Previously this fell off the end of main() and always
+     * exited 0 regardless of the result. */
+    return test_zone_run_all() != 0;
 }

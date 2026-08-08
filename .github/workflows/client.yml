@@ -253,3 +253,15 @@ jobs:
             ls -la "build-${{ matrix.sanitizer }}/bin/" 2>/dev/null || echo "(no build-${{ matrix.sanitizer }}/bin/)"
             exit 1
           fi
+
+      # Phase 4 (2026-08-08): tools/engine/sprite/CMakeLists.txt now wires
+      # its 11 test files (tests/test_*.c — the only automated test suite
+      # anywhere in this repo) into CTest via enable_testing()/add_test() in
+      # dkrix/CMakeLists.txt. This is the only leg where they build at all:
+      # BUILD_ENGINE defaults ON here but OFF on the Windows `build` job
+      # above (see dkrix/CMakeLists.txt). This is genuinely the first time
+      # these files have ever been compiled or executed, on either sanitizer
+      # variant — this whole job is `continue-on-error`, so a failure here
+      # is signal to look at, not (yet) a hard merge gate.
+      - name: Run engine/sprite tests
+        run: ctest --test-dir build-${{ matrix.sanitizer }} --output-on-failure
