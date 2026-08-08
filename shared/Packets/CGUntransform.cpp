@@ -25,7 +25,9 @@ void CGUntransform::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGUntransformHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

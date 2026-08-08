@@ -31,7 +31,9 @@ void CGWithdrawTax::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGWithdrawTaxHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

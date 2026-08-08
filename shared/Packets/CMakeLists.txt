@@ -113,12 +113,22 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGStoreSign.cpp
     CGThrowBomb.cpp
     CGUndisplayItem.cpp
+    CGUntransform.cpp
     CGUseItemFromGQuestInventory.cpp
+    CGVisible.cpp
+    CGWhisper.cpp
     CGWithdrawPet.cpp
+    CGWithdrawTax.cpp
 )
 set(_SHARED_PACKETS_GC_SOURCES) # Game -> Client
 set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
+    CLGetPCList.cpp
+    CLGetServerList.cpp
     CLGetWorldList.cpp
+    CLLogout.cpp
+    CLQueryCharacterName.cpp
+    CLQueryPlayerID.cpp
+    CLVersionCheck.cpp
 )
 set(_SHARED_PACKETS_LC_SOURCES) # Login -> Client
 

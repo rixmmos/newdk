@@ -543,7 +543,8 @@ set(CG_PACKET_SOURCES
     CGUnburrow.cpp CGUnburrowHandler.cpp
     # CGUndisplayItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGUndisplayItemHandler.cpp
-    CGUntransform.cpp CGUntransformHandler.cpp
+    # CGUntransform.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CGUntransformHandler.cpp
     CGUseBonusPoint.cpp CGUseBonusPointHandler.cpp
     CGUseItemFromGear.cpp CGUseItemFromGearHandler.cpp
     # CGUseItemFromGQuestInventory.cpp moved to shared/Packets/ — Phase 12 Wave 1.
@@ -554,11 +555,14 @@ set(CG_PACKET_SOURCES
     CGUsePotionFromQuickSlot.cpp CGUsePotionFromQuickSlotHandler.cpp
     CGUsePowerPoint.cpp CGUsePowerPointHandler.cpp
     CGVerifyTime.cpp CGVerifyTimeHandler.cpp
-    CGVisible.cpp CGVisibleHandler.cpp
-    CGWhisper.cpp CGWhisperHandler.cpp
+    # CGVisible.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CGVisibleHandler.cpp
+    # CGWhisper.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CGWhisperHandler.cpp
     # CGWithdrawPet.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGWithdrawPetHandler.cpp
-    CGWithdrawTax.cpp CGWithdrawTaxHandler.cpp
+    # CGWithdrawTax.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CGWithdrawTaxHandler.cpp
     # Exchange System Packets
     CGExchangeList.cpp CGExchangeListHandler.cpp
     CGExchangeBuy.cpp CGExchangeBuyHandler.cpp
@@ -569,20 +573,26 @@ set(CL_PACKET_SOURCES
     CLChangeServer.cpp CLChangeServerHandler.cpp
     CLCreatePC.cpp CLCreatePCHandler.cpp
     CLDeletePC.cpp CLDeletePCHandler.cpp
-    CLGetPCList.cpp CLGetPCListHandler.cpp
-    CLGetServerList.cpp CLGetServerListHandler.cpp
+    # CLGetPCList.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLGetPCListHandler.cpp
+    # CLGetServerList.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLGetServerListHandler.cpp
     # CLGetWorldList.cpp moved to shared/Packets/ — Phase 12 migration.
     CLGetWorldListHandler.cpp
     CLLogin.cpp CLLoginHandler.cpp
-    CLLogout.cpp CLLogoutHandler.cpp
-    CLQueryCharacterName.cpp CLQueryCharacterNameHandler.cpp
-    CLQueryPlayerID.cpp CLQueryPlayerIDHandler.cpp
+    # CLLogout.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLLogoutHandler.cpp
+    # CLQueryCharacterName.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLQueryCharacterNameHandler.cpp
+    # CLQueryPlayerID.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLQueryPlayerIDHandler.cpp
     CLReconnectLogin.cpp CLReconnectLoginHandler.cpp
     CLRegisterPlayer.cpp CLRegisterPlayerHandler.cpp
     CLSelectPC.cpp CLSelectPCHandler.cpp
     CLSelectServer.cpp CLSelectServerHandler.cpp
     CLSelectWorld.cpp CLSelectWorldHandler.cpp
-    CLVersionCheck.cpp CLVersionCheckHandler.cpp
+    # CLVersionCheck.cpp moved to shared/Packets/ — Phase 12 Wave 3.
+    CLVersionCheckHandler.cpp
     GCDisconnect.cpp GCDisconnectHandler.cpp
 	CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp 
 )

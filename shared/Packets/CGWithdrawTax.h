@@ -25,10 +25,10 @@ class CGWithdrawTax : public Packet {
 public:
     CGWithdrawTax() {};
     virtual ~CGWithdrawTax() {};
-    
+
     void read(SocketInputStream& iStream);
 
-    
+
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -74,33 +74,40 @@ private:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Client Cpackets copy wrapped getPacketName()/toString() (only) in
+// #ifdef __DEBUG_OUTPUT__; adopting the server's unconditional canonical
+// style per Phase 12's reconciliation rules.
 class CGWithdrawTaxFactory : public PacketFactory {
 public:
     // constructor
-    CGWithdrawTaxFactory() {}
+    // Base PacketFactory declares these with throw() specs on the client
+    // tree; narrowing to throw() here also satisfies the server tree's
+    // unconstrained base. See CLGetWorldList.h (Phase 12 pilot) for the
+    // precedent.
+    CGWithdrawTaxFactory() throw() {}
 
     // destructor
-    virtual ~CGWithdrawTaxFactory() {}
+    virtual ~CGWithdrawTaxFactory() throw() {}
 
 
 public:
     // create packet
-    Packet* createPacket() {
+    Packet* createPacket() throw() {
         return new CGWithdrawTax();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGWithdrawTax";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_WITHDRAW_TAX;
     }
 
     // get Packet Max Size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szGold;
     }
 };
@@ -112,10 +119,20 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CGWithdrawTaxHandler::execute has no client-side definition
+// or use. The client Cpackets copy left the class declaration itself
+// unguarded and wrapped only the method declaration in
+// #ifndef __GAME_CLIENT__ -- replicated exactly (a declared-but-never-
+// ODR-used static method needs no definition, same as the
+// CGSMSAddressList/CGGQuestAccept precedent, just with the guard drawn one
+// line tighter).
 class CGWithdrawTaxHandler {
 public:
+#ifndef __GAME_CLIENT__
+
     // execute packet's handler
     static void execute(CGWithdrawTax* pCGWithdrawTax, Player* pPlayer);
+#endif
 };
 
 #endif

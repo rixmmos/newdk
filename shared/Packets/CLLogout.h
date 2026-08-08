@@ -19,7 +19,6 @@
 //
 
 
-
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -27,10 +26,10 @@ class CLLogout : public Packet {
 public:
     CLLogout() {};
     virtual ~CLLogout() {};
-    
+
     void read(SocketInputStream& iStream);
 
-    
+
     void write(SocketOutputStream& oStream) const;
 
     // execute packet's handler
@@ -66,25 +65,35 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Client Cpackets copy wrapped this whole class in
+// #ifdef __DEBUG_OUTPUT__ (the client never needs a factory to decode
+// its own outgoing CL packets, only to build debug tooling); adopting
+// the server's unconditional canonical style here per Phase 12's
+// reconciliation rules is behaviorally neutral -- the class has no
+// side effects, it just becomes compilable in more configurations.
 class CLLogoutFactory : public PacketFactory {
 public:
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
     // create packet
-    Packet* createPacket() {
+    Packet* createPacket() throw() {
         return new CLLogout();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CLLogout";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CL_LOGOUT;
     }
 
     // get packet's max body size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return 0;
     }
 };
@@ -96,10 +105,15 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CLLogoutHandler::execute has no client-side definition
+// or use. Guarded (matching the client Cpackets copy's existing guard)
+// since no CGHandlersStub.cpp-style client stub exists for this family.
+#ifndef __GAME_CLIENT__
 class CLLogoutHandler {
 public:
     // execute packet's handler
     static void execute(CLLogout* pPacket, Player* player);
 };
+#endif
 
 #endif

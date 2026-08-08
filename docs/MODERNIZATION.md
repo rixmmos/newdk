@@ -1701,7 +1701,7 @@ the same date-format directive it always received. **Compile gate:
 next server CI run [unverified]** — this sandbox has no server
 toolchain; landed after the last known-green run referenced above.
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 and Wave 2 batches A–B landed here 2026-08-08)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -2453,6 +2453,151 @@ remains the real gate per `docs/CLAUDE.md`. Both batches landed
 (cherry-picked onto `main` in the same review pass), bringing the
 packet-duplicates ratchet from 278 down to 222 (250 after batch B alone,
 222 after both).
+
+**Wave 3 landed 2026-08-09 (worktree, not yet on `main`): 10 pairs,
+clearing the confirmed style-only backlog to zero.** Unlike every prior
+wave, this batch is **mixed-family** rather than CG-only: 4 CG pairs
+(`CGUntransform`, `CGVisible`, `CGWhisper`, `CGWithdrawTax`) plus the
+first post-pilot CL pairs (`CLGetPCList`, `CLGetServerList`, `CLLogout`,
+`CLQueryCharacterName`, `CLQueryPlayerID`, `CLVersionCheck`) — the CL
+family's target (`shared_packets_cl`) already existed from the
+`CLGetWorldList` pilot and already linked into `LoginServerPackets`, so
+this was purely adding sources to an existing list, no new target/link
+wiring. `normalize-packet-style.py --all --tsv` re-run against this
+worktree's tree state confirmed all 10 named pairs at `residual: 0` /
+`style-only` individually via `--pair` before any file was touched, and
+the pre-batch summary line read `pairs 111 | style-only 10` — this batch
+*is* the entire remaining style-only set, not a ranked subset of a larger
+pool (unlike every prior wave, which picked winners from a bigger
+backlog). Two of the ten — `CGWhisper` and `CLQueryCharacterName` — were
+on Wave 1 batch 1's exclusion list ("a parallel SQL-migration workstream
+may touch their `*Handler.cpp` files"); that workstream landed and only
+ever touched the `Handler.cpp` files, never the packet class pair itself
+(consistent with the same caveat resolving cleanly for
+`CGExpelGuild`/`CGQuitUnionAccept`/`CGDenyUnion`/`CGQuitUnion` in Wave 2
+batch A), so both were clean to take here.
+
+Reconciliation followed the established recipe for all 10: adopt the
+server's canonical style, add `throw()` back to the four `<Name>Factory`
+overrides (with the pilot-precedent comment), drop whole-class
+`#ifdef __DEBUG_OUTPUT__` Factory guards where present (`CGUntransform`,
+`CGVisible`, all six CL pairs), and keep `#ifndef __GAME_CLIENT__` around
+`<Name>Handler` and its dispatch call — none of the 10 have a
+`CGHandlersStub.cpp` entry (checked explicitly), so all 10 needed some
+form of Handler guard. **One new guard variant, beyond the pilot's/Wave
+1's/Wave 2's established set:** `CGWithdrawTax`'s client Cpackets copy
+left the `CGWithdrawTaxHandler` class declaration itself unguarded but
+wrapped only the single method declaration inside it in
+`#ifndef __GAME_CLIENT__` — a half-step between the `CGAuthKey` pattern
+(whole class guarded) and the `CGGQuestAccept`/`CGSMSAddressList`
+pattern (class unguarded, `.cpp` dispatch call alone guarded). Replicated
+verbatim rather than normalized to either existing pattern, per the
+"replicate the client's own pre-existing choice exactly" rule — a
+declared-but-never-ODR-used static method still needs no definition
+regardless of exactly where the guard is drawn. `CLGetServerList`'s
+server-side `.cpp` called `CLGetServerListHandler::execute()`
+unconditionally (no guard at all, unlike every other pair in this batch
+and most prior ones, where the *server* copy already carried the guard
+even though the macro is never defined server-side) while the client
+copy's `execute()` body omitted the call entirely rather than guarding
+it. Both are behaviorally identical outcomes to the standard merged form
+(guarded call: fires server-side since `__GAME_CLIENT__` is never
+defined there, compiles out client-side) — the merged file uses the
+standard guarded form for consistency with the rest of the family, which
+changes nothing observable on either side.
+
+**Indirect-consumer sweep (the check every prior wave's CI-red incident
+came from) — 13 real consumer files found across `dkrix/`, zero requiring
+new `target_include_directories`/`target_link_libraries` wiring**, since
+every affected target (`DarkEden`, `VS_UI`, `LoginServerPackets`) already
+had `shared/Packets` + `SharedPacketsShim` (client) or `shared/Packets`
+alone (server, already on `src/Core`'s own path) wired from the pilot and
+Wave 1's fixes. `git grep -i` for all 10 old `Cpackets/<Name>.h` paths
+(all case/slash variants) across the whole tree, not just
+`src/Core`/`Client/Packet/Cpackets`, found real `#include` sites,
+repointed to bare filenames, in: `dkrix/Client/Packet/PacketFactoryManager.cpp`
+(all 10, one line each), `dkrix/Client/PacketDef.h` (6 names —
+`CLVersionCheck`, `CLLogout`, `CLGetPCList`, `CLQueryPlayerID`,
+`CGWhisper`, `CGUntransform`, `CGVisible` — reached by `VS_UI` via
+`MPlayer.cpp`/`MTradeManager.cpp`, already covered by the pilot's
+`VS_UI` wiring, and by `DarkEden` directly), `dkrix/Client/UIMessageManager.cpp`
+(3: `CLGetServerList`, `CLQueryCharacterName`, `CGWithdrawTax`),
+`dkrix/Client/SizeOfObjects.cpp` (3, all with the same backslash/
+mixed-case divergence Wave 2 batch A already flagged in this file:
+`Packet\CPackets\`, `packet\Cpackets\`, `packet/CPackets\...H`
+extension), `dkrix/Client/CWaitUIUpdate.cpp` (1: `CLGetServerList`),
+`dkrix/Client/WhisperManager.cpp` (1: `CGWhisper`), and four
+`dkrix/Client/Packet/Lpackets/*.cpp` handler files
+(`LCCreatePCOKHandler.cpp`, `LCDeletePCOKHandler.cpp`,
+`LCQueryResultPlayerIDHandler.cpp`, `LCRegisterPlayerOKHandler.cpp`, each
+one `../Cpackets/CLGetPCList.h` or `CLQueryPlayerID.h` site). All of
+these compile into `DarkEden` (`Client/*.cpp` and
+`Client/Packet/**/*.cpp` globs) and were already covered by existing
+include paths — only the `#include` text needed repointing, no CMake
+change. `LCLoginOKHandler.cpp`'s `//#include "../Cpackets/CLGetPCList.h"`
+is dead (commented out, already superseded by a live
+`#include "CLGetWorldList.h"` two lines below from the pilot) and was
+left alone, matching how commented-out code has been treated throughout
+Phase 12. `dkrix/Client/OtherClass/RequestServerPacketFactoryManager.cpp`
+and `RequestClientPacketFactoryManager.cpp` (8 sites each) got the same
+treatment as every prior wave — repointed for consistency even though
+both files are confirmed not part of any real build (no `.vcxproj`
+exists under `dkrix/Client/`, `OtherClass/` isn't named by any glob or
+explicit source list). `dkrix/Client/Client.vcxproj.filters` is the one
+remaining reference anywhere in the tree, left alone as the orphaned,
+non-authoritative file every prior wave has already excluded. Server
+side: only `dkrixserver/src/Core/PacketFactoryManager.cpp` and each
+pair's own `*Handler.cpp` (all bare, same-directory includes) reference
+the 10 names, all part of `CG_PACKET_SOURCES`/`CL_PACKET_SOURCES`/
+`LC_PACKET_SOURCES` → `GameServerPackets`/`LoginServerPackets`, both
+already linking their `shared_packets_<family>` target. Checked and
+confirmed zero direct references anywhere under
+`dkrixserver/src/server/gameserver/` (including every subdirectory
+library: skill, item, billing, war, couple, mission, ctf, quest, mofus),
+`dkrixserver/src/server/{loginserver,sharedserver}/`, and `dkrix/VS_UI/`
+(direct — its one indirect path via `PacketDef.h` is covered above), so
+none of this batch hits the gameserver-subdirectory-library or
+VS_UI-own-include-dirs gap classes Wave 1/Wave 2 found and fixed. No new
+`SharedPacketsShim` forwarders were needed either: the 10 headers only
+reach `Packet.h`/`PacketFactory.h` (all 10) and `Exception.h`/`Types.h`
+(`CGWithdrawTax`, `CLQueryCharacterName`, `CLQueryPlayerID`,
+`CLVersionCheck` — all explicit, all already forwarded since Wave 1 batch
+2); none use `DatagramPacket.h`, `Assert1.h`, or the
+`SocketEncrypt{Input,Output}Stream.h` pair.
+
+Ratchet: `check-packet-duplicates.sh --count` 222 → 202 (10 pairs × 2
+files), baseline updated via `--update`. `normalize-packet-style.py --all
+--tsv`: 111 → 101 pairs, summary line changed from `style-only 10 |
+style-residual<=5 44 | style-residual>5 48 | real-divergence 9` to
+`style-only 0 | style-residual<=5 44 | style-residual>5 48 |
+real-divergence 9` — **the confirmed style-only backlog measured at 62
+pairs on 2026-08-07 is now fully cleared** (pilot 1 + Wave 1's 23 + Wave
+2's 28 + Wave 3's 10 = 62). What remains unmigrated (92 of the original
+163 pairs) splits into `style-residual` (92, further split ≤5/>5
+normalized lines) and the 9-pair `real-divergence` protocol-review queue
+named in the 2026-08-07 sizing (`CLLogin`, `CLCreatePC`, `CGMove`,
+`CGGuildChat`, `CGModifyNickname`, `CGSkillToInventory`,
+`CGUseItemFromInventory`, `CGExchangeBuy`, `CGExchangeList`) — none of
+these are style-only twins the mechanical batch recipe applies to; each
+needs a human protocol read (some show the *server* header as the stale
+copy, per the 2026-08-07 sizing note), which is a separate future
+decision, not a mechanical follow-up batch.
+
+**Not build-verified — no compiler in this environment**, same caveat as
+every prior wave. Verified by reading: `git grep -i` (all case/slash
+variants) for every old `Cpackets/<Name>.h` path returns nothing under
+`dkrix/` except the dead `OtherClass/` files (repointed anyway), the
+orphaned `.vcxproj.filters`, and the one dead commented-out line in
+`LCLoginOKHandler.cpp`; the 10 pairs' files exist only at
+`shared/Packets/` (`normalize-packet-style.py --pair <Name>` now reports
+"not a complete pair" for each, spot-checked on `CGUntransform` and
+`CLVersionCheck`); `dkrixserver/src/Core/CMakeLists.txt`'s
+`CG_PACKET_SOURCES`/`CL_PACKET_SOURCES` no longer name any of the 10
+`.cpp` files but still name all 10 `*Handler.cpp`;
+`shared/Packets/CMakeLists.txt` names each of the 10 exactly once, in
+the correct per-family list (`_SHARED_PACKETS_CG_SOURCES` for 4,
+`_SHARED_PACKETS_CL_SOURCES` for 6). Both-tree CI remains the real gate
+per `docs/CLAUDE.md`.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`

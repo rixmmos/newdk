@@ -12,7 +12,7 @@
 
 #ifdef __GAME_CLIENT__
 	#include "../ClientPlayer.h"
-	#include "../Cpackets/CLGetPCList.h"
+	#include "CLGetPCList.h"
 #endif
 
 #include "ClientDef.h"

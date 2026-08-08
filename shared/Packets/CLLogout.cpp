@@ -1,29 +1,33 @@
 //////////////////////////////////////////////////////////////////////////////
-// Filename    : CLGetServerList.cpp
+// Filename    : CLLogout.cpp
 // Written By  : reiot@ewestsoft.com
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
-#include "CLGetServerList.h"
+#include "CLLogout.h"
 
-void CLGetServerList::read(SocketInputStream& iStream)
-
-{
-    __BEGIN_TRY
-    __END_CATCH
-}
-
-void CLGetServerList::write(SocketOutputStream& oStream) const
+void CLLogout::read(SocketInputStream& iStream)
 
 {
     __BEGIN_TRY
     __END_CATCH
 }
 
-void CLGetServerList::execute(Player* pPlayer)
+void CLLogout::write(SocketOutputStream& oStream) const
 
 {
     __BEGIN_TRY
-    CLGetServerListHandler::execute(this, pPlayer);
+    __END_CATCH
+}
+
+void CLLogout::execute(Player* pPlayer)
+
+{
+    __BEGIN_TRY
+
+#ifndef __GAME_CLIENT__
+    CLLogoutHandler::execute(this, pPlayer);
+#endif
+
     __END_CATCH
 }

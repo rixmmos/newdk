@@ -11,7 +11,7 @@ void CGWhisper::read(SocketInputStream& iStream)
 {
     __BEGIN_TRY
 
-    
+
     BYTE szName;
 
     iStream.read(szName);
@@ -25,7 +25,7 @@ void CGWhisper::read(SocketInputStream& iStream)
     iStream.read(m_Name, szName);
     iStream.read(m_Color);
 
-    
+
     BYTE szMessage;
 
     iStream.read(szMessage);
@@ -46,7 +46,7 @@ void CGWhisper::write(SocketOutputStream& oStream) const
 {
     __BEGIN_TRY
 
-    
+
     BYTE szName = m_Name.size();
 
     if (szName == 0)
@@ -61,7 +61,7 @@ void CGWhisper::write(SocketOutputStream& oStream) const
 
     oStream.write(m_Color);
 
-    
+
     BYTE szMessage = m_Message.size();
 
     if (szMessage == 0)
@@ -82,7 +82,9 @@ void CGWhisper::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGWhisperHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

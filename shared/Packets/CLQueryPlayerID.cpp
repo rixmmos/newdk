@@ -53,7 +53,9 @@ void CLQueryPlayerID::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CLQueryPlayerIDHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

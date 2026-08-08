@@ -23,7 +23,7 @@
 #include "PacketDef.h"
 #include "VS_UI.h"
 #include "ServerInformation.h"
-#include "Packet/Cpackets/CLGetServerList.h"
+#include "CLGetServerList.h"
 #include "Packet/Cpackets/CLChangeServer.h"
 #include "CWaitUIUpdate.h"
 #include "MTestDef.h"

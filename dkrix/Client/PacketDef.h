@@ -9,15 +9,15 @@
 //-----------------------------------------------------------------------------
 // Login
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CLVersionCheck.h"
-#include "Packet/Cpackets/CLLogout.h"
+#include "CLVersionCheck.h"
+#include "CLLogout.h"
 #include "Packet/Cpackets/CLLogin.h"
 #include "Packet/Cpackets/CLRegisterPlayer.h"
-#include "Packet/Cpackets/CLGetPCList.h"
+#include "CLGetPCList.h"
 #include "Packet/Cpackets/CLCreatePC.h"
 #include "Packet/Cpackets/CLDeletePC.h"
 #include "Packet/Cpackets/CLSelectPC.h"
-#include "Packet/Cpackets/CLQueryPlayerID.h"
+#include "CLQueryPlayerID.h"
 
 //-----------------------------------------------------------------------------
 // core
@@ -42,7 +42,7 @@
 #include "Packet/Cpackets/CGDialUp.h"
 #include "Packet/Cpackets/CGPhoneDisconnect.h"
 #include "Packet/Cpackets/CGPhoneSay.h"
-#include "Packet/Cpackets/CGWhisper.h"
+#include "CGWhisper.h"
 
 //-----------------------------------------------------------------------------
 
@@ -64,8 +64,8 @@
 #include "Packet/Cpackets/CGBloodDrain.h"
 
 #include "CGThrowBomb.h"
-#include "Packet/Cpackets/CGUntransform.h"
-#include "Packet/Cpackets/CGVisible.h"
+#include "CGUntransform.h"
+#include "CGVisible.h"
 #include "Packet/Cpackets/CGAbsorbSoul.h"
 
 //-----------------------------------------------------------------------------

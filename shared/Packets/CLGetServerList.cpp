@@ -1,31 +1,33 @@
 //////////////////////////////////////////////////////////////////////////////
-// Filename    : CLGetPCList.cpp
+// Filename    : CLGetServerList.cpp
 // Written By  : reiot@ewestsoft.com
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
-#include "CLGetPCList.h"
+#include "CLGetServerList.h"
 
-void CLGetPCList::read(SocketInputStream& iStream)
-
-{
-    __BEGIN_TRY
-    __END_CATCH
-}
-
-void CLGetPCList::write(SocketOutputStream& oStream) const
+void CLGetServerList::read(SocketInputStream& iStream)
 
 {
     __BEGIN_TRY
     __END_CATCH
 }
 
-void CLGetPCList::execute(Player* pPlayer)
+void CLGetServerList::write(SocketOutputStream& oStream) const
+
+{
+    __BEGIN_TRY
+    __END_CATCH
+}
+
+void CLGetServerList::execute(Player* pPlayer)
 
 {
     __BEGIN_TRY
 
-    CLGetPCListHandler::execute(this, pPlayer);
+#ifndef __GAME_CLIENT__
+    CLGetServerListHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

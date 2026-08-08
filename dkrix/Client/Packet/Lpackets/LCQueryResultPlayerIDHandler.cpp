@@ -15,7 +15,7 @@
 
 #ifdef __GAME_CLIENT__
 	#include "../ClientPlayer.h"
-	#include "../Cpackets/CLQueryPlayerID.h"
+	#include "CLQueryPlayerID.h"
 	#include "../Cpackets/CLRegisterPlayer.h"
 #endif
 
