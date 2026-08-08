@@ -1805,6 +1805,50 @@ of the 10 exactly once, under `_SHARED_PACKETS_CG_SOURCES`. Both-tree CI
 remains the real gate — per `docs/CLAUDE.md`, this client+server change
 lands as one unit.
 
+**CI verdict, 2026-08-08: both trees red on the same push, both from the
+identical root cause — a target that consumes the migrated headers
+indirectly, one level removed from the target the pilot actually wired
+up.** Not a repeat of the pilot's *resolution-mechanics* saga (three
+pushes, wrong shim scope) — this time the shim/include-path mechanism
+itself was correct, it just wasn't applied everywhere a real consumer
+existed.
+
+- **Client — run #17 (`ac642e0`) red.** `error C1083: Cannot open
+  include file: 'CGLogout.h'` from `Client/PacketDef.h`, compiled into
+  the **`VS_UI`** CMake target (pulled in via `MPlayer.cpp` /
+  `MTradeManager.cpp`, both part of `VS_UI_CLIENT_SOURCES`) — a
+  completely different target from `DarkEden`, which is the only one
+  the pilot ever wired up. Fixed in `e75eb67`: added `shared/Packets`
+  and `Client/Packet/SharedPacketsShim` to `VS_UI`'s own
+  `target_include_directories`, header-visibility only — deliberately
+  not linking `shared_packets_cg`/`_cl` there, which would recompile
+  their `.cpp` sources a second time (once into `VS_UI`, once into
+  `DarkEden`), a multiply-defined-symbol error.
+- **Server — run #17 (`ac642e0`) red, found after the client fix.**
+  `fatal error: CGLogout.h: No such file or directory` from
+  `src/server/gameserver/ZonePlayerManager.cpp` — a `gameserver`-direct
+  source, not part of `GameServerPackets`. Root cause one level more
+  subtle than the client case: `GameServerPackets` *does* link
+  `shared_packets_cg`, correctly — but `PRIVATE`, so the include path
+  never propagates to `gameserver`, which links `GameServerPackets` as
+  a dependency. Fixed in `b84723f`: added `shared/Packets` to all three
+  server executables' (`gameserver`/`loginserver`/`sharedserver`) own
+  include dirs, same header-visibility-only pattern. No shim needed
+  server-side — `src/Core`, already on every executable's include
+  path, already has the server's own `Packet.h`/`PacketFactory.h`.
+- **Run #18 (`e75eb67`/`b84723f`) — both trees green.** Client:
+  `MSVC x64 (Debug)` + `Viewers and validators`, 32m7s. Server:
+  `make debug` + `clang-format` + `ratchets`, 20m21s.
+
+**Lesson for Wave 2+:** the pilot's DarkEden-only and
+GameServerPackets/LoginServerPackets-only wiring was correct for what
+existed *then* — nothing was migrated yet that any other target
+touched. Every batch that follows needs to be checked against **every**
+target that might compile a file referencing the migrated headers, not
+just the "obvious" owning target — `git grep` for each migrated name
+across the whole tree (not just `src/Core`/`Client/Packet/Cpackets`)
+before assuming the existing shim/include-dir wiring is sufficient.
+
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
 (`56e59cc`). Remaining: `dkrix/Client/Packet/SocketInputStream` /
