@@ -79,9 +79,9 @@ CWaitUIUpdate::Init()
 	g_pSDLInput->SetKeyboardEventReceiver( DXKeyboardEvent );
 
 	
-	dxlib_input_set_textinput_callback(SDLTextInputEvent);
-	dxlib_input_set_textediting_callback(SDLTextEditingEvent);
-	dxlib_input_start_text();  // Enable SDL text input
+	platform_input_set_textinput_callback(SDLTextInputEvent);
+	platform_input_set_textediting_callback(SDLTextEditingEvent);
+	platform_input_start_text();  // Enable SDL text input
 	printf("DEBUG: SDL text input enabled, callback set to %p\n", (void*)SDLTextInputEvent);
 	fflush(stdout);
 }

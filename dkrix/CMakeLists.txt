@@ -432,7 +432,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Link libraries
 	target_link_libraries(VS_UI PUBLIC
 		basic
-		dxlib
+		platform
 		SpriteLib
 		framelib
 		TextSystem
@@ -493,7 +493,7 @@ target_include_directories(sprite_viewer PRIVATE
 
 target_link_libraries(sprite_viewer PRIVATE
 	SpriteLib
-	dxlib
+	platform
 	basic
 	SDL2::SDL2
 	${SDL2_VIEWER_MAIN_LIB}
@@ -528,7 +528,7 @@ target_include_directories(item_viewer PRIVATE
 
 target_link_libraries(item_viewer PRIVATE
 	SpriteLib
-	dxlib
+	platform
 	basic
 	SDL2::SDL2
 	${SDL2_VIEWER_MAIN_LIB}
@@ -553,7 +553,7 @@ target_include_directories(creature_viewer PRIVATE
 target_link_libraries(creature_viewer PRIVATE
 	SpriteLib
 	framelib
-	dxlib
+	platform
 	basic
 	SDL2::SDL2
 	${SDL2_VIEWER_MAIN_LIB}
@@ -582,7 +582,7 @@ if(NOT WIN32)
 	target_link_libraries(map_viewer PRIVATE
 		sprite
 		SpriteLib
-		dxlib
+		platform
 		basic
 		SDL2::SDL2
 		${SDL2_VIEWER_MAIN_LIB}
@@ -615,7 +615,7 @@ if(NOT WIN32)
 		sprite
 		SpriteLib
 		framelib
-		dxlib
+		platform
 		basic
 		SDL2::SDL2
 		${SDL2_VIEWER_MAIN_LIB}
@@ -751,7 +751,7 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 	# Link libraries (now includes VS_UI and TextSystem)
 	target_link_libraries(DarkEden PRIVATE
 		SpriteLib
-		dxlib
+		platform
 		basic
 		framelib
 		VS_UI

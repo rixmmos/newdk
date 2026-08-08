@@ -5,7 +5,7 @@
 // Windows DirectSound implementation removed - using SDL2_mixer on all platforms
 // NOTE: This class is a stub. Use SDL_mixer functions directly instead.
 // (CDirectSound_Adapter.cpp, a duplicate implementation that called into
-// DXLibBackend's dxlib_sound_* functions, was deleted in Phase 3 item 1: it
+// DXLibBackend's platform_sound_* functions, was deleted in Phase 3 item 1: it
 // never compiled — its ctor/dtor were named CDirectSound() instead of
 // AudioManager(), and its global instance was declared with the undeclared
 // type `CDirectSound`. It also duplicated every symbol below whenever

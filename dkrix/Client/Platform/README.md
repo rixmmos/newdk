@@ -1,8 +1,11 @@
 > **Moved 2026-08 (Phase 3 item 3):** this directory was `Client/DXLib/`.
-> Files kept their names and the library target is still `dxlib`. The
-> `#include` examples below were updated to the `Platform/` path; the rest
-> of this document predates the move (including mentions of the
-> never-ported Windows-DirectX backend).
+> Files kept their names. The library target, `PLATFORM_*` defines, and
+> `platform_*` C API were renamed from `dxlib`/`DXLIB_*`/`dxlib_*` in the
+> item 3 follow-up (2026-08); the function/define names below were updated
+> to match. The `#include` examples were updated to the `Platform/` path;
+> the rest of this document predates the move (including mentions of the
+> never-ported Windows-DirectX backend and already-deleted `_Adapter.cpp`
+> files).
 
 # DXLib 
 
@@ -40,21 +43,21 @@ DXLibBackend.h
 
 |  |  |  |
 |------|------|------|
-|  |  | `dxlib_input_init()` |
-|  |  | `dxlib_input_key_down()` |
-|  |  | `dxlib_input_get_mouse_pos()` |
-|  |  | `dxlib_input_get_mouse_buttons()` |
-|  |  | `dxlib_input_get_mouse_wheel()` |
-|  |  | `dxlib_input_update()` |
-|  |  | `dxlib_sound_load_wav()` ( SDL_mixer) |
-|  |  | `dxlib_sound_play()` |
-|  |  | `dxlib_sound_stop()` |
-|  |  | `dxlib_sound_set_volume()` |
-|  |  | `dxlib_music_load()` ( SDL_mixer) |
-|  |  | `dxlib_music_play()` |
-| / |  | `dxlib_music_pause()/resume()` |
-|  |  | `dxlib_music_set_volume()` |
-|  |  | `dxlib_get_backend_name()` |
+|  |  | `platform_input_init()` |
+|  |  | `platform_input_key_down()` |
+|  |  | `platform_input_get_mouse_pos()` |
+|  |  | `platform_input_get_mouse_buttons()` |
+|  |  | `platform_input_get_mouse_wheel()` |
+|  |  | `platform_input_update()` |
+|  |  | `platform_sound_load_wav()` ( SDL_mixer) |
+|  |  | `platform_sound_play()` |
+|  |  | `platform_sound_stop()` |
+|  |  | `platform_sound_set_volume()` |
+|  |  | `platform_music_load()` ( SDL_mixer) |
+|  |  | `platform_music_play()` |
+| / |  | `platform_music_pause()/resume()` |
+|  |  | `platform_music_set_volume()` |
+|  |  | `platform_get_backend_name()` |
 
 ****
 
@@ -95,32 +98,32 @@ cmake --build build
 #include "Platform/DXLibBackend.h"
 
 
-dxlib_input_init(window_handle);
+platform_input_init(window_handle);
 
 
 while (running) {
 
-    dxlib_input_update();
+    platform_input_update();
 
 
-    if (dxlib_input_key_down(DIK_W)) {
+    if (platform_input_key_down(DIK_W)) {
 
     }
 
 
     int x, y;
-    dxlib_input_get_mouse_pos(&x, &y);
+    platform_input_get_mouse_pos(&x, &y);
 
 
     int left, right, center;
-    dxlib_input_get_mouse_buttons(&left, &right, &center);
+    platform_input_get_mouse_buttons(&left, &right, &center);
     if (left) {
 
     }
 }
 
 
-dxlib_input_release();
+platform_input_release();
 ```
 
 ### 
@@ -129,25 +132,25 @@ dxlib_input_release();
 #include "Platform/DXLibBackend.h"
 
 
-dxlib_sound_init(window_handle);
+platform_sound_init(window_handle);
 
 
-dxlib_sound_t sound = dxlib_sound_load_wav("explosion.wav");
+platform_sound_t sound = platform_sound_load_wav("explosion.wav");
 
 
-dxlib_sound_play(sound, 0); // 0 = 
+platform_sound_play(sound, 0); // 0 = 
 
 
-dxlib_sound_set_volume(sound, 50);
+platform_sound_set_volume(sound, 50);
 
 
-dxlib_sound_stop(sound);
+platform_sound_stop(sound);
 
 
-dxlib_sound_free(sound);
+platform_sound_free(sound);
 
 
-dxlib_sound_release();
+platform_sound_release();
 ```
 
 ### 
@@ -156,26 +159,26 @@ dxlib_sound_release();
 #include "Platform/DXLibBackend.h"
 
 
-dxlib_music_init(window_handle);
+platform_music_init(window_handle);
 
 
-dxlib_music_load("background.mp3");
+platform_music_load("background.mp3");
 
 
-dxlib_music_play(1);
+platform_music_play(1);
 
 
-dxlib_music_set_volume(70);
+platform_music_set_volume(70);
 
 // /
-dxlib_music_pause();
-dxlib_music_resume();
+platform_music_pause();
+platform_music_resume();
 
 
-dxlib_music_stop();
+platform_music_stop();
 
 
-dxlib_music_release();
+platform_music_release();
 ```
 
 ## API 
@@ -184,31 +187,31 @@ dxlib_music_release();
 
 |  CDirectInput | DXLibBackend API | SDL  |
 |-------------------|------------------|----------|
-| `KeyDown(DIK_W)` | `dxlib_input_key_down(DIK_W)` | SDL_GetKeyboardState |
-| `m_mouse_x, m_mouse_y` | `dxlib_input_get_mouse_pos()` | SDL_GetMouseState |
-| `m_lb_down` | `dxlib_input_get_mouse_buttons()` | SDL_GetMouseState |
-| `m_mouse_z` | `dxlib_input_get_mouse_wheel()` | SDL_MouseWheelEvent |
-| `UpdateInput()` | `dxlib_input_update()` | SDL_PollEvent |
+| `KeyDown(DIK_W)` | `platform_input_key_down(DIK_W)` | SDL_GetKeyboardState |
+| `m_mouse_x, m_mouse_y` | `platform_input_get_mouse_pos()` | SDL_GetMouseState |
+| `m_lb_down` | `platform_input_get_mouse_buttons()` | SDL_GetMouseState |
+| `m_mouse_z` | `platform_input_get_mouse_wheel()` | SDL_MouseWheelEvent |
+| `UpdateInput()` | `platform_input_update()` | SDL_PollEvent |
 
 ### 
 
 |  CDirectSound | DXLibBackend API | SDL  |
 |-------------------|------------------|----------|
-| `LoadWav(filename)` | `dxlib_sound_load_wav()` | Mix_LoadWAV |
-| `Play(buffer, loop)` | `dxlib_sound_play(sound, loop)` | Mix_PlayChannel |
-| `Stop(buffer)` | `dxlib_sound_stop(sound)` | Mix_HaltChannel |
-| `AddVolume(buffer, n)` | `dxlib_sound_set_volume()` | Mix_Volume |
-| `RightPan/LeftPan` | `dxlib_sound_set_pan()` |   |
+| `LoadWav(filename)` | `platform_sound_load_wav()` | Mix_LoadWAV |
+| `Play(buffer, loop)` | `platform_sound_play(sound, loop)` | Mix_PlayChannel |
+| `Stop(buffer)` | `platform_sound_stop(sound)` | Mix_HaltChannel |
+| `AddVolume(buffer, n)` | `platform_sound_set_volume()` | Mix_Volume |
+| `RightPan/LeftPan` | `platform_sound_set_pan()` |   |
 
 ### 
 
 |  CDirectMusic | DXLibBackend API | SDL  |
 |-------------------|------------------|----------|
-| `Play(filename)` | `dxlib_music_load() + play()` | Mix_LoadMUS + Mix_PlayMusic |
-| `Stop()` | `dxlib_music_stop()` | Mix_HaltMusic |
-| `Pause()` | `dxlib_music_pause()` | Mix_PauseMusic |
-| `Resume()` | `dxlib_music_resume()` | Mix_ResumeMusic |
-| `SetCurrentTempo()` | `dxlib_music_set_tempo()` |   |
+| `Play(filename)` | `platform_music_load() + play()` | Mix_LoadMUS + Mix_PlayMusic |
+| `Stop()` | `platform_music_stop()` | Mix_HaltMusic |
+| `Pause()` | `platform_music_pause()` | Mix_PauseMusic |
+| `Resume()` | `platform_music_resume()` | Mix_ResumeMusic |
+| `SetCurrentTempo()` | `platform_music_set_tempo()` |   |
 
 ## 
 
@@ -271,14 +274,14 @@ dxlib_music_release();
 
 ### 
 
- (`#ifdef DXLIB_BACKEND_SDL`) 
+ (`#ifdef PLATFORM_BACKEND_SDL`) 
 
 ```cpp
 // CDirectInput.cpp / CDirectInput_Adapter.cpp
-#ifdef DXLIB_BACKEND_SDL
+#ifdef PLATFORM_BACKEND_SDL
     //  DXLibBackend API (SDL2)
-    dxlib_input_init(hWnd);
-    dxlib_input_update();
+    platform_input_init(hWnd);
+    platform_input_update();
 #else
     //  DirectInput API (Windows)
 
@@ -302,7 +305,7 @@ dxlib_music_release();
 
 ```cpp
 class CDirectInputSDL {
-    //  dxlib_input_* 
+    //  platform_input_* 
     // API  CDirectInput 
 };
 ```
@@ -326,8 +329,8 @@ class CDirectInputSDL {
 #include "DXLibBackend.h"
 
 //  API
-dxlib_input_init(window);
-if (dxlib_input_key_down(DIK_W)) { ... }
+platform_input_init(window);
+if (platform_input_key_down(DIK_W)) { ... }
 ```
 
 ****

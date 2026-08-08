@@ -9,8 +9,8 @@
 
 -----------------------------------------------------------------------------*/
 
-#ifndef __DXLIB_BACKEND_H__
-#define __DXLIB_BACKEND_H__
+#ifndef __PLATFORM_BACKEND_H__
+#define __PLATFORM_BACKEND_H__
 
 #include "../basic/Platform.h"
 
@@ -24,14 +24,14 @@ extern "C" {
 
 /* Backend type selection */
 #ifdef PLATFORM_WINDOWS
-	#ifndef DXLIB_USE_SDL_BACKEND
-		#define DXLIB_BACKEND_WINDOWS  /* Use native Windows APIs */
+	#ifndef PLATFORM_USE_SDL_BACKEND
+		#define PLATFORM_BACKEND_WINDOWS  /* Use native Windows APIs */
 	#else
-		#define DXLIB_BACKEND_SDL      /* Use SDL2 */
+		#define PLATFORM_BACKEND_SDL      /* Use SDL2 */
 	#endif
 #else
 	/* Non-Windows platforms must use SDL backend */
-	#define DXLIB_BACKEND_SDL
+	#define PLATFORM_BACKEND_SDL
 #endif
 
 /* ============================================================================
@@ -43,38 +43,38 @@ extern "C" {
  * @param window_handle Native window handle (HWND on Windows, SDL_Window* on SDL)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_input_init(void* window_handle);
+int platform_input_init(void* window_handle);
 
 /**
  * Release input backend
  */
-void dxlib_input_release(void);
+void platform_input_release(void);
 
 /**
  * Update input state (poll for new events)
  * Call this once per frame
  */
-void dxlib_input_update(void);
+void platform_input_update(void);
 
 /**
  * Check if a key is down
  * @param dik_key DirectInput key code (DIK_*)
  * @return 1 if key is down, 0 otherwise
  */
-int dxlib_input_key_down(int dik_key);
+int platform_input_key_down(int dik_key);
 
 /**
  * Get mouse position
  * @param x Output X coordinate
  * @param y Output Y coordinate
  */
-void dxlib_input_get_mouse_pos(int* x, int* y);
+void platform_input_get_mouse_pos(int* x, int* y);
 
 /**
  * Get mouse wheel position
  * @return Wheel position (z-coordinate)
  */
-int dxlib_input_get_mouse_wheel(void);
+int platform_input_get_mouse_wheel(void);
 
 /**
  * Check mouse button states
@@ -82,27 +82,27 @@ int dxlib_input_get_mouse_wheel(void);
  * @param right Output: right button state
  * @param center Output: center button state
  */
-void dxlib_input_get_mouse_buttons(int* left, int* right, int* center);
+void platform_input_get_mouse_buttons(int* left, int* right, int* center);
 
 /**
  * Set mouse position (for relative movement)
  * @param x X coordinate
  * @param y Y coordinate
  */
-void dxlib_input_set_mouse_pos(int x, int y);
+void platform_input_set_mouse_pos(int x, int y);
 
 /**
  * Text input event callback
  * @param text UTF-8 encoded text input (one or more characters)
  * @param window_coords Window coordinates array [x, y] for cursor position
  */
-typedef void (*dxlib_textinput_callback)(const char* text, int* window_coords);
+typedef void (*platform_textinput_callback)(const char* text, int* window_coords);
 
 /**
  * Set text input event receiver callback
  * @param callback Function to call when text is entered
  */
-void dxlib_input_set_textinput_callback(dxlib_textinput_callback callback);
+void platform_input_set_textinput_callback(platform_textinput_callback callback);
 
 /**
  * Text editing event callback (for IME composition)
@@ -111,23 +111,23 @@ void dxlib_input_set_textinput_callback(dxlib_textinput_callback callback);
  * @param length Length of composition text
  * @param window_coords Window coordinates array [x, y] for cursor position
  */
-typedef void (*dxlib_textediting_callback)(const char* text, int start, int length, int* window_coords);
+typedef void (*platform_textediting_callback)(const char* text, int start, int length, int* window_coords);
 
 /**
  * Set text editing event receiver callback
  * @param callback Function to call when text is being composed (IME)
  */
-void dxlib_input_set_textediting_callback(dxlib_textediting_callback callback);
+void platform_input_set_textediting_callback(platform_textediting_callback callback);
 
 /**
  * Start text input (enables SDL_TEXTINPUT events)
  */
-void dxlib_input_start_text(void);
+void platform_input_start_text(void);
 
 /**
  * Stop text input (disables SDL_TEXTINPUT events)
  */
-void dxlib_input_stop_text(void);
+void platform_input_stop_text(void);
 
 /* ============================================================================
  * Sound Backend Interface
@@ -136,26 +136,26 @@ void dxlib_input_stop_text(void);
 /**
  * Sound buffer handle (opaque)
  */
-typedef struct dxlib_sound_buffer* dxlib_sound_t;
+typedef struct platform_sound_buffer* platform_sound_t;
 
 /**
  * Initialize sound backend
  * @param window_handle Native window handle
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_init(void* window_handle);
+int platform_sound_init(void* window_handle);
 
 /**
  * Release sound backend
  */
-void dxlib_sound_release(void);
+void platform_sound_release(void);
 
 /**
  * Load WAV file into memory
  * @param filename Path to WAV file
  * @return Sound handle or NULL on failure
  */
-dxlib_sound_t dxlib_sound_load_wav(const char* filename);
+platform_sound_t platform_sound_load_wav(const char* filename);
 
 /**
  * Create sound buffer from raw data
@@ -166,7 +166,7 @@ dxlib_sound_t dxlib_sound_load_wav(const char* filename);
  * @param bits_per_sample Bits per sample (8 or 16)
  * @return Sound handle or NULL on failure
  */
-dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
+platform_sound_t platform_sound_create_buffer(const void* data, int size,
                                        int channels, int sample_rate,
                                        int bits_per_sample);
 
@@ -174,7 +174,7 @@ dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
  * Release sound buffer
  * @param sound Sound handle
  */
-void dxlib_sound_free(dxlib_sound_t sound);
+void platform_sound_free(platform_sound_t sound);
 
 /**
  * Play sound
@@ -182,21 +182,21 @@ void dxlib_sound_free(dxlib_sound_t sound);
  * @param loop Loop continuously (1) or play once (0)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_play(dxlib_sound_t sound, int loop);
+int platform_sound_play(platform_sound_t sound, int loop);
 
 /**
  * Stop sound
  * @param sound Sound handle
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_stop(dxlib_sound_t sound);
+int platform_sound_stop(platform_sound_t sound);
 
 /**
  * Check if sound is playing
  * @param sound Sound handle
  * @return 1 if playing, 0 otherwise
  */
-int dxlib_sound_is_playing(dxlib_sound_t sound);
+int platform_sound_is_playing(platform_sound_t sound);
 
 /**
  * Set sound volume
@@ -204,7 +204,7 @@ int dxlib_sound_is_playing(dxlib_sound_t sound);
  * @param volume Volume level (0-100, where 100 is max)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_set_volume(dxlib_sound_t sound, int volume);
+int platform_sound_set_volume(platform_sound_t sound, int volume);
 
 /**
  * Set sound pan (stereo positioning)
@@ -212,7 +212,7 @@ int dxlib_sound_set_volume(dxlib_sound_t sound, int volume);
  * @param pan Pan value (-100 to 100, where -100=left, 0=center, 100=right)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_set_pan(dxlib_sound_t sound, int pan);
+int platform_sound_set_pan(platform_sound_t sound, int pan);
 
 /**
  * Set sound frequency (playback speed)
@@ -220,14 +220,14 @@ int dxlib_sound_set_pan(dxlib_sound_t sound, int pan);
  * @param frequency Frequency in Hz (0 = original frequency)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_sound_set_frequency(dxlib_sound_t sound, int frequency);
+int platform_sound_set_frequency(platform_sound_t sound, int frequency);
 
 /**
  * Duplicate sound buffer (for simultaneous playback)
  * @param sound Source sound handle
  * @return Duplicate sound handle or NULL on failure
  */
-dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound);
+platform_sound_t platform_sound_duplicate(platform_sound_t sound);
 
 /* ============================================================================
  * Music Backend Interface
@@ -238,72 +238,72 @@ dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound);
  * @param window_handle Native window handle
  * @return 0 on success, non-zero on failure
  */
-int dxlib_music_init(void* window_handle);
+int platform_music_init(void* window_handle);
 
 /**
  * Release music backend
  */
-void dxlib_music_release(void);
+void platform_music_release(void);
 
 /**
  * Load music file
  * @param filename Path to music file (MIDI, MP3, OGG, etc.)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_music_load(const char* filename);
+int platform_music_load(const char* filename);
 
 /**
  * Free current music
  */
-void dxlib_music_free(void);
+void platform_music_free(void);
 
 /**
  * Play music
  * @param loop Loop continuously (1) or play once (0)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_music_play(int loop);
+int platform_music_play(int loop);
 
 /**
  * Stop music
  */
-void dxlib_music_stop(void);
+void platform_music_stop(void);
 
 /**
  * Pause music
  */
-void dxlib_music_pause(void);
+void platform_music_pause(void);
 
 /**
  * Resume music
  */
-void dxlib_music_resume(void);
+void platform_music_resume(void);
 
 /**
  * Check if music is playing
  * @return 1 if playing, 0 otherwise
  */
-int dxlib_music_is_playing(void);
+int platform_music_is_playing(void);
 
 /**
  * Check if music is paused
  * @return 1 if paused, 0 otherwise
  */
-int dxlib_music_is_paused(void);
+int platform_music_is_paused(void);
 
 /**
  * Set music volume
  * @param volume Volume level (0-100)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_music_set_volume(int volume);
+int platform_music_set_volume(int volume);
 
 /**
  * Set music tempo (playback speed)
  * @param tempo Tempo multiplier (1.0 = normal, 0.5 = half speed, 2.0 = double speed)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_music_set_tempo(float tempo);
+int platform_music_set_tempo(float tempo);
 
 /* ============================================================================
  * Stream Backend Interface (for long audio files)
@@ -312,32 +312,32 @@ int dxlib_music_set_tempo(float tempo);
 /**
  * Stream handle (opaque)
  */
-typedef struct dxlib_stream* dxlib_stream_t;
+typedef struct platform_stream* platform_stream_t;
 
 /**
  * Initialize stream backend
  * @param window_handle Native window handle
  * @return 0 on success, non-zero on failure
  */
-int dxlib_stream_init(void* window_handle);
+int platform_stream_init(void* window_handle);
 
 /**
  * Release stream backend
  */
-void dxlib_stream_release(void);
+void platform_stream_release(void);
 
 /**
  * Load audio file for streaming
  * @param filename Path to audio file
  * @return Stream handle or NULL on failure
  */
-dxlib_stream_t dxlib_stream_load(const char* filename);
+platform_stream_t platform_stream_load(const char* filename);
 
 /**
  * Free stream
  * @param stream Stream handle
  */
-void dxlib_stream_free(dxlib_stream_t stream);
+void platform_stream_free(platform_stream_t stream);
 
 /**
  * Play stream
@@ -345,20 +345,20 @@ void dxlib_stream_free(dxlib_stream_t stream);
  * @param loop Loop continuously
  * @return 0 on success, non-zero on failure
  */
-int dxlib_stream_play(dxlib_stream_t stream, int loop);
+int platform_stream_play(platform_stream_t stream, int loop);
 
 /**
  * Stop stream
  * @param stream Stream handle
  */
-void dxlib_stream_stop(dxlib_stream_t stream);
+void platform_stream_stop(platform_stream_t stream);
 
 /**
  * Update stream (call regularly to refill buffers)
  * @param stream Stream handle
  * @return 0 on success, non-zero on failure
  */
-int dxlib_stream_update(dxlib_stream_t stream);
+int platform_stream_update(platform_stream_t stream);
 
 /**
  * Set stream volume
@@ -366,14 +366,14 @@ int dxlib_stream_update(dxlib_stream_t stream);
  * @param volume Volume level (0-100)
  * @return 0 on success, non-zero on failure
  */
-int dxlib_stream_set_volume(dxlib_stream_t stream, int volume);
+int platform_stream_set_volume(platform_stream_t stream, int volume);
 
 /**
  * Check if stream is playing
  * @param stream Stream handle
  * @return 1 if playing, 0 otherwise
  */
-int dxlib_stream_is_playing(dxlib_stream_t stream);
+int platform_stream_is_playing(platform_stream_t stream);
 
 /* ============================================================================
  * Backend Information
@@ -383,23 +383,23 @@ int dxlib_stream_is_playing(dxlib_stream_t stream);
  * Get backend name
  * @return Backend name string ("DirectInput/DirectSound" or "SDL2")
  */
-const char* dxlib_get_backend_name(void);
+const char* platform_get_backend_name(void);
 
 /**
  * Get backend capabilities flags
  */
-#define DXLIB_CAP_INPUT           0x01
-#define DXLIB_CAP_SOUND           0x02
-#define DXLIB_CAP_MUSIC           0x04
-#define DXLIB_CAP_STREAM          0x08
-#define DXLIB_CAP_MIDI            0x10
-#define DXLIB_CAP_MP3             0x20
-#define DXLIB_CAP_OGG             0x40
+#define PLATFORM_CAP_INPUT           0x01
+#define PLATFORM_CAP_SOUND           0x02
+#define PLATFORM_CAP_MUSIC           0x04
+#define PLATFORM_CAP_STREAM          0x08
+#define PLATFORM_CAP_MIDI            0x10
+#define PLATFORM_CAP_MP3             0x20
+#define PLATFORM_CAP_OGG             0x40
 
-int dxlib_get_capabilities(void);
+int platform_get_capabilities(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __DXLIB_BACKEND_H__ */
+#endif /* __PLATFORM_BACKEND_H__ */

@@ -9,13 +9,13 @@
 
 -----------------------------------------------------------------------------*/
 
-#define DXLIB_BACKEND_SDL_IMPL
+#define PLATFORM_BACKEND_SDL_IMPL
 
 /* Include InputManager.h first to get DIK constants */
 #include "InputManager.h"
 #include "DXLibBackend.h"
 
-#ifdef DXLIB_BACKEND_SDL
+#ifdef PLATFORM_BACKEND_SDL
 
 #include <SDL.h>
 #ifdef PLATFORM_WINDOWS
@@ -198,10 +198,10 @@ static int g_mouse_wheel = 0;
 static int g_mouse_buttons[3] = {0, 0, 0};
 
 /* Text input callback */
-static dxlib_textinput_callback g_textinput_callback = NULL;
+static platform_textinput_callback g_textinput_callback = NULL;
 
 /* Text editing callback */
-static dxlib_textediting_callback g_textediting_callback = NULL;
+static platform_textediting_callback g_textediting_callback = NULL;
 
 /* Legacy global mouse coordinates (used by CWaitUIUpdate) */
 extern int g_x, g_y;
@@ -333,7 +333,7 @@ static void init_key_mapping(void) {
 	g_dik_to_scancode[DIK_DECIMAL] = SDL_SCANCODE_KP_PERIOD;
 }
 
-int dxlib_input_init(void* window_handle) {
+int platform_input_init(void* window_handle) {
 	if (g_input_initialized) return 0;
 
 	/* Initialize SDL subsystems (if not already initialized) */
@@ -356,15 +356,15 @@ int dxlib_input_init(void* window_handle) {
 	return 0;
 }
 
-void dxlib_input_release(void) {
+void platform_input_release(void) {
 	g_input_initialized = 0;
 }
 
-void dxlib_input_update(void) {
+void platform_input_update(void) {
 	if (!g_input_initialized) {
 		static int notInitCount = 0;
 		if (++notInitCount <= 3) {
-			printf("WARNING: dxlib_input_update called but not initialized!\n");
+			printf("WARNING: platform_input_update called but not initialized!\n");
 			fflush(stdout);
 		}
 		return;
@@ -426,7 +426,7 @@ void dxlib_input_update(void) {
 						LogSDLInput("SDL_KEYDOWN control vk=%u", vk_code);
 						g_GetInputFocusManager().HandleKeyDown(vk_code);
 						// Don't break here - let keyboard state update below
-						// This ensures dxlib_input_key_down() works correctly
+						// This ensures platform_input_key_down() works correctly
 					}
 
 #ifndef PLATFORM_WINDOWS
@@ -529,7 +529,7 @@ void dxlib_input_update(void) {
 	g_y = g_mouse_y;
 }
 
-int dxlib_input_key_down(int dik_key) {
+int platform_input_key_down(int dik_key) {
 	if (!g_input_initialized) return 0;
 
 	if (dik_key < 0 || dik_key >= 256) return 0;
@@ -541,38 +541,38 @@ int dxlib_input_key_down(int dik_key) {
 	return state[scancode] ? 1 : 0;
 }
 
-void dxlib_input_get_mouse_pos(int* x, int* y) {
+void platform_input_get_mouse_pos(int* x, int* y) {
 	if (x) *x = g_mouse_x;
 	if (y) *y = g_mouse_y;
 }
 
-int dxlib_input_get_mouse_wheel(void) {
+int platform_input_get_mouse_wheel(void) {
 	return g_mouse_wheel;
 }
 
-void dxlib_input_get_mouse_buttons(int* left, int* right, int* center) {
+void platform_input_get_mouse_buttons(int* left, int* right, int* center) {
 	if (left) *left = g_mouse_buttons[0];
 	if (right) *right = g_mouse_buttons[1];
 	if (center) *center = g_mouse_buttons[2];
 }
 
-void dxlib_input_set_mouse_pos(int x, int y) {
+void platform_input_set_mouse_pos(int x, int y) {
 	SDL_WarpMouseInWindow(NULL, x, y);
 }
 
-void dxlib_input_set_textinput_callback(dxlib_textinput_callback callback) {
+void platform_input_set_textinput_callback(platform_textinput_callback callback) {
 	g_textinput_callback = callback;
 }
 
-void dxlib_input_set_textediting_callback(dxlib_textediting_callback callback) {
+void platform_input_set_textediting_callback(platform_textediting_callback callback) {
 	g_textediting_callback = callback;
 }
 
-void dxlib_input_start_text(void) {
+void platform_input_start_text(void) {
 	SDL_StartTextInput();
 }
 
-void dxlib_input_stop_text(void) {
+void platform_input_stop_text(void) {
 	SDL_StopTextInput();
 }
 
@@ -582,7 +582,7 @@ void dxlib_input_stop_text(void) {
 
 #ifdef SDL_MIXER_MAJOR_VERSION
 
-struct dxlib_sound_buffer {
+struct platform_sound_buffer {
 	Mix_Chunk* chunk;
 	int channel;
 	int volume;
@@ -592,7 +592,7 @@ struct dxlib_sound_buffer {
 
 static int g_max_volume = 100;
 
-int dxlib_sound_init(void* window_handle) {
+int platform_sound_init(void* window_handle) {
 	if (g_sound_initialized) return 0;
 
 	/* Initialize SDL_mixer */
@@ -608,14 +608,14 @@ int dxlib_sound_init(void* window_handle) {
 	return 0;
 }
 
-void dxlib_sound_release(void) {
+void platform_sound_release(void) {
 	if (!g_sound_initialized) return;
 
 	Mix_CloseAudio();
 	g_sound_initialized = 0;
 }
 
-dxlib_sound_t dxlib_sound_load_wav(const char* filename) {
+platform_sound_t platform_sound_load_wav(const char* filename) {
 	if (!g_sound_initialized) return NULL;
 
 	Mix_Chunk* chunk = Mix_LoadWAV(filename);
@@ -624,7 +624,7 @@ dxlib_sound_t dxlib_sound_load_wav(const char* filename) {
 		return NULL;
 	}
 
-	struct dxlib_sound_buffer* sound = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
+	struct platform_sound_buffer* sound = (struct platform_sound_buffer*)malloc(sizeof(struct platform_sound_buffer));
 	if (!sound) {
 		Mix_FreeChunk(chunk);
 		return NULL;
@@ -639,7 +639,7 @@ dxlib_sound_t dxlib_sound_load_wav(const char* filename) {
 	return sound;
 }
 
-dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
+platform_sound_t platform_sound_create_buffer(const void* data, int size,
                                        int channels, int sample_rate,
                                        int bits_per_sample) {
 	if (!g_sound_initialized) return NULL;
@@ -651,7 +651,7 @@ dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
 	Mix_Chunk* chunk = Mix_LoadWAV_RW(rw, 1); /* 1 = auto-free */
 	if (!chunk) return NULL;
 
-	struct dxlib_sound_buffer* sound = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
+	struct platform_sound_buffer* sound = (struct platform_sound_buffer*)malloc(sizeof(struct platform_sound_buffer));
 	if (!sound) {
 		Mix_FreeChunk(chunk);
 		return NULL;
@@ -666,7 +666,7 @@ dxlib_sound_t dxlib_sound_create_buffer(const void* data, int size,
 	return sound;
 }
 
-void dxlib_sound_free(dxlib_sound_t sound) {
+void platform_sound_free(platform_sound_t sound) {
 	if (!sound) return;
 
 	if (sound->playing) {
@@ -677,7 +677,7 @@ void dxlib_sound_free(dxlib_sound_t sound) {
 	free(sound);
 }
 
-int dxlib_sound_play(dxlib_sound_t sound, int loop) {
+int platform_sound_play(platform_sound_t sound, int loop) {
 	if (!sound || !sound->chunk) return 1;
 
 	int loops = loop ? -1 : 0; /* -1 = infinite loop */
@@ -687,7 +687,7 @@ int dxlib_sound_play(dxlib_sound_t sound, int loop) {
 	return sound->playing ? 0 : 1;
 }
 
-int dxlib_sound_stop(dxlib_sound_t sound) {
+int platform_sound_stop(platform_sound_t sound) {
 	if (!sound) return 1;
 
 	if (sound->channel >= 0) {
@@ -699,12 +699,12 @@ int dxlib_sound_stop(dxlib_sound_t sound) {
 	return 0;
 }
 
-int dxlib_sound_is_playing(dxlib_sound_t sound) {
+int platform_sound_is_playing(platform_sound_t sound) {
 	if (!sound) return 0;
 	return sound->playing && (sound->channel >= 0) && Mix_Playing(sound->channel);
 }
 
-int dxlib_sound_set_volume(dxlib_sound_t sound, int volume) {
+int platform_sound_set_volume(platform_sound_t sound, int volume) {
 	if (!sound) return 1;
 
 	sound->volume = volume;
@@ -717,7 +717,7 @@ int dxlib_sound_set_volume(dxlib_sound_t sound, int volume) {
 	return 0;
 }
 
-int dxlib_sound_set_pan(dxlib_sound_t sound, int pan) {
+int platform_sound_set_pan(platform_sound_t sound, int pan) {
 	if (!sound) return 1;
 
 	/* SDL_mixer doesn't support panning directly on channels */
@@ -728,16 +728,16 @@ int dxlib_sound_set_pan(dxlib_sound_t sound, int pan) {
 	return 0;
 }
 
-int dxlib_sound_set_frequency(dxlib_sound_t sound, int frequency) {
+int platform_sound_set_frequency(platform_sound_t sound, int frequency) {
 	/* SDL_mixer doesn't support changing frequency */
 	/* This would require recreating the chunk with resampled data */
 	return 1;
 }
 
-dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound) {
+platform_sound_t platform_sound_duplicate(platform_sound_t sound) {
 	if (!sound) return NULL;
 
-	struct dxlib_sound_buffer* duplicate = (struct dxlib_sound_buffer*)malloc(sizeof(struct dxlib_sound_buffer));
+	struct platform_sound_buffer* duplicate = (struct platform_sound_buffer*)malloc(sizeof(struct platform_sound_buffer));
 	if (!duplicate) return NULL;
 
 	/* Reference the same chunk */
@@ -753,17 +753,17 @@ dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound) {
 #else /* !SDL_MIXER_MAJOR_VERSION */
 
 /* SDL_mixer not available - stub implementation */
-int dxlib_sound_init(void* window_handle) { return 1; }
-void dxlib_sound_release(void) {}
-dxlib_sound_t dxlib_sound_load_wav(const char* filename) { return NULL; }
-void dxlib_sound_free(dxlib_sound_t sound) {}
-int dxlib_sound_play(dxlib_sound_t sound, int loop) { return 1; }
-int dxlib_sound_stop(dxlib_sound_t sound) { return 1; }
-int dxlib_sound_is_playing(dxlib_sound_t sound) { return 0; }
-int dxlib_sound_set_volume(dxlib_sound_t sound, int volume) { return 1; }
-int dxlib_sound_set_pan(dxlib_sound_t sound, int pan) { return 1; }
-int dxlib_sound_set_frequency(dxlib_sound_t sound, int frequency) { return 1; }
-dxlib_sound_t dxlib_sound_duplicate(dxlib_sound_t sound) { return NULL; }
+int platform_sound_init(void* window_handle) { return 1; }
+void platform_sound_release(void) {}
+platform_sound_t platform_sound_load_wav(const char* filename) { return NULL; }
+void platform_sound_free(platform_sound_t sound) {}
+int platform_sound_play(platform_sound_t sound, int loop) { return 1; }
+int platform_sound_stop(platform_sound_t sound) { return 1; }
+int platform_sound_is_playing(platform_sound_t sound) { return 0; }
+int platform_sound_set_volume(platform_sound_t sound, int volume) { return 1; }
+int platform_sound_set_pan(platform_sound_t sound, int pan) { return 1; }
+int platform_sound_set_frequency(platform_sound_t sound, int frequency) { return 1; }
+platform_sound_t platform_sound_duplicate(platform_sound_t sound) { return NULL; }
 
 #endif /* SDL_MIXER_MAJOR_VERSION */
 
@@ -778,12 +778,12 @@ static int g_music_playing = 0;
 static int g_music_paused = 0;
 static int g_music_volume = 100;
 
-int dxlib_music_init(void* window_handle) {
+int platform_music_init(void* window_handle) {
 	if (g_music_initialized) return 0;
 
-	/* SDL_mixer should already be initialized by dxlib_sound_init */
+	/* SDL_mixer should already be initialized by platform_sound_init */
 	if (!g_sound_initialized) {
-		if (dxlib_sound_init(window_handle) != 0) {
+		if (platform_sound_init(window_handle) != 0) {
 			return 1;
 		}
 	}
@@ -792,17 +792,17 @@ int dxlib_music_init(void* window_handle) {
 	return 0;
 }
 
-void dxlib_music_release(void) {
+void platform_music_release(void) {
 	if (!g_music_initialized) return;
 
 	if (g_current_music) {
-		dxlib_music_free();
+		platform_music_free();
 	}
 
 	g_music_initialized = 0;
 }
 
-int dxlib_music_load(const char* filename) {
+int platform_music_load(const char* filename) {
 	if (!g_music_initialized) return 1;
 
 	/* Free previous music */
@@ -820,7 +820,7 @@ int dxlib_music_load(const char* filename) {
 	return 0;
 }
 
-void dxlib_music_free(void) {
+void platform_music_free(void) {
 	if (g_current_music) {
 		Mix_FreeMusic(g_current_music);
 		g_current_music = NULL;
@@ -830,7 +830,7 @@ void dxlib_music_free(void) {
 	g_music_paused = 0;
 }
 
-int dxlib_music_play(int loop) {
+int platform_music_play(int loop) {
 	if (!g_current_music) return 1;
 
 	int loops = loop ? -1 : 0; /* -1 = infinite loop */
@@ -844,42 +844,42 @@ int dxlib_music_play(int loop) {
 	return 0;
 }
 
-void dxlib_music_stop(void) {
+void platform_music_stop(void) {
 	Mix_HaltMusic();
 	g_music_playing = 0;
 	g_music_paused = 0;
 }
 
-void dxlib_music_pause(void) {
+void platform_music_pause(void) {
 	if (g_music_playing && !g_music_paused) {
 		Mix_PauseMusic();
 		g_music_paused = 1;
 	}
 }
 
-void dxlib_music_resume(void) {
+void platform_music_resume(void) {
 	if (g_music_playing && g_music_paused) {
 		Mix_ResumeMusic();
 		g_music_paused = 0;
 	}
 }
 
-int dxlib_music_is_playing(void) {
+int platform_music_is_playing(void) {
 	return g_music_playing && !g_music_paused && Mix_PlayingMusic();
 }
 
-int dxlib_music_is_paused(void) {
+int platform_music_is_paused(void) {
 	return g_music_paused;
 }
 
-int dxlib_music_set_volume(int volume) {
+int platform_music_set_volume(int volume) {
 	g_music_volume = volume;
 	int mix_volume = (volume * 128) / 100;
 	Mix_VolumeMusic(mix_volume);
 	return 0;
 }
 
-int dxlib_music_set_tempo(float tempo) {
+int platform_music_set_tempo(float tempo) {
 	/* SDL_mixer doesn't support tempo changes */
 	return 1;
 }
@@ -887,18 +887,18 @@ int dxlib_music_set_tempo(float tempo) {
 #else /* !SDL_MIXER_MAJOR_VERSION */
 
 /* SDL_mixer not available - stub implementation */
-int dxlib_music_init(void* window_handle) { return 1; }
-void dxlib_music_release(void) {}
-int dxlib_music_load(const char* filename) { return 1; }
-void dxlib_music_free(void) {}
-int dxlib_music_play(int loop) { return 1; }
-void dxlib_music_stop(void) {}
-void dxlib_music_pause(void) {}
-void dxlib_music_resume(void) {}
-int dxlib_music_is_playing(void) { return 0; }
-int dxlib_music_is_paused(void) { return 0; }
-int dxlib_music_set_volume(int volume) { return 1; }
-int dxlib_music_set_tempo(float tempo) { return 1; }
+int platform_music_init(void* window_handle) { return 1; }
+void platform_music_release(void) {}
+int platform_music_load(const char* filename) { return 1; }
+void platform_music_free(void) {}
+int platform_music_play(int loop) { return 1; }
+void platform_music_stop(void) {}
+void platform_music_pause(void) {}
+void platform_music_resume(void) {}
+int platform_music_is_playing(void) { return 0; }
+int platform_music_is_paused(void) { return 0; }
+int platform_music_set_volume(int volume) { return 1; }
+int platform_music_set_tempo(float tempo) { return 1; }
 
 #endif /* SDL_MIXER_MAJOR_VERSION */
 
@@ -906,62 +906,62 @@ int dxlib_music_set_tempo(float tempo) { return 1; }
  * Stream Backend (uses music backend)
  * ============================================================================ */
 
-int dxlib_stream_init(void* window_handle) {
-	return dxlib_music_init(window_handle);
+int platform_stream_init(void* window_handle) {
+	return platform_music_init(window_handle);
 }
 
-void dxlib_stream_release(void) {
-	dxlib_music_release();
+void platform_stream_release(void) {
+	platform_music_release();
 }
 
-dxlib_stream_t dxlib_stream_load(const char* filename) {
+platform_stream_t platform_stream_load(const char* filename) {
 	/* For simplicity, streams use the music backend */
-	return (dxlib_stream_t)1; /* Non-null value */
+	return (platform_stream_t)1; /* Non-null value */
 }
 
-void dxlib_stream_free(dxlib_stream_t stream) {
-	dxlib_music_free();
+void platform_stream_free(platform_stream_t stream) {
+	platform_music_free();
 }
 
-int dxlib_stream_play(dxlib_stream_t stream, int loop) {
-	return dxlib_music_play(loop);
+int platform_stream_play(platform_stream_t stream, int loop) {
+	return platform_music_play(loop);
 }
 
-void dxlib_stream_stop(dxlib_stream_t stream) {
-	dxlib_music_stop();
+void platform_stream_stop(platform_stream_t stream) {
+	platform_music_stop();
 }
 
-int dxlib_stream_update(dxlib_stream_t stream) {
+int platform_stream_update(platform_stream_t stream) {
 	/* SDL_mixer handles streaming automatically */
 	return 0;
 }
 
-int dxlib_stream_set_volume(dxlib_stream_t stream, int volume) {
-	return dxlib_music_set_volume(volume);
+int platform_stream_set_volume(platform_stream_t stream, int volume) {
+	return platform_music_set_volume(volume);
 }
 
-int dxlib_stream_is_playing(dxlib_stream_t stream) {
-	return dxlib_music_is_playing();
+int platform_stream_is_playing(platform_stream_t stream) {
+	return platform_music_is_playing();
 }
 
 /* ============================================================================
  * Backend Information
  * ============================================================================ */
 
-const char* dxlib_get_backend_name(void) {
+const char* platform_get_backend_name(void) {
 	return "SDL2";
 }
 
-int dxlib_get_capabilities(void) {
+int platform_get_capabilities(void) {
 	int caps = 0;
 
 	#ifdef SDL_MIXER_MAJOR_VERSION
-		caps |= DXLIB_CAP_SOUND | DXLIB_CAP_MUSIC | DXLIB_CAP_STREAM | DXLIB_CAP_MP3 | DXLIB_CAP_OGG;
+		caps |= PLATFORM_CAP_SOUND | PLATFORM_CAP_MUSIC | PLATFORM_CAP_STREAM | PLATFORM_CAP_MP3 | PLATFORM_CAP_OGG;
 	#endif
 
-	caps |= DXLIB_CAP_INPUT;
+	caps |= PLATFORM_CAP_INPUT;
 
 	return caps;
 }
 
-#endif /* DXLIB_BACKEND_SDL */
+#endif /* PLATFORM_BACKEND_SDL */

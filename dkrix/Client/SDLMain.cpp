@@ -42,7 +42,7 @@
 #include "MPlayer.h"
 #include "../basic/Platform.h"
 #include "Packet/Exception.h"  // For NoSuchElementException, Throwable
-#include "Platform/DXLibBackend.h"  // For dxlib_input_update
+#include "Platform/DXLibBackend.h"  // For platform_input_update
 
 // Language detection
 enum DARKEDEN_LANGUAGE
@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
 		//-----------------------------------------------------------------
 		// Main game loop (from WinMain lines 4244-4341)
 		//-----------------------------------------------------------------
-		// Note: All SDL events are now handled by dxlib_input_update() in DXLibBackendSDL.cpp
+		// Note: All SDL events are now handled by platform_input_update() in DXLibBackendSDL.cpp
 		// This prevents event queue conflicts and ensures mouse events are properly processed
 		static int loopCount = 0;
 
@@ -370,8 +370,8 @@ int main(int argc, char* argv[])
 		while (g_bRunning)
 		{
 			// Process SDL events (IMPORTANT: prevents "Not Responding" on macOS)
-			// dxlib_input_update handles: SDL_QUIT, SDL_WINDOWEVENT, SDL_KEY*, SDL_MOUSE*, SDL_TEXT*
-			dxlib_input_update();
+			// platform_input_update handles: SDL_QUIT, SDL_WINDOWEVENT, SDL_KEY*, SDL_MOUSE*, SDL_TEXT*
+			platform_input_update();
 
 			// Game update when active
 			if (g_bActiveApp)

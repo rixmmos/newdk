@@ -22,7 +22,7 @@ InputManager*	g_pSDLInput = NULL;
  * SDL Backend Implementation
  *=============================================================================*/
 
-#ifdef DXLIB_BACKEND_SDL
+#ifdef PLATFORM_BACKEND_SDL
 
 /* Constructor */
 InputManager::InputManager()
@@ -74,7 +74,7 @@ void InputManager::Clear()
 BOOL InputManager::Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 {
 	// Initialize SDL backend
-	if (dxlib_input_init(hWnd) != 0) {
+	if (platform_input_init(hWnd) != 0) {
 		return FALSE;
 	}
 
@@ -89,7 +89,7 @@ BOOL InputManager::Init(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex)
 /* Release SDL backend */
 void InputManager::FreeDirectInput()
 {
-	dxlib_input_release();
+	platform_input_release();
 
 	m_pDI = NULL;
 	m_pMouse = NULL;
@@ -100,7 +100,7 @@ void InputManager::FreeDirectInput()
 void InputManager::UpdateInput()
 {
 	// Update backend
-	dxlib_input_update();
+	platform_input_update();
 
 	// Legacy game code treats DOWN/UP as edge events, not held states.
 	m_lb_down = FALSE;
@@ -112,7 +112,7 @@ void InputManager::UpdateInput()
 
 	// Update keyboard state
 	for (int i = 0; i < 256; i++) {
-		BOOL down = dxlib_input_key_down(i) ? TRUE : FALSE;
+		BOOL down = platform_input_key_down(i) ? TRUE : FALSE;
 		
 		// Check for state changes and trigger events
 		if (down && !m_key[i]) {
@@ -131,7 +131,7 @@ void InputManager::UpdateInput()
 	// Update mouse position
 	int old_x = m_mouse_x;
 	int old_y = m_mouse_y;
-	dxlib_input_get_mouse_pos(&m_mouse_x, &m_mouse_y);
+	platform_input_get_mouse_pos(&m_mouse_x, &m_mouse_y);
 
 	// Check for mouse movement
 	if (old_x != m_mouse_x || old_y != m_mouse_y) {
@@ -142,7 +142,7 @@ void InputManager::UpdateInput()
 
 	// Update mouse wheel
 	int old_z = m_mouse_z;
-	m_mouse_z = dxlib_input_get_mouse_wheel();
+	m_mouse_z = platform_input_get_mouse_wheel();
 	
 	// Check for wheel movement
 	if (old_z != m_mouse_z) {
@@ -157,7 +157,7 @@ void InputManager::UpdateInput()
 
 	// Update mouse buttons
 	int left, right, center;
-	dxlib_input_get_mouse_buttons(&left, &right, &center);
+	platform_input_get_mouse_buttons(&left, &right, &center);
 
 	// Check for button state changes
 	if (left && !m_lb_held) {
@@ -220,7 +220,7 @@ void InputManager::SetMousePosition(int x, int y)
 {
 	m_mouse_x = x;
 	m_mouse_y = y;
-	dxlib_input_set_mouse_pos(x, y);
+	platform_input_set_mouse_pos(x, y);
 }
 
 /* Set mouse speed (SDL backend - stub) */
@@ -267,4 +267,4 @@ bool InputManager::InitDI(HWND hWnd, HINSTANCE hInst, E_EXCLUSIVE ex) {
 	return Init(hWnd, hInst, ex) != FALSE;
 }
 
-#endif /* DXLIB_BACKEND_SDL */
+#endif /* PLATFORM_BACKEND_SDL */

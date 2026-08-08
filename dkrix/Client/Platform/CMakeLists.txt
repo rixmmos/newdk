@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 # Platform layer — formerly Client/DXLib/, moved here by Phase 3 item 3
 # (2026-08). SDL2-backed graphics/sound/music/input behind legacy
-# DirectX-shaped APIs. The library target keeps its historical name
-# "dxlib"; renaming the target/define/dxlib_* API is a separate item.
+# DirectX-shaped APIs. The library target, PLATFORM_* defines, and
+# platform_* C API were renamed from their dxlib/DXLIB_/dxlib_ originals
+# in the Phase 3 item 3 follow-up (2026-08). Filenames (DXLibBackend.h,
+# DXLibBackendSDL.cpp, DXLib.h) and Client/DXLib.h were deliberately kept.
 
-project(dxlib)
+project(platform)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,7 +17,7 @@ if(WIN32)
 	option(USE_SDL_BACKEND "Use SDL2 backend instead of DirectX" OFF)
 
 	if(USE_SDL_BACKEND)
-		add_definitions(-DDXLIB_USE_SDL_BACKEND)
+		add_definitions(-DPLATFORM_USE_SDL_BACKEND)
 		message(STATUS "DXLib: Using SDL2 backend")
 		find_package(SDL2 REQUIRED)
 		find_package(SDL2_mixer)
@@ -29,7 +31,7 @@ endif()
 
 # Non-Windows platforms must use SDL
 if(NOT WIN32)
-	add_definitions(-DDXLIB_USE_SDL_BACKEND)
+	add_definitions(-DPLATFORM_USE_SDL_BACKEND)
 	# Define platform-specific macros
 	if(APPLE)
 		add_definitions(-DPLATFORM_MACOS)
@@ -50,7 +52,7 @@ else()
 endif()
 
 # DXLib source files
-set(DXLIB_SOURCES
+set(PLATFORM_SOURCES
 	# Platform backend
 	DXLibBackendSDL.cpp
 
@@ -71,7 +73,7 @@ set(DXLIB_SOURCES
 # Phase 3 item 1 (2026-08): the CDirect{Sound,Music,SoundStream}_Adapter.cpp
 # files formerly appended here were duplicate implementations of the same
 # classes as AudioManager.cpp / CDirectMusic.cpp / CDirectSoundStream.cpp.
-# They landed in DXLIB_SOURCES whenever HAVE_SDL2_MIXER was on, which never
+# They landed in PLATFORM_SOURCES whenever HAVE_SDL2_MIXER was on, which never
 # actually built: CDirectSound_Adapter.cpp and CDirectSoundStream_Adapter.cpp
 # had ctor/dtor names left over from before a rename (e.g.
 # `AudioManager::CDirectSound()`, not a valid member of that class), and
@@ -87,10 +89,10 @@ if(WIN32 AND NOT USE_SDL_BACKEND)
 endif()
 
 # Create library
-add_library(dxlib STATIC ${DXLIB_SOURCES})
+add_library(platform STATIC ${PLATFORM_SOURCES})
 
 # Public include directories
-target_include_directories(dxlib
+target_include_directories(platform
 	PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_SOURCE_DIR}/basic  # For platform abstraction
@@ -99,29 +101,29 @@ target_include_directories(dxlib
 # Link SDL2 if using SDL backend
 if(USE_SDL_BACKEND OR NOT WIN32)
 	if(TARGET SDL2::SDL2)
-		target_link_libraries(dxlib PUBLIC SDL2::SDL2)
+		target_link_libraries(platform PUBLIC SDL2::SDL2)
 	else()
-		target_link_libraries(dxlib PUBLIC ${SDL2_LIBRARIES})
-		target_include_directories(dxlib PUBLIC ${SDL2_INCLUDE_DIRS})
+		target_link_libraries(platform PUBLIC ${SDL2_LIBRARIES})
+		target_include_directories(platform PUBLIC ${SDL2_INCLUDE_DIRS})
 	endif()
 
 	# Link SDL2_mixer if available
 	if(HAVE_SDL2_MIXER)
 		if(TARGET SDL2::SDL2_mixer)
-			target_link_libraries(dxlib PUBLIC SDL2::SDL2_mixer)
+			target_link_libraries(platform PUBLIC SDL2::SDL2_mixer)
 		else()
-			target_link_libraries(dxlib PUBLIC ${SDL2_MIXER_LIBRARIES})
-			target_include_directories(dxlib PUBLIC ${SDL2_MIXER_INCLUDE_DIRS})
+			target_link_libraries(platform PUBLIC ${SDL2_MIXER_LIBRARIES})
+			target_include_directories(platform PUBLIC ${SDL2_MIXER_INCLUDE_DIRS})
 		endif()
 	endif()
 endif()
 
 # Link basic library for platform abstraction
-target_link_libraries(dxlib PUBLIC basic)
+target_link_libraries(platform PUBLIC basic)
 
 # Windows-specific libraries
 if(WIN32 AND NOT USE_SDL_BACKEND)
-	target_link_libraries(dxlib PUBLIC
+	target_link_libraries(platform PUBLIC
 		dinput8
 		dsound
 		dxguid
@@ -130,7 +132,7 @@ if(WIN32 AND NOT USE_SDL_BACKEND)
 endif()
 
 # Installation
-install(TARGETS dxlib
+install(TARGETS platform
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
 )
@@ -143,7 +145,7 @@ install(FILES
 	AudioManager.h
 	CDirectMusic.h
 	CDirectSoundStream.h
-	DESTINATION include/dxlib
+	DESTINATION include/platform
 )
 
 # Build options message

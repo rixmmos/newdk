@@ -833,6 +833,26 @@ back to a single unconditional typedef.
       Grep-verified zero DXLib-dir references in build files and
       includes; **not compile-verified in this session** — the client
       CI run is the gate, same as items 1 and 2.
+      **Follow-up executed 2026-08-08**: the deferred build/API identity
+      rename. CMake target `dxlib` → `platform` (`Client/Platform/
+      CMakeLists.txt`'s `project()`/`add_library()`/`target_link_libraries()`/
+      `install(TARGETS …)`, plus 7 `target_link_libraries()` entries in the
+      root `dkrix/CMakeLists.txt`); `DXLIB_*` defines → `PLATFORM_*`
+      (`DXLIB_USE_SDL_BACKEND`, `DXLIB_BACKEND_{WINDOWS,SDL}`, `DXLIB_CAP_*`,
+      the `__DXLIB_BACKEND_H__` include guard, and the `install(FILES …
+      DESTINATION include/dxlib)` path → `include/platform`); `dxlib_*` C API
+      → `platform_*` at every declaration (`DXLibBackend.h`) and call site
+      (`DXLibBackendSDL.cpp`, `InputManager.cpp`, `AudioManager.cpp` comment,
+      `CGameUpdate.cpp`, `CWaitUIUpdate.cpp`, `SDLMain.cpp`). Filenames
+      (`DXLibBackend.h`, `DXLibBackendSDL.cpp`, `Client/Platform/DXLib.h`,
+      `Client/DXLib.h`) and the umbrella header's own prose were left alone,
+      per this item's original scope note. `Client/Platform/README.md`'s
+      documented API-name table/examples updated to match; its stale
+      pre-move content (dead `_Adapter.cpp` references, never-built
+      `DXLibBackendWindows.cpp`) is unrelated and untouched. Pure rename, no
+      behavior change. Grep-verified zero remaining `dxlib_`/`DXLIB_`/bare
+      `dxlib` hits outside the kept filenames/umbrella content; **not
+      compile-verified in this session** — next client CI run is the gate.
 
 ### Phase 4 — One sprite pipeline (client, re-scoped 2026-08-06)
 

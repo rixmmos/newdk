@@ -231,9 +231,9 @@ CGameUpdate::Init()
 	TraceGameUpdate("CGameUpdate::Init after SetKeyboardEventReceiver");
 
 	
-	dxlib_input_set_textinput_callback(SDLTextInputEvent);
+	platform_input_set_textinput_callback(SDLTextInputEvent);
 	TraceGameUpdate("CGameUpdate::Init after set_textinput_callback");
-	dxlib_input_start_text();  // Enable SDL text input
+	platform_input_start_text();  // Enable SDL text input
 	TraceGameUpdate("CGameUpdate::Init end");
 }
 

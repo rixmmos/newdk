@@ -49,9 +49,12 @@ mentioning it are archaeology only.
 ## Current technical shape
 
 - `D3DLib/` has been deleted.
-- `Client/Platform/` (the former `DXLib/`; moved and renamed by Phase 3
-  item 3, 2026-08, keeping file names and the `dxlib` target name) still
-  exposes some DirectX-shaped interfaces backed by SDL.
+- `Client/Platform/` (the former `DXLib/`; moved by Phase 3 item 3, 2026-08,
+  keeping filenames — including `DXLibBackend.{h,cpp}` and the umbrella
+  `Client/DXLib.h`) still exposes some DirectX-shaped interfaces backed by
+  SDL. The build/API identity — CMake target `dxlib`, `DXLIB_*`
+  defines, `dxlib_*` C API — was renamed to `platform`/`PLATFORM_*`/
+  `platform_*` in the item 3 follow-up (2026-08); filenames did not change.
   **[2026-08] Phase 3 item 1**: the input and audio classes were renamed to
   `InputManager` / `AudioManager` (files `InputManager.{h,cpp}` /
   `AudioManager.{h,cpp}`), and the `CDirectSound_Adapter.cpp` /
