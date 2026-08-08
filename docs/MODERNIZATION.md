@@ -887,10 +887,75 @@ Unblocked 2026-08-06 (CI green), not started:
       demoted to what it already is, the viewer tools' library.
 - [ ] Wire `engine/sprite`'s 11 test files (3,898 lines) into CI — the only
       automated tests in this repo.
-- [ ] **4c** — audit shipped SPK assets in `Darkeden/` for the pixel
+- [x] **4c** — audit shipped SPK assets in `Darkeden/` for the pixel
       encodings actually in use. That evidence, not the class count,
       decides the fate of the 555/565 serializers.
-- [ ] `CAlphaSprite::Blt4444*` methods — re-check against asset evidence.
+
+      **[measured 2026-08-08]** The premise ("check what encoding each SPK
+      file uses") doesn't hold: SPK files carry no format tag. The answer is
+      in the serializer code, not the bytes. `CSprite555::LoadFromFile`
+      (`Client/SpriteLib/CSprite555.cpp:103-194`) reads the *identical* byte
+      layout as `CSprite565::LoadFromFile` (`CSprite565.cpp:72-150`) — `u16
+      width`, `u16 height`, then per row `u16 len` + `len` words of
+      RLE-encoded pixel data — and only *after* reading converts every pixel
+      565→555 in memory via `ColorDraw::Convert565to555`. `SaveToFile`
+      mirrors this: convert 555→565, write the 565 bytes, convert back to
+      restore the in-memory 555 copy. `CIndexSprite555/565.cpp` and
+      `CAlphaSprite555/565.cpp` follow the same pattern. **On-disk SPK data
+      is 5:6:5 in every case that exists in this codebase; "555" is an
+      in-memory-only pixel representation, never a file encoding.** There is
+      no such thing as a 555-encoded asset to find.
+
+      The runtime switch that picks which in-memory class to build —
+      `ColorDraw::Is565()` (`basic/ColorDraw.h:43`) and
+      `CSDLGraphics::Is565()` (`Client/Platform/CSDLGraphics.h:231`) — is
+      hardcoded `return true` in the SDL2 backend. The `else` branches that
+      would construct `CSprite555` / `CIndexSprite555` / `CAlphaSprite555`
+      (`CSpriteSet.cpp:58`, `CAlphaSpritePack.cpp:58`, `GameInit.cpp:431`,
+      `MGuildMarkManager.cpp:140-141,336-337,848-849`) are unreachable in the
+      current build — not just unused on disk, dead at runtime too.
+
+      Cross-checked against the real assets: ran `tools/spk_tools.ps1`'s own
+      `[count:u16][w,h,then-per-row-RLE]` reader, structure-only (no bitmap
+      decode, for speed), against all 137 non-index sprite-pack files under
+      `Darkeden/Data/Image/` (extensions `.spk .sspk .ispk .cfpk .afpk .efpk
+      .ifpk .ppk .aspk .sppk`; the matching `*i` files are `CFileIndexTable`
+      offset tables, not pixel data, and were excluded). 69 files — every
+      `.spk`/`.sspk`/`.ispk` file, the exact families the tool was written
+      for — parsed as well-formed RLE streams with no overrun. The other 68,
+      entirely `.cfpk`/`.ppk`/`.aspk`/`.sppk`, fail to parse under that
+      reader; a hex check of one (`vampire.cfpk`) shows the count field reads
+      correctly (10) but the following bytes don't line up as `[w,h,...]`,
+      meaning those pack types wrap the per-sprite payload in additional
+      container framing (likely `CAlphaSpritePack`/`CFilterPack` header
+      fields) that `spk_tools.ps1` was never built to parse. This is a
+      **container-framing gap, not a pixel-format one** — the per-sprite row
+      encoding those failures would expose, if parsed correctly, is the same
+      `CAlphaSprite555/565::LoadFromFile` code path already shown uniform
+      above, not a different pack-level pixel format. No file of any
+      extension produced evidence of a distinct on-disk 555 encoding.
+
+      Net: the 555/565 serializers are not deletable by evidence of asset
+      encoding, because there is no asset-encoding distinction to find — but
+      the `else` branches building the `*555` classes are runtime-dead today
+      given the hardcoded `Is565()`.
+
+- [x] `CAlphaSprite::Blt4444*` methods — re-check against asset evidence.
+
+      **[measured 2026-08-08]** Not an asset-encoding question. These are
+      render-time alpha-blend blit functions (`CAlphaSprite.cpp:1157-2925`:
+      `Blt4444`/`Blt4444ClipLeft/Right/Width/Height`/`Blt4444NotTrans*`/
+      `Blt4444SmallNotTrans`, plus the `memcpyAlpha4444`/
+      `memcpyAlpha4444Small` helpers) that composite an already-loaded
+      sprite's pixels (565 or 555 in memory, per above) into a
+      4:4:4:4-format destination buffer for translucency — called live from
+      `CSpriteSurface.cpp`, `CShadowSprite.cpp`, `CFilter.cpp`,
+      `CAlphaSpritePal.cpp`, and `MTopView.cpp`. No `CSprite4444` /
+      `CIndexSprite4444` / `CAlphaSprite4444` serializer class exists
+      anywhere in `Client/SpriteLib/` — nothing is ever stored on disk in
+      4444. 4444 is a render-target format, not a shipped-asset one; it is
+      out of scope for the SPK-encoding question this item was flagged
+      under.
 
 Explicitly **rejected**: porting the client onto `tools/engine/sprite/`.
 It is the better-structured artifact and holds the only tests, but it has
