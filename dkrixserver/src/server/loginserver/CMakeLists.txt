@@ -29,6 +29,13 @@ target_include_directories(loginserver PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server
     ${CMAKE_SOURCE_DIR}/src/server/database
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
+    # Phase 12: header-visibility for migrated packet headers moved out of
+    # src/Core into shared/Packets/ -- see the matching comment in
+    # server/gameserver/CMakeLists.txt for the full reasoning. Deliberately
+    # not linking shared_packets_cl here (LoginServerPackets already does,
+    # and PRIVATE linkage there means loginserver itself never saw the
+    # include path even though it can have direct sources of its own).
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 

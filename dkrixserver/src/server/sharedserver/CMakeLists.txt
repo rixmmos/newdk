@@ -27,6 +27,10 @@ target_include_directories(sharedserver PRIVATE
     ${CMAKE_SOURCE_DIR}/src/Core
     ${CMAKE_SOURCE_DIR}/src/server
     ${CMAKE_SOURCE_DIR}/src/server/database
+    # Phase 12: header-visibility for migrated packet headers moved out of
+    # src/Core into shared/Packets/ -- see the matching comment in
+    # server/gameserver/CMakeLists.txt for the full reasoning.
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 

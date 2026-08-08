@@ -9,6 +9,17 @@ set(GAMESERVER_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/src/Core
     ${CMAKE_SOURCE_DIR}/src/server
     ${CMAKE_SOURCE_DIR}/src/server/database
+    # Phase 12: migrated packet headers (e.g. CGLogout.h) moved out of
+    # src/Core into shared/Packets/. GameServerPackets already sees them
+    # (it links shared_packets_cg to compile the .cpp sources), but that
+    # link is PRIVATE and doesn't propagate the include path to gameserver
+    # itself -- and gameserver has files of its own (e.g.
+    # server/gameserver/ZonePlayerManager.cpp) that #include a migrated
+    # header directly. Header-visibility only, deliberately not linking
+    # shared_packets_cg here -- that would recompile its .cpp sources a
+    # second time into gameserver, duplicating symbols GameServerPackets
+    # already provides.
+    ${CMAKE_SOURCE_DIR}/../shared/Packets
     ${CMAKE_CURRENT_SOURCE_DIR}/skill
     ${CMAKE_CURRENT_SOURCE_DIR}/item
     ${CMAKE_CURRENT_SOURCE_DIR}/billing
