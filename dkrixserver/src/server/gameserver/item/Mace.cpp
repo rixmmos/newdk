@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -61,7 +62,7 @@ void Mace::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -75,22 +76,27 @@ void Mace::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO MaceObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertMaceObjectStmt(
+            pConn, "INSERT INTO MaceObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertMaceObjectStmt.bindLong(1, m_ItemID);
+        insertMaceObjectStmt.bindLong(2, m_ObjectID);
+        insertMaceObjectStmt.bindInt(3, getItemType());
+        insertMaceObjectStmt.bindString(4, ownerID);
+        insertMaceObjectStmt.bindInt(5, (int)storage);
+        insertMaceObjectStmt.bindLong(6, storageID);
+        insertMaceObjectStmt.bindInt(7, (int)x);
+        insertMaceObjectStmt.bindInt(8, (int)y);
+        insertMaceObjectStmt.bindString(9, optionField);
+        insertMaceObjectStmt.bindInt(10, getDurability());
+        insertMaceObjectStmt.bindInt(11, (int)getGrade());
+        insertMaceObjectStmt.bindInt(12, (int)m_CreateType);
+        insertMaceObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -109,11 +115,15 @@ void Mace::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMaceObjectStmt(pConn, string("UPDATE MaceObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMaceObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMaceObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MaceObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -128,10 +138,10 @@ void Mace::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -155,13 +165,24 @@ void Mace::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE MaceObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getSilver(), (int)getGrade(), m_ItemID);
+        PreparedStatement updateMaceObjectStmt(
+            pConn, "UPDATE MaceObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, Silver=?, Grade=? WHERE ItemID=?");
+        updateMaceObjectStmt.bindLong(1, m_ObjectID);
+        updateMaceObjectStmt.bindInt(2, getItemType());
+        updateMaceObjectStmt.bindString(3, ownerID);
+        updateMaceObjectStmt.bindInt(4, (int)storage);
+        updateMaceObjectStmt.bindLong(5, storageID);
+        updateMaceObjectStmt.bindInt(6, (int)x);
+        updateMaceObjectStmt.bindInt(7, (int)y);
+        updateMaceObjectStmt.bindString(8, optionField);
+        updateMaceObjectStmt.bindInt(9, getDurability());
+        updateMaceObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateMaceObjectStmt.bindInt(11, (int)getSilver());
+        updateMaceObjectStmt.bindInt(12, (int)getGrade());
+        updateMaceObjectStmt.bindLong(13, m_ItemID);
+        updateMaceObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -306,12 +327,13 @@ void MaceInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MaceInfo");
+        PreparedStatement selectMaceInfoStmt(pConn, "SELECT MAX(ItemType) FROM MaceInfo");
+        Result* pResult = selectMaceInfoStmt.execute();
 
         pResult->next();
 
@@ -322,10 +344,11 @@ void MaceInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MPBonus, "
-            "MaxSilver, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-            "NextOptionRatio, NextItemType, DowngradeRatio FROM MaceInfo");
+        PreparedStatement selectMaceInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, "
+                   "MPBonus, MaxSilver, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, "
+                   "UpgradeCrashPercent, NextOptionRatio, NextItemType, DowngradeRatio FROM MaceInfo");
+        pResult = selectMaceInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -358,7 +381,6 @@ void MaceInfoManager::load()
             addItemInfo(pMaceInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -376,10 +398,10 @@ void MaceLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -394,10 +416,12 @@ void MaceLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, EnchantLevel, "
-            "Silver, Grade, ItemFlag FROM MaceObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectMaceObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, Grade, ItemFlag FROM MaceObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, "
+                   "3, 4, 9)");
+        selectMaceObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMaceObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -502,7 +526,6 @@ void MaceLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -514,7 +537,6 @@ void MaceLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -532,18 +554,19 @@ void MaceLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM MaceObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneMaceObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, ItemFlag FROM MaceObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneMaceObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneMaceObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneMaceObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -585,7 +608,6 @@ void MaceLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -601,7 +623,7 @@ void MaceLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

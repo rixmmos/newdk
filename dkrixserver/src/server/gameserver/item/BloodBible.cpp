@@ -13,6 +13,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void BloodBible::create(const string& ownerID, Storage storage, StorageID_t stor
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,20 +74,22 @@ void BloodBible::create(const string& ownerID, Storage storage, StorageID_t stor
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO BloodBibleObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, Durability)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", " << m_Durability << ")";
-
-        pStmt->executeQueryString(sql.toString());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertBloodBibleObjectStmt(
+            pConn, "INSERT INTO BloodBibleObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "Durability) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertBloodBibleObjectStmt.bindLong(1, m_ItemID);
+        insertBloodBibleObjectStmt.bindLong(2, m_ObjectID);
+        insertBloodBibleObjectStmt.bindInt(3, m_ItemType);
+        insertBloodBibleObjectStmt.bindString(4, ownerID);
+        insertBloodBibleObjectStmt.bindInt(5, (int)storage);
+        insertBloodBibleObjectStmt.bindLong(6, storageID);
+        insertBloodBibleObjectStmt.bindInt(7, (int)x);
+        insertBloodBibleObjectStmt.bindInt(8, (int)y);
+        insertBloodBibleObjectStmt.bindInt(9, m_Durability);
+        insertBloodBibleObjectStmt.execute();
         filelog("WarLog.txt", "%s", sql.toString().c_str());
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -106,13 +109,22 @@ void BloodBible::tinysave(const char* field) const
     char query[255];
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         sprintf(query, "UPDATE BloodBibleObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-        pStmt->executeQuery(query);
         filelog("WarLog.txt", "%s", query);
 
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound. `query` above is retained
+        // solely to preserve the WarLog.txt debug logging of the SQL text that
+        // used to be executed verbatim; it is no longer the string that runs.
+        PreparedStatement tinysaveBloodBibleObjectStmt(
+            pConn, string("UPDATE BloodBibleObject SET ") + field + " WHERE ItemID=?");
+        tinysaveBloodBibleObjectStmt.bindLong(1, m_ItemID);
+        tinysaveBloodBibleObjectStmt.execute();
+
     }
     END_DB(pStmt)
 
@@ -127,10 +139,10 @@ void BloodBible::save(const string& ownerID, Storage storage, StorageID_t storag
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -151,12 +163,21 @@ void BloodBible::save(const string& ownerID, Storage storage, StorageID_t storag
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE BloodBibleObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Durability=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            m_Durability, (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateBloodBibleObjectStmt(
+            pConn, "UPDATE BloodBibleObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Durability=?, EnchantLevel=? WHERE ItemID=?");
+        updateBloodBibleObjectStmt.bindLong(1, m_ObjectID);
+        updateBloodBibleObjectStmt.bindInt(2, m_ItemType);
+        updateBloodBibleObjectStmt.bindString(3, ownerID);
+        updateBloodBibleObjectStmt.bindInt(4, (int)storage);
+        updateBloodBibleObjectStmt.bindLong(5, storageID);
+        updateBloodBibleObjectStmt.bindInt(6, (int)x);
+        updateBloodBibleObjectStmt.bindInt(7, (int)y);
+        updateBloodBibleObjectStmt.bindInt(8, m_Durability);
+        updateBloodBibleObjectStmt.bindInt(9, (int)getEnchantLevel());
+        updateBloodBibleObjectStmt.bindLong(10, m_ItemID);
+        updateBloodBibleObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -270,12 +291,13 @@ void BloodBibleInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM BloodBibleInfo");
+        PreparedStatement selectBloodBibleInfoStmt(pConn, "SELECT MAX(ItemType) FROM BloodBibleInfo");
+        Result* pResult = selectBloodBibleInfoStmt.execute();
 
         pResult->next();
 
@@ -286,8 +308,10 @@ void BloodBibleInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, "
-                                      "Defense, Protection, ReqAbility, ItemLevel FROM BloodBibleInfo");
+        PreparedStatement selectBloodBibleInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel FROM BloodBibleInfo");
+        pResult = selectBloodBibleInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -310,7 +334,6 @@ void BloodBibleInfoManager::load()
             addItemInfo(pBloodBibleInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -328,10 +351,10 @@ void BloodBibleLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -346,14 +369,15 @@ void BloodBibleLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        
-        
-        
-        pStmt->executeQuery("DELETE FROM BloodBibleObject WHERE OwnerID = '%s'", pCreature->getName().c_str());
 
-         
 
-        SAFE_DELETE(pStmt);
+
+        PreparedStatement deleteBloodBibleObjectStmt(pConn, "DELETE FROM BloodBibleObject WHERE OwnerID = ?");
+        deleteBloodBibleObjectStmt.bindString(1, pCreature->getName());
+        deleteBloodBibleObjectStmt.execute();
+
+
+
     }
     END_DB(pStmt)
 
@@ -371,18 +395,19 @@ void BloodBibleLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " Durability, EnchantLevel FROM BloodBibleObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneBloodBibleObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Durability, EnchantLevel FROM "
+                   "BloodBibleObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneBloodBibleObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneBloodBibleObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneBloodBibleObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -417,7 +442,6 @@ void BloodBibleLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -433,7 +457,7 @@ void BloodBibleLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

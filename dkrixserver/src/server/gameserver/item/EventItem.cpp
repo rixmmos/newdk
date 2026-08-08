@@ -13,6 +13,7 @@
 #include "Motorcycle.h"
 #include "Ousters.h"
 #include "Party.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -64,17 +65,21 @@ void EventItem::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO EventItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertEventItemObjectStmt(
+            pConn, "INSERT INTO EventItemObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, "
+                   "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertEventItemObjectStmt.bindLong(1, m_ItemID);
+        insertEventItemObjectStmt.bindLong(2, m_ObjectID);
+        insertEventItemObjectStmt.bindInt(3, m_ItemType);
+        insertEventItemObjectStmt.bindString(4, ownerID);
+        insertEventItemObjectStmt.bindInt(5, (int)storage);
+        insertEventItemObjectStmt.bindLong(6, storageID);
+        insertEventItemObjectStmt.bindInt(7, (int)x);
+        insertEventItemObjectStmt.bindInt(8, (int)y);
+        insertEventItemObjectStmt.bindInt(9, (int)m_Num);
+        insertEventItemObjectStmt.bindInt(10, (int)m_CreateType);
+        insertEventItemObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -92,11 +97,16 @@ void EventItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveEventItemObjectStmt(
+            pConn, string("UPDATE EventItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveEventItemObjectStmt.bindLong(1, m_ItemID);
+        tinysaveEventItemObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE EventItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -128,15 +138,23 @@ void EventItem::save(const string& ownerID, Storage storage, StorageID_t storage
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateEventItemObjectStmt(
+            pConn, "UPDATE EventItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateEventItemObjectStmt.bindLong(1, m_ObjectID);
+        updateEventItemObjectStmt.bindInt(2, m_ItemType);
+        updateEventItemObjectStmt.bindString(3, ownerID);
+        updateEventItemObjectStmt.bindInt(4, (int)storage);
+        updateEventItemObjectStmt.bindLong(5, storageID);
+        updateEventItemObjectStmt.bindInt(6, (int)x);
+        updateEventItemObjectStmt.bindInt(7, (int)y);
+        updateEventItemObjectStmt.bindInt(8, (int)m_Num);
+        updateEventItemObjectStmt.bindLong(9, m_ItemID);
+        updateEventItemObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -209,9 +227,10 @@ void EventItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM EventItemInfo");
+        PreparedStatement selectEventItemInfoStmt(pConn, "SELECT MAX(ItemType) FROM EventItemInfo");
+        Result* pResult = selectEventItemInfoStmt.execute();
 
         pResult->next();
 
@@ -222,7 +241,9 @@ void EventItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventItemInfo");
+        PreparedStatement selectEventItemInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventItemInfo");
+        pResult = selectEventItemInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -240,7 +261,6 @@ void EventItemInfoManager::load()
             addItemInfo(pEventItemInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -261,7 +281,7 @@ void EventItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -275,10 +295,11 @@ void EventItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "EventItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectEventItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventItemObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectEventItemObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectEventItemObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -333,7 +354,7 @@ void EventItemLoader::load(Creature* pCreature)
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
 
                 if (pEventItem->getItemType() == 27) {
-                    
+
                     processItemBug(pCreature, pEventItem);
                 } else
                     switch (storage) {
@@ -385,7 +406,6 @@ void EventItemLoader::load(Creature* pCreature)
                         break;
 
                     default:
-                        SAFE_DELETE(pStmt); // by sigi
                         throw Error("invalid storage or OwnerID must be NULL");
                     }
 
@@ -397,7 +417,6 @@ void EventItemLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -411,17 +430,19 @@ void EventItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneEventItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventItemObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneEventItemObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneEventItemObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneEventItemObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -456,7 +477,6 @@ void EventItemLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -468,7 +488,7 @@ void EventItemLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

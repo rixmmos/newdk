@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -33,7 +34,7 @@ Motorcycle::Motorcycle(ItemType_t itemType, const list<OptionType_t>& optionType
     : m_ItemType(itemType), m_OptionType(optionType), m_Durability(0), m_pInventory(NULL) {
     __BEGIN_TRY
 
-    
+
     switch (itemType) {
     case 0:
         m_pInventory = new Inventory(10, 6);
@@ -83,7 +84,7 @@ void Motorcycle::create(const string& ownerID, Storage storage, StorageID_t stor
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -97,23 +98,25 @@ void Motorcycle::create(const string& ownerID, Storage storage, StorageID_t stor
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(m_OptionType, optionField);
 
-        sql << "INSERT INTO MotorcycleObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << m_Durability << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertMotorcycleObjectStmt(
+            pConn, "INSERT INTO MotorcycleObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertMotorcycleObjectStmt.bindLong(1, m_ItemID);
+        insertMotorcycleObjectStmt.bindLong(2, m_ObjectID);
+        insertMotorcycleObjectStmt.bindInt(3, m_ItemType);
+        insertMotorcycleObjectStmt.bindString(4, ownerID);
+        insertMotorcycleObjectStmt.bindInt(5, (int)storage);
+        insertMotorcycleObjectStmt.bindLong(6, storageID);
+        insertMotorcycleObjectStmt.bindInt(7, (int)x);
+        insertMotorcycleObjectStmt.bindInt(8, (int)y);
+        insertMotorcycleObjectStmt.bindString(9, optionField);
+        insertMotorcycleObjectStmt.bindInt(10, m_Durability);
+        insertMotorcycleObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -132,11 +135,16 @@ void Motorcycle::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMotorcycleObjectStmt(
+            pConn, string("UPDATE MotorcycleObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMotorcycleObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMotorcycleObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MotorcycleObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -151,10 +159,10 @@ void Motorcycle::save(const string& ownerID, Storage storage, StorageID_t storag
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -177,13 +185,22 @@ void Motorcycle::save(const string& ownerID, Storage storage, StorageID_t storag
         string optionField;
         setOptionTypeToField(m_OptionType, optionField);
 
-        pStmt->executeQuery("UPDATE MotorcycleObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s', Durability=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), m_Durability, m_ItemID);
+        PreparedStatement updateMotorcycleObjectStmt(
+            pConn, "UPDATE MotorcycleObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=? WHERE ItemID=?");
+        updateMotorcycleObjectStmt.bindLong(1, m_ObjectID);
+        updateMotorcycleObjectStmt.bindInt(2, m_ItemType);
+        updateMotorcycleObjectStmt.bindString(3, ownerID);
+        updateMotorcycleObjectStmt.bindInt(4, (int)storage);
+        updateMotorcycleObjectStmt.bindLong(5, storageID);
+        updateMotorcycleObjectStmt.bindInt(6, (int)x);
+        updateMotorcycleObjectStmt.bindInt(7, (int)y);
+        updateMotorcycleObjectStmt.bindString(8, optionField);
+        updateMotorcycleObjectStmt.bindInt(9, m_Durability);
+        updateMotorcycleObjectStmt.bindLong(10, m_ItemID);
+        updateMotorcycleObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -274,12 +291,13 @@ void MotorcycleInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MotorcycleInfo");
+        PreparedStatement selectMotorcycleInfoStmt(pConn, "SELECT MAX(ItemType) FROM MotorcycleInfo");
+        Result* pResult = selectMotorcycleInfoStmt.execute();
 
         pResult->next();
 
@@ -290,8 +308,9 @@ void MotorcycleInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability FROM MotorcycleInfo");
+        PreparedStatement selectMotorcycleInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability FROM MotorcycleInfo");
+        pResult = selectMotorcycleInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -310,7 +329,6 @@ void MotorcycleInfoManager::load()
             addItemInfo(pMotorcycleInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -328,10 +346,10 @@ void MotorcycleLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -346,10 +364,11 @@ void MotorcycleLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability "
-                                "FROM MotorcycleObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectMotorcycleObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability FROM "
+                   "MotorcycleObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectMotorcycleObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMotorcycleObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -374,7 +393,7 @@ void MotorcycleLoader::load(Creature* pCreature)
 
                 pMotorcycle->setDurability(pResult->getInt(++i));
 
-                 
+
 
             } catch (Error& error) {
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), error.toString().c_str());
@@ -384,7 +403,6 @@ void MotorcycleLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -402,18 +420,19 @@ void MotorcycleLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " Durability FROM MotorcycleObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneMotorcycleObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Durability FROM MotorcycleObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneMotorcycleObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneMotorcycleObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneMotorcycleObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -448,7 +467,6 @@ void MotorcycleLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -464,7 +482,7 @@ void MotorcycleLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

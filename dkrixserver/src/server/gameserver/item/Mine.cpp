@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -55,7 +56,7 @@ void Mine::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -69,18 +70,20 @@ void Mine::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO MineObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << "," << (int)m_Num << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertMineObjectStmt(
+            pConn, "INSERT INTO MineObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?)");
+        insertMineObjectStmt.bindLong(1, m_ItemID);
+        insertMineObjectStmt.bindLong(2, m_ObjectID);
+        insertMineObjectStmt.bindInt(3, m_ItemType);
+        insertMineObjectStmt.bindString(4, ownerID);
+        insertMineObjectStmt.bindInt(5, (int)storage);
+        insertMineObjectStmt.bindLong(6, storageID);
+        insertMineObjectStmt.bindInt(7, (int)x);
+        insertMineObjectStmt.bindInt(8, (int)y);
+        insertMineObjectStmt.bindInt(9, (int)m_Num);
+        insertMineObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -99,11 +102,15 @@ void Mine::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMineObjectStmt(pConn, string("UPDATE MineObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMineObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMineObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MineObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -118,10 +125,10 @@ void Mine::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -139,13 +146,21 @@ void Mine::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         pStmt->executeQueryString(sql.toString());
         */
-        pStmt->executeQuery("UPDATE MineObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateMineObjectStmt(
+            pConn, "UPDATE MineObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, Num=? "
+                   "WHERE ItemID=?");
+        updateMineObjectStmt.bindLong(1, m_ObjectID);
+        updateMineObjectStmt.bindInt(2, m_ItemType);
+        updateMineObjectStmt.bindString(3, ownerID);
+        updateMineObjectStmt.bindInt(4, (int)storage);
+        updateMineObjectStmt.bindLong(5, storageID);
+        updateMineObjectStmt.bindInt(6, (int)x);
+        updateMineObjectStmt.bindInt(7, (int)y);
+        updateMineObjectStmt.bindInt(8, (int)m_Num);
+        updateMineObjectStmt.bindLong(9, m_ItemID);
+        updateMineObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -255,12 +270,13 @@ void MineInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MineInfo");
+        PreparedStatement selectMineInfoStmt(pConn, "SELECT MAX(ItemType) FROM MineInfo");
+        Result* pResult = selectMineInfoStmt.execute();
 
         pResult->next();
 
@@ -271,8 +287,9 @@ void MineInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM MineInfo");
+        PreparedStatement selectMineInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM MineInfo");
+        pResult = selectMineInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -292,7 +309,6 @@ void MineInfoManager::load()
             addItemInfo(pMineInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -310,10 +326,10 @@ void MineLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -327,9 +343,11 @@ void MineLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "MineObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectMineObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM MineObject WHERE OwnerID = "
+                   "? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectMineObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMineObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -414,7 +432,6 @@ void MineLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -426,7 +443,6 @@ void MineLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -444,17 +460,19 @@ void MineLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM MineObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneMineObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM MineObject WHERE Storage = ? AND "
+                   "StorageID = ?");
+        loadZoneMineObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneMineObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneMineObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -486,7 +504,6 @@ void MineLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -502,7 +519,7 @@ void MineLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

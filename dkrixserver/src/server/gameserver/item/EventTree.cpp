@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -63,17 +64,21 @@ void EventTree::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO EventTreeObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertEventTreeObjectStmt(
+            pConn, "INSERT INTO EventTreeObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, "
+                   "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertEventTreeObjectStmt.bindLong(1, m_ItemID);
+        insertEventTreeObjectStmt.bindLong(2, m_ObjectID);
+        insertEventTreeObjectStmt.bindInt(3, m_ItemType);
+        insertEventTreeObjectStmt.bindString(4, ownerID);
+        insertEventTreeObjectStmt.bindInt(5, (int)storage);
+        insertEventTreeObjectStmt.bindLong(6, storageID);
+        insertEventTreeObjectStmt.bindInt(7, (int)x);
+        insertEventTreeObjectStmt.bindInt(8, (int)y);
+        insertEventTreeObjectStmt.bindInt(9, (int)m_Num);
+        insertEventTreeObjectStmt.bindInt(10, (int)m_CreateType);
+        insertEventTreeObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +96,16 @@ void EventTree::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveEventTreeObjectStmt(
+            pConn, string("UPDATE EventTreeObject SET ") + field + " WHERE ItemID=?");
+        tinysaveEventTreeObjectStmt.bindLong(1, m_ItemID);
+        tinysaveEventTreeObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE EventTreeObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -127,15 +137,23 @@ void EventTree::save(const string& ownerID, Storage storage, StorageID_t storage
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventTreeObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateEventTreeObjectStmt(
+            pConn, "UPDATE EventTreeObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateEventTreeObjectStmt.bindLong(1, m_ObjectID);
+        updateEventTreeObjectStmt.bindInt(2, m_ItemType);
+        updateEventTreeObjectStmt.bindString(3, ownerID);
+        updateEventTreeObjectStmt.bindInt(4, (int)storage);
+        updateEventTreeObjectStmt.bindLong(5, storageID);
+        updateEventTreeObjectStmt.bindInt(6, (int)x);
+        updateEventTreeObjectStmt.bindInt(7, (int)y);
+        updateEventTreeObjectStmt.bindInt(8, (int)m_Num);
+        updateEventTreeObjectStmt.bindLong(9, m_ItemID);
+        updateEventTreeObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -206,9 +224,10 @@ void EventTreeInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM EventTreeInfo");
+        PreparedStatement selectEventTreeInfoStmt(pConn, "SELECT MAX(ItemType) FROM EventTreeInfo");
+        Result* pResult = selectEventTreeInfoStmt.execute();
 
         pResult->next();
 
@@ -219,7 +238,9 @@ void EventTreeInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventTreeInfo");
+        PreparedStatement selectEventTreeInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventTreeInfo");
+        pResult = selectEventTreeInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -237,7 +258,6 @@ void EventTreeInfoManager::load()
             addItemInfo(pEventTreeInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -258,7 +278,7 @@ void EventTreeLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -272,10 +292,11 @@ void EventTreeLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "EventTreeObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectEventTreeObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventTreeObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectEventTreeObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectEventTreeObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -371,7 +392,6 @@ void EventTreeLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -383,7 +403,6 @@ void EventTreeLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -397,17 +416,19 @@ void EventTreeLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventTreeObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneEventTreeObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventTreeObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneEventTreeObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneEventTreeObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneEventTreeObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -442,7 +463,6 @@ void EventTreeLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -454,7 +474,7 @@ void EventTreeLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

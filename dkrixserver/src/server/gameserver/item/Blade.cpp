@@ -12,6 +12,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void Blade::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,23 +74,27 @@ void Blade::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO BladeObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertBladeObjectStmt(
+            pConn, "INSERT INTO BladeObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertBladeObjectStmt.bindLong(1, m_ItemID);
+        insertBladeObjectStmt.bindLong(2, m_ObjectID);
+        insertBladeObjectStmt.bindInt(3, getItemType());
+        insertBladeObjectStmt.bindString(4, ownerID);
+        insertBladeObjectStmt.bindInt(5, (int)storage);
+        insertBladeObjectStmt.bindLong(6, storageID);
+        insertBladeObjectStmt.bindInt(7, (int)x);
+        insertBladeObjectStmt.bindInt(8, (int)y);
+        insertBladeObjectStmt.bindString(9, optionField);
+        insertBladeObjectStmt.bindInt(10, getDurability());
+        insertBladeObjectStmt.bindInt(11, getGrade());
+        insertBladeObjectStmt.bindInt(12, (int)m_CreateType);
+        insertBladeObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +112,15 @@ void Blade::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveBladeObjectStmt(pConn, string("UPDATE BladeObject SET ") + field + " WHERE ItemID=?");
+        tinysaveBladeObjectStmt.bindLong(1, m_ItemID);
+        tinysaveBladeObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE BladeObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -129,7 +138,7 @@ void Blade::save(const string& ownerID, Storage storage, StorageID_t storageID, 
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -153,14 +162,25 @@ void Blade::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE BladeObject SET ObjectID=%ld, ItemType=%d, OwnerID= '%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getSilver(), (int)getGrade(), m_ItemID);
+        PreparedStatement updateBladeObjectStmt(
+            pConn, "UPDATE BladeObject SET ObjectID=?, ItemType=?, OwnerID= ?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, Silver=?, Grade=? WHERE ItemID=?");
+        updateBladeObjectStmt.bindLong(1, m_ObjectID);
+        updateBladeObjectStmt.bindInt(2, getItemType());
+        updateBladeObjectStmt.bindString(3, ownerID);
+        updateBladeObjectStmt.bindInt(4, (int)storage);
+        updateBladeObjectStmt.bindLong(5, storageID);
+        updateBladeObjectStmt.bindInt(6, (int)x);
+        updateBladeObjectStmt.bindInt(7, (int)y);
+        updateBladeObjectStmt.bindString(8, optionField);
+        updateBladeObjectStmt.bindInt(9, getDurability());
+        updateBladeObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateBladeObjectStmt.bindInt(11, (int)getSilver());
+        updateBladeObjectStmt.bindInt(12, (int)getGrade());
+        updateBladeObjectStmt.bindLong(13, m_ItemID);
+        updateBladeObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -295,12 +315,13 @@ void BladeInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM BladeInfo");
+        PreparedStatement selectBladeInfoStmt(pConn, "SELECT MAX(ItemType) FROM BladeInfo");
+        Result* pResult = selectBladeInfoStmt.execute();
 
         pResult->next();
 
@@ -311,11 +332,12 @@ void BladeInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT "
-                                "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,"
-                                "MaxSilver,Speed,ReqAbility,ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, "
-                                "UpgradeCrashPercent, NextOptionRatio, NextItemType, DowngradeRatio FROM BladeInfo");
+        PreparedStatement selectBladeInfoStmt2(
+            pConn, "SELECT "
+                   "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,MaxSilver,Speed,ReqAb"
+                   "ility,ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM BladeInfo");
+        pResult = selectBladeInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -347,7 +369,6 @@ void BladeInfoManager::load()
             addItemInfo(pBladeInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -365,10 +386,10 @@ void BladeLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -383,10 +404,12 @@ void BladeLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, EnchantLevel, "
-            "Silver, Grade, ItemFlag FROM BladeObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectBladeObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, Grade, ItemFlag FROM BladeObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, "
+                   "3, 4, 9)");
+        selectBladeObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectBladeObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -492,7 +515,6 @@ void BladeLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -504,7 +526,6 @@ void BladeLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -522,18 +543,19 @@ void BladeLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM BladeObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneBladeObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, ItemFlag FROM BladeObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneBladeObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneBladeObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneBladeObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -575,7 +597,6 @@ void BladeLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -591,7 +612,7 @@ void BladeLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

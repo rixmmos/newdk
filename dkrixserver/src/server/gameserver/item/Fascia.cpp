@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -52,7 +53,7 @@ void Fascia::create(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -66,23 +67,26 @@ void Fascia::create(const string& ownerID, Storage storage, StorageID_t storageI
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO FasciaObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertFasciaObjectStmt(
+            pConn, "INSERT INTO FasciaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertFasciaObjectStmt.bindLong(1, m_ItemID);
+        insertFasciaObjectStmt.bindLong(2, m_ObjectID);
+        insertFasciaObjectStmt.bindInt(3, getItemType());
+        insertFasciaObjectStmt.bindString(4, ownerID);
+        insertFasciaObjectStmt.bindInt(5, (int)storage);
+        insertFasciaObjectStmt.bindLong(6, storageID);
+        insertFasciaObjectStmt.bindInt(7, (int)x);
+        insertFasciaObjectStmt.bindInt(8, (int)y);
+        insertFasciaObjectStmt.bindString(9, optionField);
+        insertFasciaObjectStmt.bindInt(10, (int)getGrade());
+        insertFasciaObjectStmt.bindInt(11, (int)m_CreateType);
+        insertFasciaObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -101,11 +105,16 @@ void Fascia::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveFasciaObjectStmt(
+            pConn, string("UPDATE FasciaObject SET ") + field + " WHERE ItemID=?");
+        tinysaveFasciaObjectStmt.bindLong(1, m_ItemID);
+        tinysaveFasciaObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE FasciaObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -120,19 +129,29 @@ void Fascia::save(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE FasciaObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s', Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateFasciaObjectStmt(
+            pConn, "UPDATE FasciaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateFasciaObjectStmt.bindLong(1, m_ObjectID);
+        updateFasciaObjectStmt.bindInt(2, getItemType());
+        updateFasciaObjectStmt.bindString(3, ownerID);
+        updateFasciaObjectStmt.bindInt(4, (int)storage);
+        updateFasciaObjectStmt.bindLong(5, storageID);
+        updateFasciaObjectStmt.bindInt(6, (int)x);
+        updateFasciaObjectStmt.bindInt(7, (int)y);
+        updateFasciaObjectStmt.bindString(8, optionField);
+        updateFasciaObjectStmt.bindInt(9, getGrade());
+        updateFasciaObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateFasciaObjectStmt.bindLong(11, m_ItemID);
+        updateFasciaObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -181,12 +200,13 @@ void FasciaInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM FasciaInfo");
+        PreparedStatement selectFasciaInfoStmt(pConn, "SELECT MAX(ItemType) FROM FasciaInfo");
+        Result* pResult = selectFasciaInfoStmt.execute();
 
         pResult->next();
 
@@ -197,10 +217,11 @@ void FasciaInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, "
-                                "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM FasciaInfo");
+        PreparedStatement selectFasciaInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, ReqAbility, "
+                   "ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+                   "DowngradeRatio FROM FasciaInfo");
+        pResult = selectFasciaInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -228,7 +249,6 @@ void FasciaInfoManager::load()
             addItemInfo(pFasciaInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -246,15 +266,16 @@ void FasciaLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, EnchantLevel, ItemFlag "
-            "FROM FasciaObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectFasciaObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, EnchantLevel, "
+                   "ItemFlag FROM FasciaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectFasciaObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectFasciaObjectStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -360,7 +381,6 @@ void FasciaLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -371,7 +391,6 @@ void FasciaLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

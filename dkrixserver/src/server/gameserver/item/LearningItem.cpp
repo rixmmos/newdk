@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -47,7 +48,7 @@ void LearningItem::create(const string& ownerID, Storage storage, StorageID_t st
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -61,18 +62,19 @@ void LearningItem::create(const string& ownerID, Storage storage, StorageID_t st
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO LearningItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertLearningItemObjectStmt(
+            pConn, "INSERT INTO LearningItemObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        insertLearningItemObjectStmt.bindLong(1, m_ItemID);
+        insertLearningItemObjectStmt.bindLong(2, m_ObjectID);
+        insertLearningItemObjectStmt.bindInt(3, m_ItemType);
+        insertLearningItemObjectStmt.bindString(4, ownerID);
+        insertLearningItemObjectStmt.bindInt(5, (int)storage);
+        insertLearningItemObjectStmt.bindLong(6, storageID);
+        insertLearningItemObjectStmt.bindInt(7, (int)x);
+        insertLearningItemObjectStmt.bindInt(8, (int)y);
+        insertLearningItemObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +93,16 @@ void LearningItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveLearningItemObjectStmt(
+            pConn, string("UPDATE LearningItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveLearningItemObjectStmt.bindLong(1, m_ItemID);
+        tinysaveLearningItemObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE LearningItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -110,10 +117,10 @@ void LearningItem::save(const string& ownerID, Storage storage, StorageID_t stor
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -131,12 +138,20 @@ void LearningItem::save(const string& ownerID, Storage storage, StorageID_t stor
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE LearningItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%s, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
+        PreparedStatement updateLearningItemObjectStmt(
+            pConn, "UPDATE LearningItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=? "
+                   "WHERE ItemID=?");
+        updateLearningItemObjectStmt.bindLong(1, m_ObjectID);
+        updateLearningItemObjectStmt.bindInt(2, m_ItemType);
+        updateLearningItemObjectStmt.bindString(3, ownerID);
+        updateLearningItemObjectStmt.bindString(4, (int)storage);
+        updateLearningItemObjectStmt.bindLong(5, storageID);
+        updateLearningItemObjectStmt.bindInt(6, (int)x);
+        updateLearningItemObjectStmt.bindInt(7, (int)y);
+        updateLearningItemObjectStmt.bindLong(8, m_ItemID);
+        updateLearningItemObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -226,12 +241,13 @@ void LearningItemInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM LearningItemInfo");
+        PreparedStatement selectLearningItemInfoStmt(pConn, "SELECT MAX(ItemType) FROM LearningItemInfo");
+        Result* pResult = selectLearningItemInfoStmt.execute();
 
         pResult->next();
 
@@ -242,8 +258,9 @@ void LearningItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, SkillType FROM LearningItemInfo");
+        PreparedStatement selectLearningItemInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, SkillType FROM LearningItemInfo");
+        pResult = selectLearningItemInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -262,7 +279,6 @@ void LearningItemInfoManager::load()
             addItemInfo(pLearningItemInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -280,10 +296,10 @@ void LearningItemLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -297,10 +313,11 @@ void LearningItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM LearningItemObject "
-                                "WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectLearningItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM LearningItemObject WHERE OwnerID "
+                   "= ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectLearningItemObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectLearningItemObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -383,7 +400,6 @@ void LearningItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -395,7 +411,6 @@ void LearningItemLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -413,17 +428,19 @@ void LearningItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM LearningItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneLearningItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM LearningItemObject WHERE Storage "
+                   "= ? AND StorageID = ?");
+        loadZoneLearningItemObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneLearningItemObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneLearningItemObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -455,7 +472,6 @@ void LearningItemLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -471,7 +487,7 @@ void LearningItemLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

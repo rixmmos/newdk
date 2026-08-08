@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -63,17 +64,21 @@ void LuckyBag::create(const string& ownerID, Storage storage, StorageID_t storag
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO LuckyBagObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertLuckyBagObjectStmt(
+            pConn, "INSERT INTO LuckyBagObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, "
+                   "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertLuckyBagObjectStmt.bindLong(1, m_ItemID);
+        insertLuckyBagObjectStmt.bindLong(2, m_ObjectID);
+        insertLuckyBagObjectStmt.bindInt(3, m_ItemType);
+        insertLuckyBagObjectStmt.bindString(4, ownerID);
+        insertLuckyBagObjectStmt.bindInt(5, (int)storage);
+        insertLuckyBagObjectStmt.bindLong(6, storageID);
+        insertLuckyBagObjectStmt.bindInt(7, (int)x);
+        insertLuckyBagObjectStmt.bindInt(8, (int)y);
+        insertLuckyBagObjectStmt.bindInt(9, (int)m_Num);
+        insertLuckyBagObjectStmt.bindInt(10, (int)m_CreateType);
+        insertLuckyBagObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +96,16 @@ void LuckyBag::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveLuckyBagObjectStmt(
+            pConn, string("UPDATE LuckyBagObject SET ") + field + " WHERE ItemID=?");
+        tinysaveLuckyBagObjectStmt.bindLong(1, m_ItemID);
+        tinysaveLuckyBagObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE LuckyBagObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -127,15 +137,23 @@ void LuckyBag::save(const string& ownerID, Storage storage, StorageID_t storageI
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE LuckyBagObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateLuckyBagObjectStmt(
+            pConn, "UPDATE LuckyBagObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateLuckyBagObjectStmt.bindLong(1, m_ObjectID);
+        updateLuckyBagObjectStmt.bindInt(2, m_ItemType);
+        updateLuckyBagObjectStmt.bindString(3, ownerID);
+        updateLuckyBagObjectStmt.bindInt(4, (int)storage);
+        updateLuckyBagObjectStmt.bindLong(5, storageID);
+        updateLuckyBagObjectStmt.bindInt(6, (int)x);
+        updateLuckyBagObjectStmt.bindInt(7, (int)y);
+        updateLuckyBagObjectStmt.bindInt(8, (int)m_Num);
+        updateLuckyBagObjectStmt.bindLong(9, m_ItemID);
+        updateLuckyBagObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -205,9 +223,10 @@ void LuckyBagInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM LuckyBagInfo");
+        PreparedStatement selectLuckyBagInfoStmt(pConn, "SELECT MAX(ItemType) FROM LuckyBagInfo");
+        Result* pResult = selectLuckyBagInfoStmt.execute();
 
         pResult->next();
 
@@ -218,7 +237,9 @@ void LuckyBagInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM LuckyBagInfo");
+        PreparedStatement selectLuckyBagInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM LuckyBagInfo");
+        pResult = selectLuckyBagInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -236,7 +257,6 @@ void LuckyBagInfoManager::load()
             addItemInfo(pLuckyBagInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -257,7 +277,7 @@ void LuckyBagLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -271,10 +291,11 @@ void LuckyBagLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "LuckyBagObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectLuckyBagObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM LuckyBagObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectLuckyBagObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectLuckyBagObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -367,7 +388,6 @@ void LuckyBagLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -379,7 +399,6 @@ void LuckyBagLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,17 +412,19 @@ void LuckyBagLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM LuckyBagObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneLuckyBagObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM LuckyBagObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneLuckyBagObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneLuckyBagObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneLuckyBagObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -438,7 +459,6 @@ void LuckyBagLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -450,7 +470,7 @@ void LuckyBagLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

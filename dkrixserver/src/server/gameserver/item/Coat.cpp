@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -57,7 +58,7 @@ void Coat::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -71,22 +72,27 @@ void Coat::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO CoatObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ",  " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCoatObjectStmt(
+            pConn, "INSERT INTO CoatObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?)");
+        insertCoatObjectStmt.bindLong(1, m_ItemID);
+        insertCoatObjectStmt.bindLong(2, m_ObjectID);
+        insertCoatObjectStmt.bindInt(3, getItemType());
+        insertCoatObjectStmt.bindString(4, ownerID);
+        insertCoatObjectStmt.bindInt(5, (int)storage);
+        insertCoatObjectStmt.bindLong(6, storageID);
+        insertCoatObjectStmt.bindInt(7, (int)x);
+        insertCoatObjectStmt.bindInt(8, (int)y);
+        insertCoatObjectStmt.bindString(9, optionField);
+        insertCoatObjectStmt.bindInt(10, getDurability());
+        insertCoatObjectStmt.bindInt(11, (int)getGrade());
+        insertCoatObjectStmt.bindInt(12, (int)m_CreateType);
+        insertCoatObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -105,11 +111,15 @@ void Coat::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCoatObjectStmt(pConn, string("UPDATE CoatObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCoatObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCoatObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CoatObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -124,10 +134,10 @@ void Coat::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -150,13 +160,24 @@ void Coat::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE CoatObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getDurability(), (int)getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateCoatObjectStmt(
+            pConn, "UPDATE CoatObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateCoatObjectStmt.bindLong(1, m_ObjectID);
+        updateCoatObjectStmt.bindInt(2, getItemType());
+        updateCoatObjectStmt.bindString(3, ownerID);
+        updateCoatObjectStmt.bindInt(4, (int)storage);
+        updateCoatObjectStmt.bindLong(5, storageID);
+        updateCoatObjectStmt.bindInt(6, (int)x);
+        updateCoatObjectStmt.bindInt(7, (int)y);
+        updateCoatObjectStmt.bindString(8, optionField);
+        updateCoatObjectStmt.bindInt(9, getDurability());
+        updateCoatObjectStmt.bindInt(10, (int)getGrade());
+        updateCoatObjectStmt.bindInt(11, (int)getEnchantLevel());
+        updateCoatObjectStmt.bindLong(12, m_ItemID);
+        updateCoatObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -271,12 +292,13 @@ void CoatInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CoatInfo");
+        PreparedStatement selectCoatInfoStmt(pConn, "SELECT MAX(ItemType) FROM CoatInfo");
+        Result* pResult = selectCoatInfoStmt.execute();
 
         pResult->next();
 
@@ -287,10 +309,11 @@ void CoatInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM CoatInfo");
+        PreparedStatement selectCoatInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM CoatInfo");
+        pResult = selectCoatInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -319,7 +342,6 @@ void CoatInfoManager::load()
             addItemInfo(pCoatInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -337,10 +359,10 @@ void CoatLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -355,10 +377,11 @@ void CoatLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM CoatObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectCoatObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM CoatObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCoatObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCoatObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -462,7 +485,6 @@ void CoatLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -474,7 +496,6 @@ void CoatLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -492,18 +513,19 @@ void CoatLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM CoatObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCoatObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, ItemFlag FROM CoatObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneCoatObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCoatObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCoatObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -544,7 +566,6 @@ void CoatLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -560,7 +581,7 @@ void CoatLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

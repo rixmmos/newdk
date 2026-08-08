@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -63,18 +64,21 @@ void EffectItem::create(const string& ownerID, Storage storage, StorageID_t stor
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO EffectItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)getNum() << ", " << (int)m_CreateType
-            << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertEffectItemObjectStmt(
+            pConn, "INSERT INTO EffectItemObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertEffectItemObjectStmt.bindLong(1, m_ItemID);
+        insertEffectItemObjectStmt.bindLong(2, m_ObjectID);
+        insertEffectItemObjectStmt.bindInt(3, getItemType());
+        insertEffectItemObjectStmt.bindString(4, ownerID);
+        insertEffectItemObjectStmt.bindInt(5, (int)storage);
+        insertEffectItemObjectStmt.bindLong(6, storageID);
+        insertEffectItemObjectStmt.bindInt(7, (int)x);
+        insertEffectItemObjectStmt.bindInt(8, (int)y);
+        insertEffectItemObjectStmt.bindInt(9, (int)getNum());
+        insertEffectItemObjectStmt.bindInt(10, (int)m_CreateType);
+        insertEffectItemObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -92,11 +96,16 @@ void EffectItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveEffectItemObjectStmt(
+            pConn, string("UPDATE EffectItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveEffectItemObjectStmt.bindLong(1, m_ItemID);
+        tinysaveEffectItemObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE EffectItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -128,15 +137,23 @@ void EffectItem::save(const string& ownerID, Storage storage, StorageID_t storag
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EffectItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)getNum(), m_ItemID);
+        PreparedStatement updateEffectItemObjectStmt(
+            pConn, "UPDATE EffectItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateEffectItemObjectStmt.bindLong(1, m_ObjectID);
+        updateEffectItemObjectStmt.bindInt(2, getItemType());
+        updateEffectItemObjectStmt.bindString(3, ownerID);
+        updateEffectItemObjectStmt.bindInt(4, (int)storage);
+        updateEffectItemObjectStmt.bindLong(5, storageID);
+        updateEffectItemObjectStmt.bindInt(6, (int)x);
+        updateEffectItemObjectStmt.bindInt(7, (int)y);
+        updateEffectItemObjectStmt.bindInt(8, (int)getNum());
+        updateEffectItemObjectStmt.bindLong(9, m_ItemID);
+        updateEffectItemObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -207,9 +224,10 @@ void EffectItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM EffectItemInfo");
+        PreparedStatement selectEffectItemInfoStmt(pConn, "SELECT MAX(ItemType) FROM EffectItemInfo");
+        Result* pResult = selectEffectItemInfoStmt.execute();
 
         pResult->next();
 
@@ -220,8 +238,10 @@ void EffectItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, EffectClass, TimeSec FROM EffectItemInfo");
+        PreparedStatement selectEffectItemInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, EffectClass, TimeSec FROM "
+                   "EffectItemInfo");
+        pResult = selectEffectItemInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -241,7 +261,6 @@ void EffectItemInfoManager::load()
             addItemInfo(pEffectItemInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -262,7 +281,7 @@ void EffectItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -276,10 +295,11 @@ void EffectItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "EffectItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectEffectItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EffectItemObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectEffectItemObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectEffectItemObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -372,7 +392,6 @@ void EffectItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -384,7 +403,6 @@ void EffectItemLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -398,17 +416,19 @@ void EffectItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EffectItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneEffectItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EffectItemObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneEffectItemObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneEffectItemObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneEffectItemObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -443,7 +463,6 @@ void EffectItemLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -455,7 +474,7 @@ void EffectItemLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

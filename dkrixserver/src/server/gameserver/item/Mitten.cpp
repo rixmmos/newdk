@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -55,7 +56,7 @@ void Mitten::create(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -69,23 +70,27 @@ void Mitten::create(const string& ownerID, Storage storage, StorageID_t storageI
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO MittenObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertMittenObjectStmt(
+            pConn, "INSERT INTO MittenObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertMittenObjectStmt.bindLong(1, m_ItemID);
+        insertMittenObjectStmt.bindLong(2, m_ObjectID);
+        insertMittenObjectStmt.bindInt(3, getItemType());
+        insertMittenObjectStmt.bindString(4, ownerID);
+        insertMittenObjectStmt.bindInt(5, (int)storage);
+        insertMittenObjectStmt.bindLong(6, storageID);
+        insertMittenObjectStmt.bindInt(7, (int)x);
+        insertMittenObjectStmt.bindInt(8, (int)y);
+        insertMittenObjectStmt.bindString(9, optionField);
+        insertMittenObjectStmt.bindInt(10, getDurability());
+        insertMittenObjectStmt.bindInt(11, getGrade());
+        insertMittenObjectStmt.bindInt(12, (int)m_CreateType);
+        insertMittenObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -104,11 +109,16 @@ void Mitten::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMittenObjectStmt(
+            pConn, string("UPDATE MittenObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMittenObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMittenObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MittenObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -123,20 +133,30 @@ void Mitten::save(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE MittenObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateMittenObjectStmt(
+            pConn, "UPDATE MittenObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateMittenObjectStmt.bindLong(1, m_ObjectID);
+        updateMittenObjectStmt.bindInt(2, getItemType());
+        updateMittenObjectStmt.bindString(3, ownerID);
+        updateMittenObjectStmt.bindInt(4, (int)storage);
+        updateMittenObjectStmt.bindLong(5, storageID);
+        updateMittenObjectStmt.bindInt(6, (int)x);
+        updateMittenObjectStmt.bindInt(7, (int)y);
+        updateMittenObjectStmt.bindString(8, optionField);
+        updateMittenObjectStmt.bindInt(9, getDurability());
+        updateMittenObjectStmt.bindInt(10, getGrade());
+        updateMittenObjectStmt.bindInt(11, (int)getEnchantLevel());
+        updateMittenObjectStmt.bindLong(12, m_ItemID);
+        updateMittenObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -185,12 +205,13 @@ void MittenInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MittenInfo");
+        PreparedStatement selectMittenInfoStmt(pConn, "SELECT MAX(ItemType) FROM MittenInfo");
+        Result* pResult = selectMittenInfoStmt.execute();
 
         pResult->next();
 
@@ -201,10 +222,11 @@ void MittenInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM MittenInfo");
+        PreparedStatement selectMittenInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM MittenInfo");
+        pResult = selectMittenInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -233,7 +255,6 @@ void MittenInfoManager::load()
             addItemInfo(pMittenInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -251,15 +272,16 @@ void MittenLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM MittenObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectMittenObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM MittenObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectMittenObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMittenObjectStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -366,7 +388,6 @@ void MittenLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -377,7 +398,6 @@ void MittenLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -11,6 +11,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "PCItemInfo.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -77,7 +78,7 @@ void Belt::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -91,7 +92,7 @@ void Belt::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -109,13 +110,22 @@ void Belt::create(const string& ownerID, Storage storage, StorageID_t storageID,
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "INSERT INTO BeltObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, OptionType, "
-            "Durability, Grade, ItemFlag) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, '%s', %d, %d, %d)",
-            m_ItemID, m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-            optionField.c_str(), getDurability(), getGrade(), (int)m_CreateType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement createBeltStmt(
+            pConn, "INSERT INTO BeltObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        createBeltStmt.bindLong(1, m_ItemID);
+        createBeltStmt.bindLong(2, m_ObjectID);
+        createBeltStmt.bindInt(3, getItemType());
+        createBeltStmt.bindString(4, ownerID);
+        createBeltStmt.bindInt(5, (int)storage);
+        createBeltStmt.bindLong(6, storageID);
+        createBeltStmt.bindInt(7, (int)x);
+        createBeltStmt.bindInt(8, (int)y);
+        createBeltStmt.bindString(9, optionField);
+        createBeltStmt.bindInt(10, getDurability());
+        createBeltStmt.bindInt(11, getGrade());
+        createBeltStmt.bindInt(12, (int)m_CreateType);
+        createBeltStmt.execute();
     }
     END_DB(pStmt)
 
@@ -131,14 +141,14 @@ bool Belt::destroy()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     //-------------------------------------------------------
-    
-    
-    
-    
-    
+
+
+
+
+
     //-------------------------------------------------------
     for (int i = 0; i < m_pInventory->getHeight(); i++) {
         for (int j = 0; j < m_pInventory->getWidth(); j++) {
@@ -150,15 +160,14 @@ bool Belt::destroy()
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM BeltObject WHERE ItemID = %ld", m_ItemID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement destroyBeltStmt(pConn, "DELETE FROM BeltObject WHERE ItemID = ?");
+        destroyBeltStmt.bindLong(1, m_ItemID);
+        destroyBeltStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (destroyBeltStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -179,11 +188,14 @@ void Belt::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQuery("UPDATE BeltObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveBeltStmt(pConn, string("UPDATE BeltObject SET ") + field + " WHERE ItemID=?");
+        tinysaveBeltStmt.bindLong(1, m_ItemID);
+        tinysaveBeltStmt.execute();
     }
     END_DB(pStmt)
 
@@ -198,10 +210,10 @@ void Belt::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -224,13 +236,23 @@ void Belt::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE BeltObject SET ObjectID=%ld, ItemType=%d, OwnerID= '%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement saveBeltStmt(
+            pConn, "UPDATE BeltObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveBeltStmt.bindLong(1, m_ObjectID);
+        saveBeltStmt.bindInt(2, getItemType());
+        saveBeltStmt.bindString(3, ownerID);
+        saveBeltStmt.bindInt(4, (int)storage);
+        saveBeltStmt.bindLong(5, storageID);
+        saveBeltStmt.bindInt(6, (int)x);
+        saveBeltStmt.bindInt(7, (int)y);
+        saveBeltStmt.bindString(8, optionField);
+        saveBeltStmt.bindInt(9, getDurability());
+        saveBeltStmt.bindInt(10, getGrade());
+        saveBeltStmt.bindInt(11, (int)getEnchantLevel());
+        saveBeltStmt.bindLong(12, m_ItemID);
+        saveBeltStmt.execute();
 
-        
         for (int i = 0; i < m_pInventory->getHeight(); i++) {
             for (int j = 0; j < m_pInventory->getWidth(); j++) {
                 Item* pItem = m_pInventory->getItem(j, 0);
@@ -239,8 +261,6 @@ void Belt::save(const string& ownerID, Storage storage, StorageID_t storageID, B
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,12 +413,13 @@ void BeltInfoManager::load()
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM BeltInfo");
+        PreparedStatement maxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM BeltInfo");
+        Result* pResult = maxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -409,10 +430,11 @@ void BeltInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, PocketCount, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, "
-                                "UpgradeCrashPercent, NextOptionRatio, NextItemType, DowngradeRatio FROM BeltInfo");
+        PreparedStatement loadBeltInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, PocketCount, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, "
+                   "UpgradeCrashPercent, NextOptionRatio, NextItemType, DowngradeRatio FROM BeltInfo");
+        pResult = loadBeltInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -441,8 +463,6 @@ void BeltInfoManager::load()
 
             addItemInfo(pBeltInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -461,10 +481,10 @@ void BeltLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -479,11 +499,12 @@ void BeltLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
+        PreparedStatement loadBeltStmt(
+            pConn,
             "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM BeltObject WHERE OwnerID = '%s' AND Storage IN (0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
-
+            "ItemFlag FROM BeltObject WHERE OwnerID = ? AND Storage IN (0, 1, 2, 3, 4, 9)");
+        loadBeltStmt.bindString(1, pCreature->getName());
+        Result* pResult = loadBeltStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -590,10 +611,8 @@ void BeltLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
-
 
             } catch (Error& error) {
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), error.toString().c_str());
@@ -602,8 +621,6 @@ void BeltLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -621,18 +638,20 @@ void BeltLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM BeltObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (STORAGE_ZONE enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneBeltStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, "
+                   "OptionType, Durability, EnchantLevel, ItemFlag FROM BeltObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneBeltStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneBeltStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneBeltStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -672,8 +691,6 @@ void BeltLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -689,7 +706,7 @@ void BeltLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

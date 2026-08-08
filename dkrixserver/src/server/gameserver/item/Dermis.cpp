@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -51,7 +52,7 @@ void Dermis::create(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -65,23 +66,26 @@ void Dermis::create(const string& ownerID, Storage storage, StorageID_t storageI
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO DermisObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertDermisObjectStmt(
+            pConn, "INSERT INTO DermisObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertDermisObjectStmt.bindLong(1, m_ItemID);
+        insertDermisObjectStmt.bindLong(2, m_ObjectID);
+        insertDermisObjectStmt.bindInt(3, getItemType());
+        insertDermisObjectStmt.bindString(4, ownerID);
+        insertDermisObjectStmt.bindInt(5, (int)storage);
+        insertDermisObjectStmt.bindLong(6, storageID);
+        insertDermisObjectStmt.bindInt(7, (int)x);
+        insertDermisObjectStmt.bindInt(8, (int)y);
+        insertDermisObjectStmt.bindString(9, optionField);
+        insertDermisObjectStmt.bindInt(10, getGrade());
+        insertDermisObjectStmt.bindInt(11, (int)m_CreateType);
+        insertDermisObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -100,11 +104,16 @@ void Dermis::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveDermisObjectStmt(
+            pConn, string("UPDATE DermisObject SET ") + field + " WHERE ItemID=?");
+        tinysaveDermisObjectStmt.bindLong(1, m_ItemID);
+        tinysaveDermisObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE DermisObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -119,19 +128,29 @@ void Dermis::save(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE DermisObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s', Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateDermisObjectStmt(
+            pConn, "UPDATE DermisObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateDermisObjectStmt.bindLong(1, m_ObjectID);
+        updateDermisObjectStmt.bindInt(2, getItemType());
+        updateDermisObjectStmt.bindString(3, ownerID);
+        updateDermisObjectStmt.bindInt(4, (int)storage);
+        updateDermisObjectStmt.bindLong(5, storageID);
+        updateDermisObjectStmt.bindInt(6, (int)x);
+        updateDermisObjectStmt.bindInt(7, (int)y);
+        updateDermisObjectStmt.bindString(8, optionField);
+        updateDermisObjectStmt.bindInt(9, getGrade());
+        updateDermisObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateDermisObjectStmt.bindLong(11, m_ItemID);
+        updateDermisObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -181,12 +200,13 @@ void DermisInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM DermisInfo");
+        PreparedStatement selectDermisInfoStmt(pConn, "SELECT MAX(ItemType) FROM DermisInfo");
+        Result* pResult = selectDermisInfoStmt.execute();
 
         pResult->next();
 
@@ -197,10 +217,11 @@ void DermisInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, "
-                                "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM DermisInfo");
+        PreparedStatement selectDermisInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, ReqAbility, "
+                   "ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+                   "DowngradeRatio FROM DermisInfo");
+        pResult = selectDermisInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -228,7 +249,6 @@ void DermisInfoManager::load()
             addItemInfo(pDermisInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -246,15 +266,16 @@ void DermisLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Grade, EnchantLevel, ItemFlag "
-            "FROM DermisObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectDermisObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Grade, EnchantLevel, "
+                   "ItemFlag FROM DermisObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectDermisObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectDermisObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -354,7 +375,6 @@ void DermisLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -365,7 +385,6 @@ void DermisLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

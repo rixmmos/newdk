@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -58,7 +59,7 @@ void Helm::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,23 +73,27 @@ void Helm::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO HelmObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertHelmObjectStmt(
+            pConn, "INSERT INTO HelmObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertHelmObjectStmt.bindLong(1, m_ItemID);
+        insertHelmObjectStmt.bindLong(2, m_ObjectID);
+        insertHelmObjectStmt.bindInt(3, getItemType());
+        insertHelmObjectStmt.bindString(4, ownerID);
+        insertHelmObjectStmt.bindInt(5, (int)storage);
+        insertHelmObjectStmt.bindLong(6, storageID);
+        insertHelmObjectStmt.bindInt(7, (int)x);
+        insertHelmObjectStmt.bindInt(8, (int)y);
+        insertHelmObjectStmt.bindString(9, optionField);
+        insertHelmObjectStmt.bindInt(10, getDurability());
+        insertHelmObjectStmt.bindInt(11, (int)getGrade());
+        insertHelmObjectStmt.bindInt(12, (int)m_CreateType);
+        insertHelmObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +112,15 @@ void Helm::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveHelmObjectStmt(pConn, string("UPDATE HelmObject SET ") + field + " WHERE ItemID=?");
+        tinysaveHelmObjectStmt.bindLong(1, m_ItemID);
+        tinysaveHelmObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE HelmObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -126,10 +135,10 @@ void Helm::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,13 +161,24 @@ void Helm::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE HelmObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getDurability(), (int)getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateHelmObjectStmt(
+            pConn, "UPDATE HelmObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateHelmObjectStmt.bindLong(1, m_ObjectID);
+        updateHelmObjectStmt.bindInt(2, getItemType());
+        updateHelmObjectStmt.bindString(3, ownerID);
+        updateHelmObjectStmt.bindInt(4, (int)storage);
+        updateHelmObjectStmt.bindLong(5, storageID);
+        updateHelmObjectStmt.bindInt(6, (int)x);
+        updateHelmObjectStmt.bindInt(7, (int)y);
+        updateHelmObjectStmt.bindString(8, optionField);
+        updateHelmObjectStmt.bindInt(9, getDurability());
+        updateHelmObjectStmt.bindInt(10, (int)getGrade());
+        updateHelmObjectStmt.bindInt(11, (int)getEnchantLevel());
+        updateHelmObjectStmt.bindLong(12, m_ItemID);
+        updateHelmObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -273,12 +293,13 @@ void HelmInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM HelmInfo");
+        PreparedStatement selectHelmInfoStmt(pConn, "SELECT MAX(ItemType) FROM HelmInfo");
+        Result* pResult = selectHelmInfoStmt.execute();
 
         pResult->next();
 
@@ -289,10 +310,11 @@ void HelmInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM HelmInfo");
+        PreparedStatement selectHelmInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM HelmInfo");
+        pResult = selectHelmInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -321,7 +343,6 @@ void HelmInfoManager::load()
             addItemInfo(pHelmInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -339,10 +360,10 @@ void HelmLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -357,10 +378,11 @@ void HelmLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM HelmObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectHelmObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM HelmObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectHelmObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectHelmObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -464,7 +486,6 @@ void HelmLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -476,7 +497,6 @@ void HelmLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -494,18 +514,19 @@ void HelmLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM HelmObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneHelmObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, ItemFlag FROM HelmObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneHelmObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneHelmObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneHelmObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -547,7 +568,6 @@ void HelmLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -563,7 +583,7 @@ void HelmLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

@@ -12,6 +12,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -47,7 +48,7 @@ void Key::create(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -61,18 +62,20 @@ void Key::create(const string& ownerID, Storage storage, StorageID_t storageID, 
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO KeyObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Target)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", " << m_Target << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertKeyObjectStmt(
+            pConn, "INSERT INTO KeyObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Target) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertKeyObjectStmt.bindLong(1, m_ItemID);
+        insertKeyObjectStmt.bindLong(2, m_ObjectID);
+        insertKeyObjectStmt.bindInt(3, m_ItemType);
+        insertKeyObjectStmt.bindString(4, ownerID);
+        insertKeyObjectStmt.bindInt(5, (int)storage);
+        insertKeyObjectStmt.bindLong(6, storageID);
+        insertKeyObjectStmt.bindInt(7, (int)x);
+        insertKeyObjectStmt.bindInt(8, (int)y);
+        insertKeyObjectStmt.bindInt(9, m_Target);
+        insertKeyObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +94,15 @@ void Key::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveKeyObjectStmt(pConn, string("UPDATE KeyObject SET ") + field + " WHERE ItemID=?");
+        tinysaveKeyObjectStmt.bindLong(1, m_ItemID);
+        tinysaveKeyObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE KeyObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -110,10 +117,10 @@ void Key::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -132,12 +139,20 @@ void Key::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE KeyObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, Target=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_Target,
-                            m_ItemID);
+        PreparedStatement updateKeyObjectStmt(
+            pConn, "UPDATE KeyObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Target=? WHERE ItemID=?");
+        updateKeyObjectStmt.bindLong(1, m_ObjectID);
+        updateKeyObjectStmt.bindInt(2, m_ItemType);
+        updateKeyObjectStmt.bindString(3, ownerID);
+        updateKeyObjectStmt.bindInt(4, (int)storage);
+        updateKeyObjectStmt.bindLong(5, storageID);
+        updateKeyObjectStmt.bindInt(6, (int)x);
+        updateKeyObjectStmt.bindInt(7, (int)y);
+        updateKeyObjectStmt.bindInt(8, m_Target);
+        updateKeyObjectStmt.bindLong(9, m_ItemID);
+        updateKeyObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -149,7 +164,7 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
 
     ItemID_t targetID = 0;
 
-    
+
     //	Assert( getTarget() == 0 );
     Assert(pSlayer != NULL);
     Zone* pZone = pSlayer->getZone();
@@ -176,12 +191,14 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
-    
-    BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("UPDATE KeyObject SET Target=%lu WHERE ItemID=%lu", targetID, getItemID());
 
-        SAFE_DELETE(pStmt);
+    BEGIN_DB {
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateKeyObjectStmt2(pConn, "UPDATE KeyObject SET Target=? WHERE ItemID=?");
+        updateKeyObjectStmt2.bindULong(1, targetID);
+        updateKeyObjectStmt2.bindULong(2, getItemID());
+        pResult = updateKeyObjectStmt2.execute();
+
     }
     END_DB(pStmt)
 
@@ -189,7 +206,7 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
     filelog("motorcycle.txt", "[SetTargetID] Owner = %s, KeyID = %lu, Key's targetID = %lu, MotorcycleID = %lu",
             pSlayer->getName().c_str(), getItemID(), getTarget(), pMotorcycle->getItemID());
 
-    
+
     SAFE_DELETE(pMotorcycle);
 
     return targetID;
@@ -279,12 +296,13 @@ void KeyInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM KeyInfo");
+        PreparedStatement selectKeyInfoStmt(pConn, "SELECT MAX(ItemType) FROM KeyInfo");
+        Result* pResult = selectKeyInfoStmt.execute();
 
         pResult->next();
 
@@ -295,10 +313,10 @@ void KeyInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionType, TargetType FROM KeyInfo"
-            //			"SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM KeyInfo"
-        );
+        PreparedStatement selectKeyInfoSELECTStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionType, TargetType FROM "
+                   "KeyInfoSELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM KeyInfo");
+        pResult = selectKeyInfoSELECTStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -318,7 +336,6 @@ void KeyInfoManager::load()
             addItemInfo(pKeyInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -336,10 +353,10 @@ void KeyLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -353,9 +370,11 @@ void KeyLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Target "
-                                              "FROM KeyObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectKeyObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Target FROM KeyObject WHERE OwnerID "
+                   "= ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectKeyObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectKeyObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -454,7 +473,6 @@ void KeyLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -466,7 +484,6 @@ void KeyLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -484,17 +501,19 @@ void KeyLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Target FROM KeyObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneKeyObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Target FROM KeyObject WHERE Storage "
+                   "= ? AND StorageID = ?");
+        loadZoneKeyObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneKeyObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneKeyObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -528,7 +547,6 @@ void KeyLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -544,7 +562,7 @@ void KeyLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

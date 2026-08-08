@@ -13,6 +13,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -60,7 +61,7 @@ void CastleSymbol::create(const string& ownerID, Storage storage, StorageID_t st
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -74,20 +75,22 @@ void CastleSymbol::create(const string& ownerID, Storage storage, StorageID_t st
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO CastleSymbolObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, Durability )"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", " << m_Durability << ")";
-
-        pStmt->executeQueryString(sql.toString());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertCastleSymbolObjectStmt(
+            pConn, "INSERT INTO CastleSymbolObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "Durability ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCastleSymbolObjectStmt.bindLong(1, m_ItemID);
+        insertCastleSymbolObjectStmt.bindLong(2, m_ObjectID);
+        insertCastleSymbolObjectStmt.bindInt(3, m_ItemType);
+        insertCastleSymbolObjectStmt.bindString(4, ownerID);
+        insertCastleSymbolObjectStmt.bindInt(5, (int)storage);
+        insertCastleSymbolObjectStmt.bindLong(6, storageID);
+        insertCastleSymbolObjectStmt.bindInt(7, (int)x);
+        insertCastleSymbolObjectStmt.bindInt(8, (int)y);
+        insertCastleSymbolObjectStmt.bindInt(9, m_Durability);
+        insertCastleSymbolObjectStmt.execute();
         filelog("WarLog.txt", "%s", sql.toString().c_str());
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -107,13 +110,22 @@ void CastleSymbol::tinysave(const char* field) const
     char query[255];
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         sprintf(query, "UPDATE CastleSymbolObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-        pStmt->executeQuery(query);
         filelog("WarLog.txt", "%s", query);
 
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound. `query` above is retained
+        // solely to preserve the WarLog.txt debug logging of the SQL text that
+        // used to be executed verbatim; it is no longer the string that runs.
+        PreparedStatement tinysaveCastleSymbolObjectStmt(
+            pConn, string("UPDATE CastleSymbolObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCastleSymbolObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCastleSymbolObjectStmt.execute();
+
     }
     END_DB(pStmt)
 
@@ -128,10 +140,10 @@ void CastleSymbol::save(const string& ownerID, Storage storage, StorageID_t stor
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,12 +164,21 @@ void CastleSymbol::save(const string& ownerID, Storage storage, StorageID_t stor
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE CastleSymbolObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Durability=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            m_Durability, (int)m_EnchantLevel, m_ItemID);
+        PreparedStatement updateCastleSymbolObjectStmt(
+            pConn, "UPDATE CastleSymbolObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, "
+                   "Y=?, Durability=?, EnchantLevel=? WHERE ItemID=?");
+        updateCastleSymbolObjectStmt.bindLong(1, m_ObjectID);
+        updateCastleSymbolObjectStmt.bindInt(2, m_ItemType);
+        updateCastleSymbolObjectStmt.bindString(3, ownerID);
+        updateCastleSymbolObjectStmt.bindInt(4, (int)storage);
+        updateCastleSymbolObjectStmt.bindLong(5, storageID);
+        updateCastleSymbolObjectStmt.bindInt(6, (int)x);
+        updateCastleSymbolObjectStmt.bindInt(7, (int)y);
+        updateCastleSymbolObjectStmt.bindInt(8, m_Durability);
+        updateCastleSymbolObjectStmt.bindInt(9, (int)m_EnchantLevel);
+        updateCastleSymbolObjectStmt.bindLong(10, m_ItemID);
+        updateCastleSymbolObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -271,12 +292,13 @@ void CastleSymbolInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CastleSymbolInfo");
+        PreparedStatement selectCastleSymbolInfoStmt(pConn, "SELECT MAX(ItemType) FROM CastleSymbolInfo");
+        Result* pResult = selectCastleSymbolInfoStmt.execute();
 
         pResult->next();
 
@@ -287,8 +309,10 @@ void CastleSymbolInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, "
-                                      "Defense, Protection, ReqAbility, ItemLevel FROM CastleSymbolInfo");
+        PreparedStatement selectCastleSymbolInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel FROM CastleSymbolInfo");
+        pResult = selectCastleSymbolInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -311,7 +335,6 @@ void CastleSymbolInfoManager::load()
             addItemInfo(pCastleSymbolInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -329,10 +352,10 @@ void CastleSymbolLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -347,14 +370,15 @@ void CastleSymbolLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        
-        
-        
-        pStmt->executeQuery("DELETE FROM CastleSymbolObject WHERE OwnerID = '%s'", pCreature->getName().c_str());
 
-         
 
-        SAFE_DELETE(pStmt);
+
+        PreparedStatement deleteCastleSymbolObjectStmt(pConn, "DELETE FROM CastleSymbolObject WHERE OwnerID = ?");
+        deleteCastleSymbolObjectStmt.bindString(1, pCreature->getName());
+        deleteCastleSymbolObjectStmt.execute();
+
+
+
     }
     END_DB(pStmt)
 
@@ -372,18 +396,19 @@ void CastleSymbolLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " Durability, EnchantLevel FROM CastleSymbolObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCastleSymbolObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Durability, EnchantLevel FROM "
+                   "CastleSymbolObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneCastleSymbolObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCastleSymbolObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCastleSymbolObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -418,7 +443,6 @@ void CastleSymbolLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -434,7 +458,7 @@ void CastleSymbolLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

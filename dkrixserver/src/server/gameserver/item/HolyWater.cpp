@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -52,7 +53,7 @@ void HolyWater::create(const string& ownerID, Storage storage, StorageID_t stora
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -66,7 +67,7 @@ void HolyWater::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         /*
         StringStream sql;
         sql << "INSERT INTO HolyWaterObject "
@@ -80,12 +81,20 @@ void HolyWater::create(const string& ownerID, Storage storage, StorageID_t stora
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("INSERT INTO HolyWaterObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, "
-                            "Y, Num) VALUES (%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num);
+        PreparedStatement insertHolyWaterObjectStmt(
+            pConn, "INSERT INTO HolyWaterObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertHolyWaterObjectStmt.bindLong(1, m_ItemID);
+        insertHolyWaterObjectStmt.bindLong(2, m_ObjectID);
+        insertHolyWaterObjectStmt.bindInt(3, m_ItemType);
+        insertHolyWaterObjectStmt.bindString(4, ownerID);
+        insertHolyWaterObjectStmt.bindInt(5, (int)storage);
+        insertHolyWaterObjectStmt.bindLong(6, storageID);
+        insertHolyWaterObjectStmt.bindInt(7, (int)x);
+        insertHolyWaterObjectStmt.bindInt(8, (int)y);
+        insertHolyWaterObjectStmt.bindInt(9, (int)m_Num);
+        insertHolyWaterObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -104,11 +113,16 @@ void HolyWater::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveHolyWaterObjectStmt(
+            pConn, string("UPDATE HolyWaterObject SET ") + field + " WHERE ItemID=?");
+        tinysaveHolyWaterObjectStmt.bindLong(1, m_ItemID);
+        tinysaveHolyWaterObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE HolyWaterObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -123,10 +137,10 @@ void HolyWater::save(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -145,13 +159,21 @@ void HolyWater::save(const string& ownerID, Storage storage, StorageID_t storage
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE HolyWaterObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld ,X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateHolyWaterObjectStmt(
+            pConn, "UPDATE HolyWaterObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=? ,X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateHolyWaterObjectStmt.bindLong(1, m_ObjectID);
+        updateHolyWaterObjectStmt.bindInt(2, m_ItemType);
+        updateHolyWaterObjectStmt.bindString(3, ownerID);
+        updateHolyWaterObjectStmt.bindInt(4, (int)storage);
+        updateHolyWaterObjectStmt.bindLong(5, storageID);
+        updateHolyWaterObjectStmt.bindInt(6, (int)x);
+        updateHolyWaterObjectStmt.bindInt(7, (int)y);
+        updateHolyWaterObjectStmt.bindInt(8, (int)m_Num);
+        updateHolyWaterObjectStmt.bindLong(9, m_ItemID);
+        updateHolyWaterObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -258,12 +280,13 @@ void HolyWaterInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM HolyWaterInfo");
+        PreparedStatement selectHolyWaterInfoStmt(pConn, "SELECT MAX(ItemType) FROM HolyWaterInfo");
+        Result* pResult = selectHolyWaterInfoStmt.execute();
 
         pResult->next();
 
@@ -274,8 +297,10 @@ void HolyWaterInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM HolyWaterInfo");
+        PreparedStatement selectHolyWaterInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM "
+                   "HolyWaterInfo");
+        pResult = selectHolyWaterInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -295,7 +320,6 @@ void HolyWaterInfoManager::load()
             addItemInfo(pHolyWaterInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -313,10 +337,10 @@ void HolyWaterLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -330,9 +354,11 @@ void HolyWaterLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "HolyWaterObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectHolyWaterObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM HolyWaterObject WHERE "
+                   "OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectHolyWaterObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectHolyWaterObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -417,7 +443,6 @@ void HolyWaterLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -429,7 +454,6 @@ void HolyWaterLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -447,17 +471,19 @@ void HolyWaterLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM HolyWaterObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneHolyWaterObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM HolyWaterObject WHERE "
+                   "Storage = ? AND StorageID = ?");
+        loadZoneHolyWaterObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneHolyWaterObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneHolyWaterObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -491,7 +517,6 @@ void HolyWaterLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -507,7 +532,7 @@ void HolyWaterLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

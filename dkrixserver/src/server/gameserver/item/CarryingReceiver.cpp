@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -52,7 +53,7 @@ void CarryingReceiver::create(const string& ownerID, Storage storage, StorageID_
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -66,23 +67,26 @@ void CarryingReceiver::create(const string& ownerID, Storage storage, StorageID_
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO CarryingReceiverObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCarryingReceiverObjectStmt(
+            pConn, "INSERT INTO CarryingReceiverObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, "
+                   "Y, OptionType, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCarryingReceiverObjectStmt.bindLong(1, m_ItemID);
+        insertCarryingReceiverObjectStmt.bindLong(2, m_ObjectID);
+        insertCarryingReceiverObjectStmt.bindInt(3, getItemType());
+        insertCarryingReceiverObjectStmt.bindString(4, ownerID);
+        insertCarryingReceiverObjectStmt.bindInt(5, (int)storage);
+        insertCarryingReceiverObjectStmt.bindLong(6, storageID);
+        insertCarryingReceiverObjectStmt.bindInt(7, (int)x);
+        insertCarryingReceiverObjectStmt.bindInt(8, (int)y);
+        insertCarryingReceiverObjectStmt.bindString(9, optionField);
+        insertCarryingReceiverObjectStmt.bindInt(10, getGrade());
+        insertCarryingReceiverObjectStmt.bindInt(11, (int)m_CreateType);
+        insertCarryingReceiverObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -101,11 +105,16 @@ void CarryingReceiver::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCarryingReceiverObjectStmt(
+            pConn, string("UPDATE CarryingReceiverObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCarryingReceiverObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCarryingReceiverObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CarryingReceiverObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -120,19 +129,29 @@ void CarryingReceiver::save(const string& ownerID, Storage storage, StorageID_t 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE CarryingReceiverObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s', Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateCarryingReceiverObjectStmt(
+            pConn, "UPDATE CarryingReceiverObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, "
+                   "Y=?, OptionType=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateCarryingReceiverObjectStmt.bindLong(1, m_ObjectID);
+        updateCarryingReceiverObjectStmt.bindInt(2, getItemType());
+        updateCarryingReceiverObjectStmt.bindString(3, ownerID);
+        updateCarryingReceiverObjectStmt.bindInt(4, (int)storage);
+        updateCarryingReceiverObjectStmt.bindLong(5, storageID);
+        updateCarryingReceiverObjectStmt.bindInt(6, (int)x);
+        updateCarryingReceiverObjectStmt.bindInt(7, (int)y);
+        updateCarryingReceiverObjectStmt.bindString(8, optionField);
+        updateCarryingReceiverObjectStmt.bindInt(9, getGrade());
+        updateCarryingReceiverObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateCarryingReceiverObjectStmt.bindLong(11, m_ItemID);
+        updateCarryingReceiverObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -182,12 +201,13 @@ void CarryingReceiverInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CarryingReceiverInfo");
+        PreparedStatement selectCarryingReceiverInfoStmt(pConn, "SELECT MAX(ItemType) FROM CarryingReceiverInfo");
+        Result* pResult = selectCarryingReceiverInfoStmt.execute();
 
         pResult->next();
 
@@ -198,10 +218,11 @@ void CarryingReceiverInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, "
-                                "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM CarryingReceiverInfo");
+        PreparedStatement selectCarryingReceiverInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Defense, Protection, ReqAbility, "
+                   "ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+                   "DowngradeRatio FROM CarryingReceiverInfo");
+        pResult = selectCarryingReceiverInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -229,7 +250,6 @@ void CarryingReceiverInfoManager::load()
             addItemInfo(pCarryingReceiverInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -247,15 +267,16 @@ void CarryingReceiverLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, EnchantLevel, ItemFlag "
-            "FROM CarryingReceiverObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectCarryingReceiverObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, EnchantLevel, "
+                   "ItemFlag FROM CarryingReceiverObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCarryingReceiverObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCarryingReceiverObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -358,7 +379,6 @@ void CarryingReceiverLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -369,7 +389,6 @@ void CarryingReceiverLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

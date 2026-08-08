@@ -13,6 +13,7 @@
 #include "Motorcycle.h"
 #include "Ousters.h"
 #include "OustersArmsband.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -57,7 +58,7 @@ void ComposMei::create(const string& ownerID, Storage storage, StorageID_t stora
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,7 +73,7 @@ void ComposMei::create(const string& ownerID, Storage storage, StorageID_t stora
 
     BEGIN_DB {
         // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -87,13 +88,21 @@ void ComposMei::create(const string& ownerID, Storage storage, StorageID_t stora
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("INSERT INTO ComposMeiObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, "
-                            "Y, Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, x, y,
-                            (int)getNum());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertComposMeiObjectStmt(
+            pConn, "INSERT INTO ComposMeiObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertComposMeiObjectStmt.bindLong(1, m_ItemID);
+        insertComposMeiObjectStmt.bindLong(2, m_ObjectID);
+        insertComposMeiObjectStmt.bindInt(3, getItemType());
+        insertComposMeiObjectStmt.bindString(4, ownerID);
+        insertComposMeiObjectStmt.bindInt(5, (int)storage);
+        insertComposMeiObjectStmt.bindLong(6, storageID);
+        insertComposMeiObjectStmt.bindInt(7, x);
+        insertComposMeiObjectStmt.bindInt(8, y);
+        insertComposMeiObjectStmt.bindInt(9, (int)getNum());
+        insertComposMeiObjectStmt.execute();
+
     }
     END_DB(pStmt)
 
@@ -111,16 +120,21 @@ bool ComposMei::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %ld", getObjectTableName().c_str(), m_ItemID);
+        // getObjectTableName() returns a fixed per-class literal (see the
+        // commented-out override in ComposMei.h), never packet/user input --
+        // PreparedStatement cannot bind an identifier, so the table name stays
+        // spliced into the SQL text, matching the batch 2/6/7 table-name
+        // precedent. Only ItemID is bound.
+        PreparedStatement deleteStmt(pConn, "DELETE FROM " + getObjectTableName() + " WHERE ItemID = ?");
+        deleteStmt.bindLong(1, m_ItemID);
+        deleteStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deleteStmt.getAffectedRowCount() == 0) {
             return false;
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -141,11 +155,16 @@ void ComposMei::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveComposMeiObjectStmt(
+            pConn, string("UPDATE ComposMeiObject SET ") + field + " WHERE ItemID=?");
+        tinysaveComposMeiObjectStmt.bindLong(1, m_ItemID);
+        tinysaveComposMeiObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE ComposMeiObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -160,18 +179,26 @@ void ComposMei::save(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ComposMeiObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)getNum(), m_ItemID);
+        PreparedStatement updateComposMeiObjectStmt(
+            pConn, "UPDATE ComposMeiObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateComposMeiObjectStmt.bindLong(1, m_ObjectID);
+        updateComposMeiObjectStmt.bindInt(2, getItemType());
+        updateComposMeiObjectStmt.bindString(3, ownerID);
+        updateComposMeiObjectStmt.bindInt(4, (int)storage);
+        updateComposMeiObjectStmt.bindLong(5, storageID);
+        updateComposMeiObjectStmt.bindInt(6, (int)x);
+        updateComposMeiObjectStmt.bindInt(7, (int)y);
+        updateComposMeiObjectStmt.bindInt(8, (int)getNum());
+        updateComposMeiObjectStmt.bindLong(9, m_ItemID);
+        updateComposMeiObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -400,12 +427,13 @@ void ComposMeiInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM ComposMeiInfo");
+        PreparedStatement selectComposMeiInfoStmt(pConn, "SELECT MAX(ItemType) FROM ComposMeiInfo");
+        Result* pResult = selectComposMeiInfoStmt.execute();
 
         pResult->next();
 
@@ -416,8 +444,9 @@ void ComposMeiInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM ComposMeiInfo");
+        PreparedStatement selectComposMeiInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM ComposMeiInfo");
+        pResult = selectComposMeiInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -436,7 +465,6 @@ void ComposMeiInfoManager::load()
             addItemInfo(pComposMeiInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -454,14 +482,16 @@ void ComposMeiLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "ComposMeiObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectComposMeiObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM ComposMeiObject WHERE "
+                   "OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectComposMeiObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectComposMeiObjectStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -594,7 +624,6 @@ void ComposMeiLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -606,7 +635,6 @@ void ComposMeiLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -624,17 +652,19 @@ void ComposMeiLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM ComposMeiObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneComposMeiObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM ComposMeiObject WHERE "
+                   "Storage = ? AND StorageID = ?");
+        loadZoneComposMeiObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneComposMeiObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneComposMeiObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -668,7 +698,6 @@ void ComposMeiLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -684,7 +713,7 @@ void ComposMeiLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

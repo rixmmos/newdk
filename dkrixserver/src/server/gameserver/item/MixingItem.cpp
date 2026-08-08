@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -63,17 +64,21 @@ void MixingItem::create(const string& ownerID, Storage storage, StorageID_t stor
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO MixingItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertMixingItemObjectStmt(
+            pConn, "INSERT INTO MixingItemObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertMixingItemObjectStmt.bindLong(1, m_ItemID);
+        insertMixingItemObjectStmt.bindLong(2, m_ObjectID);
+        insertMixingItemObjectStmt.bindInt(3, m_ItemType);
+        insertMixingItemObjectStmt.bindString(4, ownerID);
+        insertMixingItemObjectStmt.bindInt(5, (int)storage);
+        insertMixingItemObjectStmt.bindLong(6, storageID);
+        insertMixingItemObjectStmt.bindInt(7, (int)x);
+        insertMixingItemObjectStmt.bindInt(8, (int)y);
+        insertMixingItemObjectStmt.bindInt(9, (int)m_Num);
+        insertMixingItemObjectStmt.bindInt(10, (int)m_CreateType);
+        insertMixingItemObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +96,16 @@ void MixingItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMixingItemObjectStmt(
+            pConn, string("UPDATE MixingItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMixingItemObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMixingItemObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MixingItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -126,15 +136,23 @@ void MixingItem::save(const string& ownerID, Storage storage, StorageID_t storag
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE MixingItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateMixingItemObjectStmt(
+            pConn, "UPDATE MixingItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateMixingItemObjectStmt.bindLong(1, m_ObjectID);
+        updateMixingItemObjectStmt.bindInt(2, m_ItemType);
+        updateMixingItemObjectStmt.bindString(3, ownerID);
+        updateMixingItemObjectStmt.bindInt(4, (int)storage);
+        updateMixingItemObjectStmt.bindLong(5, storageID);
+        updateMixingItemObjectStmt.bindInt(6, (int)x);
+        updateMixingItemObjectStmt.bindInt(7, (int)y);
+        updateMixingItemObjectStmt.bindInt(8, (int)m_Num);
+        updateMixingItemObjectStmt.bindLong(9, m_ItemID);
+        updateMixingItemObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -205,9 +223,10 @@ void MixingItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MixingItemInfo");
+        PreparedStatement selectMixingItemInfoStmt(pConn, "SELECT MAX(ItemType) FROM MixingItemInfo");
+        Result* pResult = selectMixingItemInfoStmt.execute();
 
         pResult->next();
 
@@ -218,8 +237,10 @@ void MixingItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Target-1, Type-1, "
-                                      "SlayerLevel, VampireLevel, OustersLevel FROM MixingItemInfo");
+        PreparedStatement selectMixingItemInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Target-1, Type-1, SlayerLevel, VampireLevel, "
+                   "OustersLevel FROM MixingItemInfo");
+        pResult = selectMixingItemInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -241,7 +262,6 @@ void MixingItemInfoManager::load()
             addItemInfo(pMixingItemInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -262,7 +282,7 @@ void MixingItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -276,10 +296,11 @@ void MixingItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "MixingItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectMixingItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM MixingItemObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectMixingItemObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMixingItemObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -372,7 +393,6 @@ void MixingItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -384,7 +404,6 @@ void MixingItemLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -398,17 +417,19 @@ void MixingItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM MixingItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneMixingItemObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM MixingItemObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneMixingItemObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneMixingItemObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneMixingItemObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -443,7 +464,6 @@ void MixingItemLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -455,7 +475,7 @@ void MixingItemLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

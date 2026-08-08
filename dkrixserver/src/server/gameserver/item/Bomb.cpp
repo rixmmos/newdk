@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -51,7 +52,7 @@ void Bomb::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -65,18 +66,20 @@ void Bomb::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO BombObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << "," << (int)m_Num << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertBombObjectStmt(
+            pConn, "INSERT INTO BombObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?,?)");
+        insertBombObjectStmt.bindLong(1, m_ItemID);
+        insertBombObjectStmt.bindLong(2, m_ObjectID);
+        insertBombObjectStmt.bindInt(3, m_ItemType);
+        insertBombObjectStmt.bindString(4, ownerID);
+        insertBombObjectStmt.bindInt(5, (int)storage);
+        insertBombObjectStmt.bindLong(6, storageID);
+        insertBombObjectStmt.bindInt(7, (int)x);
+        insertBombObjectStmt.bindInt(8, (int)y);
+        insertBombObjectStmt.bindInt(9, (int)m_Num);
+        insertBombObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -95,11 +98,15 @@ void Bomb::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveBombObjectStmt(pConn, string("UPDATE BombObject SET ") + field + " WHERE ItemID=?");
+        tinysaveBombObjectStmt.bindLong(1, m_ItemID);
+        tinysaveBombObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE BombObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -114,10 +121,10 @@ void Bomb::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -136,13 +143,21 @@ void Bomb::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE BombObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateBombObjectStmt(
+            pConn, "UPDATE BombObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, Num=? "
+                   "WHERE ItemID=?");
+        updateBombObjectStmt.bindLong(1, m_ObjectID);
+        updateBombObjectStmt.bindInt(2, m_ItemType);
+        updateBombObjectStmt.bindString(3, ownerID);
+        updateBombObjectStmt.bindInt(4, (int)storage);
+        updateBombObjectStmt.bindLong(5, storageID);
+        updateBombObjectStmt.bindInt(6, (int)x);
+        updateBombObjectStmt.bindInt(7, (int)y);
+        updateBombObjectStmt.bindInt(8, (int)m_Num);
+        updateBombObjectStmt.bindLong(9, m_ItemID);
+        updateBombObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -252,12 +267,13 @@ void BombInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM BombInfo");
+        PreparedStatement selectBombInfoStmt(pConn, "SELECT MAX(ItemType) FROM BombInfo");
+        Result* pResult = selectBombInfoStmt.execute();
 
         pResult->next();
 
@@ -268,8 +284,9 @@ void BombInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM BombInfo");
+        PreparedStatement selectBombInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, minDamage, maxDamage FROM BombInfo");
+        pResult = selectBombInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -289,7 +306,6 @@ void BombInfoManager::load()
             addItemInfo(pBombInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -307,10 +323,10 @@ void BombLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -324,9 +340,11 @@ void BombLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "BombObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectBombObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM BombObject WHERE OwnerID = "
+                   "? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectBombObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectBombObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -411,7 +429,6 @@ void BombLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -423,7 +440,6 @@ void BombLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -441,17 +457,19 @@ void BombLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM BombObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneBombObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM BombObject WHERE Storage = ? AND "
+                   "StorageID = ?");
+        loadZoneBombObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneBombObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneBombObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -483,7 +501,6 @@ void BombLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -499,7 +516,7 @@ void BombLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

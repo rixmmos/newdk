@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -46,7 +47,7 @@ void EventGiftBox::create(const string& ownerID, Storage storage, StorageID_t st
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -60,15 +61,20 @@ void EventGiftBox::create(const string& ownerID, Storage storage, StorageID_t st
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO EventGiftBoxObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertEventGiftBoxObjectStmt(
+            pConn, "INSERT INTO EventGiftBoxObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        insertEventGiftBoxObjectStmt.bindLong(1, m_ItemID);
+        insertEventGiftBoxObjectStmt.bindLong(2, m_ObjectID);
+        insertEventGiftBoxObjectStmt.bindInt(3, m_ItemType);
+        insertEventGiftBoxObjectStmt.bindString(4, ownerID);
+        insertEventGiftBoxObjectStmt.bindInt(5, (int)storage);
+        insertEventGiftBoxObjectStmt.bindLong(6, storageID);
+        insertEventGiftBoxObjectStmt.bindInt(7, (int)x);
+        insertEventGiftBoxObjectStmt.bindInt(8, (int)y);
+        insertEventGiftBoxObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -86,11 +92,16 @@ void EventGiftBox::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveEventGiftBoxObjectStmt(
+            pConn, string("UPDATE EventGiftBoxObject SET ") + field + " WHERE ItemID=?");
+        tinysaveEventGiftBoxObjectStmt.bindLong(1, m_ItemID);
+        tinysaveEventGiftBoxObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE EventGiftBoxObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -121,13 +132,21 @@ void EventGiftBox::save(const string& ownerID, Storage storage, StorageID_t stor
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventGiftBoxObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
+        PreparedStatement updateEventGiftBoxObjectStmt(
+            pConn, "UPDATE EventGiftBoxObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=? "
+                   "WHERE ItemID=?");
+        updateEventGiftBoxObjectStmt.bindLong(1, m_ObjectID);
+        updateEventGiftBoxObjectStmt.bindInt(2, m_ItemType);
+        updateEventGiftBoxObjectStmt.bindString(3, ownerID);
+        updateEventGiftBoxObjectStmt.bindInt(4, (int)storage);
+        updateEventGiftBoxObjectStmt.bindLong(5, storageID);
+        updateEventGiftBoxObjectStmt.bindInt(6, (int)x);
+        updateEventGiftBoxObjectStmt.bindInt(7, (int)y);
+        updateEventGiftBoxObjectStmt.bindLong(8, m_ItemID);
+        updateEventGiftBoxObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -196,9 +215,10 @@ void EventGiftBoxInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM EventGiftBoxInfo");
+        PreparedStatement selectEventGiftBoxInfoStmt(pConn, "SELECT MAX(ItemType) FROM EventGiftBoxInfo");
+        Result* pResult = selectEventGiftBoxInfoStmt.execute();
 
         pResult->next();
 
@@ -209,8 +229,9 @@ void EventGiftBoxInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventGiftBoxInfo");
+        PreparedStatement selectEventGiftBoxInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM EventGiftBoxInfo");
+        pResult = selectEventGiftBoxInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -228,7 +249,6 @@ void EventGiftBoxInfoManager::load()
             addItemInfo(pEventGiftBoxInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -246,10 +266,10 @@ void EventGiftBoxLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -263,10 +283,11 @@ void EventGiftBoxLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM EventGiftBoxObject "
-                                "WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectEventGiftBoxObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM EventGiftBoxObject WHERE OwnerID "
+                   "= ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectEventGiftBoxObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectEventGiftBoxObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -356,7 +377,6 @@ void EventGiftBoxLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -368,7 +388,6 @@ void EventGiftBoxLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -382,17 +401,19 @@ void EventGiftBoxLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM EventGiftBoxObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneEventGiftBoxObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM EventGiftBoxObject WHERE Storage "
+                   "= ? AND StorageID = ?");
+        loadZoneEventGiftBoxObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneEventGiftBoxObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneEventGiftBoxObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -424,7 +445,6 @@ void EventGiftBoxLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -436,7 +456,7 @@ void EventGiftBoxLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

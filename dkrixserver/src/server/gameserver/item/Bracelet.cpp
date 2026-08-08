@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -57,7 +58,7 @@ void Bracelet::create(const string& ownerID, Storage storage, StorageID_t storag
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -71,23 +72,27 @@ void Bracelet::create(const string& ownerID, Storage storage, StorageID_t storag
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO BraceletObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertBraceletObjectStmt(
+            pConn, "INSERT INTO BraceletObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertBraceletObjectStmt.bindLong(1, m_ItemID);
+        insertBraceletObjectStmt.bindLong(2, m_ObjectID);
+        insertBraceletObjectStmt.bindInt(3, getItemType());
+        insertBraceletObjectStmt.bindString(4, ownerID);
+        insertBraceletObjectStmt.bindInt(5, (int)storage);
+        insertBraceletObjectStmt.bindLong(6, storageID);
+        insertBraceletObjectStmt.bindInt(7, (int)x);
+        insertBraceletObjectStmt.bindInt(8, (int)y);
+        insertBraceletObjectStmt.bindString(9, optionField);
+        insertBraceletObjectStmt.bindInt(10, getDurability());
+        insertBraceletObjectStmt.bindInt(11, getGrade());
+        insertBraceletObjectStmt.bindInt(12, (int)m_CreateType);
+        insertBraceletObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -106,11 +111,16 @@ void Bracelet::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveBraceletObjectStmt(
+            pConn, string("UPDATE BraceletObject SET ") + field + " WHERE ItemID=?");
+        tinysaveBraceletObjectStmt.bindLong(1, m_ItemID);
+        tinysaveBraceletObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE BraceletObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -125,10 +135,10 @@ void Bracelet::save(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
 
         /*
@@ -152,14 +162,24 @@ void Bracelet::save(const string& ownerID, Storage storage, StorageID_t storageI
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE BraceletObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateBraceletObjectStmt(
+            pConn, "UPDATE BraceletObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        updateBraceletObjectStmt.bindLong(1, m_ObjectID);
+        updateBraceletObjectStmt.bindInt(2, getItemType());
+        updateBraceletObjectStmt.bindString(3, ownerID);
+        updateBraceletObjectStmt.bindInt(4, (int)storage);
+        updateBraceletObjectStmt.bindLong(5, storageID);
+        updateBraceletObjectStmt.bindInt(6, (int)x);
+        updateBraceletObjectStmt.bindInt(7, (int)y);
+        updateBraceletObjectStmt.bindString(8, optionField);
+        updateBraceletObjectStmt.bindInt(9, getDurability());
+        updateBraceletObjectStmt.bindInt(10, getGrade());
+        updateBraceletObjectStmt.bindInt(11, (int)getEnchantLevel());
+        updateBraceletObjectStmt.bindLong(12, m_ItemID);
+        updateBraceletObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -274,12 +294,13 @@ void BraceletInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM BraceletInfo");
+        PreparedStatement selectBraceletInfoStmt(pConn, "SELECT MAX(ItemType) FROM BraceletInfo");
+        Result* pResult = selectBraceletInfoStmt.execute();
 
         pResult->next();
 
@@ -290,10 +311,11 @@ void BraceletInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility,ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM BraceletInfo");
+        PreparedStatement selectBraceletInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility,ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM BraceletInfo");
+        pResult = selectBraceletInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -322,7 +344,6 @@ void BraceletInfoManager::load()
             addItemInfo(pBraceletInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -340,10 +361,10 @@ void BraceletLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -358,10 +379,11 @@ void BraceletLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM BraceletObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectBraceletObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM BraceletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectBraceletObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectBraceletObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -465,7 +487,6 @@ void BraceletLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -477,7 +498,6 @@ void BraceletLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -495,18 +515,19 @@ void BraceletLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM BraceletObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneBraceletObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, ItemFlag FROM BraceletObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneBraceletObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneBraceletObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneBraceletObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -547,7 +568,6 @@ void BraceletLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -563,7 +583,7 @@ void BraceletLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

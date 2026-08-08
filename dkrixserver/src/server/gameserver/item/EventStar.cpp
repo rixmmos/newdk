@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -63,17 +64,21 @@ void EventStar::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
-        sql << "INSERT INTO EventStarObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertEventStarObjectStmt(
+            pConn, "INSERT INTO EventStarObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, "
+                   "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertEventStarObjectStmt.bindLong(1, m_ItemID);
+        insertEventStarObjectStmt.bindLong(2, m_ObjectID);
+        insertEventStarObjectStmt.bindInt(3, m_ItemType);
+        insertEventStarObjectStmt.bindString(4, ownerID);
+        insertEventStarObjectStmt.bindInt(5, (int)storage);
+        insertEventStarObjectStmt.bindLong(6, storageID);
+        insertEventStarObjectStmt.bindInt(7, (int)x);
+        insertEventStarObjectStmt.bindInt(8, (int)y);
+        insertEventStarObjectStmt.bindInt(9, (int)m_Num);
+        insertEventStarObjectStmt.bindInt(10, (int)m_CreateType);
+        insertEventStarObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +96,16 @@ void EventStar::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveEventStarObjectStmt(
+            pConn, string("UPDATE EventStarObject SET ") + field + " WHERE ItemID=?");
+        tinysaveEventStarObjectStmt.bindLong(1, m_ItemID);
+        tinysaveEventStarObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE EventStarObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -127,15 +137,23 @@ void EventStar::save(const string& ownerID, Storage storage, StorageID_t storage
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventStarObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateEventStarObjectStmt(
+            pConn, "UPDATE EventStarObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateEventStarObjectStmt.bindLong(1, m_ObjectID);
+        updateEventStarObjectStmt.bindInt(2, m_ItemType);
+        updateEventStarObjectStmt.bindString(3, ownerID);
+        updateEventStarObjectStmt.bindInt(4, (int)storage);
+        updateEventStarObjectStmt.bindLong(5, storageID);
+        updateEventStarObjectStmt.bindInt(6, (int)x);
+        updateEventStarObjectStmt.bindInt(7, (int)y);
+        updateEventStarObjectStmt.bindInt(8, (int)m_Num);
+        updateEventStarObjectStmt.bindLong(9, m_ItemID);
+        updateEventStarObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -207,9 +225,10 @@ void EventStarInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM EventStarInfo");
+        PreparedStatement selectEventStarInfoStmt(pConn, "SELECT MAX(ItemType) FROM EventStarInfo");
+        Result* pResult = selectEventStarInfoStmt.execute();
 
         pResult->next();
 
@@ -220,8 +239,10 @@ void EventStarInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, FunctionFlag, "
-                                      "FunctionValue FROM EventStarInfo");
+        PreparedStatement selectEventStarInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, FunctionFlag, FunctionValue FROM "
+                   "EventStarInfo");
+        pResult = selectEventStarInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -241,7 +262,6 @@ void EventStarInfoManager::load()
             addItemInfo(pEventStarInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -262,7 +282,7 @@ void EventStarLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -276,10 +296,11 @@ void EventStarLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "EventStarObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectEventStarObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventStarObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectEventStarObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectEventStarObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -372,7 +393,6 @@ void EventStarLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -384,7 +404,6 @@ void EventStarLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -398,17 +417,19 @@ void EventStarLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventStarObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneEventStarObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM EventStarObject "
+                   "WHERE Storage = ? AND StorageID = ?");
+        loadZoneEventStarObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneEventStarObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneEventStarObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -443,7 +464,6 @@ void EventStarLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -455,7 +475,7 @@ void EventStarLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

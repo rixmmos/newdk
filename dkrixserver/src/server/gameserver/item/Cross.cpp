@@ -12,6 +12,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -62,7 +63,7 @@ void Cross::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -76,22 +77,27 @@ void Cross::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO CrossObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCrossObjectStmt(
+            pConn, "INSERT INTO CrossObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCrossObjectStmt.bindLong(1, m_ItemID);
+        insertCrossObjectStmt.bindLong(2, m_ObjectID);
+        insertCrossObjectStmt.bindInt(3, getItemType());
+        insertCrossObjectStmt.bindString(4, ownerID);
+        insertCrossObjectStmt.bindInt(5, (int)storage);
+        insertCrossObjectStmt.bindLong(6, storageID);
+        insertCrossObjectStmt.bindInt(7, (int)x);
+        insertCrossObjectStmt.bindInt(8, (int)y);
+        insertCrossObjectStmt.bindString(9, optionField);
+        insertCrossObjectStmt.bindInt(10, getDurability());
+        insertCrossObjectStmt.bindInt(11, (int)getGrade());
+        insertCrossObjectStmt.bindInt(12, (int)m_CreateType);
+        insertCrossObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -110,11 +116,15 @@ void Cross::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCrossObjectStmt(pConn, string("UPDATE CrossObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCrossObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCrossObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CrossObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -129,10 +139,10 @@ void Cross::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -156,14 +166,25 @@ void Cross::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE CrossObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%d, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getSilver(), (int)getGrade(), m_ItemID);
+        PreparedStatement updateCrossObjectStmt(
+            pConn, "UPDATE CrossObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, Silver=?, Grade=? WHERE ItemID=?");
+        updateCrossObjectStmt.bindLong(1, m_ObjectID);
+        updateCrossObjectStmt.bindInt(2, getItemType());
+        updateCrossObjectStmt.bindString(3, ownerID);
+        updateCrossObjectStmt.bindInt(4, (int)storage);
+        updateCrossObjectStmt.bindInt(5, storageID);
+        updateCrossObjectStmt.bindInt(6, (int)x);
+        updateCrossObjectStmt.bindInt(7, (int)y);
+        updateCrossObjectStmt.bindString(8, optionField);
+        updateCrossObjectStmt.bindInt(9, getDurability());
+        updateCrossObjectStmt.bindInt(10, (int)getEnchantLevel());
+        updateCrossObjectStmt.bindInt(11, (int)getSilver());
+        updateCrossObjectStmt.bindInt(12, (int)getGrade());
+        updateCrossObjectStmt.bindLong(13, m_ItemID);
+        updateCrossObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -308,12 +329,13 @@ void CrossInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CrossInfo");
+        PreparedStatement selectCrossInfoStmt(pConn, "SELECT MAX(ItemType) FROM CrossInfo");
+        Result* pResult = selectCrossInfoStmt.execute();
 
         pResult->next();
 
@@ -324,10 +346,11 @@ void CrossInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MPBonus, "
-            "MaxSilver, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-            "NextOptionRatio, NextItemType, DowngradeRatio FROM CrossInfo");
+        PreparedStatement selectCrossInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, "
+                   "MPBonus, MaxSilver, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, "
+                   "UpgradeCrashPercent, NextOptionRatio, NextItemType, DowngradeRatio FROM CrossInfo");
+        pResult = selectCrossInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -360,7 +383,6 @@ void CrossInfoManager::load()
             addItemInfo(pCrossInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -378,10 +400,10 @@ void CrossLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -396,10 +418,12 @@ void CrossLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, EnchantLevel, "
-            "Silver, Grade, ItemFlag FROM CrossObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectCrossObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, Grade, ItemFlag FROM CrossObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, "
+                   "3, 4, 9)");
+        selectCrossObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCrossObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -504,7 +528,6 @@ void CrossLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -516,7 +539,6 @@ void CrossLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -534,18 +556,19 @@ void CrossLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM CrossObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCrossObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, Silver, ItemFlag FROM CrossObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneCrossObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCrossObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCrossObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -587,7 +610,6 @@ void CrossLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -603,7 +625,7 @@ void CrossLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

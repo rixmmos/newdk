@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -53,7 +54,7 @@ void CoreZap::create(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -67,23 +68,26 @@ void CoreZap::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO CoreZapObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCoreZapObjectStmt(
+            pConn, "INSERT INTO CoreZapObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCoreZapObjectStmt.bindLong(1, m_ItemID);
+        insertCoreZapObjectStmt.bindLong(2, m_ObjectID);
+        insertCoreZapObjectStmt.bindInt(3, getItemType());
+        insertCoreZapObjectStmt.bindString(4, ownerID);
+        insertCoreZapObjectStmt.bindInt(5, (int)storage);
+        insertCoreZapObjectStmt.bindLong(6, storageID);
+        insertCoreZapObjectStmt.bindInt(7, (int)x);
+        insertCoreZapObjectStmt.bindInt(8, (int)y);
+        insertCoreZapObjectStmt.bindString(9, optionField);
+        insertCoreZapObjectStmt.bindInt(10, getGrade());
+        insertCoreZapObjectStmt.bindInt(11, (int)m_CreateType);
+        insertCoreZapObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -102,11 +106,16 @@ void CoreZap::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCoreZapObjectStmt(
+            pConn, string("UPDATE CoreZapObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCoreZapObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCoreZapObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CoreZapObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -121,10 +130,10 @@ void CoreZap::save(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -146,12 +155,21 @@ void CoreZap::save(const string& ownerID, Storage storage, StorageID_t storageID
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE CoreZapObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s', Grade=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getGrade(), m_ItemID);
+        PreparedStatement updateCoreZapObjectStmt(
+            pConn, "UPDATE CoreZapObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Grade=? WHERE ItemID=?");
+        updateCoreZapObjectStmt.bindLong(1, m_ObjectID);
+        updateCoreZapObjectStmt.bindInt(2, getItemType());
+        updateCoreZapObjectStmt.bindString(3, ownerID);
+        updateCoreZapObjectStmt.bindInt(4, (int)storage);
+        updateCoreZapObjectStmt.bindLong(5, storageID);
+        updateCoreZapObjectStmt.bindInt(6, (int)x);
+        updateCoreZapObjectStmt.bindInt(7, (int)y);
+        updateCoreZapObjectStmt.bindString(8, optionField);
+        updateCoreZapObjectStmt.bindInt(9, getGrade());
+        updateCoreZapObjectStmt.bindLong(10, m_ItemID);
+        updateCoreZapObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -265,12 +283,13 @@ void CoreZapInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CoreZapInfo");
+        PreparedStatement selectCoreZapInfoStmt(pConn, "SELECT MAX(ItemType) FROM CoreZapInfo");
+        Result* pResult = selectCoreZapInfoStmt.execute();
 
         pResult->next();
 
@@ -281,8 +300,9 @@ void CoreZapInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionClass FROM CoreZapInfo");
+        PreparedStatement selectCoreZapInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionClass FROM CoreZapInfo");
+        pResult = selectCoreZapInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -301,7 +321,6 @@ void CoreZapInfoManager::load()
             addItemInfo(pCoreZapInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -319,10 +338,10 @@ void CoreZapLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -337,10 +356,11 @@ void CoreZapLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, "
-                                "ItemFlag FROM CoreZapObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectCoreZapObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Grade, ItemFlag FROM "
+                   "CoreZapObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCoreZapObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCoreZapObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -459,7 +479,6 @@ void CoreZapLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -470,7 +489,6 @@ void CoreZapLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -488,18 +506,19 @@ void CoreZapLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, ItemFlag FROM CoreZapObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCoreZapObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, ItemFlag FROM "
+                   "CoreZapObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneCoreZapObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCoreZapObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCoreZapObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -538,7 +557,6 @@ void CoreZapLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -554,7 +572,7 @@ void CoreZapLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

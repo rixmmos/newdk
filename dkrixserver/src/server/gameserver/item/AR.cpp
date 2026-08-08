@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -66,7 +67,7 @@ void AR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -80,7 +81,7 @@ void AR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -99,17 +100,27 @@ void AR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
         pStmt->executeQueryString(sql.toString());
         */
 
-        
+
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("INSERT INTO ARObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
-                            "OptionType, Durability, BulletCount, Grade, ItemFlag) VALUES(%ld, %ld, %d, '%s', %d, %ld, "
-                            "%d, %d, '%s', %d, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x,
-                            (int)y, optionField.c_str(), getDurability(), (int)getBulletCount(), (int)getGrade(),
-                            (int)m_CreateType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement createARStmt(
+            pConn, "INSERT INTO ARObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "OptionType, Durability, BulletCount, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+                   "?)");
+        createARStmt.bindLong(1, m_ItemID);
+        createARStmt.bindLong(2, m_ObjectID);
+        createARStmt.bindInt(3, getItemType());
+        createARStmt.bindString(4, ownerID);
+        createARStmt.bindInt(5, (int)storage);
+        createARStmt.bindLong(6, storageID);
+        createARStmt.bindInt(7, (int)x);
+        createARStmt.bindInt(8, (int)y);
+        createARStmt.bindString(9, optionField);
+        createARStmt.bindInt(10, getDurability());
+        createARStmt.bindInt(11, (int)getBulletCount());
+        createARStmt.bindInt(12, (int)getGrade());
+        createARStmt.bindInt(13, (int)m_CreateType);
+        createARStmt.execute();
     }
     END_DB(pStmt)
 
@@ -128,11 +139,14 @@ void AR::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQuery("UPDATE ARObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveARStmt(pConn, string("UPDATE ARObject SET ") + field + " WHERE ItemID=?");
+        tinysaveARStmt.bindLong(1, m_ItemID);
+        tinysaveARStmt.execute();
     }
     END_DB(pStmt)
 
@@ -150,7 +164,7 @@ void AR::save(const string& ownerID, Storage storage, StorageID_t storageID, BYT
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -175,14 +189,24 @@ void AR::save(const string& ownerID, Storage storage, StorageID_t storageID, BYT
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE ARObject SET ObjectID = %ld, ItemType = %d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, BulletCount=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getBulletCount(), (int)getSilver(), (int)getGrade(),
-            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveARStmt(
+            pConn, "UPDATE ARObject SET ObjectID = ?, ItemType = ?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, BulletCount=?, Silver=?, Grade=? WHERE ItemID=?");
+        saveARStmt.bindLong(1, m_ObjectID);
+        saveARStmt.bindInt(2, getItemType());
+        saveARStmt.bindString(3, ownerID);
+        saveARStmt.bindInt(4, (int)storage);
+        saveARStmt.bindLong(5, storageID);
+        saveARStmt.bindInt(6, (int)x);
+        saveARStmt.bindInt(7, (int)y);
+        saveARStmt.bindString(8, optionField);
+        saveARStmt.bindInt(9, getDurability());
+        saveARStmt.bindInt(10, (int)getEnchantLevel());
+        saveARStmt.bindInt(11, (int)getBulletCount());
+        saveARStmt.bindInt(12, (int)getSilver());
+        saveARStmt.bindInt(13, (int)getGrade());
+        saveARStmt.bindLong(14, m_ItemID);
+        saveARStmt.execute();
     }
     END_DB(pStmt)
 
@@ -198,11 +222,11 @@ void AR::saveBullet() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQuery("UPDATE ARObject SET BulletCount = %d WHERE ItemID = %d", getBulletCount(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement saveBulletStmt(pConn, "UPDATE ARObject SET BulletCount = ? WHERE ItemID = ?");
+        saveBulletStmt.bindInt(1, getBulletCount());
+        saveBulletStmt.bindInt(2, m_ItemID);
+        saveBulletStmt.execute();
     }
     END_DB(pStmt)
 
@@ -365,12 +389,13 @@ void ARInfoManager::load()
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM ARInfo");
+        PreparedStatement maxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM ARInfo");
+        Result* pResult = maxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -381,10 +406,12 @@ void ARInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
+        PreparedStatement loadARInfoStmt(
+            pConn,
             "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
             "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
             "NextOptionRatio, NextItemType, DowngradeRatio FROM ARInfo");
+        pResult = loadARInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -416,8 +443,6 @@ void ARInfoManager::load()
 
             addItemInfo(pARInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -436,10 +461,10 @@ void ARLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -453,10 +478,12 @@ void ARLoader::load(Creature* pCreature)
 
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
-        Result* pResult = pStmt->executeQuery(
+        PreparedStatement loadARStmt(
+            pConn,
             "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, BulletCount, Silver, "
-            "EnchantLevel, Grade, ItemFlag FROM ARObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+            "EnchantLevel, Grade, ItemFlag FROM ARObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        loadARStmt.bindString(1, pCreature->getName());
+        Result* pResult = loadARStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -561,7 +588,6 @@ void ARLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -571,8 +597,6 @@ void ARLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -590,18 +614,19 @@ void ARLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, BulletCount, "
-               "Silver, EnchantLevel, ItemFlag FROM ARObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (STORAGE_ZONE enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneARStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, BulletCount, "
+                   "Silver, EnchantLevel, ItemFlag FROM ARObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneARStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneARStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneARStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -637,16 +662,12 @@ void ARLoader::load(Zone* pZone)
 
             case STORAGE_STASH:
             case STORAGE_CORPSE:
-                SAFE_DELETE(pStmt); // by sigi
                 throw UnsupportedError("       .");
 
             default:
-                SAFE_DELETE(pStmt); // by sigi
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -662,7 +683,7 @@ void ARLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt);

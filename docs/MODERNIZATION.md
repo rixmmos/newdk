@@ -2019,6 +2019,130 @@ local to this worktree — two sibling agents migrated the disjoint `item/`
 file set in parallel in their own worktrees; whoever merges all three
 reconciles the final combined baseline number.
 
+**11.2 batch 10 (2026-08-09, agent stream, worktree): `dkrixserver/src/server/
+gameserver/item/`, the `A`–`Necklace` alphabetical half (a sibling agent took
+`Necklace`-exclusive through the end in its own worktree; a third stream
+covered the rest of the tree — all three ran against the same 305 baseline in
+disjoint files).** 45 files in scope; two (`CoupleRingBase.cpp`, `Gun.cpp`)
+turned out to carry no SQL at all (verified by reading — they're thin
+base-class shims whose subclasses own the real `Statement`/`PreparedStatement`
+calls). Of the remaining 43, every live call site was migrated: **460**
+`PreparedStatement` sites in total, of which the ratchet's grep could only
+ever see **80** — the other 380 were invisible to it, overwhelmingly
+concentrated in one file. **Ratchet 305 → 225** [measured], re-baselined via
+`--update`.
+
+Per-item-class files (42 of the 43) follow a near-identical boilerplate
+established across the whole `item/` subsystem — `create()`, `tinysave()`,
+`save()`, occasionally `destroy()`, `XInfoManager::load()`, `XLoader::
+load(Creature*)`, `XLoader::load(Zone*)`, and a no-op `XLoader::
+load(StorageID_t, Inventory*)` — and were migrated by a purpose-built
+script (not hand-edited file-by-file) that parses each `pStmt->executeQuery
+(fmt, args...)` call's printf-style format string and argument list, and a
+second pattern for the `StringStream sql; sql << ...; pStmt->
+executeQueryString(sql.toString())` form used by roughly half these files'
+`create()` and all of their `Zone*` loaders. Every transformed call was
+verified programmatically per file — `?`-placeholder count against bind-call
+count and index sequence 1..N, brace/paren balance against the pre-edit
+`HEAD` copy, no raw `Statement`/`executeQuery`/`executeQueryString`/
+`createStatement`/`SAFE_DELETE(pStmt)` left outside a comment, no line over
+clang-format's 120-column limit. The script had two real bugs during
+development that the first two verification passes did not catch (a missing
+`.` before `bindX(...)` calls, and a regex whose `(?!literal)` lookahead
+guard could still start-match one character into the literal it was meant to
+exclude — reproducibly splitting `BEGIN_DB {` into `B` + injected code +
+`EGIN_DB {` in the two files using the less-common "helpers-before-chain"
+argument order, `CoupleRing.cpp` and `EventGiftBox.cpp`); both were caught
+only by a third pass that diffed `__BEGIN_TRY`/`__END_CATCH`/`BEGIN_DB`/
+`END_DB` token counts against each file's original and grepped for
+`[A-Za-z]Connection\* pConn`, and fixed by hand. Called out here because it's
+a real lesson for whoever runs a similar script next: token-count and
+qmark-count invariants can hold by coincidence over corrupted output — this
+batch's worst corruption (`Money.cpp`, below) had a bind-index sequence that
+ran 1..20 with no gaps despite being nonsense. One further miss, caught only
+by a final `git status` file-count sanity check against the derived scope
+list rather than any content check: `Blade.cpp` was typed out of the script's
+file list by hand (it sorts immediately after `Belt.cpp`, migrated separately
+and first) and was silently skipped through two full verification passes
+before anyone noticed the file was missing from `git status`, not that its
+content was wrong. Migrated last, same script, same checks, clean.
+
+The **`ItemIDRegistry.cpp` file alone accounts for 164 of the 460 sites** (43%
+of the whole batch, all 164 invisible to the ratchet) — 81
+`ClassName::initItemIDRegistry()` functions (six generated from one
+`#define ITEMIDREGISTRY(CLASS, TABLE)` macro, the rest hand-duplicated
+copies of it), each running an `SELECT COUNT(*) from X` followed
+conditionally by `SELECT MAX(ItemID) FROM X`. None of these 162 sites ever
+had a `%`-placeholder — most pass the table name as a bare literal
+(`"SELECT COUNT(*) from MotorcycleObject"`), and the macro's two sites use
+`%s` but are invisible to the ratchet for the batch 2 reason (`COUNT(*)`'s
+`)` appears before the `%s`). This is the largest single-file invisible-site
+count found in any Phase 11.2 batch so far. The macro itself was rewritten
+once — `"SELECT COUNT(*) from " TABLE` using adjacent string-literal
+concatenation (`TABLE` is always a `"...Object"` string literal at the call
+site, e.g. `ITEMIDREGISTRY(CarryingReceiver, "CarryingReceiverObject")`) —
+which propagates to its six invocations; the 81 hand-duplicated functions
+were migrated by a dedicated regex pass (verified against the macro's
+already-hand-checked output, then applied uniformly).
+
+Four non-mechanical judgment calls, three of them variations on the
+`tinysave`/table-name-splice precedents already established:
+- `tinysave(const char* field)` is the same caller-built fragment as every
+  prior batch's `tinysave` — spliced, only `ItemID` bound, inline comment —
+  across all 42 item-class files that have it.
+- `ComposMei::destroy()` and `Larva::destroy()` call `DELETE FROM %s WHERE
+  ItemID = %ld` with `getObjectTableName().c_str()` as the `%s` argument —
+  a virtual method returning a fixed per-class literal (e.g. `Item.h`'s pure
+  virtual, overridden per subclass to return `"XObject"`), never packet/user
+  input. `PreparedStatement` can't bind an identifier, so the table name
+  stays spliced (`"DELETE FROM " + getObjectTableName() + " WHERE ItemID =
+  ?"`), matching the batch 2/6/7 table-name precedent; only `ItemID` is
+  bound. Migrating this also meant fixing `if (pStmt->getAffectedRowCount()
+  == 0)` to read off the new `PreparedStatement` instead of the
+  now-permanently-`NULL` `pStmt` (the same fix `Belt::destroy()` needed).
+- `BloodBible::tinysave()` and `CastleSymbol::tinysave()` build the SQL into
+  a `char query[255]` buffer via `sprintf()` before calling
+  `pStmt->executeQuery(query)` — a fifth invisibility mode, distinct from
+  the four found in batches 1/2/6/9 (the ratchet's grep only matches
+  `executeQuery(`/`Statement(`/`setStatement(` calls whose *own* argument
+  list contains a `%` specifier; here the specifier lives one line up, inside
+  the `sprintf` call, invisible regardless of format). The `sprintf`/
+  `filelog("WarLog.txt", ...)` pair is kept (preserves the existing SQL debug
+  log), but the buffer is no longer executed — a `PreparedStatement` with the
+  same spliced-fragment-plus-bound-`ItemID` shape runs instead.
+- `Money::tinysave()` has a variant fragment shape,
+  `"UPDATE MoneyObject SET %s, Amount=%ld WHERE ItemID=%ld"` — the caller
+  fragment *and* a real bindable `Amount` column share one call. Migrated as
+  `string("UPDATE MoneyObject SET ") + field + ", Amount=? WHERE ItemID=?"`
+  with both `?`s bound (`Amount` as `bindLong`, matching this site's own
+  `%ld`, even though `Money::create()`'s `%d` for the same field binds it
+  `bindInt` elsewhere in the same file — preserved verbatim per the
+  batch 9 precedent of matching each site's own specifier, not unifying
+  across sites).
+
+Every other value across the batch is bound by the same convention as prior
+batches: bind method chosen from the original `%`-specifier where the site
+had one (`%s`→`bindString` with `.c_str()` stripped, `%d`/`%c`→`bindInt`,
+`%u`→`bindUInt`, `%ld`→`bindLong`, `%lu`→`bindULong`), and for the `<<`-chain
+`create()` sites that never had a specifier, inferred from an explicit
+`(int)`/`(uint)`/`(long)` cast where present or a small fixed lookup table
+for the bare fields that recur across nearly every file (`m_ItemID`/
+`m_ObjectID`/`storageID`→`bindLong`, `getItemType()`/`getGrade()`/
+`m_CreateType`/`m_Num`/`m_ItemType`→`bindInt`) — cross-checked against each
+file's own printf-style `save()`, which binds the identical column with the
+identical type. `Statement* pStmt;` (no initialiser) was changed to
+`= NULL` everywhere its only assignment was removed, matching the batch 9
+precedent (the `END_DB` macro's `delete STMT` on catch would otherwise run
+on an indeterminate pointer); every `SAFE_DELETE(pStmt)` — including the
+`// by sigi` ones inside `Loader::load()`'s `switch` `default:` branches —
+was dropped as RAII-redundant. **Not compile-verified** — no server
+toolchain in this sandbox; verified by reading and by the programmatic
+passes described above, re-run after the corruption fixes until clean. CI is
+the real gate, same caveat as every prior batch. This batch's ratchet delta
+(305 → 225) does not by itself reflect the tree-wide baseline — two sibling
+agents migrated disjoint file sets in parallel in their own worktrees;
+whoever merges all three batches reconciles the final combined number.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,

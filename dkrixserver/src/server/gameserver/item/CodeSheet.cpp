@@ -14,6 +14,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -71,7 +72,7 @@ void CodeSheet::create(const string& ownerID, Storage storage, StorageID_t stora
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -85,23 +86,24 @@ void CodeSheet::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(m_OptionType, optionField);
 
-        sql << "INSERT INTO CodeSheetObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "')";
 
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCodeSheetObjectStmt(
+            pConn, "INSERT INTO CodeSheetObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCodeSheetObjectStmt.bindLong(1, m_ItemID);
+        insertCodeSheetObjectStmt.bindLong(2, m_ObjectID);
+        insertCodeSheetObjectStmt.bindInt(3, m_ItemType);
+        insertCodeSheetObjectStmt.bindString(4, ownerID);
+        insertCodeSheetObjectStmt.bindInt(5, (int)storage);
+        insertCodeSheetObjectStmt.bindLong(6, storageID);
+        insertCodeSheetObjectStmt.bindInt(7, (int)x);
+        insertCodeSheetObjectStmt.bindInt(8, (int)y);
+        insertCodeSheetObjectStmt.bindString(9, optionField);
+        insertCodeSheetObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -120,11 +122,16 @@ void CodeSheet::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCodeSheetObjectStmt(
+            pConn, string("UPDATE CodeSheetObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCodeSheetObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCodeSheetObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CodeSheetObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -139,10 +146,10 @@ void CodeSheet::save(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -165,12 +172,20 @@ void CodeSheet::save(const string& ownerID, Storage storage, StorageID_t storage
 
         string optionField;
         setOptionTypeToField(m_OptionType, optionField);
-        pStmt->executeQuery("UPDATE CodeSheetObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, OptionType='%s' WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), m_ItemID);
+        PreparedStatement updateCodeSheetObjectStmt(
+            pConn, "UPDATE CodeSheetObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=? WHERE ItemID=?");
+        updateCodeSheetObjectStmt.bindLong(1, m_ObjectID);
+        updateCodeSheetObjectStmt.bindInt(2, m_ItemType);
+        updateCodeSheetObjectStmt.bindString(3, ownerID);
+        updateCodeSheetObjectStmt.bindInt(4, (int)storage);
+        updateCodeSheetObjectStmt.bindLong(5, storageID);
+        updateCodeSheetObjectStmt.bindInt(6, (int)x);
+        updateCodeSheetObjectStmt.bindInt(7, (int)y);
+        updateCodeSheetObjectStmt.bindString(8, optionField);
+        updateCodeSheetObjectStmt.bindLong(9, m_ItemID);
+        updateCodeSheetObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -260,12 +275,13 @@ void CodeSheetInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CodeSheetInfo");
+        PreparedStatement selectCodeSheetInfoStmt(pConn, "SELECT MAX(ItemType) FROM CodeSheetInfo");
+        Result* pResult = selectCodeSheetInfoStmt.execute();
 
         pResult->next();
 
@@ -276,7 +292,9 @@ void CodeSheetInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight FROM CodeSheetInfo");
+        PreparedStatement selectCodeSheetInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight FROM CodeSheetInfo");
+        pResult = selectCodeSheetInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -293,7 +311,6 @@ void CodeSheetInfoManager::load()
             addItemInfo(pCodeSheetInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -311,10 +328,10 @@ void CodeSheetLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -329,10 +346,11 @@ void CodeSheetLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType FROM "
-                                "CodeSheetObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectCodeSheetObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType FROM CodeSheetObject "
+                   "WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCodeSheetObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCodeSheetObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -425,7 +443,6 @@ void CodeSheetLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -436,7 +453,6 @@ void CodeSheetLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -454,18 +470,19 @@ void CodeSheetLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM CodeSheetObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCodeSheetObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, ItemFlag FROM CodeSheetObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneCodeSheetObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCodeSheetObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCodeSheetObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -506,7 +523,6 @@ void CodeSheetLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -522,7 +538,7 @@ void CodeSheetLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

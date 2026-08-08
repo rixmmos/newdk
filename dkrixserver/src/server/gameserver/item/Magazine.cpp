@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -46,7 +47,7 @@ void Magazine::create(const string& ownerID, Storage storage, StorageID_t storag
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -60,7 +61,7 @@ void Magazine::create(const string& ownerID, Storage storage, StorageID_t storag
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -76,12 +77,20 @@ void Magazine::create(const string& ownerID, Storage storage, StorageID_t storag
         */
 
 
-        pStmt->executeQuery("INSERT INTO MagazineObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, "
-                            "Y, Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num);
+        PreparedStatement insertMagazineObjectStmt(
+            pConn, "INSERT INTO MagazineObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertMagazineObjectStmt.bindLong(1, m_ItemID);
+        insertMagazineObjectStmt.bindLong(2, m_ObjectID);
+        insertMagazineObjectStmt.bindInt(3, m_ItemType);
+        insertMagazineObjectStmt.bindString(4, ownerID);
+        insertMagazineObjectStmt.bindInt(5, (int)storage);
+        insertMagazineObjectStmt.bindLong(6, storageID);
+        insertMagazineObjectStmt.bindInt(7, (int)x);
+        insertMagazineObjectStmt.bindInt(8, (int)y);
+        insertMagazineObjectStmt.bindInt(9, (int)m_Num);
+        insertMagazineObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -100,11 +109,16 @@ void Magazine::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveMagazineObjectStmt(
+            pConn, string("UPDATE MagazineObject SET ") + field + " WHERE ItemID=?");
+        tinysaveMagazineObjectStmt.bindLong(1, m_ItemID);
+        tinysaveMagazineObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE MagazineObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -119,10 +133,10 @@ void Magazine::save(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -141,12 +155,20 @@ void Magazine::save(const string& ownerID, Storage storage, StorageID_t storageI
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE MagazineObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateMagazineObjectStmt(
+            pConn, "UPDATE MagazineObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Num=? WHERE ItemID=?");
+        updateMagazineObjectStmt.bindLong(1, m_ObjectID);
+        updateMagazineObjectStmt.bindInt(2, m_ItemType);
+        updateMagazineObjectStmt.bindString(3, ownerID);
+        updateMagazineObjectStmt.bindInt(4, (int)storage);
+        updateMagazineObjectStmt.bindLong(5, storageID);
+        updateMagazineObjectStmt.bindInt(6, (int)x);
+        updateMagazineObjectStmt.bindInt(7, (int)y);
+        updateMagazineObjectStmt.bindInt(8, (int)m_Num);
+        updateMagazineObjectStmt.bindLong(9, m_ItemID);
+        updateMagazineObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -236,12 +258,13 @@ void MagazineInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM MagazineInfo");
+        PreparedStatement selectMagazineInfoStmt(pConn, "SELECT MAX(ItemType) FROM MagazineInfo");
+        Result* pResult = selectMagazineInfoStmt.execute();
 
         pResult->next();
 
@@ -252,8 +275,10 @@ void MagazineInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel, "
-                                      "MaxBullets, MaxSilverBullets, Vivid, GunType-1 FROM MagazineInfo");
+        PreparedStatement selectMagazineInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel, MaxBullets, "
+                   "MaxSilverBullets, Vivid, GunType-1 FROM MagazineInfo");
+        pResult = selectMagazineInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -276,7 +301,6 @@ void MagazineInfoManager::load()
             addItemInfo(pMagazineInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -294,10 +318,10 @@ void MagazineLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -311,9 +335,11 @@ void MagazineLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "MagazineObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectMagazineObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM MagazineObject WHERE "
+                   "OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectMagazineObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectMagazineObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -424,7 +450,6 @@ void MagazineLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -436,7 +461,6 @@ void MagazineLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -454,17 +478,19 @@ void MagazineLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM MagazineObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneMagazineObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM MagazineObject WHERE "
+                   "Storage = ? AND StorageID = ?");
+        loadZoneMagazineObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneMagazineObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneMagazineObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -498,7 +524,6 @@ void MagazineLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -514,7 +539,7 @@ void MagazineLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

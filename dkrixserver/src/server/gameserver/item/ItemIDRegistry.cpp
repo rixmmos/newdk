@@ -64,6 +64,7 @@
 #include "PetFood.h"
 #include "PetItem.h"
 #include "Potion.h"
+#include "PreparedStatement.h"
 #include "Pupa.h"
 #include "QuestItem.h"
 #include "Relic.h"
@@ -108,18 +109,17 @@
         __ENTER_CRITICAL_SECTION(m_Mutex)                                                         \
                                                                                                   \
         BEGIN_DB {                                                                                \
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();             \
-            Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from %s", TABLE);         \
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");                    \
+            PreparedStatement countStmt(pConn, "SELECT COUNT(*) from " TABLE);                    \
+            Result* pCountResult = countStmt.execute();                                           \
             pCountResult->next();                                                                 \
             int count = pCountResult->getDWORD(1);                                                \
-            SAFE_DELETE(pStmt);                                                                   \
                                                                                                   \
             if (count != 0) {                                                                     \
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();         \
-                Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM %s", TABLE);       \
+                PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM " TABLE);             \
+                Result* pResult = maxIDStmt.execute();                                            \
                 pResult->next();                                                                  \
                 m_ItemIDRegistry = pResult->getDWORD(1);                                          \
-                SAFE_DELETE(pStmt);                                                               \
             }                                                                                     \
                                                                                                   \
             m_ItemIDRegistry += (g_pItemInfoManager->getItemIDSuccessor() -                       \
@@ -152,18 +152,17 @@ void Motorcycle::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MotorcycleObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MotorcycleObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MotorcycleObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MotorcycleObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -189,20 +188,18 @@ void Potion::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from PotionObject");
+        // pConn = g_pDatabaseManager->getConnection("DIST_DARKEDEN"); (dead, both queries used it)
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from PotionObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM PotionObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM PotionObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -228,18 +225,17 @@ void Water::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from WaterObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from WaterObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM WaterObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM WaterObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -265,18 +261,17 @@ void HolyWater::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQueryString("SELECT COUNT(*) from HolyWaterObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from HolyWaterObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQueryString("SELECT MAX(ItemID) FROM HolyWaterObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM HolyWaterObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -302,18 +297,17 @@ void Magazine::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MagazineObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MagazineObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MagazineObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MagazineObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -339,18 +333,17 @@ void BombMaterial::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQueryString("SELECT COUNT(*) from BombMaterialObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BombMaterialObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQueryString("SELECT MAX(ItemID) FROM BombMaterialObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BombMaterialObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -376,18 +369,17 @@ void ETC::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ETCObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ETCObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ETCObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ETCObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -413,18 +405,17 @@ void Key::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from KeyObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from KeyObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM KeyObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM KeyObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -450,18 +441,17 @@ void Ring::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from RingObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from RingObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM RingObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM RingObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -487,18 +477,17 @@ void Bracelet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from BraceletObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BraceletObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM BraceletObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BraceletObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -524,18 +513,17 @@ void Necklace::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from NecklaceObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from NecklaceObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM NecklaceObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM NecklaceObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -561,18 +549,17 @@ void Coat::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CoatObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CoatObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CoatObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CoatObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -598,18 +585,17 @@ void Trouser::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from TrouserObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from TrouserObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM TrouserObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM TrouserObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -635,18 +621,17 @@ void Shoes::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ShoesObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ShoesObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ShoesObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ShoesObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -672,18 +657,17 @@ void Sword::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SwordObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SwordObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SwordObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SwordObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -709,18 +693,17 @@ void Blade::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from BladeObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BladeObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM BladeObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BladeObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -746,18 +729,17 @@ void Shield::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ShieldObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ShieldObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ShieldObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ShieldObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -783,18 +765,17 @@ void Cross::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CrossObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CrossObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CrossObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CrossObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -820,18 +801,17 @@ void Mace::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MaceObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MaceObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MaceObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MaceObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -857,18 +837,17 @@ void Glove::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from GloveObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from GloveObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM GloveObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM GloveObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -894,18 +873,17 @@ void Helm::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from HelmObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from HelmObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM HelmObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM HelmObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -931,18 +909,17 @@ void SG::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SGObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SGObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SGObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SGObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -968,18 +945,17 @@ void SMG::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SMGObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SMGObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SMGObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SMGObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1005,18 +981,17 @@ void AR::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ARObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ARObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ARObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ARObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1042,18 +1017,17 @@ void SR::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SRObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SRObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SRObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SRObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1079,18 +1053,17 @@ void Bomb::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from BombObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BombObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM BombObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BombObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1116,18 +1089,17 @@ void Mine::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MineObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MineObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MineObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MineObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1153,18 +1125,17 @@ void Belt::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from BeltObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BeltObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM BeltObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BeltObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1190,18 +1161,17 @@ void LearningItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from LearningItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from LearningItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM LearningItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM LearningItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1227,18 +1197,17 @@ void Money::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MoneyObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MoneyObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MoneyObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MoneyObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1264,18 +1233,17 @@ void VampireRing::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireRingObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireRingObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireRingObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireRingObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1302,18 +1270,17 @@ void VampireBracelet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireBraceletObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireBraceletObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireBraceletObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireBraceletObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1339,18 +1306,17 @@ void VampireNecklace::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireNecklaceObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireNecklaceObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireNecklaceObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireNecklaceObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1376,18 +1342,17 @@ void VampireCoat::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireCoatObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireCoatObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireCoatObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireCoatObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1413,18 +1378,17 @@ void Skull::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SkullObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SkullObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SkullObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SkullObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1450,18 +1414,17 @@ void Serum::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SerumObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SerumObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SerumObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SerumObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1487,18 +1450,17 @@ void VampireETC::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireETCObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireETCObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireETCObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireETCObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1524,18 +1486,17 @@ void SlayerPortalItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SlayerPortalItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SlayerPortalItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SlayerPortalItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SlayerPortalItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1561,18 +1522,17 @@ void VampirePortalItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampirePortalItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampirePortalItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampirePortalItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampirePortalItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1598,18 +1558,17 @@ void EventGiftBox::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EventGiftBoxObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EventGiftBoxObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EventGiftBoxObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EventGiftBoxObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1635,18 +1594,17 @@ void EventStar::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EventStarObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EventStarObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EventStarObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EventStarObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1672,18 +1630,17 @@ void VampireEarring::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireEarringObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireEarringObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireEarringObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireEarringObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1709,18 +1666,17 @@ void Relic::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from RelicObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from RelicObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM RelicObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM RelicObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1746,18 +1702,17 @@ void VampireWeapon::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireWeaponObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireWeaponObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireWeaponObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireWeaponObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1783,18 +1738,17 @@ void VampireAmulet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireAmuletObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireAmuletObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireAmuletObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireAmuletObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1820,18 +1774,17 @@ void QuestItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from QuestItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from QuestItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM QuestItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM QuestItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1857,18 +1810,17 @@ void EventTree::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EventTreeObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EventTreeObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EventTreeObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EventTreeObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1894,18 +1846,17 @@ void EventETC::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EventETCObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EventETCObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EventETCObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EventETCObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1931,18 +1882,17 @@ void BloodBible::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from BloodBibleObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from BloodBibleObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM BloodBibleObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM BloodBibleObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -1968,18 +1918,17 @@ void CastleSymbol::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CastleSymbolObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CastleSymbolObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CastleSymbolObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CastleSymbolObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2005,18 +1954,17 @@ void CoupleRing::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CoupleRingObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CoupleRingObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CoupleRingObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CoupleRingObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2042,18 +1990,17 @@ void VampireCoupleRing::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from VampireCoupleRingObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from VampireCoupleRingObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM VampireCoupleRingObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM VampireCoupleRingObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2079,18 +2026,17 @@ void EventItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EventItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EventItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EventItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EventItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2116,18 +2062,17 @@ void DyePotion::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from DyePotionObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from DyePotionObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM DyePotionObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM DyePotionObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2153,18 +2098,17 @@ void ResurrectItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ResurrectItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ResurrectItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ResurrectItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ResurrectItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2190,18 +2134,17 @@ void MixingItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MixingItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MixingItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MixingItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MixingItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2227,18 +2170,17 @@ void OustersArmsband::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersArmsbandObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersArmsbandObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersArmsbandObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersArmsbandObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2264,18 +2206,17 @@ void OustersBoots::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersBootsObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersBootsObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersBootsObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersBootsObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2301,18 +2242,17 @@ void OustersChakram::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersChakramObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersChakramObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersChakramObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersChakramObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2338,18 +2278,17 @@ void OustersCirclet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersCircletObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersCircletObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersCircletObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersCircletObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2375,18 +2314,17 @@ void OustersCoat::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersCoatObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersCoatObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersCoatObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersCoatObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2412,18 +2350,17 @@ void OustersPendent::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersPendentObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersPendentObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersPendentObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersPendentObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2449,18 +2386,17 @@ void OustersRing::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersRingObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersRingObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersRingObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersRingObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2486,18 +2422,17 @@ void OustersStone::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersStoneObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersStoneObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersStoneObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersStoneObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2523,18 +2458,17 @@ void OustersWristlet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersWristletObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersWristletObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersWristletObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersWristletObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2560,18 +2494,17 @@ void Larva::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from LarvaObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from LarvaObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM LarvaObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM LarvaObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2597,18 +2530,17 @@ void Pupa::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from PupaObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from PupaObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM PupaObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM PupaObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2634,18 +2566,17 @@ void ComposMei::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from ComposMeiObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from ComposMeiObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM ComposMeiObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM ComposMeiObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2671,18 +2602,17 @@ void OustersSummonItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from OustersSummonItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from OustersSummonItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM OustersSummonItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM OustersSummonItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2708,18 +2638,17 @@ void EffectItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from EffectItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from EffectItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM EffectItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM EffectItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2745,18 +2674,17 @@ void CodeSheet::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CodeSheetObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CodeSheetObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CodeSheetObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CodeSheetObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2782,18 +2710,17 @@ void MoonCard::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from MoonCardObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from MoonCardObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM MoonCardObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM MoonCardObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2819,18 +2746,17 @@ void Sweeper::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SweeperObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SweeperObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SweeperObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SweeperObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2856,18 +2782,17 @@ void PetItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from PetItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from PetItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM PetItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM PetItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2893,18 +2818,17 @@ void PetFood::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from PetFoodObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from PetFoodObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM PetFoodObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM PetFoodObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2930,18 +2854,17 @@ void PetEnchantItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from PetEnchantItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from PetEnchantItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM PetEnchantItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM PetEnchantItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -2967,18 +2890,17 @@ void LuckyBag::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from LuckyBagObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from LuckyBagObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM LuckyBagObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM LuckyBagObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -3004,18 +2926,17 @@ void SMSItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from SMSItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from SMSItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM SMSItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM SMSItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -3041,18 +2962,17 @@ void CoreZap::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from CoreZapObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from CoreZapObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM CoreZapObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM CoreZapObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -3078,18 +2998,17 @@ void TrapItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from TrapItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from TrapItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM TrapItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM TrapItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=
@@ -3115,18 +3034,17 @@ void WarItem::initItemIDRegistry(void)
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pCountResult = pStmt->executeQuery("SELECT COUNT(*) from WarItemObject");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) from WarItemObject");
+        Result* pCountResult = countStmt.execute();
         pCountResult->next();
         int count = pCountResult->getDWORD(1);
-        SAFE_DELETE(pStmt);
 
         if (count != 0) {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT MAX(ItemID) FROM WarItemObject");
+            PreparedStatement maxIDStmt(pConn, "SELECT MAX(ItemID) FROM WarItemObject");
+            Result* pResult = maxIDStmt.execute();
             pResult->next();
             m_ItemIDRegistry = pResult->getDWORD(1);
-            SAFE_DELETE(pStmt);
         }
 
         m_ItemIDRegistry +=

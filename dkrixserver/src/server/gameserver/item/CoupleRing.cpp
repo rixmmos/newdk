@@ -15,6 +15,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -53,7 +54,7 @@ void CoupleRing::create(const string& ownerID, Storage storage, StorageID_t stor
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -67,19 +68,26 @@ void CoupleRing::create(const string& ownerID, Storage storage, StorageID_t stor
     }
 
     BEGIN_DB {
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
         string optionField;
         setOptionTypeToField(m_OptionType, optionField);
 
-        StringStream sql;
-        sql << "INSERT INTO CoupleRingObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, OptionType, Name, PartnerItemID)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', '" << getName().c_str() << "', " << getPartnerItemID() << ")";
-
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertCoupleRingObjectStmt(
+            pConn, "INSERT INTO CoupleRingObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "OptionType, Name, PartnerItemID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertCoupleRingObjectStmt.bindLong(1, m_ItemID);
+        insertCoupleRingObjectStmt.bindLong(2, m_ObjectID);
+        insertCoupleRingObjectStmt.bindInt(3, m_ItemType);
+        insertCoupleRingObjectStmt.bindString(4, ownerID);
+        insertCoupleRingObjectStmt.bindInt(5, (int)storage);
+        insertCoupleRingObjectStmt.bindLong(6, storageID);
+        insertCoupleRingObjectStmt.bindInt(7, (int)x);
+        insertCoupleRingObjectStmt.bindInt(8, (int)y);
+        insertCoupleRingObjectStmt.bindString(9, optionField);
+        insertCoupleRingObjectStmt.bindString(10, getName());
+        insertCoupleRingObjectStmt.bindInt(11, getPartnerItemID());
+        insertCoupleRingObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -97,11 +105,16 @@ void CoupleRing::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveCoupleRingObjectStmt(
+            pConn, string("UPDATE CoupleRingObject SET ") + field + " WHERE ItemID=?");
+        tinysaveCoupleRingObjectStmt.bindLong(1, m_ItemID);
+        tinysaveCoupleRingObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE CoupleRingObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -132,14 +145,23 @@ void CoupleRing::save(const string& ownerID, Storage storage, StorageID_t storag
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE CoupleRingObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Name = '%s', PartnerItemID=%ld WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            getName().c_str(), getPartnerItemID(), m_ItemID);
+        PreparedStatement updateCoupleRingObjectStmt(
+            pConn, "UPDATE CoupleRingObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "Name = ?, PartnerItemID=? WHERE ItemID=?");
+        updateCoupleRingObjectStmt.bindLong(1, m_ObjectID);
+        updateCoupleRingObjectStmt.bindInt(2, m_ItemType);
+        updateCoupleRingObjectStmt.bindString(3, ownerID);
+        updateCoupleRingObjectStmt.bindInt(4, (int)storage);
+        updateCoupleRingObjectStmt.bindLong(5, storageID);
+        updateCoupleRingObjectStmt.bindInt(6, (int)x);
+        updateCoupleRingObjectStmt.bindInt(7, (int)y);
+        updateCoupleRingObjectStmt.bindString(8, getName());
+        updateCoupleRingObjectStmt.bindLong(9, getPartnerItemID());
+        updateCoupleRingObjectStmt.bindLong(10, m_ItemID);
+        updateCoupleRingObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -195,17 +217,18 @@ bool CoupleRing::hasPartnerItem()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT count(*) from CoupleRingObject where ItemID=%ld and Storage IN(0, 1, 2, 3, 4, 9)",
-            getPartnerItemID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectCoupleRingObjectStmt(
+            pConn, "SELECT count(*) from CoupleRingObject where ItemID=? and Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCoupleRingObjectStmt.bindLong(1, getPartnerItemID());
+        Result* pResult = selectCoupleRingObjectStmt.execute();
 
-        
+
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
 
-            
+
             Assert(count >= 0);
             Assert(count <= 1);
 
@@ -215,7 +238,6 @@ bool CoupleRing::hasPartnerItem()
             bRet = false;
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -247,9 +269,10 @@ void CoupleRingInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM CoupleRingInfo");
+        PreparedStatement selectCoupleRingInfoStmt(pConn, "SELECT MAX(ItemType) FROM CoupleRingInfo");
+        Result* pResult = selectCoupleRingInfoStmt.execute();
 
         pResult->next();
 
@@ -260,7 +283,9 @@ void CoupleRingInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM CoupleRingInfo");
+        PreparedStatement selectCoupleRingInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM CoupleRingInfo");
+        pResult = selectCoupleRingInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -278,7 +303,6 @@ void CoupleRingInfoManager::load()
             addItemInfo(pCoupleRingInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -296,10 +320,10 @@ void CoupleRingLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -313,10 +337,11 @@ void CoupleRingLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Name, PartnerItemID FROM "
-            "CoupleRingObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectCoupleRingObjectStmt2(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Name, PartnerItemID FROM "
+                   "CoupleRingObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCoupleRingObjectStmt2.bindString(1, pCreature->getName());
+        Result* pResult = selectCoupleRingObjectStmt2.execute();
 
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
         if (pResult->getRowCount() == 0 && pPC->getFlagSet()->isOn(FLAGSET_IS_COUPLE)) {
@@ -349,7 +374,7 @@ void CoupleRingLoader::load(Creature* pCreature)
                 pCoupleRing->setName(pResult->getString(++i));
                 pCoupleRing->setPartnerItemID(pResult->getDWORD(++i));
 
-                
+
                 if (pPC != NULL &&
                     (!g_pCoupleManager->isCouple(pPC, pCoupleRing->getName()) || !pCoupleRing->hasPartnerItem())) {
                     g_pCoupleManager->removeCoupleForce(pPC, pCoupleRing->getName());
@@ -359,7 +384,7 @@ void CoupleRingLoader::load(Creature* pCreature)
                     pCoupleRing->tinysave(sql);
                     SAFE_DELETE(pCoupleRing);
 
-                    
+
                     pPC->getFlagSet()->turnOff(FLAGSET_IS_COUPLE);
                     pPC->getFlagSet()->save(pPC->getName());
                     continue;
@@ -444,7 +469,6 @@ void CoupleRingLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -456,7 +480,6 @@ void CoupleRingLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -473,17 +496,19 @@ void CoupleRingLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM CoupleRingObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneCoupleRingObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y FROM CoupleRingObject WHERE Storage = "
+                   "? AND StorageID = ?");
+        loadZoneCoupleRingObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneCoupleRingObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneCoupleRingObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -515,7 +540,6 @@ void CoupleRingLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -527,7 +551,7 @@ void CoupleRingLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

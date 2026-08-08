@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -58,7 +59,7 @@ void Glove::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,22 +73,27 @@ void Glove::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
-
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO GloveObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getGrade() << ", " << (int)m_CreateType << ")";
 
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertGloveObjectStmt(
+            pConn, "INSERT INTO GloveObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
+                   "OptionType, Durability, Grade, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertGloveObjectStmt.bindLong(1, m_ItemID);
+        insertGloveObjectStmt.bindLong(2, m_ObjectID);
+        insertGloveObjectStmt.bindInt(3, getItemType());
+        insertGloveObjectStmt.bindString(4, ownerID);
+        insertGloveObjectStmt.bindInt(5, (int)storage);
+        insertGloveObjectStmt.bindLong(6, storageID);
+        insertGloveObjectStmt.bindInt(7, (int)x);
+        insertGloveObjectStmt.bindInt(8, (int)y);
+        insertGloveObjectStmt.bindString(9, optionField);
+        insertGloveObjectStmt.bindInt(10, getDurability());
+        insertGloveObjectStmt.bindInt(11, (int)getGrade());
+        insertGloveObjectStmt.bindInt(12, (int)m_CreateType);
+        insertGloveObjectStmt.execute();
     }
     END_DB(pStmt)
 
@@ -106,11 +112,15 @@ void Glove::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveGloveObjectStmt(pConn, string("UPDATE GloveObject SET ") + field + " WHERE ItemID=?");
+        tinysaveGloveObjectStmt.bindLong(1, m_ItemID);
+        tinysaveGloveObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE GloveObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -125,10 +135,10 @@ void Glove::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -151,13 +161,23 @@ void Glove::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE GloveObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel = %d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement updateGloveObjectStmt(
+            pConn, "UPDATE GloveObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel = ? WHERE ItemID=?");
+        updateGloveObjectStmt.bindLong(1, m_ObjectID);
+        updateGloveObjectStmt.bindInt(2, getItemType());
+        updateGloveObjectStmt.bindString(3, ownerID);
+        updateGloveObjectStmt.bindInt(4, (int)storage);
+        updateGloveObjectStmt.bindLong(5, storageID);
+        updateGloveObjectStmt.bindInt(6, (int)x);
+        updateGloveObjectStmt.bindInt(7, (int)y);
+        updateGloveObjectStmt.bindString(8, optionField);
+        updateGloveObjectStmt.bindInt(9, getDurability());
+        updateGloveObjectStmt.bindInt(10, (int)getGrade());
+        updateGloveObjectStmt.bindInt(11, (int)getEnchantLevel());
+        updateGloveObjectStmt.bindLong(12, m_ItemID);
+        updateGloveObjectStmt.execute();
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -272,12 +292,13 @@ void GloveInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM GloveInfo");
+        PreparedStatement selectGloveInfoStmt(pConn, "SELECT MAX(ItemType) FROM GloveInfo");
+        Result* pResult = selectGloveInfoStmt.execute();
 
         pResult->next();
 
@@ -288,10 +309,11 @@ void GloveInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM GloveInfo");
+        PreparedStatement selectGloveInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM GloveInfo");
+        pResult = selectGloveInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -320,7 +342,6 @@ void GloveInfoManager::load()
             addItemInfo(pGloveInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -338,10 +359,10 @@ void GloveLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -356,10 +377,11 @@ void GloveLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM GloveObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectGloveObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM GloveObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectGloveObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectGloveObjectStmt.execute();
 
 
         while (pResult->next()) {
@@ -463,7 +485,6 @@ void GloveLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -475,7 +496,6 @@ void GloveLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -493,18 +513,19 @@ void GloveLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM GloveObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneGloveObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, "
+                   "EnchantLevel, ItemFlag FROM GloveObject WHERE Storage = ? AND StorageID = ?");
+        loadZoneGloveObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneGloveObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneGloveObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -545,7 +566,6 @@ void GloveLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -561,7 +581,7 @@ void GloveLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)

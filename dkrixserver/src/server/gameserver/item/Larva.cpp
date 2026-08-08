@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -50,7 +51,7 @@ void Larva::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -65,7 +66,7 @@ void Larva::create(const string& ownerID, Storage storage, StorageID_t storageID
 
     BEGIN_DB {
         // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -80,13 +81,21 @@ void Larva::create(const string& ownerID, Storage storage, StorageID_t storageID
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("INSERT INTO LarvaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
-                            "Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, x, y,
-                            (int)m_Num);
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertLarvaObjectStmt(
+            pConn, "INSERT INTO LarvaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                   "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertLarvaObjectStmt.bindLong(1, m_ItemID);
+        insertLarvaObjectStmt.bindLong(2, m_ObjectID);
+        insertLarvaObjectStmt.bindInt(3, m_ItemType);
+        insertLarvaObjectStmt.bindString(4, ownerID);
+        insertLarvaObjectStmt.bindInt(5, (int)storage);
+        insertLarvaObjectStmt.bindLong(6, storageID);
+        insertLarvaObjectStmt.bindInt(7, x);
+        insertLarvaObjectStmt.bindInt(8, y);
+        insertLarvaObjectStmt.bindInt(9, (int)m_Num);
+        insertLarvaObjectStmt.execute();
+
     }
     END_DB(pStmt)
 
@@ -104,16 +113,21 @@ bool Larva::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %ld", getObjectTableName().c_str(), m_ItemID);
+        // getObjectTableName() returns a fixed per-class literal (see the
+        // override in Larva.h), never packet/user input -- PreparedStatement
+        // cannot bind an identifier, so the table name stays spliced into the
+        // SQL text, matching the batch 2/6/7 table-name precedent. Only
+        // ItemID is bound.
+        PreparedStatement deleteStmt(pConn, "DELETE FROM " + getObjectTableName() + " WHERE ItemID = ?");
+        deleteStmt.bindLong(1, m_ItemID);
+        deleteStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deleteStmt.getAffectedRowCount() == 0) {
             return false;
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -134,11 +148,15 @@ void Larva::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave
+        // precedent (batch 9). Only ItemID is bound.
+        PreparedStatement tinysaveLarvaObjectStmt(pConn, string("UPDATE LarvaObject SET ") + field + " WHERE ItemID=?");
+        tinysaveLarvaObjectStmt.bindLong(1, m_ItemID);
+        tinysaveLarvaObjectStmt.execute();
 
-        pStmt->executeQuery("UPDATE LarvaObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -153,18 +171,26 @@ void Larva::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE LarvaObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
+        PreparedStatement updateLarvaObjectStmt(
+            pConn, "UPDATE LarvaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, Num=? "
+                   "WHERE ItemID=?");
+        updateLarvaObjectStmt.bindLong(1, m_ObjectID);
+        updateLarvaObjectStmt.bindInt(2, m_ItemType);
+        updateLarvaObjectStmt.bindString(3, ownerID);
+        updateLarvaObjectStmt.bindInt(4, (int)storage);
+        updateLarvaObjectStmt.bindLong(5, storageID);
+        updateLarvaObjectStmt.bindInt(6, (int)x);
+        updateLarvaObjectStmt.bindInt(7, (int)y);
+        updateLarvaObjectStmt.bindInt(8, (int)m_Num);
+        updateLarvaObjectStmt.bindLong(9, m_ItemID);
+        updateLarvaObjectStmt.execute();
 
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,12 +419,13 @@ void LarvaInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM LarvaInfo");
+        PreparedStatement selectLarvaInfoStmt(pConn, "SELECT MAX(ItemType) FROM LarvaInfo");
+        Result* pResult = selectLarvaInfoStmt.execute();
 
         pResult->next();
 
@@ -409,8 +436,9 @@ void LarvaInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM LarvaInfo");
+        PreparedStatement selectLarvaInfoStmt2(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM LarvaInfo");
+        pResult = selectLarvaInfoStmt2.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -429,7 +457,6 @@ void LarvaInfoManager::load()
             addItemInfo(pLarvaInfo);
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -447,14 +474,16 @@ void LarvaLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "LarvaObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectLarvaObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM LarvaObject WHERE OwnerID = "
+                   "? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectLarvaObjectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectLarvaObjectStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -584,7 +613,6 @@ void LarvaLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -596,7 +624,6 @@ void LarvaLoader::load(Creature* pCreature)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -614,17 +641,19 @@ void LarvaLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM LarvaObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        // StorageID_t/int values only (Storage enum, pZone->getZoneID()); no
+        // string/user input. Migrated for consistency with the rest of the file.
+        PreparedStatement loadZoneLarvaObjectStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM LarvaObject WHERE Storage = "
+                   "? AND StorageID = ?");
+        loadZoneLarvaObjectStmt.bindInt(1, (int)STORAGE_ZONE);
+        loadZoneLarvaObjectStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = loadZoneLarvaObjectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -658,7 +687,6 @@ void LarvaLoader::load(Zone* pZone)
             }
         }
 
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -674,7 +702,7 @@ void LarvaLoader::load(StorageID_t storageID, Inventory* pInventory)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {}
     END_DB(pStmt)
