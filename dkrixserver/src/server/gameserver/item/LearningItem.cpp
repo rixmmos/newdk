@@ -143,7 +143,7 @@ void LearningItem::save(const string& ownerID, Storage storage, StorageID_t stor
         updateLearningItemObjectStmt.bindLong(1, m_ObjectID);
         updateLearningItemObjectStmt.bindInt(2, m_ItemType);
         updateLearningItemObjectStmt.bindString(3, ownerID);
-        updateLearningItemObjectStmt.bindString(4, (int)storage);
+        updateLearningItemObjectStmt.bindInt(4, (int)storage);
         updateLearningItemObjectStmt.bindLong(5, storageID);
         updateLearningItemObjectStmt.bindInt(6, (int)x);
         updateLearningItemObjectStmt.bindInt(7, (int)y);
