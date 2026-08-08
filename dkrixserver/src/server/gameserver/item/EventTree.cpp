@@ -101,11 +101,10 @@ void EventTree::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveEventTreeObjectStmt(
-            pConn, string("UPDATE EventTreeObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveEventTreeObjectStmt(pConn, string("UPDATE EventTreeObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveEventTreeObjectStmt.bindLong(1, m_ItemID);
         tinysaveEventTreeObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -152,8 +151,6 @@ void EventTree::save(const string& ownerID, Storage storage, StorageID_t storage
         updateEventTreeObjectStmt.bindInt(8, (int)m_Num);
         updateEventTreeObjectStmt.bindLong(9, m_ItemID);
         updateEventTreeObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -257,7 +254,6 @@ void EventTreeInfoManager::load()
 
             addItemInfo(pEventTreeInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -402,7 +398,6 @@ void EventTreeLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -462,7 +457,6 @@ void EventTreeLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

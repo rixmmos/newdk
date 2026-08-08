@@ -101,11 +101,10 @@ void MixingItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveMixingItemObjectStmt(
-            pConn, string("UPDATE MixingItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveMixingItemObjectStmt(pConn, string("UPDATE MixingItemObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveMixingItemObjectStmt.bindLong(1, m_ItemID);
         tinysaveMixingItemObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -151,8 +150,6 @@ void MixingItem::save(const string& ownerID, Storage storage, StorageID_t storag
         updateMixingItemObjectStmt.bindInt(8, (int)m_Num);
         updateMixingItemObjectStmt.bindLong(9, m_ItemID);
         updateMixingItemObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -261,7 +258,6 @@ void MixingItemInfoManager::load()
 
             addItemInfo(pMixingItemInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -403,7 +399,6 @@ void MixingItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -463,7 +458,6 @@ void MixingItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

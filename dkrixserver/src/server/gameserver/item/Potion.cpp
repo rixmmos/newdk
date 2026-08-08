@@ -197,9 +197,8 @@ void Potion::save(const string& ownerID, Storage storage, StorageID_t storageID,
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement savePotionStmt(pConn,
-                                          "UPDATE PotionObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                          "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement savePotionStmt(pConn, "UPDATE PotionObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                                "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         savePotionStmt.bindUInt(1, m_ObjectID);
         savePotionStmt.bindUInt(2, getItemType());
         savePotionStmt.bindString(3, ownerID);

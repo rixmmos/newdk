@@ -102,11 +102,10 @@ void EventETC::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveEventETCObjectStmt(
-            pConn, string("UPDATE EventETCObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveEventETCObjectStmt(pConn,
+                                                     string("UPDATE EventETCObject SET ") + field + " WHERE ItemID=?");
         tinysaveEventETCObjectStmt.bindLong(1, m_ItemID);
         tinysaveEventETCObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -153,8 +152,6 @@ void EventETC::save(const string& ownerID, Storage storage, StorageID_t storageI
         updateEventETCObjectStmt.bindInt(8, (int)m_Num);
         updateEventETCObjectStmt.bindLong(9, m_ItemID);
         updateEventETCObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -259,7 +256,6 @@ void EventETCInfoManager::load()
 
             addItemInfo(pEventETCInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -444,7 +440,6 @@ void EventETCLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -504,7 +499,6 @@ void EventETCLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

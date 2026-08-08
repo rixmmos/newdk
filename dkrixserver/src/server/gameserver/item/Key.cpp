@@ -102,7 +102,6 @@ void Key::tinysave(const char* field) const
         PreparedStatement tinysaveKeyObjectStmt(pConn, string("UPDATE KeyObject SET ") + field + " WHERE ItemID=?");
         tinysaveKeyObjectStmt.bindLong(1, m_ItemID);
         tinysaveKeyObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -152,7 +151,6 @@ void Key::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
         updateKeyObjectStmt.bindInt(8, m_Target);
         updateKeyObjectStmt.bindLong(9, m_ItemID);
         updateKeyObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -198,7 +196,6 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
         updateKeyObjectStmt2.bindULong(1, targetID);
         updateKeyObjectStmt2.bindULong(2, getItemID());
         pResult = updateKeyObjectStmt2.execute();
-
     }
     END_DB(pStmt)
 
@@ -335,7 +332,6 @@ void KeyInfoManager::load()
 
             addItemInfo(pKeyInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -483,7 +479,6 @@ void KeyLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -546,7 +541,6 @@ void KeyLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

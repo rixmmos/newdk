@@ -120,7 +120,6 @@ void Blade::tinysave(const char* field) const
         PreparedStatement tinysaveBladeObjectStmt(pConn, string("UPDATE BladeObject SET ") + field + " WHERE ItemID=?");
         tinysaveBladeObjectStmt.bindLong(1, m_ItemID);
         tinysaveBladeObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -179,8 +178,6 @@ void Blade::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateBladeObjectStmt.bindInt(12, (int)getGrade());
         updateBladeObjectStmt.bindLong(13, m_ItemID);
         updateBladeObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -368,7 +365,6 @@ void BladeInfoManager::load()
 
             addItemInfo(pBladeInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -525,7 +521,6 @@ void BladeLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -596,7 +591,6 @@ void BladeLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

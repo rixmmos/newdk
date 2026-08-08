@@ -75,10 +75,9 @@ void VampireCoupleRing::create(const string& ownerID, Storage storage, StorageID
         setOptionTypeToField(m_OptionType, optionField);
 
         PreparedStatement insertVampireCoupleRingStmt(
-            pConn,
-            "INSERT INTO VampireCoupleRingObject "
-            "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, OptionType, Name, PartnerItemID)"
-            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            pConn, "INSERT INTO VampireCoupleRingObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, OptionType, Name, PartnerItemID)"
+                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireCoupleRingStmt.bindUInt(1, m_ItemID);
         insertVampireCoupleRingStmt.bindUInt(2, m_ObjectID);
         insertVampireCoupleRingStmt.bindUInt(3, m_ItemType);
@@ -114,8 +113,8 @@ void VampireCoupleRing::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireCoupleRingStmt(
-            pConn, string("UPDATE VampireCoupleRingObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireCoupleRingStmt(pConn, string("UPDATE VampireCoupleRingObject SET ") + field +
+                                                                   " WHERE ItemID=?");
         tinysaveVampireCoupleRingStmt.bindUInt(1, m_ItemID);
         tinysaveVampireCoupleRingStmt.execute();
     }
@@ -371,7 +370,7 @@ void VampireCoupleRingLoader::load(Creature* pCreature)
                 pVampireCoupleRing->setName(pResult->getString(++i));
                 pVampireCoupleRing->setPartnerItemID(pResult->getDWORD(++i));
 
-                
+
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
                 //				if ( !pVampireCoupleRing->hasPartnerItem() )
                 //				if ( pPC != NULL && !g_pCoupleManager->isCouple( pPC, pVampireCoupleRing->getName() ) )
@@ -384,7 +383,7 @@ void VampireCoupleRingLoader::load(Creature* pCreature)
                     pVampireCoupleRing->tinysave(sql);
                     SAFE_DELETE(pVampireCoupleRing);
 
-                    
+
                     pPC->getFlagSet()->turnOff(FLAGSET_IS_COUPLE);
                     pPC->getFlagSet()->save(pPC->getName());
                     continue;

@@ -74,11 +74,10 @@ void WarItem::create(const string& ownerID, Storage storage, StorageID_t storage
         // sql is retained only to reproduce the WarLog.txt audit line verbatim;
         // the query itself now executes via bound parameters below.
 
-        PreparedStatement insertWarItemStmt(pConn,
-                                             "INSERT INTO WarItemObject "
-                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                             " X, Y)"
-                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertWarItemStmt(pConn, "INSERT INTO WarItemObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                   " X, Y)"
+                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
         insertWarItemStmt.bindUInt(1, m_ItemID);
         insertWarItemStmt.bindUInt(2, m_ObjectID);
         insertWarItemStmt.bindUInt(3, m_ItemType);
@@ -140,8 +139,8 @@ void WarItem::save(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveWarItemStmt(pConn,
-                                           "UPDATE WarItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                           "StorageID=?, X=?, Y=? WHERE ItemID=?");
+                                          "UPDATE WarItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                          "StorageID=?, X=?, Y=? WHERE ItemID=?");
         saveWarItemStmt.bindUInt(1, m_ObjectID);
         saveWarItemStmt.bindUInt(2, m_ItemType);
         saveWarItemStmt.bindString(3, ownerID);

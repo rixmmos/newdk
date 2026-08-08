@@ -120,7 +120,6 @@ void Helm::tinysave(const char* field) const
         PreparedStatement tinysaveHelmObjectStmt(pConn, string("UPDATE HelmObject SET ") + field + " WHERE ItemID=?");
         tinysaveHelmObjectStmt.bindLong(1, m_ItemID);
         tinysaveHelmObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -177,8 +176,6 @@ void Helm::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         updateHelmObjectStmt.bindInt(11, (int)getEnchantLevel());
         updateHelmObjectStmt.bindLong(12, m_ItemID);
         updateHelmObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -342,7 +339,6 @@ void HelmInfoManager::load()
 
             addItemInfo(pHelmInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -496,7 +492,6 @@ void HelmLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -567,7 +562,6 @@ void HelmLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

@@ -102,7 +102,6 @@ void ETC::tinysave(const char* field) const
         PreparedStatement tinysaveETCObjectStmt(pConn, string("UPDATE ETCObject SET ") + field + " WHERE ItemID=?");
         tinysaveETCObjectStmt.bindLong(1, m_ItemID);
         tinysaveETCObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -151,7 +150,6 @@ void ETC::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
         updateETCObjectStmt.bindInt(8, (int)m_Num);
         updateETCObjectStmt.bindLong(9, m_ItemID);
         updateETCObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -258,8 +256,8 @@ void ETCInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        PreparedStatement selectETCInfoStmt2(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM ETCInfo");
+        PreparedStatement selectETCInfoStmt2(pConn,
+                                             "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM ETCInfo");
         pResult = selectETCInfoStmt2.execute();
 
         while (pResult->next()) {
@@ -277,7 +275,6 @@ void ETCInfoManager::load()
 
             addItemInfo(pETCInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -411,7 +408,6 @@ void ETCLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -474,7 +470,6 @@ void ETCLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

@@ -102,7 +102,6 @@ void ComposMei::create(const string& ownerID, Storage storage, StorageID_t stora
         insertComposMeiObjectStmt.bindInt(8, y);
         insertComposMeiObjectStmt.bindInt(9, (int)getNum());
         insertComposMeiObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -134,7 +133,6 @@ bool ComposMei::destroy()
         if (deleteStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
     }
     END_DB(pStmt)
 
@@ -160,11 +158,10 @@ void ComposMei::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveComposMeiObjectStmt(
-            pConn, string("UPDATE ComposMeiObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveComposMeiObjectStmt(pConn, string("UPDATE ComposMeiObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveComposMeiObjectStmt.bindLong(1, m_ItemID);
         tinysaveComposMeiObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -197,8 +194,6 @@ void ComposMei::save(const string& ownerID, Storage storage, StorageID_t storage
         updateComposMeiObjectStmt.bindInt(8, (int)getNum());
         updateComposMeiObjectStmt.bindLong(9, m_ItemID);
         updateComposMeiObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -464,7 +459,6 @@ void ComposMeiInfoManager::load()
 
             addItemInfo(pComposMeiInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -634,7 +628,6 @@ void ComposMeiLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -697,7 +690,6 @@ void ComposMeiLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

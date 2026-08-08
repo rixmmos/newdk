@@ -124,7 +124,6 @@ void Cross::tinysave(const char* field) const
         PreparedStatement tinysaveCrossObjectStmt(pConn, string("UPDATE CrossObject SET ") + field + " WHERE ItemID=?");
         tinysaveCrossObjectStmt.bindLong(1, m_ItemID);
         tinysaveCrossObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -183,8 +182,6 @@ void Cross::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateCrossObjectStmt.bindInt(12, (int)getGrade());
         updateCrossObjectStmt.bindLong(13, m_ItemID);
         updateCrossObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -382,7 +379,6 @@ void CrossInfoManager::load()
 
             addItemInfo(pCrossInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -538,7 +534,6 @@ void CrossLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -609,7 +604,6 @@ void CrossLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

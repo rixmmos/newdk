@@ -119,7 +119,6 @@ void Coat::tinysave(const char* field) const
         PreparedStatement tinysaveCoatObjectStmt(pConn, string("UPDATE CoatObject SET ") + field + " WHERE ItemID=?");
         tinysaveCoatObjectStmt.bindLong(1, m_ItemID);
         tinysaveCoatObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -176,8 +175,6 @@ void Coat::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         updateCoatObjectStmt.bindInt(11, (int)getEnchantLevel());
         updateCoatObjectStmt.bindLong(12, m_ItemID);
         updateCoatObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -341,7 +338,6 @@ void CoatInfoManager::load()
 
             addItemInfo(pCoatInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -495,7 +491,6 @@ void CoatLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -565,7 +560,6 @@ void CoatLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

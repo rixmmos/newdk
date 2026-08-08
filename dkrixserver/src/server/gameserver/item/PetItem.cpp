@@ -87,8 +87,9 @@ void PetItem::create(const string& ownerID, Storage storage, StorageID_t storage
 
         if (m_pPetInfo == NULL) {
             PreparedStatement insertPetItemStmt(
-                pConn, "INSERT INTO PetItemObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) "
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                pConn,
+                "INSERT INTO PetItemObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             insertPetItemStmt.bindUInt(1, m_ItemID);
             insertPetItemStmt.bindUInt(2, m_ObjectID);
             insertPetItemStmt.bindUInt(3, m_ItemType);
@@ -172,9 +173,9 @@ void PetItem::save(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         if (m_pPetInfo == NULL) {
-            PreparedStatement savePetItemStmt(
-                pConn, "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                       "StorageID=?, X=?, Y=? WHERE ItemID=?");
+            PreparedStatement savePetItemStmt(pConn,
+                                              "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                              "StorageID=?, X=?, Y=? WHERE ItemID=?");
             savePetItemStmt.bindUInt(1, m_ObjectID);
             savePetItemStmt.bindUInt(2, m_ItemType);
             savePetItemStmt.bindString(3, ownerID);
@@ -189,11 +190,10 @@ void PetItem::save(const string& ownerID, Storage storage, StorageID_t storageID
             // embedding; with a bound parameter that escaping would double-encode
             // the nickname, so the raw string is bound instead.
             PreparedStatement savePetItemWithInfoStmt(
-                pConn,
-                "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
-                "PetCreatureType=?, PetLevel=?, PetAttr=?, PetAttrLevel=?, PetExp=?, PetHP=?, FoodType=?, "
-                "CanGamble=?, CanCutHead=?, CanAttack=?, LastFeedTime=?, Nickname=? "
-                "WHERE ItemID=?");
+                pConn, "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                       "PetCreatureType=?, PetLevel=?, PetAttr=?, PetAttrLevel=?, PetExp=?, PetHP=?, FoodType=?, "
+                       "CanGamble=?, CanCutHead=?, CanAttack=?, LastFeedTime=?, Nickname=? "
+                       "WHERE ItemID=?");
             savePetItemWithInfoStmt.bindUInt(1, m_ObjectID);
             savePetItemWithInfoStmt.bindUInt(2, m_ItemType);
             savePetItemWithInfoStmt.bindString(3, ownerID);
@@ -286,7 +286,6 @@ void PetItem::whenPCTake(PlayerCreature* pPC) {
     pPC->getPetItems().push_back(this);
 
     if (!pPC->isFlag(Effect::EFFECT_CLASS_HAS_PET)) {
-        
         EffectHasPet* pEffect = new EffectHasPet(pPC);
         pEffect->setNextTime(600);
         pPC->setFlag(Effect::EFFECT_CLASS_HAS_PET);
@@ -306,7 +305,6 @@ void PetItem::whenPCLost(PlayerCreature* pPC) {
 
     pPC->getPetItems().remove(this);
     if (pPC->getPetItems().empty()) {
-        
         Effect* pEffect = pPC->findEffect(Effect::EFFECT_CLASS_HAS_PET);
         if (pEffect != NULL)
             pEffect->setDeadline(0);
@@ -403,8 +401,8 @@ void PetItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        PreparedStatement selectPetItemInfoStmt(pConn,
-                                                 "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM PetItemInfo");
+        PreparedStatement selectPetItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM PetItemInfo");
         pResult = selectPetItemInfoStmt.execute();
 
         while (pResult->next()) {
@@ -497,7 +495,7 @@ void PetItemLoader::load(Creature* pCreature)
                 pPetInfo->setFeedTime(VSDateTime(pResult->getString(++i)));
                 pPetInfo->setNickname(pResult->getString(++i));
 
-                
+
                 pPetItem->setPetInfo(pPetInfo);
                 pPetInfo->setPetItem(pPetItem);
 
@@ -601,7 +599,7 @@ void PetItemLoader::load(Creature* pCreature)
 
 
                 case STORAGE_PET_STASH:
-                     
+
                     if (pPC->getPetStashItem(storageID) == NULL) {
                         pPC->addPetStashItem(storageID, pPetItem);
                         pPetItem->whenPCTake(pPC);

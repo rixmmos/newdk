@@ -78,11 +78,10 @@ void VampireCoat::create(const string& ownerID, Storage storage, StorageID_t sto
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertVampireCoatStmt(pConn,
-                                                  "INSERT INTO VampireCoatObject "
-                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertVampireCoatStmt(pConn, "INSERT INTO VampireCoatObject "
+                                                       "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                       " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                       " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireCoatStmt.bindUInt(1, m_ItemID);
         insertVampireCoatStmt.bindUInt(2, m_ObjectID);
         insertVampireCoatStmt.bindUInt(3, getItemType());
@@ -120,8 +119,8 @@ void VampireCoat::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireCoatStmt(
-            pConn, string("UPDATE VampireCoatObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireCoatStmt(pConn,
+                                                  string("UPDATE VampireCoatObject SET ") + field + " WHERE ItemID=?");
         tinysaveVampireCoatStmt.bindUInt(1, m_ItemID);
         tinysaveVampireCoatStmt.execute();
     }
@@ -312,8 +311,9 @@ void VampireCoatInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectVampireCoatInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
-                   "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM VampireCoatInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
+            "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM VampireCoatInfo");
         pResult = selectVampireCoatInfoStmt.execute();
 
         while (pResult->next()) {

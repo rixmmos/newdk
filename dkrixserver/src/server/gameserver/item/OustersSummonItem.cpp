@@ -69,8 +69,9 @@ void OustersSummonItem::create(const string& ownerID, Storage storage, StorageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement insertOustersSummonItemStmt(
-            pConn, "INSERT INTO OustersSummonItemObject "
-                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            pConn,
+            "INSERT INTO OustersSummonItemObject "
+            "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersSummonItemStmt.bindUInt(1, m_ItemID);
         insertOustersSummonItemStmt.bindUInt(2, m_ObjectID);
         insertOustersSummonItemStmt.bindUInt(3, m_ItemType);
@@ -104,8 +105,8 @@ void OustersSummonItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersSummonItemStmt(
-            pConn, string("UPDATE OustersSummonItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersSummonItemStmt(pConn, string("UPDATE OustersSummonItemObject SET ") + field +
+                                                                   " WHERE ItemID=?");
         tinysaveOustersSummonItemStmt.bindUInt(1, m_ItemID);
         tinysaveOustersSummonItemStmt.execute();
     }

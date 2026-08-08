@@ -69,8 +69,9 @@ void Serum::create(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement insertSerumStmt(
-            pConn, "INSERT INTO SerumObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            pConn,
+            "INSERT INTO SerumObject "
+            "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSerumStmt.bindUInt(1, m_ItemID);
         insertSerumStmt.bindUInt(2, m_ObjectID);
         insertSerumStmt.bindUInt(3, m_ItemType);
@@ -144,9 +145,8 @@ void Serum::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement saveSerumStmt(pConn,
-                                         "UPDATE SerumObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement saveSerumStmt(pConn, "UPDATE SerumObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                               "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         saveSerumStmt.bindUInt(1, m_ObjectID);
         saveSerumStmt.bindUInt(2, m_ItemType);
         saveSerumStmt.bindString(3, ownerID);
@@ -370,9 +370,9 @@ void SerumLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement selectSerumLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                   "SerumObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        PreparedStatement selectSerumLoaderStmt(pConn,
+                                                "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                                                "SerumObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSerumLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSerumLoaderStmt.execute();
 

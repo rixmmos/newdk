@@ -80,11 +80,10 @@ void OustersWristlet::create(const string& ownerID, Storage storage, StorageID_t
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersWristletStmt(pConn,
-                                                      "INSERT INTO OustersWristletObject "
-                                                      "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                      " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                      " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersWristletStmt(pConn, "INSERT INTO OustersWristletObject "
+                                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersWristletStmt.bindUInt(1, m_ItemID);
         insertOustersWristletStmt.bindUInt(2, m_ObjectID);
         insertOustersWristletStmt.bindUInt(3, getItemType());
@@ -121,8 +120,8 @@ void OustersWristlet::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersWristletStmt(
-            pConn, string("UPDATE OustersWristletObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersWristletStmt(pConn, string("UPDATE OustersWristletObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveOustersWristletStmt.bindUInt(1, m_ItemID);
         tinysaveOustersWristletStmt.execute();
     }
@@ -355,14 +354,15 @@ void OustersWristletInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectOustersWristletInfoStmt(
-            pConn, "SELECT "
-                   "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
-                   "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
-                   "DowngradeRatio, ElementalType, Elemental FROM OustersWristletInfo"
-                   //"SELECT
-                   // ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel,
-                   // CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType,
-                   // DowngradeRatio FROM OustersWristletInfo"
+            pConn,
+            "SELECT "
+            "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
+            "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+            "DowngradeRatio, ElementalType, Elemental FROM OustersWristletInfo"
+            //"SELECT
+            // ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel,
+            // CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType,
+            // DowngradeRatio FROM OustersWristletInfo"
         );
         pResult = selectOustersWristletInfoStmt.execute();
 
@@ -432,8 +432,9 @@ void OustersWristletLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectOustersWristletLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade,EnchantLevel, "
-                   "ItemFlag FROM OustersWristletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade,EnchantLevel, "
+            "ItemFlag FROM OustersWristletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectOustersWristletLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectOustersWristletLoaderStmt.execute();
 

@@ -172,9 +172,9 @@ void Pupa::save(const string& ownerID, Storage storage, StorageID_t storageID, B
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement savePupaStmt(pConn,
-                                        "UPDATE PupaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
-                                        "X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement savePupaStmt(
+            pConn, "UPDATE PupaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
+                   "X=?, Y=?, Num=? WHERE ItemID=?");
         savePupaStmt.bindUInt(1, m_ObjectID);
         savePupaStmt.bindUInt(2, m_ItemType);
         savePupaStmt.bindString(3, ownerID);
@@ -472,9 +472,9 @@ void PupaLoader::load(Creature* pCreature)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectPupaLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                   "PupaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        PreparedStatement selectPupaLoaderStmt(pConn,
+                                               "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                                               "PupaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectPupaLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectPupaLoaderStmt.execute();
 

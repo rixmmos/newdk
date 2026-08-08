@@ -101,11 +101,10 @@ void BombMaterial::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveBombMaterialObjectStmt(
-            pConn, string("UPDATE BombMaterialObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveBombMaterialObjectStmt(pConn, string("UPDATE BombMaterialObject SET ") + field +
+                                                                    " WHERE ItemID=?");
         tinysaveBombMaterialObjectStmt.bindLong(1, m_ItemID);
         tinysaveBombMaterialObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -155,8 +154,6 @@ void BombMaterial::save(const string& ownerID, Storage storage, StorageID_t stor
         updateBombMaterialObjectStmt.bindInt(8, (int)m_Num);
         updateBombMaterialObjectStmt.bindLong(9, m_ItemID);
         updateBombMaterialObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -282,7 +279,6 @@ void BombMaterialInfoManager::load()
 
             addItemInfo(pBombMaterialInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -416,7 +412,6 @@ void BombMaterialLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -477,7 +472,6 @@ void BombMaterialLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

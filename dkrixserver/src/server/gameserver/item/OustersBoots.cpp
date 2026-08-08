@@ -80,11 +80,10 @@ void OustersBoots::create(const string& ownerID, Storage storage, StorageID_t st
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersBootsStmt(pConn,
-                                                   "INSERT INTO OustersBootsObject "
-                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                   " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersBootsStmt(pConn, "INSERT INTO OustersBootsObject "
+                                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                        " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                        " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersBootsStmt.bindUInt(1, m_ItemID);
         insertOustersBootsStmt.bindUInt(2, m_ObjectID);
         insertOustersBootsStmt.bindUInt(3, getItemType());
@@ -122,8 +121,8 @@ void OustersBoots::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersBootsStmt(pConn,
-                                                     string("UPDATE OustersBootsObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersBootsStmt(pConn, string("UPDATE OustersBootsObject SET ") + field +
+                                                              " WHERE ItemID=?");
         tinysaveOustersBootsStmt.bindUInt(1, m_ItemID);
         tinysaveOustersBootsStmt.execute();
     }

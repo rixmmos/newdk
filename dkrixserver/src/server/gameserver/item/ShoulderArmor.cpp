@@ -74,11 +74,10 @@ void ShoulderArmor::create(const string& ownerID, Storage storage, StorageID_t s
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertShoulderArmorStmt(pConn,
-                                                    "INSERT INTO ShoulderArmorObject "
-                                                    "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                    " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertShoulderArmorStmt(pConn, "INSERT INTO ShoulderArmorObject "
+                                                         "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                         " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                         " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertShoulderArmorStmt.bindUInt(1, m_ItemID);
         insertShoulderArmorStmt.bindUInt(2, m_ObjectID);
         insertShoulderArmorStmt.bindUInt(3, getItemType());
@@ -116,8 +115,8 @@ void ShoulderArmor::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveShoulderArmorStmt(
-            pConn, string("UPDATE ShoulderArmorObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveShoulderArmorStmt(pConn, string("UPDATE ShoulderArmorObject SET ") + field +
+                                                               " WHERE ItemID=?");
         tinysaveShoulderArmorStmt.bindUInt(1, m_ItemID);
         tinysaveShoulderArmorStmt.execute();
     }
@@ -278,8 +277,9 @@ void ShoulderArmorLoader::load(Creature* pCreature)
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement selectShoulderArmorLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-                   "ItemFlag FROM ShoulderArmorObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
+            "ItemFlag FROM ShoulderArmorObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectShoulderArmorLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectShoulderArmorLoaderStmt.execute();
 

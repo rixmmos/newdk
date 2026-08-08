@@ -110,7 +110,6 @@ void Mine::tinysave(const char* field) const
         PreparedStatement tinysaveMineObjectStmt(pConn, string("UPDATE MineObject SET ") + field + " WHERE ItemID=?");
         tinysaveMineObjectStmt.bindLong(1, m_ItemID);
         tinysaveMineObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -159,8 +158,6 @@ void Mine::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         updateMineObjectStmt.bindInt(8, (int)m_Num);
         updateMineObjectStmt.bindLong(9, m_ItemID);
         updateMineObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -308,7 +305,6 @@ void MineInfoManager::load()
 
             addItemInfo(pMineInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -442,7 +438,6 @@ void MineLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -503,7 +498,6 @@ void MineLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

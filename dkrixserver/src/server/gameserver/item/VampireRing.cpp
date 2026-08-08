@@ -78,11 +78,10 @@ void VampireRing::create(const string& ownerID, Storage storage, StorageID_t sto
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertVampireRingStmt(pConn,
-                                                  "INSERT INTO VampireRingObject "
-                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertVampireRingStmt(pConn, "INSERT INTO VampireRingObject "
+                                                       "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                       " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                       " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireRingStmt.bindUInt(1, m_ItemID);
         insertVampireRingStmt.bindUInt(2, m_ObjectID);
         insertVampireRingStmt.bindUInt(3, getItemType());
@@ -120,7 +119,8 @@ void VampireRing::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireRingStmt(pConn, string("UPDATE VampireRingObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireRingStmt(pConn,
+                                                  string("UPDATE VampireRingObject SET ") + field + " WHERE ItemID=?");
         tinysaveVampireRingStmt.bindUInt(1, m_ItemID);
         tinysaveVampireRingStmt.execute();
     }

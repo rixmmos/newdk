@@ -79,11 +79,10 @@ void VampireBracelet::create(const string& ownerID, Storage storage, StorageID_t
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertVampireBraceletStmt(pConn,
-                                                      "INSERT INTO VampireBraceletObject "
-                                                      "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                      " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                      " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertVampireBraceletStmt(pConn, "INSERT INTO VampireBraceletObject "
+                                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireBraceletStmt.bindUInt(1, m_ItemID);
         insertVampireBraceletStmt.bindUInt(2, m_ObjectID);
         insertVampireBraceletStmt.bindUInt(3, getItemType());
@@ -121,8 +120,8 @@ void VampireBracelet::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireBraceletStmt(
-            pConn, string("UPDATE VampireBraceletObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireBraceletStmt(pConn, string("UPDATE VampireBraceletObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveVampireBraceletStmt.bindUInt(1, m_ItemID);
         tinysaveVampireBraceletStmt.execute();
     }
@@ -380,8 +379,9 @@ void VampireBraceletLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectVampireBraceletLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM VampireBraceletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM VampireBraceletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectVampireBraceletLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectVampireBraceletLoaderStmt.execute();
 

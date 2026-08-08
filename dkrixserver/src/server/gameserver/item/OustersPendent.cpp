@@ -80,11 +80,10 @@ void OustersPendent::create(const string& ownerID, Storage storage, StorageID_t 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersPendentStmt(pConn,
-                                                     "INSERT INTO OustersPendentObject "
-                                                     "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                     " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                     " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersPendentStmt(pConn, "INSERT INTO OustersPendentObject "
+                                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                          " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                          " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersPendentStmt.bindUInt(1, m_ItemID);
         insertOustersPendentStmt.bindUInt(2, m_ObjectID);
         insertOustersPendentStmt.bindUInt(3, getItemType());
@@ -122,8 +121,8 @@ void OustersPendent::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersPendentStmt(
-            pConn, string("UPDATE OustersPendentObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersPendentStmt(pConn, string("UPDATE OustersPendentObject SET ") + field +
+                                                                " WHERE ItemID=?");
         tinysaveOustersPendentStmt.bindUInt(1, m_ItemID);
         tinysaveOustersPendentStmt.execute();
     }
@@ -381,8 +380,9 @@ void OustersPendentLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectOustersPendentLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM OustersPendentObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM OustersPendentObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectOustersPendentLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectOustersPendentLoaderStmt.execute();
 

@@ -19,8 +19,7 @@
 #include "Stash.h"
 #include "Vampire.h"
 
-void setStoneNum(vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y,
-                 uint Num); 
+void setStoneNum(vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y, uint Num);
 
 // global variable declaration
 CodeSheetInfoManager* g_pCodeSheetInfoManager = NULL;
@@ -127,11 +126,10 @@ void CodeSheet::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveCodeSheetObjectStmt(
-            pConn, string("UPDATE CodeSheetObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveCodeSheetObjectStmt(pConn, string("UPDATE CodeSheetObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveCodeSheetObjectStmt.bindLong(1, m_ItemID);
         tinysaveCodeSheetObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -185,7 +183,6 @@ void CodeSheet::save(const string& ownerID, Storage storage, StorageID_t storage
         updateCodeSheetObjectStmt.bindString(8, optionField);
         updateCodeSheetObjectStmt.bindLong(9, m_ItemID);
         updateCodeSheetObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -310,7 +307,6 @@ void CodeSheetInfoManager::load()
 
             addItemInfo(pCodeSheetInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -452,7 +448,6 @@ void CodeSheetLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -522,7 +517,6 @@ void CodeSheetLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

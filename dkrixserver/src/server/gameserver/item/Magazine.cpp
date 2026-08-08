@@ -90,7 +90,6 @@ void Magazine::create(const string& ownerID, Storage storage, StorageID_t storag
         insertMagazineObjectStmt.bindInt(8, (int)y);
         insertMagazineObjectStmt.bindInt(9, (int)m_Num);
         insertMagazineObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -114,11 +113,10 @@ void Magazine::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveMagazineObjectStmt(
-            pConn, string("UPDATE MagazineObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveMagazineObjectStmt(pConn,
+                                                     string("UPDATE MagazineObject SET ") + field + " WHERE ItemID=?");
         tinysaveMagazineObjectStmt.bindLong(1, m_ItemID);
         tinysaveMagazineObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -168,7 +166,6 @@ void Magazine::save(const string& ownerID, Storage storage, StorageID_t storageI
         updateMagazineObjectStmt.bindInt(8, (int)m_Num);
         updateMagazineObjectStmt.bindLong(9, m_ItemID);
         updateMagazineObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -300,7 +297,6 @@ void MagazineInfoManager::load()
 
             addItemInfo(pMagazineInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -460,7 +456,6 @@ void MagazineLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -523,7 +518,6 @@ void MagazineLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

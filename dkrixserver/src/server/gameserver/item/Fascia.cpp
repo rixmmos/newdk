@@ -110,11 +110,10 @@ void Fascia::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveFasciaObjectStmt(
-            pConn, string("UPDATE FasciaObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveFasciaObjectStmt(pConn,
+                                                   string("UPDATE FasciaObject SET ") + field + " WHERE ItemID=?");
         tinysaveFasciaObjectStmt.bindLong(1, m_ItemID);
         tinysaveFasciaObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -151,7 +150,6 @@ void Fascia::save(const string& ownerID, Storage storage, StorageID_t storageID,
         updateFasciaObjectStmt.bindInt(10, (int)getEnchantLevel());
         updateFasciaObjectStmt.bindLong(11, m_ItemID);
         updateFasciaObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -248,7 +246,6 @@ void FasciaInfoManager::load()
 
             addItemInfo(pFasciaInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -390,7 +387,6 @@ void FasciaLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 

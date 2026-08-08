@@ -87,11 +87,10 @@ void SR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertSRStmt(pConn,
-                                        "INSERT INTO SRObject "
-                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                        " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
-                                        " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSRStmt(pConn, "INSERT INTO SRObject "
+                                              "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                              " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
+                                              " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSRStmt.bindUInt(1, m_ItemID);
         insertSRStmt.bindUInt(2, m_ObjectID);
         insertSRStmt.bindUInt(3, getItemType());
@@ -131,7 +130,7 @@ void SR::tinysave(const char* field) const
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). BulletCount and ItemID are bound.
         PreparedStatement tinysaveSRStmt(pConn,
-                                          string("UPDATE SRObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
+                                         string("UPDATE SRObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
         tinysaveSRStmt.bindInt(1, (int)getBulletCount());
         tinysaveSRStmt.bindUInt(2, m_ItemID);
         tinysaveSRStmt.execute();
@@ -400,9 +399,10 @@ void SRInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectSRInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
-                   "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SRInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
+            "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+            "NextOptionRatio, NextItemType, DowngradeRatio FROM SRInfo");
         pResult = selectSRInfoStmt.execute();
 
         while (pResult->next()) {
@@ -471,8 +471,9 @@ void SRLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectSRLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
-                   "BulletCount, Silver, Grade, ItemFlag FROM SRObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
+            "BulletCount, Silver, Grade, ItemFlag FROM SRObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSRLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSRLoaderStmt.execute();
 

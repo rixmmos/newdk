@@ -79,11 +79,10 @@ void Shield::create(const string& ownerID, Storage storage, StorageID_t storageI
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertShieldStmt(pConn,
-                                            "INSERT INTO ShieldObject "
-                                            "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                            " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertShieldStmt(pConn, "INSERT INTO ShieldObject "
+                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertShieldStmt.bindUInt(1, m_ItemID);
         insertShieldStmt.bindUInt(2, m_ObjectID);
         insertShieldStmt.bindUInt(3, getItemType());
@@ -517,10 +516,10 @@ void ShieldLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneShieldStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                   " OptionType, Durability, EnchantLevel, ItemFlag FROM ShieldObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneShieldStmt(pConn,
+                                               "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                               " OptionType, Durability, EnchantLevel, ItemFlag FROM ShieldObject"
+                                               " WHERE Storage = ? AND StorageID = ?");
         selectZoneShieldStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneShieldStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneShieldStmt.execute();

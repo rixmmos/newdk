@@ -101,11 +101,10 @@ void MoonCard::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveMoonCardObjectStmt(
-            pConn, string("UPDATE MoonCardObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveMoonCardObjectStmt(pConn,
+                                                     string("UPDATE MoonCardObject SET ") + field + " WHERE ItemID=?");
         tinysaveMoonCardObjectStmt.bindLong(1, m_ItemID);
         tinysaveMoonCardObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -152,8 +151,6 @@ void MoonCard::save(const string& ownerID, Storage storage, StorageID_t storageI
         updateMoonCardObjectStmt.bindInt(8, (int)m_Num);
         updateMoonCardObjectStmt.bindLong(9, m_ItemID);
         updateMoonCardObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -256,7 +253,6 @@ void MoonCardInfoManager::load()
 
             addItemInfo(pMoonCardInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -398,7 +394,6 @@ void MoonCardLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -458,7 +453,6 @@ void MoonCardLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

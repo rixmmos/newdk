@@ -85,11 +85,10 @@ void Sweeper::create(const string& ownerID, Storage storage, StorageID_t storage
         // sql is retained only to reproduce the WarLog.txt audit line verbatim;
         // the query itself now executes via bound parameters below.
 
-        PreparedStatement insertSweeperStmt(pConn,
-                                             "INSERT INTO SweeperObject "
-                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                             " X, Y, Durability)"
-                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSweeperStmt(pConn, "INSERT INTO SweeperObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                   " X, Y, Durability)"
+                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSweeperStmt.bindUInt(1, m_ItemID);
         insertSweeperStmt.bindUInt(2, m_ObjectID);
         insertSweeperStmt.bindUInt(3, m_ItemType);
@@ -171,8 +170,8 @@ void Sweeper::save(const string& ownerID, Storage storage, StorageID_t storageID
         */
 
         PreparedStatement saveSweeperStmt(pConn,
-                                           "UPDATE SweeperObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                           "StorageID=?, X=?, Y=?, Durability=?, EnchantLevel=? WHERE ItemID=?");
+                                          "UPDATE SweeperObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                          "StorageID=?, X=?, Y=?, Durability=?, EnchantLevel=? WHERE ItemID=?");
         saveSweeperStmt.bindUInt(1, m_ObjectID);
         saveSweeperStmt.bindUInt(2, m_ItemType);
         saveSweeperStmt.bindString(3, ownerID);
@@ -314,9 +313,9 @@ void SweeperInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        PreparedStatement selectSweeperInfoStmt(pConn,
-                                                 "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, "
-                                                 "Defense, Protection, ReqAbility, ItemLevel FROM SweeperInfo");
+        PreparedStatement selectSweeperInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, "
+                   "Defense, Protection, ReqAbility, ItemLevel FROM SweeperInfo");
         pResult = selectSweeperInfoStmt.execute();
 
         while (pResult->next()) {
@@ -399,10 +398,9 @@ void SweeperLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneSweeperStmt(pConn,
-                                                 "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                                                 " Durability, EnchantLevel FROM SweeperObject"
-                                                 " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneSweeperStmt(pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                                       " Durability, EnchantLevel FROM SweeperObject"
+                                                       " WHERE Storage = ? AND StorageID = ?");
         selectZoneSweeperStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneSweeperStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneSweeperStmt.execute();

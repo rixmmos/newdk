@@ -90,7 +90,6 @@ void CastleSymbol::create(const string& ownerID, Storage storage, StorageID_t st
         insertCastleSymbolObjectStmt.bindInt(9, m_Durability);
         insertCastleSymbolObjectStmt.execute();
         filelog("WarLog.txt", "%s", sql.toString().c_str());
-
     }
     END_DB(pStmt)
 
@@ -121,11 +120,10 @@ void CastleSymbol::tinysave(const char* field) const
         // precedent (batch 9). Only ItemID is bound. `query` above is retained
         // solely to preserve the WarLog.txt debug logging of the SQL text that
         // used to be executed verbatim; it is no longer the string that runs.
-        PreparedStatement tinysaveCastleSymbolObjectStmt(
-            pConn, string("UPDATE CastleSymbolObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveCastleSymbolObjectStmt(pConn, string("UPDATE CastleSymbolObject SET ") + field +
+                                                                    " WHERE ItemID=?");
         tinysaveCastleSymbolObjectStmt.bindLong(1, m_ItemID);
         tinysaveCastleSymbolObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -178,7 +176,6 @@ void CastleSymbol::save(const string& ownerID, Storage storage, StorageID_t stor
         updateCastleSymbolObjectStmt.bindInt(9, (int)m_EnchantLevel);
         updateCastleSymbolObjectStmt.bindLong(10, m_ItemID);
         updateCastleSymbolObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -334,7 +331,6 @@ void CastleSymbolInfoManager::load()
 
             addItemInfo(pCastleSymbolInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -371,14 +367,9 @@ void CastleSymbolLoader::load(Creature* pCreature)
         */
 
 
-
-
         PreparedStatement deleteCastleSymbolObjectStmt(pConn, "DELETE FROM CastleSymbolObject WHERE OwnerID = ?");
         deleteCastleSymbolObjectStmt.bindString(1, pCreature->getName());
         deleteCastleSymbolObjectStmt.execute();
-
-
-
     }
     END_DB(pStmt)
 
@@ -442,7 +433,6 @@ void CastleSymbolLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

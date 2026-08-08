@@ -68,9 +68,9 @@ void ResurrectItem::create(const string& ownerID, Storage storage, StorageID_t s
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertResurrectItemStmt(
-            pConn, "INSERT INTO ResurrectItemObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertResurrectItemStmt(pConn, "INSERT INTO ResurrectItemObject "
+                                                         "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, "
+                                                         "X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertResurrectItemStmt.bindUInt(1, m_ItemID);
         insertResurrectItemStmt.bindUInt(2, m_ObjectID);
         insertResurrectItemStmt.bindUInt(3, m_ItemType);
@@ -105,8 +105,8 @@ void ResurrectItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveResurrectItemStmt(
-            pConn, string("UPDATE ResurrectItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveResurrectItemStmt(pConn, string("UPDATE ResurrectItemObject SET ") + field +
+                                                               " WHERE ItemID=?");
         tinysaveResurrectItemStmt.bindUInt(1, m_ItemID);
         tinysaveResurrectItemStmt.execute();
     }

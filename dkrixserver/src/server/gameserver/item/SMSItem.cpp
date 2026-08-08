@@ -65,9 +65,9 @@ void SMSItem::create(const string& ownerID, Storage storage, StorageID_t storage
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertSMSItemStmt(
-            pConn, "INSERT INTO SMSItemObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSMSItemStmt(pConn, "INSERT INTO SMSItemObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                                                   "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSMSItemStmt.bindUInt(1, m_ItemID);
         insertSMSItemStmt.bindUInt(2, m_ObjectID);
         insertSMSItemStmt.bindUInt(3, getItemType());
@@ -137,8 +137,8 @@ void SMSItem::save(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveSMSItemStmt(pConn,
-                                           "UPDATE SMSItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                           "StorageID=?, X=?, Y=? WHERE ItemID=?");
+                                          "UPDATE SMSItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                          "StorageID=?, X=?, Y=? WHERE ItemID=?");
         saveSMSItemStmt.bindUInt(1, m_ObjectID);
         saveSMSItemStmt.bindUInt(2, getItemType());
         saveSMSItemStmt.bindString(3, ownerID);

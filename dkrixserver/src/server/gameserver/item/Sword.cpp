@@ -79,11 +79,10 @@ void Sword::create(const string& ownerID, Storage storage, StorageID_t storageID
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertSwordStmt(pConn,
-                                           "INSERT INTO SwordObject "
-                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSwordStmt(pConn, "INSERT INTO SwordObject "
+                                                 "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                 " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSwordStmt.bindUInt(1, m_ItemID);
         insertSwordStmt.bindUInt(2, m_ObjectID);
         insertSwordStmt.bindUInt(3, getItemType());
@@ -334,9 +333,10 @@ void SwordInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectSwordInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MaxSilver, "
-                   "Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SwordInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MaxSilver, "
+            "Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+            "NextOptionRatio, NextItemType, DowngradeRatio FROM SwordInfo");
         pResult = selectSwordInfoStmt.execute();
 
         while (pResult->next()) {
@@ -404,8 +404,9 @@ void SwordLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectSwordLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, Silver, "
-                   "Grade, ItemFlag FROM SwordObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, Silver, "
+            "Grade, ItemFlag FROM SwordObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSwordLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSwordLoaderStmt.execute();
 
@@ -543,10 +544,10 @@ void SwordLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneSwordStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                   " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM SwordObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneSwordStmt(pConn,
+                                              "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                              " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM SwordObject"
+                                              " WHERE Storage = ? AND StorageID = ?");
         selectZoneSwordStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneSwordStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneSwordStmt.execute();

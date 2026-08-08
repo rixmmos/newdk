@@ -146,9 +146,6 @@ bool Belt::destroy()
     //-------------------------------------------------------
 
 
-
-
-
     //-------------------------------------------------------
     for (int i = 0; i < m_pInventory->getHeight(); i++) {
         for (int j = 0; j < m_pInventory->getWidth(); j++) {
@@ -272,7 +269,7 @@ void Belt::makePCItemInfo(PCItemInfo& result) const {
 
     BYTE SubItemCount = 0;
 
-    
+
     for (int i = 0; i < getPocketCount(); i++) {
         Item* pBeltItem = getInventory()->getItem(i, 0);
         if (pBeltItem != NULL) {
@@ -645,10 +642,9 @@ void BeltLoader::load(Zone* pZone)
 
         // StorageID_t/int values only (STORAGE_ZONE enum, pZone->getZoneID()); no
         // string/user input. Migrated for consistency with the rest of the file.
-        PreparedStatement loadZoneBeltStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, "
-                   "OptionType, Durability, EnchantLevel, ItemFlag FROM BeltObject "
-                   "WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement loadZoneBeltStmt(pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, "
+                                                  "OptionType, Durability, EnchantLevel, ItemFlag FROM BeltObject "
+                                                  "WHERE Storage = ? AND StorageID = ?");
         loadZoneBeltStmt.bindInt(1, (int)STORAGE_ZONE);
         loadZoneBeltStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = loadZoneBeltStmt.execute();

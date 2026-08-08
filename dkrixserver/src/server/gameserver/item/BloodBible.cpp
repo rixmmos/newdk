@@ -89,7 +89,6 @@ void BloodBible::create(const string& ownerID, Storage storage, StorageID_t stor
         insertBloodBibleObjectStmt.bindInt(9, m_Durability);
         insertBloodBibleObjectStmt.execute();
         filelog("WarLog.txt", "%s", sql.toString().c_str());
-
     }
     END_DB(pStmt)
 
@@ -120,11 +119,10 @@ void BloodBible::tinysave(const char* field) const
         // precedent (batch 9). Only ItemID is bound. `query` above is retained
         // solely to preserve the WarLog.txt debug logging of the SQL text that
         // used to be executed verbatim; it is no longer the string that runs.
-        PreparedStatement tinysaveBloodBibleObjectStmt(
-            pConn, string("UPDATE BloodBibleObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveBloodBibleObjectStmt(pConn, string("UPDATE BloodBibleObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveBloodBibleObjectStmt.bindLong(1, m_ItemID);
         tinysaveBloodBibleObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -177,7 +175,6 @@ void BloodBible::save(const string& ownerID, Storage storage, StorageID_t storag
         updateBloodBibleObjectStmt.bindInt(9, (int)getEnchantLevel());
         updateBloodBibleObjectStmt.bindLong(10, m_ItemID);
         updateBloodBibleObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -333,7 +330,6 @@ void BloodBibleInfoManager::load()
 
             addItemInfo(pBloodBibleInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -370,14 +366,9 @@ void BloodBibleLoader::load(Creature* pCreature)
         */
 
 
-
-
         PreparedStatement deleteBloodBibleObjectStmt(pConn, "DELETE FROM BloodBibleObject WHERE OwnerID = ?");
         deleteBloodBibleObjectStmt.bindString(1, pCreature->getName());
         deleteBloodBibleObjectStmt.execute();
-
-
-
     }
     END_DB(pStmt)
 
@@ -441,7 +432,6 @@ void BloodBibleLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

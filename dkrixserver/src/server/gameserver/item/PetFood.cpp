@@ -67,9 +67,9 @@ void PetFood::create(const string& ownerID, Storage storage, StorageID_t storage
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertPetFoodStmt(
-            pConn, "INSERT INTO PetFoodObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertPetFoodStmt(pConn, "INSERT INTO PetFoodObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                                                   "Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertPetFoodStmt.bindUInt(1, m_ItemID);
         insertPetFoodStmt.bindUInt(2, m_ObjectID);
         insertPetFoodStmt.bindUInt(3, m_ItemType);
@@ -140,8 +140,8 @@ void PetFood::save(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement savePetFoodStmt(pConn,
-                                           "UPDATE PetFoodObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                           "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+                                          "UPDATE PetFoodObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                          "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         savePetFoodStmt.bindUInt(1, m_ObjectID);
         savePetFoodStmt.bindUInt(2, m_ItemType);
         savePetFoodStmt.bindString(3, ownerID);
@@ -237,7 +237,8 @@ void PetFoodInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectPetFoodInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Target, PetHP, TameRatio FROM PetFoodInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Target, PetHP, TameRatio FROM PetFoodInfo");
         pResult = selectPetFoodInfoStmt.execute();
 
         while (pResult->next()) {

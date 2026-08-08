@@ -109,12 +109,11 @@ void Money::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Amount and ItemID are bound.
-        PreparedStatement tinysaveMoneyObjectStmt(
-            pConn, string("UPDATE MoneyObject SET ") + field + ", Amount=? WHERE ItemID=?");
+        PreparedStatement tinysaveMoneyObjectStmt(pConn, string("UPDATE MoneyObject SET ") + field +
+                                                             ", Amount=? WHERE ItemID=?");
         tinysaveMoneyObjectStmt.bindLong(1, m_Amount);
         tinysaveMoneyObjectStmt.bindLong(2, m_ItemID);
         tinysaveMoneyObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -165,7 +164,6 @@ void Money::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateMoneyObjectStmt.bindInt(9, (int)m_Num);
         updateMoneyObjectStmt.bindLong(10, m_ItemID);
         updateMoneyObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -291,7 +289,6 @@ void MoneyInfoManager::load()
 
             addItemInfo(pMoneyInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -426,7 +423,6 @@ void MoneyLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -489,7 +485,6 @@ void MoneyLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

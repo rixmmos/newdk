@@ -95,7 +95,6 @@ void Larva::create(const string& ownerID, Storage storage, StorageID_t storageID
         insertLarvaObjectStmt.bindInt(8, y);
         insertLarvaObjectStmt.bindInt(9, (int)m_Num);
         insertLarvaObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -127,7 +126,6 @@ bool Larva::destroy()
         if (deleteStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
     }
     END_DB(pStmt)
 
@@ -156,7 +154,6 @@ void Larva::tinysave(const char* field) const
         PreparedStatement tinysaveLarvaObjectStmt(pConn, string("UPDATE LarvaObject SET ") + field + " WHERE ItemID=?");
         tinysaveLarvaObjectStmt.bindLong(1, m_ItemID);
         tinysaveLarvaObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -189,8 +186,6 @@ void Larva::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateLarvaObjectStmt.bindInt(8, (int)m_Num);
         updateLarvaObjectStmt.bindLong(9, m_ItemID);
         updateLarvaObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -456,7 +451,6 @@ void LarvaInfoManager::load()
 
             addItemInfo(pLarvaInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -623,7 +617,6 @@ void LarvaLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -686,7 +679,6 @@ void LarvaLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

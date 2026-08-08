@@ -114,11 +114,10 @@ void Mitten::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveMittenObjectStmt(
-            pConn, string("UPDATE MittenObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveMittenObjectStmt(pConn,
+                                                   string("UPDATE MittenObject SET ") + field + " WHERE ItemID=?");
         tinysaveMittenObjectStmt.bindLong(1, m_ItemID);
         tinysaveMittenObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -156,7 +155,6 @@ void Mitten::save(const string& ownerID, Storage storage, StorageID_t storageID,
         updateMittenObjectStmt.bindInt(11, (int)getEnchantLevel());
         updateMittenObjectStmt.bindLong(12, m_ItemID);
         updateMittenObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -254,7 +252,6 @@ void MittenInfoManager::load()
 
             addItemInfo(pMittenInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -397,7 +394,6 @@ void MittenLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 

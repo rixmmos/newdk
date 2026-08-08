@@ -80,11 +80,10 @@ void OustersCirclet::create(const string& ownerID, Storage storage, StorageID_t 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersCircletStmt(pConn,
-                                                     "INSERT INTO OustersCircletObject "
-                                                     "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                     " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                     " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersCircletStmt(pConn, "INSERT INTO OustersCircletObject "
+                                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                          " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                          " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersCircletStmt.bindUInt(1, m_ItemID);
         insertOustersCircletStmt.bindUInt(2, m_ObjectID);
         insertOustersCircletStmt.bindUInt(3, getItemType());
@@ -122,8 +121,8 @@ void OustersCirclet::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersCircletStmt(
-            pConn, string("UPDATE OustersCircletObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersCircletStmt(pConn, string("UPDATE OustersCircletObject SET ") + field +
+                                                                " WHERE ItemID=?");
         tinysaveOustersCircletStmt.bindUInt(1, m_ItemID);
         tinysaveOustersCircletStmt.execute();
     }
@@ -381,8 +380,9 @@ void OustersCircletLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectOustersCircletLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM OustersCircletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM OustersCircletObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectOustersCircletLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectOustersCircletLoaderStmt.execute();
 

@@ -74,11 +74,10 @@ void Persona::create(const string& ownerID, Storage storage, StorageID_t storage
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertPersonaStmt(pConn,
-                                             "INSERT INTO PersonaObject "
-                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                             " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertPersonaStmt(pConn, "INSERT INTO PersonaObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                   " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertPersonaStmt.bindUInt(1, m_ItemID);
         insertPersonaStmt.bindUInt(2, m_ObjectID);
         insertPersonaStmt.bindUInt(3, getItemType());
@@ -222,8 +221,9 @@ void PersonaInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectPersonaInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
-                   "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM PersonaInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
+            "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM PersonaInfo");
         pResult = selectPersonaInfoStmt.execute();
 
         while (pResult->next()) {
@@ -273,8 +273,9 @@ void PersonaLoader::load(Creature* pCreature)
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement selectPersonaLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-                   "ItemFlag FROM PersonaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
+            "ItemFlag FROM PersonaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectPersonaLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectPersonaLoaderStmt.execute();
 

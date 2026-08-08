@@ -109,11 +109,10 @@ void Dermis::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveDermisObjectStmt(
-            pConn, string("UPDATE DermisObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveDermisObjectStmt(pConn,
+                                                   string("UPDATE DermisObject SET ") + field + " WHERE ItemID=?");
         tinysaveDermisObjectStmt.bindLong(1, m_ItemID);
         tinysaveDermisObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -150,7 +149,6 @@ void Dermis::save(const string& ownerID, Storage storage, StorageID_t storageID,
         updateDermisObjectStmt.bindInt(10, (int)getEnchantLevel());
         updateDermisObjectStmt.bindLong(11, m_ItemID);
         updateDermisObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -248,7 +246,6 @@ void DermisInfoManager::load()
 
             addItemInfo(pDermisInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -384,7 +381,6 @@ void DermisLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 

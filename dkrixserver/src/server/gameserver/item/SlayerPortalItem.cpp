@@ -68,8 +68,9 @@ void SlayerPortalItem::create(const string& ownerID, Storage storage, StorageID_
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement insertSlayerPortalItemStmt(
-            pConn, "INSERT INTO SlayerPortalItemObject "
-                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            pConn,
+            "INSERT INTO SlayerPortalItemObject "
+            "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSlayerPortalItemStmt.bindUInt(1, m_ItemID);
         insertSlayerPortalItemStmt.bindUInt(2, m_ObjectID);
         insertSlayerPortalItemStmt.bindUInt(3, m_ItemType);
@@ -103,8 +104,8 @@ void SlayerPortalItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveSlayerPortalItemStmt(
-            pConn, string("UPDATE SlayerPortalItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveSlayerPortalItemStmt(pConn, string("UPDATE SlayerPortalItemObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveSlayerPortalItemStmt.bindUInt(1, m_ItemID);
         tinysaveSlayerPortalItemStmt.execute();
     }

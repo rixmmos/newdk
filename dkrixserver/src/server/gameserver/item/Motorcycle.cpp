@@ -140,11 +140,10 @@ void Motorcycle::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveMotorcycleObjectStmt(
-            pConn, string("UPDATE MotorcycleObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveMotorcycleObjectStmt(pConn, string("UPDATE MotorcycleObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveMotorcycleObjectStmt.bindLong(1, m_ItemID);
         tinysaveMotorcycleObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -199,8 +198,6 @@ void Motorcycle::save(const string& ownerID, Storage storage, StorageID_t storag
         updateMotorcycleObjectStmt.bindInt(9, m_Durability);
         updateMotorcycleObjectStmt.bindLong(10, m_ItemID);
         updateMotorcycleObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -328,7 +325,6 @@ void MotorcycleInfoManager::load()
 
             addItemInfo(pMotorcycleInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -394,7 +390,6 @@ void MotorcycleLoader::load(Creature* pCreature)
                 pMotorcycle->setDurability(pResult->getInt(++i));
 
 
-
             } catch (Error& error) {
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), error.toString().c_str());
                 throw;
@@ -402,7 +397,6 @@ void MotorcycleLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -466,7 +460,6 @@ void MotorcycleLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

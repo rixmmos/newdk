@@ -94,11 +94,10 @@ void OustersArmsband::create(const string& ownerID, Storage storage, StorageID_t
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersArmsbandStmt(pConn,
-                                                      "INSERT INTO OustersArmsbandObject "
-                                                      "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                      " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                      " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersArmsbandStmt(pConn, "INSERT INTO OustersArmsbandObject "
+                                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersArmsbandStmt.bindUInt(1, m_ItemID);
         insertOustersArmsbandStmt.bindUInt(2, m_ObjectID);
         insertOustersArmsbandStmt.bindUInt(3, getItemType());
@@ -130,9 +129,6 @@ bool OustersArmsband::destroy()
     Statement* pStmt = NULL;
 
     //-------------------------------------------------------
-
-
-
 
 
     //-------------------------------------------------------
@@ -180,8 +176,8 @@ void OustersArmsband::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersArmsbandStmt(
-            pConn, string("UPDATE OustersArmsbandObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersArmsbandStmt(pConn, string("UPDATE OustersArmsbandObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveOustersArmsbandStmt.bindUInt(1, m_ItemID);
         tinysaveOustersArmsbandStmt.execute();
     }
@@ -260,7 +256,7 @@ void OustersArmsband::makePCItemInfo(PCItemInfo& result) const {
 
     BYTE SubItemCount = 0;
 
-    
+
     for (int i = 0; i < getPocketCount(); i++) {
         Item* pOustersArmsbandItem = getInventory()->getItem(i, 0);
 
@@ -422,9 +418,10 @@ void OustersArmsbandInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectOustersArmsbandInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
-                   "PocketCount,ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
-                   "NextItemType, DowngradeRatio FROM OustersArmsbandInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+            "PocketCount,ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+            "NextItemType, DowngradeRatio FROM OustersArmsbandInfo");
         pResult = selectOustersArmsbandInfoStmt.execute();
 
         while (pResult->next()) {
@@ -490,8 +487,9 @@ void OustersArmsbandLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectOustersArmsbandLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM OustersArmsbandObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM OustersArmsbandObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectOustersArmsbandLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectOustersArmsbandLoaderStmt.execute();
 

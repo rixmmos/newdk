@@ -69,8 +69,9 @@ void VampireETC::create(const string& ownerID, Storage storage, StorageID_t stor
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement insertVampireETCStmt(
-            pConn, "INSERT INTO VampireETCObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            pConn,
+            "INSERT INTO VampireETCObject "
+            "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireETCStmt.bindUInt(1, m_ItemID);
         insertVampireETCStmt.bindUInt(2, m_ObjectID);
         insertVampireETCStmt.bindUInt(3, m_ItemType);
@@ -105,8 +106,8 @@ void VampireETC::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireETCStmt(
-            pConn, string("UPDATE VampireETCObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireETCStmt(pConn,
+                                                 string("UPDATE VampireETCObject SET ") + field + " WHERE ItemID=?");
         tinysaveVampireETCStmt.bindUInt(1, m_ItemID);
         tinysaveVampireETCStmt.execute();
     }
@@ -145,9 +146,9 @@ void VampireETC::save(const string& ownerID, Storage storage, StorageID_t storag
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement saveVampireETCStmt(pConn,
-                                              "UPDATE VampireETCObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                              "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement saveVampireETCStmt(
+            pConn, "UPDATE VampireETCObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         saveVampireETCStmt.bindUInt(1, m_ObjectID);
         saveVampireETCStmt.bindUInt(2, m_ItemType);
         saveVampireETCStmt.bindString(3, ownerID);

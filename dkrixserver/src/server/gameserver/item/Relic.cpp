@@ -78,11 +78,10 @@ void Relic::create(const string& ownerID, Storage storage, StorageID_t storageID
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertRelicStmt(pConn,
-                                           "INSERT INTO RelicObject "
-                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                           " X, Y, Durability)"
-                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertRelicStmt(pConn, "INSERT INTO RelicObject "
+                                                 "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                 " X, Y, Durability)"
+                                                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertRelicStmt.bindUInt(1, m_ItemID);
         insertRelicStmt.bindUInt(2, m_ObjectID);
         insertRelicStmt.bindUInt(3, m_ItemType);
@@ -158,9 +157,8 @@ void Relic::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement saveRelicStmt(pConn,
-                                         "UPDATE RelicObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                         "StorageID=?, X=?, Y=?, Durability=?, EnchantLevel=?  WHERE ItemID=?");
+        PreparedStatement saveRelicStmt(pConn, "UPDATE RelicObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                               "StorageID=?, X=?, Y=?, Durability=?, EnchantLevel=?  WHERE ItemID=?");
         saveRelicStmt.bindUInt(1, m_ObjectID);
         saveRelicStmt.bindUInt(2, m_ItemType);
         saveRelicStmt.bindString(3, ownerID);
@@ -303,8 +301,9 @@ void RelicInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectRelicInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
-                   "ItemLevel, RelicType, ZoneID, XCoord, YCoord, MonsterType FROM RelicInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
+            "ItemLevel, RelicType, ZoneID, XCoord, YCoord, MonsterType FROM RelicInfo");
         pResult = selectRelicInfoStmt.execute();
 
         while (pResult->next()) {
@@ -393,10 +392,9 @@ void RelicLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneRelicStmt(pConn,
-                                               "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                                               " Durability, EnchantLevel FROM RelicObject"
-                                               " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneRelicStmt(pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                                     " Durability, EnchantLevel FROM RelicObject"
+                                                     " WHERE Storage = ? AND StorageID = ?");
         selectZoneRelicStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneRelicStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneRelicStmt.execute();

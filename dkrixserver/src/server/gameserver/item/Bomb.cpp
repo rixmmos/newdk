@@ -106,7 +106,6 @@ void Bomb::tinysave(const char* field) const
         PreparedStatement tinysaveBombObjectStmt(pConn, string("UPDATE BombObject SET ") + field + " WHERE ItemID=?");
         tinysaveBombObjectStmt.bindLong(1, m_ItemID);
         tinysaveBombObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -156,8 +155,6 @@ void Bomb::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         updateBombObjectStmt.bindInt(8, (int)m_Num);
         updateBombObjectStmt.bindLong(9, m_ItemID);
         updateBombObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -305,7 +302,6 @@ void BombInfoManager::load()
 
             addItemInfo(pBombInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -439,7 +435,6 @@ void BombLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -500,7 +495,6 @@ void BombLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

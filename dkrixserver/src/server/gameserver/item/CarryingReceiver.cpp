@@ -110,11 +110,10 @@ void CarryingReceiver::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveCarryingReceiverObjectStmt(
-            pConn, string("UPDATE CarryingReceiverObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveCarryingReceiverObjectStmt(pConn, string("UPDATE CarryingReceiverObject SET ") +
+                                                                        field + " WHERE ItemID=?");
         tinysaveCarryingReceiverObjectStmt.bindLong(1, m_ItemID);
         tinysaveCarryingReceiverObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -151,7 +150,6 @@ void CarryingReceiver::save(const string& ownerID, Storage storage, StorageID_t 
         updateCarryingReceiverObjectStmt.bindInt(10, (int)getEnchantLevel());
         updateCarryingReceiverObjectStmt.bindLong(11, m_ItemID);
         updateCarryingReceiverObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -249,7 +247,6 @@ void CarryingReceiverInfoManager::load()
 
             addItemInfo(pCarryingReceiverInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -388,7 +385,6 @@ void CarryingReceiverLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 

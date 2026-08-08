@@ -80,11 +80,10 @@ void OustersStone::create(const string& ownerID, Storage storage, StorageID_t st
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersStoneStmt(pConn,
-                                                   "INSERT INTO OustersStoneObject "
-                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                   " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersStoneStmt(pConn, "INSERT INTO OustersStoneObject "
+                                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                        " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                        " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersStoneStmt.bindUInt(1, m_ItemID);
         insertOustersStoneStmt.bindUInt(2, m_ObjectID);
         insertOustersStoneStmt.bindUInt(3, getItemType());
@@ -122,8 +121,8 @@ void OustersStone::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersStoneStmt(pConn,
-                                                     string("UPDATE OustersStoneObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersStoneStmt(pConn, string("UPDATE OustersStoneObject SET ") + field +
+                                                              " WHERE ItemID=?");
         tinysaveOustersStoneStmt.bindUInt(1, m_ItemID);
         tinysaveOustersStoneStmt.execute();
     }
@@ -338,12 +337,13 @@ void OustersStoneInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectOustersStoneInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
-                   "ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
-                   "DowngradeRatio, ElementalType, Elemental FROM OustersStoneInfo"
-                   //"SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility,
-                   // ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType,
-                   // DowngradeRatio FROM OustersStoneInfo"
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
+            "ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+            "DowngradeRatio, ElementalType, Elemental FROM OustersStoneInfo"
+            //"SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility,
+            // ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType,
+            // DowngradeRatio FROM OustersStoneInfo"
         );
         pResult = selectOustersStoneInfoStmt.execute();
 

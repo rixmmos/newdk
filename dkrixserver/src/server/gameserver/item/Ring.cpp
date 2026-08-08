@@ -78,11 +78,10 @@ void Ring::create(const string& ownerID, Storage storage, StorageID_t storageID,
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertRingStmt(pConn,
-                                          "INSERT INTO RingObject "
-                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                          " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                          " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertRingStmt(pConn, "INSERT INTO RingObject "
+                                                "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertRingStmt.bindUInt(1, m_ItemID);
         insertRingStmt.bindUInt(2, m_ObjectID);
         insertRingStmt.bindUInt(3, getItemType());
@@ -516,10 +515,9 @@ void RingLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneRingStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                   " OptionType, Durability, EnchantLevel, ItemFlag FROM RingObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneRingStmt(pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                                    " OptionType, Durability, EnchantLevel, ItemFlag FROM RingObject"
+                                                    " WHERE Storage = ? AND StorageID = ?");
         selectZoneRingStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneRingStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneRingStmt.execute();

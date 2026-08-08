@@ -98,11 +98,10 @@ void LearningItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveLearningItemObjectStmt(
-            pConn, string("UPDATE LearningItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveLearningItemObjectStmt(pConn, string("UPDATE LearningItemObject SET ") + field +
+                                                                    " WHERE ItemID=?");
         tinysaveLearningItemObjectStmt.bindLong(1, m_ItemID);
         tinysaveLearningItemObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -150,8 +149,6 @@ void LearningItem::save(const string& ownerID, Storage storage, StorageID_t stor
         updateLearningItemObjectStmt.bindInt(7, (int)y);
         updateLearningItemObjectStmt.bindLong(8, m_ItemID);
         updateLearningItemObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -278,7 +275,6 @@ void LearningItemInfoManager::load()
 
             addItemInfo(pLearningItemInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -410,7 +406,6 @@ void LearningItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -471,7 +466,6 @@ void LearningItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

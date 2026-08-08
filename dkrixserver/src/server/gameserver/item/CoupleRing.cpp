@@ -110,11 +110,10 @@ void CoupleRing::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveCoupleRingObjectStmt(
-            pConn, string("UPDATE CoupleRingObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveCoupleRingObjectStmt(pConn, string("UPDATE CoupleRingObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveCoupleRingObjectStmt.bindLong(1, m_ItemID);
         tinysaveCoupleRingObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -161,7 +160,6 @@ void CoupleRing::save(const string& ownerID, Storage storage, StorageID_t storag
         updateCoupleRingObjectStmt.bindLong(9, getPartnerItemID());
         updateCoupleRingObjectStmt.bindLong(10, m_ItemID);
         updateCoupleRingObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -224,7 +222,6 @@ bool CoupleRing::hasPartnerItem()
         Result* pResult = selectCoupleRingObjectStmt.execute();
 
 
-
         if (pResult->next()) {
             int count = pResult->getInt(1);
 
@@ -237,7 +234,6 @@ bool CoupleRing::hasPartnerItem()
         } else {
             bRet = false;
         }
-
     }
     END_DB(pStmt)
 
@@ -302,7 +298,6 @@ void CoupleRingInfoManager::load()
 
             addItemInfo(pCoupleRingInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -479,7 +474,6 @@ void CoupleRingLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -539,7 +533,6 @@ void CoupleRingLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

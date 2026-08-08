@@ -65,9 +65,9 @@ void QuestItem::create(const string& ownerID, Storage storage, StorageID_t stora
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertQuestItemStmt(
-            pConn, "INSERT INTO QuestItemObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertQuestItemStmt(pConn, "INSERT INTO QuestItemObject "
+                                                     "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                                                     "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertQuestItemStmt.bindUInt(1, m_ItemID);
         insertQuestItemStmt.bindUInt(2, m_ObjectID);
         insertQuestItemStmt.bindUInt(3, m_ItemType);
@@ -101,7 +101,8 @@ void QuestItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveQuestItemStmt(pConn, string("UPDATE QuestItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveQuestItemStmt(pConn,
+                                                string("UPDATE QuestItemObject SET ") + field + " WHERE ItemID=?");
         tinysaveQuestItemStmt.bindUInt(1, m_ItemID);
         tinysaveQuestItemStmt.execute();
     }
@@ -137,8 +138,8 @@ void QuestItem::save(const string& ownerID, Storage storage, StorageID_t storage
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveQuestItemStmt(pConn,
-                                             "UPDATE QuestItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                             "StorageID=?, X=?, Y=? WHERE ItemID=?");
+                                            "UPDATE QuestItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                            "StorageID=?, X=?, Y=? WHERE ItemID=?");
         saveQuestItemStmt.bindUInt(1, m_ObjectID);
         saveQuestItemStmt.bindUInt(2, m_ItemType);
         saveQuestItemStmt.bindString(3, ownerID);

@@ -79,11 +79,10 @@ void VampireNecklace::create(const string& ownerID, Storage storage, StorageID_t
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertVampireNecklaceStmt(pConn,
-                                                      "INSERT INTO VampireNecklaceObject "
-                                                      "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                      " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                      " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertVampireNecklaceStmt(pConn, "INSERT INTO VampireNecklaceObject "
+                                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireNecklaceStmt.bindUInt(1, m_ItemID);
         insertVampireNecklaceStmt.bindUInt(2, m_ObjectID);
         insertVampireNecklaceStmt.bindUInt(3, getItemType());
@@ -121,8 +120,8 @@ void VampireNecklace::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireNecklaceStmt(
-            pConn, string("UPDATE VampireNecklaceObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireNecklaceStmt(pConn, string("UPDATE VampireNecklaceObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveVampireNecklaceStmt.bindUInt(1, m_ItemID);
         tinysaveVampireNecklaceStmt.execute();
     }
@@ -380,8 +379,9 @@ void VampireNecklaceLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectVampireNecklaceLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM VampireNecklaceObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM VampireNecklaceObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectVampireNecklaceLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectVampireNecklaceLoaderStmt.execute();
 

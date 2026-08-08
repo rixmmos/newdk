@@ -66,9 +66,9 @@ void Water::create(const string& ownerID, Storage storage, StorageID_t storageID
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement insertWaterStmt(pConn,
-                                           "INSERT INTO WaterObject "
-                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
-                                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                                          "INSERT INTO WaterObject "
+                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertWaterStmt.bindUInt(1, m_ItemID);
         insertWaterStmt.bindUInt(2, m_ObjectID);
         insertWaterStmt.bindUInt(3, m_ItemType);
@@ -142,9 +142,8 @@ void Water::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement saveWaterStmt(pConn,
-                                         "UPDATE WaterObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement saveWaterStmt(pConn, "UPDATE WaterObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                               "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         saveWaterStmt.bindUInt(1, m_ObjectID);
         saveWaterStmt.bindUInt(2, m_ItemType);
         saveWaterStmt.bindString(3, ownerID);
@@ -312,9 +311,9 @@ void WaterLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement selectCreatureWaterStmt(pConn,
-                                                   "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                                   "WaterObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        PreparedStatement selectCreatureWaterStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                   "WaterObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectCreatureWaterStmt.bindString(1, pCreature->getName());
         Result* pResult = selectCreatureWaterStmt.execute();
 
@@ -432,9 +431,9 @@ void WaterLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneWaterStmt(pConn,
-                                               "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM WaterObject"
-                                               " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneWaterStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM WaterObject"
+                   " WHERE Storage = ? AND StorageID = ?");
         selectZoneWaterStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneWaterStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneWaterStmt.execute();

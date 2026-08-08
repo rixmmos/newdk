@@ -74,11 +74,10 @@ void Shoes::create(const string& ownerID, Storage storage, StorageID_t storageID
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertShoesStmt(pConn,
-                                           "INSERT INTO ShoesObject "
-                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertShoesStmt(pConn, "INSERT INTO ShoesObject "
+                                                 "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                 " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertShoesStmt.bindUInt(1, m_ItemID);
         insertShoesStmt.bindUInt(2, m_ObjectID);
         insertShoesStmt.bindUInt(3, getItemType());
@@ -513,10 +512,9 @@ void ShoesLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneShoesStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                   " OptionType, Durability, EnchantLevel, ItemFlag FROM ShoesObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneShoesStmt(pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                                     " OptionType, Durability, EnchantLevel, ItemFlag FROM ShoesObject"
+                                                     " WHERE Storage = ? AND StorageID = ?");
         selectZoneShoesStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneShoesStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneShoesStmt.execute();

@@ -122,7 +122,8 @@ void VampirePortalItem::create(const string& ownerID, Storage storage, StorageID
 
         PreparedStatement insertVampirePortalItemStmt(
             pConn, "INSERT INTO VampirePortalItemObject "
-                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge,TargetZID,TargetX,TargetY) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge,TargetZID,TargetX,TargetY) VALUES "
+                   "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampirePortalItemStmt.bindUInt(1, m_ItemID);
         insertVampirePortalItemStmt.bindUInt(2, m_ObjectID);
         insertVampirePortalItemStmt.bindUInt(3, m_ItemType);
@@ -159,8 +160,8 @@ void VampirePortalItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampirePortalItemStmt(
-            pConn, string("UPDATE VampirePortalItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampirePortalItemStmt(pConn, string("UPDATE VampirePortalItemObject SET ") + field +
+                                                                   " WHERE ItemID=?");
         tinysaveVampirePortalItemStmt.bindUInt(1, m_ItemID);
         tinysaveVampirePortalItemStmt.execute();
     }
@@ -408,8 +409,9 @@ void VampirePortalItemLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectVampirePortalItemLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge, TargetZID, TargetX, TargetY FROM "
-                   "VampirePortalItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge, TargetZID, TargetX, TargetY FROM "
+            "VampirePortalItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectVampirePortalItemLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectVampirePortalItemLoaderStmt.execute();
 

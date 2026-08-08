@@ -87,11 +87,10 @@ void SG::create(const string& ownerID, Storage storage, StorageID_t storageID, B
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertSGStmt(pConn,
-                                        "INSERT INTO SGObject "
-                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                        " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
-                                        " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSGStmt(pConn, "INSERT INTO SGObject "
+                                              "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                              " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
+                                              " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSGStmt.bindUInt(1, m_ItemID);
         insertSGStmt.bindUInt(2, m_ObjectID);
         insertSGStmt.bindUInt(3, getItemType());
@@ -131,7 +130,7 @@ void SG::tinysave(const char* field) const
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). BulletCount and ItemID are bound.
         PreparedStatement tinysaveSGStmt(pConn,
-                                          string("UPDATE SGObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
+                                         string("UPDATE SGObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
         tinysaveSGStmt.bindInt(1, (int)getBulletCount());
         tinysaveSGStmt.bindUInt(2, m_ItemID);
         tinysaveSGStmt.execute();
@@ -399,9 +398,10 @@ void SGInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectSGInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
-                   "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SGInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
+            "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+            "NextOptionRatio, NextItemType, DowngradeRatio FROM SGInfo");
         pResult = selectSGInfoStmt.execute();
 
         while (pResult->next()) {
@@ -470,8 +470,9 @@ void SGLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectSGLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
-                   "BulletCount, Silver, Grade, ItemFlag FROM SGObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
+            "BulletCount, Silver, Grade, ItemFlag FROM SGObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSGLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSGLoaderStmt.execute();
 

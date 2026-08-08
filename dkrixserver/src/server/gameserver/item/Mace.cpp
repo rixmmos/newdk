@@ -123,7 +123,6 @@ void Mace::tinysave(const char* field) const
         PreparedStatement tinysaveMaceObjectStmt(pConn, string("UPDATE MaceObject SET ") + field + " WHERE ItemID=?");
         tinysaveMaceObjectStmt.bindLong(1, m_ItemID);
         tinysaveMaceObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -182,7 +181,6 @@ void Mace::save(const string& ownerID, Storage storage, StorageID_t storageID, B
         updateMaceObjectStmt.bindInt(12, (int)getGrade());
         updateMaceObjectStmt.bindLong(13, m_ItemID);
         updateMaceObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -380,7 +378,6 @@ void MaceInfoManager::load()
 
             addItemInfo(pMaceInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -536,7 +533,6 @@ void MaceLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -607,7 +603,6 @@ void MaceLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

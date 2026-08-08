@@ -101,11 +101,10 @@ void EffectItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveEffectItemObjectStmt(
-            pConn, string("UPDATE EffectItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveEffectItemObjectStmt(pConn, string("UPDATE EffectItemObject SET ") + field +
+                                                                  " WHERE ItemID=?");
         tinysaveEffectItemObjectStmt.bindLong(1, m_ItemID);
         tinysaveEffectItemObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -152,8 +151,6 @@ void EffectItem::save(const string& ownerID, Storage storage, StorageID_t storag
         updateEffectItemObjectStmt.bindInt(8, (int)getNum());
         updateEffectItemObjectStmt.bindLong(9, m_ItemID);
         updateEffectItemObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -260,7 +257,6 @@ void EffectItemInfoManager::load()
 
             addItemInfo(pEffectItemInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -402,7 +398,6 @@ void EffectItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -462,7 +457,6 @@ void EffectItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

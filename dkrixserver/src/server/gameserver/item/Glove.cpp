@@ -120,7 +120,6 @@ void Glove::tinysave(const char* field) const
         PreparedStatement tinysaveGloveObjectStmt(pConn, string("UPDATE GloveObject SET ") + field + " WHERE ItemID=?");
         tinysaveGloveObjectStmt.bindLong(1, m_ItemID);
         tinysaveGloveObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -177,7 +176,6 @@ void Glove::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateGloveObjectStmt.bindInt(11, (int)getEnchantLevel());
         updateGloveObjectStmt.bindLong(12, m_ItemID);
         updateGloveObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -341,7 +339,6 @@ void GloveInfoManager::load()
 
             addItemInfo(pGloveInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -495,7 +492,6 @@ void GloveLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -565,7 +561,6 @@ void GloveLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

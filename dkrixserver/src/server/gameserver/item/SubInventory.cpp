@@ -74,9 +74,9 @@ void SubInventory::create(const string& ownerID, Storage storage, StorageID_t st
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertSubInventoryStmt(
-            pConn, "INSERT INTO SubInventoryObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSubInventoryStmt(pConn, "INSERT INTO SubInventoryObject "
+                                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, "
+                                                        "Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSubInventoryStmt.bindUInt(1, m_ItemID);
         insertSubInventoryStmt.bindUInt(2, m_ObjectID);
         insertSubInventoryStmt.bindUInt(3, m_ItemType);
@@ -110,8 +110,8 @@ void SubInventory::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveSubInventoryStmt(
-            pConn, string("UPDATE SubInventoryObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveSubInventoryStmt(pConn, string("UPDATE SubInventoryObject SET ") + field +
+                                                              " WHERE ItemID=?");
         tinysaveSubInventoryStmt.bindUInt(1, m_ItemID);
         tinysaveSubInventoryStmt.execute();
     }

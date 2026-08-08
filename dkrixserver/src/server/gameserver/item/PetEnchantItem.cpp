@@ -67,9 +67,9 @@ void PetEnchantItem::create(const string& ownerID, Storage storage, StorageID_t 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertPetEnchantItemStmt(
-            pConn, "INSERT INTO PetEnchantItemObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertPetEnchantItemStmt(pConn, "INSERT INTO PetEnchantItemObject "
+                                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, "
+                                                          "X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertPetEnchantItemStmt.bindUInt(1, m_ItemID);
         insertPetEnchantItemStmt.bindUInt(2, m_ObjectID);
         insertPetEnchantItemStmt.bindUInt(3, m_ItemType);
@@ -104,8 +104,8 @@ void PetEnchantItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysavePetEnchantItemStmt(
-            pConn, string("UPDATE PetEnchantItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysavePetEnchantItemStmt(pConn, string("UPDATE PetEnchantItemObject SET ") + field +
+                                                                " WHERE ItemID=?");
         tinysavePetEnchantItemStmt.bindUInt(1, m_ItemID);
         tinysavePetEnchantItemStmt.execute();
     }
@@ -419,8 +419,9 @@ void PetEnchantItemLoader::load(Zone* pZone)
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement selectZonePetEnchantItemStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM PetEnchantItemObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM PetEnchantItemObject"
+            " WHERE Storage = ? AND StorageID = ?");
         selectZonePetEnchantItemStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZonePetEnchantItemStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZonePetEnchantItemStmt.execute();

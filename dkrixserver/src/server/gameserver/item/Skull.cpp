@@ -157,9 +157,8 @@ void Skull::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement saveSkullStmt(pConn,
-                                         "UPDATE SkullObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        PreparedStatement saveSkullStmt(pConn, "UPDATE SkullObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                               "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
         saveSkullStmt.bindUInt(1, m_ObjectID);
         saveSkullStmt.bindUInt(2, m_ItemType);
         saveSkullStmt.bindString(3, ownerID);
@@ -328,9 +327,9 @@ void SkullLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        PreparedStatement selectSkullLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                   "SkullObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        PreparedStatement selectSkullLoaderStmt(pConn,
+                                                "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                                                "SkullObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSkullLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSkullLoaderStmt.execute();
 

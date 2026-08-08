@@ -102,11 +102,10 @@ void EventItem::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveEventItemObjectStmt(
-            pConn, string("UPDATE EventItemObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveEventItemObjectStmt(pConn, string("UPDATE EventItemObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveEventItemObjectStmt.bindLong(1, m_ItemID);
         tinysaveEventItemObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -153,8 +152,6 @@ void EventItem::save(const string& ownerID, Storage storage, StorageID_t storage
         updateEventItemObjectStmt.bindInt(8, (int)m_Num);
         updateEventItemObjectStmt.bindLong(9, m_ItemID);
         updateEventItemObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -260,7 +257,6 @@ void EventItemInfoManager::load()
 
             addItemInfo(pEventItemInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -354,7 +350,6 @@ void EventItemLoader::load(Creature* pCreature)
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
 
                 if (pEventItem->getItemType() == 27) {
-
                     processItemBug(pCreature, pEventItem);
                 } else
                     switch (storage) {
@@ -416,7 +411,6 @@ void EventItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -476,7 +470,6 @@ void EventItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

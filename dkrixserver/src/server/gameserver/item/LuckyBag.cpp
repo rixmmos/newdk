@@ -101,11 +101,10 @@ void LuckyBag::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveLuckyBagObjectStmt(
-            pConn, string("UPDATE LuckyBagObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveLuckyBagObjectStmt(pConn,
+                                                     string("UPDATE LuckyBagObject SET ") + field + " WHERE ItemID=?");
         tinysaveLuckyBagObjectStmt.bindLong(1, m_ItemID);
         tinysaveLuckyBagObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -152,8 +151,6 @@ void LuckyBag::save(const string& ownerID, Storage storage, StorageID_t storageI
         updateLuckyBagObjectStmt.bindInt(8, (int)m_Num);
         updateLuckyBagObjectStmt.bindLong(9, m_ItemID);
         updateLuckyBagObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -256,7 +253,6 @@ void LuckyBagInfoManager::load()
 
             addItemInfo(pLuckyBagInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -398,7 +394,6 @@ void LuckyBagLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -458,7 +453,6 @@ void LuckyBagLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

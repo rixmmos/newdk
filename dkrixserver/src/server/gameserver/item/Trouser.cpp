@@ -78,11 +78,10 @@ void Trouser::create(const string& ownerID, Storage storage, StorageID_t storage
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertTrouserStmt(pConn,
-                                             "INSERT INTO TrouserObject "
-                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                             " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertTrouserStmt(pConn, "INSERT INTO TrouserObject "
+                                                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                   " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                   " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertTrouserStmt.bindUInt(1, m_ItemID);
         insertTrouserStmt.bindUInt(2, m_ObjectID);
         insertTrouserStmt.bindUInt(3, getItemType());
@@ -517,10 +516,10 @@ void TrouserLoader::load(Zone* pZone)
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement selectZoneTrouserStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-                   " OptionType, Durability, EnchantLevel, ItemFlag FROM TrouserObject"
-                   " WHERE Storage = ? AND StorageID = ?");
+        PreparedStatement selectZoneTrouserStmt(pConn,
+                                                "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                                                " OptionType, Durability, EnchantLevel, ItemFlag FROM TrouserObject"
+                                                " WHERE Storage = ? AND StorageID = ?");
         selectZoneTrouserStmt.bindInt(1, (int)STORAGE_ZONE);
         selectZoneTrouserStmt.bindUInt(2, pZone->getZoneID());
         Result* pResult = selectZoneTrouserStmt.execute();

@@ -65,9 +65,9 @@ void TrapItem::create(const string& ownerID, Storage storage, StorageID_t storag
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        PreparedStatement insertTrapItemStmt(
-            pConn, "INSERT INTO TrapItemObject "
-                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertTrapItemStmt(pConn, "INSERT INTO TrapItemObject "
+                                                    "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                                                    "ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertTrapItemStmt.bindUInt(1, m_ItemID);
         insertTrapItemStmt.bindUInt(2, m_ObjectID);
         insertTrapItemStmt.bindUInt(3, m_ItemType);
@@ -137,8 +137,8 @@ void TrapItem::save(const string& ownerID, Storage storage, StorageID_t storageI
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveTrapItemStmt(pConn,
-                                            "UPDATE TrapItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
-                                            "StorageID=?, X=?, Y=? WHERE ItemID=?");
+                                           "UPDATE TrapItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                           "StorageID=?, X=?, Y=? WHERE ItemID=?");
         saveTrapItemStmt.bindUInt(1, m_ObjectID);
         saveTrapItemStmt.bindUInt(2, m_ItemType);
         saveTrapItemStmt.bindString(3, ownerID);
@@ -233,7 +233,8 @@ void TrapItemInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectTrapItemInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, Parameter FROM TrapItemInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, Parameter FROM TrapItemInfo");
         pResult = selectTrapItemInfoStmt.execute();
 
         while (pResult->next()) {

@@ -79,11 +79,10 @@ void VampireWeapon::create(const string& ownerID, Storage storage, StorageID_t s
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertVampireWeaponStmt(pConn,
-                                                    "INSERT INTO VampireWeaponObject "
-                                                    "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                    " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertVampireWeaponStmt(pConn, "INSERT INTO VampireWeaponObject "
+                                                         "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                         " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                         " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertVampireWeaponStmt.bindUInt(1, m_ItemID);
         insertVampireWeaponStmt.bindUInt(2, m_ObjectID);
         insertVampireWeaponStmt.bindUInt(3, getItemType());
@@ -120,8 +119,8 @@ void VampireWeapon::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveVampireWeaponStmt(pConn,
-                                                      string("UPDATE VampireWeaponObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveVampireWeaponStmt(pConn, string("UPDATE VampireWeaponObject SET ") + field +
+                                                               " WHERE ItemID=?");
         tinysaveVampireWeaponStmt.bindUInt(1, m_ItemID);
         tinysaveVampireWeaponStmt.execute();
     }
@@ -331,10 +330,11 @@ void VampireWeaponInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectVampireWeaponInfoStmt(
-            pConn, "SELECT "
-                   "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
-                   "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
-                   "DowngradeRatio FROM VampireWeaponInfo");
+            pConn,
+            "SELECT "
+            "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
+            "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+            "DowngradeRatio FROM VampireWeaponInfo");
         pResult = selectVampireWeaponInfoStmt.execute();
 
         while (pResult->next()) {
@@ -401,8 +401,9 @@ void VampireWeaponLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectVampireWeaponLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM VampireWeaponObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM VampireWeaponObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectVampireWeaponLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectVampireWeaponLoaderStmt.execute();
 

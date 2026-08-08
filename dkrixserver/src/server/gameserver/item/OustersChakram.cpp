@@ -79,11 +79,10 @@ void OustersChakram::create(const string& ownerID, Storage storage, StorageID_t 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersChakramStmt(pConn,
-                                                     "INSERT INTO OustersChakramObject "
-                                                     "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                     " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                     " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersChakramStmt(pConn, "INSERT INTO OustersChakramObject "
+                                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                          " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                          " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersChakramStmt.bindUInt(1, m_ItemID);
         insertOustersChakramStmt.bindUInt(2, m_ObjectID);
         insertOustersChakramStmt.bindUInt(3, getItemType());
@@ -120,8 +119,8 @@ void OustersChakram::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
-        PreparedStatement tinysaveOustersChakramStmt(
-            pConn, string("UPDATE OustersChakramObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveOustersChakramStmt(pConn, string("UPDATE OustersChakramObject SET ") + field +
+                                                                " WHERE ItemID=?");
         tinysaveOustersChakramStmt.bindUInt(1, m_ItemID);
         tinysaveOustersChakramStmt.execute();
     }
@@ -331,10 +330,11 @@ void OustersChakramInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectOustersChakramInfoStmt(
-            pConn, "SELECT "
-                   "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
-                   "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
-                   "DowngradeRatio FROM OustersChakramInfo");
+            pConn,
+            "SELECT "
+            "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
+            "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+            "DowngradeRatio FROM OustersChakramInfo");
         pResult = selectOustersChakramInfoStmt.execute();
 
         while (pResult->next()) {
@@ -401,8 +401,9 @@ void OustersChakramLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectOustersChakramLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
-                   "EnchantLevel, ItemFlag FROM OustersChakramObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+            "EnchantLevel, ItemFlag FROM OustersChakramObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectOustersChakramLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectOustersChakramLoaderStmt.execute();
 

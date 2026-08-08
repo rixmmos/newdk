@@ -111,11 +111,10 @@ void CoreZap::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveCoreZapObjectStmt(
-            pConn, string("UPDATE CoreZapObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveCoreZapObjectStmt(pConn,
+                                                    string("UPDATE CoreZapObject SET ") + field + " WHERE ItemID=?");
         tinysaveCoreZapObjectStmt.bindLong(1, m_ItemID);
         tinysaveCoreZapObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -169,7 +168,6 @@ void CoreZap::save(const string& ownerID, Storage storage, StorageID_t storageID
         updateCoreZapObjectStmt.bindInt(9, getGrade());
         updateCoreZapObjectStmt.bindLong(10, m_ItemID);
         updateCoreZapObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -320,7 +318,6 @@ void CoreZapInfoManager::load()
 
             addItemInfo(pCoreZapInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -488,7 +485,6 @@ void CoreZapLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -556,7 +552,6 @@ void CoreZapLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

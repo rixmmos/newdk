@@ -86,11 +86,10 @@ void SMG::create(const string& ownerID, Storage storage, StorageID_t storageID, 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertSMGStmt(pConn,
-                                         "INSERT INTO SMGObject "
-                                         "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                         " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
-                                         " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertSMGStmt(pConn, "INSERT INTO SMGObject "
+                                               "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                               " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
+                                               " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertSMGStmt.bindUInt(1, m_ItemID);
         insertSMGStmt.bindUInt(2, m_ObjectID);
         insertSMGStmt.bindUInt(3, getItemType());
@@ -129,8 +128,8 @@ void SMG::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). BulletCount and ItemID are bound.
-        PreparedStatement tinysaveSMGStmt(
-            pConn, string("UPDATE SMGObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
+        PreparedStatement tinysaveSMGStmt(pConn,
+                                          string("UPDATE SMGObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
         tinysaveSMGStmt.bindInt(1, (int)getBulletCount());
         tinysaveSMGStmt.bindUInt(2, m_ItemID);
         tinysaveSMGStmt.execute();
@@ -399,9 +398,10 @@ void SMGInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectSMGInfoStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
-                   "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SMGInfo");
+            pConn,
+            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
+            "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+            "NextOptionRatio, NextItemType, DowngradeRatio FROM SMGInfo");
         pResult = selectSMGInfoStmt.execute();
 
         while (pResult->next()) {
@@ -470,8 +470,9 @@ void SMGLoader::load(Creature* pCreature)
         */
 
         PreparedStatement selectSMGLoaderStmt(
-            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
-                   "BulletCount, Silver, Grade, ItemFlag FROM SMGObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+            pConn,
+            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
+            "BulletCount, Silver, Grade, ItemFlag FROM SMGObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
         selectSMGLoaderStmt.bindString(1, pCreature->getName());
         Result* pResult = selectSMGLoaderStmt.execute();
 

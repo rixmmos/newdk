@@ -101,11 +101,10 @@ void DyePotion::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveDyePotionObjectStmt(
-            pConn, string("UPDATE DyePotionObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveDyePotionObjectStmt(pConn, string("UPDATE DyePotionObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveDyePotionObjectStmt.bindLong(1, m_ItemID);
         tinysaveDyePotionObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -135,8 +134,6 @@ void DyePotion::save(const string& ownerID, Storage storage, StorageID_t storage
         updateDyePotionObjectStmt.bindInt(8, (int)getNum());
         updateDyePotionObjectStmt.bindLong(9, m_ItemID);
         updateDyePotionObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -244,7 +241,6 @@ void DyePotionInfoManager::load()
 
             addItemInfo(pDyePotionInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -373,7 +369,6 @@ void DyePotionLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -433,7 +428,6 @@ void DyePotionLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

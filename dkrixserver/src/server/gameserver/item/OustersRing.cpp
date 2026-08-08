@@ -79,11 +79,10 @@ void OustersRing::create(const string& ownerID, Storage storage, StorageID_t sto
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        PreparedStatement insertOustersRingStmt(pConn,
-                                                  "INSERT INTO OustersRingObject "
-                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
-                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertOustersRingStmt(pConn, "INSERT INTO OustersRingObject "
+                                                       "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                       " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                       " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertOustersRingStmt.bindUInt(1, m_ItemID);
         insertOustersRingStmt.bindUInt(2, m_ObjectID);
         insertOustersRingStmt.bindUInt(3, getItemType());
@@ -122,7 +121,7 @@ void OustersRing::tinysave(const char* field) const
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
         // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
         PreparedStatement tinysaveOustersRingStmt(pConn,
-                                                    string("UPDATE OustersRingObject SET ") + field + " WHERE ItemID=?");
+                                                  string("UPDATE OustersRingObject SET ") + field + " WHERE ItemID=?");
         tinysaveOustersRingStmt.bindUInt(1, m_ItemID);
         tinysaveOustersRingStmt.execute();
     }

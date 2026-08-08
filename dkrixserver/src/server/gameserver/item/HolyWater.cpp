@@ -94,7 +94,6 @@ void HolyWater::create(const string& ownerID, Storage storage, StorageID_t stora
         insertHolyWaterObjectStmt.bindInt(8, (int)y);
         insertHolyWaterObjectStmt.bindInt(9, (int)m_Num);
         insertHolyWaterObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -118,11 +117,10 @@ void HolyWater::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveHolyWaterObjectStmt(
-            pConn, string("UPDATE HolyWaterObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveHolyWaterObjectStmt(pConn, string("UPDATE HolyWaterObject SET ") + field +
+                                                                 " WHERE ItemID=?");
         tinysaveHolyWaterObjectStmt.bindLong(1, m_ItemID);
         tinysaveHolyWaterObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -172,8 +170,6 @@ void HolyWater::save(const string& ownerID, Storage storage, StorageID_t storage
         updateHolyWaterObjectStmt.bindInt(8, (int)m_Num);
         updateHolyWaterObjectStmt.bindLong(9, m_ItemID);
         updateHolyWaterObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -319,7 +315,6 @@ void HolyWaterInfoManager::load()
 
             addItemInfo(pHolyWaterInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -453,7 +448,6 @@ void HolyWaterLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -516,7 +510,6 @@ void HolyWaterLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 

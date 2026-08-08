@@ -116,11 +116,10 @@ void Bracelet::tinysave(const char* field) const
         // single bindable value; PreparedStatement cannot parameterise an entire
         // dynamic assignment list. Left spliced, matching the Slayer::tinysave
         // precedent (batch 9). Only ItemID is bound.
-        PreparedStatement tinysaveBraceletObjectStmt(
-            pConn, string("UPDATE BraceletObject SET ") + field + " WHERE ItemID=?");
+        PreparedStatement tinysaveBraceletObjectStmt(pConn,
+                                                     string("UPDATE BraceletObject SET ") + field + " WHERE ItemID=?");
         tinysaveBraceletObjectStmt.bindLong(1, m_ItemID);
         tinysaveBraceletObjectStmt.execute();
-
     }
     END_DB(pStmt)
 
@@ -178,8 +177,6 @@ void Bracelet::save(const string& ownerID, Storage storage, StorageID_t storageI
         updateBraceletObjectStmt.bindInt(11, (int)getEnchantLevel());
         updateBraceletObjectStmt.bindLong(12, m_ItemID);
         updateBraceletObjectStmt.execute();
-
-
     }
     END_DB(pStmt)
 
@@ -343,7 +340,6 @@ void BraceletInfoManager::load()
 
             addItemInfo(pBraceletInfo);
         }
-
     }
     END_DB(pStmt)
 
@@ -497,7 +493,6 @@ void BraceletLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
     }
     END_DB(pStmt)
 
@@ -567,7 +562,6 @@ void BraceletLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
     }
     END_DB(pStmt)
 
