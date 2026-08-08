@@ -430,15 +430,15 @@ In order; each independently shippable:
    See Phase 10 above for detail and compile-gate caveats.
 6. **Phase 8 secrets step 2** — deployment change; needs a live-server
    window, config backups, and Enrico at the wheel.
-7. **Phase 12.1 — build `shared/Packets/` infrastructure + one pilot
-   pair.** Decided 2026-08-08 (see Phase 12 above): the simple "point
-   client at the server file" approach is structurally broken
-   (include-resolution pulls in the wrong `Packet.h`); building
-   `shared/Packets/` — proven on the parked line — is approved as its
-   own scoped, CI-gated change, sized against `main`'s current tree.
-   Land the directory + `shared_packets` CMake target + exactly one
-   migrated pair first; both-tree CI green on the pilot gates resuming
-   the batch plan (Wave 1 proper, ~20 pairs at a time).
+7. ~~**Phase 12.1 — build `shared/Packets/` infrastructure + one pilot
+   pair.**~~ **Done and green 2026-08-08.** `shared_packets` CMake
+   INTERFACE target landed, `CLGetWorldList` migrated as the pilot
+   pair (ratchet 326→324). Took three pushes to get the client build
+   green — see Phase 12 above for the full include-resolution story
+   (a shadowed Windows SDK header, then a CMake property that silently
+   didn't apply, then a forwarding-header shim that finally worked).
+   Both trees confirmed green on `46746eb`. Wave 1 proper (batches of
+   ~20 of the remaining 61 style-only pairs) is now unblocked.
 
 > **2026-08-07 five-stream agent wave (cloud session):** items 3–5 above
 > advanced in one parallel pass — 11.2 batch 1 (ratchet 542→529), Phase 3
@@ -1548,6 +1548,68 @@ source list) has caused three CI-red incidents in this tree in one day.
 Wave 1 proper (batches of ~20 of the remaining 61 style-only pairs)
 stays gated on this pilot going green on both trees' CI, per the plan
 above — nothing here pre-approves it.
+
+**CI verdict, 2026-08-08: three client-side red runs before green —
+all in the include-resolution mechanics, none in the migrated packet
+itself.** Server CI was green on the pilot from the first push (run
+#16, `b0df2a8`) and never regressed; every failure below was
+client-only.
+
+- **Run #13 (`b0df2a8`) — red.** `error C1083: Cannot open include
+  file: 'Packet.h'` in `shared/Packets/CLGetWorldList.h`. Root cause:
+  `Packet.h`/`PacketFactory.h` live in `Client/Packet/`, not
+  `shared/Packets/`; the old `Cpackets/CLGetWorldList.h` resolved them
+  only because it was `#include`d from
+  `Client/Packet/PacketFactoryManager.cpp`, and MSVC's quoted-include
+  search walks the `#include` stack up to each includer's directory.
+  `shared/Packets/CLGetWorldList.cpp` is now a standalone translation
+  unit (`target_sources` on the `shared_packets` INTERFACE target, not
+  `#include`d from anywhere) — no stack to walk.
+- **Fix attempt 1 (`0a46249`) — red, worse.** Added `Client/Packet` to
+  `DarkEden`'s target-wide include dirs. Got past the original error
+  into a much bigger one: run #14 cascaded hundreds of errors in
+  `winbase.h` and ATL headers (`STREAM_INFO_LEVELS` syntax error;
+  `CreateFile`/`DeleteFile`/`FindFirstFile`/`ReadFile`/`GetFileSize`
+  "not a member of global namespace"). `Client/Packet/FileAPI.h` is
+  unrelated game code (a `FileAPI::` namespace of exception-throwing
+  POSIX-style wrappers) whose name case-insensitively matches Windows'
+  real `<fileapi.h>` — once `Client/Packet` was on every one of
+  `DarkEden`'s ~1000 translation units' `/I` path, ours shadowed the
+  SDK's ahead of the toolchain's own Windows Kits path, and every
+  `<windows.h>`-pulling file (ATL, `VS_UI_WebBrowser.cpp`'s COM code)
+  lost the real Win32 file API.
+- **Fix attempt 2 (`38052e8`) — red, same original error.** Tried
+  scoping the include path to only the `shared_packets` source files
+  via the per-source-file `INCLUDE_DIRECTORIES` property (additive,
+  not a target-wide replacement), set from `dkrix/CMakeLists.txt` —
+  the same directory scope as the `DarkEden` target, which should have
+  been enough regardless of `CMP0118`. It silently did nothing: run
+  #15 hit the identical `Packet.h` C1083 from run #13. Most likely a
+  Visual Studio generator quirk for sources absorbed into a target via
+  a *linked INTERFACE library's* `target_sources`, rather than added
+  to the target directly — untested territory, not worth chasing
+  further given a simpler fix existed.
+- **Fix attempt 3 (`46746eb`) — green.** A two-file forwarding-header
+  shim, `Client/Packet/SharedPacketsShim/{Packet,PacketFactory}.h`,
+  each a one-line `#include "../Packet.h"` /
+  `#include "../PacketFactory.h"`. Safe to add target-wide because the
+  shim directory holds nothing else — no shadow risk, and any other
+  accidental quoted-include of `"Packet.h"` would just get correctly
+  forwarded rather than broken. **Run #16 (`46746eb`) — SUCCESS**,
+  `MSVC x64 (Debug)` and `Viewers and validators` both green, 27m37s.
+  The two `sanitizers-linux` legs are still red on this run, but for
+  unrelated, pre-existing reasons (`Timer2.h` / `types/SystemTypes.h`
+  not found on that path) and are `continue-on-error` by design — they
+  did not block the merge and are not part of this pilot's story.
+
+Net effect on the plan: Wave 1's batch template should budget for this
+class of failure specifically. The lesson isn't "don't touch include
+paths" — it's that a shared/interface-library source, once it stops
+being reached via `#include` from an existing file, loses whatever
+include-stack resolution that file's location was quietly providing,
+and the fix must be scoped as narrowly as the problem (a two-header
+shim, not a directory-wide `/I` addition) or it trades one failure
+mode for a worse one.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
