@@ -1789,13 +1789,60 @@ static inline void SetRect(LPRECT lprc, int xLeft, int yTop, int xRight, int yBo
 }
 #endif
 
-/* max and min macros for compatibility with Windows code */
+/* max and min for compatibility with Windows code.
+ *
+ * These used to be plain object-like macros. That is wrong on any
+ * non-Windows platform: once a translation unit includes this header and
+ * later pulls in <algorithm>/<string>/<vector>/... (anything that transitively
+ * drags in libstdc++'s <bits/stl_algobase.h>), the preprocessor macro-expands
+ * that header's own `min`/`max` declarations -- including the 3-argument
+ * comparator overloads -- as if they were 2-argument macro calls. That is a
+ * hard, cascading parse failure ("macro 'min' passed 3 arguments, but takes
+ * just 2"), confirmed blocking the Linux sanitizer CI leg in client.yml.
+ *
+ * Ordinary (non-template) inline functions fix the root cause: functions
+ * don't participate in preprocessor text substitution, so they cannot mangle
+ * a standard header's own declarations.
+ *
+ * Deliberately a single non-template `int` overload, not a function template
+ * and not a wider overload set:
+ *
+ *  - Not a template: this codebase's Client_PCH.h (included by essentially
+ *    every .cpp under Client/ and VS_UI/) has an unconditional
+ *    `using namespace std;`. In any translation unit where that
+ *    using-directive is active and std::min/std::max have already been
+ *    declared, a function *template* min/max here would tie with
+ *    std::min/std::max at "exact match" for any argument type -- neither is
+ *    preferred by partial ordering, so the call becomes ambiguous (a real
+ *    compile error, confirmed as a live risk here, not theoretical -- this is
+ *    a well-known Linux-port gotcha). A non-template overload is preferred
+ *    over a function-template specialization of equal rank by
+ *    [over.match.best], so a plain `int` overload always wins unambiguously
+ *    over std::min/std::max wherever both are visible, and falls back
+ *    cleanly to whichever standard-library min/max is in scope for any
+ *    argument type it doesn't cover (still numerically identical -- min/max
+ *    of two values).
+ *  - Not a wider overload set (e.g. adding BYTE/WORD/DWORD overloads
+ *    alongside `int`): call sites in this tree mix narrower integer types
+ *    with plain `int` in the same call (e.g.
+ *    Client/SpriteLib/CAlphaSpritePack.cpp / CShadowSpritePack.cpp:
+ *    `min(lastSpriteID, m_nSprites-1)`, where `lastSpriteID` is
+ *    TYPE_SPRITEID == unsigned short but `m_nSprites-1` is a promoted `int`).
+ *    With both an `int` and a `WORD` overload present, that call is
+ *    ambiguous between our *own* two overloads (each is the better match for
+ *    one argument and the worse match for the other -- neither dominates).
+ *    A single `int` overload sidesteps this: every narrower integer type
+ *    (BYTE/WORD/TYPE_SPRITEID/etc.) promotes cleanly to `int` with no
+ *    competing candidate of ours, so there is nothing left to be ambiguous
+ *    against. This is exact-value-preserving for every real call site in
+ *    this tree (verified: no float/double arguments, no argument wider than
+ *    32 bits, actually reach this call). */
 #ifndef PLATFORM_WINDOWS
 #ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
+static inline int max(int a, int b) { return (a > b) ? a : b; }
 #endif
 #ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
+static inline int min(int a, int b) { return (a < b) ? a : b; }
 #endif
 /* __int64 Windows type - use long long on macOS */
 typedef long long __int64;
