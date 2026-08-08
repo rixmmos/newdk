@@ -1800,6 +1800,84 @@ files (per this batch's task brief); the two deltas stack the same way
 batches 6/7 did, and whoever merges both is responsible for
 reconciling the final combined baseline number.
 
+**11.2 batch 8 (2026-08-09, agent stream, worktree): three named files —
+`server/PaySystem.cpp`, `server/gameserver/GamePlayer.cpp`,
+`server/loginserver/LoginPlayer.cpp`.** Ratchet baseline going in: **352**
+(post batch 6+7 merge, this worktree). Per-file ratchet-visible deltas:
+PaySystem.cpp 7 (352→345), GamePlayer.cpp 9 (345→336), LoginPlayer.cpp 5
+(336→331). **Combined 352 → 331** [measured], re-baselined via `--update`.
+
+Went well beyond the ratchet-visible count in all three files — reading each
+file whole (per this batch's brief) turned up 15 further live call sites the
+grep never had a chance to see, all migrated alongside the counted ones:
+- **9 more in PaySystem.cpp** (16 `PreparedStatement`s created vs. 7
+  ratchet-visible sites): multi-line `executeQuery(...)` calls across
+  `loginPayPlayPCRoom`, `loginPayPlay(ip, playerID)`,
+  `increasePayPlayTimePCRoom`, and `isPlayInPayPCRoom` — the same
+  invisibility mode as batch 1, just concentrated in this file's
+  PC-room/billing code.
+- **2 more in GamePlayer.cpp** (11 vs. 9): `disconnect()`'s
+  `LastLogoutDate=now() WHERE PlayerID = '%s' AND LogOn='GAME'` (batch 2's
+  embedded-`)`-before-first-`%s` mode), and `addLogoutPlayerData()`'s
+  `executeQueryString(sql.toString())` built from a `StringStream` — batch
+  6's fourth invisibility mode (raw concatenation, no `%[sdluxc]` anywhere in
+  the call) — migrated to four bound `?` placeholders.
+- **4 more in LoginPlayer.cpp** (9 vs. 5): `sendLGKickCharacter()`'s
+  `CurrentWorldID` lookup and `makePCList()`'s three column-list SELECTs
+  (Slayer/Vampire/Ousters) — all multi-line format strings.
+
+Two non-mechanical judgment calls:
+- `loginPayPlayPCRoom()` and `isPlayInPayPCRoom()` each reuse one `Result*`
+  across a sequence of differently-shaped queries on the same connection —
+  the old `Statement` API supported this because a single `Statement`
+  object's owned `Result` is what the pointer aliased; `PreparedStatement`
+  has no equivalent "reprepare with new SQL" call, so each of those queries
+  became its own named `PreparedStatement` local. The risk this raises is
+  real, not stylistic: `PreparedStatement::execute()`'s returned `Result*` is
+  owned and freed by that specific statement object (`~PreparedStatement`
+  deletes `m_pResult`), so a statement declared inside a narrow `try` block
+  and read from outside it would dangle. Every statement in this batch is
+  therefore declared at the same scope as its own `Result` reads (never
+  nested one level deeper just to wrap the `.execute()` call in a `try`);
+  where the original code had a narrow `try/catch(Throwable&)` around the
+  `executeQuery(...)` call specifically, that narrow `try` now wraps only the
+  `.execute()` call, with construction left outside it — construction-time
+  failures (`PreparedStatement`'s ctor throws base `SQLException`) now
+  surface at whatever handler is next up the stack rather than the file's own
+  `filelog("paySystem.txt", ...)` logging, the same documented Phase 11.1
+  caveat, not a new one.
+- `sendLGKickCharacter()`'s `Slot='SLOT%d'` (formatted directly from the
+  1-based `LastSlot` DB column) was **not** rewritten as
+  `Slot2String[lastSlot]` despite that 0-indexed table being the established
+  bind pattern elsewhere (`CLCreatePCHandler.cpp`, `CLDeletePCHandler.cpp`) —
+  cross-checked `CLSelectPCHandler.cpp:212`
+  (`slotStr.at(4) - '0'`) confirms `LastSlot`/`slot` are stored and read as
+  the raw 1-based suffix (1/2/3), not the `Slot` enum's 0-based index
+  (`SLOT1=0`); `Slot2String[lastSlot]` would have been off-by-one and
+  eventually out-of-bounds at `lastSlot==3`. Bound
+  `"SLOT" + std::to_string(lastSlot)` instead, preserving the exact original
+  string verbatim.
+
+Stack-allocated `PreparedStatement` locals throughout, per the established
+pattern; every `SAFE_DELETE(pStmt)` on a migrated call site was dropped as
+RAII-redundant, while every bare `Statement* pStmt[/1/2] = NULL;` that only
+exists to satisfy an `END_DB(pStmt)` macro invocation elsewhere in the same
+function was left in place, unused, exactly matching batch 6/7's precedent.
+No gameplay-visible SQL or bind-order changes; `PaySystem.cpp` in particular
+(real billing/currency data) was bound with the same int/uint distinctions
+the original `%d`/`%u` format specifiers implied (`ObjectID_t`/`DWORD` →
+`bindUInt`, `int` → `bindInt`). **Not compile-verified** — no server
+toolchain in this sandbox; verified by reading only (every `?` count matched
+against its bind-call count and index sequence 1..N, programmatically,
+across all three files; brace/paren balance diffed against each file's
+pre-edit `HEAD` copy; the two lines that grew past the 120-column
+`.clang-format` limit were re-wrapped to the established
+`PreparedStatement name(\n    pConn, "...")` style). CI is the real gate for
+this batch, same caveat as every prior one. This batch's combined ratchet
+delta (352 → 331) does not by itself reflect the tree-wide baseline — a
+sibling agent migrated a disjoint file set in parallel in its own worktree;
+whoever merges both batches reconciles the final combined number.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,

@@ -22,6 +22,7 @@
 #include "Properties.h"
 #include "Thread.h"
 #include "database/DB.h"
+#include "database/PreparedStatement.h"
 
 //---------------------------------------------------------------------------
 // How often should we check (seconds)?
@@ -339,7 +340,7 @@ bool PaySystem::updatePayPlayTime(const string& playerID, const VSDateTime& curr
 bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
     __BEGIN_TRY
 
-    Statement* pStmt = NULL;
+    Connection* pConn = NULL;
     Result* pResult = NULL;
 
     // Statement* pStmt = NULL;
@@ -347,17 +348,22 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
 
     BEGIN_DB {
         try {
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
         } catch (Throwable& t) {
             filelog("paySystem.txt", "%s", t.toString().c_str());
             throw;
         }
 
+        // Declared outside the try below so `pResult` (which points into this
+        // statement's owned Result) stays valid for the rest of the block.
+        PreparedStatement selectPCRoomInfoStmt(
+            pConn,
+            "SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours, r.PayPlayFlag, r.UserLimit, "
+            "r.UserMax FROM PCRoomInfo r, PCRoomIPInfo p WHERE p.IP=? AND p.ID=r.ID");
+        selectPCRoomInfoStmt.bindString(1, ip);
+
         try {
-            pResult = pStmt->executeQuery(
-                "SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours, r.PayPlayFlag, r.UserLimit, "
-                "r.UserMax FROM PCRoomInfo r, PCRoomIPInfo p WHERE p.IP='%s' AND p.ID=r.ID",
-                ip.c_str());
+            pResult = selectPCRoomInfoStmt.execute();
         } catch (Throwable& t) {
             filelog("paySystem.txt", "%s", t.toString().c_str());
             throw;
@@ -393,7 +399,9 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
             // m_UserMax = min((unsigned int)12, m_UserMax);
             m_UserMax = 15; // Max 15 people per PC room
 
-            pResult = pStmt->executeQuery("SELECT count(*) from PCRoomUserInfo WHERE ID=%d", m_PCRoomID);
+            PreparedStatement selectUserCountStmt(pConn, "SELECT count(*) from PCRoomUserInfo WHERE ID=?");
+            selectUserCountStmt.bindUInt(1, m_PCRoomID);
+            pResult = selectUserCountStmt.execute();
 
             if (pResult->next()) {
                 uint users = pResult->getInt(1);
@@ -410,7 +418,6 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                 if (m_PayType == PAY_TYPE_PERIOD && users >= m_UserLimit ||
                     m_PayType == PAY_TYPE_TIME && users >= m_UserMax) {
                     // cout << "[PayPCRoom] User Limit Exceed!" << endl;
-                    SAFE_DELETE(pStmt);
 
                     return false;
                 }
@@ -419,15 +426,21 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                 if (bAvailable) {
                     // Tentatively insert the user.
                     try {
-                        pStmt->executeQuery("INSERT IGNORE INTO PCRoomUserInfo(ID, PlayerID) VALUES(%d, '%s')",
-                                            m_PCRoomID, playerID.c_str());
+                        PreparedStatement insertUserStmt(
+                            pConn, "INSERT IGNORE INTO PCRoomUserInfo(ID, PlayerID) VALUES(?, ?)");
+                        insertUserStmt.bindUInt(1, m_PCRoomID);
+                        insertUserStmt.bindString(2, playerID);
+                        insertUserStmt.execute();
                     } catch (SQLQueryException& se) {
                         filelog("paySystem.txt", "%s", se.toString().c_str());
-                        
+
                     }
 
                     // Check the user count after insertion.
-                    pResult = pStmt->executeQuery("SELECT count(*) from PCRoomUserInfo WHERE ID=%d", m_PCRoomID);
+                    PreparedStatement selectUserCountAfterInsertStmt(pConn,
+                                                                      "SELECT count(*) from PCRoomUserInfo WHERE ID=?");
+                    selectUserCountAfterInsertStmt.bindUInt(1, m_PCRoomID);
+                    pResult = selectUserCountAfterInsertStmt.execute();
 
                     if (pResult->next()) {
                         users = pResult->getInt(1);
@@ -436,17 +449,15 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                         if (m_PayType == PAY_TYPE_PERIOD && users >= m_UserLimit ||
                             m_PayType == PAY_TYPE_TIME && users >= m_UserMax) {
                             // Remove the row we just inserted.
-                            pStmt->executeQuery("DELETE FROM PCRoomUserInfo WHERE PlayerID='%s'", playerID.c_str());
+                            PreparedStatement deleteUserStmt(pConn, "DELETE FROM PCRoomUserInfo WHERE PlayerID=?");
+                            deleteUserStmt.bindString(1, playerID);
+                            deleteUserStmt.execute();
 
                             // cout << "[PayPCRoom] User Limit Exceed2!" << endl;
 
                             // Not allowed.
-                            SAFE_DELETE(pStmt);
-
                             return false;
                         } else {
-                            
-                            SAFE_DELETE(pStmt);
 
                             m_bPCRoomPlay = true;
 
@@ -456,12 +467,8 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
-
         filelog("paySystem.txt", "%s", sqe.toString().c_str());
         throw;
     }
@@ -477,20 +484,17 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
 void PaySystem::logoutPayPlayPCRoom(const string& playerID) {
     __BEGIN_TRY
 
-    Statement* pStmt = NULL;
-
     if (m_PayPlayType == PAY_PLAY_TYPE_PCROOM) {
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
             // Remove the row we inserted earlier.
-            pStmt->executeQuery("DELETE FROM PCRoomUserInfo WHERE PlayerID='%s'", playerID.c_str());
-
-            SAFE_DELETE(pStmt);
+            PreparedStatement deleteUserStmt(pConn, "DELETE FROM PCRoomUserInfo WHERE PlayerID=?");
+            deleteUserStmt.bindString(1, playerID);
+            deleteUserStmt.execute();
             //} END_DB(pStmt);
         }
         catch (SQLQueryException& sqe) {
-            SAFE_DELETE(pStmt);
             filelog("paySystem.txt", "%s", sqe.toString().c_str());
             throw;
         }
@@ -593,8 +597,6 @@ bool PaySystem::loginPayPlay(PayType payType, const string& payPlayDate, int pay
 // login PayPlay
 //---------------------------------------------------------------------------
 bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
-    Statement* pStmt = NULL;
-
     __BEGIN_TRY
 
     // If already logged in, reuse the session.
@@ -607,16 +609,16 @@ bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
 
     if (!m_bSetPersonValue) {
         BEGIN_DB {
-            // pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
+            Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-            Result* pResult = pStmt->executeQuery("SELECT PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
-                                                  "FamilyPayPlayDate FROM Player WHERE PlayerID='%s'",
-                                                  playerID.c_str());
+            PreparedStatement selectPlayerPayInfoStmt(pConn,
+                                                       "SELECT PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
+                                                       "FamilyPayPlayDate FROM Player WHERE PlayerID=?");
+            selectPlayerPayInfoStmt.bindString(1, playerID);
+            Result* pResult = selectPlayerPayInfoStmt.execute();
 
             if (pResult->getRowCount() == 0) {
-                SAFE_DELETE(pStmt);
-
                 // cout << "No PlayerID" << endl;
                 return false;
             }
@@ -631,13 +633,9 @@ bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
 
             setFamilyPayPlayAvailableDateTime(pResult->getString(5));
 
-            SAFE_DELETE(pStmt);
-
             //} END_DB(pStmt)
         }
         catch (SQLQueryException& sqe) {
-            SAFE_DELETE(pStmt);
-
             filelog("paySystem.txt", "%s", sqe.toString().c_str());
             throw;
         }
@@ -781,13 +779,13 @@ void PaySystem::clearPayPlayDateTime(const string& playerID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pStmt->executeQuery("UPDATE Player SET PayPlayHours=0, PayPlayDate='2002-11-18 00:00:00' WHERE PlayerID='%s'",
-                            playerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement clearPayPlayStmt(
+            pConn, "UPDATE Player SET PayPlayHours=0, PayPlayDate='2002-11-18 00:00:00' WHERE PlayerID=?");
+        clearPayPlayStmt.bindString(1, playerID);
+        clearPayPlayStmt.execute();
     }
     END_DB(pStmt)
 
@@ -806,12 +804,14 @@ void PaySystem::decreasePayPlayTime(const string& playerID, uint mm) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pStmt->executeQuery("UPDATE Player SET PayPlayHours=PayPlayHours-%d WHERE PlayerID='%s'", mm, playerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement decreasePlayerHoursStmt(pConn,
+                                                   "UPDATE Player SET PayPlayHours=PayPlayHours-? WHERE PlayerID=?");
+        decreasePlayerHoursStmt.bindUInt(1, mm);
+        decreasePlayerHoursStmt.bindString(2, playerID);
+        decreasePlayerHoursStmt.execute();
     }
     END_DB(pStmt)
 
@@ -829,18 +829,22 @@ void PaySystem::decreasePayPlayTimePCRoom(uint mm) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pStmt->executeQuery("UPDATE PCRoomInfo SET PayPlayHours=PayPlayHours-%d WHERE ID=%d", mm, m_PCRoomID);
+        PreparedStatement decreasePCRoomHoursStmt(pConn,
+                                                   "UPDATE PCRoomInfo SET PayPlayHours=PayPlayHours-? WHERE ID=?");
+        decreasePCRoomHoursStmt.bindUInt(1, mm);
+        decreasePCRoomHoursStmt.bindUInt(2, m_PCRoomID);
+        decreasePCRoomHoursStmt.execute();
 
-        Result* pResult = pStmt->executeQuery("SELECT PayPlayHours FROM PCRoomInfo WHERE ID=%d", m_PCRoomID);
+        PreparedStatement selectPCRoomHoursStmt(pConn, "SELECT PayPlayHours FROM PCRoomInfo WHERE ID=?");
+        selectPCRoomHoursStmt.bindUInt(1, m_PCRoomID);
+        Result* pResult = selectPCRoomHoursStmt.execute();
 
         if (pResult->next()) {
             m_PayPlayAvailableHours = pResult->getInt(1);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -857,26 +861,35 @@ void PaySystem::increasePayPlayTimePCRoom(uint mm) {
     VSDate vsDate = VSDate::currentDate();
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pResult =
-            pStmt->executeQuery("SELECT PayPlayMinute FROM PCRoomPayList WHERE PCRoomID=%d AND Year=%d AND Month=%d",
-                                m_PCRoomID, vsDate.year(), vsDate.month());
+        PreparedStatement selectPCRoomPayListStmt(
+            pConn, "SELECT PayPlayMinute FROM PCRoomPayList WHERE PCRoomID=? AND Year=? AND Month=?");
+        selectPCRoomPayListStmt.bindUInt(1, m_PCRoomID);
+        selectPCRoomPayListStmt.bindInt(2, vsDate.year());
+        selectPCRoomPayListStmt.bindInt(3, vsDate.month());
+        Result* pResult = selectPCRoomPayListStmt.execute();
 
         if (pResult->next()) {
-            pStmt->executeQuery(
-                "UPDATE PCRoomPayList SET PayPlayMinute=PayPlayMinute+%d WHERE PCRoomID=%d AND Year=%d AND Month=%d",
-                mm, m_PCRoomID, vsDate.year(), vsDate.month());
+            PreparedStatement updatePCRoomPayListStmt(
+                pConn,
+                "UPDATE PCRoomPayList SET PayPlayMinute=PayPlayMinute+? WHERE PCRoomID=? AND Year=? AND Month=?");
+            updatePCRoomPayListStmt.bindUInt(1, mm);
+            updatePCRoomPayListStmt.bindUInt(2, m_PCRoomID);
+            updatePCRoomPayListStmt.bindInt(3, vsDate.year());
+            updatePCRoomPayListStmt.bindInt(4, vsDate.month());
+            updatePCRoomPayListStmt.execute();
         } else {
-            pStmt->executeQuery(
-                "INSERT INTO PCRoomPayList (PCRoomID, Year, Month, PayPlayMinute) VALUES (%d, %d, %d, %d)", m_PCRoomID,
-                vsDate.year(), vsDate.month(), mm);
+            PreparedStatement insertPCRoomPayListStmt(
+                pConn, "INSERT INTO PCRoomPayList (PCRoomID, Year, Month, PayPlayMinute) VALUES (?, ?, ?, ?)");
+            insertPCRoomPayListStmt.bindUInt(1, m_PCRoomID);
+            insertPCRoomPayListStmt.bindInt(2, vsDate.year());
+            insertPCRoomPayListStmt.bindInt(3, vsDate.month());
+            insertPCRoomPayListStmt.bindUInt(4, mm);
+            insertPCRoomPayListStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -887,28 +900,24 @@ void PaySystem::increasePayPlayTimePCRoom(uint mm) {
 bool PaySystem::isPayPlayingPeriodPersonal(const string& PlayerID) {
     __BEGIN_TRY
 
-    Statement* pStmt = NULL;
-
     bool isPayPlay = false;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection((int)(long)Thread::self())->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        Result* pResult = pStmt->executeQuery("SELECT PayType=0 or PayPlayDate > now() FROM Player WHERE PlayerID='%s'",
-                                              PlayerID.c_str());
+        PreparedStatement selectPayPlayStmt(pConn,
+                                             "SELECT PayType=0 or PayPlayDate > now() FROM Player WHERE PlayerID=?");
+        selectPayPlayStmt.bindString(1, PlayerID);
+        Result* pResult = selectPayPlayStmt.execute();
 
         if (pResult->next()) {
             isPayPlay = pResult->getInt(1) == 1;
         }
 
-        SAFE_DELETE(pStmt);
-
         //} END_DB(pStmt)
     }
     catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
-
         filelog("paySystem.txt", "%s", sqe.toString().c_str());
         throw;
     }
@@ -926,21 +935,26 @@ bool PaySystem::isPayPlayingPeriodPersonal(const string& PlayerID) {
 bool PaySystem::isPlayInPayPCRoom(const string& ip, const string& playerID) {
     __BEGIN_TRY
 
-    Statement* pStmt = NULL;
+    Connection* pConn = NULL;
     Result* pResult = NULL;
 
     BEGIN_DB {
         try {
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
         } catch (Throwable& t) {
             filelog("paySystem.txt", "%s", t.toString().c_str());
             throw;
         }
 
+        // Declared outside the try below so `pResult` (which points into this
+        // statement's owned Result) stays valid for the rest of the block.
+        PreparedStatement selectPCRoomInfoStmt(
+            pConn, "SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours FROM "
+                   "PCRoomInfo r, PCRoomIPInfo p WHERE p.IP=? AND p.ID=r.ID");
+        selectPCRoomInfoStmt.bindString(1, ip);
+
         try {
-            pResult = pStmt->executeQuery("SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours FROM "
-                                          "PCRoomInfo r, PCRoomIPInfo p WHERE p.IP='%s' AND p.ID=r.ID",
-                                          ip.c_str());
+            pResult = selectPCRoomInfoStmt.execute();
         } catch (Throwable& t) {
             filelog("paySystem.txt", "%s", t.toString().c_str());
             throw;
@@ -980,12 +994,8 @@ bool PaySystem::isPlayInPayPCRoom(const string& ip, const string& playerID) {
 
             return bAvailable;
         }
-
-        SAFE_DELETE(pStmt);
     }
     catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
-
         filelog("paySystem.txt", "%s", sqe.toString().c_str());
         throw;
     }

@@ -26,6 +26,7 @@
 #include "PCFinder.h"
 #include "PacketFactoryManager.h"
 #include "PacketValidator.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "RelicUtil.h"
 #include "ServiceDeadline.h"
@@ -215,9 +216,11 @@ GamePlayer::~GamePlayer() {
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 0 WHERE Name = '%s'",
-                                                pSlayer->getName().c_str());
+                            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                            PreparedStatement updateGuildMemberLogOffStmt(
+                                pConn, "UPDATE GuildMember SET LogOn = 0 WHERE Name = ?");
+                            updateGuildMemberLogOffStmt.bindString(1, pSlayer->getName());
+                            updateGuildMemberLogOffStmt.execute();
                         }
                         END_DB(pStmt)
                     } else
@@ -240,9 +243,11 @@ GamePlayer::~GamePlayer() {
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 0 WHERE Name = '%s'",
-                                                pVampire->getName().c_str());
+                            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                            PreparedStatement updateGuildMemberLogOffStmt(
+                                pConn, "UPDATE GuildMember SET LogOn = 0 WHERE Name = ?");
+                            updateGuildMemberLogOffStmt.bindString(1, pVampire->getName());
+                            updateGuildMemberLogOffStmt.execute();
                         }
                         END_DB(pStmt)
                     } else
@@ -265,9 +270,11 @@ GamePlayer::~GamePlayer() {
 
                         
                         BEGIN_DB {
-                            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                            pStmt->executeQuery("UPDATE GuildMember SET LogOn = 0 WHERE Name = '%s'",
-                                                pOusters->getName().c_str());
+                            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                            PreparedStatement updateGuildMemberLogOffStmt(
+                                pConn, "UPDATE GuildMember SET LogOn = 0 WHERE Name = ?");
+                            updateGuildMemberLogOffStmt.bindString(1, pOusters->getName());
+                            updateGuildMemberLogOffStmt.execute();
                         }
                         END_DB(pStmt)
                     } else
@@ -708,41 +715,38 @@ void GamePlayer::disconnect(bool bDisconnected) {
 
         BEGIN_DB {
             //            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            
+
             // pStmt1 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt1 = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            Connection* pConn1 = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-            
-            pStmt1->executeQuery(
-                "UPDATE Player SET LogOn='LOGOFF', LastLogoutDate=now() WHERE PlayerID = '%s' AND LogOn='GAME'",
-                m_ID.c_str());
+            PreparedStatement logoffPlayerStmt(
+                pConn1, "UPDATE Player SET LogOn='LOGOFF', LastLogoutDate=now() WHERE PlayerID = ? AND LogOn='GAME'");
+            logoffPlayerStmt.bindString(1, m_ID);
+            logoffPlayerStmt.execute();
 
-            
+
             //	addLogoutPlayerData(this);
 
-            if (pStmt1->getAffectedRowCount() == 0) {
-                
-                
-                
+            if (logoffPlayerStmt.getAffectedRowCount() == 0) {
+
+
+
             }
 
-            
+
 #if defined(__PAY_SYSTEM_LOGIN__) || defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
             if (isPayPlaying() || isPremiumPlay()) {
                 logoutPayPlay(m_ID);
             }
 #endif
-
-
-            SAFE_DELETE(pStmt1);
         }
         END_DB(pStmt1)
         BEGIN_DB {
-            
-            pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt2->executeQuery("DELETE FROM UserIPInfo WHERE Name = '%s'", CreatureName.c_str());
 
-            SAFE_DELETE(pStmt2);
+            Connection* pConn2 = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement deleteUserIPInfoStmt(pConn2, "DELETE FROM UserIPInfo WHERE Name = ?");
+            deleteUserIPInfoStmt.bindString(1, CreatureName);
+            deleteUserIPInfoStmt.execute();
         }
         END_DB(pStmt2)
     }
@@ -991,24 +995,22 @@ void GamePlayer::loadSpecialEventCount(void) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        //		pStmt   = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        //		pConn   = g_pDatabaseManager->getConnection("DARKEDEN");
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pResult = pStmt->executeQuery("SELECT SpecialEventCount FROM Player WHERE PlayerID='%s'", m_ID.c_str());
+        PreparedStatement selectSpecialEventCountStmt(pConn, "SELECT SpecialEventCount FROM Player WHERE PlayerID=?");
+        selectSpecialEventCountStmt.bindString(1, m_ID);
+        Result* pResult = selectSpecialEventCountStmt.execute();
 
         if (pResult->getRowCount() != 0) {
             pResult->next();
             m_SpecialEventCount = pResult->getDWORD(1);
         } else {
-            SAFE_DELETE(pStmt);
             throw("GamePlayer::loadSpecialEventCount() : unable to dispatch data");
             return;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -1021,12 +1023,14 @@ void GamePlayer::saveSpecialEventCount(void) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        //		pStmt = g_pDatabaseManager->getConnection( (int)Thread::self() )->createStatement();
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+        //		pConn = g_pDatabaseManager->getConnection( (int)Thread::self() );
 
-        pStmt->executeQuery("UPDATE Player SET SpecialEventCount=%d WHERE PlayerID='%s'", m_SpecialEventCount,
-                            m_ID.c_str());
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateSpecialEventCountStmt(pConn,
+                                                        "UPDATE Player SET SpecialEventCount=? WHERE PlayerID=?");
+        updateSpecialEventCountStmt.bindUInt(1, m_SpecialEventCount);
+        updateSpecialEventCountStmt.bindString(2, m_ID);
+        updateSpecialEventCountStmt.execute();
     }
     END_DB(pStmt);
 
@@ -1236,25 +1240,25 @@ bool GamePlayer::isPayPlaying() const {
 void addLogoutPlayerData(Player* pPlayer) {
     Statement* pStmt = NULL;
 
-    pStmt = g_pDatabaseManager->getUserInfoConnection()->createStatement();
+    Connection* pConn = g_pDatabaseManager->getUserInfoConnection();
 
-    
+
     BEGIN_DB {
         string ID = pPlayer->getID();
         string ip = pPlayer->getSocket()->getHost();
 
-        
+
         int year, month, day, hour, minute, second;
         getCurrentTimeEx(year, month, day, hour, minute, second);
         string currentDT = VSDateTime::currentDateTime().toDateTime();
 
-        StringStream sql;
-        sql << "INSERT INTO USERINFO.LogoutPlayerData (PlayerID,IP,Date,Time) VALUES ('" << ID << "','" << ip << "','"
-            << currentDT.substr(0, 10).c_str() << "','" << currentDT.substr(11).c_str() << "')";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertLogoutPlayerDataStmt(
+            pConn, "INSERT INTO USERINFO.LogoutPlayerData (PlayerID,IP,Date,Time) VALUES (?, ?, ?, ?)");
+        insertLogoutPlayerDataStmt.bindString(1, ID);
+        insertLogoutPlayerDataStmt.bindString(2, ip);
+        insertLogoutPlayerDataStmt.bindString(3, currentDT.substr(0, 10));
+        insertLogoutPlayerDataStmt.bindString(4, currentDT.substr(11));
+        insertLogoutPlayerDataStmt.execute();
     }
     END_DB(pStmt)
 }
@@ -1310,7 +1314,6 @@ void GamePlayer::giveLotto() {
         return;
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
         static uint DimensionID = g_pConfig->getPropertyInt("Dimension");
@@ -1319,23 +1322,41 @@ void GamePlayer::giveLotto() {
         string Name = m_pCreature->getName();
         Race_t Race = m_pCreature->getRace();
         int Amount = 0;
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Amount FROM PCRoomLottoObject WHERE PlayerID = '%s' AND Name = '%s' AND "
-                                      "DimensionID = %u AND WorldID = %u",
-                                      PlayerID.c_str(), Name.c_str(), DimensionID, WorldID);
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+
+        PreparedStatement selectLottoAmountStmt(pConn,
+                                                 "SELECT Amount FROM PCRoomLottoObject WHERE PlayerID = ? AND Name = ? "
+                                                 "AND DimensionID = ? AND WorldID = ?");
+        selectLottoAmountStmt.bindString(1, PlayerID);
+        selectLottoAmountStmt.bindString(2, Name);
+        selectLottoAmountStmt.bindUInt(3, DimensionID);
+        selectLottoAmountStmt.bindUInt(4, WorldID);
+        Result* pResult = selectLottoAmountStmt.execute();
 
         if (pResult->next()) {
             Amount = pResult->getInt(1);
 
             if (Amount < PCRoomLottoMaxAmount) {
-                pStmt->executeQuery("UPDATE PCRoomLottoObject SET Amount = %d WHERE PlayerID = '%s' AND Name = '%s' "
-                                    "AND DimensionID = %u AND WorldID = %u",
-                                    Amount + 1, PlayerID.c_str(), Name.c_str(), DimensionID, WorldID);
+                PreparedStatement updateLottoAmountStmt(
+                    pConn, "UPDATE PCRoomLottoObject SET Amount = ? WHERE PlayerID = ? AND Name = ? "
+                           "AND DimensionID = ? AND WorldID = ?");
+                updateLottoAmountStmt.bindInt(1, Amount + 1);
+                updateLottoAmountStmt.bindString(2, PlayerID);
+                updateLottoAmountStmt.bindString(3, Name);
+                updateLottoAmountStmt.bindUInt(4, DimensionID);
+                updateLottoAmountStmt.bindUInt(5, WorldID);
+                updateLottoAmountStmt.execute();
             }
         } else {
-            
-            pStmt->executeQuery("INSERT INTO PCRoomLottoObject VALUES ( 0, %u, '%s', %u, %u, '%s', %u, 1 )", m_PCRoomID,
-                                PlayerID.c_str(), DimensionID, WorldID, Name.c_str(), Race);
+
+            PreparedStatement insertLottoStmt(pConn, "INSERT INTO PCRoomLottoObject VALUES ( 0, ?, ?, ?, ?, ?, ?, 1 )");
+            insertLottoStmt.bindUInt(1, m_PCRoomID);
+            insertLottoStmt.bindString(2, PlayerID);
+            insertLottoStmt.bindUInt(3, DimensionID);
+            insertLottoStmt.bindUInt(4, WorldID);
+            insertLottoStmt.bindString(5, Name);
+            insertLottoStmt.bindUInt(6, (uint)Race);
+            insertLottoStmt.execute();
         }
 
         if (Amount < PCRoomLottoMaxAmount) {

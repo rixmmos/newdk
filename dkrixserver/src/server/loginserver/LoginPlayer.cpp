@@ -21,6 +21,7 @@
 #include "PacketFactoryManager.h"
 #include "PacketProfile.h"
 #include "PacketValidator.h"
+#include "PreparedStatement.h"
 #include "Profile.h"
 #include "gameserver/billing/BillingPlayerManager.h"
 
@@ -326,37 +327,35 @@ void LoginPlayer::disconnect(bool bDisconnected) {
     
     
     if (m_ID != "NONE") {
-        Statement* pStmt = NULL;
         // Result*    pResult = NULL;
 
         try {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
             //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
 
-            
+
             //	pResult->next();
             //	string logon = pResult->getString(1);
             // cout << "logon = " << logon << endl;
             // Assert( logon == "LOGON" );
 
-            
-            
-            pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID='%s' AND LogOn='LOGON'",
-                                m_ID.c_str());
+
+
+            PreparedStatement logoffPlayerStmt(
+                pConn, "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
+            logoffPlayerStmt.bindString(1, m_ID);
+            logoffPlayerStmt.execute();
 
 #if defined(__PAY_SYSTEM_LOGIN__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-            bool bClear = false;        
-            bool bDecreaseTime = false; 
+            bool bClear = false;
+            bool bDecreaseTime = false;
             logoutPayPlay(m_ID, bClear, bDecreaseTime);
 #endif
 
             // cout << m_ID << " : LOGOFF" << endl;
-
-            SAFE_DELETE(pStmt);
         } catch (SQLQueryException& sqe) {
             filelog("DBError.log", "%s", sqe.toString().c_str());
-            SAFE_DELETE(pStmt);
             throw Error(sqe.toString());
         }
     }
@@ -397,37 +396,35 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
     
     
     if (m_ID != "NONE") {
-        Statement* pStmt = NULL;
         // Result*    pResult = NULL;
 
         try {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
             //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
 
-            
+
             //	pResult->next();
             //	string logon = pResult->getString(1);
             // cout << "logon = " << logon << endl;
             // Assert( logon == "LOGON" );
 
-            
-            
-            pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID='%s' AND LogOn='LOGON'",
-                                m_ID.c_str());
+
+
+            PreparedStatement logoffPlayerStmt(
+                pConn, "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
+            logoffPlayerStmt.bindString(1, m_ID);
+            logoffPlayerStmt.execute();
 
 #if defined(__PAY_SYSTEM_LOGIN__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-            bool bClear = false;        
-            bool bDecreaseTime = false; 
+            bool bClear = false;
+            bool bDecreaseTime = false;
             logoutPayPlay(m_ID, bClear, bDecreaseTime);
 #endif
 
             // cout << m_ID << " : LOGOFF" << endl;
-
-            SAFE_DELETE(pStmt);
         } catch (SQLQueryException& sqe) {
             filelog("DBError.log", "%s", sqe.toString().c_str());
-            SAFE_DELETE(pStmt);
             throw Error(sqe.toString());
         }
     }
@@ -536,13 +533,14 @@ void LoginPlayer::sendLGKickCharacter() {
     //----------------------------------------------------------------------
     if (!isSetWorldGroupID()) {
         BEGIN_DB {
-            pStmt1 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt1->executeQuery(
-                "SELECT CurrentWorldID, CurrentServerGroupID, LastSlot FROM Player where PlayerID='%s'",
-                getID().c_str());
+            Connection* pConn1 = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectWorldInfoStmt(
+                pConn1, "SELECT CurrentWorldID, CurrentServerGroupID, LastSlot FROM Player where PlayerID=?");
+            selectWorldInfoStmt.bindString(1, getID());
+            Result* pResult = selectWorldInfoStmt.execute();
 
             if (pResult->next()) {
-                serverID = 1; 
+                serverID = 1;
                 worldID = pResult->getInt(1);
                 serverGroupID = pResult->getInt(2);
                 lastSlot = pResult->getInt(3);
@@ -551,29 +549,32 @@ void LoginPlayer::sendLGKickCharacter() {
                 setGroupID(serverGroupID);
                 setLastSlot(lastSlot);
 
-                setWorldGroupID(true); 
-                                       
-            }
+                setWorldGroupID(true);
 
-            SAFE_DELETE(pStmt1);
+            }
         }
         END_DB(pStmt1)
     } else {
-        
-        serverID = 1; 
+
+        serverID = 1;
         worldID = getWorldID();
         serverGroupID = getGroupID();
     }
 
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     if (characterName.size() == 0) {
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection(m_WorldID)->createStatement();
-            Result* pResult = pStmt->executeQuery("SELECT Name from Slayer where PlayerID='%s' AND Slot='SLOT%d'",
-                                                  getID().c_str(), lastSlot);
+            Connection* pConn = g_pDatabaseManager->getConnection(m_WorldID);
+            PreparedStatement selectCharacterNameStmt(pConn, "SELECT Name from Slayer where PlayerID=? AND Slot=?");
+            selectCharacterNameStmt.bindString(1, getID());
+            // Preserves the original "SLOT%d" formatting verbatim (not the
+            // 0-indexed Slot2String[] table used elsewhere) since LastSlot is
+            // stored as the raw 1-based suffix, not a Slot enum value.
+            selectCharacterNameStmt.bindString(2, "SLOT" + std::to_string(lastSlot));
+            Result* pResult = selectCharacterNameStmt.execute();
 
             if (pResult->next()) {
                 characterName = pResult->getString(1);
@@ -581,19 +582,16 @@ void LoginPlayer::sendLGKickCharacter() {
                 setLastCharacterName(characterName);
             } else {
                 cout << "No CharacterName" << endl;
-                
+
                 LCLoginError lcLoginError;
                 lcLoginError.setErrorID(ALREADY_CONNECTED);
                 sendPacket(&lcLoginError);
                 setPlayerStatus(LPS_BEGIN_SESSION);
 
-                setID("NONE"); 
+                setID("NONE");
 
-                SAFE_DELETE(pStmt);
                 return;
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     }
@@ -663,10 +661,12 @@ void LoginPlayer::sendLCLoginOK() {
         string connectIP = getSocket()->getHost();
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGON' WHERE PlayerID = '%s'", getID().c_str());
-            if (pStmt->getAffectedRowCount() == 0) {
+            PreparedStatement loginPlayerStmt(pConn, "UPDATE Player SET LogOn = 'LOGON' WHERE PlayerID = ?");
+            loginPlayerStmt.bindString(1, getID());
+            loginPlayerStmt.execute();
+            if (loginPlayerStmt.getAffectedRowCount() == 0) {
                 filelog("MultiLogin.log", "     : [%s:%s]", getID().c_str(),
                         connectIP.c_str());
                 LCLoginError lcLoginError;
@@ -674,16 +674,15 @@ void LoginPlayer::sendLCLoginOK() {
                 lcLoginError.setErrorID(ALREADY_CONNECTED);
                 sendPacket(&lcLoginError);
 
-                SAFE_DELETE(pStmt);
                 setPlayerStatus(LPS_BEGIN_SESSION);
 
                 return;
             }
 
-            pStmt->executeQuery("UPDATE Player SET LoginIP = '%s' WHERE PlayerID = '%s'", connectIP.c_str(),
-                                getID().c_str());
-
-            SAFE_DELETE(pStmt)
+            PreparedStatement updateLoginIPStmt(pConn, "UPDATE Player SET LoginIP = ? WHERE PlayerID = ?");
+            updateLoginIPStmt.bindString(1, connectIP);
+            updateLoginIPStmt.bindString(2, getID());
+            updateLoginIPStmt.execute();
         }
         END_DB(pStmt)
 
@@ -763,16 +762,11 @@ void addLogoutPlayerData(Player* pPlayer) {
 }
 
 void LoginPlayer::makePCList(LCPCList& lcPCList) {
-    Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
-    Result* pResult1 = NULL;
-    Result* pResult2 = NULL;
-
     WorldID_t WorldID = getWorldID();
 
     try {
-        pStmt = g_pDatabaseManager->getConnection(WorldID)->createStatement();
-        pStmt2 = g_pDatabaseManager->getConnection(WorldID)->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection(WorldID);
+        Connection* pConn2 = g_pDatabaseManager->getConnection(WorldID);
 
         //----------------------------------------------------------------------
         
@@ -792,14 +786,28 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
         
         //
         //----------------------------------------------------------------------
-        pResult1 = pStmt->executeQuery(
+        PreparedStatement selectSlayerListStmt(
+            pConn,
             "SELECT Race, Name, Slot, Sex, HairColor, SkinColor, AdvancementClass, STR, STRExp, DEX, DEXExp, INTE, "
             "INTExp, HP, CurrentHP, MP, CurrentMP, Fame, BladeLevel, SwordLevel, GunLevel, HealLevel, EnchantLevel, "
             "ETCLevel, Alignment, Shape, HelmetColor, JacketColor, PantsColor, WeaponColor, ShieldColor, `Rank` FROM "
-            "Slayer WHERE PlayerID = '%s' AND Active = 'ACTIVE'",
-            getID().c_str());
+            "Slayer WHERE PlayerID = ? AND Active = 'ACTIVE'");
+        selectSlayerListStmt.bindString(1, getID());
+        Result* pResult1 = selectSlayerListStmt.execute();
 
-        
+        // Prepared once, executed per matching row below (Vampire/Ousters
+        // rows can't share a statement since their SQL text differs).
+        PreparedStatement selectVampireStmt(
+            pConn2,
+            "SELECT Name, Slot, Sex, BatColor, SkinColor, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, "
+            "`Rank`, GoalExp, Level, Bonus, Fame, Alignment, Shape, CoatColor FROM Vampire WHERE PlayerID = "
+            "? AND Active = 'ACTIVE' AND Name=?");
+        PreparedStatement selectOustersStmt(
+            pConn2,
+            "SELECT Name, Slot, Sex, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, `Rank`, Exp, Level, "
+            "Bonus, SkillBonus, Fame, Alignment, CoatType, ArmType, CoatColor, HairColor, ArmColor, BootsColor "
+            "FROM Ousters WHERE PlayerID = ? AND Active = 'ACTIVE' AND Name=?");
+
         DWORD shape;
         Color_t colors[PCSlayerInfo::SLAYER_COLOR_MAX];
         Color_t colorsVamp[PCVampireInfo::VAMPIRE_COLOR_MAX];
@@ -871,11 +879,9 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 //
                 //----------------------------------------------------------------------
 
-                pResult2 = pStmt2->executeQuery(
-                    "SELECT Name, Slot, Sex, BatColor, SkinColor, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, "
-                    "`Rank`, GoalExp, Level, Bonus, Fame, Alignment, Shape, CoatColor FROM Vampire WHERE PlayerID = "
-                    "'%s' AND Active = 'ACTIVE' AND Name='%s'",
-                    getID().c_str(), name.c_str());
+                selectVampireStmt.bindString(1, getID());
+                selectVampireStmt.bindString(2, name);
+                Result* pResult2 = selectVampireStmt.execute();
 
                 if (pResult2->getRowCount() == 0) {
                     throw DisconnectException("No Vampire");
@@ -933,11 +939,9 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 //
                 //----------------------------------------------------------------------
 
-                pResult2 = pStmt2->executeQuery(
-                    "SELECT Name, Slot, Sex, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, `Rank`, Exp, Level, "
-                    "Bonus, SkillBonus, Fame, Alignment, CoatType, ArmType, CoatColor, HairColor, ArmColor, BootsColor "
-                    "FROM Ousters WHERE PlayerID = '%s' AND Active = 'ACTIVE' AND Name='%s'",
-                    getID().c_str(), name.c_str());
+                selectOustersStmt.bindString(1, getID());
+                selectOustersStmt.bindString(2, name);
+                Result* pResult2 = selectOustersStmt.execute();
 
                 if (pResult2->getRowCount() == 0) {
                     throw DisconnectException("No Ousters");
@@ -978,15 +982,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 lcPCList.setPCInfo(pPCOustersInfo->getSlot(), pPCOustersInfo);
             }
         }
-
-        
-        SAFE_DELETE(pStmt);
-        SAFE_DELETE(pStmt2);
     } catch (SQLQueryException& sce) {
-        
-        SAFE_DELETE(pStmt);
-        SAFE_DELETE(pStmt2);
-
         throw DisconnectException(sce.toString());
     }
 }
