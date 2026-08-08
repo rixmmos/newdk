@@ -2742,6 +2742,30 @@ reach `Packet.h`/`PacketFactory.h` (all 10) and `Exception.h`/`Types.h`
 2); none use `DatagramPacket.h`, `Assert1.h`, or the
 `SocketEncrypt{Input,Output}Stream.h` pair.
 
+**[measured 2026-08-09]** `dkrix/Client/OtherClass/RequestServerPacketFactoryManager.{cpp,h}`
+and `RequestClientPacketFactoryManager.{cpp,h}` — the pre-existing dead pair
+described above, left untouched by Wave 1/2/3 — were independently
+re-verified from scratch (not just re-trusting the prior three batches) and
+deleted. Confirmed: (1) both classes are near-duplicate reimplementations of
+the live `Client/Packet/PacketFactoryManager` (same method surface;
+`g_pPacketFactoryManager` is the one actually instantiated, in
+`Client/GameInit.cpp`); `g_pRequestServerPacketFactoryManager` /
+`g_pRequestClientPacketFactoryManager` are declared but never assigned
+anywhere. (2) `dkrix/CMakeLists.txt`'s `CLIENT_MAIN_SOURCES` glob
+(`Client/*.cpp`, `Client/Packet/*.cpp`, `Client/Packet/**/*.cpp`,
+`Client/SXml/*.cpp`, `Client/WinLib/*.cpp`) does not reach `Client/OtherClass/`
+— a sibling directory to `Packet/`, not a descendant. (3) No other
+`CMakeLists.txt` in the tree (`basic/`, `Client/framelib/`, `Client/Platform/`,
+`Client/SpriteLib/`, `tools/engine/sprite/`, `shared/Packets/`) names
+`OtherClass` or either class. (4) A tree-wide grep for both class names
+(covering `#include`, type use, and the `g_pRequest...` globals) matched only
+the two file pairs themselves plus `Client/Client.vcxproj.filters`, which is
+orphaned — `Client/` has no matching `Client.vcxproj`, only `.filters` and
+`.user`; the real build is CMake-generated (`build/DarkEden.vcxproj`, no
+`Client.vcxproj` among them). Zero real consumers, zero build-system
+references confirmed independently — the four files were deleted;
+`Client/OtherClass/` is now empty.
+
 Ratchet: `check-packet-duplicates.sh --count` 222 → 202 (10 pairs × 2
 files), baseline updated via `--update`. `normalize-packet-style.py --all
 --tsv`: 111 → 101 pairs, summary line changed from `style-only 10 |
