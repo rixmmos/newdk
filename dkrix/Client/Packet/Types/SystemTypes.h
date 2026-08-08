@@ -20,7 +20,7 @@
 
 #ifdef PLATFORM_WINDOWS
 	#include <Windows.h>
-#elif defined(__LINUX__) || defined(PLATFORM_MACOS)
+#elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
 	#include <sys/types.h>
 #endif
 
@@ -43,7 +43,7 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 #endif
 
-#if defined(__LINUX__) || defined(__WIN_CONSOLE__) || defined(PLATFORM_MACOS)
+#if defined(PLATFORM_LINUX) || defined(__WIN_CONSOLE__) || defined(PLATFORM_MACOS)
 	typedef unsigned char  BYTE;
 	typedef unsigned short WORD;
 //	typedef unsigned int DWORD;
@@ -55,10 +55,10 @@ typedef unsigned long ulong;
 	typedef unsigned long long ulonglong;
 #endif
 
-#if defined(__LINUX__) || defined(PLATFORM_MACOS)
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
 	const char separatorChar = '/';
 	const std::string separator = "/";
-#elif defined(__WINDOWS__)
+#elif defined(PLATFORM_WINDOWS)
 	const char separatorChar = '\\';
 	const std::string separator = "\\";
 #endif

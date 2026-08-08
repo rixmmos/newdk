@@ -189,29 +189,99 @@ Windows builds, some helpers include `sys/time.h`.
 > because it reads as evidence. Anything added here should be tested against a
 > case it is supposed to reject before it is trusted.
 
-### 20. Dead `__LINUX__` / `__WINDOWS__` conditionals — Priority 20
+### 20. Dead `__LINUX__` / `__WINDOWS__` conditionals — Priority 20 — **addressed 2026-08-09**
 
-**[measured 2026-08-06]** 66 `#if __LINUX__` / `#elif __WINDOWS__` directives
-across 16 files, mostly under `Client/Packet/`. **Neither macro is defined
-anywhere** — not by CMake, not by any header, not by any compiler. Both arms
-evaluate false on every platform, so every one of those blocks is inert.
-
-The tree builds regardless because `Client/Packet/SocketAPI.h:12-21` performs
-real platform detection from `_WIN32` / `__APPLE__` / `__linux__`, defines
-`PLATFORM_WINDOWS` / `PLATFORM_LINUX` / `PLATFORM_MACOS`, and includes the right
-socket headers. Everything else picks them up transitively.
-
-Impact is low today (I=2) but the trap is sharp (R=3): an include or declaration
-added to an `#elif __WINDOWS__` arm is silently dropped, and the failure looks
-like a missing symbol far from the cause. Effort is low (E=2) — the fix is to
-replace them with the `PLATFORM_*` macros `SocketAPI.h` already establishes.
-
-**Do not do it before CI is green.** Activating 66 never-compiled branches
-without a build is how a working tree stops working.
-
-Files: `Client/Packet/{Assert.h, Assert1.h, Datagram.h, Exception.h, FileAPI.cpp,
-SocketAPI.cpp, SocketImpl.cpp, SocketInputStream.cpp}` plus eight
-`Gpackets/`/`Lpackets/` handlers.
+> **Partially converted.** CI went green on both trees (2026-08-06/07), which
+> lifted the "do not do it before CI is green" gate this item carried. A
+> re-measurement on 2026-08-09 found 75 raw occurrences of `__LINUX__` /
+> `__WINDOWS__` across 19 files (the file count grew from 16 because the
+> original sweep undercounted files where every occurrence sits inside a
+> comment — see below). Of those, **63 were converted** to the real
+> `PLATFORM_LINUX` / `PLATFORM_WINDOWS` macros `SocketAPI.h` already
+> establishes; **1 was deliberately left dead** (behavior-change risk, not a
+> compile risk); **11 were left untouched** because they are not live
+> directives at all (inside `//` or `/* */` comments, or an unreachable `#elif`
+> arm of an always-true `#ifdef __GAME_CLIENT__`).
+>
+> **Converted (bucket a — mirrors already-live code, high confidence it
+> compiles):**
+> - `Client/Packet/Assert.h:25`, `Assert1.h:25` — the `#elif __LINUX__` arm of
+>   the `Assert(expr)` macro chain now reads `defined(PLATFORM_LINUX)`.
+> - `Client/Packet/Datagram.h:16,20` — socket header include guard.
+> - `Client/Packet/Exception.h:16` (`#pragma warning` guard) and `:148`
+>   (`__BEGIN_DEBUG`/`__END_DEBUG` OR-chain).
+> - `Client/Packet/FileAPI.cpp` — all 21 occurrences (every `open_ex`/
+>   `read_ex`/`write_ex`/`close_ex`/`fcntl_ex`/`ioctl_ex`/`dup_ex`/`lseek_ex`
+>   POSIX branch). Verified line-for-line against `dkrixserver/src/Core/
+>   FileAPI.cpp`, which compiles this same code today under the server's own
+>   (real, CMake-defined) `__LINUX__` — see below.
+> - `Client/Packet/SocketAPI.cpp` — all 25 occurrences, same rationale as
+>   FileAPI.cpp; compared against `dkrixserver/src/Core/SocketAPI.cpp`.
+> - `Client/Packet/SocketImpl.cpp:17,20` and `SocketInputStream.cpp:22,24,602,649`.
+> - `Client/Packet/Types/SystemTypes.h:23,46,58,61` — this header does its own
+>   independent `_WIN32`/`__APPLE__`/`__linux__` platform detection (identical
+>   to `SocketAPI.h`'s), so the fix is self-contained regardless of include
+>   order or which target compiles it. Note: line 46/58's `__LINUX__` term was
+>   previously being masked by a real (but separately buggy) CMake definition
+>   — `dkrix/CMakeLists.txt` sets `PLATFORM_MACOS` on `if(NOT WIN32)` for the
+>   `DarkEden`/`VS_UI`/`TextSystem` targets, i.e. it mislabels a Linux build as
+>   macOS. That bug is out of scope here (it's not a `__LINUX__`/`__WINDOWS__`
+>   conditional) but is worth its own item — flagging for a future audit pass.
+> - `Client/Packet/Lpackets/LCDeletePCOKHandler.cpp:50` — **only** the
+>   `#elif __WINDOWS__` arm. See below for why the sibling `#if __LINUX__` arm
+>   in the same block was left alone.
+>
+> **Deliberately left dead (bucket b — 1 occurrence):**
+> - `Client/Packet/Lpackets/LCDeletePCOKHandler.cpp:34` (`#if __LINUX__`).
+>   The `#elif __WINDOWS__` arm right below it was converted because it
+>   mirrors the sibling `LCCreatePCOKHandler.cpp`'s unconditional (always-live)
+>   body almost line for line — `UI_DeleteCharacterOK()`, send `CLGetPCList`,
+>   `setPlayerStatus(CPS_AFTER_SENDING_CL_GET_PC_LIST)`, plus
+>   `g_ModeNext = MODE_WAIT_PCLIST`. The `__LINUX__` arm, by contrast, only
+>   prints a `cout` banner and sends `CLGetPCList` — it skips the UI call and
+>   the mode transition entirely, which reads as a console-era leftover from
+>   before this client had an SDL2 GUI on Linux too (the `sanitizers-linux` CI
+>   job now builds the real `DarkEden` GUI target on Linux, not a headless
+>   variant). Activating it as-is would give Linux a different, weaker
+>   post-delete state than Windows — a gameplay-behavior change, not just a
+>   dead-code fix, so it wasn't converted. Left as `__LINUX__` (still
+>   permanently inert); worth a real look at what the Linux/SDL2 path should
+>   do before touching it.
+>
+> **Left untouched — not live directives (bucket c — 11 occurrences, 9 files):**
+> - `Client/Packet/Cpackets/CGAttack.h:18-20`, `CGBloodDrain.h:18-20` — the
+>   `#ifdef __LINUX__` body is only a commented-out `#include`; nothing to
+>   activate either way.
+> - `Client/Packet/Gpackets/GCMoveErrorHandler.cpp:35` — the text
+>   `#elif __WINDOWS__` sits inside a `/* ... */` block comment (comment
+>   removal happens before directive parsing), so it was never a real
+>   directive; the code around it is guarded only by the real, always-defined
+>   `__GAME_CLIENT__` and already runs unconditionally today.
+> - `Client/Packet/Gpackets/{GCPetUseSkillHandler.cpp:207,
+>   GCSMSAddressListHandler.cpp:32}` — real `#elif __WINDOWS__` directives, but
+>   as the *alternative* arm to `#ifdef __GAME_CLIENT__` (not nested inside
+>   it). `__GAME_CLIENT__=1` is always defined for the `DarkEden` target
+>   (`dkrix/CMakeLists.txt`), so this `#elif` is permanently unreachable
+>   regardless of `__WINDOWS__`'s spelling, and both bodies are empty anyway.
+> - `Client/Packet/Gpackets/{GCAddNicknameHandler.cpp:26,
+>   GCExecuteElementHandler.cpp:47, GCGQuestInventoryHandler.cpp:61,
+>   GCNicknameListHandler.cpp:28}` — `//`-commented, not directives.
+>
+> Preprocessor balance (`#if`/`#ifdef`/`#ifndef` count vs `#endif` count) was
+> checked in every touched file before and after; all ten stayed balanced.
+> `docs/adr/`-style deep dive not warranted — this was a mechanical macro
+> rename plus a documented set of skips, not a redesign.
+>
+> **[measured 2026-08-06, superseded above]** 66 `#if __LINUX__` /
+> `#elif __WINDOWS__` directives across 16 files, mostly under
+> `Client/Packet/`. **Neither macro was defined anywhere** — not by CMake, not
+> by any header, not by any compiler. Both arms evaluated false on every
+> platform, so every one of those blocks was inert.
+>
+> The tree built regardless because `Client/Packet/SocketAPI.h:12-21` performs
+> real platform detection from `_WIN32` / `__APPLE__` / `__linux__`, defines
+> `PLATFORM_WINDOWS` / `PLATFORM_LINUX` / `PLATFORM_MACOS`, and includes the
+> right socket headers. Everything else picks them up transitively.
 
 ### 3. Branch has no upstream — Priority 32
 

@@ -19,9 +19,9 @@
 #include "MinTr.h"
 #include <cstdio>
 
-#if __LINUX__
+#if defined(PLATFORM_LINUX)
 	#include <sys/ioctl.h>
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	#include <winsock.h>
 #endif
 
@@ -599,8 +599,8 @@ uint SocketInputStream::fill_RAW ()
 {
 	__BEGIN_TRY
 		
-#if __LINUX__
-	uint nfree = m_BufferLen - m_Tail - 1;	
+#if defined(PLATFORM_LINUX)
+	uint nfree = m_BufferLen - m_Tail - 1;
 
 	int nread = recv( m_pSocket->getSOCKET() , &m_Buffer[m_Tail] , nfree , 0 );
 
@@ -646,7 +646,7 @@ uint SocketInputStream::fill_RAW ()
 	
 	return nread;
 
-#elif __WINDOWS__
+#elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
 #endif
 

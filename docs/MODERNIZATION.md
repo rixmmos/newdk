@@ -1158,6 +1158,26 @@ Option B.
     not mass-rename existing `DWORD`/`BYTE`/`BOOL` usage.
   - Translate Korean/Chinese comments to English.
 
+- **[2026-08-09] Dead `__LINUX__`/`__WINDOWS__` conditionals (`docs/
+  TECH-DEBT-AUDIT.md` item 20) — partially converted, now that both
+  trees' CI is green.** Re-measured 75 raw occurrences across 19
+  `Client/Packet/` files (vs. the 2026-08-06 estimate of 66/16 — the
+  gap is files where every hit sits inside a comment, which the
+  original grep-based count didn't distinguish from live directives).
+  63 were renamed to the real `PLATFORM_LINUX`/`PLATFORM_WINDOWS`
+  macros `Client/Packet/SocketAPI.h` already defines; 1 was left as
+  dead `__LINUX__` on purpose (converting it would have changed
+  observable post-character-delete behavior on Linux, not just fixed
+  dead code — see the audit doc); 11 were left alone because they were
+  never live directives (inside comments, or an unreachable `#elif`
+  arm of an always-true `#ifdef __GAME_CLIENT__`). Full file/line list
+  and reasoning: `docs/TECH-DEBT-AUDIT.md` item 20. Every touched file
+  was checked for `#if`/`#endif` balance before and after; all ten
+  stayed balanced. Not yet run through either CI — the client's
+  blocking Windows job exercises the `PLATFORM_WINDOWS` arms, the
+  non-blocking `sanitizers-linux` job exercises the `PLATFORM_LINUX`
+  arms for the first time ever.
+
 ### Phase 7 — Server: retire dead binaries — done 2026-08-06/07
 
 > **Correction to the original wording:** `chinabilling/` top-level is

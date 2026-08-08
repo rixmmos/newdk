@@ -47,7 +47,7 @@ throw ( ProtocolException , Error )
 
 		pClientPlayer->setPlayerStatus( CPS_AFTER_SENDING_CL_GET_PC_LIST );
 
-	#elif __WINDOWS__
+	#elif defined(PLATFORM_WINDOWS)
 
 		ClientPlayer * pClientPlayer = dynamic_cast<ClientPlayer*>(pPlayer);
 

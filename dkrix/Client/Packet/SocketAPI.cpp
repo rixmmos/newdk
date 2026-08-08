@@ -13,7 +13,7 @@
 
 #include "SocketAPI.h"
 #if defined(PLATFORM_WINDOWS)
-#elif __LINUX__
+#elif defined(PLATFORM_LINUX)
 #include <sys/types.h>			// for accept()
 #include <sys/socket.h>
 #include <arpa/inet.h>			// for inet_xxx()
@@ -27,7 +27,7 @@
 //////////////////////////////////////////////////
 // external variable
 //////////////////////////////////////////////////
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 extern int errno;
 #endif
 
@@ -60,7 +60,7 @@ SOCKET SocketAPI::socket_ex ( int domain , int type , int protocol )
 	SOCKET s = ::socket(domain,type,protocol);
 
 	if ( s == INVALID_SOCKET ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EPROTONOSUPPORT :
 			throw Error("The protocol type or the specified protocol is not supported within this domain.");
@@ -135,7 +135,7 @@ void SocketAPI::bind_ex ( SOCKET s , const struct sockaddr * addr , uint addrlen
 	__BEGIN_TRY
 
 	if ( bind ( s , addr , addrlen ) == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EADDRINUSE :
 			throw BindException("The address is already in use. kill another server or use another port.      .    ,    .");
@@ -225,7 +225,7 @@ void SocketAPI::connect_ex ( SOCKET s , const struct sockaddr * addr , uint addr
 	__BEGIN_TRY
 
 	if ( connect(s,addr,addrlen) == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EALREADY : 
 			throw NonBlockingIOException("The socket is non-blocking and a previous connection attempt has not yet been completed.");
@@ -323,7 +323,7 @@ void SocketAPI::listen_ex ( SOCKET s , uint backlog )
 	__BEGIN_TRY
 
 	if ( listen( s , backlog ) == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("Bad descriptor.");
@@ -393,14 +393,14 @@ SOCKET SocketAPI::accept_ex ( SOCKET s , struct sockaddr * addr , uint * addrlen
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	SOCKET client = accept( s , addr , addrlen );
 #elif defined(PLATFORM_WINDOWS)
 	SOCKET client = accept( s , addr , (int*)addrlen );
 #endif
 	
 	if ( client == INVALID_SOCKET ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EWOULDBLOCK : 
 			throw NonBlockingIOException("The socket is marked non-blocking and no connections are present to be accepted.");
@@ -476,7 +476,7 @@ void SocketAPI::getsockopt_ex ( SOCKET s , int level , int optname , void * optv
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	if ( getsockopt( s , level , optname , optval , optlen ) == SOCKET_ERROR ) {
 		switch ( errno ) {
 		case EBADF : 
@@ -544,7 +544,7 @@ void SocketAPI::setsockopt_ex ( SOCKET s , int level , int optname , const void 
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	if ( setsockopt( s , level , optname , optval , optlen ) == SOCKET_ERROR ) {
 		switch ( errno ) {
 			case EBADF : 
@@ -619,14 +619,14 @@ uint SocketAPI::send_ex ( SOCKET s , const void * buf , uint len , uint flags )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nSent = send(s,buf,len,flags);
 #elif defined(PLATFORM_WINDOWS)
 	int nSent = send(s,(const char *)buf,len,flags);
 #endif
 
 	if ( nSent == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("An invalid descriptor was specified.");
@@ -708,14 +708,14 @@ uint SocketAPI::sendto_ex ( SOCKET s , const void * buf , int len , unsigned int
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nSent = sendto(s,buf,len,flags,to,tolen);
 #elif defined(PLATFORM_WINDOWS)
 	int nSent = sendto(s,(const char *)buf,len,flags,to,tolen);
 #endif
 
 	if ( nSent == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("An invalid descriptor was specified.");
@@ -775,14 +775,14 @@ uint SocketAPI::recv_ex ( SOCKET s , void * buf , uint len , uint flags )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nrecv = recv(s,buf,len,flags);
 #elif defined(PLATFORM_WINDOWS)
 	int nrecv = recv(s,(char*)buf,len,flags);
 #endif
 
 	if ( nrecv == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("The argument s is an invalid descriptor.");
@@ -858,14 +858,14 @@ uint SocketAPI::recvfrom_ex ( SOCKET s , void * buf , int len , uint flags , str
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int nReceived = recvfrom(s,buf,len,flags,from,fromlen);
 #elif defined(PLATFORM_WINDOWS)
 	int nReceived = recvfrom(s,(char*)buf,len,flags,from,(int*)fromlen);
 #endif
 
 	if ( nReceived == SOCKET_ERROR ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("The argument s is an invalid descriptor.");
@@ -972,7 +972,7 @@ void SocketAPI::closesocket_ex ( SOCKET s )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	// using close_ex()
 	FileAPI::close_ex(s);
 #elif defined(PLATFORM_WINDOWS)
@@ -1013,7 +1013,7 @@ void SocketAPI::ioctlsocket_ex ( SOCKET s , long cmd , ulong * argp )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	throw UnsupportedError();
 #elif defined(PLATFORM_WINDOWS)
 	if ( ioctlsocket(s,cmd,argp) == SOCKET_ERROR ) {
@@ -1060,7 +1060,7 @@ bool SocketAPI::getsocketnonblocking_ex ( SOCKET s )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	return FileAPI::getfilenonblocking_ex(s);
 #elif defined(PLATFORM_WINDOWS)
 	throw UnsupportedError();
@@ -1093,7 +1093,7 @@ void SocketAPI::setsocketnonblocking_ex ( SOCKET s , bool on )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	FileAPI::setfilenonblocking_ex(s,on);
 #elif defined(PLATFORM_WINDOWS)
 	ulong argp = ( on == true ) ? 1 : 0;
@@ -1125,7 +1125,7 @@ uint SocketAPI::availablesocket_ex ( SOCKET s )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	return availablefile_ex(s);
 #elif defined(PLATFORM_WINDOWS)
 	ulong argp = 0;
@@ -1161,7 +1161,7 @@ void SocketAPI::shutdown_ex ( SOCKET s , uint how )
 	__BEGIN_TRY
 
 	if ( shutdown(s,how) < 0 ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("s is not a valid descriptor.");
@@ -1223,7 +1223,7 @@ int SocketAPI::select_ex ( int maxfdp1 , fd_set * readset , fd_set * writeset , 
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 
 	int result = select( maxfdp1 , readset , writeset , exceptset , timeout );
 

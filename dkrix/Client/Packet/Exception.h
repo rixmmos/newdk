@@ -13,7 +13,7 @@
 #include "Packet/Types.h"
 #include "StringStream.h"
 
-#if __WINDOWS__
+#if defined(PLATFORM_WINDOWS)
 #pragma warning ( disable : 4786 )
 #endif
 
@@ -145,7 +145,7 @@ private :
 #if defined(NDEBUG) || defined(__WIN32__) || defined(PLATFORM_WINDOWS)
 	#define __BEGIN_DEBUG ((void)0);
 	#define __END_DEBUG ((void)0);
-#elif defined(__LINUX__) || defined(__APPLE__) || defined(__macos__) || defined(__WIN_CONSOLE__) || defined(__EMSCRIPTEN__)
+#elif defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__macos__) || defined(__WIN_CONSOLE__) || defined(__EMSCRIPTEN__)
 	#define __BEGIN_DEBUG \
 				try {
 	#define __END_DEBUG  \

@@ -18,7 +18,7 @@
 #include <io.h>			// for _open()
 #include <fcntl.h>		// for _open()/_close()/_read()/_write()...
 #include <string.h>		// for memcpy()
-#elif __LINUX__ || defined(__APPLE__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#elif defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 #include <sys/types.h>	// for open()
 #include <sys/stat.h>	// for open()
 #include <unistd.h>		// for fcntl()
@@ -31,7 +31,7 @@
 //////////////////////////////////////////////////
 // external variables
 //////////////////////////////////////////////////
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 extern int errno;
 #endif
 
@@ -42,14 +42,14 @@ int FileAPI::open_ex ( const char * filename , int flags )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int fd = open(filename,flags);
 #elif defined(PLATFORM_WINDOWS)
 	int fd = _open(filename,flags);
 #endif
 	if ( fd < 0 ) {
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EEXIST : 
 			throw FileAlreadyExistException("pathname already exists and O_CREAT and O_EXCL were used.");
@@ -103,14 +103,14 @@ int FileAPI::open_ex ( const char * filename , int flags , int mode )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int fd = open(filename,flags,mode);
 #elif defined(PLATFORM_WINDOWS)
 	int fd = _open(filename,flags,mode);
 #endif
 
 	if ( fd < 0 ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EEXIST : 
 			throw FileAlreadyExistException("pathname already exists and O_CREAT and O_EXCL were used.");
@@ -182,7 +182,7 @@ uint FileAPI::read_ex ( int fd , void * buf , uint len )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = read ( fd , buf , len );
 #elif defined(PLATFORM_WINDOWS)
 	int result = _read ( fd , buf , len );
@@ -190,7 +190,7 @@ uint FileAPI::read_ex ( int fd , void * buf , uint len )
 
 	if ( result < 0 ) {
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 			case EINTR : 
 				throw InterruptedIOException("The call was interrupted by a signal before any data was read.");
@@ -247,7 +247,7 @@ uint FileAPI::write_ex ( int fd , const void * buf , uint len )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = write ( fd , buf , len );
 #elif defined(PLATFORM_WINDOWS)
 	int result = _write ( fd , buf , len );
@@ -255,7 +255,7 @@ uint FileAPI::write_ex ( int fd , const void * buf , uint len )
 
 	if ( result < 0 ) {
 		
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 			case EAGAIN : 
 				throw NonBlockingIOException("Non-blocking I/O has been selected using O_NONBLOCK and there was no room in the pipe or socket connected to fd to write the data immediately.");
@@ -319,7 +319,7 @@ void FileAPI::close_ex ( int fd )
 		close(fd)
 #endif
 		< 0 ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 			case EBADF : 
 				throw FileNotOpenedException("fd isn't a valid open file descriptor.");
@@ -354,7 +354,7 @@ int FileAPI::fcntl_ex ( int fd , int cmd )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = fcntl ( fd , cmd );
 	if ( result < 0 ) {
 		switch ( errno ) {
@@ -406,7 +406,7 @@ int FileAPI::fcntl_ex ( int fd , int cmd , long arg )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int result = fcntl ( fd , cmd , arg );
 	if ( result < 0 ) {
 		switch ( errno ) {
@@ -461,7 +461,7 @@ bool FileAPI::getfilenonblocking_ex ( int fd )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int flags = fcntl_ex( fd , F_GETFL , 0 );
 	return flags | O_NONBLOCK;
 #elif defined(PLATFORM_WINDOWS)
@@ -494,7 +494,7 @@ void FileAPI::setfilenonblocking_ex ( int fd , bool on )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int flags = fcntl_ex( fd , F_GETFL , 0 );
 
 	if ( on )
@@ -536,7 +536,7 @@ void FileAPI::ioctl_ex ( int fd , int request , void * argp )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	if ( ioctl(fd,request,argp) < 0 ) {
 		switch ( errno ) {
 		case EBADF : 
@@ -581,7 +581,7 @@ void FileAPI::setfilenonblocking_ex2 ( int fd , bool on )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	ulong arg = ( on == true ? 1 : 0 );
 	ioctl_ex(fd,FIONBIO,&arg);
 #elif defined(PLATFORM_WINDOWS)
@@ -614,7 +614,7 @@ uint FileAPI::availablefile_ex ( int fd )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	
 	
 	uint arg = 0;
@@ -639,14 +639,14 @@ int FileAPI::dup_ex ( int fd )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	int newfd = dup(fd);
 #elif defined(PLATFORM_WINDOWS)
 	int newfd = _dup(fd);
 #endif
 
 	if ( newfd < 0 ) {
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 		switch ( errno ) {
 		case EBADF : 
 			throw Error("oldfd isn't an open file descriptor, or newfd is out of the allowed range for file descriptors.");
@@ -676,7 +676,7 @@ long FileAPI::lseek_ex ( int fd , long offset , int whence )
 {
 	__BEGIN_TRY
 
-#if __LINUX__ || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(PLATFORM_LINUX) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 	long result = lseek(fd,offset,whence);
 	if ( result < 0 ) {
 		switch ( errno ) {
