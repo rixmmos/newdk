@@ -64,17 +64,31 @@ endif()
 # owning library should compile the .cpp).
 # ----------------------------------------------------------------------
 set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
+    CGAcceptUnion.cpp
     CGAddItemToCodeSheet.cpp
     CGAddItemToItem.cpp
+    CGAppointSubmaster.cpp
     CGAuthKey.cpp
     CGBuyStoreItem.cpp
+    CGDenyUnion.cpp
     CGDisplayItem.cpp
+    CGDownSkill.cpp
+    CGExpelGuild.cpp
+    CGFailQuest.cpp
     CGGQuestAccept.cpp
     CGGQuestCancel.cpp
     CGGlobalChat.cpp
     CGLogout.cpp
     CGLotterySelect.cpp
+    CGModifyGuildIntro.cpp
+    CGModifyGuildMember.cpp
+    CGModifyGuildMemberIntro.cpp
     CGModifyTaxRatio.cpp
+    CGNPCAskAnswer.cpp
+    CGPartyLeave.cpp
+    CGPortCheck.cpp
+    CGQuitUnion.cpp
+    CGQuitUnionAccept.cpp
     CGQuitUnionDeny.cpp
     CGReady.cpp
     CGRequestGuildList.cpp

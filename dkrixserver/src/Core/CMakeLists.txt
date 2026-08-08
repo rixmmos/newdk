@@ -361,7 +361,8 @@ set(GC_PACKET_SOURCES
 # CG Packets (Client -> Game)
 set(CG_PACKET_SOURCES
     CGAbsorbSoul.cpp CGAbsorbSoulHandler.cpp
-    CGAcceptUnion.cpp CGAcceptUnionHandler.cpp
+    # CGAcceptUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGAcceptUnionHandler.cpp
     CGAddGearToMouse.cpp CGAddGearToMouseHandler.cpp
 #    CGAddInjuriousCreature.cpp CGAddInjuriousCreatureHandler.cpp
     CGAddInventoryToMouse.cpp CGAddInventoryToMouseHandler.cpp
@@ -377,7 +378,8 @@ set(CG_PACKET_SOURCES
     CGAddSMSAddress.cpp CGAddSMSAddressHandler.cpp
     CGAddZoneToInventory.cpp CGAddZoneToInventoryHandler.cpp
     CGAddZoneToMouse.cpp CGAddZoneToMouseHandler.cpp
-    CGAppointSubmaster.cpp CGAppointSubmasterHandler.cpp
+    # CGAppointSubmaster.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGAppointSubmasterHandler.cpp
     CGAttack.cpp CGAttackHandler.cpp
     # CGAuthKey.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGAuthKeyHandler.cpp
@@ -389,18 +391,22 @@ set(CG_PACKET_SOURCES
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
     CGCrashReport.cpp CGCrashReportHandler.cpp
     CGDeleteSMSAddress.cpp CGDeleteSMSAddressHandler.cpp
-    CGDenyUnion.cpp CGDenyUnionHandler.cpp
+    # CGDenyUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGDenyUnionHandler.cpp
     CGDepositPet.cpp CGDepositPetHandler.cpp
     CGDialUp.cpp CGDialUpHandler.cpp
     # CGDisplayItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGDisplayItemHandler.cpp
     CGDissectionCorpse.cpp CGDissectionCorpseHandler.cpp
     CGDonationMoney.cpp CGDonationMoneyHandler.cpp
-    CGDownSkill.cpp CGDownSkillHandler.cpp
+    # CGDownSkill.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGDownSkillHandler.cpp
     CGDropMoney.cpp CGDropMoneyHandler.cpp
-    CGExpelGuild.cpp CGExpelGuildHandler.cpp
+    # CGExpelGuild.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGExpelGuildHandler.cpp
     CGExpelGuildMember.cpp CGExpelGuildMemberHandler.cpp
-    CGFailQuest.cpp CGFailQuestHandler.cpp
+    # CGFailQuest.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGFailQuestHandler.cpp
     CGGetEventItem.cpp CGGetEventItemHandler.cpp
     CGGetOffMotorCycle.cpp CGGetOffMotorCycleHandler.cpp
     # CGGlobalChat.cpp moved to shared/Packets/ — Phase 12 Wave 1.
@@ -418,28 +424,36 @@ set(CG_PACKET_SOURCES
     CGLotterySelectHandler.cpp
     CGMakeItem.cpp CGMakeItemHandler.cpp
     CGMixItem.cpp CGMixItemHandler.cpp
-    CGModifyGuildIntro.cpp CGModifyGuildIntroHandler.cpp
-    CGModifyGuildMember.cpp CGModifyGuildMemberHandler.cpp
-    CGModifyGuildMemberIntro.cpp CGModifyGuildMemberIntroHandler.cpp
+    # CGModifyGuildIntro.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGModifyGuildIntroHandler.cpp
+    # CGModifyGuildMember.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGModifyGuildMemberHandler.cpp
+    # CGModifyGuildMemberIntro.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGModifyGuildMemberIntroHandler.cpp
     CGModifyNickname.cpp CGModifyNicknameHandler.cpp
     # CGModifyTaxRatio.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGModifyTaxRatioHandler.cpp
     CGMouseToStash.cpp CGMouseToStashHandler.cpp
     CGMove.cpp CGMoveHandler.cpp
-    CGNPCAskAnswer.cpp CGNPCAskAnswerHandler.cpp
+    # CGNPCAskAnswer.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGNPCAskAnswerHandler.cpp
     CGNPCTalk.cpp CGNPCTalkHandler.cpp
     CGPartyInvite.cpp CGPartyInviteHandler.cpp
-    CGPartyLeave.cpp CGPartyLeaveHandler.cpp
+    # CGPartyLeave.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGPartyLeaveHandler.cpp
     CGPartyPosition.cpp CGPartyPositionHandler.cpp
     CGPartySay.cpp CGPartySayHandler.cpp
     CGPetGamble.cpp CGPetGambleHandler.cpp
     CGPhoneDisconnect.cpp CGPhoneDisconnectHandler.cpp
     CGPhoneSay.cpp CGPhoneSayHandler.cpp
     CGPickupMoney.cpp CGPickupMoneyHandler.cpp
-    CGPortCheck.cpp CGPortCheckHandler.cpp
+    # CGPortCheck.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGPortCheckHandler.cpp
     CGQuitGuild.cpp CGQuitGuildHandler.cpp
-    CGQuitUnion.cpp CGQuitUnionHandler.cpp
-    CGQuitUnionAccept.cpp CGQuitUnionAcceptHandler.cpp
+    # CGQuitUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGQuitUnionHandler.cpp
+    # CGQuitUnionAccept.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
+    CGQuitUnionAcceptHandler.cpp
     # CGQuitUnionDeny.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGQuitUnionDenyHandler.cpp
     CGRangerSay.cpp CGRangerSayHandler.cpp

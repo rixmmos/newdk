@@ -34,7 +34,7 @@
 #include "CGLogout.h"
 #include "Cpackets/CGMakeItem.h"
 #include "Cpackets/CGMove.h"
-#include "Cpackets/CGNPCAskAnswer.h"
+#include "CGNPCAskAnswer.h"
 #include "Cpackets/CGNPCTalk.h"
 #include "Cpackets/CGPickupMoney.h"
 #include "CGReady.h"
@@ -346,7 +346,7 @@
 #include "CGSelectTileEffect.h"
 
 #include "Cpackets/CGPartyInvite.h"
-#include "Cpackets/CGPartyLeave.h"
+#include "CGPartyLeave.h"
 
 #include "Gpackets/GCPartyInvite.h"
 #include "Gpackets/GCPartyLeave.h"
@@ -397,7 +397,7 @@
 #include "CGRequestGuildMemberList.h"
 #include "CGSelectGuildMember.h"
 //#include "Cpackets/CGExpelGuildMember.h"
-#include "Cpackets/CGModifyGuildMember.h"
+#include "CGModifyGuildMember.h"
 #include "Gpackets/GCActiveGuildList.h"
 #include "Gpackets/GCShowGuildMemberInfo.h"
 #include "Gpackets/GCGuildMemberList.h"
@@ -420,7 +420,7 @@
 
 #include "Cpackets/CGRelicToObject.h"
 
-#include "Cpackets/CGPortCheck.h"
+#include "CGPortCheck.h"
 
 #include "Cpackets/CGGuildChat.h"
 #include "Gpackets/GCGuildChat.h"
@@ -437,8 +437,8 @@
 #include "CGRequestInfo.h"
 #include "Gpackets/GCNoticeEvent.h"
 
-#include "Cpackets/CGModifyGuildIntro.h"
-#include "Cpackets/CGModifyGuildMemberIntro.h"
+#include "CGModifyGuildIntro.h"
+#include "CGModifyGuildMemberIntro.h"
 
 #ifndef __GAME_CLIENT__
 	#include "Gpackets/GSModifyGuildIntro.h"
@@ -476,13 +476,13 @@
 #include "Gpackets/GCAddOustersCorpse.h"
 #include "Cpackets/CGAbsorbSoul.h"
 
-#include "Cpackets/CGDownSkill.h"
+#include "CGDownSkill.h"
 #include "Gpackets/GCDownSkillOK.h"
 #include "Gpackets/GCDownSkillFailed.h"
 
 #include "Gpackets/GCMiniGameScores.h"
 #include "Cpackets/CGSubmitScore.h"
-#include "Cpackets/CGFailQuest.h"
+#include "CGFailQuest.h"
 #include "CGAddItemToCodeSheet.h"
 #include "Gpackets/GCFlagWarStatus.h"
 #include "Gpackets/GCOtherGuildName.h"
@@ -535,12 +535,12 @@
 
 #include "CGUseItemFromGQuestInventory.h"
 
-#include "Cpackets/CGAcceptUnion.h"
-#include "Cpackets/CGAppointSubmaster.h"
-#include "Cpackets/CGDenyUnion.h"
-#include "Cpackets/CGExpelGuild.h"
-#include "Cpackets/CGQuitUnion.h"
-#include "Cpackets/CGQuitUnionAccept.h"
+#include "CGAcceptUnion.h"
+#include "CGAppointSubmaster.h"
+#include "CGDenyUnion.h"
+#include "CGExpelGuild.h"
+#include "CGQuitUnion.h"
+#include "CGQuitUnionAccept.h"
 #include "CGQuitUnionDeny.h"
 #include "CGRequestGuildList.h"
 #include "CGRequestUnion.h"

@@ -120,7 +120,7 @@
 // NPC
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGNPCTalk.h"
-#include "Packet/Cpackets/CGNPCAskAnswer.h"
+#include "CGNPCAskAnswer.h"
 
 //-----------------------------------------------------------------------------
 

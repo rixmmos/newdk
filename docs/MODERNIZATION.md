@@ -1667,7 +1667,7 @@ the same date-format directive it always received. **Compile gate:
 next server CI run [unverified]** — this sandbox has no server
 toolchain; landed after the last known-green run referenced above.
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 and Wave 2 batch B landed here 2026-08-08)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 and Wave 2 batches A–B landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -2261,6 +2261,154 @@ names each of the 14 exactly once under `_SHARED_PACKETS_CG_SOURCES`.
 Both-tree CI remains the real gate per `docs/CLAUDE.md`; this batch and
 the sibling batch A agent's parallel 14 pairs are expected to be
 reviewed and cherry-picked onto `main` separately.
+
+**Wave 2 batch A landed 2026-08-08 (worktree, not yet on `main`): 14 more
+CG-family pairs, migrated in parallel with a second, non-overlapping
+14-pair batch on another agent line.** `normalize-packet-style.py --all
+--tsv` re-run against the current tree (139 pairs, 38 style-only)
+confirmed all 14 candidates named for this batch — **CGAcceptUnion,
+CGAppointSubmaster, CGDenyUnion, CGDownSkill, CGExpelGuild, CGFailQuest,
+CGModifyGuildIntro, CGModifyGuildMember, CGModifyGuildMemberIntro,
+CGNPCAskAnswer, CGPartyLeave, CGPortCheck, CGQuitUnion,
+CGQuitUnionAccept** — verdict `style-only` / `residual: 0` individually
+via `--pair`. `CGExpelGuild`, `CGQuitUnionAccept`, `CGDenyUnion`,
+`CGQuitUnion` were the four batch 2 skipped as belonging to the
+guild-formation/union `PreparedStatement` workstream (`1ebedbe`); that
+workstream landed before this batch started and only ever touched
+`*Handler.cpp` files, never the packet class pair itself, so all four
+were confirmed clean and taken in this batch. `CGPortCheck` and
+`CGNPCAskAnswer` — the two pairs batches 1 and 2 both skipped as
+"messier" (`DatagramPacket.h` base class; `SocketEncryptInputStream.h`
+path plus an `Assert1.h`-vs-`Assert.h` filename divergence) — were
+deliberately taken on this time rather than deferred a third time.
+
+Reconciliation followed the established recipe (server's canonical
+style, `throw()` added back to the four `<Name>Factory` overrides,
+`#ifndef __GAME_CLIENT__` kept around `<Name>Handler` and its dispatch
+call) for all 14; none have a `CGHandlersStub.cpp` entry, so all 14 keep
+the Handler guard rather than going unconditional. Two new findings
+beyond the recipe:
+
+- **`CGPortCheck` derives from `DatagramPacket`** (`DatagramPacket.h`,
+  living in `Client/Packet/`/`dkrixserver/src/Core/` like
+  `Packet.h`/`PacketFactory.h` — not part of this migration itself,
+  stays duplicated). Needed one more one-line forwarder in the existing
+  shim directory, `SharedPacketsShim/DatagramPacket.h`, alongside the
+  pilot's `Packet.h`/`PacketFactory.h` and batch 2's
+  `Exception.h`/`Types.h`.
+- **`CGNPCAskAnswer.cpp` includes `Assert1.h`, `SocketEncryptInputStream.h`,
+  `SocketEncryptOutputStream.h`** (bare form, matching the server's own
+  style) for its `__USE_ENCRYPTER__` read/write path. Needed three more
+  shim forwarders. `Assert1.h` is a second, identically-named-content
+  file alongside `Assert.h` in both trees (the client `.cpp`'s
+  pre-migration copy used `Assert.h`; the server's used `Assert1.h` —
+  same macro, just the file the server author happened to include). The
+  merged file keeps the server's `Assert1.h` spelling per the
+  "adopt server's canonical style" rule, so the shim forwards that name.
+
+**Third finding, more consequential — a real safety check, not just a
+new shim:** five pairs (`CGModifyGuildIntro`, `CGModifyGuildMember`,
+`CGModifyGuildMemberIntro`, `CGNPCAskAnswer`, `CGPartyLeave`) had their
+entire `<Name>Factory` class wrapped in `#ifdef __DEBUG_OUTPUT__` on the
+client's pre-migration copy — a coarser-grained version of the
+method-level `__DEBUG_OUTPUT__` guard the recipe already normalizes away
+(batch 1: "adopt the server's canonical style... unconditional
+getPacketName()/toString() instead of `#ifdef __DEBUG_OUTPUT__`-gated").
+Unlike the `__GAME_CLIENT__` Handler guard (safe to replicate verbatim,
+since the server never defines that macro), `__DEBUG_OUTPUT__` is
+defined by **no target in either tree** — grepped for
+`target_compile_definitions`/`add_definitions` across both CMake trees,
+zero hits. Replicating the client's class-level guard into the merged
+header would have deleted `CGModifyGuildIntroFactory` (etc.) from the
+*server* build too, where `dkrixserver/src/Core/PacketFactoryManager.cpp`
+registers it unconditionally (`addFactory(new
+CGModifyGuildIntroFactory())`, confirmed at the call site) — a compile
+error, and if worked around by also un-registering it, a live protocol
+break (the server can no longer decode that packet ID at all). Resolved
+the same way the method-level case already is: dropped the
+`__DEBUG_OUTPUT__` guard, Factory unconditional, matching the server's
+own pre-migration file exactly. On the client this is a no-op
+behaviorally — the class never compiled there either (dead code, since
+the macro was never defined), so making it unconditional only adds a
+small self-contained unused class to the binary, not a behavior change.
+`CGFailQuest` is the one pair where the client wrapped *both*
+`CGFailQuestFactory` and `CGFailQuestHandler` together in a single
+`#ifndef __GAME_CLIENT__` block (rather than the usual Handler-only
+guard) — that one **was** replicated verbatim, since `__GAME_CLIENT__`
+is safe on the server (never defined there) and this matches batch 2's
+"replicate the client's own pre-existing choice exactly" precedent for
+genuinely guard-neutral divergences.
+
+**Indirect-consumer sweep (the check every prior batch's CI-red
+incident came from) — five real gaps found, all fixed without any new
+`target_include_directories` calls, since every affected target already
+had `shared/Packets` + `SharedPacketsShim` wired from the pilot / Wave 1
+fixes.** `git grep -i` for all 14 old `Cpackets/<Name>.h` paths (all
+case/slash variants) across the whole tree, not just `src/Core`/
+`Client/Packet/Cpackets`, found real full-path `#include` sites in:
+
+- **`dkrix/Client/Packet/PacketFactoryManager.cpp`** — compiled directly
+  into `DarkEden` via the `Client/Packet/**/*.cpp` glob. All 14 names,
+  one `#include "Cpackets/CGXxx.h"` line each, repointed to bare
+  `"CGXxx.h"`.
+- **`dkrix/Client/UIMessageManager.cpp`** and
+  **`dkrix/Client/SizeOfObjects.cpp`** — both compiled into `DarkEden`
+  via the `Client/*.cpp` glob (neither is in `VS_UI_CLIENT_SOURCES`).
+  12 and 6 `#include` lines respectively repointed; `SizeOfObjects.cpp`
+  additionally used backslash path separators and mixed
+  `Cpackets`/`CPackets`/`cpackets` casing on some lines — same
+  case-insensitive-glob class of divergence Phase 16/the pilot already
+  flagged, now confirmed in include paths too, not just filenames.
+- **`dkrix/Client/PacketDef.h`** — one `CGNPCAskAnswer.h` site, repointed
+  (matching the already-bare `CGLogout.h` line from batch 1 in the same
+  file). Reached by `VS_UI` via `MPlayer.cpp`/`MTradeManager.cpp`
+  (the exact path batch 1's `e75eb67` fix covers) and by `DarkEden`
+  directly — both already had the include paths this needs.
+- **`dkrix/Client/Packet/Lpackets/LCReconnectHandler.cpp`** — one
+  `#include "../Cpackets/CGPortCheck.h"` inside an `#ifdef
+  __GAME_CLIENT__` block, compiled into `DarkEden`. Repointed to bare
+  `"CGPortCheck.h"`.
+
+Checked and confirmed clean (no new gaps): every subdirectory library
+under `dkrixserver/src/server/gameserver/` (`skill`, `item`, `billing`,
+`war`, `couple`, `mission`, `ctf`, `quest`, `mofus`) and under
+`dkrixserver/src/server/{loginserver,sharedserver}/` — zero `#include`
+sites for any of the 14 names, so the `Quest`-library-style gap the
+commit just before this batch found and fixed does not recur here.
+`VS_UI` and `SpriteLib` likewise have zero *direct* `#include` sites
+(`VS_UI`'s one indirect path, via `PacketDef.h`, is covered above).
+`dkrixserver/src/Core/CGSayHandler.cpp` (an unrelated pair's handler)
+turned out to bare-`#include` `CGModifyGuildIntro.h` and
+`CGModifyGuildMemberIntro.h` — already covered, since it's part of
+`CG_PACKET_SOURCES` → `GameServerPackets`, which already links
+`shared_packets_cg`. Two files were found still pointing at the deleted
+`Cpackets/` paths and deliberately left alone:
+`dkrix/Client/OtherClass/Request{Server,Client}PacketFactoryManager.cpp`
+— confirmed not part of any build (no `.vcxproj` exists anywhere under
+`dkrix/Client/` root, `OtherClass/` is not named by any glob or explicit
+source list in `dkrix/CMakeLists.txt`) — same treatment as the orphaned
+`Client.vcxproj.filters` the pilot already excludes.
+
+Ratchet: `check-packet-duplicates.sh --count` 278 → 250 (14 pairs × 2
+files), baseline updated via `--update`. `normalize-packet-style.py
+--all --tsv`: 139 → 125 pairs, 38 → 24 style-only, both exactly -14 as
+expected.
+
+**Not build-verified — no compiler in this environment**, same caveat as
+every prior step. Verified by reading: `git grep -i` (all case/slash
+variants) for every old `Cpackets/<Name>.h` path returns nothing under
+`dkrix/` except the two confirmed-dead `OtherClass/` files and the
+orphaned `.vcxproj.filters`; the 14 pairs' files exist only at
+`shared/Packets/`, confirmed absent from both old locations
+(`normalize-packet-style.py --pair <Name>` reports "not a complete
+pair" for each); `dkrixserver/src/Core/CMakeLists.txt`'s
+`CG_PACKET_SOURCES` no longer names any of the 14 `.cpp` files but still
+names all 14 `*Handler.cpp`; `shared/Packets/CMakeLists.txt` names each
+of the 14 exactly once under `_SHARED_PACKETS_CG_SOURCES`. Both-tree CI
+remains the real gate per `docs/CLAUDE.md`. Both batches landed
+(cherry-picked onto `main` in the same review pass), bringing the
+packet-duplicates ratchet from 278 down to 222 (250 after batch B alone,
+222 after both).
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
