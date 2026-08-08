@@ -427,6 +427,21 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/Platform
 		${CMAKE_CURRENT_SOURCE_DIR}/Client/framelib
 		${CMAKE_CURRENT_SOURCE_DIR}
+		# Phase 12: Client/PacketDef.h (compiled into VS_UI, not just
+		# DarkEden) bare-#includes migrated packet headers like
+		# "CGLogout.h", which now live in shared/Packets/, not any
+		# directory already listed above. Header-visibility only --
+		# deliberately NOT linking the shared_packets_<family> INTERFACE
+		# targets here (unlike DarkEden below), since that would also
+		# absorb their .cpp sources as VS_UI's own compiled objects,
+		# duplicating every symbol DarkEden's own shared_packets_<family>
+		# link already provides -- a multiply-defined-symbol link error.
+		${CMAKE_CURRENT_SOURCE_DIR}/../shared/Packets
+		# Those shared/Packets/*.h in turn quoted-#include "Packet.h" /
+		# "PacketFactory.h" (see the SharedPacketsShim comment on
+		# DarkEden's own target_include_directories below for the full
+		# story) -- VS_UI needs the same shim for the same reason.
+		${CMAKE_CURRENT_SOURCE_DIR}/Client/Packet/SharedPacketsShim
 	)
 
 	# Link libraries
