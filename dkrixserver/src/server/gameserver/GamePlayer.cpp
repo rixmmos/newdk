@@ -63,14 +63,14 @@
 const int defaultGamePlayerInputStreamSize = 1024;
 const int defaultGamePlayerOutputStreamSize = 20480;
 
-static int maxIdleSec = 60 * 5; 
+static int maxIdleSec = 60 * 5;
 
-static int maxVerifyCount = 3;   
-static int maxTimeGap = 5;       
-static int SpeedCheckDelay = 60; 
+static int maxVerifyCount = 3;
+static int maxTimeGap = 5;
+static int SpeedCheckDelay = 60;
 
-const int PCRoomLottoSec = 3600;    
-const int PCRoomLottoMaxAmount = 3; 
+const int PCRoomLottoSec = 3600;
+const int PCRoomLottoMaxAmount = 3;
 
 void addLogoutPlayerData(Player* pPlayer);
 
@@ -110,7 +110,7 @@ GamePlayer::GamePlayer(Socket* pSocket)
     getCurrentTime(m_ExpireTime);
     m_ExpireTime.tv_sec += maxIdleSec;
 
-    
+
     // getCurrentTime(m_SpeedVerify);
     m_SpeedVerify.tv_sec = 0;
     ;
@@ -140,7 +140,7 @@ GamePlayer::GamePlayer(Socket* pSocket)
 
     m_bPacketLog = false;
 
-    
+
     m_LoginDateTime = VSDateTime::currentDateTime();
 
 #ifdef __THAILAND_SERVER__
@@ -162,14 +162,12 @@ GamePlayer::~GamePlayer() {
 
     //__ENTER_CRITICAL_SECTION(m_Mutex)
 
-    
-    
+
     Assert(m_PlayerStatus == GPS_END_SESSION);
 
     try {
         // Delete creature
         if (m_pCreature != NULL) {
-            
             if (m_pCreature->hasRelicItem()) {
                 dropRelicToZone(m_pCreature, false);
             }
@@ -179,7 +177,7 @@ GamePlayer::~GamePlayer() {
 
             // try
             //{
-            
+
             g_pPCFinder->deleteCreature(m_pCreature->getName());
             //}
             // catch (NoSuchElementException & t)
@@ -187,19 +185,19 @@ GamePlayer::~GamePlayer() {
             //}
 
 #ifdef __CONNECT_BILLING_SYSTEM__
-            
+
             if (isBillingPlayAvaiable() && !m_bMetroFreePlayer) // by sigi. 2002.11.23
             {
                 g_pBillingPlayerManager->sendPayLogout(this);
             }
 #elif defined(__CONNECT_CBILLING_SYSTEM__)
-            
+
             g_pCBillingPlayerManager->sendLogout(this);
 #endif
 
             Statement* pStmt = NULL;
 
-            
+
             if (m_pCreature->isSlayer()) {
                 Slayer* pSlayer = dynamic_cast<Slayer*>(m_pCreature);
                 if (pSlayer->getGuildID() != 99) {
@@ -214,7 +212,7 @@ GamePlayer::~GamePlayer() {
 
                         g_pSharedServerManager->sendPacket(&gsGuildMemberLogOn);
 
-                        
+
                         BEGIN_DB {
                             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
                             PreparedStatement updateGuildMemberLogOffStmt(
@@ -241,7 +239,7 @@ GamePlayer::~GamePlayer() {
 
                         g_pSharedServerManager->sendPacket(&gsGuildMemberLogOn);
 
-                        
+
                         BEGIN_DB {
                             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
                             PreparedStatement updateGuildMemberLogOffStmt(
@@ -268,7 +266,7 @@ GamePlayer::~GamePlayer() {
 
                         g_pSharedServerManager->sendPacket(&gsGuildMemberLogOn);
 
-                        
+
                         BEGIN_DB {
                             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
                             PreparedStatement updateGuildMemberLogOffStmt(
@@ -304,7 +302,7 @@ GamePlayer::~GamePlayer() {
         throw;
     }
 
-    
+
     while (!m_PacketHistory.empty()) {
         Packet* pPacket = m_PacketHistory.front();
         SAFE_DELETE(pPacket);
@@ -338,19 +336,16 @@ void GamePlayer::tv_sub(struct timeval* out, struct timeval* in) {
 void GamePlayer::processCommand(bool Option) {
     __BEGIN_TRY
 
-    
+
     char header[szPacketHeader];
     PacketID_t packetID;
     PacketSize_t packetSize;
-    
+
     SequenceSize_t packetSequence;
 
     Packet* pPacket = NULL;
 
     try {
-        
-        
-        
         if (isPenaltyFlag(PENALTY_TYPE_KICKED)) {
             filelog("GamePlayer.txt", "Penalty Kicked. Name[%s],Host[%s],Type[%d]",
                     ((getCreature() == NULL) ? "NULL" : getCreature()->getName().c_str()),
@@ -363,12 +358,8 @@ void GamePlayer::processCommand(bool Option) {
             m_EventManager.heartbeat();
         }
 
-        
+
         while (true) {
-            
-            
-            
-            
             if (!m_pInputStream->peek(&header[0], szPacketHeader)) {
                 Timeval currentTime;
                 getCurrentTime(currentTime);
@@ -383,14 +374,13 @@ void GamePlayer::processCommand(bool Option) {
                 break;
             }
 
-            
-            
+
             memcpy(&packetID, &header[0], szPacketID);
             memcpy(&packetSize, &header[szPacketID], szPacketSize);
-            
+
 
             memcpy(&packetSequence, &header[szPacketID + szPacketSize], szSequenceSize);
-            
+
             if (packetSequence != m_Sequence) {
                 filelog("SequenceError.txt", "Timeout Disconnect1. Name[%s],Host[%s]",
                         ((getCreature() == NULL) ? "NULL" : getCreature()->getName().c_str()),
@@ -399,7 +389,7 @@ void GamePlayer::processCommand(bool Option) {
             }
             m_Sequence++;
 
-            
+
             if (packetID >= (int)Packet::PACKET_MAX) {
                 filelog("GamePlayer.txt", "Packet ID exceed MAX, RECV [%d/%d],ID[%s],Host[%s]", packetID,
                         Packet::PACKET_MAX, m_ID.c_str(),
@@ -410,7 +400,6 @@ void GamePlayer::processCommand(bool Option) {
             }
 
             try {
-                
                 if (!g_pPacketValidator->isValidPacketID(getPlayerStatus(), packetID)) {
                     filelog("GamePlayer.txt", "Not Valid Packet, RECV [%d],ID[%s],Host[%s]", packetID, m_ID.c_str(),
                             //						getCreature()->getName().c_str(),
@@ -418,7 +407,7 @@ void GamePlayer::processCommand(bool Option) {
                     throw InvalidProtocolException("invalid packet order");
                 }
 
-                
+
                 if (packetID == Packet::PACKET_GC_OTHER_STORE_INFO || packetID == Packet::PACKET_GC_MY_STORE_INFO) {
                     filelog("GamePlayer.txt", "Not Valid Packet, RECV [%d],ID[%s],Host[%s]", packetID, m_ID.c_str(),
                             //						getCreature()->getName().c_str(),
@@ -426,7 +415,7 @@ void GamePlayer::processCommand(bool Option) {
                     throw InvalidProtocolException("invalid packet order");
                 }
 
-                
+
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID)) {
                     filelog("GamePlayer.txt", "Too Larget Packet Size, RECV [%d],PacketSize[%d/%d],ID[%s],Host[%s]",
                             packetID, packetSize, g_pPacketFactoryManager->getPacketMaxSize(packetID), m_ID.c_str(),
@@ -435,29 +424,25 @@ void GamePlayer::processCommand(bool Option) {
                     throw InvalidProtocolException("too large packet size");
                 }
 
-                
+
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     // throw InsufficientDataException();
                     break;
 
-                
+
                 getCurrentTime(m_ExpireTime);
                 m_ExpireTime.tv_sec += maxIdleSec;
 
-                
-                
-                
+
                 pPacket = g_pPacketFactoryManager->createPacket(packetID);
 
-                
-                
-                
+
                 m_pInputStream->readPacket(pPacket);
 
-                
+
                 m_PacketHistory.push_back(pPacket);
 
-                
+
                 if (m_bPacketLog) {
                     Timeval currentTime;
                     getCurrentTime(currentTime);
@@ -472,8 +457,7 @@ void GamePlayer::processCommand(bool Option) {
                 // cout << "[" << (int)Thread::self() << "] execute before : " << pPacket->getPacketName().c_str() <<
                 // endl;
 
-                
-                
+
                 try {
 #ifdef __PROFILE_PACKETS__
 
@@ -500,17 +484,13 @@ void GamePlayer::processCommand(bool Option) {
                 // cout << "[" << (int)Thread::self() << "] execute after : " << pPacket->getPacketName().c_str() <<
                 // endl;
 
-                
+
                 while (m_PacketHistory.size() > nPacketHistorySize) {
                     Packet* oldPacket = m_PacketHistory.front();
                     SAFE_DELETE(oldPacket);
                     m_PacketHistory.pop_front();
                 }
             } catch (IgnorePacketException& igpe) {
-                
-                
-
-                
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID)) {
                     filelog("GamePlayer.txt",
                             "Too Larget Packet Size[Ignore], RECV [%d],PacketSize[%d],Name[%s],Host[%s]", packetID,
@@ -519,22 +499,15 @@ void GamePlayer::processCommand(bool Option) {
                     throw InvalidProtocolException("too large packet sizeIgnore");
                 }
 
-                
-                
+
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     throw InsufficientDataException();
 
-                
-                
-                m_pInputStream->skip(szPacketHeader + packetSize);
 
-                
-                
-                
+                m_pInputStream->skip(szPacketHeader + packetSize);
             }
         }
     } catch (InsufficientDataException& ide) {
-        
         Timeval currentTime;
         getCurrentTime(currentTime);
         if (currentTime >= m_ExpireTime) {
@@ -545,8 +518,7 @@ void GamePlayer::processCommand(bool Option) {
             throw DisconnectException("    ,  .");
         }
     }
-    
-     
+
 
     __END_CATCH
 }
@@ -574,7 +546,7 @@ void GamePlayer::processOutput() {
     } catch (InvalidProtocolException& It) {
         // cerr << "GamePlayer::processOutput Exception Check!!" << endl;
         // cerr << It.toString() << endl;
-        
+
         throw DisconnectException("Pipe    ");
     }
 
@@ -595,7 +567,6 @@ void GamePlayer::sendPacket(Packet* pPacket) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     try {
-        
         if (m_bPacketLog) {
             Timeval currentTime;
             getCurrentTime(currentTime);
@@ -650,7 +621,6 @@ void GamePlayer::sendPacket(Packet* pPacket) {
     } catch (InvalidProtocolException& It) {
         // cout << "GamePlayer::sendPacket Exception Check!!" << endl;
         // cout << It.toString() << endl;
-        
     }
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
@@ -673,30 +643,27 @@ void GamePlayer::disconnect(bool bDisconnected) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     //--------------------------------------------------------------------------------
-    
-    
+
+
     //--------------------------------------------------------------------------------
     string CreatureName = "";
     if (m_pCreature != NULL) {
         CreatureName = m_pCreature->getName();
 
         try {
-            
             // *CAUTION*
-            
-            
-            
-            
+
+
             if (getPlayerStatus() == GPS_NORMAL) {
                 //----------------------------------
-                
+
                 //----------------------------------
                 Zone* pZone = m_pCreature->getZone();
                 Assert(pZone != NULL);
                 pZone->deleteQueuePC(m_pCreature);
                 pZone->deleteCreature(m_pCreature, m_pCreature->getX(), m_pCreature->getY());
                 //--------------------------------------------------------------------------------
-                
+
                 //--------------------------------------------------------------------------------
                 m_pCreature->save();
             }
@@ -707,7 +674,7 @@ void GamePlayer::disconnect(bool bDisconnected) {
     setPlayerStatus(GPS_END_SESSION);
 
     //--------------------------------------------------------------------------------
-    
+
     //--------------------------------------------------------------------------------
     if (m_ID != "") {
         Statement* pStmt1 = NULL;
@@ -728,9 +695,6 @@ void GamePlayer::disconnect(bool bDisconnected) {
             //	addLogoutPlayerData(this);
 
             if (logoffPlayerStmt.getAffectedRowCount() == 0) {
-
-
-
             }
 
 
@@ -742,7 +706,6 @@ void GamePlayer::disconnect(bool bDisconnected) {
         }
         END_DB(pStmt1)
         BEGIN_DB {
-
             Connection* pConn2 = g_pDatabaseManager->getConnection("DARKEDEN");
             PreparedStatement deleteUserIPInfoStmt(pConn2, "DELETE FROM UserIPInfo WHERE Name = ?");
             deleteUserIPInfoStmt.bindString(1, CreatureName);
@@ -751,33 +714,28 @@ void GamePlayer::disconnect(bool bDisconnected) {
         END_DB(pStmt2)
     }
 
-    
-    
+
     if (m_pReconnectPacket != NULL) {
         // cout << "[SendReconnect] " << m_pReconnectPacket->toString().c_str() << endl;
 
         try {
             // sendPacket( m_pReconnectPacket );
             Player::sendPacket(m_pReconnectPacket);
-            
+
             m_pOutputStream->flush();
         } catch (Throwable& t) {
-            
         }
 
         SAFE_DELETE(m_pReconnectPacket);
     }
 
 
-    
-    
     if (bDisconnected == UNDISCONNECTED) {
         try {
-            
             // GCDisconnect gcDisconnect;
             // sendPacket(gcDisconnect);
 
-            
+
             m_pOutputStream->flush();
         } catch (Throwable& t) {
             // cerr << "GamePlayer::disconnect() : GamePlayer::disconnect Exception Check!!" << endl;
@@ -785,7 +743,7 @@ void GamePlayer::disconnect(bool bDisconnected) {
         }
     }
 
-    
+
     m_pSocket->close();
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
@@ -923,28 +881,23 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
     getCurrentTime(CurrentTime);
 
     //////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     //
 
     if (PacketID == Packet::PACKET_CG_VERIFY_TIME) {
         if (m_SpeedVerify.tv_sec == 0) {
-            
-            
             m_SpeedVerify.tv_sec = CurrentTime.tv_sec + SpeedCheckDelay;
 
             SpeedCheck = true;
         } else {
-            
-            
             if (CurrentTime.tv_sec > m_SpeedVerify.tv_sec - maxTimeGap) {
                 m_SpeedVerify.tv_sec = CurrentTime.tv_sec + SpeedCheckDelay;
 
                 SpeedCheck = true;
-                
+
                 m_VerifyCount = max(0, m_VerifyCount - 1);
             } else {
-                
                 m_SpeedVerify.tv_sec = CurrentTime.tv_sec + SpeedCheckDelay;
 
                 if (m_VerifyCount > maxVerifyCount) {
@@ -957,22 +910,21 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
         }
     }
     //
-    
+
     // Add by Coffee 2007-6-25 kf_168@hotmail.com
     //////////////////////////////////////////////////////////////////////////
 
 
     //////////////////////////////////////////////////////////////////////////
-    
+
     // Add by Coffee 2007-6-25 E-mail: kf_168@hotmail.com
     if (PacketID == Packet::PACKET_CG_MOVE) {
         if (CurrentTime <= m_MoveSpeedVerify) {
-            
         }
         // Timeval UseTimer=CurrentTime-m_MoveSpeedVerify;
         tv_sub(&CurrentTime, &m_MoveSpeedVerify);
         double rtt;
-        
+
         rtt = CurrentTime.tv_sec * 1000 + CurrentTime.tv_usec / 1000;
 
         getCurrentTime(m_MoveSpeedVerify);
@@ -984,7 +936,6 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
     // End by Coffee
     //////////////////////////////////////////////////////////////////////////
 
-     
 
     return SpeedCheck;
 
@@ -1026,8 +977,7 @@ void GamePlayer::saveSpecialEventCount(void) {
         Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
         //		pConn = g_pDatabaseManager->getConnection( (int)Thread::self() );
 
-        PreparedStatement updateSpecialEventCountStmt(pConn,
-                                                        "UPDATE Player SET SpecialEventCount=? WHERE PlayerID=?");
+        PreparedStatement updateSpecialEventCountStmt(pConn, "UPDATE Player SET SpecialEventCount=? WHERE PlayerID=?");
         updateSpecialEventCountStmt.bindUInt(1, m_SpecialEventCount);
         updateSpecialEventCountStmt.bindString(2, m_ID);
         updateSpecialEventCountStmt.execute();
@@ -1050,16 +1000,16 @@ bool GamePlayer::sendBillingLogin() {
             Timeval afterTime;
             getCurrentTime(afterTime);
 
-            
+
             if (afterTime.tv_sec > currentTime.tv_sec + 1) {
                 filelog("billingLoginTime.txt", "PlayerID : %s, CallTime : %d sec, Try : %d", m_ID.c_str(),
                         (int)(afterTime.tv_sec - currentTime.tv_sec), m_BillingLoginRequestCount);
             }
 
-            
+
             m_BillingLoginRequestCount++;
 
-            
+
             m_BillingNextLoginRequestTime.tv_sec = currentTime.tv_sec + 60;
         }
 
@@ -1106,10 +1056,10 @@ void GamePlayer::setEncryptCode() {
 #ifdef __USE_ENCRYPTER__
     Assert(m_pCreature != NULL);
 
-    
+
     // ObjectID_t 	objectID 	= m_pCreature->getObjectID();
 
-    
+
     //	ZoneID_t 	zoneID 		= m_pCreature->getZone()->getZoneID();
     //	static int	serverID	= g_pConfig->getPropertyInt("ServerID");
 
@@ -1120,9 +1070,9 @@ void GamePlayer::setEncryptCode() {
     uchar code = m_pCreature->getZone()->getEncryptCode();
 
 #ifdef __ACTIVE_SERVICE_DEADLINE__
-    
+
     VSDate date = VSDate::currentDate();
-    
+
     if (date.year() >= DEADLINE_YEAR && date.month() > DEADLINE_MONTH)
         code += (date.year() + date.month()) / 11;
 #endif
@@ -1144,7 +1094,7 @@ void GamePlayer::setEncryptCode() {
 void GamePlayer::kickPlayer(uint nSeconds, uint KickMessageType) {
     __BEGIN_TRY
 
-    
+
     if (m_EventManager.getEvent(Event::EVENT_CLASS_KICK) != NULL)
         return;
 
@@ -1152,7 +1102,7 @@ void GamePlayer::kickPlayer(uint nSeconds, uint KickMessageType) {
     pEventKick->setDeadline(nSeconds * 10);
     addEvent(pEventKick);
 
-    
+
     GCKickMessage gcKickMessage;
     gcKickMessage.setType(KickMessageType);
     gcKickMessage.setSeconds(nSeconds);
@@ -1303,7 +1253,7 @@ void GamePlayer::checkPCRoomLotto(const Timeval& currentTime) {
     if (time >= PCRoomLottoSec) {
         giveLotto();
 
-        
+
         m_PCRoomLottoStartTime.tv_sec = currentTime.tv_sec;
         m_PCRoomLottoSumTime = 0;
     }
@@ -1325,8 +1275,8 @@ void GamePlayer::giveLotto() {
         Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
         PreparedStatement selectLottoAmountStmt(pConn,
-                                                 "SELECT Amount FROM PCRoomLottoObject WHERE PlayerID = ? AND Name = ? "
-                                                 "AND DimensionID = ? AND WorldID = ?");
+                                                "SELECT Amount FROM PCRoomLottoObject WHERE PlayerID = ? AND Name = ? "
+                                                "AND DimensionID = ? AND WorldID = ?");
         selectLottoAmountStmt.bindString(1, PlayerID);
         selectLottoAmountStmt.bindString(2, Name);
         selectLottoAmountStmt.bindUInt(3, DimensionID);
@@ -1348,7 +1298,6 @@ void GamePlayer::giveLotto() {
                 updateLottoAmountStmt.execute();
             }
         } else {
-
             PreparedStatement insertLottoStmt(pConn, "INSERT INTO PCRoomLottoObject VALUES ( 0, ?, ?, ?, ?, ?, ?, 1 )");
             insertLottoStmt.bindUInt(1, m_PCRoomID);
             insertLottoStmt.bindString(2, PlayerID);
@@ -1395,17 +1344,16 @@ void GamePlayer::logLoginoutDateTime() {
     if (m_pCreature == NULL)
         return;
 
-    
+
     uint dimensionID = g_pConfig->getPropertyInt("Dimension");
     if (g_pConfig->getPropertyInt("IsNetMarble") == 0) {
-        
         dimensionID = 2;
     }
 
     // WorldID
     uint worldID = g_pConfig->getPropertyInt("WorldID");
 
-    
+
     uint racecode;
     uint str, dex, inte;
     if (m_pCreature->isSlayer()) {
@@ -1418,7 +1366,6 @@ void GamePlayer::logLoginoutDateTime() {
         dex = pSlayer->getDEX();
         inte = pSlayer->getINT();
     } else if (m_pCreature->isVampire()) {
-        
         racecode = 10;
 
         Vampire* pVampire = dynamic_cast<Vampire*>(m_pCreature);
@@ -1428,7 +1375,6 @@ void GamePlayer::logLoginoutDateTime() {
         dex = pVampire->getDEX();
         inte = pVampire->getINT();
     } else if (m_pCreature->isOusters()) {
-        
         racecode = 20;
 
         Ousters* pOusters = dynamic_cast<Ousters*>(m_pCreature);
@@ -1441,10 +1387,10 @@ void GamePlayer::logLoginoutDateTime() {
         return;
     }
 
-    
+
     uint level = (uint)m_pCreature->getLevel();
 
-    
+
     VSDateTime logoutDateTime = VSDateTime::currentDateTime();
 
     // filename

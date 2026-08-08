@@ -29,12 +29,11 @@
 const int defaultLoginPlayerInputStreamSize = 1024;
 const int defaultLoginPlayerOutputStreamSize = 4096;
 
-static int maxIdleSec = 60 * 15; 
+static int maxIdleSec = 60 * 15;
 
 
-static uint maxWaitForKickCharacter = 3;      
-static uint maxWaitForKickCharacterCount = 3; 
-
+static uint maxWaitForKickCharacter = 3;
+static uint maxWaitForKickCharacterCount = 3;
 
 
 void addLoginPlayerData(const string& ID, const string& ip, const string& SSN, const string& zipcode);
@@ -70,7 +69,7 @@ LoginPlayer::LoginPlayer(Socket* pSocket)
 
     Assert(m_PacketHistory.empty());
 
-    
+
     getCurrentTime(m_ExpireTime);
     m_ExpireTime.tv_sec += maxIdleSec;
 
@@ -97,8 +96,7 @@ LoginPlayer::LoginPlayer(Socket* pSocket)
 LoginPlayer::~LoginPlayer() {
     __BEGIN_TRY
 
-    
-    
+
     Assert(m_PlayerStatus == LPS_END_SESSION);
 
     // delete all previous packets
@@ -133,18 +131,16 @@ void LoginPlayer::processCommand(bool Option) {
 
     //	static Timeval currentTime;
 
-    
+
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         Timeval currentTime;
         getCurrentTime(currentTime);
 
-        
+
         if (currentTime >= m_ExpireTimeForKickCharacter) {
-            
             sendLGKickCharacter();
 
-            
-            
+
             if (++m_KickCharacterCount >= maxWaitForKickCharacterCount) {
                 sendLCLoginOK();
             }
@@ -154,19 +150,14 @@ void LoginPlayer::processCommand(bool Option) {
     }
 
     try {
-        
         char header[szPacketHeader];
         PacketID_t packetID;
         PacketSize_t packetSize;
         Packet* pPacket;
 
-        
+
         while (true) {
-            
-            
-            
             if (!m_pInputStream->peek(header, szPacketHeader)) {
-                
                 Timeval currentTime;
                 getCurrentTime(currentTime);
                 if (currentTime >= m_ExpireTime)
@@ -174,8 +165,7 @@ void LoginPlayer::processCommand(bool Option) {
                 break;
             }
 
-            
-            
+
             memcpy(&packetID, &header[0], szPacketID);
             memcpy(&packetSize, &header[szPacketID], szPacketSize);
 
@@ -195,58 +185,50 @@ void LoginPlayer::processCommand(bool Option) {
                 << packetID << ") " << szPacketHeader + packetSize << "/" << m_pInputStream->length() << eos;
             cout << msg.toString() << endl;
 
-            
+
             if (packetID >= Packet::PACKET_MAX)
-                
+
                 throw InvalidProtocolException("too large packet id");
 
             try {
-                
                 if (!g_pPacketValidator->isValidPacketID(getPlayerStatus(), packetID)) {
                     // DEBUG by tiancaiamao
                     cout << "player status: " << getPlayerStatus() << " receive packet: " << packetID << endl;
                     throw InvalidProtocolException("invalid packet order");
                 }
 
-                
+
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
                     throw InvalidProtocolException("too large packet size");
 
-                
-                
+
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     //	throw InsufficientDataException();
                     break;
 
-                
-                
+
                 getCurrentTime(m_ExpireTime);
                 m_ExpireTime.tv_sec += maxIdleSec;
 
-                
-                
-                
+
                 pPacket = g_pPacketFactoryManager->createPacket(packetID);
 
-                
-                
-                
+
                 m_pInputStream->readPacket(pPacket);
 
                 Timeval start, end;
                 getCurrentTime(start);
 
-                
-                
+
                 pPacket->execute(this);
 
                 getCurrentTime(end);
                 g_PacketProfileManager.addAccuTime(pPacket->getPacketName(), start, end);
 
-                
+
                 m_PacketHistory.push_back(pPacket);
 
-                
+
                 while (m_PacketHistory.size() > nPacketHistory) {
                     Packet* oldPacket = m_PacketHistory.front();
                     delete oldPacket;
@@ -254,41 +236,28 @@ void LoginPlayer::processCommand(bool Option) {
                 }
 
             } catch (IgnorePacketException&) {
-                
-                
-
-                
                 if (packetSize > g_pPacketFactoryManager->getPacketMaxSize(packetID))
                     throw InvalidProtocolException("too large packet size");
 
-                
-                
+
                 if (m_pInputStream->length() < szPacketHeader + packetSize)
                     throw InsufficientDataException();
 
-                
-                
-                m_pInputStream->skip(szPacketHeader + packetSize);
 
-                
-                
-                
+                m_pInputStream->skip(szPacketHeader + packetSize);
             }
         }
 
     } catch (InsufficientDataException& ide) {
-        
         Timeval currentTime;
         getCurrentTime(currentTime);
         if (currentTime >= m_ExpireTime)
             throw DisconnectException("     .");
 
     } catch (InvalidProtocolException& ipe) {
-        
         throw;
 
     } catch (DisconnectException& de) {
-        
         throw;
     }
 
@@ -303,29 +272,26 @@ void LoginPlayer::disconnect(bool bDisconnected) {
     __BEGIN_TRY
 
     if (bDisconnected == UNDISCONNECTED) {
-        
         // GCDisconnect lcDisconnect;
         // sendPacket( lcDisconnect );
 
-        
+
         m_pOutputStream->flush();
     }
 
-    
+
     m_pSocket->close();
 
-    
+
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         m_ID = "NONE";
     }
 
-    
+
     Assert(m_PlayerStatus != LPS_END_SESSION);
     m_PlayerStatus = LPS_END_SESSION;
 
-    
-    
-    
+
     if (m_ID != "NONE") {
         // Result*    pResult = NULL;
 
@@ -341,9 +307,8 @@ void LoginPlayer::disconnect(bool bDisconnected) {
             // Assert( logon == "LOGON" );
 
 
-
-            PreparedStatement logoffPlayerStmt(
-                pConn, "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
+            PreparedStatement logoffPlayerStmt(pConn,
+                                               "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
             logoffPlayerStmt.bindString(1, m_ID);
             logoffPlayerStmt.execute();
 
@@ -372,29 +337,26 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
     __BEGIN_TRY
 
     if (bDisconnected == UNDISCONNECTED) {
-        
         // GCDisconnect lcDisconnect;
         // sendPacket( lcDisconnect );
 
-        
+
         m_pOutputStream->flush();
     }
 
-    
+
     m_pSocket->close();
 
-    
+
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         m_ID = "NONE";
     }
 
-    
+
     Assert(m_PlayerStatus != LPS_END_SESSION);
     m_PlayerStatus = LPS_END_SESSION;
 
-    
-    
-    
+
     if (m_ID != "NONE") {
         // Result*    pResult = NULL;
 
@@ -410,9 +372,8 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
             // Assert( logon == "LOGON" );
 
 
-
-            PreparedStatement logoffPlayerStmt(
-                pConn, "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
+            PreparedStatement logoffPlayerStmt(pConn,
+                                               "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
             logoffPlayerStmt.bindString(1, m_ID);
             logoffPlayerStmt.execute();
 
@@ -435,8 +396,6 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
 
 //--------------------------------------------------------------------------------
 //
-
-
 
 
 //
@@ -515,7 +474,7 @@ Packet* LoginPlayer::getOldPacket(PacketID_t packetID) {
 void LoginPlayer::sendLGKickCharacter() {
     cout << "send LGKickCharacter" << endl;
 
-    
+
     LGKickCharacter lgKickCharacter;
 
     Statement* pStmt = NULL;
@@ -528,8 +487,8 @@ void LoginPlayer::sendLGKickCharacter() {
     uint gameServerPort;
 
     //----------------------------------------------------------------------
-    
-    
+
+
     //----------------------------------------------------------------------
     if (!isSetWorldGroupID()) {
         BEGIN_DB {
@@ -550,12 +509,10 @@ void LoginPlayer::sendLGKickCharacter() {
                 setLastSlot(lastSlot);
 
                 setWorldGroupID(true);
-
             }
         }
         END_DB(pStmt1)
     } else {
-
         serverID = 1;
         worldID = getWorldID();
         serverGroupID = getGroupID();
@@ -597,9 +554,9 @@ void LoginPlayer::sendLGKickCharacter() {
     }
 
     //----------------------------------------------------------------------
-    
+
     //
-    
+
     //----------------------------------------------------------------------
     for (int i = 0; i < g_pGameServerInfoManager->getMaxServerGroupID(); i++) {
         serverGroupID = i;
@@ -620,18 +577,18 @@ void LoginPlayer::sendLGKickCharacter() {
             }
         } catch (NoSuchElementException&) {
             cout << "No GameServerInfo" << endl;
-            
+
             //		LCLoginError lcLoginError;
             //		lcLoginError.setErrorID(ALREADY_CONNECTED);
             //		sendPacket(&lcLoginError);
             //		setPlayerStatus(LPS_BEGIN_SESSION);
 
-            setID("NONE"); 
+            setID("NONE");
 
             return;
         }
 
-        lgKickCharacter.setID(getSocket()->getSOCKET()); 
+        lgKickCharacter.setID(getSocket()->getSOCKET());
         lgKickCharacter.setPCName(characterName);
 
         cout << "( " << gameServerIP.c_str() << ", " << gameServerPort << " )" << endl;
@@ -647,7 +604,6 @@ void LoginPlayer::sendLGKickCharacter() {
 //
 // send LCLoginOK
 //
-
 
 
 //
@@ -667,8 +623,7 @@ void LoginPlayer::sendLCLoginOK() {
             loginPlayerStmt.bindString(1, getID());
             loginPlayerStmt.execute();
             if (loginPlayerStmt.getAffectedRowCount() == 0) {
-                filelog("MultiLogin.log", "     : [%s:%s]", getID().c_str(),
-                        connectIP.c_str());
+                filelog("MultiLogin.log", "     : [%s:%s]", getID().c_str(), connectIP.c_str());
                 LCLoginError lcLoginError;
                 // lcLoginError.setMessage("already connected");
                 lcLoginError.setErrorID(ALREADY_CONNECTED);
@@ -687,10 +642,9 @@ void LoginPlayer::sendLCLoginOK() {
         END_DB(pStmt)
 
 
-        
         LCLoginOK lcLoginOK;
 
-        
+
         lcLoginOK.setAdult(isAdult());
         lcLoginOK.setLastDays(0xffff);
 
@@ -698,7 +652,7 @@ void LoginPlayer::sendLCLoginOK() {
 
         setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
-        
+
         addLoginPlayerData(m_ID, connectIP, m_SSN, m_Zipcode);
 
     } catch (Throwable& t) {
@@ -718,10 +672,10 @@ bool LoginPlayer::sendBillingLogin() {
         if (currentTime > m_BillingNextLoginRequestTime) {
             g_pBillingPlayerManager->sendPayLogin(this);
 
-            
+
             m_BillingLoginRequestCount++;
 
-            
+
             m_BillingNextLoginRequestTime.tv_sec = currentTime.tv_sec + 10;
         }
 
@@ -757,9 +711,7 @@ string LoginPlayer::toString() const {
 
 //
 //////////////////////////////////////////////////////////////////////////////
-void addLogoutPlayerData(Player* pPlayer) {
-     
-}
+void addLogoutPlayerData(Player* pPlayer) {}
 
 void LoginPlayer::makePCList(LCPCList& lcPCList) {
     WorldID_t WorldID = getWorldID();
@@ -769,21 +721,11 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
         Connection* pConn2 = g_pDatabaseManager->getConnection(WorldID);
 
         //----------------------------------------------------------------------
-        
-        
+
+
         //
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
         //
         //----------------------------------------------------------------------
         PreparedStatement selectSlayerListStmt(
@@ -798,15 +740,13 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
         // Prepared once, executed per matching row below (Vampire/Ousters
         // rows can't share a statement since their SQL text differs).
         PreparedStatement selectVampireStmt(
-            pConn2,
-            "SELECT Name, Slot, Sex, BatColor, SkinColor, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, "
-            "`Rank`, GoalExp, Level, Bonus, Fame, Alignment, Shape, CoatColor FROM Vampire WHERE PlayerID = "
-            "? AND Active = 'ACTIVE' AND Name=?");
+            pConn2, "SELECT Name, Slot, Sex, BatColor, SkinColor, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, "
+                    "`Rank`, GoalExp, Level, Bonus, Fame, Alignment, Shape, CoatColor FROM Vampire WHERE PlayerID = "
+                    "? AND Active = 'ACTIVE' AND Name=?");
         PreparedStatement selectOustersStmt(
-            pConn2,
-            "SELECT Name, Slot, Sex, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, `Rank`, Exp, Level, "
-            "Bonus, SkillBonus, Fame, Alignment, CoatType, ArmType, CoatColor, HairColor, ArmColor, BootsColor "
-            "FROM Ousters WHERE PlayerID = ? AND Active = 'ACTIVE' AND Name=?");
+            pConn2, "SELECT Name, Slot, Sex, AdvancementClass, STR, DEX, INTE, HP, CurrentHP, `Rank`, Exp, Level, "
+                    "Bonus, SkillBonus, Fame, Alignment, CoatType, ArmType, CoatColor, HairColor, ArmColor, BootsColor "
+                    "FROM Ousters WHERE PlayerID = ? AND Active = 'ACTIVE' AND Name=?");
 
         DWORD shape;
         Color_t colors[PCSlayerInfo::SLAYER_COLOR_MAX];
@@ -818,10 +758,9 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
             string name = pResult1->getString(++i);
 
             if (race == "SLAYER") {
-                
                 PCSlayerInfo* pPCSlayerInfo = new PCSlayerInfo();
 
-                
+
                 pPCSlayerInfo->setName(name);
                 pPCSlayerInfo->setSlot(pResult1->getString(++i));
                 pPCSlayerInfo->setSex(pResult1->getString(++i));
@@ -845,7 +784,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pPCSlayerInfo->setAlignment(pResult1->getInt(++i));
 
-                
+
                 shape = pResult1->getDWORD(++i);
 
                 colors[PCSlayerInfo::SLAYER_COLOR_HAIR] = pPCSlayerInfo->getHairColor();
@@ -863,16 +802,16 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 lcPCList.setPCInfo(pPCSlayerInfo->getSlot(), pPCSlayerInfo);
             } else if (race == "VAMPIRE") {
                 //----------------------------------------------------------------------
-                
-                
+
+
                 //
                 //    - Name
                 //    - Slot
                 //    - Sex
                 //    - BatColor
                 //    - SkinColor
-                
-                
+
+
                 //    - CurrentHP/MaxHP
                 //    - Gold
                 //    - ZoneID
@@ -889,10 +828,10 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pResult2->next();
 
-                
+
                 PCVampireInfo* pPCVampireInfo = new PCVampireInfo();
 
-                
+
                 uint i = 0;
 
                 pPCVampireInfo->setName(pResult2->getString(++i));
@@ -914,7 +853,7 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 pPCVampireInfo->setFame(pResult2->getInt(++i));
                 pPCVampireInfo->setAlignment(pResult2->getInt(++i));
 
-                
+
                 shape = pResult2->getDWORD(++i);
 
                 colorsVamp[0] = pResult2->getInt(++i); // CoatColor
@@ -923,16 +862,16 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
                 lcPCList.setPCInfo(pPCVampireInfo->getSlot(), pPCVampireInfo);
             } else {
                 //----------------------------------------------------------------------
-                
-                
+
+
                 //
                 //    - Name
                 //    - Slot
                 //    - Sex
                 //    - HairColor
                 //    - SkinColor
-                
-                
+
+
                 //    - CurrentHP/MaxHP
                 //    - Gold
                 //    - ZoneID
@@ -949,10 +888,10 @@ void LoginPlayer::makePCList(LCPCList& lcPCList) {
 
                 pResult2->next();
 
-                
+
                 PCOustersInfo* pPCOustersInfo = new PCOustersInfo();
 
-                
+
                 uint i = 0;
 
                 pPCOustersInfo->setName(pResult2->getString(++i));

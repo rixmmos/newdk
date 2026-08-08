@@ -314,7 +314,6 @@ bool PaySystem::updatePayPlayTime(const string& playerID, const VSDateTime& curr
             }
 
             if (m_PayPlayAvailableHours <= 0) {
-                
                 m_PayPlayStartTime.tv_sec = 0;
                 m_bPremiumPlay = false;
                 return false;
@@ -357,9 +356,8 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
         // Declared outside the try below so `pResult` (which points into this
         // statement's owned Result) stays valid for the rest of the block.
         PreparedStatement selectPCRoomInfoStmt(
-            pConn,
-            "SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours, r.PayPlayFlag, r.UserLimit, "
-            "r.UserMax FROM PCRoomInfo r, PCRoomIPInfo p WHERE p.IP=? AND p.ID=r.ID");
+            pConn, "SELECT r.ID, r.PayType, r.PayStartDate, r.PayPlayDate, r.PayPlayHours, r.PayPlayFlag, r.UserLimit, "
+                   "r.UserMax FROM PCRoomInfo r, PCRoomIPInfo p WHERE p.IP=? AND p.ID=r.ID");
         selectPCRoomInfoStmt.bindString(1, ip);
 
         try {
@@ -433,12 +431,11 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                         insertUserStmt.execute();
                     } catch (SQLQueryException& se) {
                         filelog("paySystem.txt", "%s", se.toString().c_str());
-
                     }
 
                     // Check the user count after insertion.
                     PreparedStatement selectUserCountAfterInsertStmt(pConn,
-                                                                      "SELECT count(*) from PCRoomUserInfo WHERE ID=?");
+                                                                     "SELECT count(*) from PCRoomUserInfo WHERE ID=?");
                     selectUserCountAfterInsertStmt.bindUInt(1, m_PCRoomID);
                     pResult = selectUserCountAfterInsertStmt.execute();
 
@@ -458,7 +455,6 @@ bool PaySystem::loginPayPlayPCRoom(const string& ip, const string& playerID) {
                             // Not allowed.
                             return false;
                         } else {
-
                             m_bPCRoomPlay = true;
 
                             return true;
@@ -586,7 +582,7 @@ bool PaySystem::loginPayPlay(PayType payType, const string& payPlayDate, int pay
 
     getCurrentTime(m_PayPlayStartTime);
 
-    
+
     checkPayPlayAvailable();
     m_bPremiumPlay = true;
 
@@ -612,9 +608,8 @@ bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
             // pConn = g_pDatabaseManager->getConnection((int)(long)Thread::self());
             Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-            PreparedStatement selectPlayerPayInfoStmt(pConn,
-                                                       "SELECT PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
-                                                       "FamilyPayPlayDate FROM Player WHERE PlayerID=?");
+            PreparedStatement selectPlayerPayInfoStmt(pConn, "SELECT PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
+                                                             "FamilyPayPlayDate FROM Player WHERE PlayerID=?");
             selectPlayerPayInfoStmt.bindString(1, playerID);
             Result* pResult = selectPlayerPayInfoStmt.execute();
 
@@ -701,7 +696,7 @@ bool PaySystem::loginPayPlay(const string& ip, const string& playerID) {
 
     getCurrentTime(m_PayPlayStartTime);
 
-    
+
     checkPayPlayAvailable();
 
     m_bPremiumPlay = true;
@@ -808,7 +803,7 @@ void PaySystem::decreasePayPlayTime(const string& playerID, uint mm) {
         Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
         PreparedStatement decreasePlayerHoursStmt(pConn,
-                                                   "UPDATE Player SET PayPlayHours=PayPlayHours-? WHERE PlayerID=?");
+                                                  "UPDATE Player SET PayPlayHours=PayPlayHours-? WHERE PlayerID=?");
         decreasePlayerHoursStmt.bindUInt(1, mm);
         decreasePlayerHoursStmt.bindString(2, playerID);
         decreasePlayerHoursStmt.execute();
@@ -833,7 +828,7 @@ void PaySystem::decreasePayPlayTimePCRoom(uint mm) {
         Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
         PreparedStatement decreasePCRoomHoursStmt(pConn,
-                                                   "UPDATE PCRoomInfo SET PayPlayHours=PayPlayHours-? WHERE ID=?");
+                                                  "UPDATE PCRoomInfo SET PayPlayHours=PayPlayHours-? WHERE ID=?");
         decreasePCRoomHoursStmt.bindUInt(1, mm);
         decreasePCRoomHoursStmt.bindUInt(2, m_PCRoomID);
         decreasePCRoomHoursStmt.execute();
@@ -907,7 +902,7 @@ bool PaySystem::isPayPlayingPeriodPersonal(const string& PlayerID) {
         Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
         PreparedStatement selectPayPlayStmt(pConn,
-                                             "SELECT PayType=0 or PayPlayDate > now() FROM Player WHERE PlayerID=?");
+                                            "SELECT PayType=0 or PayPlayDate > now() FROM Player WHERE PlayerID=?");
         selectPayPlayStmt.bindString(1, PlayerID);
         Result* pResult = selectPayPlayStmt.execute();
 
