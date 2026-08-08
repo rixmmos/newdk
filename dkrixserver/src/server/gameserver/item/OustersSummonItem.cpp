@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -65,15 +66,21 @@ void OustersSummonItem::create(const string& ownerID, Storage storage, StorageID
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO OustersSummonItemObject "
-            << "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (" << m_ItemID << ","
-            << m_ObjectID << "," << m_ItemType << ",'" << ownerID << "'," << (int)storage << "," << storageID << ","
-            << (int)x << "," << (int)y << "," << m_Charge << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertOustersSummonItemStmt(
+            pConn, "INSERT INTO OustersSummonItemObject "
+                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertOustersSummonItemStmt.bindUInt(1, m_ItemID);
+        insertOustersSummonItemStmt.bindUInt(2, m_ObjectID);
+        insertOustersSummonItemStmt.bindUInt(3, m_ItemType);
+        insertOustersSummonItemStmt.bindString(4, ownerID);
+        insertOustersSummonItemStmt.bindInt(5, (int)storage);
+        insertOustersSummonItemStmt.bindUInt(6, storageID);
+        insertOustersSummonItemStmt.bindInt(7, (int)x);
+        insertOustersSummonItemStmt.bindInt(8, (int)y);
+        insertOustersSummonItemStmt.bindInt(9, m_Charge);
+        insertOustersSummonItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -91,11 +98,16 @@ void OustersSummonItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersSummonItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveOustersSummonItemStmt(
+            pConn, string("UPDATE OustersSummonItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveOustersSummonItemStmt.bindUInt(1, m_ItemID);
+        tinysaveOustersSummonItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -126,14 +138,21 @@ void OustersSummonItem::save(const string& ownerID, Storage storage, StorageID_t
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersSummonItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Charge=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_Charge,
-                            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveOustersSummonItemStmt(
+            pConn, "UPDATE OustersSummonItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=?, Charge=? WHERE ItemID=?");
+        saveOustersSummonItemStmt.bindUInt(1, m_ObjectID);
+        saveOustersSummonItemStmt.bindUInt(2, m_ItemType);
+        saveOustersSummonItemStmt.bindString(3, ownerID);
+        saveOustersSummonItemStmt.bindInt(4, (int)storage);
+        saveOustersSummonItemStmt.bindUInt(5, storageID);
+        saveOustersSummonItemStmt.bindInt(6, (int)x);
+        saveOustersSummonItemStmt.bindInt(7, (int)y);
+        saveOustersSummonItemStmt.bindInt(8, m_Charge);
+        saveOustersSummonItemStmt.bindUInt(9, m_ItemID);
+        saveOustersSummonItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -207,11 +226,12 @@ void OustersSummonItemInfoManager::load()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM OustersSummonItemInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM OustersSummonItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -222,8 +242,9 @@ void OustersSummonItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, MaxCharge, Effect FROM OustersSummonItemInfo");
+        PreparedStatement selectOustersSummonItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, MaxCharge, Effect FROM OustersSummonItemInfo");
+        pResult = selectOustersSummonItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -240,8 +261,6 @@ void OustersSummonItemInfoManager::load()
 
             addItemInfo(pOustersSummonItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -276,10 +295,9 @@ void OustersSummonItemLoader::load(Creature* pCreature)
     Assert(pCreature != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -293,9 +311,11 @@ void OustersSummonItemLoader::load(Creature* pCreature)
         pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM "
-                                      "OustersSummonItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                      pCreature->getName().c_str());
+        PreparedStatement selectOustersSummonItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM "
+                   "OustersSummonItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectOustersSummonItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectOustersSummonItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -374,7 +394,6 @@ void OustersSummonItemLoader::load(Creature* pCreature)
                 } else if (storage == STORAGE_GARBAGE) {
                     processItemBug(pCreature, pOustersSummonItem);
                 } else {
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -384,8 +403,6 @@ void OustersSummonItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -400,15 +417,16 @@ void OustersSummonItemLoader::load(Zone* pZone)
     Assert(pZone != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM OustersSummonItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneOustersSummonItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM OustersSummonItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneOustersSummonItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneOustersSummonItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneOustersSummonItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -436,8 +454,6 @@ void OustersSummonItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

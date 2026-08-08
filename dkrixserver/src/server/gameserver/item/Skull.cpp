@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -53,7 +54,7 @@ void Skull::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -67,7 +68,7 @@ void Skull::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         /*
         StringStream sql;
         sql << "INSERT INTO SkullObject "
@@ -80,12 +81,19 @@ void Skull::create(const string& ownerID, Storage storage, StorageID_t storageID
 
         pStmt->executeQueryString(sql.toString());
         */
-        pStmt->executeQuery("INSERT INTO SkullObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
-                            "Num) VALUES (%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSkullStmt(
+            pConn, "INSERT INTO SkullObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSkullStmt.bindUInt(1, m_ItemID);
+        insertSkullStmt.bindUInt(2, m_ObjectID);
+        insertSkullStmt.bindUInt(3, m_ItemType);
+        insertSkullStmt.bindString(4, ownerID);
+        insertSkullStmt.bindInt(5, (int)storage);
+        insertSkullStmt.bindUInt(6, storageID);
+        insertSkullStmt.bindInt(7, (int)x);
+        insertSkullStmt.bindInt(8, (int)y);
+        insertSkullStmt.bindInt(9, (int)m_Num);
+        insertSkullStmt.execute();
     }
     END_DB(pStmt)
 
@@ -104,11 +112,15 @@ void Skull::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SkullObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSkullStmt(pConn, string("UPDATE SkullObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSkullStmt.bindUInt(1, m_ItemID);
+        tinysaveSkullStmt.execute();
     }
     END_DB(pStmt)
 
@@ -123,10 +135,10 @@ void Skull::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -145,12 +157,19 @@ void Skull::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE SkullObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSkullStmt(pConn,
+                                         "UPDATE SkullObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        saveSkullStmt.bindUInt(1, m_ObjectID);
+        saveSkullStmt.bindUInt(2, m_ItemType);
+        saveSkullStmt.bindString(3, ownerID);
+        saveSkullStmt.bindInt(4, (int)storage);
+        saveSkullStmt.bindUInt(5, storageID);
+        saveSkullStmt.bindInt(6, (int)x);
+        saveSkullStmt.bindInt(7, (int)y);
+        saveSkullStmt.bindInt(8, (int)m_Num);
+        saveSkullStmt.bindUInt(9, m_ItemID);
+        saveSkullStmt.execute();
     }
     END_DB(pStmt)
 
@@ -238,12 +257,13 @@ void SkullInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SkullInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SkullInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -254,8 +274,9 @@ void SkullInfoManager::load()
         for (uint i = 0; i < m_InfoCount + 1; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel FROM SkullInfo");
+        PreparedStatement selectSkullInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel FROM SkullInfo");
+        pResult = selectSkullInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -273,8 +294,6 @@ void SkullInfoManager::load()
 
             addItemInfo(pSkullInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -292,10 +311,10 @@ void SkullLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -309,9 +328,11 @@ void SkullLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "SkullObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectSkullLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                   "SkullObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSkullLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSkullLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -403,7 +424,6 @@ void SkullLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -413,8 +433,6 @@ void SkullLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -432,17 +450,17 @@ void SkullLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM SkullObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSkullStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM SkullObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSkullStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSkullStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSkullStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -475,8 +493,6 @@ void SkullLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

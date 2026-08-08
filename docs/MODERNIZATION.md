@@ -2143,6 +2143,101 @@ the real gate, same caveat as every prior batch. This batch's ratchet delta
 agents migrated disjoint file sets in parallel in their own worktrees;
 whoever merges all three batches reconciles the final combined number.
 
+**11.2 batch 11 (2026-08-09, agent stream, worktree): 47 files in
+`server/gameserver/item/`** — every `.cpp` in that directory sorting
+alphabetically after `Necklace.cpp` (a sibling agent covered the rest of
+the directory, `<= Necklace.cpp`, in a separate worktree against the same
+starting baseline). Full list: OustersArmsband/Boots/Chakram/Circlet/Coat/
+Pendent/Ring/Stone/SummonItem/Wristlet, Persona, PetEnchantItem/Food/Item,
+Potion, Pupa, QuestItem, Relic, ResurrectItem, Ring, SG, SMG, SMSItem, SR,
+Serum, Shield, Shoes, ShoulderArmor, Skull, SlayerPortalItem, SubInventory,
+Sweeper, Sword, TrapItem, Trouser, VampireAmulet/Bracelet/Coat/CoupleRing/
+ETC/Earring/Necklace/PortalItem/Ring/Weapon, WarItem, Water. **Ratchet 305 →
+230** [measured], re-baselined via `--update` — a delta of 75 sites, this
+worktree's contribution only (per this batch's brief, the sibling stream's
+delta on the other half of the directory is reconciled separately at merge
+time).
+
+Nearly all 47 files are one of a handful of near-identical item-class
+templates — `create()`/`tinysave()`/`save()`/`InfoManager::load()`/
+`Loader::load(Creature*)`/`load(Zone*)`/`load(StorageID_t, Inventory*)` —
+following the wearable/consumable shape established by the Ousters/Vampire
+files in batches 7 and 9. Counting every `PreparedStatement` construction
+(not just the ratchet-visible ones) puts the true migrated-site count at
+**335** across the 47 files, well above the 75 the ratchet could see. The
+260-site gap is concentrated in two invisibility categories already
+documented in prior batches, but pervasive here rather than occasional:
+every file's `InfoManager::load()` opens with two zero-placeholder queries
+(`SELECT MAX(ItemType) FROM XxxInfo` and the full column-list `SELECT`)
+that never had a `%`-format argument for the grep to match (batch 6/9's
+"zero-placeholder" mode), and most files' `Loader::load(Zone*)` built its
+query via `StringStream` + `executeQueryString(sql.toString())` with no
+`%`-format anywhere in the call (batch 8's raw-concat mode). Both patterns
+recur once or twice per file across the whole 47-file set, so the
+aggregate invisible count is large even though no individual file is an
+outlier.
+
+Judgment calls, in addition to the SAFE_DELETE-removal/`getObjectTableName()`
+splice/`tinysave(field)`-splice precedents already established (batches
+2/6/7/9), each applied here exactly as before:
+- **PetItem.cpp**: `getDBString(m_pPetInfo->getNickname())` — a
+  hand-escaping shim for the old raw-format string embedding — was dropped
+  in favor of binding the raw nickname directly; escaping it again before
+  binding would double-encode it. `create()`/`save()` each keep their
+  original two-branch shape (9-column vs. 21-column INSERT/UPDATE
+  depending on `m_pPetInfo == NULL`), migrated branch-for-branch.
+- **Potion.cpp, Pupa.cpp**: `destroy()` builds its `DELETE FROM <table>
+  WHERE ItemID = ?` using the caller's `getObjectTableName()`, a
+  macro-generated compile-time-fixed identifier, never user input — left
+  spliced (identifiers can't be bound), matching the batch 2/6/7/9
+  precedent.
+- **SG.cpp, SMG.cpp, SR.cpp**: the gun-family classes append a
+  `BulletCount=?` clause onto the caller-built `tinysave(field)` fragment
+  (`UPDATE SGObject SET <field>, BulletCount=? WHERE ItemID=?`) rather than
+  the plain single-column splice every other file's `tinysave` uses, and
+  each has a separate `saveBullet()` method migrated the same way. `create()`/
+  `save()` carry a 13-column list (adds `BulletCount`, `Silver` over the
+  12-column wearable template).
+- **VampireCoupleRing.cpp**: uses `Name`/`PartnerItemID` instead of
+  `Durability`/`Grade`, and has an extra `hasPartnerItem()` method
+  (`SELECT count(*) FROM VampireCoupleRingObject WHERE ItemID=? AND
+  Storage IN(...)`) migrated alongside the standard methods. Its
+  `Loader::load(Zone*)` opens with a pre-existing `Assert(false)` dead-path
+  guard, left untouched.
+- **VampirePortalItem.cpp**: `Loader::load(Zone*)`'s SELECT lists 8
+  columns but the loop reads 11 fields (`TargetZID`/`TargetX`/`TargetY`
+  are never selected) — a pre-existing bug, preserved verbatim rather than
+  silently fixed; the migrated query text still selects only the original
+  8 columns.
+- **VampireAmulet.cpp**: the Object-table INSERT/UPDATE has no
+  `Durability` column at all (11-column list), unlike every other wearable
+  file's 12-column template; the separate Info-table SELECT does have
+  `Durability`. Both migrated as read, not reconciled with each other.
+- **Sword.cpp**: `save()` carries an extra `Silver` column that `create()`
+  does not (13 vs. 12 columns), bound as `bindInt(getSilver())`.
+- **Sweeper.cpp, WarItem.cpp**: `create()`/`tinysave()` log the query text
+  to `WarLog.txt` for audit purposes. The original `StringStream sql` /
+  `sprintf(query, ...)` construction is kept, unexecuted, purely to
+  reproduce that audit line verbatim; the query itself now runs via the
+  migrated `PreparedStatement`, with an inline comment explaining the
+  duplication.
+
+Stack-allocated `PreparedStatement` locals throughout; every
+`SAFE_DELETE(pStmt)` on a migrated call site was dropped as RAII-redundant,
+including the `default: SAFE_DELETE(pStmt); // by sigi` cases inside
+`Loader::load(Creature*)`'s storage-type `switch`, closing the same latent
+leak batch 6 documented. Dead `/* ... */`-commented SQL blocks (present in
+most of these files, reproducing the pre-migration `StringStream`
+construction for `save()`) were left completely untouched, matching every
+prior batch's precedent. **Not compile-verified** — no server toolchain in
+this sandbox; verified by reading only (every `?` count checked against its
+bind-call count and index sequence across all 335 sites; each file's
+brace/paren balance checked against its pre-edit copy; grep re-run
+per-file after editing to confirm zero live `createStatement()`/
+`pStmt->executeQuery(`/`SAFE_DELETE(pStmt)` occurrences remained outside
+dead comments and the handful of genuinely empty, no-SQL stub loaders).
+CI is the real gate for this batch, same caveat as every prior one.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,

@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void Shield::create(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,23 +74,29 @@ void Shield::create(const string& ownerID, Storage storage, StorageID_t storageI
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO ShieldObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertShieldStmt(pConn,
+                                            "INSERT INTO ShieldObject "
+                                            "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                            " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertShieldStmt.bindUInt(1, m_ItemID);
+        insertShieldStmt.bindUInt(2, m_ObjectID);
+        insertShieldStmt.bindUInt(3, getItemType());
+        insertShieldStmt.bindString(4, ownerID);
+        insertShieldStmt.bindInt(5, (int)storage);
+        insertShieldStmt.bindUInt(6, storageID);
+        insertShieldStmt.bindInt(7, (int)x);
+        insertShieldStmt.bindInt(8, (int)y);
+        insertShieldStmt.bindString(9, optionField);
+        insertShieldStmt.bindUInt(10, getDurability());
+        insertShieldStmt.bindInt(11, getGrade());
+        insertShieldStmt.bindInt(12, (int)m_CreateType);
+        insertShieldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -108,11 +115,15 @@ void Shield::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ShieldObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveShieldStmt(pConn, string("UPDATE ShieldObject SET ") + field + " WHERE ItemID=?");
+        tinysaveShieldStmt.bindUInt(1, m_ItemID);
+        tinysaveShieldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -127,10 +138,10 @@ void Shield::save(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -153,13 +164,22 @@ void Shield::save(const string& ownerID, Storage storage, StorageID_t storageID,
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE ShieldObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveShieldStmt(
+            pConn, "UPDATE ShieldObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveShieldStmt.bindUInt(1, m_ObjectID);
+        saveShieldStmt.bindUInt(2, getItemType());
+        saveShieldStmt.bindString(3, ownerID);
+        saveShieldStmt.bindInt(4, (int)storage);
+        saveShieldStmt.bindUInt(5, storageID);
+        saveShieldStmt.bindInt(6, (int)x);
+        saveShieldStmt.bindInt(7, (int)y);
+        saveShieldStmt.bindString(8, optionField);
+        saveShieldStmt.bindUInt(9, getDurability());
+        saveShieldStmt.bindInt(10, getGrade());
+        saveShieldStmt.bindInt(11, (int)getEnchantLevel());
+        saveShieldStmt.bindUInt(12, m_ItemID);
+        saveShieldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -274,12 +294,13 @@ void ShieldInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM ShieldInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM ShieldInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -290,10 +311,11 @@ void ShieldInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM ShieldInfo");
+        PreparedStatement selectShieldInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM ShieldInfo");
+        pResult = selectShieldInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -321,8 +343,6 @@ void ShieldInfoManager::load()
 
             addItemInfo(pShieldInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -340,10 +360,10 @@ void ShieldLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -358,10 +378,11 @@ void ShieldLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM ShieldObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectShieldLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM ShieldObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectShieldLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectShieldLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -465,7 +486,6 @@ void ShieldLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -475,8 +495,6 @@ void ShieldLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -494,18 +512,18 @@ void ShieldLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM ShieldObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneShieldStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM ShieldObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneShieldStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneShieldStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneShieldStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -545,8 +563,6 @@ void ShieldLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

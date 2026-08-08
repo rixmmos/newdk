@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -71,17 +72,21 @@ void SubInventory::create(const string& ownerID, Storage storage, StorageID_t st
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO SubInventoryObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(" << m_ItemID << ", "
-            << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", " << storageID
-            << ", " << (int)x << ", " << (int)y << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSubInventoryStmt(
+            pConn, "INSERT INTO SubInventoryObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSubInventoryStmt.bindUInt(1, m_ItemID);
+        insertSubInventoryStmt.bindUInt(2, m_ObjectID);
+        insertSubInventoryStmt.bindUInt(3, m_ItemType);
+        insertSubInventoryStmt.bindString(4, ownerID);
+        insertSubInventoryStmt.bindInt(5, (int)storage);
+        insertSubInventoryStmt.bindUInt(6, storageID);
+        insertSubInventoryStmt.bindInt(7, (int)x);
+        insertSubInventoryStmt.bindInt(8, (int)y);
+        insertSubInventoryStmt.bindInt(9, (int)m_CreateType);
+        insertSubInventoryStmt.execute();
     }
     END_DB(pStmt)
 
@@ -99,11 +104,16 @@ void SubInventory::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SubInventoryObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSubInventoryStmt(
+            pConn, string("UPDATE SubInventoryObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSubInventoryStmt.bindUInt(1, m_ItemID);
+        tinysaveSubInventoryStmt.execute();
     }
     END_DB(pStmt)
 
@@ -134,14 +144,20 @@ void SubInventory::save(const string& ownerID, Storage storage, StorageID_t stor
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SubInventoryObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSubInventoryStmt(
+            pConn, "UPDATE SubInventoryObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=? WHERE ItemID=?");
+        saveSubInventoryStmt.bindUInt(1, m_ObjectID);
+        saveSubInventoryStmt.bindUInt(2, m_ItemType);
+        saveSubInventoryStmt.bindString(3, ownerID);
+        saveSubInventoryStmt.bindInt(4, (int)storage);
+        saveSubInventoryStmt.bindUInt(5, storageID);
+        saveSubInventoryStmt.bindInt(6, (int)x);
+        saveSubInventoryStmt.bindInt(7, (int)y);
+        saveSubInventoryStmt.bindUInt(8, m_ItemID);
+        saveSubInventoryStmt.execute();
     }
     END_DB(pStmt)
 
@@ -217,9 +233,10 @@ void SubInventoryInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SubInventoryInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SubInventoryInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -230,8 +247,9 @@ void SubInventoryInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Width, Height FROM SubInventoryInfo");
+        PreparedStatement selectSubInventoryInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Width, Height FROM SubInventoryInfo");
+        pResult = selectSubInventoryInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -250,8 +268,6 @@ void SubInventoryInfoManager::load()
 
             addItemInfo(pSubInventoryInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -272,7 +288,7 @@ void SubInventoryLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -286,10 +302,11 @@ void SubInventoryLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
-                                "SubInventoryObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectSubInventoryLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
+                   "SubInventoryObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSubInventoryLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSubInventoryLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -390,7 +407,6 @@ void SubInventoryLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -401,8 +417,6 @@ void SubInventoryLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -416,17 +430,17 @@ void SubInventoryLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM SubInventoryObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSubInventoryStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM SubInventoryObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSubInventoryStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSubInventoryStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSubInventoryStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -459,8 +473,6 @@ void SubInventoryLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -117,16 +118,24 @@ void VampirePortalItem::create(const string& ownerID, Storage storage, StorageID
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO VampirePortalItemObject "
-            << "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge,TargetZID,TargetX,TargetY) VALUES ("
-            << m_ItemID << "," << m_ObjectID << "," << m_ItemType << ",'" << ownerID << "'," << (int)storage << ","
-            << storageID << "," << (int)x << "," << (int)y << "," << m_Charge << "," << (int)m_ZoneID << "," << (int)m_X
-            << "," << (int)m_Y << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertVampirePortalItemStmt(
+            pConn, "INSERT INTO VampirePortalItemObject "
+                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge,TargetZID,TargetX,TargetY) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertVampirePortalItemStmt.bindUInt(1, m_ItemID);
+        insertVampirePortalItemStmt.bindUInt(2, m_ObjectID);
+        insertVampirePortalItemStmt.bindUInt(3, m_ItemType);
+        insertVampirePortalItemStmt.bindString(4, ownerID);
+        insertVampirePortalItemStmt.bindInt(5, (int)storage);
+        insertVampirePortalItemStmt.bindUInt(6, storageID);
+        insertVampirePortalItemStmt.bindInt(7, (int)x);
+        insertVampirePortalItemStmt.bindInt(8, (int)y);
+        insertVampirePortalItemStmt.bindInt(9, m_Charge);
+        insertVampirePortalItemStmt.bindInt(10, (int)m_ZoneID);
+        insertVampirePortalItemStmt.bindInt(11, (int)m_X);
+        insertVampirePortalItemStmt.bindInt(12, (int)m_Y);
+        insertVampirePortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -144,11 +153,16 @@ void VampirePortalItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE VampirePortalItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveVampirePortalItemStmt(
+            pConn, string("UPDATE VampirePortalItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveVampirePortalItemStmt.bindUInt(1, m_ItemID);
+        tinysaveVampirePortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -180,15 +194,25 @@ void VampirePortalItem::save(const string& ownerID, Storage storage, StorageID_t
             << " WHERE ItemID = " << m_ItemID;
         pStmt->executeQueryString(sql.toString());
         */
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
-        pStmt->executeQuery(
-            "UPDATE VampirePortalItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-            "X=%d, Y=%d, Charge=%d, TargetZID=%d, TargetX=%d, TargetY=%d WHERE ItemID=%ld",
-            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_Charge, (int)m_ZoneID,
-            (int)m_X, (int)m_Y, m_ItemID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveVampirePortalItemStmt(
+            pConn, "UPDATE VampirePortalItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
+                   "X=?, Y=?, Charge=?, TargetZID=?, TargetX=?, TargetY=? WHERE ItemID=?");
+        saveVampirePortalItemStmt.bindUInt(1, m_ObjectID);
+        saveVampirePortalItemStmt.bindUInt(2, m_ItemType);
+        saveVampirePortalItemStmt.bindString(3, ownerID);
+        saveVampirePortalItemStmt.bindInt(4, (int)storage);
+        saveVampirePortalItemStmt.bindUInt(5, storageID);
+        saveVampirePortalItemStmt.bindInt(6, (int)x);
+        saveVampirePortalItemStmt.bindInt(7, (int)y);
+        saveVampirePortalItemStmt.bindInt(8, m_Charge);
+        saveVampirePortalItemStmt.bindInt(9, (int)m_ZoneID);
+        saveVampirePortalItemStmt.bindInt(10, (int)m_X);
+        saveVampirePortalItemStmt.bindInt(11, (int)m_Y);
+        saveVampirePortalItemStmt.bindUInt(12, m_ItemID);
+        saveVampirePortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -295,11 +319,12 @@ void VampirePortalItemInfoManager::load()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM VampirePortalItemInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM VampirePortalItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -310,8 +335,10 @@ void VampirePortalItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, MaxCharge, "
-                                      "ReqAbility FROM VampirePortalItemInfo");
+        PreparedStatement selectVampirePortalItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, MaxCharge, "
+                   "ReqAbility FROM VampirePortalItemInfo");
+        pResult = selectVampirePortalItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -329,8 +356,6 @@ void VampirePortalItemInfoManager::load()
 
             addItemInfo(pVampirePortalItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -365,10 +390,9 @@ void VampirePortalItemLoader::load(Creature* pCreature)
     Assert(pCreature != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -383,10 +407,11 @@ void VampirePortalItemLoader::load(Creature* pCreature)
         pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge, TargetZID, TargetX, TargetY FROM "
-            "VampirePortalItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectVampirePortalItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge, TargetZID, TargetX, TargetY FROM "
+                   "VampirePortalItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectVampirePortalItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectVampirePortalItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -464,7 +489,6 @@ void VampirePortalItemLoader::load(Creature* pCreature)
                 } else if (storage == STORAGE_GARBAGE) {
                     processItemBug(pCreature, pVampirePortalItem);
                 } else {
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -474,8 +498,6 @@ void VampirePortalItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -490,15 +512,16 @@ void VampirePortalItemLoader::load(Zone* pZone)
     Assert(pZone != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM VampirePortalItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneVampirePortalItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM VampirePortalItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneVampirePortalItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneVampirePortalItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneVampirePortalItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -532,8 +555,6 @@ void VampirePortalItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

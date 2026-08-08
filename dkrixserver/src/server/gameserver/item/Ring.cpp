@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -58,7 +59,7 @@ void Ring::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,23 +73,29 @@ void Ring::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO RingObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertRingStmt(pConn,
+                                          "INSERT INTO RingObject "
+                                          "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                          " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                          " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertRingStmt.bindUInt(1, m_ItemID);
+        insertRingStmt.bindUInt(2, m_ObjectID);
+        insertRingStmt.bindUInt(3, getItemType());
+        insertRingStmt.bindString(4, ownerID);
+        insertRingStmt.bindInt(5, (int)storage);
+        insertRingStmt.bindUInt(6, storageID);
+        insertRingStmt.bindInt(7, (int)x);
+        insertRingStmt.bindInt(8, (int)y);
+        insertRingStmt.bindString(9, optionField);
+        insertRingStmt.bindUInt(10, getDurability());
+        insertRingStmt.bindInt(11, getGrade());
+        insertRingStmt.bindInt(12, (int)m_CreateType);
+        insertRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +114,15 @@ void Ring::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE RingObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveRingStmt(pConn, string("UPDATE RingObject SET ") + field + " WHERE ItemID=?");
+        tinysaveRingStmt.bindUInt(1, m_ItemID);
+        tinysaveRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -126,10 +137,10 @@ void Ring::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,12 +163,22 @@ void Ring::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery("UPDATE RingObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            optionField.c_str(), getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveRingStmt(
+            pConn, "UPDATE RingObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
+                   "X=?, Y=?, OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveRingStmt.bindUInt(1, m_ObjectID);
+        saveRingStmt.bindUInt(2, getItemType());
+        saveRingStmt.bindString(3, ownerID);
+        saveRingStmt.bindInt(4, (int)storage);
+        saveRingStmt.bindUInt(5, storageID);
+        saveRingStmt.bindInt(6, (int)x);
+        saveRingStmt.bindInt(7, (int)y);
+        saveRingStmt.bindString(8, optionField);
+        saveRingStmt.bindUInt(9, getDurability());
+        saveRingStmt.bindInt(10, getGrade());
+        saveRingStmt.bindInt(11, (int)getEnchantLevel());
+        saveRingStmt.bindUInt(12, m_ItemID);
+        saveRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -272,12 +293,13 @@ void RingInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM RingInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM RingInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -288,10 +310,11 @@ void RingInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM RingInfo");
+        PreparedStatement selectRingInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM RingInfo");
+        pResult = selectRingInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -319,8 +342,6 @@ void RingInfoManager::load()
 
             addItemInfo(pRingInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -338,10 +359,10 @@ void RingLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -356,10 +377,11 @@ void RingLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM RingObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectRingLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM RingObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectRingLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectRingLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -463,7 +485,6 @@ void RingLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -473,8 +494,6 @@ void RingLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -492,18 +511,18 @@ void RingLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM RingObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneRingStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM RingObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneRingStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneRingStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneRingStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -543,8 +562,6 @@ void RingLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

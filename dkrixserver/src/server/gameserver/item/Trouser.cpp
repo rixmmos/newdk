@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -58,7 +59,7 @@ void Trouser::create(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,23 +73,29 @@ void Trouser::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO TrouserObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertTrouserStmt(pConn,
+                                             "INSERT INTO TrouserObject "
+                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                             " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertTrouserStmt.bindUInt(1, m_ItemID);
+        insertTrouserStmt.bindUInt(2, m_ObjectID);
+        insertTrouserStmt.bindUInt(3, getItemType());
+        insertTrouserStmt.bindString(4, ownerID);
+        insertTrouserStmt.bindInt(5, (int)storage);
+        insertTrouserStmt.bindUInt(6, storageID);
+        insertTrouserStmt.bindInt(7, (int)x);
+        insertTrouserStmt.bindInt(8, (int)y);
+        insertTrouserStmt.bindString(9, optionField);
+        insertTrouserStmt.bindUInt(10, getDurability());
+        insertTrouserStmt.bindInt(11, (int)getGrade());
+        insertTrouserStmt.bindInt(12, (int)m_CreateType);
+        insertTrouserStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +114,15 @@ void Trouser::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE TrouserObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveTrouserStmt(pConn, string("UPDATE TrouserObject SET ") + field + " WHERE ItemID=?");
+        tinysaveTrouserStmt.bindUInt(1, m_ItemID);
+        tinysaveTrouserStmt.execute();
     }
     END_DB(pStmt)
 
@@ -126,10 +137,10 @@ void Trouser::save(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,14 +163,22 @@ void Trouser::save(const string& ownerID, Storage storage, StorageID_t storageID
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE TrouserObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveTrouserStmt(
+            pConn, "UPDATE TrouserObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveTrouserStmt.bindUInt(1, m_ObjectID);
+        saveTrouserStmt.bindUInt(2, getItemType());
+        saveTrouserStmt.bindString(3, ownerID);
+        saveTrouserStmt.bindInt(4, (int)storage);
+        saveTrouserStmt.bindUInt(5, storageID);
+        saveTrouserStmt.bindInt(6, (int)x);
+        saveTrouserStmt.bindInt(7, (int)y);
+        saveTrouserStmt.bindString(8, optionField);
+        saveTrouserStmt.bindUInt(9, getDurability());
+        saveTrouserStmt.bindInt(10, (int)getGrade());
+        saveTrouserStmt.bindInt(11, (int)getEnchantLevel());
+        saveTrouserStmt.bindUInt(12, m_ItemID);
+        saveTrouserStmt.execute();
     }
     END_DB(pStmt)
 
@@ -275,12 +294,13 @@ void TrouserInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM TrouserInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM TrouserInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -291,10 +311,11 @@ void TrouserInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM TrouserInfo");
+        PreparedStatement selectTrouserInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM TrouserInfo");
+        pResult = selectTrouserInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -322,8 +343,6 @@ void TrouserInfoManager::load()
 
             addItemInfo(pTrouserInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -341,10 +360,10 @@ void TrouserLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -359,10 +378,11 @@ void TrouserLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM TrouserObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectTrouserLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM TrouserObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectTrouserLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectTrouserLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -466,7 +486,6 @@ void TrouserLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -476,8 +495,6 @@ void TrouserLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -498,15 +515,15 @@ void TrouserLoader::load(Zone* pZone)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM TrouserObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneTrouserStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM TrouserObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneTrouserStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneTrouserStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneTrouserStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -546,8 +563,6 @@ void TrouserLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

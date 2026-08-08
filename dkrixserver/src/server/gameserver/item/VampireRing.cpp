@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -58,7 +59,7 @@ void VampireRing::create(const string& ownerID, Storage storage, StorageID_t sto
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -72,23 +73,29 @@ void VampireRing::create(const string& ownerID, Storage storage, StorageID_t sto
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO VampireRingObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertVampireRingStmt(pConn,
+                                                  "INSERT INTO VampireRingObject "
+                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertVampireRingStmt.bindUInt(1, m_ItemID);
+        insertVampireRingStmt.bindUInt(2, m_ObjectID);
+        insertVampireRingStmt.bindUInt(3, getItemType());
+        insertVampireRingStmt.bindString(4, ownerID);
+        insertVampireRingStmt.bindInt(5, (int)storage);
+        insertVampireRingStmt.bindUInt(6, storageID);
+        insertVampireRingStmt.bindInt(7, (int)x);
+        insertVampireRingStmt.bindInt(8, (int)y);
+        insertVampireRingStmt.bindString(9, optionField);
+        insertVampireRingStmt.bindUInt(10, getDurability());
+        insertVampireRingStmt.bindInt(11, getGrade());
+        insertVampireRingStmt.bindInt(12, (int)m_CreateType);
+        insertVampireRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +114,15 @@ void VampireRing::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE VampireRingObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveVampireRingStmt(pConn, string("UPDATE VampireRingObject SET ") + field + " WHERE ItemID=?");
+        tinysaveVampireRingStmt.bindUInt(1, m_ItemID);
+        tinysaveVampireRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -126,10 +137,10 @@ void VampireRing::save(const string& ownerID, Storage storage, StorageID_t stora
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,13 +163,22 @@ void VampireRing::save(const string& ownerID, Storage storage, StorageID_t stora
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE VampireRingObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, "
-            "Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveVampireRingStmt(
+            pConn, "UPDATE VampireRingObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, "
+                   "Y=?, OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveVampireRingStmt.bindUInt(1, m_ObjectID);
+        saveVampireRingStmt.bindUInt(2, getItemType());
+        saveVampireRingStmt.bindString(3, ownerID);
+        saveVampireRingStmt.bindInt(4, (int)storage);
+        saveVampireRingStmt.bindUInt(5, storageID);
+        saveVampireRingStmt.bindInt(6, (int)x);
+        saveVampireRingStmt.bindInt(7, (int)y);
+        saveVampireRingStmt.bindString(8, optionField);
+        saveVampireRingStmt.bindUInt(9, getDurability());
+        saveVampireRingStmt.bindInt(10, getGrade());
+        saveVampireRingStmt.bindInt(11, (int)getEnchantLevel());
+        saveVampireRingStmt.bindUInt(12, m_ItemID);
+        saveVampireRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -273,12 +293,13 @@ void VampireRingInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM VampireRingInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM VampireRingInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -289,10 +310,11 @@ void VampireRingInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM VampireRingInfo");
+        PreparedStatement selectVampireRingInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM VampireRingInfo");
+        pResult = selectVampireRingInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -320,8 +342,6 @@ void VampireRingInfoManager::load()
 
             addItemInfo(pVampireRingInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -339,10 +359,10 @@ void VampireRingLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -357,10 +377,11 @@ void VampireRingLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM VampireRingObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectVampireRingLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM VampireRingObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectVampireRingLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectVampireRingLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -464,7 +485,6 @@ void VampireRingLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -474,8 +494,6 @@ void VampireRingLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -493,18 +511,18 @@ void VampireRingLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM VampireRingObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneVampireRingStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM VampireRingObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneVampireRingStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneVampireRingStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneVampireRingStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -544,8 +562,6 @@ void VampireRingLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

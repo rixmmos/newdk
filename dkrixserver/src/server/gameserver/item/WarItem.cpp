@@ -10,6 +10,7 @@
 
 #include "DB.h"
 #include "ItemInfoManager.h"
+#include "PreparedStatement.h"
 
 // global variable declaration
 WarItemInfoManager* g_pWarItemInfoManager = NULL;
@@ -47,7 +48,7 @@ void WarItem::create(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -61,7 +62,7 @@ void WarItem::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         StringStream sql;
 
@@ -70,11 +71,24 @@ void WarItem::create(const string& ownerID, Storage storage, StorageID_t storage
             << " X, Y)"
             << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
             << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ")";
+        // sql is retained only to reproduce the WarLog.txt audit line verbatim;
+        // the query itself now executes via bound parameters below.
 
-        pStmt->executeQueryString(sql.toString());
+        PreparedStatement insertWarItemStmt(pConn,
+                                             "INSERT INTO WarItemObject "
+                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                             " X, Y)"
+                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        insertWarItemStmt.bindUInt(1, m_ItemID);
+        insertWarItemStmt.bindUInt(2, m_ObjectID);
+        insertWarItemStmt.bindUInt(3, m_ItemType);
+        insertWarItemStmt.bindString(4, ownerID);
+        insertWarItemStmt.bindInt(5, (int)storage);
+        insertWarItemStmt.bindUInt(6, storageID);
+        insertWarItemStmt.bindInt(7, (int)x);
+        insertWarItemStmt.bindInt(8, (int)y);
+        insertWarItemStmt.execute();
         filelog("WarLog.txt", "%s", sql.toString().c_str());
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -94,13 +108,18 @@ void WarItem::tinysave(const char* field) const
     char query[255];
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         sprintf(query, "UPDATE WarItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-        pStmt->executeQuery(query);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound. query[]
+        // is retained only to reproduce the WarLog.txt audit line verbatim.
+        PreparedStatement tinysaveWarItemStmt(pConn, string("UPDATE WarItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveWarItemStmt.bindUInt(1, m_ItemID);
+        tinysaveWarItemStmt.execute();
         filelog("WarLog.txt", "%s", query);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -115,16 +134,23 @@ void WarItem::save(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE WarItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveWarItemStmt(pConn,
+                                           "UPDATE WarItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                           "StorageID=?, X=?, Y=? WHERE ItemID=?");
+        saveWarItemStmt.bindUInt(1, m_ObjectID);
+        saveWarItemStmt.bindUInt(2, m_ItemType);
+        saveWarItemStmt.bindString(3, ownerID);
+        saveWarItemStmt.bindInt(4, (int)storage);
+        saveWarItemStmt.bindUInt(5, storageID);
+        saveWarItemStmt.bindInt(6, (int)x);
+        saveWarItemStmt.bindInt(7, (int)y);
+        saveWarItemStmt.bindUInt(8, m_ItemID);
+        saveWarItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -214,12 +240,13 @@ void WarItemInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM WarItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM WarItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -230,7 +257,9 @@ void WarItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM WarItemInfo");
+        PreparedStatement selectWarItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM WarItemInfo");
+        pResult = selectWarItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -247,8 +276,6 @@ void WarItemInfoManager::load()
 
             addItemInfo(pWarItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

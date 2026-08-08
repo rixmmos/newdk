@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -74,7 +75,7 @@ void OustersArmsband::create(const string& ownerID, Storage storage, StorageID_t
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -88,23 +89,29 @@ void OustersArmsband::create(const string& ownerID, Storage storage, StorageID_t
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO OustersArmsbandObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertOustersArmsbandStmt(pConn,
+                                                      "INSERT INTO OustersArmsbandObject "
+                                                      "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                      " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                      " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertOustersArmsbandStmt.bindUInt(1, m_ItemID);
+        insertOustersArmsbandStmt.bindUInt(2, m_ObjectID);
+        insertOustersArmsbandStmt.bindUInt(3, getItemType());
+        insertOustersArmsbandStmt.bindString(4, ownerID);
+        insertOustersArmsbandStmt.bindInt(5, (int)storage);
+        insertOustersArmsbandStmt.bindUInt(6, storageID);
+        insertOustersArmsbandStmt.bindInt(7, (int)x);
+        insertOustersArmsbandStmt.bindInt(8, (int)y);
+        insertOustersArmsbandStmt.bindString(9, optionField);
+        insertOustersArmsbandStmt.bindUInt(10, getDurability());
+        insertOustersArmsbandStmt.bindInt(11, getGrade());
+        insertOustersArmsbandStmt.bindInt(12, (int)m_CreateType);
+        insertOustersArmsbandStmt.execute();
     }
     END_DB(pStmt)
 
@@ -120,14 +127,14 @@ bool OustersArmsband::destroy()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     //-------------------------------------------------------
-    
-    
-    
-    
-    
+
+
+
+
+
     //-------------------------------------------------------
     for (int i = 0; i < m_pInventory->getHeight(); i++) {
         for (int j = 0; j < m_pInventory->getWidth(); j++) {
@@ -139,15 +146,14 @@ bool OustersArmsband::destroy()
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM OustersArmsbandObject WHERE ItemID = %ld", m_ItemID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteOustersArmsbandStmt(pConn, "DELETE FROM OustersArmsbandObject WHERE ItemID = ?");
+        deleteOustersArmsbandStmt.bindUInt(1, m_ItemID);
+        deleteOustersArmsbandStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deleteOustersArmsbandStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -168,11 +174,16 @@ void OustersArmsband::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersArmsbandObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveOustersArmsbandStmt(
+            pConn, string("UPDATE OustersArmsbandObject SET ") + field + " WHERE ItemID=?");
+        tinysaveOustersArmsbandStmt.bindUInt(1, m_ItemID);
+        tinysaveOustersArmsbandStmt.execute();
     }
     END_DB(pStmt)
 
@@ -187,10 +198,10 @@ void OustersArmsband::save(const string& ownerID, Storage storage, StorageID_t s
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -213,13 +224,23 @@ void OustersArmsband::save(const string& ownerID, Storage storage, StorageID_t s
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE OustersArmsbandObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-            "X=%d, Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
+        PreparedStatement saveOustersArmsbandStmt(
+            pConn, "UPDATE OustersArmsbandObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
+                   "X=?, Y=?, OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveOustersArmsbandStmt.bindUInt(1, m_ObjectID);
+        saveOustersArmsbandStmt.bindUInt(2, getItemType());
+        saveOustersArmsbandStmt.bindString(3, ownerID);
+        saveOustersArmsbandStmt.bindInt(4, (int)storage);
+        saveOustersArmsbandStmt.bindUInt(5, storageID);
+        saveOustersArmsbandStmt.bindInt(6, (int)x);
+        saveOustersArmsbandStmt.bindInt(7, (int)y);
+        saveOustersArmsbandStmt.bindString(8, optionField);
+        saveOustersArmsbandStmt.bindUInt(9, getDurability());
+        saveOustersArmsbandStmt.bindInt(10, getGrade());
+        saveOustersArmsbandStmt.bindInt(11, (int)getEnchantLevel());
+        saveOustersArmsbandStmt.bindUInt(12, m_ItemID);
+        saveOustersArmsbandStmt.execute();
 
-        
         for (int i = 0; i < m_pInventory->getHeight(); i++) {
             for (int j = 0; j < m_pInventory->getWidth(); j++) {
                 Item* pItem = m_pInventory->getItem(j, 0);
@@ -228,8 +249,6 @@ void OustersArmsband::save(const string& ownerID, Storage storage, StorageID_t s
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -385,12 +404,13 @@ void OustersArmsbandInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM OustersArmsbandInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM OustersArmsbandInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -401,10 +421,11 @@ void OustersArmsbandInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
-            "PocketCount,ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
-            "NextItemType, DowngradeRatio FROM OustersArmsbandInfo");
+        PreparedStatement selectOustersArmsbandInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, "
+                   "PocketCount,ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, "
+                   "NextItemType, DowngradeRatio FROM OustersArmsbandInfo");
+        pResult = selectOustersArmsbandInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -433,8 +454,6 @@ void OustersArmsbandInfoManager::load()
 
             addItemInfo(pOustersArmsbandInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -452,10 +471,10 @@ void OustersArmsbandLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -470,10 +489,11 @@ void OustersArmsbandLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM OustersArmsbandObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectOustersArmsbandLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM OustersArmsbandObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectOustersArmsbandLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectOustersArmsbandLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -587,7 +607,6 @@ void OustersArmsbandLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -597,8 +616,6 @@ void OustersArmsbandLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -616,18 +633,18 @@ void OustersArmsbandLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersArmsbandObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneOustersArmsbandStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersArmsbandObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneOustersArmsbandStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneOustersArmsbandStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneOustersArmsbandStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -667,8 +684,6 @@ void OustersArmsbandLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

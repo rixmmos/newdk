@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -48,7 +49,7 @@ void Water::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -62,15 +63,22 @@ void Water::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO WaterObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (" << m_ItemID << ","
-            << m_ObjectID << "," << m_ItemType << ",'" << ownerID << "'," << (int)storage << ", " << storageID << ", "
-            << (int)x << "," << (int)y << "," << (int)m_Num << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertWaterStmt(pConn,
+                                           "INSERT INTO WaterObject "
+                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) "
+                                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertWaterStmt.bindUInt(1, m_ItemID);
+        insertWaterStmt.bindUInt(2, m_ObjectID);
+        insertWaterStmt.bindUInt(3, m_ItemType);
+        insertWaterStmt.bindString(4, ownerID);
+        insertWaterStmt.bindInt(5, (int)storage);
+        insertWaterStmt.bindUInt(6, storageID);
+        insertWaterStmt.bindInt(7, (int)x);
+        insertWaterStmt.bindInt(8, (int)y);
+        insertWaterStmt.bindInt(9, (int)m_Num);
+        insertWaterStmt.execute();
     }
     END_DB(pStmt)
 
@@ -89,11 +97,15 @@ void Water::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE WaterObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveWaterStmt(pConn, string("UPDATE WaterObject SET ") + field + " WHERE ItemID=?");
+        tinysaveWaterStmt.bindUInt(1, m_ItemID);
+        tinysaveWaterStmt.execute();
     }
     END_DB(pStmt)
 
@@ -108,10 +120,10 @@ void Water::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -130,12 +142,19 @@ void Water::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE WaterObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveWaterStmt(pConn,
+                                         "UPDATE WaterObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        saveWaterStmt.bindUInt(1, m_ObjectID);
+        saveWaterStmt.bindUInt(2, m_ItemType);
+        saveWaterStmt.bindString(3, ownerID);
+        saveWaterStmt.bindInt(4, (int)storage);
+        saveWaterStmt.bindUInt(5, storageID);
+        saveWaterStmt.bindInt(6, (int)x);
+        saveWaterStmt.bindInt(7, (int)y);
+        saveWaterStmt.bindInt(8, (int)m_Num);
+        saveWaterStmt.bindUInt(9, m_ItemID);
+        saveWaterStmt.execute();
     }
     END_DB(pStmt)
 
@@ -223,12 +242,13 @@ void WaterInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM WaterInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM WaterInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -239,7 +259,9 @@ void WaterInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM WaterInfo");
+        PreparedStatement selectWaterInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM WaterInfo");
+        pResult = selectWaterInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -256,8 +278,6 @@ void WaterInfoManager::load()
 
             addItemInfo(pWaterInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -275,10 +295,10 @@ void WaterLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -292,9 +312,11 @@ void WaterLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "WaterObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectCreatureWaterStmt(pConn,
+                                                   "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                                                   "WaterObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectCreatureWaterStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectCreatureWaterStmt.execute();
 
 
         while (pResult->next()) {
@@ -379,7 +401,6 @@ void WaterLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -389,8 +410,6 @@ void WaterLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -408,17 +427,17 @@ void WaterLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM WaterObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneWaterStmt(pConn,
+                                               "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM WaterObject"
+                                               " WHERE Storage = ? AND StorageID = ?");
+        selectZoneWaterStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneWaterStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneWaterStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -451,8 +470,6 @@ void WaterLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -17,6 +17,7 @@
 #include "Ousters.h"
 #include "PetTypeInfo.h"
 #include "PetUtil.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -71,7 +72,7 @@ void PetItem::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*		StringStream sql;
 
@@ -85,24 +86,49 @@ void PetItem::create(const string& ownerID, Storage storage, StorageID_t storage
                 pStmt->executeQueryString(sql.toString());*/
 
         if (m_pPetInfo == NULL) {
-            pStmt->executeQuery(
-                "INSERT INTO PetItemObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) "
-                "VALUES (%lu, %u, %u, '%s', %u, %u, %u, %u, %u)",
-                m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), storage, storageID, x, y, m_CreateType);
+            PreparedStatement insertPetItemStmt(
+                pConn, "INSERT INTO PetItemObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) "
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            insertPetItemStmt.bindUInt(1, m_ItemID);
+            insertPetItemStmt.bindUInt(2, m_ObjectID);
+            insertPetItemStmt.bindUInt(3, m_ItemType);
+            insertPetItemStmt.bindString(4, ownerID);
+            insertPetItemStmt.bindInt(5, (int)storage);
+            insertPetItemStmt.bindUInt(6, storageID);
+            insertPetItemStmt.bindInt(7, (int)x);
+            insertPetItemStmt.bindInt(8, (int)y);
+            insertPetItemStmt.bindInt(9, (int)m_CreateType);
+            insertPetItemStmt.execute();
         } else {
-            pStmt->executeQuery(
+            PreparedStatement insertPetItemWithInfoStmt(
+                pConn,
                 "INSERT INTO PetItemObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag, "
                 "PetCreatureType, PetLevel, PetExp, PetHP, PetAttr, PetAttrLevel, PetOption, FoodType, "
                 "CanGamble, CanCutHead, CanAttack, LastFeedTime) "
-                "VALUES (%lu, %u, %u, '%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, '%s')",
-                m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), storage, storageID, x, y, m_CreateType,
-                m_pPetInfo->getPetCreatureType(), m_pPetInfo->getPetLevel(), m_pPetInfo->getPetExp(),
-                m_pPetInfo->getPetHP(), m_pPetInfo->getPetAttr(), m_pPetInfo->getPetAttrLevel(),
-                m_pPetInfo->getPetOption(), m_pPetInfo->getFoodType(), m_pPetInfo->canGamble(),
-                m_pPetInfo->canCutHead(), m_pPetInfo->canAttack(), m_pPetInfo->getLastFeedTime().toDateTime().c_str());
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            insertPetItemWithInfoStmt.bindUInt(1, m_ItemID);
+            insertPetItemWithInfoStmt.bindUInt(2, m_ObjectID);
+            insertPetItemWithInfoStmt.bindUInt(3, m_ItemType);
+            insertPetItemWithInfoStmt.bindString(4, ownerID);
+            insertPetItemWithInfoStmt.bindInt(5, (int)storage);
+            insertPetItemWithInfoStmt.bindUInt(6, storageID);
+            insertPetItemWithInfoStmt.bindInt(7, (int)x);
+            insertPetItemWithInfoStmt.bindInt(8, (int)y);
+            insertPetItemWithInfoStmt.bindInt(9, (int)m_CreateType);
+            insertPetItemWithInfoStmt.bindUInt(10, m_pPetInfo->getPetCreatureType());
+            insertPetItemWithInfoStmt.bindUInt(11, m_pPetInfo->getPetLevel());
+            insertPetItemWithInfoStmt.bindUInt(12, m_pPetInfo->getPetExp());
+            insertPetItemWithInfoStmt.bindUInt(13, m_pPetInfo->getPetHP());
+            insertPetItemWithInfoStmt.bindUInt(14, m_pPetInfo->getPetAttr());
+            insertPetItemWithInfoStmt.bindUInt(15, m_pPetInfo->getPetAttrLevel());
+            insertPetItemWithInfoStmt.bindUInt(16, m_pPetInfo->getPetOption());
+            insertPetItemWithInfoStmt.bindUInt(17, m_pPetInfo->getFoodType());
+            insertPetItemWithInfoStmt.bindUInt(18, m_pPetInfo->canGamble());
+            insertPetItemWithInfoStmt.bindUInt(19, m_pPetInfo->canCutHead());
+            insertPetItemWithInfoStmt.bindUInt(20, m_pPetInfo->canAttack());
+            insertPetItemWithInfoStmt.bindString(21, m_pPetInfo->getLastFeedTime().toDateTime());
+            insertPetItemWithInfoStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -120,11 +146,15 @@ void PetItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PetItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePetItemStmt(pConn, string("UPDATE PetItemObject SET ") + field + " WHERE ItemID=?");
+        tinysavePetItemStmt.bindUInt(1, m_ItemID);
+        tinysavePetItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -139,30 +169,53 @@ void PetItem::save(const string& ownerID, Storage storage, StorageID_t storageID
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         if (m_pPetInfo == NULL) {
-            pStmt->executeQuery("UPDATE PetItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                                "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                                m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                                m_ItemID);
+            PreparedStatement savePetItemStmt(
+                pConn, "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                       "StorageID=?, X=?, Y=? WHERE ItemID=?");
+            savePetItemStmt.bindUInt(1, m_ObjectID);
+            savePetItemStmt.bindUInt(2, m_ItemType);
+            savePetItemStmt.bindString(3, ownerID);
+            savePetItemStmt.bindInt(4, (int)storage);
+            savePetItemStmt.bindUInt(5, storageID);
+            savePetItemStmt.bindInt(6, (int)x);
+            savePetItemStmt.bindInt(7, (int)y);
+            savePetItemStmt.bindUInt(8, m_ItemID);
+            savePetItemStmt.execute();
         } else {
-            pStmt->executeQuery(
-                "UPDATE PetItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, "
-                "Y=%d, "
-                "PetCreatureType=%u, PetLevel=%u, PetAttr=%u, PetAttrLevel=%u, PetExp=%u, PetHP=%u, FoodType=%u, "
-                "CanGamble=%u, CanCutHead=%u, CanAttack=%u, LastFeedTime='%s', Nickname='%s' "
-                "WHERE ItemID=%ld",
-                m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                m_pPetInfo->getPetCreatureType(), m_pPetInfo->getPetLevel(), m_pPetInfo->getPetAttr(),
-                m_pPetInfo->getPetAttrLevel(), m_pPetInfo->getPetExp(), m_pPetInfo->getPetHP(),
-                m_pPetInfo->getFoodType(), m_pPetInfo->canGamble(), m_pPetInfo->canCutHead(), m_pPetInfo->canAttack(),
-                m_pPetInfo->getLastFeedTime().toDateTime().c_str(), getDBString(m_pPetInfo->getNickname()).c_str(),
-                m_ItemID);
+            // getDBString() escaped backslash/quote for the old raw-format string
+            // embedding; with a bound parameter that escaping would double-encode
+            // the nickname, so the raw string is bound instead.
+            PreparedStatement savePetItemWithInfoStmt(
+                pConn,
+                "UPDATE PetItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                "PetCreatureType=?, PetLevel=?, PetAttr=?, PetAttrLevel=?, PetExp=?, PetHP=?, FoodType=?, "
+                "CanGamble=?, CanCutHead=?, CanAttack=?, LastFeedTime=?, Nickname=? "
+                "WHERE ItemID=?");
+            savePetItemWithInfoStmt.bindUInt(1, m_ObjectID);
+            savePetItemWithInfoStmt.bindUInt(2, m_ItemType);
+            savePetItemWithInfoStmt.bindString(3, ownerID);
+            savePetItemWithInfoStmt.bindInt(4, (int)storage);
+            savePetItemWithInfoStmt.bindUInt(5, storageID);
+            savePetItemWithInfoStmt.bindInt(6, (int)x);
+            savePetItemWithInfoStmt.bindInt(7, (int)y);
+            savePetItemWithInfoStmt.bindUInt(8, m_pPetInfo->getPetCreatureType());
+            savePetItemWithInfoStmt.bindUInt(9, m_pPetInfo->getPetLevel());
+            savePetItemWithInfoStmt.bindUInt(10, m_pPetInfo->getPetAttr());
+            savePetItemWithInfoStmt.bindUInt(11, m_pPetInfo->getPetAttrLevel());
+            savePetItemWithInfoStmt.bindUInt(12, m_pPetInfo->getPetExp());
+            savePetItemWithInfoStmt.bindUInt(13, m_pPetInfo->getPetHP());
+            savePetItemWithInfoStmt.bindUInt(14, m_pPetInfo->getFoodType());
+            savePetItemWithInfoStmt.bindUInt(15, m_pPetInfo->canGamble());
+            savePetItemWithInfoStmt.bindUInt(16, m_pPetInfo->canCutHead());
+            savePetItemWithInfoStmt.bindUInt(17, m_pPetInfo->canAttack());
+            savePetItemWithInfoStmt.bindString(18, m_pPetInfo->getLastFeedTime().toDateTime());
+            savePetItemWithInfoStmt.bindString(19, m_pPetInfo->getNickname());
+            savePetItemWithInfoStmt.bindUInt(20, m_ItemID);
+            savePetItemWithInfoStmt.execute();
         }
-
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -175,23 +228,32 @@ void PetItem::savePetInfo() const {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         if (m_pPetInfo != NULL) {
-            pStmt->executeQuery(
-                "UPDATE PetItemObject SET "
-                "PetCreatureType=%u, PetLevel=%u, PetAttr=%u, PetAttrLevel=%u, PetExp=%u, PetHP=%u, FoodType=%u, "
-                "CanGamble=%u, CanCutHead=%u, CanAttack=%u, LastFeedTime='%s', Nickname='%s' "
-                "WHERE ItemID=%ld",
-                m_pPetInfo->getPetCreatureType(), m_pPetInfo->getPetLevel(), m_pPetInfo->getPetAttr(),
-                m_pPetInfo->getPetAttrLevel(), m_pPetInfo->getPetExp(), m_pPetInfo->getPetHP(),
-                m_pPetInfo->getFoodType(), m_pPetInfo->canGamble(), m_pPetInfo->canCutHead(), m_pPetInfo->canAttack(),
-                m_pPetInfo->getLastFeedTime().toDateTime().c_str(), getDBString(m_pPetInfo->getNickname()).c_str(),
-                m_ItemID);
+            // getDBString() escaped backslash/quote for the old raw-format string
+            // embedding; with a bound parameter that escaping would double-encode
+            // the nickname, so the raw string is bound instead.
+            PreparedStatement savePetInfoStmt(
+                pConn, "UPDATE PetItemObject SET "
+                       "PetCreatureType=?, PetLevel=?, PetAttr=?, PetAttrLevel=?, PetExp=?, PetHP=?, FoodType=?, "
+                       "CanGamble=?, CanCutHead=?, CanAttack=?, LastFeedTime=?, Nickname=? "
+                       "WHERE ItemID=?");
+            savePetInfoStmt.bindUInt(1, m_pPetInfo->getPetCreatureType());
+            savePetInfoStmt.bindUInt(2, m_pPetInfo->getPetLevel());
+            savePetInfoStmt.bindUInt(3, m_pPetInfo->getPetAttr());
+            savePetInfoStmt.bindUInt(4, m_pPetInfo->getPetAttrLevel());
+            savePetInfoStmt.bindUInt(5, m_pPetInfo->getPetExp());
+            savePetInfoStmt.bindUInt(6, m_pPetInfo->getPetHP());
+            savePetInfoStmt.bindUInt(7, m_pPetInfo->getFoodType());
+            savePetInfoStmt.bindUInt(8, m_pPetInfo->canGamble());
+            savePetInfoStmt.bindUInt(9, m_pPetInfo->canCutHead());
+            savePetInfoStmt.bindUInt(10, m_pPetInfo->canAttack());
+            savePetInfoStmt.bindString(11, m_pPetInfo->getLastFeedTime().toDateTime());
+            savePetInfoStmt.bindString(12, m_pPetInfo->getNickname());
+            savePetInfoStmt.bindUInt(13, m_ItemID);
+            savePetInfoStmt.execute();
         }
-
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -327,9 +389,10 @@ void PetItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PetItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PetItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -340,7 +403,9 @@ void PetItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM PetItemInfo");
+        PreparedStatement selectPetItemInfoStmt(pConn,
+                                                 "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM PetItemInfo");
+        pResult = selectPetItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -357,8 +422,6 @@ void PetItemInfoManager::load()
 
             addItemInfo(pPetItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -379,7 +442,7 @@ void PetItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -393,12 +456,13 @@ void PetItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag, "
-                                "PetCreatureType, PetLevel, PetExp, PetHP, PetAttr, PetAttrLevel, PetOption, FoodType, "
-                                "CanGamble, CanCutHead, CanAttack, LastFeedTime, Nickname "
-                                "FROM PetItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9, 13)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectPetItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag, "
+                   "PetCreatureType, PetLevel, PetExp, PetHP, PetAttr, PetAttrLevel, PetOption, FoodType, "
+                   "CanGamble, CanCutHead, CanAttack, LastFeedTime, Nickname "
+                   "FROM PetItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9, 13)");
+        selectPetItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPetItemLoaderStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -546,7 +610,6 @@ void PetItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -557,8 +620,6 @@ void PetItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -572,17 +633,17 @@ void PetItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM PetItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZonePetItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM PetItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZonePetItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZonePetItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZonePetItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -615,8 +676,6 @@ void PetItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

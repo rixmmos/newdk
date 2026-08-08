@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -62,17 +63,21 @@ void QuestItem::create(const string& ownerID, Storage storage, StorageID_t stora
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO QuestItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(" << m_ItemID << ", "
-            << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", " << storageID
-            << ", " << (int)x << ", " << (int)y << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertQuestItemStmt(
+            pConn, "INSERT INTO QuestItemObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertQuestItemStmt.bindUInt(1, m_ItemID);
+        insertQuestItemStmt.bindUInt(2, m_ObjectID);
+        insertQuestItemStmt.bindUInt(3, m_ItemType);
+        insertQuestItemStmt.bindString(4, ownerID);
+        insertQuestItemStmt.bindInt(5, (int)storage);
+        insertQuestItemStmt.bindUInt(6, storageID);
+        insertQuestItemStmt.bindInt(7, (int)x);
+        insertQuestItemStmt.bindInt(8, (int)y);
+        insertQuestItemStmt.bindInt(9, (int)m_CreateType);
+        insertQuestItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -90,11 +95,15 @@ void QuestItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE QuestItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveQuestItemStmt(pConn, string("UPDATE QuestItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveQuestItemStmt.bindUInt(1, m_ItemID);
+        tinysaveQuestItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -125,14 +134,20 @@ void QuestItem::save(const string& ownerID, Storage storage, StorageID_t storage
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE QuestItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveQuestItemStmt(pConn,
+                                             "UPDATE QuestItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                             "StorageID=?, X=?, Y=? WHERE ItemID=?");
+        saveQuestItemStmt.bindUInt(1, m_ObjectID);
+        saveQuestItemStmt.bindUInt(2, m_ItemType);
+        saveQuestItemStmt.bindString(3, ownerID);
+        saveQuestItemStmt.bindInt(4, (int)storage);
+        saveQuestItemStmt.bindUInt(5, storageID);
+        saveQuestItemStmt.bindInt(6, (int)x);
+        saveQuestItemStmt.bindInt(7, (int)y);
+        saveQuestItemStmt.bindUInt(8, m_ItemID);
+        saveQuestItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -203,9 +218,10 @@ void QuestItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM QuestItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM QuestItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -216,8 +232,9 @@ void QuestItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, BonusRatio FROM QuestItemInfo");
+        PreparedStatement selectQuestItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, BonusRatio FROM QuestItemInfo");
+        pResult = selectQuestItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -235,8 +252,6 @@ void QuestItemInfoManager::load()
 
             addItemInfo(pQuestItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -257,7 +272,7 @@ void QuestItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -271,10 +286,11 @@ void QuestItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
-                                "QuestItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectQuestItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
+                   "QuestItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectQuestItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectQuestItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -366,7 +382,6 @@ void QuestItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -377,8 +392,6 @@ void QuestItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -392,17 +405,17 @@ void QuestItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM QuestItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneQuestItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM QuestItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneQuestItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneQuestItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneQuestItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -435,8 +448,6 @@ void QuestItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

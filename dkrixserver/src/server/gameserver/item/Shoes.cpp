@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -54,7 +55,7 @@ void Shoes::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -68,23 +69,29 @@ void Shoes::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO ShoesObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertShoesStmt(pConn,
+                                           "INSERT INTO ShoesObject "
+                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertShoesStmt.bindUInt(1, m_ItemID);
+        insertShoesStmt.bindUInt(2, m_ObjectID);
+        insertShoesStmt.bindUInt(3, getItemType());
+        insertShoesStmt.bindString(4, ownerID);
+        insertShoesStmt.bindInt(5, (int)storage);
+        insertShoesStmt.bindUInt(6, storageID);
+        insertShoesStmt.bindInt(7, (int)x);
+        insertShoesStmt.bindInt(8, (int)y);
+        insertShoesStmt.bindString(9, optionField);
+        insertShoesStmt.bindUInt(10, getDurability());
+        insertShoesStmt.bindInt(11, getGrade());
+        insertShoesStmt.bindInt(12, (int)m_CreateType);
+        insertShoesStmt.execute();
     }
     END_DB(pStmt)
 
@@ -103,11 +110,15 @@ void Shoes::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ShoesObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveShoesStmt(pConn, string("UPDATE ShoesObject SET ") + field + " WHERE ItemID=?");
+        tinysaveShoesStmt.bindUInt(1, m_ItemID);
+        tinysaveShoesStmt.execute();
     }
     END_DB(pStmt)
 
@@ -122,10 +133,10 @@ void Shoes::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -148,14 +159,22 @@ void Shoes::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE ShoesObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveShoesStmt(
+            pConn, "UPDATE ShoesObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveShoesStmt.bindUInt(1, m_ObjectID);
+        saveShoesStmt.bindUInt(2, getItemType());
+        saveShoesStmt.bindString(3, ownerID);
+        saveShoesStmt.bindInt(4, (int)storage);
+        saveShoesStmt.bindUInt(5, storageID);
+        saveShoesStmt.bindInt(6, (int)x);
+        saveShoesStmt.bindInt(7, (int)y);
+        saveShoesStmt.bindString(8, optionField);
+        saveShoesStmt.bindUInt(9, getDurability());
+        saveShoesStmt.bindInt(10, getGrade());
+        saveShoesStmt.bindInt(11, (int)getEnchantLevel());
+        saveShoesStmt.bindUInt(12, m_ItemID);
+        saveShoesStmt.execute();
     }
     END_DB(pStmt)
 
@@ -271,12 +290,13 @@ void ShoesInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM ShoesInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM ShoesInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -287,10 +307,11 @@ void ShoesInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM ShoesInfo");
+        PreparedStatement selectShoesInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM ShoesInfo");
+        pResult = selectShoesInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -318,8 +339,6 @@ void ShoesInfoManager::load()
 
             addItemInfo(pShoesInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -337,10 +356,10 @@ void ShoesLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -355,10 +374,11 @@ void ShoesLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM ShoesObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectShoesLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM ShoesObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectShoesLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectShoesLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -462,7 +482,6 @@ void ShoesLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -472,8 +491,6 @@ void ShoesLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -491,18 +508,18 @@ void ShoesLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM ShoesObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneShoesStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM ShoesObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneShoesStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneShoesStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneShoesStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -542,8 +559,6 @@ void ShoesLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

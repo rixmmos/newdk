@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -51,7 +52,7 @@ void Serum::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -65,15 +66,21 @@ void Serum::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO SerumObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (" << m_ItemID << ","
-            << m_ObjectID << "," << m_ItemType << ",'" << ownerID << "'," << (int)storage << ", " << storageID << ", "
-            << (int)x << "," << (int)y << "," << (int)m_Num << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSerumStmt(
+            pConn, "INSERT INTO SerumObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSerumStmt.bindUInt(1, m_ItemID);
+        insertSerumStmt.bindUInt(2, m_ObjectID);
+        insertSerumStmt.bindUInt(3, m_ItemType);
+        insertSerumStmt.bindString(4, ownerID);
+        insertSerumStmt.bindInt(5, (int)storage);
+        insertSerumStmt.bindUInt(6, storageID);
+        insertSerumStmt.bindInt(7, (int)x);
+        insertSerumStmt.bindInt(8, (int)y);
+        insertSerumStmt.bindInt(9, (int)m_Num);
+        insertSerumStmt.execute();
     }
     END_DB(pStmt)
 
@@ -92,11 +99,15 @@ void Serum::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SerumObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSerumStmt(pConn, string("UPDATE SerumObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSerumStmt.bindUInt(1, m_ItemID);
+        tinysaveSerumStmt.execute();
     }
     END_DB(pStmt)
 
@@ -111,10 +122,10 @@ void Serum::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -133,12 +144,19 @@ void Serum::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE SerumObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSerumStmt(pConn,
+                                         "UPDATE SerumObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                         "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        saveSerumStmt.bindUInt(1, m_ObjectID);
+        saveSerumStmt.bindUInt(2, m_ItemType);
+        saveSerumStmt.bindString(3, ownerID);
+        saveSerumStmt.bindInt(4, (int)storage);
+        saveSerumStmt.bindUInt(5, storageID);
+        saveSerumStmt.bindInt(6, (int)x);
+        saveSerumStmt.bindInt(7, (int)y);
+        saveSerumStmt.bindInt(8, (int)m_Num);
+        saveSerumStmt.bindUInt(9, m_ItemID);
+        saveSerumStmt.execute();
     }
     END_DB(pStmt)
 
@@ -281,12 +299,13 @@ void SerumInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SerumInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SerumInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -297,8 +316,9 @@ void SerumInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, SerumEffect FROM SerumInfo");
+        PreparedStatement selectSerumInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, SerumEffect FROM SerumInfo");
+        pResult = selectSerumInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -316,8 +336,6 @@ void SerumInfoManager::load()
 
             addItemInfo(pSerumInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -335,10 +353,10 @@ void SerumLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -352,9 +370,11 @@ void SerumLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "SerumObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectSerumLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                   "SerumObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSerumLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSerumLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -439,7 +459,6 @@ void SerumLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -449,8 +468,6 @@ void SerumLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -468,17 +485,17 @@ void SerumLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM SerumObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSerumStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM SerumObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSerumStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSerumStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSerumStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -511,8 +528,6 @@ void SerumLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

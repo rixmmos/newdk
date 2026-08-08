@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -66,7 +67,7 @@ void SMG::create(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -80,24 +81,30 @@ void SMG::create(const string& ownerID, Storage storage, StorageID_t storageID, 
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO SMGObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getBulletCount() << ", " << (int)getGrade() << ", "
-            << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSMGStmt(pConn,
+                                         "INSERT INTO SMGObject "
+                                         "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                         " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
+                                         " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSMGStmt.bindUInt(1, m_ItemID);
+        insertSMGStmt.bindUInt(2, m_ObjectID);
+        insertSMGStmt.bindUInt(3, getItemType());
+        insertSMGStmt.bindString(4, ownerID);
+        insertSMGStmt.bindInt(5, (int)storage);
+        insertSMGStmt.bindUInt(6, storageID);
+        insertSMGStmt.bindInt(7, (int)x);
+        insertSMGStmt.bindInt(8, (int)y);
+        insertSMGStmt.bindString(9, optionField);
+        insertSMGStmt.bindUInt(10, getDurability());
+        insertSMGStmt.bindInt(11, (int)getBulletCount());
+        insertSMGStmt.bindInt(12, (int)getGrade());
+        insertSMGStmt.bindInt(13, (int)m_CreateType);
+        insertSMGStmt.execute();
     }
     END_DB(pStmt)
 
@@ -116,12 +123,17 @@ void SMG::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SMGObject SET %s, BulletCount=%d WHERE ItemID=%ld", field, (int)getBulletCount(),
-                            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). BulletCount and ItemID are bound.
+        PreparedStatement tinysaveSMGStmt(
+            pConn, string("UPDATE SMGObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
+        tinysaveSMGStmt.bindInt(1, (int)getBulletCount());
+        tinysaveSMGStmt.bindUInt(2, m_ItemID);
+        tinysaveSMGStmt.execute();
     }
     END_DB(pStmt)
 
@@ -136,10 +148,10 @@ void SMG::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -164,14 +176,24 @@ void SMG::save(const string& ownerID, Storage storage, StorageID_t storageID, BY
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE SMGObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, BulletCount=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getBulletCount(), (int)getSilver(), (int)getGrade(),
-            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSMGStmt(
+            pConn, "UPDATE SMGObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, BulletCount=?, Silver=?, Grade=? WHERE ItemID=?");
+        saveSMGStmt.bindUInt(1, m_ObjectID);
+        saveSMGStmt.bindUInt(2, getItemType());
+        saveSMGStmt.bindString(3, ownerID);
+        saveSMGStmt.bindInt(4, (int)storage);
+        saveSMGStmt.bindUInt(5, storageID);
+        saveSMGStmt.bindInt(6, (int)x);
+        saveSMGStmt.bindInt(7, (int)y);
+        saveSMGStmt.bindString(8, optionField);
+        saveSMGStmt.bindUInt(9, getDurability());
+        saveSMGStmt.bindInt(10, (int)getEnchantLevel());
+        saveSMGStmt.bindInt(11, (int)getBulletCount());
+        saveSMGStmt.bindInt(12, (int)getSilver());
+        saveSMGStmt.bindInt(13, (int)getGrade());
+        saveSMGStmt.bindUInt(14, m_ItemID);
+        saveSMGStmt.execute();
     }
     END_DB(pStmt)
 
@@ -187,11 +209,12 @@ void SMG::saveBullet() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SMGObject SET BulletCount = %d WHERE ItemID = %ld", getBulletCount(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveBulletStmt(pConn, "UPDATE SMGObject SET BulletCount = ? WHERE ItemID = ?");
+        saveBulletStmt.bindInt(1, getBulletCount());
+        saveBulletStmt.bindUInt(2, m_ItemID);
+        saveBulletStmt.execute();
     }
     END_DB(pStmt)
 
@@ -358,12 +381,13 @@ void SMGInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SMGInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SMGInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -374,10 +398,11 @@ void SMGInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
-            "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-            "NextOptionRatio, NextItemType, DowngradeRatio FROM SMGInfo");
+        PreparedStatement selectSMGInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
+                   "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SMGInfo");
+        pResult = selectSMGInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -409,8 +434,6 @@ void SMGInfoManager::load()
 
             addItemInfo(pSMGInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -428,10 +451,10 @@ void SMGLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -446,10 +469,11 @@ void SMGLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
-            "BulletCount, Silver, Grade, ItemFlag FROM SMGObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectSMGLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
+                   "BulletCount, Silver, Grade, ItemFlag FROM SMGObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSMGLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSMGLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -555,7 +579,6 @@ void SMGLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -565,8 +588,6 @@ void SMGLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -584,18 +605,18 @@ void SMGLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << "OptionType, Durability, EnchantLevel, BulletCount, Silver, ItemFlag FROM SMGObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSMGStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   "OptionType, Durability, EnchantLevel, BulletCount, Silver, ItemFlag FROM SMGObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSMGStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSMGStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSMGStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -637,8 +658,6 @@ void SMGLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

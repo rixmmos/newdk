@@ -12,6 +12,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -67,7 +68,7 @@ void SR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -81,24 +82,30 @@ void SR::create(const string& ownerID, Storage storage, StorageID_t storageID, B
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO SRObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << (int)getBulletCount() << ", " << (int)getGrade() << ",  "
-            << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSRStmt(pConn,
+                                        "INSERT INTO SRObject "
+                                        "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                        " X, Y, OptionType, Durability, BulletCount, Grade, ItemFlag)"
+                                        " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSRStmt.bindUInt(1, m_ItemID);
+        insertSRStmt.bindUInt(2, m_ObjectID);
+        insertSRStmt.bindUInt(3, getItemType());
+        insertSRStmt.bindString(4, ownerID);
+        insertSRStmt.bindInt(5, (int)storage);
+        insertSRStmt.bindUInt(6, storageID);
+        insertSRStmt.bindInt(7, (int)x);
+        insertSRStmt.bindInt(8, (int)y);
+        insertSRStmt.bindString(9, optionField);
+        insertSRStmt.bindUInt(10, getDurability());
+        insertSRStmt.bindInt(11, (int)getBulletCount());
+        insertSRStmt.bindInt(12, (int)getGrade());
+        insertSRStmt.bindInt(13, (int)m_CreateType);
+        insertSRStmt.execute();
     }
     END_DB(pStmt)
 
@@ -117,12 +124,17 @@ void SR::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SRObject SET %s, BulletCount=%d WHERE ItemID=%ld", field, (int)getBulletCount(),
-                            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). BulletCount and ItemID are bound.
+        PreparedStatement tinysaveSRStmt(pConn,
+                                          string("UPDATE SRObject SET ") + field + ", BulletCount=? WHERE ItemID=?");
+        tinysaveSRStmt.bindInt(1, (int)getBulletCount());
+        tinysaveSRStmt.bindUInt(2, m_ItemID);
+        tinysaveSRStmt.execute();
     }
     END_DB(pStmt)
 
@@ -137,10 +149,10 @@ void SR::save(const string& ownerID, Storage storage, StorageID_t storageID, BYT
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -165,15 +177,24 @@ void SR::save(const string& ownerID, Storage storage, StorageID_t storageID, BYT
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE SRObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, BulletCount=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getBulletCount(), (int)getSilver(), (int)getGrade(),
-            m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSRStmt(
+            pConn, "UPDATE SRObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, BulletCount=?, Silver=?, Grade=? WHERE ItemID=?");
+        saveSRStmt.bindUInt(1, m_ObjectID);
+        saveSRStmt.bindUInt(2, getItemType());
+        saveSRStmt.bindString(3, ownerID);
+        saveSRStmt.bindInt(4, (int)storage);
+        saveSRStmt.bindUInt(5, storageID);
+        saveSRStmt.bindInt(6, (int)x);
+        saveSRStmt.bindInt(7, (int)y);
+        saveSRStmt.bindString(8, optionField);
+        saveSRStmt.bindUInt(9, getDurability());
+        saveSRStmt.bindInt(10, (int)getEnchantLevel());
+        saveSRStmt.bindInt(11, (int)getBulletCount());
+        saveSRStmt.bindInt(12, (int)getSilver());
+        saveSRStmt.bindInt(13, (int)getGrade());
+        saveSRStmt.bindUInt(14, m_ItemID);
+        saveSRStmt.execute();
     }
     END_DB(pStmt)
 
@@ -189,11 +210,12 @@ void SR::saveBullet() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SRObject SET BulletCount = %d WHERE ItemID = %d", getBulletCount(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveBulletStmt(pConn, "UPDATE SRObject SET BulletCount = ? WHERE ItemID = ?");
+        saveBulletStmt.bindInt(1, getBulletCount());
+        saveBulletStmt.bindUInt(2, m_ItemID);
+        saveBulletStmt.execute();
     }
     END_DB(pStmt)
 
@@ -360,12 +382,13 @@ void SRInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SRInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SRInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -376,10 +399,11 @@ void SRInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
-            "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-            "NextOptionRatio, NextItemType, DowngradeRatio FROM SRInfo");
+        PreparedStatement selectSRInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, ToHitBonus, "
+                   "`Range`, Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SRInfo");
+        pResult = selectSRInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -411,8 +435,6 @@ void SRInfoManager::load()
 
             addItemInfo(pSRInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -430,10 +452,10 @@ void SRLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -448,10 +470,11 @@ void SRLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
-            "BulletCount, Silver, Grade, ItemFlag FROM SRObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectSRLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, "
+                   "BulletCount, Silver, Grade, ItemFlag FROM SRObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSRLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSRLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -557,7 +580,6 @@ void SRLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -567,8 +589,6 @@ void SRLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -586,18 +606,18 @@ void SRLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << "OptionType, Durability, EnchantLevel, BulletCount, Silver, ItemFlag FROM SRObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSRStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   "OptionType, Durability, EnchantLevel, BulletCount, Silver, ItemFlag FROM SRObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSRStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSRStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSRStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -639,8 +659,6 @@ void SRLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

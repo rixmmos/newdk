@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -56,7 +57,7 @@ void Potion::create(const string& ownerID, Storage storage, StorageID_t storageI
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -70,8 +71,8 @@ void Potion::create(const string& ownerID, Storage storage, StorageID_t storageI
     }
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -86,13 +87,19 @@ void Potion::create(const string& ownerID, Storage storage, StorageID_t storageI
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("INSERT INTO PotionObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
-                            "Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, x, y,
-                            (int)getNum());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertPotionStmt(
+            pConn, "INSERT INTO PotionObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "Num) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertPotionStmt.bindUInt(1, m_ItemID);
+        insertPotionStmt.bindUInt(2, m_ObjectID);
+        insertPotionStmt.bindUInt(3, getItemType());
+        insertPotionStmt.bindString(4, ownerID);
+        insertPotionStmt.bindInt(5, (int)storage);
+        insertPotionStmt.bindUInt(6, storageID);
+        insertPotionStmt.bindInt(7, (int)x);
+        insertPotionStmt.bindInt(8, (int)y);
+        insertPotionStmt.bindInt(9, (int)getNum());
+        insertPotionStmt.execute();
     }
     END_DB(pStmt)
 
@@ -110,18 +117,19 @@ bool Potion::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %ld", getObjectTableName().c_str(), m_ItemID);
+        // getObjectTableName() is a per-class compile-time-fixed identifier (see
+        // Potion.h's CONCRETE_ITEM_DECL macro), never user input; PreparedStatement
+        // cannot bind an identifier, so it stays spliced. Only ItemID is bound.
+        PreparedStatement deletePotionStmt(pConn, "DELETE FROM " + getObjectTableName() + " WHERE ItemID = ?");
+        deletePotionStmt.bindUInt(1, m_ItemID);
+        deletePotionStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deletePotionStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -142,12 +150,16 @@ void Potion::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PotionObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePotionStmt(pConn, string("UPDATE PotionObject SET ") + field + " WHERE ItemID=?");
+        tinysavePotionStmt.bindUInt(1, m_ItemID);
+        tinysavePotionStmt.execute();
     }
     END_DB(pStmt)
 
@@ -162,11 +174,11 @@ void Potion::save(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -185,13 +197,19 @@ void Potion::save(const string& ownerID, Storage storage, StorageID_t storageID,
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE PotionObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)getNum(), m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement savePotionStmt(pConn,
+                                          "UPDATE PotionObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                          "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        savePotionStmt.bindUInt(1, m_ObjectID);
+        savePotionStmt.bindUInt(2, getItemType());
+        savePotionStmt.bindString(3, ownerID);
+        savePotionStmt.bindInt(4, (int)storage);
+        savePotionStmt.bindUInt(5, storageID);
+        savePotionStmt.bindInt(6, (int)x);
+        savePotionStmt.bindInt(7, (int)y);
+        savePotionStmt.bindInt(8, (int)getNum());
+        savePotionStmt.bindUInt(9, m_ItemID);
+        savePotionStmt.execute();
     }
     END_DB(pStmt)
 
@@ -423,12 +441,13 @@ void PotionInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PotionInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PotionInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -439,8 +458,9 @@ void PotionInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel, Effect FROM PotionInfo");
+        PreparedStatement selectPotionInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ItemLevel, Effect FROM PotionInfo");
+        pResult = selectPotionInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -459,8 +479,6 @@ void PotionInfoManager::load()
 
             addItemInfo(pPotionInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -478,11 +496,11 @@ void PotionLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -496,9 +514,11 @@ void PotionLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "PotionObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectPotionLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                   "PotionObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectPotionLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPotionLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -609,7 +629,6 @@ void PotionLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -620,8 +639,6 @@ void PotionLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -639,17 +656,17 @@ void PotionLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM PotionObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZonePotionStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM PotionObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZonePotionStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZonePotionStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZonePotionStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -682,8 +699,6 @@ void PotionLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

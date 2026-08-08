@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void Sword::create(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,23 +74,29 @@ void Sword::create(const string& ownerID, Storage storage, StorageID_t storageID
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO SwordObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSwordStmt(pConn,
+                                           "INSERT INTO SwordObject "
+                                           "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                           " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                           " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSwordStmt.bindUInt(1, m_ItemID);
+        insertSwordStmt.bindUInt(2, m_ObjectID);
+        insertSwordStmt.bindUInt(3, getItemType());
+        insertSwordStmt.bindString(4, ownerID);
+        insertSwordStmt.bindInt(5, (int)storage);
+        insertSwordStmt.bindUInt(6, storageID);
+        insertSwordStmt.bindInt(7, (int)x);
+        insertSwordStmt.bindInt(8, (int)y);
+        insertSwordStmt.bindString(9, optionField);
+        insertSwordStmt.bindUInt(10, getDurability());
+        insertSwordStmt.bindInt(11, getGrade());
+        insertSwordStmt.bindInt(12, (int)m_CreateType);
+        insertSwordStmt.execute();
     }
     END_DB(pStmt)
 
@@ -108,11 +115,15 @@ void Sword::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SwordObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSwordStmt(pConn, string("UPDATE SwordObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSwordStmt.bindUInt(1, m_ItemID);
+        tinysaveSwordStmt.execute();
     }
     END_DB(pStmt)
 
@@ -127,10 +138,10 @@ void Sword::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -154,14 +165,23 @@ void Sword::save(const string& ownerID, Storage storage, StorageID_t storageID, 
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE SwordObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, EnchantLevel=%d, Silver=%d, Grade=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), (int)getEnchantLevel(), (int)getSilver(), (int)getGrade(), m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSwordStmt(
+            pConn, "UPDATE SwordObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, EnchantLevel=?, Silver=?, Grade=? WHERE ItemID=?");
+        saveSwordStmt.bindUInt(1, m_ObjectID);
+        saveSwordStmt.bindUInt(2, getItemType());
+        saveSwordStmt.bindString(3, ownerID);
+        saveSwordStmt.bindInt(4, (int)storage);
+        saveSwordStmt.bindUInt(5, storageID);
+        saveSwordStmt.bindInt(6, (int)x);
+        saveSwordStmt.bindInt(7, (int)y);
+        saveSwordStmt.bindString(8, optionField);
+        saveSwordStmt.bindUInt(9, getDurability());
+        saveSwordStmt.bindInt(10, (int)getEnchantLevel());
+        saveSwordStmt.bindInt(11, (int)getSilver());
+        saveSwordStmt.bindInt(12, (int)getGrade());
+        saveSwordStmt.bindUInt(13, m_ItemID);
+        saveSwordStmt.execute();
     }
     END_DB(pStmt)
 
@@ -296,12 +316,13 @@ void SwordInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SwordInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SwordInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -312,10 +333,11 @@ void SwordInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MaxSilver, "
-            "Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-            "NextOptionRatio, NextItemType, DowngradeRatio FROM SwordInfo");
+        PreparedStatement selectSwordInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, minDamage, maxDamage, MaxSilver, "
+                   "Speed, ReqAbility, ItemLevel, CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM SwordInfo");
+        pResult = selectSwordInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -346,8 +368,6 @@ void SwordInfoManager::load()
 
             addItemInfo(pSwordInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -365,10 +385,10 @@ void SwordLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -383,10 +403,11 @@ void SwordLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, Silver, "
-            "Grade, ItemFlag FROM SwordObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectSwordLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,OptionType, Durability, EnchantLevel, Silver, "
+                   "Grade, ItemFlag FROM SwordObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSwordLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSwordLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -491,7 +512,6 @@ void SwordLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -501,8 +521,6 @@ void SwordLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -520,18 +538,18 @@ void SwordLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM SwordObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSwordStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, Silver, ItemFlag FROM SwordObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSwordStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSwordStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSwordStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -572,8 +590,6 @@ void SwordLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

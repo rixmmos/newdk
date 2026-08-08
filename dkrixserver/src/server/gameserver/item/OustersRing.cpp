@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void OustersRing::create(const string& ownerID, Storage storage, StorageID_t sto
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,23 +74,29 @@ void OustersRing::create(const string& ownerID, Storage storage, StorageID_t sto
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO OustersRingObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertOustersRingStmt(pConn,
+                                                  "INSERT INTO OustersRingObject "
+                                                  "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                  " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                  " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertOustersRingStmt.bindUInt(1, m_ItemID);
+        insertOustersRingStmt.bindUInt(2, m_ObjectID);
+        insertOustersRingStmt.bindUInt(3, getItemType());
+        insertOustersRingStmt.bindString(4, ownerID);
+        insertOustersRingStmt.bindInt(5, (int)storage);
+        insertOustersRingStmt.bindUInt(6, storageID);
+        insertOustersRingStmt.bindInt(7, (int)x);
+        insertOustersRingStmt.bindInt(8, (int)y);
+        insertOustersRingStmt.bindString(9, optionField);
+        insertOustersRingStmt.bindUInt(10, getDurability());
+        insertOustersRingStmt.bindInt(11, getGrade());
+        insertOustersRingStmt.bindInt(12, (int)m_CreateType);
+        insertOustersRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -108,11 +115,16 @@ void OustersRing::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersRingObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveOustersRingStmt(pConn,
+                                                    string("UPDATE OustersRingObject SET ") + field + " WHERE ItemID=?");
+        tinysaveOustersRingStmt.bindUInt(1, m_ItemID);
+        tinysaveOustersRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -127,10 +139,10 @@ void OustersRing::save(const string& ownerID, Storage storage, StorageID_t stora
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -153,13 +165,22 @@ void OustersRing::save(const string& ownerID, Storage storage, StorageID_t stora
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE OustersRingObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, "
-            "Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveOustersRingStmt(
+            pConn, "UPDATE OustersRingObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, "
+                   "Y=?, OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveOustersRingStmt.bindUInt(1, m_ObjectID);
+        saveOustersRingStmt.bindUInt(2, getItemType());
+        saveOustersRingStmt.bindString(3, ownerID);
+        saveOustersRingStmt.bindInt(4, (int)storage);
+        saveOustersRingStmt.bindUInt(5, storageID);
+        saveOustersRingStmt.bindInt(6, (int)x);
+        saveOustersRingStmt.bindInt(7, (int)y);
+        saveOustersRingStmt.bindString(8, optionField);
+        saveOustersRingStmt.bindUInt(9, getDurability());
+        saveOustersRingStmt.bindInt(10, getGrade());
+        saveOustersRingStmt.bindInt(11, (int)getEnchantLevel());
+        saveOustersRingStmt.bindUInt(12, m_ItemID);
+        saveOustersRingStmt.execute();
     }
     END_DB(pStmt)
 
@@ -274,12 +295,13 @@ void OustersRingInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM OustersRingInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM OustersRingInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -290,10 +312,11 @@ void OustersRingInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
-                                "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
-                                "NextOptionRatio, NextItemType, DowngradeRatio FROM OustersRingInfo");
+        PreparedStatement selectOustersRingInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, "
+                   "Protection, ReqAbility, ItemLevel, DefaultOption, UpgradeRatio, UpgradeCrashPercent, "
+                   "NextOptionRatio, NextItemType, DowngradeRatio FROM OustersRingInfo");
+        pResult = selectOustersRingInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -321,8 +344,6 @@ void OustersRingInfoManager::load()
 
             addItemInfo(pOustersRingInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -340,10 +361,10 @@ void OustersRingLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -358,10 +379,11 @@ void OustersRingLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM OustersRingObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectOustersRingLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM OustersRingObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectOustersRingLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectOustersRingLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -469,7 +491,6 @@ void OustersRingLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -479,8 +500,6 @@ void OustersRingLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -498,18 +517,18 @@ void OustersRingLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersRingObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneOustersRingStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersRingObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneOustersRingStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneOustersRingStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneOustersRingStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -549,8 +568,6 @@ void OustersRingLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

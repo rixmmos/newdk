@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -64,17 +65,22 @@ void PetEnchantItem::create(const string& ownerID, Storage storage, StorageID_t 
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO PetEnchantItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertPetEnchantItemStmt(
+            pConn, "INSERT INTO PetEnchantItemObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertPetEnchantItemStmt.bindUInt(1, m_ItemID);
+        insertPetEnchantItemStmt.bindUInt(2, m_ObjectID);
+        insertPetEnchantItemStmt.bindUInt(3, m_ItemType);
+        insertPetEnchantItemStmt.bindString(4, ownerID);
+        insertPetEnchantItemStmt.bindInt(5, (int)storage);
+        insertPetEnchantItemStmt.bindUInt(6, storageID);
+        insertPetEnchantItemStmt.bindInt(7, (int)x);
+        insertPetEnchantItemStmt.bindInt(8, (int)y);
+        insertPetEnchantItemStmt.bindInt(9, (int)m_Num);
+        insertPetEnchantItemStmt.bindInt(10, (int)m_CreateType);
+        insertPetEnchantItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -92,11 +98,16 @@ void PetEnchantItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PetEnchantItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePetEnchantItemStmt(
+            pConn, string("UPDATE PetEnchantItemObject SET ") + field + " WHERE ItemID=?");
+        tinysavePetEnchantItemStmt.bindUInt(1, m_ItemID);
+        tinysavePetEnchantItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -127,15 +138,21 @@ void PetEnchantItem::save(const string& ownerID, Storage storage, StorageID_t st
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PetEnchantItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement savePetEnchantItemStmt(
+            pConn, "UPDATE PetEnchantItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        savePetEnchantItemStmt.bindUInt(1, m_ObjectID);
+        savePetEnchantItemStmt.bindUInt(2, m_ItemType);
+        savePetEnchantItemStmt.bindString(3, ownerID);
+        savePetEnchantItemStmt.bindInt(4, (int)storage);
+        savePetEnchantItemStmt.bindUInt(5, storageID);
+        savePetEnchantItemStmt.bindInt(6, (int)x);
+        savePetEnchantItemStmt.bindInt(7, (int)y);
+        savePetEnchantItemStmt.bindInt(8, (int)m_Num);
+        savePetEnchantItemStmt.bindUInt(9, m_ItemID);
+        savePetEnchantItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -206,9 +223,10 @@ void PetEnchantItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PetEnchantItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PetEnchantItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -219,8 +237,10 @@ void PetEnchantItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, "
-                                      "FunctionGrade FROM PetEnchantItemInfo");
+        PreparedStatement selectPetEnchantItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, "
+                   "FunctionGrade FROM PetEnchantItemInfo");
+        pResult = selectPetEnchantItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -239,8 +259,6 @@ void PetEnchantItemInfoManager::load()
 
             addItemInfo(pPetEnchantItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -261,7 +279,7 @@ void PetEnchantItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -275,10 +293,11 @@ void PetEnchantItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "PetEnchantItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectPetEnchantItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
+                   "PetEnchantItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectPetEnchantItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPetEnchantItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -371,7 +390,6 @@ void PetEnchantItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -382,8 +400,6 @@ void PetEnchantItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -397,17 +413,17 @@ void PetEnchantItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM PetEnchantItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZonePetEnchantItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM PetEnchantItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZonePetEnchantItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZonePetEnchantItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZonePetEnchantItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -441,8 +457,6 @@ void PetEnchantItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -13,6 +13,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -59,7 +60,7 @@ void OustersChakram::create(const string& ownerID, Storage storage, StorageID_t 
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -73,23 +74,29 @@ void OustersChakram::create(const string& ownerID, Storage storage, StorageID_t 
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO OustersChakramObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertOustersChakramStmt(pConn,
+                                                     "INSERT INTO OustersChakramObject "
+                                                     "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                                     " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                                     " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertOustersChakramStmt.bindUInt(1, m_ItemID);
+        insertOustersChakramStmt.bindUInt(2, m_ObjectID);
+        insertOustersChakramStmt.bindUInt(3, getItemType());
+        insertOustersChakramStmt.bindString(4, ownerID);
+        insertOustersChakramStmt.bindInt(5, (int)storage);
+        insertOustersChakramStmt.bindUInt(6, storageID);
+        insertOustersChakramStmt.bindInt(7, (int)x);
+        insertOustersChakramStmt.bindInt(8, (int)y);
+        insertOustersChakramStmt.bindString(9, optionField);
+        insertOustersChakramStmt.bindUInt(10, getDurability());
+        insertOustersChakramStmt.bindInt(11, getGrade());
+        insertOustersChakramStmt.bindInt(12, (int)m_CreateType);
+        insertOustersChakramStmt.execute();
     }
     END_DB(pStmt)
 
@@ -107,11 +114,16 @@ void OustersChakram::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersChakramObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveOustersChakramStmt(
+            pConn, string("UPDATE OustersChakramObject SET ") + field + " WHERE ItemID=?");
+        tinysaveOustersChakramStmt.bindUInt(1, m_ItemID);
+        tinysaveOustersChakramStmt.execute();
     }
     END_DB(pStmt)
 
@@ -129,7 +141,7 @@ void OustersChakram::save(const string& ownerID, Storage storage, StorageID_t st
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -152,14 +164,22 @@ void OustersChakram::save(const string& ownerID, Storage storage, StorageID_t st
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE OustersChakramObject SET ObjectID=%ld, ItemType=%d, OwnerID= '%s', Storage=%d, StorageID=%ld, "
-            "X=%d, Y=%d, OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveOustersChakramStmt(
+            pConn, "UPDATE OustersChakramObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, "
+                   "Y=?, OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        saveOustersChakramStmt.bindUInt(1, m_ObjectID);
+        saveOustersChakramStmt.bindUInt(2, getItemType());
+        saveOustersChakramStmt.bindString(3, ownerID);
+        saveOustersChakramStmt.bindInt(4, (int)storage);
+        saveOustersChakramStmt.bindUInt(5, storageID);
+        saveOustersChakramStmt.bindInt(6, (int)x);
+        saveOustersChakramStmt.bindInt(7, (int)y);
+        saveOustersChakramStmt.bindString(8, optionField);
+        saveOustersChakramStmt.bindUInt(9, getDurability());
+        saveOustersChakramStmt.bindInt(10, getGrade());
+        saveOustersChakramStmt.bindInt(11, (int)getEnchantLevel());
+        saveOustersChakramStmt.bindUInt(12, m_ItemID);
+        saveOustersChakramStmt.execute();
     }
     END_DB(pStmt)
 
@@ -293,12 +313,13 @@ void OustersChakramInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM OustersChakramInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM OustersChakramInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -309,11 +330,12 @@ void OustersChakramInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT "
-            "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
-            "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
-            "DowngradeRatio FROM OustersChakramInfo");
+        PreparedStatement selectOustersChakramInfoStmt(
+            pConn, "SELECT "
+                   "ItemType,Name,EName,Price,Volume,Weight,Ratio,Durability,minDamage,maxDamage,Speed,ReqAbility,ItemLevel, "
+                   "CriticalBonus, DefaultOption, UpgradeRatio, UpgradeCrashPercent, NextOptionRatio, NextItemType, "
+                   "DowngradeRatio FROM OustersChakramInfo");
+        pResult = selectOustersChakramInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -343,8 +365,6 @@ void OustersChakramInfoManager::load()
 
             addItemInfo(pOustersChakramInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -362,10 +382,10 @@ void OustersChakramLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -380,10 +400,11 @@ void OustersChakramLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM OustersChakramObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectOustersChakramLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, "
+                   "EnchantLevel, ItemFlag FROM OustersChakramObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectOustersChakramLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectOustersChakramLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -495,7 +516,6 @@ void OustersChakramLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -506,8 +526,6 @@ void OustersChakramLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -525,18 +543,18 @@ void OustersChakramLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
-            << " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersChakramObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneOustersChakramStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y,"
+                   " OptionType, Durability, EnchantLevel, ItemFlag FROM OustersChakramObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneOustersChakramStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneOustersChakramStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneOustersChakramStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -576,8 +594,6 @@ void OustersChakramLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

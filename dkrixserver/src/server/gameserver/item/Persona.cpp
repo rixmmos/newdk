@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -54,7 +55,7 @@ void Persona::create(const string& ownerID, Storage storage, StorageID_t storage
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -68,23 +69,29 @@ void Persona::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        StringStream sql;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
 
-        sql << "INSERT INTO PersonaObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
-            << " X, Y, OptionType, Durability, Grade, ItemFlag)"
-            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', "
-            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", '" << optionField.c_str()
-            << "', " << getDurability() << ", " << getGrade() << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertPersonaStmt(pConn,
+                                             "INSERT INTO PersonaObject "
+                                             "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+                                             " X, Y, OptionType, Durability, Grade, ItemFlag)"
+                                             " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertPersonaStmt.bindUInt(1, m_ItemID);
+        insertPersonaStmt.bindUInt(2, m_ObjectID);
+        insertPersonaStmt.bindUInt(3, getItemType());
+        insertPersonaStmt.bindString(4, ownerID);
+        insertPersonaStmt.bindInt(5, (int)storage);
+        insertPersonaStmt.bindUInt(6, storageID);
+        insertPersonaStmt.bindInt(7, (int)x);
+        insertPersonaStmt.bindInt(8, (int)y);
+        insertPersonaStmt.bindString(9, optionField);
+        insertPersonaStmt.bindUInt(10, getDurability());
+        insertPersonaStmt.bindInt(11, getGrade());
+        insertPersonaStmt.bindInt(12, (int)m_CreateType);
+        insertPersonaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -103,11 +110,15 @@ void Persona::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PersonaObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePersonaStmt(pConn, string("UPDATE PersonaObject SET ") + field + " WHERE ItemID=?");
+        tinysavePersonaStmt.bindUInt(1, m_ItemID);
+        tinysavePersonaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -122,20 +133,29 @@ void Persona::save(const string& ownerID, Storage storage, StorageID_t storageID
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         string optionField;
         setOptionTypeToField(getOptionTypeList(), optionField);
-        pStmt->executeQuery(
-            "UPDATE PersonaObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, X=%d, Y=%d, "
-            "OptionType='%s', Durability=%d, Grade=%d, EnchantLevel=%d WHERE ItemID=%ld",
-            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, optionField.c_str(),
-            getDurability(), getGrade(), (int)getEnchantLevel(), m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement savePersonaStmt(
+            pConn, "UPDATE PersonaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, X=?, Y=?, "
+                   "OptionType=?, Durability=?, Grade=?, EnchantLevel=? WHERE ItemID=?");
+        savePersonaStmt.bindUInt(1, m_ObjectID);
+        savePersonaStmt.bindUInt(2, getItemType());
+        savePersonaStmt.bindString(3, ownerID);
+        savePersonaStmt.bindInt(4, (int)storage);
+        savePersonaStmt.bindUInt(5, storageID);
+        savePersonaStmt.bindInt(6, (int)x);
+        savePersonaStmt.bindInt(7, (int)y);
+        savePersonaStmt.bindString(8, optionField);
+        savePersonaStmt.bindUInt(9, getDurability());
+        savePersonaStmt.bindInt(10, getGrade());
+        savePersonaStmt.bindInt(11, (int)getEnchantLevel());
+        savePersonaStmt.bindUInt(12, m_ItemID);
+        savePersonaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -184,12 +204,13 @@ void PersonaInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PersonaInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PersonaInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -200,9 +221,10 @@ void PersonaInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
-            "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM PersonaInfo");
+        PreparedStatement selectPersonaInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Durability, Defense, Protection, ReqAbility, "
+                   "ItemLevel, DefaultOption, UpgradeCrashPercent, NextOptionRatio, NextItemType FROM PersonaInfo");
+        pResult = selectPersonaInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -228,8 +250,6 @@ void PersonaInfoManager::load()
 
             addItemInfo(pPersonaInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -247,15 +267,16 @@ void PersonaLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
-            "ItemFlag FROM PersonaObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-            pCreature->getName().c_str());
+        PreparedStatement selectPersonaLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, OptionType, Durability, Grade, EnchantLevel, "
+                   "ItemFlag FROM PersonaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectPersonaLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPersonaLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -357,7 +378,6 @@ void PersonaLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -367,8 +387,6 @@ void PersonaLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -62,17 +63,21 @@ void TrapItem::create(const string& ownerID, Storage storage, StorageID_t storag
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO TrapItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(" << m_ItemID << ", "
-            << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", " << storageID
-            << ", " << (int)x << ", " << (int)y << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertTrapItemStmt(
+            pConn, "INSERT INTO TrapItemObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertTrapItemStmt.bindUInt(1, m_ItemID);
+        insertTrapItemStmt.bindUInt(2, m_ObjectID);
+        insertTrapItemStmt.bindUInt(3, m_ItemType);
+        insertTrapItemStmt.bindString(4, ownerID);
+        insertTrapItemStmt.bindInt(5, (int)storage);
+        insertTrapItemStmt.bindUInt(6, storageID);
+        insertTrapItemStmt.bindInt(7, (int)x);
+        insertTrapItemStmt.bindInt(8, (int)y);
+        insertTrapItemStmt.bindInt(9, (int)m_CreateType);
+        insertTrapItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -90,11 +95,15 @@ void TrapItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE TrapItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveTrapItemStmt(pConn, string("UPDATE TrapItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveTrapItemStmt.bindUInt(1, m_ItemID);
+        tinysaveTrapItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -125,14 +134,20 @@ void TrapItem::save(const string& ownerID, Storage storage, StorageID_t storageI
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE TrapItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveTrapItemStmt(pConn,
+                                            "UPDATE TrapItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                            "StorageID=?, X=?, Y=? WHERE ItemID=?");
+        saveTrapItemStmt.bindUInt(1, m_ObjectID);
+        saveTrapItemStmt.bindUInt(2, m_ItemType);
+        saveTrapItemStmt.bindString(3, ownerID);
+        saveTrapItemStmt.bindInt(4, (int)storage);
+        saveTrapItemStmt.bindUInt(5, storageID);
+        saveTrapItemStmt.bindInt(6, (int)x);
+        saveTrapItemStmt.bindInt(7, (int)y);
+        saveTrapItemStmt.bindUInt(8, m_ItemID);
+        saveTrapItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -203,9 +218,10 @@ void TrapItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM TrapItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM TrapItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -216,8 +232,9 @@ void TrapItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, Parameter FROM TrapItemInfo");
+        PreparedStatement selectTrapItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, `Function`, Parameter FROM TrapItemInfo");
+        pResult = selectTrapItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -236,8 +253,6 @@ void TrapItemInfoManager::load()
 
             addItemInfo(pTrapItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -258,7 +273,7 @@ void TrapItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -272,10 +287,11 @@ void TrapItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
-                                "TrapItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectTrapItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
+                   "TrapItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectTrapItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectTrapItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -367,7 +383,6 @@ void TrapItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -378,8 +393,6 @@ void TrapItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,17 +406,17 @@ void TrapItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM TrapItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneTrapItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM TrapItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneTrapItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneTrapItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneTrapItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -436,8 +449,6 @@ void TrapItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

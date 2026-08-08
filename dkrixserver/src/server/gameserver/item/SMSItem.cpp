@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -62,17 +63,21 @@ void SMSItem::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO SMSItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(" << m_ItemID << ", "
-            << m_ObjectID << ", " << getItemType() << ", '" << ownerID << "', " << (int)storage << ", " << storageID
-            << ", " << (int)x << ", " << (int)y << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSMSItemStmt(
+            pConn, "INSERT INTO SMSItemObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSMSItemStmt.bindUInt(1, m_ItemID);
+        insertSMSItemStmt.bindUInt(2, m_ObjectID);
+        insertSMSItemStmt.bindUInt(3, getItemType());
+        insertSMSItemStmt.bindString(4, ownerID);
+        insertSMSItemStmt.bindInt(5, (int)storage);
+        insertSMSItemStmt.bindUInt(6, storageID);
+        insertSMSItemStmt.bindInt(7, (int)x);
+        insertSMSItemStmt.bindInt(8, (int)y);
+        insertSMSItemStmt.bindInt(9, (int)m_CreateType);
+        insertSMSItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -90,11 +95,15 @@ void SMSItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SMSItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSMSItemStmt(pConn, string("UPDATE SMSItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSMSItemStmt.bindUInt(1, m_ItemID);
+        tinysaveSMSItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -125,15 +134,20 @@ void SMSItem::save(const string& ownerID, Storage storage, StorageID_t storageID
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SMSItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d WHERE ItemID=%ld",
-                            m_ObjectID, getItemType(), ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSMSItemStmt(pConn,
+                                           "UPDATE SMSItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                           "StorageID=?, X=?, Y=? WHERE ItemID=?");
+        saveSMSItemStmt.bindUInt(1, m_ObjectID);
+        saveSMSItemStmt.bindUInt(2, getItemType());
+        saveSMSItemStmt.bindString(3, ownerID);
+        saveSMSItemStmt.bindInt(4, (int)storage);
+        saveSMSItemStmt.bindUInt(5, storageID);
+        saveSMSItemStmt.bindInt(6, (int)x);
+        saveSMSItemStmt.bindInt(7, (int)y);
+        saveSMSItemStmt.bindUInt(8, m_ItemID);
+        saveSMSItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -204,9 +218,10 @@ void SMSItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SMSItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SMSItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -217,8 +232,9 @@ void SMSItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Charge FROM SMSItemInfo");
+        PreparedStatement selectSMSItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Charge FROM SMSItemInfo");
+        pResult = selectSMSItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -236,8 +252,6 @@ void SMSItemInfoManager::load()
 
             addItemInfo(pSMSItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -258,7 +272,7 @@ void SMSItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -272,10 +286,11 @@ void SMSItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
-                                "SMSItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectSMSItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM "
+                   "SMSItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSMSItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSMSItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -367,7 +382,6 @@ void SMSItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -378,8 +392,6 @@ void SMSItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,17 +405,17 @@ void SMSItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM SMSItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSMSItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM SMSItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSMSItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSMSItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSMSItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -436,8 +448,6 @@ void SMSItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

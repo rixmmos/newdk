@@ -13,6 +13,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -65,17 +66,22 @@ void ResurrectItem::create(const string& ownerID, Storage storage, StorageID_t s
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO ResurrectItemObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertResurrectItemStmt(
+            pConn, "INSERT INTO ResurrectItemObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertResurrectItemStmt.bindUInt(1, m_ItemID);
+        insertResurrectItemStmt.bindUInt(2, m_ObjectID);
+        insertResurrectItemStmt.bindUInt(3, m_ItemType);
+        insertResurrectItemStmt.bindString(4, ownerID);
+        insertResurrectItemStmt.bindInt(5, (int)storage);
+        insertResurrectItemStmt.bindUInt(6, storageID);
+        insertResurrectItemStmt.bindInt(7, (int)x);
+        insertResurrectItemStmt.bindInt(8, (int)y);
+        insertResurrectItemStmt.bindInt(9, (int)m_Num);
+        insertResurrectItemStmt.bindInt(10, (int)m_CreateType);
+        insertResurrectItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -93,11 +99,16 @@ void ResurrectItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ResurrectItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveResurrectItemStmt(
+            pConn, string("UPDATE ResurrectItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveResurrectItemStmt.bindUInt(1, m_ItemID);
+        tinysaveResurrectItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -129,15 +140,21 @@ void ResurrectItem::save(const string& ownerID, Storage storage, StorageID_t sto
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ResurrectItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveResurrectItemStmt(
+            pConn, "UPDATE ResurrectItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        saveResurrectItemStmt.bindUInt(1, m_ObjectID);
+        saveResurrectItemStmt.bindUInt(2, m_ItemType);
+        saveResurrectItemStmt.bindString(3, ownerID);
+        saveResurrectItemStmt.bindInt(4, (int)storage);
+        saveResurrectItemStmt.bindUInt(5, storageID);
+        saveResurrectItemStmt.bindInt(6, (int)x);
+        saveResurrectItemStmt.bindInt(7, (int)y);
+        saveResurrectItemStmt.bindInt(8, (int)m_Num);
+        saveResurrectItemStmt.bindUInt(9, m_ItemID);
+        saveResurrectItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -208,9 +225,10 @@ void ResurrectItemInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM ResurrectItemInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM ResurrectItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -221,8 +239,9 @@ void ResurrectItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ResurrectType FROM ResurrectItemInfo");
+        PreparedStatement selectResurrectItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, ResurrectType FROM ResurrectItemInfo");
+        pResult = selectResurrectItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -240,8 +259,6 @@ void ResurrectItemInfoManager::load()
 
             addItemInfo(pResurrectItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -262,7 +279,7 @@ void ResurrectItemLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -276,10 +293,11 @@ void ResurrectItemLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "ResurrectItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectResurrectItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
+                   "ResurrectItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectResurrectItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectResurrectItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -372,7 +390,6 @@ void ResurrectItemLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -383,8 +400,6 @@ void ResurrectItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -398,17 +413,17 @@ void ResurrectItemLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM ResurrectItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneResurrectItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM ResurrectItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneResurrectItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneResurrectItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneResurrectItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -442,8 +457,6 @@ void ResurrectItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

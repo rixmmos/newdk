@@ -12,6 +12,7 @@
 #include "ItemUtil.h"
 #include "Motorcycle.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -64,17 +65,22 @@ void PetFood::create(const string& ownerID, Storage storage, StorageID_t storage
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "INSERT INTO PetFoodObject "
-            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(" << m_ItemID
-            << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', " << (int)storage << ", "
-            << storageID << ", " << (int)x << ", " << (int)y << ", " << (int)m_Num << ", " << (int)m_CreateType << ")";
-
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertPetFoodStmt(
+            pConn, "INSERT INTO PetFoodObject "
+                   "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, Num, ItemFlag) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertPetFoodStmt.bindUInt(1, m_ItemID);
+        insertPetFoodStmt.bindUInt(2, m_ObjectID);
+        insertPetFoodStmt.bindUInt(3, m_ItemType);
+        insertPetFoodStmt.bindString(4, ownerID);
+        insertPetFoodStmt.bindInt(5, (int)storage);
+        insertPetFoodStmt.bindUInt(6, storageID);
+        insertPetFoodStmt.bindInt(7, (int)x);
+        insertPetFoodStmt.bindInt(8, (int)y);
+        insertPetFoodStmt.bindInt(9, (int)m_Num);
+        insertPetFoodStmt.bindInt(10, (int)m_CreateType);
+        insertPetFoodStmt.execute();
     }
     END_DB(pStmt)
 
@@ -92,11 +98,15 @@ void PetFood::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PetFoodObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePetFoodStmt(pConn, string("UPDATE PetFoodObject SET ") + field + " WHERE ItemID=?");
+        tinysavePetFoodStmt.bindUInt(1, m_ItemID);
+        tinysavePetFoodStmt.execute();
     }
     END_DB(pStmt)
 
@@ -127,15 +137,21 @@ void PetFood::save(const string& ownerID, Storage storage, StorageID_t storageID
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PetFoodObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Num=%u WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_Num,
-                            m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement savePetFoodStmt(pConn,
+                                           "UPDATE PetFoodObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                                           "StorageID=?, X=?, Y=?, Num=? WHERE ItemID=?");
+        savePetFoodStmt.bindUInt(1, m_ObjectID);
+        savePetFoodStmt.bindUInt(2, m_ItemType);
+        savePetFoodStmt.bindString(3, ownerID);
+        savePetFoodStmt.bindInt(4, (int)storage);
+        savePetFoodStmt.bindUInt(5, storageID);
+        savePetFoodStmt.bindInt(6, (int)x);
+        savePetFoodStmt.bindInt(7, (int)y);
+        savePetFoodStmt.bindUInt(8, m_Num);
+        savePetFoodStmt.bindUInt(9, m_ItemID);
+        savePetFoodStmt.execute();
     }
     END_DB(pStmt)
 
@@ -206,9 +222,10 @@ void PetFoodInfoManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PetFoodInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PetFoodInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -219,8 +236,9 @@ void PetFoodInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery(
-            "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Target, PetHP, TameRatio FROM PetFoodInfo");
+        PreparedStatement selectPetFoodInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Target, PetHP, TameRatio FROM PetFoodInfo");
+        pResult = selectPetFoodInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -240,8 +258,6 @@ void PetFoodInfoManager::load()
 
             addItemInfo(pPetFoodInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -262,7 +278,7 @@ void PetFoodLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -276,10 +292,11 @@ void PetFoodLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
-                                "PetFoodObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                pCreature->getName().c_str());
+        PreparedStatement selectPetFoodLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num, ItemFlag FROM "
+                   "PetFoodObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectPetFoodLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPetFoodLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -372,7 +389,6 @@ void PetFoodLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -383,8 +399,6 @@ void PetFoodLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -398,17 +412,17 @@ void PetFoodLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM PetFoodObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZonePetFoodStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, ItemFlag FROM PetFoodObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZonePetFoodStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZonePetFoodStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZonePetFoodStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -441,8 +455,6 @@ void PetFoodLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

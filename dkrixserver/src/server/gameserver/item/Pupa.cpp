@@ -13,6 +13,7 @@
 #include "Motorcycle.h"
 #include "Ousters.h"
 #include "OustersArmsband.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Utility.h"
@@ -51,7 +52,7 @@ void Pupa::create(const string& ownerID, Storage storage, StorageID_t storageID,
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     if (itemID == 0) {
         __ENTER_CRITICAL_SECTION(m_Mutex)
@@ -65,8 +66,8 @@ void Pupa::create(const string& ownerID, Storage storage, StorageID_t storageID,
     }
 
     BEGIN_DB {
-        // pStmt = g_pDatabaseManager->getConnection("DIST_DARKEDEN")->createStatement();
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // g_pDatabaseManager->getConnection("DIST_DARKEDEN") -- historical alternate connection, unused
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -81,13 +82,19 @@ void Pupa::create(const string& ownerID, Storage storage, StorageID_t storageID,
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("INSERT INTO PupaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
-                            "Num) VALUES(%ld, %ld, %d, '%s', %d, %ld, %d, %d, %d)",
-                            m_ItemID, m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, x, y,
-                            (int)m_Num);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertPupaStmt(
+            pConn, "INSERT INTO PupaObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID, X, Y, "
+                   "Num) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertPupaStmt.bindUInt(1, m_ItemID);
+        insertPupaStmt.bindUInt(2, m_ObjectID);
+        insertPupaStmt.bindUInt(3, m_ItemType);
+        insertPupaStmt.bindString(4, ownerID);
+        insertPupaStmt.bindInt(5, (int)storage);
+        insertPupaStmt.bindUInt(6, storageID);
+        insertPupaStmt.bindInt(7, (int)x);
+        insertPupaStmt.bindInt(8, (int)y);
+        insertPupaStmt.bindInt(9, (int)m_Num);
+        insertPupaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -105,16 +112,18 @@ bool Pupa::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %ld", getObjectTableName().c_str(), m_ItemID);
+        // getObjectTableName() is a per-class compile-time-fixed identifier (see
+        // Pupa.h's CONCRETE_ITEM_DECL macro), never user input; PreparedStatement
+        // cannot bind an identifier, so it stays spliced. Only ItemID is bound.
+        PreparedStatement deletePupaStmt(pConn, "DELETE FROM " + getObjectTableName() + " WHERE ItemID = ?");
+        deletePupaStmt.bindUInt(1, m_ItemID);
+        deletePupaStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deletePupaStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -135,11 +144,15 @@ void Pupa::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PupaObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysavePupaStmt(pConn, string("UPDATE PupaObject SET ") + field + " WHERE ItemID=?");
+        tinysavePupaStmt.bindUInt(1, m_ItemID);
+        tinysavePupaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -154,18 +167,24 @@ void Pupa::save(const string& ownerID, Storage storage, StorageID_t storageID, B
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE PupaObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, StorageID=%ld, "
-                            "X=%d, Y=%d, Num=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y,
-                            (int)m_Num, m_ItemID);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement savePupaStmt(pConn,
+                                        "UPDATE PupaObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, StorageID=?, "
+                                        "X=?, Y=?, Num=? WHERE ItemID=?");
+        savePupaStmt.bindUInt(1, m_ObjectID);
+        savePupaStmt.bindUInt(2, m_ItemType);
+        savePupaStmt.bindString(3, ownerID);
+        savePupaStmt.bindInt(4, (int)storage);
+        savePupaStmt.bindUInt(5, storageID);
+        savePupaStmt.bindInt(6, (int)x);
+        savePupaStmt.bindInt(7, (int)y);
+        savePupaStmt.bindInt(8, (int)m_Num);
+        savePupaStmt.bindUInt(9, m_ItemID);
+        savePupaStmt.execute();
     }
     END_DB(pStmt)
 
@@ -394,12 +413,13 @@ void PupaInfoManager::load()
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM PupaInfo");
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM PupaInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -410,8 +430,9 @@ void PupaInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult =
-            pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM PupaInfo");
+        PreparedStatement selectPupaInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, Effect FROM PupaInfo");
+        pResult = selectPupaInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -429,8 +450,6 @@ void PupaInfoManager::load()
 
             addItemInfo(pPupaInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -448,14 +467,16 @@ void PupaLoader::load(Creature* pCreature)
 
     Assert(pCreature != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
-                                              "PupaObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectPupaLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM "
+                   "PupaObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectPupaLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectPupaLoaderStmt.execute();
 
         while (pResult->next()) {
             try {
@@ -588,7 +609,6 @@ void PupaLoader::load(Creature* pCreature)
                     break;
 
                 default:
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
 
@@ -599,8 +619,6 @@ void PupaLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -618,17 +636,17 @@ void PupaLoader::load(Zone* pZone)
 
     Assert(pZone != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM PupaObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
-
-        Result* pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZonePupaStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Num FROM PupaObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZonePupaStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZonePupaStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZonePupaStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -661,8 +679,6 @@ void PupaLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

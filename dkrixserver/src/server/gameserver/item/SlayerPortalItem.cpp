@@ -11,6 +11,7 @@
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
 #include "Motorcycle.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Stash.h"
 #include "Vampire.h"
@@ -64,15 +65,21 @@ void SlayerPortalItem::create(const string& ownerID, Storage storage, StorageID_
     }
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "INSERT INTO SlayerPortalItemObject "
-            << "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (" << m_ItemID << ","
-            << m_ObjectID << "," << m_ItemType << ",'" << ownerID << "'," << (int)storage << "," << storageID << ","
-            << (int)x << "," << (int)y << "," << m_Charge << ")";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertSlayerPortalItemStmt(
+            pConn, "INSERT INTO SlayerPortalItemObject "
+                   "(ItemID,ObjectID,ItemType,OwnerID, Storage,StorageID,X,Y, Charge) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        insertSlayerPortalItemStmt.bindUInt(1, m_ItemID);
+        insertSlayerPortalItemStmt.bindUInt(2, m_ObjectID);
+        insertSlayerPortalItemStmt.bindUInt(3, m_ItemType);
+        insertSlayerPortalItemStmt.bindString(4, ownerID);
+        insertSlayerPortalItemStmt.bindInt(5, (int)storage);
+        insertSlayerPortalItemStmt.bindUInt(6, storageID);
+        insertSlayerPortalItemStmt.bindInt(7, (int)x);
+        insertSlayerPortalItemStmt.bindInt(8, (int)y);
+        insertSlayerPortalItemStmt.bindInt(9, m_Charge);
+        insertSlayerPortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -90,11 +97,16 @@ void SlayerPortalItem::tinysave(const char* field) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SlayerPortalItemObject SET %s WHERE ItemID=%ld", field, m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        // field is a caller-built "Column=value" SQL fragment (see callers), not a
+        // single bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Slayer::tinysave /
+        // Guild::tinysave precedent (batches 7/9). Only ItemID is bound.
+        PreparedStatement tinysaveSlayerPortalItemStmt(
+            pConn, string("UPDATE SlayerPortalItemObject SET ") + field + " WHERE ItemID=?");
+        tinysaveSlayerPortalItemStmt.bindUInt(1, m_ItemID);
+        tinysaveSlayerPortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -125,14 +137,21 @@ void SlayerPortalItem::save(const string& ownerID, Storage storage, StorageID_t 
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE SlayerPortalItemObject SET ObjectID=%ld, ItemType=%d, OwnerID='%s', Storage=%d, "
-                            "StorageID=%ld, X=%d, Y=%d, Charge=%d WHERE ItemID=%ld",
-                            m_ObjectID, m_ItemType, ownerID.c_str(), (int)storage, storageID, (int)x, (int)y, m_Charge,
-                            m_ItemID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveSlayerPortalItemStmt(
+            pConn, "UPDATE SlayerPortalItemObject SET ObjectID=?, ItemType=?, OwnerID=?, Storage=?, "
+                   "StorageID=?, X=?, Y=?, Charge=? WHERE ItemID=?");
+        saveSlayerPortalItemStmt.bindUInt(1, m_ObjectID);
+        saveSlayerPortalItemStmt.bindUInt(2, m_ItemType);
+        saveSlayerPortalItemStmt.bindString(3, ownerID);
+        saveSlayerPortalItemStmt.bindInt(4, (int)storage);
+        saveSlayerPortalItemStmt.bindUInt(5, storageID);
+        saveSlayerPortalItemStmt.bindInt(6, (int)x);
+        saveSlayerPortalItemStmt.bindInt(7, (int)y);
+        saveSlayerPortalItemStmt.bindInt(8, m_Charge);
+        saveSlayerPortalItemStmt.bindUInt(9, m_ItemID);
+        saveSlayerPortalItemStmt.execute();
     }
     END_DB(pStmt)
 
@@ -206,11 +225,12 @@ void SlayerPortalItemInfoManager::load()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(ItemType) FROM SlayerPortalItemInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement selectMaxItemTypeStmt(pConn, "SELECT MAX(ItemType) FROM SlayerPortalItemInfo");
+        Result* pResult = selectMaxItemTypeStmt.execute();
 
         pResult->next();
 
@@ -221,8 +241,10 @@ void SlayerPortalItemInfoManager::load()
         for (uint i = 0; i <= m_InfoCount; i++)
             m_pItemInfos[i] = NULL;
 
-        pResult = pStmt->executeQuery("SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, MaxCharge, "
-                                      "ReqAbility FROM SlayerPortalItemInfo");
+        PreparedStatement selectSlayerPortalItemInfoStmt(
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, MaxCharge, "
+                   "ReqAbility FROM SlayerPortalItemInfo");
+        pResult = selectSlayerPortalItemInfoStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -240,8 +262,6 @@ void SlayerPortalItemInfoManager::load()
 
             addItemInfo(pSlayerPortalItemInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -276,10 +296,9 @@ void SlayerPortalItemLoader::load(Creature* pCreature)
     Assert(pCreature != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -293,9 +312,11 @@ void SlayerPortalItemLoader::load(Creature* pCreature)
         pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        pResult = pStmt->executeQuery("SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM "
-                                      "SlayerPortalItemObject WHERE OwnerID = '%s' AND Storage IN(0, 1, 2, 3, 4, 9)",
-                                      pCreature->getName().c_str());
+        PreparedStatement selectSlayerPortalItemLoaderStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM "
+                   "SlayerPortalItemObject WHERE OwnerID = ? AND Storage IN(0, 1, 2, 3, 4, 9)");
+        selectSlayerPortalItemLoaderStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectSlayerPortalItemLoaderStmt.execute();
 
 
         while (pResult->next()) {
@@ -367,7 +388,6 @@ void SlayerPortalItemLoader::load(Creature* pCreature)
                 } else if (storage == STORAGE_GARBAGE) {
                     processItemBug(pCreature, pSlayerPortalItem);
                 } else {
-                    SAFE_DELETE(pStmt); // by sigi
                     throw Error("invalid storage or OwnerID must be NULL");
                 }
             } catch (Error& error) {
@@ -377,8 +397,6 @@ void SlayerPortalItemLoader::load(Creature* pCreature)
                 filelog("itemLoadError.txt", "[%s] %s", getItemClassName().c_str(), t.toString().c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -393,15 +411,16 @@ void SlayerPortalItemLoader::load(Zone* pZone)
     Assert(pZone != NULL);
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM SlayerPortalItemObject"
-            << " WHERE Storage = " << (int)STORAGE_ZONE << " AND StorageID = " << pZone->getZoneID();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQueryString(sql.toString());
+        PreparedStatement selectZoneSlayerPortalItemStmt(
+            pConn, "SELECT ItemID, ObjectID, ItemType, Storage, StorageID, X, Y, Charge FROM SlayerPortalItemObject"
+                   " WHERE Storage = ? AND StorageID = ?");
+        selectZoneSlayerPortalItemStmt.bindInt(1, (int)STORAGE_ZONE);
+        selectZoneSlayerPortalItemStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectZoneSlayerPortalItemStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -429,8 +448,6 @@ void SlayerPortalItemLoader::load(Zone* pZone)
                 throw Error("Storage must be STORAGE_ZONE");
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
