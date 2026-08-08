@@ -23,6 +23,7 @@
 #include "PCFinder.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "ResurrectLocationManager.h"
 #include "Zone.h"
@@ -138,7 +139,7 @@ void SGDeleteGuildOKHandler::execute(SGDeleteGuildOK* pPacket)
         Result* pResult = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
             for (; itr != Members.end(); itr++) {
                 GuildMember* pGuildMember = itr->second;
@@ -168,9 +169,10 @@ void SGDeleteGuildOKHandler::execute(SGDeleteGuildOK* pPacket)
                     gcModifyInformation.addLongData(MODIFY_GOLD, Gold);
                     pPlayer->sendPacket(&gcModifyInformation);
 
-                    
-                    pResult = pStmt->executeQuery("SELECT Message FROM Messages WHERE Receiver = '%s'",
-                                                  pCreature->getName().c_str());
+
+                    PreparedStatement messageSelectStmt(pConn, "SELECT Message FROM Messages WHERE Receiver = ?");
+                    messageSelectStmt.bindString(1, pCreature->getName());
+                    pResult = messageSelectStmt.execute();
 
                     while (pResult->next()) {
                         GCSystemMessage message;
@@ -178,7 +180,9 @@ void SGDeleteGuildOKHandler::execute(SGDeleteGuildOK* pPacket)
                         pPlayer->sendPacket(&message);
                     }
 
-                    pStmt->executeQuery("DELETE FROM Messages WHERE Receiver = '%s'", pCreature->getName().c_str());
+                    PreparedStatement messageDeleteStmt(pConn, "DELETE FROM Messages WHERE Receiver = ?");
+                    messageDeleteStmt.bindString(1, pCreature->getName());
+                    messageDeleteStmt.execute();
                 }
 
                 __LEAVE_CRITICAL_SECTION((*g_pPCFinder))
@@ -194,10 +198,8 @@ void SGDeleteGuildOKHandler::execute(SGDeleteGuildOK* pPacket)
             g_pGuildManager->deleteGuild(pGuild->getID());
             GuildUnionManager::Instance().removeMasterGuild(pGuild->getID());
 
-            
-            SAFE_DELETE(pGuild);
 
-            SAFE_DELETE(pStmt);
+            SAFE_DELETE(pGuild);
         }
         END_DB(pStmt)
     }

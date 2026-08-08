@@ -21,6 +21,7 @@
 #include "PCFinder.h"
 #include "PacketUtil.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
 #endif // __GAME_SERVER__
@@ -88,20 +89,24 @@ void CGExpelGuildHandler::execute(CGExpelGuild* pPacket, Player* pPlayer)
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO `Messages` (`Receiver`, `Message`) values ('%s','%s')",
-                                TargetGuildMaster.c_str(), g_pStringPool->c_str(377));
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            Result* pResult = pStmt->executeQuery("SELECT count(*) FROM `GuildUnionMember` WHERE `UnionID`='%u'",
-                                                  pUnion->getUnionID());
+            PreparedStatement msgStmt(pConn, "INSERT INTO `Messages` (`Receiver`, `Message`) values (?,?)");
+            msgStmt.bindString(1, TargetGuildMaster);
+            msgStmt.bindString(2, g_pStringPool->c_str(377));
+            msgStmt.execute();
+
+            PreparedStatement countStmt(pConn, "SELECT count(*) FROM `GuildUnionMember` WHERE `UnionID`=?");
+            countStmt.bindInt(1, (int)pUnion->getUnionID());
+            Result* pResult = countStmt.execute();
             pResult->next();
 
             if (pResult->getInt(1) == 0) {
-                pStmt->executeQuery("DELETE FROM `GuildUnionInfo` WHERE `UnionID`='%u'", pUnion->getUnionID());
+                PreparedStatement deleteUnionStmt(pConn, "DELETE FROM `GuildUnionInfo` WHERE `UnionID`=?");
+                deleteUnionStmt.bindInt(1, (int)pUnion->getUnionID());
+                deleteUnionStmt.execute();
                 GuildUnionManager::Instance().reload();
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
 

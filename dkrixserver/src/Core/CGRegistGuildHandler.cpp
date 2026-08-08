@@ -15,6 +15,7 @@
 #include "GamePlayer.h"
 #include "Guild.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SharedServerManager.h"
 #include "Slayer.h"
@@ -65,19 +66,19 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
     Result* pResult;
 
     BEGIN_DB {
-        
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID FROM GuildInfo WHERE GuildName = '%s' AND GuildState IN ( 0, 1 )",
-                                      pPacket->getGuildName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement guildNameStmt(
+            pConn, "SELECT GuildID FROM GuildInfo WHERE GuildName = ? AND GuildState IN ( 0, 1 )");
+        guildNameStmt.bindString(1, pPacket->getGuildName());
+        pResult = guildNameStmt.execute();
 
         if (pResult->getRowCount() != 0) {
-            SAFE_DELETE(pStmt);
 
-            
             if (pCreature->isSlayer()) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_NAME);
@@ -95,9 +96,9 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
             return;
         }
 
-        
-        pResult = pStmt->executeQuery("SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = '%s'",
-                                      pCreature->getName().c_str());
+        PreparedStatement memberRankStmt(pConn, "SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = ?");
+        memberRankStmt.bindString(1, pCreature->getName());
+        pResult = memberRankStmt.execute();
 
         if (pResult->next()) {
             int Rank = pResult->getInt(1);
@@ -127,20 +128,17 @@ void CGRegistGuildHandler::execute(CGRegistGuild* pPacket, Player* pPlayer)
 
                     pPlayer->sendPacket(&response);
 
-                    SAFE_DELETE(pStmt);
-
                     return;
                 }
             }
 
-            
-            pStmt->executeQuery("DELETE FROM GuildMember WHERE Name='%s'", pCreature->getName().c_str());
+            PreparedStatement deleteMemberStmt(pConn, "DELETE FROM GuildMember WHERE Name=?");
+            deleteMemberStmt.bindString(1, pCreature->getName());
+            deleteMemberStmt.execute();
 
             // SAFE_DELETE( pStmt );
             // return;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

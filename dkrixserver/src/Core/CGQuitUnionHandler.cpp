@@ -20,6 +20,7 @@
 #include "PCFinder.h"
 #include "PacketUtil.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
 #endif // __GAME_SERVER__
@@ -91,32 +92,38 @@ void CGQuitUnionHandler::execute(CGQuitUnion* pPacket, Player* pPlayer)
 
             Statement* pStmt = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
                 string escapeGuildName = g_pGuildManager->getGuildName(pPlayerCreature->getGuildID());
                 string escapeGuildNotice = "[" + escapeGuildName + "] " + g_pStringPool->c_str(378);
 
+                PreparedStatement msgStmt(pConn, "INSERT INTO Messages (Receiver, Message) values(?,?)");
+                msgStmt.bindString(1, TargetGuildMaster);
+                msgStmt.bindString(2, escapeGuildNotice);
+                msgStmt.execute();
 
-                pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')",
-                                    TargetGuildMaster.c_str(), escapeGuildNotice.c_str());
-                pStmt->executeQuery("INSERT INTO GuildUnionOffer values('%u','ESCAPE','%u',now())", tempUnionID,
-                                    pPacket->getGuildID());
+                PreparedStatement offerStmt(pConn, "INSERT INTO GuildUnionOffer values(?,'ESCAPE',?,now())");
+                offerStmt.bindInt(1, (int)tempUnionID);
+                offerStmt.bindInt(2, (int)pPacket->getGuildID());
+                offerStmt.execute();
 
-
-                Result* pResult =
-                    pStmt->executeQuery("SELECT count(*) FROM GuildUnionMember WHERE UnionID='%u'", tempUnionID);
+                PreparedStatement countStmt(pConn, "SELECT count(*) FROM GuildUnionMember WHERE UnionID=?");
+                countStmt.bindInt(1, (int)tempUnionID);
+                Result* pResult = countStmt.execute();
                 pResult->next();
 
                 if (pResult->getInt(1) == 0) {
                     // (int)tempUnionID << endl;
-                    pStmt->executeQuery("DELETE FROM GuildUnionInfo WHERE UnionID='%u'", tempUnionID);
-                    pStmt->executeQuery("INSERT INTO Messages (Receiver, Message) values('%s','%s')",
-                                        TargetGuildMaster.c_str(), g_pStringPool->c_str(379));
+                    PreparedStatement deleteUnionStmt(pConn, "DELETE FROM GuildUnionInfo WHERE UnionID=?");
+                    deleteUnionStmt.bindInt(1, (int)tempUnionID);
+                    deleteUnionStmt.execute();
+
+                    PreparedStatement brokenMsgStmt(pConn, "INSERT INTO Messages (Receiver, Message) values(?,?)");
+                    brokenMsgStmt.bindString(1, TargetGuildMaster);
+                    brokenMsgStmt.bindString(2, g_pStringPool->c_str(379));
+                    brokenMsgStmt.execute();
                     GuildUnionManager::Instance().reload();
                 }
-
-
-                SAFE_DELETE(pStmt);
             }
             END_DB(pStmt)
 

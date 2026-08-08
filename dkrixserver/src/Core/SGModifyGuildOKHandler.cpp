@@ -21,6 +21,7 @@
 #include "PCFinder.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "Zone.h"
 #include "ZoneGroupManager.h"
@@ -93,9 +94,11 @@ void SGModifyGuildOKHandler::execute(SGModifyGuildOK* pPacket)
                 Result* pResult = NULL;
 
                 BEGIN_DB {
-                    pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                    pResult = pStmt->executeQuery("SELECT Message FROM Messages WHERE Receiver = '%s'",
-                                                  pGuildMember->getName().c_str());
+                    Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+                    PreparedStatement messageSelectStmt(pConn, "SELECT Message FROM Messages WHERE Receiver = ?");
+                    messageSelectStmt.bindString(1, pGuildMember->getName());
+                    pResult = messageSelectStmt.execute();
 
                     while (pResult->next()) {
                         GCSystemMessage gcSystemMessage;
@@ -103,9 +106,9 @@ void SGModifyGuildOKHandler::execute(SGModifyGuildOK* pPacket)
                         pPlayer->sendPacket(&gcSystemMessage);
                     }
 
-                    pStmt->executeQuery("DELETE FROM Messages WHERE Receiver = '%s'", pGuildMember->getName().c_str());
-
-                    SAFE_DELETE(pStmt);
+                    PreparedStatement messageDeleteStmt(pConn, "DELETE FROM Messages WHERE Receiver = ?");
+                    messageDeleteStmt.bindString(1, pGuildMember->getName());
+                    messageDeleteStmt.execute();
                 }
                 END_DB(pStmt)
             }

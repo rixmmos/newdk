@@ -15,6 +15,7 @@
 #include "Guild.h"
 #include "GuildManager.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SharedServerManager.h"
 #include "Slayer.h"
@@ -47,18 +48,17 @@ void CGJoinGuildHandler::execute(CGJoinGuild* pPacket, Player* pPlayer)
     Player* pPlayer = pCreature->getPlayer();
     Assert(pPlayer != NULL);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
     Result* pResult;
 
     // cout << pPacket->toString() << endl;
 
     BEGIN_DB {
-        
-        
-        
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID, `Rank`, ExpireDate FROM GuildMember WHERE Name = '%s'",
-                                      pCreature->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement memberStmt(pConn, "SELECT GuildID, `Rank`, ExpireDate FROM GuildMember WHERE Name = ?");
+        memberStmt.bindString(1, pCreature->getName());
+        pResult = memberStmt.execute();
 
         if (pResult->next()) {
             GuildID_t GuildID = pResult->getInt(1);
@@ -83,21 +83,14 @@ void CGJoinGuildHandler::execute(CGJoinGuild* pPacket, Player* pPlayer)
                 {
                      
 
-                    
-                    // 2003. 6. 25 by bezz
-                    SAFE_DELETE(pStmt);
 
+                    // 2003. 6. 25 by bezz
                     return;
                 }
             } else {
-                
-                SAFE_DELETE(pStmt);
-
                 return;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

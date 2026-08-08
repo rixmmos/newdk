@@ -23,6 +23,7 @@
 #include "PCFinder.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "StringPool.h"
 #include "StringStream.h"
@@ -144,9 +145,17 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
                 Statement* pStmt = NULL;
 
                 BEGIN_DB {
-                    pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                    pStmt->executeQuery("UPDATE %s SET Gold = IF (%u > Gold , 0, Gold - %u ) WHERE Name = '%s'",
-                                        table.c_str(), Fee, Fee, pGuildMember->getName().c_str());
+                    Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+                    // table is one of the three fixed literals assigned above, never
+                    // user-controlled, so it is safe to splice into the SQL text; Fee
+                    // and Name remain bound parameters.
+                    PreparedStatement goldStmt(
+                        pConn, "UPDATE " + table + " SET Gold = IF (? > Gold , 0, Gold - ? ) WHERE Name = ?");
+                    goldStmt.bindInt(1, (int)Fee);
+                    goldStmt.bindInt(2, (int)Fee);
+                    goldStmt.bindString(3, pGuildMember->getName());
+                    goldStmt.execute();
                 }
                 END_DB(pStmt)
             }

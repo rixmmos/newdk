@@ -18,6 +18,7 @@
 #include "Guild.h"
 #include "GuildManager.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "StringPool.h"
 #include "SystemAvailabilitiesManager.h"
@@ -58,14 +59,15 @@ void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer)
         return;
     }
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
     Result* pResult;
 
     BEGIN_DB {
-        
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID, ExpireDate,`Rank` FROM GuildMember WHERE Name = '%s'",
-                                      pCreature->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement memberStmt(pConn, "SELECT GuildID, ExpireDate,`Rank` FROM GuildMember WHERE Name = ?");
+        memberStmt.bindString(1, pCreature->getName());
+        pResult = memberStmt.execute();
 
         /*
         if (pResult->getRowCount() == 0 )
@@ -103,9 +105,7 @@ void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer)
                     //					}
                     //					else
                     //					{
-                    SAFE_DELETE(pStmt);
 
-                    
                     GCNPCResponse response;
 
                     /*						if (GuildID == pGuild->getID())
@@ -133,9 +133,6 @@ void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer)
                     //					}
                 }
             } else {
-                SAFE_DELETE(pStmt);
-
-                
                 if (pCreature->isSlayer()) {
                     GCNPCResponse response;
                     response.setCode(NPC_RESPONSE_TEAM_STARTING_FAIL_ALREADY_JOIN);
@@ -153,8 +150,6 @@ void CGTryJoinGuildHandler::execute(CGTryJoinGuild* pPacket, Player* pPlayer)
                 return;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
