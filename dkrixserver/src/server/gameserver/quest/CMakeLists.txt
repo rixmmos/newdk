@@ -167,7 +167,14 @@ target_include_directories(Quest PUBLIC
 	${CMAKE_SOURCE_DIR}/src/server/gameserver
 	${CMAKE_SOURCE_DIR}/src/server/gameserver/war
 	${CMAKE_SOURCE_DIR}/src/server/gameserver/item
-	${CMAKE_SOURCE_DIR}/src/server/gameserver/skill	
+	${CMAKE_SOURCE_DIR}/src/server/gameserver/skill
+	# Phase 12: header-visibility for migrated packet headers moved out of
+	# src/Core into shared/Packets/ -- see the matching comment in
+	# server/gameserver/CMakeLists.txt for the full reasoning. Quest is a
+	# separate STATIC library subdirectory target with its own include list,
+	# so b84723f's fix to the gameserver executable's own include dirs never
+	# reached it (ActionGiveLotto.cpp includes CGLotterySelect.h).
+	${CMAKE_SOURCE_DIR}/../shared/Packets
 )
 
 add_subdirectory(luaScript)
