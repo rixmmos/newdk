@@ -69,22 +69,26 @@ public:
 class CGLogoutFactory : public PacketFactory {
 public:
     // create packet
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGLogout();
     }
 
     // get packet name
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGLogout";
     }
 
     // get packet id
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_LOGOUT;
     }
 
     // get packet's max body size
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return 0;
     }
 };
@@ -96,10 +100,15 @@ public:
 //
 //////////////////////////////////////////////////////////////////////
 
+// Server-only: CGLogoutHandler::execute has no client-side definition
+// or use. Guarded (matching the client Cpackets copy's existing guard)
+// since no CGHandlersStub.cpp-style client stub exists for this family.
+#ifndef __GAME_CLIENT__
 class CGLogoutHandler {
 public:
     // execute packet's handler
     static void execute(CGLogout* pPacket, Player* player);
 };
+#endif
 
 #endif

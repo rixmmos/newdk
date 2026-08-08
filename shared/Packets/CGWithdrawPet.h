@@ -66,16 +66,20 @@ private:
 
 class CGWithdrawPetFactory : public PacketFactory {
 public:
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGWithdrawPet();
     }
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGWithdrawPet";
     }
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_WITHDRAW_PET;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szObjectID + szBYTE;
     }
 };
@@ -87,6 +91,15 @@ public:
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Unlike most Phase 12 pairs, this Handler class is NOT guarded by
+// #ifndef __GAME_CLIENT__: dkrix/Client/CGHandlersStub.cpp already
+// provides an empty-body client-side definition of
+// CGWithdrawPetHandler::execute (the "CGStoreOpen precedent" from the
+// parked line, rather than the CLGetWorldList pilot's guard-and-omit
+// approach). Keeping it unconditional here, matching the server's
+// pre-migration style exactly, means CGHandlersStub.cpp needs no
+// structural change — only its exception spec was updated to match this
+// declaration (see CGHandlersStub.cpp).
 class CGWithdrawPetHandler {
 public:
     // execute packet's handler

@@ -155,9 +155,9 @@ add_subdirectory(Client/SpriteLib)
 add_subdirectory(Client/framelib)
 
 # Phase 12: canonical packet-class tree lives in ../shared/Packets (sibling
-# to dkrix/ and dkrixserver/). Defines the shared_packets INTERFACE target
-# that DarkEden links below. See shared/Packets/README.md and
-# docs/MODERNIZATION.md's Phase 12 section.
+# to dkrix/ and dkrixserver/). Defines the per-family shared_packets_<cg,gc,
+# cl,lc,...> INTERFACE targets that DarkEden links below. See
+# shared/Packets/README.md and docs/MODERNIZATION.md's Phase 12 section.
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/Packets ${CMAKE_BINARY_DIR}/shared_packets_build)
 
 # ============================================================
@@ -757,10 +757,16 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 		VS_UI
 		basic
 		TextSystem
-		# Phase 12: absorbs shared/Packets/ sources (e.g. CLGetWorldList.cpp)
-		# into this target's own compilation units, with __GAME_CLIENT__=1
-		# applied below (no __GAME_SERVER__/__LOGIN_SERVER__ defines).
-		shared_packets
+		# Phase 12: absorbs shared/Packets/ sources into this target's own
+		# compilation units, with __GAME_CLIENT__=1 applied below (no
+		# __GAME_SERVER__/__LOGIN_SERVER__ defines). One line per migrated
+		# family (shared_packets_cl was "shared_packets" until Wave 1
+		# split it by family — see shared/Packets/CMakeLists.txt); the
+		# client, unlike a given server target, needs every migrated
+		# family, since __GAME_CLIENT__ strips every family's
+		# handler-dispatch call uniformly.
+		shared_packets_cl
+		shared_packets_cg
 		SDL2::SDL2
 	)
 

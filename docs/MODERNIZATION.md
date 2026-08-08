@@ -1504,7 +1504,7 @@ assignment re-checked directly against `GSQuitGuildHandler.cpp`, no
 other value ever reaches `Table`. **Compile gate: next server CI run
 [unverified]** — landed after the last green run (#14, `421088e`).
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed here 2026-08-08; Wave 1 batches not started)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batch 1 landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -1695,6 +1695,115 @@ include-stack resolution that file's location was quietly providing,
 and the fix must be scoped as narrowly as the problem (a two-header
 shim, not a directory-wide `/I` addition) or it trades one failure
 mode for a worse one.
+
+**Wave 1 batch 1 landed 2026-08-08 (worktree, not yet on `main`): 10
+CG-family pairs.** `python3 normalize-packet-style.py --all --tsv`
+re-run against the current tree confirmed 61 confirmed style-only pairs
+(unchanged from the pilot's count, since `CLGetWorldList` — the only
+migrated pair — is CL, not CG). Excluded per instruction: `CGSay`,
+`CGWhisper`, `GCFriendChatting`, `CLQueryCharacterName`, `CGConnect`,
+`CLCreatePC`, `CLLogin`, `CLSelectPC` (a parallel SQL-migration
+workstream may touch their `*Handler.cpp` files). Candidate ranking
+used client `#include`-site count exactly like the pilot, but the count
+itself needed a fix first: a same-directory `Cpackets/<Name>.h`
+case-sensitive `git grep` undercounted every pair by roughly half,
+because `dkrix/Client/` mixes `Cpackets/`, `CPackets/`, and `cpackets/`
+across different files — the exact case-sensitive-`find`-vs-Windows-glob
+class of bug this doc's Phase 16 and Phase 12 pilot sections already
+flagged, now confirmed to bite the *counting* step too, not just the
+build. Re-run case-insensitively (`git grep -io`), the ranking changed
+substantially (e.g. what looked like a 1-include pair was actually 3).
+`CGSelectBloodBible` initially looked cheapest (1 case-sensitive hit) but
+the case-insensitive re-count found its real site was `UIDialog.cpp`'s
+`#include "Packet/CPackets/CGSelectBloodBible.h"` (capital `P`) — once
+counted correctly it was no cheaper than the pairs below, so it was left
+for a future batch rather than re-optimizing the ranking after the fact.
+Final 10, all case-insensitive count 2–3, all confirmed `residual: 0` /
+`style-only` individually via `--pair`: **CGAddItemToItem, CGAuthKey,
+CGUseItemFromGQuestInventory, CGRequestInfo, CGAddItemToCodeSheet,
+CGBuyStoreItem, CGWithdrawPet, CGGlobalChat, CGLogout, CGResurrect**.
+`CGPortCheck` (case-insensitive count 2) and `CGNPCAskAnswer` (count 4)
+were considered and dropped mid-selection as messier than the rest of
+the batch: `CGPortCheck` derives from `DatagramPacket` (a second quoted
+include, `DatagramPacket.h`, living in `Client/Packet/` like
+`Packet.h`/`PacketFactory.h` but not covered by the pilot's
+`SharedPacketsShim` forwarders — extending the shim was avoidable by
+picking a different pair); `CGNPCAskAnswer` pulls in
+`SocketEncryptInputStream.h`/`SocketEncryptOutputStream.h` at different
+relative paths between the trees plus a `Assert1.h` (server) vs.
+`Assert.h` (client) filename mismatch — a second class of divergence
+the batch didn't need to take on yet.
+
+Reconciliation followed the pilot's recipe for 8 of the 10 pairs
+exactly: adopt the server's canonical style (no `throw()` specs,
+unconditional `getPacketName()`/`toString()` instead of
+`#ifdef __DEBUG_OUTPUT__`-gated), add `throw()` back to the four
+`<Name>Factory` overrides, and keep `#ifndef __GAME_CLIENT__` around
+the `<Name>Handler` class (`.h`) and its dispatch call (`.cpp`). Two —
+**`CGBuyStoreItem` and `CGWithdrawPet`** — hit the *other* precedent the
+pilot commit named but didn't need: `dkrix/Client/CGHandlersStub.cpp`
+already provides empty-body client-side definitions of both handlers'
+`execute()` (the "CGStoreOpen precedent" from the parked line, used
+when a family's packet needs to compile unconditionally into the client
+rather than being guarded out). For these two, the merged header keeps
+`<Name>Handler` fully unconditional — no `__GAME_CLIENT__` guard —
+matching what both trees already did. The only edit needed in
+`CGHandlersStub.cpp` was dropping its stub's
+`throw(ProtocolException, Error)` exception spec to match the migrated
+header's now-unconstrained declaration (an out-of-line definition's
+exception spec must match its declaration exactly; the client's old
+per-pair declaration carried `throw()`, the merged/server-style one
+doesn't) and repointing its two `#include` lines off `Cpackets/`.
+
+**CMake wiring deviated from the pilot's stated rule, for a structural
+reason discovered while implementing this batch, not a style
+preference.** The pilot's single combined `shared_packets` INTERFACE
+target held every family's sources together; `LoginServerPackets` (CL's
+owner) linking it was the only "for real" link that existed, since CL
+was the only populated family. This batch is the first time a *second*
+family (CG) needs a *different* owner (`GameServerPackets`). Populating
+`shared_packets`'s combined source list with CG sources while
+`LoginServerPackets` still linked the same combined target would have
+made `LoginServerPackets` silently absorb CG's `.cpp` files too (and
+symmetrically, `GameServerPackets` linking the combined target for CG
+would absorb CL's `CLGetWorldList.cpp`) — each family's
+`*Handler.cpp` only exists in its owning target, so an absorbed
+foreign-family `.cpp`'s handler-dispatch call has no definition to link
+against in the wrong target. Whether this is actually a hard link error
+turns on GNU `ld`'s standard archive-member-selection behavior (unused
+`.o` members of a linked static archive are never pulled into the final
+executable) — plausibly harmless in practice, but unverifiable without a
+compiler in this environment, and the pilot's own commit message treated
+the equivalent case as a real link error. Rather than bet on that
+distinction, `shared/Packets/CMakeLists.txt` now defines one INTERFACE
+library **per family** (`shared_packets_cg`, `_gc`, `_cl`, `_lc`), each
+with its own `target_sources`; `LoginServerPackets` was repointed from
+`shared_packets` to `shared_packets_cl` (a mechanical rename, identical
+effective sources, since CL was already all `shared_packets` ever
+contained); `GameServerPackets` newly links `shared_packets_cg`;
+`DarkEden` links both. This is airtight regardless of the archive-linking
+question above, and generalizes cleanly — a future family gets one more
+`_add_shared_packets_family()` call and one more consumer link line, with
+zero risk of an already-landed family's wiring being disturbed. See
+`shared/Packets/CMakeLists.txt`'s header comment and
+`shared/Packets/README.md` step 5 for the full mechanism, now updated to
+match.
+
+Ratchet: `check-packet-duplicates.sh --count` 324 → 304 (10 class pairs
+× `.h` + `.cpp`), baseline updated via `--update` in this batch.
+`normalize-packet-style.py --all --tsv` pair count 162 → 152, style-only
+61 → 51, both exactly -10 as expected.
+
+**Not build-verified — no compiler in the environment that did this
+work**, same as the pilot. Verified by reading: `git grep -i` for every
+old `Cpackets/<Name>.h` path (all case variants) returns nothing under
+`dkrix/`; the 10 pairs' files exist only at `shared/Packets/`, confirmed
+absent from both old locations; `dkrixserver/src/Core/CMakeLists.txt`'s
+`CG_PACKET_SOURCES` no longer names any of the 10 `.cpp` files but still
+names all 10 `*Handler.cpp`; `shared/Packets/CMakeLists.txt` names each
+of the 10 exactly once, under `_SHARED_PACKETS_CG_SOURCES`. Both-tree CI
+remains the real gate — per `docs/CLAUDE.md`, this client+server change
+lands as one unit.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`

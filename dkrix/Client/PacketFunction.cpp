@@ -84,7 +84,7 @@
 #include "MEffectSpriteTypeTable.h"
 #include "EffectSpriteTypeDef.h"
 
-#include "Packet/Cpackets/CGAuthKey.h"
+#include "CGAuthKey.h"
 #include "BloodBibleSignInfo.h"
 
 #ifdef __NPROTECT__

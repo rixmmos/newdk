@@ -31,7 +31,9 @@ void CGAuthKey::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGAuthKeyHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

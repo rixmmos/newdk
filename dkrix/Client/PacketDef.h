@@ -34,7 +34,7 @@
 #include "Packet/Cpackets/CGConnect.h"
 #include "Packet/Cpackets/CGReady.h"
 #include "Packet/Cpackets/CGMove.h"
-#include "Packet/Cpackets/CGLogout.h"
+#include "CGLogout.h"
 
 //-----------------------------------------------------------------------------
 // Phone / Whisper
@@ -48,7 +48,7 @@
 
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGSay.h"
-#include "Packet/Cpackets/CGGlobalChat.h"
+#include "CGGlobalChat.h"
 
 
 //-----------------------------------------------------------------------------

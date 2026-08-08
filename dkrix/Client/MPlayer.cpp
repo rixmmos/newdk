@@ -52,7 +52,7 @@
 #include "Packet/Rpackets/RCPositionInfo.h"
 #include "Packet/Rpackets/RCStatusHP.h"
 #include "Packet/Rpackets/RCCharacterInfo.h"
-#include "Packet/Cpackets/CGRequestInfo.h"
+#include "CGRequestInfo.h"
 #include "Packet/Cpackets/CGUseItemFromGear.h"
 
 #include "UserInformation.h"

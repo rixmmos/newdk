@@ -10,7 +10,15 @@
 #include "Client_PCH.h"
 
 // Include packet headers to get handler class declarations
-#include "Packet/Cpackets/CGBuyStoreItem.h"
+// Phase 12 Wave 1: CGBuyStoreItem and CGWithdrawPet migrated to
+// shared/Packets/ (flat, no Cpackets/ subpath, resolved via the
+// shared_packets_cg INTERFACE include path); their stubs below dropped
+// the throw(ProtocolException, Error) spec to match the migrated
+// header's now-unconstrained CGxxxHandler::execute declaration (adopted
+// from the server's canonical style, per Phase 12's reconciliation
+// rules) — an out-of-line definition's exception spec must match its
+// declaration exactly.
+#include "CGBuyStoreItem.h"
 #include "Packet/Cpackets/CGConnectSetKey.h"
 #include "Packet/Cpackets/CGDisplayItem.h"
 #include "Packet/Cpackets/CGDonationMoney.h"
@@ -23,10 +31,10 @@
 #include "Packet/Cpackets/CGStoreOpen.h"
 #include "Packet/Cpackets/CGStoreSign.h"
 #include "Packet/Cpackets/CGUndisplayItem.h"
-#include "Packet/Cpackets/CGWithdrawPet.h"
+#include "CGWithdrawPet.h"
 
 // Stub implementations for store-related handlers
-void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) {}
 void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
@@ -39,4 +47,4 @@ void CGStoreCloseHandler::execute(CGStoreClose* pPacket, Player* pPlayer) throw(
 void CGStoreOpenHandler::execute(CGStoreOpen* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGStoreSignHandler::execute(CGStoreSign* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGUndisplayItemHandler::execute(CGUndisplayItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
-void CGWithdrawPetHandler::execute(CGWithdrawPet* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGWithdrawPetHandler::execute(CGWithdrawPet* pPacket, Player* pPlayer) {}

@@ -64,37 +64,72 @@ Per-PR template for moving one packet class (or small family group):
    belong here" below).
 4. Add `<Name>.cpp` to the matching `_SHARED_PACKETS_<FAMILY>_SOURCES` list
    in `shared/Packets/CMakeLists.txt`.
-5. Wire the build targets that need it:
+5. Wire the build targets that need it. **Since Phase 12 Wave 1** (when a
+   second family, `CG`, got its own owner distinct from the pilot's `CL`),
+   `shared/Packets/CMakeLists.txt` defines one INTERFACE library *per
+   family* — `shared_packets_cg`, `shared_packets_gc`, `shared_packets_cl`,
+   `shared_packets_lc`, ... — instead of a single combined `shared_packets`
+   target. Link the family-scoped target, not a combined one:
    - The server target that actually compiles the family (e.g.
-     `LoginServerPackets` for a `CL` packet) needs
-     `target_link_libraries(<Target> PRIVATE shared_packets)` so it absorbs
-     the `.cpp` as a source with its own `__LOGIN_SERVER__` /
-     `__GAME_SERVER__` / `__SHARED_SERVER__` define applied.
+     `LoginServerPackets` for a `CL` packet, `GameServerPackets` for a `CG`
+     packet) needs `target_link_libraries(<Target> PRIVATE
+     shared_packets_<family>)` so it absorbs *only that family's* `.cpp`
+     sources, with its own `__LOGIN_SERVER__` / `__GAME_SERVER__` /
+     `__SHARED_SERVER__` define applied. Linking a combined multi-family
+     target here would be wrong even for the owning target: it would also
+     absorb every *other* migrated family's `.cpp` as one of this target's
+     own compiled sources, and that family's `<OtherName>Handler::execute`
+     is only ever defined in ITS owning target — a link error waiting for
+     this target to actually reference it.
    - `dkrixserver/src/Core/PacketFactoryManager.cpp` is compiled into
      *all three* server packet libraries (`PACKET_COMMON_SOURCES`) and
      `#include`s every packet header unconditionally, even though the
      `addFactory(...)` call for a given family is guarded by
      `#if defined(__LOGIN_SERVER__)` (etc.). Any server target that does
-     **not** own the family's handler must still see the header —
-     `target_include_directories(<Target> PRIVATE
-     ${CMAKE_SOURCE_DIR}/../shared/Packets)` without linking
-     `shared_packets`. Linking it there instead would absorb the `.cpp` as
-     a source in a binary that has no definition of `<Name>Handler::execute`,
-     which is a link error, not a warning.
+     **not** own the family's handler must still see the header — every
+     `shared_packets_<family>` target's `INTERFACE` include directory is
+     the same `shared/Packets` root regardless of family, so a target
+     that links even one family gets every migrated family's headers.
+     `GameServerPackets` and `SharedServerPackets` additionally keep an
+     explicit `target_include_directories(<Target> PRIVATE
+     ${CMAKE_SOURCE_DIR}/../shared/Packets)` entry for the case where a
+     target owns no migrated family yet and so links none of the
+     per-family targets.
    - The client (`DarkEden` target in `dkrix/CMakeLists.txt`) links
-     `shared_packets` directly — it globs `Client/Packet/**/*.cpp` for its
-     own duplicate, so once that duplicate is deleted (next step) the
-     shared copy, absorbed via the INTERFACE target, is the only copy left.
+     *every* populated `shared_packets_<family>` target (currently
+     `shared_packets_cl` and `shared_packets_cg`) — unlike a server
+     target, the client is never at risk of absorbing a family it
+     doesn't "own", since `__GAME_CLIENT__` uniformly strips every
+     family's handler-dispatch call. It globs `Client/Packet/**/*.cpp`
+     for its own duplicate, so once that duplicate is deleted (next step)
+     the shared copy, absorbed via the INTERFACE target, is the only copy
+     left. A migration into a family DarkEden doesn't yet link needs one
+     new line added to its `target_link_libraries(DarkEden PRIVATE ...)`
+     call.
 6. Delete the client duplicate: `git rm
    dkrix/Client/Packet/Cpackets/<Name>.{h,cpp}`, and repoint every
    `#include ".../Cpackets/<Name>.h"` site under `dkrix/` at the new,
-   flat `#include "<Name>.h"` (resolved via `shared_packets`'s
-   `INTERFACE` include directory). `git grep` for the old path afterward —
-   it must return nothing outside `.vcxproj`/`.vcxproj.filters` (the VS6/
-   VS2022-project-file bookkeeping, not part of the CMake build).
+   flat `#include "<Name>.h"` (resolved via the linked
+   `shared_packets_<family>` target's `INTERFACE` include directory).
+   **Search case-insensitively** (`git grep -i`) — `Cpackets` vs
+   `CPackets` vs `cpackets` all appear in this tree and Windows' own
+   filesystem doesn't care, but `git grep` (and MSVC's own file resolution
+   on a case-sensitive remote FS) does; a case-sensitive search undercounted
+   real include sites by more than half in one Wave 1 batch. `git grep`
+   for the old path afterward — it must return nothing outside
+   `.vcxproj`/`.vcxproj.filters` (the VS6/VS2022-project-file bookkeeping,
+   not part of the CMake build). Also check whether the pair has a
+   `dkrix/Client/CGHandlersStub.cpp` entry (an empty-body client-side
+   `<Name>Handler::execute` stub, the "CGStoreOpen precedent" alternative
+   to guarding the Handler class with `#ifndef __GAME_CLIENT__`) — if so,
+   do *not* add the guard; instead make sure the stub's exception spec
+   matches the migrated header's now-unconstrained declaration exactly
+   (out-of-line definitions must match their declaration's exception spec
+   verbatim), and repoint its `#include` too.
 7. Run `dkrixserver/scripts/check-packet-duplicates.sh --update` and commit
    the new `.packet-duplicates-baseline` alongside the migration. Confirm
-   `--count` dropped by exactly 1 (one class pair × 2 files each side).
+   `--count` dropped by exactly 2 per pair migrated in the batch (`.h` +
+   `.cpp`).
 
 ## Verifying without a compiler
 

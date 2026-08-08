@@ -35,7 +35,9 @@ void CGAddItemToCodeSheet::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGAddItemToCodeSheetHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

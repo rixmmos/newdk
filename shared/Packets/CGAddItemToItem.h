@@ -1,35 +1,36 @@
 //////////////////////////////////////////////////////////////////////////////
-// Filename    : CGAddItemToCodeSheet.h
+// Filename    : CGAddItemToItem.h
 // Written By  : elca@ewestsoft.com
 // Description :
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CG_ADD_ITEM_TO_CODE_SHEET_H__
-#define __CG_ADD_ITEM_TO_CODE_SHEET_H__
+#ifndef __CG_ADD_ITEM_TO_ITEM_H__
+#define __CG_ADD_ITEM_TO_ITEM_H__
 
 #include "Packet.h"
 #include "PacketFactory.h"
 
 
 //////////////////////////////////////////////////////////////////////////////
-// class CGAddItemToCodeSheet;
+// class CGAddItemToItem;
 //////////////////////////////////////////////////////////////////////////////
 
-class CGAddItemToCodeSheet : public Packet {
+class CGAddItemToItem : public Packet {
 public:
-    CGAddItemToCodeSheet() {};
-    ~CGAddItemToCodeSheet() {};
+    CGAddItemToItem() {};
+    ~CGAddItemToItem() {};
+
     void read(SocketInputStream& iStream);
     void write(SocketOutputStream& oStream) const;
     void execute(Player* pPlayer);
     PacketID_t getPacketID() const {
-        return PACKET_CG_ADD_ITEM_TO_CODE_SHEET;
+        return PACKET_CG_ADD_ITEM_TO_ITEM;
     }
     PacketSize_t getPacketSize() const {
         return szObjectID + szCoordInven + szCoordInven;
     }
     string getPacketName() const {
-        return "CGAddItemToCodeSheet";
+        return "CGAddItemToItem";
     }
     string toString() const;
 
@@ -62,32 +63,42 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// class CGAddItemToCodeSheetFactory;
+// class CGAddItemToItemFactory;
 //////////////////////////////////////////////////////////////////////////////
 
-class CGAddItemToCodeSheetFactory : public PacketFactory {
+class CGAddItemToItemFactory : public PacketFactory {
 public:
-    Packet* createPacket() {
-        return new CGAddItemToCodeSheet();
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
+        return new CGAddItemToItem();
     }
-    string getPacketName() const {
-        return "CGAddItemToCodeSheet";
+    string getPacketName() const throw() {
+        return "CGAddItemToItem";
     }
-    PacketID_t getPacketID() const {
-        return Packet::PACKET_CG_ADD_ITEM_TO_CODE_SHEET;
+    PacketID_t getPacketID() const throw() {
+        return Packet::PACKET_CG_ADD_ITEM_TO_ITEM;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szObjectID + szCoordInven + szCoordInven;
     }
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// class CGAddItemToCodeSheetHandler;
+// class CGAddItemToItemHandler;
 //////////////////////////////////////////////////////////////////////////////
 
-class CGAddItemToCodeSheetHandler {
+// Server-only: CGAddItemToItemHandler::execute has no client-side
+// definition or use. Guarded (matching the client Cpackets copy's
+// existing guard) since no CGHandlersStub.cpp-style client stub exists
+// for this family.
+#ifndef __GAME_CLIENT__
+class CGAddItemToItemHandler {
 public:
-    static void execute(CGAddItemToCodeSheet* pCGAddItemToCodeSheet, Player* pPlayer);
+    static void execute(CGAddItemToItem* pCGAddItemToItem, Player* pPlayer);
 };
+#endif
 
 #endif

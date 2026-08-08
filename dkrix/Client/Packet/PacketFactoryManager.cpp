@@ -29,9 +29,9 @@
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGGetOffMotorCycle.h"
-#include "Cpackets/CGGlobalChat.h"
+#include "CGGlobalChat.h"
 #include "Cpackets/CGLearnSkill.h"
-#include "Cpackets/CGLogout.h"
+#include "CGLogout.h"
 #include "Cpackets/CGMakeItem.h"
 #include "Cpackets/CGMove.h"
 #include "Cpackets/CGNPCAskAnswer.h"
@@ -353,7 +353,7 @@
 #include "Gpackets/GCPartyJoined.h"
 #include "Gpackets/GCPartyError.h"
 
-#include "Cpackets/CGResurrect.h"
+#include "CGResurrect.h"
 
 #include "Cpackets/CGRequestIP.h"
 #include "Gpackets/GCRequestedIP.h"
@@ -431,10 +431,10 @@
 	#include "Spackets/SGGuildInfo.h"
 #endif
 
-#include "Cpackets/CGAddItemToItem.h"
+#include "CGAddItemToItem.h"
 #include "Gpackets/GCAddItemToItemVerify.h"
 
-#include "Cpackets/CGRequestInfo.h"
+#include "CGRequestInfo.h"
 #include "Gpackets/GCNoticeEvent.h"
 
 #include "Cpackets/CGModifyGuildIntro.h"
@@ -483,7 +483,7 @@
 #include "Gpackets/GCMiniGameScores.h"
 #include "Cpackets/CGSubmitScore.h"
 #include "Cpackets/CGFailQuest.h"
-#include "Cpackets/CGAddItemToCodeSheet.h"
+#include "CGAddItemToCodeSheet.h"
 #include "Gpackets/GCFlagWarStatus.h"
 #include "Gpackets/GCOtherGuildName.h"
 #include "Gpackets/GCSweeperBonusInfo.h"
@@ -503,7 +503,7 @@
 //#include "Gpackets/GGServerChat.h"
 
 #include "Gpackets/GCPetStashList.h"
-#include "Cpackets/CGWithdrawPet.h"
+#include "CGWithdrawPet.h"
 #include "Cpackets/CGDepositPet.h"
 #include "Gpackets/GCPetStashVerify.h"
 #include "Cpackets/CGSMSSend.h"
@@ -531,9 +531,9 @@
 #include "Upackets/UCRequestLoginMode.h"
 
 #include "Gpackets/GCAuthKey.h"
-#include "Cpackets/CGAuthKey.h"
+#include "CGAuthKey.h"
 
-#include "Cpackets/CGUseItemFromGQuestInventory.h"
+#include "CGUseItemFromGQuestInventory.h"
 
 #include "Cpackets/CGAcceptUnion.h"
 #include "Cpackets/CGAppointSubmaster.h"
@@ -556,7 +556,7 @@
 
 #include "Cpackets/CGStoreClose.h"
 #include "Cpackets/CGRequestStoreInfo.h"
-#include "Cpackets/CGBuyStoreItem.h"
+#include "CGBuyStoreItem.h"
 #include "Gpackets/GCMyStoreInfo.h"
 #include "Gpackets/GCOtherStoreInfo.h"
 #include "Gpackets/GCRemoveStoreItem.h"

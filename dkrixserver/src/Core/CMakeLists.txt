@@ -365,8 +365,10 @@ set(CG_PACKET_SOURCES
     CGAddGearToMouse.cpp CGAddGearToMouseHandler.cpp
 #    CGAddInjuriousCreature.cpp CGAddInjuriousCreatureHandler.cpp
     CGAddInventoryToMouse.cpp CGAddInventoryToMouseHandler.cpp
-    CGAddItemToCodeSheet.cpp CGAddItemToCodeSheetHandler.cpp
-    CGAddItemToItem.cpp CGAddItemToItemHandler.cpp
+    # CGAddItemToCodeSheet.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGAddItemToCodeSheetHandler.cpp
+    # CGAddItemToItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGAddItemToItemHandler.cpp
     CGAddMouseToGear.cpp CGAddMouseToGearHandler.cpp
     CGAddMouseToInventory.cpp CGAddMouseToInventoryHandler.cpp
     CGAddMouseToQuickSlot.cpp CGAddMouseToQuickSlotHandler.cpp
@@ -377,9 +379,11 @@ set(CG_PACKET_SOURCES
     CGAddZoneToMouse.cpp CGAddZoneToMouseHandler.cpp
     CGAppointSubmaster.cpp CGAppointSubmasterHandler.cpp
     CGAttack.cpp CGAttackHandler.cpp
-    CGAuthKey.cpp CGAuthKeyHandler.cpp
+    # CGAuthKey.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGAuthKeyHandler.cpp
     CGBloodDrain.cpp CGBloodDrainHandler.cpp
-    CGBuyStoreItem.cpp CGBuyStoreItemHandler.cpp
+    # CGBuyStoreItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGBuyStoreItemHandler.cpp
     CGCastingSkill.cpp CGCastingSkillHandler.cpp
     CGConnect.cpp CGConnectHandler.cpp
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
@@ -398,13 +402,15 @@ set(CG_PACKET_SOURCES
     CGFailQuest.cpp CGFailQuestHandler.cpp
     CGGetEventItem.cpp CGGetEventItemHandler.cpp
     CGGetOffMotorCycle.cpp CGGetOffMotorCycleHandler.cpp
-    CGGlobalChat.cpp CGGlobalChatHandler.cpp
+    # CGGlobalChat.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGGlobalChatHandler.cpp
     CGGQuestAccept.cpp CGGQuestAcceptHandler.cpp
     CGGQuestCancel.cpp CGGQuestCancelHandler.cpp
     CGGuildChat.cpp CGGuildChatHandler.cpp
     CGJoinGuild.cpp CGJoinGuildHandler.cpp
     CGLearnSkill.cpp CGLearnSkillHandler.cpp
-    CGLogout.cpp CGLogoutHandler.cpp
+    # CGLogout.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGLogoutHandler.cpp
     CGLotterySelect.cpp CGLotterySelectHandler.cpp
     CGMakeItem.cpp CGMakeItemHandler.cpp
     CGMixItem.cpp CGMixItemHandler.cpp
@@ -438,7 +444,8 @@ set(CG_PACKET_SOURCES
     CGReloadFromQuickSlot.cpp CGReloadFromQuickSlotHandler.cpp
     CGRequestGuildList.cpp CGRequestGuildListHandler.cpp
     CGRequestGuildMemberList.cpp CGRequestGuildMemberListHandler.cpp
-    CGRequestInfo.cpp CGRequestInfoHandler.cpp
+    # CGRequestInfo.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGRequestInfoHandler.cpp
     CGRequestIP.cpp CGRequestIPHandler.cpp
     CGRequestNewbieItem.cpp CGRequestNewbieItemHandler.cpp
     CGRequestPowerPoint.cpp CGRequestPowerPointHandler.cpp
@@ -446,7 +453,8 @@ set(CG_PACKET_SOURCES
     CGRequestStoreInfo.cpp CGRequestStoreInfoHandler.cpp
     CGRequestUnion.cpp CGRequestUnionHandler.cpp
     CGRequestUnionInfo.cpp CGRequestUnionInfoHandler.cpp
-    CGResurrect.cpp CGResurrectHandler.cpp
+    # CGResurrect.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGResurrectHandler.cpp
     CGRideMotorCycle.cpp CGRideMotorCycleHandler.cpp
     CGSay.cpp CGSayHandler.cpp
     CGSelectBloodBible.cpp CGSelectBloodBibleHandler.cpp
@@ -497,7 +505,8 @@ set(CG_PACKET_SOURCES
     CGUntransform.cpp CGUntransformHandler.cpp
     CGUseBonusPoint.cpp CGUseBonusPointHandler.cpp
     CGUseItemFromGear.cpp CGUseItemFromGearHandler.cpp
-    CGUseItemFromGQuestInventory.cpp CGUseItemFromGQuestInventoryHandler.cpp
+    # CGUseItemFromGQuestInventory.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGUseItemFromGQuestInventoryHandler.cpp
     CGUseItemFromInventory.cpp CGUseItemFromInventoryHandler.cpp
     CGUseMessageItemFromInventory.cpp CGUseMessageItemFromInventoryHandler.cpp
     CGUsePotionFromInventory.cpp CGUsePotionFromInventoryHandler.cpp
@@ -506,7 +515,8 @@ set(CG_PACKET_SOURCES
     CGVerifyTime.cpp CGVerifyTimeHandler.cpp
     CGVisible.cpp CGVisibleHandler.cpp
     CGWhisper.cpp CGWhisperHandler.cpp
-    CGWithdrawPet.cpp CGWithdrawPetHandler.cpp
+    # CGWithdrawPet.cpp moved to shared/Packets/ — Phase 12 Wave 1.
+    CGWithdrawPetHandler.cpp
     CGWithdrawTax.cpp CGWithdrawTaxHandler.cpp
     # Exchange System Packets
     CGExchangeList.cpp CGExchangeListHandler.cpp
@@ -645,14 +655,26 @@ target_include_directories(GameServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver/billing
     # Phase 12: PacketFactoryManager.cpp (in PACKET_COMMON_SOURCES, compiled
     # into all three server packet libraries) unconditionally #includes
-    # every migrated packet's header, including CL family headers like
-    # CLGetWorldList.h even though its addFactory() call is guarded to
-    # __LOGIN_SERVER__ only. Include-only — do NOT link shared_packets here,
-    # or this target would also absorb CLGetWorldList.cpp as a source and
-    # fail to link (CLGetWorldListHandler::execute is only ever defined in
-    # LoginServerPackets).
+    # every migrated packet's header, including other families' headers
+    # like CLGetWorldList.h even though its addFactory() call is guarded
+    # to __LOGIN_SERVER__ only. Every shared_packets_<family> target's
+    # include directory is this same path, so linking shared_packets_cg
+    # below (for this target's own CG family) already covers it — this
+    # entry stays as an explicit, redundant-but-harmless include path in
+    # case a future family this target doesn't own needs the header
+    # before it's ever linked.
     ${CMAKE_SOURCE_DIR}/../shared/Packets
 )
+# Phase 12 Wave 1: this is the owning target for the CG family — links
+# shared_packets_cg (not the old combined "shared_packets") so it absorbs
+# only CG sources, compiled with __GAME_SERVER__ applied. Each CG
+# packet's *Handler.cpp stays in this directory and is still listed
+# above; deliberately NOT linking shared_packets_cl here, since
+# CLGetWorldListHandler::execute is only ever defined in
+# LoginServerPackets, and absorbing CLGetWorldList.cpp as a compiled
+# source here (with no such symbol) would be a link error waiting for
+# gameserver to actually reference it.
+target_link_libraries(GameServerPackets PRIVATE shared_packets_cg)
 
 # ============================================================================
 # LoginServerPackets  -  __LOGIN_SERVER__ 
@@ -674,11 +696,14 @@ target_include_directories(LoginServerPackets PRIVATE
     ${CMAKE_SOURCE_DIR}/src/server/gameserver
 )
 # Phase 12: this is the owning target for the CL family — links
-# shared_packets so it absorbs CLGetWorldList.cpp as a source, compiled
-# with __LOGIN_SERVER__ applied. CLGetWorldListHandler::execute (defined
-# in CLGetWorldListHandler.cpp, still in this directory — handlers never
+# shared_packets_cl (renamed from the original pilot's combined
+# "shared_packets" in Phase 12 Wave 1, when the CG family needed its own
+# owner-linked target too — see shared/Packets/CMakeLists.txt) so it
+# absorbs CLGetWorldList.cpp as a source, compiled with __LOGIN_SERVER__
+# applied. CLGetWorldListHandler::execute (defined in
+# CLGetWorldListHandler.cpp, still in this directory — handlers never
 # move) is only ever called from here.
-target_link_libraries(LoginServerPackets PRIVATE shared_packets)
+target_link_libraries(LoginServerPackets PRIVATE shared_packets_cl)
 
 # ============================================================================
 # SharedServerPackets  -  __SHARED_SERVER__ 

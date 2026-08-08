@@ -8,14 +8,31 @@
 # migration recipe; docs/MODERNIZATION.md's Phase 12 section records the
 # decision.
 #
-# Exposed as an INTERFACE library so each caller absorbs the .cpp sources
-# into ITS OWN compilation unit set, picking up its own __GAME_SERVER__ /
-# __LOGIN_SERVER__ / __SHARED_SERVER__ (server) or bare (client) defines.
-# A plain STATIC library would only ever get one set of defines baked in —
-# wrong for every consumer but the first to link it.
+# One INTERFACE library PER PACKET FAMILY (shared_packets_cg, _gc, _cl, _lc,
+# ...) rather than one combined "shared_packets" target covering every
+# family. Each caller absorbs a family's .cpp sources into ITS OWN
+# compilation unit set, picking up its own __GAME_SERVER__ / __LOGIN_SERVER__
+# / __SHARED_SERVER__ (server) or bare (client) defines — that part is
+# unchanged from the original design. What changed (Wave 1, this commit):
+# CLGetWorldList (the pilot) was the only migrated pair when this was a
+# single combined target, so LoginServerPackets (CL's owner) was the only
+# server target that ever linked it "for real" — GameServerPackets and
+# SharedServerPackets only used it for header visibility. Wave 1 adds the
+# first CG-family pairs, owned by a DIFFERENT server target
+# (GameServerPackets). A single combined target_sources would make it
+# impossible for GameServerPackets to link "just its own family": linking
+# the combined library would also absorb CL's CLGetWorldList.cpp as one of
+# GameServerPackets' own compiled sources (and vice versa, LoginServerPackets
+# would absorb CG's sources) — each family's *Handler.cpp only exists in its
+# owning server target, so an absorbed foreign-family .cpp's handler-dispatch
+# call has no definition to link against. Splitting by family means each
+# server target links only the family it owns; PacketFactoryManager.cpp's
+# unconditional #include of every packet header (regardless of family) is
+# still satisfied because every per-family library's include directory is
+# the same shared/Packets root.
 #
-# CLGetWorldList is the pilot pair (first class migrated through this
-# mechanism on main). The rest of the ~62 style-only pairs land in later,
+# CLGetWorldList remains the CL pilot pair. Wave 1 batch 1 adds the first
+# CG-family pairs. The rest of the ~62 style-only pairs land in later,
 # separately-reviewed batches per docs/MODERNIZATION.md's Phase 12 plan —
 # this file is not meant to gain many entries per commit.
 # ============================================================================
@@ -31,7 +48,9 @@ cmake_minimum_required(VERSION 3.13)
 # Guard against being add_subdirectory()'d twice — harmless today (each
 # tree only pulls this in once), but keeps the door open if a future
 # combined build ever puts dkrix/ and dkrixserver/ under one superproject.
-if(TARGET shared_packets)
+# shared_packets_cl is always defined below (even when its source list is
+# empty), so it's a stable marker for "this file already ran".
+if(TARGET shared_packets_cl)
     return()
 endif()
 
@@ -44,30 +63,44 @@ endif()
 # header unconditionally from all three server packet libraries; only the
 # owning library should compile the .cpp).
 # ----------------------------------------------------------------------
-set(_SHARED_PACKETS_CG_SOURCES) # Client -> Game
+set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
+    CGAddItemToCodeSheet.cpp
+    CGAddItemToItem.cpp
+    CGAuthKey.cpp
+    CGBuyStoreItem.cpp
+    CGGlobalChat.cpp
+    CGLogout.cpp
+    CGRequestInfo.cpp
+    CGResurrect.cpp
+    CGUseItemFromGQuestInventory.cpp
+    CGWithdrawPet.cpp
+)
 set(_SHARED_PACKETS_GC_SOURCES) # Game -> Client
 set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
     CLGetWorldList.cpp
 )
 set(_SHARED_PACKETS_LC_SOURCES) # Login -> Client
 
-set(_SHARED_PACKETS_SOURCES
-    ${_SHARED_PACKETS_CG_SOURCES}
-    ${_SHARED_PACKETS_GC_SOURCES}
-    ${_SHARED_PACKETS_CL_SOURCES}
-    ${_SHARED_PACKETS_LC_SOURCES}
-)
+# ----------------------------------------------------------------------
+# One INTERFACE library per family. A family with an empty source list
+# still gets a target (with no target_sources call) so consumers can
+# link it unconditionally as soon as it's ever populated, and so the
+# guard above has a stable target to check.
+# ----------------------------------------------------------------------
+function(_add_shared_packets_family _family)
+    set(_target "shared_packets_${_family}")
+    add_library(${_target} INTERFACE)
+    if(ARGN)
+        set(_abs_sources)
+        foreach(_src IN LISTS ARGN)
+            list(APPEND _abs_sources "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
+        endforeach()
+        target_sources(${_target} INTERFACE ${_abs_sources})
+    endif()
+    target_include_directories(${_target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+endfunction()
 
-add_library(shared_packets INTERFACE)
-
-if(_SHARED_PACKETS_SOURCES)
-    set(_SHARED_PACKETS_ABS_SOURCES)
-    foreach(_src IN LISTS _SHARED_PACKETS_SOURCES)
-        list(APPEND _SHARED_PACKETS_ABS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
-    endforeach()
-    target_sources(shared_packets INTERFACE ${_SHARED_PACKETS_ABS_SOURCES})
-endif()
-
-target_include_directories(shared_packets INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+_add_shared_packets_family(cg ${_SHARED_PACKETS_CG_SOURCES})
+_add_shared_packets_family(gc ${_SHARED_PACKETS_GC_SOURCES})
+_add_shared_packets_family(cl ${_SHARED_PACKETS_CL_SOURCES})
+_add_shared_packets_family(lc ${_SHARED_PACKETS_LC_SOURCES})

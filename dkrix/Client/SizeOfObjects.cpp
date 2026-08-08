@@ -71,11 +71,11 @@
 #include "packet/CPackets\CGUseItemFromGear.h"
 #include "packet/CPackets\CGLotterySelect.h"
 #include "packet/CPackets\CGTakeOutGood.h"
-#include "Packet/Cpackets/CGMixItem.h"					
+#include "Packet/Cpackets/CGMixItem.h"
 #include "Packet/Cpackets/CGDownSkill.h"
 #include "Packet/Gpackets/GCMiniGameScores.h"
 #include "Packet/Cpackets/CGSubmitScore.h"
-#include "Packet/Cpackets/CGAddItemToCodeSheet.h"
+#include "CGAddItemToCodeSheet.h"
 #include "Packet/Cpackets/CGFailQuest.h"
 
 #include "RequestFunction.h"

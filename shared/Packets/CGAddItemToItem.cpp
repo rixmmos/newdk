@@ -35,7 +35,9 @@ void CGAddItemToItem::execute(Player* pPlayer)
 {
     __BEGIN_TRY
 
+#ifndef __GAME_CLIENT__
     CGAddItemToItemHandler::execute(this, pPlayer);
+#endif
 
     __END_CATCH
 }

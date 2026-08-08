@@ -30,9 +30,9 @@
 #include "Cpackets/CGDissectionCorpse.h"
 #include "Cpackets/CGDropMoney.h"
 #include "Cpackets/CGGetOffMotorCycle.h"
-#include "Cpackets/CGGlobalChat.h"
+#include "CGGlobalChat.h"
 #include "Cpackets/CGLearnSkill.h"
-#include "Cpackets/CGLogout.h"
+#include "CGLogout.h"
 #include "Cpackets/CGMakeItem.h"
 #include "Cpackets/CGMove.h"
 #include "Cpackets/CGNPCAskAnswer.h"
@@ -328,7 +328,7 @@
 #include "Gpackets/GCPartyJoined.h"
 #include "Gpackets/GCPartyError.h"
 
-#include "Cpackets/CGResurrect.h"
+#include "CGResurrect.h"
 
 //////////////////////////////////////////////////////////////////////
 //
