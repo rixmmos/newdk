@@ -713,11 +713,22 @@ back to a single unconditional typedef.
       - MWorkThread.h m_csDeque/m_csCurrent migrated, fixing their
         never-initialized latent bug (both facts re-verified [measured]:
         zero init sites, zero callers of the four accessors).
-      Residual CRITICAL_SECTION users: DebugLog.cpp (live, 12 sites),
-      comments in DebugLog.h:11 / GameInitInfo.cpp:11 (latter now
-      stale), Packet/Exception.h's __ENTER/__LEAVE_CRITICAL_SECTION
-      macros (name collision — they wrap a passed-in mutex object). The
-      Platform.h CRITICAL_SECTION shim stays for DebugLog.cpp.
+      Trivial follow-up landed 2026-08-08: DebugLog.cpp's g_log_lock is
+      now std::mutex too — all 12 sites (2 Initialize/Delete, 10
+      Enter/Leave across 5 call sites) converted [measured]. Re-entrancy
+      gate checked by hand: no locked region in the file calls back into
+      another g_log_lock-locking function, so plain std::mutex is
+      correct (5 of 6 precedent cases, not the g_Lock exception). The
+      now-pointless Windows-only `<windows.h>` include and the
+      non-Windows `basic/Platform.h` include (both existed solely to
+      supply the CRITICAL_SECTION type) were dropped along with the
+      dead `PLATFORM_LOCK_INITIALIZED` define; DebugLog.h:11's comment
+      updated to match. Packet/Exception.h's __ENTER/__LEAVE_CRITICAL_SECTION
+      macros (name collision — they wrap a passed-in mutex object) and
+      GameInitInfo.cpp:11's already-stale comment are untouched, out of
+      scope. With DebugLog.cpp off it, Platform.h's CRITICAL_SECTION shim
+      [measured] has no remaining consumers in dkrix/ — candidate for a
+      future removal pass, not done here.
 - [ ] GDI stubs — skipped entirely per instructions (Phase 5 territory,
       `LOGFONT` is now a live parameter type in `Base::SetFont`).
 - Target: `Platform.h` shrinks to under 600 lines.

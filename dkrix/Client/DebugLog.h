@@ -8,7 +8,7 @@
 // - Automatic __FILE__ and __LINE__ inclusion
 // - Log levels: DEBUG/INFO/WARN/ERROR/NONE
 // - Configurable output: console/file/memory array
-// - Thread-safe (using CRITICAL_SECTION)
+// - Thread-safe (using std::mutex)
 // - Conditional compilation: DEBUG logs removed in Release builds
 //-----------------------------------------------------------------------------
 

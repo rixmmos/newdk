@@ -6,22 +6,15 @@
 //-----------------------------------------------------------------------------
 
 #include "DebugLog.h"
+#include <mutex>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
 
 #if defined(_WIN32) || defined(_WIN64)
-	#include <windows.h>
 	#include <sys/timeb.h>
 #else
 	#include <sys/time.h>
-#endif
-
-// Platform-specific includes
-#if defined(_WIN32) || defined(_WIN64)
-	#define PLATFORM_LOCK_INITIALIZED 1
-#else
-	#include "../../basic/Platform.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -50,7 +43,7 @@ static bool g_initialized = false;
 //-----------------------------------------------------------------------------
 // Thread safety
 //-----------------------------------------------------------------------------
-static CRITICAL_SECTION g_log_lock;
+static std::mutex g_log_lock;
 
 //-----------------------------------------------------------------------------
 // Helper Functions
@@ -121,9 +114,6 @@ void log_init(void) {
 		return;	// Already initialized
 	}
 
-	// Initialize lock FIRST
-	InitializeCriticalSection(&g_log_lock);
-
 	// Set default level based on build type
 #ifdef _DEBUG
 	g_config.level = LOG_LEVEL_INFO;
@@ -157,26 +147,23 @@ void log_cleanup(void) {
 		g_config.log_fp = NULL;
 	}
 
-	// Cleanup lock
-	DeleteCriticalSection(&g_log_lock);
-
 	g_initialized = false;
 }
 
 void log_set_level(LogLevel level) {
-	EnterCriticalSection(&g_log_lock);
+	g_log_lock.lock();
 	g_config.level = level;
-	LeaveCriticalSection(&g_log_lock);
+	g_log_lock.unlock();
 }
 
 void log_set_console_output(bool enable) {
-	EnterCriticalSection(&g_log_lock);
+	g_log_lock.lock();
 	g_config.output_to_console = enable;
-	LeaveCriticalSection(&g_log_lock);
+	g_log_lock.unlock();
 }
 
 void log_set_file_output(const char *path) {
-	EnterCriticalSection(&g_log_lock);
+	g_log_lock.lock();
 
 	// Close existing file if open
 	if (g_config.log_fp != NULL) {
@@ -202,13 +189,13 @@ void log_set_file_output(const char *path) {
 		g_config.log_file[0] = '\0';
 	}
 
-	LeaveCriticalSection(&g_log_lock);
+	g_log_lock.unlock();
 }
 
 void log_set_array_output(bool enable) {
-	EnterCriticalSection(&g_log_lock);
+	g_log_lock.lock();
 	g_config.output_to_array = enable;
-	LeaveCriticalSection(&g_log_lock);
+	g_log_lock.unlock();
 }
 
 //-----------------------------------------------------------------------------
@@ -247,7 +234,7 @@ void log_write(LogLevel level,
 			 timestamp, level_str, filename, line, message);
 
 	// Critical section for output
-	EnterCriticalSection(&g_log_lock);
+	g_log_lock.lock();
 
 	// Output to console (stderr)
 	if (g_config.output_to_console) {
@@ -270,5 +257,5 @@ void log_write(LogLevel level,
 	}
 #endif
 
-	LeaveCriticalSection(&g_log_lock);
+	g_log_lock.unlock();
 }
