@@ -729,6 +729,40 @@ back to a single unconditional typedef.
       scope. With DebugLog.cpp off it, Platform.h's CRITICAL_SECTION shim
       [measured] has no remaining consumers in dkrix/ — candidate for a
       future removal pass, not done here.
+      **Removal pass done 2026-08-09** — independently re-grepped the whole
+      tree (`.h`/`.cpp`/`.H`/`.CPP`, no extension filter as a second pass)
+      for `CRITICAL_SECTION`, `InitializeCriticalSection`,
+      `EnterCriticalSection`, `LeaveCriticalSection`,
+      `DeleteCriticalSection` before touching anything, per this file's own
+      documented history of false "provably dead" claims. Confirmed zero
+      real consumers [measured]: the only tree-wide hits outside
+      `basic/Platform.h` were `CMessageArray.cpp:50` and
+      `GameInitInfo.cpp:11` (comments only) and `Packet/Exception.h`'s
+      `__ENTER_CRITICAL_SECTION`/`__LEAVE_CRITICAL_SECTION` macros, which
+      take a `mutex` parameter and call `.lock()`/`.unlock()` on it — not
+      the shim type — and have zero invocations anywhere in the tree
+      besides their own definition. Deleted the shim (44 lines:
+      `_CRITICAL_SECTION_DEFINED` guard, the pthread-backed
+      `CRITICAL_SECTION` typedef, and the four
+      Initialize/Enter/Leave/DeleteCriticalSection functions) from
+      `basic/Platform.h`. **Found a real structural bug while doing it**,
+      the kind this file has bitten prior work with before: the outer
+      `#ifndef _CRITICAL_SECTION_DEFINED` did not close at the shim's own
+      `#endif` — it stayed open across the entire unrelated GDI-stub block
+      (`DeleteObject`, `LOGFONT`, font/charset/clip/quality/pitch
+      constants, `CreateFontIndirect`, ~110 lines, confirmed live per the
+      GDI-stubs item below) and only closed 113 lines later, right after
+      that block's own `#endif`. A naive line-range delete of just the
+      shim's nominal `#ifndef ... #endif` span would have orphaned that
+      outer `#endif` and desynced every conditional after it. Fix: deleted
+      the shim's open/close pair as a unit *and* the now-orphaned outer
+      `#endif`, leaving the GDI-stub block's own `#ifndef
+      PLATFORM_WINDOWS`/`#endif` standing alone, correctly matched —
+      content of that block untouched. Verified with a stack-based
+      `#if`/`#endif` balance check over the whole file post-edit: balances
+      to 0 [measured]. `Platform.h`: 1,996 → 1,982 lines. No compiler
+      available in this sandbox to confirm — gate is client CI, not run
+      here.
 - [ ] GDI stubs — skipped entirely per instructions (Phase 5 territory,
       `LOGFONT` is now a live parameter type in `Base::SetFont`).
 - Target: `Platform.h` shrinks to under 600 lines.

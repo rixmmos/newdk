@@ -217,50 +217,6 @@ typedef struct IDirectSound* LPDIRECTSOUND;
 typedef struct IDirectSoundNotify* LPDIRECTSOUNDNOTIFY;
 #endif
 
-/* CRITICAL_SECTION for thread synchronization */
-#ifndef _CRITICAL_SECTION_DEFINED
-#define _CRITICAL_SECTION_DEFINED
-#if !defined(_WIN32) && !defined(_WIN64)
-#include <pthread.h>
-
-typedef struct _CRITICAL_SECTION {
-	pthread_mutex_t mutex;
-	int initialized;
-} CRITICAL_SECTION, *PCRITICAL_SECTION, *LPCRITICAL_SECTION;
-
-/* Critical section functions - pthread-based implementations for macOS */
-/* Note: Use recursive mutex to match Windows CRITICAL_SECTION behavior */
-static inline void InitializeCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL) {
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);  
-		pthread_mutex_init(&cs->mutex, &attr);
-		pthread_mutexattr_destroy(&attr);
-		cs->initialized = 1;
-	}
-}
-
-static inline void EnterCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_lock(&cs->mutex);
-	}
-}
-
-static inline void LeaveCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_unlock(&cs->mutex);
-	}
-}
-
-static inline void DeleteCriticalSection(CRITICAL_SECTION* cs) {
-	if (cs != NULL && cs->initialized) {
-		pthread_mutex_destroy(&cs->mutex);
-		cs->initialized = 0;
-	}
-}
-#endif
-
 /* GDI object management functions - stub implementations */
 #ifndef PLATFORM_WINDOWS
 static inline int DeleteObject(void* hObject) {
@@ -371,7 +327,6 @@ static inline void* CreateFontIndirect(LOGFONT* lplf) {
 	/* Stub - would create a font on Windows */
 	return (void*)1; /* Return a non-null handle */
 }
-#endif
 #endif
 
 /* Windows path constants */
