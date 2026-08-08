@@ -10,6 +10,7 @@
 
 #include "Assert.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // class FameLimitInfo member methods
@@ -91,19 +92,19 @@ void FameLimitInfoManager::load()
     __BEGIN_TRY
 
     Statement* pStmt = NULL; // by sigi
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         for (int i = 0; i < SKILL_DOMAIN_MAX; i++) {
-            pResult = pStmt->executeQuery("SELECT MAX(Level) FROM FameLimitInfo WHERE DomainType=%d", i);
+            PreparedStatement selectMaxStmt(pConn, "SELECT MAX(Level) FROM FameLimitInfo WHERE DomainType=?");
+            selectMaxStmt.bindInt(1, i);
+            Result* pResult = selectMaxStmt.execute();
 
             if (pResult->getRowCount() == 0) {
-                SAFE_DELETE(pStmt);
                 throw Error("There is no data in FameLimitInfo Table");
             }
 
-            
+
             pResult->next();
 
             int count = pResult->getInt(1) + 1;
@@ -116,7 +117,10 @@ void FameLimitInfoManager::load()
             for (int j = 0; j < count; j++)
                 m_FameLimitInfoList[i][j] = NULL;
 
-            pResult = pStmt->executeQuery("SELECT DomainType, Level, Fame FROM FameLimitInfo WHERE DomainType = %d", i);
+            PreparedStatement selectListStmt(pConn,
+                                             "SELECT DomainType, Level, Fame FROM FameLimitInfo WHERE DomainType = ?");
+            selectListStmt.bindInt(1, i);
+            pResult = selectListStmt.execute();
             while (pResult->next()) {
                 FameLimitInfo* pFameLimitInfo = new FameLimitInfo();
                 int i = 0;
@@ -128,8 +132,6 @@ void FameLimitInfoManager::load()
                 addFameLimitInfo(pFameLimitInfo);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

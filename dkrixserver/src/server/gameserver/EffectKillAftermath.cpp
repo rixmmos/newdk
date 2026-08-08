@@ -10,6 +10,7 @@
 #include "DB.h"
 #include "GamePlayer.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 
@@ -20,7 +21,7 @@ EffectKillAftermath::EffectKillAftermath(Creature* pCreature)
 {
     __BEGIN_TRY
 
-    
+
     m_bBroadcastingEffect = false;
 
     setTarget(pCreature);
@@ -110,21 +111,23 @@ void EffectKillAftermath::create(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
 
         Turn_t currentYearTime;
 
         getCurrentYearTime(currentYearTime);
 
-        
-        pStmt->executeQuery("INSERT INTO EffectKillAftermath (OwnerID , YearTime, DayTime) VALUES('%s', %ld, %ld)",
-                            ownerID.c_str(), currentYearTime, m_Deadline.tv_sec);
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn,
+                                     "INSERT INTO EffectKillAftermath (OwnerID , YearTime, DayTime) VALUES(?, ?, ?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindLong(2, currentYearTime);
+        insertStmt.bindLong(3, m_Deadline.tv_sec);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -141,7 +144,7 @@ void EffectKillAftermath::destroy(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -149,10 +152,10 @@ void EffectKillAftermath::destroy(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("DELETE FROM EffectKillAftermath WHERE OwnerID = '%s'", ownerID.c_str());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM EffectKillAftermath WHERE OwnerID = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -166,10 +169,10 @@ void EffectKillAftermath::save(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Turn_t currentYearTime;
 
@@ -184,11 +187,13 @@ void EffectKillAftermath::save(const string& ownerID)
             << " WHERE OwnerID = '" << ownerID << "'";
         */
 
-        
-        pStmt->executeQuery("UPDATE EffectKillAftermath SET YearTime = %ld, DayTime = %ld WHERE OwnerID = '%s'",
-                            currentYearTime, m_Deadline.tv_sec, ownerID.c_str());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn,
+                                     "UPDATE EffectKillAftermath SET YearTime = ?, DayTime = ? WHERE OwnerID = ?");
+        updateStmt.bindLong(1, currentYearTime);
+        updateStmt.bindLong(2, m_Deadline.tv_sec);
+        updateStmt.bindString(3, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -218,14 +223,13 @@ void EffectKillAftermathLoader::load(Creature* pCreature)
     __BEGIN_TRY
 
     if (pCreature == NULL) {
-        
         return;
     }
 
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -237,9 +241,10 @@ void EffectKillAftermathLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        
-        Result* pResult = pStmt->executeQuery("SELECT DayTime FROM EffectKillAftermath WHERE OwnerID = '%s'",
-                                              pCreature->getName().c_str());
+
+        PreparedStatement selectStmt(pConn, "SELECT DayTime FROM EffectKillAftermath WHERE OwnerID = ?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             if (pCreature->isSlayer()) {
@@ -325,8 +330,6 @@ void EffectKillAftermathLoader::load(Creature* pCreature)
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

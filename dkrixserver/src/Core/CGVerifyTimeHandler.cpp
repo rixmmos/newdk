@@ -11,6 +11,7 @@
 #include "DB.h"
 #include "GamePlayer.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "Slayer.h"
 #include "Vampire.h"
@@ -69,7 +70,7 @@ void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
     filelog("SpeedHack.log", "ID[%s], Name[%s], IP[%s]", ID.c_str(), Name.c_str(), IP.c_str());
 
     /////////////////////////////////////////////////////////
-    
+
     /////////////////////////////////////////////////////////
     Statement* pStmt = NULL;
 
@@ -78,19 +79,29 @@ void CGVerifyTimeHandler::saveSpeedHackPlayer(Player* pPlayer) {
         static ServerGroupID_t ServerGroupID = g_pConfig->getPropertyInt("ServerID");
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-            pStmt->executeQuery("UPDATE SpeedHackPlayer SET IP = '%s', NAME = '%s', WorldID = %d, ServerGroupID = %d, "
-                                "Date = now(), Count = Count + 1 WHERE PlayerID = '%s'",
-                                IP.c_str(), Name.c_str(), (int)WorldID, (int)ServerGroupID, ID.c_str());
+            PreparedStatement updateSpeedHackPlayerStmt(
+                pConn, "UPDATE SpeedHackPlayer SET IP = ?, NAME = ?, WorldID = ?, ServerGroupID = ?, "
+                       "Date = now(), Count = Count + 1 WHERE PlayerID = ?");
+            updateSpeedHackPlayerStmt.bindString(1, IP);
+            updateSpeedHackPlayerStmt.bindString(2, Name);
+            updateSpeedHackPlayerStmt.bindInt(3, (int)WorldID);
+            updateSpeedHackPlayerStmt.bindInt(4, (int)ServerGroupID);
+            updateSpeedHackPlayerStmt.bindString(5, ID);
+            updateSpeedHackPlayerStmt.execute();
 
-            if (pStmt->getAffectedRowCount() == 0) {
-                pStmt->executeQuery("INSERT IGNORE INTO SpeedHackPlayer( PlayerID, IP, Name, WorldID, ServerGroupID, "
-                                    "Date, Count ) VALUES ( '%s', '%s', '%s', %d, %d, now(), 1 )",
-                                    ID.c_str(), IP.c_str(), Name.c_str(), (int)WorldID, (int)ServerGroupID);
+            if (updateSpeedHackPlayerStmt.getAffectedRowCount() == 0) {
+                PreparedStatement insertSpeedHackPlayerStmt(
+                    pConn, "INSERT IGNORE INTO SpeedHackPlayer( PlayerID, IP, Name, WorldID, ServerGroupID, "
+                           "Date, Count ) VALUES ( ?, ?, ?, ?, ?, now(), 1 )");
+                insertSpeedHackPlayerStmt.bindString(1, ID);
+                insertSpeedHackPlayerStmt.bindString(2, IP);
+                insertSpeedHackPlayerStmt.bindString(3, Name);
+                insertSpeedHackPlayerStmt.bindInt(4, (int)WorldID);
+                insertSpeedHackPlayerStmt.bindInt(5, (int)ServerGroupID);
+                insertSpeedHackPlayerStmt.execute();
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     } catch (Throwable& t) {

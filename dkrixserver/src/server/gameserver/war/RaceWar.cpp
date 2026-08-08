@@ -21,6 +21,7 @@
 #include "GCWarScheduleList.h"
 #include "HolyLandManager.h"
 #include "PCManager.h"
+#include "PreparedStatement.h"
 #include "RaceWarInfo.h"
 #include "RaceWarLimiter.h"
 #include "RegenZoneManager.h"
@@ -58,24 +59,23 @@ void RaceWar::executeStart()
 
     sendWarStartMessage();
 
-    
+
     //	g_pHolyLandRaceBonus->clear();
 
-    
+
     // g_pCastleInfoManager->deleteAllNPCs();
 
-    
+
     g_pCastleInfoManager->releaseAllSafeZone();
 
-    
+
     g_pShrineInfoManager->removeAllShrineShield();
 
-    
-    
+
     // g_pShrineInfoManager->broadcastBloodBibleStatus();
     //	g_pHolyLandManager->sendBloodBibleStatus();
 
-    
+
     g_pHolyLandManager->fixTimeband(g_pVariableManager->getVariable(RACE_WAR_TIMEBAND));
 
     g_pHolyLandManager->killAllMonsters();
@@ -83,15 +83,13 @@ void RaceWar::executeStart()
     RegenZoneManager::getInstance()->putTryingPosition();
     RegenZoneManager::getInstance()->broadcastStatus();
 
-    
+
     g_pDragonEyeManager->addAllDragonEyesToZone();
 
-    
-    
-    
+
     // g_pHolyLandManager->remainRaceWarPlayers();
 
-    
+
     recordRaceWarStart();
 
     __END_CATCH
@@ -103,11 +101,12 @@ void RaceWar::recordRaceWarStart()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQueryString("SELECT Race, SUM(CurrentNum) FROM RaceWarPCLimit GROUP BY Race");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectRaceWarPCLimitStmt(pConn,
+                                                   "SELECT Race, SUM(CurrentNum) FROM RaceWarPCLimit GROUP BY Race");
+        Result* pResult = selectRaceWarPCLimitStmt.execute();
 
         uint slayerSum = 0;
         uint vampireSum = 0;
@@ -129,7 +128,8 @@ void RaceWar::recordRaceWarStart()
                 oustersSum = num;
         }
 
-        pResult = pStmt->executeQueryString("SELECT ID, OwnerRace FROM ShrineInfo");
+        PreparedStatement selectShrineInfoStmt(pConn, "SELECT ID, OwnerRace FROM ShrineInfo");
+        pResult = selectShrineInfoStmt.execute();
 
         while (pResult->next()) {
             uint id = pResult->getInt(1);
@@ -143,11 +143,17 @@ void RaceWar::recordRaceWarStart()
                 oustersOld = oustersOld + itos(id) + "|";
         }
 
-        pStmt->executeQuery(
-            "INSERT INTO RaceWarHistory (RaceWarID, SlayerNum, VampireNum, OustersNum, SlayerOldBloodBible, "
-            "VampireOldBloodBible, OustersOldBloodBible) VALUES ('%s', %d, %d, %d, '%s', '%s', '%s')",
-            getWarStartTime().toStringforWeb().c_str(), slayerSum, vampireSum, oustersSum, slayerOld.c_str(),
-            vampireOld.c_str(), oustersOld.c_str());
+        PreparedStatement insertRaceWarHistoryStmt(
+            pConn, "INSERT INTO RaceWarHistory (RaceWarID, SlayerNum, VampireNum, OustersNum, SlayerOldBloodBible, "
+                   "VampireOldBloodBible, OustersOldBloodBible) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        insertRaceWarHistoryStmt.bindString(1, getWarStartTime().toStringforWeb());
+        insertRaceWarHistoryStmt.bindInt(2, slayerSum);
+        insertRaceWarHistoryStmt.bindInt(3, vampireSum);
+        insertRaceWarHistoryStmt.bindInt(4, oustersSum);
+        insertRaceWarHistoryStmt.bindString(5, slayerOld);
+        insertRaceWarHistoryStmt.bindString(6, vampireOld);
+        insertRaceWarHistoryStmt.bindString(7, oustersOld);
+        insertRaceWarHistoryStmt.execute();
     }
     END_DB(pStmt)
 
@@ -167,19 +173,19 @@ void RaceWar::executeEnd()
     __BEGIN_TRY
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     sendWarEndMessage();
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
-    
-    
+
+
     //	g_pHolyLandRaceBonus->refresh();
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     g_pShrineInfoManager->returnAllBloodBible();
 
@@ -191,30 +197,30 @@ void RaceWar::executeEnd()
 
     // g_pCastleInfoManager->loadAllNPCs();
 
-    
+
     // g_pHolyLandManager->sendBloodBibleStatus();
     g_pShrineInfoManager->broadcastBloodBibleStatus();
 
-    
+
     g_pHolyLandManager->resumeTimeband();
 
-    
+
     RaceWarLimiter::clearPCList();
 
-    
+
     RaceWarLimiter::getInstance()->clearCurrent();
     RegenZoneManager::getInstance()->deleteTryingPosition();
     RegenZoneManager::getInstance()->reload();
 
-    
+
     g_pZoneGroupManager->removeFlag(Effect::EFFECT_CLASS_RACE_WAR_JOIN_TICKET);
 
     CGSayHandler::opworld(NULL, "*world *load blood_bible_owner", 0, true);
 
-    
+
     g_pDragonEyeManager->removeAllDragonEyes();
 
-    
+
     recordRaceWarEnd();
 
     __END_CATCH
@@ -226,12 +232,12 @@ void RaceWar::recordRaceWarEnd()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pResult = pStmt->executeQueryString("SELECT ID, OwnerRace FROM ShrineInfo");
+        PreparedStatement selectShrineInfoStmt(pConn, "SELECT ID, OwnerRace FROM ShrineInfo");
+        Result* pResult = selectShrineInfoStmt.execute();
 
         string slayerNew;
         string vampireNew;
@@ -249,14 +255,18 @@ void RaceWar::recordRaceWarEnd()
                 oustersNew = oustersNew + itos(id) + "|";
         }
 
-        pStmt->executeQuery("UPDATE RaceWarHistory SET SlayerBloodBible = '%s', VampireBloodBible = '%s', "
-                            "OustersBloodBible = '%s' WHERE RaceWarID = '%s'",
-                            slayerNew.c_str(), vampireNew.c_str(), oustersNew.c_str(),
-                            getWarStartTime().toStringforWeb().c_str());
+        PreparedStatement updateRaceWarHistoryStmt(
+            pConn, "UPDATE RaceWarHistory SET SlayerBloodBible = ?, VampireBloodBible = ?, "
+                   "OustersBloodBible = ? WHERE RaceWarID = ?");
+        updateRaceWarHistoryStmt.bindString(1, slayerNew);
+        updateRaceWarHistoryStmt.bindString(2, vampireNew);
+        updateRaceWarHistoryStmt.bindString(3, oustersNew);
+        updateRaceWarHistoryStmt.bindString(4, getWarStartTime().toStringforWeb());
+        updateRaceWarHistoryStmt.execute();
     }
     END_DB(pStmt)
 
-    
+
     char cmd[100];
     sprintf(cmd, "/home/darkeden/vs/bin/script/recordRaceWarHistory.py %s %d %d ",
             getWarStartTime().toStringforWeb().c_str(), g_pConfig->getPropertyInt("Dimension"),
@@ -288,7 +298,7 @@ void RaceWar::sendWarEndMessage() const
 
     War::sendWarEndMessage();
 
-    
+
     GCNoticeEvent gcNoticeEvent;
     gcNoticeEvent.setCode(NOTICE_EVENT_RACE_WAR_OVER);
     g_pZoneGroupManager->broadcast(&gcNoticeEvent);

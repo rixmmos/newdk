@@ -12,6 +12,7 @@
 #include "DatabaseManager.h"
 #include "LCQueryResultPlayerID.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "Result.h"
 #include "Statement.h"
 #endif
@@ -31,13 +32,14 @@ void CLQueryPlayerIDHandler::execute(CLQueryPlayerID* pPacket, Player* pPlayer)
 
     LoginPlayer* pLoginPlayer = dynamic_cast<LoginPlayer*>(pPlayer);
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT Name FROM Player WHERE PlayerID = '%s'", pPacket->getPlayerID().c_str());
+        PreparedStatement selectPlayerNameStmt(pConn, "SELECT Name FROM Player WHERE PlayerID = ?");
+        selectPlayerNameStmt.bindString(1, pPacket->getPlayerID());
+        Result* pResult = selectPlayerNameStmt.execute();
 
         LCQueryResultPlayerID lcQueryResultPlayerID;
 
@@ -58,9 +60,7 @@ void CLQueryPlayerIDHandler::execute(CLQueryPlayerID* pPacket, Player* pPlayer)
 
         pLoginPlayer->sendPacket(&lcQueryResultPlayerID);
 
-        
-        
-        
+
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
 
         SAFE_DELETE(pStmt);

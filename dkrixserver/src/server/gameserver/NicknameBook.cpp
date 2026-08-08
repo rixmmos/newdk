@@ -7,6 +7,7 @@
 #include "LevelNickInfoManager.h"
 #include "NicknameInfo.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 
 #define CUSTOM_NICKNAME_ID 0
 #define LEVEL_NICKNAME_BASE_ID 1
@@ -21,10 +22,11 @@ void NicknameBook::load() {
     m_NextNicknameID = 10000;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT nID, NickType, Nickname, NickIndex FROM NicknameBook WHERE OwnerID='%s'",
-                                m_pOwner->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectNicknameStmt(
+            pConn, "SELECT nID, NickType, Nickname, NickIndex FROM NicknameBook WHERE OwnerID=?");
+        selectNicknameStmt.bindString(1, m_pOwner->getName());
+        Result* pResult = selectNicknameStmt.execute();
 
         while (pResult->next()) {
             WORD nID = pResult->getInt(1);
@@ -54,17 +56,16 @@ void NicknameBook::load() {
             pLevelNickname->setNickname(" ");
             setNicknameInfo(CUSTOM_NICKNAME_ID, pLevelNickname);
 
-            pStmt->executeQuery(
-                "INSERT IGNORE INTO NicknameBook (nID, OwnerID, NickType, Nickname, NickIndex, Time) VALUES "
-                "(0, '%s', %u, ' ', 0, now())",
-                m_pOwner->getName().c_str(), NicknameInfo::NICK_CUSTOM);
+            PreparedStatement insertCustomNicknameStmt(
+                pConn, "INSERT IGNORE INTO NicknameBook (nID, OwnerID, NickType, Nickname, NickIndex, Time) VALUES "
+                       "(0, ?, ?, ' ', 0, now())");
+            insertCustomNicknameStmt.bindString(1, m_pOwner->getName());
+            insertCustomNicknameStmt.bindUInt(2, NicknameInfo::NICK_CUSTOM);
+            insertCustomNicknameStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
-     
 
     if (m_pOwner->getLevel() >= 10) {
         Level_t level = m_pOwner->getLevel();
@@ -86,10 +87,9 @@ void NicknameBook::load() {
     }
 
     if (m_pOwner->getGuildID() != m_pOwner->getCommonGuildID()) {
-        
         Guild* pGuild = g_pGuildManager->getGuild(m_pOwner->getGuildID());
 
-        
+
         if (pGuild != NULL && pGuild->getMaster() == m_pOwner->getName()) {
             NicknameInfo* pLevelNickname = new NicknameInfo;
             pLevelNickname->setNicknameID(GUILD_MASTER_NICKNAME_ID);
@@ -133,12 +133,18 @@ void NicknameBook::addNewNickname(const string& nick)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO NicknameBook (nID, OwnerID, NickType, Nickname, Time) "
-                            "VALUES (%u, '%s', %u, '%s', now())",
-                            pNickname->getNicknameID(), m_pOwner->getName().c_str(), pNickname->getNicknameType(),
-                            getDBString(pNickname->getNickname()).c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertNicknameStmt(pConn, "INSERT INTO NicknameBook (nID, OwnerID, NickType, Nickname, Time) "
+                                                    "VALUES (?, ?, ?, ?, now())");
+        insertNicknameStmt.bindUInt(1, pNickname->getNicknameID());
+        insertNicknameStmt.bindString(2, m_pOwner->getName());
+        insertNicknameStmt.bindUInt(3, pNickname->getNicknameType());
+        // getDBString() was a manual backslash-escape for embedding into a raw SQL
+        // string literal; PreparedStatement sends the value out-of-band, so the
+        // escaping is no longer applied here (applying it now would store
+        // literal backslashes for any nickname containing a quote).
+        insertNicknameStmt.bindString(4, pNickname->getNickname());
+        insertNicknameStmt.execute();
     }
     END_DB(pStmt)
 

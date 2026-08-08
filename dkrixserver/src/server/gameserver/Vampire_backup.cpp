@@ -25,6 +25,7 @@
 #include "PacketUtil.h"
 #include "Party.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Shape.h"
 #include "SkillInfo.h"
 #include "SkillParentInfo.h"
@@ -62,7 +63,7 @@ void increaseVampExpEx(Vampire* pVampire, Exp_t Point) {
     Exp_t OldGoalExp = pVampire->getGoalExp();
     Exp_t NewGoalExp = max(0, (int)(OldGoalExp - Point));
 
-    
+
     Exp_t DiffGoalExp = max(0, (int)(OldGoalExp - NewGoalExp));
 
     Exp_t NewExp = OldExp + DiffGoalExp;
@@ -82,7 +83,7 @@ void increaseVampExpEx(Vampire* pVampire, Exp_t Point) {
     pVampire->setExp(NewExp);
     pVampire->setGoalExp(NewGoalExp);
 
-    
+
     if (NewGoalExp == 0 && curLevel < 115) {
         VAMPIRE_RECORD prev;
         pVampire->getVampireRecord(prev);
@@ -96,8 +97,6 @@ void increaseVampExpEx(Vampire* pVampire, Exp_t Point) {
 
         if ((pVampire->getSTR(ATTR_BASIC) + pVampire->getDEX(ATTR_BASIC) + pVampire->getINT(ATTR_BASIC) +
              pVampire->getBonus() - 60) < ((pVampire->getLevel() - 1) * 3)) {
-            
-            
             bonus += 3;
         }
 
@@ -132,7 +131,7 @@ Vampire::Vampire()
 
     m_Mutex.setName("Vampire");
 
-    
+
     for (int i = 0; i < SKILL_DOUBLE_IMPACT; i++) {
         VampireSkillSlot* pVampireSkillSlot = new VampireSkillSlot;
         // pVampireSkillSlot = new VampireSkillSlot;	// 2002.1.16 by sigi
@@ -147,7 +146,7 @@ Vampire::Vampire()
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++)
         m_pWearItem[i] = NULL;
 
-    
+
     for (int i = 0; i < 8; i++) {
         m_HotKey[i] = 0;
     }
@@ -155,10 +154,10 @@ Vampire::Vampire()
     m_SilverDamage = 0;
     m_ClanType = 0;
 
-    
+
     getCurrentTime(m_HPRegenTime);
 
-    
+
     m_ExpSaveCount = 0;
     m_FameSaveCount = 0;
     m_AlignmentSaveCount = 0;
@@ -171,7 +170,7 @@ Vampire::~Vampire()
 {
     __BEGIN_TRY
 
-    
+
     DWORD flag;
     Color_t color[PCVampireInfo::VAMPIRE_COLOR_MAX];
     getShapeInfo(flag, color);
@@ -184,32 +183,24 @@ Vampire::~Vampire()
     tinysave(pField);
 
 
-    
     saveGears();
     saveExps();
     saveSkills();
 
-    
+
     destroyGears();
 
-    
-    
+
     TradeManager* pTradeManager = m_pZone->getTradeManager();
     TradeInfo* pInfo = pTradeManager->getTradeInfo(getName());
     if (pInfo != NULL) {
-        
         pTradeManager->cancelTrade(this);
     }
 
-    
-    
-    
-    
-    
-    
+
     deleteAllPartyInfo(this);
 
-    
+
     unordered_map<SkillType_t, VampireSkillSlot*>::iterator itr = m_SkillSlot.begin();
     for (; itr != m_SkillSlot.end(); itr++) {
         VampireSkillSlot* pVampireSkillSlot = itr->second;
@@ -229,25 +220,25 @@ void Vampire::registerObject()
 
     Assert(getZone() != NULL);
 
-    
+
     ObjectRegistry& OR = getZone()->getObjectRegistry();
 
     __ENTER_CRITICAL_SECTION(OR)
 
-    
+
     OR.registerObject_NOLOCKED(this);
 
-    
+
     registerInventory(OR);
 
-    
+
     for (int i = 0; i < VAMPIRE_WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
         if (pItem != NULL)
             registerItem(pItem, OR);
     }
 
-    
+
     Item* pSlotItem = m_pExtraInventorySlot->getItem();
     if (pSlotItem != NULL)
         registerItem(pSlotItem, OR);
@@ -270,18 +261,18 @@ void Vampire::loadItem()
 {
     __BEGIN_TRY
 
-    
+
     SAFE_DELETE(m_pInventory);
     m_pInventory = new Inventory(10, 6);
     m_pInventory->setOwner(getName());
 
-    
+
     g_pItemLoaderManager->load(this);
 
-    
+
     registerObject();
 
-    
+
     initAllStat();
 
     __END_CATCH
@@ -301,20 +292,24 @@ bool Vampire::load()
     int reward = 0;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult =
-            pStmt->executeQuery("SELECT Name, Sex, HairColor, SkinColor, 
-                                STR,
-                                DEX, INTE, HP, CurrentHP, Fame, Exp, GoalExp, ExpOffset, Level, Bonus, InMagics, Gold,
-                                GuildID, ZoneID, XCoord, YCoord, Sight, Alignment, F5, F6, F7, F8, F9, F10, F11, F12,
-                                StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, SilverDamage,
-                                Reward FROM Vampire WHERE Name = '%s' AND Active = 'ACTIVE' ",
-                                                                                   m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // NOTE: the original raw-SQL literal here had an unescaped embedded
+        // newline (invalid C++ even before this migration); reconstructed as a
+        // concatenated multi-line string literal to migrate it.
+        PreparedStatement selectVampireStmt(pConn,
+                                            "SELECT Name, Sex, HairColor, SkinColor, "
+                                            "STR, "
+                                            "DEX, INTE, HP, CurrentHP, Fame, Exp, GoalExp, ExpOffset, Level, Bonus, "
+                                            "InMagics, Gold, "
+                                            "GuildID, ZoneID, XCoord, YCoord, Sight, Alignment, F5, F6, F7, F8, F9, "
+                                            "F10, F11, F12, "
+                                            "StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, "
+                                            "SilverDamage, "
+                                            "Reward FROM Vampire WHERE Name = ? AND Active = 'ACTIVE' ");
+        selectVampireStmt.bindString(1, m_Name);
+        pResult = selectVampireStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            
-            
-            SAFE_DELETE(pStmt);
             return false;
         }
 
@@ -380,9 +375,8 @@ bool Vampire::load()
         reward = pResult->getInt(++i);
 
 
-        
         // 2002.7.15 by sigi
-        
+
         int maxHP = m_STR[ATTR_CURRENT] * 2 + m_INT[ATTR_CURRENT] + m_DEX[ATTR_CURRENT] / 2 + m_Level;
         maxHP = min((int)maxHP, VAMPIRE_MAX_HP);
         setHP(maxHP, ATTR_MAX);
@@ -390,26 +384,19 @@ bool Vampire::load()
         try {
             setZoneID(zoneID);
         } catch (Error& e) {
-            
-            
-            
             setZoneID(1003);
             setX(30);
             setY(30);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
     if (reward != 0) {
         BEGIN_DB {
-            StringStream SQL;
-            SQL << "UPDATE Vampire SET Reward = 0 WHERE Name = '" << m_Name << "'";
-
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery(SQL.toString());
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement resetRewardStmt(pConn, "UPDATE Vampire SET Reward = 0 WHERE Name = ?");
+            resetRewardStmt.bindString(1, m_Name);
+            resetRewardStmt.execute();
         }
         END_DB(pStmt)
 
@@ -432,9 +419,9 @@ bool Vampire::load()
     }
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
-    
+
     m_VampireInfo.setObjectID(m_ObjectID);
     m_VampireInfo.setName(m_Name);
     m_VampireInfo.setSex(m_Sex);
@@ -444,13 +431,14 @@ bool Vampire::load()
     m_VampireInfo.setCompetence(m_CompetenceShape);
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT SkillType, Delay, CastingTime, NextTime FROM VampireSkillSave WHERE OwnerID = '%s'",
-            m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectSkillSaveStmt(
+            pConn, "SELECT SkillType, Delay, CastingTime, NextTime FROM VampireSkillSave WHERE OwnerID = ?");
+        selectSkillSaveStmt.bindString(1, m_Name);
+        pResult = selectSkillSaveStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -469,23 +457,21 @@ bool Vampire::load()
                 addSkill(pVampireSkillSlot);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     g_pEffectLoaderManager->load(this);
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     m_pFlagSet->load(getName());
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     /*
     ItemType_t coatType = 0;
@@ -501,24 +487,19 @@ bool Vampire::load()
     m_VampireInfo.setCoatColor(377);
     // m_VampireInfo.setCoatColor(2 , SUB_COLOR);
 
-    
+
     VampEXPInfo* pVampEXPInfo = g_pVampEXPInfoManager->getVampEXPInfo(m_Level);
 
     if ((pVampEXPInfo->getAccumExp() != m_Exp + m_GoalExp) && m_Level > 1) {
-        
         // file << "NAME:" << m_Name << endl;
         // file << "==VampEXP==" << endl;
-        
-        
-        
 
-        
+
         VampEXPInfo* pBeforeVampEXPInfo = g_pVampEXPInfoManager->getVampEXPInfo(m_Level - 1);
-        
+
         m_Exp = pBeforeVampEXPInfo->getAccumExp() + (pVampEXPInfo->getGoalExp() - m_GoalExp);
 
-        
-        
+
         // file << endl;
         // file.close();
 
@@ -550,50 +531,51 @@ void Vampire::save() const
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     //--------------------------------------------------------------------------------
-    
+
     //--------------------------------------------------------------------------------
     BEGIN_DB {
-        StringStream sql;
-        sql << "UPDATE Vampire SET"
-            //<< " HairColor = " << (int)m_HairColor
-            //<< ", SkinColor = " << (int)m_SkinColor
-            //<< ", STR = " << (int)m_STR[ATTR_MAX]
-            //<< ", DEX = " << (int)m_DEX[ATTR_MAX]
-            //<< ", INTE = " << (int)m_INT[ATTR_MAX]
-            << " CurrentHP = " << (int)m_HP[ATTR_CURRENT] << ", HP = "
-            << (int)m_HP[ATTR_MAX]
-            //<< ", Fame = " << (int)m_Fame
-            //<< ", Exp = " << (int)m_Exp
-            //<< ", ExpOffset = " << (int)m_ExpOffset
-            //<< ", Level = " << (int)m_Level
-            //<< ", Bonus = " << (int)m_Bonus
-            //<< ", Gold = " << (int)m_Gold
-            << ", ZoneID = " << (int)getZoneID() << ", XCoord = " << (int)m_X << ", YCoord = "
-            << (int)m_Y
-            //<< ", Sight = " << (int)m_Sight
-            << ", F5 = " << (int)m_HotKey[0] << ", F6 = " << (int)m_HotKey[1] << ", F7 = " << (int)m_HotKey[2]
-            << ", F8 = " << (int)m_HotKey[3] << ", F9 = " << (int)m_HotKey[4] << ", F10 = " << (int)m_HotKey[5]
-            << ", F11 = " << (int)m_HotKey[6] << ", F12 = " << (int)m_HotKey[7] << " WHERE Name = '" << m_Name << "'";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        //<< " HairColor = " << (int)m_HairColor
+        //<< ", SkinColor = " << (int)m_SkinColor
+        //<< ", STR = " << (int)m_STR[ATTR_MAX]
+        //<< ", DEX = " << (int)m_DEX[ATTR_MAX]
+        //<< ", INTE = " << (int)m_INT[ATTR_MAX]
+        //<< ", Fame = " << (int)m_Fame
+        //<< ", Exp = " << (int)m_Exp
+        //<< ", ExpOffset = " << (int)m_ExpOffset
+        //<< ", Level = " << (int)m_Level
+        //<< ", Bonus = " << (int)m_Bonus
+        //<< ", Gold = " << (int)m_Gold
+        //<< ", Sight = " << (int)m_Sight
         //<< ", InMagics = '" << ??? << "'"
+        PreparedStatement saveVampireStmt(pConn, "UPDATE Vampire SET CurrentHP=?, HP=?, ZoneID=?, XCoord=?, YCoord=?, "
+                                                 "F5=?, F6=?, F7=?, F8=?, F9=?, F10=?, F11=?, F12=? WHERE Name=?");
+        saveVampireStmt.bindInt(1, (int)m_HP[ATTR_CURRENT]);
+        saveVampireStmt.bindInt(2, (int)m_HP[ATTR_MAX]);
+        saveVampireStmt.bindInt(3, (int)getZoneID());
+        saveVampireStmt.bindInt(4, (int)m_X);
+        saveVampireStmt.bindInt(5, (int)m_Y);
+        saveVampireStmt.bindInt(6, (int)m_HotKey[0]);
+        saveVampireStmt.bindInt(7, (int)m_HotKey[1]);
+        saveVampireStmt.bindInt(8, (int)m_HotKey[2]);
+        saveVampireStmt.bindInt(9, (int)m_HotKey[3]);
+        saveVampireStmt.bindInt(10, (int)m_HotKey[4]);
+        saveVampireStmt.bindInt(11, (int)m_HotKey[5]);
+        saveVampireStmt.bindInt(12, (int)m_HotKey[6]);
+        saveVampireStmt.bindInt(13, (int)m_HotKey[7]);
+        saveVampireStmt.bindString(14, m_Name);
+        saveVampireStmt.execute();
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQueryString(sql.toString());
-
-        // Assert(pStmt->getAffectedRowCount() != 1);
-
-        SAFE_DELETE(pStmt);
+        // Assert(saveVampireStmt.getAffectedRowCount() != 1);
     }
     END_DB(pStmt)
 
-     
-
 
     //--------------------------------------------------
-    
+
     //--------------------------------------------------
     m_pEffectManager->save(m_Name);
 
@@ -612,9 +594,14 @@ void Vampire::tinysave(const char* field) // by sigi. 2002.5.15
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET %s WHERE Name='%s'", field, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment, not a single
+        // bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Vampire::tinysave
+        // precedent (batch 7 / Vampire.cpp). Only Name is bound.
+        PreparedStatement tinysaveVampireStmt(pConn, string("UPDATE Vampire SET ") + field + " WHERE Name=?");
+        tinysaveVampireStmt.bindString(1, m_Name);
+        tinysaveVampireStmt.execute();
     }
     END_DB(pStmt)
 
@@ -744,9 +731,7 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
 
     Item* pPrevItem = NULL;
 
-    
-    
-    
+
     if (isWear(Part)) {
         pPrevItem = getWearItem(Part);
         m_pWearItem[Part] = pItem;
@@ -762,7 +747,6 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
         sprintf(pField, "Storage=%d", STORAGE_EXTRASLOT);
         pPrevItem->tinysave(pField);
     } else {
-        
         m_pWearItem[Part] = pItem;
 
         // by sigi. 2002.5.15
@@ -772,23 +756,21 @@ void Vampire::wearItem(WearPart Part, Item* pItem)
         pItem->tinysave(pField);
     }
 
-    
-    
-    
+
     if (pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COAT) {
         OptionInfo* pOptionInfo = NULL;
 
-        
+
         if (pItem->getOptionType() != 0) {
             pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getOptionType());
             m_VampireInfo.setCoatColor(pOptionInfo->getColor());
         }
-        
+
         else {
             m_VampireInfo.setCoatColor(377);
         }
 
-        
+
         ItemType_t IType = pItem->getItemType();
         m_VampireInfo.setCoatType(IType);
     }
@@ -806,20 +788,17 @@ void Vampire::wearItem(WearPart Part)
 {
     __BEGIN_TRY
 
-    
+
     Item* pItem = getExtraInventorySlotItem();
     Assert(pItem != NULL);
 
     Item* pPrevItem = NULL;
 
-    
-    
+
     VAMPIRE_RECORD prev;
     getVampireRecord(prev);
 
-    
-    
-    
+
     char pField[80];
 
     if (isWear(Part)) {
@@ -852,25 +831,23 @@ void Vampire::wearItem(WearPart Part)
     sendRealWearingInfo();
     sendModifyInfo(prev);
 
-    
-    
-    
+
     if (pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COAT) {
         OptionInfo* pOptionInfo = NULL;
 
-        
+
         if (pItem->getOptionType() != 0) {
             pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getOptionType());
             m_VampireInfo.setCoatColor(pOptionInfo->getColor());
         }
-        
+
         else {
             m_VampireInfo.setCoatColor(377);
         }
 
         m_VampireInfo.setCoatType(pItem->getItemType());
 
-        
+
         GCChangeShape pkt;
         pkt.setObjectID(getObjectID());
         pkt.setItemClass(Item::ITEM_CLASS_VAMPIRE_COAT);
@@ -907,16 +884,13 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     VAMPIRE_RECORD prev;
 
-    
+
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);
 
     m_pWearItem[Part] = NULL;
 
-    
-    
-    
-    
+
     if (bSendModifyInfo) {
         getVampireRecord(prev);
         initAllStat();
@@ -927,13 +901,13 @@ void Vampire::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
     }
 
     //---------------------------------------------
-    
-    
+
+
     //---------------------------------------------
     if (bAddOnMouse) {
         addItemToExtraInventorySlot(pItem);
         // pItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
-        
+
         char pField[80];
         sprintf(pField, "Storage=%d, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
         pItem->tinysave(pField);
@@ -978,7 +952,7 @@ void Vampire::destroyGears()
             Item::ItemClass IClass = pItem->getItemClass();
 
             //-------------------------------------------------------------
-            
+
             //-------------------------------------------------------------
             Assert(IClass != Item::ITEM_CLASS_AR);
             Assert(IClass != Item::ITEM_CLASS_SR);
@@ -1036,15 +1010,13 @@ bool Vampire::isRealWearing(Item* pItem) const
     Level_t ReqLevel = pItemInfo->getReqLevel();
     Attr_t ReqGender = pItemInfo->getReqGender();
 
-    
-    
+
     if (pItem->getOptionType() != 0) {
         OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getOptionType());
         ReqLevel += pOptionInfo->getReqLevel();
     }
 
-    
-    
+
     if (ReqLevel > 0 || ReqGender != GENDER_BOTH) {
         if (ReqLevel > 0 && m_Level < ReqLevel)
             return false;
@@ -1113,10 +1085,10 @@ PCVampireInfo2* Vampire::getVampireInfo2()
     pInfo->setHairColor(m_HairColor);
     pInfo->setSkinColor(m_SkinColor);
 
-    
+
     pInfo->setAlignment(m_Alignment);
 
-    
+
     pInfo->setSTR(m_STR[ATTR_CURRENT], ATTR_CURRENT);
     pInfo->setSTR(m_STR[ATTR_MAX], ATTR_MAX);
     pInfo->setSTR(m_STR[ATTR_BASIC], ATTR_BASIC);
@@ -1241,13 +1213,13 @@ ExtraInfo* Vampire::getExtraInfo() const
             pExtraSlotInfo->setItemNum(pItem->getNum());
         }
 
-        
+
         if (IClass == Item::ITEM_CLASS_BELT) {
             Belt* pBelt = dynamic_cast<Belt*>(pItem);
             Inventory* pBeltInventory = ((Belt*)pItem)->getInventory();
             BYTE SubItemCount = 0;
 
-            
+
             for (int i = 0; i < pBelt->getPocketCount(); i++) {
                 Item* pBeltItem = pBeltInventory->getItem(i, 0);
 
@@ -1268,7 +1240,7 @@ ExtraInfo* Vampire::getExtraInfo() const
             pExtraSlotInfo->setListNum(SubItemCount);
         }
 
-        
+
         pExtraSlotInfo->setMainColor(0);
 
         pExtraInfo->addListElement(pExtraSlotInfo);
@@ -1314,11 +1286,10 @@ GearInfo* Vampire::getGearInfo() const
             pGearSlotInfo->setSilver(pItem->getSilver());
             pGearSlotInfo->setEnchantLevel(pItem->getEnchantLevel());
 
-             
 
             pGearSlotInfo->setSlotID(i);
 
-            
+
             pGearSlotInfo->setMainColor(0);
 
             pGearInfo->addListElement(pGearSlotInfo);
@@ -1362,7 +1333,7 @@ InventoryInfo* Vampire::getInventoryInfo() const
                 if (itr == ItemList.end()) {
                     ItemList.push_back(pItem);
 
-                    
+
                     InventorySlotInfo* pInventorySlotInfo = new InventorySlotInfo();
                     pInventorySlotInfo->setObjectID(pItem->getObjectID());
                     pInventorySlotInfo->setItemClass(pItem->getItemClass());
@@ -1389,14 +1360,14 @@ InventoryInfo* Vampire::getInventoryInfo() const
                         pInventorySlotInfo->setItemNum(pSR->getBulletCount());
                     }
 
-                    
+
                     if (IClass == Item::ITEM_CLASS_BELT) {
                         Belt* pBelt = dynamic_cast<Belt*>(pItem);
                         Inventory* pBeltInventory = ((Belt*)pItem)->getInventory();
 
                         BYTE SubItemCount = 0;
 
-                        
+
                         for (int i = 0; i < pBelt->getPocketCount(); i++) {
                             Item* pBeltItem = pBeltInventory->getItem(i, 0);
                             if (pBeltItem != NULL) {
@@ -1452,7 +1423,7 @@ void Vampire::sendVampireSkillInfo()
         VampireSkillSlot* pVampireSkillSlot = itr->second;
         Assert(pVampireSkillSlot != NULL);
 
-        
+
         if (pVampireSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
             SubVampireSkillInfo* pSubVampireSkillInfo = new SubVampireSkillInfo();
             pSubVampireSkillInfo->setSkillType(pVampireSkillSlot->getSkillType());
@@ -1469,9 +1440,8 @@ void Vampire::sendVampireSkillInfo()
     gcSkillInfo.setPCType(PC_VAMPIRE);
     SkillType_t LearnSkillType = g_pSkillInfoManager->getSkillTypeByLevel(SKILL_DOMAIN_VAMPIRE, m_Level);
 
-    
+
     if (LearnSkillType != 0) {
-        
         if (hasSkill(LearnSkillType) == NULL) {
             pVampireSkillInfo->setLearnNewSkill(true);
         }
@@ -1548,14 +1518,11 @@ void Vampire::heartbeat(const Timeval& currentTime)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    
+
     if (m_HPRegenTime < currentTime) {
         Timeval diffTime = timediff(currentTime, m_HPRegenTime);
 
         if (diffTime.tv_sec > 0) {
-            
-            
-            
             if (isAlive() && !isFlag(Effect::EFFECT_CLASS_COMA) && !isFlag(Effect::EFFECT_CLASS_MEPHISTO)) {
                 // by sigi. 2002.6.19
                 bool bInCasket = isFlag(Effect::EFFECT_CLASS_CASKET);
@@ -1563,14 +1530,13 @@ void Vampire::heartbeat(const Timeval& currentTime)
                 HP_t CurHP = m_HP[ATTR_CURRENT];
                 HP_t NewHP = 0;
 
-                
-                
+
                 if (bInCasket && m_SilverDamage > 0) {
                     NewHP = 4 * diffTime.tv_sec;
 
                     int remainSilver = (int)m_SilverDamage - (int)NewHP;
 
-                    
+
                     if (remainSilver < 0) {
                         m_SilverDamage = 0;
                         NewHP = -remainSilver;
@@ -1578,7 +1544,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
                         HP_t MaxHP = m_HP[ATTR_MAX];
                         m_HP[ATTR_CURRENT] = min((int)MaxHP, (int)(CurHP + NewHP));
                     }
-                    
+
                     else {
                         m_SilverDamage = remainSilver;
                     }
@@ -1588,7 +1554,7 @@ void Vampire::heartbeat(const Timeval& currentTime)
                     // Normal       : 2
                     // Burrow(Hide) : 4
                     // Casket       : 6
-                    
+
                     // Bat          : 0
                     if (isFlag(Effect::EFFECT_CLASS_HIDE)) {
                         NewHP = 4 * diffTime.tv_sec;
@@ -1611,7 +1577,6 @@ void Vampire::heartbeat(const Timeval& currentTime)
         }
     }
 
-     
 
     __END_DEBUG
     __END_CATCH
@@ -1730,7 +1695,7 @@ void Vampire::saveSkills(void) const
         VampireSkillSlot* pVampireSkillSlot = itr->second;
         Assert(pVampireSkillSlot != NULL);
 
-        
+
         if (pVampireSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
             pVampireSkillSlot->save(m_Name);
         }
@@ -1751,7 +1716,7 @@ void Vampire::saveGears(void) const
 {
     __BEGIN_TRY
 
-    
+
     char pField[80];
 
     for (int i = 0; i < Vampire::VAMPIRE_WEAR_MAX; i++) {
@@ -1760,7 +1725,7 @@ void Vampire::saveGears(void) const
             Durability_t maxDurability = computeMaxDurability(pItem);
             if (pItem->getDurability() < maxDurability) {
                 // pItem->save(m_Name, STORAGE_GEAR, 0, i, 0);
-                
+
                 sprintf(pField, "Durability=%d", pItem->getDurability());
                 pItem->tinysave(pField);
             }
@@ -1776,26 +1741,37 @@ void Vampire::saveExps(void) const
 {
     __BEGIN_TRY
 
-    
-    
-    
-    
-    StringStream sql;
-    sql << "UPDATE Vampire SET "
-        << "Alignment = " << m_Alignment << ",Fame = " << m_Fame << ",Exp = " << m_Exp << ",GoalExp = " << m_GoalExp;
-
-    if (m_SilverDamage != 0) {
-        sql << ",SilverDamage = " << m_SilverDamage;
-    }
-
-    sql << " WHERE Name = '" << m_Name << "'";
-
     Statement* pStmt = NULL;
 
+    // The old code built the SilverDamage clause as a raw StringStream-appended
+    // SQL fragment spliced into the middle of the SET list. PreparedStatement
+    // can't bind a fragment that changes the statement's shape, so the
+    // conditional is hoisted to two static, fully-parameterised query texts
+    // instead of splicing the value in (same approach as the current
+    // Vampire::saveExps in Vampire.cpp).
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        if (m_SilverDamage != 0) {
+            PreparedStatement saveExpsVampireStmt(
+                pConn, "UPDATE Vampire SET Alignment=?,Fame=?,Exp=?,GoalExp=?,SilverDamage=? WHERE Name=?");
+            saveExpsVampireStmt.bindInt(1, m_Alignment);
+            saveExpsVampireStmt.bindInt(2, m_Fame);
+            saveExpsVampireStmt.bindULong(3, m_Exp);
+            saveExpsVampireStmt.bindULong(4, m_GoalExp);
+            saveExpsVampireStmt.bindInt(5, m_SilverDamage);
+            saveExpsVampireStmt.bindString(6, m_Name);
+            saveExpsVampireStmt.execute();
+        } else {
+            PreparedStatement saveExpsVampireStmt(pConn,
+                                                  "UPDATE Vampire SET Alignment=?,Fame=?,Exp=?,GoalExp=? WHERE Name=?");
+            saveExpsVampireStmt.bindInt(1, m_Alignment);
+            saveExpsVampireStmt.bindInt(2, m_Fame);
+            saveExpsVampireStmt.bindULong(3, m_Exp);
+            saveExpsVampireStmt.bindULong(4, m_GoalExp);
+            saveExpsVampireStmt.bindString(5, m_Name);
+            saveExpsVampireStmt.execute();
+        }
     }
     END_DB(pStmt)
 
@@ -1826,11 +1802,11 @@ void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_CO
     int vampireBit;
     int vampireColor;
 
-    
+
     flag = 0;
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     pItem = m_pWearItem[WEAR_BODY];
     vampireBit = 0;
@@ -1847,12 +1823,12 @@ void Vampire::getShapeInfo(DWORD& flag, Color_t colors[PCVampireInfo::VAMPIRE_CO
         // colors[vampireColor] = pItem->getOptionType();
         // flag |= (getVampireCoatType(IType) << vampireBit);
 
-        
+
         flag = IType;
     } else {
         colors[vampireColor] = 377;
         // flag |= (VAMPIRE_COAT_BASIC << vampireBit);
-        
+
         flag = (m_Sex ? 0 : 1);
     }
 

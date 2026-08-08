@@ -27,6 +27,7 @@
 #include "MonsterCorpse.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "RelicUtil.h"
 #include "StringPool.h"
 #include "StringStream.h"
@@ -231,12 +232,14 @@ void ShrineInfoManager::load()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pResult = pStmt->executeQuery(
+        PreparedStatement selectShrineInfoStmt(
+            pConn,
             "SELECT ID, Name, ItemType, SlayerGuardZoneID, SlayerGuardX, SlayerGuardY, SlayerGuardMType, "
             "VampireGuardZoneID, VampireGuardX, VampireGuardY, VampireGuardMType, OustersGuardZoneID, OustersGuardX, "
             "OustersGuardY, OustersGuardMType, HolyZoneID, HolyX, HolyY, HolyMType, OwnerRace FROM ShrineInfo");
+        pResult = selectShrineInfoStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -280,7 +283,7 @@ void ShrineInfoManager::load()
             OustersGuardShrine.setShrineType(ShrineInfo::SHRINE_GUARD);
             HolyShrine.setShrineType(ShrineInfo::SHRINE_HOLY);
 
-            
+
             if (pShrineSet->getBloodBibleItemType() != pShrineSet->getShrineID()) {
                 cout << "ShrineID  ItemType  . DB ." << endl;
                 Assert(false);
@@ -288,8 +291,6 @@ void ShrineInfoManager::load()
 
             addShrineSet(pShrineSet);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -308,9 +309,10 @@ void ShrineInfoManager::reloadOwner()
     bool bOwnerChanged = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pResult = pStmt->executeQuery("SELECT ID, OwnerRace FROM ShrineInfo");
+        PreparedStatement selectShrineOwnerStmt(pConn, "SELECT ID, OwnerRace FROM ShrineInfo");
+        pResult = selectShrineOwnerStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -327,8 +329,6 @@ void ShrineInfoManager::reloadOwner()
                 bOwnerChanged = true;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -373,11 +373,11 @@ void ShrineInfoManager::addShrineToZone(ShrineInfo& shrineInfo, ItemType_t itemT
 {
     __BEGIN_TRY
 
-    
+
     if (shrineInfo.getShrineType() == ShrineInfo::SHRINE_HOLY)
         return;
 
-    
+
     Zone* pZone = getZoneByZoneID(shrineInfo.getZoneID());
     Assert(pZone != NULL);
 
@@ -420,7 +420,6 @@ void ShrineInfoManager::addShrineToZone(ShrineInfo& shrineInfo, ItemType_t itemT
     Assert(tp.x != -1);
 
     if (shrineInfo.getShrineType() == ShrineInfo::SHRINE_GUARD) {
-        
         pShrine->setFlag(Effect::EFFECT_CLASS_SHRINE_SHIELD);
 
         EffectShrineShield* pEffect = new EffectShrineShield(pShrine);
@@ -432,7 +431,7 @@ void ShrineInfoManager::addShrineToZone(ShrineInfo& shrineInfo, ItemType_t itemT
 
     forbidDarkness(pZone, tp.x, tp.y, 2);
 
-    
+
     shrineInfo.setX(tp.x);
     shrineInfo.setY(tp.y);
 
@@ -506,12 +505,10 @@ bool ShrineInfoManager::isMatchGuardShrine(Item* pItem, MonsterCorpse* pMonsterC
     ShrineSet* pShrineSet = getShrineSet(shrineID);
 
     if (pShrineSet == NULL) {
-        
         return false;
     }
 
-    
-    
+
     if (pPC->isSlayer()) {
         return pShrineSet->getSlayerGuardShrine().getMonsterType() == pMonsterCorpse->getMonsterType();
     } else if (pPC->isVampire()) {
@@ -540,12 +537,10 @@ bool ShrineInfoManager::isMatchHolyShrine(Item* pItem, MonsterCorpse* pMonsterCo
     ShrineSet* pShrineSet = getShrineSet(shrineID);
 
     if (pShrineSet == NULL) {
-        
         return false;
     }
 
-    
-    
+
     return pShrineSet->getHolyShrine().getMonsterType() == pMonsterCorpse->getMonsterType();
 
     __END_CATCH
@@ -559,7 +554,7 @@ bool ShrineInfoManager::isDefenderOfGuardShrine(PlayerCreature* pPC, MonsterCorp
     Zone* pZone = pShrine->getZone();
     Assert(pZone != NULL);
 
-    
+
     if (!pZone->isCastle()) {
         return false;
     }
@@ -570,7 +565,7 @@ bool ShrineInfoManager::isDefenderOfGuardShrine(PlayerCreature* pPC, MonsterCorp
     if (pCastleInfo == NULL)
         return false;
 
-    
+
     if (pPC->getRace() == pCastleInfo->getRace())
         return true;
 
@@ -585,10 +580,10 @@ bool ShrineInfoManager::canPickupBloodBible(Race_t race, BloodBible* pBloodBible
 {
     __BEGIN_TRY
 
-    
+
     return true;
 
-     
+
     __END_CATCH
 }
 
@@ -606,7 +601,6 @@ bool ShrineInfoManager::getMatchGuardShrinePosition(Item* pItem, ZoneItemPositio
     ShrineSet* pShrineSet = getShrineSet(shrineID);
 
     if (pShrineSet == NULL) {
-        
         return false;
     }
 
@@ -622,16 +616,13 @@ bool ShrineInfoManager::getMatchGuardShrinePosition(Item* pItem, ZoneItemPositio
 }
 
 
-
-
-
 // 2003. 2. 5. by Sequoia
 bool ShrineInfoManager::returnBloodBible(ShrineID_t shrineID, bool bLock) const
 
 {
     __BEGIN_TRY
 
-    
+
     ShrineSet* pShrineSet = getShrineSet(shrineID);
 
     if (pShrineSet == NULL)
@@ -666,8 +657,6 @@ bool ShrineInfoManager::returnBloodBible(ShrineID_t shrineID, bool bLock) const
 }
 
 
- 
-
 bool ShrineInfoManager::returnAllBloodBible() const
 
 {
@@ -677,7 +666,7 @@ bool ShrineInfoManager::returnAllBloodBible() const
 
     HashMapShrineSetConstItor itr = m_ShrineSets.begin();
 
-    
+
     for (; itr != m_ShrineSets.end(); itr++) {
         ShrineSet* pShrineSet = itr->second;
 
@@ -698,7 +687,7 @@ bool ShrineInfoManager::returnBloodBible(Zone* pZone, BloodBible* pBloodBible) c
     Assert(pZone != NULL);
     Assert(pBloodBible != NULL);
 
-    
+
     ShrineID_t shrineID = pBloodBible->getItemType();
     ShrineSet* pShrineSet = getShrineSet(shrineID);
 
@@ -714,7 +703,6 @@ bool ShrineInfoManager::returnBloodBible(Zone* pZone, BloodBible* pBloodBible) c
 
     pZone->transportItemToCorpse(pBloodBible, pTargetZone, CorpseObjectID);
 
-     
 
     char msg[300];
 
@@ -752,13 +740,12 @@ bool ShrineInfoManager::putBloodBible(PlayerCreature* pPC, Item* pItem, MonsterC
 
     ShrineID_t shrineID = pItem->getItemType();
 
-    filelog("WarLog.txt", "%s   [%u]  [%s] .", pPC->getName().c_str(), (uint)shrineID,
-            pCorpse->getName().c_str());
+    filelog("WarLog.txt", "%s   [%u]  [%s] .", pPC->getName().c_str(), (uint)shrineID, pCorpse->getName().c_str());
 
-    
+
     //	sendBloodBibleEffect( pCorpse, Effect::EFFECT_CLASS_SHRINE_HOLY_WARP );
 
-    
+
     Assert(pItem->getObjectID() == pPC->getExtraInventorySlotItem()->getObjectID());
     pPC->deleteItemFromExtraInventorySlot();
 
@@ -777,20 +764,20 @@ bool ShrineInfoManager::putBloodBible(PlayerCreature* pPC, Item* pItem, MonsterC
 
     // ZoneID_t castleZoneID = pShrineSet->getReturnGuardShrine().getZoneID();
 
-    
+
     if (isMatchHolyShrine(pItem, pCorpse) // && g_pWarSystem->isModifyCastleOwner( castleZoneID, pPC ))
-                                          
+
         || isDefenderOfGuardShrine(pPC, pCorpse) && isMatchGuardShrine(pItem, pCorpse, pPC)) {
         pShrineSet->setOwnerRace(pPC->getRace());
         //        g_pWarSystem->endWar(pPC, castleZoneID);
 
-        
+
         //        returnBloodBible( shrineID, false );
 
         // return true;
     }
 
-    
+
     returnBloodBible(shrineID, false);
 
     return false;
@@ -798,7 +785,6 @@ bool ShrineInfoManager::putBloodBible(PlayerCreature* pPC, Item* pItem, MonsterC
     __END_CATCH
 }
 
- 
 
 bool ShrineInfoManager::removeAllShrineShield()
 
@@ -807,7 +793,7 @@ bool ShrineInfoManager::removeAllShrineShield()
 
     HashMapShrineSetConstItor itr = m_ShrineSets.begin();
 
-    
+
     for (; itr != m_ShrineSets.end(); itr++) {
         ShrineSet* pShrineSet = itr->second;
 
@@ -849,7 +835,7 @@ bool ShrineInfoManager::removeShrineShield(ShrineInfo* pShrineInfo)
         gcRemoveEffect.addEffectList(Effect::EFFECT_CLASS_SHRINE_SHIELD);
         pZone->broadcastPacket(pCorpse->getX(), pCorpse->getY(), &gcRemoveEffect);
 
-        
+
         if (pItem->isFlag(Effect::EFFECT_CLASS_HAS_BLOOD_BIBLE)) {
             Effect* pEffect = EM.findEffect(Effect::EFFECT_CLASS_HAS_BLOOD_BIBLE);
             Assert(pEffect != NULL);
@@ -892,7 +878,7 @@ bool ShrineInfoManager::removeShrineShield(ShrineInfo* pShrineInfo)
     __END_CATCH
 }
 */
- 
+
 void ShrineInfoManager::addAllShrineShield()
 
 {
@@ -984,11 +970,12 @@ bool ShrineSet::saveBloodBibleOwner()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ShrineInfo SET OwnerRace=%d WHERE ID=%d", (int)getOwnerRace(), (int)getShrineID());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateOwnerRaceStmt(pConn, "UPDATE ShrineInfo SET OwnerRace=? WHERE ID=?");
+        updateOwnerRaceStmt.bindInt(1, (int)getOwnerRace());
+        updateOwnerRaceStmt.bindInt(2, (int)getShrineID());
+        updateOwnerRaceStmt.execute();
     }
     END_DB(pStmt)
 

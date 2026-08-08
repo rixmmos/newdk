@@ -6,23 +6,24 @@
 #include "Mofus.h"
 
 #include "DB.h"
+#include "PreparedStatement.h"
 
 int loadPowerPoint(const string& name) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     int powerpoint = 0;
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Point FROM MofusPowerPoint WHERE OwnerID='%s'", name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectPowerPointStmt(pConn, "SELECT Point FROM MofusPowerPoint WHERE OwnerID=?");
+        selectPowerPointStmt.bindString(1, name);
+        Result* pResult = selectPowerPointStmt.execute();
 
         if (pResult->next()) {
             powerpoint = pResult->getInt(1);
         }
     } catch (SQLQueryException& sql) {
-        
     } catch (...) {
         SAFE_DELETE(pStmt);
 
@@ -40,25 +41,32 @@ int savePowerPoint(const string& name, int amount) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     int powerpoint = 0;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("Update MofusPowerPoint SET Point = Point + %d WHERE OwnerID='%s'", amount, name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            pStmt->executeQuery("Insert Into MofusPowerPoint Values ('%s',%d)", name.c_str(), amount);
+        PreparedStatement updatePowerPointStmt(pConn, "Update MofusPowerPoint SET Point = Point + ? WHERE OwnerID=?");
+        updatePowerPointStmt.bindInt(1, amount);
+        updatePowerPointStmt.bindString(2, name);
+        updatePowerPointStmt.execute();
+
+        if (updatePowerPointStmt.getAffectedRowCount() == 0) {
+            PreparedStatement insertPowerPointStmt(pConn, "Insert Into MofusPowerPoint Values (?,?)");
+            insertPowerPointStmt.bindString(1, name);
+            insertPowerPointStmt.bindInt(2, amount);
+            insertPowerPointStmt.execute();
         }
 
-        pResult = pStmt->executeQuery("SELECT Point FROM MofusPowerPoint WHERE OwnerID='%s'", name.c_str());
+        PreparedStatement selectPowerPointStmt(pConn, "SELECT Point FROM MofusPowerPoint WHERE OwnerID=?");
+        selectPowerPointStmt.bindString(1, name);
+        Result* pResult = selectPowerPointStmt.execute();
 
         if (pResult->next()) {
             powerpoint = pResult->getInt(1);
         }
     } catch (SQLQueryException& sql) {
-        
     } catch (...) {
         SAFE_DELETE(pStmt);
 
@@ -78,12 +86,14 @@ void logPowerPoint(const string& name, int recvPoint, int savePoint) {
     Statement* pStmt = NULL;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "INSERT INTO MofusLog (OwnerID, SaveTime, RecvPoint, SavePoint) VALUES ('%s', now(), %u, %u)", name.c_str(),
-            recvPoint, savePoint);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertMofusLogStmt(
+            pConn, "INSERT INTO MofusLog (OwnerID, SaveTime, RecvPoint, SavePoint) VALUES (?, now(), ?, ?)");
+        insertMofusLogStmt.bindString(1, name);
+        insertMofusLogStmt.bindUInt(2, recvPoint);
+        insertMofusLogStmt.bindUInt(3, savePoint);
+        insertMofusLogStmt.execute();
     } catch (SQLQueryException& sql) {
-        
     } catch (...) {
         SAFE_DELETE(pStmt);
 

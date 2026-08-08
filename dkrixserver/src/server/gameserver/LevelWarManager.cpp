@@ -12,6 +12,7 @@
 #include "LevelWarZoneInfoManager.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "StringPool.h"
 #include "SweeperBonusManager.h"
@@ -20,10 +21,10 @@
 
 
 int LevelWarTime[4][3] = {
-    {2, 20, 0}, 
-    {4, 20, 0}, 
-    {2, 21, 0}, 
-    {4, 21, 0}, 
+    {2, 20, 0},
+    {4, 20, 0},
+    {2, 21, 0},
+    {4, 21, 0},
 };
 
 void LevelWarManager::init() {
@@ -50,7 +51,6 @@ Work* LevelWarManager::heartbeat()
     }
 
     if (m_bHasWar) {
-        
         makeGCWarList();
     }
 
@@ -60,8 +60,7 @@ Work* LevelWarManager::heartbeat()
 void LevelWarManager::startWar() {
     m_bHasWar = true;
 
-    
-    
+
     setLevelWarStartTime(VSDateTime::currentDateTime());
 
     int year = VSDate::currentDate().year() - 2000;
@@ -93,18 +92,18 @@ void LevelWarManager::startWar() {
     g_pSweeperBonusManager->makeVoidSweeperBonusInfo(gcSweeperBonusInfo);
     g_pLevelWarZoneInfoManager->broadcast(m_pZone->getZoneID(), &gcSweeperBonusInfo);
 
-    
+
     recordLevelWarStart();
 }
 
 void LevelWarManager::recordLevelWarStart() {
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT SweeperType, OwnerRace FROM SweeperOwnerInfo WHERE ZoneID = %d",
-                                      m_pZone->getZoneID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStmt(pConn, "SELECT SweeperType, OwnerRace FROM SweeperOwnerInfo WHERE ZoneID = ?");
+        selectStmt.bindInt(1, m_pZone->getZoneID());
+        Result* pResult = selectStmt.execute();
 
         string slayerOld;
         string vampireOld;
@@ -125,10 +124,16 @@ void LevelWarManager::recordLevelWarStart() {
                 defaultOld = defaultOld + itos(id) + "|";
         }
 
-        pStmt->executeQuery("INSERT INTO LevelWarHistory (Level, LevelWarID, SlayerOldSweeper, VampireOldSweeper, "
-                            "OustersOldSweeper, DefaultOldSweeper) VALUES (%d, '%s', '%s', '%s', '%s', '%s')",
-                            m_Level, getLevelWarStartTime().toStringforWeb().c_str(), slayerOld.c_str(),
-                            vampireOld.c_str(), oustersOld.c_str(), defaultOld.c_str());
+        PreparedStatement insertStmt(pConn, "INSERT INTO LevelWarHistory (Level, LevelWarID, SlayerOldSweeper, "
+                                            "VampireOldSweeper, OustersOldSweeper, DefaultOldSweeper) VALUES "
+                                            "(?, ?, ?, ?, ?, ?)");
+        insertStmt.bindInt(1, m_Level);
+        insertStmt.bindString(2, getLevelWarStartTime().toStringforWeb());
+        insertStmt.bindString(3, slayerOld);
+        insertStmt.bindString(4, vampireOld);
+        insertStmt.bindString(5, oustersOld);
+        insertStmt.bindString(6, defaultOld);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 }
@@ -166,18 +171,18 @@ void LevelWarManager::endWar() {
     sprintf(sLoad, "*world *load sweeper_owner %d", m_Level);
     CGSayHandler::opworld(NULL, sLoad, 0, true);
 
-    
+
     recordLevelWarEnd();
 }
 
 void LevelWarManager::recordLevelWarEnd() {
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT SweeperType, OwnerRace FROM SweeperOwnerInfo WHERE ZoneID = %d",
-                                      m_pZone->getZoneID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStmt(pConn, "SELECT SweeperType, OwnerRace FROM SweeperOwnerInfo WHERE ZoneID = ?");
+        selectStmt.bindInt(1, m_pZone->getZoneID());
+        Result* pResult = selectStmt.execute();
 
         string slayerNew;
         string vampireNew;
@@ -198,14 +203,20 @@ void LevelWarManager::recordLevelWarEnd() {
                 defaultNew = defaultNew + itos(id) + "|";
         }
 
-        pStmt->executeQuery("UPDATE LevelWarHistory SET SlayerSweeper = '%s', VampireSweeper = '%s', OustersSweeper = "
-                            "'%s', DefaultSweeper = '%s' WHERE Level = %d AND LevelWarID = '%s'",
-                            slayerNew.c_str(), vampireNew.c_str(), oustersNew.c_str(), defaultNew.c_str(), m_Level,
-                            getLevelWarStartTime().toStringforWeb().c_str());
+        PreparedStatement updateStmt(pConn,
+                                     "UPDATE LevelWarHistory SET SlayerSweeper = ?, VampireSweeper = ?, "
+                                     "OustersSweeper = ?, DefaultSweeper = ? WHERE Level = ? AND LevelWarID = ?");
+        updateStmt.bindString(1, slayerNew);
+        updateStmt.bindString(2, vampireNew);
+        updateStmt.bindString(3, oustersNew);
+        updateStmt.bindString(4, defaultNew);
+        updateStmt.bindInt(5, m_Level);
+        updateStmt.bindString(6, getLevelWarStartTime().toStringforWeb());
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
-    
+
     char cmd[100];
     sprintf(cmd, "/home/darkeden/vs/bin/script/recordLevelWarHistory.py %d %s %d %d ", m_Level,
             getLevelWarStartTime().toStringforWeb().c_str(), g_pConfig->getPropertyInt("Dimension"),
@@ -396,7 +407,7 @@ void LevelWarManager::freeUserTimeCheck()
     if (m_bCanEnterFreeUser && hour != LevelWarTime[m_Level - 1][1]) {
         m_bCanEnterFreeUser = false;
 
-        
+
         m_pZone->remainPayPlayer();
     } else if (!m_bCanEnterFreeUser && hour == LevelWarTime[m_Level - 1][1]) {
         m_bCanEnterFreeUser = true;

@@ -15,6 +15,7 @@
 #include "LCPCList.h"
 #include "LoginPlayer.h"
 #include "OptionInfo.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -39,10 +40,10 @@ void CLChangeServerHandler::execute(CLChangeServer* pPacket, Player* pPlayer)
     Statement* pStmt = NULL;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         //----------------------------------------------------------------------
-        
+
         //----------------------------------------------------------------------
         LCPCList lcPCList;
 
@@ -50,15 +51,18 @@ void CLChangeServerHandler::execute(CLChangeServer* pPacket, Player* pPlayer)
         pLoginPlayer->sendPacket(&lcPCList);
         pLoginPlayer->setPlayerStatus(LPS_PC_MANAGEMENT);
 
-        pStmt->executeQuery("UPDATE Player set CurrentServerGroupID = %d WHERE PlayerID = '%s'",
-                            (int)pPacket->getServerGroupID(), pLoginPlayer->getID().c_str());
+        PreparedStatement updatePlayerServerGroupStmt(pConn,
+                                                      "UPDATE Player set CurrentServerGroupID = ? WHERE PlayerID = ?");
+        updatePlayerServerGroupStmt.bindInt(1, (int)pPacket->getServerGroupID());
+        updatePlayerServerGroupStmt.bindString(2, pLoginPlayer->getID());
+        updatePlayerServerGroupStmt.execute();
 
-        
+
         SAFE_DELETE(pStmt);
     } catch (SQLQueryException& sce) {
         // cout << sce.toString() << endl;
 
-        
+
         SAFE_DELETE(pStmt);
 
         throw DisconnectException(sce.toString());

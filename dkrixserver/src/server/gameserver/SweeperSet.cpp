@@ -9,6 +9,7 @@
 #include "Item.h"
 #include "ItemFactoryManager.h"
 #include "MonsterCorpse.h"
+#include "PreparedStatement.h"
 #include "SweeperBonus.h"
 #include "SweeperBonusManager.h"
 #include "Utility.h"
@@ -62,7 +63,6 @@ void SweeperSetManager::load(int level, Zone* pZone) {
     m_SweeperSets.clear();
 
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
 
     m_SweeperSets[0] = new SweeperSet(SweeperSet::SWEEPER_SLAYER);
     m_SweeperSets[1] = new SweeperSet(SweeperSet::SWEEPER_VAMPIRE);
@@ -70,15 +70,16 @@ void SweeperSetManager::load(int level, Zone* pZone) {
     m_SweeperSets[3] = new SweeperSet(SweeperSet::SWEEPER_DEFAULT);
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT ItemType, "
-                                              "SlayerX, SlayerY, SlayerMType, "
-                                              "VampireX, VampireY, VampireMType, "
-                                              "OustersX, OustersY, OustersMType, "
-                                              "DefaultX, DefaultY, DefaultMType, "
-                                              "Name "
-                                              "FROM SweeperSetInfo WHERE ZoneID = %d",
-                                              pZone->getZoneID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectSweeperSetStmt(pConn, "SELECT ItemType, "
+                                                      "SlayerX, SlayerY, SlayerMType, "
+                                                      "VampireX, VampireY, VampireMType, "
+                                                      "OustersX, OustersY, OustersMType, "
+                                                      "DefaultX, DefaultY, DefaultMType, "
+                                                      "Name "
+                                                      "FROM SweeperSetInfo WHERE ZoneID = ?");
+        selectSweeperSetStmt.bindInt(1, pZone->getZoneID());
+        Result* pResult = selectSweeperSetStmt.execute();
 
         while (pResult->next()) {
             ItemType_t ItemType = pResult->getInt(1);
@@ -105,7 +106,7 @@ void SweeperSetManager::load(int level, Zone* pZone) {
             //			SweeperSet::SweeperIndex Owner = (SweeperSet::SweeperIndex)OwnerID;
 
             //			StringStream name;
-            
+
 
             string name = pResult->getString(14);
 
@@ -156,10 +157,10 @@ void SweeperSetManager::load(int level, Zone* pZone) {
             //			TargetSafe->addTreasure( Sweeper );
         }
 
-        pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult2 = pStmt2->executeQuery(
-            "SELECT SweeperType, OwnerRace, SweeperSafeType FROM SweeperOwnerInfo WHERE ZoneID = %d",
-            pZone->getZoneID());
+        PreparedStatement selectSweeperOwnerStmt(
+            pConn, "SELECT SweeperType, OwnerRace, SweeperSafeType FROM SweeperOwnerInfo WHERE ZoneID = ?");
+        selectSweeperOwnerStmt.bindInt(1, pZone->getZoneID());
+        Result* pResult2 = selectSweeperOwnerStmt.execute();
 
         while (pResult2->next()) {
             int type = pResult2->getInt(1);
@@ -215,7 +216,7 @@ bool SweeperSetManager::putSweeper(Item* pSweeper, MonsterCorpse* pSafe) {
     Assert(pSweeper != NULL);
     Assert(pSafe != NULL);
 
-    
+
     if (pSweeper->getItemClass() != Item::ITEM_CLASS_SWEEPER)
         return false;
     if (pSafe->getItemClass() != Item::ITEM_CLASS_CORPSE)
@@ -312,17 +313,18 @@ bool SweeperSetManager::returnSweeper(ItemType_t sweeperID, bool bLock) {
     return false;
 }
 
- 
 
 void SweeperSetManager::saveSweeperOwner(uint itemType, int safeType, int ownerRace) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE SweeperOwnerInfo SET OwnerRace = %ld, SweeperSafeType = %d WHERE SweeperType = %d",
-                            ownerRace, safeType, itemType);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateOwnerStmt(
+            pConn, "UPDATE SweeperOwnerInfo SET OwnerRace = ?, SweeperSafeType = ? WHERE SweeperType = ?");
+        updateOwnerStmt.bindLong(1, ownerRace);
+        updateOwnerStmt.bindInt(2, safeType);
+        updateOwnerStmt.bindInt(3, itemType);
+        updateOwnerStmt.execute();
     }
     END_DB(pStmt)
 }

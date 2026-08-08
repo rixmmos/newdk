@@ -61,6 +61,7 @@
 #include "MonsterSummonInfo.h"
 #include "PKZoneInfoManager.h"
 #include "PacketUtil.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "Relic.h"
 #include "RelicUtil.h"
@@ -118,8 +119,6 @@ string correctString(const string& str) {
 //////////////////////////////////////////////////////////////////////////////
 
 //
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -198,9 +197,6 @@ TPOINT findSuitablePosition(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy, Creatur
 //
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 TPOINT findSuitablePositionForItem(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy, bool bAllowCreature,
                                    bool bAllowSafeZone, bool bForce)
@@ -220,24 +216,19 @@ TPOINT findSuitablePositionForItem(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy, 
     TPOINT pt;
 
     do {
-        
-        
         if (x > 2 && y > 2 && x < pZone->getWidth() - 2 && y < pZone->getHeight() - 2) {
             Tile& rTile = pZone->getTile(x, y);
 
-            
+
             if ((!rTile.isGroundBlocked() || rTile.hasWalkingCreature()) && rTile.hasItem() == false &&
                 rTile.hasPortal() == false) {
-                
                 if (bAllowSafeZone || !(pZone->getZoneLevel(x, y) & SAFE_ZONE)) {
                     pt.x = x;
                     pt.y = y;
                     return pt;
                 }
-                
-                
-                
-                
+
+
                 //				if (bAllowCreature == false && rTile.hasCreature() == false)
                 //				{
                 //					pt.x = x;
@@ -297,8 +288,6 @@ TPOINT findSuitablePositionForItem(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy, 
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 TPOINT findSuitablePositionForEffect(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy, Effect::EffectClass EClass)
 
@@ -319,11 +308,11 @@ TPOINT findSuitablePositionForEffect(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy
     do {
         if (x > 0 && y > 0 && x < pZone->getWidth() && y < pZone->getHeight()) {
             Tile& rTile = pZone->getTile(x, y);
-            
+
             if (rTile.canAddEffect() && rTile.getEffect(EClass) == NULL) {
                 bool bNearTileCheck = true;
 
-                
+
                 for (int i = 0; i < 8; i++) {
                     int tileX = x + dirMoveMask[i].x;
                     int tileY = y + dirMoveMask[i].y;
@@ -374,8 +363,6 @@ TPOINT findSuitablePositionForEffect(Zone* pZone, ZoneCoord_t cx, ZoneCoord_t cy
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 bool canAddCreature(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Creature::MoveMode MMode)
 
@@ -401,7 +388,6 @@ bool canAddCreature(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, Creature::MoveMod
 //
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 bool canBurrow(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y)
 
@@ -421,7 +407,6 @@ bool canBurrow(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y)
 //
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 bool canUnburrow(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y)
 
@@ -439,8 +424,6 @@ bool canUnburrow(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y)
 //////////////////////////////////////////////////////////////////////////////
 
 //
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -485,7 +468,7 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
         //		if ( pMonster->hasRelic() || pMonster->getBrain() == NULL ) return UP;
     }
 
-    
+
     ZoneCoord_t nx = pCreature->getX();
     ZoneCoord_t ny = pCreature->getY();
     ZoneCoord_t cx = nx;
@@ -498,7 +481,7 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
     if (rOriginTile.getEffect(Effect::EFFECT_CLASS_TRYING_POSITION) != NULL)
         return UP;
 
-    
+
     switch (dir) {
     case UP:
         if (ny > 0) {
@@ -546,8 +529,7 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
         break;
     }
 
-    
-    
+
     Tile& rTargetTile = pZone->getTile(nx, ny);
     if (!pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) && !rTargetTile.isBlocked(pCreature->getMoveMode()) &&
         !pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) && !rTargetTile.hasPortal()) {
@@ -555,16 +537,14 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
         pCreature->setY(ny);
 
         try {
-            
             rOriginTile.deleteCreature(pCreature->getObjectID());
 
-            
+
             if (!rTargetTile.addCreature(pCreature)) {
-                
                 return dir;
             }
 
-            
+
             try {
                 checkMine(pZone, pCreature, nx, ny);
                 checkTrap(pZone, pCreature);
@@ -572,7 +552,7 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
                 filelog("CheckMineBug.txt", "%s : %s", "KnockBackCreature", t.toString().c_str());
             }
 
-            
+
             if (pCreature->isPC()) {
                 pZone->movePCBroadcast(pCreature, cx, cy, nx, ny, false, true);
             } else {
@@ -583,7 +563,6 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
         } catch (DuplicatedException& de) {
             throw Error("Thers's a creature on new tile");
         } catch (PortalException&) {
-            
         } catch (Error& e) {
             filelog("assertTile.txt", "knockbackCreature : %s", e.toString().c_str());
             throw;
@@ -599,8 +578,6 @@ Dir_t knockbackCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t originX, Z
 //////////////////////////////////////////////////////////////////////////////
 
 //
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -632,14 +609,14 @@ void addBurrowingCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
 
         Assert(pCreature == newTile.getCreature(pCreature->getMoveMode()));
 
-        
+
         pCreature->setXYDir(pt.x, pt.y, pCreature->getDir());
 
         // scanPC(pCreature);
-        
+
         // gcDO.setObjectID(pCreature->getObjectID());
 
-        
+
         GCAddBurrowingCreature gcABC;
         gcABC.setObjectID(pCreature->getObjectID());
         gcABC.setName(pCreature->getName());
@@ -648,15 +625,12 @@ void addBurrowingCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
 
         //--------------------------------------------------------------------------------
         //
-        
-        
+
+
         //
         //--------------------------------------------------------------------------------
-        
-         
 
 
-        
         pZone->broadcastPacket(pt.x, pt.y, &gcABC, pCreature);
     } else
         throw EmptyTileNotExistException("addBurrowingCreature() : Tile is not empty.");
@@ -668,9 +642,6 @@ void addBurrowingCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
 //////////////////////////////////////////////////////////////////////////////
 
 //
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -689,16 +660,15 @@ void addUnburrowCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneC
         Tile& oldTile = pZone->getTile(oldX, oldY);
         Tile& newTile = pZone->getTile(pt.x, pt.y);
 
-        
+
         GCDeleteObject gcDO;
         gcDO.setObjectID(pCreature->getObjectID());
         pZone->broadcastPacket(oldX, oldY, &gcDO, pCreature);
 
-        
+
         pCreature->removeFlag(Effect::EFFECT_CLASS_HIDE);
 
-        
-        
+
         try {
             oldTile.deleteCreature(pCreature->getObjectID());
         } catch (Error& e) {
@@ -710,20 +680,19 @@ void addUnburrowCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneC
 
         Assert(pCreature == newTile.getCreature(pCreature->getMoveMode()));
 
-        
+
         pCreature->setXYDir(pt.x, pt.y, dir);
 
         // scanPC(pCreature);
 
         Creature::CreatureClass CClass = pCreature->getCreatureClass();
         if (CClass == Creature::CREATURE_CLASS_VAMPIRE) {
-            
             Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
             GCAddVampireFromBurrowing gcAVFB(pVampire->getVampireInfo3());
             gcAVFB.setEffectInfo(pVampire->getEffectInfo());
             pZone->broadcastPacket(pt.x, pt.y, &gcAVFB, pCreature);
 
-            
+
             GCUnburrowOK gcUnburrowOK(pt.x, pt.y, dir);
             Player* pPlayer = pCreature->getPlayer();
             GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
@@ -747,8 +716,6 @@ void addUnburrowCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneC
             throw Error("invalid creature type");
         }
     } else {
-        
-        
         if (pCreature->isPC()) {
             GCUnburrowFail gcUnburrowFail;
             pCreature->getPlayer()->sendPacket(&gcUnburrowFail);
@@ -767,8 +734,6 @@ void addUnburrowCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneC
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
     __BEGIN_TRY
@@ -777,7 +742,7 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
     Assert(pZone != NULL);
     Assert(pCreature != NULL);
 
-    
+
     Assert(pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF) ||
            pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT) ||
            pCreature->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
@@ -802,17 +767,15 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
         gcDO.setObjectID(pCreature->getObjectID());
         pZone->broadcastPacket(oldX, oldY, &gcDO, pCreature);
 
-        
+
         EffectManager* pEffectManager = pCreature->getEffectManager();
         Assert(pEffectManager != NULL);
 
         if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF); 
+            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF);
 
-            
-            
+
             if (bForce) {
-                
                 GCRemoveEffect gcRemoveEffect;
                 gcRemoveEffect.setObjectID(pCreature->getObjectID());
                 gcRemoveEffect.addEffectList((EffectID_t)Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF);
@@ -838,12 +801,10 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
             }
         }
         if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF)) {
-            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF); 
+            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF);
 
-            
-            
+
             if (bForce) {
-                
                 GCRemoveEffect gcRemoveEffect;
                 gcRemoveEffect.setObjectID(pCreature->getObjectID());
                 gcRemoveEffect.addEffectList((EffectID_t)Effect::EFFECT_CLASS_TRANSFORM_TO_WERWOLF);
@@ -868,12 +829,10 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
                 pMonster->initAllStat();
             }
         } else if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT)) {
-            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT); 
+            pCreature->removeFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_BAT);
 
-            
-            
+
             if (bForce) {
-                
                 GCRemoveEffect gcRemoveEffect;
                 gcRemoveEffect.setObjectID(pCreature->getObjectID());
                 gcRemoveEffect.addEffectList((EffectID_t)Effect::EFFECT_CLASS_TRANSFORM_TO_BAT);
@@ -899,8 +858,7 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
             }
         }
 
-        
-        
+
         Tile& oldTile = pZone->getTile(oldX, oldY);
         Tile& newTile = pZone->getTile(pt.x, pt.y);
 
@@ -915,10 +873,10 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
 
         Assert(pCreature == newTile.getCreature(pCreature->getMoveMode()));
 
-        
+
         pCreature->setXYDir(pt.x, pt.y, pCreature->getDir());
 
-        
+
         Creature::CreatureClass CClass = pCreature->getCreatureClass();
 
         if (CClass == Creature::CREATURE_CLASS_VAMPIRE) {
@@ -958,9 +916,7 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
         }
     }
 
-    
-    
-    
+
     if (pCreature->isVampire()) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
         GCModifyInformation gcMI;
@@ -978,8 +934,6 @@ void addUntransformCreature(Zone* pZone, Creature* pCreature, bool bForce) {
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy)
 
@@ -989,7 +943,7 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
     Assert(pZone != NULL);
     Assert(pCreature != NULL);
 
-    
+
     Assert(pCreature->isVampire() || pCreature->isMonster());
 
     ObjectID_t creatureID = pCreature->getObjectID();
@@ -1008,8 +962,8 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
 
     //--------------------------------------------------------------------------------
     //
-    
-    
+
+
     //
     //--------------------------------------------------------------------------------
     for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1),
@@ -1028,7 +982,6 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
                 Creature* pViewer = dynamic_cast<Creature*>(*itr);
 
                 if (pViewer != pCreature && pViewer->isPC() && (pViewer->getVisionState(cx, cy) >= IN_SIGHT)) {
-                    
                     EffectObservingEye* pEffectObservingEye = NULL;
                     if (pViewer->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
                         pEffectObservingEye =
@@ -1036,7 +989,7 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
                         // Assert( pEffectObservingEye != NULL );
                     }
 
-                    
+
                     EffectGnomesWhisper* pEffectGnomesWhisper = NULL;
                     if (pViewer->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
                         pEffectGnomesWhisper = dynamic_cast<EffectGnomesWhisper*>(
@@ -1060,7 +1013,7 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
                             pViewer->getPlayer()->sendPacket(&gcDO);
                             // cout << "send delete object" << endl;
                         }
-                        
+
                         /*						if (!pViewer->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY)
                                                     && pViewer->isSlayer())
                                                 {
@@ -1071,7 +1024,6 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
                                                     pViewer->getPlayer()->sendPacket(&gcAddEffect);
                                                 }*/
                     } else {
-                        
                     }
                 } // if
             } // for
@@ -1086,7 +1038,6 @@ void addInvisibleCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zone
 //
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
@@ -1096,10 +1047,10 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
     Assert(pZone != NULL);
     Assert(pCreature != NULL);
 
-    
+
     Assert(pCreature->isVampire() || pCreature->isMonster());
 
-    
+
     Assert(pCreature->isFlag(Effect::EFFECT_CLASS_INVISIBILITY));
 
     ZoneCoord_t cx = pCreature->getX();
@@ -1116,8 +1067,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
     if (CClass == Creature::CREATURE_CLASS_MONSTER) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
-        if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) 
-        {
+        if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) {
             gcABC.setObjectID(pMonster->getObjectID());
             gcABC.setName(pMonster->getName());
             gcABC.setX(cx);
@@ -1125,9 +1075,6 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
             pGCAddXXX = &gcABC;
         } else {
-            
-            
-            
             EffectInfo* pEffectInfo = new EffectInfo;
             pEffectInfo->addListElement(Effect::EFFECT_CLASS_INVISIBILITY, 0xFFFF);
 
@@ -1146,8 +1093,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
         }
     } else if (CClass == Creature::CREATURE_CLASS_VAMPIRE) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
-        if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) 
-        {
+        if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) {
             gcABC.setObjectID(pVampire->getObjectID());
             gcABC.setName(pVampire->getName());
             gcABC.setX(cx);
@@ -1175,8 +1121,8 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
     //--------------------------------------------------------------------------------
     //
-    
-    
+
+
     //
     //--------------------------------------------------------------------------------
     for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1),
@@ -1195,7 +1141,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
                 Creature* pViewer = dynamic_cast<Creature*>(*itr);
 
-                
+
                 //				EffectRevealer* pEffectRevealer = NULL;
                 //				if ( pViewer->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
                 //				{
@@ -1203,7 +1149,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
                 // Effect::EFFECT_CLASS_REVEALER ) ); 					Assert( pEffectRevealer );
                 //				}
 
-                
+
                 EffectObservingEye* pEffectObservingEye = NULL;
                 if (pViewer->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
                     pEffectObservingEye =
@@ -1211,7 +1157,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
                     // Assert( pEffectObservingEye != NULL );
                 }
 
-                
+
                 EffectGnomesWhisper* pEffectGnomesWhisper = NULL;
                 if (pViewer->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
                     pEffectGnomesWhisper =
@@ -1220,13 +1166,9 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
                 }
 
                 if (pViewer != pCreature && pViewer->isPC() && (pViewer->getVisionState(cx, cy) >= IN_SIGHT)) {
-                    
                     // if ((!pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)
                     //	|| pViewer->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN)))
                     {
-                        
-                        
-                        
                         if (!pViewer->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY) &&
                             (pViewer->isSlayer() || pViewer->isOusters()) &&
                             !(pEffectObservingEye != NULL && pEffectObservingEye->canSeeInvisibility(pCreature)) &&
@@ -1235,11 +1177,9 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
                         }
                     }
                     // else
-                    {
-                        
-                    }
+                    {}
 
-                    
+
                     pViewer->getPlayer()->sendPacket(&gcRemoveEffect);
 
                 } // if
@@ -1252,7 +1192,7 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
 
     //--------------------------------------------
-    
+
     //--------------------------------------------
     if (bForced == true) {
         EffectManager* pEffectManager = pCreature->getEffectManager();
@@ -1277,8 +1217,6 @@ void addVisibleCreature(Zone* pZone, Creature* pCreature, bool bForced)
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy)
 
@@ -1288,7 +1226,7 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
     Assert(pZone != NULL);
     Assert(pCreature != NULL);
 
-    
+
     Assert(pCreature->isSlayer());
 
     ObjectID_t creatureID = pCreature->getObjectID();
@@ -1307,8 +1245,8 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
 
     //--------------------------------------------------------------------------------
     //
-    
-    
+
+
     //
     //--------------------------------------------------------------------------------
     for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1),
@@ -1327,14 +1265,13 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
                 Creature* pViewer = dynamic_cast<Creature*>(*itr);
 
                 if (pViewer != pCreature && pViewer->isPC() && (pViewer->getVisionState(cx, cy) >= IN_SIGHT)) {
-                    
                     //					EffectRevealer* pEffectRevealer = NULL;
                     //					if ( pViewer->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
                     //					{
                     //						pEffectRevealer = dynamic_cast<EffectRevealer*>(pViewer->findEffect(
                     // Effect::EFFECT_CLASS_REVEALER ) ); 						Assert( pEffectRevealer );
                     //					}
-                    
+
                     EffectGnomesWhisper* pEffectGnomesWhisper = NULL;
                     if (pViewer->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
                         pEffectGnomesWhisper = dynamic_cast<EffectGnomesWhisper*>(
@@ -1358,7 +1295,7 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
                             pViewer->getPlayer()->sendPacket(&gcDO);
                         }
 
-                        
+
                         /*						if (!pViewer->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY) ||
                            pViewer->isVampire())
                                                 {
@@ -1369,7 +1306,6 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
                                                     pViewer->getPlayer()->sendPacket(&gcAddEffect);
                                                 }*/
                     } else {
-                        
                     }
                 } // if
             } // for
@@ -1384,7 +1320,6 @@ void addSnipingModeCreature(Zone* pZone, Creature* pCreature, ZoneCoord_t cx, Zo
 //
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
@@ -1394,10 +1329,10 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
     Assert(pZone != NULL);
     Assert(pCreature != NULL);
 
-    
+
     Assert(pCreature->isSlayer());
 
-    
+
     Assert(pCreature->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE));
 
     ZoneCoord_t cx = pCreature->getX();
@@ -1425,8 +1360,8 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
     //--------------------------------------------------------------------------------
     //
-    
-    
+
+
     //
     //--------------------------------------------------------------------------------
     for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1),
@@ -1445,7 +1380,7 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
                 Creature* pViewer = dynamic_cast<Creature*>(*itr);
 
-                
+
                 //				EffectRevealer* pEffectRevealer = NULL;
                 //				if ( pViewer->isFlag( Effect::EFFECT_CLASS_REVEALER ) )
                 //				{
@@ -1453,7 +1388,7 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
                 // dynamic_cast<EffectRevealer*>(pViewer->findEffect(Effect::EFFECT_CLASS_REVEALER));
                 // Assert( pEffectRevealer );
                 //				}
-                
+
                 EffectGnomesWhisper* pEffectGnomesWhisper = NULL;
                 if (pViewer->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
                     pEffectGnomesWhisper =
@@ -1468,7 +1403,6 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
                     //						|| ( pEffectRevealer != NULL && pEffectRevealer->canSeeHide( pCreature ) )
                     //))
                     {
-                        
                         if (!pViewer->isFlag(Effect::EFFECT_CLASS_DETECT_INVISIBILITY) ||
                             (pEffectGnomesWhisper != NULL && pEffectGnomesWhisper->canSeeSniping()))
                         //							&& !( pEffectRevealer != NULL && pEffectRevealer->canSeeSniping(
@@ -1477,10 +1411,9 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
                             pViewer->getPlayer()->sendPacket(pGCAddXXX);
                         }
                     } else {
-                        
                     }
 
-                    
+
                     pViewer->getPlayer()->sendPacket(&gcRemoveEffect);
 
                 } // if
@@ -1493,7 +1426,7 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
 
 
     //--------------------------------------------
-    
+
     //--------------------------------------------
     if (bForced == true) {
         EffectManager* pEffectManager = pCreature->getEffectManager();
@@ -1514,8 +1447,6 @@ void addUnSnipingModeCreature(Zone* pZone, Creature* pCreature, bool bForced)
 //////////////////////////////////////////////////////////////////////////////
 
 //
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1544,8 +1475,8 @@ void addInstalledMine(Zone* pZone, Mine* pMine, ZoneCoord_t cx, ZoneCoord_t cy)
 
     //--------------------------------------------------------------------------------
     //
-    
-    
+
+
     //
     //--------------------------------------------------------------------------------
     for (ZoneCoord_t ix = max(0, cx - maxViewportWidth - 1),
@@ -1587,8 +1518,6 @@ void addInstalledMine(Zone* pZone, Mine* pMine, ZoneCoord_t cx, ZoneCoord_t cy)
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -1604,20 +1533,19 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
     if (bNonPK && pCreature->isPC())
         return false;
 
-    
+
     if (pCreature->isSlayer())
         return false;
 
     Assert(pZone != NULL);
 
-    
-    
+
     if (pZone->getZoneLevel(X, Y) & SAFE_ZONE)
         return false;
 
     Tile& rTile = pZone->getTile(X, Y);
 
-    
+
     if (!rTile.hasItem())
         return false;
 
@@ -1625,8 +1553,7 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
 
     Item* pItem = rTile.getItem();
 
-    
-    
+
     if (pItem->getItemClass() != Item::ITEM_CLASS_MINE)
         return false;
     if (pItem->isFlag(Effect::EFFECT_CLASS_INSTALL) == false)
@@ -1648,9 +1575,9 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
     string InstallerName = pMine->getInstallerName();
     int PartyID = pMine->getInstallerPartyID();
 
-    BYTE explodeType = Type; 
+    BYTE explodeType = Type;
 
-    
+
     pZone->deleteItem(pMine, X, Y);
 
     GCDeleteObject gcDO;
@@ -1685,7 +1612,7 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
     const int* yOffsetByEType = NULL;
     int tiles = 0;
 
-    
+
     getExplosionTypeXYOffset(explodeType, Dir, xOffsetByEType, yOffsetByEType, tiles);
 
     VSRect rect(0, 0, pZone->getWidth() - 1, pZone->getHeight() - 1);
@@ -1695,18 +1622,16 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
         tileY = Y + yOffsetByEType[tileI];
         // cout << "Check1 Tile X : " << (int)tileX << "," << " Tile Y : " << (int)tileY << endl;
 
-        
+
         if (rect.ptInRect(tileX, tileY) && !(pZone->getZoneLevel(tileX, tileY) & SAFE_ZONE)) {
             //			if( tileX != X || tileY != Y ) checkMine( pZone, tileX, tileY );
             const Tile& tile = pZone->getTile(tileX, tileY);
             const forward_list<Object*>& oList = tile.getObjectList();
 
-            
+
             for (forward_list<Object*>::const_iterator itr = oList.begin(); itr != oList.end(); itr++) {
-                
                 Object* pObject = *itr;
                 if (pObject->getObjectClass() == Object::OBJECT_CLASS_CREATURE) {
-                    
                     Creature* pTargetCreature = dynamic_cast<Creature*>(pObject);
                     if (pTargetCreature->isSlayer()) {
                         // Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
@@ -1750,9 +1675,7 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
         } else if (pTargetCreature->isMonster()) {
             Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
 
-            
-            
-            
+
             pMonster->addPrecedence(InstallerName, PartyID, Damage);
             pMonster->setLastHitCreatureClass(Creature::CREATURE_CLASS_SLAYER);
         }
@@ -1771,8 +1694,6 @@ bool checkMine(Zone* pZone, Creature* pCreature, ZoneCoord_t X, ZoneCoord_t Y)
 //
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
 
@@ -1781,13 +1702,13 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
 
     Assert(pZone != NULL);
 
-    
+
     if (pZone->getZoneLevel(X, Y) & SAFE_ZONE)
         return false;
 
     Tile& rTile = pZone->getTile(X, Y);
 
-    
+
     if (rTile.hasItem() == false)
         return false;
 
@@ -1795,8 +1716,7 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
 
     Item* pItem = rTile.getItem();
 
-    
-    
+
     if (pItem->getItemClass() != Item::ITEM_CLASS_MINE)
         return false;
     if (pItem->isFlag(Effect::EFFECT_CLASS_INSTALL) == false)
@@ -1816,7 +1736,7 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
     string InstallerName = pMine->getInstallerName();
     int PartyID = pMine->getInstallerPartyID();
 
-    BYTE explodeType = Type; 
+    BYTE explodeType = Type;
     /*
     switch(Type)
     {
@@ -1837,7 +1757,7 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
     };
     */
 
-    
+
     pZone->deleteItem(pMine, X, Y);
 
     GCDeleteObject gcDO;
@@ -1853,7 +1773,7 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
     const int* yOffsetByEType = NULL;
     int tiles = 0;
 
-    
+
     getExplosionTypeXYOffset(explodeType, Dir, xOffsetByEType, yOffsetByEType, tiles);
 
     VSRect rect(0, 0, pZone->getWidth() - 1, pZone->getHeight() - 1);
@@ -1863,19 +1783,17 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
         tileY = Y + yOffsetByEType[tileI];
         // cout << "Check2 Tile X : " << (int)tileX << "," << " Tile Y : " << (int)tileY << endl;
 
-        
+
         if (rect.ptInRect(tileX, tileY) && !(pZone->getZoneLevel(tileX, tileY) & SAFE_ZONE)) {
             //			if( tileX != X || tileY != Y ) checkMine( pZone, tileX, tileY );
 
             const Tile& tile = pZone->getTile(tileX, tileY);
             const forward_list<Object*>& oList = tile.getObjectList();
 
-            
+
             for (forward_list<Object*>::const_iterator itr = oList.begin(); itr != oList.end(); itr++) {
-                
                 Object* pObject = *itr;
                 if (pObject->getObjectClass() == Object::OBJECT_CLASS_CREATURE) {
-                    
                     Creature* pTargetCreature = dynamic_cast<Creature*>(pObject);
                     if (pTargetCreature->isSlayer()) {
                         // Slayer* pTargetSlayer = dynamic_cast<Slayer*>(pTargetCreature);
@@ -1919,9 +1837,7 @@ bool checkMine(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y)
         } else if (pTargetCreature->isMonster()) {
             Monster* pMonster = dynamic_cast<Monster*>(pTargetCreature);
 
-            
-            
-            
+
             pMonster->addPrecedence(InstallerName, PartyID, Damage);
             pMonster->setLastHitCreatureClass(Creature::CREATURE_CLASS_SLAYER);
         }
@@ -1972,9 +1888,6 @@ bool checkTrap(Zone* pZone, Creature* pCreature) {
 //
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t TX, ZoneCoord_t TY, bool bSendMoveOK)
 
@@ -1986,8 +1899,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pCreature->getPlayer());
     Zone* pZone = pCreature->getZone();
 
-    
-    
+
     // by sigi. 2002.12.10
 
     if (pGamePlayer->getPlayerStatus() != GPS_NORMAL) {
@@ -2007,22 +1919,21 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
 
     if (bSendMoveOK) {
         cout << "ZoneUtil.cpp step 2" << endl;
-        
+
         GCMoveOK gcMoveOK(pCreature->getX(), pCreature->getY(), pCreature->getDir());
         pGamePlayer->sendPacket(&gcMoveOK);
     }
 
 
     // #if defined(__THAILAND_SERVER__) || defined(__CHINA_SERVER__)
-    
+
     //  add by inthesky 2004.07.26
 
     ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(TargetZoneID);
 
     // add by Sonic 2006.10.21
 
-    if (TargetZoneID == 1013) 
-    {
+    if (TargetZoneID == 1013) {
         cout << "ZoneUtil.cpp step New1013" << endl;
         if (pZoneInfo->isNoPortalZone()) {
             PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
@@ -2030,7 +1941,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             // Item* pItem=pPC->getInventory()->findItem(Item::ITEM_CLASS_MONEY,fitItem);
             CoordInven_t InvenX = 0;
             CoordInven_t InvenY = 0;
-            ItemType_t fitItem = 3; 
+            ItemType_t fitItem = 3;
             Item* pItem = pPC->getInventory()->findItem(Item::ITEM_CLASS_MOON_CARD, fitItem, InvenX, InvenY);
             GCSystemMessage gcSystemMessage1;
             if (pItem == NULL) {
@@ -2076,7 +1987,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
     try {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(TargetZoneID);
 
-        
+
         if (pZoneInfo != NULL && (pZoneInfo->isPayPlay() || pZoneInfo->isPremiumZone()) &&
             !pGamePlayer->isPayPlaying() && !(g_pWarSystem->hasActiveRaceWar() && pZoneInfo->isHolyLand())) {
             cout << "ZoneUtil.cpp step 4" << endl;
@@ -2086,22 +1997,19 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             // Statement* pStmt = NULL;
             string connectIP = pGamePlayer->getSocket()->getHost();
 
-            
+
             if (pGamePlayer->loginPayPlay(connectIP, pGamePlayer->getID())) {
                 cout << "ZoneUtil.cpp step 5" << endl;
 
                 sendPayInfo(pGamePlayer);
 
-                
+
                 Zone* pZone = getZoneByZoneID(TargetZoneID);
                 Assert(pZone != NULL);
 
-                
-                
+
                 bEnterZone = enterMasterLair(pZone, pCreature);
-            } else if (pZoneInfo->isPayPlay() &&
-                       !pGamePlayer->isFamilyFreePass()) 
-            {
+            } else if (pZoneInfo->isPayPlay() && !pGamePlayer->isFamilyFreePass()) {
                 cout << "ZoneUtil.cpp step 6" << endl;
 
                 bEnterZone = false;
@@ -2110,11 +2018,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             if (!bEnterZone) {
                 cout << "ZoneUtil.cpp step 7" << endl;
 
-                
-                
-                
-                
-                
+
                 ZONE_COORD zoneCoord;
                 bool bFindPos = false;
 
@@ -2132,7 +2036,6 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
 
                     bNoMoney = true;
                 } else {
-                    
                     filelog("zoneUtilError.txt", "[ZoneUtil::transportCreature] ResurrectInfo is not esta..");
                     throw Error("Critical Error : ResurrectInfo is not established!1");
                 }
@@ -2144,10 +2047,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
     }
 
 
-    
     try {
-        
-        
         if (bNoMoney && pCreature->isSlayer()) {
             Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
             if (pSlayer->hasRideMotorcycle()) {
@@ -2160,14 +2060,13 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
         }
 
         cout << "ZoneUtil.cpp step 8" << endl;
-        
+
         pCreature->save();
 
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(TargetZoneID);
         Assert(pZoneInfo != NULL);
 
-        
-        
+
         if (pCreature->isFlag(Effect::EFFECT_CLASS_HAS_BLOOD_BIBLE)) {
             if (pZone->isHolyLand()) {
                 if (!pZoneInfo->isHolyLand() || (!pZoneInfo->isCastle() && g_pCastleInfoManager->isSameCastleZone(
@@ -2176,11 +2075,11 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             }
         }
 
-        
+
         if (pCreature->isFlag(Effect::EFFECT_CLASS_HAS_CASTLE_SYMBOL)) {
             if (pZone->isHolyLand() && !pZoneInfo->isHolyLand() ||
                 !g_pCastleInfoManager->isSameCastleZone(pCreature->getZone()->getZoneID(), TargetZoneID)
-                
+
                 || pZoneInfo->isCastle()) {
                 dropRelicToZone(pCreature);
             }
@@ -2197,7 +2096,7 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             ;
         dropSweeperToZone(pCreature);
 
-        
+
         if (pZone->isHolyLand() != pZoneInfo->isHolyLand()) {
             pCreature->setFlag(Effect::EFFECT_CLASS_INIT_ALL_STAT);
         }
@@ -2211,24 +2110,24 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
             pCreature->setFlag(Effect::EFFECT_CLASS_INIT_ALL_STAT);
         }
 
-        
+
         //
         // *CAUTION*
-        
-        
+
+
         pZone->deleteCreature(pCreature, pCreature->getX(), pCreature->getY());
 
-        
+
         // pZone->getZoneGroup()->getZonePlayerManager()->deletePlayer(pGamePlayer->getSocket()->getSOCKET());
         // pZone->getZoneGroup()->getZonePlayerManager()->deletePlayer_NOBLOCKED(pGamePlayer->getSocket()->getSOCKET());
         pZone->getZoneGroup()->getZonePlayerManager()->deletePlayer(pGamePlayer->getSocket()->getSOCKET());
 
-        
+
         // pCreature->setXY(TX, TY);
         // pCreature->setZone(NULL);
         cout << "ZoneUtil.cpp step 9" << endl;
 
-        
+
         // g_pIncomingPlayerManager->addPlayer(pGamePlayer);
         // g_pIncomingPlayerManager->pushPlayer(pGamePlayer);
         pZone->getZoneGroup()->getZonePlayerManager()->pushOutPlayer(pGamePlayer);
@@ -2237,24 +2136,17 @@ void transportCreature(Creature* pCreature, ZoneID_t TargetZoneID, ZoneCoord_t T
         throw Error(nsee.toString());
     }
 
-    
-    
+
     Zone* pNewZone = getZoneByZoneID(TargetZoneID);
     Assert(pNewZone != NULL);
 
     pCreature->setNewZone(pNewZone);
     pCreature->setNewXY(TX, TY);
 
-    
 
-    
-    
     // pCreature->registerObject();
 
-     
 
-    
-    
     if (!pZone->isHolyLand() && pNewZone->isHolyLand() || pZone->isHolyLand() && !pNewZone->isHolyLand()) {
         sendHolyLandWarpEffect(pCreature);
         cout << "ZoneUtil.cpp step 10" << endl;
@@ -2291,11 +2183,8 @@ Zone* getZoneByZoneID(ZoneID_t ZID)
     try {
         pZoneGroup = g_pZoneGroupManager->getZoneGroup(pZoneInfo->getZoneGroupID());
     } catch (NoSuchElementException&) {
-        
         // cerr << "getZoneByZoneID() : No Such ZoneGroup" << endl;
         throw Error("getZoneByZoneID() : No Such ZoneGroup");
-
-         
     }
 
     Zone* pZone = pZoneGroup->getZone(ZID);
@@ -2331,7 +2220,6 @@ void addMonstersToZone(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, SpriteType_t S
             const vector<MonsterType_t>& monsterTypes = g_pMonsterInfoManager->getMonsterTypeBySprite(SType);
 
             if (!monsterTypes.empty()) {
-                
                 for (int i = 0; i < num; i++) {
                     MonsterType_t monsterType = monsterTypes[rand() % monsterTypes.size()];
 
@@ -2382,7 +2270,6 @@ void addMonstersToZone(Zone* pZone, const SUMMON_INFO2& summonInfo, list<Monster
                     g_pMonsterInfoManager->getMonsterTypeBySprite(monsterInfo.SpriteType);
 
                 if (!monsterTypes.empty()) {
-                    
                     for (int i = 0; i < monsterInfo.Num; i++) {
                         MonsterType_t monsterType = monsterTypes[rand() % monsterTypes.size()];
 
@@ -2451,7 +2338,7 @@ bool enterMasterLair(Zone* pZone, Creature* pCreature)
     if (pZone == NULL || pCreature == NULL)
         return false;
 
-    
+
     if (!pZone->isMasterLair()) {
         return true;
     }
@@ -2460,7 +2347,6 @@ bool enterMasterLair(Zone* pZone, Creature* pCreature)
     Assert(pMasterLairManager != NULL);
 
     if (pMasterLairManager->enterCreature(pCreature)) {
-        
         return true;
     }
 
@@ -2470,7 +2356,6 @@ bool enterMasterLair(Zone* pZone, Creature* pCreature)
 }
 
 void getNewbieTransportZoneInfo(Slayer* pSlayer, ZONE_COORD& zoneInfo) {
-    
     zoneInfo.x = 30;
     zoneInfo.y = 42;
 
@@ -2496,7 +2381,6 @@ void getNewbieTransportZoneInfo(Slayer* pSlayer, ZONE_COORD& zoneInfo) {
 void checkNewbieTransportToGuild(Slayer* pSlayer) {
     try {
         if (pSlayer->isPLAYER() && g_pVariableManager->isNewbieTransportToGuild()) {
-            
             ZONE_COORD transportZone;
 
             getNewbieTransportZoneInfo(pSlayer, transportZone);
@@ -2549,11 +2433,10 @@ void checkNewbieTransportToGuild(Slayer* pSlayer) {
 
                         // transportCreature( pSlayer, ZoneID, ZoneX, ZoneY, false );
 
-                        Turn_t deadline = 600;                   
-                        int timePenalty = (BasicSUM - 40) * 100; 
+                        Turn_t deadline = 600;
+                        int timePenalty = (BasicSUM - 40) * 100;
                         deadline -= min(500, timePenalty);
 
-                         
 
                         Player* pPlayer = pSlayer->getPlayer();
                         Assert(pPlayer != NULL);
@@ -2568,7 +2451,7 @@ void checkNewbieTransportToGuild(Slayer* pSlayer) {
                         pEventTransport->setTargetZone(ZoneID, ZoneX, ZoneY);
                         pEventTransport->setZoneName(ZoneName);
 
-                        
+
                         pEventTransport->sendMessage();
 
                         pGamePlayer->addEvent(pEventTransport);
@@ -2593,13 +2476,10 @@ bool addCorpseToZone(Corpse* pCorpse, Zone* pZone, ZoneCoord_t cx, ZoneCoord_t c
     Assert(pCorpse != NULL);
     Assert(pZone != NULL);
 
-    
+
     //	Tile & tile = pZone->getTile(cx , cy);
 
-    
-     
 
-    
     TPOINT pt = pZone->addItem(pCorpse, cx, cy);
     if (pt.x == -1) {
         SAFE_DELETE(pCorpse);
@@ -2614,7 +2494,6 @@ bool addCorpseToZone(Corpse* pCorpse, Zone* pZone, ZoneCoord_t cx, ZoneCoord_t c
 
     return true;
 }
-
 
 
 bool checkCorpse(Zone* pZone, MonsterType_t MType, ZoneCoord_t x1, ZoneCoord_t y1, ZoneCoord_t x2, ZoneCoord_t y2)
@@ -2676,7 +2555,7 @@ void makeZoneIDList(const string& zoneIDs, list<ZoneID_t>& zoneIDList)
 
         string zoneID = trim(zoneIDs.substr(a, b - a));
 
-        
+
         zoneIDList.push_back(atoi(zoneID.c_str()));
 
         a = b + 1;
@@ -2717,20 +2596,26 @@ bool createBulletinBoard(Zone* pZone, ZoneCoord_t X, ZoneCoord_t Y, MonsterType_
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        string dbmsg = correctString(msg);
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO BulletinBoardObject VALUES (0, %u, %u, %u, %u, '%s', %u, '%s')",
-                            g_pConfig->getPropertyInt("ServerID"), pZone->getZoneID(), pt.x, pt.y, dbmsg.c_str(),
-                            (uint)type, timeLimit.toDateTime().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertBulletinStmt(pConn, "INSERT INTO BulletinBoardObject VALUES (0, ?, ?, ?, ?, ?, ?, ?)");
+        insertBulletinStmt.bindUInt(1, g_pConfig->getPropertyInt("ServerID"));
+        insertBulletinStmt.bindUInt(2, pZone->getZoneID());
+        insertBulletinStmt.bindUInt(3, pt.x);
+        insertBulletinStmt.bindUInt(4, pt.y);
+        // correctString() was a manual backslash-escape for embedding into a raw
+        // SQL string literal; PreparedStatement sends the value out-of-band, so
+        // bind the raw message instead (re-applying the escape would corrupt
+        // stored quotes/backslashes).
+        insertBulletinStmt.bindString(5, msg);
+        insertBulletinStmt.bindUInt(6, (uint)type);
+        insertBulletinStmt.bindString(7, timeLimit.toDateTime());
+        insertBulletinStmt.execute();
 
-        
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            filelog("BulletinBoard.log", "DB  . : %u, %u, %u, [%u:%s]", pZone->getZoneID(), pt.x,
-                    pt.y, type, msg.c_str());
+        if (insertBulletinStmt.getAffectedRowCount() == 0) {
+            filelog("BulletinBoard.log", "DB  . : %u, %u, %u, [%u:%s]", pZone->getZoneID(), pt.x, pt.y, type,
+                    msg.c_str());
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2747,12 +2632,14 @@ void loadBulletinBoard(Zone* pZone) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ID, X, Y, Message, Type, TimeLimit FROM BulletinBoardObject WHERE ServerID = %u AND ZoneID = %u",
-            g_pConfig->getPropertyInt("ServerID"), pZone->getZoneID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectBulletinStmt(
+            pConn,
+            "SELECT ID, X, Y, Message, Type, TimeLimit FROM BulletinBoardObject WHERE ServerID = ? AND ZoneID = ?");
+        selectBulletinStmt.bindUInt(1, g_pConfig->getPropertyInt("ServerID"));
+        selectBulletinStmt.bindUInt(2, pZone->getZoneID());
+        Result* pResult = selectBulletinStmt.execute();
 
-        
 
         while (pResult->next()) {
             uint ID = pResult->getInt(1);
@@ -2763,10 +2650,13 @@ void loadBulletinBoard(Zone* pZone) {
             VSDateTime timeLimit(pResult->getString(6));
 
             if (timeLimit < currentDateTime) {
-                cout << "   ." << ID << " : [" << X << "," << Y << "] " << msg << " ["
-                     << type << "] " << endl;
-                Statement* pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt2->executeQuery("DELETE FROM BulletinBoardObject WHERE ID = %u", ID);
+                cout << "   ." << ID << " : [" << X << "," << Y << "] " << msg << " [" << type << "] " << endl;
+                // Previously a Statement created here was never deleted (leaked
+                // one connection statement per expired entry); the PreparedStatement
+                // is scoped to this loop body so RAII closes it every iteration.
+                PreparedStatement deleteBulletinStmt(pConn, "DELETE FROM BulletinBoardObject WHERE ID = ?");
+                deleteBulletinStmt.bindUInt(1, ID);
+                deleteBulletinStmt.execute();
                 continue;
             }
 
@@ -2780,12 +2670,10 @@ void loadBulletinBoard(Zone* pZone) {
             TPOINT pt = pZone->addItem(pCorpse, X, Y, true, delayTime * 10);
 
             if (pt.x == -1) {
-                filelog("BulletinBoard.log", "DB   . : %u, %u, %u, [%u:%s]",
-                        pZone->getZoneID(), X, Y, type, msg.c_str());
+                filelog("BulletinBoard.log", "DB   . : %u, %u, %u, [%u:%s]", pZone->getZoneID(), X, Y, type,
+                        msg.c_str());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

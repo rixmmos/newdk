@@ -10,6 +10,7 @@
 
 #include "Assert.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Global Variable initialization
@@ -96,15 +97,16 @@ void RankEXPInfoManager::load(RankType rankType)
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(Level) FROM RankEXPInfo WHERE RankType=%d", (int)rankType);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectMaxLevelStmt(pConn, "SELECT MAX(Level) FROM RankEXPInfo WHERE RankType=?");
+        selectMaxLevelStmt.bindInt(1, (int)rankType);
+        pResult = selectMaxLevelStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            SAFE_DELETE(pStmt);
             throw Error("There is no data in RankEXPInfo Table");
         }
 
-        
+
         pResult->next();
         m_RankEXPCount = pResult->getInt(1) + 1;
 
@@ -113,13 +115,14 @@ void RankEXPInfoManager::load(RankType rankType)
         m_RankEXPInfoList = new RankEXPInfo*[m_RankEXPCount];
         Assert(m_RankEXPInfoList != NULL);
 
-        
+
         for (uint i = 0; i < m_RankEXPCount; i++)
             m_RankEXPInfoList[i] = NULL;
 
-        
-        pResult =
-            pStmt->executeQuery("Select Level, GoalExp, AccumExp from RankEXPInfo WHERE RankType=%d", (int)rankType);
+
+        PreparedStatement selectRankEXPStmt(pConn, "Select Level, GoalExp, AccumExp from RankEXPInfo WHERE RankType=?");
+        selectRankEXPStmt.bindInt(1, (int)rankType);
+        pResult = selectRankEXPStmt.execute();
         while (pResult->next()) {
             RankEXPInfo* pRankEXPInfo = new RankEXPInfo();
             Assert(pRankEXPInfo != NULL);
@@ -132,8 +135,6 @@ void RankEXPInfoManager::load(RankType rankType)
 
             addRankEXPInfo(pRankEXPInfo);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

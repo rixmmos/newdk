@@ -18,6 +18,7 @@
 #include "OptionInfo.h"
 #include "PCSlayerInfo.h"
 #include "PCVampireInfo.h"
+#include "PreparedStatement.h"
 #include "ServerGroupInfo.h"
 #include "Shape.h"
 #include "UserInfo.h"
@@ -49,14 +50,14 @@ void CLSelectWorldHandler::execute(CLSelectWorld* pPacket, Player* pPlayer)
         throw DisconnectException("WorldID over");
     }
 
-    
+
     GameWorldInfo* pGameWorldInfo = g_pGameWorldInfoManager->getGameWorldInfo(WorldID);
     if (pGameWorldInfo->getStatus() == WORLD_CLOSE) {
         filelog("errorLogin.txt", "WorldClosed[%d]", (int)WorldID);
         throw DisconnectException("WorldClosed");
     }
 
-    
+
     // if (WorldID==2) throw DisconnectException();
 
     pLoginPlayer->setWorldID(WorldID);
@@ -139,10 +140,12 @@ void CLSelectWorldHandler::execute(CLSelectWorld* pPacket, Player* pPlayer)
 
         pStmt = NULL;
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            Result* pResult = pStmt->executeQuery("SELECT CurrentServerGroupID FROM Player where PlayerID='%s'",
-                                                  pLoginPlayer->getID().c_str());
+            PreparedStatement selectPlayerServerGroupStmt(pConn,
+                                                          "SELECT CurrentServerGroupID FROM Player where PlayerID=?");
+            selectPlayerServerGroupStmt.bindString(1, pLoginPlayer->getID());
+            Result* pResult = selectPlayerServerGroupStmt.execute();
 
             if (pResult->next()) {
                 lcServerList.setCurrentServerGroupID(pResult->getInt(1));

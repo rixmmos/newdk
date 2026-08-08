@@ -5,16 +5,12 @@
 //
 
 
-
-
 //
 // *CAUTION*
 //
 
 
 //
-
-
 
 
 //
@@ -29,13 +25,11 @@
 //
 
 
-
-
 //
 
 
 //////////////////////////////////////////////////////////////////////////////
- 
+
 
 #include "CLLogin.h"
 
@@ -64,8 +58,8 @@
 
 #endif
 
-#define SYMBOL_TEST_CLIENT '#'       
-#define SYMBOL_NET_MARBLE_CLIENT '@' 
+#define SYMBOL_TEST_CLIENT '#'
+#define SYMBOL_NET_MARBLE_CLIENT '@'
 
 bool isAdultByBirthday(const string& birthday);
 void addLoginPlayerData(const string& ID, const string& ip, const string& SSN, const string& zipcode);
@@ -89,7 +83,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
     LoginPlayer* pLoginPlayer = dynamic_cast<LoginPlayer*>(pPlayer);
     Statement* pStmt = NULL;
 
-    
+
     pPacket->setID(trim(pPacket->getID()));
 
     string connectIP = pLoginPlayer->getSocket()->getHost();
@@ -120,12 +114,12 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     if (ID[0] == SYMBOL_TEST_CLIENT) {
         ID = ID.c_str() + 1;
         pPacket->setID(ID);
 
-        
+
         if (bWebLogin) {
             // cout << "WebLogin" << endl;
 
@@ -137,7 +131,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         } else {
             // cout << "not WebLogin" << endl;
 
-            
+
             // by sigi. 2002.10.23
             if (!checkNetMarbleClient(pPacket, pPlayer)) {
                 return;
@@ -146,24 +140,23 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
         bFreePass = pLoginPlayer->isFreePass();
         if (!bWebLogin && bFreePass) {
-            
             ID = ID.c_str() + 1;
             pPacket->setID(ID);
         }
 
-        
+
         BEGIN_DB {
-            PreparedStatement testClientStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
-                                             "INSERT INTO TestClientUser (PlayerID, IP, LoginDate) VALUES (?, ?, now())");
+            PreparedStatement testClientStmt(
+                g_pDatabaseManager->getConnection("DARKEDEN"),
+                "INSERT INTO TestClientUser (PlayerID, IP, LoginDate) VALUES (?, ?, now())");
             testClientStmt.bindString(1, ID);
             testClientStmt.bindString(2, connectIP);
             testClientStmt.execute();
         }
         END_DB(pStmt)
     }
-    
+
     else {
-        
         if (bWebLogin) {
             // cout << "WebLogin" << endl;
 
@@ -202,7 +195,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
     string lastIP = "";
     string lastMacAddress = "";
 
-    
+
     PayType payType;
     string payPlayDate;
     string familyPayPlayDate;
@@ -212,8 +205,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
     try {
         ////////////////////////////////////////////////////////////
-        
-        
+
+
         ////////////////////////////////////////////////////////////
         bool bError = false;
 
@@ -223,7 +216,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
             bError = true;
 
         if (bError) {
-            
             // cout << "Error" << endl;
             LCLoginError lcLoginError;
             lcLoginError.setErrorID(INVALID_ID_PASSWORD);
@@ -237,13 +229,10 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         Result* pResult = NULL;
 
 
-
-
         if (bWebLogin) {
-            PreparedStatement webLoginStmt(pConn,
-                                           "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, LoginIP, "
-                                           "PayType, PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate "
-                                           "FROM Player WHERE PlayerID = ?");
+            PreparedStatement webLoginStmt(pConn, "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, LoginIP, "
+                                                  "PayType, PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate "
+                                                  "FROM Player WHERE PlayerID = ?");
             webLoginStmt.bindString(1, ID);
             pResult = webLoginStmt.execute();
         } else if (bFreePass) // by sigi. 2002.10.23
@@ -277,24 +266,22 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         }
 
         // by sigi. 2002.10.30
-        
+
         bool bNoPlayer = ((pResult->getRowCount() == 0) && !bFreePass);
 
-        
-        
+
         if (bNoPlayer) // pResult->getRowCount() == 0)
         {
             // cout << "no Result : " << ID.c_str() << endl;
-            
+
             LCLoginError lcLoginError;
             lcLoginError.setErrorID(INVALID_ID_PASSWORD);
             pLoginPlayer->sendPacket(&lcLoginError);
             filelog("loginfail.txt", "Error Code: INVALID_ID_PASSWORD, 3, PlayerID : %s", pPacket->getID().c_str());
 
-            
+
             uint nFailed = pLoginPlayer->getFailureCount();
 
-            
 
             if (nFailed > 3) {
                 SAFE_DELETE(pStmt);
@@ -306,8 +293,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
             return;
         }
-        
-        
+
+
         else {
             int i = 0;
 
@@ -329,7 +316,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 familyPayPlayDate = pResult->getString(++i);
 
             } else if (bFreePass) {
-                
                 if (pResult->getRowCount() == 0) {
                     /*
                     cout << "NetMarble New Player: " << ID.c_str() << endl;
@@ -348,7 +334,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     payPlayFlag          = 0;
                     */
 
-                    
+
                     LCLoginError lcLoginError;
                     lcLoginError.setErrorID(ETC_ERROR);
                     pLoginPlayer->sendPacket(&lcLoginError);
@@ -442,7 +428,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 											payPlayDate, payPlayHours, payPlayFlag,
 											connectIP, ID))
 			{
-                
                 LCLoginError lcLoginError;
                 lcLoginError.setErrorID(NOT_PAY_ACCOUNT);
                 pLoginPlayer->sendPacket(&lcLoginError);
@@ -452,9 +437,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 return;
 			}
 #elif defined(__PAY_SYSTEM_FREE_LIMIT__)
-            
+
             if (pLoginPlayer->loginPayPlay(payType, payPlayDate, payPlayHours, payPlayFlag, connectIP, ID)) {
-                
             }
 #else // elif defined(__PAY_SYSTEM_ZONE__)
             pLoginPlayer->setPayPlayValue(payType, payPlayDate, payPlayHours, payPlayFlag, familyPayPlayDate);
@@ -465,15 +449,13 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 			if (logon == "LOGON" || 
 				logon == "GAME")
 			{
-                
                 // if (logon=="LOGON" && connectIP==lastIP)
                 //{
                 //}
-                
+
                 // else
 
-                
-                
+
                 if (logon == "LOGON" || connectIP != lastIP) // || !pPacket->checkMacAddress(lastMacAddress))
                 {
                     LCLoginError lcLoginError;
@@ -483,7 +465,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     filelog("loginfail.txt", "Error Code: ALREADY_CONNECTED, 7, PlayerID : %s",
                             pPacket->getID().c_str());
 
-                    
+
                     uint nFailed = pLoginPlayer->getFailureCount();
 
                     if (nFailed > 3) {
@@ -498,7 +480,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
                     // bSameIP = false;
                 }
-                
+
                 else {
                     bSameIP = true;
                 }
@@ -511,14 +493,12 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 			{
                 if (!bFreePass || bWebLogin) // by sigi. 2002.10.23
                 {
-                    
                     if (strstr(SSN.c_str(), "-") != NULL) {
                         bAdult = isAdultByBirthday(SSN.substr(0, 6));
                     }
-                    
+
                     else {
 #ifdef __CHINA_SERVER__
-                        
                         bAdult = true;
 #else
                         if (SSN.size() == 15) {
@@ -526,20 +506,18 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                         } else if (SSN.size() == 18) {
                             bAdult = isAdultByBirthday(SSN.substr(8, 14));
                         } else {
-                            
                             bAdult = false;
                         }
 #endif
                     }
                 }
 
-                
+
                 pLoginPlayer->setID(ID);
                 pLoginPlayer->setSSN(SSN);
                 pLoginPlayer->setZipcode(zipcode);
 
-                
-                
+
                 pLoginPlayer->setAdult(bAdult);
 
                 pLoginPlayer->sendLGKickCharacter();
@@ -554,8 +532,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 			{
                 __BEGIN_DEBUG
 
-                 
-                
+
                 // by sigi. 2002.5.15
                 PreparedStatement logOnStmt(pConn,
                                             "UPDATE Player SET LogOn = 'LOGON', LoginIP = ?, CurrentLoginServerID=?, "
@@ -566,8 +543,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 logOnStmt.execute();
                 int affectedRowCount = logOnStmt.getAffectedRowCount();
 
-                
-                
+
                 // pStmt->executeQuery("UPDATE PlayerIPList SET IP1=IP2, Date1=Date2, IP2=IP3, Date2=Date3, IP3=IP4,
                 // Date3=Date4, IP4=IP5, Date4=Date5, IP5='%s', Date5=now() WHERE PlayerID='%s'",connectIP.c_str(),
                 // ID.c_str());
@@ -578,17 +554,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 //							ID.c_str());
                 // }
 
-                
-                
+
                 if (affectedRowCount == 0) {
-                    
-                    
-                    
-
-                    
-                    
-
-                    
                     // pStmt->executeQuery("UPDATE Player SET LoginIP = '%s', CurrentLoginServerID=%d,
                     // LastLoginDate=now() WHERE PlayerID = '%s' AND LogOn='LOGON'",connectIP.c_str(),
                     // g_pConfig->getPropertyInt("LoginServerID"), ID.c_str());
@@ -607,8 +574,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
                     return;
                     //}
-
-                    
                 }
                 /*
                 }
@@ -616,11 +581,10 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
                 __END_DEBUG
 
-                
+
                 pLoginPlayer->setID(ID);
 
-                
-                
+
                 // #ifdef __CONNECT_BILLING_SYSTEM__
                 //  by sigi. 2002.11.21
                 // pLoginPlayer->setBillingSession();
@@ -628,29 +592,25 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 // pLoginPlayer->sendBillingLogin();
 // #endif
 #ifdef __CONNECT_CBILLING_SYSTEM__
-                
+
                 g_pCBillingPlayerManager->sendLogin(pLoginPlayer);
 #endif
 
 
-                
-                
                 //				pLoginPlayer->sendLGKickCharacter();
 
-                
+
                 LCLoginOK lcLoginOK;
                 lcLoginOK.setFamily(false);
 
                 if (!bFreePass || bWebLogin) // by sigi. 2002.10.23
                 {
-                    
                     if (strstr(SSN.c_str(), "-") != NULL) {
                         bAdult = isAdultByBirthday(SSN.substr(0, 6));
                     }
-                    
+
                     else {
 #ifdef __CHINA_SERVER__
-                        
                         bAdult = true;
 #else
                         if (SSN.size() == 15) {
@@ -658,7 +618,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                         } else if (SSN.size() == 18) {
                             bAdult = isAdultByBirthday(SSN.substr(8, 14));
                         } else {
-                            
                             bAdult = false;
                         }
 #endif
@@ -707,21 +666,18 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     }
                 }
 
-                
+
                 if (lcLoginOK.getLastDays() > 1000)
                     filelog("PayPlayDateLog.txt", "UserID : %s , LastDays : %ld", ID.c_str(), lcLoginOK.getLastDays());
 
-                
+
                 {
-                    PreparedStatement eventStmt(pConn,
-                                                "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND "
-                                                "RecvPremiumDate = '0000-00-00'");
+                    PreparedStatement eventStmt(pConn, "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND "
+                                                       "RecvPremiumDate = '0000-00-00'");
                     eventStmt.bindString(1, pLoginPlayer->getID());
                     pResult = eventStmt.execute();
 
                     if (pResult->next()) {
-
-
                         PreparedStatement payPlayDateStmt(pConn,
                                                           "UPDATE Player SET PayPlayDate = IF (PayPlayDate < NOW(), "
                                                           "NOW() + INTERVAL 7 DAY, PayPlayDate + INTERVAL 7 DAY ) "
@@ -730,9 +686,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                         payPlayDateStmt.execute();
 
 
-                        PreparedStatement recvPremiumStmt(pConn,
-                                                          "UPDATE Event200501Main SET RecvPremiumDate = NOW() "
-                                                          "WHERE PlayerID = ?");
+                        PreparedStatement recvPremiumStmt(pConn, "UPDATE Event200501Main SET RecvPremiumDate = NOW() "
+                                                                 "WHERE PlayerID = ?");
                         recvPremiumStmt.bindString(1, pLoginPlayer->getID());
                         recvPremiumStmt.execute();
 
@@ -758,7 +713,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     cout << "true - " << pLoginPlayer->getID() << endl;
                 }
 #endif
-                 
+
                 pLoginPlayer->sendPacket(&lcLoginOK);
                 pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 			}
@@ -770,7 +725,7 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         throw Error(sqe.toString());
     }
 
-    
+
     addLoginPlayerData(ID, connectIP, SSN, zipcode);
 
 #endif
@@ -802,13 +757,12 @@ bool isAdultByBirthday(const string& birthday) {
 
     // cout << "SSN = " << birthday.c_str() << " ADULTSSN = " << AdultSSN.toString().c_str() << endl;
 
-    
+
     if (atoi(birthday.c_str()) <= atoi(AdultSSN.toString().c_str())) {
-        
         return true;
     }
 
-    
+
     return false;
 }
 
@@ -826,37 +780,31 @@ void addLoginPlayerData(const string& ID, const string& ip, const string& SSN, c
 
     Statement* pStmt2 = NULL;
 
-    
-    
-    // UPDATE Player Set LoginFlagDay=1, LoginFlagWeek=1, LoginFlagMonth=1 WHERE PlayerID='%s'
-    
-    
-    
-    
-    
-    
 
-    
+    // UPDATE Player Set LoginFlagDay=1, LoginFlagWeek=1, LoginFlagMonth=1 WHERE PlayerID='%s'
+
+
     BEGIN_DB {
-        
         int year, month, day, hour, minute, second;
         getCurrentTimeEx(year, month, day, hour, minute, second);
         string currentDT = VSDateTime::currentDateTime().toDateTime();
 
-        StringStream sql;
         /*
+        StringStream sql;
         sql << "INSERT INTO LoginPlayerData (Year,Month,Day,Hour,Minute,Second,PlayerID,SSN,ZipCode,Date,Time) VALUES ("
             << year << "," << month << "," << day << "," << hour << "," << minute << "," << second << ",'"
             << ID << "','" << SSN << "','" << zipcode << "','"
             << currentDT.substr(0, 10 ).c_str() << "','" << currentDT.substr(11 ).c_str() << "')";
         */
-        sql << "INSERT INTO LoginPlayerData (PlayerID,IP,Date,Time) VALUES ('" << ID << "','" << ip << "','"
-            << currentDT.substr(0, 10).c_str() << "','" << currentDT.substr(11).c_str() << "')";
 
-        pStmt2 = g_pDatabaseManager->getUserInfoConnection()->createStatement();
-        pStmt2->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt2); // 2002.1.16 by sigi
+        Connection* pConn = g_pDatabaseManager->getUserInfoConnection();
+        PreparedStatement insertLoginPlayerDataStmt(
+            pConn, "INSERT INTO LoginPlayerData (PlayerID,IP,Date,Time) VALUES (?, ?, ?, ?)");
+        insertLoginPlayerDataStmt.bindString(1, ID);
+        insertLoginPlayerDataStmt.bindString(2, ip);
+        insertLoginPlayerDataStmt.bindString(3, currentDT.substr(0, 10));
+        insertLoginPlayerDataStmt.bindString(4, currentDT.substr(11));
+        insertLoginPlayerDataStmt.execute();
     }
     END_DB(pStmt2)
 
@@ -886,7 +834,7 @@ bool CLLoginHandler::checkNetMarbleClient(CLLogin* pPacket, Player* pPlayer)
             return false;
         }
 
-        
+
         pLoginPlayer->setFreePass(true);
 
 
@@ -912,9 +860,7 @@ bool CLLoginHandler::checkFreePass(CLLogin* pPacket, Player* pPlayer)
 
     // LoginPlayer* pLoginPlayer = dynamic_cast<LoginPlayer*>(pPlayer);
 
-    
-    
-    
+
     Statement* pStmt = NULL;
 
     try {
@@ -943,13 +889,10 @@ bool CLLoginHandler::checkFreePass(CLLogin* pPacket, Player* pPlayer)
                 cout << "NetMarble New Player: " << pPacket->getID().c_str() << endl;
 
 
-
-
                 // 2003.04.30 by bezz, DEW
-                PreparedStatement newPlayerStmt(pConn,
-                                                "INSERT IGNORE INTO Player (PlayerID, Password, Name, SSN, "
-                                                "SpecialEventCount, Event, creation_date) Values (?, ?, ?, "
-                                                "'123456-1122339', 2, 0, CURDATE())");
+                PreparedStatement newPlayerStmt(pConn, "INSERT IGNORE INTO Player (PlayerID, Password, Name, SSN, "
+                                                       "SpecialEventCount, Event, creation_date) Values (?, ?, ?, "
+                                                       "'123456-1122339', 2, 0, CURDATE())");
                 newPlayerStmt.bindString(1, pPacket->getID());
                 newPlayerStmt.bindString(2, pPacket->getPassword());
                 newPlayerStmt.bindString(3, pPacket->getID());
@@ -963,7 +906,6 @@ bool CLLoginHandler::checkFreePass(CLLogin* pPacket, Player* pPlayer)
 
                 return true;
             }
-
         }
         END_DB(pStmt)
     } catch (Throwable& t) {
@@ -999,8 +941,8 @@ bool isBlockIP(const string& ip) {
         //		int classD    = atoi(ip.substr(k+1, ip.size()-k-1).c_str());
 
         PreparedStatement ipBlockStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
-                                     "SELECT class, first, last FROM IPBlockInfo WHERE	(IP = ? AND "
-                                     "class=1) OR (IP = ? AND class=2) OR (IP = ?)");
+                                      "SELECT class, first, last FROM IPBlockInfo WHERE	(IP = ? AND "
+                                      "class=1) OR (IP = ? AND class=2) OR (IP = ?)");
         ipBlockStmt.bindString(1, classA);
         ipBlockStmt.bindString(2, classB);
         ipBlockStmt.bindString(3, classC);
@@ -1013,15 +955,14 @@ bool isBlockIP(const string& ip) {
             int index;
 
             switch (ipClass) {
-            
             case 0:
                 index = atoi(ip.substr(k + 1, ip.size() - k - 1).c_str());
                 break;
-            
+
             case 1:
                 index = atoi(ip.substr(i + 1, j - i - 1).c_str());
                 break;
-            
+
             case 2:
                 index = atoi(ip.substr(j + 1, k - j - 1).c_str());
                 break;
@@ -1089,7 +1030,6 @@ bool CLLoginHandler::checkWebLogin(CLLogin* pPacket, Player* pPlayer) {
 
                 // check key
                 if (key != pPacket->getPassword()) {
-
                     LCLoginError lcLoginError;
                     lcLoginError.setErrorID(INVALID_ID_PASSWORD);
                     pLoginPlayer->sendPacket(&lcLoginError);
@@ -1120,8 +1060,6 @@ bool CLLoginHandler::checkWebLogin(CLLogin* pPacket, Player* pPlayer) {
                 deleteWebLoginStmt.bindString(1, pPacket->getID());
                 deleteWebLoginStmt.execute();
             } else {
-
-
                 LCLoginError lcLoginError;
                 lcLoginError.setErrorID(NOT_FOUND_KEY);
                 pLoginPlayer->sendPacket(&lcLoginError);

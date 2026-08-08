@@ -4,6 +4,7 @@
 #include "DB.h"
 #include "InventoryItemPosition.h"
 #include "MouseItemPosition.h"
+#include "PreparedStatement.h"
 #include "ZoneItemPosition.h"
 
 GlobalItemPosition* GlobalItemPositionLoader::load(Item::ItemClass itemClass, ItemID_t itemID)
@@ -15,10 +16,14 @@ GlobalItemPosition* GlobalItemPositionLoader::load(Item::ItemClass itemClass, It
     GlobalItemPosition* pRet = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT OwnerID, Storage, StorageID, X, Y, ObjectID FROM %s WHERE ItemID = %d",
-                                ItemObjectTableName[(int)itemClass].c_str(), itemID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        // table is a hardcoded per-item-class lookup, never packet/user input; PreparedStatement cannot bind
+        // identifiers.
+        PreparedStatement selectStmt(pConn, "SELECT OwnerID, Storage, StorageID, X, Y, ObjectID FROM " +
+                                                ItemObjectTableName[(int)itemClass] + " WHERE ItemID = ?");
+        selectStmt.bindInt(1, itemID);
+        Result* pResult = selectStmt.execute();
 
         if (pResult->next()) {
             int i = 0;
@@ -34,7 +39,6 @@ GlobalItemPosition* GlobalItemPositionLoader::load(Item::ItemClass itemClass, It
         } else {
             pRet = NULL;
         }
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -30,6 +30,7 @@
 #include "ItemUtil.h"
 #include "Ousters.h"
 #include "ParkingCenter.h"
+#include "PreparedStatement.h"
 #include "SiegeManager.h"
 #include "Slayer.h"
 #include "Vampire.h"
@@ -149,7 +150,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) {
         GCCannotUse _GCCannotUse;
         _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -177,13 +178,13 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             Inventory* pBeltInventory = ((Belt*)pBelt)->getInventory();
 
-            
+
             SlotID_t SlotID = pPacket->getSlotID();
 
-            
+
             if (SlotID >= pBeltInventory->getWidth()) {
                 GCCannotUse _GCCannotUse;
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -191,10 +192,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             Item* pBeltItem = pBeltInventory->getItem(SlotID, 0);
 
-            
+
             if (pBeltItem == NULL) {
                 GCCannotUse _GCCannotUse;
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -202,10 +203,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             ObjectID_t ItemObjectID = pBeltItem->getObjectID();
 
-            
+
             if (ItemObjectID != pPacket->getObjectID() || (pBeltItem->getItemClass() != Item::ITEM_CLASS_POTION &&
                                                            pBeltItem->getItemClass() != Item::ITEM_CLASS_KEY)) {
                 if (ItemObjectID != pPacket->getObjectID()) {
@@ -248,7 +249,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     return;
                 }
 
-                
+
                 ItemID_t targetID = dynamic_cast<Key*>(pBeltItem)->getTarget();
 
                 Statement* pStmt = NULL;
@@ -261,11 +262,12 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     targetID = pKey->setNewMotorcycle(pSlayer);
 
                 } else {
-                    
-                    
                     BEGIN_DB {
-                        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                        pResult = pStmt->executeQuery("SELECT ItemID FROM MotorcycleObject WHERE ItemID=%lu", targetID);
+                        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                        PreparedStatement selectMotorcycleItemIDStmt(
+                            pConn, "SELECT ItemID FROM MotorcycleObject WHERE ItemID=?");
+                        selectMotorcycleItemIDStmt.bindULong(1, targetID);
+                        pResult = selectMotorcycleItemIDStmt.execute();
 
                         if (!pResult->next()) {
                             Key* pKey = dynamic_cast<Key*>(pBeltItem);
@@ -278,7 +280,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     }
                     END_DB(pStmt);
                 }
-                
+
                 if (targetID == 0) {
                     filelog("errorLog.txt", "[ActionRedeemMotorcycle] itemID=%lu, motorItemID=%lu",
                             (int)pBeltItem->getItemID(), (int)targetID);
@@ -297,13 +299,11 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         ZoneCoord_t motorY = pMotorcycleBox->getY();
                         Motorcycle* pMotorcycle = pMotorcycleBox->getMotorcycle();
 
-                        
-                        
+
                         if (pMotorZone != pZone || pSlayer->getDistance(motorX, motorY) > 15) {
-                            
                             pMotorcycleBox->setTransport();
 
-                            
+
                             /*							pMotorZone->transportItem( motorX, motorY, pMotorcycle,
                                                                                     pZone, pSlayer->getX(),
                                pSlayer->getY() );*/
@@ -313,14 +313,11 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                             pMotorZone->registerObject(pEffectRecallMotorcycle);
                             pMotorZone->addEffect_LOCKING(pEffectRecallMotorcycle);
 
-                            
-                            
+
                             /*
                             GCCannotUse _GCCannotUse;
                             _GCCannotUse.setObjectID(pPacket->getObjectID());
                             */
-
-                            
                         }
                     }
 
@@ -331,10 +328,11 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     return;
                 }
                 BEGIN_DB {
-                    pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                    pResult = pStmt->executeQuery(
-                        "SELECT ItemID, ItemType, OptionType, Durability FROM MotorcycleObject WHERE ItemID=%lu",
-                        targetID);
+                    Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                    PreparedStatement selectMotorcycleObjectStmt(
+                        pConn, "SELECT ItemID, ItemType, OptionType, Durability FROM MotorcycleObject WHERE ItemID=?");
+                    selectMotorcycleObjectStmt.bindULong(1, targetID);
+                    pResult = selectMotorcycleObjectStmt.execute();
 
                     ItemID_t itemID;
                     ItemType_t itemType;
@@ -359,7 +357,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         durability = 300;
                     }
 
-                    
+
                     Motorcycle* pMotorcycle = new Motorcycle(itemType, optionTypes);
 
                     Assert(pMotorcycle != NULL);
@@ -367,11 +365,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     pMotorcycle->setItemID(itemID);
                     pMotorcycle->setDurability(durability);
 
-                    
+
                     (pZone->getObjectRegistry()).registerObject(pMotorcycle);
 
 
-                    
                     cout << "  " << pSlayer->getX() << " " << pSlayer->getY() << endl;
                     TPOINT pt = pZone->addItem(pMotorcycle, pSlayer->getX(), pSlayer->getY(), false);
 
@@ -382,25 +379,33 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                             << ", Y=" << (int)pSlayer->getY();
 
                         filelog("motorError.txt", "%s", msg.toString().c_str());
-                        
+
 
                         SAFE_DELETE(pMotorcycle);
                     } else {
                         if (!bFound) {
                             // by sigi. 2002.10.14
-                            pStmt->executeQuery("INSERT INTO MotorcycleObject (ItemID, ObjectID, ItemType, OwnerID, "
-                                                "Storage, StorageID, X, Y, OptionType, Durability) Values (%d, %d, %d, "
-                                                "'', %d, %d, %d, %d, '', %d)",
-                                                itemID, pMotorcycle->getObjectID(), itemType, STORAGE_ZONE,
-                                                pZone->getZoneID(), pt.x, pt.y, durability);
+                            PreparedStatement insertMotorcycleObjectStmt(
+                                pConn, "INSERT INTO MotorcycleObject (ItemID, ObjectID, ItemType, OwnerID, "
+                                       "Storage, StorageID, X, Y, OptionType, Durability) Values (?, ?, ?, "
+                                       "'', ?, ?, ?, ?, '', ?)");
+                            insertMotorcycleObjectStmt.bindInt(1, itemID);
+                            insertMotorcycleObjectStmt.bindInt(2, pMotorcycle->getObjectID());
+                            insertMotorcycleObjectStmt.bindInt(3, itemType);
+                            insertMotorcycleObjectStmt.bindInt(4, STORAGE_ZONE);
+                            insertMotorcycleObjectStmt.bindInt(5, pZone->getZoneID());
+                            insertMotorcycleObjectStmt.bindInt(6, pt.x);
+                            insertMotorcycleObjectStmt.bindInt(7, pt.y);
+                            insertMotorcycleObjectStmt.bindInt(8, durability);
+                            insertMotorcycleObjectStmt.execute();
                         }
 
-                        
+
                         MotorcycleBox* pBox = new MotorcycleBox(pMotorcycle, pZone, pt.x, pt.y);
                         Assert(pBox != NULL);
                         g_pParkingCenter->addMotorcycleBox(pBox);
 
-                        
+
                         CGRideMotorCycle cgRide;
                         cgRide.setObjectID(pMotorcycle->getObjectID());
                         cgRide.setX(pt.x);
@@ -409,7 +414,6 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     }
 
 
-                    
                     GCCannotUse _GCCannotUse;
                     _GCCannotUse.setObjectID(pPacket->getObjectID());
                     pGamePlayer->sendPacket(&_GCCannotUse);
@@ -427,11 +431,11 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             MP_t CurrentMP = pSlayer->getMP(ATTR_CURRENT);
             Potion* pPotion = dynamic_cast<Potion*>(pBeltItem);
 
-            
+
             int HPQuantity = pPotion->getHPQuantity();
             int MPQuantity = pPotion->getMPQuantity();
 
-            
+
             int HPDelayProvider = pPotion->getHPDelay();
             int MPDelayProvider = pPotion->getMPDelay();
 
@@ -447,7 +451,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             bool notRecoverHP = false;
             bool notRecoverMP = false;
 
-            
+
             if (pSlayer->isFlag(Effect::EFFECT_CLASS_ACTIVATION)) {
                 if (pPotion->getItemType() >= 14 && pPotion->getItemType() <= 17) {
                 } else {
@@ -460,7 +464,6 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             }
 
 
-            
             if (HPAmount != 0 && HPQuantity != 0) {
                 if (CurrentHP < MaxHP) {
                     EffectManager* pEffectManager = pSlayer->getEffectManager();
@@ -473,28 +476,27 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
                         EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
 
-                        
-                        
+
                         int PrevHPAmount =
                             pEffectHPRecoveryEffect->getHPQuantity() * pEffectHPRecoveryEffect->getPeriod();
                         HPAmount = min((int)(HPAmount + PrevHPAmount), MaxHP - CurrentHP);
 
-                        
+
                         HPQuantity = max(HPQuantity, (int)(pEffectHPRecoveryEffect->getHPQuantity()));
                         HPDelayProvider = min(HPDelayProvider, (int)(pEffectHPRecoveryEffect->getDelay()));
 
-                        
+
                         temp = (double)((double)HPAmount / (double)HPQuantity);
                         Period = (uint)ceil(temp);
                         Deadline = Period * HPDelayProvider;
 
-                        
+
                         pEffectHPRecoveryEffect->setDeadline(Deadline);
                         pEffectHPRecoveryEffect->setDelay(HPDelayProvider);
                         pEffectHPRecoveryEffect->setHPQuantity(HPQuantity);
                         pEffectHPRecoveryEffect->setPeriod(Period);
 
-                        
+
                         GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                         gcHPRecoveryStartToSelf.setPeriod(pEffectHPRecoveryEffect->getPeriod());
                         gcHPRecoveryStartToSelf.setDelay(pEffectHPRecoveryEffect->getDelay());
@@ -502,8 +504,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                        
-                        
+
                         GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                         gcHPRecoveryStartToOthers.setObjectID(pSlayer->getObjectID());
                         gcHPRecoveryStartToOthers.setPeriod(pEffectHPRecoveryEffect->getPeriod());
@@ -525,7 +526,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pEffectManager->addEffect(pEffectHPRecovery);
 
-                        
+
                         GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                         gcHPRecoveryStartToSelf.setPeriod(Period);
                         gcHPRecoveryStartToSelf.setDelay(HPDelayProvider);
@@ -533,7 +534,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                        
+
                         GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                         gcHPRecoveryStartToOthers.setObjectID(pSlayer->getObjectID());
                         gcHPRecoveryStartToOthers.setPeriod(Period);
@@ -554,9 +555,8 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 notRecoverHP = true;
             }
 
-            
+
             if (MPAmount != 0 && MPQuantity != 0) {
-                
                 if (CurrentMP < MaxMP) {
                     EffectManager* pEffectManager = pSlayer->getEffectManager();
 
@@ -568,28 +568,27 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
                         EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
 
-                        
-                        
+
                         int PrevMPAmount =
                             pEffectMPRecoveryEffect->getMPQuantity() * pEffectMPRecoveryEffect->getPeriod();
                         MPAmount = min((int)(MPAmount + PrevMPAmount), MaxMP - CurrentMP);
 
-                        
+
                         MPQuantity = max(MPQuantity, (int)(pEffectMPRecoveryEffect->getMPQuantity()));
                         MPDelayProvider = min(MPDelayProvider, (int)(pEffectMPRecoveryEffect->getDelay()));
 
-                        
+
                         temp = (double)((double)MPAmount / (double)MPQuantity);
                         Period = (uint)ceil(temp);
                         Deadline = Period * MPDelayProvider;
 
-                        
+
                         pEffectMPRecoveryEffect->setDeadline(Deadline);
                         pEffectMPRecoveryEffect->setDelay(MPDelayProvider);
                         pEffectMPRecoveryEffect->setMPQuantity(MPQuantity);
                         pEffectMPRecoveryEffect->setPeriod(Period);
 
-                        
+
                         GCMPRecoveryStart gcMPRecoveryStart;
                         gcMPRecoveryStart.setPeriod(pEffectMPRecoveryEffect->getPeriod());
                         gcMPRecoveryStart.setDelay(pEffectMPRecoveryEffect->getDelay());
@@ -611,7 +610,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pEffectManager->addEffect(pEffectMPRecovery);
 
-                        
+
                         GCMPRecoveryStart gcMPRecoveryStart;
                         gcMPRecoveryStart.setPeriod(Period);
                         gcMPRecoveryStart.setDelay(MPDelayProvider);
@@ -645,7 +644,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
             Zone* pZone = pOusters->getZone();
 
-            
+
             SlotID_t SlotID = pPacket->getSlotID();
 
             Ousters::WearPart part = (SlotID > 2 ? Ousters::WEAR_ARMSBAND2 : Ousters::WEAR_ARMSBAND1);
@@ -661,10 +660,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             Inventory* pOustersArmsbandInventory = ((OustersArmsband*)pOustersArmsband)->getInventory();
 
-            
+
             if (SlotID >= pOustersArmsbandInventory->getWidth()) {
                 GCCannotUse _GCCannotUse;
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -672,10 +671,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             Item* pOustersArmsbandItem = pOustersArmsbandInventory->getItem(SlotID, 0);
 
-            
+
             if (pOustersArmsbandItem == NULL) {
                 GCCannotUse _GCCannotUse;
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
@@ -683,10 +682,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 return;
             }
 
-            
+
             ObjectID_t ItemObjectID = pOustersArmsbandItem->getObjectID();
 
-            
+
             if (ItemObjectID != pPacket->getObjectID() ||
                 (pOustersArmsbandItem->getItemClass() != Item::ITEM_CLASS_PUPA &&
                  pOustersArmsbandItem->getItemClass() != Item::ITEM_CLASS_COMPOS_MEI)) {
@@ -724,10 +723,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                 Pupa* pPupa = dynamic_cast<Pupa*>(pOustersArmsbandItem);
 
-                
+
                 HPQuantity = pPupa->getHPQuantity();
 
-                
+
                 HPDelayProvider = pPupa->getHPDelay();
 
                 PupaHPAmount = pPupa->getHPAmount();
@@ -739,10 +738,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                 ComposMei* pComposMei = dynamic_cast<ComposMei*>(pOustersArmsbandItem);
 
-                
+
                 HPQuantity = pComposMei->getHPQuantity();
 
-                
+
                 HPDelayProvider = pComposMei->getHPDelay();
 
                 PupaHPAmount = pComposMei->getHPAmount();
@@ -750,7 +749,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 HPAmount = min(MaxHP - CurrentHP, (int)PupaHPAmount);
             }
 
-            
+
             if (HPAmount != 0 && HPQuantity != 0) {
                 if (CurrentHP < MaxHP) {
                     EffectManager* pEffectManager = pOusters->getEffectManager();
@@ -763,28 +762,27 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
                         EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
 
-                        
-                        
+
                         int PrevHPAmount =
                             pEffectHPRecoveryEffect->getHPQuantity() * pEffectHPRecoveryEffect->getPeriod();
                         HPAmount = min((int)(HPAmount + PrevHPAmount), MaxHP - CurrentHP);
 
-                        
+
                         HPQuantity = max(HPQuantity, (int)(pEffectHPRecoveryEffect->getHPQuantity()));
                         HPDelayProvider = min(HPDelayProvider, (int)(pEffectHPRecoveryEffect->getDelay()));
 
-                        
+
                         temp = (double)((double)HPAmount / (double)HPQuantity);
                         Period = (uint)ceil(temp);
                         Deadline = Period * HPDelayProvider;
 
-                        
+
                         pEffectHPRecoveryEffect->setDeadline(Deadline);
                         pEffectHPRecoveryEffect->setDelay(HPDelayProvider);
                         pEffectHPRecoveryEffect->setHPQuantity(HPQuantity);
                         pEffectHPRecoveryEffect->setPeriod(Period);
 
-                        
+
                         GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                         gcHPRecoveryStartToSelf.setPeriod(pEffectHPRecoveryEffect->getPeriod());
                         gcHPRecoveryStartToSelf.setDelay(pEffectHPRecoveryEffect->getDelay());
@@ -792,8 +790,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                        
-                        
+
                         GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                         gcHPRecoveryStartToOthers.setObjectID(pOusters->getObjectID());
                         gcHPRecoveryStartToOthers.setPeriod(pEffectHPRecoveryEffect->getPeriod());
@@ -816,7 +813,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pEffectManager->addEffect(pEffectHPRecovery);
 
-                        
+
                         GCHPRecoveryStartToSelf gcHPRecoveryStartToSelf;
                         gcHPRecoveryStartToSelf.setPeriod(Period);
                         gcHPRecoveryStartToSelf.setDelay(HPDelayProvider);
@@ -824,7 +821,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pGamePlayer->sendPacket(&gcHPRecoveryStartToSelf);
 
-                        
+
                         GCHPRecoveryStartToOthers gcHPRecoveryStartToOthers;
                         gcHPRecoveryStartToOthers.setObjectID(pOusters->getObjectID());
                         gcHPRecoveryStartToOthers.setPeriod(Period);
@@ -856,10 +853,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 CurrentMP = pOusters->getMP(ATTR_CURRENT);
                 ComposMei* pComposMei = dynamic_cast<ComposMei*>(pOustersArmsbandItem);
 
-                
+
                 MPQuantity = pComposMei->getMPQuantity();
 
-                
+
                 MPDelayProvider = pComposMei->getMPDelay();
 
                 Attr_t INT = pOusters->getINT();
@@ -873,10 +870,10 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 CurrentMP = pOusters->getMP(ATTR_CURRENT);
                 Pupa* pPupa = dynamic_cast<Pupa*>(pOustersArmsbandItem);
 
-                
+
                 MPQuantity = pPupa->getMPQuantity();
 
-                
+
                 MPDelayProvider = pPupa->getMPDelay();
 
                 Attr_t INT = pOusters->getINT();
@@ -887,7 +884,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                     min(MaxMP - CurrentMP, (int)(ComposMeiMPAmount * (double)(1 + (double)((double)INT / 300.0))));
             }
 
-            
+
             if (MPAmount != 0 && MPQuantity != 0) {
                 if (CurrentMP < MaxMP) {
                     EffectManager* pEffectManager = pOusters->getEffectManager();
@@ -900,28 +897,27 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
                         EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
 
-                        
-                        
+
                         int PrevMPAmount =
                             pEffectMPRecoveryEffect->getMPQuantity() * pEffectMPRecoveryEffect->getPeriod();
                         MPAmount = min((int)(MPAmount + PrevMPAmount), MaxMP - CurrentMP);
 
-                        
+
                         MPQuantity = max(MPQuantity, (int)(pEffectMPRecoveryEffect->getMPQuantity()));
                         MPDelayProvider = min(MPDelayProvider, (int)(pEffectMPRecoveryEffect->getDelay()));
 
-                        
+
                         temp = (double)((double)MPAmount / (double)MPQuantity);
                         Period = (uint)ceil(temp);
                         Deadline = Period * MPDelayProvider;
 
-                        
+
                         pEffectMPRecoveryEffect->setDeadline(Deadline);
                         pEffectMPRecoveryEffect->setDelay(MPDelayProvider);
                         pEffectMPRecoveryEffect->setMPQuantity(MPQuantity);
                         pEffectMPRecoveryEffect->setPeriod(Period);
 
-                        
+
                         GCMPRecoveryStart gcMPRecoveryStart;
                         gcMPRecoveryStart.setPeriod(pEffectMPRecoveryEffect->getPeriod());
                         gcMPRecoveryStart.setDelay(pEffectMPRecoveryEffect->getDelay());
@@ -943,7 +939,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                         pEffectManager->addEffect(pEffectMPRecovery);
 
-                        
+
                         GCMPRecoveryStart gcMPRecoveryStart;
                         gcMPRecoveryStart.setPeriod(Period);
                         gcMPRecoveryStart.setDelay(MPDelayProvider);
@@ -971,7 +967,6 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 _GCCannotUse.setObjectID(pPacket->getObjectID());
                 pGamePlayer->sendPacket(&_GCCannotUse);
             }
-             
         }
     } catch (Throwable& t) {
         // cout << t.toString();

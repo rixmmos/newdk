@@ -19,6 +19,7 @@
 #include "Monster.h"
 #include "PCFinder.h"
 #include "PCManager.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 
@@ -108,21 +109,21 @@ void EffectMute::create(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
 
         Turn_t currentYearTime;
 
         getCurrentYearTime(currentYearTime);
 
-        pStmt->executeQuery("INSERT INTO EffectMute (OwnerID , YearTime, DayTime) VALUES('%s', %ld, %ld)",
-                            ownerID.c_str(), currentYearTime, m_Deadline.tv_sec);
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn, "INSERT INTO EffectMute (OwnerID , YearTime, DayTime) VALUES(?, ?, ?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindLong(2, currentYearTime);
+        insertStmt.bindLong(3, m_Deadline.tv_sec);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -137,10 +138,10 @@ void EffectMute::destroy(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -148,8 +149,9 @@ void EffectMute::destroy(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("DELETE FROM EffectMute WHERE OwnerID = '%s'", ownerID.c_str());
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM EffectMute WHERE OwnerID = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -164,10 +166,10 @@ void EffectMute::save(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Turn_t currentYearTime;
 
@@ -185,9 +187,11 @@ void EffectMute::save(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE EffectMute SET YearTime=%ld, DayTime=%ld WHERE OwnerID='%s'", currentYearTime,
-                            m_Deadline.tv_sec, ownerID.c_str());
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE EffectMute SET YearTime=?, DayTime=? WHERE OwnerID=?");
+        updateStmt.bindLong(1, currentYearTime);
+        updateStmt.bindLong(2, m_Deadline.tv_sec);
+        updateStmt.bindString(3, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -222,10 +226,11 @@ void EffectMuteLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT DayTime FROM EffectMute WHERE OwnerID='%s'", pCreature->getName().c_str());
+        PreparedStatement selectStmt(pConn, "SELECT DayTime FROM EffectMute WHERE OwnerID=?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -246,8 +251,6 @@ void EffectMuteLoader::load(Creature* pCreature)
                 pEffectMute->destroy(pCreature->getName());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

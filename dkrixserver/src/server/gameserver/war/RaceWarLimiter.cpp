@@ -6,6 +6,7 @@
 
 #include "DB.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "VSDateTime.h"
 #include "Vampire.h"
@@ -34,10 +35,13 @@ void PCWarLimiter::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT ID, MinLevel, MaxLevel, LimitNum, CurrentNum FROM %s WHERE Race=%d",
-                                getTableName().c_str(), (int)getRace());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // table is one of the hardcoded literals returned by getTableName() (see RaceWarLimiter.h), never
+        // packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement selectLimitInfoStmt(pConn, "SELECT ID, MinLevel, MaxLevel, LimitNum, CurrentNum FROM " +
+                                                         getTableName() + " WHERE Race=?");
+        selectLimitInfoStmt.bindInt(1, (int)getRace());
+        Result* pResult = selectLimitInfoStmt.execute();
 
         while (pResult->next()) {
             int ID = pResult->getInt(1);
@@ -51,8 +55,6 @@ void PCWarLimiter::load()
 
             addLimitInfo(lli);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -71,7 +73,7 @@ void PCWarLimiter::clearCurrent()
 {
     __BEGIN_TRY
 
-    
+
     int num = m_LimitInfos.size();
     for (int i = 0; i < num; i++) {
         LimitInfo_t* pLI = &(m_LimitInfos[i]);
@@ -79,14 +81,15 @@ void PCWarLimiter::clearCurrent()
         pLI->setCurrent(0);
     }
 
-    
+
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE %s SET CurrentNum=0", getTableName().c_str());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // table is one of the hardcoded literals returned by getTableName() (see RaceWarLimiter.h), never
+        // packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement resetCurrentNumStmt(pConn, "UPDATE " + getTableName() + " SET CurrentNum=0");
+        resetCurrentNumStmt.execute();
     }
     END_DB(pStmt)
 
@@ -108,11 +111,13 @@ void PCWarLimiter::saveCurrent(const LevelLimitInfo* pLI) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE %s SET CurrentNum=%d WHERE ID=%d", getTableName().c_str(), pLI->getCurrent(),
-                            pLI->getID());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // table is one of the hardcoded literals returned by getTableName() (see RaceWarLimiter.h), never
+        // packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement updateCurrentNumStmt(pConn, "UPDATE " + getTableName() + " SET CurrentNum=? WHERE ID=?");
+        updateCurrentNumStmt.bindInt(1, pLI->getCurrent());
+        updateCurrentNumStmt.bindInt(2, pLI->getID());
+        updateCurrentNumStmt.execute();
     }
     END_DB(pStmt)
 
@@ -440,9 +445,10 @@ void RaceWarLimiter::clearPCList()
     int num[3] = {0, 0, 0};
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQueryString("SELECT Name, Race FROM RaceWarPCList");
+        PreparedStatement selectRaceWarPCListStmt(pConn, "SELECT Name, Race FROM RaceWarPCList");
+        Result* pResult = selectRaceWarPCListStmt.execute();
 
         while (pResult->next()) {
             string Name = pResult->getString(1);
@@ -453,9 +459,8 @@ void RaceWarLimiter::clearPCList()
             num[Race]++;
         }
 
-        pStmt->executeQueryString("DELETE FROM RaceWarPCList");
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteRaceWarPCListStmt(pConn, "DELETE FROM RaceWarPCList");
+        deleteRaceWarPCListStmt.execute();
     }
     END_DB(pStmt)
 
@@ -480,11 +485,11 @@ void RaceWarLimiter::addPCList(PlayerCreature* pPC)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT IGNORE INTO RaceWarPCList (Name, Race) VALUES ('%s', %d)", pPC->getName().c_str(),
-                            (int)pPC->getRace());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertRaceWarPCListStmt(pConn, "INSERT IGNORE INTO RaceWarPCList (Name, Race) VALUES (?, ?)");
+        insertRaceWarPCListStmt.bindString(1, pPC->getName());
+        insertRaceWarPCListStmt.bindInt(2, (int)pPC->getRace());
+        insertRaceWarPCListStmt.execute();
     }
     END_DB(pStmt)
 
@@ -505,17 +510,16 @@ bool RaceWarLimiter::isInPCList(PlayerCreature* pPC)
     bool bExist = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT count(*) FROM RaceWarPCList WHERE Name='%s'", pPC->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectPCListCountStmt(pConn, "SELECT count(*) FROM RaceWarPCList WHERE Name=?");
+        selectPCListCountStmt.bindString(1, pPC->getName());
+        Result* pResult = selectPCListCountStmt.execute();
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
 
             bExist = count > 0;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -535,11 +539,11 @@ void RaceWarLimiter::removePCList(PlayerCreature* pPC)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM RaceWarPCList WHERE Name='%s'", pPC->getName().c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement deletePCListStmt(pConn, "DELETE FROM RaceWarPCList WHERE Name=?");
+        deletePCListStmt.bindString(1, pPC->getName());
+        deletePCListStmt.execute();
     }
     END_DB(pStmt)
 

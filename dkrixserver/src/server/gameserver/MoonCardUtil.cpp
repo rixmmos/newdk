@@ -8,6 +8,7 @@
 #include "ItemFactoryManager.h"
 #include "Monster.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 #include "VariableManager.h"
@@ -83,11 +84,11 @@ Item* getCardItem(MoonCard card) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-            pStmt->executeQuery("UPDATE CardCount SET CARDCOUNT = CARDCOUNT + 1 WHERE CARDKIND = %d", (int)card - 1);
-
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement updateCardCountStmt(pConn,
+                                                  "UPDATE CardCount SET CARDCOUNT = CARDCOUNT + 1 WHERE CARDKIND = ?");
+            updateCardCountStmt.bindInt(1, (int)card - 1);
+            updateCardCountStmt.execute();
         }
         END_DB(pStmt)
     }

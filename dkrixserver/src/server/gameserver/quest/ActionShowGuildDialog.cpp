@@ -18,6 +18,7 @@
 #include "GuildManager.h"
 #include "NPC.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "SharedServerManager.h"
 #include "Slayer.h"
 #include "SystemAvailabilitiesManager.h"
@@ -32,7 +33,6 @@ void ActionShowGuildDialog::read(PropertyBuffer& propertyBuffer)
     __BEGIN_TRY
 
     try {
-        
         m_Type = (GuildDialog_t)propertyBuffer.getPropertyInt("Type");
     } catch (NoSuchElementException& nsee) {
         throw Error(nsee.toString());
@@ -67,39 +67,30 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
     Assert(pCreature != NULL);
 
     if (m_Type == GUILD_DIALOG_REGIST) {
-        
         ////////////////////////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////////////////////////
-        Statement* pStmt;
-        Result* pResult;
+        Statement* pStmt = NULL;
 
         BEGIN_DB {
-            
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult = pStmt->executeQuery("SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = '%s'",
-                                          pCreature->getName().c_str());
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectGuildMemberStmt(pConn, "SELECT `Rank`, ExpireDate FROM GuildMember WHERE Name = ?");
+            selectGuildMemberStmt.bindString(1, pCreature->getName());
+            Result* pResult = selectGuildMemberStmt.execute();
 
             if (pResult->next()) {
-                
                 int Rank = pResult->getInt(1);
                 string ExpireDate = pResult->getString(2);
 
                 if (ExpireDate.size() == 7) {
-                    
                     if (Rank == GuildMember::GUILDMEMBER_RANK_LEAVE) {
-                        
                         time_t daytime = time(0);
                         tm Time;
                         Time.tm_year = atoi(ExpireDate.substr(0, 3).c_str());
                         Time.tm_mon = atoi(ExpireDate.substr(3, 2).c_str());
                         Time.tm_mday = atoi(ExpireDate.substr(5, 2).c_str());
 
-                        if (difftime(daytime, mktime(&Time)) < 604800) 
-                        {
-                            SAFE_DELETE(pStmt);
-
-                            
+                        if (difftime(daytime, mktime(&Time)) < 604800) {
                             if (pCreature->isSlayer()) {
                                 GCNPCResponse response;
                                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_QUIT_TIMEOUT);
@@ -118,9 +109,6 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
                         }
                     }
                 } else {
-                    SAFE_DELETE(pStmt);
-
-                    
                     if (pCreature->isSlayer()) {
                         GCNPCResponse response;
                         response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_ALREADY_JOIN);
@@ -148,34 +136,28 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
             SkillDomainType_t highest = pSlayer->getHighestSkillDomain();
 
-            if (pSlayer->getSkillDomainLevel(highest) < REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) 
-            {
-                
+            if (pSlayer->getSkillDomainLevel(highest) < REQUIRE_SLAYER_MASTER_SKILL_DOMAIN_LEVEL) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pSlayer->getGold() < REQUIRE_SLAYER_MASTER_GOLD) 
-            {
-                
+            if (pSlayer->getGold() < REQUIRE_SLAYER_MASTER_GOLD) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pSlayer->getFame() < REQUIRE_SLAYER_MASTER_FAME[highest]) 
-            {
-                
+            if (pSlayer->getFame() < REQUIRE_SLAYER_MASTER_FAME[highest]) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_TEAM_REGIST_FAIL_FAME);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            
+
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
             response.setParameter(REQUIRE_SLAYER_MASTER_GOLD);
@@ -184,59 +166,51 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
             Assert(pVampire != NULL);
 
-            
-            if (pVampire->getLevel() < REQUIRE_VAMPIRE_MASTER_LEVEL) 
-            {
-                
+
+            if (pVampire->getLevel() < REQUIRE_VAMPIRE_MASTER_LEVEL) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_CLAN_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pVampire->getGold() < REQUIRE_VAMPIRE_MASTER_GOLD) 
-            {
-                
+            if (pVampire->getGold() < REQUIRE_VAMPIRE_MASTER_GOLD) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_CLAN_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            
+
             //			{
-            
+
             //				GCNPCResponse response;
             //				response.setCode( NPC_RESPONSE_CLAN_REGIST_FAIL_FAME );
             //				pPlayer->sendPacket( &response );
             //
             //				return;
             //			}
-            
+
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
 
-            
+
             response.setParameter(REQUIRE_VAMPIRE_MASTER_GOLD);
-            
+
             pPlayer->sendPacket(&response);
         } else if (pCreature->isOusters()) {
             Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
             Assert(pOusters != NULL);
 
-            
-            if (pOusters->getLevel() < REQUIRE_OUSTERS_MASTER_LEVEL) 
-            {
-                
+
+            if (pOusters->getLevel() < REQUIRE_OUSTERS_MASTER_LEVEL) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_GUILD_REGIST_FAIL_LEVEL);
                 pPlayer->sendPacket(&response);
 
                 return;
             }
-            if (pOusters->getGold() < REQUIRE_OUSTERS_MASTER_GOLD) 
-            {
-                
+            if (pOusters->getGold() < REQUIRE_OUSTERS_MASTER_GOLD) {
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_GUILD_REGIST_FAIL_MONEY);
                 pPlayer->sendPacket(&response);
@@ -244,17 +218,16 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
                 return;
             }
 
-            
+
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_GUILD_SHOW_REGIST);
 
-            
+
             response.setParameter(REQUIRE_OUSTERS_MASTER_GOLD);
-            
+
             pPlayer->sendPacket(&response);
         }
     } else if (m_Type == GUILD_DIALOG_WAIT_LIST) {
-        
         GCWaitGuildList gcWaitGuildList;
 
         //		const HashMapGuild& Guilds = g_pGuildManager->getGuilds_const();
@@ -274,7 +247,6 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
         pPlayer->sendPacket(&gcWaitGuildList);
     } else if (m_Type == GUILD_DIALOG_LIST) {
-        
         GCActiveGuildList gcActiveGuildList;
 
         GuildRace_t race;
@@ -291,26 +263,23 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
 
         pPlayer->sendPacket(&gcActiveGuildList);
     } else if (m_Type == GUILD_DIALOG_QUIT) {
-        
         Guild* pGuild = NULL;
 
         Statement* pStmt = NULL;
-        Result* pResult = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult =
-                pStmt->executeQuery("SELECT GuildID FROM GuildMember WHERE Name = '%s'", pCreature->getName().c_str());
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectGuildIDStmt(pConn, "SELECT GuildID FROM GuildMember WHERE Name = ?");
+            selectGuildIDStmt.bindString(1, pCreature->getName());
+            Result* pResult = selectGuildIDStmt.execute();
 
             if (pResult->next()) {
                 pGuild = g_pGuildManager->getGuild(pResult->getInt(1));
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
 
-        
+
         if (pGuild == NULL ||
             (pGuild->getState() != Guild::GUILD_STATE_ACTIVE && pGuild->getState() != Guild::GUILD_STATE_WAIT)) {
             GCNPCResponse response;
@@ -320,7 +289,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             return;
         }
 
-        
+
         GuildMember* pGuildMember = pGuild->getMember(pCreature->getName());
         if (pGuildMember == NULL) {
             GCNPCResponse response;
@@ -330,7 +299,7 @@ void ActionShowGuildDialog::execute(Creature* pCreature1, Creature* pCreature2)
             return;
         }
 
-        
+
         if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_MASTER &&
             pGuild->getState() == Guild::GUILD_STATE_ACTIVE) {
             GCNPCResponse response;

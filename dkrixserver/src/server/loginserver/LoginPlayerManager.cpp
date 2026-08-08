@@ -17,6 +17,7 @@
 #include "DB.h"
 #include "LogClient.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "ReconnectLoginInfoManager.h"
 #include "Socket.h"
@@ -58,8 +59,7 @@ LoginPlayerManager::~LoginPlayerManager() {
         m_pServerSocket = NULL;
     }
 
-    
-    
+
     //
     if (g_pReconnectLoginInfoManager != NULL) {
         delete g_pReconnectLoginInfoManager;
@@ -78,12 +78,11 @@ LoginPlayerManager::~LoginPlayerManager() {
 void LoginPlayerManager::init() {
     __BEGIN_TRY
 
-    
+
     while (1) {
         try {
-            
             m_pServerSocket = new ServerSocket(g_pConfig->getPropertyInt("LoginServerPort"));
-            
+
             break;
         } catch (BindException& be) {
             SAFE_DELETE(m_pServerSocket);
@@ -92,59 +91,54 @@ void LoginPlayerManager::init() {
         }
     }
 
-    
+
     m_ServerFD = m_pServerSocket->getSOCKET();
 
-    
+
     FD_ZERO(&m_ReadFDs[0]);
     FD_ZERO(&m_WriteFDs[0]);
     FD_ZERO(&m_ExceptFDs[0]);
 
-    
+
     FD_SET(m_ServerFD, &m_ReadFDs[0]);
 
     // set min/max fd
     m_MaxFD = m_MinFD = m_ServerFD;
 
-    
-    
-    
+
     m_Timeout[0].tv_sec = 0;
     m_Timeout[0].tv_usec = 0;
 
     //--------------------------------------------------------------------------------
-    
+
     //--------------------------------------------------------------------------------
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT PlayerID from Player WHERE LogOn = 'LOGON' AND CurrentLoginServerID=%d",
-                                g_pConfig->getPropertyInt("LoginServerID"));
+        PreparedStatement selectLoggedOnPlayersStmt(
+            pConn, "SELECT PlayerID from Player WHERE LogOn = 'LOGON' AND CurrentLoginServerID=?");
+        selectLoggedOnPlayersStmt.bindInt(1, g_pConfig->getPropertyInt("LoginServerID"));
+        Result* pResult = selectLoggedOnPlayersStmt.execute();
 
-        
-        
+
         while (pResult->next()) {
             string playerID = pResult->getString(1);
 
             // cout << "delete from PCRoomUserInfo " << playerID.c_str() << endl;
 
-            pStmt2->executeQuery("DELETE FROM PCRoomUserInfo WHERE PlayerID='%s'", playerID.c_str());
+            PreparedStatement deletePCRoomUserInfoStmt(pConn, "DELETE FROM PCRoomUserInfo WHERE PlayerID=?");
+            deletePCRoomUserInfoStmt.bindString(1, playerID);
+            deletePCRoomUserInfoStmt.execute();
 
             // cout << "delete ok" << endl;
         }
 
-        pStmt->executeQuery("UPDATE Player SET LogOn = 'LOGOFF' WHERE LogOn = 'LOGON' AND CurrentLoginServerID=%d",
-                            g_pConfig->getPropertyInt("LoginServerID"));
-
-        SAFE_DELETE(pStmt);
-        SAFE_DELETE(pStmt2);
+        PreparedStatement updateLogOffStmt(
+            pConn, "UPDATE Player SET LogOn = 'LOGOFF' WHERE LogOn = 'LOGON' AND CurrentLoginServerID=?");
+        updateLogOffStmt.bindInt(1, g_pConfig->getPropertyInt("LoginServerID"));
+        updateLogOffStmt.execute();
     } catch (SQLQueryException& sqe) {
-        SAFE_DELETE(pStmt);
-        SAFE_DELETE(pStmt2);
         throw Error(sqe.toString());
     }
 
@@ -159,23 +153,21 @@ void LoginPlayerManager::select() {
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    
+
     m_Timeout[1].tv_sec = m_Timeout[0].tv_sec;
     m_Timeout[1].tv_usec = m_Timeout[0].tv_usec;
 
-    
+
     m_ReadFDs[1] = m_ReadFDs[0];
     m_WriteFDs[1] = m_WriteFDs[0];
     m_ExceptFDs[1] = m_ExceptFDs[0];
 
     try {
-        
         SocketAPI::select_ex(m_MaxFD + 1, &m_ReadFDs[1], &m_WriteFDs[1], &m_ExceptFDs[1], &m_Timeout[1]);
 
     } catch (TimeoutException) {
         // do nothing
     } catch (InterruptedException& ie) {
-        
         log(LOG_LOGINSERVER, "", "", ie.toString());
     }
 
@@ -201,13 +193,13 @@ void LoginPlayerManager::processExceptions() {
             log(LOG_LOGINSERVER_ERROR, "", "", msg.toString());
             cout << msg.toString() << endl;
 
-            
+
             m_pPlayers[i]->disconnect(UNDISCONNECTED);
 
-            
+
             delete m_pPlayers[i];
 
-            
+
             deletePlayer_NOLOCKED(i);
         }
     }
@@ -228,7 +220,6 @@ void LoginPlayerManager::processInputs() {
     for (int i = m_MinFD; i <= m_MaxFD; i++) {
         if (FD_ISSET(i, &m_ReadFDs[1])) {
             if (i == m_ServerFD) {
-                
                 acceptNewConnection();
 
             } else {
@@ -236,31 +227,28 @@ void LoginPlayerManager::processInputs() {
 
                 try {
                     if (m_pPlayers[i]->getSocket()->getSockError()) {
-                        
                         m_pPlayers[i]->disconnect(DISCONNECTED);
 
-                        
+
                         delete m_pPlayers[i];
 
-                        
+
                         deletePlayer_NOLOCKED(i);
                     } else {
                         m_pPlayers[i]->processInput();
                     }
 
                 } catch (ConnectException& ce) {
-                    
-
                     cout << ce.toString() << endl;
                     log(LOG_LOGINSERVER_ERROR, "", ce.toString());
 
-                    
+
                     m_pPlayers[i]->disconnect(DISCONNECTED);
 
-                    
+
                     delete m_pPlayers[i];
 
-                    
+
                     deletePlayer_NOLOCKED(i);
                 }
             }
@@ -280,8 +268,6 @@ void LoginPlayerManager::processCommands() {
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    
-    
 
     for (int i = m_MinFD; i <= m_MaxFD; i++) {
         if (m_pPlayers[i] != NULL && i != m_ServerFD) {
@@ -290,8 +276,7 @@ void LoginPlayerManager::processCommands() {
 
                 // LoginPlayer* pLoginPlayer = dynamic_cast<LoginPlayer*>(m_pPlayers[i]);
 
-                
-                
+
                 // if (!pLoginPlayer->isBillingLoginVerified())
                 //{
                 // pLoginPlayer->sendBillingLogin();
@@ -301,15 +286,13 @@ void LoginPlayerManager::processCommands() {
                 m_pPlayers[i]->processCommand();
             } catch (ProtocolException& pe) {
                 //--------------------------------------------------
-                
+
                 //
-                
-                
-                
+
+
                 //
-                
-                
-                
+
+
                 //
                 //--------------------------------------------------
 
@@ -318,23 +301,23 @@ void LoginPlayerManager::processCommands() {
 
                 m_pPlayers[i]->disconnect(UNDISCONNECTED);
 
-                
+
                 delete m_pPlayers[i];
 
-                
+
                 deletePlayer_NOLOCKED(i);
             }
-            
+
             catch (ConnectException& ce) {
                 cout << ce.toString() << endl;
                 log(LOG_LOGINSERVER_ERROR, "", "", ce.toString());
 
                 m_pPlayers[i]->disconnect(DISCONNECTED);
 
-                
+
                 delete m_pPlayers[i];
 
-                
+
                 deletePlayer_NOLOCKED(i);
             }
         }
@@ -364,26 +347,26 @@ void LoginPlayerManager::processOutputs() {
                 cout << ce.toString() << endl;
                 log(LOG_LOGINSERVER_ERROR, "", "", ce.toString());
 
-                
+
                 m_pPlayers[i]->disconnect(DISCONNECTED);
 
-                
+
                 delete m_pPlayers[i];
 
-                
+
                 deletePlayer_NOLOCKED(i);
 
             } catch (ProtocolException& pe) {
                 cout << pe.toString() << endl;
                 log(LOG_LOGINSERVER_ERROR, "", "", pe.toString());
 
-                
+
                 m_pPlayers[i]->disconnect(DISCONNECTED);
 
-                
+
                 delete m_pPlayers[i];
 
-                
+
                 deletePlayer_NOLOCKED(i);
             }
         }
@@ -408,9 +391,7 @@ void LoginPlayerManager::processOutputs() {
 void LoginPlayerManager::acceptNewConnection() {
     __BEGIN_TRY
 
-    
-    
-    
+
     Socket* client = NULL;
 
     try {
@@ -418,9 +399,7 @@ void LoginPlayerManager::acceptNewConnection() {
     } catch (Throwable& t) {
     }
 
-    
-    
-    
+
     if (client == NULL)
         return;
 
@@ -444,7 +423,7 @@ void LoginPlayerManager::acceptNewConnection() {
     cerr << "NEW CONNECTION FROM " << client->getHost() << ":" << client->getPort() << endl;
 
     //--------------------------------------------------
-    
+
     //--------------------------------------------------
     /*
     if ( g_pBanManager->isBanned( client->getHost() ) ) {
@@ -458,14 +437,14 @@ void LoginPlayerManager::acceptNewConnection() {
     // set socket option ( !NonBlocking, NoLinger )
     client->setLinger(0);
 
-    
+
     LoginPlayer* pPlayer = new LoginPlayer(client);
 
     // set player status to PLAYER_LOGON
     Assert(pPlayer->getPlayerStatus() == LPS_NONE);
     pPlayer->setPlayerStatus(LPS_BEGIN_SESSION);
 
-    
+
     addPlayer_NOLOCKED(pPlayer);
 
     __END_CATCH
@@ -486,12 +465,11 @@ void LoginPlayerManager::addPlayer_NOLOCKED(Player* pPlayer) {
 
     SOCKET fd = pPlayer->getSocket()->getSOCKET();
 
-    
+
     m_MinFD = min(fd, m_MinFD);
     m_MaxFD = max(fd, m_MaxFD);
 
-    
-    
+
     FD_SET(fd, &m_ReadFDs[0]);
     FD_SET(fd, &m_WriteFDs[0]);
     FD_SET(fd, &m_ExceptFDs[0]);
@@ -526,11 +504,8 @@ void LoginPlayerManager::deletePlayer_NOLOCKED(SOCKET fd) {
 
     Assert(m_pPlayers[fd] == NULL);
 
-    
-    
+
     if (fd == m_MinFD) {
-        
-        
         int i = m_MinFD;
         for (; i <= m_MaxFD; i++) {
             if (m_pPlayers[i] != NULL || i == m_ServerFD) {
@@ -539,15 +514,11 @@ void LoginPlayerManager::deletePlayer_NOLOCKED(SOCKET fd) {
             }
         }
 
-        
-        
-        
+
         if (i > m_MaxFD)
             m_MinFD = m_MaxFD = -1;
 
     } else if (fd == m_MaxFD) {
-        
-        
         int i = m_MaxFD;
         for (; i >= m_MinFD; i--) {
             if (m_pPlayers[i] != NULL || i == m_ServerFD) {
@@ -556,15 +527,13 @@ void LoginPlayerManager::deletePlayer_NOLOCKED(SOCKET fd) {
             }
         }
 
-        
+
         if (i < m_MinFD) {
             throw UnknownError("m_MinFD & m_MaxFD problem.");
         }
     }
 
-    
-    
-    
+
     FD_CLR(fd, &m_ReadFDs[0]);
     FD_CLR(fd, &m_ReadFDs[1]);
     FD_CLR(fd, &m_WriteFDs[0]);

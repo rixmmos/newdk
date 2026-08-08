@@ -4,6 +4,7 @@
 #include "GCTimeLimitItemInfo.h"
 #include "Item.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 
 TimeLimitItemManager::~TimeLimitItemManager() {
     TableRecordList::iterator itr = m_TableRecords.begin();
@@ -25,10 +26,12 @@ void TimeLimitItemManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemClass, ItemID, LimitDateTime from TimeLimitItems where OwnerID='%s' and Status=%u",
-            m_pOwnerPC->getName().c_str(), (uint)VALID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectTimeLimitStmt(
+            pConn, "SELECT ItemClass, ItemID, LimitDateTime from TimeLimitItems where OwnerID=? and Status=?");
+        selectTimeLimitStmt.bindString(1, m_pOwnerPC->getName());
+        selectTimeLimitStmt.bindUInt(2, (uint)VALID);
+        Result* pResult = selectTimeLimitStmt.execute();
 
         while (pResult->next()) {
             TableRecord* pTableRecord = new TableRecord;
@@ -41,8 +44,6 @@ void TimeLimitItemManager::load()
 
             m_TableRecords.push_back(pTableRecord);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -50,9 +51,6 @@ void TimeLimitItemManager::load()
 
     __END_CATCH
 }
-
-
-
 
 
 bool TimeLimitItemManager::registerItem(Item* pItem)
@@ -95,17 +93,15 @@ bool TimeLimitItemManager::checkTimeLimit(Item* pItem)
 
     if (itr == m_ItemTimeLimits.end()) {
         if (!registerItem(pItem)) {
-            
-            
             return true;
         }
     }
 
     VSDateTime currentTime = VSDateTime::currentDateTime();
     if (currentTime > m_ItemTimeLimits[objectID]) {
-        cout << pItem->toString() << "   : " << currentTime.toString() << " > "
-             << m_ItemTimeLimits[objectID].toString() << endl;
-        
+        cout << pItem->toString() << "   : " << currentTime.toString() << " > " << m_ItemTimeLimits[objectID].toString()
+             << endl;
+
         return false;
     }
 
@@ -125,17 +121,18 @@ bool TimeLimitItemManager::wasteIfTimeOver(Item* pItem)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE TimeLimitItems SET Status=%u where OwnerID='%s' and ItemClass=%u and ItemID=%u",
-                            (uint)EXPIRED, m_pOwnerPC->getName().c_str(), (uint)pItem->getItemClass(),
-                            (uint)pItem->getItemID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateStatusStmt(
+            pConn, "UPDATE TimeLimitItems SET Status=? where OwnerID=? and ItemClass=? and ItemID=?");
+        updateStatusStmt.bindUInt(1, (uint)EXPIRED);
+        updateStatusStmt.bindString(2, m_pOwnerPC->getName());
+        updateStatusStmt.bindUInt(3, (uint)pItem->getItemClass());
+        updateStatusStmt.bindUInt(4, (uint)pItem->getItemID());
+        updateStatusStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (updateStatusStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -201,13 +198,14 @@ void TimeLimitItemManager::addTimeLimitItem(Item* pItem, DWORD time)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "INSERT INTO TimeLimitItems (OwnerID, ItemClass, ItemID, LimitDateTime) VALUES ('%s',%u,%u,'%s')",
-            m_pOwnerPC->getName().c_str(), (uint)pItem->getItemClass(), (uint)pItem->getItemID(),
-            timeLimit.toDateTime().c_str());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertTimeLimitStmt(
+            pConn, "INSERT INTO TimeLimitItems (OwnerID, ItemClass, ItemID, LimitDateTime) VALUES (?,?,?,?)");
+        insertTimeLimitStmt.bindString(1, m_pOwnerPC->getName());
+        insertTimeLimitStmt.bindUInt(2, (uint)pItem->getItemClass());
+        insertTimeLimitStmt.bindUInt(3, (uint)pItem->getItemID());
+        insertTimeLimitStmt.bindString(4, timeLimit.toDateTime());
+        insertTimeLimitStmt.execute();
     }
     END_DB(pStmt)
 
@@ -233,17 +231,18 @@ bool TimeLimitItemManager::changeStatus(Item* pItem, TimeLimitStatus status) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE TimeLimitItems SET Status=%u where OwnerID='%s' and ItemClass=%u and ItemID=%u",
-                            (uint)status, m_pOwnerPC->getName().c_str(), (uint)pItem->getItemClass(),
-                            (uint)pItem->getItemID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateStatusStmt(
+            pConn, "UPDATE TimeLimitItems SET Status=? where OwnerID=? and ItemClass=? and ItemID=?");
+        updateStatusStmt.bindUInt(1, (uint)status);
+        updateStatusStmt.bindString(2, m_pOwnerPC->getName());
+        updateStatusStmt.bindUInt(3, (uint)pItem->getItemClass());
+        updateStatusStmt.bindUInt(4, (uint)pItem->getItemID());
+        updateStatusStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (updateStatusStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -261,10 +260,9 @@ bool TimeLimitItemManager::changeStatus(Item* pItem, TimeLimitStatus status) {
     }
 
     if (!erased)
-        filelog("QuestItem.log", "[%u,%u] :      .",
-                (uint)pItem->getItemClass(), (uint)pItem->getItemID());
+        filelog("QuestItem.log", "[%u,%u] :      .", (uint)pItem->getItemClass(), (uint)pItem->getItemID());
 
-    
+
     ItemTimeLimitMap::iterator itr2 = m_ItemTimeLimits.find(pItem->getObjectID());
 
     if (itr2 != m_ItemTimeLimits.end()) {

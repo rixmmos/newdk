@@ -20,6 +20,7 @@
 #include "LogClient.h"
 #include "NPC.h"
 #include "OptionInfo.h"
+#include "PreparedStatement.h"
 #include "ShopTemplate.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,26 +62,25 @@ void ActionRegenEventShop::read(PropertyBuffer& propertyBuffer)
         // read NPC id
         int NPCID = propertyBuffer.getPropertyInt("NPCID");
         Statement* pStmt = NULL;
-        Result* pResult = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult = pStmt->executeQuery("SELECT ID from ShopTemplate where NPCID = %d", NPCID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectShopTemplateStmt(pConn, "SELECT ID from ShopTemplate where NPCID = ?");
+            selectShopTemplateStmt.bindInt(1, NPCID);
+            Result* pResult = selectShopTemplateStmt.execute();
 
             while (pResult->next()) {
                 ShopTemplateID_t id = pResult->getInt(1);
                 addListElement(id);
             }
-
-            delete pStmt;
         }
         END_DB(pStmt)
 
-        
+
         int nSecond = propertyBuffer.getPropertyInt("Period");
         m_Period.tv_sec = nSecond;
 
-        
+
         Timeval currentTime;
         getCurrentTime(currentTime);
         m_NextRegen = currentTime;
@@ -107,48 +107,47 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
     NPC* pNPC = dynamic_cast<NPC*>(pCreature1);
     Assert(pNPC != NULL);
 
-    
+
     pNPC->setShopType(SHOPTYPE_EVENT);
 
     Zone* pZone = pNPC->getZone();
     Assert(pZone != NULL);
 
-    
+
     Timeval currentTime;
     getCurrentTime(currentTime);
 
-    
+
     if (currentTime < m_NextRegen)
         return;
 
-    
+
     VSRect rect(0, 0, pZone->getWidth() - 1, pZone->getHeight() - 1);
     int centerX = pNPC->getX();
     int centerY = pNPC->getY();
     try {
         for (int zx = centerX - 5; zx <= centerX + 5; zx++) {
             for (int zy = centerY - 5; zy <= centerY + 5; zy++) {
-                
                 if (!rect.ptInRect(zx, zy)) {
                     continue;
                 }
 
                 Tile& tile = pZone->getTile(zx, zy);
 
-                
+
                 if (tile.hasCreature(Creature::MOVE_MODE_WALKING)) {
                     Creature* pNearCreature = tile.getCreature(Creature::MOVE_MODE_WALKING);
                     Assert(pNearCreature != NULL);
-                    
+
                     if (pNearCreature->isPC()) {
                         return;
                     }
                 }
-                
+
                 if (tile.hasCreature(Creature::MOVE_MODE_FLYING)) {
                     Creature* pNearCreature = tile.getCreature(Creature::MOVE_MODE_FLYING);
                     Assert(pNearCreature != NULL);
-                    
+
                     if (pNearCreature->isPC()) {
                         return;
                     }
@@ -160,8 +159,7 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
         return;
     }
 
-    
-    
+
     for (ShopRackType_t rackType = 0; rackType < SHOP_RACK_TYPE_MAX; rackType++) {
         for (BYTE rackIndex = 0; rackIndex < SHOP_RACK_INDEX_MAX; rackIndex++) {
             Item* pShopItem = pNPC->getShopItem(rackType, rackIndex);
@@ -175,7 +173,7 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
     for (int i = 0; i < SHOP_RACK_TYPE_MAX; i++)
         pNPC->increaseShopVersion(i);
 
-    
+
     list<ShopTemplateID_t> IDList[SHOP_RACK_TYPE_MAX];
     int combi[SHOP_RACK_TYPE_MAX] = {0, 0, 0};
     int count[SHOP_RACK_TYPE_MAX] = {0, 0, 0};
@@ -187,11 +185,7 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
     uint minOptionLevel, maxOptionLevel;
     OptionType_t optionType;
 
-    
-    
-    
-    
-    
+
     for (list<ShopTemplateID_t>::const_iterator itr = m_List.begin(); itr != m_List.end(); itr++) {
         pTemplate = g_pShopTemplateManager->getTemplate((*itr));
 
@@ -202,32 +196,23 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
         minItemType = pTemplate->getMinItemType();
         maxItemType = pTemplate->getMaxItemType();
 
-        
-        
-        
+
         IDList[shopType].push_back(*itr);
         combi[shopType] += (maxItemType - minItemType + 1);
     }
 
-    
+
     for (ShopRackType_t i = 0; i < SHOP_RACK_TYPE_MAX; i++) {
-        
-        
-        
-        
-        
         if (combi[i] == 0)
             trialMax = 0;
         else
             trialMax = (int)(floor(SHOP_RACK_INDEX_MAX / combi[i]));
 
-        
-        
+
         if (i == SHOP_RACK_NORMAL || i == SHOP_RACK_MYSTERIOUS)
             trialMax = 1;
 
-        
-        
+
         for (list<ShopTemplateID_t>::const_iterator itr = IDList[i].begin(); itr != IDList[i].end(); itr++) {
             pTemplate = g_pShopTemplateManager->getTemplate((*itr));
             itemClass = pTemplate->getItemClass();
@@ -236,12 +221,11 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
             minOptionLevel = pTemplate->getMinOptionLevel();
             maxOptionLevel = pTemplate->getMaxOptionLevel();
 
-            
+
             // vector<OptionType_t> optionVector =
             // g_pOptionInfoManager->getPossibleOptionVector((Item::ItemClass)itemClass, minOptionLevel,
             // maxOptionLevel);
-            
-            
+
 
             vector<OptionType_t> optionVector;
             if (minItemType == 2 && maxItemType == 3) {
@@ -265,15 +249,10 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
             }
 
             for (ItemType_t type = minItemType; type <= maxItemType; type++) {
-                
-                
-                
-                
                 for (int tc = 0; tc < trialMax; tc++) {
                     itemType = type;
 
-                    
-                    
+
                     if (optionVector.size() > 0) {
                         int randValue = rand();
                         int size = optionVector.size();
@@ -283,7 +262,7 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
                     } else
                         optionType = 0;
 
-                    
+
                     Item::ItemClass IClass = Item::ItemClass(itemClass);
                     list<OptionType_t> optionTypes;
                     if (optionType != 0)
@@ -291,10 +270,10 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
                     Item* pItem = g_pItemFactoryManager->createItem(IClass, itemType, optionTypes);
                     Assert(pItem != NULL);
 
-                    
+
                     (pZone->getObjectRegistry()).registerObject(pItem);
 
-                    
+
                     if (count[i] < SHOP_RACK_INDEX_MAX) {
                         pNPC->insertShopItem(i, count[i], pItem);
                         count[i] = count[i] + 1;
@@ -304,7 +283,7 @@ void ActionRegenEventShop::execute(Creature* pCreature1, Creature* pCreature2)
         }
     }
 
-    
+
     m_NextRegen = m_NextRegen + m_Period;
 
     __END_CATCH

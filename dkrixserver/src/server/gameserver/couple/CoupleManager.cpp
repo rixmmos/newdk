@@ -3,6 +3,7 @@
 #include "DB.h"
 #include "DatabaseManager.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 
 bool CoupleManager::isCouple(PlayerCreature* pPC1, string name2) {
     __BEGIN_TRY
@@ -13,18 +14,21 @@ bool CoupleManager::isCouple(PlayerCreature* pPC1, string name2) {
     bool bRet = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT count(*) FROM CoupleInfo where %s='%s' and %s='%s'",
-                                              getFieldName(pPC1->getSex()).c_str(), pPC1->getName().c_str(),
-                                              getCounterFieldName(pPC1->getSex()).c_str(), name2.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement selectCountStmt(pConn, "SELECT count(*) FROM CoupleInfo where " +
+                                                     getFieldName(pPC1->getSex()) + "=? and " +
+                                                     getCounterFieldName(pPC1->getSex()) + "=?");
+        selectCountStmt.bindString(1, pPC1->getName());
+        selectCountStmt.bindString(2, name2);
+        Result* pResult = selectCountStmt.execute();
 
         if (pResult->next()) {
             int num = pResult->getInt(1);
             if (num >= 1)
                 bRet = true;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -46,18 +50,21 @@ bool CoupleManager::isCouple(PlayerCreature* pPC1, PlayerCreature* pPC2) {
     bool bRet = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT count(*) FROM CoupleInfo where %s='%s' and %s='%s'",
-                                              getFieldName(pPC1->getSex()).c_str(), pPC1->getName().c_str(),
-                                              getFieldName(pPC2->getSex()).c_str(), pPC2->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement selectCountStmt(pConn, "SELECT count(*) FROM CoupleInfo where " +
+                                                     getFieldName(pPC1->getSex()) + "=? and " +
+                                                     getFieldName(pPC2->getSex()) + "=?");
+        selectCountStmt.bindString(1, pPC1->getName());
+        selectCountStmt.bindString(2, pPC2->getName());
+        Result* pResult = selectCountStmt.execute();
 
         if (pResult->next()) {
             int num = pResult->getInt(1);
             if (num >= 1)
                 bRet = true;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -75,17 +82,19 @@ bool CoupleManager::hasCouple(PlayerCreature* pPC) {
     bool bRet = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT count(*) FROM CoupleInfo where %s='%s'",
-                                              getFieldName(pPC->getSex()).c_str(), pPC->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field name comes from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement selectCountStmt(pConn, "SELECT count(*) FROM CoupleInfo where " +
+                                                     getFieldName(pPC->getSex()) + "=?");
+        selectCountStmt.bindString(1, pPC->getName());
+        Result* pResult = selectCountStmt.execute();
 
         if (pResult->next()) {
             int num = pResult->getInt(1);
             if (num >= 1)
                 bRet = true;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -103,17 +112,18 @@ bool CoupleManager::getPartnerName(PlayerCreature* pPC, string& partnerName) {
     bool bRet = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT %s FROM CoupleInfo where %s='%s'", getCounterFieldName(pPC->getSex()).c_str(),
-                                getFieldName(pPC->getSex()).c_str(), pPC->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement selectPartnerStmt(pConn, "SELECT " + getCounterFieldName(pPC->getSex()) +
+                                                       " FROM CoupleInfo where " + getFieldName(pPC->getSex()) + "=?");
+        selectPartnerStmt.bindString(1, pPC->getName());
+        Result* pResult = selectPartnerStmt.execute();
 
         if (pResult->next()) {
             partnerName = pResult->getString(1);
             bRet = true;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -134,12 +144,16 @@ void CoupleManager::makeCouple(PlayerCreature* pPC1, PlayerCreature* pPC2) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO CoupleInfo (%s, %s, Race, CoupleDate ) VALUES ('%s','%s',%u, now())",
-                            getFieldName(pPC1->getSex()).c_str(), getFieldName(pPC2->getSex()).c_str(),
-                            pPC1->getName().c_str(), pPC2->getName().c_str(), (uint)pPC1->getRace());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement insertCoupleStmt(pConn, "INSERT INTO CoupleInfo (" + getFieldName(pPC1->getSex()) + ", " +
+                                                      getFieldName(pPC2->getSex()) +
+                                                      ", Race, CoupleDate ) VALUES (?,?,?, now())");
+        insertCoupleStmt.bindString(1, pPC1->getName());
+        insertCoupleStmt.bindString(2, pPC2->getName());
+        insertCoupleStmt.bindUInt(3, (uint)pPC1->getRace());
+        insertCoupleStmt.execute();
     }
     END_DB(pStmt)
 
@@ -158,12 +172,15 @@ void CoupleManager::removeCouple(PlayerCreature* pPC1, PlayerCreature* pPC2) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM CoupleInfo WHERE %s='%s' AND %s='%s' AND Race=%u",
-                            getFieldName(pPC1->getSex()).c_str(), pPC1->getName().c_str(),
-                            getFieldName(pPC2->getSex()).c_str(), pPC2->getName().c_str(), (uint)pPC1->getRace());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement deleteCoupleStmt(pConn, "DELETE FROM CoupleInfo WHERE " + getFieldName(pPC1->getSex()) +
+                                                      "=? AND " + getFieldName(pPC2->getSex()) + "=? AND Race=?");
+        deleteCoupleStmt.bindString(1, pPC1->getName());
+        deleteCoupleStmt.bindString(2, pPC2->getName());
+        deleteCoupleStmt.bindUInt(3, (uint)pPC1->getRace());
+        deleteCoupleStmt.execute();
     }
     END_DB(pStmt)
 
@@ -178,11 +195,16 @@ void CoupleManager::removeCoupleForce(PlayerCreature* pPC1, string strPC2) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM CoupleInfo where %s='%s' AND %s='%s' AND Race=%u",
-                            getFieldName(pPC1->getSex()).c_str(), pPC1->getName().c_str(),
-                            getCounterFieldName(pPC1->getSex()).c_str(), strPC2.c_str(), (uint)(pPC1->getRace()));
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field names come from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement deleteCoupleStmt(pConn, "DELETE FROM CoupleInfo where " + getFieldName(pPC1->getSex()) +
+                                                      "=? AND " + getCounterFieldName(pPC1->getSex()) +
+                                                      "=? AND Race=?");
+        deleteCoupleStmt.bindString(1, pPC1->getName());
+        deleteCoupleStmt.bindString(2, strPC2);
+        deleteCoupleStmt.bindUInt(3, (uint)(pPC1->getRace()));
+        deleteCoupleStmt.execute();
     }
     END_DB(pStmt)
 
@@ -197,10 +219,14 @@ void CoupleManager::removeCoupleForce(PlayerCreature* pPC1) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM CoupleInfo where %s='%s' AND Race=%u", getFieldName(pPC1->getSex()).c_str(),
-                            pPC1->getName().c_str(), (uint)(pPC1->getRace()));
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // Field name comes from a fixed 2-entry lookup table keyed by Sex, never
+        // from packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement deleteCoupleStmt(pConn, "DELETE FROM CoupleInfo where " + getFieldName(pPC1->getSex()) +
+                                                      "=? AND Race=?");
+        deleteCoupleStmt.bindString(1, pPC1->getName());
+        deleteCoupleStmt.bindUInt(2, (uint)(pPC1->getRace()));
+        deleteCoupleStmt.execute();
     }
     END_DB(pStmt)
 

@@ -27,6 +27,7 @@
 #include "PaySystem.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "Socket.h"
 #include "SocketAPI.h"
@@ -68,10 +69,9 @@ IncomingPlayerManager::IncomingPlayerManager()
 
         m_pServerSocket->setNonBlocking(true);
 
-        
+
         m_SocketID = m_pServerSocket->getSOCKET();
     } catch (NoSuchElementException& nsee) {
-        
         throw Error(nsee.toString());
     }
 
@@ -105,25 +105,22 @@ void IncomingPlayerManager::init()
 {
     __BEGIN_TRY
 
-    
+
     FD_ZERO(&m_ReadFDs[0]);
     FD_ZERO(&m_WriteFDs[0]);
     FD_ZERO(&m_ExceptFDs[0]);
 
-    
+
     FD_SET(m_SocketID, &m_ReadFDs[0]);
     FD_SET(m_SocketID, &m_ExceptFDs[0]);
 
     // set min/max fd
     m_MinFD = m_MaxFD = m_SocketID;
 
-    
-    
-    
+
     m_Timeout[0].tv_sec = 0;
     m_Timeout[0].tv_usec = 0;
 
-     
 
     string dist_host = g_pConfig->getProperty("UI_DB_HOST");
     string dist_db = "DARKEDEN";
@@ -140,46 +137,45 @@ void IncomingPlayerManager::init()
     cout << " TID Number = " << (int)(long)Thread::self() << endl;
     cout << "******************************************************" << endl;
 
-     
 
-    
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
     BEGIN_DB {
         // pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
 
         // pStmt = g_pDatabaseManager->getDistConnection( (int)(long)Thread::self() )->createStatement();
         // pStmt2 = g_pDatabaseManager->getDistConnection( (int)(long)Thread::self() )->createStatement();
 
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        pStmt2 = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        Result* pResult = pStmt->executeQuery(
-            "SELECT PlayerID from Player WHERE LogOn='GAME' AND CurrentWorldID=%d AND CurrentServerGroupID=%d",
-            g_pConfig->getPropertyInt("WorldID"), g_pConfig->getPropertyInt("ServerID"));
+        PreparedStatement selectStmt(
+            pConn, "SELECT PlayerID from Player WHERE LogOn='GAME' AND CurrentWorldID=? AND CurrentServerGroupID=?");
+        selectStmt.bindInt(1, g_pConfig->getPropertyInt("WorldID"));
+        selectStmt.bindInt(2, g_pConfig->getPropertyInt("ServerID"));
+        Result* pResult = selectStmt.execute();
 
-        
-        
+
         while (pResult->next()) {
             string playerID = pResult->getString(1);
 
-            pStmt2->executeQuery("DELETE FROM PCRoomUserInfo WHERE PlayerID='%s'", playerID.c_str());
+            PreparedStatement deleteStmt(pConn, "DELETE FROM PCRoomUserInfo WHERE PlayerID=?");
+            deleteStmt.bindString(1, playerID);
+            deleteStmt.execute();
         }
 
-        pStmt->executeQuery(
-            "UPDATE Player SET LogOn = 'LOGOFF' WHERE LogOn = 'GAME' AND CurrentWorldID=%d AND CurrentServerGroupID=%d",
-            g_pConfig->getPropertyInt("WorldID"), g_pConfig->getPropertyInt("ServerID"));
-
-         
-        SAFE_DELETE(pStmt);
-        SAFE_DELETE(pStmt2);
+        PreparedStatement updateStmt(pConn,
+                                     "UPDATE Player SET LogOn = 'LOGOFF' WHERE LogOn = 'GAME' AND CurrentWorldID=? "
+                                     "AND CurrentServerGroupID=?");
+        updateStmt.bindInt(1, g_pConfig->getPropertyInt("WorldID"));
+        updateStmt.bindInt(2, g_pConfig->getPropertyInt("ServerID"));
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM UserIPInfo WHERE ServerID = %d", g_pConfig->getPropertyInt("ServerID"));
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteStmt(pConn, "DELETE FROM UserIPInfo WHERE ServerID = ?");
+        deleteStmt.bindInt(1, g_pConfig->getPropertyInt("ServerID"));
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -233,22 +229,20 @@ void IncomingPlayerManager::select() {
 
     //__ENTER_CRITICAL_SECTION(m_Mutex)
 
-    
+
     m_Timeout[1].tv_sec = m_Timeout[0].tv_sec;
     m_Timeout[1].tv_usec = m_Timeout[0].tv_usec;
 
-    
+
     m_ReadFDs[1] = m_ReadFDs[0];
     m_WriteFDs[1] = m_WriteFDs[0];
     m_ExceptFDs[1] = m_ExceptFDs[0];
 
     try {
-        
         SocketAPI::select_ex(m_MaxFD + 1, &m_ReadFDs[1], &m_WriteFDs[1], &m_ExceptFDs[1], &m_Timeout[1]);
     }
-     
+
     catch (InterruptedException& ie) {
-        
         log(LOG_GAMESERVER_ERROR, "", "", ie.toString());
     }
 
@@ -260,7 +254,6 @@ void IncomingPlayerManager::select() {
 
 //////////////////////////////////////////////////////////////////////////////
 // process all players' inputs
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -280,10 +273,8 @@ void IncomingPlayerManager::processInputs() {
     for (int i = m_MinFD; i <= m_MaxFD; i++) {
         if (FD_ISSET(i, &m_ReadFDs[1])) {
             if (i == m_SocketID) {
-                
                 // by sigi. 2002.12.8
-                for (int i = 0; i < 50; i++) 
-                {
+                for (int i = 0; i < 50; i++) {
                     if (!acceptNewConnection())
                         break;
                 }
@@ -298,7 +289,6 @@ void IncomingPlayerManager::processInputs() {
                                                     pTempPlayer->getID().c_str(), (int)pTempPlayer->getPlayerStatus());
 
                         try {
-                            
                             pTempPlayer->disconnect(DISCONNECTED);
                         } catch (Throwable& t) {
                             cerr << t.toString() << endl;
@@ -309,10 +299,7 @@ void IncomingPlayerManager::processInputs() {
                         //						UserGateway::getInstance()->passUser(
                         // UserGateway::USER_OUT_INCOMING_INPUT_ERROR );
 
-                        
-                        
-                        
-                        
+
                         try {
                             deletePlayer(i);
                             deleteQueuePlayer(pTempPlayer);
@@ -333,9 +320,8 @@ void IncomingPlayerManager::processInputs() {
                                                         "[Input] %s, PlayerID : %s, PlayerStatus : %d",
                                                         ce.toString().c_str(), pTempPlayer->getID().c_str(),
                                                         (int)pTempPlayer->getPlayerStatus());
-                            
-                            
-                            
+
+
                             try {
                                 pTempPlayer->disconnect();
                             } catch (Throwable& t) {
@@ -346,10 +332,7 @@ void IncomingPlayerManager::processInputs() {
                             //							UserGateway::getInstance()->passUser(
                             // UserGateway::USER_OUT_INCOMING_INPUT_DISCONNECT );
 
-                            
-                            
-                            
-                            
+
                             try {
                                 deletePlayer(i);
                                 deleteQueuePlayer(pTempPlayer);
@@ -403,7 +386,6 @@ void IncomingPlayerManager::processCommands() {
                 FILELOG_INCOMING_CONNECTION("ICMPCSocketErr.log", "[Command] PlayerID : %s, PlayerStatus : %d",
                                             pTempPlayer->getID().c_str(), (int)pTempPlayer->getPlayerStatus());
                 try {
-                    
                     pTempPlayer->disconnect();
                 } catch (Throwable& t) {
                     cerr << t.toString() << endl;
@@ -412,10 +394,7 @@ void IncomingPlayerManager::processCommands() {
                 // by sigi. 2002.12.30
                 //				UserGateway::getInstance()->passUser( UserGateway::USER_OUT_INCOMING_COMMAND_ERROR );
 
-                
-                
-                
-                
+
                 try {
                     deletePlayer(i);
                     deleteQueuePlayer(pTempPlayer);
@@ -450,10 +429,7 @@ void IncomingPlayerManager::processCommands() {
                     //					UserGateway::getInstance()->passUser(
                     // UserGateway::USER_OUT_INCOMING_COMMAND_DISCONNECT );
 
-                    
-                    
-                    
-                    
+
                     try {
                         deletePlayer(i);
                         deleteQueuePlayer(pTempPlayer);
@@ -520,7 +496,6 @@ void IncomingPlayerManager::processOutputs() {
                     FILELOG_INCOMING_CONNECTION("ICMPOSocketErr.log", "[Output] PlayerID : %s, PlayerStatus : %d",
                                                 pTempPlayer->getID().c_str(), (int)pTempPlayer->getPlayerStatus());
                     try {
-                        
                         pTempPlayer->disconnect(DISCONNECTED);
                     } catch (Throwable& t) {
                         cerr << t.toString() << endl;
@@ -530,10 +505,7 @@ void IncomingPlayerManager::processOutputs() {
                     //					UserGateway::getInstance()->passUser(
                     // UserGateway::USER_OUT_INCOMING_OUTPUT_ERROR );
 
-                    
-                    
-                    
-                    
+
                     try {
                         deletePlayer(i);
                         deleteQueuePlayer(pTempPlayer);
@@ -558,7 +530,6 @@ void IncomingPlayerManager::processOutputs() {
                         log(LOG_GAMESERVER_ERROR, "", "", msg.toString());
 
                         try {
-                            
                             pTempPlayer->disconnect(DISCONNECTED);
                         } catch (Throwable& t) {
                             cerr << t.toString() << endl;
@@ -568,10 +539,7 @@ void IncomingPlayerManager::processOutputs() {
                         //						UserGateway::getInstance()->passUser(
                         // UserGateway::USER_OUT_INCOMING_OUTPUT_DISCONNECT );
 
-                        
-                        
-                        
-                        
+
                         try {
                             deletePlayer(i);
                             deleteQueuePlayer(pTempPlayer);
@@ -592,7 +560,6 @@ void IncomingPlayerManager::processOutputs() {
                         msg << "DISCONNECT " << pTempPlayer->getID() << "(" << cp.toString() << ")";
                         log(LOG_GAMESERVER_ERROR, "", "", cp.toString());
 
-                        
 
                         try {
                             pTempPlayer->disconnect(DISCONNECTED);
@@ -604,10 +571,7 @@ void IncomingPlayerManager::processOutputs() {
                         //						UserGateway::getInstance()->passUser(
                         // UserGateway::USER_OUT_INCOMING_OUTPUT_DISCONNECT2 );
 
-                        
-                        
-                        
-                        
+
                         try {
                             deletePlayer(i);
                             deleteQueuePlayer(pTempPlayer);
@@ -676,10 +640,7 @@ void IncomingPlayerManager::processExceptions() {
                     //					UserGateway::getInstance()->passUser( UserGateway::USER_OUT_INCOMING_EXCEPTION
                     //);
 
-                    
-                    
-                    
-                    
+
                     try {
                         deletePlayer(i);
                         deleteQueuePlayer(pTempPlayer);
@@ -719,9 +680,7 @@ bool IncomingPlayerManager::acceptNewConnection()
     int MinFD = (int)m_MinFD;
     int MaxFD = (int)m_MaxFD;
 
-    
-    
-    
+
     Socket* client = NULL;
 
     try {
@@ -749,9 +708,7 @@ bool IncomingPlayerManager::acceptNewConnection()
             throw Error();
         }
 
-        
-        
-        
+
         if (client->getSockError()) {
             m_CheckValue = 4;
             throw Error();
@@ -761,9 +718,7 @@ bool IncomingPlayerManager::acceptNewConnection()
         client->setNonBlocking(true);
         m_CheckValue = 6;
 
-        
-        
-        
+
         if (client->getSockError()) {
             m_CheckValue = 7;
             throw Error();
@@ -781,17 +736,16 @@ bool IncomingPlayerManager::acceptNewConnection()
         m_CheckValue = 10;
 
         //----------------------------------------------------------------------
-        
-        //----------------------------------------------------------------------
-        
 
-        
+        //----------------------------------------------------------------------
+
+
         g_pConnectionInfoManager->getConnectionInfo(client->getHost());
         FILELOG_INCOMING_CONNECTION("accept_trace.log", "connection info exists for host=%s fd=%d",
                                     client->getHost().c_str(), fd);
         m_CheckValue = 11;
 
-        
+
         GamePlayer* pGamePlayer = new GamePlayer(client);
         m_CheckValue = 12;
 
@@ -799,7 +753,7 @@ bool IncomingPlayerManager::acceptNewConnection()
         pGamePlayer->setPlayerStatus(GPS_BEGIN_SESSION);
         m_CheckValue = 13;
 
-        
+
         // addPlayer_NOBLOCKED(pGamePlayer);
         try {
             m_CheckValue = 14;
@@ -836,7 +790,7 @@ bool IncomingPlayerManager::acceptNewConnection()
         m_CheckValue += 1000;
 
         //----------------------------------------acceptNewConnection core!!!
-        
+
         // client->send("Error : Unauthorized access",27);
 
         m_CheckValue += 1000;
@@ -893,12 +847,11 @@ void IncomingPlayerManager::addPlayer(Player* pGamePlayer) {
 
     SOCKET fd = pGamePlayer->getSocket()->getSOCKET();
 
-    
+
     m_MinFD = min(fd, m_MinFD);
     m_MaxFD = max(fd, m_MaxFD);
 
-    
-    
+
     FD_SET(fd, &m_ReadFDs[0]);
     FD_SET(fd, &m_WriteFDs[0]);
     FD_SET(fd, &m_ExceptFDs[0]);
@@ -921,12 +874,11 @@ void IncomingPlayerManager::addPlayer_NOBLOCKED(Player* pGamePlayer) {
 
     SOCKET fd = pGamePlayer->getSocket()->getSOCKET();
 
-    
+
     m_MinFD = min(fd, m_MinFD);
     m_MaxFD = max(fd, m_MaxFD);
 
-    
-    
+
     FD_SET(fd, &m_ReadFDs[0]);
     FD_SET(fd, &m_WriteFDs[0]);
     FD_SET(fd, &m_ExceptFDs[0]);
@@ -943,11 +895,8 @@ void IncomingPlayerManager::deletePlayer_NOBLOCKED(SOCKET fd) {
 
     Assert(m_pPlayers[fd] == NULL);
 
-    
-    
+
     if (fd == m_MinFD) {
-        
-        
         int i = m_MinFD;
         for (i = m_MinFD; i <= m_MaxFD; i++) {
             if (m_pPlayers[i] != NULL || i == m_SocketID) {
@@ -956,14 +905,10 @@ void IncomingPlayerManager::deletePlayer_NOBLOCKED(SOCKET fd) {
             }
         }
 
-        
-        
-        
+
         if (i > m_MaxFD)
             m_MinFD = m_MaxFD = -1;
     } else if (fd == m_MaxFD) {
-        
-        
         int i = m_MaxFD;
         for (i = m_MaxFD; i >= m_MinFD; i--) {
             if (m_pPlayers[i] != NULL || i == m_SocketID) {
@@ -972,7 +917,7 @@ void IncomingPlayerManager::deletePlayer_NOBLOCKED(SOCKET fd) {
             }
         }
 
-        
+
         if (i < m_MinFD) {
             FILELOG_INCOMING_CONNECTION("ICMFD.txt",
                                         "[ i < m_MinFD nbl] nPlayers : %d, MinFD : %d, MaxFD : %d, ServerSocket : %d",
@@ -981,9 +926,7 @@ void IncomingPlayerManager::deletePlayer_NOBLOCKED(SOCKET fd) {
         }
     }
 
-    
-    
-    
+
     FD_CLR(fd, &m_ReadFDs[0]);
     FD_CLR(fd, &m_ReadFDs[1]);
     FD_CLR(fd, &m_WriteFDs[0]);
@@ -1018,11 +961,8 @@ void IncomingPlayerManager::deletePlayer(SOCKET fd) {
 
     Assert(m_pPlayers[fd] == NULL);
 
-    
-    
+
     if (fd == m_MinFD) {
-        
-        
         int i = m_MinFD;
         for (i = m_MinFD; i <= m_MaxFD; i++) {
             if (m_pPlayers[i] != NULL || i == m_SocketID) {
@@ -1031,14 +971,10 @@ void IncomingPlayerManager::deletePlayer(SOCKET fd) {
             }
         }
 
-        
-        
-        
+
         if (i > m_MaxFD)
             m_MinFD = m_MaxFD = -1;
     } else if (fd == m_MaxFD) {
-        
-        
         int i = m_MaxFD;
         for (i = m_MaxFD; i >= m_MinFD; i--) {
             if (m_pPlayers[i] != NULL || i == m_SocketID) {
@@ -1047,7 +983,7 @@ void IncomingPlayerManager::deletePlayer(SOCKET fd) {
             }
         }
 
-        
+
         if (i < m_MinFD) {
             FILELOG_INCOMING_CONNECTION("ICMFD.txt",
                                         "[ i < m_MinFD ] nPlayers : %d, MinFD : %d, MaxFD : %d, ServerSocket : %d",
@@ -1056,9 +992,7 @@ void IncomingPlayerManager::deletePlayer(SOCKET fd) {
         }
     }
 
-    
-    
-    
+
     FD_CLR(fd, &m_ReadFDs[0]);
     FD_CLR(fd, &m_ReadFDs[1]);
     FD_CLR(fd, &m_WriteFDs[0]);
@@ -1168,13 +1102,10 @@ void IncomingPlayerManager::heartbeat()
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     //--------------------------------------------------
-    
+
     //--------------------------------------------------
 
-    
-    
-    
-    
+
     while (!m_PlayerListQueue.empty()) {
         GamePlayer* pGamePlayer = m_PlayerListQueue.front();
 
@@ -1188,18 +1119,10 @@ void IncomingPlayerManager::heartbeat()
         //-----------------------------------------------------------------------------
         // * elcastle 's Note
         //-----------------------------------------------------------------------------
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
         //-----------------------------------------------------------------------------
         if (pGamePlayer->isPenaltyFlag(PENALTY_TYPE_KICKED)) {
-            
             int fd = -1;
             Socket* pSocket = pGamePlayer->getSocket();
             if (pSocket != NULL)
@@ -1218,8 +1141,7 @@ void IncomingPlayerManager::heartbeat()
             try {
                 pGamePlayer->disconnect(DISCONNECTED);
 
-                
-                
+
                 // by sigi. 2002.5.4
                 if (pGamePlayer->isKickForLogin()) {
                     // send GLKickVerify to LoginServer. 2002.5.6
@@ -1252,10 +1174,7 @@ void IncomingPlayerManager::heartbeat()
 
         // filelog("ZoneHeartbeatTrace.txt", "Added Player[%s]", pGamePlayer->getID().c_str());
 
-        
-        
 
-        
         if (pGamePlayer->getPlayerStatus() == GPS_WAITING_FOR_CG_READY) {
             Creature* pCreature = pGamePlayer->getCreature();
             Assert(pCreature != NULL);
@@ -1267,14 +1186,13 @@ void IncomingPlayerManager::heartbeat()
             // Assert(pZone != NULL);
 
             if (pOldZone != NULL) {
-                
                 if (pOldZone->isMasterLair()) {
                     MasterLairManager* pMasterLairManager = pOldZone->getMasterLairManager();
                     Assert(pMasterLairManager != NULL);
                     pMasterLairManager->leaveCreature(pCreature);
                 }
 
-                
+
                 if (pCreature->isPLAYER() && pZone != NULL && pOldZone->getZoneID() != pZone->getZoneID()) {
                     if (g_pPKZoneInfoManager->isPKZone(pOldZone->getZoneID()))
                         g_pPKZoneInfoManager->leavePKZone(pOldZone->getZoneID());
@@ -1290,18 +1208,18 @@ void IncomingPlayerManager::heartbeat()
 
                 pCreature->setXY(pCreature->getNewX(), pCreature->getNewY());
 
-                
+
                 pCreature->registerObject();
             }
 
-            
+
 #ifdef __USE_ENCRYPTER__
             pGamePlayer->setEncryptCode();
 #endif
 
 #if defined(__PAY_SYSTEM_ZONE__) || defined(__PAY_SYSTEM_FREE_LIMIT__)
-            
-            
+
+
             if ((pGamePlayer->isPayPlaying() || pGamePlayer->isPremiumPlay()) &&
                 pGamePlayer->getPayType() == PAY_TYPE_TIME) {
                 Assert(pCreature->isPC());
@@ -1317,11 +1235,11 @@ void IncomingPlayerManager::heartbeat()
             }
 #endif
 
-            
+
             SEND_SYSTEM_AVAILABILITIES(pGamePlayer);
 
             //--------------------------------------------------------------------------------
-            
+
             //--------------------------------------------------------------------------------
             GCUpdateInfo gcUpdateInfo;
 
@@ -1329,13 +1247,11 @@ void IncomingPlayerManager::heartbeat()
 
             pGamePlayer->sendPacket(&gcUpdateInfo);
 
-            
+
         } else if (pGamePlayer->getPlayerStatus() == GPS_AFTER_SENDING_GL_INCOMING_CONNECTION) {
             //			cout << "Logout..." << pGamePlayer->getID() << endl;
 
-             
-            
-            
+
             GLIncomingConnection glIncomingConnection;
             glIncomingConnection.setPlayerID(pGamePlayer->getID());
             glIncomingConnection.setClientIP(pGamePlayer->getSocket()->getHost());
@@ -1362,7 +1278,7 @@ void IncomingPlayerManager::heartbeat()
             &glIncomingConnection);
             */
 
-            
+
             g_pLoginServerManager->sendPacket(g_pConfig->getProperty("LoginServerIP"), port, &glIncomingConnection);
         }
 
@@ -1371,9 +1287,6 @@ void IncomingPlayerManager::heartbeat()
 
     __LEAVE_CRITICAL_SECTION(m_Mutex)
 
-    
-    
-    
 
     // by sigi. 2002.12.10
     __ENTER_CRITICAL_SECTION(m_MutexOut)
@@ -1389,26 +1302,25 @@ void IncomingPlayerManager::heartbeat()
             Creature* pCreature = pGamePlayer->getCreature();
             Assert(pCreature != NULL);
 
-            
+
             // Zone * pZone = pCreature->getZone();
             // Assert(pZone != NULL);
             Zone* pZone = pCreature->getNewZone();
             // Assert(pZone != NULL);
 
-            
-            
+
             if (pZone == NULL) {
                 pZone = pCreature->getZone();
                 Assert(pZone != NULL);
             }
 
-            
+
             ZoneGroup* pZoneGroup = pZone->getZoneGroup();
             Assert(pZoneGroup != NULL);
             ZonePlayerManager* pZonePlayerManager = pZoneGroup->getZonePlayerManager();
             Assert(pZonePlayerManager != NULL);
 
-            
+
             pZonePlayerManager->pushPlayer(pGamePlayer);
         } catch (...) {
             filelog("IncomingPlayerManager.txt", "AssertionError! IncomingPlayManager.cpp line 1594");
@@ -1424,9 +1336,8 @@ void IncomingPlayerManager::deleteQueuePlayer(GamePlayer* pGamePlayer) {
     __BEGIN_TRY
 
 
-    
     // by sigi. 2002.5.9
-    
+
     __ENTER_CRITICAL_SECTION(m_MutexOut)
 
     Assert(pGamePlayer != NULL);
@@ -1451,7 +1362,7 @@ void IncomingPlayerManager::clearPlayers()
 {
     __BEGIN_TRY
 
-    
+
     while (!m_PlayerListQueue.empty()) {
         GamePlayer* pGamePlayer = m_PlayerListQueue.front();
 
@@ -1461,14 +1372,13 @@ void IncomingPlayerManager::clearPlayers()
             try {
                 pGamePlayer->disconnect();
             } catch (Throwable& t) {
-                
             }
 
             SAFE_DELETE(pGamePlayer);
         }
     }
 
-    
+
     while (!m_PlayerOutListQueue.empty()) {
         GamePlayer* pGamePlayer = m_PlayerOutListQueue.front();
 
@@ -1478,7 +1388,6 @@ void IncomingPlayerManager::clearPlayers()
             try {
                 pGamePlayer->disconnect();
             } catch (Throwable& t) {
-                
             }
 
             SAFE_DELETE(pGamePlayer);
@@ -1489,7 +1398,7 @@ void IncomingPlayerManager::clearPlayers()
     if (m_MinFD == -1 && m_MaxFD == -1)
         return;
 
-    
+
     for (int i = m_MinFD; i <= m_MaxFD; i++) {
         if (i != m_SocketID && m_pPlayers[i] != NULL) {
             GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(m_pPlayers[i]);
@@ -1498,7 +1407,6 @@ void IncomingPlayerManager::clearPlayers()
                 try {
                     pGamePlayer->disconnect();
                 } catch (Throwable& t) {
-                    
                 }
 
                 SAFE_DELETE(pGamePlayer);

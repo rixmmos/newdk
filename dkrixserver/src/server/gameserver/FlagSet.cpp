@@ -8,6 +8,7 @@
 
 #include "Assert.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "StringStream.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -47,19 +48,12 @@ void FlagSet::create(const string& owner)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        StringStream sql;
-        sql << "INSERT INTO FlagSet ("
-            << "OwnerID, FlagData"
-            << ") VALUES ("
-            << "'" << owner << "', "
-            << "'" << toString() << "'  "
-            << ")";
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn, "INSERT INTO FlagSet (OwnerID, FlagData) VALUES (?, ?)");
+        insertStmt.bindString(1, owner);
+        insertStmt.bindString(2, toString());
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -74,8 +68,10 @@ void FlagSet::load(const string& owner)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT FlagData FROM FlagSet WHERE OwnerID = '%s'", owner.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStmt(pConn, "SELECT FlagData FROM FlagSet WHERE OwnerID = ?");
+        selectStmt.bindString(1, owner);
+        Result* pResult = selectStmt.execute();
 
         if (pResult->getRowCount() == 0) {
             StringStream msg;
@@ -85,8 +81,11 @@ void FlagSet::load(const string& owner)
 
             filelog("flagSetError.txt", "%s", msg.toString().c_str());
 
-            
-            pStmt->executeQuery("INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES ('%s','')", owner.c_str());
+
+            PreparedStatement insertStmt(pConn, "INSERT IGNORE INTO FlagSet (OwnerID, FlagData) VALUES (?,?)");
+            insertStmt.bindString(1, owner);
+            insertStmt.bindString(2, "");
+            insertStmt.execute();
 
             // cerr << msg.toString() << endl;
             // throw (msg.toString());
@@ -102,8 +101,6 @@ void FlagSet::load(const string& owner)
                     turnOn(i);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -118,14 +115,12 @@ void FlagSet::save(const string& owner)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "UPDATE FlagSet SET FlagData='" << toString() << "' WHERE OwnerID='" << owner << "'";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE FlagSet SET FlagData=? WHERE OwnerID=?");
+        updateStmt.bindString(1, toString());
+        updateStmt.bindString(2, owner);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -140,12 +135,11 @@ void FlagSet::destroy(const string& owner)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        StringStream sql;
-        sql << "DELETE FROM FlagSet WHERE OwnerID = '" << owner << "'";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sql.toString());
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM FlagSet WHERE OwnerID = ?");
+        deleteStmt.bindString(1, owner);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 

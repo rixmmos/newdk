@@ -21,6 +21,7 @@
 #include "LogClient.h"
 #include "NPC.h"
 #include "OptionInfo.h"
+#include "PreparedStatement.h"
 #include "ShopTemplate.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,15 +60,17 @@ void ActionPrepareShop::read(PropertyBuffer& propertyBuffer)
 
     try {
         int NPCID = propertyBuffer.getPropertyInt("NPCID");
-        Statement* pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Statement* pStmt = NULL;
 
         BEGIN_DB {
-            Result* pResult = pStmt->executeQuery("SELECT ID from ShopTemplate where NPCID = %d", NPCID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectShopTemplateStmt(pConn, "SELECT ID from ShopTemplate where NPCID = ?");
+            selectShopTemplateStmt.bindInt(1, NPCID);
+            Result* pResult = selectShopTemplateStmt.execute();
             while (pResult->next()) {
                 ShopTemplateID_t id = pResult->getInt(1);
                 addListElement(id);
             }
-            delete pStmt;
         }
         END_DB(pStmt)
 
@@ -97,11 +100,6 @@ void ActionPrepareShop::execute(Creature* pCreature1, Creature* pCreature2)
 
     NPC* pNPC = dynamic_cast<NPC*>(pCreature1);
 
-    
-    
-    
-    
-    
 
     list<ShopTemplateID_t> IDList[SHOP_RACK_TYPE_MAX];
     int combi[SHOP_RACK_TYPE_MAX] = {0, 0, 0};
@@ -114,13 +112,8 @@ void ActionPrepareShop::execute(Creature* pCreature1, Creature* pCreature2)
     uint minOptionLevel, maxOptionLevel;
     OptionType_t optionType;
 
-    
-    
-    
-    
-    
+
     for (list<ShopTemplateID_t>::const_iterator itr = m_List.begin(); itr != m_List.end(); itr++) {
-        
         pTemplate = g_pShopTemplateManager->getTemplate((*itr));
 
         Assert(pTemplate != NULL);
@@ -130,31 +123,23 @@ void ActionPrepareShop::execute(Creature* pCreature1, Creature* pCreature2)
         minItemType = pTemplate->getMinItemType();
         maxItemType = pTemplate->getMaxItemType();
 
-        
-        
-        
+
         IDList[shopType].push_back(*itr);
         combi[shopType] += (maxItemType - minItemType + 1);
     }
 
-    
+
     for (ShopRackType_t i = 0; i < SHOP_RACK_TYPE_MAX; i++) {
-        
-        
-        
-        
         if (combi[i] == 0)
             trialMax = 0;
         else
             trialMax = (int)(floor(SHOP_RACK_INDEX_MAX / combi[i]));
 
-        
-        
+
         if (i == SHOP_RACK_NORMAL || i == SHOP_RACK_MYSTERIOUS)
             trialMax = 1;
 
-        
-        
+
         for (list<ShopTemplateID_t>::const_iterator itr = IDList[i].begin(); itr != IDList[i].end(); itr++) {
             pTemplate = g_pShopTemplateManager->getTemplate((*itr));
             itemClass = pTemplate->getItemClass();
@@ -163,20 +148,15 @@ void ActionPrepareShop::execute(Creature* pCreature1, Creature* pCreature2)
             minOptionLevel = pTemplate->getMinOptionLevel();
             maxOptionLevel = pTemplate->getMaxOptionLevel();
 
-            
+
             vector<OptionType_t> optionVector = g_pOptionInfoManager->getPossibleOptionVector(
                 (Item::ItemClass)itemClass, minOptionLevel, maxOptionLevel);
 
             for (ItemType_t type = minItemType; type <= maxItemType; type++) {
-                
-                
-                
-                
                 for (int tc = 0; tc < trialMax; tc++) {
                     itemType = type;
 
-                    
-                    
+
                     Item::ItemClass IClass = Item::ItemClass(itemClass);
                     list<OptionType_t> optionTypes;
                     if (i != SHOP_RACK_MYSTERIOUS && optionVector.size() > 0) {
@@ -186,14 +166,14 @@ void ActionPrepareShop::execute(Creature* pCreature1, Creature* pCreature2)
                             optionTypes.push_back(optionType);
                     }
 
-                    
+
                     Item* pItem = g_pItemFactoryManager->createItem(IClass, itemType, optionTypes);
                     Assert(pItem != NULL);
 
-                    
+
                     (pNPC->getZone()->getObjectRegistry()).registerObject(pItem);
 
-                    
+
                     if (count[i] < SHOP_RACK_INDEX_MAX) {
                         pNPC->insertShopItem(i, count[i], pItem);
 

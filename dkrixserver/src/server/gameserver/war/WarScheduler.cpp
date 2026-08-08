@@ -6,6 +6,7 @@
 #include "DB.h"
 #include "GCWarScheduleList.h"
 #include "GuildWar.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SiegeWar.h"
 #include "VariableManager.h"
@@ -101,7 +102,6 @@ void WarScheduler::load()
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
@@ -112,14 +112,17 @@ void WarScheduler::load()
     VSDateTime currentDateTime(VSDateTime::currentDateTime());
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectWarScheduleInfoStmt(
+            pConn,
             "SELECT WarID, WarType, AttackerCount, AttackGuildID, AttackGuildID2, AttackGuildID3, AttackGuildID4, "
             "AttackGuildID5, "
             "WarFee, StartTime FROM WarScheduleInfo "
-            "WHERE ServerID = %u AND ZoneID = %u AND ( Status = 'WAIT' OR Status = 'START' ) "
-            "ORDER BY StartTime",
-            g_pConfig->getPropertyInt("ServerID"), (int)m_pZone->getZoneID());
+            "WHERE ServerID = ? AND ZoneID = ? AND ( Status = 'WAIT' OR Status = 'START' ) "
+            "ORDER BY StartTime");
+        selectWarScheduleInfoStmt.bindUInt(1, g_pConfig->getPropertyInt("ServerID"));
+        selectWarScheduleInfoStmt.bindUInt(2, (int)m_pZone->getZoneID());
+        Result* pResult = selectWarScheduleInfoStmt.execute();
 
         if (pResult->getRowCount() > 0) {
             WarID_t warID;
@@ -161,11 +164,13 @@ void WarScheduler::load()
                 pWar->setWarStartTime(warStartTime);
                 pWar->setRegistrationFee(warRegistrationFee);
 
-                pResult = pStmt->executeQuery(
-                    "SELECT ReinforceGuildID FROM ReinforceRegisterInfo WHERE WarID=%u AND Status='ACCEPT'", warID);
+                PreparedStatement selectReinforceGuildIDStmt(
+                    pConn, "SELECT ReinforceGuildID FROM ReinforceRegisterInfo WHERE WarID=? AND Status='ACCEPT'");
+                selectReinforceGuildIDStmt.bindUInt(1, warID);
+                Result* pReinforceResult = selectReinforceGuildIDStmt.execute();
 
-                if (pResult->next()) {
-                    pWar->setReinforceGuildID(pResult->getInt(1));
+                if (pReinforceResult->next()) {
+                    pWar->setReinforceGuildID(pReinforceResult->getInt(1));
                 }
 
                 for (int j = 0; j < challengerNum; ++j) {
@@ -181,8 +186,6 @@ void WarScheduler::load()
                 // if (warType==WAR_RACE) numRaceWar++;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -368,14 +371,15 @@ void WarScheduler::cancelGuildSchedules()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE WarScheduleInfo SET Status='CANCEL' WHERE ServerID = %d AND ZoneID = %d \
-				AND WarType='GUILD' AND (Status='WAIT' OR Status='START')",
-                            g_pConfig->getPropertyInt("ServerID"), m_pZone->getZoneID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement cancelGuildSchedulesStmt(
+            pConn, "UPDATE WarScheduleInfo SET Status='CANCEL' WHERE ServerID = ? AND ZoneID = ? "
+                   "AND WarType='GUILD' AND (Status='WAIT' OR Status='START')");
+        cancelGuildSchedulesStmt.bindInt(1, g_pConfig->getPropertyInt("ServerID"));
+        cancelGuildSchedulesStmt.bindInt(2, m_pZone->getZoneID());
+        cancelGuildSchedulesStmt.execute();
 
-        // pStmt->getAffectedRowCount()
-
-        SAFE_DELETE(pStmt);
+        // cancelGuildSchedulesStmt.getAffectedRowCount()
     }
     END_DB(pStmt)
 

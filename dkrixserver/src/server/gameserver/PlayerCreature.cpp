@@ -31,6 +31,7 @@
 #include "PKZoneInfoManager.h"
 #include "ParkingCenter.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "RankBonusInfo.h"
 #include "RankExpTable.h"
@@ -373,9 +374,11 @@ void PlayerCreature::loadItem()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ItemType FROM BloodBibleSignObject WHERE OwnerID='%s' ORDER BY ItemType", getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectBloodBibleSignStmt(
+            pConn, "SELECT ItemType FROM BloodBibleSignObject WHERE OwnerID=? ORDER BY ItemType");
+        selectBloodBibleSignStmt.bindString(1, getName());
+        Result* pResult = selectBloodBibleSignStmt.execute();
 
         while (pResult->next()) {
             m_pBloodBibleSign->getList().push_back(pResult->getInt(1));
@@ -559,22 +562,24 @@ void PlayerCreature::setStashNumEx(BYTE num)
     setStashNum(num);
 
     BEGIN_DB {
-        StringStream sqlSlayer;
-        StringStream sqlVampire;
-        StringStream sqlOusters;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        sqlSlayer << "UPDATE Slayer set StashNum = " << (int)num << " WHERE Name = '" << getName() << "'";
-        sqlVampire << "UPDATE Vampire set StashNum = " << (int)num << " WHERE Name = '" << getName() << "'";
-        sqlOusters << "UPDATE Ousters set StashNum = " << (int)num << " WHERE Name = '" << getName() << "'";
+        PreparedStatement updateSlayerStmt(pConn, "UPDATE Slayer set StashNum = ? WHERE Name = ?");
+        updateSlayerStmt.bindInt(1, (int)num);
+        updateSlayerStmt.bindString(2, getName());
+        updateSlayerStmt.execute();
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sqlSlayer.toString());
-        if (!isOusters())
-            pStmt->executeQueryString(sqlVampire.toString());
-        else
-            pStmt->executeQueryString(sqlOusters.toString());
-
-        SAFE_DELETE(pStmt);
+        if (!isOusters()) {
+            PreparedStatement updateVampireStmt(pConn, "UPDATE Vampire set StashNum = ? WHERE Name = ?");
+            updateVampireStmt.bindInt(1, (int)num);
+            updateVampireStmt.bindString(2, getName());
+            updateVampireStmt.execute();
+        } else {
+            PreparedStatement updateOustersStmt(pConn, "UPDATE Ousters set StashNum = ? WHERE Name = ?");
+            updateOustersStmt.bindInt(1, (int)num);
+            updateOustersStmt.bindString(2, getName());
+            updateOustersStmt.execute();
+        }
     }
     END_DB(pStmt)
 
@@ -594,22 +599,24 @@ void PlayerCreature::setStashGoldEx(Gold_t gold)
     setStashGold(gold);
 
     BEGIN_DB {
-        StringStream sqlSlayer;
-        StringStream sqlVampire;
-        StringStream sqlOusters;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        sqlSlayer << "UPDATE Slayer set StashGold = " << (int)gold << " WHERE Name = '" << getName() << "'";
-        sqlVampire << "UPDATE Vampire set StashGold = " << (int)gold << " WHERE Name = '" << getName() << "'";
-        sqlOusters << "UPDATE Ousters set StashGold = " << (int)gold << " WHERE Name = '" << getName() << "'";
+        PreparedStatement updateSlayerStmt(pConn, "UPDATE Slayer set StashGold = ? WHERE Name = ?");
+        updateSlayerStmt.bindInt(1, (int)gold);
+        updateSlayerStmt.bindString(2, getName());
+        updateSlayerStmt.execute();
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sqlSlayer.toString());
-        if (!isOusters())
-            pStmt->executeQueryString(sqlVampire.toString());
-        else
-            pStmt->executeQueryString(sqlOusters.toString());
-
-        SAFE_DELETE(pStmt);
+        if (!isOusters()) {
+            PreparedStatement updateVampireStmt(pConn, "UPDATE Vampire set StashGold = ? WHERE Name = ?");
+            updateVampireStmt.bindInt(1, (int)gold);
+            updateVampireStmt.bindString(2, getName());
+            updateVampireStmt.execute();
+        } else {
+            PreparedStatement updateOustersStmt(pConn, "UPDATE Ousters set StashGold = ? WHERE Name = ?");
+            updateOustersStmt.bindInt(1, (int)gold);
+            updateOustersStmt.bindString(2, getName());
+            updateOustersStmt.execute();
+        }
     }
     END_DB(pStmt)
 
@@ -628,22 +635,24 @@ void PlayerCreature::increaseStashGoldEx(Gold_t gold)
     setStashGold(m_StashGold + gold);
 
     BEGIN_DB {
-        StringStream sqlSlayer;
-        StringStream sqlVampire;
-        StringStream sqlOusters;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        sqlSlayer << "UPDATE Slayer set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
-        sqlVampire << "UPDATE Vampire set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
-        sqlOusters << "UPDATE Ousters set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
+        PreparedStatement updateSlayerStmt(pConn, "UPDATE Slayer set StashGold = ? WHERE Name = ?");
+        updateSlayerStmt.bindInt(1, (int)m_StashGold);
+        updateSlayerStmt.bindString(2, getName());
+        updateSlayerStmt.execute();
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sqlSlayer.toString());
-        if (!isOusters())
-            pStmt->executeQueryString(sqlVampire.toString());
-        else
-            pStmt->executeQueryString(sqlOusters.toString());
-
-        SAFE_DELETE(pStmt);
+        if (!isOusters()) {
+            PreparedStatement updateVampireStmt(pConn, "UPDATE Vampire set StashGold = ? WHERE Name = ?");
+            updateVampireStmt.bindInt(1, (int)m_StashGold);
+            updateVampireStmt.bindString(2, getName());
+            updateVampireStmt.execute();
+        } else {
+            PreparedStatement updateOustersStmt(pConn, "UPDATE Ousters set StashGold = ? WHERE Name = ?");
+            updateOustersStmt.bindInt(1, (int)m_StashGold);
+            updateOustersStmt.bindString(2, getName());
+            updateOustersStmt.execute();
+        }
     }
     END_DB(pStmt)
 
@@ -662,22 +671,24 @@ void PlayerCreature::decreaseStashGoldEx(Gold_t gold)
     setStashGold(m_StashGold - gold);
 
     BEGIN_DB {
-        StringStream sqlSlayer;
-        StringStream sqlVampire;
-        StringStream sqlOusters;
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        sqlSlayer << "UPDATE Slayer set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
-        sqlVampire << "UPDATE Vampire set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
-        sqlOusters << "UPDATE Ousters set StashGold = " << (int)m_StashGold << " WHERE Name = '" << getName() << "'";
+        PreparedStatement updateSlayerStmt(pConn, "UPDATE Slayer set StashGold = ? WHERE Name = ?");
+        updateSlayerStmt.bindInt(1, (int)m_StashGold);
+        updateSlayerStmt.bindString(2, getName());
+        updateSlayerStmt.execute();
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQueryString(sqlSlayer.toString());
-        if (!isOusters())
-            pStmt->executeQueryString(sqlVampire.toString());
-        else
-            pStmt->executeQueryString(sqlOusters.toString());
-
-        SAFE_DELETE(pStmt);
+        if (!isOusters()) {
+            PreparedStatement updateVampireStmt(pConn, "UPDATE Vampire set StashGold = ? WHERE Name = ?");
+            updateVampireStmt.bindInt(1, (int)m_StashGold);
+            updateVampireStmt.bindString(2, getName());
+            updateVampireStmt.execute();
+        } else {
+            PreparedStatement updateOustersStmt(pConn, "UPDATE Ousters set StashGold = ? WHERE Name = ?");
+            updateOustersStmt.bindInt(1, (int)m_StashGold);
+            updateOustersStmt.bindString(2, getName());
+            updateOustersStmt.execute();
+        }
     }
     END_DB(pStmt)
 
@@ -850,8 +861,10 @@ void PlayerCreature::clearRankBonus()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM RankBonusData WHERE OwnerID = '%s'", getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteRankBonusStmt(pConn, "DELETE FROM RankBonusData WHERE OwnerID = ?");
+        deleteRankBonusStmt.bindString(1, getName());
+        deleteRankBonusStmt.execute();
     }
     END_DB(pStmt)
 
@@ -899,9 +912,11 @@ void PlayerCreature::clearRankBonus(Rank_t rank)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM RankBonusData WHERE OwnerID = '%s' AND Type = %d", getName().c_str(),
-                            (int)rankBonusType);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteRankBonusStmt(pConn, "DELETE FROM RankBonusData WHERE OwnerID = ? AND Type = ?");
+        deleteRankBonusStmt.bindString(1, getName());
+        deleteRankBonusStmt.bindInt(2, (int)rankBonusType);
+        deleteRankBonusStmt.execute();
     }
     END_DB(pStmt)
 
@@ -949,11 +964,12 @@ bool PlayerCreature::learnRankBonus(DWORD type)
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO RankBonusData ( OwnerID, Type )  VALUES ( '%s', %d )", getName().c_str(),
-                                type);
-
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement insertRankBonusStmt(pConn,
+                                                  "INSERT INTO RankBonusData ( OwnerID, Type )  VALUES ( ?, ? )");
+            insertRankBonusStmt.bindString(1, getName());
+            insertRankBonusStmt.bindInt(2, type);
+            insertRankBonusStmt.execute();
         }
         END_DB(pStmt)
 
@@ -993,8 +1009,10 @@ void PlayerCreature::loadRankBonus()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Type FROM RankBonusData WHERE OwnerID ='%s'", getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectRankBonusStmt(pConn, "SELECT Type FROM RankBonusData WHERE OwnerID =?");
+        selectRankBonusStmt.bindString(1, getName());
+        pResult = selectRankBonusStmt.execute();
 
         while (pResult->next()) {
             DWORD rankBonusType = pResult->getInt(1);
@@ -1119,12 +1137,15 @@ void PlayerCreature::loadGoods()
     }
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pResult =
-            pStmt->executeQuery("SELECT ID, GoodsID, Num FROM GoodsListObject WHERE World = %d AND PlayerID = '%s' AND "
-                                "Name = '%s' AND Status = 'NOT'",
-                                g_pConfig->getPropertyInt("WorldID"), getPlayer()->getID().c_str(), getName().c_str());
+        PreparedStatement selectGoodsListStmt(
+            pConn, "SELECT ID, GoodsID, Num FROM GoodsListObject WHERE World = ? AND PlayerID = ? AND "
+                   "Name = ? AND Status = 'NOT'");
+        selectGoodsListStmt.bindInt(1, g_pConfig->getPropertyInt("WorldID"));
+        selectGoodsListStmt.bindString(2, getPlayer()->getID());
+        selectGoodsListStmt.bindString(3, getName());
+        pResult = selectGoodsListStmt.execute();
 
         while (pResult->next()) {
             string ID = pResult->getString(1);
@@ -1138,8 +1159,6 @@ void PlayerCreature::loadGoods()
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

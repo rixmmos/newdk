@@ -18,6 +18,7 @@
 #include "NicknameInfo.h"
 #include "PetInfo.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Zone.h"
 #include "item/EventGiftBox.h"
 #include "item/PetItem.h"
@@ -71,8 +72,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         pItem = dynamic_cast<EventGiftBox*>(pInventory->getItemWithObjectID(itemOID));
 
         if (pItem == NULL) {
-            filelog("Nickname.log", "[%s:%s]   EventGiftBox .", pPlayer->getID().c_str(),
-                    pPC->getName().c_str());
+            filelog("Nickname.log", "[%s:%s]   EventGiftBox .", pPlayer->getID().c_str(), pPC->getName().c_str());
 
             gcNV.setCode(NICKNAME_MODIFY_FAIL_NO_ITEM);
             pGamePlayer->sendPacket(&gcNV);
@@ -96,7 +96,6 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
     }
 
     switch (pItem->getItemType()) {
-    
     case 23: {
         PetInfo* pPetInfo = pPC->getPetInfo();
         if (pPetInfo == NULL) {
@@ -130,7 +129,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         return;
     }
 
-    
+
     case 22:
     case 25: {
         NicknameInfo* pNickname = pPC->getNicknameBook()->getNicknameInfo(0);
@@ -154,11 +153,12 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("UPDATE NicknameBook SET Nickname='%s' WHERE OwnerID='%s' AND nID=%u",
-                                getDBString(pNickname->getNickname()).c_str(), pPC->getName().c_str(),
-                                pNickname->getNicknameID());
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement updateNicknameStmt(pConn, "UPDATE NicknameBook SET Nickname=? WHERE OwnerID=? AND nID=?");
+            updateNicknameStmt.bindString(1, pNickname->getNickname());
+            updateNicknameStmt.bindString(2, pPC->getName());
+            updateNicknameStmt.bindUInt(3, pNickname->getNicknameID());
+            updateNicknameStmt.execute();
         }
         END_DB(pStmt)
 
@@ -184,7 +184,7 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         break;
     }
 
-    
+
     case 24: {
         if (pItem == NULL) {
             gcNV.setCode(NICKNAME_MODIFY_FAIL_NO_ITEM);
@@ -202,12 +202,15 @@ void CGModifyNicknameHandler::execute(CGModifyNickname* pPacket, Player* pPlayer
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("INSERT INTO NicknameBook (nID, OwnerID, NickType, Nickname, Time) "
-                                "VALUES (%u, '%s', %u, '%s', now())",
-                                pNickname->getNicknameID(), pPC->getName().c_str(), pNickname->getNicknameType(),
-                                getDBString(pNickname->getNickname()).c_str());
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement insertNicknameStmt(pConn,
+                                                 "INSERT INTO NicknameBook (nID, OwnerID, NickType, Nickname, Time) "
+                                                 "VALUES (?, ?, ?, ?, now())");
+            insertNicknameStmt.bindUInt(1, pNickname->getNicknameID());
+            insertNicknameStmt.bindString(2, pPC->getName());
+            insertNicknameStmt.bindUInt(3, pNickname->getNicknameType());
+            insertNicknameStmt.bindString(4, pNickname->getNickname());
+            insertNicknameStmt.execute();
         }
         END_DB(pStmt)
 

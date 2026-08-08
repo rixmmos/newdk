@@ -6,6 +6,7 @@
 #include "SweeperBonus.h"
 
 #include "DB.h"
+#include "PreparedStatement.h"
 
 void SweeperBonus::setRace(Race_t race) {
     __BEGIN_TRY
@@ -15,10 +16,11 @@ void SweeperBonus::setRace(Race_t race) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("UPDATE SweeperBonusInfo SET OwnerRace = %d WHERE Type = %d", m_Race, m_Type);
-
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement updateOwnerRaceStmt(pConn, "UPDATE SweeperBonusInfo SET OwnerRace = ? WHERE Type = ?");
+            updateOwnerRaceStmt.bindInt(1, m_Race);
+            updateOwnerRaceStmt.bindInt(2, m_Type);
+            updateOwnerRaceStmt.execute();
         }
         END_DB(pStmt)
     }

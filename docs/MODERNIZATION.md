@@ -1898,6 +1898,127 @@ delta (352 → 331) does not by itself reflect the tree-wide baseline — a
 sibling agent migrated a disjoint file set in parallel in its own worktree;
 whoever merges both batches reconciles the final combined number.
 
+**11.2 batch 12 (2026-08-09, agent stream, worktree): everything remaining
+outside `item/` and `CreatureUtil.cpp`.** Ran in this worktree against a
+305-site baseline (`item/`'s 155 sites plus `CreatureUtil.cpp`'s 6
+already-dead-comment sites plus this batch's 144 ratchet-visible sites,
+across 85 files derived fresh from `--list`, not reused from an older
+estimate). Split four ways across parallel sub-agents by directory cluster
+— `src/Core/` packet handlers (17 files), `gameserver/` top-level A–L (21),
+`gameserver/` top-level M–Z plus `billing/`/`couple/`/`ctf/` (20), and
+`mission/`/`quest/`/`skill/`/`war/` plus a few `server/`-level and
+`loginserver/` files (27) — each briefed with the same API reference,
+established-pattern example, and lessons-learned list, then reconciled and
+verified centrally. **Ratchet 305 → 170** in this worktree [measured],
+re-baselined via `--update` — the 170 remaining are exactly `item/`'s 155
+(untouched, out of scope) plus `CreatureUtil.cpp`'s 6 (untouched, already
+dead comments from batch 6) plus 9 newly-confirmed dead-comment lines inside
+this batch's own files (`CLLoginHandler.cpp`, `CLSelectWorldHandler.cpp`,
+`ScriptManager.cpp`, `EffectGrayDarkness.cpp`, `Slayer.cpp`,
+`ZoneGroupManager.cpp` x2, `LoginPlayer.cpp` x2) — every one individually
+confirmed by reading the surrounding `/* */` or `//` context, not assumed.
+Two files in scope (`EffectGrayDarkness.cpp`, `LoginPlayer.cpp`) needed zero
+changes — their only SQL was already dead or already migrated in an earlier
+batch — and were left untouched rather than modified for the sake of it.
+
+Went far beyond the ratchet-visible count, consistent with every prior
+batch: **254 live call sites migrated in total across 81 changed files**,
+against 144 the ratchet's `--list` could see going in (135 of which were
+actually live; the other 9 were the dead comments above). All four
+previously-identified invisibility modes recurred here — multi-line format
+strings, a SQL text with a `)` (`now()`, `COUNT(*)`) before the first
+placeholder, raw `StringStream`+`executeQueryString` concatenation (an
+entire file, `FlagSet.cpp`, was invisible this way — all 5 of its sites),
+and zero-placeholder queries — plus no new ones; every file was read in
+full, not just grepped, per the established practice.
+
+Notable judgment calls, all consistent with prior-batch precedent:
+- **Identifier/fragment splices** (value not bindable, left concatenated
+  with an inline comment, only actual data values bound): `CoupleManager.cpp`
+  (7 sites) splices a `getFieldName`/`getCounterFieldName` column name drawn
+  from a fixed 2-entry Sex lookup, never packet input; `RaceWarLimiter.cpp`
+  splices `getTableName()` (a per-subclass hardcoded literal); `Item.cpp` and
+  `GlobalItemPositionLoader.cpp` splice a table name from
+  `getObjectTableName()`/`ItemObjectTableName[itemClass]`; `CastleInfoManager
+  ::tinysave` and `WarSchedule.cpp::tinysave` splice a caller-built
+  `"Column=value"` fragment, the same `Guild::tinysave`/`Slayer::tinysave`
+  shape from batches 7 and 9.
+- **`CGModifyNicknameHandler.cpp`, `NicknameBook.cpp`, and both
+  `ZoneUtil.cpp` files' `createBulletinBoard`** dropped a pre-bind
+  `getDBString()`/`correctString()` manual backslash-escaping wrapper on
+  values that are now bound as parameters — re-applying string-literal
+  escaping to a value MySQL now receives out-of-band would have stored
+  literal backslashes in nicknames/bulletin messages. Not a behavior
+  regression: the escaping existed only to survive `vsprintf`-into-quoted-
+  SQL-text, which no longer happens.
+- **`WarScheduler::load()`** had a latent bug: its inner
+  "ReinforceGuildID" query reused the same `Statement*` object as the outer
+  per-row `SELECT`, and the old `Statement::executeQuery()` deletes its own
+  previous `Result*` on every call — so the outer select's `Result` went
+  dangling mid-iteration. `PreparedStatement` can't share one object across
+  two SQL texts, so the inner query got its own statement/result variable,
+  structurally removing the bug as a side effect of the migration rather
+  than as a deliberate fix.
+- Several `Statement* pStmt;` declarations without `= NULL`
+  (`EffectAftermath.cpp`, `EffectKillAftermath.cpp`,
+  `EffectCanEnterGDRLair.cpp`, `EffectEnemyErase.cpp`, `EffectMute.cpp`,
+  `CLQueryPlayerIDHandler.cpp`, `CLRegisterPlayerHandler.cpp`,
+  `ActionPrepareShop.cpp`, `ActionShowGuildDialog.cpp`,
+  `Vampire_backup.cpp::save()`) had their only initializing
+  `createStatement()` assignment removed by the migration — fixed to
+  `= NULL` per batch 9's precedent (an indeterminate pointer reaching
+  `END_DB`'s `delete STMT` on an exception path is a real bug the old code
+  only avoided by luck of assignment ordering), not a gameplay change.
+- Several per-iteration `Statement*` leaks (`IncomingPlayerManager.cpp`
+  init loop, `ZoneUtil.cpp::loadBulletinBoard`, `RaceWarLimiter::
+  clearPCList`, `FameLimitInfo::load`, `LevelWarManager`'s record
+  functions) were closed by declaring the `PreparedStatement` inside the
+  loop body (RAII-scoped per iteration) instead of reusing one object,
+  matching batch 7's `GuildUnionOfferManager` precedent.
+- `GQuestManager.cpp::eraseQuest` originally quoted a numeric column
+  (`QuestID='%u'`); the quotes were dropped since a `?` placeholder can't
+  sit inside a quoted literal against the real `MYSQL_STMT` backend — no
+  behavior change, MySQL compares the column the same way either type is
+  sent.
+- `Vampire_backup.cpp` (8 sites, migrated per assignment) was confirmed via
+  `grep` across every `CMakeLists.txt` to be referenced by no build target,
+  and it `#include`s the current `Vampire.h`, which no longer declares the
+  members (`m_Exp`/`getExp()`) this file's original code used — it cannot
+  compile against current headers regardless of this batch's changes. It
+  also contained a pre-existing invalid raw newline inside a string literal
+  that had to be reconstructed as a valid concatenated multi-line literal
+  purely to express the migrated call in syntactically valid C++. Left
+  migrated rather than skipped (it was in scope and not `item/`/
+  `CreatureUtil.cpp`), but its dead/orphaned status and inability to compile
+  independent of this change are flagged for whoever next touches it —
+  candidate for deletion in a future cleanup phase, out of scope here.
+- Pre-existing bugs found and preserved verbatim, not fixed:
+  `CLGetServerListHandler.cpp::execute` writes both halves of a
+  `CurrentWorldID, CurrentServerGroupID` SELECT result through
+  `setCurrentServerGroupID(...)` twice (the first call, reading column 1,
+  looks like it should be `setCurrentWorldID`); `SiegeWar.cpp` uses
+  `getConnection("Darkeden")` (lowercase) in six functions against
+  `"DARKEDEN"` everywhere else in the codebase.
+
+Stack-allocated `PreparedStatement` locals throughout, `SAFE_DELETE(pStmt)`
+dropped as RAII-redundant wherever a migrated site was the only user of the
+old `Statement*`, per established pattern. **Not compile-verified** — no
+server toolchain in this sandbox. Verified instead by: full-file reads (not
+just `--list` greps) in every one of the 85 files; a scope reconciliation
+confirming the 81 changed files are exactly the assigned 85 minus the 4 with
+no live SQL and that no file outside the assignment, `item/`, or
+`CreatureUtil.cpp` was touched; a file-wide open/close brace-and-paren-count
+diff against each file's pre-edit `HEAD` copy (9 files carry a pre-existing
+off-by-one from a brace/paren character inside a comment or string literal,
+each individually confirmed unchanged by this batch's edit — same count
+before and after); and `clang-format 18.1.8` (matching the CI-pinned
+version) applied to exactly the 81 changed files and confirmed idempotent
+(a second format pass is a no-op on all 81). CI is the real gate, same
+caveat as every prior batch. This batch's ratchet delta (305 → 170) is
+local to this worktree — two sibling agents migrated the disjoint `item/`
+file set in parallel in their own worktrees; whoever merges all three
+reconciles the final combined baseline number.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,

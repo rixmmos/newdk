@@ -7,6 +7,7 @@
 #include "Assert.h"
 #include "Creature.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "QuestPricePenalty.h"
 #include "QuestPriceReward.h"
 
@@ -35,11 +36,10 @@ SimpleQuest::~SimpleQuest() throw(Error) {
 void SimpleQuest::setDeadline(Turn_t delay) throw() {
     __BEGIN_TRY
 
-    
+
     getCurrentTime(m_Deadline);
 
-    
-    
+
     m_Deadline.tv_sec += delay / 10;
     m_Deadline.tv_usec += (delay % 10) * 100000;
 
@@ -69,11 +69,13 @@ void SimpleQuest::destroy() throw(Error) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         cout << "DELETE FROM SimpleQuest WHERE OwnerID = '" << m_pOwner->getName().c_str() << "'" << endl;
 
-        pStmt->executeQuery("DELETE FROM SimpleQuest WHERE OwnerID = '%s'", m_pOwner->getName().c_str());
+        PreparedStatement deleteSimpleQuestStmt(pConn, "DELETE FROM SimpleQuest WHERE OwnerID = ?");
+        deleteSimpleQuestStmt.bindString(1, m_pOwner->getName());
+        deleteSimpleQuestStmt.execute();
 
         /*
         if (pStmt->getAffectedRowCount()==0)
@@ -83,7 +85,6 @@ void SimpleQuest::destroy() throw(Error) {
         }
 
         */
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -152,7 +153,7 @@ void SimpleQuest::take(Creature* pCreature, bool bNewQuest) throw(Error) {
 
     setOwner(pCreature);
 
-    
+
     if (bNewQuest) {
         getCurrentTime(m_Deadline);
         m_Deadline.tv_sec += m_AvailableSecond;

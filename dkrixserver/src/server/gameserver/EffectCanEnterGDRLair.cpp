@@ -13,6 +13,7 @@
 #include "Monster.h"
 #include "Ousters.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 
@@ -63,7 +64,7 @@ void EffectCanEnterGDRLair::unaffect(Creature* pCreature)
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
-    
+
     GCRemoveEffect gcRemoveEffect;
     gcRemoveEffect.setObjectID(pCreature->getObjectID());
     gcRemoveEffect.addEffectList(getSendEffectClass());
@@ -83,7 +84,7 @@ void EffectCanEnterGDRLair::create(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Turn_t currentYearTime;
 
@@ -102,11 +103,13 @@ void EffectCanEnterGDRLair::create(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("INSERT INTO CanEnterGDRLair (OwnerID , YearTime, DayTime) VALUES ('%s', %ld, %ld)",
-                            ownerID.c_str(), currentYearTime, m_Deadline.tv_sec);
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn,
+                                     "INSERT INTO CanEnterGDRLair (OwnerID , YearTime, DayTime) VALUES (?, ?, ?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindLong(2, currentYearTime);
+        insertStmt.bindLong(3, m_Deadline.tv_sec);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -118,15 +121,15 @@ void EffectCanEnterGDRLair::destroy(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        
-        pStmt->executeQuery("DELETE FROM CanEnterGDRLair WHERE OwnerID = '%s'", ownerID.c_str());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM CanEnterGDRLair WHERE OwnerID = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -138,19 +141,20 @@ void EffectCanEnterGDRLair::save(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Turn_t currentYearTime;
 
         getCurrentYearTime(currentYearTime);
 
-        pStmt->executeQuery("UPDATE CanEnterGDRLair SET YearTime = %ld, DayTime = %ld WHERE OwnerID = '%s'",
-                            currentYearTime, m_Deadline.tv_sec, ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE CanEnterGDRLair SET YearTime = ?, DayTime = ? WHERE OwnerID = ?");
+        updateStmt.bindLong(1, currentYearTime);
+        updateStmt.bindLong(2, m_Deadline.tv_sec);
+        updateStmt.bindString(3, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -178,10 +182,10 @@ void EffectCanEnterGDRLairLoader::load(Creature* pCreature)
         return;
     }
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -193,9 +197,10 @@ void EffectCanEnterGDRLairLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        
-        Result* pResult = pStmt->executeQuery("SELECT DayTime FROM CanEnterGDRLair WHERE OwnerID = '%s'",
-                                              pCreature->getName().c_str());
+
+        PreparedStatement selectStmt(pConn, "SELECT DayTime FROM CanEnterGDRLair WHERE OwnerID = ?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -218,8 +223,6 @@ void EffectCanEnterGDRLairLoader::load(Creature* pCreature)
             pEffectManager->addEffect(pEffectCanEnterGDRLair);
             pCreature->setFlag(pEffectCanEnterGDRLair->getEffectClass());
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

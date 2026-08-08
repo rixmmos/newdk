@@ -13,6 +13,7 @@
 #include "GameServerInfoManager.h"
 #include "LCServerList.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "ServerGroupInfo.h"
 #include "UserInfoManager.h"
 #endif
@@ -92,11 +93,12 @@ void CLGetServerListHandler::execute(CLGetServerList* pPacket, Player* pPlayer)
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            Result* pResult =
-                pStmt->executeQuery("SELECT CurrentWorldID, CurrentServerGroupID FROM Player where PlayerID='%s'",
-                                    pLoginPlayer->getID().c_str());
+            PreparedStatement selectPlayerServerGroupStmt(
+                pConn, "SELECT CurrentWorldID, CurrentServerGroupID FROM Player where PlayerID=?");
+            selectPlayerServerGroupStmt.bindString(1, pLoginPlayer->getID());
+            Result* pResult = selectPlayerServerGroupStmt.execute();
 
             if (pResult->next()) {
                 lcServerList.setCurrentServerGroupID(pResult->getInt(1));

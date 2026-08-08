@@ -13,6 +13,7 @@
 #include "GCRequestedIP.h"
 #include "GamePlayer.h"
 #include "PCFinder.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -28,13 +29,13 @@ void CGRequestIPHandler::execute(CGRequestIP* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     try {
-        
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult =
-                pStmt->executeQuery("SELECT IP, Port FROM UserIPInfo WHERE Name='%s'", pPacket->getName().c_str());
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectUserIPStmt(pConn, "SELECT IP, Port FROM UserIPInfo WHERE Name=?");
+            selectUserIPStmt.bindString(1, pPacket->getName());
+            Result* pResult = selectUserIPStmt.execute();
 
             if (pResult->getRowCount() == 0) {
                 SAFE_DELETE(pStmt);
@@ -58,7 +59,6 @@ void CGRequestIPHandler::execute(CGRequestIP* pPacket, Player* pPlayer)
     }
     // catch (NoSuchElementException & nsee)
     catch (Throwable& t) {
-        
         GCRequestFailed gcRequestFailed;
         gcRequestFailed.setCode(REQUEST_FAILED_IP);
         gcRequestFailed.setName(pPacket->getName());

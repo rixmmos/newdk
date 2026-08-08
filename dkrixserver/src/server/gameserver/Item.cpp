@@ -14,6 +14,7 @@
 #include "ItemInfoManager.h"
 #include "PCItemInfo.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Store.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -45,18 +46,16 @@ bool Item::destroy()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM %s WHERE ItemID = %lu", getObjectTableName().c_str(), m_ItemID);
+        // table is the item's own class table, never packet/user input; PreparedStatement cannot bind identifiers.
+        PreparedStatement deleteStmt(pConn, "DELETE FROM " + getObjectTableName() + " WHERE ItemID = ?");
+        deleteStmt.bindULong(1, m_ItemID);
+        deleteStmt.execute();
 
-        
-        
-        if (pStmt->getAffectedRowCount() == 0) {
-            SAFE_DELETE(pStmt);
+        if (deleteStmt.getAffectedRowCount() == 0) {
             return false;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

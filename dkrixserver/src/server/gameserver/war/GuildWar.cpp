@@ -20,6 +20,7 @@
 #include "HolyLandRaceBonus.h"
 #include "Mutex.h"
 #include "PCManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "StringStream.h"
 #include "WarSystem.h"
@@ -58,20 +59,18 @@ void GuildWar::executeStart()
 
     sendWarStartMessage();
 
-    
+
     ZoneID_t guardShrineZoneID = g_pCastleShrineInfoManager->getGuardShrineZoneID(m_CastleZoneID);
     Zone* pZone = getZoneByZoneID(guardShrineZoneID);
     Assert(pZone != NULL);
 
-     
 
-    
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
     Assert(pCastleInfo != NULL);
 
     GuildID_t OwnerGuildID = pCastleInfo->getGuildID();
 
-    
+
     if (OwnerGuildID != SlayerCommon && OwnerGuildID != VampireCommon) {
         const list<ZoneID_t>& zoneIDs = pCastleInfo->getZoneIDList();
 
@@ -80,7 +79,7 @@ void GuildWar::executeStart()
             ZoneID_t targetZoneID = *itr;
             Zone* pTargetZone = getZoneByZoneID(targetZoneID);
 
-            
+
             if (targetZoneID != m_CastleZoneID) {
                 pTargetZone->killAllMonsters();
             }
@@ -89,7 +88,7 @@ void GuildWar::executeStart()
 
     g_pCastleShrineInfoManager->removeShrineShield(pZone);
 
-    
+
     recordGuildWarStart();
 
     __END_CATCH
@@ -104,19 +103,24 @@ void GuildWar::recordGuildWarStart()
 
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
 
-    
+
     if (pCastleInfo == NULL)
         return;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "INSERT IGNORE INTO GuildWarHistory (WarID, GuildWarID, ServerID, CastleName, DefenseGuildID, "
-            "DefenseGuildName, AttackGuildID, AttackGuildName) VALUES (%d, '%s', %d, '%s', %d, '%s', %d, '%s')",
-            (int)getWarID(), getWarStartTime().toStringforWeb().c_str(), g_pConfig->getPropertyInt("ServerID"),
-            pCastleInfo->getName().c_str(), (int)pCastleInfo->getGuildID(),
-            g_pGuildManager->getGuildName(pCastleInfo->getGuildID()).c_str(), getChallangerGuildID(),
-            g_pGuildManager->getGuildName(getChallangerGuildID()).c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertGuildWarHistoryStmt(
+            pConn, "INSERT IGNORE INTO GuildWarHistory (WarID, GuildWarID, ServerID, CastleName, DefenseGuildID, "
+                   "DefenseGuildName, AttackGuildID, AttackGuildName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        insertGuildWarHistoryStmt.bindInt(1, (int)getWarID());
+        insertGuildWarHistoryStmt.bindString(2, getWarStartTime().toStringforWeb());
+        insertGuildWarHistoryStmt.bindInt(3, g_pConfig->getPropertyInt("ServerID"));
+        insertGuildWarHistoryStmt.bindString(4, pCastleInfo->getName());
+        insertGuildWarHistoryStmt.bindInt(5, (int)pCastleInfo->getGuildID());
+        insertGuildWarHistoryStmt.bindString(6, g_pGuildManager->getGuildName(pCastleInfo->getGuildID()));
+        insertGuildWarHistoryStmt.bindInt(7, getChallangerGuildID());
+        insertGuildWarHistoryStmt.bindString(8, g_pGuildManager->getGuildName(getChallangerGuildID()));
+        insertGuildWarHistoryStmt.execute();
     }
     END_DB(pStmt)
 
@@ -136,12 +140,12 @@ void GuildWar::executeEnd()
     __BEGIN_TRY
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     sendWarEndMessage();
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     if (m_bModifyCastleOwner) {
         g_pCastleInfoManager->modifyCastleOwner(m_CastleZoneID, m_WinnerRace, m_WinnerGuildID);
@@ -152,21 +156,20 @@ void GuildWar::executeEnd()
             CGSayHandler::opworld(NULL, sCommand, 0, true);
         }
     } else {
-        
         CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
         m_WinnerGuildID = pCastleInfo->getGuildID();
     }
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     g_pCastleShrineInfoManager->returnAllCastleSymbol(m_CastleZoneID);
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
-    
-    
+
+
     ZoneID_t guardShrineZoneID = g_pCastleShrineInfoManager->getGuardShrineZoneID(m_CastleZoneID);
     Zone* pZone = getZoneByZoneID(guardShrineZoneID);
     Assert(pZone != NULL);
@@ -189,14 +192,13 @@ void GuildWar::executeEnd()
     g_pCastleShrineInfoManager->addShrineShield(pZone);
 
     //----------------------------------------------------------------------------
-    
-    
+
+
     //----------------------------------------------------------------------------
     g_pCastleInfoManager->increaseTaxBalance(m_CastleZoneID, m_RegistrationFee);
     m_RegistrationFee = 0;
-    
 
-    
+
     recordGuildWarEnd();
 
     __END_CATCH
@@ -210,14 +212,17 @@ void GuildWar::recordGuildWarEnd()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE GuildWarHistory SET WinnerGuildID = %d , WinnerGuildName = '%s' WHERE WarID = %d",
-                            (int)m_WinnerGuildID, g_pGuildManager->getGuildName(m_WinnerGuildID).c_str(),
-                            (int)getWarID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateGuildWarHistoryStmt(
+            pConn, "UPDATE GuildWarHistory SET WinnerGuildID = ? , WinnerGuildName = ? WHERE WarID = ?");
+        updateGuildWarHistoryStmt.bindInt(1, (int)m_WinnerGuildID);
+        updateGuildWarHistoryStmt.bindString(2, g_pGuildManager->getGuildName(m_WinnerGuildID));
+        updateGuildWarHistoryStmt.bindInt(3, (int)getWarID());
+        updateGuildWarHistoryStmt.execute();
     }
     END_DB(pStmt)
 
-    
+
     char cmd[100];
     sprintf(cmd, "/home/darkeden/vs/bin/script/recordGuildWarHistory.py %d %d %d ", (int)getWarID(),
             g_pConfig->getPropertyInt("Dimension"), g_pConfig->getPropertyInt("WorldID"));
@@ -277,14 +282,7 @@ bool GuildWar::isModifyCastleOwner(PlayerCreature* pPC)
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
     Assert(pCastleInfo != NULL);
 
-    
-    
-    
-    
-    
 
-    
-    
     if (pPC->getGuildID() == m_ChallangerGuildID ||
         (!pCastleInfo->isCommon() && pPC->getCommonGuildID() == pPC->getGuildID())) {
         return true;
@@ -310,9 +308,7 @@ GuildID_t GuildWar::getWinnerGuildID(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    
-    
-    
+
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
     Assert(pCastleInfo != NULL);
 
@@ -332,7 +328,7 @@ bool GuildWar::endWar(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    
+
     if (isModifyCastleOwner(pPC)) {
         m_WinnerRace = pPC->getRace();
         m_WinnerGuildID = getWinnerGuildID(pPC);
@@ -356,7 +352,7 @@ void GuildWar::sendWarEndMessage() const
 
     War::sendWarEndMessage();
 
-    
+
     GCNoticeEvent gcNoticeEvent;
     gcNoticeEvent.setCode(NOTICE_EVENT_WAR_OVER);
     gcNoticeEvent.setParameter(m_CastleZoneID);
@@ -393,7 +389,7 @@ void GuildWar::makeWarInfo(WarInfo* pWarInfo) const
     Assert(pGuildWarInfo != NULL);
 
     //---------------------------------------------------
-    
+
     //---------------------------------------------------
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(getCastleZoneID());
     if (pCastleInfo == NULL) {
@@ -404,11 +400,11 @@ void GuildWar::makeWarInfo(WarInfo* pWarInfo) const
     GuildID_t ownGuildID = pCastleInfo->getGuildID();
     GuildID_t challangerGuildID = getChallangerGuildID();
 
-    pGuildWarInfo->addJoinGuild(ownGuildID);        
-    pGuildWarInfo->addJoinGuild(challangerGuildID); 
+    pGuildWarInfo->addJoinGuild(ownGuildID);
+    pGuildWarInfo->addJoinGuild(challangerGuildID);
     pGuildWarInfo->setCastleID(getCastleZoneID());
 
-    
+
     static const string commonSlayerGuild("");
     static const string commonVampireGuild("");
 

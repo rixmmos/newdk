@@ -7,6 +7,7 @@
 #include "OustersSkillSlot.h"
 
 #include "DB.h"
+#include "PreparedStatement.h"
 
 OustersSkillSlot::OustersSkillSlot() throw() {
     __BEGIN_TRY
@@ -44,13 +45,18 @@ void OustersSkillSlot::create(const string& OwnerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("INSERT INTO OustersSkillSave (OwnerID, SkillType, Delay, CastingTime, NextTime, "
-                            "SkillLevel) VALUES ( '%s', %d, %d, %d, %d, %d )",
-                            OwnerID.c_str(), m_SkillType, m_Interval, m_CastingTime, m_runTime.tv_sec, m_ExpLevel);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertOustersSkillSaveStmt(
+            pConn, "INSERT INTO OustersSkillSave (OwnerID, SkillType, Delay, CastingTime, NextTime, "
+                   "SkillLevel) VALUES ( ?, ?, ?, ?, ?, ? )");
+        insertOustersSkillSaveStmt.bindString(1, OwnerID);
+        insertOustersSkillSaveStmt.bindInt(2, m_SkillType);
+        insertOustersSkillSaveStmt.bindInt(3, m_Interval);
+        insertOustersSkillSaveStmt.bindInt(4, m_CastingTime);
+        insertOustersSkillSaveStmt.bindInt(5, m_runTime.tv_sec);
+        insertOustersSkillSaveStmt.bindInt(6, m_ExpLevel);
+        insertOustersSkillSaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -65,12 +71,15 @@ void OustersSkillSlot::save(const string& OwnerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE OustersSkillSave SET SkillLevel=%d, Delay=%d WHERE OwnerID='%s' AND SkillType=%d",
-                            m_ExpLevel, m_Interval, OwnerID.c_str(), m_SkillType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateOustersSkillSaveStmt(
+            pConn, "UPDATE OustersSkillSave SET SkillLevel=?, Delay=? WHERE OwnerID=? AND SkillType=?");
+        updateOustersSkillSaveStmt.bindInt(1, m_ExpLevel);
+        updateOustersSkillSaveStmt.bindInt(2, m_Interval);
+        updateOustersSkillSaveStmt.bindString(3, OwnerID);
+        updateOustersSkillSaveStmt.bindInt(4, m_SkillType);
+        updateOustersSkillSaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -85,12 +94,13 @@ void OustersSkillSlot::destroy(const string& OwnerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM OustersSkillSave WHERE OwnerID='%s' AND SkillType=%u", OwnerID.c_str(),
-                            m_SkillType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteOustersSkillSaveStmt(pConn,
+                                                     "DELETE FROM OustersSkillSave WHERE OwnerID=? AND SkillType=?");
+        deleteOustersSkillSaveStmt.bindString(1, OwnerID);
+        deleteOustersSkillSaveStmt.bindUInt(2, m_SkillType);
+        deleteOustersSkillSaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -115,19 +125,17 @@ Turn_t OustersSkillSlot::getRemainTurn(Timeval currentTime) const throw() {
 }
 
 void OustersSkillSlot::setRunTime() throw() {
-    
     getCurrentTime(m_runTime);
 
-    
+
     m_runTime.tv_sec += m_Interval / 10;
     m_runTime.tv_usec += (m_Interval % 10) * 100000;
 }
 
 void OustersSkillSlot::setRunTime(Turn_t delay) throw() {
-    
     getCurrentTime(m_runTime);
 
-    
+
     m_runTime.tv_sec += delay / 10;
     m_runTime.tv_usec += (delay % 10) * 100000;
 
@@ -149,7 +157,7 @@ void OustersSkillSlot::setRunTime(Turn_t delay) throw() {
         case SKILL_HOWL:
             break;
         default:
-            save(m_Name); 
+            save(m_Name);
             break;
         }
     }

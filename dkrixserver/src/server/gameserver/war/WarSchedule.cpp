@@ -8,6 +8,7 @@
 #include "GCWarScheduleList.h"
 #include "GuildManager.h"
 #include "GuildWar.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SiegeWar.h"
 #include "War.h"
@@ -108,22 +109,24 @@ void WarSchedule::create()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "INSERT IGNORE INTO WarScheduleInfo ( WarID, ServerID, ZoneID, WarType, AttackGuildID, WarFee, StartTime, Status ) \
-				VALUES ( %u, %u, %u, '%s', %u, %u, '%s', '%s' )",
-            (int)pSiegeWar->getWarID(), g_pConfig->getPropertyInt("ServerID"), (int)pSiegeWar->getCastleZoneID(),
-            pSiegeWar->getWarType2DBString().c_str(), (int)pSiegeWar->getChallangerGuildID(),
-            (int)pSiegeWar->getRegistrationFee(), m_ScheduledTime.toDateTime().c_str(),
-            pSiegeWar->getState2DBString().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertWarScheduleInfoStmt(
+            pConn, "INSERT IGNORE INTO WarScheduleInfo ( WarID, ServerID, ZoneID, WarType, AttackGuildID, WarFee, "
+                   "StartTime, Status ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )");
+        insertWarScheduleInfoStmt.bindUInt(1, (int)pSiegeWar->getWarID());
+        insertWarScheduleInfoStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        insertWarScheduleInfoStmt.bindUInt(3, (int)pSiegeWar->getCastleZoneID());
+        insertWarScheduleInfoStmt.bindString(4, pSiegeWar->getWarType2DBString());
+        insertWarScheduleInfoStmt.bindUInt(5, (int)pSiegeWar->getChallangerGuildID());
+        insertWarScheduleInfoStmt.bindUInt(6, (int)pSiegeWar->getRegistrationFee());
+        insertWarScheduleInfoStmt.bindString(7, m_ScheduledTime.toDateTime());
+        insertWarScheduleInfoStmt.bindString(8, pSiegeWar->getState2DBString());
+        insertWarScheduleInfoStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
+        if (insertWarScheduleInfoStmt.getAffectedRowCount() == 0) {
             filelog("WarError.log", "WarSchedule::create() :   War    .");
-            SAFE_DELETE(pStmt);
             return;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -147,25 +150,30 @@ void WarSchedule::save()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "REPLACE INTO WarScheduleInfo ( WarID, ServerID, ZoneID, WarType, AttackerCount, "
-            "AttackGuildID, AttackGuildID2, AttackGuildID3, AttackGuildID4, AttackGuildID5, WarFee, StartTime, Status ) \
-				VALUES ( %u, %u, %u, '%s', %u, %u, %u, %u, %u, %u, %u, '%s', '%s' )",
-            (int)pSiegeWar->getWarID(), g_pConfig->getPropertyInt("ServerID"), (int)pSiegeWar->getCastleZoneID(),
-            pSiegeWar->getWarType2DBString().c_str(), (int)pSiegeWar->getChallengerGuildCount(),
-            (int)pSiegeWar->getChallangerGuildID(0), (int)pSiegeWar->getChallangerGuildID(1),
-            (int)pSiegeWar->getChallangerGuildID(2), (int)pSiegeWar->getChallangerGuildID(3),
-            (int)pSiegeWar->getChallangerGuildID(4), (int)pSiegeWar->getRegistrationFee(),
-            m_ScheduledTime.toDateTime().c_str(), pSiegeWar->getState2DBString().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement replaceWarScheduleInfoStmt(
+            pConn, "REPLACE INTO WarScheduleInfo ( WarID, ServerID, ZoneID, WarType, AttackerCount, "
+                   "AttackGuildID, AttackGuildID2, AttackGuildID3, AttackGuildID4, AttackGuildID5, WarFee, "
+                   "StartTime, Status ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )");
+        replaceWarScheduleInfoStmt.bindUInt(1, (int)pSiegeWar->getWarID());
+        replaceWarScheduleInfoStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        replaceWarScheduleInfoStmt.bindUInt(3, (int)pSiegeWar->getCastleZoneID());
+        replaceWarScheduleInfoStmt.bindString(4, pSiegeWar->getWarType2DBString());
+        replaceWarScheduleInfoStmt.bindUInt(5, (int)pSiegeWar->getChallengerGuildCount());
+        replaceWarScheduleInfoStmt.bindUInt(6, (int)pSiegeWar->getChallangerGuildID(0));
+        replaceWarScheduleInfoStmt.bindUInt(7, (int)pSiegeWar->getChallangerGuildID(1));
+        replaceWarScheduleInfoStmt.bindUInt(8, (int)pSiegeWar->getChallangerGuildID(2));
+        replaceWarScheduleInfoStmt.bindUInt(9, (int)pSiegeWar->getChallangerGuildID(3));
+        replaceWarScheduleInfoStmt.bindUInt(10, (int)pSiegeWar->getChallangerGuildID(4));
+        replaceWarScheduleInfoStmt.bindUInt(11, (int)pSiegeWar->getRegistrationFee());
+        replaceWarScheduleInfoStmt.bindString(12, m_ScheduledTime.toDateTime());
+        replaceWarScheduleInfoStmt.bindString(13, pSiegeWar->getState2DBString());
+        replaceWarScheduleInfoStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
+        if (replaceWarScheduleInfoStmt.getAffectedRowCount() == 0) {
             filelog("WarError.log", "WarSchedule::create() :   War    .");
-            SAFE_DELETE(pStmt);
             return;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -184,13 +192,16 @@ void WarSchedule::tinysave(const string& query)
     // Result*		pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE WarScheduleInfo SET %s WHERE WarID = %d AND ServerID = %d", query.c_str(),
-                            pWar->getWarID(), g_pConfig->getPropertyInt("ServerID"));
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // query is a caller-built "Column=value" SQL fragment (e.g. "Status='WAR_STARTED'"), never
+        // packet/user input; PreparedStatement cannot bind identifiers/fragments.
+        PreparedStatement updateWarScheduleInfoStmt(pConn, "UPDATE WarScheduleInfo SET " + query +
+                                                               " WHERE WarID = ? AND ServerID = ?");
+        updateWarScheduleInfoStmt.bindInt(1, pWar->getWarID());
+        updateWarScheduleInfoStmt.bindInt(2, g_pConfig->getPropertyInt("ServerID"));
+        updateWarScheduleInfoStmt.execute();
     }
     END_DB(pStmt)
-
-    SAFE_DELETE(pStmt);
 
     __END_CATCH
 }

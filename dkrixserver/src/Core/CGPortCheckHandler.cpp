@@ -14,6 +14,7 @@
 
 #ifdef __GAME_SERVER__
 #include "DB.h"
+#include "PreparedStatement.h"
 
 #endif
 
@@ -41,15 +42,22 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
     Statement* pStmt = NULL;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("INSERT IGNORE INTO UserIPInfo (Name, IP, Port, ServerID) VALUES ( '%s', %lu, %u, %d )",
-                            pPacket->getPCName().c_str(), IP, port, g_pConfig->getPropertyInt("ServerID"));
+        PreparedStatement insertUserIPStmt(
+            pConn, "INSERT IGNORE INTO UserIPInfo (Name, IP, Port, ServerID) VALUES ( ?, ?, ?, ? )");
+        insertUserIPStmt.bindString(1, pPacket->getPCName());
+        insertUserIPStmt.bindULong(2, IP);
+        insertUserIPStmt.bindUInt(3, port);
+        insertUserIPStmt.bindInt(4, g_pConfig->getPropertyInt("ServerID"));
+        insertUserIPStmt.execute();
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            
-            pStmt->executeQuery("UPDATE UserIPInfo Set IP=%lu, Port=%u WHERE Name='%s'", IP, port,
-                                pPacket->getPCName().c_str());
+        if (insertUserIPStmt.getAffectedRowCount() == 0) {
+            PreparedStatement updateUserIPStmt(pConn, "UPDATE UserIPInfo Set IP=?, Port=? WHERE Name=?");
+            updateUserIPStmt.bindULong(1, IP);
+            updateUserIPStmt.bindUInt(2, port);
+            updateUserIPStmt.bindString(3, pPacket->getPCName());
+            updateUserIPStmt.execute();
 
             // log(LOG_CGCONNECT, pPacket->getPCName(), "", host);
         }
@@ -57,7 +65,6 @@ void CGPortCheckHandler::execute(CGPortCheck* pPacket)
         SAFE_DELETE(pStmt);
 
     } catch (SQLQueryException&) {
-         
         SAFE_DELETE(pStmt);
     }
 #else

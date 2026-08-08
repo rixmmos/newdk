@@ -16,6 +16,7 @@
 #include "NewbieFlagWar.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SystemAvailabilitiesManager.h"
 #include "Zone.h"
@@ -49,9 +50,10 @@ void FlagManager::init() {
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT ZoneID, CenterX, CenterY, Width, Height, Race-1, MonsterType FROM FlagPolePosition");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectFlagPoleStmt(
+            pConn, "SELECT ZoneID, CenterX, CenterY, Width, Height, Race-1, MonsterType FROM FlagPolePosition");
+        pResult = selectFlagPoleStmt.execute();
 
         while (pResult->next()) {
             ZoneID_t zoneID = (ZoneID_t)pResult->getInt(1);
@@ -144,7 +146,7 @@ bool FlagManager::endFlagWar() {
     if (m_bHasFlagWar) {
         recordFlagWarHistory();
 
-        
+
         char cmd[100];
         sprintf(cmd, "/home/darkeden/vs/bin/script/recordFlagWarHistory.py %s %d %d %d %d %d %d %d ",
                 m_EndTime.toStringforWeb().c_str(), (int)getWinnerRace(), g_pConfig->getPropertyInt("Dimension"),
@@ -173,8 +175,8 @@ bool FlagManager::putFlag(PlayerCreature* pPC, MonsterCorpse* pFlagPole) {
     m_FlagCount[(RACEINDEX)(pPC->getRace())]++;
     m_StatusPacket.setFlagCount(pPC->getRace(), m_FlagCount[(RACEINDEX)(pPC->getRace())]);
     m_PutTime[pPC->getRace()] = VSDateTime::currentDateTime();
-    filelog("FlagWar.log", "%s    . S : %d, V : %d, O : %d", pPC->getName().c_str(),
-            m_FlagCount[SLAYER], m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
+    filelog("FlagWar.log", "%s    . S : %d, V : %d, O : %d", pPC->getName().c_str(), m_FlagCount[SLAYER],
+            m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
     unlock();
 
     broadcastStatus();
@@ -195,8 +197,8 @@ bool FlagManager::getFlag(PlayerCreature* pPC, MonsterCorpse* pFlagPole) {
     lock();
     m_FlagCount[(RACEINDEX)(m_FlagPoles[pFlagPole])]--;
     m_StatusPacket.setFlagCount(m_FlagPoles[pFlagPole], m_FlagCount[(RACEINDEX)(m_FlagPoles[pFlagPole])]);
-    filelog("FlagWar.log", "%s   . S : %d, V : %d, O : %d", pPC->getName().c_str(),
-            m_FlagCount[SLAYER], m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
+    filelog("FlagWar.log", "%s   . S : %d, V : %d, O : %d", pPC->getName().c_str(), m_FlagCount[SLAYER],
+            m_FlagCount[VAMPIRE], m_FlagCount[OUSTERS]);
     unlock();
 
     broadcastStatus();
@@ -222,7 +224,6 @@ bool FlagManager::putFlag(PlayerCreature* pPC, Item* pItem, MonsterCorpse* pFlag
 
     Effect* pEffect = pPC->findEffect(Effect::EFFECT_CLASS_HAS_FLAG);
     if (pEffect != NULL) {
-        
         pEffect->setDeadline(0);
     }
 
@@ -276,8 +277,7 @@ void FlagManager::resetFlagCounts() {
     m_FlagCount[VAMPIRE] = 0;
     m_FlagCount[OUSTERS] = 0;
 
-    
-    
+
     list<PoleFieldInfo>::iterator itr = m_PoleFields.begin();
     list<PoleFieldInfo>::iterator endItr = m_PoleFields.end();
     for (; itr != endItr; ++itr) {
@@ -307,13 +307,14 @@ void FlagManager::resetFlagCounts() {
             }
     }
 
-    
+
     Statement* pStmt = NULL;
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("DELETE FROM FlagWarStat");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteFlagWarStatStmt(pConn, "DELETE FROM FlagWarStat");
+        pResult = deleteFlagWarStatStmt.execute();
     }
     END_DB(pStmt)
 }
@@ -337,16 +338,22 @@ void FlagManager::recordPutFlag(PlayerCreature* pPC, Item* pItem)
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Name FROM FlagWarStat WHERE Name = '%s' AND ItemID = %d",
-                                      pPC->getName().c_str(), pItem->getItemID());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStatStmt(pConn, "SELECT Name FROM FlagWarStat WHERE Name = ? AND ItemID = ?");
+        selectStatStmt.bindString(1, pPC->getName());
+        selectStatStmt.bindInt(2, pItem->getItemID());
+        pResult = selectStatStmt.execute();
 
-        
+
         if (!pResult->next()) {
-            pResult = pStmt->executeQuery(
-                "INSERT INTO FlagWarStat (PlayerID, Name, Race, ServerID, ItemID) VALUES ('%s','%s',%d,%d,%d)",
-                pPC->getPlayer()->getID().c_str(), pPC->getName().c_str(), (int)pPC->getRace(),
-                g_pConfig->getPropertyInt("ServerID"), pItem->getItemID());
+            PreparedStatement insertStatStmt(
+                pConn, "INSERT INTO FlagWarStat (PlayerID, Name, Race, ServerID, ItemID) VALUES (?,?,?,?,?)");
+            insertStatStmt.bindString(1, pPC->getPlayer()->getID());
+            insertStatStmt.bindString(2, pPC->getName());
+            insertStatStmt.bindInt(3, (int)pPC->getRace());
+            insertStatStmt.bindInt(4, g_pConfig->getPropertyInt("ServerID"));
+            insertStatStmt.bindInt(5, pItem->getItemID());
+            pResult = insertStatStmt.execute();
         }
     }
     END_DB(pStmt)
@@ -356,16 +363,19 @@ void FlagManager::recordFlagWarHistory()
 
 {
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
 
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pResult = pStmt->executeQuery(
-            "SELECT PlayerID, Name, Race, ServerID, count(*) FROM FlagWarStat GROUP BY Name, ServerID");
+        PreparedStatement selectStatsStmt(
+            pConn, "SELECT PlayerID, Name, Race, ServerID, count(*) FROM FlagWarStat GROUP BY Name, ServerID");
+        pResult = selectStatsStmt.execute();
+
+        PreparedStatement insertHistoryStmt(pConn,
+                                            "INSERT INTO FlagWarHistory (FlagWarID, PlayerID, Name, Race, ServerID, "
+                                            "FlagNum) VALUES (?,?,?,?,?,?)");
 
         while (pResult->next()) {
             string playerID = pResult->getString(1);
@@ -374,13 +384,14 @@ void FlagManager::recordFlagWarHistory()
             int serverID = pResult->getInt(4);
             int num = pResult->getInt(5);
 
-            pStmt2->executeQuery("INSERT INTO FlagWarHistory (FlagWarID, PlayerID, Name, Race, ServerID, FlagNum) "
-                                 "VALUES ('%s','%s','%s',%d,%d,%d)",
-                                 m_EndTime.toStringforWeb().c_str(), playerID.c_str(), name.c_str(), (int)race,
-                                 serverID, num);
+            insertHistoryStmt.bindString(1, m_EndTime.toStringforWeb());
+            insertHistoryStmt.bindString(2, playerID);
+            insertHistoryStmt.bindString(3, name);
+            insertHistoryStmt.bindInt(4, (int)race);
+            insertHistoryStmt.bindInt(5, serverID);
+            insertHistoryStmt.bindInt(6, num);
+            insertHistoryStmt.execute();
         }
-
-        SAFE_DELETE(pStmt2);
     }
     END_DB(pStmt)
 }

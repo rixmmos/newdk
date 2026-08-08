@@ -13,6 +13,7 @@
 #include "GMServerInfo.h"
 #include "LogDef.h"
 #include "LoginServerManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "StringStream.h"
 #include "ZoneGroup.h"
@@ -39,11 +40,11 @@ ConnectionInfoManager::ConnectionInfoManager()
 
     m_Mutex.setName("ConnectionInfoManager");
 
-    
+
     getCurrentTime(m_NextHeartbeat);
     m_NextHeartbeat.tv_sec += 10;
 
-    
+
     m_UpdateUserStatusTime.tv_sec = m_NextHeartbeat.tv_sec + 20;
 
     __END_CATCH
@@ -57,13 +58,13 @@ ConnectionInfoManager::~ConnectionInfoManager()
 {
     __BEGIN_TRY
 
-    
+
     HashMapConnectionInfo::iterator itr = m_ConnectionInfos.begin();
     for (; itr != m_ConnectionInfos.end(); itr++) {
         SAFE_DELETE(itr->second);
     }
 
-    
+
     m_ConnectionInfos.clear();
 
     __END_CATCH_NO_RETHROW
@@ -85,10 +86,9 @@ void ConnectionInfoManager::addConnectionInfo(ConnectionInfo* pConnectionInfo) {
     HashMapConnectionInfo::iterator itr = m_ConnectionInfos.find(normalizedIP);
 
     if (itr != m_ConnectionInfos.end()) {
-        
         // throw DuplicatedException("duplicated connection info id");
 
-        
+
         // by sigi. 2002.12.7
         // throw DuplicatedException("duplicated connection info id");
         ConnectionInfo* pOldConnectionInfo = itr->second;
@@ -127,10 +127,10 @@ void ConnectionInfoManager::deleteConnectionInfo(const string& clientIP) {
     if (itr != m_ConnectionInfos.end()) {
         Assert(itr->second != NULL);
 
-        
+
         SAFE_DELETE(itr->second);
 
-        
+
         m_ConnectionInfos.erase(itr);
     } else {
         throw NoSuchElementException(normalizedIP);
@@ -216,22 +216,20 @@ void ConnectionInfoManager::heartbeat()
             }
         }
 
-        
+
         Statement* pStmt = NULL;
-        Result* pResult = NULL;
 
         static int GroupCount = 0;
 
         BEGIN_DB {
             if (GroupCount == 0) {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pResult = pStmt->executeQuery("SELECT MAX(ZoneGroupID) FROM ZoneGroupInfo");
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                PreparedStatement selectStmt(pConn, "SELECT MAX(ZoneGroupID) FROM ZoneGroupInfo");
+                Result* pResult = selectStmt.execute();
 
                 pResult->next();
 
                 GroupCount = pResult->getInt(1) + 1;
-
-                SAFE_DELETE(pStmt);
             }
         }
         END_DB(pStmt)
@@ -261,33 +259,37 @@ void ConnectionInfoManager::heartbeat()
             numPC += pZoneGroup->getZonePlayerManager()->size();
         }
 
-        
+
         if (currentTime > m_UpdateUserStatusTime) {
-            
             m_UpdateUserStatusTime.tv_sec = currentTime.tv_sec + 30;
 
             if (g_pConfig->getPropertyInt("IsNetMarble") == 1) {
                 pStmt = NULL;
                 BEGIN_DB {
-                    pStmt = g_pDatabaseManager->getUserInfoConnection()->createStatement();
+                    Connection* pConn = g_pDatabaseManager->getUserInfoConnection();
 
-                    pStmt->executeQuery("UPDATE UserStatus SET CurrentUser=%d WHERE WorldID=%d AND ServerID=%d", numPC,
-                                        worldID, serverID);
+                    PreparedStatement updateStmt(pConn,
+                                                 "UPDATE UserStatus SET CurrentUser=? WHERE WorldID=? AND ServerID=?");
+                    updateStmt.bindInt(1, numPC);
+                    updateStmt.bindInt(2, worldID);
+                    updateStmt.bindInt(3, serverID);
+                    updateStmt.execute();
 
-                    
-                    if (pStmt->getAffectedRowCount() == 0) {
-                        pStmt->executeQuery(
-                            "INSERT IGNORE INTO UserStatus (WorldID, ServerID, CurrentUser) Values (%d, %d, %d)",
-                            worldID, serverID, numPC);
+
+                    if (updateStmt.getAffectedRowCount() == 0) {
+                        PreparedStatement insertStmt(
+                            pConn, "INSERT IGNORE INTO UserStatus (WorldID, ServerID, CurrentUser) Values (?, ?, ?)");
+                        insertStmt.bindInt(1, worldID);
+                        insertStmt.bindInt(2, serverID);
+                        insertStmt.bindInt(3, numPC);
+                        insertStmt.execute();
                     }
-
-                    SAFE_DELETE(pStmt);
                 }
                 END_DB(pStmt)
             }
         }
 
-        
+
         // g_pLoginServerManager->sendPacket(g_pConfig->getProperty("MonitorClientIP1") ,
         // g_pConfig->getPropertyInt("MonitorClient1UDPORT"), &gmServerInfo);
         // g_pLoginServerManager->sendPacket(g_pConfig->getProperty("MonitorClientIP2") ,
@@ -298,10 +300,10 @@ void ConnectionInfoManager::heartbeat()
         static int loginServerUDPPort = g_pConfig->getPropertyInt("LoginServerUDPPort");
         static int loginServerBaseUDPPort = g_pConfig->getPropertyInt("LoginServerBaseUDPPort");
 
-        
+
         g_pLoginServerManager->sendPacket(loginServerIP, loginServerUDPPort, &gmServerInfo);
 
-        
+
         if (portNum > 1) {
             for (int j = 0; j < portNum; j++) {
                 g_pLoginServerManager->sendPacket(loginServerIP, loginServerBaseUDPPort + j, &gmServerInfo);

@@ -29,6 +29,7 @@
 #include "NPC.h"
 #include "NPCManager.h"
 #include "PCManager.h"
+#include "PreparedStatement.h"
 #include "ShrineInfoManager.h"
 #include "Skill.h"
 #include "StringPool.h"
@@ -242,14 +243,16 @@ void CastleInfoManager::load()
 
     BEGIN_DB {
         // create statement
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult =
-            pStmt->executeQuery("SELECT ZoneID, ShrineID, GuildID, Name, Race, ItemTaxRatio, EntranceFee, TaxBalance, "
-                                "BonusOptionType, FirstResurrectZoneID, FirstResurrectX, FirstResurrectY, "
-                                "SecondResurrectZoneID, SecondResurrectX, SecondResurrectY, ThirdResurrectZoneID, "
-                                "ThirdResurrectX, ThirdResurrectY, ZoneIDList FROM CastleInfo WHERE ServerID = %d",
-                                g_pConfig->getPropertyInt("ServerID"));
+        PreparedStatement selectStmt(pConn,
+                                     "SELECT ZoneID, ShrineID, GuildID, Name, Race, ItemTaxRatio, EntranceFee, "
+                                     "TaxBalance, BonusOptionType, FirstResurrectZoneID, FirstResurrectX, "
+                                     "FirstResurrectY, SecondResurrectZoneID, SecondResurrectX, SecondResurrectY, "
+                                     "ThirdResurrectZoneID, ThirdResurrectX, ThirdResurrectY, ZoneIDList FROM "
+                                     "CastleInfo WHERE ServerID = ?");
+        selectStmt.bindInt(1, g_pConfig->getPropertyInt("ServerID"));
+        Result* pResult = selectStmt.execute();
 
         ZoneCoord_t x, y;
         ZONE_COORD zoneCoord;
@@ -304,8 +307,6 @@ void CastleInfoManager::load()
 
             cout << pCastleInfo->toString().c_str() << endl;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -325,15 +326,19 @@ void CastleInfoManager::save(ZoneID_t zoneID)
 
     BEGIN_DB {
         // create statement
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE CastleInfo SET GuildID=%d, Name='%s', Race=%d, ItemTaxRatio=%d, EntranceFee=%d, "
-                            "TaxBalance=%d WHERE ServerID=%d AND ZoneID=%d",
-                            (int)pCastleInfo->getGuildID(), pCastleInfo->getName().c_str(), (int)pCastleInfo->getRace(),
-                            pCastleInfo->getItemTaxRatio(), (int)pCastleInfo->getEntranceFee(),
-                            (int)pCastleInfo->getTaxBalance(), (int)g_pConfig->getPropertyInt("ServerID"), (int)zoneID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE CastleInfo SET GuildID=?, Name=?, Race=?, ItemTaxRatio=?, "
+                                            "EntranceFee=?, TaxBalance=? WHERE ServerID=? AND ZoneID=?");
+        updateStmt.bindInt(1, (int)pCastleInfo->getGuildID());
+        updateStmt.bindString(2, pCastleInfo->getName());
+        updateStmt.bindInt(3, (int)pCastleInfo->getRace());
+        updateStmt.bindInt(4, pCastleInfo->getItemTaxRatio());
+        updateStmt.bindInt(5, (int)pCastleInfo->getEntranceFee());
+        updateStmt.bindInt(6, (int)pCastleInfo->getTaxBalance());
+        updateStmt.bindInt(7, (int)g_pConfig->getPropertyInt("ServerID"));
+        updateStmt.bindInt(8, (int)zoneID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -953,15 +958,17 @@ bool CastleInfoManager::tinysave(ZoneID_t zoneID, const string& query)
 
     BEGIN_DB {
         // create statement
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE CastleInfo SET %s WHERE ZoneID=%d AND ServerID=%d", query.c_str(),
-                            pCastleInfo->getZoneID(), g_pConfig->getPropertyInt("ServerID"));
+        // query is a caller-built "Column=value" fragment (see CastleInfo::increase/decreaseTaxBalanceEx), never
+        // packet/user input; PreparedStatement cannot bind identifiers or arbitrary SQL fragments.
+        PreparedStatement updateStmt(pConn, "UPDATE CastleInfo SET " + query + " WHERE ZoneID=? AND ServerID=?");
+        updateStmt.bindInt(1, pCastleInfo->getZoneID());
+        updateStmt.bindInt(2, g_pConfig->getPropertyInt("ServerID"));
+        updateStmt.execute();
 
-        if (pStmt->getAffectedRowCount() > 0)
+        if (updateStmt.getAffectedRowCount() > 0)
             isAffected = true;
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

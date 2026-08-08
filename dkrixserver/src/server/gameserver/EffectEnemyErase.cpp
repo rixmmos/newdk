@@ -13,6 +13,7 @@
 #include "Monster.h"
 #include "Ousters.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 
@@ -23,7 +24,7 @@ EffectEnemyErase::EffectEnemyErase(Creature* pCreature)
 
     setTarget(pCreature);
 
-    
+
     m_bBroadcastingEffect = false;
 
     __END_CATCH
@@ -103,7 +104,7 @@ void EffectEnemyErase::create(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
 
         Turn_t currentYearTime;
@@ -123,12 +124,14 @@ void EffectEnemyErase::create(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery(
-            "INSERT INTO EnemyErase (OwnerID , YearTime, DayTime, EnemyName) VALUES ('%s', %ld, %ld, '%s')",
-            ownerID.c_str(), currentYearTime, m_Deadline.tv_sec, m_EnemyName.c_str());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(
+            pConn, "INSERT INTO EnemyErase (OwnerID , YearTime, DayTime, EnemyName) VALUES (?, ?, ?, ?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindLong(2, currentYearTime);
+        insertStmt.bindLong(3, m_Deadline.tv_sec);
+        insertStmt.bindString(4, m_EnemyName);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -140,10 +143,10 @@ void EffectEnemyErase::destroy(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -151,11 +154,11 @@ void EffectEnemyErase::destroy(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        
-        pStmt->executeQuery("DELETE FROM EnemyErase WHERE OwnerID = '%s' AND EnemyName = '%s'", ownerID.c_str(),
-                            m_EnemyName.c_str());
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM EnemyErase WHERE OwnerID = ? AND EnemyName = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.bindString(2, m_EnemyName);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -167,10 +170,10 @@ void EffectEnemyErase::save(const string& ownerID)
 {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
 
         Turn_t currentYearTime;
@@ -188,11 +191,13 @@ void EffectEnemyErase::save(const string& ownerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery(
-            "UPDATE EnemyErase SET YearTime = %ld, DayTime = %ld, EnemyName = '%s' WHERE OwnerID = '%s'",
-            currentYearTime, m_Deadline.tv_sec, m_EnemyName.c_str(), ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(
+            pConn, "UPDATE EnemyErase SET YearTime = ?, DayTime = ?, EnemyName = ? WHERE OwnerID = ?");
+        updateStmt.bindLong(1, currentYearTime);
+        updateStmt.bindLong(2, m_Deadline.tv_sec);
+        updateStmt.bindString(3, m_EnemyName);
+        updateStmt.bindString(4, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -220,10 +225,10 @@ void EffectEnemyEraseLoader::load(Creature* pCreature)
         return;
     }
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -235,9 +240,10 @@ void EffectEnemyEraseLoader::load(Creature* pCreature)
         Result* pResult = pStmt->executeQueryString(sql.toString());
         */
 
-        
-        Result* pResult = pStmt->executeQuery("SELECT DayTime, EnemyName FROM EnemyErase WHERE OwnerID = '%s'",
-                                              pCreature->getName().c_str());
+
+        PreparedStatement selectStmt(pConn, "SELECT DayTime, EnemyName FROM EnemyErase WHERE OwnerID = ?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             uint i = 0;
@@ -272,8 +278,6 @@ void EffectEnemyEraseLoader::load(Creature* pCreature)
                 pOusters->addEnemy(pEffectEnemyErase->getEnemyName());
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

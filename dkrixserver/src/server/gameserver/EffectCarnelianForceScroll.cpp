@@ -9,6 +9,7 @@
 #include "DB.h"
 #include "GCRemoveEffect.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Timeval.h"
 #include "Zone.h"
 
@@ -53,7 +54,7 @@ void EffectCarnelianForceScroll::affect(Creature* pCreature)
     ObjectRegistry& objectregister = pZone->getObjectRegistry();
     objectregister.registerObject(this);
 
-    
+
     pPC->addEffectOption(getObjectID(), 182);
     pPC->initAllStatAndSend();
 
@@ -110,7 +111,7 @@ void EffectCarnelianForceScroll::create(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Timeval currentTime;
         getCurrentTime(currentTime);
@@ -118,10 +119,11 @@ void EffectCarnelianForceScroll::create(const string& ownerID)
         Timeval remainTime = timediff(m_Deadline, currentTime);
         Turn_t remainTurn = remainTime.tv_sec * 10 + remainTime.tv_usec / 100000;
 
-        pStmt->executeQuery("INSERT INTO EffectCarnelianForceScroll (OwnerID, RemainTime ) VALUES('%s',%lu)",
-                            ownerID.c_str(), remainTurn);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn,
+                                     "INSERT INTO EffectCarnelianForceScroll (OwnerID, RemainTime ) VALUES(?,?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindULong(2, remainTurn);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -138,11 +140,11 @@ void EffectCarnelianForceScroll::destroy(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM EffectCarnelianForceScroll WHERE OwnerID = '%s'", ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM EffectCarnelianForceScroll WHERE OwnerID = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -159,7 +161,7 @@ void EffectCarnelianForceScroll::save(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Timeval currentTime;
         getCurrentTime(currentTime);
@@ -167,10 +169,10 @@ void EffectCarnelianForceScroll::save(const string& ownerID)
         Timeval remainTime = timediff(m_Deadline, currentTime);
         Turn_t remainTurn = remainTime.tv_sec * 10 + remainTime.tv_usec / 100000;
 
-        pStmt->executeQuery("UPDATE EffectCarnelianForceScroll SET RemainTime = %lu WHERE OwnerID = '%s'", remainTurn,
-                            ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE EffectCarnelianForceScroll SET RemainTime = ? WHERE OwnerID = ?");
+        updateStmt.bindULong(1, remainTurn);
+        updateStmt.bindString(2, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -202,10 +204,11 @@ void EffectCarnelianForceScrollLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECt RemainTime FROM EffectCarnelianForceScroll WHERE OwnerID = '%s'",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectStmt(pConn, "SELECt RemainTime FROM EffectCarnelianForceScroll WHERE OwnerID = ?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         if (pResult->next()) {
             Turn_t remainTurn = pResult->getDWORD(1);
@@ -228,11 +231,9 @@ void EffectCarnelianForceScrollLoader::load(Creature* pCreature)
             ObjectRegistry& objectregister = pZone->getObjectRegistry();
             objectregister.registerObject(pEffect);
 
-            
+
             pPC->addEffectOption(pEffect->getObjectID(), 182);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

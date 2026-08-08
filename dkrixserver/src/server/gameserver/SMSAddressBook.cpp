@@ -3,6 +3,7 @@
 #include "DB.h"
 #include "GCAddressListVerify.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 
 AddressUnit* SMSAddressElement::getAddressUnit() const {
     AddressUnit* pRet = new AddressUnit;
@@ -34,10 +35,11 @@ void SMSAddressBook::load() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT eID, CharacterName, CustomName, Number FROM SMSAddressBook WHERE OwnerID='%s'",
-                                m_pOwner->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectAddressBookStmt(
+            pConn, "SELECT eID, CharacterName, CustomName, Number FROM SMSAddressBook WHERE OwnerID=?");
+        selectAddressBookStmt.bindString(1, m_pOwner->getName());
+        Result* pResult = selectAddressBookStmt.execute();
 
         while (pResult->next()) {
             SMSAddressElement* pElement = new SMSAddressElement(pResult->getInt(1), pResult->getString(2),
@@ -49,8 +51,6 @@ void SMSAddressBook::load() {
             if (m_NextEID <= pElement->getID())
                 m_NextEID = pElement->getID() + 1;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -82,13 +82,16 @@ int SMSAddressBook::addAddressElement(SMSAddressElement* pElement) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO SMSAddressBook (eID, OwnerID, CharacterName, CustomName, Number) VALUES (%u, "
-                            "'%s', '%s', '%s', '%s')",
-                            pElement->m_ElementID, m_pOwner->getName().c_str(), pElement->m_CharacterName.c_str(),
-                            pElement->m_CustomName.c_str(), pElement->m_Number.c_str());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertAddressStmt(
+            pConn,
+            "INSERT INTO SMSAddressBook (eID, OwnerID, CharacterName, CustomName, Number) VALUES (?, ?, ?, ?, ?)");
+        insertAddressStmt.bindUInt(1, pElement->m_ElementID);
+        insertAddressStmt.bindString(2, m_pOwner->getName());
+        insertAddressStmt.bindString(3, pElement->m_CharacterName);
+        insertAddressStmt.bindString(4, pElement->m_CustomName);
+        insertAddressStmt.bindString(5, pElement->m_Number);
+        insertAddressStmt.execute();
     }
     END_DB(pStmt);
 
@@ -106,11 +109,11 @@ int SMSAddressBook::removeAddressElement(DWORD eID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM SMSAddressBook WHERE eID = %u AND OwnerID = '%s'", eID,
-                            m_pOwner->getName().c_str());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteAddressStmt(pConn, "DELETE FROM SMSAddressBook WHERE eID = ? AND OwnerID = ?");
+        deleteAddressStmt.bindUInt(1, eID);
+        deleteAddressStmt.bindString(2, m_pOwner->getName());
+        deleteAddressStmt.execute();
     }
     END_DB(pStmt);
 

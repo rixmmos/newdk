@@ -5,6 +5,7 @@
 
 #include "DB.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 
 void EventQuestAdvance::save(const string& name) {
     __BEGIN_TRY
@@ -12,17 +13,23 @@ void EventQuestAdvance::save(const string& name) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE EventQuestAdvance SET Status=%u WHERE OwnerID='%s' AND QuestLevel=%u",
-                            (uint)getStatus(), name.c_str(), (uint)getLevel());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        if (pStmt->getAffectedRowCount() == 0) {
-            pStmt->executeQuery(
-                "INSERT IGNORE INTO EventQuestAdvance (QuestLevel, OwnerID, Status) VALUES (%u, '%s', %u)",
-                (uint)getLevel(), name.c_str(), (uint)getStatus());
+        PreparedStatement updateStatusStmt(pConn,
+                                           "UPDATE EventQuestAdvance SET Status=? WHERE OwnerID=? AND QuestLevel=?");
+        updateStatusStmt.bindUInt(1, (uint)getStatus());
+        updateStatusStmt.bindString(2, name);
+        updateStatusStmt.bindUInt(3, (uint)getLevel());
+        updateStatusStmt.execute();
+
+        if (updateStatusStmt.getAffectedRowCount() == 0) {
+            PreparedStatement insertAdvanceStmt(
+                pConn, "INSERT IGNORE INTO EventQuestAdvance (QuestLevel, OwnerID, Status) VALUES (?, ?, ?)");
+            insertAdvanceStmt.bindUInt(1, (uint)getLevel());
+            insertAdvanceStmt.bindString(2, name);
+            insertAdvanceStmt.bindUInt(3, (uint)getStatus());
+            insertAdvanceStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -94,7 +101,7 @@ bool EventQuestAdvanceManager::advanced(int questLevel) {
 EventQuestAdvance::Status EventQuestAdvanceManager::getStatus(int questLevel) {
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
 
-    
+
     if (questLevel < 0)
         return EventQuestAdvance::EVENT_QUEST_ADVANCED;
     if (m_Advances[questLevel] == NULL)
@@ -132,9 +139,11 @@ void EventQuestAdvanceManager::load() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT QuestLevel, Status FROM EventQuestAdvance WHERE OwnerID='%s'",
-                                              m_pOwner->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement selectAdvancesStmt(pConn, "SELECT QuestLevel, Status FROM EventQuestAdvance WHERE OwnerID=?");
+        selectAdvancesStmt.bindString(1, m_pOwner->getName());
+        Result* pResult = selectAdvancesStmt.execute();
 
         while (pResult->next()) {
             int qLevel = pResult->getInt(1);
@@ -142,8 +151,6 @@ void EventQuestAdvanceManager::load() {
 
             m_Advances[qLevel] = new EventQuestAdvance(qLevel, status);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

@@ -7,6 +7,7 @@
 #include "VampireSkillSlot.h"
 
 #include "DB.h"
+#include "PreparedStatement.h"
 
 VampireSkillSlot::VampireSkillSlot() throw() {
     __BEGIN_TRY
@@ -44,7 +45,7 @@ void VampireSkillSlot::create(const string& OwnerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -60,12 +61,15 @@ void VampireSkillSlot::create(const string& OwnerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("INSERT INTO VampireSkillSave (OwnerID, SkillType, Delay, CastingTime, NextTime) VALUES ( "
-                            "'%s', %d, %d, %d, %d )",
-                            OwnerID.c_str(), m_SkillType, m_Interval, m_CastingTime, m_runTime.tv_sec);
-
-
-        SAFE_DELETE(pStmt); // by sigi
+        PreparedStatement insertVampireSkillSaveStmt(
+            pConn, "INSERT INTO VampireSkillSave (OwnerID, SkillType, Delay, CastingTime, NextTime) VALUES ( "
+                   "?, ?, ?, ?, ? )");
+        insertVampireSkillSaveStmt.bindString(1, OwnerID);
+        insertVampireSkillSaveStmt.bindInt(2, m_SkillType);
+        insertVampireSkillSaveStmt.bindInt(3, m_Interval);
+        insertVampireSkillSaveStmt.bindInt(4, m_CastingTime);
+        insertVampireSkillSaveStmt.bindInt(5, m_runTime.tv_sec);
+        insertVampireSkillSaveStmt.execute(); // by sigi
     }
     END_DB(pStmt)
 
@@ -80,7 +84,7 @@ void VampireSkillSlot::save(const string& OwnerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -93,10 +97,12 @@ void VampireSkillSlot::save(const string& OwnerID)
         pStmt->executeQueryString(sql.toString());
         */
 
-        pStmt->executeQuery("UPDATE VampireSkillSave SET Delay=%d WHERE OwnerID='%s' AND SkillType=%d", m_Interval,
-                            OwnerID.c_str(), m_SkillType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateVampireSkillSaveStmt(
+            pConn, "UPDATE VampireSkillSave SET Delay=? WHERE OwnerID=? AND SkillType=?");
+        updateVampireSkillSaveStmt.bindInt(1, m_Interval);
+        updateVampireSkillSaveStmt.bindString(2, OwnerID);
+        updateVampireSkillSaveStmt.bindInt(3, m_SkillType);
+        updateVampireSkillSaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -111,7 +117,7 @@ void VampireSkillSlot::save()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         /*
         StringStream sql;
@@ -125,10 +131,12 @@ void VampireSkillSlot::save()
         */
 
 
-        pStmt->executeQuery("UPDATE VampireSkillSave SET Delay=%d WHERE OwnerID='%s' AND SkillType=%d", m_Interval,
-                            m_Name.c_str(), m_SkillType);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateVampireSkillSaveStmt(
+            pConn, "UPDATE VampireSkillSave SET Delay=? WHERE OwnerID=? AND SkillType=?");
+        updateVampireSkillSaveStmt.bindInt(1, m_Interval);
+        updateVampireSkillSaveStmt.bindString(2, m_Name);
+        updateVampireSkillSaveStmt.bindInt(3, m_SkillType);
+        updateVampireSkillSaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -143,19 +151,17 @@ Turn_t VampireSkillSlot::getRemainTurn(Timeval currentTime) const throw() {
 }
 
 void VampireSkillSlot::setRunTime() throw() {
-    
     getCurrentTime(m_runTime);
 
-    
+
     m_runTime.tv_sec += m_Interval / 10;
     m_runTime.tv_usec += (m_Interval % 10) * 100000;
 }
 
 void VampireSkillSlot::setRunTime(Turn_t delay) throw() {
-    
     getCurrentTime(m_runTime);
 
-    
+
     m_runTime.tv_sec += delay / 10;
     m_runTime.tv_usec += (delay % 10) * 100000;
 
@@ -177,7 +183,7 @@ void VampireSkillSlot::setRunTime(Turn_t delay) throw() {
         case SKILL_HOWL:
             break;
         default:
-            save(m_Name); 
+            save(m_Name);
             break;
         }
     }

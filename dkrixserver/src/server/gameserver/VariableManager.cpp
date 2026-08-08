@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SystemAvailabilitiesManager.h"
 
@@ -23,30 +24,28 @@ VariableManager::VariableManager()
     m_Variables[EVENT_RATIO] = 1000;
     m_Variables[ITEM_PROBE_RATIO] = 1;
     m_Variables[EXP_RATIO] = 1;
-    m_Variables[COMBAT_BONUS_TIME] = 30; 
+    m_Variables[COMBAT_BONUS_TIME] = 30;
     m_Variables[COMBAT_SLAYER_HP_BONUS_RATIO] = 0;
     m_Variables[COMBAT_VAMPIRE_HP_BONUS_RATIO] = 0;
     m_Variables[COMBAT_SLAYER_DAMAGE_BONUS] = 0;
     m_Variables[COMBAT_VAMPIRE_DAMAGE_BONUS] = 0;
-    m_Variables[PREMIUM_EXP_BONUS_PERCENT] = 150;               // 150%
-    m_Variables[PREMIUM_ITEM_PROBE_PERCENT] = 220;              // 220%
-    m_Variables[ZONE_GROUP_BALANCING_MINUTE] = 4 * 7 * 24 * 60; 
-    m_Variables[GAMBLE_ITEM_TYPE_RATIO] = 100;                  // 100%
-    m_Variables[GAMBLE_ITEM_OPTION_RATIO] = 100;                // 100%
+    m_Variables[PREMIUM_EXP_BONUS_PERCENT] = 150;  // 150%
+    m_Variables[PREMIUM_ITEM_PROBE_PERCENT] = 220; // 220%
+    m_Variables[ZONE_GROUP_BALANCING_MINUTE] = 4 * 7 * 24 * 60;
+    m_Variables[GAMBLE_ITEM_TYPE_RATIO] = 100;   // 100%
+    m_Variables[GAMBLE_ITEM_OPTION_RATIO] = 100; // 100%
     m_Variables[SUMMON_MOTORCYCLE] = 0;
-    m_Variables[ENEMY_LIMIT_TIME] = 300;  
+    m_Variables[ENEMY_LIMIT_TIME] = 300;
     m_Variables[RARE_ITEM_RATIO] = 100;   // 100%
     m_Variables[UNIQUE_ITEM_RATIO] = 100; // 100%
     m_Variables[ACTIVE_MASTER_LAIR] = 0;
     m_Variables[RETRY_MASTER_LAIR] = 0;
     m_Variables[HARVEST_FESTIVAL_ITEM_RATIO] = 100; // 100%
 
-    
-    
-    
+
     //      50%     20%
-    
-    
+
+
     m_Variables[MASTER_BLOOD_DRAIN_START_HP] = 70;
     m_Variables[MASTER_BLOOD_DRAIN_START_BD] = 10;
     m_Variables[MASTER_BLOOD_DRAIN_END_HP] = 30;
@@ -76,10 +75,10 @@ VariableManager::VariableManager()
 
     // 2002.12.31
     m_Variables[MASTER_LAIR_PLAYER_NUM] = 15;
-    m_Variables[RANK_EXP_GAIN_PERCENT] = 100; 
-    m_Variables[ITEM_LUCK_PERCENT] = 100;     
+    m_Variables[RANK_EXP_GAIN_PERCENT] = 100;
+    m_Variables[ITEM_LUCK_PERCENT] = 100;
 
-    
+
     // 2003. 1. 12 by bezz. Sequoia. dew
     m_Variables[LOTTO_ITEM_RATIO] = 0;
     m_Variables[LOTTO_ITEM_BONUS_NUM] = 0;
@@ -94,37 +93,37 @@ VariableManager::VariableManager()
     m_Variables[GUILD_CASTLE_ITEM_TAX_RATIO] = 150;
     m_Variables[WAR_REGISTRATION_FEE] = 50000000;
 
-    m_Variables[GUILD_WAR_TIME] = 1 * 60 * 60; 
-    m_Variables[RACE_WAR_TIME] = 3 * 60 * 60;  
+    m_Variables[GUILD_WAR_TIME] = 1 * 60 * 60;
+    m_Variables[RACE_WAR_TIME] = 3 * 60 * 60;
 
-    m_Variables[WAR_PERIOD_WEEK] = true; 
+    m_Variables[WAR_PERIOD_WEEK] = true;
 
-    m_Variables[WAR_ACTIVE] = false; 
+    m_Variables[WAR_ACTIVE] = false;
 
-    m_Variables[RACE_WAR_TIMEBAND] = 2; 
+    m_Variables[RACE_WAR_TIMEBAND] = 2;
 
-    m_Variables[AUTO_START_RACE_WAR] = false; 
+    m_Variables[AUTO_START_RACE_WAR] = false;
 
-    m_Variables[ACTIVATE_COUPLE] = false; 
+    m_Variables[ACTIVATE_COUPLE] = false;
 
-    m_Variables[ACTIVE_RACE_WAR_LIMITER] = true; 
+    m_Variables[ACTIVE_RACE_WAR_LIMITER] = true;
 
-    m_Variables[CHIEF_ITEM_BONUS_NUM] = 0; 
+    m_Variables[CHIEF_ITEM_BONUS_NUM] = 0;
 
-    m_Variables[ACTIVE_EVENT_GIVE_ITEM] = false; 
+    m_Variables[ACTIVE_EVENT_GIVE_ITEM] = false;
 
-    m_Variables[VAMPIRE_REDISTRIBUTE_ATTR_PRICE] = 1000000; 
+    m_Variables[VAMPIRE_REDISTRIBUTE_ATTR_PRICE] = 1000000;
 
-    m_Variables[ACTIVATE_COUPLE] = true; 
+    m_Variables[ACTIVATE_COUPLE] = true;
 
-    m_Variables[CAN_RECOUPLE] = false; 
+    m_Variables[CAN_RECOUPLE] = false;
 
-    m_Variables[GUILD_WAR_ACTIVE] = false; 
+    m_Variables[GUILD_WAR_ACTIVE] = false;
 
-    m_Variables[FREE_PLAY_OUSTERS_LEVEL] = 30; 
+    m_Variables[FREE_PLAY_OUSTERS_LEVEL] = 30;
 
-    m_Variables[CAN_APPLY_QUEST] = true;  
-    m_Variables[SEND_QUEST_INFO] = false; 
+    m_Variables[CAN_APPLY_QUEST] = true;
+    m_Variables[SEND_QUEST_INFO] = false;
     m_Variables[CAN_BUY_SHOP] = true;
 
     m_Variables[PCROOM_EXP_BONUS] = 100;
@@ -132,11 +131,11 @@ VariableManager::VariableManager()
 
     m_Variables[MONEY_TRACE_LOG_LIMIT] = 5000000;
 
-    m_Variables[PC_ROOM_LOTTO_EVENT] = false; 
-    m_Variables[ACTIVE_FLAG_WAR] = false;     
+    m_Variables[PC_ROOM_LOTTO_EVENT] = false;
+    m_Variables[ACTIVE_FLAG_WAR] = false;
 
-    m_Variables[KILL_DAEMONCTL] = false;  
-    m_Variables[EVENT_MOON_CARD] = false; 
+    m_Variables[KILL_DAEMONCTL] = false;
+    m_Variables[EVENT_MOON_CARD] = false;
 
     m_Variables[FULL_MOON_CARD_RATIO] = 3000;
     m_Variables[HALF_MOON_CARD_RATIO] = 100;
@@ -252,7 +251,6 @@ void VariableManager::init()
     load();
 
 
-    
     setVariable(AUTO_START_RACE_WAR, g_pConfig->getPropertyInt("ActiveRaceWar"));
     setVariable(GUILD_WAR_ACTIVE, g_pConfig->getPropertyInt("ActiveGuildWar"));
     setVariable(ACTIVE_FLAG_WAR, g_pConfig->getPropertyInt("ActiveFlagWar"));
@@ -288,11 +286,11 @@ void VariableManager::load()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(attrID) FROM AttrInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectMaxAttrStmt(pConn, "SELECT MAX(attrID) FROM AttrInfo");
+        pResult = selectMaxAttrStmt.execute();
 
         if (pResult->getRowCount() <= 0) {
-            SAFE_DELETE(pStmt);
             throw Error("VariableManager::load(): attrID MAX   .");
         }
 
@@ -301,10 +299,10 @@ void VariableManager::load()
         m_Variables.clear();
         m_Variables.resize(max((maxAttr + 1), (int)VARIABLE_MAX));
 
-        pResult = pStmt->executeQuery("SELECT attrID, attr1, attr2 FROM AttrInfo");
+        PreparedStatement selectAttrInfoStmt(pConn, "SELECT attrID, attr1, attr2 FROM AttrInfo");
+        pResult = selectAttrInfoStmt.execute();
 
         if (pResult->getRowCount() <= 0) {
-            SAFE_DELETE(pStmt);
             throw Error("VariableManager::load():    ");
         }
 
@@ -317,7 +315,6 @@ void VariableManager::load()
             setVariable(attrID, attr1);
             cout << toString(attrID).c_str() << endl;
         }
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -356,7 +353,6 @@ void VariableManager::setVariable(VariableType vt, const string& strVariable) {
 
 void VariableManager::setVariable(VariableType vt, int value) {
     try {
-        
         if (vt == RACE_WAR_TIMEBAND) {
             if (value < 0 || value > 3)
                 return;
@@ -368,10 +364,11 @@ void VariableManager::setVariable(VariableType vt, int value) {
         // Result*    pResult = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("UPDATE AttrInfo SET attr1=%d WHERE attrID=%d", value, (int)vt);
-
-            SAFE_DELETE(pStmt);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement updateAttrStmt(pConn, "UPDATE AttrInfo SET attr1=? WHERE attrID=?");
+            updateAttrStmt.bindInt(1, value);
+            updateAttrStmt.bindInt(2, (int)vt);
+            updateAttrStmt.execute();
         }
         END_DB(pStmt)
 

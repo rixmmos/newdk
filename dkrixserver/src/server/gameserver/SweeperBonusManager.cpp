@@ -10,6 +10,7 @@
 #include "GCSweeperBonusInfo.h"
 #include "LevelWarManager.h"
 #include "LevelWarZoneInfoManager.h"
+#include "PreparedStatement.h"
 #include "SweeperBonus.h"
 #include "Zone.h"
 #include "ZoneUtil.h"
@@ -75,11 +76,11 @@ void SweeperBonusManager::load()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(Type) FROM SweeperBonusInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectMaxTypeStmt(pConn, "SELECT MAX(Type) FROM SweeperBonusInfo");
+        pResult = selectMaxTypeStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            SAFE_DELETE(pStmt);
             throw Error("There is no data in SweeperBonusInfo Table");
         }
 
@@ -89,7 +90,9 @@ void SweeperBonusManager::load()
 
         Assert(m_Count > 0);
 
-        pResult = pStmt->executeQuery("SELECT Type, Name, OptionList, OwnerRace, Level FROM SweeperBonusInfo");
+        PreparedStatement selectSweeperBonusStmt(
+            pConn, "SELECT Type, Name, OptionList, OwnerRace, Level FROM SweeperBonusInfo");
+        pResult = selectSweeperBonusStmt.execute();
 
         while (pResult->next()) {
             SweeperBonus* pSweeperBonus = new SweeperBonus();
@@ -103,8 +106,6 @@ void SweeperBonusManager::load()
 
             addSweeperBonus(pSweeperBonus);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -122,11 +123,11 @@ void SweeperBonusManager::reloadOwner(int level)
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT MAX(Type) FROM SweeperBonusInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectMaxTypeStmt(pConn, "SELECT MAX(Type) FROM SweeperBonusInfo");
+        pResult = selectMaxTypeStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            SAFE_DELETE(pStmt);
             throw Error("There is no data in SweeperBonusInfo Table");
         }
 
@@ -136,7 +137,9 @@ void SweeperBonusManager::reloadOwner(int level)
 
         Assert(m_Count > 0);
 
-        pResult = pStmt->executeQuery("SELECT Type, OwnerRace FROM SweeperBonusInfo WHERE Level = %d", level);
+        PreparedStatement selectOwnerRaceStmt(pConn, "SELECT Type, OwnerRace FROM SweeperBonusInfo WHERE Level = ?");
+        selectOwnerRaceStmt.bindInt(1, level);
+        pResult = selectOwnerRaceStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -148,8 +151,6 @@ void SweeperBonusManager::reloadOwner(int level)
                 itr->second->setRace(pResult->getInt(++i));
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

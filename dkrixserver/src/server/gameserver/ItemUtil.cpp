@@ -7,6 +7,7 @@
 #include "ItemUtil.h"
 
 #include <stdio.h>
+
 #include <unordered_set>
 
 // Enable Exchange System functions
@@ -33,6 +34,7 @@
 #include "PetTypeInfo.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "RelicUtil.h"
 #include "Slayer.h"
 #include "Treasure.h"
@@ -86,7 +88,7 @@ bool isStackable(Item::ItemClass IClass) {
     case Item::ITEM_CLASS_PET_ENCHANT_ITEM:
     case Item::ITEM_CLASS_LUCKY_BAG:
     case Item::ITEM_CLASS_PET_FOOD:
-    case Item::ITEM_CLASS_MONEY: 
+    case Item::ITEM_CLASS_MONEY:
         return true;
     default:
         return false;
@@ -461,7 +463,6 @@ bool isOustersAccessory(Item::ItemClass IClass) {
 
 //////////////////////////////////////////////////////////////////////////////
 bool isRepairableItem(const Item* pItem) {
-    
     if (pItem == NULL || pItem->isUnique() || pItem->isTimeLimitItem())
         return false;
     if (pItem->isFlagItem())
@@ -525,9 +526,8 @@ void repairItem(Item* pItem) {
             OustersSummonItem* pOustersSummonItem = dynamic_cast<OustersSummonItem*>(pItem);
             pOustersSummonItem->setCharge(pOustersSummonItem->getMaxCharge());
         } else {
-            
             Durability_t maxDurability = computeMaxDurability(pItem);
-            
+
             pItem->setDurability(maxDurability);
         }
     }
@@ -545,7 +545,7 @@ Durability_t computeMaxDurability(Item* pItem) {
 
     unsigned long maxDurability = pItem->getMaxDurability();
 
-    
+
     unsigned long plusPoint = 100;
 
     const list<OptionType_t>& optionTypes = pItem->getOptionTypeList();
@@ -566,7 +566,7 @@ Durability_t computeMaxDurability(Item* pItem) {
     }
 
     maxDurability = (maxDurability * plusPoint / 100);
-    
+
     //	maxDurability = min( (unsigned long)65000, maxDurability );
 
     return (Durability_t)maxDurability;
@@ -579,7 +579,7 @@ Bullet_t reloadArmsItem(Item* pGun, Item* pMagazine) {
     Assert(pGun != NULL);
     Assert(pMagazine != NULL);
 
-    
+
     if (isSuitableMagazine(pGun, pMagazine, true) == false)
         return false;
 
@@ -632,7 +632,7 @@ Bullet_t decreaseBullet(Item* pWeapon)
     Bullet_t bullet = 0;
     Silver_t silver = 0;
 
-    
+
     /*
     if (IClass == Item::ITEM_CLASS_AR
         || IClass == Item::ITEM_CLASS_SMG
@@ -769,8 +769,7 @@ bool isUsableItem(Item* pItem, Creature* pUser) {
     Assert(pItem != NULL);
     Assert(pUser != NULL);
 
-    
-    
+
     // ItemType_t IType = pItem->getItemType();
 
     switch (pItem->getItemClass()) {
@@ -804,7 +803,7 @@ bool isUsableItem(Item* pItem, Creature* pUser) {
         break;
     case Item::ITEM_CLASS_EVENT_TREE:
         if (pItem->getItemType() == 12 || (pItem->getItemType() >= 26 && pItem->getItemType() <= 28))
-            return true; 
+            return true;
         break;
 
     case Item::ITEM_CLASS_EVENT_ETC:
@@ -887,19 +886,18 @@ ItemNum_t decreaseItemNum(Item* pItem, Inventory* pInventory, const string& Owne
     Assert(isStackable(pItem));
 
     if (pItem->getNum() > 1) {
-        pItem->setNum(pItem->getNum() - 1);             
-        pInventory->decreaseItemNum();                  
-        pInventory->decreaseWeight(pItem->getWeight()); 
-        
-        
+        pItem->setNum(pItem->getNum() - 1);
+        pInventory->decreaseItemNum();
+        pInventory->decreaseWeight(pItem->getWeight());
+
+
         char pField[80];
         sprintf(pField, "Num=%d", pItem->getNum());
         pItem->tinysave(pField);
 
 
         return pItem->getNum();
-    } else 
-    {
+    } else {
         pInventory->deleteItem(x, y);
         pItem->destroy();
         SAFE_DELETE(pItem);
@@ -964,7 +962,6 @@ bool hasOptionClass(const list<OptionType_t>& optionTypes, OptionType_t optionTy
                 return true;
         }
     } catch (Throwable& t) {
-        
         filelog("hasOptionClassBug.txt", "%s", t.toString().c_str());
     }
 
@@ -1034,15 +1031,14 @@ string getOptionTypeToString(const list<OptionType_t>& optionTypes) {
 
 //////////////////////////////////////////////////////////////////////////////
 bool isPossibleNextOption(ITEM_TEMPLATE* pTemplate) {
-    
     if (pTemplate->OptionType.size() >= 5)
         return false;
 
-    
+
     if (pTemplate->OptionType.empty())
         return true;
 
-    
+
     if (pTemplate->NextOptionRatio != 0) {
         int dice = rand() % 100;
         // cout << "NextOptionRatio : " << dice << " < " << (int)pTemplate->NextOptionRatio << endl;
@@ -1050,14 +1046,13 @@ bool isPossibleNextOption(ITEM_TEMPLATE* pTemplate) {
     }
 
     try {
-        
         ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pTemplate->ItemClass, pTemplate->ItemType);
         Ratio_t nextItemRatio = pItemInfo->getNextOptionRatio();
 
-        
+
         list<OptionType_t>::const_iterator itr = pTemplate->OptionType.begin();
-        Ratio_t nextOptionRatio = nextItemRatio; 
-        Ratio_t baseMultiplier = 100;            // 100%
+        Ratio_t nextOptionRatio = nextItemRatio;
+        Ratio_t baseMultiplier = 100; // 100%
         for (; itr != pTemplate->OptionType.end(); itr++) {
             OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(*itr);
             if (pOptionInfo == NULL)
@@ -1066,8 +1061,7 @@ bool isPossibleNextOption(ITEM_TEMPLATE* pTemplate) {
             baseMultiplier *= 100;
         }
 
-        
-        
+
         //
         // nextItemRatio = 10 %
         // nextOptionRatio1 = 20 %
@@ -1076,7 +1070,7 @@ bool isPossibleNextOption(ITEM_TEMPLATE* pTemplate) {
         // total nextOptionRatio = nextItemRatio * nextOptionRatio1 * nextOptionRatio2
         //                       = 10 * 20 * 30 = 6000
         //
-        
+
         //                = 1000000
         //
         // selectRatio = 0~baseMultiplier = 0~1000000
@@ -1088,14 +1082,13 @@ bool isPossibleNextOption(ITEM_TEMPLATE* pTemplate) {
 
         Ratio_t selectRatio = rand() % baseMultiplier;
 
-        
+
         nextOptionRatio = getPercentValue(nextOptionRatio, g_pVariableManager->getRareItemRatio());
 
-        
+
         return selectRatio < nextOptionRatio;
 
     } catch (Throwable& t) {
-        
         filelog("nextOptionBug.txt", "%s", t.toString().c_str());
     }
 
@@ -1121,7 +1114,7 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
     ItemInfo* pItemInfo = NULL;
 
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
@@ -1137,27 +1130,27 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
         Attr_t ReqSum, ReqSum2;
         Attr_t ReqGender;
 
-        
+
         CSTR += 3;
         CDEX += 3;
         CINT += 3;
         CSUM += 5;
 
-        
+
         if (maxLevel != 0) {
-            int maxAttr = maxLevel * 2 / 3; 
+            int maxAttr = maxLevel * 2 / 3;
             CSTR = min((int)maxAttr, (int)CSTR);
             CDEX = min((int)maxAttr, (int)CDEX);
             CINT = min((int)maxAttr, (int)CINT);
             CSUM = min((int)maxLevel, (int)CSUM);
         }
 
-        
+
         int i = 10;
         do {
             itemType = pInfoClass->getRandomItemType();
 
-            
+
             pItemInfo = g_pItemInfoManager->getItemInfo(itemClass, itemType);
 
             ReqSTR2 = ReqSTR = pItemInfo->getReqSTR();
@@ -1169,14 +1162,12 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
             if (CSTR >= ReqSTR && CDEX >= ReqDEX && CINT >= ReqINT && CSUM >= ReqSum &&
                 (ReqGender == GENDER_BOTH || pSlayer->getSex() == MALE && ReqGender == GENDER_MALE ||
                  pSlayer->getSex() == FEMALE && ReqGender == GENDER_FEMALE)) {
-                
                 break;
             }
 
         } while (--i);
 
         if (i == 0) {
-            
             if ((itemClass == Item::ITEM_CLASS_COAT || itemClass == Item::ITEM_CLASS_TROUSER) &&
                 pSlayer->getSex() == FEMALE) {
                 itemType = 1;
@@ -1184,13 +1175,11 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                 itemType = 0;
             }
 
-            
+
             pItemInfo = NULL;
         }
 
 
-        
-        
         int maxOptionLevel = max(1, min(100, (int)(CSUM / 3)));
 
         const vector<OptionType_t>& optionVector =
@@ -1208,15 +1197,13 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
         cout << endl;
         */
 
-        
+
         int itemOptionRatio = g_pOptionInfoManager->getTotalGambleRatio((Item::ItemClass)itemClass, maxOptionLevel);
 
         if (optionVector.size() > 0 && itemOptionRatio > 0 && (pItemInfo == NULL || !pItemInfo->isUnique())) {
-            
             int i = 10;
 
             do {
-                
                 int optionRatio = random() % itemOptionRatio;
                 int ratioSum = 0;
 
@@ -1231,13 +1218,12 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                     ratioSum += pOptionInfo->getRatio();
 
                     if (optionRatio < ratioSum) {
-                        
                         // cout << "select : " << (int)optionType << endl;
                         break;
                     }
                 }
 
-                
+
                 if (ReqSTR != 0)
                     ReqSTR = ReqSTR2 + (pOptionInfo->getReqSum() * 2);
                 if (ReqDEX != 0)
@@ -1259,9 +1245,8 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                 //	<< "CDEX=" << CDEX << ", "
                 //	<< "CINT=" << CINT << endl;
 
-                
+
                 if (CSTR >= ReqSTR && CDEX >= ReqDEX && CINT >= ReqINT && CSUM >= ReqSum) {
-                    
                     // cout << "OK!" << endl;
                     break;
                 }
@@ -1272,22 +1257,22 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                 optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
             }
         }
-        
+
         else
             optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
     }
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     else if (pCreature->isVampire()) {
         Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
 
         Level_t CLevel = pVampire->getLevel();
 
-        
+
         CLevel += 3;
 
-        
+
         if (maxLevel != 0) {
             CLevel = min((int)maxLevel, (int)CLevel);
         }
@@ -1296,19 +1281,17 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
         Attr_t ReqGender;
 
 
-        
         int i = 10;
         do {
             itemType = pInfoClass->getRandomItemType();
 
-            
+
             pItemInfo = g_pItemInfoManager->getItemInfo(itemClass, itemType);
 
             ReqLevel2 = ReqLevel = pItemInfo->getReqLevel();
             ReqGender = pItemInfo->getReqGender();
 
-            
-            
+
             if ((ReqLevel <= 0 || CLevel >= ReqLevel) &&
                 (ReqGender == GENDER_BOTH || pVampire->getSex() == MALE && ReqGender == GENDER_MALE ||
                  pVampire->getSex() == FEMALE && ReqGender == GENDER_FEMALE)) {
@@ -1318,7 +1301,6 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
         } while (--i);
 
         if (i == 0) {
-            
             if (Item::ITEM_CLASS_VAMPIRE_COAT && pVampire->getSex() == FEMALE) {
                 itemType = 1;
             } else {
@@ -1326,15 +1308,14 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
             }
         }
 
-        
-        
+
         int maxOptionLevel = max(1, min(100, (int)CLevel));
 
         const vector<OptionType_t>& optionVector =
             g_pOptionInfoManager->getPossibleGambleOptionVector((Item::ItemClass)itemClass, maxOptionLevel);
         vector<OptionType_t>::const_iterator iOption;
 
-        
+
         int itemOptionRatio = g_pOptionInfoManager->getTotalGambleRatio((Item::ItemClass)itemClass, maxOptionLevel);
 
         /*
@@ -1350,11 +1331,9 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
 
 
         if (optionVector.size() > 0 && itemOptionRatio > 0 && (pItemInfo == NULL || !pItemInfo->isUnique())) {
-            
             int i = 10;
 
             do {
-                
                 int optionRatio = random() % itemOptionRatio;
                 int ratioSum = 0;
 
@@ -1369,17 +1348,15 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                     ratioSum += pOptionInfo->getRatio();
 
                     if (optionRatio < ratioSum) {
-                        
                         break;
                     }
                 }
 
-                
+
                 ReqLevel = ReqLevel2 + pOptionInfo->getReqLevel();
 
-                
+
                 if (ReqLevel <= 0 || CLevel >= ReqLevel) {
-                    
                     break;
                 }
 
@@ -1389,40 +1366,39 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                 optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
             }
         }
-        
+
         else
             optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
     }
     //----------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------
     else if (pCreature->isOusters()) {
         Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
 
         Level_t CLevel = pOusters->getLevel();
 
-        
+
         CLevel += 3;
 
-        
+
         if (maxLevel != 0) {
             CLevel = min((int)maxLevel, (int)CLevel);
         }
 
         Attr_t ReqLevel, ReqLevel2;
 
-        
+
         int i = 10;
         do {
             itemType = pInfoClass->getRandomItemType();
 
-            
+
             pItemInfo = g_pItemInfoManager->getItemInfo(itemClass, itemType);
 
             ReqLevel2 = ReqLevel = pItemInfo->getReqLevel();
 
-            
-            
+
             if ((ReqLevel <= 0 || CLevel >= ReqLevel)) {
                 break;
             }
@@ -1433,15 +1409,14 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
             itemType = 0;
         }
 
-        
-        
+
         int maxOptionLevel = max(1, min(100, (int)CLevel));
 
         const vector<OptionType_t>& optionVector =
             g_pOptionInfoManager->getPossibleGambleOptionVector((Item::ItemClass)itemClass, maxOptionLevel);
         vector<OptionType_t>::const_iterator iOption;
 
-        
+
         int itemOptionRatio = g_pOptionInfoManager->getTotalGambleRatio((Item::ItemClass)itemClass, maxOptionLevel);
 
         /*
@@ -1457,11 +1432,9 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
 
 
         if (optionVector.size() > 0 && itemOptionRatio > 0 && (pItemInfo == NULL || !pItemInfo->isUnique())) {
-            
             int i = 10;
 
             do {
-                
                 int optionRatio = random() % itemOptionRatio;
                 int ratioSum = 0;
 
@@ -1476,17 +1449,15 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                     ratioSum += pOptionInfo->getRatio();
 
                     if (optionRatio < ratioSum) {
-                        
                         break;
                     }
                 }
 
-                
+
                 ReqLevel = ReqLevel2 + pOptionInfo->getReqLevel();
 
-                
+
                 if (ReqLevel <= 0 || CLevel >= ReqLevel) {
-                    
                     break;
                 }
 
@@ -1496,12 +1467,12 @@ Item* getRandomMysteriousItem(Creature* pCreature, Item::ItemClass itemClass, in
                 optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
             }
         }
-        
+
         else
             optionType = 0; //(rand()%3==0? 1: (rand()%2? 6:11));
     }
 
-    
+
     list<OptionType_t> optionTypes;
     if (optionType != 0)
         optionTypes.push_back(optionType);
@@ -1631,7 +1602,7 @@ ItemType_t getUpgradeItemType(Item::ItemClass IClass, ItemType_t itemType, ItemT
     InfoClassManager* pInfoClass = g_pItemInfoManager->getInfoManager(IClass);
     Assert(pInfoClass != NULL);
 
-    
+
     ItemType_t newItemType = itemType;
 
     for (int i = 0; i < upgradeCount; i++) {
@@ -1643,7 +1614,6 @@ ItemType_t getUpgradeItemType(Item::ItemClass IClass, ItemType_t itemType, ItemT
 
     // cout << "ItemType Upgrade By Luck: " << itemType << " --[+" << upgradeCount << "]--> ";
 
-     
 
     return newItemType;
 }
@@ -1662,8 +1632,6 @@ ItemType_t getDowngradeItemType(Item::ItemClass IClass, ItemType_t itemType) {
 
     return itemType;
 }
-
- 
 
 
 TPOINT checkEventPuzzle(PlayerCreature* pPC, CoordInven_t iX, CoordInven_t iY, int start) {
@@ -1726,16 +1694,15 @@ void deleteInventoryItem(Inventory* pInventory, CoordInven_t invenX0, CoordInven
     CoordInven_t curIX = 0, curIY = 0;
     Item* pCurItem = 0;
 
-    
+
     for (curIY = invenY0; curIY <= invenY1; curIY++) {
         for (curIX = invenX0; curIX <= invenX1; curIX++) {
             pCurItem = pInventory->getItem(curIX, curIY);
 
             if (pCurItem != NULL) {
-                
                 pInventory->deleteItem(pCurItem->getObjectID());
 
-                
+
                 pCurItem->destroy();
 
                 SAFE_DELETE(pCurItem);
@@ -2073,11 +2040,9 @@ void saveDissectionItem(Creature* pCreature, Item* pTreasure, int x, int y)
     Assert(pCreature != NULL);
     Assert(pTreasure != NULL);
 
-    
-    
+
     switch (pTreasure->getItemClass()) {
     case Item::ITEM_CLASS_RELIC: {
-        
     } break;
 
     case Item::ITEM_CLASS_BLOOD_BIBLE:
@@ -2094,16 +2059,9 @@ void saveDissectionItem(Creature* pCreature, Item* pTreasure, int x, int y)
         ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pTreasure->getItemClass(), pTreasure->getItemType());
         Assert(pItemInfo != NULL);
 
-        
-        
-        
+
         //
-        
-        
-        
-        
-        
-        
+
 
         if (pItemInfo->isUnique()) {
             pTreasure->setUnique();
@@ -2112,8 +2070,7 @@ void saveDissectionItem(Creature* pCreature, Item* pTreasure, int x, int y)
                     pTreasure->toString().c_str());
         }
 
-        
-        
+
         // by sigi. 2002.10.28
         pTreasure->create("", STORAGE_ZONE, pCreature->getZone()->getZoneID(), x, y, pTreasure->getItemID());
     }
@@ -2172,7 +2129,7 @@ bool canSell(Item* pItem) {
         return false;
     if (pItem->isFlagItem())
         return false;
-    
+
     // if ( pItem->isTimeLimitItem() ) return false;
 
     Item::ItemClass itemClass = pItem->getItemClass();
@@ -2186,7 +2143,7 @@ bool canSell(Item* pItem) {
     if (itemClass == Item::ITEM_CLASS_SWEEPER)
         return false;
 
-    
+
     if (itemClass == Item::ITEM_CLASS_EVENT_ITEM && pItem->getItemType() == 31)
         return true;
 
@@ -2249,11 +2206,11 @@ bool canTrade(Item* pItem) {
     if (itemClass == Item::ITEM_CLASS_SWEEPER)
         return false;
 
-    
+
     if (itemClass == Item::ITEM_CLASS_MOON_CARD && pItem->getItemType() == 0)
         return false;
 
-    
+
     if (itemClass == Item::ITEM_CLASS_LUCKY_BAG && pItem->getItemType() == 3)
         return false;
     if (itemClass == Item::ITEM_CLASS_EVENT_ITEM && pItem->getItemType() == 28)
@@ -2261,11 +2218,11 @@ bool canTrade(Item* pItem) {
     if (itemClass == Item::ITEM_CLASS_EFFECT_ITEM && pItem->getItemType() >= 4 && pItem->getItemType() <= 6)
         return false;
 
-    
+
     if (itemClass == Item::ITEM_CLASS_EVENT_STAR && (itemType >= 17 && itemType <= 21))
         return false;
 
-    
+
     if (itemClass == Item::ITEM_CLASS_MIXING_ITEM && itemType == 18)
         return false;
 
@@ -2347,15 +2304,15 @@ void setItemGender(Item* pItem, GenderRestriction gender) {
 bool bTraceLog(Item* pItem) {
     Item::ItemClass iClass = pItem->getItemClass();
 
-    
+
     if (iClass == Item::ITEM_CLASS_PET_ITEM || iClass == Item::ITEM_CLASS_CORE_ZAP)
         return true;
 
-    
+
     if (iClass == Item::ITEM_CLASS_POTION && (pItem->getItemType() == 10 || pItem->getItemType() == 11))
         return true;
 
-    
+
     if (iClass == Item::ITEM_CLASS_SERUM && (pItem->getItemType() == 4 || pItem->getItemType() == 5))
         return true;
 
@@ -2388,7 +2345,7 @@ bool bTraceLog(Item* pItem) {
     const list<OptionType_t>& optionList = pItem->getOptionTypeList();
     list<OptionType_t>::const_iterator itr;
 
-    
+
     for (itr = optionList.begin(); itr != optionList.end(); itr++) {
         OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(*itr);
         if (pOptionInfo == NULL)
@@ -2401,13 +2358,12 @@ bool bTraceLog(Item* pItem) {
             return true;
     }
 
-    
-    
+
     if (iClass == Item::ITEM_CLASS_QUEST_ITEM || iClass == Item::ITEM_CLASS_EVENT_STAR ||
         iClass == Item::ITEM_CLASS_MIXING_ITEM)
         return true;
 
-    
+
     if ((int)(pItem->getItemType()) < 3)
         return false;
 
@@ -2427,16 +2383,20 @@ void remainTraceLog(Item* pItem, const string& preOwner, const string& owner, It
     BEGIN_DB {
         string optionName = getOptionTypeToString(pItem->getOptionTypeList());
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("INSERT INTO ItemTraceLog (ItemID, ItemClass, ItemType, OptionType, PreOwnerID, OwnerID, "
-                            "LogType, DetailType, Time) VALUES ( %u,'%s',%u,'%s','%s','%s','%s','%s',now() )",
-                            pItem->getItemID(), ItemClass2ShortString[(int)(pItem->getItemClass())].c_str(),
-                            pItem->getItemType(), optionName.c_str(), preOwner.c_str(), owner.c_str(),
-                            ItemTraceLogType2String[(int)logType].c_str(),
-                            ItemTraceLogDetailType2String[(int)detailType].c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn,
+                                     "INSERT INTO ItemTraceLog (ItemID, ItemClass, ItemType, OptionType, "
+                                     "PreOwnerID, OwnerID, LogType, DetailType, Time) VALUES (?,?,?,?,?,?,?,?,now())");
+        insertStmt.bindUInt(1, pItem->getItemID());
+        insertStmt.bindString(2, ItemClass2ShortString[(int)(pItem->getItemClass())]);
+        insertStmt.bindUInt(3, pItem->getItemType());
+        insertStmt.bindString(4, optionName);
+        insertStmt.bindString(5, preOwner);
+        insertStmt.bindString(6, owner);
+        insertStmt.bindString(7, ItemTraceLogType2String[(int)logType]);
+        insertStmt.bindString(8, ItemTraceLogDetailType2String[(int)detailType]);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2490,14 +2450,17 @@ void remainMoneyTraceLog(const string& preOwner, const string& owner, ItemTraceL
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("INSERT INTO MoneyTraceLog (PreOwnerID, OwnerID, LogType, DetailType, Amount, Time) VALUES "
-                            "( '%s','%s','%s','%s', %d, now() )",
-                            preOwner.c_str(), owner.c_str(), ItemTraceLogType2String[(int)logType].c_str(),
-                            ItemTraceLogDetailType2String[(int)detailType].c_str(), amount);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn,
+                                     "INSERT INTO MoneyTraceLog (PreOwnerID, OwnerID, LogType, DetailType, Amount, "
+                                     "Time) VALUES (?,?,?,?,?,now())");
+        insertStmt.bindString(1, preOwner);
+        insertStmt.bindString(2, owner);
+        insertStmt.bindString(3, ItemTraceLogType2String[(int)logType]);
+        insertStmt.bindString(4, ItemTraceLogDetailType2String[(int)detailType]);
+        insertStmt.bindInt(5, amount);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2566,7 +2529,7 @@ Item* createItemByGoodsID(DWORD goodsID) {
         pPetInfo->setPetHP(5760);
         pPetInfo->setFeedTime(VSDateTime::currentDateTime());
 
-        
+
         pPetItem->setPetInfo(pPetInfo);
         pPetInfo->setPetItem(pPetItem);
     }
@@ -2579,16 +2542,16 @@ bool bWinPrize(DWORD rewardID, DWORD questLevel) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventQuestRewardSchedule SET Count = Count - 1 WHERE Count > 0 AND RewardID = %d "
-                            "AND QuestLevel = %d AND Time < now() LIMIT 1",
-                            rewardID, questLevel);
+        PreparedStatement updateStmt(pConn, "UPDATE EventQuestRewardSchedule SET Count = Count - 1 WHERE Count > 0 AND "
+                                            "RewardID = ? AND QuestLevel = ? AND Time < now() LIMIT 1");
+        updateStmt.bindInt(1, rewardID);
+        updateStmt.bindInt(2, questLevel);
+        updateStmt.execute();
 
-        if (pStmt->getAffectedRowCount() > 0)
+        if (updateStmt.getAffectedRowCount() > 0)
             Lotto = true;
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2613,11 +2576,10 @@ void countResurrectItem() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE ResurrectItemCount SET Count=Count+1");
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE ResurrectItemCount SET Count=Count+1");
+        updateStmt.execute();
     }
     END_DB(pStmt)
     __END_CATCH
@@ -2759,12 +2721,12 @@ ItemType_t getItemTypeByItemLimit(Item::ItemClass itemClass, ItemType_t itemType
 
     ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(itemClass, rItemType);
 
-    
+
     if (pItemInfo->getItemLevel() == 99 || pItemInfo->getItemLevel() == 255) {
         return true;
     }
 
-    int counter = 0; 
+    int counter = 0;
 
     // cout << "i. ItemLevel : " << pItemInfo->getItemLevel() << endl;
 
@@ -2785,7 +2747,8 @@ ItemType_t getItemTypeByItemLimit(Item::ItemClass itemClass, ItemType_t itemType
 // Check if item is Blue Sapphire (hard currency)
 // Blue Sapphire: ItemClass = EVENT_STAR, ItemType = 6
 bool isBlueSapphire(Item* pItem) {
-    if (pItem == NULL) return false;
+    if (pItem == NULL)
+        return false;
 
     Item::ItemClass itemClass = pItem->getItemClass();
     ItemType_t itemType = pItem->getItemType();
@@ -2797,18 +2760,21 @@ bool isBlueSapphire(Item* pItem) {
 // Returns the root (most basic) option type in the upgrade chain
 OptionType_t getBaseOptionType(OptionType_t type) {
     OptionType_t cur = type;
-    unordered_set<OptionType_t> seen;  // Prevent infinite loops from circular references
+    unordered_set<OptionType_t> seen; // Prevent infinite loops from circular references
 
     while (cur != 0) {
         // Check for circular reference
-        if (seen.count(cur)) break;
+        if (seen.count(cur))
+            break;
         seen.insert(cur);
 
         OptionInfo* pInfo = g_pOptionInfoManager->getOptionInfo(cur);
-        if (pInfo == NULL) break;  // Missing option info - stop here
+        if (pInfo == NULL)
+            break; // Missing option info - stop here
 
         OptionType_t prev = pInfo->getPreviousType();
-        if (prev == 0 || prev == cur) break;  // Reached root or self-reference
+        if (prev == 0 || prev == cur)
+            break; // Reached root or self-reference
         cur = prev;
     }
 
@@ -2818,10 +2784,12 @@ OptionType_t getBaseOptionType(OptionType_t type) {
 // Check if item has 3 options and at least one is upgraded
 // Upgraded means: current option type != base option type
 bool isUpgradedThreeOptionItem(Item* pItem) {
-    if (pItem == NULL) return false;
+    if (pItem == NULL)
+        return false;
 
     // Must have exactly 3 options
-    if (pItem->getOptionTypeSize() != 3) return false;
+    if (pItem->getOptionTypeSize() != 3)
+        return false;
 
     const list<OptionType_t>& optionTypes = pItem->getOptionTypeList();
 
@@ -2829,7 +2797,7 @@ bool isUpgradedThreeOptionItem(Item* pItem) {
     for (OptionType_t t : optionTypes) {
         OptionType_t baseType = getBaseOptionType(t);
         if (baseType != t) {
-            return true;  // At least one option is upgraded
+            return true; // At least one option is upgraded
         }
     }
 
@@ -2841,10 +2809,13 @@ bool isUpgradedThreeOptionItem(Item* pItem) {
 // 1. Blue Sapphire (hard currency)
 // 2. Three-option items with at least one upgraded option
 bool isPointOnlyTradeItem(Item* pItem) {
-    if (pItem == NULL) return false;
+    if (pItem == NULL)
+        return false;
 
-    if (isBlueSapphire(pItem)) return true;
-    if (isUpgradedThreeOptionItem(pItem)) return true;
+    if (isBlueSapphire(pItem))
+        return true;
+    if (isUpgradedThreeOptionItem(pItem))
+        return true;
 
     return false;
 }

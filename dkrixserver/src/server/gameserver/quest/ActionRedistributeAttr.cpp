@@ -13,6 +13,7 @@
 #include "GCNPCResponse.h"
 #include "GCSystemMessage.h"
 #include "GamePlayer.h"
+#include "PreparedStatement.h"
 #include "StringPool.h"
 #include "Vampire.h"
 #include "VariableManager.h"
@@ -65,7 +66,7 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
     Player* pPlayer = pCreature2->getPlayer();
     Assert(pPlayer != NULL);
 
-    
+
     GCNPCResponse okpkt;
     pPlayer->sendPacket(&okpkt);
 
@@ -73,14 +74,12 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
 
     Gold_t ATTR_PRICE = g_pVariableManager->getVariable(VAMPIRE_REDISTRIBUTE_ATTR_PRICE);
 
-    
+
     if (pVampire->getGold() < ATTR_PRICE) {
-        
         GCNPCResponse gcNPCResponse;
         gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
         pPlayer->sendPacket(&gcNPCResponse);
 
-         
 
         char msg[100];
         sprintf(msg, g_pStringPool->c_str(STRID_NOT_ENOUGH_MONEY), pVampire->getName().c_str());
@@ -91,15 +90,15 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         return;
     }
 
-    
-    
+
     Statement* pStmt = NULL;
     Result* pResult = NULL;
     int RedistributedAttr = 0;
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult =
-            pStmt->executeQuery("SELECT RedistributeAttr FROM Vampire WHERE Name='%s'", pVampire->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectRedistributeAttrStmt(pConn, "SELECT RedistributeAttr FROM Vampire WHERE Name=?");
+        selectRedistributeAttrStmt.bindString(1, pVampire->getName());
+        pResult = selectRedistributeAttrStmt.execute();
 
         if (pResult->getRowCount() == 0) {
             cerr << "ActionRedistributeAttr : No Vampire Record On Table" << endl;
@@ -110,43 +109,37 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         }
 
         if (RedistributedAttr >= pVampire->getLevel()) {
-            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            
+
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_TRANS_BONUS_POINT));
             pPlayer->sendPacket(&gcSM);
-            SAFE_DELETE(pStmt);
             return;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
-    
+
     VAMPIRE_RECORD prev;
     pVampire->getVampireRecord(prev);
 
     StringStream sql;
     StringStream sql2;
 
-    
+
     if (m_AttrType == 0) {
-        
         if (pVampire->getSTR(ATTR_BASIC) <= 20) {
-            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            
+
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_STR_LOW_LIMIT));
@@ -157,16 +150,15 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         pVampire->setSTR(pVampire->getSTR(ATTR_BASIC) - 1, ATTR_BASIC);
         sql << "STR = " << (int)pVampire->getSTR(ATTR_BASIC);
     }
-    
+
     else if (m_AttrType == 1) {
         if (pVampire->getDEX(ATTR_BASIC) <= 20) {
-            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            
+
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_DEX_LOW_LIMIT));
@@ -177,16 +169,15 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         pVampire->setDEX(pVampire->getDEX(ATTR_BASIC) - 1, ATTR_BASIC);
         sql << "DEX = " << (int)pVampire->getDEX(ATTR_BASIC);
     }
-    
+
     else if (m_AttrType == 2) {
         if (pVampire->getINT(ATTR_BASIC) <= 20) {
-            
             GCNPCResponse gcNPCResponse;
             gcNPCResponse.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
             pPlayer->sendPacket(&gcNPCResponse);
 
             //			StringStream msg;
-            
+
 
             GCSystemMessage gcSM;
             gcSM.setMessage(g_pStringPool->getString(STRID_INT_LOW_LIMIT));
@@ -200,9 +191,7 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
         Assert(false);
     }
 
-    
-    
-    
+
     pVampire->tinysave(sql.toString());
     pVampire->setBonus(pVampire->getBonus() + 1);
     sql2 << "Bonus = " << (int)pVampire->getBonus();
@@ -220,12 +209,13 @@ void ActionRedistributeAttr::execute(Creature* pCreature1, Creature* pCreature2)
     pVampire->sendRealWearingInfo();
     pPlayer->sendPacket(&gcMI);
 
-    
+
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET RedistributeAttr = %d WHERE Name='%s'", RedistributedAttr + 1,
-                            pVampire->getName().c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement updateRedistributeAttrStmt(pConn, "UPDATE Vampire SET RedistributeAttr = ? WHERE Name=?");
+        updateRedistributeAttrStmt.bindInt(1, RedistributedAttr + 1);
+        updateRedistributeAttrStmt.bindString(2, pVampire->getName());
+        updateRedistributeAttrStmt.execute();
     }
     END_DB(pStmt)
 

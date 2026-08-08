@@ -15,6 +15,7 @@
 #include "ItemFactoryManager.h"
 #include "ItemUtil.h"
 #include "ParkingCenter.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 #include "Zone.h"
@@ -44,11 +45,11 @@ void ActionRedeemMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
     Player* pPlayer = pCreature2->getPlayer();
     Assert(pPlayer != NULL);
 
-    
+
     GCNPCResponse answerOKpkt;
     pPlayer->sendPacket(&answerOKpkt);
 
-    
+
     if (pCreature2->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature2);
         Zone* pZone = pSlayer->getZone();
@@ -70,10 +71,9 @@ void ActionRedeemMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
             BeltInvenHeight = pBeltInventory->getHeight();
         }
 
-        
+
         for (uint y = 0; y < InvenHeight; y++) {
             for (uint x = 0; x < InvenWidth; x++) {
-                
                 if (pInventory->hasItem(x, y)) {
                     pItem = pInventory->getItem(x, y);
                     if (load(pItem, pSlayer, pZone, pSlayer->getX(), pSlayer->getY())) {
@@ -84,7 +84,6 @@ void ActionRedeemMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
         }
 
         if (pBelt != NULL) {
-            
             for (uint y = 0; y < BeltInvenHeight; y++) {
                 for (uint x = 0; x < BeltInvenWidth; x++) {
                     if (pBeltInventory->hasItem(x, y)) {
@@ -96,8 +95,7 @@ void ActionRedeemMotorcycle::execute(Creature* pCreature1, Creature* pCreature2)
                 }
             }
         }
-    } else 
-    {
+    } else {
     }
 
     __END_CATCH
@@ -112,7 +110,7 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
 
     __BEGIN_TRY
 
-    
+
     if (pItem->getItemClass() != Item::ITEM_CLASS_KEY)
         return false;
 
@@ -120,24 +118,20 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
     ItemID_t targetID = pKey->getTarget();
 
     try {
-        
         Statement* pStmt = NULL;
         Result* pResult = NULL;
 
-        
-        
-        
-        
+
         // by sigi. 2002.12.25 x-mas T_T;
         if (targetID == 0) {
             targetID = pKey->setNewMotorcycle(pSlayer);
-             
+
         } else {
-            
-            
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pResult = pStmt->executeQuery("SELECT ItemID FROM MotorcycleObject WHERE ItemID=%lu", targetID);
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                PreparedStatement selectMotorcycleIDStmt(pConn, "SELECT ItemID FROM MotorcycleObject WHERE ItemID=?");
+                selectMotorcycleIDStmt.bindULong(1, targetID);
+                pResult = selectMotorcycleIDStmt.execute();
 
                 if (!pResult->next()) {
                     Key* pKey = dynamic_cast<Key*>(pItem);
@@ -145,26 +139,19 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
 
                     targetID = pKey->setNewMotorcycle(pSlayer);
                 }
-
-                SAFE_DELETE(pStmt);
             }
             END_DB(pStmt);
         }
 
 
-        
         if (targetID == 0) {
             filelog("errorLog.txt", "[ActionRedeemMotorcycle] itemID=%d, motorItemID=%d", (int)pItem->getItemID(),
                     (int)targetID);
             return false;
         }
 
-        
-        if (g_pParkingCenter->hasMotorcycleBox(targetID)) {
-            
-            
-             
 
+        if (g_pParkingCenter->hasMotorcycleBox(targetID)) {
             return false;
         }
 
@@ -174,15 +161,14 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
         Durability_t durability;
 
         BEGIN_DB {
-            StringStream sql;
-            sql << "SELECT ItemID, ItemType, OptionType, Durability "
-                << "FROM MotorcycleObject where ItemID = " << targetID;
-
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult = pStmt->executeQueryString(sql.toString());
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement selectMotorcycleObjectStmt(
+                pConn, "SELECT ItemID, ItemType, OptionType, Durability FROM MotorcycleObject where ItemID = ?");
+            selectMotorcycleObjectStmt.bindULong(1, targetID);
+            pResult = selectMotorcycleObjectStmt.execute();
 
             // by sigi. 2002.10.14
-            
+
             if (pResult->getRowCount() <= 0) {
                 bFound = false;
 
@@ -202,7 +188,6 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
             }
 
 
-            
             list<OptionType_t> optionTypes;
             setOptionTypeFromField(optionTypes, optionType);
             Motorcycle* pMotorcycle = new Motorcycle(itemType, optionTypes);
@@ -212,29 +197,34 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
             pMotorcycle->setItemID(itemID);
             pMotorcycle->setDurability(durability);
 
-            
+
             (pZone->getObjectRegistry()).registerObject(pMotorcycle);
 
-            
+
             TPOINT pt = pZone->addItem(pMotorcycle, x, y, false);
             if (pt.x == -1) {
-                
-                filelog("motorError.txt",
-                        "ActionRedeemMotorcycle::load() :     . zoneID=%d, xy=(%d, %d)",
+                filelog("motorError.txt", "ActionRedeemMotorcycle::load() :     . zoneID=%d, xy=(%d, %d)",
                         (int)pZone->getZoneID(), (int)x, (int)y); // by sigi. 2002.12.24
                 throw Error("ActionRedeemMotorcycle::load() :     ");
             }
 
             // by sigi. 2002.10.14
             if (!bFound) {
-                pStmt->executeQuery(
-                    "INSERT IGNORE INTO MotorcycleObject (ItemID, ObjectID, ItemType, OwnerID, Storage, StorageID, X, "
-                    "Y, OptionType, Durability) Values (%d, %d, %d, '', %d, %d, %d, %d, '', %d)",
-                    itemID, pMotorcycle->getObjectID(), itemType, STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y,
-                    durability);
+                PreparedStatement insertMotorcycleObjectStmt(
+                    pConn, "INSERT IGNORE INTO MotorcycleObject (ItemID, ObjectID, ItemType, OwnerID, Storage, "
+                           "StorageID, X, Y, OptionType, Durability) Values (?, ?, ?, '', ?, ?, ?, ?, '', ?)");
+                insertMotorcycleObjectStmt.bindInt(1, itemID);
+                insertMotorcycleObjectStmt.bindInt(2, pMotorcycle->getObjectID());
+                insertMotorcycleObjectStmt.bindInt(3, itemType);
+                insertMotorcycleObjectStmt.bindInt(4, STORAGE_ZONE);
+                insertMotorcycleObjectStmt.bindInt(5, pZone->getZoneID());
+                insertMotorcycleObjectStmt.bindInt(6, pt.x);
+                insertMotorcycleObjectStmt.bindInt(7, pt.y);
+                insertMotorcycleObjectStmt.bindInt(8, durability);
+                insertMotorcycleObjectStmt.execute();
             }
 
-            
+
             MotorcycleBox* pBox = new MotorcycleBox(pMotorcycle, pZone, pt.x, pt.y);
             Assert(pBox != NULL);
 
@@ -247,15 +237,13 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
 
             bFound = true;
             //}
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
 
     } catch (Throwable& t) { // by sigi. 2002.12.25
         filelog("motorError.txt", "%s - itemID=%d, motorItemID=%d", t.toString().c_str(), (int)pItem->getItemID(),
                 (int)targetID);
-        
+
         // throw;
     }
 

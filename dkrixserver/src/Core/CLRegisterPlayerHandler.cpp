@@ -13,6 +13,7 @@
 #include "LCRegisterPlayerError.h"
 #include "LCRegisterPlayerOK.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -107,16 +108,18 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
     // Insert into the database.
     //----------------------------------------------------------------------
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
     Result* pResult;
 
     try {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         //--------------------------------------------------------------------------------
         // Check for duplicate PlayerID.
         //--------------------------------------------------------------------------------
-        pResult = pStmt->executeQuery("SELECT PlayerID FROM Player WHERE PlayerID = '%s'", pPacket->getID().c_str());
+        PreparedStatement selectPlayerIDStmt(pConn, "SELECT PlayerID FROM Player WHERE PlayerID = ?");
+        selectPlayerIDStmt.bindString(1, pPacket->getID());
+        pResult = selectPlayerIDStmt.execute();
 
         if (pResult->getRowCount() != 0) {
             lcRegisterPlayerError.setErrorID(ALREADY_REGISTER_ID);
@@ -132,7 +135,9 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         //--------------------------------------------------------------------------------
         // Check for duplicate SSN.
         //--------------------------------------------------------------------------------
-        pResult = pStmt->executeQuery("SELECT SSN FROM Player WHERE SSN = '%s'", pPacket->getSSN().c_str());
+        PreparedStatement selectSSNStmt(pConn, "SELECT SSN FROM Player WHERE SSN = ?");
+        selectSSNStmt.bindString(1, pPacket->getSSN());
+        pResult = selectSSNStmt.execute();
 
         if (pResult->getRowCount() != 0) {
             lcRegisterPlayerError.setErrorID(ALREADY_REGISTER_SSN);
@@ -143,23 +148,35 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         //--------------------------------------------------------------------------------
         // Insert the new player row.
         //--------------------------------------------------------------------------------
-        pResult = pStmt->executeQuery(
-            "INSERT INTO Player (PlayerID , Password , Name , Sex , SSN , Telephone , Cellular , Zipcode , Address , "
-            "Nation , Email , Homepage , Profile , Pub) VALUES ('%s' , PASSWORD('%s') , '%s' , '%s' , '%s' , '%s' , "
-            "'%s' , '%s' , '%s' , %d , '%s' , '%s' , '%s' , '%s')",
-            pPacket->getID().c_str(), pPacket->getPassword().c_str(), pPacket->getName().c_str(),
-            Sex2String[pPacket->getSex()].c_str(), pPacket->getSSN().c_str(), pPacket->getTelephone().c_str(),
-            pPacket->getCellular().c_str(), pPacket->getZipCode().c_str(), pPacket->getAddress().c_str(),
-            (int)pPacket->getNation(), pPacket->getEmail().c_str(), pPacket->getHomepage().c_str(),
-            pPacket->getProfile().c_str(), (pPacket->getPublic() == true) ? "PUBLIC" : "PRIVATE");
+        PreparedStatement insertPlayerStmt(
+            pConn, "INSERT INTO Player (PlayerID , Password , Name , Sex , SSN , Telephone , Cellular , Zipcode , "
+                   "Address , Nation , Email , Homepage , Profile , Pub) VALUES (? , PASSWORD(?) , ? , ? , ? , ? , "
+                   "? , ? , ? , ? , ? , ? , ? , ?)");
+        insertPlayerStmt.bindString(1, pPacket->getID());
+        insertPlayerStmt.bindString(2, pPacket->getPassword());
+        insertPlayerStmt.bindString(3, pPacket->getName());
+        insertPlayerStmt.bindString(4, Sex2String[pPacket->getSex()]);
+        insertPlayerStmt.bindString(5, pPacket->getSSN());
+        insertPlayerStmt.bindString(6, pPacket->getTelephone());
+        insertPlayerStmt.bindString(7, pPacket->getCellular());
+        insertPlayerStmt.bindString(8, pPacket->getZipCode());
+        insertPlayerStmt.bindString(9, pPacket->getAddress());
+        insertPlayerStmt.bindInt(10, (int)pPacket->getNation());
+        insertPlayerStmt.bindString(11, pPacket->getEmail());
+        insertPlayerStmt.bindString(12, pPacket->getHomepage());
+        insertPlayerStmt.bindString(13, pPacket->getProfile());
+        insertPlayerStmt.bindString(14, (pPacket->getPublic() == true) ? "PUBLIC" : "PRIVATE");
+        pResult = insertPlayerStmt.execute();
 
         // After successful insert, send LCRegisterPlayerOK to the client.
         Assert(pResult == NULL);
-        Assert(pStmt->getAffectedRowCount() == 1);
+        Assert(insertPlayerStmt.getAffectedRowCount() == 1);
 
         // Retrieve current world/group IDs for the new user.
-        pResult = pStmt->executeQuery("SELECT CurrentWorldID, CurrentServerGroupID FROM Player WHERE PlayerID = '%s'",
-                                      pPacket->getID().c_str());
+        PreparedStatement selectWorldGroupStmt(
+            pConn, "SELECT CurrentWorldID, CurrentServerGroupID FROM Player WHERE PlayerID = ?");
+        selectWorldGroupStmt.bindString(1, pPacket->getID());
+        pResult = selectWorldGroupStmt.execute();
 
         if (pResult->getRowCount() == 0) {
             lcRegisterPlayerError.setErrorID(ETC_ERROR);
@@ -189,7 +206,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         if (strstr(SSN.c_str(), "-") != NULL) {
             preSSN = SSN.substr(0, 6);
         }
-        
+
         else {
             isChina = true;
             if (SSN.size() == 15) {
@@ -197,7 +214,6 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
             } else if (SSN.size() == 18) {
                 preSSN = SSN.substr(8, 14);
             } else {
-                
                 preSSN = SSN.substr(0, 6);
             }
         }
@@ -217,17 +233,17 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
             lcRegisterPlayerOK.setAdult(false);
         }
 
-        
+
         if (isChina) {
             lcRegisterPlayerOK.setAdult(true);
         }
 
         pLoginPlayer->sendPacket(&lcRegisterPlayerOK);
 
-        
+
         pLoginPlayer->setID(pPacket->getID());
 
-        
+
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
         SAFE_DELETE(pStmt);
@@ -237,12 +253,12 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         // cout << de.toString() << endl;
 
         //--------------------------------------------------------------------------------
-        
+
         //--------------------------------------------------------------------------------
         pLoginPlayer->sendPacket(&lcRegisterPlayerError);
 
         //--------------------------------------------------------------------------------
-        
+
         //--------------------------------------------------------------------------------
         uint nFailed = pLoginPlayer->getFailureCount();
 
@@ -253,24 +269,24 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         pLoginPlayer->setFailureCount(nFailed);
 
-        
+
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
 
     } catch (SQLQueryException& sqe) {
         SAFE_DELETE(pStmt);
 
-        
+
         // cout << sqe.toString() << endl;
 
         //--------------------------------------------------------------------------------
-        
+
         //--------------------------------------------------------------------------------
         lcRegisterPlayerError.setErrorID(ETC_ERROR);
 
         pLoginPlayer->sendPacket(&lcRegisterPlayerError);
 
         //--------------------------------------------------------------------------------
-        
+
         //--------------------------------------------------------------------------------
         uint nFailed = pLoginPlayer->getFailureCount();
 
@@ -281,7 +297,7 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         pLoginPlayer->setFailureCount(nFailed);
 
-        
+
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_REGISTER_PLAYER);
     }
 

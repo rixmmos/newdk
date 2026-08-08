@@ -1,6 +1,7 @@
 #include "GQuestInventory.h"
 
 #include "DB.h"
+#include "PreparedStatement.h"
 
 void GQuestInventory::load(const string& ownerName) {
     __BEGIN_TRY
@@ -8,9 +9,10 @@ void GQuestInventory::load(const string& ownerName) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT ItemType FROM GQuestItemObject WHERE OwnerID='%s'", ownerName.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStmt(pConn, "SELECT ItemType FROM GQuestItemObject WHERE OwnerID=?");
+        selectStmt.bindString(1, ownerName);
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             getItems().push_back(pResult->getInt(1));
@@ -27,9 +29,11 @@ void GQuestInventory::removeOne(const string& ownerName, ItemType_t item) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM GQuestItemObject WHERE OwnerID='%s' AND ItemType=%u LIMIT 1",
-                            ownerName.c_str(), item);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteStmt(pConn, "DELETE FROM GQuestItemObject WHERE OwnerID=? AND ItemType=? LIMIT 1");
+        deleteStmt.bindString(1, ownerName);
+        deleteStmt.bindUInt(2, item);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -45,10 +49,11 @@ void GQuestInventory::saveOne(const string& ownerName, ItemType_t item) {
 
     Statement* pStmt = NULL;
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO GQuestItemObject(ItemType, OwnerID) VALUES (%u, '%s')", item,
-                            ownerName.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertStmt(pConn, "INSERT INTO GQuestItemObject(ItemType, OwnerID) VALUES (?, ?)");
+        insertStmt.bindUInt(1, item);
+        insertStmt.bindString(2, ownerName);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 }

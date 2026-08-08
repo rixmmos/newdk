@@ -23,6 +23,7 @@
 #include "LoginServerManager.h"
 #include "Mutex.h"
 #include "PCManager.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SiegeManager.h"
 #include "StringStream.h"
@@ -98,17 +99,17 @@ void SiegeWar::executeStart()
     sendWarStartMessage();
     clearReinforceRegisters();
 
-    
+
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
     Assert(pCastleInfo != NULL);
 
     ZoneID_t siegeZoneID = SiegeManager::Instance().getSiegeZoneID(m_CastleZoneID);
     Assert(siegeZoneID != 0);
-     
+
 
     SiegeManager::Instance().start(siegeZoneID);
 
-    
+
     recordSiegeWarStart();
 
     __END_CATCH
@@ -119,7 +120,6 @@ void SiegeWar::recordSiegeWarStart()
 {
     __BEGIN_TRY
 
-     
 
     __END_CATCH
 }
@@ -137,7 +137,7 @@ void SiegeWar::executeEnd()
     __BEGIN_TRY
 
     //----------------------------------------------------------------------------
-    
+
     //----------------------------------------------------------------------------
     sendWarEndMessage();
 
@@ -171,7 +171,6 @@ void SiegeWar::executeEnd()
                     GameServerInfo* pGameServerInfo = itr->second;
 
                     if (pGameServerInfo->getWorldID() == myWorldID) {
-                        
                         if (pGameServerInfo->getGroupID() == myServerID) {
                         } else if (pGameServerInfo->getCastleFollowingServerID() == myServerID) {
                             g_pLoginServerManager->sendPacket(pGameServerInfo->getIP(), pGameServerInfo->getUDPPort(),
@@ -184,18 +183,17 @@ void SiegeWar::executeEnd()
             }
         }
     } else {
-        
         CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(m_CastleZoneID);
         m_WinnerGuildID = pCastleInfo->getGuildID();
     }
 
     //----------------------------------------------------------------------------
-    
-    
+
+
     //----------------------------------------------------------------------------
     g_pCastleInfoManager->increaseTaxBalance(m_CastleZoneID, m_RegistrationFee);
     m_RegistrationFee = 0;
-    
+
 
     ZoneID_t siegeZoneID = SiegeManager::Instance().getSiegeZoneID(m_CastleZoneID);
     Assert(siegeZoneID != 0);
@@ -203,7 +201,7 @@ void SiegeWar::executeEnd()
     filelog("SiegeWar.log", "[%u] executeEnd : reset zone %u", getWarID(), siegeZoneID);
     SiegeManager::Instance().reset(siegeZoneID);
 
-    
+
     recordSiegeWarEnd();
 
     __END_CATCH
@@ -213,7 +211,7 @@ void SiegeWar::recordSiegeWarEnd()
 
     {__BEGIN_TRY
 
-          
+
          __END_CATCH}
 
 string SiegeWar::getWarName() const
@@ -273,9 +271,7 @@ GuildID_t SiegeWar::getWinnerGuildID(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    
-    
-    
+
     //	CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo( m_CastleZoneID );
     //	Assert( pCastleInfo!=NULL );
 
@@ -291,7 +287,7 @@ bool SiegeWar::endWar(PlayerCreature* pPC)
 
     Assert(pPC != NULL);
 
-    
+
     if (isModifyCastleOwner(pPC)) {
         m_WinnerRace = pPC->getRace();
         m_WinnerGuildID = getWinnerGuildID(pPC);
@@ -315,7 +311,7 @@ void SiegeWar::sendWarEndMessage() const
 
     War::sendWarEndMessage();
 
-    
+
     GCNoticeEvent gcNoticeEvent;
     gcNoticeEvent.setCode(NOTICE_EVENT_WAR_OVER);
     gcNoticeEvent.setParameter(m_CastleZoneID);
@@ -356,7 +352,7 @@ void SiegeWar::makeWarInfo(WarInfo* pWarInfo) const
     Assert(pGuildWarInfo != NULL);
 
     //---------------------------------------------------
-    
+
     //---------------------------------------------------
     CastleInfo* pCastleInfo = g_pCastleInfoManager->getCastleInfo(getCastleZoneID());
     if (pCastleInfo == NULL) {
@@ -366,14 +362,14 @@ void SiegeWar::makeWarInfo(WarInfo* pWarInfo) const
 
     GuildID_t ownGuildID = pCastleInfo->getGuildID();
 
-    pGuildWarInfo->addJoinGuild(ownGuildID); 
+    pGuildWarInfo->addJoinGuild(ownGuildID);
 
     for (uint i = 0; i < m_ChallangerGuildCount; ++i)
         pGuildWarInfo->addJoinGuild(m_ChallangerGuildID[i]);
 
     pGuildWarInfo->setCastleID(getCastleZoneID());
 
-    
+
     static const string commonGuild("");
 
     string attackGuildName;
@@ -424,26 +420,30 @@ BYTE SiegeWar::canReinforce(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT COUNT(*) FROM ReinforceRegisterInfo WHERE WarID=%u AND ServerID=%u AND Status='WAIT'", getWarID(),
-            g_pConfig->getPropertyInt("ServerID"));
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement selectWaitCountStmt(
+            pConn, "SELECT COUNT(*) FROM ReinforceRegisterInfo WHERE WarID=? AND ServerID=? AND Status='WAIT'");
+        selectWaitCountStmt.bindUInt(1, getWarID());
+        selectWaitCountStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        Result* pResult = selectWaitCountStmt.execute();
 
         if (pResult->next()) {
             if (pResult->getInt(1) > 3)
                 return NPC_RESPONSE_TOO_MANY_GUILD_REGISTERED;
         }
 
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM ReinforceRegisterInfo WHERE WarID=%u AND ServerID=%u AND "
-                                      "ReinforceGuildID=%u AND Status='DENY'",
-                                      getWarID(), g_pConfig->getPropertyInt("ServerID"), gID);
+        PreparedStatement selectDenyCountStmt(
+            pConn, "SELECT COUNT(*) FROM ReinforceRegisterInfo WHERE WarID=? AND ServerID=? AND "
+                   "ReinforceGuildID=? AND Status='DENY'");
+        selectDenyCountStmt.bindUInt(1, getWarID());
+        selectDenyCountStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        selectDenyCountStmt.bindUInt(3, gID);
+        pResult = selectDenyCountStmt.execute();
 
         if (pResult->next()) {
             if (pResult->getInt(1) > 0)
                 return NPC_RESPONSE_REINFORCE_DENYED;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -455,16 +455,16 @@ GuildID_t SiegeWar::recentReinforceGuild() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT ReinforceGuildID FROM ReinforceRegisterInfo WHERE WarID=%u AND ServerID=%u AND Status='WAIT'",
-            getWarID(), g_pConfig->getPropertyInt("ServerID"));
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement selectReinforceGuildIDStmt(
+            pConn, "SELECT ReinforceGuildID FROM ReinforceRegisterInfo WHERE WarID=? AND ServerID=? AND Status='WAIT'");
+        selectReinforceGuildIDStmt.bindUInt(1, getWarID());
+        selectReinforceGuildIDStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        Result* pResult = selectReinforceGuildIDStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -481,12 +481,14 @@ BYTE SiegeWar::registerReinforce(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        pStmt->executeQuery("INSERT INTO ReinforceRegisterInfo (WarID, ServerID, ReinforceGuildID, Status) VALUES "
-                            "(%u, %u, %u, 'WAIT')",
-                            getWarID(), g_pConfig->getPropertyInt("ServerID"), gID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement insertReinforceRegisterStmt(
+            pConn, "INSERT INTO ReinforceRegisterInfo (WarID, ServerID, ReinforceGuildID, Status) VALUES "
+                   "(?, ?, ?, 'WAIT')");
+        insertReinforceRegisterStmt.bindUInt(1, getWarID());
+        insertReinforceRegisterStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        insertReinforceRegisterStmt.bindUInt(3, gID);
+        insertReinforceRegisterStmt.execute();
     }
     END_DB(pStmt)
 
@@ -498,17 +500,19 @@ bool SiegeWar::acceptReinforce() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        pStmt->executeQuery(
-            "UPDATE ReinforceRegisterInfo SET Status='ACCEPT' WHERE WarID=%u AND ServerID=%u AND ReinforceGuildID=%u",
-            getWarID(), g_pConfig->getPropertyInt("ServerID"), m_RecentReinforceCandidate);
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement acceptReinforceStmt(
+            pConn,
+            "UPDATE ReinforceRegisterInfo SET Status='ACCEPT' WHERE WarID=? AND ServerID=? AND ReinforceGuildID=?");
+        acceptReinforceStmt.bindUInt(1, getWarID());
+        acceptReinforceStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        acceptReinforceStmt.bindUInt(3, m_RecentReinforceCandidate);
+        acceptReinforceStmt.execute();
 
-        if (pStmt->getAffectedRowCount() > 0)
+        if (acceptReinforceStmt.getAffectedRowCount() > 0)
             ret = true;
         if (ret)
             m_ReinforceGuildID = m_RecentReinforceCandidate;
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -520,15 +524,17 @@ bool SiegeWar::denyReinforce() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        pStmt->executeQuery(
-            "UPDATE ReinforceRegisterInfo SET Status='DENY' WHERE WarID=%u AND ServerID=%u AND ReinforceGuildID=%u",
-            getWarID(), g_pConfig->getPropertyInt("ServerID"), m_RecentReinforceCandidate);
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement denyReinforceStmt(
+            pConn,
+            "UPDATE ReinforceRegisterInfo SET Status='DENY' WHERE WarID=? AND ServerID=? AND ReinforceGuildID=?");
+        denyReinforceStmt.bindUInt(1, getWarID());
+        denyReinforceStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        denyReinforceStmt.bindUInt(3, m_RecentReinforceCandidate);
+        denyReinforceStmt.execute();
 
-        if (pStmt->getAffectedRowCount() > 0)
+        if (denyReinforceStmt.getAffectedRowCount() > 0)
             ret = true;
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -539,11 +545,12 @@ void SiegeWar::clearReinforceRegisters() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("Darkeden")->createStatement();
-        pStmt->executeQuery("DELETE FROM ReinforceRegisterInfo WHERE WarID=%u AND ServerID=%u", getWarID(),
-                            g_pConfig->getPropertyInt("ServerID"));
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("Darkeden");
+        PreparedStatement deleteReinforceRegistersStmt(
+            pConn, "DELETE FROM ReinforceRegisterInfo WHERE WarID=? AND ServerID=?");
+        deleteReinforceRegistersStmt.bindUInt(1, getWarID());
+        deleteReinforceRegistersStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
+        deleteReinforceRegistersStmt.execute();
     }
     END_DB(pStmt)
 }

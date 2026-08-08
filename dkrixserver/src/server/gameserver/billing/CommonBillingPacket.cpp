@@ -10,6 +10,7 @@
 
 #include "Assert.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "VSDateTime.h"
 
@@ -235,9 +236,11 @@ void CommonBillingPacket::setExpire_Date(const string& PlayerID) {
     int year = 0, month, day, hour, min; //, sec;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
 
-        pResult = pStmt->executeQuery("SELECT LastLogoutDate FROM Player WHERE PlayerID='%s'", PlayerID.c_str());
+        PreparedStatement selectLastLogoutStmt(pConn, "SELECT LastLogoutDate FROM Player WHERE PlayerID=?");
+        selectLastLogoutStmt.bindString(1, PlayerID);
+        pResult = selectLastLogoutStmt.execute();
 
         if (pResult->next()) {
             string pat = pResult->getString(1);
@@ -253,8 +256,6 @@ void CommonBillingPacket::setExpire_Date(const string& PlayerID) {
                 // sec   = atoi( pat.substr(16,2).c_str() );
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

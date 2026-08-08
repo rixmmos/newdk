@@ -17,6 +17,7 @@
 #include "OptionInfo.h"
 #include "Ousters.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 #include "VariableManager.h"
@@ -34,30 +35,18 @@ struct EVENT_ITEM_TEMPLATE {
 
 const int EVENT_ITEM_200505_SLAYER_MAX = 24;
 const EVENT_ITEM_TEMPLATE Event200505SlayerTemplate[EVENT_ITEM_200505_SLAYER_MAX] = {
-    {Item::ITEM_CLASS_COAT, 10, 4, "DUR+5", 80, " (M)"},
-    {Item::ITEM_CLASS_TROUSER, 10, 4, "DUR+5", 80, " (M)"},
-    {Item::ITEM_CLASS_COAT, 11, 4, "VIS+3", 80, " (W)"},
-    {Item::ITEM_CLASS_TROUSER, 11, 4, "VIS+3", 80, " (W)"},
-    {Item::ITEM_CLASS_GLOVE, 5, 4, "DEF+5", 80, "  "},
-    {Item::ITEM_CLASS_SHOES, 5, 4, "ASPD+5", 80, " "},
-    {Item::ITEM_CLASS_BELT, 2, 4, "RES+5", 80, " "},
-    {Item::ITEM_CLASS_SHIELD, 5, 4, "DAM+4", 80, " "},
-    {Item::ITEM_CLASS_BLADE, 3, 4, "BLRES+3", 80, " "},
-    {Item::ITEM_CLASS_SG, 3, 4, "TOHIT+3", 80, "AM-99 "},
-    {Item::ITEM_CLASS_SMG, 3, 4, "INT+5", 80, "B-INTER"},
-    {Item::ITEM_CLASS_AR, 3, 4, "ACRES+3", 80, "MK-2 G2"},
-    {Item::ITEM_CLASS_SR, 3, 4, "ATTR+3", 80, "X-45T "},
-    {Item::ITEM_CLASS_NECKLACE, 4, 4, "TOHIT+4", 80, " "},
-    {Item::ITEM_CLASS_BRACELET, 4, 4, "DEF+4", 80, " "},
-    {Item::ITEM_CLASS_NECKLACE, 5, 4, "CURES+2", 80, " "},
-    {Item::ITEM_CLASS_BRACELET, 5, 4, "HP+5", 80, " "},
-    {Item::ITEM_CLASS_RING, 5, 4, "VIS+3", 80, " "},
-    {Item::ITEM_CLASS_CARRYING_RECEIVER, 0, 4, "", 20, "  1"},
-    {Item::ITEM_CLASS_RESURRECT_ITEM, 0, 0, "", 200, " "},
-    {Item::ITEM_CLASS_RESURRECT_ITEM, 1, 0, "", 100, " "},
-    {Item::ITEM_CLASS_EVENT_ETC, 13, 0, "", 3000, " "},
-    {Item::ITEM_CLASS_EVENT_ETC, 3, 0, "", 4740, " "},
-    {Item::ITEM_CLASS_EVENT_TREE, 27, 0, "", 500, "12 "}};
+    {Item::ITEM_CLASS_COAT, 10, 4, "DUR+5", 80, " (M)"},       {Item::ITEM_CLASS_TROUSER, 10, 4, "DUR+5", 80, " (M)"},
+    {Item::ITEM_CLASS_COAT, 11, 4, "VIS+3", 80, " (W)"},       {Item::ITEM_CLASS_TROUSER, 11, 4, "VIS+3", 80, " (W)"},
+    {Item::ITEM_CLASS_GLOVE, 5, 4, "DEF+5", 80, "  "},         {Item::ITEM_CLASS_SHOES, 5, 4, "ASPD+5", 80, " "},
+    {Item::ITEM_CLASS_BELT, 2, 4, "RES+5", 80, " "},           {Item::ITEM_CLASS_SHIELD, 5, 4, "DAM+4", 80, " "},
+    {Item::ITEM_CLASS_BLADE, 3, 4, "BLRES+3", 80, " "},        {Item::ITEM_CLASS_SG, 3, 4, "TOHIT+3", 80, "AM-99 "},
+    {Item::ITEM_CLASS_SMG, 3, 4, "INT+5", 80, "B-INTER"},      {Item::ITEM_CLASS_AR, 3, 4, "ACRES+3", 80, "MK-2 G2"},
+    {Item::ITEM_CLASS_SR, 3, 4, "ATTR+3", 80, "X-45T "},       {Item::ITEM_CLASS_NECKLACE, 4, 4, "TOHIT+4", 80, " "},
+    {Item::ITEM_CLASS_BRACELET, 4, 4, "DEF+4", 80, " "},       {Item::ITEM_CLASS_NECKLACE, 5, 4, "CURES+2", 80, " "},
+    {Item::ITEM_CLASS_BRACELET, 5, 4, "HP+5", 80, " "},        {Item::ITEM_CLASS_RING, 5, 4, "VIS+3", 80, " "},
+    {Item::ITEM_CLASS_CARRYING_RECEIVER, 0, 4, "", 20, "  1"}, {Item::ITEM_CLASS_RESURRECT_ITEM, 0, 0, "", 200, " "},
+    {Item::ITEM_CLASS_RESURRECT_ITEM, 1, 0, "", 100, " "},     {Item::ITEM_CLASS_EVENT_ETC, 13, 0, "", 3000, " "},
+    {Item::ITEM_CLASS_EVENT_ETC, 3, 0, "", 4740, " "},         {Item::ITEM_CLASS_EVENT_TREE, 27, 0, "", 500, "12 "}};
 
 const int EVENT_ITEM_200505_VAMPIRE_MAX = 19;
 const EVENT_ITEM_TEMPLATE Event200505VampireTemplate[EVENT_ITEM_200505_VAMPIRE_MAX] = {
@@ -156,7 +145,7 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
     Zone* pZone = pPC->getZone();
     Assert(pZone != NULL);
 
-    
+
     if (g_pVariableManager->getVariable(FAMILY_COIN_EVENT) == 0) {
         GCNPCResponse response;
         response.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
@@ -165,7 +154,7 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
         return;
     }
 
-    
+
     _TPOINT pt;
     if (!pInventory->getEmptySlot(2, 3, pt)) {
         GCNPCResponse response;
@@ -176,7 +165,6 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
     }
 
 
-    
     if (!pInventory->hasEnoughNumItem(Item::ITEM_CLASS_EVENT_ETC, 18, 9)) {
         GCNPCResponse response;
         response.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
@@ -185,7 +173,7 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
         return;
     }
 
-    
+
     int ratio = rand() % 10000 + 1;
 
     Item::ItemClass itemClass;
@@ -254,10 +242,9 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
     }
 
     if (bFind) {
-        
         list<OptionType_t> options;
 
-        
+
         if (itemOption != "") {
             options.push_back(g_pOptionInfoManager->getOptionType(itemOption));
         }
@@ -265,7 +252,7 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
         Item* pItem = g_pItemFactoryManager->createItem(itemClass, itemType, options);
         Assert(pItem != NULL);
 
-        
+
         if (itemGrade != 0) {
             pItem->setGrade(itemGrade);
         }
@@ -273,16 +260,15 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
         pZone->registerObject(pItem);
 
         if (pInventory->addItem(pItem, pt)) {
-            
             pInventory->decreaseNumItem(Item::ITEM_CLASS_EVENT_ETC, 18, 9, pPlayer);
 
-            
+
             pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
 
-            
+
             remainTraceLog(pItem, "Event200505", pPC->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
 
-            
+
             GCCreateItem gcCreateItem;
             gcCreateItem.setObjectID(pItem->getObjectID());
             gcCreateItem.setItemClass(pItem->getItemClass());
@@ -300,14 +286,17 @@ void ActionGiveCommonEventItem::execute(Creature* pCreature1, Creature* pCreatur
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("UPDATE EventItemCount2 SET Count = Count + 1 WHERE Race = %d AND ItemIndex = %d",
-                                pPC->getRace(), itemIndex);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement updateEventItemCountStmt(
+                pConn, "UPDATE EventItemCount2 SET Count = Count + 1 WHERE Race = ? AND ItemIndex = ?");
+            updateEventItemCountStmt.bindInt(1, pPC->getRace());
+            updateEventItemCountStmt.bindInt(2, itemIndex);
+            updateEventItemCountStmt.execute();
         }
         END_DB(pStmt)
     }
 
-    
+
     GCNPCResponse response;
     response.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
     pPlayer->sendPacket(&response);

@@ -10,11 +10,10 @@
 #include "Assert1.h"
 #include "DB.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -37,13 +36,14 @@ void CLAgreementHandler::execute(CLAgreement* pPacket, Player* pPlayer)
 
         BEGIN_DB {
             //----------------------------------------------------------------------
-            
-            //----------------------------------------------------------------------
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQuery("DELETE FROM PrivateAgreementRemain WHERE PlayerID = '%s'",
-                                pLoginPlayer->getID().c_str());
 
-            
+            //----------------------------------------------------------------------
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement deleteAgreementRemainStmt(pConn, "DELETE FROM PrivateAgreementRemain WHERE PlayerID = ?");
+            deleteAgreementRemainStmt.bindString(1, pLoginPlayer->getID());
+            deleteAgreementRemainStmt.execute();
+
+
             pLoginPlayer->setAgree(true);
 
             SAFE_DELETE(pStmt);

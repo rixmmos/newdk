@@ -18,6 +18,7 @@
 #include "Party.h"
 #include "Player.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "SXml.h"
 #include "Timeval.h"
 
@@ -29,10 +30,11 @@ void GQuestManager::load()
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(
-            "SELECT QuestID, Status, unix_timestamp(now()) - unix_timestamp(Time) FROM GQuestSave WHERE OwnerID='%s'",
-            m_pOwner->getName().c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStmt(pConn, "SELECT QuestID, Status, unix_timestamp(now()) - unix_timestamp(Time) FROM "
+                                            "GQuestSave WHERE OwnerID=?");
+        selectStmt.bindString(1, m_pOwner->getName());
+        Result* pResult = selectStmt.execute();
 
         while (pResult->next()) {
             WORD qID = pResult->getInt(1);
@@ -40,8 +42,7 @@ void GQuestManager::load()
 
             if (sta != QuestStatusInfo::COMPLETE && sta != QuestStatusInfo::FAIL &&
                 sta != QuestStatusInfo::CAN_REPLAY) {
-                filelog("GQuestError.log", "  status  : [%s]:%d/%d",
-                        m_pOwner->getName().c_str(), qID, sta);
+                filelog("GQuestError.log", "  status  : [%s]:%d/%d", m_pOwner->getName().c_str(), qID, sta);
             } else {
                 if (sta == QuestStatusInfo::CAN_REPLAY)
                     continue;
@@ -63,8 +64,6 @@ void GQuestManager::load()
                 m_pOwner->addEffect(pEffect);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -200,7 +199,7 @@ void GQuestManager::heartbeat() {
         Timeval endTime = pTimeMission->getEndTime();
         if (gCurrentTime > endTime) {
             pTimeMission->m_pParent->update();
-            
+
             break;
         }
     }
@@ -238,7 +237,7 @@ void GQuestManager::blooddrain() {
             m_pOwner->getPlayer()->sendPacket(&gcSM);
         }
 
-        
+
         //		break;
     }
 }
@@ -253,7 +252,7 @@ void GQuestManager::levelUp() {
 
         if (pLevelMission->isSuccess(m_pOwner)) {
             pLevelMission->m_pParent->update();
-            
+
             //			break;
         }
     }
@@ -289,7 +288,7 @@ bool GQuestManager::metNPC(NPC* pNPC) {
         if (pSayNPCElement->getTarget() == pNPC->getNPCID()) {
             pSayNPCMission->meet();
             pSayNPCMission->m_pParent->update();
-            
+
             return true;
         }
     }
@@ -324,7 +323,7 @@ void GQuestManager::killed() {
             pKilledMission->m_pParent->update();
         }
 
-        
+
         //		break;
     }
 }
@@ -357,7 +356,7 @@ void GQuestManager::rideMotorcycle(bool isParty) {
             pRideMotorcycleMission->m_pParent->update();
         }
 
-        
+
         //		break;
     }
 
@@ -644,7 +643,7 @@ void GQuestManager::advancementClassLevelUp() {
 
         if (pAdvancementClassLevelMission->isSuccess(m_pOwner)) {
             pAdvancementClassLevelMission->m_pParent->update();
-            
+
             //			break;
         }
     }
@@ -663,7 +662,7 @@ void GQuestManager::clearDynamicZone(ZoneID_t zoneID) {
 
         if (pClearDynamicZoneMission->isClear()) {
             pClearDynamicZoneMission->m_pParent->update();
-            
+
             //			break;
         }
     }
@@ -680,7 +679,7 @@ void GQuestManager::enterDynamicZone(ZoneID_t zoneID) {
 
         if (pEnterDynamicZoneMission->isEnter()) {
             pEnterDynamicZoneMission->m_pParent->update();
-            
+
             //			break;
         }
     }
@@ -703,11 +702,11 @@ void GQuestManager::eraseQuest(DWORD qID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM GQuestSave WHERE OwnerID='%s' AND QuestID='%u'", m_pOwner->getName().c_str(),
-                            qID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteStmt(pConn, "DELETE FROM GQuestSave WHERE OwnerID=? AND QuestID=?");
+        deleteStmt.bindString(1, m_pOwner->getName());
+        deleteStmt.bindUInt(2, qID);
+        deleteStmt.execute();
     }
     END_DB(pStmt);
 }

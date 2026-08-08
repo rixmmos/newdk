@@ -8,6 +8,7 @@
 
 #include "Assert.h"
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "SXml.h"
 
@@ -23,10 +24,12 @@ void ScriptManager::load(const string& ownerID)
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         // pResult = pStmt->executeQuery("SELECT ScriptID, Subject, Content FROM Script WHERE OwnerID='%s'",
         // ownerID.c_str());
-        pResult = pStmt->executeQuery("SELECT ScriptID, OwnerID, Subject, Content FROM Script ORDER BY ScriptID");
+        PreparedStatement selectScriptStmt(pConn,
+                                           "SELECT ScriptID, OwnerID, Subject, Content FROM Script ORDER BY ScriptID");
+        pResult = selectScriptStmt.execute();
         //		XMLTree* pTree = new XMLTree("Scripts");
 
         while (pResult->next()) {
@@ -50,7 +53,7 @@ void ScriptManager::load(const string& ownerID)
             string msg;
 
             ////////////////////////////////////////////////////////////
-            
+
             ////////////////////////////////////////////////////////////
             start = 0;
             end = 0;
@@ -75,7 +78,7 @@ void ScriptManager::load(const string& ownerID)
             }
 
             ////////////////////////////////////////////////////////////
-            
+
             ////////////////////////////////////////////////////////////
             start = 0;
             end = 0;
@@ -112,8 +115,6 @@ void ScriptManager::load(const string& ownerID)
 
         //		pTree->SaveToFile( (g_pConfig->getProperty("HomePath") + "/data/Script.xml").c_str() );
         //		SAFE_DELETE( pTree );
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

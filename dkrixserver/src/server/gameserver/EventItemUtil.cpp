@@ -8,6 +8,7 @@
 #include "ItemFactoryManager.h"
 #include "Monster.h"
 #include "Ousters.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "Vampire.h"
 #include "VariableManager.h"
@@ -83,11 +84,11 @@ Item* getCardItem(MoonCard card) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            pStmt->executeQuery("UPDATE CardCount SET CARDCOUNT = CARDCOUNT + 1 WHERE CARDKIND = %d", (int)card - 1);
-
-            SAFE_DELETE(pStmt);
+            PreparedStatement updateStmt(pConn, "UPDATE CardCount SET CARDCOUNT = CARDCOUNT + 1 WHERE CARDKIND = ?");
+            updateStmt.bindInt(1, (int)card - 1);
+            updateStmt.execute();
         }
         END_DB(pStmt)
     }
@@ -167,12 +168,11 @@ Item* getLuckyBagItem(LuckyBag luckybag) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            pStmt->executeQuery("UPDATE LuckyBagCount SET BAGCOUNT = BAGCOUNT + 1 WHERE BAGKIND = %d",
-                                (int)luckybag - 1);
-
-            SAFE_DELETE(pStmt);
+            PreparedStatement updateStmt(pConn, "UPDATE LuckyBagCount SET BAGCOUNT = BAGCOUNT + 1 WHERE BAGKIND = ?");
+            updateStmt.bindInt(1, (int)luckybag - 1);
+            updateStmt.execute();
         }
         END_DB(pStmt)
     }
@@ -253,11 +253,11 @@ Item* getGiftBoxItem(GiftBox giftbox) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            pStmt->executeQuery("UPDATE GiftBoxCount SET BOXCOUNT = BOXCOUNT + 1 WHERE BOXKIND = %d", (int)giftbox + 1);
-
-            SAFE_DELETE(pStmt);
+            PreparedStatement updateStmt(pConn, "UPDATE GiftBoxCount SET BOXCOUNT = BOXCOUNT + 1 WHERE BOXKIND = ?");
+            updateStmt.bindInt(1, (int)giftbox + 1);
+            updateStmt.execute();
         }
         END_DB(pStmt)
     }
@@ -266,7 +266,6 @@ Item* getGiftBoxItem(GiftBox giftbox) {
 }
 
 int getBlackGiftBoxType(int t1, int t2) {
-    
     int min = 0;
     int max = 0;
 
@@ -342,12 +341,13 @@ void logEventItemCount(Item* pEventItem)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE EventItemCount SET Count = Count + 1 WHERE ItemClass=%u AND ItemType=%u",
-                            (uint)pEventItem->getItemClass(), (uint)pEventItem->getItemType());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn,
+                                     "UPDATE EventItemCount SET Count = Count + 1 WHERE ItemClass=? AND ItemType=?");
+        updateStmt.bindUInt(1, (uint)pEventItem->getItemClass());
+        updateStmt.bindUInt(2, (uint)pEventItem->getItemType());
+        updateStmt.execute();
     }
     END_DB(pStmt)
 }

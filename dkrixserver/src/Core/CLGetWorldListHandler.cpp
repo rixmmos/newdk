@@ -12,6 +12,7 @@
 #include "GameWorldInfoManager.h"
 #include "LCWorldList.h"
 #include "LoginPlayer.h"
+#include "PreparedStatement.h"
 #include "WorldInfo.h"
 #endif
 
@@ -50,7 +51,7 @@ void CLGetWorldListHandler::execute(CLGetWorldList* pPacket, Player* pPlayer)
 
             aWorldInfo[i] = pWorldInfo;
 
-            
+
             // if (i==2) pWorldInfo->setStat(WORLD_CLOSE);
 
             // cout << "AddWorld : " << pWorldInfo->getName() << endl;
@@ -61,10 +62,11 @@ void CLGetWorldListHandler::execute(CLGetWorldList* pPacket, Player* pPlayer)
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-            Result* pResult = pStmt->executeQuery("SELECT CurrentWorldID FROM Player where PlayerID='%s'",
-                                                  pLoginPlayer->getID().c_str());
+            PreparedStatement selectPlayerWorldIDStmt(pConn, "SELECT CurrentWorldID FROM Player where PlayerID=?");
+            selectPlayerWorldIDStmt.bindString(1, pLoginPlayer->getID());
+            Result* pResult = selectPlayerWorldIDStmt.execute();
 
             if (pResult->next()) {
                 lcWorldList.setCurrentWorldID(pResult->getInt(1));

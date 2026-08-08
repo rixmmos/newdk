@@ -24,6 +24,7 @@
 #include "NPC.h"
 #include "PCFinder.h"
 #include "Party.h"
+#include "PreparedStatement.h"
 #include "RelicUtil.h"
 #include "SharedServerManager.h"
 #include "TradeManager.h"
@@ -49,17 +50,16 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
 
         Creature* pFromCreature = pZone->getCreature(TargetObjectID);
 
-        
-        
+
         if (pFromCreature == NULL || !pFromCreature->isVampire()) {
             executeSkillFailException(pSlayer, getSkillType());
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
             return;
         }
 
-        GCSkillToObjectOK1 _GCSkillToObjectOK1; 
-        GCMorph1 _GCMorph1;                     
-        GCMorphSlayer2 _GCMorphSlayer2;         
+        GCSkillToObjectOK1 _GCSkillToObjectOK1;
+        GCMorph1 _GCMorph1;
+        GCMorphSlayer2 _GCMorphSlayer2;
 
         SkillType_t SkillType = pSkillSlot->getSkillType();
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SkillType);
@@ -72,27 +72,26 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             dropFlagToZone(pFromCreature);
 
             //////////////////////////////////////////////////////////////////////
-            
+
             //////////////////////////////////////////////////////////////////////
 
-            
+
             PartyInviteInfoManager* pPIIM = pZone->getPartyInviteInfoManager();
             Assert(pPIIM != NULL);
             pPIIM->cancelInvite(pFromCreature);
 
-            
+
             int PartyID = pFromCreature->getPartyID();
             if (PartyID != 0) {
-                
                 LocalPartyManager* pLPM = pZone->getLocalPartyManager();
                 Assert(pLPM != NULL);
                 pLPM->deletePartyMember(PartyID, pFromCreature);
 
-                
+
                 deleteAllPartyInfo(pFromCreature);
             }
 
-            
+
             TradeManager* pTM = pZone->getTradeManager();
             Assert(pTM != NULL);
             pTM->cancelTrade(pFromCreature);
@@ -103,26 +102,25 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             Slayer* pNewSlayer = new Slayer;
             Vampire* pVampire = dynamic_cast<Vampire*>(pFromCreature);
 
-            
+
             Statement* pStmt = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                StringStream sql;
-                sql << "DELETE FROM EffectBloodDrain WHERE OwnerID = '" + pFromCreature->getName() + "'";
-                pStmt->executeQueryString(sql.toString());
-                SAFE_DELETE(pStmt);
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                PreparedStatement deleteEffectBloodDrainStmt(pConn, "DELETE FROM EffectBloodDrain WHERE OwnerID = ?");
+                deleteEffectBloodDrainStmt.bindString(1, pFromCreature->getName());
+                deleteEffectBloodDrainStmt.execute();
             }
             END_DB(pStmt)
 
             pNewSlayer->setName(pFromCreature->getName());
 
-            
+
             Player* pFromPlayer = pFromCreature->getPlayer();
             pNewSlayer->setPlayer(pFromPlayer);
             GamePlayer* pFromGamePlayer = dynamic_cast<GamePlayer*>(pFromPlayer);
             pFromGamePlayer->setCreature(pNewSlayer);
 
-            
+
             pNewSlayer->load();
             pNewSlayer->setZone(pZone);
             pNewSlayer->setObjectID(pFromCreature->getObjectID());
@@ -134,13 +132,11 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             Dir_t dir = pFromCreature->getDir();
             Tile& tile = pZone->getTile(x, y);
 
-            
-            
-            
+
             g_pPCFinder->deleteCreature(pFromCreature->getName());
             g_pPCFinder->addCreature(pNewSlayer);
 
-            
+
             if (pVampire->getGuildID() != 0) {
                 Guild* pGuild = g_pGuildManager->getGuild(pVampire->getGuildID());
                 if (pGuild != NULL) {
@@ -154,11 +150,13 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                     g_pSharedServerManager->sendPacket(&gsGuildMemberLogOn);
 
                     Statement* pStmt = NULL;
-                    
+
                     BEGIN_DB {
-                        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                        pStmt->executeQuery("UPDATE GuildMember SET LogOn = 0 WHERE Name = '%s'",
-                                            pVampire->getName().c_str());
+                        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                        PreparedStatement updateGuildMemberLogOnStmt(pConn,
+                                                                     "UPDATE GuildMember SET LogOn = 0 WHERE Name = ?");
+                        updateGuildMemberLogOnStmt.bindString(1, pVampire->getName());
+                        updateGuildMemberLogOnStmt.execute();
                     }
                     END_DB(pStmt)
                 } else
@@ -166,21 +164,19 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                             pVampire->getName().c_str());
             }
 
-            
+
             Inventory* pInventory = pVampire->getInventory();
             pNewSlayer->setInventory(pInventory);
             pVampire->setInventory(NULL);
 
-            
+
             pNewSlayer->deleteStash();
             pNewSlayer->setStash(pVampire->getStash());
             pNewSlayer->setStashNum(pVampire->getStashNum());
             pNewSlayer->setStashStatus(false);
             pVampire->setStash(NULL);
 
-             
 
-            
             pNewSlayer->deleteFlagSet();
             pNewSlayer->setFlagSet(pVampire->getFlagSet());
             pVampire->setFlagSet(NULL);
@@ -188,24 +184,23 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             Item* pItem = NULL;
             _TPOINT point;
 
-            
+
             for (int part = 0; part < (int)Vampire::VAMPIRE_WEAR_MAX; part++) {
                 pItem = pVampire->getWearItem((Vampire::WearPart)part);
                 if (pItem != NULL) {
-                    
                     if (isTwohandWeapon(pItem)) {
                         Assert(((Vampire::WearPart)part == Vampire::WEAR_RIGHTHAND) ||
                                ((Vampire::WearPart)part == Vampire::WEAR_LEFTHAND));
                         Assert(pVampire->getWearItem(Vampire::WEAR_RIGHTHAND) ==
                                pVampire->getWearItem(Vampire::WEAR_LEFTHAND));
-                        
+
                         pVampire->deleteWearItem(Vampire::WEAR_RIGHTHAND);
                         pVampire->deleteWearItem(Vampire::WEAR_LEFTHAND);
                     } else {
                         pVampire->deleteWearItem((Vampire::WearPart)part);
                     }
 
-                    
+
                     if (pInventory->getEmptySlot(pItem, point)) {
                         pInventory->addItem(point.x, point.y, pItem);
                         pItem->save(pNewSlayer->getName(), STORAGE_INVENTORY, 0, point.x, point.y);
@@ -215,7 +210,7 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                         pItem->destroy();
                         SAFE_DELETE(pItem);
                     }
-                    
+
                     else {
                         ZoneCoord_t ZoneX = pVampire->getX();
                         ZoneCoord_t ZoneY = pVampire->getY();
@@ -227,14 +222,13 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                         if (pt.x != -1) {
                             pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                            
+
                             if (pItem != NULL && pItem->isTraceItem()) {
                                 char zoneName[15];
                                 sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);
                                 remainTraceLog(pItem, pFromCreature->getName(), zoneName, ITEM_LOG_MOVE, DETAIL_DROP);
                             }
                         } else {
-                            
                             if (pItem != NULL && pItem->isTraceItem()) {
                                 remainTraceLog(pItem, pFromCreature->getName(), "GOD", ITEM_LOG_DELETE, DETAIL_DROP);
                             }
@@ -250,7 +244,7 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             if (pItem != NULL) {
                 pVampire->deleteItemFromExtraInventorySlot();
 
-                
+
                 if (pInventory->getEmptySlot(pItem, point)) {
                     pInventory->addItem(point.x, point.y, pItem);
                     pItem->save(pNewSlayer->getName(), STORAGE_INVENTORY, 0, point.x, point.y);
@@ -260,7 +254,7 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                     pItem->destroy();
                     SAFE_DELETE(pItem);
                 }
-                
+
                 else {
                     TPOINT pt;
                     ZoneCoord_t ZoneX = pVampire->getX();
@@ -271,14 +265,13 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                     if (pt.x != -1) {
                         pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                        
+
                         if (pItem != NULL && pItem->isTraceItem()) {
                             char zoneName[15];
                             sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);
                             remainTraceLog(pItem, pFromCreature->getName(), zoneName, ITEM_LOG_MOVE, DETAIL_DROP);
                         }
                     } else {
-                        
                         if (pItem != NULL && pItem->isTraceItem()) {
                             remainTraceLog(pItem, pFromCreature->getName(), "GOD", ITEM_LOG_DELETE, DETAIL_DROP);
                         }
@@ -289,20 +282,17 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
                 }
             }
 
-            
+
             pNewSlayer->loadTimeLimitItem();
 
-            
-            
-            
+
             pNewSlayer->setGoldEx(0);
             pNewSlayer->setStashGoldEx(0);
 
-            
+
             pNewSlayer->sendSlayerSkillInfo();
 
 
-            
             tile.deleteCreature(pFromCreature->getObjectID());
             pZone->deletePC(pFromCreature);
 
@@ -314,7 +304,7 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
 
             pZone->addPC(pNewSlayer);
 
-            
+
             pZone->updateHiddenScan(pNewSlayer);
 
             _GCMorph1.setPCInfo2(pNewSlayer->getSlayerInfo2());
@@ -349,7 +339,7 @@ void Restore::execute(Slayer* pSlayer, ObjectID_t TargetObjectID, SkillSlot* pSk
             pSkillSlot->setRunTime(0);
 
             EffectRestore* pEffectRestore = new EffectRestore(pNewSlayer);
-            pEffectRestore->setDeadline(60 * 60 * 24 * 7 * 10); 
+            pEffectRestore->setDeadline(60 * 60 * 24 * 7 * 10);
             pNewSlayer->addEffect(pEffectRestore);
             pNewSlayer->setFlag(Effect::EFFECT_CLASS_RESTORE);
             pEffectRestore->create(pNewSlayer->getName());
@@ -382,14 +372,14 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
         Zone* pZone = pNPC->getZone();
         Assert(pZone != NULL);
 
-        
+
         if (!pFromCreature->isVampire()) {
             // cout << "TID[" << Thread::self() << "]" << getSkillHandlerName() << " End" << endl;
             return;
         }
 
-        GCMorph1 _GCMorph1;             
-        GCMorphSlayer2 _GCMorphSlayer2; 
+        GCMorph1 _GCMorph1;
+        GCMorphSlayer2 _GCMorphSlayer2;
 
         // SkillType_t SkillType = SKILL_RESTORE;
 
@@ -399,27 +389,26 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
         // if (bRangeCheck && bHitRoll)
         if (bHitRoll) {
             //////////////////////////////////////////////////////////////////////
-            
+
             //////////////////////////////////////////////////////////////////////
 
-            
+
             PartyInviteInfoManager* pPIIM = pZone->getPartyInviteInfoManager();
             Assert(pPIIM != NULL);
             pPIIM->cancelInvite(pFromCreature);
 
-            
+
             int PartyID = pFromCreature->getPartyID();
             if (PartyID != 0) {
-                
                 LocalPartyManager* pLPM = pZone->getLocalPartyManager();
                 Assert(pLPM != NULL);
                 pLPM->deletePartyMember(PartyID, pFromCreature);
 
-                
+
                 deleteAllPartyInfo(pFromCreature);
             }
 
-            
+
             TradeManager* pTM = pZone->getTradeManager();
             Assert(pTM != NULL);
             pTM->cancelTrade(pFromCreature);
@@ -430,21 +419,20 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
             Slayer* pNewSlayer = new Slayer;
             Vampire* pVampire = dynamic_cast<Vampire*>(pFromCreature);
 
-            
+
             Statement* pStmt = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                StringStream sql;
-                sql << "DELETE FROM EffectBloodDrain WHERE OwnerID = '" + pFromCreature->getName() + "'";
-                pStmt->executeQueryString(sql.toString());
-                SAFE_DELETE(pStmt);
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+                PreparedStatement deleteEffectBloodDrainStmt(pConn, "DELETE FROM EffectBloodDrain WHERE OwnerID = ?");
+                deleteEffectBloodDrainStmt.bindString(1, pFromCreature->getName());
+                deleteEffectBloodDrainStmt.execute();
             }
             END_DB(pStmt)
 
             pNewSlayer->setName(pFromCreature->getName());
             pNewSlayer->setPlayer(pFromCreature->getPlayer());
             pNewSlayer->load();
-            
+
             pNewSlayer->setZone(pZone);
             pNewSlayer->setObjectID(pFromCreature->getObjectID());
             // pZone->getObjectRegistry().registerObject(pNewSlayer);
@@ -457,19 +445,17 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
 
             pNewSlayer->setXYDir(x, y, dir);
 
-            
+
             Player* pFromPlayer = pFromCreature->getPlayer();
             // pNewSlayer->setPlayer(pFromPlayer);
             GamePlayer* pFromGamePlayer = dynamic_cast<GamePlayer*>(pFromPlayer);
             pFromGamePlayer->setCreature(pNewSlayer);
 
-            
-            
-            
+
             g_pPCFinder->deleteCreature(pFromCreature->getName());
             g_pPCFinder->addCreature(pNewSlayer);
 
-            
+
             if (pVampire->getGuildID() != 0) {
                 Guild* pGuild = g_pGuildManager->getGuild(pVampire->getGuildID());
                 if (pGuild != NULL)
@@ -479,19 +465,19 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
                             pVampire->getName().c_str());
             }
 
-            
+
             Inventory* pInventory = pVampire->getInventory();
             pNewSlayer->setInventory(pInventory);
             pVampire->setInventory(NULL);
 
-            
+
             pNewSlayer->deleteStash();
             pNewSlayer->setStash(pVampire->getStash());
             pNewSlayer->setStashNum(pVampire->getStashNum());
             pNewSlayer->setStashStatus(false);
             pVampire->setStash(NULL);
 
-            
+
             pNewSlayer->deleteFlagSet();
             pNewSlayer->setFlagSet(pVampire->getFlagSet());
             pVampire->setFlagSet(NULL);
@@ -499,24 +485,23 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
             Item* pItem = NULL;
             _TPOINT point;
 
-            
+
             for (int part = 0; part < (int)Vampire::VAMPIRE_WEAR_MAX; part++) {
                 pItem = pVampire->getWearItem((Vampire::WearPart)part);
                 if (pItem != NULL) {
-                    
                     if (isTwohandWeapon(pItem)) {
                         Assert(((Vampire::WearPart)part == Vampire::WEAR_RIGHTHAND) ||
                                ((Vampire::WearPart)part == Vampire::WEAR_LEFTHAND));
                         Assert(pVampire->getWearItem(Vampire::WEAR_RIGHTHAND) ==
                                pVampire->getWearItem(Vampire::WEAR_LEFTHAND));
-                        
+
                         pVampire->deleteWearItem(Vampire::WEAR_RIGHTHAND);
                         pVampire->deleteWearItem(Vampire::WEAR_LEFTHAND);
                     } else {
                         pVampire->deleteWearItem((Vampire::WearPart)part);
                     }
 
-                    
+
                     if (pInventory->getEmptySlot(pItem, point)) {
                         pInventory->addItem(point.x, point.y, pItem);
                         pItem->save(pNewSlayer->getName(), STORAGE_INVENTORY, 0, point.x, point.y);
@@ -526,7 +511,7 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
                         pItem->destroy();
                         SAFE_DELETE(pItem);
                     }
-                    
+
                     else {
                         ZoneCoord_t ZoneX = pVampire->getX();
                         ZoneCoord_t ZoneY = pVampire->getY();
@@ -538,14 +523,13 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
                         if (pt.x != -1) {
                             pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                            
+
                             if (pItem != NULL && pItem->isTraceItem()) {
                                 char zoneName[15];
                                 sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);
                                 remainTraceLog(pItem, pFromCreature->getName(), zoneName, ITEM_LOG_MOVE, DETAIL_DROP);
                             }
                         } else {
-                            
                             if (pItem != NULL && pItem->isTraceItem()) {
                                 remainTraceLog(pItem, pFromCreature->getName(), "GOD", ITEM_LOG_DELETE, DETAIL_DROP);
                             }
@@ -561,7 +545,7 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
             if (pItem != NULL) {
                 pVampire->deleteItemFromExtraInventorySlot();
 
-                
+
                 if (pInventory->getEmptySlot(pItem, point)) {
                     pInventory->addItem(point.x, point.y, pItem);
                     pItem->save(pNewSlayer->getName(), STORAGE_INVENTORY, 0, point.x, point.y);
@@ -571,7 +555,7 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
                     pItem->destroy();
                     SAFE_DELETE(pItem);
                 }
-                
+
                 else {
                     TPOINT pt;
                     ZoneCoord_t ZoneX = pVampire->getX();
@@ -582,14 +566,13 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
                     if (pt.x != -1) {
                         pItem->save("", STORAGE_ZONE, pZone->getZoneID(), pt.x, pt.y);
 
-                        
+
                         if (pItem != NULL && pItem->isTraceItem()) {
                             char zoneName[15];
                             sprintf(zoneName, "%4d%3d%3d", pZone->getZoneID(), pt.x, pt.y);
                             remainTraceLog(pItem, pFromCreature->getName(), zoneName, ITEM_LOG_MOVE, DETAIL_DROP);
                         }
                     } else {
-                        
                         if (pItem != NULL && pItem->isTraceItem()) {
                             remainTraceLog(pItem, pFromCreature->getName(), "GOD", ITEM_LOG_DELETE, DETAIL_DROP);
                         }
@@ -602,14 +585,12 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
 
             pNewSlayer->loadTimeLimitItem();
 
-            
-            
+
             // pNewSlayer->setGoldEx(pVampire->getGold());
             pNewSlayer->setGoldEx(0);
             pNewSlayer->setStashGoldEx(0);
 
 
-            
             pNewSlayer->sendSlayerSkillInfo();
 
             _GCMorph1.setPCInfo2(pNewSlayer->getSlayerInfo2());
@@ -623,7 +604,6 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
             // pFromGamePlayer->deleteEvent(Event::EVENT_CLASS_REGENERATION);
 
 
-            
             tile.deleteCreature(pFromCreature->getObjectID());
             pZone->deletePC(pFromCreature);
 
@@ -645,11 +625,10 @@ void Restore::execute(NPC* pNPC, Creature* pFromCreature)
             SAFE_DELETE(pFromCreature);
 
 
-            
             pZone->updateHiddenScan(pNewSlayer);
 
             EffectRestore* pEffectRestore = new EffectRestore(pNewSlayer);
-            pEffectRestore->setDeadline(60 * 60 * 24 * 7 * 10); 
+            pEffectRestore->setDeadline(60 * 60 * 24 * 7 * 10);
             pNewSlayer->addEffect(pEffectRestore);
             pNewSlayer->setFlag(Effect::EFFECT_CLASS_RESTORE);
             pEffectRestore->create(pNewSlayer->getName());

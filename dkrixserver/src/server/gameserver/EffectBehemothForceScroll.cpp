@@ -9,6 +9,7 @@
 #include "DB.h"
 #include "GCRemoveEffect.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Timeval.h"
 #include "Zone.h"
 
@@ -101,7 +102,7 @@ void EffectBehemothForceScroll::create(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Timeval currentTime;
         getCurrentTime(currentTime);
@@ -109,10 +110,10 @@ void EffectBehemothForceScroll::create(const string& ownerID)
         Timeval remainTime = timediff(m_Deadline, currentTime);
         Turn_t remainTurn = remainTime.tv_sec * 10 + remainTime.tv_usec / 100000;
 
-        pStmt->executeQuery("INSERT INTO EffectBehemothForceScroll (OwnerID, RemainTime ) VALUES('%s',%lu)",
-                            ownerID.c_str(), remainTurn);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement insertStmt(pConn, "INSERT INTO EffectBehemothForceScroll (OwnerID, RemainTime ) VALUES(?,?)");
+        insertStmt.bindString(1, ownerID);
+        insertStmt.bindULong(2, remainTurn);
+        insertStmt.execute();
     }
     END_DB(pStmt)
 
@@ -129,11 +130,11 @@ void EffectBehemothForceScroll::destroy(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM EffectBehemothForceScroll WHERE OwnerID = '%s'", ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteStmt(pConn, "DELETE FROM EffectBehemothForceScroll WHERE OwnerID = ?");
+        deleteStmt.bindString(1, ownerID);
+        deleteStmt.execute();
     }
     END_DB(pStmt)
 
@@ -150,7 +151,7 @@ void EffectBehemothForceScroll::save(const string& ownerID)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         Timeval currentTime;
         getCurrentTime(currentTime);
@@ -158,10 +159,10 @@ void EffectBehemothForceScroll::save(const string& ownerID)
         Timeval remainTime = timediff(m_Deadline, currentTime);
         Turn_t remainTurn = remainTime.tv_sec * 10 + remainTime.tv_usec / 100000;
 
-        pStmt->executeQuery("UPDATE EffectBehemothForceScroll SET RemainTime = %lu WHERE OwnerID = '%s'", remainTurn,
-                            ownerID.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement updateStmt(pConn, "UPDATE EffectBehemothForceScroll SET RemainTime = ? WHERE OwnerID = ?");
+        updateStmt.bindULong(1, remainTurn);
+        updateStmt.bindString(2, ownerID);
+        updateStmt.execute();
     }
     END_DB(pStmt)
 
@@ -193,10 +194,11 @@ void EffectBehemothForceScrollLoader::load(Creature* pCreature)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        Result* pResult = pStmt->executeQuery("SELECt RemainTime FROM EffectBehemothForceScroll WHERE OwnerID = '%s'",
-                                              pCreature->getName().c_str());
+        PreparedStatement selectStmt(pConn, "SELECt RemainTime FROM EffectBehemothForceScroll WHERE OwnerID = ?");
+        selectStmt.bindString(1, pCreature->getName());
+        Result* pResult = selectStmt.execute();
 
         if (pResult->next()) {
             Turn_t remainTurn = pResult->getDWORD(1);
@@ -210,8 +212,6 @@ void EffectBehemothForceScrollLoader::load(Creature* pCreature)
             pCreature->addEffect(pEffect);
             pCreature->setFlag(pEffect->getEffectClass());
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

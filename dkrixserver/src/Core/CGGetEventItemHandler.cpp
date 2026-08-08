@@ -19,6 +19,7 @@
 #include "NicknameBook.h"
 #include "PacketUtil.h"
 #include "PlayerCreature.h"
+#include "PreparedStatement.h"
 #include "Zone.h"
 #endif
 
@@ -59,15 +60,15 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
     static int i = 0;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT RecvItemDate FROM Event200501Main WHERE PlayerID = '%s'",
-                                              pGamePlayer->getID().c_str());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+        PreparedStatement selectEventMainStmt(pConn, "SELECT RecvItemDate FROM Event200501Main WHERE PlayerID = ?");
+        selectEventMainStmt.bindString(1, pGamePlayer->getID());
+        Result* pResult = selectEventMainStmt.execute();
 
         if (pResult->next()) {
             string RecvItemDate = pResult->getString(1);
 
             if (RecvItemDate == "0000-00-00") {
-                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -88,7 +89,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 Grade_t iGrade = 6;
                 list<OptionType_t> optionType;
 
-                
+
                 i = i ^ 1;
                 if (i) {
                     optionType.push_back(50);  // DAM+3
@@ -98,7 +99,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                     optionType.push_back(184); // ATTR+2
                 }
 
-                
+
                 if (race == RACE_SLAYER) {
                     iClass = Item::ITEM_CLASS_RING;
                 } else if (race == RACE_VAMPIRE) {
@@ -109,7 +110,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                     Assert(false);
                 }
 
-                
+
                 if (level <= 30) {
                     iType = 3;
                 } else if (level <= 60) {
@@ -141,7 +142,7 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
 
                 pItem->setGrade(iGrade);
 
-                
+
                 _TPOINT tp;
                 if (!pInventory->getEmptySlot(pItem, tp)) {
                     SAFE_DELETE(pItem);
@@ -181,17 +182,18 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 pPlayer->sendPacket(&gcCI);
 
 
-                
-                pStmt->executeQuery("UPDATE Event200501Main SET RecvItemDate = now() WHERE PlayerID = '%s'",
-                                    pGamePlayer->getID().c_str());
+                PreparedStatement updateEventMainRecvDateStmt(
+                    pConn, "UPDATE Event200501Main SET RecvItemDate = now() WHERE PlayerID = ?");
+                updateEventMainRecvDateStmt.bindString(1, pGamePlayer->getID());
+                updateEventMainRecvDateStmt.execute();
 
-                
+
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
 
-                
+
                 NicknameBook* pNicknameBook = pPC->getNicknameBook();
                 Assert(pNicknameBook != NULL);
 
@@ -200,7 +202,6 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 pGamePlayer->sendPacket(pNicknamePacket);
                 SAFE_DELETE(pNicknamePacket);
             } else {
-                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -208,7 +209,6 @@ void CGGetEventItemHandler::executeCombackItem(CGGetEventItem* pPacket, Player* 
                 return;
             }
         } else {
-            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);
@@ -231,10 +231,11 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT PayPremiumDate, RecvPremiumItemDate FROM Event200501Main WHERE PlayerID = '%s'",
-                                pGamePlayer->getID().c_str());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+        PreparedStatement selectEventMainPremiumStmt(
+            pConn, "SELECT PayPremiumDate, RecvPremiumItemDate FROM Event200501Main WHERE PlayerID = ?");
+        selectEventMainPremiumStmt.bindString(1, pGamePlayer->getID());
+        Result* pResult = selectEventMainPremiumStmt.execute();
 
         if (pResult->next()) {
             string PayPremiumDate = pResult->getString(1);
@@ -249,7 +250,6 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
             }
 
             if (RecvItemDate == "0000-00-00") {
-                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -266,43 +266,28 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                 Item* pItem[5] = {NULL, NULL, NULL, NULL, NULL};
 
-                
+
                 list<OptionType_t> optionType;
                 optionType.push_back(50); // DAM+3
 
                 if (race == RACE_SLAYER) {
-                    pItem[0] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_NECKLACE, 8, optionType); 
-                    pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8,
-                                                                 optionType); 
-                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8,
-                                                                 optionType); 
-                    pItem[3] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); 
-                    pItem[4] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType); 
+                    pItem[0] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_NECKLACE, 8, optionType);
+                    pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8, optionType);
+                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_BRACELET, 8, optionType);
+                    pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType);
+                    pItem[4] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_RING, 8, optionType);
                 } else if (race == RACE_VAMPIRE) {
-                    pItem[0] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 8,
-                                                                 optionType); 
-                    pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_BRACELET, 7,
-                                                                 optionType); 
-                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_RING, 8,
-                                                                 optionType); 
-                    pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_EARRING, 8,
-                                                                 optionType); 
-                    pItem[4] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_AMULET, 8, optionType); 
+                    pItem[0] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 8, optionType);
+                    pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_BRACELET, 7, optionType);
+                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_RING, 8, optionType);
+                    pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_EARRING, 8, optionType);
+                    pItem[4] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_AMULET, 8, optionType);
                 } else if (race == RACE_OUSTERS) {
-                    pItem[0] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); 
-                    pItem[1] =
-                        g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType); 
-                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); 
-                    pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); 
-                    pItem[4] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8,
-                                                                 optionType); 
+                    pItem[0] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType);
+                    pItem[1] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_RING, 8, optionType);
+                    pItem[2] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8, optionType);
+                    pItem[3] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8, optionType);
+                    pItem[4] = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_OUSTERS_PENDENT, 8, optionType);
                 } else {
                     GCNPCResponse response;
                     response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
@@ -329,10 +314,7 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                 _TPOINT tp[5];
                 for (int i = 0; i < 5; ++i) {
-                    
-
                     if (!pInventory->getEmptySlot(pItem[i], tp[i])) {
-                        
                         for (int j = 0; j < i; ++j) {
                             pInventory->deleteItem(pItem[j]->getObjectID());
                         }
@@ -356,7 +338,6 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                     }
 
                     if (!pInventory->addItem(pItem[i], tp[i])) {
-                        
                         for (int j = 0; j < i; ++j) {
                             pInventory->deleteItem(pItem[j]->getObjectID());
                         }
@@ -373,8 +354,7 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                     }
                 }
 
-                
-                
+
                 for (int i = 0; i < 5; ++i) {
                     pItem[i]->create(pPC->getName(), STORAGE_INVENTORY, 0, tp[i].x, tp[i].y);
 
@@ -386,23 +366,24 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
 
                     pPlayer->sendPacket(&gcCI);
 
-                    
+
                     pPC->addTimeLimitItem(pItem[i], 7 * 24 * 60 * 60);
                 }
 
                 pPC->sendTimeLimitItemInfo();
 
-                
-                pStmt->executeQuery("UPDATE Event200501Main SET RecvPremiumItemDate = now() WHERE PlayerID = '%s'",
-                                    pGamePlayer->getID().c_str());
 
-                
+                PreparedStatement updateEventMainPremiumRecvDateStmt(
+                    pConn, "UPDATE Event200501Main SET RecvPremiumItemDate = now() WHERE PlayerID = ?");
+                updateEventMainPremiumRecvDateStmt.bindString(1, pGamePlayer->getID());
+                updateEventMainPremiumRecvDateStmt.execute();
+
+
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
             } else {
-                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -410,7 +391,6 @@ void CGGetEventItemHandler::executeCombackPremiumItem(CGGetEventItem* pPacket, P
                 return;
             }
         } else {
-            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);
@@ -435,17 +415,17 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
     static int i = 0;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT UniqueID, RecvItemDate FROM Event200501Recommend WHERE PlayerID = '%s'",
-                                pGamePlayer->getID().c_str());
+        Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+        PreparedStatement selectEventRecommendStmt(
+            pConn, "SELECT UniqueID, RecvItemDate FROM Event200501Recommend WHERE PlayerID = ?");
+        selectEventRecommendStmt.bindString(1, pGamePlayer->getID());
+        Result* pResult = selectEventRecommendStmt.execute();
 
         if (pResult->next()) {
             int UniqueID = pResult->getInt(1);
             string RecvItemDate = pResult->getString(2);
 
             if (RecvItemDate == "0000-00-00") {
-                
                 Creature* pCreature = pGamePlayer->getCreature();
                 Assert(pCreature != NULL);
 
@@ -466,7 +446,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                 Grade_t iGrade = 6;
                 list<OptionType_t> optionType;
 
-                
+
                 i = i ^ 1;
                 if (i) {
                     optionType.push_back(50);  // DAM+3
@@ -476,7 +456,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                     optionType.push_back(184); // ATTR+2
                 }
 
-                
+
                 if (race == RACE_SLAYER) {
                     iClass = Item::ITEM_CLASS_RING;
                 } else if (race == RACE_VAMPIRE) {
@@ -487,7 +467,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                     Assert(false);
                 }
 
-                
+
                 if (level <= 30) {
                     iType = 3;
                 } else if (level <= 60) {
@@ -519,7 +499,7 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
 
                 pItem->setGrade(iGrade);
 
-                
+
                 _TPOINT tp;
                 if (!pInventory->getEmptySlot(pItem, tp)) {
                     SAFE_DELETE(pItem);
@@ -558,17 +538,18 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
 
                 pPlayer->sendPacket(&gcCI);
 
-                
-                pStmt->executeQuery("UPDATE Event200501Recommend SET RecvItemDate = now() WHERE UniqueID = '%d'",
-                                    UniqueID);
 
-                
+                PreparedStatement updateEventRecommendRecvDateStmt(
+                    pConn, "UPDATE Event200501Recommend SET RecvItemDate = now() WHERE UniqueID = ?");
+                updateEventRecommendRecvDateStmt.bindInt(1, UniqueID);
+                updateEventRecommendRecvDateStmt.execute();
+
+
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(YOU_GET_EVENT_ITEM);
                 pPlayer->sendPacket(&response);
             } else {
-                
                 GCNPCResponse response;
                 response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
                 response.setParameter(ALEADY_GET_EVENT_ITEM);
@@ -576,7 +557,6 @@ void CGGetEventItemHandler::executeCombackRecommendItem(CGGetEventItem* pPacket,
                 return;
             }
         } else {
-            
             GCNPCResponse response;
             response.setCode(NPC_RESPONSE_SHOW_COMMON_MESSAGE_DIALOG);
             response.setParameter(YOU_ARE_NOT_EVENT_TARGET);
