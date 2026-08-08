@@ -8,6 +8,7 @@
 
 #include "DB.h"
 #include "Guild.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "StringStream.h"
 
@@ -71,14 +72,14 @@ void GuildManager::init() noexcept(false) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
+        PreparedStatement countStmt(pConn, "SELECT COUNT(*) FROM GuildInfo");
+        Result* pResult = countStmt.execute();
 
         pResult->next();
 
@@ -87,51 +88,59 @@ void GuildManager::init() noexcept(false) {
                                  g_pConfig->getPropertyInt("WorldID") * 3000 + 100);
         } else {
             // get & set MaxGuildID
-            pResult = pStmt->executeQuery("SELECT MAX(GuildID) FROM GuildInfo");
+            PreparedStatement maxIdStmt(pConn, "SELECT MAX(GuildID) FROM GuildInfo");
+            pResult = maxIdStmt.execute();
             pResult->next();
             Guild::setMaxGuildID(pResult->getInt(1));
         }
 
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = %d", Guild::GUILD_RACE_SLAYER);
+        PreparedStatement slayerCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
+        slayerCountStmt.bindInt(1, Guild::GUILD_RACE_SLAYER);
+        pResult = slayerCountStmt.execute();
         pResult->next();
 
         if (pResult->getInt(1) == 0) {
             Guild::setMaxSlayerZoneID(Guild::getMaxSlayerZoneID() + 1);
         } else {
             // get & set MaxSlayerZoneID
-            pResult = pStmt->executeQuery("SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = %d",
-                                          Guild::GUILD_RACE_SLAYER);
+            PreparedStatement slayerZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
+            slayerZoneStmt.bindInt(1, Guild::GUILD_RACE_SLAYER);
+            pResult = slayerZoneStmt.execute();
             pResult->next();
             Guild::setMaxSlayerZoneID(max(pResult->getInt(1), Guild::getMaxSlayerZoneID() + 1));
         }
 
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = %d", Guild::GUILD_RACE_VAMPIRE);
+        PreparedStatement vampireCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
+        vampireCountStmt.bindInt(1, Guild::GUILD_RACE_VAMPIRE);
+        pResult = vampireCountStmt.execute();
         pResult->next();
 
         if (pResult->getInt(1) == 0) {
             Guild::setMaxVampireZoneID(Guild::getMaxVampireZoneID() + 1);
         } else {
             // get & set MaxVampireZoneID
-            pResult = pStmt->executeQuery("SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = %d",
-                                          Guild::GUILD_RACE_VAMPIRE);
+            PreparedStatement vampireZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
+            vampireZoneStmt.bindInt(1, Guild::GUILD_RACE_VAMPIRE);
+            pResult = vampireZoneStmt.execute();
             pResult->next();
             Guild::setMaxVampireZoneID(max(pResult->getInt(1), Guild::getMaxVampireZoneID() + 1));
         }
 
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = %d", Guild::GUILD_RACE_OUSTERS);
+        PreparedStatement oustersCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
+        oustersCountStmt.bindInt(1, Guild::GUILD_RACE_OUSTERS);
+        pResult = oustersCountStmt.execute();
         pResult->next();
 
         if (pResult->getInt(1) == 0) {
             Guild::setMaxOustersZoneID(Guild::getMaxOustersZoneID() + 1);
         } else {
             // get & set MaxOustersZoneID
-            pResult = pStmt->executeQuery("SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = %d",
-                                          Guild::GUILD_RACE_OUSTERS);
+            PreparedStatement oustersZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
+            oustersZoneStmt.bindInt(1, Guild::GUILD_RACE_OUSTERS);
+            pResult = oustersZoneStmt.execute();
             pResult->next();
             Guild::setMaxOustersZoneID(max(pResult->getInt(1), Guild::getMaxOustersZoneID() + 1));
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -149,15 +158,18 @@ void GuildManager::load() noexcept(false) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID, GuildName, GuildType, GuildRace, GuildState, ServerGroupID, "
-                                      "GuildZoneID, Master, Date, Intro FROM GuildInfo WHERE GuildState IN ( %d, %d )",
-                                      Guild::GUILD_STATE_WAIT, Guild::GUILD_STATE_ACTIVE);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement guildStmt(
+            pConn, "SELECT GuildID, GuildName, GuildType, GuildRace, GuildState, ServerGroupID, "
+                   "GuildZoneID, Master, Date, Intro FROM GuildInfo WHERE GuildState IN ( ?, ? )");
+        guildStmt.bindInt(1, Guild::GUILD_STATE_WAIT);
+        guildStmt.bindInt(2, Guild::GUILD_STATE_ACTIVE);
+        Result* pResult = guildStmt.execute();
 
         while (pResult->next()) {
             GuildState_t state = pResult->getInt(5);
@@ -181,9 +193,10 @@ void GuildManager::load() noexcept(false) {
             }
         }
 
-
-        pResult = pStmt->executeQuery(
+        PreparedStatement memberStmt(
+            pConn,
             "SELECT GuildID, Name, `Rank`, RequestDateTime, LogOn FROM GuildMember WHERE `Rank` IN ( 0, 1, 2, 3 )");
+        pResult = memberStmt.execute();
 
         while (pResult->next()) {
             GuildMember* pMember = new GuildMember();
@@ -202,8 +215,6 @@ void GuildManager::load() noexcept(false) {
             if (pGuild != NULL)
                 pGuild->addMember(pMember);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -302,20 +313,23 @@ void GuildManager::deleteGuild(GuildID_t id) noexcept(false) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
+        PreparedStatement deleteInfoStmt(pConn, "DELETE FROM GuildInfo WHERE GuildID=?");
+        deleteInfoStmt.bindInt(1, id);
+        deleteInfoStmt.execute();
 
-        pStmt->executeQuery("DELETE FROM GuildInfo WHERE GuildID=%d", id);
+        PreparedStatement deleteMemberStmt(pConn, "DELETE FROM GuildMember WHERE GuildID=?");
+        deleteMemberStmt.bindInt(1, id);
+        deleteMemberStmt.execute();
 
+        PreparedStatement deleteUnionMemberStmt(pConn, "DELETE FROM GuildUnionMember WHERE OwnerGuildID=?");
+        deleteUnionMemberStmt.bindInt(1, id);
+        deleteUnionMemberStmt.execute();
 
-        pStmt->executeQuery("DELETE FROM GuildMember WHERE GuildID=%d", id);
-
-
-        pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE OwnerGuildID=%d", id);
-
-        pStmt->executeQuery("UPDATE WarScheduleInfo SET Status='CANCEL' WHERE AttackGuildID=%d", id);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement cancelWarStmt(pConn, "UPDATE WarScheduleInfo SET Status='CANCEL' WHERE AttackGuildID=?");
+        cancelWarStmt.bindInt(1, id);
+        cancelWarStmt.execute();
     }
     END_DB(pStmt)
 #endif
@@ -542,8 +556,10 @@ bool GuildManager::hasCastle(GuildID_t guildID) noexcept(false) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT count(*) FROM CastleInfo WHERE GuildID = %d", (int)guildID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement castleStmt(pConn, "SELECT count(*) FROM CastleInfo WHERE GuildID = ?");
+        castleStmt.bindInt(1, (int)guildID);
+        Result* pResult = castleStmt.execute();
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
@@ -552,8 +568,6 @@ bool GuildManager::hasCastle(GuildID_t guildID) noexcept(false) {
                 bHasCastle = true;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -575,9 +589,10 @@ bool GuildManager::hasCastle(GuildID_t guildID, ServerID_t& serverID, ZoneID_t& 
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT ServerID, ZoneID FROM CastleInfo WHERE GuildID = %d", (int)guildID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement castleStmt(pConn, "SELECT ServerID, ZoneID FROM CastleInfo WHERE GuildID = ?");
+        castleStmt.bindInt(1, (int)guildID);
+        Result* pResult = castleStmt.execute();
 
         if (pResult->next()) {
             serverID = pResult->getInt(1);
@@ -585,8 +600,6 @@ bool GuildManager::hasCastle(GuildID_t guildID, ServerID_t& serverID, ZoneID_t& 
 
             bHasCastle = true;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -608,12 +621,17 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT count(*) FROM WarScheduleInfo WHERE "
-                                "(AttackGuildID = %d OR AttackGuildID2 = %d OR AttackGuildID3 = %d OR AttackGuildID4 = "
-                                "%d OR AttackGuildID5 = %d) AND Status in ('WAIT', 'START')",
-                                (int)guildID, (int)guildID, (int)guildID, (int)guildID, (int)guildID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement scheduleStmt(
+            pConn, "SELECT count(*) FROM WarScheduleInfo WHERE "
+                   "(AttackGuildID = ? OR AttackGuildID2 = ? OR AttackGuildID3 = ? OR AttackGuildID4 = "
+                   "? OR AttackGuildID5 = ?) AND Status in ('WAIT', 'START')");
+        scheduleStmt.bindInt(1, (int)guildID);
+        scheduleStmt.bindInt(2, (int)guildID);
+        scheduleStmt.bindInt(3, (int)guildID);
+        scheduleStmt.bindInt(4, (int)guildID);
+        scheduleStmt.bindInt(5, (int)guildID);
+        Result* pResult = scheduleStmt.execute();
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
@@ -623,11 +641,12 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
             }
         }
 
-        pResult = pStmt->executeQuery(
-            "SELECT count(*) FROM ReinforceRegisterInfo, WarScheduleInfo WHERE ReinforceRegisterInfo.WarID = "
-            "WarScheduleInfo.WarID AND WarScheduleInfo.Status in ('WAIT', 'START') AND "
-            "ReinforceRegisterInfo.ReinforceGuildID = %d AND ReinforceRegisterInfo.Status<>'DENY'",
-            (int)guildID);
+        PreparedStatement reinforceStmt(
+            pConn, "SELECT count(*) FROM ReinforceRegisterInfo, WarScheduleInfo WHERE ReinforceRegisterInfo.WarID = "
+                   "WarScheduleInfo.WarID AND WarScheduleInfo.Status in ('WAIT', 'START') AND "
+                   "ReinforceRegisterInfo.ReinforceGuildID = ? AND ReinforceRegisterInfo.Status<>'DENY'");
+        reinforceStmt.bindInt(1, (int)guildID);
+        pResult = reinforceStmt.execute();
 
         if (pResult->next()) {
             int count = pResult->getInt(1);
@@ -636,8 +655,6 @@ bool GuildManager::hasWarSchedule(GuildID_t guildID) noexcept(false) {
                 bHasWarSchedule = true;
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -662,10 +679,12 @@ bool GuildManager::hasActiveWar(GuildID_t guildID) noexcept(false) {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery(
-                "SELECT count(*) FROM WarScheduleInfo WHERE ServerID = %u AND ZoneID = %u AND Status = 'START'",
-                serverID, zoneID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement activeWarStmt(
+                pConn, "SELECT count(*) FROM WarScheduleInfo WHERE ServerID = ? AND ZoneID = ? AND Status = 'START'");
+            activeWarStmt.bindUInt(1, serverID);
+            activeWarStmt.bindUInt(2, zoneID);
+            Result* pResult = activeWarStmt.execute();
 
             if (pResult->next()) {
                 int count = pResult->getInt(1);
@@ -674,17 +693,17 @@ bool GuildManager::hasActiveWar(GuildID_t guildID) noexcept(false) {
                     bHasActiveWar = true;
                 }
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     } else {
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult = pStmt->executeQuery(
-                "SELECT count(*) FROM WarScheduleInfo WHERE AttackGuildID = %d AND Status = 'START'", (int)guildID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement activeWarStmt(
+                pConn, "SELECT count(*) FROM WarScheduleInfo WHERE AttackGuildID = ? AND Status = 'START'");
+            activeWarStmt.bindInt(1, (int)guildID);
+            Result* pResult = activeWarStmt.execute();
 
             if (pResult->next()) {
                 int count = pResult->getInt(1);
@@ -693,8 +712,6 @@ bool GuildManager::hasActiveWar(GuildID_t guildID) noexcept(false) {
                     bHasActiveWar = true;
                 }
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     }

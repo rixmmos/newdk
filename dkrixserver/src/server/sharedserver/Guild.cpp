@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include "DB.h"
+#include "PreparedStatement.h"
 #include "StringStream.h"
 
 #ifdef __SHARED_SERVER__
@@ -36,36 +37,53 @@ void GuildMember::create() noexcept(false) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID FROM GuildMember WHERE Name = '%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement checkStmt(pConn, "SELECT GuildID FROM GuildMember WHERE Name = ?");
+        checkStmt.bindString(1, m_Name);
+        Result* pResult = checkStmt.execute();
 
         if (pResult->getRowCount() != 0) {
-            
-            
+
+
             if (m_Rank == GUILDMEMBER_RANK_WAIT) {
-                pStmt->executeQuery("UPDATE GuildMember SET GuildID = %d, `Rank` = %d, ExpireDate = '', "
-                                    "RequestDateTime = '%s' WHERE Name = '%s'",
-                                    m_GuildID, m_Rank, getRequestDateTime().c_str(), m_Name.c_str());
+                PreparedStatement updateStmt(pConn,
+                                             "UPDATE GuildMember SET GuildID = ?, `Rank` = ?, ExpireDate = '', "
+                                             "RequestDateTime = ? WHERE Name = ?");
+                updateStmt.bindInt(1, m_GuildID);
+                updateStmt.bindInt(2, m_Rank);
+                updateStmt.bindString(3, getRequestDateTime());
+                updateStmt.bindString(4, m_Name);
+                updateStmt.execute();
             } else {
-                pStmt->executeQuery(
-                    "UPDATE GuildMember SET GuildID = %d, `Rank` = %d, ExpireDate = '' WHERE Name = '%s'", m_GuildID,
-                    m_Rank, m_Name.c_str());
+                PreparedStatement updateStmt(
+                    pConn, "UPDATE GuildMember SET GuildID = ?, `Rank` = ?, ExpireDate = '' WHERE Name = ?");
+                updateStmt.bindInt(1, m_GuildID);
+                updateStmt.bindInt(2, m_Rank);
+                updateStmt.bindString(3, m_Name);
+                updateStmt.execute();
             }
         } else {
             if (m_Rank == GUILDMEMBER_RANK_WAIT) {
-                pStmt->executeQuery(
-                    "INSERT INTO GuildMember( GuildID, Name, `Rank`, RequestDateTime ) VALUES ( %d, '%s', %d, '%s' )",
-                    m_GuildID, m_Name.c_str(), m_Rank, getRequestDateTime().c_str());
+                PreparedStatement insertStmt(
+                    pConn,
+                    "INSERT INTO GuildMember( GuildID, Name, `Rank`, RequestDateTime ) VALUES ( ?, ?, ?, ? )");
+                insertStmt.bindInt(1, m_GuildID);
+                insertStmt.bindString(2, m_Name);
+                insertStmt.bindInt(3, m_Rank);
+                insertStmt.bindString(4, getRequestDateTime());
+                insertStmt.execute();
             } else {
-                pStmt->executeQuery("INSERT INTO GuildMember( GuildID, Name, `Rank` ) VALUES ( %d, '%s', %d )",
-                                    m_GuildID, m_Name.c_str(), m_Rank);
+                PreparedStatement insertStmt(pConn,
+                                             "INSERT INTO GuildMember( GuildID, Name, `Rank` ) VALUES ( ?, ?, ? )");
+                insertStmt.bindInt(1, m_GuildID);
+                insertStmt.bindString(2, m_Name);
+                insertStmt.bindInt(3, m_Rank);
+                insertStmt.execute();
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -77,15 +95,15 @@ bool GuildMember::load() noexcept(false) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildID, Name, `Rank`, LogOn FROM GuildMember WHERE Name = '%s'",
-                                      m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement loadStmt(pConn, "SELECT GuildID, Name, `Rank`, LogOn FROM GuildMember WHERE Name = ?");
+        loadStmt.bindString(1, m_Name);
+        Result* pResult = loadStmt.execute();
 
         if (pResult->getRowCount() != 1) {
-            SAFE_DELETE(pStmt);
             return false;
         }
 
@@ -97,8 +115,6 @@ bool GuildMember::load() noexcept(false) {
         m_bLogOn = pResult->getInt(4);
 
         //		m_ServerID  = g_pConfig->getPropertyInt("ServerID");
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -114,12 +130,13 @@ void GuildMember::save() noexcept(false) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildMember SET GuildID = %d, `Rank` = %d WHERE Name = '%s'", m_GuildID, m_Rank,
-                            m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveStmt(pConn, "UPDATE GuildMember SET GuildID = ?, `Rank` = ? WHERE Name = ?");
+        saveStmt.bindInt(1, m_GuildID);
+        saveStmt.bindInt(2, m_Rank);
+        saveStmt.bindString(3, m_Name);
+        saveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -130,14 +147,14 @@ void GuildMember::save() noexcept(false) {
 void GuildMember::destroy() noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM GuildMember WHERE Name = '%s'", m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement destroyStmt(pConn, "DELETE FROM GuildMember WHERE Name = ?");
+        destroyStmt.bindString(1, m_Name);
+        destroyStmt.execute();
     }
     END_DB(pStmt)
 
@@ -147,22 +164,23 @@ void GuildMember::destroy() noexcept(false) {
 void GuildMember::expire() noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        
+
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
         char ExpireDate[8];
         sprintf(ExpireDate, "%03d%02d%02d", Timec.tm_year, Timec.tm_mon, Timec.tm_mday);
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildMember SET `Rank` = %d, ExpireDate = '%s' WHERE Name = '%s'",
-                            GUILDMEMBER_RANK_DENY, ExpireDate, m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement expireStmt(pConn, "UPDATE GuildMember SET `Rank` = ?, ExpireDate = ? WHERE Name = ?");
+        expireStmt.bindInt(1, GUILDMEMBER_RANK_DENY);
+        expireStmt.bindString(2, ExpireDate);
+        expireStmt.bindString(3, m_Name);
+        expireStmt.execute();
     }
     END_DB(pStmt)
 
@@ -172,22 +190,23 @@ void GuildMember::expire() noexcept(false) {
 void GuildMember::leave() noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
-        
+
         time_t daytime = time(0);
         tm Timec;
         localtime_r(&daytime, &Timec);
         char ExpireDate[8];
         sprintf(ExpireDate, "%03d%02d%02d", Timec.tm_year, Timec.tm_mon, Timec.tm_mday);
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildMember SET `Rank` = %d, ExpireDate = '%s' WHERE Name = '%s'",
-                            GUILDMEMBER_RANK_LEAVE, ExpireDate, m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement leaveStmt(pConn, "UPDATE GuildMember SET `Rank` = ?, ExpireDate = ? WHERE Name = ?");
+        leaveStmt.bindInt(1, GUILDMEMBER_RANK_LEAVE);
+        leaveStmt.bindString(2, ExpireDate);
+        leaveStmt.bindString(3, m_Name);
+        leaveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -198,17 +217,17 @@ void GuildMember::leave() noexcept(false) {
 void GuildMember::saveIntro(const string& intro) noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     string modifyIntro = Guild::correctString(intro);
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildMember SET Intro = '%s' WHERE Name = '%s'", modifyIntro.c_str(),
-                            m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveIntroStmt(pConn, "UPDATE GuildMember SET Intro = ? WHERE Name = ?");
+        saveIntroStmt.bindString(1, modifyIntro);
+        saveIntroStmt.bindString(2, m_Name);
+        saveIntroStmt.execute();
     }
     END_DB(pStmt)
 
@@ -219,20 +238,20 @@ void GuildMember::saveIntro(const string& intro) noexcept(false) {
 string GuildMember::getIntro() const noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
-    Result* pResult;
+    Statement* pStmt = NULL;
 
     string intro = "";
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Intro FROM GuildMember WHERE Name = '%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement getIntroStmt(pConn, "SELECT Intro FROM GuildMember WHERE Name = ?");
+        getIntroStmt.bindString(1, m_Name);
+        Result* pResult = getIntroStmt.execute();
 
         if (pResult->next()) {
             intro = pResult->getString(1);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -379,15 +398,22 @@ void Guild::create() noexcept(false) {
     string correctIntro = correctString(m_Intro);
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery(
-            "INSERT INTO GuildInfo ( GuildID, GuildName, GuildType, GuildRace, GuildState, ServerGroupID, GuildZoneID, "
-            "Master, Date, Intro ) VALUES ( %d, '%s', %d, %d, %d, %d, %d, '%s', '%s', '%s' )",
-            m_ID, m_Name.c_str(), m_Type, m_Race, m_State, m_ServerGroupID, m_ZoneID, m_Master.c_str(), m_Date.c_str(),
-            correctIntro.c_str());
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement createStmt(
+            pConn, "INSERT INTO GuildInfo ( GuildID, GuildName, GuildType, GuildRace, GuildState, ServerGroupID, "
+                   "GuildZoneID, Master, Date, Intro ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )");
+        createStmt.bindInt(1, m_ID);
+        createStmt.bindString(2, m_Name);
+        createStmt.bindInt(3, m_Type);
+        createStmt.bindInt(4, m_Race);
+        createStmt.bindInt(5, m_State);
+        createStmt.bindInt(6, m_ServerGroupID);
+        createStmt.bindInt(7, m_ZoneID);
+        createStmt.bindString(8, m_Master);
+        createStmt.bindString(9, m_Date);
+        createStmt.bindString(10, correctIntro);
+        createStmt.execute();
     }
     END_DB(pStmt)
 
@@ -401,18 +427,19 @@ bool Guild::load() noexcept(false) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT GuildName, GuildType, GuildRace, GuildState, ServerGroupID, GuildZoneID, "
-                                      "Master, Date FROM GuildInfo WHERE GuildID = %d",
-                                      m_ID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement loadStmt(pConn,
+                                   "SELECT GuildName, GuildType, GuildRace, GuildState, ServerGroupID, GuildZoneID, "
+                                   "Master, Date FROM GuildInfo WHERE GuildID = ?");
+        loadStmt.bindInt(1, m_ID);
+        Result* pResult = loadStmt.execute();
 
         if (pResult->getRowCount() != 1) {
-            SAFE_DELETE(pStmt);
             m_Mutex.unlock();
 
             return false;
@@ -428,8 +455,6 @@ bool Guild::load() noexcept(false) {
         m_ZoneID = pResult->getInt(6);
         m_Master = pResult->getString(7);
         m_Date = pResult->getString(8);
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -449,14 +474,21 @@ void Guild::save() noexcept(false) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildInfo SET GuildName = '%s', GuildType = %d, GuildRace = %d, GuildState = %d, "
-                            "ServerGroupID = %d, GuildZoneID = %d, Master = '%s', Date = '%s' WHERE GuildID = %d",
-                            m_Name.c_str(), m_Type, m_Race, m_State, m_ServerGroupID, m_ZoneID, m_Master.c_str(),
-                            m_Date.c_str(), m_ID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveStmt(
+            pConn, "UPDATE GuildInfo SET GuildName = ?, GuildType = ?, GuildRace = ?, GuildState = ?, "
+                   "ServerGroupID = ?, GuildZoneID = ?, Master = ?, Date = ? WHERE GuildID = ?");
+        saveStmt.bindString(1, m_Name);
+        saveStmt.bindInt(2, m_Type);
+        saveStmt.bindInt(3, m_Race);
+        saveStmt.bindInt(4, m_State);
+        saveStmt.bindInt(5, m_ServerGroupID);
+        saveStmt.bindInt(6, m_ZoneID);
+        saveStmt.bindString(7, m_Master);
+        saveStmt.bindString(8, m_Date);
+        saveStmt.bindInt(9, m_ID);
+        saveStmt.execute();
     }
     END_DB(pStmt)
 
@@ -474,12 +506,15 @@ void Guild::destroy() noexcept(false) {
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("DELETE FROM GuildInfo WHERE GuildID = %d", m_ID);
-        pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE OwnerGuildID = %d", m_ID);
+        PreparedStatement deleteInfoStmt(pConn, "DELETE FROM GuildInfo WHERE GuildID = ?");
+        deleteInfoStmt.bindInt(1, m_ID);
+        deleteInfoStmt.execute();
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement deleteUnionMemberStmt(pConn, "DELETE FROM GuildUnionMember WHERE OwnerGuildID = ?");
+        deleteUnionMemberStmt.bindInt(1, m_ID);
+        deleteUnionMemberStmt.execute();
     }
     END_DB(pStmt)
 
@@ -500,11 +535,12 @@ void Guild::saveIntro(const string& intro) noexcept(false) {
     string modifyIntro = Guild::correctString(intro);
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildInfo SET Intro = '%s' WHERE GuildID = %u", modifyIntro.c_str(), m_ID);
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveIntroStmt(pConn, "UPDATE GuildInfo SET Intro = ? WHERE GuildID = ?");
+        saveIntroStmt.bindString(1, modifyIntro);
+        saveIntroStmt.bindUInt(2, m_ID);
+        saveIntroStmt.execute();
     }
     END_DB(pStmt)
 
@@ -517,11 +553,18 @@ void Guild::tinysave(const char* field) const noexcept(false) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery("UPDATE GuildInfo SET %s WHERE GuildID = %u", field, m_ID);
-
-        SAFE_DELETE(pStmt);
+        // `field` is a caller-built "Column = value" SQL fragment (see
+        // GSModifyGuildMemberHandler.cpp, e.g. "Master='Name'"), not a
+        // single bindable value -- PreparedStatement has no way to
+        // parameterise an entire dynamic assignment list without changing
+        // tinysave()'s signature and every caller. Left spliced, same as
+        // the pre-existing (un-migrated) parked-line copy of this
+        // function; only the GuildID condition is bound.
+        PreparedStatement tinysaveStmt(pConn, "UPDATE GuildInfo SET " + string(field) + " WHERE GuildID = ?");
+        tinysaveStmt.bindUInt(1, m_ID);
+        tinysaveStmt.execute();
     }
     END_DB(pStmt)
 

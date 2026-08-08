@@ -13,6 +13,7 @@
 #include "PCFinder.h"
 #include "PacketUtil.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "VariableManager.h"
 GuildUnion::~GuildUnion() {
     // cout << "GuildUnion : DELETE!!!" << endl;
@@ -37,9 +38,11 @@ bool GuildUnion::addGuild(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO GuildUnionMember (UnionID, OwnerGuildID) VALUES (%u, %u)", m_UnionID, gID);
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement insertStmt(pConn, "INSERT INTO GuildUnionMember (UnionID, OwnerGuildID) VALUES (?, ?)");
+        insertStmt.bindUInt(1, m_UnionID);
+        insertStmt.bindUInt(2, gID);
+        insertStmt.execute();
     }
     END_DB(pStmt);
 
@@ -59,13 +62,14 @@ bool GuildUnion::removeGuild(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE UnionID = %u and OwnerGuildID = %u", m_UnionID, gID);
-        if (pStmt->getAffectedRowCount() < 1) {
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement deleteStmt(pConn, "DELETE FROM GuildUnionMember WHERE UnionID = ? and OwnerGuildID = ?");
+        deleteStmt.bindUInt(1, m_UnionID);
+        deleteStmt.bindUInt(2, gID);
+        deleteStmt.execute();
+        if (deleteStmt.getAffectedRowCount() < 1) {
             filelog("GuildUnion.log", "[%u:%u]    .", m_UnionID, gID);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -78,19 +82,23 @@ void GuildUnion::create() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("INSERT INTO GuildUnionInfo (MasterGuildID) VALUES (%u)", m_MasterGuildID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        m_UnionID = pStmt->getInsertID();
+        PreparedStatement insertUnionStmt(pConn, "INSERT INTO GuildUnionInfo (MasterGuildID) VALUES (?)");
+        insertUnionStmt.bindUInt(1, m_MasterGuildID);
+        insertUnionStmt.execute();
+
+        m_UnionID = insertUnionStmt.getInsertID();
 
         list<GuildID_t>::iterator itr = m_Guilds.begin();
 
         for (; itr != m_Guilds.end(); ++itr) {
-            pStmt->executeQuery("INSERT INTO GuildUnionMember (UnionID, OwnerGuildID) VALUES (%u, %u)", m_UnionID,
-                                (*itr));
+            PreparedStatement insertMemberStmt(pConn,
+                                               "INSERT INTO GuildUnionMember (UnionID, OwnerGuildID) VALUES (?, ?)");
+            insertMemberStmt.bindUInt(1, m_UnionID);
+            insertMemberStmt.bindUInt(2, (*itr));
+            insertMemberStmt.execute();
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -103,9 +111,15 @@ void GuildUnion::destroy() {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM GuildUnionInfo WHERE UnionID = %u", m_UnionID);
-        pStmt->executeQuery("DELETE FROM GuildUnionMember WHERE UnionID = %u", m_UnionID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        PreparedStatement deleteInfoStmt(pConn, "DELETE FROM GuildUnionInfo WHERE UnionID = ?");
+        deleteInfoStmt.bindUInt(1, m_UnionID);
+        deleteInfoStmt.execute();
+
+        PreparedStatement deleteMemberStmt(pConn, "DELETE FROM GuildUnionMember WHERE UnionID = ?");
+        deleteMemberStmt.bindUInt(1, m_UnionID);
+        deleteMemberStmt.execute();
     }
     END_DB(pStmt);
 
@@ -245,24 +259,24 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
     
 
     GuildUnion* pUnion = m_GuildUnionMap[gID];
-    
+
     if (pUnion != NULL) {
-        uint uID = pUnion->getUnionID(); 
+        uint uID = pUnion->getUnionID();
         Statement* pStmt = NULL;
 
         BEGIN_DB {
-            Result* pResult = NULL;
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult = pStmt->executeQuery("SELECT OwnerGuildID FROM GuildUnionMember WHERE UnionID = %u", uID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement memberStmt(pConn, "SELECT OwnerGuildID FROM GuildUnionMember WHERE UnionID = ?");
+            memberStmt.bindUInt(1, uID);
+            Result* pResult = memberStmt.execute();
 
-            
+
             if (pResult->getRowCount() == 0) {
-                SAFE_DELETE(pStmt);
                 return false;
             }
 
             string unionMasterID = g_pGuildManager->getGuild(gID)->getMaster();
-            
+
             while (pResult->next()) {
                 if (pUnion->removeGuild(pResult->getInt(1))) {
                     m_GuildUnionMap[gID] = NULL;
@@ -300,37 +314,42 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
             sendRefreshCommand();
         }
         END_DB(pStmt);
-    } else 
+    } else
     {
         Statement* pStmt = NULL;
-        Statement* pStmt2 = NULL;
 
         string unionMasterID = "";
         string guildMasterID = "";
         GuildID_t unionMasterGuildID = 0;
 
         BEGIN_DB {
-            Result* pResult = NULL;
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pResult =
-                pStmt->executeQuery("SELECT UnionID, OwnerGuildID FROM GuildUnionMember WHERE OwnerGuildID = %u", gID);
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+            PreparedStatement memberStmt(pConn,
+                                         "SELECT UnionID, OwnerGuildID FROM GuildUnionMember WHERE OwnerGuildID = ?");
+            memberStmt.bindUInt(1, gID);
+            Result* pResult = memberStmt.execute();
 
-            
+
             if (pResult->getRowCount() == 0) {
-                SAFE_DELETE(pStmt);
                 return false;
             }
 
-            
+
             pResult->next();
 
-            BEGIN_DB {
-                Result* pResult2 = NULL;
-                pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pResult2 = pStmt->executeQuery("SELECT MasterGuildID FROM GuildUnionInfo WHERE UnionID = %u",
-                                               pResult->getInt(1));
+            {
+                // NOTE: the pre-migration code here allocated a second
+                // Statement (pStmt2) but never actually executed a query
+                // on it -- the second SELECT ran through the outer
+                // statement's connection instead (pre-existing bug).
+                // Preserved as-is: this second query still executes on
+                // the same `pConn` rather than a distinct one, exactly
+                // matching what actually ran before.
+                PreparedStatement unionInfoStmt(pConn, "SELECT MasterGuildID FROM GuildUnionInfo WHERE UnionID = ?");
+                unionInfoStmt.bindUInt(1, pResult->getInt(1));
+                Result* pResult2 = unionInfoStmt.execute();
 
-                
+
                 if (pResult2->getRowCount() != 0) {
                     pResult->next();
 
@@ -338,7 +357,6 @@ bool GuildUnionManager::removeMasterGuild(GuildID_t gID) {
                     unionMasterID = g_pGuildManager->getGuild(unionMasterGuildID)->getMaster();
                 }
             }
-            END_DB(pStmt2);
 
             guildMasterID = g_pGuildManager->getGuild(gID)->getMaster();
 
@@ -442,8 +460,9 @@ void GuildUnionManager::load() {
     Statement* pStmt2 = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT UnionID, MasterGuildID FROM GuildUnionInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement unionStmt(pConn, "SELECT UnionID, MasterGuildID FROM GuildUnionInfo");
+        Result* pResult = unionStmt.execute();
 
         while (pResult->next()) {
             uint uID = pResult->getInt(1);
@@ -453,24 +472,20 @@ void GuildUnionManager::load() {
             pUnion->setUnionID(uID);
 
             BEGIN_DB {
-                pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                Result* pResult2 =
-                    pStmt2->executeQuery("SELECT OwnerGuildID FROM GuildUnionMember WHERE UnionID = %u", uID);
+                PreparedStatement memberStmt(pConn, "SELECT OwnerGuildID FROM GuildUnionMember WHERE UnionID = ?");
+                memberStmt.bindUInt(1, uID);
+                Result* pResult2 = memberStmt.execute();
 
                 while (pResult2->next()) {
                     GuildID_t gID2 = pResult2->getInt(1);
                     pUnion->m_Guilds.push_back(gID2);
                     //					pUnion->addGuild( gID2 );
                 }
-
-                SAFE_DELETE(pStmt2);
             }
             END_DB(pStmt2)
 
             addGuildUnion(pUnion);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -510,38 +525,42 @@ uint GuildUnionOfferManager::offerJoin(GuildID_t gID, GuildID_t masterGID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        
-        Result* pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildUnionOffer WHERE OfferType='ESCAPE' and "
-                                              "OwnerGuildID='%u' and OfferTime >= now() - interval 10 day",
-                                              gID);
+        PreparedStatement penaltyStmt(pConn,
+                                      "SELECT COUNT(*) FROM GuildUnionOffer WHERE OfferType='ESCAPE' and "
+                                      "OwnerGuildID=? and OfferTime >= now() - interval 10 day");
+        penaltyStmt.bindUInt(1, gID);
+        Result* pResult = penaltyStmt.execute();
 
         pResult->next();
 
-        
+
         if (pResult->getInt(1) > 0) {
-            SAFE_DELETE(pStmt);
             return YOU_HAVE_PENALTY;
         }
 
 
-        pResult = pStmt->executeQuery("SELECT COUNT(*) FROM GuildUnionMember WHERE UnionID='%u'", pUnion->getUnionID());
+        PreparedStatement slotStmt(pConn, "SELECT COUNT(*) FROM GuildUnionMember WHERE UnionID=?");
+        slotStmt.bindUInt(1, pUnion->getUnionID());
+        pResult = slotStmt.execute();
         pResult->next();
 
         if (pResult->getInt(1) >= g_pVariableManager->getVariable(GUILD_UNION_MAX)) {
-            SAFE_DELETE(pStmt);
             return NOT_ENOUGH_SLOT;
         }
 
-        
-        pStmt->executeQuery(
-            "DELETE FROM GuildUnionOffer WHERE OwnerGuildID='%u' and OfferTime < now() - interval 10 day", gID);
-        pStmt->executeQuery(
-            "INSERT INTO GuildUnionOffer (UnionID, OfferType, OwnerGuildID, OfferTime) VALUES (%u, 'JOIN', %u, now())",
-            pUnion->getUnionID(), gID);
 
-        SAFE_DELETE(pStmt);
+        PreparedStatement expireStmt(
+            pConn, "DELETE FROM GuildUnionOffer WHERE OwnerGuildID=? and OfferTime < now() - interval 10 day");
+        expireStmt.bindUInt(1, gID);
+        expireStmt.execute();
+
+        PreparedStatement offerStmt(
+            pConn, "INSERT INTO GuildUnionOffer (UnionID, OfferType, OwnerGuildID, OfferTime) VALUES (?, 'JOIN', ?, now())");
+        offerStmt.bindUInt(1, pUnion->getUnionID());
+        offerStmt.bindUInt(2, gID);
+        offerStmt.execute();
     }
     END_DB(pStmt)
 
@@ -568,12 +587,12 @@ uint GuildUnionOfferManager::offerQuit(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery(
-            "INSERT INTO GuildUnionOffer (UnionID, OfferType, OwnerGuildID, OfferTime) VALUES (%u, 'QUIT', %u, now())",
-            pUnion->getUnionID(), gID);
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(
+            pConn, "INSERT INTO GuildUnionOffer (UnionID, OfferType, OwnerGuildID, OfferTime) VALUES (?, 'QUIT', ?, now())");
+        offerStmt.bindUInt(1, pUnion->getUnionID());
+        offerStmt.bindUInt(2, gID);
+        offerStmt.execute();
     }
     END_DB(pStmt)
 
@@ -584,16 +603,16 @@ uint GuildUnionOfferManager::offerQuit(GuildID_t gID) {
 
 bool GuildUnionOfferManager::makeOfferList(uint uID, GCUnionOfferList& offerList) {
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT OfferType+0, OwnerGuildID, DATE_FORMAT(Offertime,'%%y%%m%%d') "
-                                              "FROM GuildUnionOffer WHERE UnionID=%u",
-                                              uID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(pConn,
+                                    "SELECT OfferType+0, OwnerGuildID, DATE_FORMAT(Offertime,'%y%m%d') "
+                                    "FROM GuildUnionOffer WHERE UnionID=?");
+        offerStmt.bindUInt(1, uID);
+        Result* pResult = offerStmt.execute();
 
 
-        
 
         if (pResult->getRowCount() == 0) {
             return false;
@@ -612,9 +631,9 @@ bool GuildUnionOfferManager::makeOfferList(uint uID, GCUnionOfferList& offerList
 
             // cout << "TYPE : " << (int)pResult->getInt(1) << endl;
 
-            pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            Result* pResult2 =
-                pStmt2->executeQuery("SELECT GuildName, Master FROM GuildInfo WHERE GuildID=%u", pResult->getInt(2));
+            PreparedStatement guildInfoStmt(pConn, "SELECT GuildName, Master FROM GuildInfo WHERE GuildID=?");
+            guildInfoStmt.bindUInt(1, pResult->getInt(2));
+            Result* pResult2 = guildInfoStmt.execute();
 
             if (pResult2->getRowCount() == 0) {
                 delete offer;
@@ -635,8 +654,6 @@ bool GuildUnionOfferManager::makeOfferList(uint uID, GCUnionOfferList& offerList
                 << endl;
              */
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -648,13 +665,13 @@ uint GuildUnionOfferManager::acceptJoin(GuildID_t gID) {
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Statement* pStmt2 = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt2 = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT UnionID FROM GuildUnionOffer WHERE OfferType='JOIN' AND OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(pConn,
+                                    "SELECT UnionID FROM GuildUnionOffer WHERE OfferType='JOIN' AND OwnerGuildID=?");
+        offerStmt.bindUInt(1, gID);
+        Result* pResult = offerStmt.execute();
 
         if (pResult->getRowCount() == 0)
             return NO_TARGET_UNION;
@@ -673,11 +690,12 @@ uint GuildUnionOfferManager::acceptJoin(GuildID_t gID) {
                 return NO_TARGET_UNION;
             }
 
-            Result* pResult2 = pStmt2->executeQuery("SELECT COUNT(*) FROM GuildUnionMember WHERE UnionID='%u'", uID);
+            PreparedStatement slotStmt(pConn, "SELECT COUNT(*) FROM GuildUnionMember WHERE UnionID=?");
+            slotStmt.bindUInt(1, uID);
+            Result* pResult2 = slotStmt.execute();
             pResult2->next();
 
             if (pResult2->getInt(1) >= g_pVariableManager->getVariable(GUILD_UNION_MAX)) {
-                SAFE_DELETE(pStmt2);
                 return NOT_ENOUGH_SLOT;
             }
 
@@ -698,9 +716,11 @@ uint GuildUnionOfferManager::acceptQuit(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT UnionID FROM GuildUnionOffer WHERE OfferType='QUIT' AND OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(pConn,
+                                    "SELECT UnionID FROM GuildUnionOffer WHERE OfferType='QUIT' AND OwnerGuildID=?");
+        offerStmt.bindUInt(1, gID);
+        Result* pResult = offerStmt.execute();
 
         if (pResult->next()) {
             clearOffer(gID);
@@ -736,9 +756,11 @@ uint GuildUnionOfferManager::denyJoin(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT UnionID FROM GuildUnionOffer WHERE OfferType='JOIN' AND OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(pConn,
+                                    "SELECT UnionID FROM GuildUnionOffer WHERE OfferType='JOIN' AND OwnerGuildID=?");
+        offerStmt.bindUInt(1, gID);
+        Result* pResult = offerStmt.execute();
 
         if (pResult->next()) {
             clearOffer(gID);
@@ -768,9 +790,11 @@ uint GuildUnionOfferManager::denyQuit(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult =
-            pStmt->executeQuery("SELECT UnionID FROM GuildUnionOffer WHERE OfferType='QUIT' AND OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement offerStmt(pConn,
+                                    "SELECT UnionID FROM GuildUnionOffer WHERE OfferType='QUIT' AND OwnerGuildID=?");
+        offerStmt.bindUInt(1, gID);
+        Result* pResult = offerStmt.execute();
 
         if (pResult->next()) {
             clearOffer(gID);
@@ -804,8 +828,10 @@ void GuildUnionOfferManager::clearOffer(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("DELETE FROM GuildUnionOffer WHERE OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement clearStmt(pConn, "DELETE FROM GuildUnionOffer WHERE OwnerGuildID=?");
+        clearStmt.bindUInt(1, gID);
+        clearStmt.execute();
     }
     END_DB(pStmt)
 
@@ -818,11 +844,12 @@ bool GuildUnionOfferManager::hasOffer(GuildID_t gID) {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT count(*) FROM GuildUnionOffer WHERE OwnerGuildID=%u", gID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement hasOfferStmt(pConn, "SELECT count(*) FROM GuildUnionOffer WHERE OwnerGuildID=?");
+        hasOfferStmt.bindUInt(1, gID);
+        Result* pResult = hasOfferStmt.execute();
         if (pResult->next()) {
             if (pResult->getInt(1) > 0) {
-                SAFE_DELETE(pStmt);
                 return true;
             }
         }

@@ -1599,6 +1599,74 @@ re-wrapped to match the established
 used in `CLDeletePCHandler.cpp`). CI is the real gate for this batch,
 same caveat as every prior one.
 
+**11.2 batches 3–5** landed across other parallel agent streams earlier
+(not written up individually in this section — see the
+verification-status boxes above and `git log` for the touched files,
+including batch 4's guild-formation/union packet-handler migration
+referenced from Phase 12's Wave 1 batch 2 write-up). Ratchet stood at
+**437** going into batch 6 above and batch 7 below (the two ran in
+parallel against the same 437 baseline, in disjoint files — batch 6's
+`CreatureUtil.cpp` vs. batch 7's five guild domain-class files — so
+their ratchet deltas stack: 437 → 404 (batch 6) → 352 (both, after
+merge; batch 7 alone would have read 437 → 385 had it landed first).
+
+**11.2 batch 7 (2026-08-08, agent stream):** the guild *domain-class*
+cluster — a different layer from batch 2's guild-membership packet
+handlers. All raw `Statement`/`executeQuery` call sites migrated to
+`PreparedStatement` in five files: `server/sharedserver/Guild.cpp`,
+`server/gameserver/Guild.cpp` (near-duplicate trees — `GuildMember`
+and `Guild` CRUD, both migrated identically), `server/gameserver/
+GuildUnion.cpp` (`GuildUnion`, `GuildUnionManager`,
+`GuildUnionOfferManager` — union create/destroy/offer/accept/deny),
+`server/sharedserver/GuildManager.cpp` and `server/gameserver/
+GuildManager.cpp` (`init`/`load`/`deleteGuild`/`hasCastle`/
+`hasWarSchedule`/`hasActiveWar`). **Ratchet 437 → 385** [measured],
+re-baselined via `--update` — exactly the 52 sites the ratchet's
+`--list` counted going in (14/14/14/5/5 per file). Went beyond the
+ratchet-visible count: every remaining `executeQuery` call in these
+five files was migrated too, including zero-placeholder queries
+(`SELECT COUNT(*) FROM GuildInfo`) and ones the ratchet's single-line
+grep missed because the SQL text has a `)` — from `COUNT(*)` or a
+column list — before the first placeholder (e.g. `GuildManager::init()`'s
+five `GuildRace = %d` counts). These files are now off the
+`Statement`/vsprintf path entirely rather than left with a mixed old/
+new API within the same `BEGIN_DB` block, matching batch 2's
+established precedent of migrating whole blocks together.
+
+Three non-mechanical judgment calls:
+- `Guild::tinysave(const char* field)` builds a full `"Column = value"`
+  SQL fragment in the caller (`GSModifyGuildMemberHandler.cpp`, e.g.
+  `Master='Name'`, out of this batch's file scope) — not a single
+  bindable value, and `PreparedStatement` cannot parameterise an
+  entire dynamic assignment list without changing the function's
+  signature and every caller. Left spliced into the SQL text with an
+  inline comment; only the `GuildID` condition is bound. The parked
+  line (`archive/modernization-phases-1-17`) never migrated this
+  call site either — checked directly, same raw form there.
+- `GuildUnionManager::removeMasterGuild()`'s `else` branch had a
+  pre-existing bug: it allocated a second `Statement` (`pStmt2`) but
+  never executed a query on it — the second `SELECT` actually ran
+  through the first statement's connection. Preserved as-is: the
+  migrated code drops the always-inert second `Statement` object (no
+  behavior it produced) but keeps the second query running on the
+  same `Connection*` as the first, exactly matching what the old code
+  actually executed.
+- `GuildUnionOfferManager::makeOfferList()`'s per-row `GuildInfo`
+  lookup previously reused one `Statement*` (`pStmt2`) across loop
+  iterations without deleting the prior one between iterations (a
+  leak). The migrated version declares the `PreparedStatement` inside
+  the loop body, so each iteration's object is destroyed via RAII at
+  scope exit — this incidentally closes the leak without changing any
+  query's SQL or result semantics.
+
+`DATE_FORMAT(Offertime,'%%y%%m%%d')` in the same function became
+`DATE_FORMAT(Offertime,'%y%m%d')` — the old code's `%%` was a
+vsprintf escape for a literal `%`; `PreparedStatement` sends the SQL
+text unmodified, so the single-`%` form is what MySQL now needs to see
+the same date-format directive it always received. **Compile gate:
+next server CI run [unverified]** — this sandbox has no server
+toolchain; landed after the last known-green run referenced above.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
