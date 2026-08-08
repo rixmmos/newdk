@@ -65,6 +65,7 @@
 #include "Party.h"
 #include "PaySystem.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Properties.h"
 #include "RegenZoneManager.h"
 #include "Relic.h"
@@ -2233,8 +2234,10 @@ void Zone::loadTriggeredPortal()
             zoneID = m_pDynamicZone->getTemplateZoneID();
         }
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT X1, Y1, X2, Y2 FROM ZoneTriggers WHERE ZoneID=%d", zoneID);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectZoneTriggersStmt(pConn, "SELECT X1, Y1, X2, Y2 FROM ZoneTriggers WHERE ZoneID=?");
+        selectZoneTriggersStmt.bindInt(1, zoneID);
+        pResult = selectZoneTriggersStmt.execute();
 
         while (pResult->next()) {
             int left = pResult->getInt(1);
@@ -2271,8 +2274,6 @@ void Zone::loadTriggeredPortal()
                 }
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -3038,9 +3039,11 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
             Result* pResult = NULL;
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pResult = pStmt->executeQuery("SELECT Message FROM Messages WHERE Receiver = '%s'",
-                                              pCreature->getName().c_str());
+                Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+                PreparedStatement selectMessagesStmt(pConn, "SELECT Message FROM Messages WHERE Receiver = ?");
+                selectMessagesStmt.bindString(1, pCreature->getName());
+                pResult = selectMessagesStmt.execute();
 
                 while (pResult->next()) {
                     GCSystemMessage message;
@@ -3048,9 +3051,9 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
                     pCreature->getPlayer()->sendPacket(&message);
                 }
 
-                pStmt->executeQuery("DELETE FROM Messages WHERE Receiver = '%s'", pCreature->getName().c_str());
-
-                SAFE_DELETE(pStmt);
+                PreparedStatement deleteMessagesStmt(pConn, "DELETE FROM Messages WHERE Receiver = ?");
+                deleteMessagesStmt.bindString(1, pCreature->getName());
+                deleteMessagesStmt.execute();
             }
             END_DB(pStmt)
 
@@ -3291,10 +3294,12 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
             Statement* pStmt = NULL;
             Result* pResult = NULL;
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getDistConnection("PLAYER_DB")->createStatement();
-                pResult = pStmt->executeQuery(
-                    "SELECT PlayerID FROM Event200501Main WHERE PlayerID = '%s' AND RecvItemDate = '0000-00-00'",
-                    pPC->getPlayer()->getID().c_str());
+                Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
+
+                PreparedStatement selectEvent200501MainStmt(
+                    pConn, "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND RecvItemDate = '0000-00-00'");
+                selectEvent200501MainStmt.bindString(1, pPC->getPlayer()->getID());
+                pResult = selectEvent200501MainStmt.execute();
 
                 if (pResult->next()) {
                     GCNPCResponse response;
@@ -3303,9 +3308,11 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
                     pPC->getPlayer()->sendPacket(&response);
                 }
 
-                pResult = pStmt->executeQuery("SELECT PlayerID FROM Event200501Main WHERE PlayerID = '%s' AND "
-                                              "PayPremiumDate <> '0000-00-00' AND RecvPremiumItemDate = '0000-00-00'",
-                                              pPC->getPlayer()->getID().c_str());
+                PreparedStatement selectEvent200501PremiumStmt(
+                    pConn, "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND "
+                           "PayPremiumDate <> '0000-00-00' AND RecvPremiumItemDate = '0000-00-00'");
+                selectEvent200501PremiumStmt.bindString(1, pPC->getPlayer()->getID());
+                pResult = selectEvent200501PremiumStmt.execute();
 
                 if (pResult->next()) {
                     GCNPCResponse response;
@@ -3314,9 +3321,11 @@ void Zone::addPC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir)
                     pPC->getPlayer()->sendPacket(&response);
                 }
 
-                pResult = pStmt->executeQuery(
-                    "SELECT PlayerID FROM Event200501Recommend WHERE PlayerID = '%s' AND RecvItemDate = '0000-00-00'",
-                    pPC->getPlayer()->getID().c_str());
+                PreparedStatement selectEvent200501RecommendStmt(
+                    pConn,
+                    "SELECT PlayerID FROM Event200501Recommend WHERE PlayerID = ? AND RecvItemDate = '0000-00-00'");
+                selectEvent200501RecommendStmt.bindString(1, pPC->getPlayer()->getID());
+                pResult = selectEvent200501RecommendStmt.execute();
 
                 if (pResult->next()) {
                     GCNPCResponse response;
@@ -8489,13 +8498,15 @@ void Zone::loadEffect()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         ///////////////////////////////////////////////////////////////////////////////
-        
+
         ///////////////////////////////////////////////////////////////////////////////
-        pResult = pStmt->executeQuery("SELECT LeftX, TopY, RightX, BottomY FROM EffectPKZoneRegen WHERE ZoneID=%u",
-                                      getZoneID());
+        PreparedStatement selectEffectPKZoneRegenStmt(
+            pConn, "SELECT LeftX, TopY, RightX, BottomY FROM EffectPKZoneRegen WHERE ZoneID=?");
+        selectEffectPKZoneRegenStmt.bindUInt(1, getZoneID());
+        pResult = selectEffectPKZoneRegenStmt.execute();
 
         while (pResult->next()) {
             int count = 0;
@@ -8518,11 +8529,14 @@ void Zone::loadEffect()
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        
-        
+
+
         ///////////////////////////////////////////////////////////////////////////////
-        pResult = pStmt->executeQuery("SELECT X, Y FROM WayPointInfo WHERE ZoneID = %u AND Race = %d", getZoneID(),
-                                      RACE_OUSTERS);
+        PreparedStatement selectWayPointInfoStmt(pConn,
+                                                  "SELECT X, Y FROM WayPointInfo WHERE ZoneID = ? AND Race = ?");
+        selectWayPointInfoStmt.bindUInt(1, getZoneID());
+        selectWayPointInfoStmt.bindInt(2, RACE_OUSTERS);
+        pResult = selectWayPointInfoStmt.execute();
 
         while (pResult->next()) {
             ZoneCoord_t X = pResult->getInt(1);
@@ -8539,8 +8553,6 @@ void Zone::loadEffect()
                 addEffect(pEffect);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

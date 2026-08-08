@@ -20,6 +20,7 @@
 #include "PacketUtil.h"
 #include "Party.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Shape.h"
 #include "SkillInfo.h"
 #include "SkillParentInfo.h"
@@ -466,17 +467,20 @@ bool Ousters::load()
     Result* pResult = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT Name, AdvancementClass, AdvancementGoalExp, Sex,MasterEffectColor,\
-			STR, DEX, INTE, HP, CurrentHP, MP, CurrentMP, Fame, \
-			GoalExp, Level, Bonus, SkillBonus, Gold, GuildID, \
-			ZoneID, XCoord, YCoord, Sight, Alignment,\
-			StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, SilverDamage, SMSCharge,\
-			`Rank`, RankGoalExp, HairColor FROM Ousters WHERE Name = '%s' AND Active = 'ACTIVE'",
-                                      m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement loadOustersStmt(pConn,
+                                           "SELECT Name, AdvancementClass, AdvancementGoalExp, Sex,MasterEffectColor,"
+                                           "STR, DEX, INTE, HP, CurrentHP, MP, CurrentMP, Fame, "
+                                           "GoalExp, Level, Bonus, SkillBonus, Gold, GuildID, "
+                                           "ZoneID, XCoord, YCoord, Sight, Alignment,"
+                                           "StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, "
+                                           "SilverDamage, SMSCharge,"
+                                           "`Rank`, RankGoalExp, HairColor FROM Ousters WHERE Name = ? AND "
+                                           "Active = 'ACTIVE'");
+        loadOustersStmt.bindString(1, m_Name);
+        pResult = loadOustersStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            SAFE_DELETE(pStmt);
             return false;
         }
 
@@ -577,8 +581,6 @@ bool Ousters::load()
             setX(ResurrectCoord.x);
             setY(ResurrectCoord.y);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -595,10 +597,12 @@ bool Ousters::load()
     //----------------------------------------------------------------------
     //----------------------------------------------------------------------
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT SkillType, SkillLevel, Delay, CastingTime, NextTime FROM OustersSkillSave WHERE OwnerID = '%s'",
-            m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectOustersSkillSaveStmt(
+            pConn,
+            "SELECT SkillType, SkillLevel, Delay, CastingTime, NextTime FROM OustersSkillSave WHERE OwnerID = ?");
+        selectOustersSkillSaveStmt.bindString(1, m_Name);
+        pResult = selectOustersSkillSaveStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -617,8 +621,6 @@ bool Ousters::load()
                 addSkill(pOustersSkillSlot);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -716,23 +718,28 @@ void Ousters::save() const
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     //--------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------
     BEGIN_DB {
-        StringStream sql;
-        sql << "UPDATE Ousters SET"
-            << " CurrentHP = " << (int)m_HP[ATTR_CURRENT] << ", HP = " << (int)m_HP[ATTR_MAX]
-            << ", CurrentMP = " << (int)m_MP[ATTR_CURRENT] << ", MP = " << (int)m_MP[ATTR_MAX]
-            << ", ZoneID = " << (int)getZoneID() << ", XCoord = " << (int)m_X << ", YCoord = " << (int)m_Y
-            << " WHERE Name = '" << m_Name << "'";
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-        pStmt->executeQueryString(sql.toString());
-
-        SAFE_DELETE(pStmt);
+        // Was built via StringStream + executeQueryString, splicing m_Name
+        // straight into the WHERE clause with no escaping. Migrated to bound
+        // parameters; same columns as before.
+        PreparedStatement saveOustersStmt(pConn,
+                                           "UPDATE Ousters SET CurrentHP=?, HP=?, CurrentMP=?, MP=?, ZoneID=?, "
+                                           "XCoord=?, YCoord=? WHERE Name=?");
+        saveOustersStmt.bindInt(1, (int)m_HP[ATTR_CURRENT]);
+        saveOustersStmt.bindInt(2, (int)m_HP[ATTR_MAX]);
+        saveOustersStmt.bindInt(3, (int)m_MP[ATTR_CURRENT]);
+        saveOustersStmt.bindInt(4, (int)m_MP[ATTR_MAX]);
+        saveOustersStmt.bindInt(5, (int)getZoneID());
+        saveOustersStmt.bindInt(6, (int)m_X);
+        saveOustersStmt.bindInt(7, (int)m_Y);
+        saveOustersStmt.bindString(8, m_Name);
+        saveOustersStmt.execute();
     }
     END_DB(pStmt)
 
@@ -755,9 +762,14 @@ void Ousters::tinysave(const string& field) // by sigi. 2002.5.15
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Ousters SET %s WHERE Name='%s'", field.c_str(), m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment, not a single
+        // bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Guild::tinysave
+        // precedent (batch 7). Only Name is bound.
+        PreparedStatement tinysaveOustersStmt(pConn, "UPDATE Ousters SET " + field + " WHERE Name=?");
+        tinysaveOustersStmt.bindString(1, m_Name);
+        tinysaveOustersStmt.execute();
     }
     END_DB(pStmt)
 
@@ -1975,9 +1987,11 @@ void Ousters::increaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Ousters SET Gold=Gold+%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement increaseGoldStmt(pConn, "UPDATE Ousters SET Gold=Gold+? WHERE NAME=?");
+        increaseGoldStmt.bindUInt(1, gold);
+        increaseGoldStmt.bindString(2, m_Name);
+        increaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2001,9 +2015,11 @@ void Ousters::decreaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Ousters SET Gold=Gold-%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement decreaseGoldStmt(pConn, "UPDATE Ousters SET Gold=Gold-? WHERE NAME=?");
+        decreaseGoldStmt.bindUInt(1, gold);
+        decreaseGoldStmt.bindString(2, m_Name);
+        decreaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2033,14 +2049,14 @@ bool Ousters::checkGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT Gold FROM Ousters WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectGoldStmt(pConn, "SELECT Gold FROM Ousters WHERE NAME=?");
+        selectGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_Gold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2056,14 +2072,14 @@ bool Ousters::checkStashGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT StashGold FROM Ousters WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStashGoldStmt(pConn, "SELECT StashGold FROM Ousters WHERE NAME=?");
+        selectStashGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectStashGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_StashGold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2295,13 +2311,21 @@ void Ousters::saveExps(void) const
         else silverDam[0]='\0'; */
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Ousters SET Alignment=%d, Fame=%d, GoalExp=%lu, SilverDamage = %d, `Rank`=%d, "
-                            "RankGoalExp=%lu, AdvancementClass=%u, AdvancementGoalExp=%d WHERE Name='%s'",
-                            m_Alignment, m_Fame, m_GoalExp, m_SilverDamage, getRank(), getRankGoalExp(),
-                            getAdvancementClassLevel(), getAdvancementClassGoalExp(), m_Name.c_str());
-
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement saveExpsOustersStmt(pConn,
+                                               "UPDATE Ousters SET Alignment=?, Fame=?, GoalExp=?, SilverDamage=?, "
+                                               "`Rank`=?, RankGoalExp=?, AdvancementClass=?, AdvancementGoalExp=? "
+                                               "WHERE Name=?");
+        saveExpsOustersStmt.bindInt(1, m_Alignment);
+        saveExpsOustersStmt.bindInt(2, m_Fame);
+        saveExpsOustersStmt.bindULong(3, m_GoalExp);
+        saveExpsOustersStmt.bindInt(4, m_SilverDamage);
+        saveExpsOustersStmt.bindInt(5, getRank());
+        saveExpsOustersStmt.bindULong(6, getRankGoalExp());
+        saveExpsOustersStmt.bindUInt(7, getAdvancementClassLevel());
+        saveExpsOustersStmt.bindInt(8, getAdvancementClassGoalExp());
+        saveExpsOustersStmt.bindString(9, m_Name);
+        saveExpsOustersStmt.execute();
     }
     END_DB(pStmt)
 

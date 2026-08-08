@@ -1701,6 +1701,105 @@ the same date-format directive it always received. **Compile gate:
 next server CI run [unverified]** — this sandbox has no server
 toolchain; landed after the last known-green run referenced above.
 
+**11.2 batch 9 (2026-08-09, agent stream):** the three playable-race
+classes plus zone loading — five files: `server/gameserver/Slayer.cpp`,
+`server/gameserver/Vampire.cpp`, `server/gameserver/Ousters.cpp`,
+`server/gameserver/Zone.cpp`, `server/gameserver/ZoneGroupManager.cpp`.
+Ran against the same 352 baseline batch 7 left behind. **Ratchet 352 →
+326** [measured], re-baselined via `--update` — 26 of the 29 sites the
+ratchet's `--list` counted going in (7/6/6/6/4 per file, matching all
+five files' pre-migration `--list` output exactly); the other 3 are
+dead code inside `/* */` or `//` comments, see below. Went well beyond
+the ratchet-visible count, same as every prior batch: 39 live call
+sites were migrated in total, of which the ratchet could only ever see
+26 — 13 more were invisible to its single-line grep (3 each in
+Slayer.cpp/Vampire.cpp/Ousters.cpp, 2 in Zone.cpp, 2 in
+ZoneGroupManager.cpp), all migrated alongside the counted ones rather
+than left inconsistent within the same function. Two invisibility
+modes not seen in prior batches: `ZoneGroupManager::load()`'s and
+`makeDefaultLoadInfo()`'s `SELECT ZoneGroupID FROM ZoneGroupInfo[
+ORDER BY ZoneGroupID]` queries take no parameters at all, so they never
+had a `%`-placeholder for the grep to match (same category as batch
+7's zero-placeholder `COUNT(*)` queries). `Vampire::save()` and
+`Ousters::save()` went further still: both built their `UPDATE` via
+`StringStream` + `executeQueryString`, splicing `m_Name` straight into
+the `WHERE` clause with no escaping and no `%`-format placeholder
+anywhere in the call, so the ratchet's grep never had anything to
+match. Both are now bound parameters over the same columns that were
+ever live (`CurrentHP`/`HP`/`SilverDamage`/`ZoneID`/`XCoord`/`YCoord`/
+`Name` for Vampire; Ousters additionally has `CurrentMP`/`MP`), with
+the commented-out dead columns (`BatColor`, `Fame`, `Sight`, `F5`-
+`F12`, `InMagics`, etc. — Vampire only) preserved as an explanatory
+comment rather than as inert `<<` chains that no longer have a
+`StringStream` to chain onto. Both functions' `Statement* pStmt;` was
+also declared without `= NULL`, unlike every other function in these
+files — a latent bug (`END_DB`'s `delete STMT` on an indeterminate
+pointer if a `SQLQueryException` hit before the old
+`pStmt = createStatement()` assignment ran) that removing that
+assignment would have turned from theoretical into guaranteed. Fixed
+by initializing both to `= NULL`, matching the pattern everywhere else
+in these files; not a gameplay-behavior change.
+
+Three non-mechanical judgment calls, all consistent with established
+precedent:
+- `Slayer::tinysave`/`Vampire::tinysave`/`Ousters::tinysave` each take
+  a caller-built `"Column=value"` fragment (e.g. `saveSilverDamage`'s
+  `sprintf(pField, "SilverDamage=%d", ...)`) — not a single bindable
+  value, matching the `Guild::tinysave` precedent from batch 7
+  exactly. Left spliced into the SQL text with an inline comment; only
+  `Name` is bound.
+- `Vampire::saveExps()` conditionally appended a `,SilverDamage = %d`
+  fragment via a `sprintf`'d `char[40]` spliced through a `%s`
+  placeholder — a fragment that changes the statement's shape, not a
+  value. Hoisted to two static, fully-parameterised query texts
+  (with/without the `SilverDamage` column) selected by the same
+  `if (m_SilverDamage != 0)` branch the old code used, rather than
+  splicing the fragment. `Ousters::saveExps()` has the identical
+  pattern in a `/* */` comment but the live code always includes
+  `SilverDamage` unconditionally, so no branch was needed there.
+- `ZoneGroupManager::load()`/`makeDefaultLoadInfo()` each carry one
+  dead `// Result* pResult = pStmt->executeQuery(...)` comment
+  immediately above the live query it once was — the ratchet's grep
+  still matches both (they contain the pre-migration `%d` form), so 2
+  of the 4 counted sites in this file are inert. Left untouched,
+  matching the `CreatureUtil.cpp`/`CLDeletePCHandler.cpp` precedent of
+  preserving dead-comment SQL verbatim; `Slayer.cpp` had a fourth case
+  of the same thing — a `/* if (reward != 0) { ... } */` block
+  (`Reward = 0` UPDATE, `Slayer.cpp`) that has been fully commented out
+  since before this batch, contributing 1 of its own 7 ratchet-counted
+  sites without being live code. `Vampire.cpp` has the equivalent
+  `/* if (reward != 0) { ... } */` block too, but its `executeQuery`
+  call was never in `%`-placeholder form (`SQL.toString()` after a
+  `StringStream`), so it was already invisible to the ratchet and
+  isn't part of the 26-site delta.
+
+Every other value in these five files — every `m_Name`/`field.c_str()`
+target, `gold`, `zoneID`, `getRank()`/`getRankGoalExp()`, the
+`Alignment`/`Fame`/`GoalExp`/`AdvancementClass`/`Advanced{STR,DEX,INT}`
+stat family, `pCreature->getName()`, `pPC->getPlayer()->getID()`, and
+`RACE_OUSTERS` — is bound as a parameter (`bindString`/`bindInt`/
+`bindUInt`/`bindLong`/`bindULong`), with the bind type chosen to match
+each site's original `printf` format specifier (`%d`→`bindInt`,
+`%u`→`bindUInt`, `%ld`→`bindLong`, `%lu`→`bindULong`, `%s`→
+`bindString`) rather than the C++ declared type of the value, since
+several of these fields (e.g. `Fame_t`/`Exp_t` as `DWORD`) were already
+being passed to a differently-signed format specifier before this
+batch touched them — a pre-existing quirk of the vsprintf-based
+`Statement::executeQuery`, preserved rather than fixed. No `Statement`/
+`executeQuery`/`executeQueryString` call sites remain live in any of
+the five files; `--list` still shows the 3 dead-comment lines above.
+**Not compile-verified** — no server toolchain in this sandbox;
+verified by reading only (bind-index-to-`?`-order correspondence
+checked for every statement, `?` count matches bind count matches
+original printf-arg count for every site, file-wide brace/paren
+balance checked programmatically against each file's pre-edit count,
+`.clang-format`'s 120-column limit checked). CI is the real gate for
+this batch, same caveat as every prior one. Ran in parallel with
+another Phase 11.2 stream against the same 352 baseline in disjoint
+files (per this batch's task brief); the two deltas stack the same way
+batches 6/7 did, and whoever merges both is responsible for
+reconciling the final combined baseline number.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,

@@ -19,6 +19,7 @@
 #include "PacketUtil.h"
 #include "Party.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Shape.h"
 #include "SkillInfo.h"
 #include "SkillParentInfo.h"
@@ -503,23 +504,25 @@ bool Vampire::load()
     int reward = 0;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         // add by Sonic 2006.10.28
-        pResult = pStmt->executeQuery("SELECT Name, AdvancementClass, AdvancementGoalExp, Sex, \
-			MasterEffectColor, \
-			BatColor, SkinColor,\
-			STR, DEX, INTE, HP, CurrentHP, Fame,\
-			GoalExp, Level, Bonus, Gold, GuildID,\
-			ZoneID, XCoord, YCoord, Sight, Alignment,\
-			StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, SilverDamage, Reward, SMSCharge,\
-			`Rank`, RankGoalExp FROM Vampire WHERE Name = '%s' AND Active = 'ACTIVE'",
-                                      m_Name.c_str());
+        PreparedStatement loadVampireStmt(pConn,
+                                           "SELECT Name, AdvancementClass, AdvancementGoalExp, Sex, "
+                                           "MasterEffectColor, "
+                                           "BatColor, SkinColor,"
+                                           "STR, DEX, INTE, HP, CurrentHP, Fame,"
+                                           "GoalExp, Level, Bonus, Gold, GuildID,"
+                                           "ZoneID, XCoord, YCoord, Sight, Alignment,"
+                                           "StashGold, StashNum, Competence, CompetenceShape, ResurrectZone, "
+                                           "SilverDamage, Reward, SMSCharge,"
+                                           "`Rank`, RankGoalExp FROM Vampire WHERE Name = ? AND Active = 'ACTIVE'");
+        loadVampireStmt.bindString(1, m_Name);
+        pResult = loadVampireStmt.execute();
         // end by Sonic
 
         if (pResult->getRowCount() == 0) {
-            
-            
-            SAFE_DELETE(pStmt);
+
+
             return false;
         }
 
@@ -629,8 +632,6 @@ bool Vampire::load()
             setX(ResurrectCoord.x);
             setY(ResurrectCoord.y);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -683,10 +684,11 @@ bool Vampire::load()
     
     //----------------------------------------------------------------------
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT SkillType, Delay, CastingTime, NextTime FROM VampireSkillSave WHERE OwnerID = '%s'",
-            m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectVampireSkillSaveStmt(
+            pConn, "SELECT SkillType, Delay, CastingTime, NextTime FROM VampireSkillSave WHERE OwnerID = ?");
+        selectVampireSkillSaveStmt.bindString(1, m_Name);
+        pResult = selectVampireSkillSaveStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -705,8 +707,6 @@ bool Vampire::load()
                 addSkill(pVampireSkillSlot);
             }
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -795,50 +795,34 @@ void Vampire::save() const
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
-    Statement* pStmt;
+    Statement* pStmt = NULL;
 
     //--------------------------------------------------------------------------------
     
     //--------------------------------------------------------------------------------
     BEGIN_DB {
-        StringStream sql;
-        sql << "UPDATE Vampire SET"
-            //<< " BatColor = " << (int)m_BatColor
-            //<< ", SkinColor = " << (int)m_SkinColor
-            //<< ", STR = " << (int)m_STR[ATTR_MAX]
-            //<< ", DEX = " << (int)m_DEX[ATTR_MAX]
-            //<< ", INTE = " << (int)m_INT[ATTR_MAX]
-            << " CurrentHP = " << (int)m_HP[ATTR_CURRENT] << ", HP = " << (int)m_HP[ATTR_MAX] << ", SilverDamage = "
-            << (int)m_SilverDamage
-            //<< ", Fame = " << (int)m_Fame
-            //<< ", Exp = " << (int)m_Exp
-            //<< ", ExpOffset = " << (int)m_ExpOffset
-            //<< ", Rank = " << (int)m_Rank
-            //<< ", RankExp = " << (int)m_RankExp
-            //<< ", Level = " << (int)m_Level
-            //<< ", Bonus = " << (int)m_Bonus
-            //<< ", Gold = " << (int)m_Gold
-            << ", ZoneID = " << (int)getZoneID() << ", XCoord = " << (int)m_X << ", YCoord = "
-            << (int)m_Y
-            //<< ", Sight = " << (int)m_Sight
-            //			<< ", F5 = " << (int)m_HotKey[0]
-            //			<< ", F6 = " << (int)m_HotKey[1]
-            //			<< ", F7 = " << (int)m_HotKey[2]
-            //			<< ", F8 = " << (int)m_HotKey[3]
-            //			<< ", F9 = " << (int)m_HotKey[4]
-            //			<< ", F10 = " << (int)m_HotKey[5]
-            //			<< ", F11 = " << (int)m_HotKey[6]
-            //			<< ", F12 = " << (int)m_HotKey[7]
-            << " WHERE Name = '" << m_Name << "'";
-        //<< ", InMagics = '" << ??? << "'"
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        // Was built via StringStream + executeQueryString, splicing m_Name
+        // straight into the WHERE clause with no escaping. Migrated to bound
+        // parameters. Only CurrentHP/HP/SilverDamage/ZoneID/XCoord/YCoord/Name
+        // were ever live here; BatColor, SkinColor, STR, DEX, INTE, Fame, Exp,
+        // ExpOffset, Rank, RankExp, Level, Bonus, Gold, Sight, F5-F12, and
+        // InMagics were already commented out / never wired up in the old
+        // StringStream chain (dead, preserved as history in this comment).
+        PreparedStatement saveVampireStmt(pConn,
+                                           "UPDATE Vampire SET CurrentHP=?, HP=?, SilverDamage=?, ZoneID=?, "
+                                           "XCoord=?, YCoord=? WHERE Name=?");
+        saveVampireStmt.bindInt(1, (int)m_HP[ATTR_CURRENT]);
+        saveVampireStmt.bindInt(2, (int)m_HP[ATTR_MAX]);
+        saveVampireStmt.bindInt(3, (int)m_SilverDamage);
+        saveVampireStmt.bindInt(4, (int)getZoneID());
+        saveVampireStmt.bindInt(5, (int)m_X);
+        saveVampireStmt.bindInt(6, (int)m_Y);
+        saveVampireStmt.bindString(7, m_Name);
+        saveVampireStmt.execute();
 
-        pStmt->executeQueryString(sql.toString());
-
-        // Assert(pStmt->getAffectedRowCount() != 1);
-
-        SAFE_DELETE(pStmt);
+        // Assert(saveVampireStmt.getAffectedRowCount() != 1);
     }
     END_DB(pStmt)
 
@@ -865,9 +849,14 @@ void Vampire::tinysave(const string& field) // by sigi. 2002.5.15
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET %s WHERE Name='%s'", field.c_str(), m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment, not a single
+        // bindable value; PreparedStatement cannot parameterise an entire
+        // dynamic assignment list. Left spliced, matching the Guild::tinysave
+        // precedent (batch 7). Only Name is bound.
+        PreparedStatement tinysaveVampireStmt(pConn, "UPDATE Vampire SET " + field + " WHERE Name=?");
+        tinysaveVampireStmt.bindString(1, m_Name);
+        tinysaveVampireStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2060,9 +2049,11 @@ void Vampire::increaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET Gold=Gold+%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement increaseGoldStmt(pConn, "UPDATE Vampire SET Gold=Gold+? WHERE NAME=?");
+        increaseGoldStmt.bindUInt(1, gold);
+        increaseGoldStmt.bindString(2, m_Name);
+        increaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2087,9 +2078,11 @@ void Vampire::decreaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET Gold=Gold-%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement decreaseGoldStmt(pConn, "UPDATE Vampire SET Gold=Gold-? WHERE NAME=?");
+        decreaseGoldStmt.bindUInt(1, gold);
+        decreaseGoldStmt.bindString(2, m_Name);
+        decreaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2104,14 +2097,14 @@ bool Vampire::checkGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT Gold FROM Vampire WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectGoldStmt(pConn, "SELECT Gold FROM Vampire WHERE NAME=?");
+        selectGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_Gold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2127,14 +2120,14 @@ bool Vampire::checkStashGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT StashGold FROM Vampire WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStashGoldStmt(pConn, "SELECT StashGold FROM Vampire WHERE NAME=?");
+        selectStashGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectStashGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_StashGold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2445,20 +2438,44 @@ void Vampire::saveExps(void) const
 
     Statement* pStmt = NULL;
 
-    char silverDam[40];
-    if (m_SilverDamage != 0) {
-        sprintf(silverDam, ",SilverDamage = %d", m_SilverDamage);
-    } else
-        silverDam[0] = '\0';
-
+    // The old code built the SilverDamage clause as a raw sprintf'd SQL
+    // fragment (",SilverDamage = %d" or "") spliced into the middle of the
+    // SET list via %s. PreparedStatement can't bind a fragment that changes
+    // the statement's shape, so the conditional is hoisted to two static,
+    // fully-parameterised query texts instead of splicing the value in.
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Vampire SET Alignment=%d, Fame=%d, GoalExp=%lu%s, `Rank`=%d, RankGoalExp=%lu, "
-                            "AdvancementClass=%u, AdvancementGoalExp=%d WHERE Name='%s'",
-                            m_Alignment, m_Fame, m_GoalExp, silverDam, getRank(), getRankGoalExp(),
-                            getAdvancementClassLevel(), getAdvancementClassGoalExp(), m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        SAFE_DELETE(pStmt);
+        if (m_SilverDamage != 0) {
+            PreparedStatement saveExpsVampireStmt(pConn,
+                                                   "UPDATE Vampire SET Alignment=?, Fame=?, GoalExp=?, "
+                                                   "SilverDamage=?, `Rank`=?, RankGoalExp=?, AdvancementClass=?, "
+                                                   "AdvancementGoalExp=? WHERE Name=?");
+            saveExpsVampireStmt.bindInt(1, m_Alignment);
+            saveExpsVampireStmt.bindInt(2, m_Fame);
+            saveExpsVampireStmt.bindULong(3, m_GoalExp);
+            saveExpsVampireStmt.bindInt(4, m_SilverDamage);
+            saveExpsVampireStmt.bindInt(5, getRank());
+            saveExpsVampireStmt.bindULong(6, getRankGoalExp());
+            saveExpsVampireStmt.bindUInt(7, getAdvancementClassLevel());
+            saveExpsVampireStmt.bindInt(8, getAdvancementClassGoalExp());
+            saveExpsVampireStmt.bindString(9, m_Name);
+            saveExpsVampireStmt.execute();
+        } else {
+            PreparedStatement saveExpsVampireStmt(pConn,
+                                                   "UPDATE Vampire SET Alignment=?, Fame=?, GoalExp=?, `Rank`=?, "
+                                                   "RankGoalExp=?, AdvancementClass=?, AdvancementGoalExp=? "
+                                                   "WHERE Name=?");
+            saveExpsVampireStmt.bindInt(1, m_Alignment);
+            saveExpsVampireStmt.bindInt(2, m_Fame);
+            saveExpsVampireStmt.bindULong(3, m_GoalExp);
+            saveExpsVampireStmt.bindInt(4, getRank());
+            saveExpsVampireStmt.bindULong(5, getRankGoalExp());
+            saveExpsVampireStmt.bindUInt(6, getAdvancementClassLevel());
+            saveExpsVampireStmt.bindInt(7, getAdvancementClassGoalExp());
+            saveExpsVampireStmt.bindString(8, m_Name);
+            saveExpsVampireStmt.execute();
+        }
     }
     END_DB(pStmt)
 

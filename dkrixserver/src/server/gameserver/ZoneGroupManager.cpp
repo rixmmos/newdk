@@ -22,6 +22,7 @@
 #include "LoginServerManager.h"
 #include "PCManager.h"
 #include "Portal.h"
+#include "PreparedStatement.h"
 #include "Tile.h"
 #include "ZoneGroup.h"
 #include "ZoneInfoManager.h"
@@ -88,15 +89,14 @@ void ZoneGroupManager::load()
 
     
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT ZoneGroupID FROM ZoneGroupInfo ORDER BY ZoneGroupID");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectZoneGroupIDStmt(pConn, "SELECT ZoneGroupID FROM ZoneGroupInfo ORDER BY ZoneGroupID");
+        Result* pResult = selectZoneGroupIDStmt.execute();
 
         while (pResult->next()) {
             ZoneGroupID_t ID = pResult->getInt(1);
             ZoneGroupIDList.push_back(ID);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -114,10 +114,12 @@ void ZoneGroupManager::load()
 
         
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
             // Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
-            Result* pResult =
-                pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d ORDER BY ZoneID", (int)ID);
+            PreparedStatement selectZoneIDStmt(pConn,
+                                                "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ? ORDER BY ZoneID");
+            selectZoneIDStmt.bindInt(1, (int)ID);
+            Result* pResult = selectZoneIDStmt.execute();
 
             while (pResult->next()) {
                 ZoneID_t zoneID = pResult->getInt(1);
@@ -142,8 +144,6 @@ void ZoneGroupManager::load()
 
                 printf("\n@@@@@@@@@@@@@@@ [%d]th ZONE INITIALIZATION SUCCESS @@@@@@@@@@@@@@@\n", zoneID);
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     }
@@ -531,15 +531,14 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
 
     
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT ZoneGroupID FROM ZoneGroupInfo");
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectZoneGroupIDStmt(pConn, "SELECT ZoneGroupID FROM ZoneGroupInfo");
+        Result* pResult = selectZoneGroupIDStmt.execute();
 
         while (pResult->next()) {
             ZoneGroupID_t ID = pResult->getInt(1);
             ZoneGroupIDList.push_back(ID);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -549,9 +548,11 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
         ZoneGroupID_t ID = *itr;
 
         BEGIN_DB {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
             // Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
-            Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
+            PreparedStatement selectZoneIDStmt(pConn, "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ?");
+            selectZoneIDStmt.bindInt(1, ID);
+            Result* pResult = selectZoneIDStmt.execute();
 
             while (pResult->next()) {
                 ZoneID_t zoneID = pResult->getInt(1);
@@ -571,8 +572,6 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
 
                 loadInfos[zoneID] = pInfo;
             }
-
-            SAFE_DELETE(pStmt);
         }
         END_DB(pStmt)
     }

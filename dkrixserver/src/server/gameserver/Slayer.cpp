@@ -10,6 +10,7 @@
 #include "EffectManager.h"
 #include "LogClient.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 // #include <algo.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -595,35 +596,36 @@ bool Slayer::load()
     int reward = 0;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT Name, AdvancementClass, AdvancementGoalExp, Competence, CompetenceShape, Sex,MasterEffectColor, \
-			HairStyle, HairColor, SkinColor, Phone, \
-			STR, STRGoalExp,\
-			DEX, DEXGoalExp,\
-			INTE, INTGoalExp,\
-			AdvancedSTR, AdvancedDEX, AdvancedINT, Bonus,\
-			`Rank`, RankGoalExp,\
-			CurrentHP, HP, CurrentMP, MP,\
-			Fame, Gold, GuildID,\
-			BladeLevel, BladeGoalExp,\
-			SwordLevel, SwordGoalExp,\
-			GunLevel, GunGoalExp,\
-			EnchantLevel, EnchantGoalExp,\
-			HealLevel, HealGoalExp,\
-			ETCLevel, ETCGoalExp,\
-			ZoneID, XCoord, YCoord, Sight,\
-			GunBonusExp, RifleBonusExp,\
-			Alignment,\
-			StashGold, StashNum, ResurrectZone, Reward,\
-			SMSCharge \
-			FROM Slayer WHERE Name = '%s' AND Active = 'ACTIVE'",
-            m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement loadSlayerStmt(
+            pConn,
+            "SELECT Name, AdvancementClass, AdvancementGoalExp, Competence, CompetenceShape, Sex,MasterEffectColor, "
+            "HairStyle, HairColor, SkinColor, Phone, "
+            "STR, STRGoalExp,"
+            "DEX, DEXGoalExp,"
+            "INTE, INTGoalExp,"
+            "AdvancedSTR, AdvancedDEX, AdvancedINT, Bonus,"
+            "`Rank`, RankGoalExp,"
+            "CurrentHP, HP, CurrentMP, MP,"
+            "Fame, Gold, GuildID,"
+            "BladeLevel, BladeGoalExp,"
+            "SwordLevel, SwordGoalExp,"
+            "GunLevel, GunGoalExp,"
+            "EnchantLevel, EnchantGoalExp,"
+            "HealLevel, HealGoalExp,"
+            "ETCLevel, ETCGoalExp,"
+            "ZoneID, XCoord, YCoord, Sight,"
+            "GunBonusExp, RifleBonusExp,"
+            "Alignment,"
+            "StashGold, StashNum, ResurrectZone, Reward,"
+            "SMSCharge "
+            "FROM Slayer WHERE Name = ? AND Active = 'ACTIVE'");
+        loadSlayerStmt.bindString(1, m_Name);
+        pResult = loadSlayerStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-            
-            
-            SAFE_DELETE(pStmt);
+
+
             return false;
         }
 
@@ -773,12 +775,10 @@ bool Slayer::load()
             setX(ResurrectCoord.x);
             setY(ResurrectCoord.y);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
-    
+
     ObjectRegistry& OR = getZone()->getObjectRegistry();
     OR.registerObject(this);
 
@@ -901,10 +901,12 @@ bool Slayer::load()
 
     
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery(
-            "SELECT SkillType, SkillLevel, SkillExp, Delay, CastingTime, NextTime FROM SkillSave WHERE OwnerID = '%s'",
-            m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectSkillSaveStmt(
+            pConn,
+            "SELECT SkillType, SkillLevel, SkillExp, Delay, CastingTime, NextTime FROM SkillSave WHERE OwnerID = ?");
+        selectSkillSaveStmt.bindString(1, m_Name);
+        pResult = selectSkillSaveStmt.execute();
 
         while (pResult->next()) {
             int i = 0;
@@ -934,12 +936,10 @@ bool Slayer::load()
 
             addSkill(pSkillSlot);
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
-    
+
     g_pEffectLoaderManager->load(this);
 
     
@@ -1014,24 +1014,22 @@ void Slayer::save() const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-         
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        PreparedStatement saveSlayerStmt(pConn,
+                                          "UPDATE Slayer SET CurrentHP=?, HP=?, CurrentMP=?, MP=?, ZoneID=?, XCoord=?, "
+                                          "YCoord=? WHERE Name=?");
+        saveSlayerStmt.bindInt(1, m_HP[ATTR_CURRENT]);
+        saveSlayerStmt.bindInt(2, m_HP[ATTR_MAX]);
+        saveSlayerStmt.bindInt(3, m_MP[ATTR_CURRENT]);
+        saveSlayerStmt.bindInt(4, m_MP[ATTR_MAX]);
+        saveSlayerStmt.bindInt(5, getZoneID());
+        saveSlayerStmt.bindInt(6, (int)m_X);
+        saveSlayerStmt.bindInt(7, (int)m_Y);
+        saveSlayerStmt.bindString(8, m_Name);
+        saveSlayerStmt.execute();
 
-        pStmt->executeQuery("UPDATE Slayer SET CurrentHP=%d, HP=%d, CurrentMP=%d, MP=%d, ZoneID=%d, XCoord=%d, "
-                            "YCoord=%d WHERE Name='%s'",
-                            m_HP[ATTR_CURRENT], m_HP[ATTR_MAX], m_MP[ATTR_CURRENT], m_MP[ATTR_MAX], getZoneID(),
-                            (int)m_X, (int)m_Y, m_Name.c_str());
-
-
-        
-        
-        
-        
-        
-        // Assert(pStmt->getAffectedRowCount() == 1);
-
-        SAFE_DELETE(pStmt);
+        // Assert(saveSlayerStmt.getAffectedRowCount() == 1);
     }
     END_DB(pStmt)
 
@@ -1063,9 +1061,14 @@ void Slayer::tinysave(const string& field) const {
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Slayer SET %s WHERE NAME='%s'", field.c_str(), m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        // field is a caller-built "Column=value" SQL fragment (see callers, e.g.
+        // saveSilverDamage), not a single bindable value; PreparedStatement cannot
+        // parameterise an entire dynamic assignment list. Left spliced, matching
+        // the Guild::tinysave precedent (batch 7). Only Name is bound.
+        PreparedStatement tinysaveSlayerStmt(pConn, "UPDATE Slayer SET " + field + " WHERE NAME=?");
+        tinysaveSlayerStmt.bindString(1, m_Name);
+        tinysaveSlayerStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2581,9 +2584,11 @@ void Slayer::increaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Slayer SET Gold=Gold+%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement increaseGoldStmt(pConn, "UPDATE Slayer SET Gold=Gold+? WHERE NAME=?");
+        increaseGoldStmt.bindUInt(1, gold);
+        increaseGoldStmt.bindString(2, m_Name);
+        increaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2608,9 +2613,11 @@ void Slayer::decreaseGoldEx(Gold_t gold)
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("UPDATE Slayer SET Gold=Gold-%u WHERE NAME='%s'", gold, m_Name.c_str());
-        SAFE_DELETE(pStmt);
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement decreaseGoldStmt(pConn, "UPDATE Slayer SET Gold=Gold-? WHERE NAME=?");
+        decreaseGoldStmt.bindUInt(1, gold);
+        decreaseGoldStmt.bindString(2, m_Name);
+        decreaseGoldStmt.execute();
     }
     END_DB(pStmt)
 
@@ -2625,14 +2632,14 @@ bool Slayer::checkGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT Gold FROM Slayer WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectGoldStmt(pConn, "SELECT Gold FROM Slayer WHERE NAME=?");
+        selectGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_Gold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -2648,14 +2655,14 @@ bool Slayer::checkStashGoldIntegrity() {
     bool ret = false;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery("SELECT StashGold FROM Slayer WHERE NAME='%s'", m_Name.c_str());
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+        PreparedStatement selectStashGoldStmt(pConn, "SELECT StashGold FROM Slayer WHERE NAME=?");
+        selectStashGoldStmt.bindString(1, m_Name);
+        Result* pResult = selectStashGoldStmt.execute();
 
         if (pResult->next()) {
             ret = pResult->getInt(1) == m_StashGold;
         }
-
-        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 
@@ -3025,21 +3032,35 @@ void Slayer::saveExps(void) const
     Statement* pStmt = NULL;
 
     BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
+        Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
-        pStmt->executeQuery(
-            "UPDATE Slayer SET STRGoalExp=%lu, DEXGoalExp=%lu, INTGoalExp=%lu, BladeGoalExp=%lu, SwordGoalExp=%lu, "
-            "GunGoalExp=%lu, EnchantGoalExp=%lu, HealGoalExp=%lu, ETCGoalExp=%lu, Alignment=%d, Fame=%ld, `Rank`=%d, "
-            "RankGoalExp=%lu, AdvancementClass=%u, AdvancementGoalExp=%d, AdvancedSTR=%u, AdvancedDEX=%u, "
-            "AdvancedINT=%u, Bonus=%u WHERE Name='%s'",
-            getSTRGoalExp(), getDEXGoalExp(), getINTGoalExp(), m_GoalExp[SKILL_DOMAIN_BLADE],
-            m_GoalExp[SKILL_DOMAIN_SWORD], m_GoalExp[SKILL_DOMAIN_GUN], m_GoalExp[SKILL_DOMAIN_ENCHANT],
-            m_GoalExp[SKILL_DOMAIN_HEAL], m_GoalExp[SKILL_DOMAIN_ETC], m_Alignment, m_Fame, getRank(), getRankGoalExp(),
-            getAdvancementClassLevel(), getAdvancementClassGoalExp(), m_AdvancedSTR, m_AdvancedDEX, m_AdvancedINT,
-            m_AdvancedAttrBonus, m_Name.c_str());
-
-
-        SAFE_DELETE(pStmt);
+        PreparedStatement saveExpsSlayerStmt(
+            pConn,
+            "UPDATE Slayer SET STRGoalExp=?, DEXGoalExp=?, INTGoalExp=?, BladeGoalExp=?, SwordGoalExp=?, "
+            "GunGoalExp=?, EnchantGoalExp=?, HealGoalExp=?, ETCGoalExp=?, Alignment=?, Fame=?, `Rank`=?, "
+            "RankGoalExp=?, AdvancementClass=?, AdvancementGoalExp=?, AdvancedSTR=?, AdvancedDEX=?, "
+            "AdvancedINT=?, Bonus=? WHERE Name=?");
+        saveExpsSlayerStmt.bindULong(1, getSTRGoalExp());
+        saveExpsSlayerStmt.bindULong(2, getDEXGoalExp());
+        saveExpsSlayerStmt.bindULong(3, getINTGoalExp());
+        saveExpsSlayerStmt.bindULong(4, m_GoalExp[SKILL_DOMAIN_BLADE]);
+        saveExpsSlayerStmt.bindULong(5, m_GoalExp[SKILL_DOMAIN_SWORD]);
+        saveExpsSlayerStmt.bindULong(6, m_GoalExp[SKILL_DOMAIN_GUN]);
+        saveExpsSlayerStmt.bindULong(7, m_GoalExp[SKILL_DOMAIN_ENCHANT]);
+        saveExpsSlayerStmt.bindULong(8, m_GoalExp[SKILL_DOMAIN_HEAL]);
+        saveExpsSlayerStmt.bindULong(9, m_GoalExp[SKILL_DOMAIN_ETC]);
+        saveExpsSlayerStmt.bindInt(10, m_Alignment);
+        saveExpsSlayerStmt.bindLong(11, m_Fame);
+        saveExpsSlayerStmt.bindInt(12, getRank());
+        saveExpsSlayerStmt.bindULong(13, getRankGoalExp());
+        saveExpsSlayerStmt.bindUInt(14, getAdvancementClassLevel());
+        saveExpsSlayerStmt.bindInt(15, getAdvancementClassGoalExp());
+        saveExpsSlayerStmt.bindUInt(16, m_AdvancedSTR);
+        saveExpsSlayerStmt.bindUInt(17, m_AdvancedDEX);
+        saveExpsSlayerStmt.bindUInt(18, m_AdvancedINT);
+        saveExpsSlayerStmt.bindUInt(19, m_AdvancedAttrBonus);
+        saveExpsSlayerStmt.bindString(20, m_Name);
+        saveExpsSlayerStmt.execute();
     }
     END_DB(pStmt)
 
