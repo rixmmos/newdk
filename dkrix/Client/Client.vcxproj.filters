@@ -5646,7 +5646,7 @@
     <ClInclude Include="UIFunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DXLib\CDirectDraw.h" />
+    <ClInclude Include="Platform\CSDLGraphics.h" />
     <ClInclude Include="SpriteLib\CFileIndexTable.h" />
     <ClInclude Include="EXECryptor.h" />
     <ClInclude Include="GAME1024.h" />
