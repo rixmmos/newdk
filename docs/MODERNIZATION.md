@@ -1538,6 +1538,67 @@ assignment re-checked directly against `GSQuitGuildHandler.cpp`, no
 other value ever reaches `Table`. **Compile gate: next server CI run
 [unverified]** — landed after the last green run (#14, `421088e`).
 
+**11.2 batch 6 (2026-08-08, agent stream): `dkrixserver/src/server/gameserver/CreatureUtil.cpp`.**
+33 ratchet-counted sites migrated across seven functions —
+`getRaceFromDB` (1: race lookup by Slayer name), `getGuildIDFromDB`
+(1: guild-ID lookup, table name spliced — see below), `changeSexEx`
+(2: Slayer/Vampire SEX UPDATE), `giveUnderworldGift` (1, guarded by
+`#ifdef __UNDERWORLD__`: UnderworldEvent INSERT), `giveGoldMedal`
+(1: GoldMedalCount INSERT), `giveLotto` (3: EventLotto
+UPDATE/REPLACE/SELECT), and `deletePC` (24 ratchet-visible sites: the
+Slayer/Vampire/Ousters deactivation UPDATEs, the SkillSave family,
+CoupleInfo, 15 EffectX/EnemyErase tables, FlagSet, TimeLimitItems,
+EventQuestAdvance). **Ratchet 437 → 404** [measured], re-baselined via
+`--update`.
+
+A fourth invisibility mode, distinct from batch 1's multi-line-format-string
+case and batch 2's embedded-`)` case: `deletePC`'s 82-table
+object-deletion sweep used
+`executeQueryString("DELETE FROM X WHERE OwnerID = '" + ownerID + "'")`
+— raw string concatenation with no `%[sdluxc]` placeholder anywhere in
+the call, so none of the 82 sites were ever counted by the ratchet's
+grep in the first place. All 82 were migrated alongside the 33 counted
+sites — same rationale as batch 2: leaving them inconsistent within the
+same `BEGIN_DB` block would be worse than migrating them together —
+which brings the file's true live-call-site count from roughly 115 to
+zero even though the ratchet delta only reflects the 33 sites it could
+ever see. Six further textual hits remain in `--list` for this file:
+`giveGoldMedal`'s and the fully-commented-out `addOlympicStat`'s dead
+`/* */` blocks, plus three `//`-commented lines inside `deletePC`
+preserving the historical DELETE-vs-UPDATE-Active choice. All six are
+inside comments, never compiled, and were left untouched exactly as
+`CLDeletePCHandler.cpp`'s equivalent dead comments were preserved in an
+earlier batch — they inflate the ratchet's grep count but are not live
+SQL and not call sites.
+
+One non-mechanical judgment call: `getGuildIDFromDB` selects its
+target table (`Slayer`/`Vampire`/`Ousters`) via a three-way `if/else`
+on the `Race_t` parameter, never packet/user input —
+`PreparedStatement` can't bind an identifier, so the table name stays
+spliced into the SQL text
+(`"SELECT GuildID FROM " + table + " where Name=?"`, inline comment),
+matching batch 2's guild-cancel precedent exactly; the `Name`
+parameter itself is bound. Every other value in this file — every
+`pPC->getName()`/`ownerID`, `Sex2String[...]`, `PlayerID`/`PlayerName`,
+and the `type`/`num` counters in `giveLotto` — is bound as a parameter
+(`bindString`/`bindUInt`); no other identifier splices were needed.
+
+Stack-allocated `PreparedStatement` locals throughout, per the
+established pattern, which also closes several early-return `Statement`
+leaks in `getRaceFromDB`/`getGuildIDFromDB`: the old code called
+`SAFE_DELETE(pStmt)` before each early `return false`, which the
+`PreparedStatement` destructor now makes unnecessary, so those manual
+deletes were removed. **Not compile-verified** — no server toolchain in
+this sandbox; verified by reading only (bind-index-to-`?`-order
+correspondence checked for every statement, `?` count matches bind
+count matches original printf-arg count for every site, file-wide
+brace/paren balance checked programmatically, `.clang-format`'s
+120-column limit checked and the 8 constructor calls that exceeded it
+re-wrapped to match the established
+`PreparedStatement name(\n    pConn, "...")` line-break style already
+used in `CLDeletePCHandler.cpp`). CI is the real gate for this batch,
+same caveat as every prior one.
+
 ### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2 landed here 2026-08-08)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
