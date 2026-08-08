@@ -2210,6 +2210,16 @@ Wave 1 established:
   of this batch's 14 pairs); flagged for the next batch or a follow-up
   fix, since if `SizeOfObjects.cpp` is genuinely compiled this is a
   live break the “both trees green” claim for batch 1 didn't catch.
+  **Closed out as a follow-up (2026-08-08):** the same mixed-case/backslash
+  bug also hit two more already-migrated names in this file —
+  `#include "packet/CPackets\CGAddItemToItem.h"` (batch 1) and
+  `#include "packet/CPackets\CGLotterySelect.h"` (batch 2) — missed by
+  the same grep-pattern gap. All three lines repointed to the bare
+  `#include "<Name>.h"` form already used elsewhere in this file
+  (`shared/Packets` is already on `DarkEden`'s include path from the
+  Phase 12 pilot, so no CMake change was needed). A tree-wide sweep for
+  the same backslash pattern against every migrated name found no other
+  instances outside this file.
 - `dkrix/Client/MPlayer.cpp` (`CGSelectTileEffect`) and
   `dkrix/Client/PacketDef.h` (`CGReady`, `CGThrowBomb`,
   `CGSetSlayerHotKey`, `CGSetVampireHotKey`, included transitively by
