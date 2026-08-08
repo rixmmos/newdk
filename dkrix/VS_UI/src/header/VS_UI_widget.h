@@ -6,7 +6,7 @@
 #include "VS_UI_Base.h"
 #include "VS_UI_GlobalResource.h"
 #include "../Imm/CImm.h"
-#include "VS_UI_MOUSE_POINTER.h"
+#include "VS_UI_mouse_pointer.h"
 #include "../widget/u_button.h"  // For EventButton, Exec, Button classes
 /*
 //----------------------------------------------------------------------------

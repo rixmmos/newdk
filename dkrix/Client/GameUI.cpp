@@ -12,7 +12,7 @@
 #include "Client.h"
 #include "UIFunction.h"
 #include "VS_UI.h" 
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #include "PacketDef.h"
 #include "TalkBox.h"
 #include "MShopShelf.h"

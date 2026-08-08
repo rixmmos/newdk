@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #include <math.h>
 #include "mp3.h"
 #include "soundbuf.h"

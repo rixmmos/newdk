@@ -6,7 +6,7 @@
 #else
 #include "../basic/Platform.h"  // For UINT and other basic types
 #endif
-#include "bit_res.h"
+#include "BIT_RES.H"
 
 
 #define HUFFBITS UINT

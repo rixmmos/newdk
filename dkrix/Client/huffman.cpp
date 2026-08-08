@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #ifdef PLATFORM_WINDOWS
 #include <strstream>
 #else
@@ -8,7 +8,7 @@
 #define STRICT
 #endif   // __WIN32__
 
-#include "bit_res.h"
+#include "BIT_RES.H"
 #include "huffman.h"
 
 HUFFBITS dmask = 1 << ((sizeof(HUFFBITS) * 8) - 1);

@@ -35,7 +35,7 @@
 #include "MTestDef.h"
 #include <fstream>
 #include "SkillDef.h"
-#include "mintr.h"
+#include "MinTr.h"
 #include "MNPC.h"
 #include "MGuildType.h"
 #include "MEffectStatusDef.h"

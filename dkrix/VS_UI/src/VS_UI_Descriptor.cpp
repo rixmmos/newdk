@@ -1,10 +1,10 @@
 // VS_UI_Descriptor.cpp
 
-#include "client_PCH.h"
+#include "Client_PCH.h"
 #include <assert.h>
 #define assert(e) ((void)(e))
 // Disabled assert for macOS
-#include "VS_UI_Descriptor.h"
+#include "VS_UI_descriptor.h"
 
 DescriptorManager	g_descriptor_manager;
 

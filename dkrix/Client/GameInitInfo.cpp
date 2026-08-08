@@ -49,7 +49,7 @@
 #include "ServerInfo.h"
 #include "DebugInfo.h"
 #include "RankBonusTable.h"
-#include "MWarManager.h"
+#include "MWarManager.H"
 #include "FameInfo.h"	
 #include "MTimeItemManager.h"
 #include "MMonsterKillQuestInfo.h"

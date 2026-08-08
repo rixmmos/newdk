@@ -2,7 +2,7 @@
 #define __PET_INFO_H__
 
 #include "Packet/Types.h"
-#include "types/PetTypes.h"
+#include "Types/PetTypes.h"
 #include "Exception.h"
 
 #include "Packet.h"

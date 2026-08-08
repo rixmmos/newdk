@@ -12,15 +12,15 @@
 #include "MEventManager.h"
 #include "MGameStringTable.h"
 #include "CMessageArray.h"
-#include "MWarManager.h"
+#include "MWarManager.H"
 #include "UserInformation.h"
 #include "MPlayer.h"
 
 #ifdef __GAME_CLIENT__
 #include "../ClientPlayer.h"
 #include "MZoneTable.h"
-#include "MZone.H"
-#include "UiFunction.h"
+#include "MZone.h"
+#include "UIFunction.h"
 #include "PacketFunction.h"
 #endif
 

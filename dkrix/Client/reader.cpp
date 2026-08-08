@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #include "reader.h"
 #include "common.h"
 #ifdef PLATFORM_WINDOWS

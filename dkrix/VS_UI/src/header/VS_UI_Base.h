@@ -9,13 +9,13 @@
 #ifndef __VS_UI_BASE_H__
 #define __VS_UI_BASE_H__
 
-#include "BasicS.h"
+#include "Basics.h"
 #include "DLL.h"
 #include "GL_import.h"
-#include "Timer2.h"
+#include "timer2.h"
 #include "DXLib.h"
 #ifdef PLATFORM_WINDOWS
-#include "Unicorn.h"
+#include "unicorn.h"
 #endif
 #include "SP.h"
 #include "../hangul/Fl2.h"  // For full PrintInfo definition
@@ -23,7 +23,7 @@
 //#include "VS_UI_Exception.h"
 #include "VS_UI_ui_result_receiver.h"
 #include "SimpleDataList.h"
-#include "PI.h"
+#include "PI.H"
 #include "PS.h"
 #include "RaceType.h"
 

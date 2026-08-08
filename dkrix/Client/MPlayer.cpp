@@ -59,7 +59,7 @@
 #include "MParty.h"
 #include "MJusticeAttackManager.h"
 #include "RequestUserManager.h"
-#include "MWarManager.h"
+#include "MWarManager.H"
 
 #include "MGuildType.h"
 #include "ServerInfo.h"
@@ -131,7 +131,7 @@ BYTE GetCreatureActionCountMax( const MCreature* pCreature, int action );
 
 
 #include "VS_UI.h" // KJTINC
-#include "VS_UI_Mouse_pointer.h"
+#include "VS_UI_mouse_pointer.h"
 #ifdef PLATFORM_WINDOWS
 #include "CImm.h"
 #endif

@@ -45,7 +45,7 @@
 #include <list>
 #include <map>
 #include <fstream>
-#include "Packet/types/RequestTypes.h"
+#include "Packet/Types/RequestTypes.h"
 #include "Packet/Exception.h"
 class RequestClientPlayer;
 class RequestServerPlayer;

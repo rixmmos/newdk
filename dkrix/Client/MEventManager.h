@@ -7,7 +7,7 @@
 
 #pragma warning(disable:4786)
 
-#include "ctypetable.h"
+#include "CTypeTable.h"
 #include "CDirectDrawSurface.h"
 #include <map>
 #include <vector>

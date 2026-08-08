@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #include "../basic/Platform.h"
 #include <memory.h>
 #include "soundbuf.h"

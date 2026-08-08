@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #include "mp3.h"
 #ifdef PLATFORM_WINDOWS
 #include <wtypes.h>

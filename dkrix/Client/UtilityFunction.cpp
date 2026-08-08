@@ -578,7 +578,7 @@ SaveSurfaceToImage(const char* pFilename, CSpriteSurface& surface)
 // CBaseImage
 
 extern "C" {
-#include "jpegLib/jpeglib.h"
+#include "JpegLib/JPEGLIB.H"
 }
 
 /*

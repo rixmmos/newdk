@@ -1,4 +1,4 @@
-#include "COGGSTREAM.h"
+#include "COGGSTREAM.H"
 #include "Platform/AudioManager.h"
 #include "basic/Platform.h"
 

@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 #define NOMCX
@@ -57,7 +57,7 @@
 #define __oleidl_h__
 #define _OLE2_H_
 
-#include "bit_res.h"
+#include "BIT_RES.H"
 
 Bit_Reserve::Bit_Reserve ()
 {

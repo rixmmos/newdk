@@ -11,7 +11,7 @@
 #ifndef __FL2_H__
 #define __FL2_H__
 
-#include "CI.h"
+#include "Ci.h"
 #include <string>
 #ifdef PLATFORM_WINDOWS
 #include <ddraw.h>

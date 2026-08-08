@@ -37,7 +37,7 @@ extern CImm *gpC_Imm;
 
 #else
 
-#include "ifc.h"
+#include "IFC.h"
 #include <vector>
 
 class CImm  

@@ -68,12 +68,12 @@
 #include "Profiler.h"
 #include "CMP3.h"
 #include "MEventManager.h"
-#include "MNpc.h"
+#include "MNPC.h"
 #include "UtilityFunction.h"
 
 
 
-#include "MWarManager.h"
+#include "MWarManager.H"
 #include "MTimeItemManager.h"
 
 #include "VS_UI.h"

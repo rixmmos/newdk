@@ -1,4 +1,4 @@
-#include "DirectXlib_PCH.h"
+#include "DirectXLib_PCH.h"
 #include <memory.h>
 #include "mp3.h"
 #include "reader.h"
@@ -9,7 +9,7 @@
 #else
 #include "Platform/AudioManager.h"
 #endif
-#include "debuginfo.h"
+#include "DebugInfo.h"
 #include <math.h>
 
 #define	MP3BUFSIZE		1024

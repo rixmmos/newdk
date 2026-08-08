@@ -76,7 +76,7 @@ APICheck _APICheck;
 #include "Packet/Properties.h"
 #include "ServerInfo.h"
 #include "MTestDef.h"
-#include "Resource.h"
+#include "resource.h"
 #include "UserInformation.h"
 #ifdef SPRITELIB_BACKEND_SDL
 #include <SDL.h>

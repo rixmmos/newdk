@@ -4,7 +4,7 @@
 #include "header.h"
 #include "common.h"
 //#include "dslib.h"
-#include "bit_res.h"
+#include "BIT_RES.H"
 #ifdef PLATFORM_WINDOWS
 #include <dsound.h>
 #else

@@ -23,8 +23,8 @@
 #include "PacketDef.h"
 #include "VS_UI.h"
 #include "ServerInformation.h"
-#include "packet/cpackets/CLGetServerList.h"
-#include "packet/cpackets/CLChangeServer.h"
+#include "Packet/Cpackets/CLGetServerList.h"
+#include "Packet/Cpackets/CLChangeServer.h"
 #include "CWaitUIUpdate.h"
 #include "MTestDef.h"
 #include "DXLibBackend.h"  // For SDL text input functions

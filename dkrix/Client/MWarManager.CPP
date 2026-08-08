@@ -1,5 +1,5 @@
 #include "Client_PCH.h"
-#include "MWarManager.h"
+#include "MWarManager.H"
 #include "MZoneTable.h"
 #include "UserInformation.h"
 #include "UIFunction.h"

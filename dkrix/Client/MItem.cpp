@@ -27,13 +27,13 @@
 	#include "MZone.h"
 	#include "MZoneTable.h"
 	#include "MPlayer.h"
-#include "packet/CPackets/CGUseItemFromGear.h"
-	#include "packet/CPackets/CGUsePotionFromInventory.h"
-	#include "packet/CPackets/CGUsePotionFromQuickSlot.h"
+#include "Packet/Cpackets/CGUseItemFromGear.h"
+	#include "Packet/Cpackets/CGUsePotionFromInventory.h"
+	#include "Packet/Cpackets/CGUsePotionFromQuickSlot.h"
 
-	#include "FL2.h"
+	#include "Fl2.h"
 	#include "VS_UI_GameCommon.h"
-	#include "vs_ui.h"
+	#include "VS_UI.h"
 	#include "UIDialog.h"
 #endif
 

@@ -8,7 +8,7 @@
 #include "InputService.h"
 #include "Platform/InputManager.h"
 #include "MEventManager.h"
-#include "MWarManager.h"
+#include "MWarManager.H"
 #include "MZone.h"
 #include "Packet/GuildWarInfo.h"
 #include "Packet/RaceWarInfo.h"
