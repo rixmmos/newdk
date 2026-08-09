@@ -175,8 +175,20 @@ jobs:
     name: Linux sanitizer (${{ matrix.sanitizer }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # Non-blocking, same as the `tools` job above: this leg has never
-    # been run against this tree before. Windows/MSVC is this repo's
+    # Non-blocking, same as the `tools` job above.
+    #
+    # Flip rule (MODERNIZATION.md Phase 10 bullet 3): a leg becomes
+    # blocking after ≥5 consecutive green runs of that leg. Neither leg
+    # here has ever been green. [measured 2026-08-09, job-level, Actions
+    # API] `Linux sanitizer (asan)` and `Linux sanitizer (ubsan)` are
+    # both red on every client run from #20 (11e441d6) through #38
+    # (00a51ff) — 19 for 19 each, always in the `Build` step, never
+    # reaching `Verify binary` or the ctest step. That is not neglect:
+    # the Linux client port is an active workstream, handed over at 17%
+    # complete with link-only failures remaining (cd8c3c6). These legs
+    # become flippable when that port lands, not before.
+    #
+    # Windows/MSVC is this repo's
     # authoritative client build (dkrix/CLAUDE.md); Linux is documented
     # there only as "a secondary portability target", and the USE_ASAN/
     # USE_UBSAN CMake options only take effect under GNU/Clang (a no-op
