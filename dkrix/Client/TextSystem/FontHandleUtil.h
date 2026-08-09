@@ -11,6 +11,18 @@ enum FontFamilyId {
 	FontFamilyUnifrakturCook = 2
 };
 
+// Minimal font-spec replacement for the old Win32 LOGFONT parameter that
+// Base::SetFont() / Base::SetDefaultLogfont() used to take. Those two
+// functions only ever read a font family and a point size out of LOGFONT
+// (see basic/Platform.h's removed GDI stub and docs/MODERNIZATION.md Phase 5
+// for the sizing that led here) - every other LOGFONT field (weight, italic,
+// charset, precision, quality, pitch-and-family) was set by callers but
+// never consumed, so it has no equivalent here.
+struct FontSpec {
+	FontFamilyId family;
+	int height;
+};
+
 // Encode a font size into a pointer-sized handle for non-Windows builds.
 // This avoids allocating font objects while still preserving size/family info.
 inline void* EncodeFontHandle(int size, int familyId)

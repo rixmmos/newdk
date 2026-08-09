@@ -19,6 +19,7 @@
 #endif
 #include "SP.h"
 #include "../hangul/Fl2.h"  // For full PrintInfo definition
+#include "TextSystem/FontHandleUtil.h"  // TextSystem::FontSpec (replaces the old LOGFONT param)
 #include "CSpriteSurface.h"
 //#include "VS_UI_Exception.h"
 #include "VS_UI_ui_result_receiver.h"
@@ -303,8 +304,8 @@ private:
 	void	InitFont();
 	void	InitSurface(CSpriteSurface *surface);
 	// Font management methods - available on all platforms
-	void	SetDefaultLogfont(LOGFONT &lf) const;
-	void	SetFont(PrintInfo &pi, LOGFONT &lf, COLORREF textcolor, COLORREF backcolor=0, int bk_mode=TRANSPARENT, int align=TA_LEFT);
+	void	SetDefaultFontSpec(TextSystem::FontSpec &spec) const;
+	void	SetFont(PrintInfo &pi, const TextSystem::FontSpec &spec, COLORREF textcolor, COLORREF backcolor=0, int bk_mode=TRANSPARENT, int align=TA_LEFT);
 
 public:
 	Base();

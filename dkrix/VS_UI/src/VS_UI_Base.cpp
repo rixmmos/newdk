@@ -58,16 +58,11 @@ Base::~Base()
 //
 // GDI removed (SDL2) - All platforms use TextSystem
 //-----------------------------------------------------------------------------
-void Base::SetFont(PrintInfo &pi, LOGFONT &lf, COLORREF textcolor, COLORREF backcolor, int bk_mode, int align)
+void Base::SetFont(PrintInfo &pi, const TextSystem::FontSpec &spec, COLORREF textcolor, COLORREF backcolor, int bk_mode, int align)
 {
 	// GDI removed: CreateFontIndirect() was used on Windows
 	// Now using TextSystem for all platforms
-	const int familyId = (strcmp(lf.lfFaceName, "Cormorant Garamond") == 0)
-		? TextSystem::FontFamilyCormorantGaramond
-		: (strcmp(lf.lfFaceName, "UnifrakturCook") == 0)
-		? TextSystem::FontFamilyUnifrakturCook
-		: TextSystem::FontFamilyDefault;
-	pi.hfont = (HFONT)TextSystem::EncodeFontHandle(lf.lfHeight, familyId);
+	pi.hfont = (HFONT)TextSystem::EncodeFontHandle(spec.height, spec.family);
 	pi.text_color = textcolor;
 	pi.back_color = backcolor;
 	pi.bk_mode = bk_mode;
@@ -75,27 +70,14 @@ void Base::SetFont(PrintInfo &pi, LOGFONT &lf, COLORREF textcolor, COLORREF back
 }
 
 //-----------------------------------------------------------------------------
-// SetDefaultLogfont
+// SetDefaultFontSpec (formerly SetDefaultLogfont)
 //
 // GDI removed (SDL2) - Simplified for TextSystem (all platforms)
 //-----------------------------------------------------------------------------
-void Base::SetDefaultLogfont(LOGFONT &lf) const
+void Base::SetDefaultFontSpec(TextSystem::FontSpec &spec) const
 {
-	// Set default LOGFONT values for TextSystem
-	lf.lfHeight = 0;
-	lf.lfWidth = 0;
-	lf.lfEscapement = 0;
-	lf.lfOrientation = 0;
-	lf.lfWeight = FW_NORMAL;
-	lf.lfItalic = 0;
-	lf.lfUnderline = 0;
-	lf.lfStrikeOut = 0;
-	lf.lfCharSet = DEFAULT_CHARSET;
-	lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-	lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-	lf.lfQuality = DEFAULT_QUALITY;
-	lf.lfPitchAndFamily = DEFAULT_PITCH|FF_DONTCARE;
-	strcpy(lf.lfFaceName, "Cormorant Garamond");
+	spec.height = 0;
+	spec.family = TextSystem::FontFamilyCormorantGaramond;
 }
 
 //-----------------------------------------------------------------------------
@@ -165,14 +147,14 @@ void Base::Init(CSpriteSurface *surface, void (*fp)(DWORD, int, int, void *))
 //-----------------------------------------------------------------------------
 void Base::InitFont()
 {
-	LOGFONT lf;
+	TextSystem::FontSpec fs;
 
-	// 
-	
 	//
-	
+
 	//
-	
+
+	//
+
 	//
 	const char szFontName[4][2][20] = {
 		// Hangul Font      Chinese Font
@@ -183,153 +165,138 @@ void Base::InitFont()
 	};
 
 	char Language;
-	
+
 	Language = 0;
-	const char* bodyFont = "Cormorant Garamond";
-	const char* menuFont = "UnifrakturCook";
-	
-	SetDefaultLogfont(lf); //by larosel
-	lf.lfHeight = 10;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_small_pi, lf, RGB(20, 70, 0));
+	const TextSystem::FontFamilyId bodyFont = TextSystem::FontFamilyCormorantGaramond;
+	const TextSystem::FontFamilyId menuFont = TextSystem::FontFamilyUnifrakturCook;
 
-	SetDefaultLogfont(lf); //by larosel
-	lf.lfHeight = 12;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_chatting_pi, lf, RGB(20, 70, 0));
+	SetDefaultFontSpec(fs); //by larosel
+	fs.height = 10;
+	fs.family = bodyFont;
+	SetFont(m_small_pi, fs, RGB(20, 70, 0));
 
-	SetDefaultLogfont(lf); //by larosel
-	lf.lfHeight = 12;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_user_id_pi, lf, RGB(20, 70, 0));
+	SetDefaultFontSpec(fs); //by larosel
+	fs.height = 12;
+	fs.family = bodyFont;
+	SetFont(m_chatting_pi, fs, RGB(20, 70, 0));
 
-	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-	lf.lfItalic = 1;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_value_pi, lf, RGB(255, 255, 255), 0, TRANSPARENT, TA_RIGHT);
+	SetDefaultFontSpec(fs); //by larosel
+	fs.height = 12;
+	fs.family = bodyFont;
+	SetFont(m_user_id_pi, fs, RGB(20, 70, 0));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-	lf.lfItalic = 1;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_value2_pi, lf, RGB(20, 70, 0));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = bodyFont;
+	SetFont(m_value_pi, fs, RGB(255, 255, 255), 0, TRANSPARENT, TA_RIGHT);
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_item_name_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = bodyFont;
+	SetFont(m_value2_pi, fs, RGB(20, 70, 0));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 12;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_item_desc_pi, lf, RGB(192, 192, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = bodyFont;
+	SetFont(m_item_name_pi, fs, RGB(255, 255, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-//	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, menuFont);
-	SetFont(m_dialog_menu_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 12;
+	fs.family = bodyFont;
+	SetFont(m_item_desc_pi, fs, RGB(192, 192, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	strcpy(lf.lfFaceName, bodyFont);
-	lf.lfHeight = 13;
-	SetFont(m_dialog_msg_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = menuFont;
+	SetFont(m_dialog_menu_pi, fs, RGB(255, 255, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, menuFont);
-	SetFont(m_desc_menu_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.family = bodyFont;
+	fs.height = 13;
+	SetFont(m_dialog_msg_pi, fs, RGB(255, 255, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	strcpy(lf.lfFaceName, bodyFont);
-	lf.lfHeight = 14;
-	SetFont(m_desc_msg_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = menuFont;
+	SetFont(m_desc_menu_pi, fs, RGB(255, 255, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 16;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_money_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.family = bodyFont;
+	fs.height = 14;
+	SetFont(m_desc_msg_pi, fs, RGB(255, 255, 255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 16;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_char_value_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 16;
+	fs.family = bodyFont;
+	SetFont(m_money_pi, fs, RGB(255, 255, 255));
+
+	// new style...
+	SetDefaultFontSpec(fs);
+	fs.height = 16;
+	fs.family = bodyFont;
+	SetFont(m_char_value_pi, fs, RGB(255, 255, 255));
 
 	//
-	
+
 	//
-	//SetDefaultLogfont(lf);
-	//lf.lfHeight = 12;
-	
-	//SetFont(m_chat_dialog_pi, lf, RGB(255, 255, 255));
+	//SetDefaultFontSpec(fs);
+	//fs.height = 12;
 
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 14;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_info_pi, lf, RGB(255, 255, 255));
+	//SetFont(m_chat_dialog_pi, fs, RGB(255, 255, 255));
 
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 12;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_item_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 14;
+	fs.family = bodyFont;
+	SetFont(m_info_pi, fs, RGB(255, 255, 255));
 
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 13;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_char_name_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 12;
+	fs.family = bodyFont;
+	SetFont(m_item_pi, fs, RGB(255, 255, 255));
 
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 13;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_char_chat_pi, lf, RGB(255, 255, 255));
+	SetDefaultFontSpec(fs);
+	fs.height = 13;
+	fs.family = bodyFont;
+	SetFont(m_char_name_pi, fs, RGB(255, 255, 255));
+
+	SetDefaultFontSpec(fs);
+	fs.height = 13;
+	fs.family = bodyFont;
+	SetFont(m_char_chat_pi, fs, RGB(255, 255, 255));
 
 	//party
-	SetDefaultLogfont(lf); //by larosel
-	lf.lfHeight = 12;
-//	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_party_name_pi, lf, RGB(20, 70, 0));
+	SetDefaultFontSpec(fs); //by larosel
+	fs.height = 12;
+	fs.family = bodyFont;
+	SetFont(m_party_name_pi, fs, RGB(20, 70, 0));
 
 	//xmas
-	SetDefaultLogfont(lf); //by larosel
-	lf.lfHeight = 10;
-//	lf.lfWeight = FW_BOLD;
-	lf.lfItalic = true;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_xmas_pi, lf, RGB(20, 70, 0));
+	SetDefaultFontSpec(fs); //by larosel
+	fs.height = 10;
+	fs.family = bodyFont;
+	SetFont(m_xmas_pi, fs, RGB(20, 70, 0));
 
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 16;
-	lf.lfWeight = FW_BOLD;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont( m_char_chat_large_pi, lf, RGB(255,255,255));
+	SetDefaultFontSpec(fs);
+	fs.height = 16;
+	fs.family = bodyFont;
+	SetFont( m_char_chat_large_pi, fs, RGB(255,255,255));
 
 	// new style...
-	SetDefaultLogfont(lf);
-	lf.lfHeight = 16;
-	strcpy(lf.lfFaceName, bodyFont);
-	SetFont(m_money2_pi, lf, RGB(255, 255, 255), 0, TRANSPARENT, TA_RIGHT);
+	SetDefaultFontSpec(fs);
+	fs.height = 16;
+	fs.family = bodyFont;
+	SetFont(m_money2_pi, fs, RGB(255, 255, 255), 0, TRANSPARENT, TA_RIGHT);
 
-	
+
 }
 
 //-----------------------------------------------------------------------------

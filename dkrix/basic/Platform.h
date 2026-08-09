@@ -225,86 +225,6 @@ static inline int DeleteObject(void* hObject) {
 	return 1; /* Return TRUE */
 }
 
-/* Font weight constants */
-#define FW_NORMAL 400
-#define FW_BOLD 700
-#define FW_THIN 100
-#define FW_MEDIUM 500
-#define FW_HEAVY 900
-#define FW_EXTRABOLD 800
-#define FW_LIGHT 300
-
-/* LOGFONT structure for font creation */
-#ifndef LOGFONT_DEFINED
-#define LOGFONT_DEFINED
-typedef struct tagLOGFONT {
-	long lfHeight;
-	long lfWidth;
-	long lfEscapement;
-	long lfOrientation;
-	long lfWeight;
-	unsigned char lfItalic;
-	unsigned char lfUnderline;
-	unsigned char lfStrikeOut;
-	unsigned char lfCharSet;
-	unsigned char lfOutPrecision;
-	unsigned char lfClipPrecision;
-	unsigned char lfQuality;
-	unsigned char lfPitchAndFamily;
-	char lfFaceName[32];
-} LOGFONT, *PLOGFONT, *LPLOGFONT;
-#endif
-
-/* Character set constants */
-#define ANSI_CHARSET 0
-#define DEFAULT_CHARSET 1
-#define SYMBOL_CHARSET 2
-#define SHIFTJIS_CHARSET 128
-#define HANGUL_CHARSET 129
-#define GB2312_CHARSET 134
-#define OEM_CHARSET 255
-
-/* Output precision constants */
-#define OUT_DEFAULT_PRECIS 0
-#define OUT_STRING_PRECIS 1
-#define OUT_CHARACTER_PRECIS 2
-#define OUT_STROKE_PRECIS 3
-#define OUT_TT_PRECIS 4
-#define OUT_DEVICE_PRECIS 5
-#define OUT_RASTER_PRECIS 6
-#define OUT_TT_ONLY_PRECIS 7
-#define OUT_OUTLINE_PRECIS 8
-#define OUT_SCREEN_OUTLINE_PRECIS 9
-#define OUT_PS_ONLY_PRECIS 10
-
-/* Clip precision constants */
-#define CLIP_DEFAULT_PRECIS 0
-#define CLIP_CHARACTER_PRECIS 1
-#define CLIP_STROKE_PRECIS 2
-#define CLIP_MASK 0xf
-#define CLIP_LH_ANGLES (1<<4)
-#define CLIP_TT_ALWAYS (2<<4)
-#define CLIP_EMBEDDED (8<<4)
-
-/* Font quality constants */
-#define DEFAULT_QUALITY 0
-#define DRAFT_QUALITY 1
-#define PROOF_QUALITY 2
-#define NONANTIALIASED_QUALITY 3
-#define ANTIALIASED_QUALITY 4
-#define CLEARTYPE_QUALITY 5
-
-/* Font pitch and family constants */
-#define DEFAULT_PITCH 0
-#define FIXED_PITCH 1
-#define VARIABLE_PITCH 2
-#define FF_DONTCARE 0
-#define FF_ROMAN 1
-#define FF_SWISS 2
-#define FF_MODERN 3
-#define FF_SCRIPT 4
-#define FF_DECORATIVE 5
-
 /* Background mode constants */
 #define TRANSPARENT 1
 #define OPAQUE 2
@@ -320,14 +240,17 @@ typedef struct tagLOGFONT {
 
 /* DirectDraw surface capabilities */
 #define DDSCAPS_SYSTEMMEMORY 0x00000800L
-
-/* GDI font creation function - stub implementation */
-static inline void* CreateFontIndirect(LOGFONT* lplf) {
-	(void)lplf;
-	/* Stub - would create a font on Windows */
-	return (void*)1; /* Return a non-null handle */
-}
 #endif
+
+/* The LOGFONT typedef, its associated font-weight/charset/precision/quality/
+   pitch-and-family constants, and the CreateFontIndirect() stub that used to
+   live here were removed 2026-08-09 (Phase 5). Their only real consumer was
+   Base::SetFont() / Base::SetDefaultLogfont() in VS_UI_Base.cpp, which read
+   just two of LOGFONT's fields (lfFaceName, lfHeight); both now take a
+   TextSystem::FontSpec (Client/TextSystem/FontHandleUtil.h) instead. See
+   docs/MODERNIZATION.md Phase 5 for the sizing/inventory that preceded this
+   change. On PLATFORM_WINDOWS builds this block never compiled anyway - the
+   real windows.h already supplies LOGFONT/CreateFontIndirect unchanged. */
 
 /* Windows path constants */
 #ifndef _MAX_PATH

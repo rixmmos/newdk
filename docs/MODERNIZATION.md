@@ -1152,6 +1152,13 @@ Option B.
 > 1–4. `VS_UI_Base.cpp` now includes `TextSystem/FontHandleUtil.h` and
 > `Base::SetFont` builds a `TextSystem` font handle for every platform.
 > No GDI call remains in the file.
+>
+> **[measured 2026-08-09]** The GDI-stub-deletion item below is also done:
+> `basic/Platform.h` no longer defines `LOGFONT` (or its associated
+> constants) on any platform, and `Base::SetFont`/`SetDefaultFontSpec`
+> take a `TextSystem::FontSpec` instead. Not compiler-verified — see the
+> caveat in that item's own note. Only the glyph-coverage item remains
+> open in this phase.
 
 - [x] In `VS_UI/src/VS_UI_Base.cpp`, remove the `#ifdef
       PLATFORM_WINDOWS` GDI branch and route Windows through
@@ -1162,12 +1169,14 @@ Option B.
       missing glyph range would show as blank or box characters rather
       than a crash. Needs a human looking at a running client, ideally at
       both QHD and FHD.
-- [ ] Delete the GDI stubs in `Platform.h` (previously deferred from
-      Phase 2). **Still blocked, for a new reason:** `Base::SetFont` keeps
-      `LOGFONT &lf` in its signature and reads `lf.lfFaceName` /
-      `lf.lfHeight`. Removing the stub requires introducing a small
+- [x] Delete the GDI stubs in `Platform.h` (previously deferred from
+      Phase 2). **[measured 2026-08-09] Implemented** — see the
+      "Implemented" note below the sizing report. **Original blocker, for
+      context:** `Base::SetFont` used to keep
+      `LOGFONT &lf` in its signature and read `lf.lfFaceName` /
+      `lf.lfHeight`. Removing the stub required introducing a small
       `TextSystem` font-spec struct and updating every caller — a real
-      refactor, not a deletion. Size it before scheduling.
+      refactor, not a deletion. It was sized first, then implemented.
 
       **[measured 2026-08-07] Sized, ready to schedule — no code changed.**
       Grepped `dkrix/` for `SetFont(`, `LOGFONT`, `DeleteObject`, and
@@ -1242,6 +1251,84 @@ Option B.
       other open item (Korean/Chinese glyph verification) landing first, or
       at least not regressing, since this touches the same call chain that
       builds every font handle in the UI.
+
+      **[measured 2026-08-09] Implemented, no compiler available to verify
+      (see caveat below).** Re-ran the same grep sweep fresh (not just
+      trusted the 2026-08-07 numbers) before touching anything; the
+      inventory above held with one minor correction — `Base::InitFont()`
+      has **21** live `SetFont` call sites, not 20 (the extra one is
+      `m_char_chat_pi`; the commented-out `m_chat_dialog_pi` call at the
+      old `:281` is still there and still commented out). Everything else
+      — zero callers outside `VS_UI/src/VS_UI_Base.{h,cpp}`, the two
+      dead-field observations (`lfWeight`/`lfItalic` set but never read),
+      and the unrelated `DeleteObject` COM-pointer snag — matched exactly.
+
+      Changes made:
+      - `Client/TextSystem/FontHandleUtil.h`: added
+        `struct FontSpec { FontFamilyId family; int height; };` next to
+        the existing `FontFamilyId` enum and `EncodeFontHandle`/
+        `DecodeFont*Handle` helpers it already fed — natural home, no new
+        file.
+      - `VS_UI/src/header/VS_UI_Base.h`: added
+        `#include "TextSystem/FontHandleUtil.h"`; changed
+        `SetDefaultLogfont(LOGFONT &lf) const` →
+        `SetDefaultFontSpec(TextSystem::FontSpec &spec) const` and
+        `SetFont(PrintInfo &pi, LOGFONT &lf, ...)` →
+        `SetFont(PrintInfo &pi, const TextSystem::FontSpec &spec, ...)`
+        (renamed alongside the type change since "logfont" is no longer
+        accurate; `SetFont`'s own name didn't need to change).
+      - `VS_UI/src/VS_UI_Base.cpp`: `SetFont` now reads `spec.family` /
+        `spec.height` directly — the old `strcmp(lf.lfFaceName, ...)`
+        dispatch is gone because `InitFont()` now sets the
+        `TextSystem::FontFamilyId` enum value directly instead of a face
+        name string, so there is nothing left to string-compare.
+        `SetDefaultFontSpec` sets exactly the two fields that matter
+        (`height = 0`, `family = FontFamilyCormorantGaramond` — the same
+        effective default as before). `InitFont()`'s 21 call sites were
+        mechanically rewritten one-for-one (`LOGFONT lf` →
+        `TextSystem::FontSpec fs`; `lf.lfHeight = N` → `fs.height = N`;
+        `strcpy(lf.lfFaceName, bodyFont/menuFont)` → `fs.family =
+        FontFamilyCormorantGaramond/FontFamilyUnifrakturCook` since those
+        were the only two strings ever passed); the dead `lf.lfWeight =
+        FW_BOLD` / `lf.lfItalic = 1` lines (live and already-commented
+        alike) were dropped since `FontSpec` has no equivalent field and
+        `SetFont` never read them — confirmed behavior-neutral, not just
+        assumed.
+      - `basic/Platform.h`: removed the `LOGFONT` typedef, the
+        font-weight/charset/output-precision/clip-precision/quality/
+        pitch-and-family constant blocks, and the `CreateFontIndirect`
+        stub. Left `DeleteObject` (real, unrelated callers — see the
+        side-cleanup note above, deliberately not touched by this change),
+        `TRANSPARENT`/`OPAQUE`, and the `TA_*` text-alignment constants in
+        place — `SetFont`'s own `bk_mode`/`align` parameters still use
+        them and they carry no GDI-font-specific semantics. Left a comment
+        pointing at this Phase 5 entry for why the block shrank.
+      - Verified after the edit: grepped the whole `dkrix/` tree for every
+        removed symbol (`LOGFONT`, `CreateFontIndirect`, `FW_*`,
+        `*_CHARSET`, `OUT_*_PRECIS`, `CLIP_*`, `*_QUALITY`, `*_PITCH`,
+        `FF_*`) — zero live hits remain; the only matches left are this
+        doc, the two archived `.md` files (explicitly historical, per the
+        sizing report), and the explanatory comments this change itself
+        added.
+
+      **Caveat — not compiler-verified.** No Windows+VS2022+vcpkg
+      toolchain is available in this sandbox (see `../CLAUDE.md`'s
+      "Sandbox capabilities" — CI is the substitute, and this change
+      wasn't pushed through it yet). The edit is textually exhaustive and
+      mechanical, but the first real build (native Windows or client CI)
+      should be treated as the actual verification step, not this note.
+      If it doesn't compile clean, the likely culprits are the new
+      `#include "TextSystem/FontHandleUtil.h"` in `VS_UI_Base.h` (path
+      resolves via `VS_UI`'s existing `${CMAKE_CURRENT_SOURCE_DIR}` and
+      `Client/TextSystem` include dirs in `CMakeLists.txt`, both already
+      relied on by `VS_UI_Base.cpp`'s pre-existing identical include) or
+      the `SetFont`/`SetDefaultFontSpec` signature edits not matching at
+      every call site.
+      - **Also unverified, pre-existing and unrelated to this change:**
+        Phase 5's other open item (Korean/Chinese glyph coverage in the
+        fallback fonts) — this refactor doesn't touch glyph rendering, only
+        how the family/size get to `TextSystem::EncodeFontHandle`, but
+        both should be checked in the same human pass on a running client.
 
 ### Phase 6 — Modern C++ as we touch it (ongoing)
 - Rule of thumb when a file is already being modified for another
