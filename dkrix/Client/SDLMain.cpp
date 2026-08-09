@@ -63,9 +63,13 @@ extern C_VS_UI gC_vs_ui;
 //-----------------------------------------------------------------------------
 // SDL-specific globals
 //-----------------------------------------------------------------------------
-SDL_Window* g_pSDLWindow = NULL;
-SDL_Renderer* g_pSDLRenderer = NULL;
-bool g_bRunning = true;
+// These three are defined elsewhere and linked into every build: the two SDL
+// handles by Client.cpp (which also uses them from CSDLGraphics::Flip), and
+// g_bRunning by Globals.cpp (DXLibBackendSDL.cpp clears it on SDL_QUIT).
+// Defining them here as well is a duplicate definition on this platform.
+extern SDL_Window* g_pSDLWindow;
+extern SDL_Renderer* g_pSDLRenderer;
+extern bool g_bRunning;
 
 //-----------------------------------------------------------------------------
 // Stub implementations for functions not available on non-Windows platforms
