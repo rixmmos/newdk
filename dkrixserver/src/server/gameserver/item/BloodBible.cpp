@@ -75,6 +75,17 @@ void BloodBible::create(const string& ownerID, Storage storage, StorageID_t stor
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        StringStream sql;
+
+        sql << "INSERT INTO BloodBibleObject "
+            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+            << " X, Y, Durability)"
+            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
+            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", " << m_Durability << ")";
+        // sql is retained only to reproduce the WarLog.txt audit line verbatim;
+        // the query itself now executes via bound parameters below.
+
         PreparedStatement insertBloodBibleObjectStmt(
             pConn, "INSERT INTO BloodBibleObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
                    "Durability) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");

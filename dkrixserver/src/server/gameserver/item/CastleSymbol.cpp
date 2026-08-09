@@ -76,6 +76,17 @@ void CastleSymbol::create(const string& ownerID, Storage storage, StorageID_t st
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+        StringStream sql;
+
+        sql << "INSERT INTO CastleSymbolObject "
+            << "(ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID ,"
+            << " X, Y, Durability )"
+            << " VALUES(" << m_ItemID << ", " << m_ObjectID << ", " << m_ItemType << ", '" << ownerID << "', "
+            << (int)storage << ", " << storageID << ", " << (int)x << ", " << (int)y << ", " << m_Durability << ")";
+        // sql is retained only to reproduce the WarLog.txt audit line verbatim;
+        // the query itself now executes via bound parameters below.
+
         PreparedStatement insertCastleSymbolObjectStmt(
             pConn, "INSERT INTO CastleSymbolObject (ItemID,  ObjectID, ItemType, OwnerID, Storage, StorageID , X, Y, "
                    "Durability ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
