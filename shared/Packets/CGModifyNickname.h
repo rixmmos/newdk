@@ -39,7 +39,16 @@ public:
     ObjectID_t getItemObjectID() const {
         return m_ItemObjectID;
     }
-    void setItemObjectID(WORD id) {
+    // Parameter widened from the server copy's WORD to ObjectID_t
+    // (Phase 12, 2026-08-09). The member has always been ObjectID_t
+    // (DWORD) and both sides read/write it at that width, so the WORD
+    // parameter was a latent 32->16-bit truncation. It never bit the
+    // server, which only ever read()s this request packet and calls the
+    // setter nowhere; the client is the sole caller and passes
+    // MItem::GetID(), a TYPE_OBJECTID (unsigned int). Adopting the
+    // server's WORD here would have truncated every item object ID
+    // above 65535.
+    void setItemObjectID(ObjectID_t id) {
         m_ItemObjectID = id;
     }
 
@@ -61,16 +70,20 @@ private:
 
 class CGModifyNicknameFactory : public PacketFactory {
 public:
-    Packet* createPacket() {
+    // Base PacketFactory declares these four with throw() specs on the
+    // client tree; narrowing to throw() here also satisfies the server
+    // tree's unconstrained base. See CLGetWorldList.h (Phase 12 pilot)
+    // for the precedent.
+    Packet* createPacket() throw() {
         return new CGModifyNickname();
     }
-    string getPacketName() const {
+    string getPacketName() const throw() {
         return "CGModifyNickname";
     }
-    PacketID_t getPacketID() const {
+    PacketID_t getPacketID() const throw() {
         return Packet::PACKET_CG_MODIFY_NICKNAME;
     }
-    PacketSize_t getPacketMaxSize() const {
+    PacketSize_t getPacketMaxSize() const throw() {
         return szObjectID + szBYTE + MAX_NICKNAME_SIZE;
     }
 };
@@ -79,9 +92,14 @@ public:
 // class CGModifyNicknameHandler;
 //////////////////////////////////////////////////////////////////////////////
 
+// Server-only: CGModifyNicknameHandler::execute has no client-side definition
+// or use. Guarded (matching the client Cpackets copy's existing guard)
+// since no CGHandlersStub.cpp-style client stub exists for this family.
+#ifndef __GAME_CLIENT__
 class CGModifyNicknameHandler {
 public:
     static void execute(CGModifyNickname* pPacket, Player* player);
 };
+#endif
 
 #endif

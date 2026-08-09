@@ -444,7 +444,8 @@ set(CG_PACKET_SOURCES
     CGModifyGuildMemberHandler.cpp
     # CGModifyGuildMemberIntro.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGModifyGuildMemberIntroHandler.cpp
-    CGModifyNickname.cpp CGModifyNicknameHandler.cpp
+    # CGModifyNickname.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 3.
+    CGModifyNicknameHandler.cpp
     # CGModifyTaxRatio.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGModifyTaxRatioHandler.cpp
     CGMouseToStash.cpp CGMouseToStashHandler.cpp

@@ -515,7 +515,7 @@
 
 #include "Gpackets/GCNicknameList.h"
 #include "Gpackets/GCAddNickname.h"
-#include "Cpackets/CGModifyNickname.h"
+#include "CGModifyNickname.h"
 #include "CGSelectNickname.h"
 #include "Gpackets/GCNicknameVerify.h"
 #include "Gpackets/GCModifyNickname.h"

@@ -99,7 +99,7 @@
 #include "CGDeleteSMSAddress.h"
 #include "CGAddSMSAddress.h"
 #include "CGSelectNickname.h"
-#include "Packet/Cpackets/CGModifyNickname.h"
+#include "CGModifyNickname.h"
 #include "CGGQuestAccept.h"
 #include "CGGQuestCancel.h"
 #include "CGUseItemFromGQuestInventory.h"
@@ -9914,7 +9914,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 				
 			//	Execute_UI_ITEM_USE(pItem->GetID(), 0, (void*)pItem);
 				
-				_CGModifyNickname.setNicknameID(pItem->GetID());
+				_CGModifyNickname.setItemObjectID(pItem->GetID());
 				g_pSocket->sendPacket( &_CGModifyNickname );
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
@@ -9927,7 +9927,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 			else
 			{
 				
-				_CGModifyNickname.setNicknameID(0);
+				_CGModifyNickname.setItemObjectID(0);
 				g_pSocket->sendPacket( &_CGModifyNickname );
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
 				g_pTempInformation->Value1 = left;					

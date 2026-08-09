@@ -97,6 +97,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGModifyGuildIntro.cpp
     CGModifyGuildMember.cpp
     CGModifyGuildMemberIntro.cpp
+    CGModifyNickname.cpp
     CGModifyTaxRatio.cpp
     CGNPCAskAnswer.cpp
     CGPartyInvite.cpp
