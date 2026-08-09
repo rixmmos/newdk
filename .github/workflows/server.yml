@@ -103,13 +103,19 @@ jobs:
     name: build (${{ matrix.sanitizer }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # Non-blocking, same reasoning as client.yml's sanitizers-linux job:
-    # this leg has never run before, and the plain `make debug` job above
-    # is what stayed red twice today (ff96e46, 421088e) before finally
-    # going green — an untested sanitizer leg shouldn't be able to flip
-    # the whole workflow red again while it's still finding its feet.
-    # Drop this once the leg has a few clean runs behind it.
-    continue-on-error: true
+    # Per-leg blocking, driven by `matrix.non_blocking` below. Both legs
+    # started non-blocking (2026-08-07): neither had ever run, and the
+    # plain `make debug` job above is what stayed red twice that day
+    # (ff96e46, 421088e) before finally going green — an untested
+    # sanitizer leg shouldn't be able to flip the whole workflow red
+    # while it's still finding its feet.
+    #
+    # The flip rule (MODERNIZATION.md Phase 10 bullet 3): a leg becomes
+    # blocking after ≥5 consecutive green runs of that leg. `asan`
+    # reached that on 2026-08-09 and is now blocking; `ubsan` has never
+    # been green and stays non-blocking. See the per-leg comments in the
+    # matrix `include:` entries.
+    continue-on-error: ${{ matrix.non_blocking }}
     defaults:
       run:
         working-directory: dkrixserver
@@ -119,10 +125,26 @@ jobs:
       matrix:
         sanitizer: [asan, ubsan]
         include:
+          # BLOCKING since 2026-08-09. [measured, job-level, Actions API]
+          # `build (asan)` green on server runs #27 (c91eebb) → #31
+          # (cc4ea8ba) — five consecutive. Over the leg's whole life
+          # (#15 eb9fd2d1 onward) it is 13 green / 4 red, and all four
+          # reds — #17, #19, #25, #26 — are runs where the plain
+          # `make debug (ubuntu)` job was red too, i.e. the tree was
+          # compile-broken for everyone. -fsanitize=address has never
+          # failed on its own here.
           - sanitizer: asan
             make_target: debug-asan
+            non_blocking: false
+          # NON-BLOCKING. [measured] `build (ubsan)` has failed its own
+          # `make debug-ubsan` step on every run it has ever had —
+          # #15 (eb9fd2d1) through #31 (cc4ea8ba), 17 for 17, including
+          # the 13 runs where both the plain build and the asan leg were
+          # green. Consecutive greens: 0, and it has never had one.
+          # Diagnosis: docs/ci-server-ubsan.md.
           - sanitizer: ubsan
             make_target: debug-ubsan
+            non_blocking: true
 
     steps:
       - uses: actions/checkout@v4
