@@ -4087,6 +4087,8 @@ original locations, kept for provenance.
 Phase 0 moved these into `dkrix/docs/archive/2026-migration-notes/` so they
 stop competing with the current plan. Done.
 
+Not superseded, listed here only so it is findable: `docs/phase12-residual-triage-2026-08-09.md` — per-pair triage of Phase 12's 48-pair `>5`-residual set (45 mechanical / 3 needs-decision / 0 blocked, with a recommended batch order).
+
 ## Windows Build Direction
 
 For current client work on this workstation, the primary smoke test is a native
