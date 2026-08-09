@@ -1034,11 +1034,108 @@ back to a single unconditional typedef.
       to 0 [measured]. `Platform.h`: 1,996 → 1,982 lines. No compiler
       available in this sandbox to confirm — gate is client CI, not run
       here.
-- [ ] GDI stubs — skipped entirely per instructions (Phase 5 territory,
-      `LOGFONT` is now a live parameter type in `Base::SetFont`).
+- [x] Transitive-include sweep — **done 2026-08-09, exhaustively.** This
+      file has cost the Linux port four separate CI rounds one missing
+      include at a time (`<time.h>` for `GetLocalTime` at `8cabe14`,
+      `<libgen.h>`, `<algorithm>` for `std::sort`, and the `strlen` noted
+      as still-latent in the run #26–#28 entry above — that note is now
+      stale, it is fixed). Enumerated the whole class instead of waiting
+      for the next one.
+      **Method [measured]:** rebuilt `8cabe14`'s standalone probe — compile
+      `basic/Platform.h` alone under g++ 13.3.0 in WSL against a stub
+      `SDL2/SDL.h` — and ran it against *two* stubs. One models what real
+      `SDL_stdinc.h` drags in (`<stdio.h>`, `<string.h>`, `<stdlib.h>`,
+      `<wchar.h>`, …); the other deliberately includes nothing at all. Any
+      symbol that resolves under the first and not the second is surviving
+      on a transitive include and is one build step from breaking. This is
+      the technique that proved `strlen` load-bearing, generalised: it
+      turns "what else might be missing?" into a measurement.
+      Three sites, and **only** three, in the whole file:
+      - `375` — `fprintf`/`stderr` in the `MessageBox` stub → `<stdio.h>`
+      - `1462–1464` — `time_t` fields in `struct _finddata_t` → `<time.h>`
+      - `1841` — `strlen` in the `GetCurrentDirectory` stub → `<string.h>`
+      All three hoisted to the top of the file rather than patched in at
+      each use site, so the next stub added below is covered too, and left
+      unconditional rather than platform-guarded because all three are ISO
+      C and MSVC has them — the Windows/non-Windows split that must stay
+      (see the preamble) is about *typedefs*, not about standard headers.
+      The now-redundant second copies of `<stdio.h>`/`<time.h>` further
+      down were removed. After the change the bare-stub probe compiles
+      clean, with and without `-DUNICODE`: **zero transitive survivors
+      remain** [measured]. Commit `9d655ef`.
+- [x] Duplicate typedefs, the rest of the class `cdf82ef` opened —
+      **done 2026-08-09.** Extending the probe to `-DUNICODE`, the one
+      branch a plain Linux compile never takes, turned up a hard error:
+      `LPTSTR`/`LPCTSTR` were declared twice inside the same
+      `#ifndef PLATFORM_WINDOWS`, once as a plain char-pointer pair and
+      again 55 lines later off `TCHAR`. Legal only because `TCHAR` is
+      `char` while `UNICODE` is undefined; `conflicting declaration` the
+      moment it is not. Kept the `TCHAR`-derived pair (it is what the name
+      means, and it makes the `UNICODE` branch above it coherent); the
+      earlier pair had no use before it, so it was dead in every
+      configuration. Commit `7f4dfb8`.
+      Then enumerated that class too, the same way as the includes:
+      every typedef name in the file, grouped, each repeat checked against
+      its enclosing guards to separate real duplicates from `#if`/`#else`
+      alternates. Eight names repeat. **Four pairs are correct and were
+      kept** — `QWORD`, `ADDRESS_MODE`, `id_t`, `TCHAR` and the four
+      `platform_*` handle types are one definition per arm of a mutually
+      exclusive conditional, and for `id_t` that is precisely the split
+      `067067f` introduced. **Six were genuinely both-active**, declared
+      twice under the same condition with nothing conditional between:
+      `BOOL` (158/295), `LONG` (157/313), `UINT` (145/328), `HANDLE`
+      (319/1223), `HWND` (315/1224), `HINSTANCE` (318/1225). Each pair
+      named the same type, so all six compiled — the `LPTSTR` hazard one
+      step earlier, waiting for someone to widen one copy and get a
+      redefinition error a thousand lines from the edit. Later copy
+      deleted in each case, never the earlier. Commit `d878c25`.
+      All four probe configurations (two stubs × `-DUNICODE` on/off)
+      compile clean after both commits, and the `#if`/`#endif` balance
+      re-checks to the single outer include guard — the structural failure
+      mode that nearly bit the `CRITICAL_SECTION` removal.
+      **Two dead duplicates left in place deliberately, flagged not fixed:**
+      `INVALID_HANDLE_VALUE` (433 active, 1322 behind an `#ifndef` that can
+      never fire) and `MAKELPARAM` (545 active, 1901 likewise). The second
+      `MAKELPARAM` is not equivalent to the first — `545` does not mask the
+      high word, `1901` routes through `MAKELONG` which does, so they
+      disagree for `h > 0xFFFF`. Unreachable today, but anyone deleting
+      `545` would silently change behaviour. Wants a decision, not a
+      blind edit.
+- [ ] GDI stubs — still deferred, but **the stated reason was stale and is
+      corrected here [measured 2026-08-09]:** `LOGFONT` is no longer "a live
+      parameter type in `Base::SetFont`". The `LOGFONT` typedef, its
+      constants and the `CreateFontIndirect()` stub were removed from
+      `Platform.h` under Phase 5 on 2026-08-09 — `Base::SetFont()` /
+      `Base::SetDefaultLogfont()` now take a `TextSystem::FontSpec`
+      (`Client/TextSystem/FontHandleUtil.h`), and the only `LOGFONT` hits
+      left in the tree are comments. Re-checked what the block actually
+      still holds, and it stays deferred on its own merits: `DeleteObject`
+      has two live callers (`Client/Client.cpp:3553`,
+      `VS_UI/src/VS_UI_WebBrowser.cpp:220`), `TRANSPARENT` / `TA_LEFT` /
+      `TA_RIGHT` / `TA_CENTER` are live (including as default arguments in
+      `VS_UI_Base.h:308`), and `DDSCAPS_SYSTEMMEMORY` — misfiled under
+      "GDI" — has dozens of call sites across `Client/` and `VS_UI/`. Only
+      `OPAQUE`, `TA_NOUPDATECP`, `TA_TOP`, `TA_UPDATECP` and `TA_BASELINE`
+      are unused, which is not worth a commit on its own.
 - Target: `Platform.h` shrinks to under 600 lines.
-      **[measured 2026-08-06] 1,995 lines** (was 1,996 at session start;
-      1,968 baseline). The two safely-completed Platform.h items nearly
+      **[measured 2026-08-09] 1,906 lines** (1,903 before this session's
+      three commits; 1,995 on 2026-08-06; 1,968 baseline). Note the
+      direction: this session *removed* six duplicate typedefs, two
+      duplicate `#include`s and a duplicate typedef pair, and the file
+      still ended three lines longer, because the comment explaining why
+      the three hoisted standard headers belong at the top costs more
+      lines than the declarations it replaced. That is the same effect
+      recorded below and it is not a reason to drop the comment — the
+      whole reason `<time.h>` was re-broken once already is that nothing
+      recorded why it was there.
+      **Under-600 is not reachable by this kind of work.** Every pass so
+      far has removed genuinely dead code and moved the number by tens of
+      lines, because what is left is mostly live: Win32 constants and
+      typedefs with real call sites across `Client/` and `VS_UI/`. Getting
+      to 600 means migrating callers off the Win32 vocabulary (Phases 4/5
+      territory), not further auditing of this file. The target should
+      probably be restated as such rather than carried as an open number.
+      The two safely-completed Platform.h items nearly
       net out — comments explaining *why* the Windows/non-Windows split
       must stay cost about as many lines as the dead code removal saved.
       The real mass reduction available here is the mutex unification
