@@ -1,0 +1,101 @@
+# Style for shared/ -- the canonical packet tree consumed by BOTH dkrix/ and
+# dkrixserver/.
+#
+# [found 2026-08-09] Until this file existed there was no .clang-format
+# anywhere above shared/: not at the repo root, not in shared/, not in
+# shared/Packets/. Every clang-format invocation against these 236 files
+# therefore fell back to the built-in LLVM default -- 2-space indent, 80
+# columns, right-aligned pointers -- which is not this project's style in
+# either tree. Nothing had noticed because neither CI format job scopes this
+# directory: server.yml greps '^dkrixserver/', client.yml does `cd dkrix` and
+# diffs --relative.
+#
+# Why this is dkrix/.clang-format rather than dkrixserver/'s: the two are
+# byte-identical apart from include handling (dkrixserver sorts and regroups;
+# dkrix does neither, deliberately). Files here are compiled into both trees,
+# so the safer of the two wins -- and packet headers are exactly where include
+# order has already broken this project once, when Wave 4 repointed
+# UIMessageManager.cpp at these headers and PlayerInfo lost the transitive
+# include it had been riding. A tool that silently reorders includes in this
+# directory is a build hazard.
+#
+# This file only fixes which style applies. It does NOT reformat anything and
+# no gate reads it yet: 79 of the 236 files here do not match this style, a
+# backlog inherited from the migration recipe (each merged file keeps its
+# server original's formatting). Wiring a gate is a separate decision, because
+# it has to choose between reformatting those 79 and ratcheting on new lines
+# only.
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+PointerAlignment: Left
+DerivePointerAlignment: false
+AccessModifierOffset: -4
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+NamespaceIndentation: None
+# [2026-08-09] Include sorting is OFF for this tree, deliberately.
+#
+# Two independent reasons:
+#  1. Safety. This client relies on include order in places -- the Phase 12
+#     Wave 4 PlayerInfo break was exactly a transitive-include failure. A tool
+#     that silently reorders ~300 includes in a 10.9k-line legacy file is a
+#     build hazard, not a tidiness win.
+#  2. It makes the changed-lines format gate unworkable. clang-format sorts
+#     the whole contiguous include block that intersects the lines it is
+#     given, so adding ONE #include asks to reorder the entire block. Under a
+#     changed-lines ratchet that turns every new include into a bulk reorder
+#     -- measured: it was the only thing failing the gate on this wave's
+#     commits, and turning it off made all of them clean.
+#
+# Cost is small: sorting accounts for 219 of UIMessageManager.cpp's 18,350
+# lines of drift and 6 of Platform.h's 1,683. The backlog is ordinary
+# formatting, not include order.
+#
+# IncludeCategories below is retained but inert; it takes effect only if
+# SortIncludes is turned back on.
+SortIncludes: Never
+IncludeBlocks: Preserve
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
+ReflowComments: false
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+IncludeCategories:
+  - Regex: '^<[a-z_]+\.h>'
+    Priority: 1
+  - Regex: '^<[a-z]+>'
+    Priority: 2
+  - Regex: '^<.*>'
+    Priority: 3
+  - Regex: '^".*"'
+    Priority: 4
