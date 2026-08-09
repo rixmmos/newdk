@@ -2499,66 +2499,6 @@ ApplyPatch()
             DeleteFile("Updater2.exe");
         }
 //yckou end
-//add by sonic Check *.dll have Bug. 2006.4.13
-//yckou begin: check invalid *.dll
-#ifndef PLATFORM_WINDOWS
-	WIN32_FIND_DATA FileData; 
-	HANDLE hSearch; 
-	bool fFinished = false; 
-
-	std::string InvalidDll;
-	hSearch = FindFirstFile("*.dll", &FileData); 
-	if (hSearch != INVALID_HANDLE_VALUE) 
-	{
-		while (!fFinished) 
-		{
-			int iLen = strlen(FileData.cFileName);
-			for (int j=0;j<iLen;j++)
-			{
-				if(isupper(FileData.cFileName[j]) != 0)
-					FileData.cFileName[j] = tolower(FileData.cFileName[j]);
-			}
-			InvalidDll = FileData.cFileName;
-
-			if(InvalidDll != "timer.dll" &&
-				InvalidDll != "msvcrtd.dll" &&
-				InvalidDll != "msvcrt.dll" &&
-				InvalidDll != "msvcp60.dll" &&
-				InvalidDll != "msvcirt.dll" &&
-				InvalidDll != "ifc22.dll" &&
-				InvalidDll != "gl.dll" &&
-				InvalidDll != "dsetup32.dll" &&
-				InvalidDll != "dsetup.dll" &&
-				InvalidDll != "deutil.dll" &&
-				InvalidDll != "basics.dll" &&
-				InvalidDll != "npx.dll" &&
-				InvalidDll != "npupdate0.dll" &&
-				InvalidDll != "nppsk.dll" &&
-				InvalidDll != "npgmup.dll" &&
-				InvalidDll != "npfgm9x.dll" &&
-				InvalidDll != "npcipher.dll" &&
-				InvalidDll != "mother.dll" &&
-				InvalidDll != "fl.dll" &&
-				InvalidDll != "dbghelp.dll" &&
-				InvalidDll != "darkedenweb.dll" &&
-				InvalidDll != "npchk.dll" &&
-				InvalidDll != "xerces-c_2_4_0.dll")
-				//MessageBox(0,(LPCTSTR)InvalidDll.c_str(),"ERROR",MB_OK);
-				//MessageBox(0,
-				return -1;
-				
-		
-			if (!FindNextFile(hSearch, &FileData)) 
-			{
-				fFinished = true; 
-			}
-		} 
-		// Close the search handle. 
-		FindClose(hSearch);
-	}
-#endif
-//yckou end
-//end sonic
 
 #endif
 
@@ -3399,7 +3339,6 @@ _APICheck.init();
 
 					//if (g_CurrentTime - lastTime > g_UpdateDelay)
 					{
-#ifdef PLATFORM_WINDOWS
 						if (g_pUpdate!=NULL)
 						{
 							
@@ -3412,10 +3351,6 @@ _APICheck.init();
 							#endif
 
 						}
-#else
-						// On non-Windows platforms, game update is handled differently
-						// TODO: Implement SDL2-based game loop
-#endif
 						//lastTime = g_CurrentTime;
 					}
 // REMOVED: nProtect anti-cheat code (SDL migration - no longer needed)

@@ -63,22 +63,18 @@ extern C_VS_UI gC_vs_ui;
 //-----------------------------------------------------------------------------
 // SDL-specific globals
 //-----------------------------------------------------------------------------
-SDL_Window* g_pSDLWindow = NULL;
-SDL_Renderer* g_pSDLRenderer = NULL;
-bool g_bRunning = true;
+// These three are defined elsewhere and linked into every build: the two SDL
+// handles by Client.cpp (which also uses them from CSDLGraphics::Flip), and
+// g_bRunning by Globals.cpp (DXLibBackendSDL.cpp clears it on SDL_QUIT).
+// Defining them here as well is a duplicate definition on this platform.
+extern SDL_Window* g_pSDLWindow;
+extern SDL_Renderer* g_pSDLRenderer;
+extern bool g_bRunning;
 
-//-----------------------------------------------------------------------------
-// Stub implementations for functions not available on non-Windows platforms
-//-----------------------------------------------------------------------------
-
-// Stub for ExecuteActionInfoFromMainNode
-void ExecuteActionInfoFromMainNode(
-	unsigned short, unsigned short, unsigned short, int, int, unsigned int,
-	unsigned short, unsigned short, int, unsigned long,
-	struct MActionResult*, bool, int, int)
-{
-	// Stub - do nothing on SDL platform
-}
+// The process working directory, owned by Client.cpp:197. WinMain fills it
+// from GetModuleFileName and chdir()s to it; here getcwd() fills it instead.
+// CGameUpdate.cpp:133 declares it the same way.
+extern char g_CWD[_MAX_PATH];
 
 // g_Print / FillRect / rectangle are provided by RenderingFunctions.cpp
 
@@ -87,80 +83,77 @@ void ExecuteActionInfoFromMainNode(
  * SDL version of InitApp - Creates window and initializes game
  *
  *-----------------------------------------------------------------------------*/
-static BOOL InitApp(int nCmdShow)
-{
-	int cx = 800, cy = 600;
-	Uint32 flags = SDL_WINDOW_SHOWN;
+static BOOL InitApp(int nCmdShow) {
+    int cx = 800, cy = 600;
+    Uint32 flags = SDL_WINDOW_SHOWN;
 
-	// Determine window size and flags based on command line
-	extern bool g_bFullScreen;
-	extern bool g_MyFull;
+    // Determine window size and flags based on command line
+    extern bool g_bFullScreen;
+    extern bool g_MyFull;
 
-	if (g_bFullScreen) {
-		flags |= SDL_WINDOW_FULLSCREEN;
-		flags |= SDL_WINDOW_BORDERLESS;
+    if (g_bFullScreen) {
+        flags |= SDL_WINDOW_FULLSCREEN;
+        flags |= SDL_WINDOW_BORDERLESS;
 
-		// Get screen dimensions
-		SDL_DisplayMode dm;
-		if (SDL_GetCurrentDisplayMode(0, &dm) == 0) {
-			cx = dm.w;
-			cy = dm.h;
-		}
-	} else {
-		flags |= SDL_WINDOW_RESIZABLE;
+        // Get screen dimensions
+        SDL_DisplayMode dm;
+        if (SDL_GetCurrentDisplayMode(0, &dm) == 0) {
+            cx = dm.w;
+            cy = dm.h;
+        }
+    } else {
+        flags |= SDL_WINDOW_RESIZABLE;
 
-		extern RECT g_GameRect;
-		cx = g_GameRect.right;
-		cy = g_GameRect.bottom;
-	}
+        extern RECT g_GameRect;
+        cx = g_GameRect.right;
+        cy = g_GameRect.bottom;
+    }
 
-	// Create SDL window
-	g_pSDLWindow = SDL_CreateWindow(
-		"Dark Eden",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		cx, cy,
-		flags
-	);
+    // Create SDL window
+    g_pSDLWindow = SDL_CreateWindow("Dark Eden", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, cx, cy, flags);
 
-	if (!g_pSDLWindow) {
-		fprintf(stderr, "Failed to create SDL window: %s\n", SDL_GetError());
-		return FALSE;
-	}
+    if (!g_pSDLWindow) {
+        fprintf(stderr, "Failed to create SDL window: %s\n", SDL_GetError());
+        return FALSE;
+    }
 
-	// Create SDL renderer
-	g_pSDLRenderer = SDL_CreateRenderer(
-		g_pSDLWindow, -1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
+    // Create SDL renderer
+    g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	if (!g_pSDLRenderer) {
-		fprintf(stderr, "Failed to create SDL renderer: %s\n", SDL_GetError());
-		return FALSE;
-	}
+    if (!g_pSDLRenderer) {
+        // Same fallback as the Windows path (Client.cpp:1755): an accelerated
+        // renderer is unavailable on plenty of Linux setups, and software
+        // rendering is preferable to refusing to start.
+        g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_SOFTWARE);
+    }
 
-	// Set the renderer's draw color to black for SDL_RenderClear
-	// This ensures the screen is cleared to black each frame
-	if (SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, 255) != 0) {
-		fprintf(stderr, "Failed to set render draw color: %s\n", SDL_GetError());
-	}
+    if (!g_pSDLRenderer) {
+        fprintf(stderr, "Failed to create SDL renderer: %s\n", SDL_GetError());
+        return FALSE;
+    }
 
-	// Hide cursor
-	SDL_ShowCursor(0);
+    // Set the renderer's draw color to black for SDL_RenderClear
+    // This ensures the screen is cleared to black each frame
+    if (SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, 255) != 0) {
+        fprintf(stderr, "Failed to set render draw color: %s\n", SDL_GetError());
+    }
 
-	// Initialize SpriteLib SDL backend
-	if (spritectl_init() != 0) {
-		fprintf(stderr, "Failed to initialize SpriteLib backend\n");
-		return FALSE;
-	}
+    // Hide cursor
+    SDL_ShowCursor(0);
 
-	// Initialize game
-	if (!InitGame()) {
-		fprintf(stderr, "Failed to initialize game\n");
-		return FALSE;
-	}
+    // Initialize SpriteLib SDL backend
+    if (spritectl_init() != 0) {
+        fprintf(stderr, "Failed to initialize SpriteLib backend\n");
+        return FALSE;
+    }
 
-	return TRUE;
+    // Initialize game
+    if (!InitGame()) {
+        fprintf(stderr, "Failed to initialize game\n");
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /*-----------------------------------------------------------------------------
@@ -252,8 +245,6 @@ int main(int argc, char* argv[])
 	//-----------------------------------------------------------------
 	// Get current directory (from WinMain lines 3201-3213)
 	//-----------------------------------------------------------------
-	char g_CWD[_MAX_PATH];
-
 	// On macOS/Linux, use getcwd() to get current directory
 	// Note: When running from DarkEden directory, this should already be correct
 	if (getcwd(g_CWD, _MAX_PATH) != NULL) {
@@ -301,7 +292,6 @@ int main(int argc, char* argv[])
 
 	// Frame rate tracking variables (declared outside InitApp block for cleanup access)
 	const int g_FrameGood = 15;  // Minimum acceptable FPS (from Client.cpp line 154)
-	DWORD g_FrameCount = 0;  // Local frame counter
 
 	try {
 		if (InitApp(nCmdShow))
@@ -364,8 +354,6 @@ int main(int argc, char* argv[])
 
 		// Frame rate tracking variables
 		g_StartTime = SDL_GetTicks();
-		g_StartFrameCount = 0;
-		g_FrameCount = 0;
 
 		while (g_bRunning)
 		{
@@ -416,7 +404,6 @@ int main(int argc, char* argv[])
 				}
 
 				SDL_RenderPresent(g_pSDLRenderer);  // Replaces CSDLGraphics::Flip()
-				g_FrameCount++;
 			}
 			else
 			{
@@ -463,7 +450,6 @@ int main(int argc, char* argv[])
 	CleanupSDL();
 
 	printf("Game exited cleanly.\n");
-	printf("Total frames rendered: %u\n", g_FrameCount);
 
 	return 0;
 }

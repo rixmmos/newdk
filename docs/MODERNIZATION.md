@@ -601,13 +601,12 @@ deleted; `MEffectTarget`'s key function stubbed.
    **Unverified — and unverifiable locally:** `CMakeLists.txt:86-88` forces
    `BUILD_ENGINE OFF` on `WIN32`, so `effect_viewer` exists only on Linux and
    is absent from the Windows viewers job. Run #38 is the first check.
-2. **`Client/SDLMain.cpp` has still never compiled.** It now owns the Linux
-   entry point (`cc57206` guarded `Client.cpp`'s `WinMain`/`InitApp`/
-   `WindowProc`/`PatchLogWindowProc` behind `PLATFORM_WINDOWS`). The build has
-   not reached it. It previously failed on `CDirectDraw`, renamed to
-   `CSDLGraphics` by Phase 3, and its `main()` is 471 lines against `WinMain`'s
-   ~1,340 — so whatever initialisation was not carried across simply does not
-   happen on Linux.
+2. ~~**`Client/SDLMain.cpp` has still never compiled.**~~ **Superseded — see
+   "Linux client port, thread 2" below.** It does compile, and always did;
+   the `CDirectDraw` failure belonged to `VS_UI/WinMain.cpp`, a different
+   file. What was true is that it would not have *linked*, and that the
+   initialisation `WinMain` does and `main()` does not is a real list. Both
+   are worked through in that section.
 3. **`ctest` has never executed.** It runs after the build step. The 11
    engine/sprite tests are compiled at best, never run. Do not record them as
    passing.
@@ -632,6 +631,188 @@ which was gate-checked per file, passed first time.
 `Co-Authored-By: Claude Opus 5` trailer. That is wrong — the session ran on
 Sonnet 5. The trailer came from environment configuration, not from checking
 what was actually executing. Not rewritten, since the commits are pushed.
+
+### Linux client port, thread 2 — `Client/SDLMain.cpp` (2026-08-09)
+
+**A Linux client build is available on this workstation after all, without
+root.** This is the single most useful thing to carry forward from this
+thread; the handover assumed CI's two `continue-on-error` sanitizer legs were
+the only compile gate, and they are not. WSL has g++ 13.3.0 but no SDL2 and
+no passwordless `sudo`. `apt-get download` needs neither:
+
+```bash
+mkdir -p /tmp/sdlpkg && cd /tmp/sdlpkg
+apt-get download libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev \
+                 libsdl2-mixer-dev libsdl2-2.0-0 libsdl2-image-2.0-0 \
+                 libsdl2-ttf-2.0-0 libsdl2-mixer-2.0-0 libjpeg-dev
+mkdir root && for d in *.deb; do dpkg -x "$d" root; done
+# Debian's SDL_config.h does #include <SDL2/_real_SDL_config.h>, which lives
+# under include/x86_64-linux-gnu/SDL2. Targets get -isystem .../include/SDL2
+# only, so give that directory a self-referencing SDL2 link:
+ln -sfn . root/usr/include/SDL2/SDL2
+cp -n root/usr/include/x86_64-linux-gnu/SDL2/* root/usr/include/SDL2/
+
+cmake -S dkrix -B /tmp/dkbuild -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -DCMAKE_PREFIX_PATH=/tmp/sdlpkg/root/usr \
+      -DJPEG_INCLUDE_DIR=/tmp/sdlpkg/root/usr/include \
+      -DJPEG_LIBRARY=/tmp/sdlpkg/root/usr/lib/x86_64-linux-gnu/libjpeg.so
+```
+
+The runtime `.so` files matter: `sdl2_ttf-config.cmake` gates
+`add_library(SDL2_ttf::SDL2_ttf …)` on `EXISTS` of the versioned library, and
+CMake reports a dangling symlink as absent, so the `-dev` packages alone
+configure but fail to generate. Linking a whole executable also wants SDL2's
+own transitive deps (ALSA, PulseAudio, libdecor, libsamplerate, Xss); for
+compile-only work pass `-DCMAKE_EXE_LINKER_FLAGS='-Wl,--allow-shlib-undefined
+-Wl,--unresolved-symbols=ignore-in-shared-libs'` rather than chasing them.
+
+With that, `compile_commands.json` gives the exact CI compile line for any
+single file, which is a seconds-long check instead of a 25-minute CI round
+trip. It also gets far past where CI stops: everything CI reported as a link
+failure at 17% is a *viewer/test executable*, and `--target DarkEden -- -k`
+walks straight past those into the client's own translation units.
+
+**[measured 2026-08-09] Three files fail to compile past the 17% mark**,
+found this way and left for whoever owns them — none is in this thread's
+scope, and all three are small:
+
+- `Client/MEffectSpriteTypeTable.cpp:44` — `__asan_address_is_poisoned` is
+  not declared. The same fix `a227d26` applied to `MZone`
+  (`<sanitizer/asan_interface.h>`) was not applied here. Asan leg only.
+- `Client/Packet/Gpackets/GCAddNPCHandler.cpp:43` — `_stricmp` is not
+  declared; GCC suggests `stricmp`, which the shim does provide.
+- `Client/Packet/Gpackets/GCMonsterKillQuestInfoHandler.cpp:30` —
+  `std::auto_ptr` is not a member of `std`. Not a C++11-vs-C++17 problem —
+  libstdc++ 13 still declares it under `-std=gnu++11` (checked) — the TU
+  simply never includes `<memory>` and got it transitively on MSVC. Three
+  cascading errors from the one declaration.
+
+That census is from a run stopped just short of 60% of the `DarkEden`
+target, so it is a floor, not a complete list.
+
+**Two handover claims were wrong.** `Client/SDLMain.cpp` compiles clean today
+— `-fsyntax-only` and a real `-c`, zero errors, both before and after this
+thread's changes. And it never referenced `CDirectDraw`: the only occurrence
+of the name in the tree is `CMakeLists.txt:296-315`, describing
+`VS_UI/WinMain.cpp`, a different file with a different entry point, which
+that comment excludes unconditionally. The two got conflated. What is true is
+that the *link* had never reached it, and it would not have linked.
+
+**CMake wiring is correct, no change needed.** `file(GLOB
+CLIENT_MAIN_SOURCES … Client/*.cpp)` (`CMakeLists.txt:687`) picks up
+`SDLMain.cpp` on every platform; on Windows the whole file is inside
+`#ifndef PLATFORM_WINDOWS` and compiles to an empty object.
+
+**Gap analysis: `WinMain` (Client.cpp:2292-3549) vs `main()`
+(SDLMain.cpp:182-455).** Line numbers are post-`5c725eb`.
+
+| What Windows does | Client.cpp | SDLMain.cpp | Verdict |
+| --- | --- | --- | --- |
+| `EnableDpiAwareProcess`, `timeBeginPeriod/timeEndPeriod` | 2296-2297, 3400 | — | Win32 by nature |
+| Force a 16bpp display mode, restore on exit | 2311-2317, 3399 | — | Win32 by nature; SDL owns the mode |
+| Parse launch mode from the last command-line char | 2319-2342 | 217-243 | ported, equivalent |
+| Single-instance mutex `<<<DarkEden>>>` | 2375, 3529 | — | **gap**: two clients can run at once on Linux. Win32 by mechanism, but the intent is portable |
+| `FindWindow("PROCEXPL")` anti-debug bail-out | 2408 | — | dead copy protection; correctly absent |
+| Fill `g_CWD` from the exe path, `chdir` to it | 2423-2433 | 248-257 | **partly ported** — `getcwd` fills `g_CWD` (fixed here, `69d0efb`), but nothing derives the exe directory or `chdir`s; Linux relies on the caller's cwd |
+| Replace `Updater.exe` with `Updater2.exe` | 2478-2489 | — | Windows updater; correctly absent |
+| `srand(time(NULL))` | 2626 | — | **gap**, but inert: `VS_UI_Title.cpp:1012` seeds before the title screen. Not landed — the one added line would have cost a 280-line reformat of `main()` |
+| `g_pFileDef = new Properties` + load | 2644-2645 | — | correctly absent: `GameInit.cpp:1657` does it inside `InitGame()`, which both paths call. The Windows path allocates it twice and leaks the first |
+| Load the Netmarble config, `ParsingNetmarble` | 2652, 3127 | — | **gap**; dead Korean-portal integration |
+| `g_MaxNPC = 0` | 2714, 2940 | — | **gap**, cosmetic: `GameMain.cpp:238` leaves it at `MAX_NPC`. `g_bHAL`/`g_bMusicSW` are already `true` there, so those two are correctly absent |
+| 8-char command-line auth prefix, `g_Dimension` from `lpCmdLine[8]` | 2736-2849 | — | **gap**: world id never set from the command line |
+| `GetFutecAddress(lpCmdLine)` | 2959 | — | **gap**: `g_FutecIP`/`g_FutecPort` never set |
+| `CheckTerriblePatch()` | 2992 | — | **gap**: append-patch integrity check never runs. Note it dereferences `g_pFileDef`, which on Linux is null until `InitGame`, so it cannot simply be called in the same place |
+| Delete the leftover `Update/` directory | 3044-3100 | — | **gap**; Win32 CRT `_findfirst`/`_rmdir`. Only matters alongside the Windows updater |
+| `RemoveProgressBar()` | 3107 | — | correctly absent: the body is `#ifdef PLATFORM_WINDOWS DestroyWindow` and `g_hWndProgress` is only ever set on Windows |
+| `ParsingRealServer` → `IsAutoLogIn`, `UserID`, `AutoLogInKeyValue`, `g_Dimension` | 3146, 3247-3272 | — | **the biggest gap**: auto-login is entirely absent on Linux |
+| `_APICheck.init()` / `.CheckApi()` | 3158, 3318 | — | correctly absent: `APICheck.cpp:139-151` is a no-op stub off Windows |
+| `CheckDarkEdenLanguage()` → `gC_ci` | 3221-3228 | 284 | equivalent: the function is `return DARKEDEN_ENGLISH;` (Client.cpp:636) and the switch has only a `default:` arm |
+| `InitCrashReport()` | 3234 | — | Windows minidump; correctly absent |
+| `InitApp`, `g_dwVideoMemory`, `SetKorean`, `g_pTopView->Init`, `g_bActiveApp` | 3237-3307 | 297-334 | ported. SDLMain adds `CheckActivate(TRUE)` and `SDL_RaiseWindow` (335, 338), which Windows gets from `WM_ACTIVATEAPP` |
+| `PeekMessage`/`GetMessage`/`Translate`/`Dispatch` | 3320-3327 | 362 | replaced by `platform_input_update()`; equivalent by design |
+| `g_pUpdate->Update()` | 3342 | 375-378 | ported |
+| FPS window using `g_FrameCount`/`g_StartFrameCount` | 3367-3381 | 381-390 | ported; was mixing a local with a global until `69d0efb` |
+| `WaitMessage()` when inactive | 3386 | 411 | replaced by `SDL_Delay(10)` |
+| `SPI_SETSCREENSAVERRUNNING` | 3391 | — | Win32 by nature |
+| `g_bForceExitBynProtect` → the bad-timer dialog loop | 3358-3361, 3405-3477 | — | dead nProtect anti-cheat; correctly absent |
+| `ReleaseAllObjects()`, `delete gC_ci` | 3482, 3494 | 443, 446 | ported |
+| `delete g_pClientConfig` | 3521 | — | **gap**, minor: leak at exit |
+| Re-launch the updater when `g_bNeedUpdate` | 3536-3546 | — | Windows updater; correctly absent |
+
+**Presentation is the one divergence worth a decision.** `CGameUpdate.cpp:5032`
+and `:5954` call `CSDLGraphics::Flip()` from inside the update path on every
+platform, and `Flip()` (Client.cpp:103-137) already does `SDL_RenderClear` +
+`spritectl_present_surface` + `SDL_RenderPresent`. SDLMain's loop then does
+all three again around the same `g_pUpdate->Update()` call (372, 393-405),
+plus a full `g_pLast`→`g_pBack` blit. So every Linux frame is presented twice
+and cleared twice. Left alone deliberately: deciding which of the two owns
+presentation needs the client actually running, and neither answer is implied
+by the Windows path. **[unverified]** — nothing here has been executed.
+
+**Landed (5 commits, all compile-verified under WSL g++ 13.3.0).**
+
+- `25d2ee5` — `SDLMain.cpp` defined `g_pSDLWindow`, `g_pSDLRenderer` and
+  `g_bRunning`, all of which are already strong definitions in objects that
+  link into the same binary (`Client.cpp:84-85`, which reaches
+  `libVS_UI.a` via `VS_UI_CLIENT_SOURCES` on every platform; and
+  `Globals.cpp:25`). Confirmed with `nm` on both sides. Now `extern`.
+- `fbc7e75` — deleted an empty `ExecuteActionInfoFromMainNode` stub. The real
+  one is `PacketFunction.cpp:1531`, declared in `GameHelpers.h:83`, and
+  compiles on Linux. The stub was not even the same function: its tenth
+  parameter was `unsigned long` where `DWORD` is `unsigned int` here, so
+  `nm` shows two distinct mangled names and no caller could ever have
+  selected it.
+- `69d0efb` — `g_CWD` and `g_FrameCount` were re-declared as locals inside
+  `main()`, shadowing the globals they were ported from. `g_FrameCount` is
+  the client's frame clock: `CGameUpdate.cpp:5771` and
+  `CWaitUIUpdate.cpp:403` increment it, `MTopView.cpp:13060/13078/17618` read
+  it to pick animation frames. SDLMain subtracted its local from the real
+  `g_StartFrameCount` and wrote the local's value back into that global once
+  a second. Removing the local alone would have double-counted, since SDLMain
+  incremented it on top of the update path's own increment and `WinMain` only
+  reads — so the extra `++` and the two loop-entry resets went too. After
+  this, `nm` reports exactly one defined symbol in `SDLMain.cpp.o`: `main`.
+- `ab8469a` — added the `SDL_RENDERER_SOFTWARE` retry that
+  `Client.cpp:1755` has. Without it any host with no usable accelerated
+  renderer — headless runner, VM with no GL, remote X — fails `InitApp` and
+  exits before `InitGame`.
+- `5c725eb` — deleted two preprocessor branches in `Client.cpp` that cannot
+  compile anywhere now that `WinMain` is Windows-only: the `#ifndef
+  PLATFORM_WINDOWS` invalid-DLL whitelist scan, and the `#else` whose body is
+  the comment "TODO: Implement SDL2-based game loop" — that loop is
+  `SDLMain.cpp`. Details, including why the DLL scan must be deleted rather
+  than corrected, are in the commit message.
+
+**Needs a human decision, not a patch.** `Client.cpp:2676`'s
+`#if defined(USE_UPDATER) && !defined(PLATFORM_WINDOWS)` is inside the
+Windows-only `WinMain` region, so the "empty command line → re-launch
+`Updater.exe`" path has never run in a shipping build. Correcting the guard
+would change what the released client does, so it was left alone.
+
+**Still open, and what is *not* claimed.** The `DarkEden` link has not been
+reached — the target builds to just under 60% locally, and the errors above
+keep even `make -k` from finishing it. So nothing here shows the client
+links; it shows only that `SDLMain.cpp` no longer contributes a duplicate
+symbol to that link, and that the three symbols it used to duplicate really
+were duplicated. Everything about runtime behaviour in the table above is
+reasoning from the source, not from a run. `ctest` still has never executed.
+
+**A third data point on the format gate, and a rule.** Formatting only the
+changed lines still does not converge in this tree: on `SDLMain.cpp` the
+range grew every pass for eight passes and was still growing (`211` → `211,
+213` → `211, 213-214` → … → `211, 213-214, 216-219, 221, 239, 241-242`).
+The cause is that the file is tab-indented and `.clang-format` says
+`UseTab: Never`, so any touched line converts to spaces and drags its
+neighbour. Practical rule for this tree:
+
+- Deleting lines is free — the gate skips a diff with no added lines.
+- Adding a line at **file scope, column 0** is free: no indentation to
+  convert, no enclosing scope to drag. Both new `extern` blocks here went in
+  that way on purpose.
+- Adding a line **inside a function** costs a full reformat of that function.
+  `ab8469a` paid it (75 lines, `git diff -w` clean); the `srand` line was
+  dropped rather than pay 280 lines for a seed that is already set elsewhere.
 
    **Design problem this wave exposed, now resolved by `945a1a4`:** the format gate's
    ratchet *was* whole-file — touch a file, the whole file had to be
