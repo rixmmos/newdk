@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdint>
-
+#include <algorithm> /* std::sort, used in the tile depth sort below */
 
 
 #define DEFAULT_CELL_PIXELS 48  

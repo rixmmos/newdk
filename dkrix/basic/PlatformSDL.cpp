@@ -30,7 +30,7 @@ extern "C" int platform_is_ctrl_pressed(void) {
 #ifdef PLATFORM_LINUX
 	#include <limits.h>
 	#include <stdlib.h>
-	#include <libgen.h>  /* For dirname, used by platform_get_executable_dir */
+#include <libgen.h> /* For dirname, used by platform_get_executable_dir */
 #endif
 
 #ifdef PLATFORM_MACOS
