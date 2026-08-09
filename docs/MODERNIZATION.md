@@ -575,6 +575,64 @@ to run it and listen. `main` now produces audio-enabled builds; the next
 that has never executed. Listen first. `git revert bb02c95` restores the
 silent-but-stable status quo without touching anything else.
 
+### Linux client port — state at handover, 2026-08-09 (runs #29–#38)
+
+**Where it got to.** Both sanitizer legs reached **17% of the build with zero
+compile errors** at `4e0625c`; every remaining failure is at *link*. The Linux
+client compiling at all is new — it was not true at any point before this wave.
+Error counts ran **65 → 8 → 1 → 3 → 1 → 1 → 5 → 1 → 2 → link-only**, progress
+**2% → 10% → 13% → 15%/16% → 17%**. MSVC, `Viewers and validators` and
+`clang-format` were green throughout, except run #31's format job (see below).
+
+**Commits, `e6398ae..00a51ff` (21).** In rough order: the `PlayerInfo`
+regression fix; both format gates' base SHA; `<time.h>`; 22 bare
+`std::ofstream;`/`std::ifstream;` statements across 11 SpriteLib headers; the
+changed-lines ratchet + `SortIncludes: Never`; `<libgen.h>`, `test_zone.c`'s
+`src/` path, `<algorithm>`; `CFilterPack`'s stray guard, `Platform.h`'s
+duplicate `SetSurfaceInfo`, `enum Race Race` in two files; 68 `Assert.h`
+path-qualifications; `Client.cpp`'s Win32 entry-point guards; `CTypeTable::TYPE`;
+`asan_interface.h` + the `HFONT` forwarder guards; a redundant ASan block
+deleted; `MEffectTarget`'s key function stubbed.
+
+**Open, in the order they will be hit:**
+
+1. **`effect_viewer` link (both legs).** `00a51ff` stubs
+   `MEffectTarget::~MEffectTarget()` in the viewer's `stubs.cpp`.
+   **Unverified — and unverifiable locally:** `CMakeLists.txt:86-88` forces
+   `BUILD_ENGINE OFF` on `WIN32`, so `effect_viewer` exists only on Linux and
+   is absent from the Windows viewers job. Run #38 is the first check.
+2. **`Client/SDLMain.cpp` has still never compiled.** It now owns the Linux
+   entry point (`cc57206` guarded `Client.cpp`'s `WinMain`/`InitApp`/
+   `WindowProc`/`PatchLogWindowProc` behind `PLATFORM_WINDOWS`). The build has
+   not reached it. It previously failed on `CDirectDraw`, renamed to
+   `CSDLGraphics` by Phase 3, and its `main()` is 471 lines against `WinMain`'s
+   ~1,340 — so whatever initialisation was not carried across simply does not
+   happen on Linux.
+3. **`ctest` has never executed.** It runs after the build step. The 11
+   engine/sprite tests are compiled at best, never run. Do not record them as
+   passing.
+
+**Two lessons worth keeping.**
+- *In an unformatted file, deleting lines is nearly free; changing them is
+  expensive.* The gate only polices added lines. Correcting one call in
+  `MZone::AddEffect` required reformatting 802 lines including gameplay boolean
+  logic; deleting the same redundant block cost 10 lines and no reformat.
+- *Narrowing works, broadening backfires.* Adding `Client/Packet` to VS_UI's
+  include path changed search order and broke the Windows build (two
+  `Exception.h` files). Adding `Client/MEffectTarget.cpp` to `effect_viewer`
+  traded one missing typeinfo for 19, against the stated intent in `stubs.cpp`'s
+  own header. Both were reverted for a narrower fix.
+
+**Process note.** Run #31's `clang-format` job failed because two commits were
+pushed after verifying only that they built. A local build and the format gate
+are separate checks and neither substitutes for the other; the 68-file batch,
+which was gate-checked per file, passed first time.
+
+**Attribution correction.** Every commit in this range carries a
+`Co-Authored-By: Claude Opus 5` trailer. That is wrong — the session ran on
+Sonnet 5. The trailer came from environment configuration, not from checking
+what was actually executing. Not rewritten, since the commits are pushed.
+
    **Design problem this wave exposed, now resolved by `945a1a4`:** the format gate's
    ratchet *was* whole-file — touch a file, the whole file had to be
    clang-format clean. Against a 2,199-file backlog of legacy sources with
