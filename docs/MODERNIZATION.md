@@ -673,15 +673,23 @@ trip. It also gets far past where CI stops: everything CI reported as a link
 failure at 17% is a *viewer/test executable*, and `--target DarkEden -- -k`
 walks straight past those into the client's own translation units.
 
-**[measured 2026-08-09] Two genuine compile errors sit past the 17% mark**,
-found this way and left for whoever owns those files — both are one-line
-portability bugs, neither is in this thread's scope:
+**[measured 2026-08-09] Three files fail to compile past the 17% mark**,
+found this way and left for whoever owns them — none is in this thread's
+scope, and all three are small:
 
 - `Client/MEffectSpriteTypeTable.cpp:44` — `__asan_address_is_poisoned` is
   not declared. The same fix `a227d26` applied to `MZone`
-  (`<sanitizer/asan_interface.h>`) was not applied here.
+  (`<sanitizer/asan_interface.h>`) was not applied here. Asan leg only.
 - `Client/Packet/Gpackets/GCAddNPCHandler.cpp:43` — `_stricmp` is not
   declared; GCC suggests `stricmp`, which the shim does provide.
+- `Client/Packet/Gpackets/GCMonsterKillQuestInfoHandler.cpp:30` —
+  `std::auto_ptr` is not a member of `std`. Not a C++11-vs-C++17 problem —
+  libstdc++ 13 still declares it under `-std=gnu++11` (checked) — the TU
+  simply never includes `<memory>` and got it transitively on MSVC. Three
+  cascading errors from the one declaration.
+
+That census is from a run stopped just short of 60% of the `DarkEden`
+target, so it is a floor, not a complete list.
 
 **Two handover claims were wrong.** `Client/SDLMain.cpp` compiles clean today
 — `-fsyntax-only` and a real `-c`, zero errors, both before and after this
@@ -783,7 +791,7 @@ Windows-only `WinMain` region, so the "empty command line → re-launch
 would change what the released client does, so it was left alone.
 
 **Still open, and what is *not* claimed.** The `DarkEden` link has not been
-reached — the target builds past a third locally, and the two errors above
+reached — the target builds to just under 60% locally, and the errors above
 keep even `make -k` from finishing it. So nothing here shows the client
 links; it shows only that `SDLMain.cpp` no longer contributes a duplicate
 symbol to that link, and that the three symbols it used to duplicate really
