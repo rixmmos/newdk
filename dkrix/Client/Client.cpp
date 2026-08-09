@@ -811,8 +811,9 @@ UpdateProgressBar()
 //-----------------------------------------------------------------------------
 HWND		g_hPatchLogWnd = NULL;
 HWND		g_hPatchLogEdit = NULL;
-char*		g_pPatchLogBuffer = NULL;	
+char* g_pPatchLogBuffer = NULL;
 
+#ifdef PLATFORM_WINDOWS
 long FAR PASCAL PatchLogWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -823,6 +824,7 @@ long FAR PASCAL PatchLogWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 	}
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
+#endif /* PLATFORM_WINDOWS -- PatchLogWindowProc */
 
 bool
 ReadPatchLogFromFile()
@@ -901,8 +903,10 @@ ShowPatchLogWindow()
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
- 
- 
+
+
+#ifdef PLATFORM_WINDOWS
+
 //-----------------------------------------------------------------------------
 // Name: WindowProc()
 // Desc: The Main Window Procedure
@@ -1768,6 +1772,8 @@ InitApp(int nCmdShow)
 	return InitGame();
 }
 
+#endif /* PLATFORM_WINDOWS -- WindowProc/InitApp; see the note at WinMain */
+
 
 //extern void OutputMemorySize();
 //#include "MemoryCheck.cpp"
@@ -2255,81 +2261,92 @@ ApplyPatch()
 //    return CallNextHookEx(g_hHook, nCode, wParam, lParam);
 //}
 
-//-----------------------------------------------------------------------------
-// Name: WinMain()
-// Desc: Initialization, message loop
-//-----------------------------------------------------------------------------
-int PASCAL
-WinMain(HINSTANCE hInstance,
-        HINSTANCE hPrevInstance,
-        LPSTR lpCmdLine,
-        int nCmdShow)
-{	
-	ResetStartupTrace();
-	ResetLoginFlowTrace();
-	TraceStartup("WinMain begin");
-	EnableDpiAwareProcess();
-	timeBeginPeriod(1);
-	ApplyConfiguredGameResolution();
-// 	char tttt[] = "0000000011";
-// 	memcpy(lpCmdLine,tttt,strlen(tttt));
-	//tttt += lpCmdLine;
+    // Win32 entry point and window plumbing [guarded 2026-08-09].
+    //
+    // WinMain, InitApp, WindowProc and PatchLogWindowProc are the Windows
+    // application entry point, window-class registration and message pump. They
+    // are Win32 by nature -- WNDCLASS/WNDPROC, MAKEINTRESOURCE, the multimedia
+    // timer, SystemParametersInfo -- and on Windows this remains the real,
+    // shipping entry point, compiled exactly as before.
+    //
+    // The non-Windows entry point is Client/SDLMain.cpp's `int main()`, which is
+    // gated on #ifndef PLATFORM_WINDOWS and provides its own SDL InitApp built on
+    // SDL_CreateWindow (rather than this file's SDL_CreateWindowFrom(g_hWnd),
+    // which wraps an already-created Win32 window). It references this file's
+    // globals via extern and defines none of them, so the two do not collide.
+    //
+    // Previously this code was compiled on every platform, kept alive only by the
+    // 1,903-line fake-Win32 shim in basic/Platform.h. Making it build on Linux
+    // would have meant growing that shim further -- against docs/CLAUDE.md
+    // priority 4 ("remove fake Win32 wrappers") and its rule that a shim which
+    // permanently freezes a bad interface is not worth having. Guarding instead
+    // removes ~1,340 lines of Win32 code from the Linux translation unit and
+    // lets the SDL entry point own that platform, which is what it was written
+    // for. Nothing outside this file references these four functions (verified).
+    //-----------------------------------------------------------------------------
+    // Name: WinMain()
+    // Desc: Initialization, message loop
+    //-----------------------------------------------------------------------------
+#ifdef PLATFORM_WINDOWS
+
+    int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+        ResetStartupTrace();
+        ResetLoginFlowTrace();
+        TraceStartup("WinMain begin");
+        EnableDpiAwareProcess();
+        timeBeginPeriod(1);
+        ApplyConfiguredGameResolution();
+        // 	char tttt[] = "0000000011";
+        // 	memcpy(lpCmdLine,tttt,strlen(tttt));
+        //tttt += lpCmdLine;
 #ifdef OUTPUT_DEBUG
-	//lpCmdLine="";
-	//MessageBox(0,"Winmain","",MB_OK);
-	std::string tttt = "0000000031";
-	tttt += lpCmdLine;
+        //lpCmdLine="";
+        //MessageBox(0,"Winmain","",MB_OK);
+        std::string tttt = "0000000031";
+        tttt += lpCmdLine;
 #endif
 
-	//add by Soargon
-	DEVMODE   DevMode; 
-	EnumDisplaySettings( NULL, ENUM_CURRENT_SETTINGS, &DevMode );
-	TraceStartup("display settings read");
-	if(DevMode.dmBitsPerPel != 16)
-	{
-		DEVMODE	tempDevMode = DevMode;
-		tempDevMode.dmBitsPerPel = 16;
-		ChangeDisplaySettings( &tempDevMode, CDS_RESET );
-	}
-	//end
-	//add by zdj
-	bool cmpFullScreen = false;
-	size_t cmdLineLength = (lpCmdLine != NULL) ? strlen(lpCmdLine) : 0;
-	char launchMode = (cmdLineLength > 0) ? lpCmdLine[cmdLineLength - 1] : '1';
-	TraceStartup("command line parsed");
-	if (launchMode == '1')
-	{
-		g_MyFull=false;
-		cmpFullScreen = false;
-	}
-	else if (launchMode == '2')
-	{
-		g_MyFull=false;
-		cmpFullScreen=true;
-	}
-	// add by Sonic 2006.9.26
-	else if (launchMode == '3')
-	{
-		g_MyFull=true;
-		cmpFullScreen=false;
-		ApplyConfiguredGameResolution();
-	}
-	else if (launchMode == '4')
-	{
-		g_MyFull=true;
-		cmpFullScreen=true;
-		ApplyConfiguredGameResolution();
-	}
-	if (cmdLineLength > 0 && launchMode >= '1' && launchMode <= '4')
-	{
-		lpCmdLine[cmdLineLength - 1] = 0x0;
-	}
+        //add by Soargon
+        DEVMODE DevMode;
+        EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &DevMode);
+        TraceStartup("display settings read");
+        if (DevMode.dmBitsPerPel != 16) {
+            DEVMODE tempDevMode = DevMode;
+            tempDevMode.dmBitsPerPel = 16;
+            ChangeDisplaySettings(&tempDevMode, CDS_RESET);
+        }
+        //end
+        //add by zdj
+        bool cmpFullScreen = false;
+        size_t cmdLineLength = (lpCmdLine != NULL) ? strlen(lpCmdLine) : 0;
+        char launchMode = (cmdLineLength > 0) ? lpCmdLine[cmdLineLength - 1] : '1';
+        TraceStartup("command line parsed");
+        if (launchMode == '1') {
+            g_MyFull = false;
+            cmpFullScreen = false;
+        } else if (launchMode == '2') {
+            g_MyFull = false;
+            cmpFullScreen = true;
+        }
+        // add by Sonic 2006.9.26
+        else if (launchMode == '3') {
+            g_MyFull = true;
+            cmpFullScreen = false;
+            ApplyConfiguredGameResolution();
+        } else if (launchMode == '4') {
+            g_MyFull = true;
+            cmpFullScreen = true;
+            ApplyConfiguredGameResolution();
+        }
+        if (cmdLineLength > 0 && launchMode >= '1' && launchMode <= '4') {
+            lpCmdLine[cmdLineLength - 1] = 0x0;
+        }
 
-	//std::string tttt = "NEWSTART0";
-	//tttt = lpCmdLine + tttt;
-	//lpCmdLine = (char *)tttt.c_str();
+        //std::string tttt = "NEWSTART0";
+        //tttt = lpCmdLine + tttt;
+        //lpCmdLine = (char *)tttt.c_str();
 
-	/*
+        /*
 	CIndexSpritePack ISPK;
 	std::ifstream ispkFile("f:\\vcpp\\clientinfo\\Data\\AppendPatch\\New18Creature.ispk", ios::binary);
 	ISPK.LoadFromFile(ispkFile);
@@ -2341,25 +2358,23 @@ WinMain(HINSTANCE hInstance,
 	ispkFile2.close();
 	ispkFile3.close();
 	*/
-		
-	
 
-	
-	//----------------------------------------------------------
-	
-	//----------------------------------------------------------
-	
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof(sa);
-    sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = FALSE;
+
+        //----------------------------------------------------------
+
+        //----------------------------------------------------------
+
+        SECURITY_ATTRIBUTES sa;
+        sa.nLength = sizeof(sa);
+        sa.lpSecurityDescriptor = NULL;
+        sa.bInheritHandle = FALSE;
 
 
 #ifndef OUTPUT_DEBUG
-	
-	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");  
-	TraceStartup("mutex created");
-	/*
+
+        HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");
+        TraceStartup("mutex created");
+        /*
 	HANDLE hMutex = CreateMutex(&sa, FALSE, "<<<DarkEden>>>");   
 	
 
@@ -2389,13 +2404,12 @@ WinMain(HINSTANCE hInstance,
 		return -1;
 	}
 	*/
-	// end Coffee 2006.11.07  
-	if( FindWindow( "PROCEXPL", "" ) != NULL )
-	{
-		return -1;
-	}
+        // end Coffee 2006.11.07
+        if (FindWindow("PROCEXPL", "") != NULL) {
+            return -1;
+        }
 
-/*	SYSTEMTIME CurTime;
+        /*	SYSTEMTIME CurTime;
 	GetLocalTime(&CurTime);
 	if((CurTime.wMonth == 1) || (CurTime.wMonth == 3) || (CurTime.wMonth == 5))
 	{
@@ -2403,91 +2417,87 @@ WinMain(HINSTANCE hInstance,
 	}*/
 
 #endif
-	
-		
-//	strcpy(g_CWD, __argv[0]);
- 	GetModuleFileName(NULL, g_CWD, _MAX_PATH);
-	char *tempCut = strrchr(g_CWD, '\\');
-	if(tempCut == NULL)
-		return FALSE;
 
-	*tempCut = '\0';
 
-//	GetCurrentDirectory( _MAX_PATH, g_CWD );
+        //	strcpy(g_CWD, __argv[0]);
+        GetModuleFileName(NULL, g_CWD, _MAX_PATH);
+        char* tempCut = strrchr(g_CWD, '\\');
+        if (tempCut == NULL)
+            return FALSE;
 
-	
-	SetCurrentDirectory(g_CWD);
-	TraceStartup("current directory set");
-	
+        *tempCut = '\0';
 
-//	if (_access(UPDATER_NEW_FILENAME, 0) == 0/* && _access(UPDATER_FILENAME, 0)*/)//updaterNewFile)
-//	{	
+        //	GetCurrentDirectory( _MAX_PATH, g_CWD );
 
-//		if (remove( UPDATER_FILENAME )==0)
-//		{
 
-//			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
-//			{
-//				DEBUG_ADD("Update Updater.exe OK"); 
-//			}
-//		}
+        SetCurrentDirectory(g_CWD);
+        TraceStartup("current directory set");
 
-////		//remove( UPDATER_FILENAME );
 
-////		if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
-////		{
-////			DEBUG_ADD("Update Updater.exe OK"); 
-////		}
-//	}	
+        //	if (_access(UPDATER_NEW_FILENAME, 0) == 0/* && _access(UPDATER_FILENAME, 0)*/)//updaterNewFile)
+        //	{
 
-	
+        //		if (remove( UPDATER_FILENAME )==0)
+        //		{
+
+        //			if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
+        //			{
+        //				DEBUG_ADD("Update Updater.exe OK");
+        //			}
+        //		}
+
+        ////		//remove( UPDATER_FILENAME );
+
+        ////		if (rename( UPDATER_NEW_FILENAME, UPDATER_FILENAME )==0)
+        ////		{
+        ////			DEBUG_ADD("Update Updater.exe OK");
+        ////		}
+        //	}
+
 
 #ifdef __METROTECH_TEST__
-	CheckLogFile();
+        CheckLogFile();
 #endif
 
 #ifdef DEBUG_INFO
-	InitDebugInfo();
+        InitDebugInfo();
 #endif
-	
+
 #ifdef DEBUG_INFO
-	switch(g_nKeyMapSelect)
-	{
-	case 0:
-		g_wAuthKeyMap = 0x5154;
-		break;
-	case 1:
-		break;
-	default:
-		break;
-	}
+        switch (g_nKeyMapSelect) {
+        case 0:
+            g_wAuthKeyMap = 0x5154;
+            break;
+        case 1:
+            break;
+        default:
+            break;
+        }
 #else
-//yckou:update the update.exe program
-/*
+        //yckou:update the update.exe program
+        /*
 	CFileFind finder;
 	BOOL bWorking = finder.FindFile("Updater2.exe");
 */
-	WIN32_FIND_DATA FileData1; 
-	HANDLE hSearch1; 
-	DWORD pid;
-	HANDLE hProcess=NULL,hProcessToken=NULL;
-	HWND hwndUpdate = FindWindow("#32770", "FsDarkedenLaunch");
-		if(hwndUpdate != NULL)
-		{
-				pid =0;
-				GetWindowThreadProcessId(hwndUpdate, &pid);
-				hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-				TerminateProcess(hProcess, 0);
-				int a = SendMessage(hwndUpdate, WM_CLOSE, 0 , 0);
-		}
-		Sleep(1000);
-	hSearch1 = FindFirstFile("Updater2.exe", &FileData1); 
-	if(hSearch1 != INVALID_HANDLE_VALUE)
-	{
-		DeleteFile("Updater.exe");
-		CopyFile("Updater2.exe","Updater.exe",FALSE);
-		DeleteFile("Updater2.exe");
-	}
+        WIN32_FIND_DATA FileData1;
+        HANDLE hSearch1;
+        DWORD pid;
+        HANDLE hProcess = NULL, hProcessToken = NULL;
+        HWND hwndUpdate = FindWindow("#32770", "FsDarkedenLaunch");
+        if (hwndUpdate != NULL) {
+            pid = 0;
+            GetWindowThreadProcessId(hwndUpdate, &pid);
+            hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+            TerminateProcess(hProcess, 0);
+            int a = SendMessage(hwndUpdate, WM_CLOSE, 0, 0);
+        }
+        Sleep(1000);
+        hSearch1 = FindFirstFile("Updater2.exe", &FileData1);
+        if (hSearch1 != INVALID_HANDLE_VALUE) {
+            DeleteFile("Updater.exe");
+            CopyFile("Updater2.exe", "Updater.exe", FALSE);
+            DeleteFile("Updater2.exe");
+        }
 //yckou end
 //add by sonic Check *.dll have Bug. 2006.4.13
 //yckou begin: check invalid *.dll
@@ -3600,42 +3610,42 @@ _APICheck.init();
 	}	
 
 	return 0;
-}
-BOOL GetSystem()
-{
-	OSVERSIONINFO OsInfo;
-	OsInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	if (GetVersionEx(&OsInfo))
-	{
-		// platform
-		switch (OsInfo.dwPlatformId)
-		{
-		case VER_PLATFORM_WIN32_WINDOWS:
-			if(OsInfo.dwMajorVersion == 3)
-				
-				
-				return FALSE;
-			else if(OsInfo.dwMajorVersion == 4)
-				
-				return FALSE;
-				
-			break;
-		case VER_PLATFORM_WIN32_NT:
-			if(OsInfo.dwMajorVersion == 5)
-				
-				return TRUE;
-				
-			else
-				return TRUE;
-				
-				
-			break;
-		default:
-			return FALSE;
-			
-			break;
-		}
-		// version and language
-	}
-	return FALSE;
-}
+    }
+
+#endif /* PLATFORM_WINDOWS -- WinMain */
+
+    BOOL GetSystem() {
+        OSVERSIONINFO OsInfo;
+        OsInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+        if (GetVersionEx(&OsInfo)) {
+            // platform
+            switch (OsInfo.dwPlatformId) {
+            case VER_PLATFORM_WIN32_WINDOWS:
+                if (OsInfo.dwMajorVersion == 3)
+
+
+                    return FALSE;
+                else if (OsInfo.dwMajorVersion == 4)
+
+                    return FALSE;
+
+                break;
+            case VER_PLATFORM_WIN32_NT:
+                if (OsInfo.dwMajorVersion == 5)
+
+                    return TRUE;
+
+                else
+                    return TRUE;
+
+
+                break;
+            default:
+                return FALSE;
+
+                break;
+            }
+            // version and language
+        }
+        return FALSE;
+    }
