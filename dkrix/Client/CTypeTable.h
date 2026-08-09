@@ -14,72 +14,77 @@
 
 //
 //----------------------------------------------------------------------
-template <class Type>
-class CTypeTable {
-	public :
-		CTypeTable();
-		~CTypeTable();
+template <class Type> class CTypeTable {
+public:
+    typedef Type TYPE;
 
-		//-------------------------------------------------------
-		// Init / Release
-		//-------------------------------------------------------
-		void			Init(int size);
-		void			Release();
+    CTypeTable();
+    ~CTypeTable();
 
-		//-------------------------------------------------------
-		// Size
-		//-------------------------------------------------------
-		int				GetSize() const		{ return m_Size; }
+    //-------------------------------------------------------
+    // Init / Release
+    //-------------------------------------------------------
+    void Init(int size);
+    void Release();
 
-		//-------------------------------------------------------
-		// Debug/Internal access
-		//-------------------------------------------------------
-		Type*			GetInternalPointer() const { return m_pTypeInfo; }
-		
-		//-------------------------------------------------------
-		// Reference
-		//-------------------------------------------------------
-		const Type&	operator [] (int type) const {
+    //-------------------------------------------------------
+    // Size
+    //-------------------------------------------------------
+    int GetSize() const {
+        return m_Size;
+    }
+
+    //-------------------------------------------------------
+    // Debug/Internal access
+    //-------------------------------------------------------
+    Type* GetInternalPointer() const {
+        return m_pTypeInfo;
+    }
+
+    //-------------------------------------------------------
+    // Reference
+    //-------------------------------------------------------
+    const Type& operator[](int type) const {
 #ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
-				static Type dummy;
-				return dummy;
-			}
+        if (type < 0 || type >= m_Size) {
+            static Type dummy;
+            return dummy;
+        }
 #endif
-			return m_pTypeInfo[type];
-		}
-		Type&	operator [] (int type) {
+        return m_pTypeInfo[type];
+    }
+    Type& operator[](int type) {
 #ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
-				static Type dummy;
-				return dummy;
-			}
+        if (type < 0 || type >= m_Size) {
+            static Type dummy;
+            return dummy;
+        }
 #endif
-			return m_pTypeInfo[type];
-		}
-		Type&	Get(int type) {
+        return m_pTypeInfo[type];
+    }
+    Type& Get(int type) {
 #ifdef _DEBUG
-			if (type < 0 || type >= m_Size) {
-				static Type dummy;
-				return dummy;
-			}
+        if (type < 0 || type >= m_Size) {
+            static Type dummy;
+            return dummy;
+        }
 #endif
-			return m_pTypeInfo[type];
-		}
+        return m_pTypeInfo[type];
+    }
 
 
-		//-------------------------------------------------------
-		// File I/O
-		//-------------------------------------------------------
-		void			SaveToFile(std::ofstream& file);
-		void			LoadFromFile(std::ifstream& file);
-		void			SaveToFile(const char *filename);
-		void			LoadFromFile(const char *filename);
-		bool			LoadFromFile_NickNameString(std::ifstream& file);
-	protected :		
-		int			m_Size;					
-		Type*		m_pTypeInfo;			
+    //-------------------------------------------------------
+    // File I/O
+    //-------------------------------------------------------
+    void SaveToFile(std::ofstream& file);
+    void LoadFromFile(std::ifstream& file);
+    void SaveToFile(const char* filename);
+    void LoadFromFile(const char* filename);
+    bool LoadFromFile_NickNameString(std::ifstream& file);
 
+protected:
+    int m_Size;
+    Type* m_pTypeInfo;
 };
 
 
@@ -88,11 +93,9 @@ class CTypeTable {
 //    constructor/destructor
 //
 //----------------------------------------------------------------------
-template <class Type>
-CTypeTable<Type>::CTypeTable()
-{
-	m_pTypeInfo	= NULL;
-	m_Size		= 0;
+template <class Type> CTypeTable<Type>::CTypeTable() {
+    m_pTypeInfo = NULL;
+    m_Size = 0;
 }
 
 template <class Type>
