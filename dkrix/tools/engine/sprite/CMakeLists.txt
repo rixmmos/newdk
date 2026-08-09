@@ -86,5 +86,10 @@ add_test(NAME sprite_tests COMMAND sprite_tests)
 # dependencies (stdlib, string, stdio, error.h — all header-only), so it
 # gets its own executable and does not link the `sprite` target.
 add_executable(sprite_test_zone tests/test_zone.c)
-target_include_directories(sprite_test_zone PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# src/ as well as include/: the #include "zone.c" above resolves against it.
+# Without it the target fails at "zone.c: No such file or directory" -- which
+# is exactly what happened the first time this leg ever ran (2026-08-09).
+target_include_directories(sprite_test_zone PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 add_test(NAME sprite_test_zone COMMAND sprite_test_zone)

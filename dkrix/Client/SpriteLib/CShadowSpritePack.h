@@ -45,8 +45,6 @@
 #include "CShadowSprite.h"
 #include "CIndexSpritePack.h"
 #include <list>
-std::ofstream;
-std::ifstream;
 
 class CShadowSpritePack {
 	public :

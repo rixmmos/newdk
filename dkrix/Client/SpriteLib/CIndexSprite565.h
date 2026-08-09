@@ -13,8 +13,6 @@
 #else
 	#include "../basic/Platform.h"
 #endif
-std::ofstream;
-std::ifstream;
 
 
 #include "CIndexSprite.h"
