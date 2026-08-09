@@ -934,6 +934,65 @@ back to a single unconditional typedef.
       behavior change. Grep-verified zero remaining `dxlib_`/`DXLIB_`/bare
       `dxlib` hits outside the kept filenames/umbrella content; **not
       compile-verified in this session** — next client CI run is the gate.
+      **Follow-up 2 executed 2026-08-08 (`0e54e07`)**: deleted the "moved dead
+      leftovers" this item flagged above — but at `Client/Platform/`, i.e.
+      the ten files the `git mv` had carried over
+      (`header.{cpp,h}`, `l3types.h`, `common.h`, `codec.h`, `config_types.h`,
+      `ogg.h`, `os_types.h`, `vorbisenc.h`, `vorbisfile.h`) — not in any CMake
+      source list or glob, zero external includers, no symbol reach-through;
+      the live MP3 decoder already had its own twins of `header.{cpp,h}` and
+      `common.h` at `Client/` proper. Also dropped the three now-dead
+      `Client/Platform/{ogg,vorbisenc,vorbisfile}.h` `FMT_EXCLUDES` entries
+      from `dkrix/Makefile`.
+      **Follow-up 3, this task, re-verified from scratch 2026-08-09**: the
+      prompt that dispatched this investigation predated `0e54e07` landing
+      and still pointed at the (by-then-already-deleted) `Platform/` copies,
+      so the first job was re-confirming what actually remains on disk. It
+      does not match the old framing — `Client/Platform/` today holds none of
+      the ten names above (`0e54e07` really did delete them, confirmed by
+      directory listing); the *only* physical files matching
+      `header.{cpp,h}` / `l3types.h` / `common.h` / `*ogg*` / `*vorbis*`
+      anywhere under `dkrix/Client/` are four at `Client/` root
+      (`header.cpp`, `header.h`, `l3types.h`, `common.h`) plus the
+      already-known-live `COGGSTREAM.{CPP,H}` (Phase 10's case-sensitivity
+      fix, unrelated to this item). `git log --follow` on all four shows none
+      were ever touched by the item-3 `git mv` — they've been at `Client/`
+      since the initial checkpoint commit, i.e. they are the "live twins in
+      Client/" the earlier entries kept referring to, not leftover copies of
+      the deleted set. Verified individually, full CMake-list → glob →
+      include-chain → symbol-reach-through evidence per file:
+      - **`Client/header.h` — LIVE.** `#include`d unconditionally by
+        `Client/mp3.h:4`; defines `struct MP3Header`, whose only field types
+        (`e_mode`, `e_sample_frequency`) come from `common.h`.
+      - **`Client/header.cpp` — LIVE.** Swept into `CLIENT_MAIN_SOURCES` by
+        the case-sensitive `Client/*.cpp` glob in `dkrix/CMakeLists.txt:688`
+        (exact-case match, no filter excludes it). Defines
+        `MP3_ReadHeader()`, called from `Client/mp3.cpp` at five call sites
+        (lines 72, 137, 193, 238, 351).
+      - **`Client/common.h` — LIVE.** `#include`d by `Client/header.h:4`,
+        `Client/mp3.h:5`, and directly by `Client/reader.cpp:3`. Defines
+        `e_mode`/`e_sample_frequency`/`UINT`/`BYTE`/`MAX`/`MIN`/`ABS` used
+        throughout the live MP3 decoder cluster (`mp3.h`, `header.h`,
+        `reader.cpp`).
+      - **`Client/l3types.h` — DEAD, deleted this session.** Same evidence
+        standard as the six `0e54e07` deleted: not named in any CMake list;
+        not swept by any glob (it's a header, never a compiled unit, and no
+        glob targets `Client/*.h`); its only two references anywhere in the
+        repo are commented-out `#include "l3types.h"` lines in
+        `Client/mp3.h:3` and in its own `Client/common.h:4` — never a live
+        include. Its three type definitions (`gr_info_s`, `side_info_t`,
+        `scalefac_t`) are dead weight even by name: `git grep` for all three
+        across `dkrix/` shows every real use resolves to `Client/mp3.h`'s own
+        byte-for-byte duplicate inline definitions (`mp3.h:19-56`), which is
+        what `mp3.cpp`/`reader.cpp`/`subdecoder.cpp` actually build against
+        — `l3types.h` was never in the compiled path. Deleted via
+        `git rm dkrix/Client/l3types.h`; the two stale commented-out
+        `#include` lines that named it were left untouched (cosmetic,
+        already-commented, in two otherwise-live files — not worth a diff
+        of its own).
+      No compiler in this sandbox; verified by full CMake-source-list +
+      glob-filter + include-chain + symbol-usage tracing, the same method
+      `a107d63`/`0e54e07` used. Client CI on this push is the gate.
 
 ### Phase 4 — One sprite pipeline (client, re-scoped 2026-08-06)
 
