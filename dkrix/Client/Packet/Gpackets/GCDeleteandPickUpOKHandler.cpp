@@ -20,7 +20,7 @@
 #include "UIFunction.h"
 
 #include "../ClientPlayer.h"
-#include "Packet/Cpackets/CGAddMouseToQuickSlot.h"
+#include "CGAddMouseToQuickSlot.h"
 
 
 bool	IsBombMaterial(const MItem* pItem);

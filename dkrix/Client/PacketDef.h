@@ -39,8 +39,8 @@
 //-----------------------------------------------------------------------------
 // Phone / Whisper
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGDialUp.h"
-#include "Packet/Cpackets/CGPhoneDisconnect.h"
+#include "CGDialUp.h"
+#include "CGPhoneDisconnect.h"
 #include "CGPhoneSay.h"
 #include "CGWhisper.h"
 
@@ -55,7 +55,7 @@
 
 //-----------------------------------------------------------------------------
 #include "CGAttack.h"
-#include "Packet/Cpackets/CGCastingSkill.h"
+#include "CGCastingSkill.h"
 #include "Packet/Cpackets/CGSkillToInventory.h"
 #include "Packet/Cpackets/CGSkillToSelf.h"
 #include "CGSkillToTile.h"
@@ -80,13 +80,13 @@
 //-----------------------------------------------------------------------------
 // Item 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGAddGearToMouse.h"
+#include "CGAddGearToMouse.h"
 #include "Packet/Cpackets/CGAddInventoryToMouse.h"
-#include "Packet/Cpackets/CGAddMouseToGear.h"
+#include "CGAddMouseToGear.h"
 #include "Packet/Cpackets/CGAddMouseToInventory.h"
-#include "Packet/Cpackets/CGAddMouseToQuickSlot.h"
+#include "CGAddMouseToQuickSlot.h"
 #include "CGAddMouseToZone.h"
-#include "Packet/Cpackets/CGAddQuickSlotToMouse.h"
+#include "CGAddQuickSlotToMouse.h"
 #include "CGAddZoneToInventory.h"
 #include "CGAddZoneToMouse.h"
 #include "CGPickupMoney.h"
@@ -100,8 +100,8 @@
 #include "Packet/Cpackets/CGDissectionCorpse.h"
 
 
-#include "Packet/Cpackets/CGReloadFromInventory.h"
-#include "Packet/Cpackets/CGReloadFromQuickSlot.h"
+#include "CGReloadFromInventory.h"
+#include "CGReloadFromQuickSlot.h"
 
 
 #include "Packet/Cpackets/CGGetOffMotorCycle.h"
@@ -112,14 +112,14 @@
 
 // potion
 #include "Packet/Cpackets/CGUsePotionFromInventory.h"
-#include "Packet/Cpackets/CGUsePotionFromQuickSlot.h"
+#include "CGUsePotionFromQuickSlot.h"
 
 #include "Packet/Cpackets/CGUseItemFromInventory.h"
 
 //-----------------------------------------------------------------------------
 // NPC
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGNPCTalk.h"
+#include "CGNPCTalk.h"
 #include "CGNPCAskAnswer.h"
 
 //-----------------------------------------------------------------------------

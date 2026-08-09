@@ -29,12 +29,12 @@
 	#include "MPlayer.h"
 #include "CGUseItemFromGear.h"
 	#include "Packet/Cpackets/CGUsePotionFromInventory.h"
-	#include "Packet/Cpackets/CGUsePotionFromQuickSlot.h"
+#include "CGUsePotionFromQuickSlot.h"
 
-	#include "Fl2.h"
-	#include "VS_UI_GameCommon.h"
-	#include "VS_UI.h"
-	#include "UIDialog.h"
+#include "Fl2.h"
+#include "VS_UI_GameCommon.h"
+#include "VS_UI.h"
+#include "UIDialog.h"
 #endif
 
 #include <fstream>

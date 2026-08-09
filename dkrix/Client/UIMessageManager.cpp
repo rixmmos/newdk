@@ -164,7 +164,7 @@
 //
 
 #include "CGUsePowerPoint.h"
-#include "Packet/Cpackets/CGRequestPowerPoint.h"
+#include "CGRequestPowerPoint.h"
 #include "CGDonationMoney.h"
 #include "Packet/Cpackets/CGGetEventItem.h"
 #include "Packet/Cpackets/CGUseMessageItemFromInventory.h"
