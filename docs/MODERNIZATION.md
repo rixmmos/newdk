@@ -4294,6 +4294,72 @@ set, and 7 of the 9 review pairs. **Not build-verified — no compiler for
 either tree in this environment**; both-tree CI is the gate, per every
 prior wave.
 
+**Batch 5A landed 2026-08-09: the first 12 of the `>5`-residual set.**
+Ratchet **114 → 90**. Pairs, all CG, all into `_SHARED_PACKETS_CG_SOURCES`:
+**CGAddGearToMouse, CGAddMouseToGear, CGAddMouseToQuickSlot,
+CGAddQuickSlotToMouse, CGCastingSkill, CGDialUp, CGPhoneDisconnect,
+CGReloadFromInventory, CGReloadFromQuickSlot, CGUsePotionFromQuickSlot,
+CGNPCTalk, CGRequestPowerPoint** — the batch 5A set from
+`docs/phase12-residual-triage-2026-08-09.md`, taken in the order that doc
+recommends. Recipe unchanged from Wave 4 batch 3.
+
+*Gates.* Per pair before deletion: `--pair` wire signature all four
+`match`, verdict `style-residual`, zero notes. Post-merge against the
+pre-migration originals exported from `cd8c3c6`: **merged-vs-server
+residual 0 / `style-only` for all 12**, and merged-vs-client reproduces
+each pair's pre-migration residual exactly (8 ×10; 6 for `CGNPCTalk` and
+`CGRequestPowerPoint`) — no new drift. The ctor hazard was checked with a
+detector first validated against `CGDissectionCorpse`, where it correctly
+reports client-only init; no pair here initialises on either side.
+
+*The step that nearly shipped a broken client.* Deleting the 12 Cpackets
+headers left **25 `#include` sites across 5 files** naming the deleted
+path (`PacketFactoryManager.cpp` 11, `PacketDef.h` 11, plus
+`GCDeleteandPickUpOKHandler.cpp`, `MItem.cpp`, `UIMessageManager.cpp`).
+The ratchet does not see this, the normalizer does not see this, and
+nothing in the per-pair gate covers it — **the include sweep is a
+required step of the recipe, not an optional tidy-up**, and it is the one
+step whose omission produces a hard client build failure. Wave 4 batch 3
+did the same sweep across its own 5 files; that it was needed twice
+running is the argument for treating it as part of the recipe.
+
+*Format-gate consequence, worth knowing before batch 5B.* One repointed
+line sat in a tab-indented include run in `MItem.cpp`. Putting the new
+line at column 0 was not enough: clang-format treats a contiguous include
+run as a unit, so the changed-lines gate kept demanding the four
+neighbours too. De-indenting the whole run converges — the behaviour
+recorded in Phase 10 bullet 1 and re-confirmed here. Cost 5 whitespace
+lines, verified neutral with `git diff -w`.
+
+**[unverified] against a compiler.** CI is the gate.
+
+### `shared/` had no `.clang-format` at all — found 2026-08-09
+
+While running the gate over batch 5A: there was **no `.clang-format`
+anywhere above `shared/`** — not at the repo root, not in `shared/`, not
+in `shared/Packets/`. Every `clang-format` invocation against that tree
+silently used the built-in LLVM default (2-space indent, 80 columns,
+right-aligned pointers), which is this project's style in neither tree.
+
+It went unnoticed because **neither CI format job scopes the directory**:
+`server.yml` greps `^dkrixserver/`, `client.yml` does `cd dkrix` and diffs
+`--relative`. So the canonical packet tree Phase 12 has spent the month
+building — 236 files — is format-checked by nothing.
+
+Fixed only in the narrow sense: `shared/.clang-format` now exists, copied
+from `dkrix/`'s rather than `dkrixserver/`'s. The two are byte-identical
+apart from include handling, and these files compile into both trees, so
+the safer wins — packet headers being exactly where include order has
+already broken this project once (Wave 4's `PlayerInfo` regression).
+
+**Still open, and it is a decision, not a task:** 79 of the 236 files do
+not match that style, inherited from the recipe (each merged file keeps
+its server original's formatting). Wiring a gate means choosing between
+reformatting those 79 and ratcheting on new lines only. Note the second
+option is weaker here than in the legacy trees: files arrive in
+`shared/Packets/` whole, so "new lines only" means every migrated file is
+checked in full on arrival anyway.
+
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
 (`56e59cc`). Remaining: `dkrix/Client/Packet/SocketInputStream` /
