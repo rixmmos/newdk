@@ -54,7 +54,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGAttack.h"
+#include "CGAttack.h"
 #include "Packet/Cpackets/CGCastingSkill.h"
 #include "Packet/Cpackets/CGSkillToInventory.h"
 #include "Packet/Cpackets/CGSkillToSelf.h"
@@ -85,12 +85,12 @@
 #include "Packet/Cpackets/CGAddMouseToGear.h"
 #include "Packet/Cpackets/CGAddMouseToInventory.h"
 #include "Packet/Cpackets/CGAddMouseToQuickSlot.h"
-#include "Packet/Cpackets/CGAddMouseToZone.h"
+#include "CGAddMouseToZone.h"
 #include "Packet/Cpackets/CGAddQuickSlotToMouse.h"
-#include "Packet/Cpackets/CGAddZoneToInventory.h"
-#include "Packet/Cpackets/CGAddZoneToMouse.h"
+#include "CGAddZoneToInventory.h"
+#include "CGAddZoneToMouse.h"
 #include "Packet/Cpackets/CGPickupMoney.h"
-#include "Packet/Cpackets/CGDropMoney.h"
+#include "CGDropMoney.h"
 #include "Packet/Cpackets/CGRequestRepair.h"
 #include "Packet/Cpackets/CGMakeItem.h"
 
@@ -142,11 +142,11 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGTradePrepare.h"
-#include "Packet/Cpackets/CGTradeAddItem.h"
-#include "Packet/Cpackets/CGTradeRemoveItem.h"
-#include "Packet/Cpackets/CGTradeMoney.h"
-#include "Packet/Cpackets/CGTradeFinish.h"
+#include "CGTradePrepare.h"
+#include "CGTradeAddItem.h"
+#include "CGTradeRemoveItem.h"
+#include "CGTradeMoney.h"
+#include "CGTradeFinish.h"
 
 
 

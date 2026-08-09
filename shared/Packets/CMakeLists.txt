@@ -67,20 +67,29 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGAcceptUnion.cpp
     CGAddItemToCodeSheet.cpp
     CGAddItemToItem.cpp
+    CGAddMouseToZone.cpp
+    CGAddSMSAddress.cpp
+    CGAddZoneToInventory.cpp
+    CGAddZoneToMouse.cpp
     CGAppointSubmaster.cpp
+    CGAttack.cpp
     CGAuthKey.cpp
     CGBuyStoreItem.cpp
     CGConnect.cpp
+    CGCrashReport.cpp
+    CGDeleteSMSAddress.cpp
     CGDenyUnion.cpp
     CGDepositPet.cpp
     CGDisplayItem.cpp
     CGDonationMoney.cpp
     CGDownSkill.cpp
+    CGDropMoney.cpp
     CGExpelGuild.cpp
     CGFailQuest.cpp
     CGGQuestAccept.cpp
     CGGQuestCancel.cpp
     CGGlobalChat.cpp
+    CGJoinGuild.cpp
     CGLearnSkill.cpp
     CGLogout.cpp
     CGLotterySelect.cpp
@@ -125,10 +134,16 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGStoreOpen.cpp
     CGStoreSign.cpp
     CGThrowBomb.cpp
+    CGTradeAddItem.cpp
+    CGTradeFinish.cpp
+    CGTradeMoney.cpp
+    CGTradePrepare.cpp
+    CGTradeRemoveItem.cpp
     CGTryJoinGuild.cpp
     CGUndisplayItem.cpp
     CGUntransform.cpp
     CGUseItemFromGQuestInventory.cpp
+    CGUseItemFromGear.cpp
     CGVisible.cpp
     CGWhisper.cpp
     CGWithdrawPet.cpp

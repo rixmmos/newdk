@@ -18,9 +18,9 @@
 #ifdef __GAME_CLIENT__
 
 	#include "../ClientPlayer.h"
-	#include "../Cpackets/CGTradeAddItem.h"
-	#include "../Cpackets/CGTradeFinish.h"
-	#include "../Cpackets/CGTradeRemoveItem.h"
+	#include "CGTradeAddItem.h"
+	#include "CGTradeFinish.h"
+	#include "CGTradeRemoveItem.h"
 
 #endif
 

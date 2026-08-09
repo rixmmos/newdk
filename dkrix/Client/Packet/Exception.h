@@ -108,9 +108,17 @@ private :
 //
 //--------------------------------------------------------------------------------
 
+// __END_CATCH_NO_RETHROW mirrors the server tree's macro of the same name
+// (dkrixserver/src/Core/Exception.h): catch and record, but do not
+// rethrow — for destructors, which must not throw. Added for the Phase 12
+// shared/Packets files (several server-canonical packet .cpp files define
+// an explicit empty destructor with it); follows this file's own
+// addStack(__FILE__, __LINE__) convention rather than the server's
+// __PRETTY_FUNCTION__ one.
 #ifdef NDEBUG
 	#define __BEGIN_TRY ((void)0);
 	#define __END_CATCH ((void)0);
+	#define __END_CATCH_NO_RETHROW ((void)0);
 #else
 	#define __BEGIN_TRY \
 				try {
@@ -118,6 +126,10 @@ private :
 				} catch ( Throwable & t ) { \
 					t.addStack(__FILE__, __LINE__); \
 					throw; \
+				}
+	#define __END_CATCH_NO_RETHROW \
+				} catch ( Throwable & t ) { \
+					t.addStack(__FILE__, __LINE__); \
 				}
 #endif
 

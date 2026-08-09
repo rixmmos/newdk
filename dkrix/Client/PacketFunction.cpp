@@ -61,7 +61,7 @@
 #include "Packet/GearInfo.h"
 #include "Packet/ExtraInfo.h"
 #include "Packet/Cpackets/CGSay.h"
-#include "Packet/Cpackets/CGCrashReport.h"
+#include "CGCrashReport.h"
 #include "Packet/EffectInfo.h"
 #include "MScreenEffectManager.h"
 #include "TempInformation.h"

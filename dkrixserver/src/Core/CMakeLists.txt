@@ -373,14 +373,19 @@ set(CG_PACKET_SOURCES
     CGAddMouseToGear.cpp CGAddMouseToGearHandler.cpp
     CGAddMouseToInventory.cpp CGAddMouseToInventoryHandler.cpp
     CGAddMouseToQuickSlot.cpp CGAddMouseToQuickSlotHandler.cpp
-    CGAddMouseToZone.cpp CGAddMouseToZoneHandler.cpp
+    # CGAddMouseToZone.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGAddMouseToZoneHandler.cpp
     CGAddQuickSlotToMouse.cpp CGAddQuickSlotToMouseHandler.cpp
-    CGAddSMSAddress.cpp CGAddSMSAddressHandler.cpp
-    CGAddZoneToInventory.cpp CGAddZoneToInventoryHandler.cpp
-    CGAddZoneToMouse.cpp CGAddZoneToMouseHandler.cpp
+    # CGAddSMSAddress.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGAddSMSAddressHandler.cpp
+    # CGAddZoneToInventory.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGAddZoneToInventoryHandler.cpp
+    # CGAddZoneToMouse.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGAddZoneToMouseHandler.cpp
     # CGAppointSubmaster.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGAppointSubmasterHandler.cpp
-    CGAttack.cpp CGAttackHandler.cpp
+    # CGAttack.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGAttackHandler.cpp
     # CGAuthKey.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGAuthKeyHandler.cpp
     CGBloodDrain.cpp CGBloodDrainHandler.cpp
@@ -390,8 +395,10 @@ set(CG_PACKET_SOURCES
     # CGConnect.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
     CGConnectHandler.cpp
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
-    CGCrashReport.cpp CGCrashReportHandler.cpp
-    CGDeleteSMSAddress.cpp CGDeleteSMSAddressHandler.cpp
+    # CGCrashReport.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGCrashReportHandler.cpp
+    # CGDeleteSMSAddress.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGDeleteSMSAddressHandler.cpp
     # CGDenyUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGDenyUnionHandler.cpp
     # CGDepositPet.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
@@ -404,7 +411,8 @@ set(CG_PACKET_SOURCES
     CGDonationMoneyHandler.cpp
     # CGDownSkill.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGDownSkillHandler.cpp
-    CGDropMoney.cpp CGDropMoneyHandler.cpp
+    # CGDropMoney.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGDropMoneyHandler.cpp
     # CGExpelGuild.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGExpelGuildHandler.cpp
     CGExpelGuildMember.cpp CGExpelGuildMemberHandler.cpp
@@ -419,7 +427,8 @@ set(CG_PACKET_SOURCES
     # CGGQuestCancel.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGGQuestCancelHandler.cpp
     CGGuildChat.cpp CGGuildChatHandler.cpp
-    CGJoinGuild.cpp CGJoinGuildHandler.cpp
+    # CGJoinGuild.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGJoinGuildHandler.cpp
     # CGLearnSkill.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
     CGLearnSkillHandler.cpp
     # CGLogout.cpp moved to shared/Packets/ — Phase 12 Wave 1.
@@ -546,11 +555,16 @@ set(CG_PACKET_SOURCES
     # CGThrowBomb.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGThrowBombHandler.cpp
     CGThrowItem.cpp CGThrowItemHandler.cpp
-    CGTradeAddItem.cpp CGTradeAddItemHandler.cpp
-    CGTradeFinish.cpp CGTradeFinishHandler.cpp
-    CGTradeMoney.cpp CGTradeMoneyHandler.cpp
-    CGTradePrepare.cpp CGTradePrepareHandler.cpp
-    CGTradeRemoveItem.cpp CGTradeRemoveItemHandler.cpp
+    # CGTradeAddItem.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGTradeAddItemHandler.cpp
+    # CGTradeFinish.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGTradeFinishHandler.cpp
+    # CGTradeMoney.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGTradeMoneyHandler.cpp
+    # CGTradePrepare.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGTradePrepareHandler.cpp
+    # CGTradeRemoveItem.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGTradeRemoveItemHandler.cpp
     # CGTryJoinGuild.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
     CGTryJoinGuildHandler.cpp
     CGTypeStringList.cpp CGTypeStringListHandler.cpp
@@ -560,7 +574,8 @@ set(CG_PACKET_SOURCES
     # CGUntransform.cpp moved to shared/Packets/ — Phase 12 Wave 3.
     CGUntransformHandler.cpp
     CGUseBonusPoint.cpp CGUseBonusPointHandler.cpp
-    CGUseItemFromGear.cpp CGUseItemFromGearHandler.cpp
+    # CGUseItemFromGear.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
+    CGUseItemFromGearHandler.cpp
     # CGUseItemFromGQuestInventory.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGUseItemFromGQuestInventoryHandler.cpp
     CGUseItemFromInventory.cpp CGUseItemFromInventoryHandler.cpp
