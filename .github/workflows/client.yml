@@ -265,3 +265,78 @@ jobs:
       # is signal to look at, not (yet) a hard merge gate.
       - name: Run engine/sprite tests
         run: ctest --test-dir build-${{ matrix.sanitizer }} --output-on-failure
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Same pin as server.yml (ce4a73f): the runner image's apt
+      # clang-format is 18.1.3, which formats comment-heavy files
+      # differently from every later version (18.1.8/19/20/22 all agree)
+      # — an unpinned gate is nondeterministic, and 99.8% of client files
+      # carry non-ASCII comment bytes. Match it locally with:
+      #   pip install clang-format==18.1.8
+      - name: Install clang-format (pinned)
+        run: |
+          sudo pip install --break-system-packages clang-format==18.1.8
+          which clang-format
+          clang-format --version
+
+      # Changed-files-only, so the measured backlog (2,199 unformatted
+      # files at the 2026-08-07 census) does not block every push — same
+      # ratchet policy as the server gate. Runs from dkrix/ with
+      # --relative and the same pathspecs as dkrix/Makefile's fmt
+      # targets, so the vendored exclude list (Client/JpegLib, the 11
+      # flat zlib 1.1.x headers) lives in one shape instead of being
+      # duplicated here as a regex. Keep the excludes in sync with
+      # FMT_EXCLUDES in dkrix/Makefile.
+      - name: Check changed client C++ files
+        run: |
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"; fi
+
+          cd dkrix
+          changed=$(git diff --name-only --diff-filter=ACM --relative "$base" HEAD -- \
+            '*.cpp' '*.h' '*.CPP' '*.H' \
+            ':(exclude)Client/JpegLib' \
+            ':(exclude)Client/deflate.h' ':(exclude)Client/infblock.h' \
+            ':(exclude)Client/infcodes.h' ':(exclude)Client/inffast.h' \
+            ':(exclude)Client/inffixed.h' ':(exclude)Client/inftrees.h' \
+            ':(exclude)Client/infutil.h' ':(exclude)Client/trees.h' \
+            ':(exclude)Client/zconf.h' ':(exclude)Client/zlib.h' \
+            ':(exclude)Client/zutil.h' || true)
+
+          if [ -z "$changed" ]; then
+            echo "No client C++ files changed."
+            exit 0
+          fi
+
+          checked=0
+          failed=0
+          for f in $changed; do
+            if [ ! -f "$f" ]; then
+              echo "::warning file=dkrix/$f::listed as changed but not present in the worktree; skipped"
+              continue
+            fi
+            checked=$((checked + 1))
+            if ! diff -q "$f" <(clang-format "$f") >/dev/null; then
+              echo "::error file=dkrix/$f::Not clang-format clean. Run 'make fmt' in dkrix/."
+              failed=1
+            fi
+          done
+
+          # Same guard server.yml's format job grew in 60f4c35: a
+          # non-empty change list that checks zero files is a bug in this
+          # workflow's path resolution, not a passing format check.
+          echo "Checked $checked of $(echo "$changed" | wc -l) changed file(s)."
+          if [ "$checked" -eq 0 ]; then
+            echo "::error::Change list was non-empty but no file was readable — path resolution is wrong in this workflow."
+            exit 1
+          fi
+          exit $failed
