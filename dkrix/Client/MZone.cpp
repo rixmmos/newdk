@@ -3439,16 +3439,6 @@ MZone::AddEffect(MEffect* pNewEffect, DWORD dwWaitCount)
 		return false;
 	}
 
-	// ASAN check: verify g_pEffectSpriteTypeTable pointer is not poisoned
-	#ifdef __SANITIZE_ADDRESS__
-	if (__asan_address_is_poisoned((void*)g_pEffectSpriteTypeTable, sizeof(void*))) {
-		DEBUG_ADD_ERR("AddEffect: g_pEffectSpriteTypeTable pointer is poisoned!");
-		DEBUG_ADD_FORMAT("AddEffect: g_pEffectSpriteTypeTable=%p points to freed memory", g_pEffectSpriteTypeTable);
-		delete pNewEffect;
-		return false;
-	}
-	#endif
-
 	DEBUG_ADD_FORMAT("AddEffect: g_pEffectSpriteTypeTable=%p, checking frameID=%d", g_pEffectSpriteTypeTable, frameID);
 
 	// Validate that the global table pointer hasn't been corrupted
