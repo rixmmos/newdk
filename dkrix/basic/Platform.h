@@ -1734,6 +1734,9 @@ typedef long long __int64;
 #include <stdarg.h>
 #include <unistd.h>
 #include <stdlib.h>
+/* time_t / struct tm / time() / localtime() for the GetLocalTime stub below.
+   MSVC gets these transitively from <windows.h>; GCC does not. */
+#include <time.h>
 static inline int wsprintf(char* buf, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
