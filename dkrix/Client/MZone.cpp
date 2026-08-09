@@ -5,6 +5,9 @@
 #pragma warning(disable:4786)
 
 #include <math.h>
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/asan_interface.h>
+#endif
 #include "MZoneDef.h"
 #include "MSector.h"
 #include "MCreature.h"

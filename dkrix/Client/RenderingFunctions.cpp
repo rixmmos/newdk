@@ -338,6 +338,7 @@ bool g_PossibleStringCut(const char* pStr, int maxWidth)
     return width <= maxWidth;
 }
 
+#ifdef PLATFORM_WINDOWS
 int g_GetStringWidth(const char* pStr, HFONT hfont)
 {
 	return g_GetStringWidth(pStr, reinterpret_cast<void*>(hfont));
@@ -347,6 +348,8 @@ int g_GetStringHeight(const char* pStr, HFONT hfont)
 {
 	return g_GetStringHeight(pStr, reinterpret_cast<void*>(hfont));
 }
+#endif /* PLATFORM_WINDOWS: off-Windows HFONT is typedef void*, so these
+          forwarders would redeclare the void* overloads above verbatim. */
 
 int g_DBCSLen(const char_t* p_dbcs)
 {
