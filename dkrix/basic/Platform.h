@@ -16,6 +16,20 @@
 
 #include <stdint.h>
 #include <stddef.h>
+/* Standard C headers this file's own stubs need, hoisted above their first use
+   rather than left to whichever header happens to arrive first:
+     <stdio.h>  - fprintf/stderr in the MessageBox stub
+     <string.h> - strlen in the GetCurrentDirectory stub
+     <time.h>   - time_t in struct _finddata_t, time()/localtime() in GetLocalTime
+   All three used to survive only on a transitive include: <windows.h> supplies
+   them on Windows, and SDL.h happened to supply two of the three elsewhere.
+   That is why <time.h> surfaced as a GCC error (8cabe14) the moment the Linux
+   build first reached GetLocalTime, and why the other two were one build step
+   away from doing the same. They are ISO C rather than platform-specific, so
+   they are included unconditionally - MSVC has all three. */
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 /* Define assert macro for non-Windows platforms */
 #if !defined(_WIN32) && !defined(_WIN64)
@@ -278,7 +292,6 @@ typedef WORD			char_t;
 
 #ifndef PLATFORM_WINDOWS
 	/* Windows-compatible type definitions for non-Windows platforms */
-	typedef int				BOOL;
 	/* id_t is already defined above (single definition point). */
 	#ifndef TRUE
 		#define TRUE	1
@@ -296,7 +309,6 @@ typedef WORD			char_t;
 	#endif
 
 	/* Additional Windows types */
-	typedef int32_t			LONG;
 	typedef void*			LPVOID;
 	typedef void*			HWND;
 	typedef void*			HDC;
@@ -306,14 +318,11 @@ typedef WORD			char_t;
 	typedef DWORD*			LPDWORD;
 	typedef const char*		LPCSTR;
 	typedef char*			LPSTR;
-	typedef const char*		LPCTSTR;
-	typedef char*			LPTSTR;
 	typedef const wchar_t*	LPCWSTR;
 	typedef wchar_t*		LPWSTR;
 	typedef unsigned char*	LPBYTE;
 	typedef intptr_t		LPARAM;
 	typedef intptr_t		WPARAM;
-	typedef uint32_t			UINT;
 
 	/* MessageBox constants */
 	#define MB_OK			0x00000000L
@@ -1208,9 +1217,6 @@ typedef struct _WIN32_FIND_DATAA {
 #endif
 
 /* Find file handles */
-typedef void* HANDLE;
-typedef void* HWND;
-typedef void* HINSTANCE;
 typedef void* HMODULE;
 typedef void* HKEY;
 
@@ -1730,13 +1736,10 @@ typedef long long __int64;
 
 /* wsprintf stub for macOS - writes formatted output to string */
 #ifndef PLATFORM_WINDOWS
-#include <stdio.h>
+/* <stdio.h>, <string.h> and <time.h> are included at the top of this file. */
 #include <stdarg.h>
 #include <unistd.h>
 #include <stdlib.h>
-/* time_t / struct tm / time() / localtime() for the GetLocalTime stub below.
-   MSVC gets these transitively from <windows.h>; GCC does not. */
-#include <time.h>
 static inline int wsprintf(char* buf, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
