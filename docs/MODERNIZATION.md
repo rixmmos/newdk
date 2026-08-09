@@ -427,6 +427,52 @@ In order; each independently shippable:
      `IncludeBlocks: Regroup`, so a format pass reorders ~300 includes in a
      file that has demonstrably been relying on include order). Deliberately
      not reformatted alongside a one-line build fix.
+
+   **[measured 2026-08-09, follow-up wave] Client run #25 at `22d144e` —
+   `MSVC x64 (Debug)` SUCCESS, `Viewers and validators` SUCCESS.** The
+   regression is closed. Three follow-ups landed on top of it:
+
+   - **`4f1dd38` — both format gates now check the whole push.** Client and
+     server both derived their base as `HEAD~1`, so a multi-commit push was
+     only inspected at its tip. Now `github.event.before`, falling back to
+     `HEAD~1` when it is absent (`workflow_dispatch`), all-zeros (first
+     push), or unreachable (force-push). Both jobs already use
+     `fetch-depth: 0`. Measured against the real `96a1995..e6398ae` push:
+     client 16 files in range, **all 16 fail** clang-format but **0 are
+     regressions** — every one already failed at `96a1995`, i.e. pre-existing
+     backlog surfaced by being touched; server 9 in range, 0 fail. Note the
+     window has already closed: `origin/main` is past that push, so those 16
+     will not be re-flagged and are only swept by a deliberate `make fmt`.
+   - **`8cabe14` — `<time.h>` for the non-Windows `GetLocalTime` stub.**
+     Verified under g++ 13.3.0 in WSL by compiling `basic/Platform.h`
+     standalone against a stub SDL2 header: the pre-fix copy reproduces CI's
+     errors at byte-identical line numbers, the fixed copy compiles clean.
+   - **The sanitizer legs are still not green, and one line will not do it.**
+     The 65 errors per job are two classes: 45 are the `<time.h>` gap above
+     (5 TUs), the other 20 are `error: declaration does not declare anything`
+     from bare `std::ofstream;` / `std::ifstream;` statements at namespace
+     scope in four SpriteLib headers — `CSprite.h:29-30`, `CSpriteDef.h:14-15`,
+     `CFilter.h:21-22`, `CAlphaSprite.h:19-20`. Almost certainly decayed
+     `using std::ofstream;` declarations. They declare nothing today, so
+     deleting them is a no-op *for those files* — but SpriteLib has many
+     unqualified `ofstream`/`ifstream` uses (`CSpritePalBase.h:38-39`,
+     `CTypePackVector.h:73-74`, several `.cpp`), which today resolve via
+     something else entirely. Confirm what that something is before deleting.
+     And the build aborted at 2%, so a third class may sit behind these.
+   - **Latent, not breaking CI:** `Platform.h:1841`'s `strlen` has no
+     `<string.h>` either — it survives only on SDL's transitive include.
+     Proved load-bearing by rerunning the probe with that include removed.
+
+   **Design problem this wave exposed, unresolved:** the format gate's
+   ratchet is *whole-file* — touch a file, the whole file must be
+   clang-format clean. Against a 2,199-file backlog of legacy sources with
+   four-figure drift each (`Platform.h` 1,683 lines; `UIMessageManager.cpp`
+   18,350), that means **every genuine one-line bug fix in a legacy file
+   trips the gate**, and the only ways out are a risky whole-file reformat
+   or a carve-out. The standard fix is to ratchet on *changed lines* rather
+   than changed files (`git-clang-format`/`clang-format --diff` against the
+   same base), which makes the gate enforce "new code is clean" without
+   demanding a reformat as the price of a bug fix. Not attempted here.
 2. **Phase 18 — run the smoke test** (prep pack:
    `_incoming\wave-2026-08-09\w6-prep\` — `PREFLIGHT.md` first; it
    resolves which MySQL instance is listening before any destructive step
