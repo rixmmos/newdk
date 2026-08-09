@@ -71,19 +71,6 @@ extern SDL_Window* g_pSDLWindow;
 extern SDL_Renderer* g_pSDLRenderer;
 extern bool g_bRunning;
 
-//-----------------------------------------------------------------------------
-// Stub implementations for functions not available on non-Windows platforms
-//-----------------------------------------------------------------------------
-
-// Stub for ExecuteActionInfoFromMainNode
-void ExecuteActionInfoFromMainNode(
-	unsigned short, unsigned short, unsigned short, int, int, unsigned int,
-	unsigned short, unsigned short, int, unsigned long,
-	struct MActionResult*, bool, int, int)
-{
-	// Stub - do nothing on SDL platform
-}
-
 // g_Print / FillRect / rectangle are provided by RenderingFunctions.cpp
 
 /*-----------------------------------------------------------------------------
