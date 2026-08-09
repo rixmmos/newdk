@@ -43,11 +43,16 @@ fmt:
 	find src -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \) -exec clang-format -i {} +
 	@echo "Code formatted successfully!"
 
-# Check format for modified files only (fast)
+# Check format for modified files only (fast). `--relative` is
+# required: without it git prints paths from the repo root
+# (dkrixserver/src/...), which do not resolve from this directory and
+# every file would be silently skipped. Same fix dkrix/Makefile
+# shipped with; CI never had the bug — server.yml's format job
+# inlines its own check from the repo root.
 fmt-check:
 	@echo "Checking format for modified files..."
 	@failed=false; \
-	files=$$(git diff --name-only --diff-filter=ACM | grep -E '\.(cpp|h|hpp)$$' || true); \
+	files=$$(git diff --name-only --diff-filter=ACM --relative | grep -E '\.(cpp|h|hpp)$$' || true); \
 	if [ -z "$$files" ]; then \
 		echo "No modified C++ files to check."; \
 	else \
