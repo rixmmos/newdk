@@ -15,6 +15,7 @@
 #include "Assert.h"
 #include "Exception.h"
 #include "Result.h"
+#include "Utility.h"
 
 namespace {
 struct PreparedResultColumn {
@@ -120,17 +121,24 @@ PreparedStatement::PreparedStatement(Connection* pConnection, const std::string&
 
     MYSQL* mysql = m_pConnection->getMYSQL();
 
+    // Prepare-time failures throw base SQLException, which END_DB's
+    // catch (SQLQueryException&) does not see, so without logging here they
+    // would never reach DBError.log (the documented Phase 11.1 caveat).
     m_pStmt = mysql_stmt_init(mysql);
     if (m_pStmt == NULL) {
-        throw SQLException(std::string("PreparedStatement: mysql_stmt_init failed: ") + mysql_error(mysql));
+        std::string msg = std::string("PreparedStatement: mysql_stmt_init failed: ") + mysql_error(mysql);
+        filelog("DBError.log", "%s", msg.c_str());
+        throw SQLException(msg);
     }
 
     if (mysql_stmt_prepare(m_pStmt, sqlWithQMarks.c_str(), sqlWithQMarks.size()) != 0) {
         std::string err = mysql_stmt_error(m_pStmt);
         mysql_stmt_close(m_pStmt);
         m_pStmt = NULL;
-        throw SQLException(std::string("PreparedStatement: mysql_stmt_prepare failed: ") + err +
-                           " [sql=" + sqlWithQMarks + "]");
+        std::string msg =
+            std::string("PreparedStatement: mysql_stmt_prepare failed: ") + err + " [sql=" + sqlWithQMarks + "]";
+        filelog("DBError.log", "%s", msg.c_str());
+        throw SQLException(msg);
     }
 
     my_bool_t updateMaxLength = 1;
