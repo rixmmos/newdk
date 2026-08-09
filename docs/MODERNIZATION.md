@@ -388,57 +388,45 @@ interleave once P0 is done.
 > 10 — and everything the parked line numbered 11–18, now booked below.
 > Treat the ordering as intent, not history.
 
-### Current next steps (audit 2026-08-07)
+### Current next steps (re-audit 2026-08-09, after the second agent wave)
 
 In order; each independently shippable:
 
-1. ~~**CI on the merged tip — one tail open.**~~ — **fully resolved
-   2026-08-07.** Client run #8 (tip `5ca240a`): SUCCESS, 28m30s — the
-   client wave compiles. Server run #6 (same tip): `make debug` green in
-   21m32s; only the `clang-format` job was red, fixed by the fmt pass.
-   Run #9 (`8f4ca50`): `make debug` green again; fmt red on
-   formatter-version skew, fixed by pinning `clang-format==18.1.8` in
-   `server.yml`. **The "now deterministic" call here was wrong**: the
-   next push (`19f41c4`, run #12) went RED on a static-link-order bug in
-   the three server executables (`*Database` before `*Packets`/`Core`),
-   latent since `PreparedStatement` was introduced and surfaced by 11.2
-   batch 1's first call sites. Fixed in `ff96e46`; run #13 then surfaced
-   a second, opposite-direction ordering bug in `sharedserver`
-   (`Database` linked after `ServerCore`), fixed properly in `421088e`
-   via `target_link_libraries(Database PUBLIC ServerCore)` rather than
-   more manual list-tuning. **Run #14 (`421088e`) — GREEN**, 21m39s, all
-   three jobs. Full detail in the verification-status box above. Item 2
-   below is now genuinely the top item.
-2. **Phase 18 — run the smoke test against `main`** (`docs/smoke-test/`,
-   filling PORTING-NOTE's verification table as you go). Workstation + WSL
-   + MySQL. Fold Phase 5's Korean/Chinese glyph check into the same session
-   — it needs eyes on a running client anyway.
-3. **Phase 8 SQL half, via Phase 11.** ~~Lift the parked `PreparedStatement`
-   design.~~ **11.1 landed 2026-08-07** (API only, zero call sites; compile
-   gate = next server CI run). 11.2 batch 1 done (542→529); **batch 2
-   done 2026-08-07** (529→510, guild-membership subsystem). Ongoing —
-   ~510 sites remain, ratchet-driven.
-4. ~~**Phase 3 items 2–3, then 4b/4c.**~~ **Items 2–3 done 2026-08-07**
-   (see Phase 3 above). 4b/4c remain and are explicitly **not
-   delegable** — Phase 4 sprite consolidation changes rendering with no
-   automated test coverage; needs eyes on a running client (folds into
-   item 2's Phase 18 session).
-5. ~~**Phase 10 (+ parked 14/15).**~~ **All three bullets done
-   2026-08-07**: `.clang-format` + fmt infra (bullet 1, census only, no
-   source reformatted), explicit source lists / `CONFIGURE_DEPENDS`
-   (bullet 2), `USE_ASAN/TSAN/UBSAN` + CI sanitizer matrix (bullet 3).
-   See Phase 10 above for detail and compile-gate caveats.
-6. **Phase 8 secrets step 2** — deployment change; needs a live-server
-   window, config backups, and Enrico at the wheel.
-7. ~~**Phase 12.1 — build `shared/Packets/` infrastructure + one pilot
-   pair.**~~ **Done and green 2026-08-08.** `shared_packets` CMake
-   INTERFACE target landed, `CLGetWorldList` migrated as the pilot
-   pair (ratchet 326→324). Took three pushes to get the client build
-   green — see Phase 12 above for the full include-resolution story
-   (a shadowed Windows SDK header, then a CMake property that silently
-   didn't apply, then a forwarding-header shim that finally worked).
-   Both trees confirmed green on `46746eb`. Wave 1 proper (batches of
-   ~20 of the remaining 61 style-only pairs) is now unblocked.
+1. **Push the 2026-08-09 wave and watch CI.** Ten commits staged in
+   `C:\dev\_incoming\wave-2026-08-09\` (apply order + expected outputs in
+   its `APPLY.md`; the whole stack `git am`s clean on `96a1995` and was
+   ratchet-verified at the integrated tip). Contents: client fmt gate +
+   server fmt-check fix (D3), Phase 11.2 close-out (SQL ratchet **15 → 0**),
+   Phase 12 Wave 4 batches 1–2 (packet ratchet **202 → 142**, 30 pairs),
+   the 9-pair protocol-review briefs doc, and this docs commit. Server
+   `ratchets` must print `OK: 0` and `OK: 142`; the client run is the
+   compile gate for Wave 4 and the first live run of the new `format` job.
+2. **Phase 18 — run the smoke test** (prep pack:
+   `_incoming\wave-2026-08-09\w6-prep\` — `PREFLIGHT.md` first; it
+   resolves which MySQL instance is listening before any destructive step
+   and pre-fills the backup commands. Known traps found by static
+   verification: SMOKE_TEST §7's account-creation SQL is wrong three ways —
+   use `create_test_account.sql`; `smoke_test_finish.sh` is an unported
+   parked-line artifact, do not run; launch commands need `-f`; a CJK font
+   must be present in `Data\Font` for the Phase 5 glyph check.)
+3. **Phase 12 endgame.** 14 ≤5-residual pairs left: 12 mechanical next-ups
+   (listed in the Wave 4 batch 2 note) + 2 recorded skips needing their own
+   decisions (`CGUseMessageItemFromInventory` waits on its divergent base;
+   `CGConnectSetKey` needs a cross-family target extension). Then the
+   48-pair `>5` set, same recipe, more per-pair reading. The 9-pair review
+   queue lands per `docs/packet-protocol-review-2026-08-09.md` — recommended
+   order there: CGGuildChat and CGModifyNickname are land-now; the three
+   size-formula pairs go after the first smoke run; CGMove and CLLogin need
+   live windows; the exchange pair is feature-gated (client UI is dead).
+   Phase 13's client half rides the tail of this queue.
+4. **Sanitizer legs** — flip per the ≥5-consecutive-greens rule recorded in
+   Phase 10 bullet 3 (server asan at 2; server ubsan needs an actual fix —
+   diagnosis needs the run logs; client legs are blocked on the Linux
+   `min`/`max` macro bug).
+5. **Phase 8 secrets step 2** — rotate the deployment onto the `DKRIX_*`
+   templates. Live-server window, backups first, human-only.
+6. **Phase 4b** — sprite backend collapse; human-validated rendering
+   (prep brief pending; folds into a post-smoke-test sitting).
 
 > **2026-08-07 five-stream agent wave (cloud session):** items 3–5 above
 > advanced in one parallel pass — 11.2 batch 1 (ratchet 542→529), Phase 3
@@ -1642,13 +1630,26 @@ to `main` at authoring time, each independently green under
       `Client/`, the Xiph headers — at `Client/Platform/` after Phase 3
       item 3), and `fmt-check` uses `git diff --relative` — without it
       every path is repo-root-relative and silently skipped from
-      `dkrix/` (the server's own `fmt-check` has that latent bug; its
-      CI job is unaffected). [measured] Census at pinned 18.1.8:
+      `dkrix/` (the server's own `fmt-check` had that latent bug —
+      fixed 2026-08-09, `b147f2b`, reproduced in-tree first; its CI
+      job was never affected since it runs from the repo root). [measured] Census at pinned 18.1.8:
       **2,199 of 2,227** in-scope files unformatted, ~946k diff lines;
       0 clang-format errors, 0 non-UTF-8 files, 0 in-repo CRLF. No
-      source reformatted; no CI gate wired yet — proposed job +
-      sequencing in the stream-② manifest
-      (`_incoming/phase10/MANIFEST.md`).
+      source reformatted. CI gate wired 2026-08-09 (`86208bc`): a
+      `format` job in `client.yml` — changed-files-only, pinned
+      18.1.8 via pip (ce4a73f rationale), server.yml's checked-zero
+      guard (60f4c35), scoped by cd-into-dkrix + `git diff --relative`
+      + the Makefile's own pathspecs. Exclude list synced to the
+      Makefile's current 12 entries — the stream-② snippet's five
+      DXLib Xiph excludes were dropped because those files have since
+      been deleted [measured: `git ls-files` returns none]. Scope at
+      wiring time [measured 2026-08-09]: 2,090 in-scope files of
+      2,106 tracked C++ (the 08-07 census's 2,227/2,248 predates the
+      Phase 2/3/5 dead-code deletions). Shell verified by local
+      dry-run only — first CI run of the job is the compile-truth
+      gate [unverified until it runs]. Mass-reformat decision:
+      approved 2026-08-09 — chunked per-directory, each chunk ridden
+      through client CI, scheduled only after Phase 18 passes.
 - [x] Replace `file(GLOB …)` with explicit source lists in the client
       CMake — done 2026-08-07. Lifted the parked line's Phase 14 approach
       (`4670b06`/`ed23fea`) against `main`'s current tree, not copied
@@ -1690,9 +1691,24 @@ to `main` at authoring time, each independently green under
       the plain build job already went red twice today (`ff96e46`,
       `421088e`) before landing green — an unproven leg shouldn't be
       able to flip the whole workflow red while it finds its feet.
-      **Compile gate: next CI run on `main` [unverified]** — no
-      compiler in this sandbox to check `-fsanitize=...` actually
-      links clean here.
+      **Compile gate [measured 2026-08-09, job-level, off the public
+      Actions pages]:** the four legs have real, divergent histories.
+      Server `build (asan)`: green on #24/#27/#28, red on #25/#26
+      only because the whole tree was compile-broken there (make
+      debug red too; fixed by c91eebb) — `-fsanitize=address` links
+      clean. Server `build (ubsan)`: red on ALL of #24–#28, failing
+      its own `make debug-ubsan` step even when the plain build is
+      green — a real, leg-specific break, cause unread (logs need
+      sign-in). Client `Linux sanitizer (asan/ubsan)`: both red on
+      #22/#23, dying in the Build step in ~40s — consistent with the
+      tree-wide Linux `min`/`max` macro bug (Phase 4 note above);
+      still true that the ctest sprite tests have never executed.
+      **Decision 2026-08-09: all legs stay non-blocking.** Flip rule:
+      a leg becomes blocking after ≥5 consecutive green runs of that
+      leg (asan is at 2; the other three at 0). Ready-to-apply flip
+      diffs: `server-asan-blocking.patch.HOLD` /
+      `client-sanitizers-blocking.patch.HOLD` in the D3/D5 stream
+      output. TSan remains excluded (unaudited thread model).
 - [x] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
       editor detritus — **already done on this line** (Phase -1/Phase 1
       passes, verified with `git check-ignore -v`).
@@ -1704,7 +1720,7 @@ numbers are kept so `git log archive/modernization-phases-1-17 --oneline
 --grep "Phase N"` keeps working. For each: read what the tag did first,
 lift the approach one phase at a time against a build — never as a merge.
 
-### Phase 11 — SQL injection remediation (11.1 lifted onto main 2026-08-07; 11.2 ongoing)
+### Phase 11 — SQL injection remediation (11.1 lifted onto main 2026-08-07; 11.2 complete 2026-08-09 — ratchet 0)
 **11.1 — done.** `PreparedStatement.{h,cpp}` lifted at tag-tip content
 (which includes the parked line's later SELECT-materialization work)
 into `src/server/database/`, added to `DATABASE_SOURCES` so all five
@@ -1745,7 +1761,8 @@ the plan's "pet names" priority item is empty on `main` (no pet-name SQL
 exists; Pet* files carry only tier-2 OwnerID strings plus a non-bindable
 `SET %s` fragment). PreparedStatement's ctor throws base `SQLException`,
 which `END_DB` does not catch — prepare-time failures skip DBError.log
-(execute-time errors unchanged). **Compile-verified 2026-08-07**: CI run
+(execute-time errors unchanged; closed 2026-08-09 by the 11.2 close-out:
+the ctor now logs to DBError.log before throwing). **Compile-verified 2026-08-07**: CI run
 #14 (`421088e`) went GREEN after two link-order bugs were fixed
 (`ff96e46`, `421088e` — see the verification-status box above); both
 failures were link-order problems in the surrounding `CMakeLists.txt`,
@@ -2442,7 +2459,61 @@ per-file after editing to confirm zero live `createStatement()`/
 dead comments and the handful of genuinely empty, no-SQL stub loaders).
 CI is the real gate for this batch, same caveat as every prior one.
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Wave 1 batches 1–2, Wave 2 batches A–B, and Wave 3 landed here 2026-08-08/09)
+**11.2 close-out (2026-08-09, agent stream, worktree): ratchet 15 → 0
+[measured].** The 15 hits remaining after batches 10–12 merged were
+audited one final time, each file read in full plus a string-literal-
+aware comment strip: **all 15 were dead comments; zero live sites
+remained**. This *confirms* batch 12's "every one individually confirmed
+dead" claim and *retracts* the 2026-08-09 audit note (AGENT_WORK_GUIDE
+§2 / this wave's brief) that reclassified three of them as live — that
+reclassification was a misread caused by verification context windows
+(`sed -n '815,830p'`, `'2175,2190p'`, `'88,100p'`) that each start a few
+lines below the enclosing block's `/*` opener: `Slayer.cpp:823` sits in
+the `/* if (reward != 0) */` block (785–888), `CreatureUtil.cpp:2182`
+plus the REPLACE below it sit in `addOlympicStat`'s commented-out body
+(2170–2197; the function itself is a live no-op with 18 callers), and
+`EffectGrayDarkness.cpp:95` sits in the block (84–135) that comments out
+the whole loader — whose class declaration is equally commented out in
+its header. Lesson recorded: when auditing live-vs-dead, quote the
+enclosing `/* */` bounds, not a fixed context window.
+
+All 15 dead blocks were then **deleted** per decision D2 (approved by
+Enrico 2026-08-09): prior batches preserved dead-comment SQL in passing,
+but lines that hold a security ratchet above zero are noise the gate
+carries forever — a different, defensible call. Whole blocks went, not
+just matching lines (Slayer's reward block, EffectGrayDarkness's
+commented-out loader, giveGoldMedal's and addOlympicStat's `/* */`
+bodies, deletePC's three DELETE-vs-UPDATE history lines, both
+LoginPlayer disconnect variants' LogOn-check fragments,
+CLSelectWorldHandler's `/* BEGIN_DB */` block, CLLoginHandler's LoginIP
+fallback, ZoneGroupManager's and ScriptManager's pre-migration query
+comments). Deletion verified comment-only: comment-stripped,
+whitespace-stripped token streams of all eight files byte-identical
+before/after. A preceding fmt-only commit brought the four files with
+pre-existing clang-format drift (Slayer, ZoneGroupManager, CreatureUtil,
+EffectGrayDarkness) to 18.1.8-clean, string literals verified
+byte-identical, so the format gate judges the deletions on their own
+content.
+
+Baseline re-baselined **15 → 0** via `--update` and the gate verified
+both ways [measured]: exit 0 at baseline ("OK: 0 sites"), and — since
+baseline−1 is impossible at 0 — exit 1 with a deliberately re-added
+dummy `%s` site, which the gate printed and which was removed before
+commit. Every future `%`-format `executeQuery`/`setStatement`/
+`Statement` call in compiled server sources now fails CI outright.
+
+The Phase 11.1 END_DB caveat is also closed: `PreparedStatement`'s ctor
+now writes prepare-time failures (`mysql_stmt_init`/`mysql_stmt_prepare`)
+to DBError.log before throwing, exception type and text unchanged.
+Widening END_DB's catch was rejected — END_DB rethrows `const char*`,
+invisible to upstream `catch (Throwable&)`, so widening would reroute
+every previously-uncaught SQLException in the tree. `execute()`'s
+unbound-parameter SQLException still bypasses END_DB's log by design
+(programming-error guard). **Compile gate: server CI on the landing
+push [unverified until green]** — this close-out was produced in a
+sandbox with no server toolchain, same as every prior batch.
+
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Waves 1–3 landed 2026-08-08/09; Wave 4 batches 1–2 landed 2026-08-09)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -3337,8 +3408,9 @@ style-residual<=5 44 | style-residual>5 48 | real-divergence 9` to
 `style-only 0 | style-residual<=5 44 | style-residual>5 48 |
 real-divergence 9` — **the confirmed style-only backlog measured at 62
 pairs on 2026-08-07 is now fully cleared** (pilot 1 + Wave 1's 23 + Wave
-2's 28 + Wave 3's 10 = 62). What remains unmigrated (92 of the original
-163 pairs) splits into `style-residual` (92, further split ≤5/>5
+2's 28 + Wave 3's 10 = 62). What remains unmigrated (101 of the original
+163 pairs — corrected 2026-08-09; the prior 92 counted the
+style-residual subset alone, omitting the 9-pair review queue) splits into `style-residual` (92, further split ≤5/>5
 normalized lines) and the 9-pair `real-divergence` protocol-review queue
 named in the 2026-08-07 sizing (`CLLogin`, `CLCreatePC`, `CGMove`,
 `CGGuildChat`, `CGModifyNickname`, `CGSkillToInventory`,
@@ -3364,6 +3436,160 @@ the correct per-family list (`_SHARED_PACKETS_CG_SOURCES` for 4,
 `_SHARED_PACKETS_CL_SOURCES` for 6). Both-tree CI remains the real gate
 per `docs/CLAUDE.md`.
 
+**Wave 4 batch 1 landed 2026-08-09 (worktree `agent/w3-packets`, not yet on
+`main`): 15 pairs, the first batch drawn from the style-residual queue.**
+Unlike Waves 1–3 (which consumed the residual-0 style-only backlog, cleared
+by Wave 3), every pair here has a nonzero residual — selection was the 15
+lowest-residual pairs of the 44-pair `style-residual<=5` population, ranked
+by `normalize-packet-style.py --all --tsv` at `96a1995`, ties alphabetical:
+**CGSelectWayPoint, CLRegisterPlayer (residual 1); CGDepositPet,
+CGDonationMoney, CGPartyInvite, CGPhoneSay, CGRangerSay, CGRegistGuild,
+CGRequestNewbieItem, CGSelectRankBonus, CGShopRequestList, CGTryJoinGuild
+(2); CGConnect, CGLearnSkill, CGRequestUnionInfo (3)** — 14 CG + 1 CL. The
+hard gate for a residual pair is wire equality after canonicalization, not
+residual 0: each pair's `--pair` verdict showed read/write/size/maxsize all
+`match`, each residual diff was read and judged provably wire-neutral
+(toString text; server-only Handler method/ctor declarations; include-set
+drift; one always-false validation check; one client-only setter — the
+itemized classes below), and each **merged file was re-verified post-merge**:
+its canonicalized wire signature equals both pre-migration originals' and
+its normalized style stream is byte-identical to the server original's
+(one reviewed exception, CGConnect).
+
+Two pairs ranked above the cut were skipped — skipping is the designed
+outcome of the gate, and both are recorded here rather than forced:
+
+- **CGUseMessageItemFromInventory (residual 1) — demoted to the
+  protocol-review queue.** Its class derives from and delegates
+  `read()`/`write()` to `CGUseItemFromInventory`, one of the 9
+  real-divergence pairs (`size_expr`). The derived pair's own fields are
+  stream-equal, but its effective wire format is inherited from a divergent
+  base, and the migration would need a novel `SharedPacketsShim` forwarder
+  into `Cpackets/` for the very header the protocol review will rework.
+  It moves when its base moves.
+- **CGConnectSetKey (residual 1) — skipped on build structure, not wire.**
+  The only pair whose `.cpp` sits in *two* server family lists
+  (`CG_PACKET_SOURCES` and `CL_PACKET_SOURCES` — gameserver and loginserver
+  both compile the class and its handler). The per-family
+  `shared_packets_<fam>` design has no slot for a cross-server-family pair:
+  `_cg` alone unlinks it from LoginServerPackets; `_cg` + `_cl` together
+  double-compile it into DarkEden. Needs a small deliberate extension (a
+  `shared_packets_cg_login`-style third target linked by GameServerPackets,
+  LoginServerPackets and DarkEden) — a wiring decision for its own commit,
+  not something a mechanical batch should back into. Found for later: the
+  server file carries an unused `#include "libcpsso.h"` (legacy
+  copy-protection SSO header, server-tree-only) that the eventual merged
+  file must drop — provably compile- and wire-neutral.
+
+Wire-neutrality evidence for the residual classes taken (each verified
+against the actual declarations, not assumed): **CLRegisterPlayer** — the
+divergence doc's "account family worth re-checking" flag resolved by
+measurement: the server form's bare `maxIDLength`-family constants
+(`Core/types/PlayerTypes.h`) and the client's `Packet/Types/PlayerTypes.h`
+copies are value-identical (all 13 compared), both reached via
+`Packet.h → Types.h`, so the client-only `PlayerInfo.h` include (a third
+duplicate set, namespace-qualified) disappears with validation limits
+unchanged. **CGRegistGuild** — the client's extra
+`if (szGuildIntro > 256) throw` operates on a declared `BYTE` (max 255):
+dead on read and write, dropped with the server form. **CGDonationMoney** —
+the server enum's extra `DONATION_TYPE_200505_WEDDING` shifts the client's
+`DONATION_TYPE_MAX` 2→3; zero client-side consumers of any
+`DONATION_TYPE_*` name exist outside the pair, and the one server consumer
+(`quest/ActionShowDonationDialog.cpp`, Quest library — already wired by
+`377ff47`) uses only the two value-unchanged enumerators. **CGConnect** —
+the one union-keep: the merged header keeps the client's `setMacAddress`
+(live consumer `LCReconnectHandler.cpp:167` fills the MAC before sending;
+inline memcpy setter, wire-neutral, unused server-side; memcpy availability
+proven both sides — the server's own `SocketInputStream.h` uses it at
+header scope). **CGDepositPet** — a new no-guard variant: *neither* side
+guarded the Handler class, and the client's `execute()` omitted the
+dispatch call entirely; merged file keeps the class unguarded (replicating
+the client's — and server's — own choice) with the standard guarded
+dispatch call, the CLGetServerList precedent, behaviorally identical on
+both sides. **CGDonationMoney** is also this wave's only
+`CGHandlersStub.cpp` member (Handler unconditional, stub spec dropped, the
+CGBuyStoreItem precedent); the other 13 pairs take the whole-class guard,
+each checked against its own client copy.
+
+Indirect-consumer sweep (`git grep -i`, all case/slash variants, whole
+tree): 42 include sites repointed across 10 client files —
+`PacketFactoryManager.cpp`, `UIMessageManager.cpp`, `SizeOfObjects.cpp`
+(backslash + mixed-case + one uppercase-extension variant:
+`packet/CPackets\CGSelectRankBonus.H`), `PacketDef.h`, `MPlayer.cpp`,
+`CGHandlersStub.cpp`, two `Gpackets/*.cpp` and two `Lpackets/*.cpp`
+handlers. Server side beyond `src/Core`: `gameserver/GamePlayer.cpp`
+(CGConnect) and `quest/ActionShowDonationDialog.cpp` (CGDonationMoney),
+both bare includes covered by `b84723f`/`377ff47`. **Zero new
+`target_include_directories`/`target_link_libraries` calls and zero new
+shim forwarders** — every consumer sits on wiring the pilot and Wave 1
+fixes established. Left alone per precedent: `Client.vcxproj.filters`, the
+dead commented-out `CGPhoneSay` include in `PacketFactoryManager.cpp`.
+
+Ratchet: `check-packet-duplicates.sh --count` 202 → **172** (15 pairs × 2),
+baseline updated via `--update` in the batch commit.
+`normalize-packet-style.py --all --tsv`: 101 → 86 pairs,
+`style-residual<=5` 44 → 29. **Not build-verified — no compiler in this
+environment**; both-tree CI is the gate, per every prior wave.
+
+**Wave 4 batch 2 landed 2026-08-09 (same worktree, on top of batch 1): 15
+more pairs, the next 15 by residual rank (3–4 lines each), all CG:**
+**CGTradeAddItem, CGTradeFinish, CGTradeMoney, CGTradePrepare,
+CGTradeRemoveItem, CGUseItemFromGear (3); CGAddMouseToZone,
+CGAddSMSAddress, CGAddZoneToInventory, CGAddZoneToMouse, CGAttack,
+CGCrashReport, CGDeleteSMSAddress, CGDropMoney, CGJoinGuild (4).** Same
+per-pair gate and post-merge re-verification as batch 1; all 15 merged
+style streams byte-identical to the server originals. Residual classes:
+the five CGTrade* pairs and CGUseItemFromGear carry server-only
+`executeOusters`/`executeCoupleRing` Handler declarations (declaration-only
+client-side, never ODR-used; CGUseItemFromGear also keeps the server's
+`class GamePlayer;` forward declaration and `GamePlayer*` parameter type on
+that guarded declaration); CGJoinGuild repeats CGRegistGuild's always-false
+`BYTE > 256` check (verified `BYTE` on both paths); and **eight pairs share
+one residual class new to the migration: a server-only explicit empty
+destructor of the form `~CGAttack() { __BEGIN_TRY __END_CATCH_NO_RETHROW }`**
+(the client copies simply omit the destructor — behaviorally identical, an
+empty body can't throw).
+
+That destructor macro is the batch's one piece of new client-side
+infrastructure: `__END_CATCH_NO_RETHROW` existed only in the server tree's
+`Exception.h`, so `dkrix/Client/Packet/Exception.h` now defines it too —
+mirroring the server macro's semantics (catch, record, no rethrow;
+destructor-safe) but following the client file's own
+`addStack(__FILE__, __LINE__)` convention rather than the server's
+`__PRETTY_FUNCTION__` (which MSVC lacks). Behaviorally inert for every
+pre-existing client file (nothing referenced the name before), resolved via
+the existing `SharedPacketsShim/Exception.h` forwarder — no new shim files,
+no CMake change. Guards: whole-class for 13 pairs; **CGAddSMSAddress and
+CGDeleteSMSAddress replicate their client copies' dispatch-call-only guard**
+(class declaration unguarded — the CGSMSAddressList/CGGQuestAccept
+precedent, consistent across the SMS family).
+
+Indirect-consumer sweep: 38 sites repointed across 10 client files — the
+usual four (`PacketFactoryManager.cpp`, `PacketDef.h`,
+`UIMessageManager.cpp`, `SizeOfObjects.cpp`) plus `MPlayer.cpp`,
+`PacketFunction.cpp`, three `Gpackets/*.cpp` handlers, and **`MItem.cpp` —
+a consumer no prior wave had hit** (member of both `VS_UI_CLIENT_SOURCES`
+and the DarkEden `Client/*.cpp` glob; both targets already wired, so
+include-text repoints only). The five `SocketEncrypt{Input,Output}Stream.h`
+users and CGCrashReport's `Assert1.h` resolve via Wave 2 batch A's
+forwarders. Zero new wiring anywhere. The one remaining old-path reference
+in the tree outside the known-dead set is a dated prose citation in
+`docs/TECH-DEBT-AUDIT.md` (historical audit appendix — cite, don't
+rewrite).
+
+Ratchet: `check-packet-duplicates.sh --count` 172 → **142** (15 pairs × 2),
+baseline updated via `--update`. `normalize-packet-style.py --all --tsv`:
+86 → **71** pairs — summary line now
+`style-only 0 | style-residual<=5 14 | style-residual>5 48 |
+real-divergence 9`. Wave 4's two batches moved 30 of the 44 original ≤5
+pairs; the 14 left are the 2 recorded skips above plus CGPetGamble,
+CGPickupMoney, CGShopRequestBuy, CGSkillToTile, CGSubmitScore,
+CGTakeOutGood, CGTameMonster, CGUsePowerPoint, CLDeletePC, CLSelectPC
+(residual 4) and CGRequestRepair, CGShopRequestSell (residual 5). The
+48-pair `>5` set and the 9-pair protocol-review queue are untouched.
+**Not build-verified — no compiler in this environment**; both-tree CI is
+the gate, per every prior wave.
+
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
 (`56e59cc`). Remaining: `dkrix/Client/Packet/SocketInputStream` /
@@ -3383,9 +3609,10 @@ on the current tree, exit 1 with the baseline set one below the measured
 count.
 
 - `check-sql-injection.sh` — counts `executeQuery`/`setStatement`/
-  `Statement` calls carrying a `%[sdluxc]` format spec. **Baseline 542.**
-  (Parked line: 567 at introduction, 540 at its tip — after Phase 11
-  migrations `main` never ran.) The 598 in Ground truth is a narrower
+  `Statement` calls carrying a `%[sdluxc]` format spec. **Baseline 542
+  at activation; 0 since the 11.2 close-out (2026-08-09).**
+  (Parked line: 567 at introduction, 540 at its tip — `main`'s own
+  Phase 11.2 run finished the job the parked line started.) The 598 in Ground truth is a narrower
   `executeQuery`-only grep; both are recorded, and the script's own
   count is what the gate enforces.
 - `check-packet-duplicates.sh` — same-named packet files present in both
