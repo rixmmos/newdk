@@ -1,8 +1,8 @@
 # Why the server `build (ubsan)` CI leg is red
 
-**Status:** diagnosed 2026-08-09, not fixed. The fix is a one-line change to
-`dkrixserver/CMakeLists.txt`, which was outside the scope of the session that
-diagnosed it.
+**Status:** diagnosed 2026-08-09, fix identified and verified locally, **not
+applied**. The fix is a one-line change to `dkrixserver/CMakeLists.txt`, which
+was outside the file scope of the session that diagnosed it.
 
 **Scope of this note:** it explains one specific, reproducible link failure. It
 does *not* claim the tree is otherwise UBSan-clean — no server binary has ever
@@ -76,9 +76,30 @@ function** rule. `GCGuildMemberList` declares `~GCGuildMemberList();`
 (`GCGuildMemberList.h:36`) — virtual through `Packet`, declared but not defined
 inline. It is therefore the class's key function, and GCC emits the vtable *and*
 the typeinfo in exactly one translation unit: `src/Core/GCGuildMemberList.cpp`.
-That file is compiled into the **`GameServerPackets`** library
-(`dkrixserver/src/Core/CMakeLists.txt:183`), and `sharedserver` does not link it —
-it links `SharedServerPackets` (`src/server/sharedserver/CMakeLists.txt:43-51`).
+That file is listed at `dkrixserver/src/Core/CMakeLists.txt:183`, inside the
+`GC_PACKET_SOURCES` block that opens at `:98` and is consumed only by
+`add_library(GameServerPackets STATIC …)` at `:717`. `sharedserver` does not link
+that library — it links `SharedServerPackets`
+(`src/server/sharedserver/CMakeLists.txt:43-51`).
+
+Object-level confirmation [measured 2026-08-09] — recompiling the two offending
+translation units with the build's own configured command line and reading the
+undefined-symbol table:
+
+```
+$ nm -uC Guild.o          # as configured
+                 U typeinfo for GCGuildMemberList
+$ nm -uC GuildManager.o   # as configured
+                 U typeinfo for GCWaitGuildList
+                 U typeinfo for GCActiveGuildList
+
+$ # same commands with -fno-sanitize=vptr appended
+$ nm -uC Guild.o | grep 'typeinfo for GC'          # (no output)
+$ nm -uC GuildManager.o | grep 'typeinfo for GC'   # (no output)
+```
+
+Exactly the three link errors, and exactly those three references, and they are
+`vptr`'s doing.
 
 So in an ordinary build sharedserver never needs anything out-of-line from these
 classes. `addGuildMemberInfo` is defined inline in the header
@@ -122,13 +143,38 @@ GCC emits the vtable and typeinfo as COMDAT weak symbols in every TU that needs
 them. That is a broad change across the packet families and is not worth doing
 for this alone.
 
+## The fix is verified
+
+[measured 2026-08-09] The whole server tree was rebuilt from scratch with
+`-fsanitize=undefined` **and** `-fno-sanitize=vptr`, same WSL toolchain, at
+`cd8c3c6`. It compiles and links clean and produces all three binaries:
+
+```
+BUILD_OK
+ok: bin/gameserver
+ok: bin/loginserver
+ok: bin/sharedserver
+```
+
+`sharedserver` linked at the 26% mark — the exact point where the unfixed build
+dies — and neither `loginserver` nor `gameserver` had a comparable problem, so
+those three symbols were the whole of it.
+
+Method note, because it matters for anyone rerunning this: the flag was **not**
+injected by editing `CMakeLists.txt`. `dkrixserver/CMakeLists.txt:35` does
+`set(CMAKE_CXX_FLAGS_DEBUG "-g")` — a plain `set` that overrides the cache — so
+`-DCMAKE_CXX_FLAGS_DEBUG=…` on the command line is silently discarded, and
+`-DCMAKE_CXX_FLAGS=…` lands *before* the appended `SANITIZER_FLAGS` and gets
+cancelled. The verification used `CMAKE_CXX_COMPILER_LAUNCHER` pointed at a
+two-line wrapper that appends the flag after everything else. That is a
+verification trick, not the fix — the fix is still the `CMakeLists.txt` edit
+above.
+
 ## What is still unverified
 
-- Whether `sharedserver` is the *only* target with this problem. The local repro
-  stops at the first link failure; `gameserver` and `loginserver` had not linked
-  when the build aborted. There may be more `typeinfo for …` symbols behind this
-  one. [unverified]
-- Whether the tree links clean with `-fno-sanitize=vptr` applied. [unverified]
 - What UBSan reports at *runtime*. No server binary has ever been executed under
   it, and the CI leg only builds and checks that the binaries exist — even fully
   green it proves the tree compiles and links under UBSan, nothing more.
+- Whether the same `vptr` problem exists in the client tree's `sanitizers-linux`
+  ubsan leg. That leg still dies during compilation, well before any link, so
+  the question has not come up yet.
