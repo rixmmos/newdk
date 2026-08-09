@@ -631,6 +631,42 @@ back to a single unconditional typedef.
         guarded). `WinMain.cpp` looks like dead/superseded legacy
         residue — candidate for outright deletion in a future pass, but
         that's out of scope here.
+
+        **[measured 2026-08-09] Deleted, independently re-verified.** The
+        note above was a snapshot from reading the file in passing, not a
+        from-scratch liveness check — and it, and the CMake exclusion it
+        described, were both stale by the time of this pass. By now
+        `CMakeLists.txt` no longer had that `if(WIN32)`-only exclusion at
+        all: the Phase 10 explicit-source-list rewrite plus an
+        undocumented same-day follow-up (both 2026-08-07) had already
+        replaced it with `list(FILTER VS_UI_SRC_SOURCES EXCLUDE REGEX
+        ".*WinMain.*")` at line 316 — unconditional, outside any
+        `if(WIN32)`/`if(NOT WIN32)` guard, inside the `if(USE_SDL_BACKEND
+        OR NOT WIN32)` block that always runs since `USE_SDL_BACKEND` is
+        `FORCE`d `ON`. So the file was already excluded from the only
+        source list that ever named it, on *both* platforms, with the
+        CMake comment right there (lines 295–315) explaining why: it
+        fails to compile as of the Phase 3 item 3 `CDirectDraw`→
+        `CSDLGraphics` rename (`gC_DD` at file scope), and would collide
+        at link time regardless — it redefines globals `Client/Client.cpp`
+        already defines unconditionally into the same `VS_UI` static
+        library (`g_hWnd`, `g_LeftPremiumDays`, `g_pWebBrowser`,
+        `g_mapPremiumZone`, `InitSound`, `MouseEventReceiver`,
+        `KeyboardEventReceiver`, `UI_ResultReceiver`, `ProgramLoop`).
+        Independently re-verified that last claim by grepping each symbol
+        tree-wide: every hit outside `WinMain.cpp` itself is a separate,
+        independent definition in another file (`Client.cpp`,
+        `GameUI.cpp`, `GameInit.cpp`, `ClientFunction.cpp`,
+        `MPriceManager.cpp`, `MTopView.cpp`, `VS_UI_Title.cpp`,
+        `VS_UI_GameCommon.cpp`, `LCLoginOKHandler.cpp`,
+        `GCNoticeEventHandler.cpp`) — name collisions, not references
+        into `WinMain.cpp`. Also confirmed: no `#include "WinMain.cpp"`
+        anywhere; `CLIENT_MAIN_SOURCES`'s glob (`CMakeLists.txt:687-693`)
+        is scoped to `Client/*.cpp` and never reaches `VS_UI/`; and no
+        *tracked* `.vcxproj` references it — `dkrix/Client/Client.vcxproj`
+        itself isn't tracked (only its already-known-orphaned `.filters`
+        and a `.user` are, and neither mentions `WinMain`). Deleted
+        `VS_UI/WinMain.cpp` (3,782 lines) on that evidence.
       - **Migrated off the shim** (all callers read first; every one
         discarded the return value as a bare statement, matching
         `8725860`'s pattern):
