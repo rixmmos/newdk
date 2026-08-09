@@ -3,6 +3,9 @@ build/
 build-wsl/
 build-docker/
 build-docker20/
+build-asan/
+build-ubsan/
+build-tsan/
 dkrix/build/
 dkrix/publish/
 dkrix/test-install/
