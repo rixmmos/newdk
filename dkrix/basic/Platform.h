@@ -292,7 +292,6 @@ typedef WORD			char_t;
 
 #ifndef PLATFORM_WINDOWS
 	/* Windows-compatible type definitions for non-Windows platforms */
-	typedef int				BOOL;
 	/* id_t is already defined above (single definition point). */
 	#ifndef TRUE
 		#define TRUE	1
@@ -310,7 +309,6 @@ typedef WORD			char_t;
 	#endif
 
 	/* Additional Windows types */
-	typedef int32_t			LONG;
 	typedef void*			LPVOID;
 	typedef void*			HWND;
 	typedef void*			HDC;
@@ -325,7 +323,6 @@ typedef WORD			char_t;
 	typedef unsigned char*	LPBYTE;
 	typedef intptr_t		LPARAM;
 	typedef intptr_t		WPARAM;
-	typedef uint32_t			UINT;
 
 	/* MessageBox constants */
 	#define MB_OK			0x00000000L
@@ -1220,9 +1217,6 @@ typedef struct _WIN32_FIND_DATAA {
 #endif
 
 /* Find file handles */
-typedef void* HANDLE;
-typedef void* HWND;
-typedef void* HINSTANCE;
 typedef void* HMODULE;
 typedef void* HKEY;
 
