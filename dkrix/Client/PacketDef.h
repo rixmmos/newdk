@@ -15,8 +15,8 @@
 #include "CLRegisterPlayer.h"
 #include "CLGetPCList.h"
 #include "Packet/Cpackets/CLCreatePC.h"
-#include "Packet/Cpackets/CLDeletePC.h"
-#include "Packet/Cpackets/CLSelectPC.h"
+#include "CLDeletePC.h"
+#include "CLSelectPC.h"
 #include "CLQueryPlayerID.h"
 
 //-----------------------------------------------------------------------------
@@ -58,7 +58,7 @@
 #include "Packet/Cpackets/CGCastingSkill.h"
 #include "Packet/Cpackets/CGSkillToInventory.h"
 #include "Packet/Cpackets/CGSkillToSelf.h"
-#include "Packet/Cpackets/CGSkillToTile.h"
+#include "CGSkillToTile.h"
 #include "Packet/Cpackets/CGSkillToObject.h"
 #include "Packet/Cpackets/CGUnburrow.h"
 #include "Packet/Cpackets/CGBloodDrain.h"
@@ -89,9 +89,9 @@
 #include "Packet/Cpackets/CGAddQuickSlotToMouse.h"
 #include "CGAddZoneToInventory.h"
 #include "CGAddZoneToMouse.h"
-#include "Packet/Cpackets/CGPickupMoney.h"
+#include "CGPickupMoney.h"
 #include "CGDropMoney.h"
-#include "Packet/Cpackets/CGRequestRepair.h"
+#include "CGRequestRepair.h"
 #include "Packet/Cpackets/CGMakeItem.h"
 
 //-----------------------------------------------------------------------------
@@ -126,8 +126,8 @@
 
 //-----------------------------------------------------------------------------
 #include "CGShopRequestList.h"
-#include "Packet/Cpackets/CGShopRequestBuy.h"
-#include "Packet/Cpackets/CGShopRequestSell.h"
+#include "CGShopRequestBuy.h"
+#include "CGShopRequestSell.h"
 
 //-----------------------------------------------------------------------------
 

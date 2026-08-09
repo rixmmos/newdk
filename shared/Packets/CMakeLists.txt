@@ -100,7 +100,9 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGNPCAskAnswer.cpp
     CGPartyInvite.cpp
     CGPartyLeave.cpp
+    CGPetGamble.cpp
     CGPhoneSay.cpp
+    CGPickupMoney.cpp
     CGPortCheck.cpp
     CGQuitUnion.cpp
     CGQuitUnionAccept.cpp
@@ -112,6 +114,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGRequestGuildMemberList.cpp
     CGRequestInfo.cpp
     CGRequestNewbieItem.cpp
+    CGRequestRepair.cpp
     CGRequestStoreInfo.cpp
     CGRequestUnion.cpp
     CGRequestUnionInfo.cpp
@@ -128,11 +131,17 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGSelectWayPoint.cpp
     CGSetSlayerHotKey.cpp
     CGSetVampireHotKey.cpp
+    CGShopRequestBuy.cpp
     CGShopRequestList.cpp
+    CGShopRequestSell.cpp
     CGSilverCoating.cpp
+    CGSkillToTile.cpp
     CGStoreClose.cpp
     CGStoreOpen.cpp
     CGStoreSign.cpp
+    CGSubmitScore.cpp
+    CGTakeOutGood.cpp
+    CGTameMonster.cpp
     CGThrowBomb.cpp
     CGTradeAddItem.cpp
     CGTradeFinish.cpp
@@ -144,6 +153,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGUntransform.cpp
     CGUseItemFromGQuestInventory.cpp
     CGUseItemFromGear.cpp
+    CGUsePowerPoint.cpp
     CGVisible.cpp
     CGWhisper.cpp
     CGWithdrawPet.cpp
@@ -151,6 +161,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
 )
 set(_SHARED_PACKETS_GC_SOURCES) # Game -> Client
 set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
+    CLDeletePC.cpp
     CLGetPCList.cpp
     CLGetServerList.cpp
     CLGetWorldList.cpp
@@ -158,6 +169,7 @@ set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
     CLQueryCharacterName.cpp
     CLQueryPlayerID.cpp
     CLRegisterPlayer.cpp
+    CLSelectPC.cpp
     CLVersionCheck.cpp
 )
 set(_SHARED_PACKETS_LC_SOURCES) # Login -> Client
