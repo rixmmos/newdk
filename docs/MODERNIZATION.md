@@ -463,16 +463,64 @@ In order; each independently shippable:
      `<string.h>` either — it survives only on SDL's transitive include.
      Proved load-bearing by rerunning the probe with that include removed.
 
-   **Design problem this wave exposed, unresolved:** the format gate's
-   ratchet is *whole-file* — touch a file, the whole file must be
+   **[measured 2026-08-09, runs #26–#28] Where this actually ended.**
+   Client run #28 at `122173e`: **`MSVC x64 (Debug)` SUCCESS,
+   `Viewers and validators` SUCCESS, `clang-format` SUCCESS.** The format
+   job is green for the first time in the project's history, and on run #27
+   it blocked a commit for the first time — correctly, a tab-indented
+   `#include` of mine. Commits: `3376ec9`, `945a1a4`, `668ed2c`, `122173e`.
+
+   The **changed-lines ratchet** (`945a1a4`) replaced the whole-file one:
+   `tools/ci/clang-format-changed-lines.sh` derives added-line ranges from a
+   zero-context diff and passes them to `clang-format --lines`. Enabling it
+   required `SortIncludes: Never` in `dkrix/.clang-format` — clang-format
+   sorts the whole include block intersecting the given lines, so one new
+   `#include` still demanded a full reorder. Measured cost of losing sorting:
+   219 of `UIMessageManager.cpp`'s 18,350 drift lines, 6 of `Platform.h`'s
+   1,683. `IndentPPDirectives` was checked at the same time and left at
+   `None` — measured best fit (20,446 drift lines vs 21,180 `BeforeHash`,
+   21,058 `AfterHash`). `server.yml` deliberately keeps its whole-file check;
+   that tree is nearly formatted and its gate passes 9 of 9.
+
+   **The sanitizer legs are a port, not a bug — stop treating them as one.**
+   Error counts across the run sequence: **65 → 8 → 1 → 3**, while build
+   progress went 2% → 10%. Every fix exposed the next layer. Fixed so far:
+   `<time.h>` (`8cabe14`), 22 bare `std::ofstream;`/`std::ifstream;`
+   statements across 11 SpriteLib headers (`3376ec9`, `668ed2c` — the tree
+   is now swept, zero remain), `<libgen.h>` for `PLATFORM_LINUX`,
+   `test_zone.c`'s missing `src/` include path, and `<algorithm>` for
+   `map_viewer`'s `std::sort`.
+
+   Still open at 10%, and these are **structural, not missing includes**:
+   - `Client/MTopView.h:687` — `CFilterPack` does not name a type.
+   - `basic/GL_import.h:31` — redefinition of `SetSurfaceInfo`, an ODR
+     violation in a header.
+   - `VS_UI/src/header/VS_UI_title.h:306` — `Race S_SLOT::Race`, a member
+     named identically to its own type. GCC 13 rejects
+     (`-Wchanges-meaning`), MSVC accepts. Fixing means renaming a member.
+
+   Book this as its own phase before continuing. Both legs are
+   `continue-on-error` and were already failing before 2026-08-09, so
+   nothing regressed by leaving them red — but the 11 engine/sprite tests
+   (the only automated suite in the repo) **have still never executed**.
+   `ctest` runs after the build step, and the build has never completed.
+   They are compiled, not passed; do not record them as passing.
+
+   **Design problem this wave exposed, now resolved by `945a1a4`:** the format gate's
+   ratchet *was* whole-file — touch a file, the whole file had to be
    clang-format clean. Against a 2,199-file backlog of legacy sources with
    four-figure drift each (`Platform.h` 1,683 lines; `UIMessageManager.cpp`
-   18,350), that means **every genuine one-line bug fix in a legacy file
-   trips the gate**, and the only ways out are a risky whole-file reformat
-   or a carve-out. The standard fix is to ratchet on *changed lines* rather
-   than changed files (`git-clang-format`/`clang-format --diff` against the
-   same base), which makes the gate enforce "new code is clean" without
-   demanding a reformat as the price of a bug fix. Not attempted here.
+   18,350), that meant **every genuine one-line bug fix in a legacy file
+   tripped the gate**, and the only ways out were a risky whole-file
+   reformat or a carve-out. Both fixes in this wave hit it. Resolved by
+   ratcheting on changed lines instead — see the run #26–#28 entry above.
+
+   Consequence worth recording: **the 2,199-file backlog is now permanent
+   unless deliberately swept.** The gate no longer asks anyone to reformat a
+   legacy file, which is the point, but it also means the backlog will never
+   shrink as a side effect of ordinary work. A sweep would be its own
+   project — and note the client tree is CRLF on disk, so a bulk reformat
+   rewrites line endings across thousands of files as well.
 2. **Phase 18 — run the smoke test** (prep pack:
    `_incoming\wave-2026-08-09\w6-prep\` — `PREFLIGHT.md` first; it
    resolves which MySQL instance is listening before any destructive step
