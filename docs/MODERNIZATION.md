@@ -499,12 +499,81 @@ In order; each independently shippable:
      named identically to its own type. GCC 13 rejects
      (`-Wchanges-meaning`), MSVC accepts. Fixing means renaming a member.
 
-   Book this as its own phase before continuing. Both legs are
-   `continue-on-error` and were already failing before 2026-08-09, so
-   nothing regressed by leaving them red — but the 11 engine/sprite tests
-   (the only automated suite in the repo) **have still never executed**.
-   `ctest` runs after the build step, and the build has never completed.
-   They are compiled, not passed; do not record them as passing.
+   Both legs are `continue-on-error` and were already failing before
+   2026-08-09, so nothing regressed by leaving them red — but the 11
+   engine/sprite tests (the only automated suite in the repo) **have still
+   never executed**. `ctest` runs after the build step, and the build has
+   never completed. They are compiled, not passed; do not record them as
+   passing.
+
+   **[measured 2026-08-09, runs #29–#31] Continued past the "book it"
+   recommendation on request.** All three structural items above are fixed
+   (`0da76a0`): the `CFilterPack` typedef was `#ifdef PLATFORM_WINDOWS`
+   while `MTopView.h:687` uses it unconditionally and its three sibling
+   aliases are unguarded; `Platform.h` carried a non-Windows duplicate of
+   `GL_import.h:31`'s `SetSurfaceInfo` (`S_SURFACEINFO` has four fields, so
+   the two were behaviourally identical); `VS_UI_title.h:306`'s
+   `Race Race;` became `enum Race Race;`. Then `414ed98` closed that last
+   class — a tree-wide sweep found **exactly two** members named identically
+   to their type in 1.29M lines. Then `4f7a1f7` for `Assert.h`.
+
+   Run sequence now **65 → 8 → 1 → 3 → 1 → 1**, progress **2% → 10% → 13%**.
+
+   Two things worth carrying forward from this stretch:
+   - **MSVC resolves quoted includes from the whole include stack.** GCC
+     searches only the includer's own directory. `VS_UI/src/Vs_ui.cpp:21`'s
+     bare `#include "Assert.h"` (the file is `Client/Packet/Assert.h`)
+     worked on MSVC for that reason alone. Expect more of these as the
+     Linux build gets deeper; the fix is to path-qualify, **not** to add the
+     directory to the include path.
+   - **Do not "fix" these by adding include directories.** Doing exactly
+     that for `Client/Packet` changed search order, and VS_UI TUs began
+     resolving `#include "Exception.h"` to `Client/Packet/Exception.h`
+     (there are two files by that name) — 25 MSVC errors, i.e. it traded a
+     broken Linux build for a broken Windows one, the authoritative target.
+     Caught by the restored local build before reaching CI.
+
+   **Each fix in a fully-unformatted file forces a reformat of its enclosing
+   scope.** Touching one line makes clang-format destabilise the next, and
+   the changed-line range grows by one per pass without converging (measured
+   on `VS_UI_title.h`: 306:306 → 306:315 over eight iterations). Formatting
+   the whole enclosing struct/class does converge. Cost so far: ~200 lines
+   of forced whitespace churn across two headers, both verified semantically
+   neutral with `git diff -w`. Budget for this continuing.
+
+### Audio has never worked — `bb02c95`, found 2026-08-09
+
+**[measured] The client has had no sound at all, in every build including
+shipped releases.** Two independent bugs that were mutually consistent, which
+is why it linked cleanly and nobody noticed:
+
+1. `Client/Platform/CMakeLists.txt:45` tested `TARGET SDL2::SDL2_mixer`.
+   vcpkg's `SDL2_mixerConfig.cmake` defines **`SDL2_mixer::SDL2_mixer`** —
+   the same `X::X` convention as the `SDL2_image::SDL2_image` and
+   `SDL2_ttf::SDL2_ttf` targets this tree already links. `find_package`
+   succeeded while the check failed, so `HAVE_SDL2_MIXER` was never true.
+2. `DXLibBackendSDL.cpp:42` guarded `#include <SDL_mixer.h>` with
+   `#ifdef SDL_MIXER_MAJOR_VERSION` — a macro defined at **`SDL_mixer.h:47`**,
+   i.e. only by the header the guard protects. It can never fire.
+
+All eight guarded regions therefore fell through to stubs that **return
+success while doing nothing** (`platform_sound_play` → `return 1`,
+`platform_sound_load_wav` → `NULL`). No error path ever fired.
+`HAVE_SDL2_MIXER` appeared in the entire source tree exactly once: in a
+comment. The Phase 3 note at `CMakeLists.txt:76` had already observed that
+code "landed in PLATFORM_SOURCES whenever HAVE_SDL2_MIXER was on, which never
+actually built" — the symptom was seen, the cause was not.
+
+After the fix, configure reports `SDL2_mixer found - audio support enabled`
+and the build stages `SDL2_mixerd.dll` plus `ogg`/`vorbis`/`vorbisfile`/
+`wavpack`, none of which were present before. Local Debug build exit 0, so the
+28 previously-uncompiled `Mix_*` call sites are sound against the real headers.
+
+**NOT verified: that the client produces correct audio.** That needs a human
+to run it and listen. `main` now produces audio-enabled builds; the next
+`PUBLISH_RELEASE.cmd` would give testers sound for the first time from code
+that has never executed. Listen first. `git revert bb02c95` restores the
+silent-but-stable status quo without touching anything else.
 
    **Design problem this wave exposed, now resolved by `945a1a4`:** the format gate's
    ratchet *was* whole-file — touch a file, the whole file had to be
