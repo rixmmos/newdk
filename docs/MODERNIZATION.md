@@ -1992,6 +1992,28 @@ Notable judgment calls, all consistent with prior-batch precedent:
   `CreatureUtil.cpp`), but its dead/orphaned status and inability to compile
   independent of this change are flagged for whoever next touches it —
   candidate for deletion in a future cleanup phase, out of scope here.
+- **[measured 2026-08-09]** `Vampire_backup.cpp` deleted, independently
+  re-verified from scratch rather than trusting the passing note above:
+  (1) all 18 `CMakeLists.txt` under `dkrixserver/` grepped for
+  `Vampire_backup` — zero references, including the `gameserver/`,
+  `gameserver/item/`, `gameserver/skill/`, `loginserver/`, and
+  `sharedserver/` ones; (2) every `CMakeLists.txt` in the tree grepped for
+  `file(GLOB` — zero matches anywhere, so no implicit sweep is possible;
+  (3) whole-tree grep for the string `Vampire_backup` — the only hit was
+  the file itself (no `Vampire_backup.h` exists, no `#include` of one, no
+  other consumer); (4) diffed against the live `Vampire.h`: the backup
+  calls `pVampire->getExp()`/`->setExp()` (standalone `increaseVampExpEx`),
+  and the class's own `load()`/`save()`/`toString()` directly reference
+  `m_Exp`, `m_ExpOffset`, and `m_HotKey[8]` and call `setExpOffset()` /
+  `setHotKey()` — every one of these is commented out in current
+  `Vampire.h` (`//	Exp_t m_Exp;`, `//	Exp_t getExp() const ...`, etc.,
+  mirroring the same commented-out shape in sibling `Slayer.h` and
+  `Ousters.h`, evidence of a prior repo-wide refactor) and absent from
+  `PlayerCreature.h`, so the class as declared today has no such members or
+  methods to bind to — not just unreferenced, structurally incapable of
+  compiling against current headers. All four checks independently
+  confirmed the batch 12 note; none were ambiguous. Deleted with no
+  replacement file (no `.h` counterpart existed).
 - Pre-existing bugs found and preserved verbatim, not fixed:
   `CLGetServerListHandler.cpp::execute` writes both halves of a
   `CurrentWorldID, CurrentServerGroupID` SELECT result through
