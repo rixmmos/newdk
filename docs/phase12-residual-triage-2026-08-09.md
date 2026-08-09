@@ -37,12 +37,28 @@ the five are named there.** `CGPetGamble`, `CGPickupMoney`, `CGSkillToTile`,
 `CGTakeOutGood`, and `CGTameMonster` are listed as "(residual 4)"; all five
 measure **residual 6** on this tree [measured, TSV rows above]. The
 normalizer has not changed since it was introduced (`54b2790`, the only
-commit touching `normalize-packet-style.py` [measured, `git log`]), and none
-of the ten files involved has been touched since the initial import
-[measured, `git log -- dkrixserver/src/Core/CGPetGamble.h …` → `067067f`
-`4123ff3` `df4895e` only]. So the discrepancy is a transcription error in the
-batch-2 note, not drift. Recorded here rather than fixed in place, because
-another agent is editing that file this session.
+commit touching `normalize-packet-style.py` [measured, `git log`]).
+
+**Correction, 2026-08-09 — this is drift, and the batch-2 note was right when
+written.** The paragraph above originally concluded "transcription error, not
+drift" on the strength of `git log -- dkrixserver/src/Core/CGPetGamble.h …`
+returning only the import commits. That check inspected the **server** copies
+only. The residual is a property of the *pair*, so the client copies had to be
+checked too — and they had changed. `cc4ea8b` ("client: path-qualify 68 bare
+`Assert.h` includes for GCC", part of the Linux-port wave) rewrote
+`#include "Assert.h"` → `#include "Packet/Assert.h"` in 15 `Cpackets/` files,
+including all five disputed pairs, one line each [measured,
+`git show --stat cc4ea8b -- dkrix/Client/Packet/Cpackets/`]. That single line
+is the +2 residual per pair. So the count moved from 4 to 6 *after* the
+batch-2 note was written, by a commit made for an unrelated reason in another
+workstream. Found by S1 while migrating these same files.
+
+**The transferable lesson:** a residual figure is only valid against the SHA
+it was measured at, and either side of a pair can invalidate it. Include-
+hygiene commits aimed at the Linux port will keep perturbing Phase 12's
+numbers, because they touch client packet copies without touching protocol.
+Re-derive residuals at the tip before trusting a recorded count — and when
+checking whether a pair has drifted, `git log` **both** trees.
 
 **It does not change this doc's scope.** The task defines the subject as
 "everything except the 14 pairs S1 is migrating", and S1's 14 are the ones
