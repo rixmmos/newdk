@@ -422,7 +422,7 @@
 
 #include "CGPortCheck.h"
 
-#include "Cpackets/CGGuildChat.h"
+#include "CGGuildChat.h"
 #include "Gpackets/GCGuildChat.h"
 
 #ifndef __GAME_CLIENT__

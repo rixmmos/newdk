@@ -426,7 +426,8 @@ set(CG_PACKET_SOURCES
     CGGQuestAcceptHandler.cpp
     # CGGQuestCancel.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGGQuestCancelHandler.cpp
-    CGGuildChat.cpp CGGuildChatHandler.cpp
+    # CGGuildChat.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 3.
+    CGGuildChatHandler.cpp
     # CGJoinGuild.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 2.
     CGJoinGuildHandler.cpp
     # CGLearnSkill.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.

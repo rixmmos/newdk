@@ -89,6 +89,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGGQuestAccept.cpp
     CGGQuestCancel.cpp
     CGGlobalChat.cpp
+    CGGuildChat.cpp
     CGJoinGuild.cpp
     CGLearnSkill.cpp
     CGLogout.cpp

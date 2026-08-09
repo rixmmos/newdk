@@ -84,7 +84,7 @@
 #include "ClientCommunicationManager.h"
 #include "WhisperManager.h"
 #include "packet\Rpackets\RCSay.h"
-#include "packet\Cpackets\CGGuildChat.h"
+#include "CGGuildChat.h"
 #include "CMP3.h"
 #include "RankBonusTable.h"
 #include "Profiler.h"

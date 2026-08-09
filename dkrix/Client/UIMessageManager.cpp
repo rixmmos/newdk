@@ -110,7 +110,7 @@
 #include "Packet/ClientCommunicationManager.h"
 #include "WhisperManager.h"
 #include "Packet/Rpackets/RCSay.h"
-#include "Packet/Cpackets/CGGuildChat.h"
+#include "CGGuildChat.h"
 #include "CMP3.h"
 #include "RankBonusTable.h"
 #include "Profiler.h"
@@ -1958,9 +1958,9 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 			CGGuildChat _CGGuildChat;
 			// 2004, 11, 11, sobeit add start
 			if(left==CLD_GUILD)
-				_CGGuildChat.SetType(0);
+				_CGGuildChat.setType(0);
 			else
-				_CGGuildChat.SetType(1);
+				_CGGuildChat.setType(1);
 			// 2004, 11, 11, sobeit add end
 			_CGGuildChat.setMessage( std::string(chatString) );
 			_CGGuildChat.setColor( right );
