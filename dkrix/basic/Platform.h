@@ -320,8 +320,6 @@ typedef WORD			char_t;
 	typedef DWORD*			LPDWORD;
 	typedef const char*		LPCSTR;
 	typedef char*			LPSTR;
-	typedef const char*		LPCTSTR;
-	typedef char*			LPTSTR;
 	typedef const wchar_t*	LPCWSTR;
 	typedef wchar_t*		LPWSTR;
 	typedef unsigned char*	LPBYTE;
