@@ -15,7 +15,7 @@
 
 #ifdef __GAME_CLIENT__
 	#include "../ClientPlayer.h"
-	#include "../Cpackets/CGConnect.h"
+	#include "CGConnect.h"
 	#include "CGPortCheck.h"
 	#include "UserInformation.h"
 	#include "Packet/Properties.h"

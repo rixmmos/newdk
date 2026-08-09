@@ -70,14 +70,18 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGAppointSubmaster.cpp
     CGAuthKey.cpp
     CGBuyStoreItem.cpp
+    CGConnect.cpp
     CGDenyUnion.cpp
+    CGDepositPet.cpp
     CGDisplayItem.cpp
+    CGDonationMoney.cpp
     CGDownSkill.cpp
     CGExpelGuild.cpp
     CGFailQuest.cpp
     CGGQuestAccept.cpp
     CGGQuestCancel.cpp
     CGGlobalChat.cpp
+    CGLearnSkill.cpp
     CGLogout.cpp
     CGLotterySelect.cpp
     CGModifyGuildIntro.cpp
@@ -85,17 +89,23 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGModifyGuildMemberIntro.cpp
     CGModifyTaxRatio.cpp
     CGNPCAskAnswer.cpp
+    CGPartyInvite.cpp
     CGPartyLeave.cpp
+    CGPhoneSay.cpp
     CGPortCheck.cpp
     CGQuitUnion.cpp
     CGQuitUnionAccept.cpp
     CGQuitUnionDeny.cpp
+    CGRangerSay.cpp
     CGReady.cpp
+    CGRegistGuild.cpp
     CGRequestGuildList.cpp
     CGRequestGuildMemberList.cpp
     CGRequestInfo.cpp
+    CGRequestNewbieItem.cpp
     CGRequestStoreInfo.cpp
     CGRequestUnion.cpp
+    CGRequestUnionInfo.cpp
     CGResurrect.cpp
     CGSMSAddressList.cpp
     CGSelectBloodBible.cpp
@@ -103,15 +113,19 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGSelectGuildMember.cpp
     CGSelectNickname.cpp
     CGSelectQuest.cpp
+    CGSelectRankBonus.cpp
     CGSelectRegenZone.cpp
     CGSelectTileEffect.cpp
+    CGSelectWayPoint.cpp
     CGSetSlayerHotKey.cpp
     CGSetVampireHotKey.cpp
+    CGShopRequestList.cpp
     CGSilverCoating.cpp
     CGStoreClose.cpp
     CGStoreOpen.cpp
     CGStoreSign.cpp
     CGThrowBomb.cpp
+    CGTryJoinGuild.cpp
     CGUndisplayItem.cpp
     CGUntransform.cpp
     CGUseItemFromGQuestInventory.cpp
@@ -128,6 +142,7 @@ set(_SHARED_PACKETS_CL_SOURCES  # Client -> Login
     CLLogout.cpp
     CLQueryCharacterName.cpp
     CLQueryPlayerID.cpp
+    CLRegisterPlayer.cpp
     CLVersionCheck.cpp
 )
 set(_SHARED_PACKETS_LC_SOURCES) # Login -> Client

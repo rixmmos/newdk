@@ -41,7 +41,7 @@
 #include "SoundDef.h"
 #include "MItemFinder.h"
 #include "CGSelectTileEffect.h"
-#include "Packet/Cpackets/CGPartyInvite.h"
+#include "CGPartyInvite.h"
 #include "EffectSpriteTypeDef.h"
 #include "ModifyStatusManager.h"
 #include "Packet/ClientCommunicationManager.h"

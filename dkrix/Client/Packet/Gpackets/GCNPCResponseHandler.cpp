@@ -30,7 +30,7 @@
 
 #ifdef __GAME_CLIENT__
 	#include "../ClientPlayer.h"
-	#include "../Cpackets/CGConnect.h"
+	#include "CGConnect.h"
 	#include "../Cpackets/CGStashList.h"
 	#include "VS_UI.h"
 	#include "VS_UI_filepath.h"

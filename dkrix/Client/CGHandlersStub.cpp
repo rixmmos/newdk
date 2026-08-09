@@ -20,11 +20,11 @@
 // now-unconstrained CGxxxHandler::execute declaration (adopted from the
 // server's canonical style, per Phase 12's reconciliation rules) — an
 // out-of-line definition's exception spec must match its declaration
-// exactly.
+// exactly. Wave 4 batch 1: CGDonationMoney joined them the same way.
 #include "CGBuyStoreItem.h"
 #include "Packet/Cpackets/CGConnectSetKey.h"
 #include "CGDisplayItem.h"
-#include "Packet/Cpackets/CGDonationMoney.h"
+#include "CGDonationMoney.h"
 #include "CGLotterySelect.h"
 #include "Packet/Cpackets/CGMixItem.h"
 #include "CGRequestStoreInfo.h"
@@ -40,7 +40,7 @@
 void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer) {}
 void CGConnectSetKeyHandler::execute(CGConnectSetKey* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) {}
-void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
+void CGDonationMoneyHandler::execute(CGDonationMoney* pPacket, Player* pPlayer) {}
 void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer) {}
 void CGMixItemHandler::execute(CGMixItem* pPacket, Player* pPlayer) throw(ProtocolException, Error) {}
 void CGRequestStoreInfoHandler::execute(CGRequestStoreInfo* pPacket, Player* pPlayer) {}

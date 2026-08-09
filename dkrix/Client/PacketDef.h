@@ -12,7 +12,7 @@
 #include "CLVersionCheck.h"
 #include "CLLogout.h"
 #include "Packet/Cpackets/CLLogin.h"
-#include "Packet/Cpackets/CLRegisterPlayer.h"
+#include "CLRegisterPlayer.h"
 #include "CLGetPCList.h"
 #include "Packet/Cpackets/CLCreatePC.h"
 #include "Packet/Cpackets/CLDeletePC.h"
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // connect
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGConnect.h"
+#include "CGConnect.h"
 #include "CGReady.h"
 #include "Packet/Cpackets/CGMove.h"
 #include "CGLogout.h"
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 #include "Packet/Cpackets/CGDialUp.h"
 #include "Packet/Cpackets/CGPhoneDisconnect.h"
-#include "Packet/Cpackets/CGPhoneSay.h"
+#include "CGPhoneSay.h"
 #include "CGWhisper.h"
 
 //-----------------------------------------------------------------------------
@@ -71,7 +71,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGLearnSkill.h"
+#include "CGLearnSkill.h"
 #include "Packet/Cpackets/CGUseBonusPoint.h"		// for vampire lev up
 #include "CGSetSlayerHotKey.h"
 #include "CGSetVampireHotKey.h"
@@ -125,7 +125,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-#include "Packet/Cpackets/CGShopRequestList.h"
+#include "CGShopRequestList.h"
 #include "Packet/Cpackets/CGShopRequestBuy.h"
 #include "Packet/Cpackets/CGShopRequestSell.h"
 

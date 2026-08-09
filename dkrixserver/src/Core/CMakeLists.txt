@@ -387,18 +387,21 @@ set(CG_PACKET_SOURCES
     # CGBuyStoreItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGBuyStoreItemHandler.cpp
     CGCastingSkill.cpp CGCastingSkillHandler.cpp
-    CGConnect.cpp CGConnectHandler.cpp
+    # CGConnect.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGConnectHandler.cpp
     CGConnectSetKey.cpp CGConnectSetKeyHandler.cpp
     CGCrashReport.cpp CGCrashReportHandler.cpp
     CGDeleteSMSAddress.cpp CGDeleteSMSAddressHandler.cpp
     # CGDenyUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGDenyUnionHandler.cpp
-    CGDepositPet.cpp CGDepositPetHandler.cpp
+    # CGDepositPet.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGDepositPetHandler.cpp
     CGDialUp.cpp CGDialUpHandler.cpp
     # CGDisplayItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGDisplayItemHandler.cpp
     CGDissectionCorpse.cpp CGDissectionCorpseHandler.cpp
-    CGDonationMoney.cpp CGDonationMoneyHandler.cpp
+    # CGDonationMoney.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGDonationMoneyHandler.cpp
     # CGDownSkill.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGDownSkillHandler.cpp
     CGDropMoney.cpp CGDropMoneyHandler.cpp
@@ -417,7 +420,8 @@ set(CG_PACKET_SOURCES
     CGGQuestCancelHandler.cpp
     CGGuildChat.cpp CGGuildChatHandler.cpp
     CGJoinGuild.cpp CGJoinGuildHandler.cpp
-    CGLearnSkill.cpp CGLearnSkillHandler.cpp
+    # CGLearnSkill.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGLearnSkillHandler.cpp
     # CGLogout.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGLogoutHandler.cpp
     # CGLotterySelect.cpp moved to shared/Packets/ — Phase 12 Wave 1.
@@ -438,14 +442,16 @@ set(CG_PACKET_SOURCES
     # CGNPCAskAnswer.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGNPCAskAnswerHandler.cpp
     CGNPCTalk.cpp CGNPCTalkHandler.cpp
-    CGPartyInvite.cpp CGPartyInviteHandler.cpp
+    # CGPartyInvite.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGPartyInviteHandler.cpp
     # CGPartyLeave.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGPartyLeaveHandler.cpp
     CGPartyPosition.cpp CGPartyPositionHandler.cpp
     CGPartySay.cpp CGPartySayHandler.cpp
     CGPetGamble.cpp CGPetGambleHandler.cpp
     CGPhoneDisconnect.cpp CGPhoneDisconnectHandler.cpp
-    CGPhoneSay.cpp CGPhoneSayHandler.cpp
+    # CGPhoneSay.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGPhoneSayHandler.cpp
     CGPickupMoney.cpp CGPickupMoneyHandler.cpp
     # CGPortCheck.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch A.
     CGPortCheckHandler.cpp
@@ -456,10 +462,12 @@ set(CG_PACKET_SOURCES
     CGQuitUnionAcceptHandler.cpp
     # CGQuitUnionDeny.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGQuitUnionDenyHandler.cpp
-    CGRangerSay.cpp CGRangerSayHandler.cpp
+    # CGRangerSay.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGRangerSayHandler.cpp
     # CGReady.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGReadyHandler.cpp
-    CGRegistGuild.cpp CGRegistGuildHandler.cpp
+    # CGRegistGuild.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGRegistGuildHandler.cpp
     CGRelicToObject.cpp CGRelicToObjectHandler.cpp
     CGReloadFromInventory.cpp CGReloadFromInventoryHandler.cpp
     CGReloadFromQuickSlot.cpp CGReloadFromQuickSlotHandler.cpp
@@ -470,14 +478,16 @@ set(CG_PACKET_SOURCES
     # CGRequestInfo.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGRequestInfoHandler.cpp
     CGRequestIP.cpp CGRequestIPHandler.cpp
-    CGRequestNewbieItem.cpp CGRequestNewbieItemHandler.cpp
+    # CGRequestNewbieItem.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGRequestNewbieItemHandler.cpp
     CGRequestPowerPoint.cpp CGRequestPowerPointHandler.cpp
     CGRequestRepair.cpp CGRequestRepairHandler.cpp
     # CGRequestStoreInfo.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGRequestStoreInfoHandler.cpp
     # CGRequestUnion.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGRequestUnionHandler.cpp
-    CGRequestUnionInfo.cpp CGRequestUnionInfoHandler.cpp
+    # CGRequestUnionInfo.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGRequestUnionInfoHandler.cpp
     # CGResurrect.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGResurrectHandler.cpp
     CGRideMotorCycle.cpp CGRideMotorCycleHandler.cpp
@@ -493,18 +503,21 @@ set(CG_PACKET_SOURCES
     CGSelectPortal.cpp CGSelectPortalHandler.cpp
     # CGSelectQuest.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGSelectQuestHandler.cpp
-    CGSelectRankBonus.cpp CGSelectRankBonusHandler.cpp
+    # CGSelectRankBonus.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGSelectRankBonusHandler.cpp
     # CGSelectRegenZone.cpp moved to shared/Packets/ — Phase 12 Wave 1.
     CGSelectRegenZoneHandler.cpp
     # CGSelectTileEffect.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGSelectTileEffectHandler.cpp
-    CGSelectWayPoint.cpp CGSelectWayPointHandler.cpp
+    # CGSelectWayPoint.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGSelectWayPointHandler.cpp
     # CGSetSlayerHotKey.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGSetSlayerHotKeyHandler.cpp
     # CGSetVampireHotKey.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGSetVampireHotKeyHandler.cpp
     CGShopRequestBuy.cpp CGShopRequestBuyHandler.cpp
-    CGShopRequestList.cpp CGShopRequestListHandler.cpp
+    # CGShopRequestList.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGShopRequestListHandler.cpp
     CGShopRequestSell.cpp CGShopRequestSellHandler.cpp
     # CGSilverCoating.cpp moved to shared/Packets/ — Phase 12 Wave 2 batch B.
     CGSilverCoatingHandler.cpp
@@ -538,7 +551,8 @@ set(CG_PACKET_SOURCES
     CGTradeMoney.cpp CGTradeMoneyHandler.cpp
     CGTradePrepare.cpp CGTradePrepareHandler.cpp
     CGTradeRemoveItem.cpp CGTradeRemoveItemHandler.cpp
-    CGTryJoinGuild.cpp CGTryJoinGuildHandler.cpp
+    # CGTryJoinGuild.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CGTryJoinGuildHandler.cpp
     CGTypeStringList.cpp CGTypeStringListHandler.cpp
     CGUnburrow.cpp CGUnburrowHandler.cpp
     # CGUndisplayItem.cpp moved to shared/Packets/ — Phase 12 Wave 1.
@@ -587,7 +601,8 @@ set(CL_PACKET_SOURCES
     # CLQueryPlayerID.cpp moved to shared/Packets/ — Phase 12 Wave 3.
     CLQueryPlayerIDHandler.cpp
     CLReconnectLogin.cpp CLReconnectLoginHandler.cpp
-    CLRegisterPlayer.cpp CLRegisterPlayerHandler.cpp
+    # CLRegisterPlayer.cpp moved to shared/Packets/ — Phase 12 Wave 4 batch 1.
+    CLRegisterPlayerHandler.cpp
     CLSelectPC.cpp CLSelectPCHandler.cpp
     CLSelectServer.cpp CLSelectServerHandler.cpp
     CLSelectWorld.cpp CLSelectWorldHandler.cpp
