@@ -2031,26 +2031,6 @@ void giveGoldMedal(PlayerCreature* pPC) {
         GCSystemMessage gcSM;
         gcSM.setMessage(".");
         pGamePlayer->sendPacket(&gcSM);
-        /*		pStmt->executeQuery("UPDATE GoldMedalCount SET GoldMedalCount=GoldMedalCount+1 WHERE PlayerID='%s'",
-                        pGamePlayer->getID().c_str());
-
-                if ( pStmt->getAffectedRowCount() < 1 )
-                {
-                    pStmt->executeQuery("REPLACE INTO GoldMedalCount (PlayerID,GoldMedalCount) VALUES ('%s',1)",
-                            pGamePlayer->getID().c_str());
-                }
-
-                Result* pResult = pStmt->executeQuery("SELECT GoldMedalCount FROM GoldMedalCount WHERE PlayerID='%s'",
-                        pGamePlayer->getID().c_str());
-
-                if ( pResult->next() )
-                {
-                    GCNoticeEvent gcNE;
-                    gcNE.setCode(NOTICE_EVENT_GOLD_MEDALS);
-                    gcNE.setParameter(pResult->getInt(1));
-                    pGamePlayer->sendPacket(&gcNE);
-                }
-        */
     }
     END_DB(pStmt);
 
@@ -2105,34 +2085,6 @@ void giveLotto(PlayerCreature* pPC, BYTE type, uint num) {
 void addOlympicStat(PlayerCreature* pPC, BYTE type, uint num) {
     __BEGIN_TRY
 
-    /*	if ( !g_pVariableManager->getVariable( OLYMPIC_EVENT ) )
-            return;
-
-        GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPC->getPlayer());
-        Assert( pGamePlayer != NULL );
-
-        Statement* pStmt = NULL;
-
-        BEGIN_DB
-        {
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-            pStmt->executeQuery("UPDATE OlympicStat SET count=count+%u WHERE PlayerID='%s' AND OwnerID='%s' AND Type=%u
-       AND Day=now()", num, pGamePlayer->getID().c_str(), pPC->getName().c_str(), type);
-
-            if ( pStmt->getAffectedRowCount() < 1 )
-            {
-                pStmt->executeQuery("REPLACE INTO OlympicStat (PlayerID,OwnerID,Race,Type,count,Day) VALUES
-       ('%s','%s',%u,%u,%u, now())", pGamePlayer->getID().c_str(), pPC->getName().c_str(), (uint)pPC->getRace(), type,
-       num);
-            }
-    */
-
-    /*
-            SAFE_DELETE( pStmt );
-        }
-        END_DB(pStmt);
-    */
     __END_CATCH
 }
 
@@ -2147,7 +2099,6 @@ void deletePC(PlayerCreature* pPC) {
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
-        //		pStmt->executeQuery("DELETE FROM Slayer WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateSlayerStmt(pConn, "UPDATE Slayer SET Active='INACTIVE' WHERE Name = ?");
         inactivateSlayerStmt.bindString(1, pPC->getName());
         inactivateSlayerStmt.execute();
@@ -2155,7 +2106,6 @@ void deletePC(PlayerCreature* pPC) {
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
-        //		pStmt->executeQuery("DELETE FROM Vampire WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateVampireStmt(pConn, "UPDATE Vampire SET Active='INACTIVE' WHERE Name = ?");
         inactivateVampireStmt.bindString(1, pPC->getName());
         inactivateVampireStmt.execute();
@@ -2163,7 +2113,6 @@ void deletePC(PlayerCreature* pPC) {
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
-        //		pStmt->executeQuery("DELETE FROM Ousters WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateOustersStmt(pConn, "UPDATE Ousters SET Active='INACTIVE' WHERE Name = ?");
         inactivateOustersStmt.bindString(1, pPC->getName());
         inactivateOustersStmt.execute();

@@ -64,18 +64,6 @@ void CLSelectWorldHandler::execute(CLSelectWorld* pPacket, Player* pPlayer)
 
     Statement* pStmt = NULL;
 
-    /*	BEGIN_DB
-        {
-            pStmt    = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-
-            //cout << "PlayerID: " << pLoginPlayer->getID() << endl;
-            pStmt->executeQuery("UPDATE Player set CurrentWorldID = %d WHERE PlayerID = '%s'", WorldID ,
-       pLoginPlayer->getID().c_str());
-
-            SAFE_DELETE(pStmt); // by sigi
-        }
-        END_DB(pStmt)*/
-
     try {
         int GroupNum = g_pGameServerGroupInfoManager->getSize(WorldID);
 

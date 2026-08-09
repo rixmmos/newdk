@@ -293,19 +293,8 @@ void LoginPlayer::disconnect(bool bDisconnected) {
 
 
     if (m_ID != "NONE") {
-        // Result*    pResult = NULL;
-
         try {
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
-
-            //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
-
-
-            //	pResult->next();
-            //	string logon = pResult->getString(1);
-            // cout << "logon = " << logon << endl;
-            // Assert( logon == "LOGON" );
-
 
             PreparedStatement logoffPlayerStmt(pConn,
                                                "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");
@@ -358,19 +347,8 @@ void LoginPlayer::disconnect_nolog(bool bDisconnected) {
 
 
     if (m_ID != "NONE") {
-        // Result*    pResult = NULL;
-
         try {
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
-
-            //	pResult = pStmt->executeQuery( "SELECT LogOn FROM Player WHERE PlayerID='%s'" , m_ID.c_str() );
-
-
-            //	pResult->next();
-            //	string logon = pResult->getString(1);
-            // cout << "logon = " << logon << endl;
-            // Assert( logon == "LOGON" );
-
 
             PreparedStatement logoffPlayerStmt(pConn,
                                                "UPDATE Player SET LogOn = 'LOGOFF' WHERE PlayerID=? AND LogOn='LOGON'");

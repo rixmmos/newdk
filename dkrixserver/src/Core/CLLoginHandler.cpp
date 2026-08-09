@@ -556,10 +556,6 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
 
                 if (affectedRowCount == 0) {
-                    // pStmt->executeQuery("UPDATE Player SET LoginIP = '%s', CurrentLoginServerID=%d,
-                    // LastLoginDate=now() WHERE PlayerID = '%s' AND LogOn='LOGON'",connectIP.c_str(),
-                    // g_pConfig->getPropertyInt("LoginServerID"), ID.c_str());
-
                     // if (pStmt->getAffectedRowCount()==0)
                     //{
                     LCLoginError lcLoginError;

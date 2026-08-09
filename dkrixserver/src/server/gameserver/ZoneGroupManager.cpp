@@ -115,7 +115,6 @@ void ZoneGroupManager::load()
 
         BEGIN_DB {
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
-            // Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
             PreparedStatement selectZoneIDStmt(pConn,
                                                "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ? ORDER BY ZoneID");
             selectZoneIDStmt.bindInt(1, (int)ID);
@@ -536,7 +535,6 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
 
         BEGIN_DB {
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
-            // Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
             PreparedStatement selectZoneIDStmt(pConn, "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ?");
             selectZoneIDStmt.bindInt(1, ID);
             Result* pResult = selectZoneIDStmt.execute();

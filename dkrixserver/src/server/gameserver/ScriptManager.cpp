@@ -25,8 +25,6 @@ void ScriptManager::load(const string& ownerID)
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
-        // pResult = pStmt->executeQuery("SELECT ScriptID, Subject, Content FROM Script WHERE OwnerID='%s'",
-        // ownerID.c_str());
         PreparedStatement selectScriptStmt(pConn,
                                            "SELECT ScriptID, OwnerID, Subject, Content FROM Script ORDER BY ScriptID");
         pResult = selectScriptStmt.execute();
