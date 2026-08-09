@@ -288,9 +288,10 @@ jobs:
           which clang-format
           clang-format --version
 
-      # Changed-files-only, so the measured backlog (2,199 unformatted
-      # files at the 2026-08-07 census) does not block every push — same
-      # ratchet policy as the server gate. Runs from dkrix/ with
+      # Changed-lines-only [2026-08-09; was changed-files], so the measured
+      # backlog (2,199 unformatted files at the 2026-08-07 census) does not
+      # block every push — same ratchet policy as the server gate. Runs from
+      # dkrix/ with
       # --relative and the same pathspecs as dkrix/Makefile's fmt
       # targets, so the vendored exclude list (Client/JpegLib, the 11
       # flat zlib 1.1.x headers) lives in one shape instead of being
@@ -333,26 +334,7 @@ jobs:
             exit 0
           fi
 
-          checked=0
-          failed=0
-          for f in $changed; do
-            if [ ! -f "$f" ]; then
-              echo "::warning file=dkrix/$f::listed as changed but not present in the worktree; skipped"
-              continue
-            fi
-            checked=$((checked + 1))
-            if ! diff -q "$f" <(clang-format "$f") >/dev/null; then
-              echo "::error file=dkrix/$f::Not clang-format clean. Run 'make fmt' in dkrix/."
-              failed=1
-            fi
-          done
-
-          # Same guard server.yml's format job grew in 60f4c35: a
-          # non-empty change list that checks zero files is a bug in this
-          # workflow's path resolution, not a passing format check.
-          echo "Checked $checked of $(echo "$changed" | wc -l) changed file(s)."
-          if [ "$checked" -eq 0 ]; then
-            echo "::error::Change list was non-empty but no file was readable — path resolution is wrong in this workflow."
-            exit 1
-          fi
-          exit $failed
+          # Changed LINES, not changed files — see the header comment in the
+          # script for why. The whole-file form this replaced made every
+          # one-line fix in a legacy file a bulk-reformat demand.
+          echo "$changed" | BASE="$base" bash ../tools/ci/clang-format-changed-lines.sh "client C++ file(s)"

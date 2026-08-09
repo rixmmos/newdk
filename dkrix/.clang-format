@@ -12,8 +12,28 @@ AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 NamespaceIndentation: None
-SortIncludes: true
-IncludeBlocks: Regroup
+# [2026-08-09] Include sorting is OFF for this tree, deliberately.
+#
+# Two independent reasons:
+#  1. Safety. This client relies on include order in places -- the Phase 12
+#     Wave 4 PlayerInfo break was exactly a transitive-include failure. A tool
+#     that silently reorders ~300 includes in a 10.9k-line legacy file is a
+#     build hazard, not a tidiness win.
+#  2. It makes the changed-lines format gate unworkable. clang-format sorts
+#     the whole contiguous include block that intersects the lines it is
+#     given, so adding ONE #include asks to reorder the entire block. Under a
+#     changed-lines ratchet that turns every new include into a bulk reorder
+#     -- measured: it was the only thing failing the gate on this wave's
+#     commits, and turning it off made all of them clean.
+#
+# Cost is small: sorting accounts for 219 of UIMessageManager.cpp's 18,350
+# lines of drift and 6 of Platform.h's 1,683. The backlog is ordinary
+# formatting, not include order.
+#
+# IncludeCategories below is retained but inert; it takes effect only if
+# SortIncludes is turned back on.
+SortIncludes: Never
+IncludeBlocks: Preserve
 MaxEmptyLinesToKeep: 2
 KeepEmptyLinesAtTheStartOfBlocks: false
 ReflowComments: false
