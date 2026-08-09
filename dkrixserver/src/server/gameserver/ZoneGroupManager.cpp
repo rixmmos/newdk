@@ -50,7 +50,7 @@ ZoneGroupManager::ZoneGroupManager()
         SAFE_DELETE(pZoneGroup);
     }
 
-    
+
     m_ZoneGroups.clear();
 
     __END_CATCH_NO_RETHROW
@@ -87,7 +87,7 @@ void ZoneGroupManager::load()
     Statement* pStmt = NULL;
     list<ZoneGroupID_t> ZoneGroupIDList;
 
-    
+
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement selectZoneGroupIDStmt(pConn, "SELECT ZoneGroupID FROM ZoneGroupInfo ORDER BY ZoneGroupID");
@@ -105,26 +105,26 @@ void ZoneGroupManager::load()
     for (; itr != ZoneGroupIDList.end(); itr++) {
         ZoneGroupID_t ID = (*itr);
 
-        
+
         ZoneGroup* pZoneGroup = new ZoneGroup(ID);
         ZonePlayerManager* pZonePlayerManager = new ZonePlayerManager();
         pZonePlayerManager->setZGID(ID);
         pZoneGroup->setZonePlayerManager(pZonePlayerManager);
         addZoneGroup(pZoneGroup);
 
-        
+
         BEGIN_DB {
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
             // Result* pResult = pStmt->executeQuery("SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = %d", ID);
             PreparedStatement selectZoneIDStmt(pConn,
-                                                "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ? ORDER BY ZoneID");
+                                               "SELECT ZoneID FROM ZoneInfo WHERE ZoneGroupID = ? ORDER BY ZoneID");
             selectZoneIDStmt.bindInt(1, (int)ID);
             Result* pResult = selectZoneIDStmt.execute();
 
             while (pResult->next()) {
                 ZoneID_t zoneID = pResult->getInt(1);
 
-                
+
                 Zone* pZone = new Zone(zoneID);
                 Assert(pZone != NULL);
 
@@ -133,9 +133,8 @@ void ZoneGroupManager::load()
                 pZoneGroup->addZone(pZone);
 
                 //--------------------------------------------------------------------------------
-                
-                
-                
+
+
                 //--------------------------------------------------------------------------------
 
                 printf("\n@@@@@@@@@@@@@@@ [%d]th ZONE INITIALIZATION START @@@@@@@@@@@@@@@\n", zoneID);
@@ -150,7 +149,6 @@ void ZoneGroupManager::load()
 
     ZoneGroupIDList.clear();
 
-     
 
     __END_DEBUG
     __END_CATCH
@@ -182,10 +180,10 @@ void ZoneGroupManager::addZoneGroup(ZoneGroup* pZoneGroup)
     unordered_map<ZoneGroupID_t, ZoneGroup*>::iterator itr = m_ZoneGroups.find(pZoneGroup->getZoneGroupID());
 
     if (itr != m_ZoneGroups.end())
-        
+
         throw Error("duplicated zone id");
 
-    
+
     m_ZoneGroups[pZoneGroup->getZoneGroupID()] = pZoneGroup;
 
     __END_CATCH
@@ -205,7 +203,6 @@ ZoneGroup* ZoneGroupManager::getZoneGroupByGroupID(ZoneGroupID_t ZoneGroupID) co
         pZoneGroup = itr->second;
 
     } else {
-        
         StringStream msg;
         msg << "ZoneGroupID : " << ZoneGroupID;
         throw NoSuchElementException(msg.toString());
@@ -226,13 +223,11 @@ void ZoneGroupManager::deleteZoneGroup(ZoneGroupID_t zoneID) {
     unordered_map<ZoneGroupID_t, ZoneGroup*>::iterator itr = m_ZoneGroups.find(zoneID);
 
     if (itr != m_ZoneGroups.end()) {
-        
         SAFE_DELETE(itr->second);
 
-        
+
         m_ZoneGroups.erase(itr);
     } else {
-        
         StringStream msg;
         msg << "ZoneGroupID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -256,7 +251,6 @@ ZoneGroup* ZoneGroupManager::getZoneGroup(ZoneGroupID_t zoneID) const {
         pZoneGroup = itr->second;
 
     } else {
-        
         StringStream msg;
         msg << "ZoneGroupID : " << zoneID;
         throw NoSuchElementException(msg.toString());
@@ -315,7 +309,7 @@ void ZoneGroupManager::outputLoadValue()
         const unordered_map<ZoneID_t, Zone*>& zones = pZoneGroup->getZones();
         unordered_map<ZoneID_t, Zone*>::const_iterator iZone;
 
-        
+
         int totalLoad = 0;
         for (iZone = zones.begin(); iZone != zones.end(); iZone++) {
             Zone* pZone = iZone->second;
@@ -351,15 +345,14 @@ void ZoneGroupManager::outputLoadValue()
 bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
 
 {
-    const int maxGroup = m_ZoneGroups.size(); 
-    
-    const int loadLimit = 500;  
-    const int stableLoad = 120; 
-    
-    
-    const int minLoadGap =
-        20; 
-    const int averageLoadPercent = 90; 
+    const int maxGroup = m_ZoneGroups.size();
+
+    const int loadLimit = 500;
+    const int stableLoad = 120;
+
+
+    const int minLoadGap = 20;
+    const int averageLoadPercent = 90;
 
     int i;
 
@@ -368,12 +361,12 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
 
     unordered_map<ZoneGroupID_t, ZoneGroup*>::const_iterator itr;
 
-    
+
     int totalLoad = 0;
 
 
     //------------------------------------------------------------------
-    
+
     //------------------------------------------------------------------
     int maxLoadValue = 0;
     int minLoadValue = loadLimit;
@@ -383,7 +376,7 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
         const unordered_map<ZoneID_t, Zone*>& zones = pZoneGroup->getZones();
         unordered_map<ZoneID_t, Zone*>::const_iterator iZone;
 
-        
+
         for (iZone = zones.begin(); iZone != zones.end(); iZone++) {
             Zone* pZone = iZone->second;
 
@@ -394,14 +387,11 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
             maxLoadValue = max(maxLoadValue, load);
             minLoadValue = min(minLoadValue, load);
 
-            
-            
-            
-            
+
             int playerLoad = pZone->getPCCount() / 10;
             playerLoad = max(1, playerLoad);
-            
-            load = (loadLimit - load) * playerLoad; 
+
+            load = (loadLimit - load) * playerLoad;
 
             LoadInfo* pInfo = new LoadInfo;
             pInfo->id = pZone->getZoneID();
@@ -409,7 +399,7 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
             pInfo->groupID = -1;
             pInfo->load = load;
 
-            
+
             DWORD key = (load << 8) | pInfo->id;
 
             loadInfos[key] = pInfo;
@@ -420,27 +410,24 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
 
     //------------------------------------------------------------------
     //
-    
+
     //
     //------------------------------------------------------------------
     if (!bForce) {
         int loadBoundary = stableLoad;
         // int loadBoundary = ( loadLimit - stableLoad ) * loadMultiplier;
 
-        
-        
-        
+
         // if (maxLoad <= loadBoundary
         if (minLoadValue >= loadBoundary || maxLoadValue - minLoadValue <= minLoadGap) {
-            
             for (itr = m_ZoneGroups.begin(); itr != m_ZoneGroups.end(); itr++) {
                 ZoneGroup* pZoneGroup = itr->second;
 
-                
+
                 const unordered_map<ZoneID_t, Zone*>& zones = pZoneGroup->getZones();
                 unordered_map<ZoneID_t, Zone*>::const_iterator iZone;
 
-                
+
                 for (iZone = zones.begin(); iZone != zones.end(); iZone++) {
                     Zone* pZone = iZone->second;
 
@@ -452,25 +439,25 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
         }
     }
 
-    
+
     // int avgLoad = totalLoad / maxGroups;
-    
+
     int avgLoad = totalLoad * averageLoadPercent / maxGroup / 100;
 
-    
+
     groups.reserve(maxGroup);
     for (i = 0; i < maxGroup; i++) {
         groups[i] = 0;
     }
 
-    
+
     // outputLoadValue();
 
     //------------------------------------------------------------------
     //
     // load balancing
     //
-    
+
     //------------------------------------------------------------------
     LOAD_INFOS::const_iterator iInfo = loadInfos.begin();
 
@@ -479,7 +466,7 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
     for (; iInfo != loadInfos.end(); iInfo++) {
         LoadInfo* pInfo = iInfo->second;
 
-        
+
         int newGroupID = -1;
         for (int k = 0; k < maxGroup; k++) {
             int groupLoad = groups[index];
@@ -497,7 +484,7 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
                 index = 0;
         }
 
-        
+
         if (newGroupID == -1) {
             newGroupID = 0;
             for (int k = 1; k < maxGroup; k++) {
@@ -507,8 +494,8 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
             }
         }
 
-        
-        pInfo->groupID = newGroupID + 1; 
+
+        pInfo->groupID = newGroupID + 1;
         groups[newGroupID] += pInfo->load;
     }
 
@@ -529,7 +516,7 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
     Statement* pStmt = NULL;
     list<ZoneGroupID_t> ZoneGroupIDList;
 
-    
+
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement selectZoneGroupIDStmt(pConn, "SELECT ZoneGroupID FROM ZoneGroupInfo");
@@ -564,11 +551,11 @@ bool ZoneGroupManager::makeDefaultLoadInfo(LOAD_INFOS& loadInfos)
                     pInfo->oldGroupID = g_pZoneInfoManager->getZoneInfo(zoneID)->getZoneGroupID();
                 } catch (NoSuchElementException&) {
                     filelog("makeDefaultLoadInfoError.txt", "NoSuch ZoneInfo : %d", zoneID);
-                    pInfo->oldGroupID = ID; 
+                    pInfo->oldGroupID = ID;
                 }
 
                 pInfo->groupID = ID;
-                pInfo->load = 0; 
+                pInfo->load = 0;
 
                 loadInfos[zoneID] = pInfo;
             }
@@ -607,7 +594,7 @@ void ZoneGroupManager::balanceZoneGroup(bool bForce, bool bDefault)
     filelog("balanceZoneGroup.txt", "  .");
     return;
 
-     
+
     __END_CATCH
 }
 
@@ -634,7 +621,6 @@ void ZoneGroupManager::lockZoneGroups()
     for (itr = m_ZoneGroups.begin(); itr != m_ZoneGroups.end(); itr++) {
         ZoneGroup* pZoneGroup = itr->second;
         pZoneGroup->lock();
-        
     }
 
     __END_CATCH
@@ -658,7 +644,6 @@ void ZoneGroupManager::unlockZoneGroups()
     for (itr = m_ZoneGroups.begin(); itr != m_ZoneGroups.end(); itr++) {
         ZoneGroup* pZoneGroup = itr->second;
         pZoneGroup->unlock();
-        
     }
 
     //------------------------------------------------------------------
@@ -685,7 +670,7 @@ int ZoneGroupManager::getPlayerNum() const
     for (; itr != m_ZoneGroups.end(); itr++) {
         ZoneGroup* pZoneGroup = itr->second;
 
-        
+
         numPC += pZoneGroup->getZonePlayerManager()->size();
     }
 

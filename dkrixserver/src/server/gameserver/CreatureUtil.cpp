@@ -4,8 +4,6 @@
 // Description :
 
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "CreatureUtil.h"
@@ -126,7 +124,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    
+
     pItem = pInventory->findItemOID(id, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -135,7 +133,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
         return pItem;
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -171,14 +169,14 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, int& storage, int& x, int&
         }
     }
 
-    
+
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getObjectID() == id) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    
+
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -211,7 +209,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    
+
     pItem = pInventory->findItemOID(id, IClass, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -220,7 +218,7 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
         return pItem;
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -256,14 +254,14 @@ Item* findItemOID(Creature* pCreature, ObjectID_t id, Item::ItemClass IClass, in
         }
     }
 
-    
+
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getObjectID() == id && pItem->getItemClass() == IClass) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    
+
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -324,7 +322,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    
+
     pItem = pInventory->findItemIID(id, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -333,7 +331,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
         return pItem;
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -369,14 +367,14 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, int& storage, int& x, int& y
         }
     }
 
-    
+
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getItemID() == id) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    
+
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -409,7 +407,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
     CoordInven_t tx = 0;
     CoordInven_t ty = 0;
 
-    
+
     pItem = pInventory->findItemIID(id, IClass, tx, ty);
     if (pItem != NULL) {
         storage = STORAGE_INVENTORY;
@@ -418,7 +416,7 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
         return pItem;
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
 
@@ -454,14 +452,14 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
         }
     }
 
-    
+
     pItem = pPC->getExtraInventorySlotItem();
     if (pItem != NULL && pItem->getItemID() == id && pItem->getItemClass() == IClass) {
         storage = STORAGE_EXTRASLOT;
         return pItem;
     }
 
-    
+
     for (int r = 0; r < STASH_RACK_MAX; r++) {
         for (int i = 0; i < STASH_INDEX_MAX; i++) {
             pItem = pStash->get(r, i);
@@ -482,7 +480,6 @@ Item* findItemIID(Creature* pCreature, ItemID_t id, Item::ItemClass IClass, int&
 ////////////////////////////////////////////////////////////////////////////////
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
 
@@ -495,8 +492,6 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
     int exp = 0;
 
     if (pCreature->isSlayer()) {
-        
-        
         if ((pCreature->isFlag(Effect::EFFECT_CLASS_KILL_AFTERMATH) == true && percent != BLOODDRAIN_EXP) ||
             (pCreature->isFlag(Effect::EFFECT_CLASS_AFTERMATH) == true && percent == BLOODDRAIN_EXP)) {
             exp = 0;
@@ -509,7 +504,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1;
         }
 
-        
+
         if (g_pCombatInfoManager->isCombat()) {
             if (percent == BLOODDRAIN_EXP)
                 percent = KILL_EXP;
@@ -528,8 +523,6 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1;
         }
     } else if (pCreature->isOusters()) {
-        
-        
         if ((pCreature->isFlag(Effect::EFFECT_CLASS_KILL_AFTERMATH) == true && percent == KILL_EXP) ||
             (pCreature->isFlag(Effect::EFFECT_CLASS_AFTERMATH) == true && percent == BLOODDRAIN_EXP) ||
             pOusters != NULL) {
@@ -544,7 +537,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
         }
     } else if (pCreature->isMonster()) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
-        
+
         if (pMonster->getMonsterType() == 753) {
             return 0;
         }
@@ -552,7 +545,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             return 0;
         }
 
-        
+
         if (pOusters != NULL) {
             return getPercentValue(getPercentValue((int)(pMonster->getOustersExp(pOusters)),
                                                    g_pVariableManager->getVariable(MONSTER_EXP_RATIO)),
@@ -564,7 +557,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
         exp += pMonster->getINT();
         exp = (int)(exp * (0.75 + (double)(pMonster->getLevel() / 200.0)));
 
-        
+
         MonsterType_t MonsterType = pMonster->getMonsterType();
         if (MonsterType == 358 || MonsterType == 359)
             exp = 1144;
@@ -572,7 +565,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
             exp = 1076;
 
         // cout << pMonster->getName() << " exp = " << exp << "  percent=" << percent << endl;
-        
+
         /*
         const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(pMonster->getMonsterType());
         int HPBoost = pMonsterInfo->getEnhanceHP();
@@ -586,7 +579,7 @@ int computeCreatureExp(Creature* pCreature, int percent, Ousters* pOusters)
     } else
         Assert(false);
 
-    
+
     // exp = (int)((float)exp * 1.5);
     exp = getPercentValue(exp, percent);
     exp = getPercentValue(exp, g_pVariableManager->getVariable(MONSTER_EXP_RATIO));
@@ -618,7 +611,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
         exp += pSlayer->getINT(ATTR_BASIC);*/
         exp = 1;
 
-        
+
         if (g_pCombatInfoManager->isCombat()) {
             if (percent == BLOODDRAIN_EXP)
                 percent = KILL_EXP;
@@ -642,7 +635,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
     } else if (pCreature->isMonster()) {
         Monster* pMonster = dynamic_cast<Monster*>(pCreature);
 
-        
+
         if (pMonster->getMonsterType() == 753) {
             return 0;
         }
@@ -652,7 +645,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
         exp += pMonster->getINT();
         exp = (int)(exp * (0.75 + (double)(pMonster->getLevel() / 200.0)));
 
-        
+
         MonsterType_t MonsterType = pMonster->getMonsterType();
         if (MonsterType == 358 || MonsterType == 359)
             exp = 1144;
@@ -660,7 +653,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
             exp = 1076;
 
         // cout << pMonster->getName() << " exp = " << exp << "  percent=" << percent << endl;
-        
+
         /*
         const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(pMonster->getMonsterType());
         int HPBoost = pMonsterInfo->getEnhanceHP();
@@ -674,7 +667,7 @@ int computeBloodDrainHealPoint(Creature* pCreature, int percent)
     } else
         Assert(false);
 
-    
+
     // exp = (int)((float)exp * 1.5);
     exp = getPercentValue(exp, percent);
 
@@ -719,27 +712,26 @@ bool isEventMonster(Creature* pCreature)
 bool isAbleToMove(Creature* pCreature) {
     Assert(pCreature != NULL);
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE)) {
         if (pCreature->isVampire())
             return false;
 
-        
+
         // if (pCreature->isMonster()) return false;
 
         if (pCreature->isSlayer())
             return false;
     }
 
-    
-    if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA) ||
-        pCreature->isDead()
-        
+
+    if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead()
+
         || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_ETERNITY_PAUSE)
         //		|| pCreature->isFlag(Effect::EFFECT_CLASS_SANCTUARY)
         || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET)
-        
+
         || pCreature->isFlag(Effect::EFFECT_CLASS_CAUSE_CRITICAL_WOUNDS) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_SOUL_CHAIN) || pCreature->isFlag(Effect::EFFECT_CLASS_LOVE_CHAIN) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_GUN_SHOT_GUIDANCE_AIM) ||
@@ -768,16 +760,11 @@ bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    
-    
-    
-    
-    
-    
+
     if ((pCreature->isDead() || pCreature->isFlag(Effect::EFFECT_CLASS_COMA)) && SkillType != SKILL_ETERNITY)
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
@@ -798,9 +785,8 @@ bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
         return false;
     }
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE || SkillType != SKILL_UN_TRANSFORM)
         // end  edit
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE && SkillType != SKILL_UN_TRANSFORM)
@@ -815,13 +801,13 @@ bool isAbleToUseSelfSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
         if (SkillType != SKILL_UN_TRANSFORM)
             return false;
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle()) {
@@ -847,16 +833,11 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    
-    
-    
-    
-    
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||
         pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
@@ -871,9 +852,8 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE || SkillType != SKILL_ATTACK_MELEE)
         // end  edit
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE && SkillType != SKILL_ATTACK_MELEE)
@@ -889,7 +869,7 @@ bool isAbleToUseObjectSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -909,16 +889,11 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    
-    
-    
-    
-    
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||
         pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
@@ -933,9 +908,8 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE)
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE)
         // end  edit
@@ -951,7 +925,7 @@ bool isAbleToUseTileSkill(Creature* pCreature, SkillType_t SkillType) {
         }
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -971,17 +945,11 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
     if (pCreature->isFlag(Effect::EFFECT_CLASS_PLEASURE_EXPLOSION))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_DRAGON_EYE))
         return false;
 
-    
-    
-    
-    
-    
-    
-    
+
     // if (X >= 10 || Y >= 6 || TX >= 10 || TY >= 6) return false;
     if (X >= 10 || Y >= 6)
         return false;
@@ -999,9 +967,8 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         pCreature->isFlag(Effect::EFFECT_CLASS_TRAPPED) || pCreature->isFlag(Effect::EFFECT_CLASS_EXPLOSION_WATER))
         return false;
 
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF)) {
-        
         // if (SkillType != SKILL_HOWL && SkillType != SKILL_EAT_CORPSE)
         if (SkillType != SKILL_HOWL || SkillType != SKILL_EAT_CORPSE)
         // end  edit
@@ -1017,7 +984,7 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         }
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
@@ -1038,11 +1005,10 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
 bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
     Assert(pCreature != NULL);
 
-    
-    
+
     if (pCreature->isFlag(Effect::EFFECT_CLASS_COMA)
 
-        
+
         || pCreature->isFlag(Effect::EFFECT_CLASS_PARALYZE) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_ETERNITY_PAUSE)
         //		|| pCreature->isFlag(Effect::EFFECT_CLASS_SANCTUARY)
@@ -1055,7 +1021,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         pCreature->isFlag(Effect::EFFECT_CLASS_INSTALL_TURRET))
         return false;
 
-    
+
     Zone* pZone = pCreature->getZone();
     if (pZone != NULL) {
         Tile& rTile = pZone->getTile(pCreature->getX(), pCreature->getY());
@@ -1064,15 +1030,14 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         }
     }
 
-    
+
     if (pCreature->isSlayer()) {
         Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
         if (pSlayer->hasRideMotorcycle())
             return false;
     }
 
-    
-    
+
     Item::ItemClass itemClass = pItem->getItemClass();
     ItemType_t itemtype = pItem->getItemType();
 
@@ -1080,14 +1045,14 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
         Inventory* pInventory = pPC->getInventory();
 
-        
+
         Item* pMouseItem = pPC->getExtraInventorySlotItem();
 
         if (pMouseItem != NULL && pMouseItem->getItemClass() == Item::ITEM_CLASS_QUEST_ITEM &&
             pMouseItem->getItemType() < 4)
             return false;
 
-        
+
         Item* pInvenItem = pInventory->findItem(Item::ITEM_CLASS_QUEST_ITEM);
 
         if (pInvenItem != NULL && pInvenItem->getItemClass() == Item::ITEM_CLASS_QUEST_ITEM &&
@@ -1109,14 +1074,12 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
             return false;
     }
 
-    
+
     if (pItem->isTimeLimitItem())
         return false;
 
-    
+
     if (isRelicItem(itemClass)) {
-        
-        
         if (pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK) || pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) ||
             pCreature->isFlag(Effect::EFFECT_CLASS_INVISIBILITY) || pCreature->isFlag(Effect::EFFECT_CLASS_FADE_OUT) ||
             pCreature->isFlag(Effect::EFFECT_CLASS_TRANSFORM_TO_WOLF) ||
@@ -1129,7 +1092,6 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         }
 
         switch (itemClass) {
-        
         case Item::ITEM_CLASS_RELIC: {
             const RelicInfo* pRelicInfo = dynamic_cast<RelicInfo*>(g_pRelicInfoManager->getItemInfo(itemtype));
 
@@ -1154,7 +1116,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
                 return false;
             }
 
-            
+
             ZoneLevel_t zoneLevel = pCreature->getZone()->getZoneLevel(pCreature->getX(), pCreature->getY());
             if (zoneLevel & SAFE_ZONE) {
                 return false;
@@ -1180,7 +1142,6 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         } break;
 
         case Item::ITEM_CLASS_WAR_ITEM: {
-            
             Level_t level = pCreature->getLevel();
             if (level < 150)
                 return false;
@@ -1210,7 +1171,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
             return false;
     }
 
-    
+
     if (pItem->isFlagItem()) {
         if (!g_pFlagManager->hasFlagWar())
             return false;
@@ -1232,8 +1193,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_OUSTERS_ONLY))
             return false;
 
-        
-        
+
         switch (itemClass) {
         case Item::ITEM_CLASS_VAMPIRE_RING:
         case Item::ITEM_CLASS_VAMPIRE_BRACELET:
@@ -1261,7 +1221,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_FASCIA:
         case Item::ITEM_CLASS_MITTEN:
             // case Item::ITEM_CLASS_MONEY :
-            
+
             //  edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return false;
             return false;
@@ -1280,8 +1240,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_OUSTERS_ONLY))
             return false;
 
-        
-        
+
         switch (pItem->getItemClass()) {
         case Item::ITEM_CLASS_VAMPIRE_RING:
         case Item::ITEM_CLASS_VAMPIRE_BRACELET:
@@ -1321,7 +1280,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_DERMIS:
         case Item::ITEM_CLASS_PERSONA:
         case Item::ITEM_CLASS_MONEY:
-            
+
             // edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return true;
             return true;
@@ -1341,8 +1300,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         if (pItem->isFlag(Effect::EFFECT_CLASS_VAMPIRE_ONLY))
             return false;
 
-        
-        
+
         switch (pItem->getItemClass()) {
         case Item::ITEM_CLASS_OUSTERS_ARMSBAND:
         case Item::ITEM_CLASS_OUSTERS_BOOTS:
@@ -1384,7 +1342,7 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
         case Item::ITEM_CLASS_FASCIA:
         case Item::ITEM_CLASS_MITTEN:
         case Item::ITEM_CLASS_MONEY:
-            
+
             // edit by sonic 2006.10.31
             // if (pItem->getItemType()==1) return true;
             return true;
@@ -1409,7 +1367,6 @@ bool isAbleToPickupItem(Creature* pCreature, Item* pItem) {
 }
 
 bool canDropToZone(Creature* pCreature, Item* pItem) {
-    
     if (pItem->isTimeLimitItem())
         return false;
 
@@ -1431,12 +1388,11 @@ bool canDropToZone(Creature* pCreature, Item* pItem) {
     } break;
 
     case Item::ITEM_CLASS_MOON_CARD:
-        
-        {
-            if (pItem->getItemType() == 0)
-                return false;
-        }
-        break;
+
+    {
+        if (pItem->getItemType() == 0)
+            return false;
+    } break;
     case Item::ITEM_CLASS_LUCKY_BAG: {
         if (pItem->getItemType() == 3)
             return false;
@@ -1576,34 +1532,32 @@ bool getGuildIDFromDB(const string& Name, Race_t race, GuildID_t& guildID)
 
 bool canSee(const Creature* pSource, Creature* pTarget, EffectObservingEye* pEffectObservingEye,
             EffectGnomesWhisper* pEffectGnomesWhisper) {
-    
     if (pTarget->isFlag(Effect::EFFECT_CLASS_GHOST))
         return false;
 
     // ZoneCoord_t targetX = pTarget->getX(), targetY = pTarget->getY();
 
-    
+
     if (pEffectObservingEye == NULL && pSource->isFlag(Effect::EFFECT_CLASS_OBSERVING_EYE)) {
         pEffectObservingEye =
             dynamic_cast<EffectObservingEye*>(pSource->findEffect(Effect::EFFECT_CLASS_OBSERVING_EYE));
     }
 
-    
+
     if (pEffectGnomesWhisper == NULL && pSource->isFlag(Effect::EFFECT_CLASS_GNOMES_WHISPER)) {
         pEffectGnomesWhisper =
             dynamic_cast<EffectGnomesWhisper*>(pSource->findEffect(Effect::EFFECT_CLASS_GNOMES_WHISPER));
     }
 
-    
+
     // if (pSource->getVisionState(targetX, targetY) >= IN_SIGHT)
     //{
-    
+
     if (pSource->isVampire() && pTarget->isVampire())
         return true;
 
-    if ((!pTarget->isFlag(Effect::EFFECT_CLASS_HIDE) ||
-         pSource->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN)
-         
+    if ((!pTarget->isFlag(Effect::EFFECT_CLASS_HIDE) || pSource->isFlag(Effect::EFFECT_CLASS_DETECT_HIDDEN)
+
          || pSource->isFlag(Effect::EFFECT_CLASS_REVEALER) ||
          (pEffectGnomesWhisper != NULL && pEffectGnomesWhisper->canSeeHide())) &&
         (!pTarget->isFlag(Effect::EFFECT_CLASS_INVISIBILITY) ||
@@ -1661,8 +1615,7 @@ int changeSexEx(PlayerCreature* pPC) {
     } else
         return 3;
 
-    
-    
+
     Statement* pStmt = NULL;
 
     BEGIN_DB {
@@ -1757,10 +1710,7 @@ bool dropFlagToZone(PlayerCreature* pPC, Item* pItem)
     Zone* pZone = pPC->getZone();
     Assert(pZone != NULL);
 
-    
 
-    
-    
     //	TPOINT pt = pZone->addItem( pItem, pPC->getX(), pPC->getY(), false );
     pZone->addItemDelayed(pItem, pPC->getX(), pPC->getY(), false);
 
@@ -1770,12 +1720,11 @@ bool dropFlagToZone(PlayerCreature* pPC, Item* pItem)
 
     if (!pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK)) {
         EffectRelicLock* pLock = new EffectRelicLock(pItem);
-        pLock->setDeadline(10 * 10); 
+        pLock->setDeadline(10 * 10);
         pItem->setFlag(Effect::EFFECT_CLASS_RELIC_LOCK);
         pItem->getEffectManager().addEffect(pLock);
     }
 
-     
 
     return true;
 }
@@ -1787,16 +1736,13 @@ bool dropFlagToZone(Creature* pCreature, bool bSendPacket) {
 
     bool bDrop = false;
 
-    
+
     Item* pSlotItem = pPC->getExtraInventorySlotItem();
 
     if (pSlotItem != NULL && pSlotItem->isFlagItem()) {
         if (dropFlagToZone(pPC, pSlotItem)) {
             pPC->deleteItemFromExtraInventorySlot();
 
-            
-            
-            
 
             if (bSendPacket) {
                 GCDeleteInventoryItem gcDeleteInventoryItem;
@@ -1815,17 +1761,15 @@ bool dropFlagToZone(Creature* pCreature, bool bSendPacket) {
     Inventory* pInventory = pPC->getInventory();
     Assert(pInventory != NULL);
 
-    
+
     for (CoordInven_t y = 0; y < pInventory->getHeight(); y++) {
         for (CoordInven_t x = 0; x < pInventory->getWidth(); x++) {
             Item* pItem = pInventory->getItem(x, y);
             if (pItem != NULL && pItem->isFlagItem()) {
-                
                 if (dropFlagToZone(pPC, pItem)) {
-                    
                     pInventory->deleteItem(pItem->getObjectID());
 
-                    
+
                     if (bSendPacket) {
                         GCDeleteInventoryItem gcDeleteInventoryItem;
                         gcDeleteInventoryItem.setObjectID(pItem->getObjectID());
@@ -1927,9 +1871,8 @@ void giveUnderworldGift(Creature* pCreature) {
         BEGIN_DB {
             Connection* pConn = g_pDatabaseManager->getDistConnection("PLAYER_DB");
             PreparedStatement insertUnderworldEventStmt(
-                pConn,
-                "INSERT INTO UnderworldEvent (WorldID, ServerID, PlayerID, CharacterID, KillTime) "
-                "VALUES (?, ?, ?, ?, now())");
+                pConn, "INSERT INTO UnderworldEvent (WorldID, ServerID, PlayerID, CharacterID, KillTime) "
+                       "VALUES (?, ?, ?, ?, now())");
             insertUnderworldEventStmt.bindUInt(1, g_pConfig->getPropertyInt("WorldID"));
             insertUnderworldEventStmt.bindUInt(2, g_pConfig->getPropertyInt("ServerID"));
             insertUnderworldEventStmt.bindString(3, PlayerID);
@@ -1968,7 +1911,7 @@ bool dropSweeperToZone(PlayerCreature* pPC, Item* pItem)
 
     if (!pItem->isFlag(Effect::EFFECT_CLASS_RELIC_LOCK)) {
         EffectRelicLock* pLock = new EffectRelicLock(pItem);
-        pLock->setDeadline(10 * 10); 
+        pLock->setDeadline(10 * 10);
         pItem->setFlag(Effect::EFFECT_CLASS_RELIC_LOCK);
         pItem->getEffectManager().addEffect(pLock);
     }
@@ -1983,16 +1926,13 @@ bool dropSweeperToZone(Creature* pCreature, bool bSendPacket) {
 
     bool bDrop = false;
 
-    
+
     Item* pSlotItem = pPC->getExtraInventorySlotItem();
 
     if (pSlotItem != NULL && pSlotItem->getItemClass() == Item::ITEM_CLASS_SWEEPER) {
         if (dropSweeperToZone(pPC, pSlotItem)) {
             pPC->deleteItemFromExtraInventorySlot();
 
-            
-            
-            
 
             if (bSendPacket) {
                 GCDeleteInventoryItem gcDeleteInventoryItem;
@@ -2011,17 +1951,15 @@ bool dropSweeperToZone(Creature* pCreature, bool bSendPacket) {
     Inventory* pInventory = pPC->getInventory();
     Assert(pInventory != NULL);
 
-    
+
     for (CoordInven_t y = 0; y < pInventory->getHeight(); y++) {
         for (CoordInven_t x = 0; x < pInventory->getWidth(); x++) {
             Item* pItem = pInventory->getItem(x, y);
             if (pItem != NULL && pItem->getItemClass() == Item::ITEM_CLASS_SWEEPER) {
-                
                 if (dropSweeperToZone(pPC, pItem)) {
-                    
                     pInventory->deleteItem(pItem->getObjectID());
 
-                    
+
                     if (bSendPacket) {
                         GCDeleteInventoryItem gcDeleteInventoryItem;
                         gcDeleteInventoryItem.setObjectID(pItem->getObjectID());
@@ -2085,7 +2023,7 @@ void giveGoldMedal(PlayerCreature* pPC) {
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getDistConnection("USERINFO");
         PreparedStatement insertGoldMedalCountStmt(pConn,
-                                                    "INSERT INTO GoldMedalCount (PlayerID, getTime) VALUES (?, now())");
+                                                   "INSERT INTO GoldMedalCount (PlayerID, getTime) VALUES (?, now())");
         insertGoldMedalCountStmt.bindString(1, pGamePlayer->getID());
         insertGoldMedalCountStmt.execute();
         addSimpleCreatureEffect(pPC, Effect::EFFECT_CLASS_GOLD_MEDAL, 10, true);
@@ -2131,7 +2069,7 @@ void giveLotto(PlayerCreature* pPC, BYTE type, uint num) {
         Connection* pConn = g_pDatabaseManager->getDistConnection("USERINFO");
 
         PreparedStatement updateEventLottoStmt(pConn,
-                                                "UPDATE EventLotto SET count=count+? WHERE PlayerID=? AND Type=?");
+                                               "UPDATE EventLotto SET count=count+? WHERE PlayerID=? AND Type=?");
         updateEventLottoStmt.bindUInt(1, num);
         updateEventLottoStmt.bindString(2, pGamePlayer->getID());
         updateEventLottoStmt.bindUInt(3, type);
@@ -2139,7 +2077,7 @@ void giveLotto(PlayerCreature* pPC, BYTE type, uint num) {
 
         if (updateEventLottoStmt.getAffectedRowCount() < 1) {
             PreparedStatement replaceEventLottoStmt(pConn,
-                                                     "REPLACE INTO EventLotto (PlayerID,Type,count) VALUES (?,?,?)");
+                                                    "REPLACE INTO EventLotto (PlayerID,Type,count) VALUES (?,?,?)");
             replaceEventLottoStmt.bindString(1, pGamePlayer->getID());
             replaceEventLottoStmt.bindUInt(2, type);
             replaceEventLottoStmt.bindUInt(3, num);
@@ -2189,7 +2127,7 @@ void addOlympicStat(PlayerCreature* pPC, BYTE type, uint num) {
        num);
             }
     */
-     
+
     /*
             SAFE_DELETE( pStmt );
         }
@@ -2207,7 +2145,7 @@ void deletePC(PlayerCreature* pPC) {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Slayer WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateSlayerStmt(pConn, "UPDATE Slayer SET Active='INACTIVE' WHERE Name = ?");
@@ -2215,7 +2153,7 @@ void deletePC(PlayerCreature* pPC) {
         inactivateSlayerStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Vampire WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateVampireStmt(pConn, "UPDATE Vampire SET Active='INACTIVE' WHERE Name = ?");
@@ -2223,7 +2161,7 @@ void deletePC(PlayerCreature* pPC) {
         inactivateVampireStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         //		pStmt->executeQuery("DELETE FROM Ousters WHERE Name = '%s'", pPC->getName().c_str());
         PreparedStatement inactivateOustersStmt(pConn, "UPDATE Ousters SET Active='INACTIVE' WHERE Name = ?");
@@ -2231,35 +2169,35 @@ void deletePC(PlayerCreature* pPC) {
         inactivateOustersStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteSkillSaveStmt(pConn, "DELETE FROM SkillSave WHERE OwnerID = ?");
         deleteSkillSaveStmt.bindString(1, pPC->getName());
         deleteSkillSaveStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteVampireSkillSaveStmt(pConn, "DELETE FROM VampireSkillSave WHERE OwnerID = ?");
         deleteVampireSkillSaveStmt.bindString(1, pPC->getName());
         deleteVampireSkillSaveStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteOustersSkillSaveStmt(pConn, "DELETE FROM OustersSkillSave WHERE OwnerID = ?");
         deleteOustersSkillSaveStmt.bindString(1, pPC->getName());
         deleteOustersSkillSaveStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteRankBonusDataStmt(pConn, "DELETE FROM RankBonusData WHERE OwnerID = ?");
         deleteRankBonusDataStmt.bindString(1, pPC->getName());
         deleteRankBonusDataStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         string ownerID = pPC->getName();
         PreparedStatement deleteARObjectStmt(pConn, "DELETE FROM ARObject WHERE OwnerID = ?");
@@ -2370,8 +2308,8 @@ void deletePC(PlayerCreature* pPC) {
         PreparedStatement deleteSkullObjectStmt(pConn, "DELETE FROM SkullObject WHERE OwnerID = ?");
         deleteSkullObjectStmt.bindString(1, ownerID);
         deleteSkullObjectStmt.execute();
-        PreparedStatement deleteSlayerPortalItemObjectStmt(
-            pConn, "DELETE FROM SlayerPortalItemObject WHERE OwnerID = ?");
+        PreparedStatement deleteSlayerPortalItemObjectStmt(pConn,
+                                                           "DELETE FROM SlayerPortalItemObject WHERE OwnerID = ?");
         deleteSlayerPortalItemObjectStmt.bindString(1, ownerID);
         deleteSlayerPortalItemObjectStmt.execute();
         PreparedStatement deleteSwordObjectStmt(pConn, "DELETE FROM SwordObject WHERE OwnerID = ?");
@@ -2404,8 +2342,8 @@ void deletePC(PlayerCreature* pPC) {
         PreparedStatement deleteVampireNecklaceObjectStmt(pConn, "DELETE FROM VampireNecklaceObject WHERE OwnerID = ?");
         deleteVampireNecklaceObjectStmt.bindString(1, ownerID);
         deleteVampireNecklaceObjectStmt.execute();
-        PreparedStatement deleteVampirePortalItemObjectStmt(
-            pConn, "DELETE FROM VampirePortalItemObject WHERE OwnerID = ?");
+        PreparedStatement deleteVampirePortalItemObjectStmt(pConn,
+                                                            "DELETE FROM VampirePortalItemObject WHERE OwnerID = ?");
         deleteVampirePortalItemObjectStmt.bindString(1, ownerID);
         deleteVampirePortalItemObjectStmt.execute();
         PreparedStatement deleteVampireRingObjectStmt(pConn, "DELETE FROM VampireRingObject WHERE OwnerID = ?");
@@ -2414,8 +2352,8 @@ void deletePC(PlayerCreature* pPC) {
         PreparedStatement deleteVampireWeaponObjectStmt(pConn, "DELETE FROM VampireWeaponObject WHERE OwnerID = ?");
         deleteVampireWeaponObjectStmt.bindString(1, ownerID);
         deleteVampireWeaponObjectStmt.execute();
-        PreparedStatement deleteVampireCoupleRingObjectStmt(
-            pConn, "DELETE FROM VampireCoupleRingObject WHERE OwnerID = ?");
+        PreparedStatement deleteVampireCoupleRingObjectStmt(pConn,
+                                                            "DELETE FROM VampireCoupleRingObject WHERE OwnerID = ?");
         deleteVampireCoupleRingObjectStmt.bindString(1, ownerID);
         deleteVampireCoupleRingObjectStmt.execute();
         PreparedStatement deleteWaterObjectStmt(pConn, "DELETE FROM WaterObject WHERE OwnerID = ?");
@@ -2469,8 +2407,8 @@ void deletePC(PlayerCreature* pPC) {
         PreparedStatement deleteComposMeiObjectStmt(pConn, "DELETE FROM ComposMeiObject WHERE OwnerID = ?");
         deleteComposMeiObjectStmt.bindString(1, ownerID);
         deleteComposMeiObjectStmt.execute();
-        PreparedStatement deleteOustersSummonItemObjectStmt(
-            pConn, "DELETE FROM OustersSummonItemObject WHERE OwnerID = ?");
+        PreparedStatement deleteOustersSummonItemObjectStmt(pConn,
+                                                            "DELETE FROM OustersSummonItemObject WHERE OwnerID = ?");
         deleteOustersSummonItemObjectStmt.bindString(1, ownerID);
         deleteOustersSummonItemObjectStmt.execute();
         PreparedStatement deleteEffectItemObjectStmt(pConn, "DELETE FROM EffectItemObject WHERE OwnerID = ?");
@@ -2514,10 +2452,10 @@ void deletePC(PlayerCreature* pPC) {
         deleteTrapItemObjectStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
-        PreparedStatement deleteCoupleInfoFemalePartnerNameStmt(
-            pConn, "DELETE FROM CoupleInfo WHERE FemalePartnerName=?");
+        PreparedStatement deleteCoupleInfoFemalePartnerNameStmt(pConn,
+                                                                "DELETE FROM CoupleInfo WHERE FemalePartnerName=?");
         deleteCoupleInfoFemalePartnerNameStmt.bindString(1, ownerID);
         deleteCoupleInfoFemalePartnerNameStmt.execute();
         PreparedStatement deleteCoupleInfoMalePartnerNameStmt(pConn, "DELETE FROM CoupleInfo WHERE MalePartnerName=?");
@@ -2525,7 +2463,7 @@ void deletePC(PlayerCreature* pPC) {
         deleteCoupleInfoMalePartnerNameStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteEffectAcidTouchStmt(pConn, "DELETE FROM EffectAcidTouch where OwnerID=?");
         deleteEffectAcidTouchStmt.bindString(1, pPC->getName());
@@ -2577,21 +2515,21 @@ void deletePC(PlayerCreature* pPC) {
         deleteEnemyEraseStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteFlagSetStmt(pConn, "DELETE FROM FlagSet WHERE OwnerID=?");
         deleteFlagSetStmt.bindString(1, pPC->getName());
         deleteFlagSetStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteTimeLimitItemsStmt(pConn, "DELETE FROM TimeLimitItems WHERE OwnerID=?");
         deleteTimeLimitItemsStmt.bindString(1, pPC->getName());
         deleteTimeLimitItemsStmt.execute();
 
         ////////////////////////////////////////////////////////////
-        
+
         ////////////////////////////////////////////////////////////
         PreparedStatement deleteEventQuestAdvanceStmt(pConn, "DELETE FROM EventQuestAdvance WHERE OwnerID=?");
         deleteEventQuestAdvanceStmt.bindString(1, pPC->getName());

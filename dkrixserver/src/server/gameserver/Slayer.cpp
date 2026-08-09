@@ -115,7 +115,7 @@ Slayer::Slayer()
 
     m_Mutex.setName("Slayer");
 
-    
+
     for (int i = 0; i < SKILL_DOUBLE_IMPACT; i++) {
         SkillSlot* pSkillSlot = new SkillSlot;
         // pSkillSlot = new SkillSlot;	// 2002.1.16  by sigi
@@ -132,23 +132,23 @@ Slayer::Slayer()
     for (int i = 0; i < WEAR_MAX; i++)
         m_pWearItem[i] = NULL;
 
-    
+
     m_pMotorcycle = NULL;
 
     for (int i = 0; i < MAX_PHONE_SLOT; i++) {
         m_PhoneSlot[i] = 0;
     }
 
-    
+
     //	for (int i = 0; i < 4; i++)
     //	{
     //		m_HotKey[i] = 0;
     //	}
 
-    
+
     getCurrentTime(m_MPRegenTime);
 
-    
+
     m_DomainExpSaveCount = 0;
     m_AttrExpSaveCount = 0;
     m_SkillExpSaveCount = 0;
@@ -171,8 +171,7 @@ Slayer::~Slayer()
         if (m_pMotorcycle != NULL) {
             // getOffMotorcycle();
 
-            
-            
+
             if (g_pParkingCenter->hasMotorcycleBox(m_pMotorcycle->getItemID())) {
                 g_pParkingCenter->deleteMotorcycleBox(m_pMotorcycle->getItemID());
             }
@@ -180,7 +179,7 @@ Slayer::~Slayer()
             m_pMotorcycle = NULL;
         }
 
-        
+
         DWORD flag;
         Color_t color[PCSlayerInfo::SLAYER_COLOR_MAX];
         getShapeInfo(flag, color);
@@ -196,32 +195,24 @@ Slayer::~Slayer()
         tinysave(pField);
 
 
-        
         saveGears();
         saveExps();
         saveSkills();
 
-        
+
         destroyGears();
 
-        
-        
+
         TradeManager* pTradeManager = m_pZone->getTradeManager();
         TradeInfo* pInfo = pTradeManager->getTradeInfo(getName());
         if (pInfo != NULL) {
-            
             pTradeManager->cancelTrade(this);
         }
 
-        
-        
-        
-        
-        
-        
+
         deleteAllPartyInfo(this);
 
-        
+
         unordered_map<SkillType_t, SkillSlot*>::iterator itr = m_SkillSlot.begin();
         for (; itr != m_SkillSlot.end(); itr++) {
             SkillSlot* pSkillSlot = itr->second;
@@ -249,7 +240,6 @@ Slayer::~Slayer()
 }
 
 
-
 void Slayer::registerObject()
 
 {
@@ -257,33 +247,32 @@ void Slayer::registerObject()
 
     Assert(getZone() != NULL);
 
-    
+
     ObjectRegistry& OR = getZone()->getObjectRegistry();
 
     __ENTER_CRITICAL_SECTION(OR)
 
-    
+
     if (m_pTimeLimitItemManager != NULL)
         m_pTimeLimitItemManager->clear();
 
-    
+
     OR.registerObject_NOLOCKED(this);
 
-    
+
     registerInventory(OR);
 
-    
+
     registerGoodsInventory(OR);
 
-    
+
     for (int i = 0; i < WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
 
         if (pItem != NULL) {
             bool bCheck = true;
 
-            
-            
+
             if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                 bCheck = false;
 
@@ -292,12 +281,12 @@ void Slayer::registerObject()
         }
     }
 
-    
+
     Item* pSlotItem = m_pExtraInventorySlot->getItem();
     if (pSlotItem != NULL)
         registerItem(pSlotItem, OR);
 
-    
+
     if (m_pMotorcycle != NULL)
         OR.registerObject_NOLOCKED(m_pMotorcycle);
 
@@ -318,7 +307,6 @@ void Slayer::registerObject()
 }
 
 
-
 void Slayer::registerInitObject()
 
 {
@@ -326,36 +314,34 @@ void Slayer::registerInitObject()
 
     Assert(getZone() != NULL);
 
-    
+
     ObjectRegistry& OR = getZone()->getObjectRegistry();
 
     __ENTER_CRITICAL_SECTION(OR)
 
-    
+
     if (m_pTimeLimitItemManager != NULL)
         m_pTimeLimitItemManager->clear();
 
-    
+
     OR.registerObject_NOLOCKED(this);
 
-    
+
     registerInitInventory(OR);
 
-    
+
     registerGoodsInventory(OR);
 
-    
+
     for (int i = 0; i < WEAR_MAX; i++) {
         Item* pItem = m_pWearItem[i];
 
         if (pItem != NULL) {
-            
             pItem->setTraceItem(bTraceLog(pItem));
 
             bool bCheck = true;
 
-            
-            
+
             if (i == WEAR_RIGHTHAND && isTwohandWeapon(pItem))
                 bCheck = false;
 
@@ -364,15 +350,14 @@ void Slayer::registerInitObject()
         }
     }
 
-    
+
     Item* pSlotItem = m_pExtraInventorySlot->getItem();
     if (pSlotItem != NULL) {
-        
         pSlotItem->setTraceItem(bTraceLog(pSlotItem));
         registerItem(pSlotItem, OR);
     }
 
-    
+
     if (m_pMotorcycle != NULL)
         OR.registerObject_NOLOCKED(m_pMotorcycle);
 
@@ -386,12 +371,10 @@ void Slayer::registerInitObject()
 }
 
 
-
-
 void Slayer::checkItemTimeLimit() {
     __BEGIN_TRY
 
-    
+
     {
         list<Item*> ItemList;
         int height = m_pInventory->getHeight();
@@ -401,7 +384,6 @@ void Slayer::checkItemTimeLimit() {
             for (int i = 0; i < width; i++) {
                 Item* pItem = m_pInventory->getItem(i, j);
                 if (pItem != NULL) {
-                    
                     list<Item*>::iterator itr = find(ItemList.begin(), ItemList.end(), pItem);
 
                     if (itr == ItemList.end()) {
@@ -411,9 +393,6 @@ void Slayer::checkItemTimeLimit() {
                             m_pInventory->deleteItem(pItem->getObjectID());
                             SAFE_DELETE(pItem);
                         } else {
-                            
-                            
-                            
                             ItemList.push_back(pItem);
                         }
                     }
@@ -422,7 +401,7 @@ void Slayer::checkItemTimeLimit() {
         }
     }
 
-    
+
     {
         for (int i = 0; i < WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
@@ -445,7 +424,7 @@ void Slayer::checkItemTimeLimit() {
         }
     }
 
-    
+
     {
         Item* pSlotItem = m_pExtraInventorySlot->getItem();
         if (pSlotItem != NULL && wasteIfTimeLimitExpired(pSlotItem)) {
@@ -454,8 +433,7 @@ void Slayer::checkItemTimeLimit() {
         }
     }
 
-    
-    
+
     /*	{
             if (m_pMotorcycle != NULL && wasteIfTimeLimitExpired( m_pMotorcycle ) )
             {
@@ -468,7 +446,7 @@ void Slayer::checkItemTimeLimit() {
 void Slayer::updateEventItemTime(DWORD time) {
     __BEGIN_TRY
 
-    
+
     {
         list<Item*> ItemList;
         int height = m_pInventory->getHeight();
@@ -478,7 +456,6 @@ void Slayer::updateEventItemTime(DWORD time) {
             for (int i = 0; i < width; i++) {
                 Item* pItem = m_pInventory->getItem(i, j);
                 if (pItem != NULL) {
-                    
                     list<Item*>::iterator itr = find(ItemList.begin(), ItemList.end(), pItem);
 
                     if (itr == ItemList.end()) {
@@ -486,9 +463,7 @@ void Slayer::updateEventItemTime(DWORD time) {
 
                         updateItemTimeLimit(pItem, time);
 
-                        
-                        
-                        
+
                         ItemList.push_back(pItem);
                     }
                 }
@@ -496,7 +471,7 @@ void Slayer::updateEventItemTime(DWORD time) {
         }
     }
 
-    
+
     {
         for (int i = 0; i < WEAR_MAX; i++) {
             Item* pItem = m_pWearItem[i];
@@ -514,7 +489,7 @@ void Slayer::updateEventItemTime(DWORD time) {
         }
     }
 
-    
+
     {
         Item* pSlotItem = m_pExtraInventorySlot->getItem();
         if (pSlotItem != NULL) {
@@ -532,27 +507,26 @@ void Slayer::loadItem(bool checkTimeLimit)
 
     PlayerCreature::loadItem();
 
-    
-    
+
     SAFE_DELETE(m_pInventory);
     m_pInventory = new Inventory(10, 6);
     m_pInventory->setOwner(getName());
 
-    
+
     g_pItemLoaderManager->load(this);
 
-    
+
     PlayerCreature::loadGoods();
 
-    
+
     registerInitObject();
 
-    
+
     if (m_pFlagSet->isOn(FLAGSET_RECEIVE_NEWBIE_ITEM_AUTO)) {
         addNewbieItemToInventory(this);
         addNewbieGoldToInventory(this);
         addNewbieItemToGear(this);
-        
+
         m_pFlagSet->turnOff(FLAGSET_RECEIVE_NEWBIE_ITEM_AUTO);
         m_pFlagSet->save(getName());
     }
@@ -561,7 +535,7 @@ void Slayer::loadItem(bool checkTimeLimit)
         checkItemTimeLimit();
     }
 
-    
+
     initAllStat();
 
     // cout << "Slayer::loadItem() : STR[CURRENT]" << (int)m_STR[ATTR_CURRENT] << endl;
@@ -624,8 +598,6 @@ bool Slayer::load()
         pResult = loadSlayerStmt.execute();
 
         if (pResult->getRowCount() == 0) {
-
-
             return false;
         }
 
@@ -760,15 +732,12 @@ bool Slayer::load()
         reward = pResult->getInt(++i);
         setSMSCharge(pResult->getInt(++i));
 
-        
-        
+
         //		m_HP[ATTR_MAX]      = m_STR[ATTR_CURRENT]*2;
 
         try {
             setZoneID(zoneID);
         } catch (Error& e) {
-            
-            
             ZONE_COORD ResurrectCoord;
             g_pResurrectLocationManager->getSlayerPosition(12, ResurrectCoord);
             setZoneID(ResurrectCoord.id);
@@ -886,7 +855,7 @@ bool Slayer::load()
             }
         }
     */
-    
+
     m_SlayerInfo.setObjectID(m_ObjectID);
     m_SlayerInfo.setName(m_Name);
     m_SlayerInfo.setX(m_X);
@@ -895,11 +864,10 @@ bool Slayer::load()
     m_SlayerInfo.setSex(m_Sex);
     m_SlayerInfo.setHairStyle(m_HairStyle);
 
-    
-    
+
     m_SlayerInfo.setCompetence(m_CompetenceShape);
 
-    
+
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement selectSkillSaveStmt(
@@ -923,12 +891,11 @@ bool Slayer::load()
             // pSkillSlot->setRunTime (pResult->getInt(++i));
             pSkillSlot->setRunTime();
 
-            
-            
+
             SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(pSkillSlot->getSkillType());
             Assert(pSkillInfo != NULL);
 
-            
+
             if (pSkillInfo->getLevel() > m_SkillDomainLevels[pSkillInfo->getDomainType()] &&
                 pSkillInfo->getDomainType() != SKILL_DOMAIN_ETC) {
                 pSkillSlot->setDisable();
@@ -942,10 +909,10 @@ bool Slayer::load()
 
     g_pEffectLoaderManager->load(this);
 
-    
+
     loadRankBonus();
 
-    
+
     // by sigi. 2002.11.8
     if (getHighestSkillDomainLevel() >= 100 && SystemAvailabilitiesManager::getInstance()->isAvailable(
                                                    SystemAvailabilitiesManager::SYSTEM_GRAND_MASTER_EFFECT)) {
@@ -958,10 +925,9 @@ bool Slayer::load()
     }
 
 
-    
     m_pFlagSet->load(getName());
 
-    
+
     m_SlayerInfo.setHelmetType(HELMET_NONE);
     m_SlayerInfo.setJacketType(JACKET_BASIC);
     m_SlayerInfo.setPantsType(PANTS_BASIC);
@@ -975,17 +941,15 @@ bool Slayer::load()
 
     m_SlayerInfo.setAdvancementLevel(getAdvancementClassLevel());
 
-    
+
     if (getRank() == 0) {
         saveInitialRank();
     }
 
 
-    
-    
     initAllStat();
 
-    
+
     if (RaceWarLimiter::isInPCList(this)) {
         setFlag(Effect::EFFECT_CLASS_RACE_WAR_JOIN_TICKET);
     }
@@ -1017,8 +981,8 @@ void Slayer::save() const
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveSlayerStmt(pConn,
-                                          "UPDATE Slayer SET CurrentHP=?, HP=?, CurrentMP=?, MP=?, ZoneID=?, XCoord=?, "
-                                          "YCoord=? WHERE Name=?");
+                                         "UPDATE Slayer SET CurrentHP=?, HP=?, CurrentMP=?, MP=?, ZoneID=?, XCoord=?, "
+                                         "YCoord=? WHERE Name=?");
         saveSlayerStmt.bindInt(1, m_HP[ATTR_CURRENT]);
         saveSlayerStmt.bindInt(2, m_HP[ATTR_MAX]);
         saveSlayerStmt.bindInt(3, m_MP[ATTR_CURRENT]);
@@ -1033,12 +997,10 @@ void Slayer::save() const
     }
     END_DB(pStmt)
 
-     
 
-    
     m_pEffectManager->save(m_Name);
 
-    
+
     if (m_pMotorcycle != NULL) {
         // m_pMotorcycle->save("", STORAGE_ZONE, m_pZone->getZoneID(), m_X, m_Y);
         //  by sigi. 2002.5.15
@@ -1158,7 +1120,6 @@ bool Slayer::isEmptyPhoneSlot()
 
     for (int i = 0; i < MAX_PHONE_SLOT; i++) {
         if (m_PhoneSlot[i] == 0) {
-            
             Success = true;
         }
     }
@@ -1211,7 +1172,7 @@ void Slayer::addSkill(SkillSlot* pSkillSlot)
         m_SkillSlot[pSkillSlot->getSkillType()] = pSkillSlot;
     }
     // 2002.1.16 by sigi
-    
+
     else {
         if (pSkillSlot != itr->second)
             SAFE_DELETE(pSkillSlot);
@@ -1267,7 +1228,7 @@ void Slayer::removeCastleSkill(SkillType_t SkillType)
 {
     __BEGIN_TRY
 
-    
+
     if (g_pCastleSkillInfoManager->getZoneID(SkillType) == 0)
         return;
 
@@ -1296,19 +1257,17 @@ void Slayer::removeAllCastleSkill()
         if (itr->second != NULL) {
             SkillSlot* pSkillSlot = itr->second;
             if (g_pCastleSkillInfoManager->getZoneID(pSkillSlot->getSkillType()) == 0) {
-                
                 ++itr;
                 continue;
             }
 
-            
+
             SAFE_DELETE(pSkillSlot);
             unordered_map<SkillType_t, SkillSlot*>::iterator prevItr = itr;
 
             ++itr;
             m_SkillSlot.erase(prevItr);
         } else {
-            
             Assert(false);
         }
     }
@@ -1317,7 +1276,6 @@ void Slayer::removeAllCastleSkill()
 }
 
 // Slayer::wearItem()
-
 
 
 void Slayer::wearItem(WearPart Part, Item* pItem)
@@ -1334,23 +1292,18 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
     Item* pPrevItem = NULL;
     OptionInfo* pOptionInfo = NULL;
 
-    
+
     if (pItem->getFirstOptionType() != 0)
         pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getFirstOptionType());
 
-    
-    
-    
-    
+
     if (isTwohandWeapon(pItem)) {
-        
         if (isWear(WEAR_RIGHTHAND) && isWear(WEAR_LEFTHAND)) {
             pLeft = getWearItem(WEAR_RIGHTHAND);
             pRight = getWearItem(WEAR_LEFTHAND);
 
-            
+
             if (pLeft == pRight) {
-                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
@@ -1360,30 +1313,26 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            
+
             else {
-                
-                
-                
-                
                 cerr << "    ,     ." << endl;
                 return;
             }
         }
-        
+
         else {
             char pField[128];
 
-            
+
             if (isWear(WEAR_RIGHTHAND)) {
                 pRight = getWearItem(WEAR_RIGHTHAND);
-                
+
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
@@ -1392,16 +1341,16 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 addItemToExtraInventorySlot(pRight);
                 // pRight->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
             }
-            
+
             else if (isWear(WEAR_LEFTHAND)) {
                 pLeft = getWearItem(WEAR_LEFTHAND);
-                
+
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
@@ -1410,15 +1359,14 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            
+
             else {
-                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
@@ -1433,7 +1381,7 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
 
         if (isWear(Part)) {
             pPrevItem = getWearItem(Part);
-            
+
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
@@ -1441,14 +1389,13 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
             sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
-            
+
             addItemToExtraInventorySlot(pPrevItem);
 
             // pPrevItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
             sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
-            
             m_pWearItem[Part] = pItem;
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
             sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
@@ -1458,8 +1405,7 @@ void Slayer::wearItem(WearPart Part, Item* pItem)
 
     ItemType_t IType = pItem->getItemType();
 
-    
-    
+
     Color_t color = getItemShapeColor(pItem, pOptionInfo);
 
     switch (IClass) {
@@ -1538,7 +1484,7 @@ void Slayer::wearItem(WearPart Part)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    
+
     Item* pItem = getExtraInventorySlotItem();
     Assert(pItem != NULL);
 
@@ -1549,7 +1495,7 @@ void Slayer::wearItem(WearPart Part)
     Item* pPrevItem = NULL;
     GCTakeOff _GCTakeOff;
 
-    
+
     if (pItem->getFirstOptionType() != 0)
         pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getFirstOptionType());
 
@@ -1559,28 +1505,23 @@ void Slayer::wearItem(WearPart Part)
     if (IClass == Item::ITEM_CLASS_SWORD)
         Part = WEAR_RIGHTHAND;
 
-    
-    
+
     SLAYER_RECORD prev;
     getSlayerRecord(prev);
 
-    
-    
-    
-    
+
     if (isTwohandWeapon(pItem)) {
-        
         if (isWear(WEAR_RIGHTHAND) && isWear(WEAR_LEFTHAND)) {
             pLeft = getWearItem(WEAR_RIGHTHAND);
             pRight = getWearItem(WEAR_LEFTHAND);
 
-            
+
             if (pLeft == pRight) {
                 char pField[128];
 
                 takeOffItem(WEAR_LEFTHAND, false, false);
 
-                
+
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
                 // by sigi. 2002.5.15
@@ -1588,36 +1529,32 @@ void Slayer::wearItem(WearPart Part)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 deleteItemFromExtraInventorySlot();
-                
+
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
 
             }
-            
+
             else {
-                
-                
-                
-                
                 return;
             }
         }
-        
+
         else {
             // by sigi. 2002.5.15
             char pField[128];
 
-            
+
             if (isWear(WEAR_RIGHTHAND)) {
                 pRight = getWearItem(WEAR_RIGHTHAND);
 
                 takeOffItem(WEAR_RIGHTHAND, false, false);
 
-                
+
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
                 // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
@@ -1626,22 +1563,22 @@ void Slayer::wearItem(WearPart Part)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 deleteItemFromExtraInventorySlot();
-                
+
                 addItemToExtraInventorySlot(pRight);
                 // pRight->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pRight->tinysave(pField);
 
             }
-            
+
             else if (isWear(WEAR_LEFTHAND)) {
                 pLeft = getWearItem(WEAR_LEFTHAND);
 
                 takeOffItem(WEAR_LEFTHAND, false, false);
 
-                
+
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
@@ -1650,22 +1587,21 @@ void Slayer::wearItem(WearPart Part)
                 sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
                 pItem->tinysave(pField);
 
-                
+
                 deleteItemFromExtraInventorySlot();
-                
+
                 addItemToExtraInventorySlot(pLeft);
                 // pLeft->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
                 sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
                 pLeft->tinysave(pField);
             }
-            
+
             else {
-                
                 m_pWearItem[WEAR_RIGHTHAND] = pItem;
                 m_pWearItem[WEAR_LEFTHAND] = pItem;
 
                 pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
-                
+
                 deleteItemFromExtraInventorySlot();
             }
         }
@@ -1677,40 +1613,39 @@ void Slayer::wearItem(WearPart Part)
 
             takeOffItem(Part, false, false);
 
-            
+
             m_pWearItem[Part] = pItem;
             // by sigi. 2002.5.15
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
             sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
 
-            
+
             deleteItemFromExtraInventorySlot();
-            
+
             addItemToExtraInventorySlot(pPrevItem);
             // pPrevItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
             sprintf(pField, "Storage=%d, StorageID=0", STORAGE_EXTRASLOT);
             pPrevItem->tinysave(pField);
         } else {
-            
             m_pWearItem[Part] = pItem;
 
             // by sigi. 2002.5.15
             // pItem->save(m_Name, STORAGE_GEAR, 0, Part, 0);
             sprintf(pField, "Storage=%d, StorageID=0, X=%d", STORAGE_GEAR, Part);
             pItem->tinysave(pField);
-            
+
             deleteItemFromExtraInventorySlot();
         }
     }
 
-    
+
     // by sigi. 2002.10.31
     m_pRealWearingCheck[Part] = true;
 
     initAllStat();
     sendRealWearingInfo();
-    sendModifyInfo(prev); 
+    sendModifyInfo(prev);
 
     // bool bisWeapon = false;
     bool bisChange = false;
@@ -1719,13 +1654,10 @@ void Slayer::wearItem(WearPart Part)
 
     Color_t color = getItemShapeColor(pItem, pOptionInfo);
 
-    
+
     bisChange = changeShape(pItem, color);
-     
 
-     
 
-    
     if (m_pRealWearingCheck[Part])
     // if (bisChange)
     {
@@ -1769,7 +1701,7 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     SLAYER_RECORD prev;
 
-    
+
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);
     Item::ItemClass IClass = pItem->getItemClass();
@@ -1783,17 +1715,14 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
         }
     }
 
-    
+
     if (isTwohandWeapon(pItem)) {
         m_pWearItem[WEAR_RIGHTHAND] = NULL;
         m_pWearItem[WEAR_LEFTHAND] = NULL;
     } else
         m_pWearItem[Part] = NULL;
 
-    
-    
-    
-    
+
     if (bSendModifyInfo) {
         getSlayerRecord(prev);
         initAllStat();
@@ -1803,12 +1732,11 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
         initAllStat();
     }
 
-    
-    
+
     if (bAddOnMouse) {
         addItemToExtraInventorySlot(pItem);
 
-        
+
         // pItem->save(m_Name, STORAGE_EXTRASLOT, 0, 0, 0);
         char pField[128];
 
@@ -1818,8 +1746,8 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
                 sprintf(pField, "Storage=%d, StorageID=0, Durability=%d, BulletCount=%d, Silver=%d", STORAGE_EXTRASLOT,
                         pItem->getDurability(), pItem->getBulletCount(), pItem->getSilver());
             } else {
-                sprintf(pField, "Storage=%d, StorageID=0, Durability=%d, Silver=%d", STORAGE_EXTRASLOT, pItem->getDurability(),
-                        pItem->getSilver());
+                sprintf(pField, "Storage=%d, StorageID=0, Durability=%d, Silver=%d", STORAGE_EXTRASLOT,
+                        pItem->getDurability(), pItem->getSilver());
             }
         } else {
             sprintf(pField, "Storage=%d, StorageID=0, Durability=%d", STORAGE_EXTRASLOT, pItem->getDurability());
@@ -1886,7 +1814,6 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
         break;
     }
 
-     
 
     if (m_pZone != NULL) {
         GCOtherModifyInfo gcOtherModifyInfo;
@@ -1911,8 +1838,6 @@ void Slayer::destroyGears()
     for (int j = 0; j < WEAR_MAX; j++) {
         Item* pItem = m_pWearItem[j];
         if (pItem != NULL) {
-            
-            
             if (isTwohandWeapon(pItem)) {
                 m_pWearItem[WEAR_RIGHTHAND] = NULL;
                 m_pWearItem[WEAR_LEFTHAND] = NULL;
@@ -1936,7 +1861,6 @@ bool Slayer::isRealWearing(WearPart part) const
     if (m_pWearItem[part] == NULL)
         return false;
     if (part >= WEAR_ZAP1 && part <= WEAR_ZAP4) {
-        
         if (m_pWearItem[part - WEAR_ZAP1 + WEAR_FINGER1] == NULL)
             return false;
     }
@@ -1971,7 +1895,7 @@ bool Slayer::isRealWearing(Item* pItem) const
             return false;
     }
 
-    
+
     if (pItem->isTimeLimitItem()) {
         Attr_t ReqGender = pItemInfo->getReqGender();
         if ((m_Sex == MALE && ReqGender == GENDER_FEMALE) || (m_Sex == FEMALE && ReqGender == GENDER_MALE))
@@ -1979,8 +1903,7 @@ bool Slayer::isRealWearing(Item* pItem) const
         return true;
     }
 
-    
-    
+
     if (getZone()->isPremiumZone() &&
         (pItem->isUnique() || pItem->getOptionTypeSize() > 1 || pItem->getItemClass() == Item::ITEM_CLASS_COUPLE_RING ||
          pItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_COUPLE_RING)) {
@@ -2001,19 +1924,15 @@ bool Slayer::isRealWearing(Item* pItem) const
     Attr_t ReqSum = pItemInfo->getReqSum();
     Attr_t ReqGender = pItemInfo->getReqGender();
 
-    
-    
-    
+
     Attr_t ReqSumMax = ((ReqSum > MAX_SLAYER_SUM_OLD) ? MAX_SLAYER_SUM : MAX_SLAYER_SUM_OLD);
     Attr_t ReqSTRMax = ((ReqSTR > MAX_SLAYER_ATTR_OLD) ? MAX_SLAYER_ATTR : MAX_SLAYER_ATTR_OLD);
     Attr_t ReqDEXMax = ((ReqDEX > MAX_SLAYER_ATTR_OLD) ? MAX_SLAYER_ATTR : MAX_SLAYER_ATTR_OLD);
     Attr_t ReqINTMax = ((ReqINT > MAX_SLAYER_ATTR_OLD) ? MAX_SLAYER_ATTR : MAX_SLAYER_ATTR_OLD);
 
-    
-    
+
     const list<OptionType_t>& optionTypes = pItem->getOptionTypeList();
     if (!optionTypes.empty()) {
-        
         list<OptionType_t>::const_iterator itr;
         for (itr = optionTypes.begin(); itr != optionTypes.end(); itr++) {
             OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(*itr);
@@ -2037,14 +1956,13 @@ bool Slayer::isRealWearing(Item* pItem) const
     }
 
     // 2003.1.6 by Sequoia, Bezz
-    
+
     ReqSTR = min(ReqSTR, ReqSTRMax);
     ReqDEX = min(ReqDEX, ReqDEXMax);
     ReqINT = min(ReqINT, ReqINTMax);
     ReqSum = min(ReqSum, ReqSumMax);
 
-    
-    
+
     Attr_t CSTR = m_STR[ATTR_CURRENT];
     Attr_t CDEX = m_DEX[ATTR_CURRENT];
     Attr_t CINT = m_INT[ATTR_CURRENT];
@@ -2097,10 +2015,10 @@ void Slayer::setMotorcycle(Motorcycle* pMotorcycle)
 {
     __BEGIN_DEBUG
 
-    
+
     m_pMotorcycle = pMotorcycle;
 
-    
+
     // m_SlayerInfo.setMotorcycleType(MOTORCYCLE1);
     // by sigi.2002.6.22
     m_SlayerInfo.setMotorcycleType(getMotorcycleType(pMotorcycle->getItemType()));
@@ -2126,13 +2044,13 @@ void Slayer::getOffMotorcycle()
 {
     __BEGIN_DEBUG
 
-    
+
     TPOINT pt = m_pZone->addItem((Item*)m_pMotorcycle, m_X, m_Y);
 
     if (pt.x != -1) {
         // m_pMotorcycle->save("", STORAGE_ZONE, m_pZone->getZoneID(), pt.x, pt.y);
 
-        
+
         char pField[128];
         sprintf(pField, "OwnerID='', Storage=%d, StorageID=%u, X=%d, Y=%d", STORAGE_ZONE, m_pZone->getZoneID(),
                 (int)pt.x, (int)pt.y);
@@ -2148,20 +2066,17 @@ void Slayer::getOffMotorcycle()
             // cout << "Slayer::getOffMotorcycle() - pMotorcycleBox is NULL" << endl;
             filelog("errorLog.txt", "Slayer::getOffMotorcycle() - No MotorcycleBox: %d",
                     (int)m_pMotorcycle->getItemID());
-            
         }
     } else {
-        
-        
         if (g_pParkingCenter->hasMotorcycleBox(m_pMotorcycle->getItemID())) {
             g_pParkingCenter->deleteMotorcycleBox(m_pMotorcycle->getItemID());
         }
     }
 
-    
+
     m_pMotorcycle = NULL;
 
-    
+
     m_SlayerInfo.setMotorcycleType(MOTORCYCLE_NONE);
 
     __END_DEBUG
@@ -2186,7 +2101,7 @@ PCSlayerInfo2* Slayer::getSlayerInfo2() const
 
     // pInfo->setPhoneNumber(m_PhoneNumber);
 
-    
+
     pInfo->setAlignment(m_Alignment);
 
     // cout << "STR[CURRENT]" << (int)m_STR[ATTR_CURRENT] << endl;
@@ -2199,7 +2114,7 @@ PCSlayerInfo2* Slayer::getSlayerInfo2() const
     // cout << "INT[MAX]" << (int)m_INT[ATTR_MAX] << endl;
     // cout << "INT[BASIC]" << (int)m_INT[ATTR_BASIC] << endl;
 
-    
+
     pInfo->setSTR(m_STR[ATTR_CURRENT], ATTR_CURRENT);
     pInfo->setSTR(m_STR[ATTR_MAX], ATTR_MAX);
     pInfo->setSTR(m_STR[ATTR_BASIC], ATTR_BASIC);
@@ -2210,7 +2125,7 @@ PCSlayerInfo2* Slayer::getSlayerInfo2() const
     pInfo->setINT(m_INT[ATTR_MAX], ATTR_MAX);
     pInfo->setINT(m_INT[ATTR_BASIC], ATTR_BASIC);
 
-    
+
     //	pInfo->setSTRExp(m_STRExp);
     //	pInfo->setDEXExp(m_DEXExp);
     //	pInfo->setINTExp(m_INTExp);
@@ -2218,7 +2133,7 @@ PCSlayerInfo2* Slayer::getSlayerInfo2() const
     pInfo->setDEXExp(getDEXGoalExp());
     pInfo->setINTExp(getINTGoalExp());
 
-    
+
     pInfo->setRank(getRank());
     pInfo->setRankExp(getRankGoalExp());
 
@@ -2242,8 +2157,7 @@ PCSlayerInfo2* Slayer::getSlayerInfo2() const
     //		pInfo->setHotKey(i, m_HotKey[i]);
     //	}
 
-    
-    
+
     pInfo->setCompetence(m_CompetenceShape);
     pInfo->setGuildID(m_GuildID);
     pInfo->setGuildName(getGuildName());
@@ -2269,9 +2183,8 @@ PCSlayerInfo3 Slayer::getSlayerInfo3() const
 {
     __BEGIN_DEBUG
 
-    
-    
-    m_SlayerInfo.setObjectID(m_ObjectID); 
+
+    m_SlayerInfo.setObjectID(m_ObjectID);
     m_SlayerInfo.setX(m_X);
     m_SlayerInfo.setY(m_Y);
     m_SlayerInfo.setDir(m_Dir);
@@ -2280,13 +2193,13 @@ PCSlayerInfo3 Slayer::getSlayerInfo3() const
     m_SlayerInfo.setAlignment(m_Alignment);
     m_SlayerInfo.setGuildID(m_GuildID);
 
-    
+
     m_SlayerInfo.setAttackSpeed(m_AttackSpeed[ATTR_CURRENT]);
 
     // by sigi. 2002.9.10
     m_SlayerInfo.setRank(getRank());
 
-    
+
     m_SlayerInfo.setHairColor(m_HairColor);
     m_SlayerInfo.setSkinColor(m_SkinColor);
     m_SlayerInfo.setMasterEffectColor(m_MasterEffectColor);
@@ -2321,7 +2234,7 @@ ExtraInfo* Slayer::getExtraInfo() const
         ExtraSlotInfo* pExtraSlotInfo = new ExtraSlotInfo();
         pItem->makePCItemInfo(*pExtraSlotInfo);
 
-         
+
         pExtraInfo->addListElement(pExtraSlotInfo);
 
         ItemCount++;
@@ -2353,7 +2266,6 @@ GearInfo* Slayer::getGearInfo() const
 
             pGearSlotInfo->setSlotID(i);
 
-             
 
             pGearInfo->addListElement(pGearSlotInfo);
 
@@ -2392,8 +2304,6 @@ InventoryInfo* Slayer::getInventoryInfo() const
                 list<Item*>::iterator itr = find(ItemList.begin(), ItemList.end(), pItem);
 
                 if (itr == ItemList.end()) {
-                    
-                    
                     ItemList.push_back(pItem);
 
                     InventorySlotInfo* pInventorySlotInfo = new InventorySlotInfo();
@@ -2401,8 +2311,6 @@ InventoryInfo* Slayer::getInventoryInfo() const
                     pInventorySlotInfo->setInvenX(i);
                     pInventorySlotInfo->setInvenY(j);
 
-                    
-                     
 
                     pInventoryInfo->addListElement(pInventorySlotInfo);
                     ItemCount++;
@@ -2458,7 +2366,7 @@ void Slayer::sendSlayerSkillInfo()
         SkillInfo* pSkillInfo = NULL;
         SkillDomainType_t SDomainType = 0;
 
-        
+
         Timeval currentTime;
         getCurrentTime(currentTime);
 
@@ -2467,29 +2375,26 @@ void Slayer::sendSlayerSkillInfo()
             SkillSlot* pSkillSlot = itr->second;
             Assert(pSkillSlot != NULL);
 
-            
+
             if (pSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
-                
                 pSkillInfo = g_pSkillInfoManager->getSkillInfo(pSkillSlot->getSkillType());
 
-                
+
                 SDomainType = pSkillInfo->getDomainType();
 
-                
+
                 SubSlayerSkillInfo* pSubSlayerSkillInfo = new SubSlayerSkillInfo();
                 pSubSlayerSkillInfo->setSkillType(pSkillSlot->getSkillType());
                 pSubSlayerSkillInfo->setSkillExp(pSkillSlot->getExp());
                 pSubSlayerSkillInfo->setSkillExpLevel(pSkillSlot->getExpLevel());
                 pSubSlayerSkillInfo->setSkillTurn(pSkillSlot->getInterval());
 
-                
 
-                
                 // pSubSlayerSkillInfo->setCastingTime(pSkillSlot->getCastingTime());
                 pSubSlayerSkillInfo->setCastingTime(pSkillSlot->getRemainTurn(currentTime));
                 pSubSlayerSkillInfo->setEnable(pSkillSlot->canUse());
 
-                
+
                 pSlayerSkillInfo[SDomainType]->addListElement(pSubSlayerSkillInfo);
                 SkillCount[SDomainType]++;
                 pSlayerSkillInfo[SDomainType]->setListNum(SkillCount[SDomainType]);
@@ -2503,9 +2408,8 @@ void Slayer::sendSlayerSkillInfo()
         for (int i = 0; i < SKILL_DOMAIN_VAMPIRE; i++) {
             SkillType_t LearnSkillType = g_pSkillInfoManager->getSkillTypeByLevel(i, m_SkillDomainLevels[i]);
 
-            
+
             if (LearnSkillType != 0) {
-                
                 if (hasSkill(LearnSkillType) == NULL) {
                     pSlayerSkillInfo[i]->setLearnNewSkill(true);
                 }
@@ -2539,7 +2443,7 @@ void Slayer::setGold(Gold_t gold)
 {
     __BEGIN_TRY
 
-    
+
     // 2003.1.8  by bezz.
     m_Gold = min((Gold_t)MAX_MONEY, gold);
 
@@ -2574,7 +2478,7 @@ void Slayer::increaseGoldEx(Gold_t gold)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    
+
     // 2003.1.8  by bezz.
     if (m_Gold + gold > MAX_MONEY)
         gold = MAX_MONEY - m_Gold;
@@ -2603,7 +2507,7 @@ void Slayer::decreaseGoldEx(Gold_t gold)
     __BEGIN_TRY
     __BEGIN_DEBUG
 
-    
+
     // 2003.1.8  by bezz.
     if (m_Gold < gold)
         gold = m_Gold;
@@ -2687,8 +2591,7 @@ void Slayer::heartbeat(const Timeval& currentTime)
 
     PlayerCreature::heartbeat(currentTime);
 
-    
-    
+
     Item* pWeapon = getWearItem(Slayer::WEAR_RIGHTHAND);
     if (pWeapon != NULL) {
         Item::ItemClass IClass = pWeapon->getItemClass();
@@ -2716,7 +2619,7 @@ void Slayer::heartbeat(const Timeval& currentTime)
                     m_pPlayer->sendPacket(&gcMI);
                 }
 
-                
+
                 m_MPRegenTime.tv_sec = currentTime.tv_sec + 5;
                 m_MPRegenTime.tv_usec = currentTime.tv_usec;
             }
@@ -2740,14 +2643,13 @@ void Slayer::heartbeat(const Timeval& currentTime)
                     m_pPlayer->sendPacket(&gcMI);
                 }
 
-                
+
                 m_MPRegenTime.tv_sec = (currentTime.tv_sec + 5);
                 m_MPRegenTime.tv_usec = currentTime.tv_usec;
             }
         }
     }
 
-     
 
     __END_DEBUG
 }
@@ -2953,7 +2855,7 @@ void Slayer::saveSkills(void) const
         SkillSlot* pSkillSlot = itr->second;
         Assert(pSkillSlot != NULL);
 
-        
+
         if (pSkillSlot->getSkillType() >= SKILL_DOUBLE_IMPACT) {
             pSkillSlot->save(m_Name);
         }
@@ -2969,9 +2871,6 @@ IP_t Slayer::getIP(void) const {
     Assert(pSocket != NULL);
     return pSocket->getHostIP();
     //*/
-
-
-     
 }
 
 void Slayer::saveGears(void) const
@@ -2979,7 +2878,7 @@ void Slayer::saveGears(void) const
 {
     __BEGIN_TRY
 
-    
+
     char pField[128];
 
     for (int i = 0; i < Slayer::WEAR_MAX; i++) {
@@ -2987,9 +2886,7 @@ void Slayer::saveGears(void) const
         if (pItem != NULL) {
             Durability_t maxDurability = computeMaxDurability(pItem);
             if (pItem->getDurability() < maxDurability) {
-                
-                if (i == Slayer::WEAR_RIGHTHAND) 
-                {
+                if (i == Slayer::WEAR_RIGHTHAND) {
                     if (pItem->isGun()) {
                         //						Gun* pGun = dynamic_cast<Gun*>(pItem);
 
@@ -3000,7 +2897,7 @@ void Slayer::saveGears(void) const
                             pItem->tinysave(pField);
                         }
                     }
-                    
+
                     else // if (pItem->isSilverWeapon())
                     {
                         sprintf(pField, "Durability=%d, Silver=%d", pItem->getDurability(), pItem->getSilver());
@@ -3008,7 +2905,7 @@ void Slayer::saveGears(void) const
                     }
                 } else {
                     // pItem->save(m_Name, STORAGE_GEAR, 0, i, 0);
-                    
+
                     sprintf(pField, "Durability=%d", pItem->getDurability());
                     pItem->tinysave(pField);
                 }
@@ -3035,11 +2932,10 @@ void Slayer::saveExps(void) const
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement saveExpsSlayerStmt(
-            pConn,
-            "UPDATE Slayer SET STRGoalExp=?, DEXGoalExp=?, INTGoalExp=?, BladeGoalExp=?, SwordGoalExp=?, "
-            "GunGoalExp=?, EnchantGoalExp=?, HealGoalExp=?, ETCGoalExp=?, Alignment=?, Fame=?, `Rank`=?, "
-            "RankGoalExp=?, AdvancementClass=?, AdvancementGoalExp=?, AdvancedSTR=?, AdvancedDEX=?, "
-            "AdvancedINT=?, Bonus=? WHERE Name=?");
+            pConn, "UPDATE Slayer SET STRGoalExp=?, DEXGoalExp=?, INTGoalExp=?, BladeGoalExp=?, SwordGoalExp=?, "
+                   "GunGoalExp=?, EnchantGoalExp=?, HealGoalExp=?, ETCGoalExp=?, Alignment=?, Fame=?, `Rank`=?, "
+                   "RankGoalExp=?, AdvancementClass=?, AdvancementGoalExp=?, AdvancedSTR=?, AdvancedDEX=?, "
+                   "AdvancedINT=?, Bonus=? WHERE Name=?");
         saveExpsSlayerStmt.bindULong(1, getSTRGoalExp());
         saveExpsSlayerStmt.bindULong(2, getDEXGoalExp());
         saveExpsSlayerStmt.bindULong(3, getINTGoalExp());
@@ -3091,11 +2987,11 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
 
     WearPart Part;
 
-    
+
     flag = 0;
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     slayerBit = PCSlayerInfo::SLAYER_BIT_SEX;
     flag |= ((m_Sex ? 1 : 0) << slayerBit);
@@ -3107,7 +3003,7 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
     flag |= (m_HairStyle << slayerBit);
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     Part = WEAR_LEG;
     pItem = m_pWearItem[Part];
@@ -3138,7 +3034,7 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
         flag |= (PANTS_BASIC << slayerBit);
     }
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     Part = WEAR_BODY;
     pItem = m_pWearItem[Part];
@@ -3171,7 +3067,7 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
     }
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     Part = WEAR_HEAD;
     pItem = m_pWearItem[Part];
@@ -3201,11 +3097,10 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
 
     } else {
         colors[slayerColor] = 0;
-        
     }
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     Part = WEAR_LEFTHAND;
     pItem = m_pWearItem[Part];
@@ -3235,11 +3130,10 @@ void Slayer::getShapeInfo(DWORD& flag, Color_t colors[PCSlayerInfo::SLAYER_COLOR
         flag |= (getShieldType(IType) << slayerBit);
     } else {
         colors[slayerColor] = 0;
-        
     }
 
     //-----------------------------------------------------------------
-    
+
     //-----------------------------------------------------------------
     Part = WEAR_RIGHTHAND;
     pItem = m_pWearItem[Part];
@@ -3496,8 +3390,7 @@ bool Slayer::addShape(Item::ItemClass IClass, ItemType_t IType, Color_t color) {
 bool Slayer::removeShape(Item::ItemClass IClass, bool bSendPacket) {
     bool bisWeapon = false;
 
-    
-    
+
     // by sigi. 2002.11.7
     Creature* pOwner = (isDead() ? NULL : this);
 
@@ -3605,22 +3498,19 @@ Color_t Slayer::getItemShapeColor(Item* pItem, OptionInfo* pOptionInfo) const {
     Color_t color;
 
     if (pItem->isTimeLimitItem()) {
-        
         color = QUEST_COLOR;
     } else if (pItem->isUnique()) {
-        
         color = UNIQUE_COLOR;
     }
-    
+
     else if (pOptionInfo != NULL) {
         color = pOptionInfo->getColor();
     }
-    
+
     else if (pItem->getFirstOptionType() != 0) {
         OptionInfo* pOptionInfo = g_pOptionInfoManager->getOptionInfo(pItem->getFirstOptionType());
         color = pOptionInfo->getColor();
     } else {
-        
         color = 377;
     }
 
@@ -3650,13 +3540,12 @@ bool Slayer::isPayPlayAvaiable()
 
 #ifdef __CONNECT_BILLING_SYSTEM__
     if (pGamePlayer->isPayPlaying()) {
-        
         if (pGamePlayer->getPayType() == PAY_TYPE_FREE)
             return true;
 
         int DomainSUM = getSkillDomainLevelSum();
 
-        
+
         if (DomainSUM <= g_pVariableManager->getVariable(FREE_PLAY_SLAYER_DOMAIN_SUM)) {
             return true;
         }
@@ -3670,7 +3559,7 @@ bool Slayer::isPayPlayAvaiable()
     if (!pGamePlayer->isPayPlaying()) {
         int DomainSUM = getSkillDomainLevelSum();
 
-        
+
         if (DomainSUM <= g_pVariableManager->getVariable(FREE_PLAY_SLAYER_DOMAIN_SUM)) {
             return true;
         }
@@ -3709,7 +3598,7 @@ void Slayer::divideAttrExp(AttrKind kind, Damage_t damage, ModifyInfo& modifyInf
     if (g_pVariableManager->getExpRatio() > 100 && g_pVariableManager->getEventActivate() == 1)
         damage = getPercentValue(damage, g_pVariableManager->getExpRatio());
 
-    
+
     if (isAffectExp2X())
         damage <<= 1;
 
@@ -3721,7 +3610,7 @@ void Slayer::divideAttrExp(AttrKind kind, Damage_t damage, ModifyInfo& modifyInf
 
 #ifdef __CHINA_SERVER__
 
-    
+
     float userExpConst = 1.0;
 
     SkillLevel_t HighSkillLevel = getHighestSkillDomainLevel();
@@ -3740,16 +3629,13 @@ void Slayer::divideAttrExp(AttrKind kind, Damage_t damage, ModifyInfo& modifyInf
 
 #endif
 
-    
-    
-    
 
     SkillLevel_t MaxDomainLevel = getHighestSkillDomainLevel();
     Attr_t TotalAttr = getTotalAttr(ATTR_BASIC);
-    Attr_t TotalAttrBound = 0;  
-    Attr_t AttrBound = 0;       
-    Attr_t OneAttrExpBound = 0; 
-    Attr_t SubAttrMax = 0;      
+    Attr_t TotalAttrBound = 0;
+    Attr_t AttrBound = 0;
+    Attr_t OneAttrExpBound = 0;
+    Attr_t SubAttrMax = 0;
 
     if (MaxDomainLevel <= SLAYER_BOUND_LEVEL && TotalAttr <= SLAYER_BOUND_ATTR_SUM) {
         TotalAttrBound = SLAYER_BOUND_ATTR_SUM;      // 300
