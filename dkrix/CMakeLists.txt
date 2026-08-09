@@ -624,11 +624,6 @@ if(NOT WIN32)
 		Client/MObject.cpp
 		Client/EffectResourceContainer.cpp
 		Client/MEffect.cpp
-		# MEffect.cpp emits references to MEffectTarget's typeinfo (it is
-		# polymorphic), so the viewer failed to link with "undefined reference
-		# to typeinfo for MEffectTarget" once the ubsan leg first got far
-		# enough to link it at all. stubs.cpp does not provide it.
-		Client/MEffectTarget.cpp
 	)
 
 	target_include_directories(effect_viewer PRIVATE
