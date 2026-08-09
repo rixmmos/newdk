@@ -42,6 +42,10 @@
 #include "MZoneTable.h"
 //#include "MFileDef.h"
 #include "Packet/Properties.h"
+// Phase 12 Wave 4: this file's PlayerInfo::* uses used to arrive transitively
+// via the old Client/Packet/Cpackets/ headers, which included ../PlayerInfo.h.
+// Their shared/Packets/ replacements do not, so include it directly.
+#include "Packet/PlayerInfo.h"
 #include "UserInformation.h"
 #include "TempInformation.h"
 #include "ProfileManager.h"

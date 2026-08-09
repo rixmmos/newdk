@@ -401,6 +401,32 @@ In order; each independently shippable:
    the 9-pair protocol-review briefs doc, and this docs commit. Server
    `ratchets` must print `OK: 0` and `OK: 142`; the client run is the
    compile gate for Wave 4 and the first live run of the new `format` job.
+
+   **[measured 2026-08-09] Pushed. Server run #29 at `e6398ae` — SUCCESS.
+   Client run #24 — FAILURE, and the gate did its job:** Wave 4 repointed
+   `Client/UIMessageManager.cpp` at the `shared/Packets/` headers, which —
+   unlike the `Client/Packet/Cpackets/` originals — do not include
+   `../PlayerInfo.h`. That file is the tree's only user of `PlayerInfo::`
+   and had been riding the transitive include, so it lost the namespace:
+   25 × `error C2653: 'PlayerInfo': is not a class or namespace name`, the
+   only error in the run. Fixed by an explicit `#include
+   "Packet/PlayerInfo.h"`. The `Viewers and validators` job failed on the
+   same symbol (it builds `DarkEden` too); the two Linux sanitizer legs
+   also failed but were **already failing at the last green run `96a1995`**
+   on an unrelated missing-`<ctime>` problem in `basic/Platform.h` — both
+   are `continue-on-error`, so this is pre-existing noise, not new.
+
+   Two things this exposed, neither fixed here:
+   - **The `format` job never checked Wave 4's files.** It derives its base
+     as `HEAD~1`, so on a ten-commit push it only sees the last commit —
+     here a docs commit, hence "No client C++ files changed" and a green
+     job. `github.event.before` is the correct base; switching to it will
+     immediately flag everything Wave 4 touched.
+   - **`UIMessageManager.cpp` is not clang-format clean** (18,350 lines of
+     drift; `.clang-format` has `SortIncludes: true` +
+     `IncludeBlocks: Regroup`, so a format pass reorders ~300 includes in a
+     file that has demonstrably been relying on include order). Deliberately
+     not reformatted alongside a one-line build fix.
 2. **Phase 18 — run the smoke test** (prep pack:
    `_incoming\wave-2026-08-09\w6-prep\` — `PREFLIGHT.md` first; it
    resolves which MySQL instance is listening before any destructive step
