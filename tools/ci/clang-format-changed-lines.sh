@@ -115,9 +115,15 @@ while IFS= read -r f; do
 			}
 			inhunk {
 				body = body $0 "\n"
-				if (substr($0, 1, 1) == "-")      { if (inrange(cur)) hit = 1; cur++ }
-				else if (substr($0, 1, 1) == "+") { if (inrange(cur) || inrange(cur - 1)) hit = 1 }
-				else                              { cur++ }
+				# Only "-" lines identify a line of THIS file that clang-format
+				# disagrees with, so only they can implicate the author. A "+"
+				# line has no line number in this file: attributing it to the
+				# current position blames whichever line happens to follow an
+				# unrelated deletion, which is how an untouched blank line at
+				# 9916 got charged to a changed line at 9917. Any real
+				# objection to a changed line always shows up as a "-" for it.
+				if (substr($0, 1, 1) == "-") { if (inrange(cur)) hit = 1; cur++ }
+				else if (substr($0, 1, 1) != "+") { cur++ }
 			}
 			END { flush() }
 		')

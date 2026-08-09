@@ -1958,10 +1958,10 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 			CGGuildChat _CGGuildChat;
 			// 2004, 11, 11, sobeit add start
 			if(left==CLD_GUILD)
-				_CGGuildChat.setType(0);
-			else
-				_CGGuildChat.setType(1);
-			// 2004, 11, 11, sobeit add end
+                _CGGuildChat.setType(0);
+            else
+                _CGGuildChat.setType(1);
+            // 2004, 11, 11, sobeit add end
 			_CGGuildChat.setMessage( std::string(chatString) );
 			_CGGuildChat.setColor( right );
 			
@@ -9914,7 +9914,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 				
 			//	Execute_UI_ITEM_USE(pItem->GetID(), 0, (void*)pItem);
 				
-				_CGModifyNickname.setItemObjectID(pItem->GetID());
+            _CGModifyNickname.setItemObjectID(pItem->GetID());
 				g_pSocket->sendPacket( &_CGModifyNickname );
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
@@ -9927,7 +9927,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 			else
 			{
 				
-				_CGModifyNickname.setItemObjectID(0);
+                _CGModifyNickname.setItemObjectID(0);
 				g_pSocket->sendPacket( &_CGModifyNickname );
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
 				g_pTempInformation->Value1 = left;					

@@ -18,8 +18,8 @@
 	#include "../ClientPlayer.h"
 	#include "UserInformation.h"
 	#include "../Cpackets/CLCreatePC.h"
-	#include "CLDeletePC.h"
-	#include "CLSelectPC.h"
+#include "CLDeletePC.h"
+#include "CLSelectPC.h"
 #endif
 
 static void TraceGameEntryFlow(const char* step)
