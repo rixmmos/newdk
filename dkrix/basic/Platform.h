@@ -1864,18 +1864,13 @@ static inline void GetLocalTime(LPSYSTEMTIME lpSystemTime) {
 }
 #endif
 
-/* SetSurfaceInfo for SDL backend - copies S_SURFACEINFO */
-#ifndef PLATFORM_WINDOWS
-#include "2d.h"
-static inline void SetSurfaceInfo(S_SURFACEINFO* dest, const S_SURFACEINFO* src) {
-    if (dest && src) {
-        dest->p_surface = src->p_surface;
-        dest->width = src->width;
-        dest->height = src->height;
-        dest->pitch = src->pitch;
-    }
-}
-#endif
+/* SetSurfaceInfo(S_SURFACEINFO*, const S_SURFACEINFO*) is NOT defined here.
+   basic/GL_import.h:31 defines it unconditionally, alongside the rest of the
+   SetSurfaceInfo overload family, and S_SURFACEINFO's four fields make the
+   two definitions behaviourally identical. This file used to carry an
+   #ifndef PLATFORM_WINDOWS copy, which meant every non-Windows TU seeing
+   both headers failed with a redefinition error. Any caller must already
+   reach GL_import.h to compile on Windows, so nothing loses the symbol. */
 
 /* DirectInput key codes for non-Windows platforms */
 #ifndef PLATFORM_WINDOWS

@@ -79,9 +79,12 @@ class CFilter {
 		BYTE**		m_ppFilter;
 };
 
-#ifdef PLATFORM_WINDOWS
+// Not platform-guarded: MTopView.h:687 declares a CFilterPack member
+// unconditionally, and the sibling aliases (CAlphaSpritePalPack,
+// CShadowSpritePack, CSpritePalPack) are all unguarded too. The #ifdef here
+// was an oversight from a partial port -- it made this the only one of the
+// four missing on Linux.
 typedef CTypePack<CFilter>			CFilterPack;
-#endif
 
 #endif
 

@@ -221,101 +221,100 @@ struct S_SLOT
 		  m_AdvancementLevel(0)
 	{
 	}
-	bool								bl_set;
-//	bool								bl_vampire;
-	bool								bl_female;
-	bool								bl_drained;
-	MAN_INFO							man_info;
-	WOMAN_INFO							woman_info;
-	
-	int									helmet_color;
-	int									trouser_color;
-	int									coat_color;
-	int									skin_color;
-	int									hair_color;
-	int									left_color;
-	int									right_color;
+    bool bl_set;
+    //	bool								bl_vampire;
+    bool bl_female;
+    bool bl_drained;
+    MAN_INFO man_info;
+    WOMAN_INFO woman_info;
 
-	std::string							sz_name;
-	std::string							sz_guild_name;
-	ALIGNMENT							alignment;
-	int									alignment_num;
-	int									level;		// vampire only
-	int									STR_PURE;	// by larosel
-	int									STR_CUR;	// by larosel
-	int									STR_MAX;	// by larosel
-	int									DEX_PURE;	// by larosel
-	int									DEX_CUR;	// by larosel
-	int									DEX_MAX;	// by larosel
-	int									INT_PURE;	// by larosel
-	int									INT_CUR;	// by larosel
-	int									INT_MAXX;
-	int									STR_EXP_REMAIN;
-	int									DEX_EXP_REMAIN;
-	int									INT_EXP_REMAIN;
-	int									EXP_REMAIN;		// vampire only
-	int									DAM;			// max
-	int									DAM2;			// min
-	int									SILVER_DAM;		//max
-	int									SILVER_DAM2;	//min
-	int									CHANGE_VAMPIRE;
-//	int									AC;
-	int									DEFENSE;	// by larosel
-	int									PROTECTION;	// by larosel
-	int									TOHIT;
-	int									HP;
-	int									MP;
-	int									HP_MAX;
-	int									MP_MAX;
-	int									SILVER_HP;
+    int helmet_color;
+    int trouser_color;
+    int coat_color;
+    int skin_color;
+    int hair_color;
+    int left_color;
+    int right_color;
 
-	int									DOMAIN_SWORD;
-	int									DOMAIN_BLADE;
-	int									DOMAIN_GUN;
-	int									DOMAIN_HEAL;
-	int									DOMAIN_ENCHANT;
+    std::string sz_name;
+    std::string sz_guild_name;
+    ALIGNMENT alignment;
+    int alignment_num;
+    int level;    // vampire only
+    int STR_PURE; // by larosel
+    int STR_CUR;  // by larosel
+    int STR_MAX;  // by larosel
+    int DEX_PURE; // by larosel
+    int DEX_CUR;  // by larosel
+    int DEX_MAX;  // by larosel
+    int INT_PURE; // by larosel
+    int INT_CUR;  // by larosel
+    int INT_MAXX;
+    int STR_EXP_REMAIN;
+    int DEX_EXP_REMAIN;
+    int INT_EXP_REMAIN;
+    int EXP_REMAIN;  // vampire only
+    int DAM;         // max
+    int DAM2;        // min
+    int SILVER_DAM;  //max
+    int SILVER_DAM2; //min
+    int CHANGE_VAMPIRE;
+    //	int									AC;
+    int DEFENSE;    // by larosel
+    int PROTECTION; // by larosel
+    int TOHIT;
+    int HP;
+    int MP;
+    int HP_MAX;
+    int MP_MAX;
+    int SILVER_HP;
 
-//	int									CC;
-	int									FAME;		// slayer only
-//	int									NOTERITY;
-	int									bonus_point; // vampire only
-	int									skill_point; // ousters only
+    int DOMAIN_SWORD;
+    int DOMAIN_BLADE;
+    int DOMAIN_GUN;
+    int DOMAIN_HEAL;
+    int DOMAIN_ENCHANT;
 
-	struct UI_EFFECTSTATUS_STRUCT
-	{
-		TYPE_ACTIONINFO actionInfo;
-		DWORD			delayFrame;
-	};
+    //	int									CC;
+    int FAME;        // slayer only
+                     //	int									NOTERITY;
+    int bonus_point; // vampire only
+    int skill_point; // ousters only
 
-	typedef std::vector<UI_EFFECTSTATUS_STRUCT>			UI_EFFECTSTATUS_TYPE;
-	UI_EFFECTSTATUS_TYPE				STATUS;	
-	
-//	WORD									hp_cur_line;
-//	WORD									mp_cur_line;	// slayer only
-//	WORD									hp_percent;
-//	WORD									mp_percent;		// slayer only
+    struct UI_EFFECTSTATUS_STRUCT {
+        TYPE_ACTIONINFO actionInfo;
+        DWORD delayFrame;
+    };
 
-	WORD								GUILD_ID;
-	BYTE								GUILD_GRADE;
+    typedef std::vector<UI_EFFECTSTATUS_STRUCT> UI_EFFECTSTATUS_TYPE;
+    UI_EFFECTSTATUS_TYPE STATUS;
 
-	BYTE								WS;
-	BYTE								WeaponSpeed;
-	int									GRADE;
-	int									GRADE_EXP_REMAIN;
+    //	WORD									hp_cur_line;
+    //	WORD									mp_cur_line;	// slayer only
+    //	WORD									hp_percent;
+    //	WORD									mp_percent;		// slayer only
 
-	Race								Race;
-	
-	int									ElementalFire;
-	int									ElementalWater;
-	int									ElementalEarth;
-	int									ElementalWind;
-	
-	int									m_SMS_Charge;
-	int									m_Powerjjang_Point;
-	int									m_AdvancementLevel;
-//	BYTE								m_NickNameType;
-//	std::string							m_NickName;
-};	
+    WORD GUILD_ID;
+    BYTE GUILD_GRADE;
+
+    BYTE WS;
+    BYTE WeaponSpeed;
+    int GRADE;
+    int GRADE_EXP_REMAIN;
+
+    enum Race Race;
+
+    int ElementalFire;
+    int ElementalWater;
+    int ElementalEarth;
+    int ElementalWind;
+
+    int m_SMS_Charge;
+    int m_Powerjjang_Point;
+    int m_AdvancementLevel;
+    //	BYTE								m_NickNameType;
+    //	std::string							m_NickName;
+};
 
 class C_VS_UI_TITLE;
 
