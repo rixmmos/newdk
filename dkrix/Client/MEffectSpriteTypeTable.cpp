@@ -4,6 +4,10 @@
 #include "Client_PCH.h"
 #include "MEffectSpriteTypeTable.h"
 
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/asan_interface.h>
+#endif
+
 
 //----------------------------------------------------------------------
 // Global

@@ -422,6 +422,7 @@ typedef WORD			char_t;
 
 	/* String comparison (case-insensitive) - Windows stricmp equivalent */
 	#define stricmp strcasecmp
+#define _stricmp strcasecmp
 
 	/* Microsoft-specific string functions - use standard equivalents */
 	#define _stscanf sscanf

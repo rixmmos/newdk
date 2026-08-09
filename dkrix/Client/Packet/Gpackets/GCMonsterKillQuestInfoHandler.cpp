@@ -8,6 +8,9 @@
 
 // include files
 #include "Client_PCH.h"
+
+#include <memory>
+
 #include "GCMonsterKillQuestInfo.h"
 #include "MMonsterKillQuestInfo.h"
 #include "MCreatureTable.h"
@@ -27,13 +30,11 @@ throw ( ProtocolException , Error )
 		
 	while(! pPacket->empty() )
 	{
-		std::auto_ptr<GCMonsterKillQuestInfo::QuestInfo> pInfo( pPacket->popQuestInfo() );
-//		GCMonsterKillQuestInfo::QuestInfo* pInfo = pPacket->popQuestInfo();	
+        std::unique_ptr<GCMonsterKillQuestInfo::QuestInfo> pInfo(pPacket->popQuestInfo());
 		std::string str;
 		//pInfo->sType
 		str = (*g_pCreatureTable)[pInfo->sType].Name;
 		g_pQuestInfoManager->SetInfo (pInfo->questID, pInfo->goal, pInfo->timeLimit, str);		
-//		delete pInfo;
 	}
 	
 #endif
