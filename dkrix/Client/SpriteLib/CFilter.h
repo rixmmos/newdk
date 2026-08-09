@@ -18,8 +18,6 @@
 	#include "../basic/Platform.h"
 #endif
 #include "CTypePack.h"
-std::ifstream;
-std::ofstream;
 
 class CFilter {
 	public :

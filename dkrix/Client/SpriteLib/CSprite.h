@@ -26,9 +26,6 @@ class CFilter;
 class CSpriteSurface;
 #endif
 
-std::ofstream;
-std::ifstream;
-
 
 //----------------------------------------------------------------------
 
