@@ -74,7 +74,7 @@ maintainer.
 | 7 | CMake `file(GLOB)` + 34 `FILTER`/`REMOVE_ITEM` lines | Architecture | 4 | 3 | 3 | **21** |
 | 8 | Zero tests on 1.29M LOC (except `engine/sprite`'s 11 files) | Test | 4 | 5 | 4 | **18** |
 | 9 | Two independent SDL2 backends | Architecture | 3 | 3 | 3 | **18** |
-| 10 | Lua quest scripts get full `io` via `luaL_openlibs` | Security | 1 | 5 | 3 | **18** |
+| 10 | ~~Lua quest scripts get full `io` via `luaL_openlibs`~~ → **whitelisted to base/string/math** (see item 10) | Security | 1 | 5 | 3 | **18** |
 | 11 | 10 dead server `main.cpp` entry points | Code | 2 | 2 | 2 | **16** |
 | 12 | `basic/Platform.h` at 1,996 lines | Architecture | 4 | 3 | 4 | **14** |
 | 13 | `DXLib/` — 46 files, 10,163 LOC vestigial shim | Architecture | 3 | 2 | 3 | **15** |
@@ -390,7 +390,61 @@ a bool.
 Wiring `engine/sprite`'s existing tests into CI is the cheapest possible first
 green check and should ride along with item #1.
 
-### 10. Lua sandbox — Priority 18
+### 10. Lua sandbox — Priority 18 — **addressed 2026-08-07** (docs caught up 2026-08-09)
+
+> **Fixed.** `luaL_openlibs()` (single call site, `LuaState::init()` in
+> `dkrixserver/src/server/gameserver/quest/luaScript/LuaState.cpp`) is
+> replaced with an explicit whitelist: `base`, `string`, `math` only, loaded
+> via the same `lua_pushcfunction` + `lua_pushstring` + `lua_call(L, 1, 0)`
+> idiom Lua 5.1's own `linit.c` uses. `io`, `os`, `debug`, `package`
+> (`require`/`loadlib`), and `table` are all dropped. Commits: `45d10fc`
+> (2026-04-19, initial `base`/`table`/`string`/`math` whitelist), `b204ebd`
+> (2026-08-07, re-verified against a real WSL `liblua5.1-0-dev` build and
+> narrowed further to drop `table` too).
+>
+> **Inventory — every real `*.lua` under the repo, re-confirmed 2026-08-09:**
+> 18 files (15 under `dkrixserver/data/lua/**`, 3 under
+> `dkrixserver/src/server/gameserver/quest/luaScript/test/*.lua`; the sibling
+> `test/lt` is a leftover compiled ELF, not a script). Grepped for
+> `io.`, `os.`, `debug.`, `require`/`package.`, `table.`, `string.`, `math.`:
+> **zero matches of any kind, in any file.** The only stdlib-shaped calls
+> anywhere are bare `random(1, getn(t))` in the six `xmasEventCommon.lua`
+> variants — Lua 4.x/5.0-era globals, not `math.random`/`table.getn`. A
+> throwaway C harness against this WSL image's actual `liblua5.1-0-dev`
+> (`LUA_COMPAT_GETN` is `#undef`'d in its `luaconf.h`) confirmed both
+> `random` and `getn` are already nil globals even under the old,
+> unrestricted `luaL_openlibs()` — those six scripts' `selectOne()` already
+> threw "attempt to call a nil value" before this change, on `main`,
+> independent of the sandbox. Dropping `table` from the whitelist does not
+> make them any more broken than they already were.
+>
+> **Kept:** `base`, `string`, `math`. This integration is one-directional —
+> C++ `luaL_dofile`s a script (`LuaSelectItem::executeFile()`) and then
+> `lua_getglobal`s the four result variables the script sets
+> (`ItemClass`/`ItemType`/`OptionType`/`OptionType2`); there is no
+> `lua_register`/`luaL_register` anywhere in `dkrixserver/src` exposing
+> custom C++ game functions (e.g. `GiveItem`, `Say`) back into Lua — checked
+> repo-wide, not just under `quest/`. So `base`/`string`/`math` are kept
+> purely because the scripts' own control-flow and table-building logic use
+> them, not because any C++ callback surface depends on the standard
+> library being present.
+> **Dropped:** `io` (filesystem read/write), `os` (`os.execute`,
+> `os.remove`, `os.rename`, `os.getenv`, …), `debug` (VM reflection /
+> sandbox escape), `package` (`require`/`loadlib`, dynamic C module
+> loading), `table` (unused — see inventory above). No script exercises any
+> function in a dropped library, dangerous or otherwise — no stop-and-report
+> case.
+>
+> The enum-range-check half of this item's finding (`lua_tonumber` cast with
+> no bounds check) is also fixed, as a separate follow-on: `LuaState.h`'s
+> `lua_toboundedenum<T>()` wraps all four call sites in
+> `LuaSelectItem.cpp::executeFile()` (`ItemClass`, `ItemType`, `OptionType`,
+> `OptionType2`), throwing `InvalidProtocolException` on a non-numeric or
+> out-of-range slot instead of silently reinterpret-casting. See
+> `docs/MODERNIZATION.md` Phase 9 for the full writeup and the build
+> verification (`make debug` in WSL, all three binaries link clean).
+>
+> **Original finding, for record:**
 
 `LuaState.cpp:27` calls `luaL_openlibs(m_pState)`, giving quest scripts the full
 standard library including `io.open` — filesystem access from script content. Impact
