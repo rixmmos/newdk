@@ -80,16 +80,16 @@
 #include "CGWithdrawTax.h"
 #include "Packet/Cpackets/CGTypeStringList.h"
 #include "CGLotterySelect.h"
-#include "Packet/Cpackets/CGTakeOutGood.h"
+#include "CGTakeOutGood.h"
 #include "Packet/Cpackets/CGMixItem.h"
 #include "CGDownSkill.h"
 #include "Packet/Gpackets/GCMiniGameScores.h"
-#include "Packet/Cpackets/CGSubmitScore.h"
+#include "CGSubmitScore.h"
 #include "CGAddItemToCodeSheet.h"
 #include "CGFailQuest.h"
 #include "CGSelectRegenZone.h"
-#include "Packet/Cpackets/CGTameMonster.h"
-#include "Packet/Cpackets/CGPetGamble.h"
+#include "CGTameMonster.h"
+#include "CGPetGamble.h"
 #include "Packet/Cpackets/CGUseMessageItemFromInventory.h"
 #include "Packet/Cpackets/CGPartySay.h"
 #include "CGDepositPet.h"
@@ -99,7 +99,7 @@
 #include "CGDeleteSMSAddress.h"
 #include "CGAddSMSAddress.h"
 #include "CGSelectNickname.h"
-#include "Packet/Cpackets/CGModifyNickname.h"
+#include "CGModifyNickname.h"
 #include "CGGQuestAccept.h"
 #include "CGGQuestCancel.h"
 #include "CGUseItemFromGQuestInventory.h"
@@ -110,7 +110,7 @@
 #include "Packet/ClientCommunicationManager.h"
 #include "WhisperManager.h"
 #include "Packet/Rpackets/RCSay.h"
-#include "Packet/Cpackets/CGGuildChat.h"
+#include "CGGuildChat.h"
 #include "CMP3.h"
 #include "RankBonusTable.h"
 #include "Profiler.h"
@@ -163,7 +163,7 @@
 #include "Packet/Gpackets/GCAddStoreItem.h"
 //
 
-#include "Packet/Cpackets/CGUsePowerPoint.h"
+#include "CGUsePowerPoint.h"
 #include "Packet/Cpackets/CGRequestPowerPoint.h"
 #include "CGDonationMoney.h"
 #include "Packet/Cpackets/CGGetEventItem.h"
@@ -1958,9 +1958,9 @@ UIMessageManager::Execute_UI_CHAT_RETURN(int left, int right, void* void_ptr)
 			CGGuildChat _CGGuildChat;
 			// 2004, 11, 11, sobeit add start
 			if(left==CLD_GUILD)
-				_CGGuildChat.SetType(0);
+				_CGGuildChat.setType(0);
 			else
-				_CGGuildChat.SetType(1);
+				_CGGuildChat.setType(1);
 			// 2004, 11, 11, sobeit add end
 			_CGGuildChat.setMessage( std::string(chatString) );
 			_CGGuildChat.setColor( right );
@@ -9914,7 +9914,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 				
 			//	Execute_UI_ITEM_USE(pItem->GetID(), 0, (void*)pItem);
 				
-				_CGModifyNickname.setNicknameID(pItem->GetID());
+				_CGModifyNickname.setItemObjectID(pItem->GetID());
 				g_pSocket->sendPacket( &_CGModifyNickname );
 
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
@@ -9927,7 +9927,7 @@ UIMessageManager::Execute_UI_CHANGE_CUSTOM_NAMING(int left, int right, void* voi
 			else
 			{
 				
-				_CGModifyNickname.setNicknameID(0);
+				_CGModifyNickname.setItemObjectID(0);
 				g_pSocket->sendPacket( &_CGModifyNickname );
 				g_pTempInformation->SetMode(TempInformation::MODE_NICKNAME_CHANGE_CUSTOM);
 				g_pTempInformation->Value1 = left;					
