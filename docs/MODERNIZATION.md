@@ -656,16 +656,17 @@ what was actually executing. Not rewritten, since the commits are pushed.
    use `create_test_account.sql`; `smoke_test_finish.sh` is an unported
    parked-line artifact, do not run; launch commands need `-f`; a CJK font
    must be present in `Data\Font` for the Phase 5 glyph check.)
-3. **Phase 12 endgame.** 14 ≤5-residual pairs left: 12 mechanical next-ups
-   (listed in the Wave 4 batch 2 note) + 2 recorded skips needing their own
-   decisions (`CGUseMessageItemFromInventory` waits on its divergent base;
-   `CGConnectSetKey` needs a cross-family target extension). Then the
-   48-pair `>5` set, same recipe, more per-pair reading. The 9-pair review
-   queue lands per `docs/packet-protocol-review-2026-08-09.md` — recommended
-   order there: CGGuildChat and CGModifyNickname are land-now; the three
-   size-formula pairs go after the first smoke run; CGMove and CLLogin need
-   live windows; the exchange pair is feature-gated (client UI is dead).
-   Phase 13's client half rides the tail of this queue.
+3. **Phase 12 endgame.** The ≤5-residual queue is **empty except for its 2
+   recorded skips** (Wave 4 batch 3, 2026-08-09) — `CGUseMessageItemFromInventory`
+   waits on its divergent base, `CGConnectSetKey` needs a cross-family target
+   extension; both want their own decision, neither is mechanical. Remaining:
+   the 48-pair `>5` set, same recipe, more per-pair reading. The review queue
+   is down to **7** — `docs/packet-protocol-review-2026-08-09.md`'s two
+   `land-now` pairs (CGGuildChat, CGModifyNickname) landed with batch 3.
+   Recommended order for the rest, unchanged: the three size-formula pairs
+   after the first smoke run; CGMove and CLLogin need live windows; the
+   exchange pair is feature-gated (client UI is dead). Phase 13's client half
+   rides the tail of this queue.
 4. **Sanitizer legs** — flip per the ≥5-consecutive-greens rule recorded in
    Phase 10 bullet 3 (server asan at 2; server ubsan needs an actual fix —
    diagnosis needs the run logs; client legs are blocked on the Linux
@@ -2760,7 +2761,7 @@ unbound-parameter SQLException still bypasses END_DB's log by design
 push [unverified until green]** — this close-out was produced in a
 sandbox with no server toolchain, same as every prior batch.
 
-### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Waves 1–3 landed 2026-08-08/09; Wave 4 batches 1–2 landed 2026-08-09)
+### Phase 12 — Packet schema unification (12.1 scaffolding + pilot landed 2026-08-08; Waves 1–3 landed 2026-08-08/09; Wave 4 batches 1–3 landed 2026-08-09, ratchet 326 → 114)
 Booked by Phase 9's proposal above. Parked 12.0 measured the real scope:
 **920** packet `.{h,cpp}` pairs in `dkrixserver/src/Core/` (300 CG,
 516 GC, 34 CL, 34 LC, 16 GS, 20 SG — `GT`/`TG` turned out to be 0 files),
@@ -3836,6 +3837,130 @@ CGTakeOutGood, CGTameMonster, CGUsePowerPoint, CLDeletePC, CLSelectPC
 48-pair `>5` set and the 9-pair protocol-review queue are untouched.
 **Not build-verified — no compiler in this environment**; both-tree CI is
 the gate, per every prior wave.
+
+**Wave 4 batch 3 landed 2026-08-09 (worktree, on top of batch 2): the last
+12 mechanical pairs, plus the review queue's two `land-now` pairs.** Three
+commits, ratchet **142 → 114**.
+
+*Part A — the 12 mechanical next-ups batch 2 named* (one commit):
+**CGPetGamble, CGPickupMoney, CGRequestRepair, CGShopRequestBuy,
+CGShopRequestSell, CGSkillToTile, CGSubmitScore, CGTakeOutGood,
+CGTameMonster, CGUsePowerPoint, CLDeletePC, CLSelectPC** — 10 CG + 2 CL.
+This empties the ≤5-residual queue except for its two recorded skips.
+
+*Residual-label drift, cause found rather than guessed.* Batch 2's tally
+above (`≤5 14 | >5 48`) no longer matches the tree, which measures
+`≤5 9 | >5 53` — five pairs it lists at residual 4 (CGPetGamble,
+CGPickupMoney, CGSkillToTile, CGTakeOutGood, CGTameMonster) now measure
+6. Cause: `cc4ea8b` path-qualified bare `"Assert.h"` includes across 15
+`Cpackets/` files, five of them in this set, adding one changed include
+line (+2 residual) each. Client-side include spelling, not protocol
+drift, and it disappears with the client copy — the merged file takes the
+server's `Assert1.h` spelling via the existing `SharedPacketsShim`
+forwarder. The 12-pair target set was named explicitly, not derived by
+threshold, so it did not change. The correction to batch 2's numbers is
+recorded by the parallel triage stream in
+`docs/phase12-residual-triage-2026-08-09.md`; it is deliberately not
+patched into batch 2's paragraph here, which stands as what was measured
+at the time.
+
+*Residual classes taken, each read and judged wire-neutral.* Mostly
+repeats of batches 1–2: the server-only empty destructor
+`~X() { __BEGIN_TRY __END_CATCH_NO_RETHROW }` (seven pairs); server-only
+extra Handler method declarations — `executeAll` (CGRequestRepair),
+`executeOpSwapAdvancementItem` (CGShopRequestSell), `executeEvent`
+(CGShopRequestBuy, where the client copy instead declared
+`sendFailPacket`), all inside the whole-class guard on both sides, with
+`git grep` finding **zero** references to any of these 12 Handler classes
+anywhere in `dkrix/`; `toString()` text drift; and client-only top-level
+`SocketInputStream.h`/`SocketOutputStream.h` includes that `Packet.h`
+already pulls in transitively. Two are new and neither was assumed:
+
+- **CLDeletePC — a real validation-bound difference, not an always-false
+  check.** `szSSN > 14` (server `read()`) vs `> 18` (client `write()`);
+  lengths 15–18 are inside the gap, so batch 1's `BYTE > 256` reasoning
+  does **not** apply. Resolved by measurement instead: the client's single
+  `CLDeletePC` send site sets the field to the literal `"CONFIRM"`, 7
+  characters [measured, `dkrix/Client/UIMessageManager.cpp:1431` — the
+  only `setSSN` call in `dkrix/`]. Both bounds are unreachable at that
+  length. The server's 14 was kept, which leaves the loginserver's read
+  path byte-for-byte as it is today; adopting the client's 18 would have
+  **widened** server-side validation and was rejected for that reason.
+- **CLSelectPC — four client-only unguarded `cout` debug prints** in
+  `read()`/`write()`. Dropped with the server form: stdout, not the wire,
+  and `dkrix/` calls `AllocConsole` nowhere [measured], so they have no
+  console to reach.
+
+*Three new `SharedPacketsShim` forwarders* — the batch's only new client
+infrastructure, all following the pilot's mechanism. `Player.h`
+(CLSelectPC.h is the first migrated header to include it; the Cpackets
+copy spelled it `"../Player.h"`, and `Client/Packet/Player.h` is the only
+`Player.h` in `dkrix/`, so there is nothing to shadow) and
+`SocketInputStream.h` / `SocketOutputStream.h` (CGPickupMoney.cpp is the
+first migrated `.cpp` to include them at top level rather than
+transitively — a standalone TU in `shared/Packets/` has no include stack
+to walk, the pilot's own lesson). Note `CGModifyNickname.h`'s
+`"NicknameInfo.h"` needed **no** forwarder: `dkrix/Client` is already on
+both DarkEden's and VS_UI's include paths, unlike `Client/Packet`.
+
+*Part B — the two `land-now` protocol-review pairs*, per
+`docs/packet-protocol-review-2026-08-09.md`'s recommended order, one
+commit each. Both briefs' premises were re-checked against the current
+tree before landing and both hold: size and maxsize expressions match,
+and the only `read_seq`/`write_seq` DIFF in each is a member **name** at
+an unchanged position and width.
+
+- **CGGuildChat** — `m_Type` (server) vs `m_bType` (client), both `BYTE`.
+  Server form kept, including `getType() const` over the client's
+  non-const `GetType()` (called nowhere in `dkrix/`) and
+  `setMessage(const string&)` over the client's by-value copy. Two client
+  call sites rewritten, `UIMessageManager.cpp:1961,1963`.
+- **CGModifyNickname** — `m_ItemObjectID` (server) vs `m_NicknameID`
+  (client), both `ObjectID_t`. **One correction to the brief, found by
+  measurement while landing it:** "adopt the server file" is not safe
+  verbatim here, because the server's setter is
+  `setItemObjectID(WORD id)` while the member is `ObjectID_t` and both
+  sides read/write it at DWORD width — a latent 32→16-bit truncation. It
+  has never bitten the server, which only `read()`s this request packet
+  and calls the setter nowhere, but the **client** is the sole caller and
+  passes `MItem::GetID()`, a `TYPE_OBJECTID` (`unsigned int`,
+  `Client/MTypeDef.h:47`). The merged setter takes `ObjectID_t`. Two
+  client call sites rewritten, `UIMessageManager.cpp:9917,9930`; the
+  nearby `_CGSelectNickName.setNicknameID` at `:9840` is a different
+  packet class and was left alone.
+
+*Constructor-initialisation hazard, checked and clear.* A parallel stream
+found on `CGDissectionCorpse` that "adopt the server's canonical form"
+can silently drop a client ctor's initialisation of a wire member —
+distinct from, and not to be filed with, the behaviour-neutral server-only
+empty **destructor** class. All 14 pairs in this batch were re-checked by
+brace-matching every constructor body on both sides and diffing the set of
+members each assigns: 13 pairs have an empty or absent ctor on **both**
+sides (nothing to lose), and the one pair that does initialise —
+**CGShopRequestSell** (`m_ObjectID`, `m_ItemObjectID`, `m_OpCode`) —
+carries the identical ctor in the *server* copy, so the merged file
+preserves all three. No pair loses an initialisation.
+
+*Sweep and wiring.* 32 include sites repointed across 5 client files —
+`PacketFactoryManager.cpp`, `PacketDef.h`, `UIMessageManager.cpp`,
+`SizeOfObjects.cpp` (the uppercase-backslash `packet/CPackets\…` variant
+again) and `Lpackets/LCPCListHandler.cpp`. Every server consumer is
+inside `src/Core/` and already resolved by each
+`shared_packets_<family>` target's include directory — **zero new
+`target_include_directories`/`target_link_libraries` anywhere**.
+`Client.vcxproj.filters` left alone per precedent; the review doc's own
+prose citation of an old path is a dated record, not a reference to
+rewrite.
+
+Ratchet: `check-packet-duplicates.sh` **142 → 114** (14 pairs × 2),
+baseline updated via `--update` in each commit.
+`normalize-packet-style.py --all`: 71 → **57** pairs — summary line now
+`style-only 0 | style-residual<=5 2 | style-residual>5 48 |
+real-divergence 7`. What is left: the 2 recorded skips
+(`CGUseMessageItemFromInventory`, `CGConnectSetKey`), the 48-pair `>5`
+set, and 7 of the 9 review pairs. **Not build-verified — no compiler for
+either tree in this environment**; both-tree CI is the gate, per every
+prior wave.
 
 ### Phase 13 — Endian-safe wire I/O (server half done here via Phase 9)
 `main` already has the server side: opt-in `readLE`/`writeLE`
