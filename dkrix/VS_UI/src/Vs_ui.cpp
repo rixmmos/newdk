@@ -18,7 +18,7 @@
 #include "MEventManager.h"
 #include "MGameStringTable.h"
 #include "SkinManager.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 #include "MHelpDef.h"
 #include "../../basic/timer2.h"
 #include "Platform/InputManager.h"
