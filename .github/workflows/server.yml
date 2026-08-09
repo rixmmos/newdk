@@ -190,8 +190,22 @@ jobs:
       # unformatted backlog does not block every PR.
       - name: Check changed C++ files
         run: |
+          # Base selection [fixed 2026-08-09] — same bug and same fix as
+          # client.yml. On a push the range is github.event.before..HEAD, the
+          # whole push; the old HEAD~1 fallback inspected only the tip commit,
+          # so a multi-commit push ending on a docs-only commit skipped every
+          # source file it touched and passed green. `before` falls back to
+          # HEAD~1 in three cases: absent on workflow_dispatch, all-zeros on a
+          # branch's first push, unreachable after a force-push.
           base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then base="${{ github.event.before }}"; fi
+          if [ "$base" = "0000000000000000000000000000000000000000" ]; then base=""; fi
+          if [ -n "$base" ] && ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "::notice::base $base is not reachable (force-push?); falling back to HEAD~1"
+            base=""
+          fi
           if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"; fi
+          echo "Comparing $base..HEAD"
 
           changed=$(git diff --name-only --diff-filter=ACM "$base" HEAD \
             | grep -E '^dkrixserver/.*\.(cpp|h|hpp)$' || true)

@@ -298,8 +298,24 @@ jobs:
       # FMT_EXCLUDES in dkrix/Makefile.
       - name: Check changed client C++ files
         run: |
+          # Base selection [fixed 2026-08-09]. On a push, the range to check
+          # is github.event.before..HEAD — the whole push, not its last
+          # commit. The previous HEAD~1 fallback inspected only the tip: the
+          # ten-commit push 96a1995..e6398ae ended on a docs-only commit, so
+          # this gate printed "No client C++ files changed" and passed green
+          # while the Phase 12 Wave 4 client changes went unchecked.
+          # `before` is unusable in three cases, all falling back to HEAD~1:
+          # absent on workflow_dispatch, all-zeros on a branch's first push,
+          # and unreachable after a force-push (hence the cat-file guard).
           base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then base="${{ github.event.before }}"; fi
+          if [ "$base" = "0000000000000000000000000000000000000000" ]; then base=""; fi
+          if [ -n "$base" ] && ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "::notice::base $base is not reachable (force-push?); falling back to HEAD~1"
+            base=""
+          fi
           if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"; fi
+          echo "Comparing $base..HEAD"
 
           cd dkrix
           changed=$(git diff --name-only --diff-filter=ACM --relative "$base" HEAD -- \
