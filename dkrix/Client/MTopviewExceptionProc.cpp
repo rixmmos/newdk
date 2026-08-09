@@ -15,7 +15,7 @@
 #include "MZone.h"
 #include "MCreature.h"
 #include "MFakeCreature.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 #include "MTopView.h"
 #include "CMessageArray.h"

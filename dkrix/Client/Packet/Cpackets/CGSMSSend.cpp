@@ -7,7 +7,7 @@
 #include "CGSMSSend.h"
 #include "../SocketEncryptInputStream.h"
 #include "../SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 
 void CGSMSSend::read (SocketInputStream & iStream) 

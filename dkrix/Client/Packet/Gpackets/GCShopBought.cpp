@@ -11,7 +11,7 @@
 
 #include "Client_PCH.h"
 #include "GCShopBought.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // constructor

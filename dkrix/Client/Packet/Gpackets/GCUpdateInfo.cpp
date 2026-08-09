@@ -11,7 +11,7 @@
 #include "../PCSlayerInfo2.h"
 #include "../PCVampireInfo2.h"
 #include "../PCOustersInfo2.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 #ifdef __GAME_CLIENT__
 static void TraceGCUpdateInfoRead(const char* step)

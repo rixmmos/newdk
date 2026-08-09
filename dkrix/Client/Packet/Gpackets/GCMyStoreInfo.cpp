@@ -6,7 +6,7 @@
 
 #include "Client_PCH.h"
 #include "GCMyStoreInfo.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 #define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
 //////////////////////////////////////////////////////////////////////////////

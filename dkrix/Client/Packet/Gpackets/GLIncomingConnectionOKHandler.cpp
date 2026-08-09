@@ -14,9 +14,9 @@
 
 	#include "LoginPlayer.h"
 	#include "LoginPlayerManager.h"
-	#include "Assert.h"
+#include "Packet/Assert.h"
 
-	#include "Lpackets/LCReconnect.h"
+#include "Lpackets/LCReconnect.h"
 
 #endif
 

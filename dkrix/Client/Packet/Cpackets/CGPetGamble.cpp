@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGPetGamble.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 
 CGPetGamble::CGPetGamble () 

@@ -12,7 +12,7 @@
 #include "GCMoveOK.h"
 #include "../SocketEncryptInputStream.h"
 #include "../SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 //////////////////////////////////////////////////////////////////////
 

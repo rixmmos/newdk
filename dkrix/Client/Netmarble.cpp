@@ -5,7 +5,7 @@
 #else
 #include "../../basic/Platform.h"
 #endif
-#include "Assert.h"
+#include "Packet/Assert.h"
 #include "NMCrypt.h"
 #include "MString.h"
 

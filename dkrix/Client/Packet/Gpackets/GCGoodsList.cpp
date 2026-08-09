@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "GCGoodsList.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 #ifdef __GAME_SERVER__
 	#include "Item.h"

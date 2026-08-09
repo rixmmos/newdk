@@ -12,7 +12,7 @@
 #include "Client_PCH.h"
 
 #include "SXml.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 using namespace std;
 
 //#pragma warning (push, 1)

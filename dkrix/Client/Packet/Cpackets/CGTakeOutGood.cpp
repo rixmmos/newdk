@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "Client_PCH.h"
 #include "CGTakeOutGood.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 
 CGTakeOutGood::CGTakeOutGood () 

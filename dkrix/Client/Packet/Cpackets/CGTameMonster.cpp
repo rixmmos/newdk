@@ -7,7 +7,7 @@
 #include "CGTameMonster.h"
 #include "../SocketEncryptInputStream.h"
 #include "../SocketEncryptOutputStream.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 
 CGTameMonster::CGTameMonster () 

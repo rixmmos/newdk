@@ -8,7 +8,7 @@
 #include "Client_PCH.h"
 // include files
 #include "GCAddInstalledMineToZone.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 //--------------------------------------------------------------------
 // Constructor

@@ -21,7 +21,7 @@
 #include "MImageObject.h"
 #include "MAnimationObject.h"
 #include "MShadowAnimationObject.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 #include "MMovingEffect.h"
 #include "MScreenEffect.h"

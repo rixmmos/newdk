@@ -12,8 +12,8 @@
 
 #ifdef __UPDATE_CLIENT__
 
-	#include "Assert.h"
-	#include "Packet/Properties.h"
+#include "Packet/Assert.h"
+#include "Packet/Properties.h"
 #endif
 
 //--------------------------------------------------------------------------------

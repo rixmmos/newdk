@@ -9,7 +9,7 @@
 // include files
 #include "Client_PCH.h"
 #include "GCDropItemToZone.h"
-#include "Assert.h"
+#include "Packet/Assert.h"
 
 //--------------------------------------------------------------------
 // Constructor
