@@ -65,9 +65,13 @@ endif()
 # ----------------------------------------------------------------------
 set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGAcceptUnion.cpp
+    CGAddGearToMouse.cpp
     CGAddItemToCodeSheet.cpp
     CGAddItemToItem.cpp
+    CGAddMouseToGear.cpp
+    CGAddMouseToQuickSlot.cpp
     CGAddMouseToZone.cpp
+    CGAddQuickSlotToMouse.cpp
     CGAddSMSAddress.cpp
     CGAddZoneToInventory.cpp
     CGAddZoneToMouse.cpp
@@ -75,11 +79,13 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGAttack.cpp
     CGAuthKey.cpp
     CGBuyStoreItem.cpp
+    CGCastingSkill.cpp
     CGConnect.cpp
     CGCrashReport.cpp
     CGDeleteSMSAddress.cpp
     CGDenyUnion.cpp
     CGDepositPet.cpp
+    CGDialUp.cpp
     CGDisplayItem.cpp
     CGDonationMoney.cpp
     CGDownSkill.cpp
@@ -100,9 +106,11 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGModifyNickname.cpp
     CGModifyTaxRatio.cpp
     CGNPCAskAnswer.cpp
+    CGNPCTalk.cpp
     CGPartyInvite.cpp
     CGPartyLeave.cpp
     CGPetGamble.cpp
+    CGPhoneDisconnect.cpp
     CGPhoneSay.cpp
     CGPickupMoney.cpp
     CGPortCheck.cpp
@@ -112,10 +120,13 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGRangerSay.cpp
     CGReady.cpp
     CGRegistGuild.cpp
+    CGReloadFromInventory.cpp
+    CGReloadFromQuickSlot.cpp
     CGRequestGuildList.cpp
     CGRequestGuildMemberList.cpp
     CGRequestInfo.cpp
     CGRequestNewbieItem.cpp
+    CGRequestPowerPoint.cpp
     CGRequestRepair.cpp
     CGRequestStoreInfo.cpp
     CGRequestUnion.cpp
@@ -155,6 +166,7 @@ set(_SHARED_PACKETS_CG_SOURCES # Client -> Game
     CGUntransform.cpp
     CGUseItemFromGQuestInventory.cpp
     CGUseItemFromGear.cpp
+    CGUsePotionFromQuickSlot.cpp
     CGUsePowerPoint.cpp
     CGVisible.cpp
     CGWhisper.cpp
