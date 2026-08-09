@@ -71,6 +71,11 @@ extern SDL_Window* g_pSDLWindow;
 extern SDL_Renderer* g_pSDLRenderer;
 extern bool g_bRunning;
 
+// The process working directory, owned by Client.cpp:197. WinMain fills it
+// from GetModuleFileName and chdir()s to it; here getcwd() fills it instead.
+// CGameUpdate.cpp:133 declares it the same way.
+extern char g_CWD[_MAX_PATH];
+
 // g_Print / FillRect / rectangle are provided by RenderingFunctions.cpp
 
 /*-----------------------------------------------------------------------------
@@ -243,8 +248,6 @@ int main(int argc, char* argv[])
 	//-----------------------------------------------------------------
 	// Get current directory (from WinMain lines 3201-3213)
 	//-----------------------------------------------------------------
-	char g_CWD[_MAX_PATH];
-
 	// On macOS/Linux, use getcwd() to get current directory
 	// Note: When running from DarkEden directory, this should already be correct
 	if (getcwd(g_CWD, _MAX_PATH) != NULL) {
@@ -292,7 +295,6 @@ int main(int argc, char* argv[])
 
 	// Frame rate tracking variables (declared outside InitApp block for cleanup access)
 	const int g_FrameGood = 15;  // Minimum acceptable FPS (from Client.cpp line 154)
-	DWORD g_FrameCount = 0;  // Local frame counter
 
 	try {
 		if (InitApp(nCmdShow))
@@ -355,8 +357,6 @@ int main(int argc, char* argv[])
 
 		// Frame rate tracking variables
 		g_StartTime = SDL_GetTicks();
-		g_StartFrameCount = 0;
-		g_FrameCount = 0;
 
 		while (g_bRunning)
 		{
@@ -407,7 +407,6 @@ int main(int argc, char* argv[])
 				}
 
 				SDL_RenderPresent(g_pSDLRenderer);  // Replaces CSDLGraphics::Flip()
-				g_FrameCount++;
 			}
 			else
 			{
@@ -454,7 +453,6 @@ int main(int argc, char* argv[])
 	CleanupSDL();
 
 	printf("Game exited cleanly.\n");
-	printf("Total frames rendered: %u\n", g_FrameCount);
 
 	return 0;
 }
