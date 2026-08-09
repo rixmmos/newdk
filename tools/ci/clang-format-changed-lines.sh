@@ -65,12 +65,68 @@ while IFS= read -r f; do
 
 	checked=$((checked + 1))
 
+	# Compare ONLY within the changed ranges [fixed 2026-08-09].
+	#
+	# clang-format does not honour --lines for preprocessor-directive
+	# indentation: with IndentPPDirectives: None it renormalises every "#"
+	# directive in the file no matter how narrow the range. Measured on
+	# basic/Platform.h -- `clang-format --lines=425:427` also rewrites lines
+	# 726, 728 and 730. A plain whole-file diff therefore blamed each author
+	# for directives they never touched, and since fixing those shifted the
+	# next range, the check never converged: three separate sessions hit it
+	# (one watched the range grow for eight passes), and it made Platform.h
+	# uneditable under the gate.
+	#
+	# So report a hunk only when a line the author actually changed is the
+	# one clang-format disagrees about. This is what the header comment above
+	# has always promised; the whole-file diff simply did not implement it.
 	# shellcheck disable=SC2086 -- $ranges is a deliberately word-split flag list
-	if ! diff -q "$f" <(clang-format $ranges "$f") >/dev/null 2>&1; then
+	offending=$(diff -u "$f" <(clang-format $ranges "$f") |
+		awk -v ranges="$ranges" '
+			function inrange(L,   i) {
+				for (i = 1; i <= m; i++)
+					if (L >= lo[i] && L <= hi[i]) return 1
+				return 0
+			}
+			function flush() {
+				if (inhunk && hit) printf "%s\n%s", hdr, body
+			}
+			BEGIN {
+				n = split(ranges, r, /[[:space:]]+/)
+				for (i = 1; i <= n; i++)
+					if (match(r[i], /^--lines=[0-9]+:[0-9]+$/)) {
+						split(substr(r[i], 9), p, ":")
+						lo[++m] = p[1]; hi[m] = p[2]
+					}
+			}
+			/^(---|\+\+\+)/ { next }
+			/^@@ / {
+				# "@@ -a,b +c,d @@" -- a,b is the range in the ORIGINAL file.
+				# Walk the original-side line number through the hunk body so
+				# the test is per line, not per hunk: one hunk routinely spans
+				# both a line the author changed and unrelated directives
+				# clang-format wants reindented, and blaming the author for
+				# the latter is the bug being fixed here.
+				flush()
+				hdr = $0; body = ""; hit = 0; inhunk = 1
+				split($2, o, ",")                  # o[1] = "-a", o[2] = b
+				cur = substr(o[1], 2) + 0
+				next
+			}
+			inhunk {
+				body = body $0 "\n"
+				if (substr($0, 1, 1) == "-")      { if (inrange(cur)) hit = 1; cur++ }
+				else if (substr($0, 1, 1) == "+") { if (inrange(cur) || inrange(cur - 1)) hit = 1 }
+				else                              { cur++ }
+			}
+			END { flush() }
+		')
+
+	if [ -n "$offending" ]; then
 		echo "::error file=$f::Lines changed in this push are not clang-format clean."
 		# Show only the offending hunks; a whole-file diff on a legacy file
 		# is thousands of lines and buries the actual problem.
-		diff -u "$f" <(clang-format $ranges "$f") | head -40
+		printf '%s\n' "$offending" | head -40
 		failed=1
 	fi
 done
