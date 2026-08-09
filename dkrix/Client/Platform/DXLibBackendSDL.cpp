@@ -39,7 +39,7 @@ static void LogSDLInput(const char* fmt, ...)
 }
 
 /* For MP3/OGG support */
-#ifdef SDL_MIXER_MAJOR_VERSION
+#ifdef HAVE_SDL2_MIXER
 	#include <SDL_mixer.h>
 #endif
 
@@ -580,7 +580,7 @@ void platform_input_stop_text(void) {
  * Sound Backend Implementation (SDL_mixer)
  * ============================================================================ */
 
-#ifdef SDL_MIXER_MAJOR_VERSION
+#ifdef HAVE_SDL2_MIXER
 
 struct platform_sound_buffer {
 	Mix_Chunk* chunk;
@@ -750,7 +750,7 @@ platform_sound_t platform_sound_duplicate(platform_sound_t sound) {
 	return duplicate;
 }
 
-#else /* !SDL_MIXER_MAJOR_VERSION */
+#else /* !HAVE_SDL2_MIXER */
 
 /* SDL_mixer not available - stub implementation */
 int platform_sound_init(void* window_handle) { return 1; }
@@ -765,13 +765,13 @@ int platform_sound_set_pan(platform_sound_t sound, int pan) { return 1; }
 int platform_sound_set_frequency(platform_sound_t sound, int frequency) { return 1; }
 platform_sound_t platform_sound_duplicate(platform_sound_t sound) { return NULL; }
 
-#endif /* SDL_MIXER_MAJOR_VERSION */
+#endif /* HAVE_SDL2_MIXER */
 
 /* ============================================================================
  * Music Backend Implementation (SDL_mixer)
  * ============================================================================ */
 
-#ifdef SDL_MIXER_MAJOR_VERSION
+#ifdef HAVE_SDL2_MIXER
 
 static Mix_Music* g_current_music = NULL;
 static int g_music_playing = 0;
@@ -884,7 +884,7 @@ int platform_music_set_tempo(float tempo) {
 	return 1;
 }
 
-#else /* !SDL_MIXER_MAJOR_VERSION */
+#else /* !HAVE_SDL2_MIXER */
 
 /* SDL_mixer not available - stub implementation */
 int platform_music_init(void* window_handle) { return 1; }
@@ -900,7 +900,7 @@ int platform_music_is_paused(void) { return 0; }
 int platform_music_set_volume(int volume) { return 1; }
 int platform_music_set_tempo(float tempo) { return 1; }
 
-#endif /* SDL_MIXER_MAJOR_VERSION */
+#endif /* HAVE_SDL2_MIXER */
 
 /* ============================================================================
  * Stream Backend (uses music backend)
@@ -955,7 +955,7 @@ const char* platform_get_backend_name(void) {
 int platform_get_capabilities(void) {
 	int caps = 0;
 
-	#ifdef SDL_MIXER_MAJOR_VERSION
+	#ifdef HAVE_SDL2_MIXER
 		caps |= PLATFORM_CAP_SOUND | PLATFORM_CAP_MUSIC | PLATFORM_CAP_STREAM | PLATFORM_CAP_MP3 | PLATFORM_CAP_OGG;
 	#endif
 

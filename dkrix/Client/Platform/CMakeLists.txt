@@ -41,8 +41,16 @@ if(NOT WIN32)
 	message(STATUS "DXLib: Using SDL2 backend (required on this platform)")
 endif()
 
-# Check if SDL2_mixer is available
-if(TARGET SDL2::SDL2_mixer OR SDL2_MIXER_LIBRARIES)
+# Check if SDL2_mixer is available.
+#
+# [fixed 2026-08-09] SDL2_mixer::SDL2_mixer is the target vcpkg's
+# SDL2_mixerConfig.cmake actually defines -- the same X::X convention as the
+# SDL2_image::SDL2_image / SDL2_ttf::SDL2_ttf targets this tree already links.
+# Testing only SDL2::SDL2_mixer meant find_package succeeded while this check
+# still failed, so HAVE_SDL2_MIXER was never once true and audio was silently
+# compiled out of every build, including shipped releases. SDL2_MIXER_LIBRARIES
+# is kept for module-mode find_package (older SDL2_mixer with no CMake config).
+if(TARGET SDL2_mixer::SDL2_mixer OR TARGET SDL2::SDL2_mixer OR SDL2_MIXER_LIBRARIES)
 	set(HAVE_SDL2_MIXER TRUE)
 	message(STATUS "DXLib: SDL2_mixer found - audio support enabled")
 	add_definitions(-DHAVE_SDL2_MIXER)
@@ -109,7 +117,9 @@ if(USE_SDL_BACKEND OR NOT WIN32)
 
 	# Link SDL2_mixer if available
 	if(HAVE_SDL2_MIXER)
-		if(TARGET SDL2::SDL2_mixer)
+		if(TARGET SDL2_mixer::SDL2_mixer)
+			target_link_libraries(platform PUBLIC SDL2_mixer::SDL2_mixer)
+		elseif(TARGET SDL2::SDL2_mixer)
 			target_link_libraries(platform PUBLIC SDL2::SDL2_mixer)
 		else()
 			target_link_libraries(platform PUBLIC ${SDL2_MIXER_LIBRARIES})
