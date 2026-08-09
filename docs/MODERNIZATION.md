@@ -666,10 +666,14 @@ what was actually executing. Not rewritten, since the commits are pushed.
    size-formula pairs go after the first smoke run; CGMove and CLLogin need
    live windows; the exchange pair is feature-gated (client UI is dead).
    Phase 13's client half rides the tail of this queue.
-4. **Sanitizer legs** — flip per the ≥5-consecutive-greens rule recorded in
-   Phase 10 bullet 3 (server asan at 2; server ubsan needs an actual fix —
-   diagnosis needs the run logs; client legs are blocked on the Linux
-   `min`/`max` macro bug).
+4. **Sanitizer legs** — largely done 2026-08-09; see Phase 10 bullet 3 for
+   the measured per-leg table. Server asan reached 5 consecutive greens and
+   is now blocking (`71e2381`). What is left is one line, already verified
+   against a full local build: apply `-fno-sanitize=vptr` **after**
+   `-fsanitize=undefined` in `dkrixserver/CMakeLists.txt` per
+   `docs/ci-server-ubsan.md`, then let server ubsan earn its own 5 greens.
+   The two client legs are gated on the Linux client port finishing (17% at
+   `cd8c3c6`), not on a rule.
 5. **Phase 8 secrets step 2** — rotate the deployment onto the `DKRIX_*`
    templates. Live-server window, backups first, human-only.
 6. **Phase 4b** — sprite backend collapse; human-validated rendering
@@ -1938,24 +1942,67 @@ to `main` at authoring time, each independently green under
       the plain build job already went red twice today (`ff96e46`,
       `421088e`) before landing green — an unproven leg shouldn't be
       able to flip the whole workflow red while it finds its feet.
-      **Compile gate [measured 2026-08-09, job-level, off the public
-      Actions pages]:** the four legs have real, divergent histories.
-      Server `build (asan)`: green on #24/#27/#28, red on #25/#26
-      only because the whole tree was compile-broken there (make
-      debug red too; fixed by c91eebb) — `-fsanitize=address` links
-      clean. Server `build (ubsan)`: red on ALL of #24–#28, failing
-      its own `make debug-ubsan` step even when the plain build is
-      green — a real, leg-specific break, cause unread (logs need
-      sign-in). Client `Linux sanitizer (asan/ubsan)`: both red on
-      #22/#23, dying in the Build step in ~40s — consistent with the
-      tree-wide Linux `min`/`max` macro bug (Phase 4 note above);
-      still true that the ctest sprite tests have never executed.
-      **Decision 2026-08-09: all legs stay non-blocking.** Flip rule:
-      a leg becomes blocking after ≥5 consecutive green runs of that
-      leg (asan is at 2; the other three at 0). Ready-to-apply flip
-      diffs: `server-asan-blocking.patch.HOLD` /
-      `client-sanitizers-blocking.patch.HOLD` in the D3/D5 stream
-      output. TSan remains excluded (unaudited thread model).
+      **Compile gate — re-measured 2026-08-09 [measured, job-level,
+      off the GitHub Actions REST API, full history rather than the
+      #22–#28 window the earlier revision of this bullet sampled].**
+      The four legs have real, divergent histories:
+
+      | Leg | First run | Record | Consecutive greens |
+      | --- | --- | --- | --- |
+      | server `build (asan)` | #15 `eb9fd2d1` | 13 green / 4 red | **5** (#27–#31) |
+      | server `build (ubsan)` | #15 `eb9fd2d1` | 0 green / 17 red | 0 |
+      | client `Linux sanitizer (asan)` | ≤#20 `11e441d6` | 0 green / 19 red | 0 |
+      | client `Linux sanitizer (ubsan)` | ≤#20 `11e441d6` | 0 green / 19 red | 0 |
+
+      Server asan's four reds are #17, #19, #25 and #26 — every one a
+      run where the plain `make debug (ubuntu)` job was red too, i.e.
+      the tree was compile-broken for everyone. `-fsanitize=address`
+      has never failed on its own here. The earlier "asan is at 2" was
+      measured before #29–#31 landed.
+
+      **Decision 2026-08-09 (revised): server asan flips to blocking,
+      the other three stay non-blocking.** Flip rule unchanged — a leg
+      becomes blocking after ≥5 consecutive green runs of that leg.
+      Server asan reached 5 and was flipped (`71e2381`); because both
+      server legs share one job, `continue-on-error` is now
+      `${{ matrix.non_blocking }}` set per matrix leg rather than a
+      job-level literal. The `.patch.HOLD` diffs in the D3/D5 stream
+      output are superseded by that commit. TSan remains excluded
+      (unaudited thread model).
+
+      **Server ubsan is diagnosed, not fixed —
+      `docs/ci-server-ubsan.md`.** It is one narrow break, not a
+      general UBSan unfitness: `-fsanitize=undefined` implies the
+      `vptr` check, which makes GCC emit a `typeinfo for T` reference
+      at each member access through a polymorphic reference. Three
+      sharedserver sites take a `GC*` packet by reference
+      (`Guild.cpp:893`, `GuildManager.cpp:439`/`:460`); those classes'
+      vtables and typeinfos live in `GameServerPackets`, which
+      `sharedserver` does not link. Three undefined references, one
+      `collect2: error`, nothing fails to *compile*. [measured
+      2026-08-09 — reproduced in WSL (Ubuntu 24.04, g++ 13.3.0) at
+      `cd8c3c6`; `nm -u` on the two objects shows exactly those three
+      symbols, and they disappear when `-fno-sanitize=vptr` is
+      appended.] **The fix is verified but not applied**: a from-
+      scratch build with `-fsanitize=undefined -fno-sanitize=vptr`
+      compiles and links the whole tree and produces all three
+      binaries, with `sharedserver` linking at the same 26% mark where
+      the unfixed build dies [measured 2026-08-09]. It is one line in
+      `dkrixserver/CMakeLists.txt`, the flag order is load-bearing, and
+      that file was outside the flipping session's scope — so only the
+      write-up landed. Note also
+      that the leg's ~12m runtime is misleading — it fails at ~26% and
+      `make` keeps compiling `gameserver` to the end — and that
+      Actions logs return 403 unauthenticated even on this public
+      repo, so a local repro is the only outside route to them.
+
+      **Client legs are blocked on a live workstream, not on
+      neglect.** Both die in the `Build` step, so `Verify binary` and
+      the ctest sprite tests have still never executed. The Linux
+      client port was handed over at 17% complete with link-only
+      failures remaining (`cd8c3c6`); these legs become flippable when
+      it lands. The older "`min`/`max` macro bug" attribution is
+      stale — that specific blocker has been passed.
 - [x] Both trees: `.gitignore` for `build/`, `compile_commands.json`,
       editor detritus — **already done on this line** (Phase -1/Phase 1
       passes, verified with `git check-ignore -v`).
