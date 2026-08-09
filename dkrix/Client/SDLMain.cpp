@@ -83,80 +83,77 @@ extern char g_CWD[_MAX_PATH];
  * SDL version of InitApp - Creates window and initializes game
  *
  *-----------------------------------------------------------------------------*/
-static BOOL InitApp(int nCmdShow)
-{
-	int cx = 800, cy = 600;
-	Uint32 flags = SDL_WINDOW_SHOWN;
+static BOOL InitApp(int nCmdShow) {
+    int cx = 800, cy = 600;
+    Uint32 flags = SDL_WINDOW_SHOWN;
 
-	// Determine window size and flags based on command line
-	extern bool g_bFullScreen;
-	extern bool g_MyFull;
+    // Determine window size and flags based on command line
+    extern bool g_bFullScreen;
+    extern bool g_MyFull;
 
-	if (g_bFullScreen) {
-		flags |= SDL_WINDOW_FULLSCREEN;
-		flags |= SDL_WINDOW_BORDERLESS;
+    if (g_bFullScreen) {
+        flags |= SDL_WINDOW_FULLSCREEN;
+        flags |= SDL_WINDOW_BORDERLESS;
 
-		// Get screen dimensions
-		SDL_DisplayMode dm;
-		if (SDL_GetCurrentDisplayMode(0, &dm) == 0) {
-			cx = dm.w;
-			cy = dm.h;
-		}
-	} else {
-		flags |= SDL_WINDOW_RESIZABLE;
+        // Get screen dimensions
+        SDL_DisplayMode dm;
+        if (SDL_GetCurrentDisplayMode(0, &dm) == 0) {
+            cx = dm.w;
+            cy = dm.h;
+        }
+    } else {
+        flags |= SDL_WINDOW_RESIZABLE;
 
-		extern RECT g_GameRect;
-		cx = g_GameRect.right;
-		cy = g_GameRect.bottom;
-	}
+        extern RECT g_GameRect;
+        cx = g_GameRect.right;
+        cy = g_GameRect.bottom;
+    }
 
-	// Create SDL window
-	g_pSDLWindow = SDL_CreateWindow(
-		"Dark Eden",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		cx, cy,
-		flags
-	);
+    // Create SDL window
+    g_pSDLWindow = SDL_CreateWindow("Dark Eden", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, cx, cy, flags);
 
-	if (!g_pSDLWindow) {
-		fprintf(stderr, "Failed to create SDL window: %s\n", SDL_GetError());
-		return FALSE;
-	}
+    if (!g_pSDLWindow) {
+        fprintf(stderr, "Failed to create SDL window: %s\n", SDL_GetError());
+        return FALSE;
+    }
 
-	// Create SDL renderer
-	g_pSDLRenderer = SDL_CreateRenderer(
-		g_pSDLWindow, -1,
-		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-	);
+    // Create SDL renderer
+    g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	if (!g_pSDLRenderer) {
-		fprintf(stderr, "Failed to create SDL renderer: %s\n", SDL_GetError());
-		return FALSE;
-	}
+    if (!g_pSDLRenderer) {
+        // Same fallback as the Windows path (Client.cpp:1755): an accelerated
+        // renderer is unavailable on plenty of Linux setups, and software
+        // rendering is preferable to refusing to start.
+        g_pSDLRenderer = SDL_CreateRenderer(g_pSDLWindow, -1, SDL_RENDERER_SOFTWARE);
+    }
 
-	// Set the renderer's draw color to black for SDL_RenderClear
-	// This ensures the screen is cleared to black each frame
-	if (SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, 255) != 0) {
-		fprintf(stderr, "Failed to set render draw color: %s\n", SDL_GetError());
-	}
+    if (!g_pSDLRenderer) {
+        fprintf(stderr, "Failed to create SDL renderer: %s\n", SDL_GetError());
+        return FALSE;
+    }
 
-	// Hide cursor
-	SDL_ShowCursor(0);
+    // Set the renderer's draw color to black for SDL_RenderClear
+    // This ensures the screen is cleared to black each frame
+    if (SDL_SetRenderDrawColor(g_pSDLRenderer, 0, 0, 0, 255) != 0) {
+        fprintf(stderr, "Failed to set render draw color: %s\n", SDL_GetError());
+    }
 
-	// Initialize SpriteLib SDL backend
-	if (spritectl_init() != 0) {
-		fprintf(stderr, "Failed to initialize SpriteLib backend\n");
-		return FALSE;
-	}
+    // Hide cursor
+    SDL_ShowCursor(0);
 
-	// Initialize game
-	if (!InitGame()) {
-		fprintf(stderr, "Failed to initialize game\n");
-		return FALSE;
-	}
+    // Initialize SpriteLib SDL backend
+    if (spritectl_init() != 0) {
+        fprintf(stderr, "Failed to initialize SpriteLib backend\n");
+        return FALSE;
+    }
 
-	return TRUE;
+    // Initialize game
+    if (!InitGame()) {
+        fprintf(stderr, "Failed to initialize game\n");
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /*-----------------------------------------------------------------------------
