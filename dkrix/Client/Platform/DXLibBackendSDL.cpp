@@ -40,7 +40,7 @@ static void LogSDLInput(const char* fmt, ...)
 
 /* For MP3/OGG support */
 #ifdef HAVE_SDL2_MIXER
-	#include <SDL_mixer.h>
+#include <SDL_mixer.h>
 #endif
 
 /* Fallback: If DIK constants are not defined, define them here */
@@ -955,13 +955,13 @@ const char* platform_get_backend_name(void) {
 int platform_get_capabilities(void) {
 	int caps = 0;
 
-	#ifdef HAVE_SDL2_MIXER
-		caps |= PLATFORM_CAP_SOUND | PLATFORM_CAP_MUSIC | PLATFORM_CAP_STREAM | PLATFORM_CAP_MP3 | PLATFORM_CAP_OGG;
-	#endif
+#ifdef HAVE_SDL2_MIXER
+    caps |= PLATFORM_CAP_SOUND | PLATFORM_CAP_MUSIC | PLATFORM_CAP_STREAM | PLATFORM_CAP_MP3 | PLATFORM_CAP_OGG;
+#endif
 
-	caps |= PLATFORM_CAP_INPUT;
+    caps |= PLATFORM_CAP_INPUT;
 
-	return caps;
+    return caps;
 }
 
 #endif /* PLATFORM_BACKEND_SDL */
