@@ -30,6 +30,15 @@ GameServerManager::GameServerManager() : m_pServerSocket(NULL), m_SocketID(INVAL
 
     m_Mutex.setName("GameServerManager");
 
+    // m_pGameServerPlayers is a raw array member and was never initialised, so
+    // every slot held an indeterminate value. The `!= NULL` tests scattered
+    // through this file therefore passed on garbage and getSocket() dereferenced
+    // it -- AddressSanitizer catches it as a SEGV in processCommands() the
+    // moment a real gameserver connects. A normal build survived only because
+    // fresh pages happen to be zero. Same defect as GameServerInfoManager.
+    for (int i = 0; i < nMaxGameServers; i++)
+        m_pGameServerPlayers[i] = NULL;
+
     try {
         // create  server socket
         while (true) {
