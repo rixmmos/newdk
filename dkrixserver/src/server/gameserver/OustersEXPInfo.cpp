@@ -142,6 +142,11 @@ void OustersEXPInfoManager::addOustersEXPInfo(OustersEXPInfo* pOustersEXPInfo)
     __BEGIN_TRY
 
     Assert(pOustersEXPInfo != NULL);
+
+    // See VampEXPInfoManager::addVampEXPInfo -- same shape, same heap write.
+    if (pOustersEXPInfo->getLevel() >= m_OustersEXPCount)
+        throw OutOfBoundException("OustersEXPInfoManager::addOustersEXPInfo: level out of range");
+
     Assert(m_OustersEXPInfoList[pOustersEXPInfo->getLevel()] == NULL);
 
     m_OustersEXPInfoList[pOustersEXPInfo->getLevel()] = pOustersEXPInfo;
@@ -149,8 +154,14 @@ void OustersEXPInfoManager::addOustersEXPInfo(OustersEXPInfo* pOustersEXPInfo)
     __END_CATCH
 }
 
+// See VampEXPInfoManager::getVampEXPInfo -- identical shape. Callers at
+// SkillUtil.cpp:4827 and GQuestAdvanceClassElement.cpp:38 dereference the
+// result on the spot, so this throws rather than returning NULL.
 OustersEXPInfo* OustersEXPInfoManager::getOustersEXPInfo(uint OustersEXPType) const {
     __BEGIN_TRY
+
+    if (OustersEXPType >= m_OustersEXPCount)
+        throw OutOfBoundException("OustersEXPInfoManager::getOustersEXPInfo: level out of range");
 
     Assert(OustersEXPType < m_OustersEXPCount);
     Assert(m_OustersEXPInfoList[OustersEXPType] != NULL);

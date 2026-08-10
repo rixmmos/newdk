@@ -99,7 +99,22 @@ void ActionTeachSkill::executeSlayer(Creature* pCreature1, Creature* pCreature2)
 
     Assert(pPlayer != NULL);
 
-    
+    // execute() dispatches on the *player's* race, not the NPC's, so a Slayer
+    // who talks to a Vampire trainer arrives here with m_DomainType ==
+    // SKILL_DOMAIN_VAMPIRE -- live data: triggers 672 (Kaim) and 727
+    // (Bricolacas) both carry `DomainType : VAMPIRE`. That indexed one past the
+    // end of the Slayer's six-entry m_GoalExp and m_SkillDomainLevels below.
+    // A Slayer has no Vampire domain, so answer with the "nothing to teach"
+    // reply this function already sends when the domain is mid-advancement,
+    // rather than letting the bounded accessors throw at a legitimate NPC.
+    if (m_DomainType >= SKILL_DOMAIN_VAMPIRE) {
+        teachinfo.setDomainType(m_DomainType);
+        teachinfo.setTargetLevel(0);
+        pPlayer->sendPacket(&teachinfo);
+        return;
+    }
+
+
     if (pSlayer->getGoalExp(m_DomainType) != 0) {
         
         teachinfo.setDomainType(m_DomainType);

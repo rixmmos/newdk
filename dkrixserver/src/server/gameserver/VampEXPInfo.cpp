@@ -140,6 +140,14 @@ void VampEXPInfoManager::addVampEXPInfo(VampEXPInfo* pVampEXPInfo)
     __BEGIN_TRY
 
     Assert(pVampEXPInfo != NULL);
+
+    // getLevel() is the VampEXPBalanceInfo row's Level and there was no bound
+    // on it at all -- the Assert below dereferences the slot it is meant to be
+    // checking. Safe by construction today (m_VampEXPCount is MAX(Level) + 1
+    // from the same table) but this is a heap pointer write, so make it real.
+    if (pVampEXPInfo->getLevel() >= m_VampEXPCount)
+        throw OutOfBoundException("VampEXPInfoManager::addVampEXPInfo: level out of range");
+
     Assert(m_VampEXPInfoList[pVampEXPInfo->getLevel()] == NULL);
 
     m_VampEXPInfoList[pVampEXPInfo->getLevel()] = pVampEXPInfo;
@@ -147,8 +155,17 @@ void VampEXPInfoManager::addVampEXPInfo(VampEXPInfo* pVampEXPInfo)
     __END_CATCH
 }
 
+// VampEXPType is the Vampire's level, and m_VampEXPInfoList holds only
+// m_VampEXPCount == MAX(Level) + 1 entries, so a character above the highest
+// row in VampEXPBalanceInfo indexes past the end -- an out-of-bounds pointer
+// read that the Assert on the next line then dereferences, live in Debug as
+// well as Release. Throws rather than returning NULL: SkillUtil.cpp:4697 and
+// GQuestAdvanceClassElement.cpp:29 both dereference the result immediately.
 VampEXPInfo* VampEXPInfoManager::getVampEXPInfo(uint VampEXPType) const {
     __BEGIN_TRY
+
+    if (VampEXPType >= m_VampEXPCount)
+        throw OutOfBoundException("VampEXPInfoManager::getVampEXPInfo: level out of range");
 
     Assert(VampEXPType < m_VampEXPCount);
     Assert(m_VampEXPInfoList[VampEXPType] != NULL);

@@ -397,17 +397,46 @@ public:
     
     //////////////////////////////////////////////////////////////
 public:
+    // m_GoalExp and m_SkillDomainLevels both hold SKILL_DOMAIN_VAMPIRE entries,
+    // i.e. the Slayer domains 0..SKILL_DOMAIN_ETC. SkillDomainType_t is a BYTE
+    // and the index is not always a constant: it comes from SkillInfo's DB
+    // `Domain` column (SkillHandler.cpp:47, CGLearnSkillHandler:581), from a
+    // quest-script string (ActionTeachSkill), and -- until 89b2892 bounded it --
+    // straight off the wire. A Vampire or Ousters skill row carries Domain 6 or
+    // 7, so an OOB read is one bad row away, and setSkillDomainLevel is a write.
+    //
+    // These throw rather than returning 0. There is no benign sentinel here:
+    // every caller uses the result as a number (grade lookup, level comparison,
+    // damage bonus, EXP arithmetic), and 0 is a legal domain level, so a
+    // sentinel would turn a detectable fault into silently wrong game maths.
+    // OutOfBoundException is already what the surrounding code throws for
+    // exactly this -- SkillInfoManager::getSkillTypeByLevel bounds its own
+    // domain argument the same way -- and it is a Throwable, caught at the
+    // packet boundary. The one live caller that could legitimately arrive with
+    // SKILL_DOMAIN_VAMPIRE is ActionTeachSkill::executeSlayer, bounded there.
     Exp_t getGoalExp(SkillDomainType_t Domain) const {
+        if (Domain >= SKILL_DOMAIN_VAMPIRE)
+            throw OutOfBoundException("Slayer::getGoalExp: skill domain out of range");
+
         return m_GoalExp[Domain];
     }
     void setGoalExp(SkillDomainType_t Domain, Exp_t GoalExp) {
+        if (Domain >= SKILL_DOMAIN_VAMPIRE)
+            throw OutOfBoundException("Slayer::setGoalExp: skill domain out of range");
+
         m_GoalExp[Domain] = GoalExp;
     }
 
     SkillLevel_t getSkillDomainLevel(SkillDomainType_t skillDomain) const {
+        if (skillDomain >= SKILL_DOMAIN_VAMPIRE)
+            throw OutOfBoundException("Slayer::getSkillDomainLevel: skill domain out of range");
+
         return m_SkillDomainLevels[skillDomain];
     }
     void setSkillDomainLevel(SkillDomainType_t skillDomain, SkillLevel_t skillLevel) {
+        if (skillDomain >= SKILL_DOMAIN_VAMPIRE)
+            throw OutOfBoundException("Slayer::setSkillDomainLevel: skill domain out of range");
+
         m_SkillDomainLevels[skillDomain] = skillLevel;
     }
     SkillLevel_t getHighestSkillDomainLevel() const;
