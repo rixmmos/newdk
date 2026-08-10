@@ -802,8 +802,7 @@ bool Slayer::load()
 
             if (domainType >= SKILL_DOMAIN_VAMPIRE) {
                 pSkillSlot->setDisable();
-            } else if (pSkillInfo->getLevel() > m_SkillDomainLevels[domainType] &&
-                       domainType != SKILL_DOMAIN_ETC) {
+            } else if (pSkillInfo->getLevel() > m_SkillDomainLevels[domainType] && domainType != SKILL_DOMAIN_ETC) {
                 pSkillSlot->setDisable();
             }
 
