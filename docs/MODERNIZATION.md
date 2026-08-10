@@ -4435,7 +4435,26 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
 | STEP2_SERVER | verified, with drift (stale CMake caches, root-owned `lib/`+`bin/`) |
 | STEP2_GREEN_SNAPSHOT | **verified** after the Bug 18-A fix — all three servers green, incl. the `GSRequestGuildInfo`→`SGGuildInfo()` round trip |
 | STEP3_CLIENT | **verified** — login screen renders from the fresh VS2022 Debug build (art, SPK sprites, text). Three Windows-route divergences from the doc, recorded in `PORTING-NOTE.md` under "STEP3 drift" |
-| LOGIN_SMOKE | **blocked — Bug 18-B.** Both client→login packets are received and parsed; the loginserver then segfaults |
+| LOGIN_SMOKE | **verified — end-to-end login → gameplay**, after fixing Bugs 18-B and 18-C |
+
+**Run 1 reached end-to-end login → gameplay on 2026-08-10** — the first time
+on `main`. [measured] The parked line got there on 2026-04-20 (`dbc3087`);
+this tree never had. The full chain: `CGConnectSetKey`/`CLLogin` →
+`LCLoginOK` → `CLGetWorldList`/`LCWorldList(Eslanian)` →
+`CLSelectWorld`/`LCServerList` → `CLSelectServer`/`LCPCList` →
+`CLSelectPC(rixvamp, PC_VAMPIRE)` → `LCReconnect(127.0.0.1:9998)` → gameserver
+TCP established → `CGReady` → `GCSetPosition(X:62,Y:64,Dir:2)` in zone 1003,
+followed by `GCRealWearingInfo`, `GCSkillInfo`, six `GCAddNPC`, quest and
+store info. On screen: Limbo Castle rendering isometrically with HP/MP bars, a
+minimap, NPCs, and a working NPC dialogue (Bricolacas). Client working set
+~1 GB, TCP `127.0.0.1:9998 Established`.
+
+Two things this run did **not** establish, and they should not be read into
+the result: **character creation was never exercised** — the account already
+had `rixvamp`, so `CLCreatePC` is still untested — and **movement was not
+tested**, so "walk one step" from LOGIN_SMOKE's goal 3 remains open. What is
+proven is that a client can log in, select an existing character, enter the
+world, and render and interact with it.
 
 - **Bug 18-A — the gameserver could not boot; every build since
   2026-08-09 was dead on arrival.** [measured] `KeyInfoManager::load()`
