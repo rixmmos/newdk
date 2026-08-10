@@ -4607,12 +4607,27 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
   constructed in the scope that holds the uses. All three branches bind the
   same two parameters (PC name, player ID), so only the SQL text varies.
 
-  **Verification status is weaker than 18-B's** and should stay that way in
-  the record until someone proves otherwise: it compiles and links, and the
-  reasoning is identical to a bug that *was* runtime-proven, but it has not
-  been exercised at runtime because the test account has no characters (the
-  smoke run's `LCPCList` returned three `EMPTY SLOT`s). Creating a character
-  and selecting it is the outstanding check.
+  **Runtime-verified 2026-08-10** [measured], on the second attempt. The first
+  smoke run could not exercise this path — `LCPCList` came back as three
+  `EMPTY SLOT`s — so it was recorded as compile-verified only. A later run on
+  the same account returned a populated `LCPCList` (47 bytes) and selected the
+  ACTIVE Vampire `rixvamp`, confirmed in the database as belonging to
+  `testuser`. The Vampire branch of the fixed code ran end to end:
+
+  ```
+  RECV PACKET from testuser, CLSelectPC(159) 16/16
+  Receive:CLSelectPC(PCName:rixvamp,PCType:PC_VAMPIRE)
+  WorldID 1, ServerGroupID : 0, ServerID : 1
+  Send:450[18,4] LCReconnect(GameServerIP:127.0.0.1,GameServerPort:9998,KEY:2306048)
+  ```
+
+  All four column reads after the fix (`getRowCount`, `getWORD(1)`,
+  `getString(2)`, `getInt(3)`/`getInt(4)`) succeeded and the loginserver stayed
+  up, handing the client off to the gameserver. Note what is *not* claimed: the
+  pre-fix crash was never observed on this path, because the bug was found by
+  audit rather than by a failure. What is established is that the fixed path
+  works at runtime. The Slayer and Ousters branches remain compile-verified
+  only.
 - **Audit of the whole candidate set — 1 live bug in 129 files.** [measured
   2026-08-10] Five parallel auditors covered all 129 files carrying the risky
   shape, partitioned by site count. Each traced every assignment-form
