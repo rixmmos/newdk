@@ -24,7 +24,10 @@
 //////////////////////////////////////////////////////////////////////
 Player::Player() : m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL) {
     // add by viva
-    // pHashTable = NULL;
+    // Must be initialised: setKey() below tests `pHashTable != NULL` on the
+    // first call, so leaving it indeterminate is an uninitialised read whose
+    // outcome decides whether the exit(0) branch is taken.
+    pHashTable = NULL;
 }
 
 Player::Player(Socket* pSocket) : m_pSocket(pSocket), m_pInputStream(NULL), m_pOutputStream(NULL) {
@@ -43,7 +46,10 @@ Player::Player(Socket* pSocket) : m_pSocket(pSocket), m_pInputStream(NULL), m_pO
     Assert(m_pOutputStream != NULL);
 
     // add by viva
-    // pHashTable = NULL;
+    // Must be initialised: setKey() below tests `pHashTable != NULL` on the
+    // first call, so leaving it indeterminate is an uninitialised read whose
+    // outcome decides whether the exit(0) branch is taken.
+    pHashTable = NULL;
     __END_CATCH
 }
 
@@ -237,6 +243,13 @@ void Player::setKey(WORD EncryptKey, WORD HashKey) {
         if (EncryptKey == 0xAEB7 && HashKey == 0x9B3E)
             exit(0);
     }
+    // Each call allocated a fresh table and never released the previous one:
+    // 512 bytes leaked per CGConnectSetKey packet, which a client may send
+    // repeatedly. The old table cannot be freed before the streams below are
+    // re-pointed -- SocketInput/OutputStream::setKey retains the raw pointer --
+    // so it is released at the end of the function instead.
+    BYTE* pOldHashTable = pHashTable;
+
     pHashTable = new BYTE[512];
     BYTE key = (HashKey + 4658) & 0x00FF;
     for (int i = 0; i < 512; i++) {
@@ -249,6 +262,9 @@ void Player::setKey(WORD EncryptKey, WORD HashKey) {
         m_pInputStream->setKey(EncryptKey, pHashTable);
     if (m_pOutputStream != NULL)
         m_pOutputStream->setKey(EncryptKey, pHashTable);
+
+    // Safe now: both streams point at the new table.
+    SAFE_DELETE_ARRAY(pOldHashTable);
 
     __END_CATCH
 }

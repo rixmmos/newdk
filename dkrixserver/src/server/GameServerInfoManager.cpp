@@ -13,6 +13,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 GameServerInfoManager::GameServerInfoManager() {
+    // See the gameserver copy: clear() delete[]s this before it is assigned.
+    m_pGameServerInfos = NULL;
     m_MaxWorldID = 0;
     m_MaxServerGroupID = 0;
 }

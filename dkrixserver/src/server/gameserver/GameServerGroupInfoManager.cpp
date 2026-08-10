@@ -21,6 +21,13 @@
 GameServerGroupInfoManager::GameServerGroupInfoManager()
 
 {
+    // Both members must be initialised here: load() calls clear() before
+    // anything is allocated, and clear() ends in SAFE_DELETE_ARRAY, which only
+    // guards against NULL. An indeterminate pointer therefore reaches
+    // delete[], which reads the array cookie ahead of the pointer -- ASan
+    // reports SEGV on a high address in clear(). A normal build survives only
+    // because fresh pages happen to be zero.
+    m_GameServerGroupInfos = NULL;
     m_MaxWorldID = 0;
 }
 

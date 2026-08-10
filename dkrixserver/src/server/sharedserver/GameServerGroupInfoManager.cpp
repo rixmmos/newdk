@@ -18,7 +18,14 @@
 //----------------------------------------------------------------------
 // constructor
 //----------------------------------------------------------------------
-GameServerGroupInfoManager::GameServerGroupInfoManager() throw() {}
+GameServerGroupInfoManager::GameServerGroupInfoManager() throw() {
+    // This constructor was empty, leaving BOTH members indeterminate. The
+    // destructor below loops `i < m_MaxWorldID` indexing m_GameServerGroupInfos,
+    // so uninitialised values are read as a loop bound and a base pointer.
+    // See the gameserver copy for the ASan report on the same defect.
+    m_GameServerGroupInfos = NULL;
+    m_MaxWorldID = 0;
+}
 
 //----------------------------------------------------------------------
 // destructor
