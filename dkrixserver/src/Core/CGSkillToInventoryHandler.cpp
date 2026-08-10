@@ -61,18 +61,24 @@ void CGSkillToInventoryHandler::execute(CGSkillToInventory* pPacket, Player* pPl
             if (pSkillSlot == NULL)
                 bSuccess = false;
 
-            // The INSTALL_MINE branch used to set bSuccess = true
-            // unconditionally, which undid both the "do you actually own this
-            // skill" result above and the coordinate validation below -- so a
-            // Slayer who had never learned the skill reached InstallMine with a
-            // NULL SkillSlot, and X/Y were never bounds-checked. Keep the
-            // TY = 0 special case (the skill targets a tile, not an inventory
-            // cell) but never resurrect bSuccess, and always validate.
-            if (SkillType == SKILL_INSTALL_MINE)
+            // INSTALL_MINE used to set bSuccess = true unconditionally, which
+            // also undid the pSkillSlot == NULL result above -- a Slayer who had
+            // never learned the skill reached InstallMine::execute with a NULL
+            // SkillSlot. That part is fixed: bSuccess is never resurrected.
+            //
+            // The skill still skips isAbleToUseInventorySkill, as before. That
+            // is deliberate, not an oversight: routing it through the full
+            // predicate would newly forbid mining while riding a motorcycle
+            // (CreatureUtil::hasRideMotorcycle) and ~20 other effect-flag
+            // states, which is an observable gameplay change. Its coordinates
+            // are made safe at the accessor instead -- Inventory::getItem
+            // returns NULL for out-of-range input.
+            if (SkillType == SKILL_INSTALL_MINE) {
                 TY = 0;
-
-            if (!isAbleToUseInventorySkill(pSlayer, X, Y, TX, TY))
-                bSuccess = false;
+            } else {
+                if (!isAbleToUseInventorySkill(pSlayer, X, Y, TX, TY))
+                    bSuccess = false;
+            }
             /*			if (pSlayer->isFlag(Effect::EFFECT_CLASS_SNIPING_MODE))
                         {
                             g_Sniping.checkRevealRatio(pSlayer, 20, 10);

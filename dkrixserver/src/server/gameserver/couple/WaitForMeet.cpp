@@ -243,7 +243,9 @@ CoupleRingBase* WaitForMeet::giveCoupleRing(PlayerCreature* pPC, string partnerN
         pt = *pPt;
     }
 
-    Assert(pPCInven->addItem(pt.x, pt.y, pCoupleItem));
+    // Hoisted out of Assert(): NDEBUG would skip the call entirely.
+    bool bAdded = pPCInven->addItem(pt.x, pt.y, pCoupleItem);
+    Assert(bAdded);
     pCoupleItem->create(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
 
     GCCreateItem gcCreateItem;

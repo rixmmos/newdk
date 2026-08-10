@@ -150,7 +150,12 @@ void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer)
         return;
     }
 
-    Assert(pStore->removeStoreItem(pPacket->getIndex()) == 0);
+    // The call must NOT live inside Assert(): under NDEBUG that macro expands
+    // to ((void)0) and never evaluates its argument, so the listing would not
+    // be removed while deleteItem/increaseGoldEx below still run -- the same
+    // item then sells again and again. Item duplication, silent, Release-only.
+    int removeResult = pStore->removeStoreItem(pPacket->getIndex());
+    Assert(removeResult == 0);
 
     pStoreInventory->deleteItem(storeX, storeY);
     pStorePC->increaseGoldEx(price);
@@ -165,7 +170,10 @@ void CGBuyStoreItemHandler::execute(CGBuyStoreItem* pPacket, Player* pPlayer)
     gcSellOK.setPrice(price);
     pStorePC->getPlayer()->sendPacket(&gcSellOK);
 
-    Assert(pInventory->addItem(pItem, emptyPos));
+    // Hoisted out of Assert() for the same reason: under NDEBUG the buyer would
+    // never receive the item while decreaseGoldEx below still charged them.
+    bool bAdded = pInventory->addItem(pItem, emptyPos);
+    Assert(bAdded);
     pPC->decreaseGoldEx(price);
 
     char pField[80];

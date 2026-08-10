@@ -950,13 +950,17 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         return false;
 
 
-    // TX/TY are validated again. They are wire-controlled just like X/Y, and
-    // the Create* skills (CreateBomb, CreateMine, CreateHolyWater,
-    // CreateHolyPotion) index the inventory with the *target* coordinates --
-    // both to read and, via Inventory::addItem, to write. The combined check
-    // had been commented out in favour of an X/Y-only one, leaving TX/TY
-    // unvalidated on every one of those paths.
-    if (X >= 10 || Y >= 6 || TX >= 10 || TY >= 6)
+    // Deliberately X/Y only -- do NOT add TX/TY here. Most senders of
+    // CGSkillToInventory never set the target fields (Bloody Mark, Bloody
+    // Tunnel, and the three Transform skills), and the packet's constructor
+    // leaves m_TargetX/m_TargetY uninitialised in both trees, so those skills
+    // put stack garbage on the wire. Validating TX/TY here rejects them and
+    // breaks live gameplay for already-deployed clients -- which is why the
+    // combined check was commented out in the first place. The Create* skills
+    // that genuinely index the inventory with TX/TY are protected at the
+    // accessor instead: Inventory::getItem returns NULL and
+    // getInventorySlot throws for out-of-range coordinates.
+    if (X >= 10 || Y >= 6)
         return false;
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||

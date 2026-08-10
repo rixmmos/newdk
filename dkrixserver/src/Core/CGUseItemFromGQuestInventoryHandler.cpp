@@ -118,7 +118,9 @@ void CGUseItemFromGQuestInventoryHandler::execute(CGUseItemFromGQuestInventory* 
     rList.erase(itr);
     pGamePlayer->sendPacket(rInventory.getInventoryPacket());
 
-    Assert(pInventory->addItem(pt.x, pt.y, pItem));
+    // Hoisted out of Assert(): NDEBUG would skip the call entirely.
+    bool bAdded = pInventory->addItem(pt.x, pt.y, pItem);
+    Assert(bAdded);
 
     pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, pt.x, pt.y);
     GCCreateItem gcCreateItem;
