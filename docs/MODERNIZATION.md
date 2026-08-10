@@ -4587,9 +4587,68 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
     `EMPTY SLOT`s). The client advances past the login screen to **Select
     World**. The process stays up. This is the furthest this tree has ever
     been taken against a live client.
-  - **Still open: the other 203 candidate sites.** Only `CLLoginHandler` is
-    fixed. Every other risky-shape site remains a latent use-after-free until
-    each is checked for scope, and the two shapes are visually near-identical.
+  - **Candidate sweep completed 2026-08-10 — see Bug 18-C.** All 129 files
+    were audited; exactly one other live instance was found.
+- **Bug 18-C — the same use-after-free on the character-select path.
+  FIXED (compile-verified; not yet runtime-verified).**
+  [measured 2026-08-10] Found by auditing the Bug 18-B candidate set, not by a
+  crash. `src/Core/CLSelectPCHandler.cpp` is a structural clone of 18-B:
+  `Result* pResult;` is declared at function scope (line 96, uninitialised),
+  and each of the three race branches — Slayer (122-128), Vampire (130-135),
+  Ousters (137-142) — declares its own `PreparedStatement` and assigns
+  `pResult` from it. The `Result` is freed at the branch's closing brace
+  (129 / 136 / 143) and the first dereference is `pResult->getRowCount()` at
+  line 146, with further uses through line 195.
+
+  This one is on the **character-select** path, i.e. the next thing
+  LOGIN_SMOKE exercises after the 18-B fix — it would have crashed the
+  loginserver the moment a character was selected. Fixed the same way: the
+  branch chain selects a `pcSelectSql` string and one `PreparedStatement` is
+  constructed in the scope that holds the uses. All three branches bind the
+  same two parameters (PC name, player ID), so only the SQL text varies.
+
+  **Verification status is weaker than 18-B's** and should stay that way in
+  the record until someone proves otherwise: it compiles and links, and the
+  reasoning is identical to a bug that *was* runtime-proven, but it has not
+  been exercised at runtime because the test account has no characters (the
+  smoke run's `LCPCList` returned three `EMPTY SLOT`s). Creating a character
+  and selecting it is the outstanding check.
+- **Audit of the whole candidate set — 1 live bug in 129 files.** [measured
+  2026-08-10] Five parallel auditors covered all 129 files carrying the risky
+  shape, partitioned by site count. Each traced every assignment-form
+  `<var> = <stmt>.execute()` to its owning block and to the last dereference
+  of the assigned pointer.
+
+  | Group | Files | Assignment sites | Confirmed |
+  |---|---|---|---|
+  | 1 | 26 | 44 | 0 |
+  | 2 | 26 | 42 | **1** (`CLSelectPCHandler`, 3 branches) |
+  | 3 | 26 | 40 | 0 |
+  | 4 | 26 | 39 | 0 |
+  | 5 | 25 | 35 | 0 |
+  | **total** | **129** | **200** | **1** |
+
+  So the earlier "203 risky sites" figure was a shape count, not a bug count —
+  the true rate is 1 in 200. The dominant safe shape is the
+  `XxxInfoManager::load()` template and the `BEGIN_DB { … } END_DB(pStmt)`
+  body, where the statement and every dereference are siblings in one block.
+  (`BEGIN_DB` expands to a bare `try` and `END_DB` to a `catch` chain —
+  `src/server/database/DB.h:16-27` — so those are genuine scopes and the brace
+  analysis holds.)
+
+  **Near-misses: dangling but never read.** Several sites *do* leave `pResult`
+  dangling when an inner block closes, and are safe only because nothing reads
+  it before it is reassigned. These are one edit away from becoming live bugs
+  and are worth knowing about:
+  `sharedserver/GuildManager.cpp:92,108,124,140`;
+  `gameserver/GuildManager.cpp` (the `init()` else-branches, under
+  `#ifdef __SHARED_SERVER__`); `gameserver/item/Key.cpp:198`;
+  `Core/CGUseItemFromInventoryHandler.cpp:1067`;
+  `Core/CLLoginHandler.cpp:677` (the `eventStmt` block);
+  `gameserver/quest/ActionRedeemMotorcycle.cpp:134`;
+  `Core/CGUsePotionFromQuickSlotHandler.cpp:270`.
+  Also noted: `ctf/FlagManager.cpp:317` assigns the result of a `DELETE` and
+  never reads it — dead assignment, harmless.
   - **Gate implication.** Both 18-A and 18-B are Phase 11 `PreparedStatement`
     defects that no existing gate can see — 18-A because SQL is string data,
     18-B because the lifetime error is legal C++. An ASan build of the server

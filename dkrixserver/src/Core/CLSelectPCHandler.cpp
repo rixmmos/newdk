@@ -118,29 +118,29 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         bool isSlayer = (pPacket->getPCType() == PC_SLAYER);
         bool isVampire = (pPacket->getPCType() == PC_VAMPIRE);
 
+        // A PreparedStatement owns the Result that execute() hands back and
+        // deletes it in its destructor, so the statement must outlive every use
+        // of pResult -- which runs to the getInt(4) below. Select the query
+        // here and construct the statement in the same scope as those uses:
+        // declaring it inside the branches frees the Result at the branch's
+        // closing brace and leaves pResult dangling. Same defect as Bug 18-B in
+        // CLLoginHandler; all three branches bind the same two parameters.
+        const char* pcSelectSql = NULL;
         if (isSlayer) {
-            PreparedStatement slayerSelectStmt(
-                pConn,
-                "SELECT ZoneID, Slot, GREATEST(SwordLevel,BladeLevel,GunLevel,EnchantLevel,HealLevel), Competence "
-                "FROM Slayer WHERE Name = ? AND PlayerID = ? AND Active = 'ACTIVE'");
-            slayerSelectStmt.bindString(1, pPacket->getPCName());
-            slayerSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = slayerSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, GREATEST(SwordLevel,BladeLevel,GunLevel,EnchantLevel,HealLevel), "
+                          "Competence FROM Slayer WHERE Name = ? AND PlayerID = ? AND Active = 'ACTIVE'";
         } else if (isVampire) {
-            PreparedStatement vampireSelectStmt(pConn,
-                                                "SELECT ZoneID, Slot, Level, Competence FROM Vampire WHERE Name = ? "
-                                                "AND PlayerID = ? AND Active = 'ACTIVE'");
-            vampireSelectStmt.bindString(1, pPacket->getPCName());
-            vampireSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = vampireSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, Level, Competence FROM Vampire WHERE Name = ? "
+                          "AND PlayerID = ? AND Active = 'ACTIVE'";
         } else {
-            PreparedStatement oustersSelectStmt(pConn,
-                                                "SELECT ZoneID, Slot, Level, Competence FROM Ousters WHERE Name = ? "
-                                                "AND PlayerID = ? AND Active = 'ACTIVE'");
-            oustersSelectStmt.bindString(1, pPacket->getPCName());
-            oustersSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = oustersSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, Level, Competence FROM Ousters WHERE Name = ? "
+                          "AND PlayerID = ? AND Active = 'ACTIVE'";
         }
+
+        PreparedStatement pcSelectStmt(pConn, pcSelectSql);
+        pcSelectStmt.bindString(1, pPacket->getPCName());
+        pcSelectStmt.bindString(2, pLoginPlayer->getID());
+        pResult = pcSelectStmt.execute();
 
 
         if (pResult->getRowCount() != 1) {
