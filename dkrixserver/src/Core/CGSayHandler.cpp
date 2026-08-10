@@ -2920,29 +2920,32 @@ void CGSayHandler::opmrecall(GamePlayer* pGamePlayer, string msg, int i) {
 void CGSayHandler::opnotice(GamePlayer* pGamePlayer, string msg, int i) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
-        // Creature* pCreature = pGamePlayer->getCreature();
-
-        size_t j = msg.find_first_of(' ', i + 1);
-    size_t k = msg.find_first_of(' ', j + 1);
-
-    string noticemsg = msg.substr(j + 1, k - j - 1).c_str();
-
-    StringStream sql;
-
-    sql << "INSERT INTO quick1001 (content) VALUES (" << noticemsg << ")";
-
-    Connection* pConnection = new Connection("211.117.52.124", "darkBBS2002", "elcastle", "elca005", 3306);
-    Statement* pStmt = pConnection->createStatement();
-    pStmt->executeQueryString(sql.toString());
-
-    SAFE_DELETE(pStmt);
-    SAFE_DELETE(pConnection);
+        // DISABLED 2026-08-10. This function used to open a Connection to a
+        // hardcoded remote host with hardcoded credentials, both compiled into
+        // the binary and published in a public repository, and then wrote a
+        // chat-supplied string into it as raw SQL:
+        //
+        //     sql << "INSERT INTO quick1001 (content) VALUES (" << noticemsg << ")";
+        //
+        // Three separate problems. The credentials were a live secret in public
+        // source. The host is not this project's infrastructure -- it is an
+        // upstream OpenDarkEden artifact -- so the command either failed or, if
+        // it ever connected, wrote into a third party's database. And noticemsg
+        // came straight from a GM's chat line, concatenated unquoted and
+        // unescaped, so it was a SQL injection as well as being malformed for
+        // any ordinary text.
+        //
+        // Disabled rather than reimplemented: nothing here can be salvaged
+        // without knowing what that remote BBS table was for, and it is not
+        // reachable from this deployment. If a notice board is wanted, add it
+        // against the configured DARKEDEN connection with a PreparedStatement.
+        (void) pGamePlayer;
+    (void)msg;
+    (void)i;
 
     __END_DEBUG_EX __END_CATCH
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 void CGSayHandler::opsummon(GamePlayer* pGamePlayer, string msg, int i) {
     __BEGIN_TRY __BEGIN_DEBUG_EX
 
