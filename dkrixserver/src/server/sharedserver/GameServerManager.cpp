@@ -573,7 +573,6 @@ void GameServerManager::acceptNewConnection() {
     }
 
     try {
-
         if (client->getSockError())
             throw Error();
         client->setNonBlocking(true);
