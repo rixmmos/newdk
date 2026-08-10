@@ -17,6 +17,14 @@
 #include "ItemUtil.h"
 #include "PlayerCreature.h"
 
+// The code sheet is a fixed 10x6 grid of stone cells packed two cells per
+// byte, so its option-type vector holds exactly 30 entries. Both figures come
+// from CodeSheet::CodeSheet(), which builds the vector, and from canPutStone()
+// below, whose neighbour walk stops at the last column and row.
+const uint CODE_SHEET_WIDTH = 10;
+const uint CODE_SHEET_HEIGHT = 6;
+const uint CODE_SHEET_OPTION_COUNT = CODE_SHEET_WIDTH * CODE_SHEET_HEIGHT / 2;
+
 uint getStoneNum(const vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y);
 void setStoneNum(vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y, uint Num);
 bool canPutStone(const vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y, uint StoneNum);
@@ -59,8 +67,21 @@ void CGAddItemToCodeSheetHandler::execute(CGAddItemToCodeSheet* pPacket, Player*
     x = pPacket->getX();
     y = pPacket->getY();
 
+    // SECURITY: x and y arrive straight off the wire as CoordInven_t, a BYTE,
+    // so 0-255 each. getStoneNum()/setStoneNum() index the option vector at
+    // (y * CODE_SHEET_WIDTH + x) / 2, which reaches 1402 for the worst pair,
+    // and the only guard used to be the lower bound on the vector's size below
+    // -- an out-of-bounds read in getStoneNum() and an out-of-bounds write in
+    // setStoneNum(). Validate the coordinates once here, at packet entry, so
+    // every helper is only ever reached with in-grid values. A real runtime
+    // check rather than Assert(), so it survives a Release build.
+    if (x >= CODE_SHEET_WIDTH || y >= CODE_SHEET_HEIGHT) {
+        pPlayer->sendPacket(&failpkt);
+        return;
+    }
+
     vector<OptionType_t> OptionType(pTargetItem->getOptionTypeList().begin(), pTargetItem->getOptionTypeList().end());
-    if (OptionType.size() < 30) {
+    if (OptionType.size() < CODE_SHEET_OPTION_COUNT) {
         pPlayer->sendPacket(&failpkt);
         return;
     }
@@ -97,7 +118,7 @@ void CGAddItemToCodeSheetHandler::execute(CGAddItemToCodeSheet* pPacket, Player*
 }
 
 uint getStoneNum(const vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y) {
-    uint SerialNum = y * 10 + x;
+    uint SerialNum = y * CODE_SHEET_WIDTH + x;
     uint IndexNum = SerialNum / 2;
     uint LowerBit = SerialNum % 2;
 
@@ -114,7 +135,7 @@ uint getStoneNum(const vector<OptionType_t>& OptionType, CoordInven_t x, CoordIn
 }
 
 void setStoneNum(vector<OptionType_t>& OptionType, CoordInven_t x, CoordInven_t y, uint StoneNum) {
-    uint SerialNum = y * 10 + x;
+    uint SerialNum = y * CODE_SHEET_WIDTH + x;
     uint IndexNum = SerialNum / 2;
     uint LowerBit = SerialNum % 2;
 
@@ -142,12 +163,12 @@ bool canPutStone(const vector<OptionType_t>& OptionType, CoordInven_t x, CoordIn
             return false;
     }
 
-    if (x < 9) {
+    if (x < CODE_SHEET_WIDTH - 1) {
         if (getStoneNum(OptionType, x + 1, y) == StoneNum)
             return false;
     }
 
-    if (y < 5) {
+    if (y < CODE_SHEET_HEIGHT - 1) {
         if (getStoneNum(OptionType, x, y + 1) == StoneNum)
             return false;
     }

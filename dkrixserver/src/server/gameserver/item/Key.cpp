@@ -187,15 +187,17 @@ ItemID_t Key::setNewMotorcycle(Slayer* pSlayer) {
     targetID = pMotorcycle->getItemID();
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
-
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement updateKeyObjectStmt2(pConn, "UPDATE KeyObject SET Target=? WHERE ItemID=?");
         updateKeyObjectStmt2.bindULong(1, targetID);
         updateKeyObjectStmt2.bindULong(2, getItemID());
-        pResult = updateKeyObjectStmt2.execute();
+        // The statement owns the Result and frees it at this block's closing brace,
+        // so storing it in a longer-lived pointer only creates a dangling one. This
+        // is an UPDATE and the Result is never read -- discard it, as the sibling
+        // save paths in this file already do.
+        updateKeyObjectStmt2.execute();
     }
     END_DB(pStmt)
 

@@ -13,9 +13,9 @@ void ItemGradeManager::load() {
         Result* pResult = pStmt->executeQuery("SELECT Grade, Ratio, GambleRatio, BeadRatio FROM ItemGradeRatioInfo");
 
         Assert(pResult->getRowCount() == 10);
-        m_GradeGambleRatios.reserve(10);
-        m_GradeBeadRatios.reserve(10);
-        m_GradeRatios.reserve(10);
+        m_GradeGambleRatios.assign(10, 0);
+        m_GradeBeadRatios.assign(10, 0);
+        m_GradeRatios.assign(10, 0);
 
         while (pResult->next()) {
             int Grade = pResult->getInt(1);

@@ -49,7 +49,7 @@ void CGDisplayItemHandler::execute(CGDisplayItem* pPacket, Player* pPlayer) {
     GCSystemMessage errorMsg;
     GCNoticeEvent errorNotice;
 
-    if (pPacket->getIndex() > MAX_ITEM_NUM) {
+    if (pPacket->getIndex() >= MAX_ITEM_NUM) {
         filelog("Store.log", "[%s:%s] (%u)  .", pGamePlayer->getID().c_str(), pPC->getName().c_str(),
                 pPacket->getIndex());
         return;

@@ -172,7 +172,7 @@ void Cross::save(const string& ownerID, Storage storage, StorageID_t storageID, 
         updateCrossObjectStmt.bindInt(2, getItemType());
         updateCrossObjectStmt.bindString(3, ownerID);
         updateCrossObjectStmt.bindInt(4, (int)storage);
-        updateCrossObjectStmt.bindInt(5, storageID);
+        updateCrossObjectStmt.bindLong(5, storageID);
         updateCrossObjectStmt.bindInt(6, (int)x);
         updateCrossObjectStmt.bindInt(7, (int)y);
         updateCrossObjectStmt.bindString(8, optionField);

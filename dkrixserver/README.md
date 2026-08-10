@@ -40,7 +40,7 @@ or `make -j 8` for the last step if you have a 8 cores CPU computor to accelerat
 
 MySQL 5.7 or 8 are tested.
 
-Create a user 'elcastle'@'%' with password 'elca110'
+Create a user 'elcastle'@'%' with password 'password'
 
 Create the `DARKEDEN` and `USERINFO` database:
 

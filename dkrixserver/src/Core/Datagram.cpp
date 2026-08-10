@@ -75,6 +75,19 @@ bool Datagram::isDatagram(PacketID_t packetID) {
 void Datagram::read(char* buf, uint len) {
     __BEGIN_TRY
 
+    // Real bounds check, not just the Assert: readPacket() validates only the
+    // 5-byte header against m_Length, then hands the datagram to
+    // DatagramPacket::read(), where GG/GL/LG packets read a wire-supplied BYTE
+    // length and pass it straight back in here (GGGuildChat, GGServerChat,
+    // GGCommand, GLIncomingConnection, ...). Under NDEBUG the Assert is gone
+    // and this memcpy reads off the end of m_Data. Written subtractively so
+    // m_InputOffset + len cannot itself wrap. InsufficientDataException matches
+    // SocketInputStream::read on the TCP side and derives from
+    // ProtocolException, which the datagram receive loops already catch and
+    // treat as "drop this datagram".
+    if (m_InputOffset > m_Length || len > m_Length - m_InputOffset)
+        throw InsufficientDataException("Datagram::read: read past end of datagram");
+
     // boundary check
     Assert(m_InputOffset + len <= m_Length);
 
@@ -91,6 +104,11 @@ void Datagram::read(char* buf, uint len) {
 //////////////////////////////////////////////////////////////////////
 void Datagram::read(string& str, uint len) {
     __BEGIN_TRY
+
+    // See Datagram::read(char*, uint) -- same guard, and this is the overload
+    // the wire-supplied string lengths actually reach.
+    if (m_InputOffset > m_Length || len > m_Length - m_InputOffset)
+        throw InsufficientDataException("Datagram::read: read past end of datagram");
 
     // boundary check
     Assert(m_InputOffset + len <= m_Length);
@@ -180,12 +198,14 @@ void Datagram::read(DatagramPacket*& pPacket) {
 void Datagram::write(const char* buf, uint len) {
     __BEGIN_TRY
 
+    // Real bounds check on the send side too -- overflowing m_Data here is a
+    // heap *write*. This replaces a commented-out `if` with the same condition
+    // that the original author left unfinished.
+    if (m_OutputOffset > m_Length || len > m_Length - m_OutputOffset)
+        throw OutOfBoundException("Datagram::write: write past end of datagram");
+
     // boundary check
     Assert(m_OutputOffset + len <= m_Length);
-    //	if (m_OutputOffset + len > m_Length)
-    //	{
-    
-    //	}
 
     memcpy(&m_Data[m_OutputOffset], buf, len);
 

@@ -29,9 +29,6 @@
 //
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////
 void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
 
@@ -47,9 +44,7 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
 
     bool bCheckATTR = false;
 
-    
-    
- 
+
 #ifdef __NETMARBLE_SERVER__
     if (!pLoginPlayer->isAgree()) {
         LCSelectPCError lcSelectPCError;
@@ -80,9 +75,8 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
 #endif
 
 
-
 #ifdef __PAY_SYSTEM_FREE_LIMIT__
-    
+
     if (!pLoginPlayer->isPayPlaying()) {
         bCheckATTR = true;
     }
@@ -101,11 +95,10 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         Connection* pConn = g_pDatabaseManager->getConnection((int)WorldID);
 
         //----------------------------------------------------------------------
-        
+
         //----------------------------------------------------------------------
 
-        
-        
+
         /*
         pResult = pStmt->executeQuery(
             "SELECT ZoneID, Slot FROM %s WHERE Name = '%s' AND PlayerID = '%s' AND Active = 'ACTIVE'",
@@ -118,29 +111,29 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         bool isSlayer = (pPacket->getPCType() == PC_SLAYER);
         bool isVampire = (pPacket->getPCType() == PC_VAMPIRE);
 
+        // A PreparedStatement owns the Result that execute() hands back and
+        // deletes it in its destructor, so the statement must outlive every use
+        // of pResult -- which runs to the getInt(4) below. Select the query
+        // here and construct the statement in the same scope as those uses:
+        // declaring it inside the branches frees the Result at the branch's
+        // closing brace and leaves pResult dangling. Same defect as Bug 18-B in
+        // CLLoginHandler; all three branches bind the same two parameters.
+        const char* pcSelectSql = NULL;
         if (isSlayer) {
-            PreparedStatement slayerSelectStmt(
-                pConn,
-                "SELECT ZoneID, Slot, GREATEST(SwordLevel,BladeLevel,GunLevel,EnchantLevel,HealLevel), Competence "
-                "FROM Slayer WHERE Name = ? AND PlayerID = ? AND Active = 'ACTIVE'");
-            slayerSelectStmt.bindString(1, pPacket->getPCName());
-            slayerSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = slayerSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, GREATEST(SwordLevel,BladeLevel,GunLevel,EnchantLevel,HealLevel), "
+                          "Competence FROM Slayer WHERE Name = ? AND PlayerID = ? AND Active = 'ACTIVE'";
         } else if (isVampire) {
-            PreparedStatement vampireSelectStmt(pConn,
-                                                "SELECT ZoneID, Slot, Level, Competence FROM Vampire WHERE Name = ? "
-                                                "AND PlayerID = ? AND Active = 'ACTIVE'");
-            vampireSelectStmt.bindString(1, pPacket->getPCName());
-            vampireSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = vampireSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, Level, Competence FROM Vampire WHERE Name = ? "
+                          "AND PlayerID = ? AND Active = 'ACTIVE'";
         } else {
-            PreparedStatement oustersSelectStmt(pConn,
-                                                "SELECT ZoneID, Slot, Level, Competence FROM Ousters WHERE Name = ? "
-                                                "AND PlayerID = ? AND Active = 'ACTIVE'");
-            oustersSelectStmt.bindString(1, pPacket->getPCName());
-            oustersSelectStmt.bindString(2, pLoginPlayer->getID());
-            pResult = oustersSelectStmt.execute();
+            pcSelectSql = "SELECT ZoneID, Slot, Level, Competence FROM Ousters WHERE Name = ? "
+                          "AND PlayerID = ? AND Active = 'ACTIVE'";
         }
+
+        PreparedStatement pcSelectStmt(pConn, pcSelectSql);
+        pcSelectStmt.bindString(1, pPacket->getPCName());
+        pcSelectStmt.bindString(2, pLoginPlayer->getID());
+        pResult = pcSelectStmt.execute();
 
 
         if (pResult->getRowCount() != 1) {
@@ -152,7 +145,7 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         ZoneID_t zoneID = pResult->getWORD(1);
         string slotStr = pResult->getString(2);
 
-        
+
         if (bCheckATTR) {
 #ifdef __PAY_SYSTEM_FREE_LIMIT__
             if (isSlayer) {
@@ -182,7 +175,7 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
-        
+
         //////////////////////////////////////////////////////////////////////////////////////
         bool bNonPKServer =
             g_pGameServerInfoManager->getGameServerInfo(1, pLoginPlayer->getServerGroupID(), pLoginPlayer->getWorldID())
@@ -194,8 +187,7 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
             int playerLevel = pResult->getInt(3);
             int competence = pResult->getInt(4);
 
-            
-            
+
             if (playerLevel > 80 && competence == 3) {
                 LCSelectPCError lcSelectPCError;
                 lcSelectPCError.setCode(SELECT_PC_CANNOT_PLAY_BY_ATTR);
@@ -212,11 +204,10 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         int slot = slotStr.at(4) - '0';
 
         //----------------------------------------------------------------------
-        
+
         //----------------------------------------------------------------------
         GameServerInfo* pGameServerInfo;
         if (zoneID > 10000 && zoneID < 30000) {
-            
             pGameServerInfo = g_pGameServerInfoManager->getGameServerInfo(1, pLoginPlayer->getServerGroupID(), WorldID);
         } else {
             ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(zoneID);
@@ -230,13 +221,13 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         }
 
         //----------------------------------------------------------------------
-        
+
         //----------------------------------------------------------------------
         //		GameServerInfo* pGameServerInfo = g_pGameServerInfoManager->getGameServerInfo(pPlayer->getServerID());
 
 
         //----------------------------------------------------------------------
-        
+
         //----------------------------------------------------------------------
         LGIncomingConnection lgIncomingConnection;
         lgIncomingConnection.setClientIP(pLoginPlayer->getSocket()->getHost());
@@ -247,11 +238,8 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         //
         // *CAUTION*
         //
-        
-        
-        
-        
-        
+
+
         //
         //--------------------------------------------------------------------------------
         pLoginPlayer->setPlayerStatus(LPS_AFTER_SENDING_LG_INCOMING_CONNECTION);
@@ -264,7 +252,6 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
         // IP in database GameServerInfo table. The outside IP should be used.
         pLoginPlayer->setGameServerIP(pGameServerInfo->getIP());
 
-         
 
         if (g_pConfig->getProperty("User") == "excel96")
             // g_pGameServerManager->sendPacket(pGameServerInfo->getIP() ,
@@ -292,8 +279,7 @@ void CLSelectPCHandler::execute(CLSelectPC* pPacket, Player* pPlayer)
 
 
         PreparedStatement playerUpdateStmt( // (!)
-            pConn1,
-            "UPDATE Player Set CurrentWorldID = ?, CurrentServerGroupID = ?, LastSlot = ? WHERE PlayerID = ?");
+            pConn1, "UPDATE Player Set CurrentWorldID = ?, CurrentServerGroupID = ?, LastSlot = ? WHERE PlayerID = ?");
         playerUpdateStmt.bindInt(1, (int)WorldID);
         playerUpdateStmt.bindInt(2, pLoginPlayer->getServerGroupID());
         playerUpdateStmt.bindInt(3, slot);

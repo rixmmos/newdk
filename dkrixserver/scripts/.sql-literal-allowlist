@@ -1,0 +1,21 @@
+# Allowlist for check-sql-literals.sh.
+#
+# One line per KNOWN, STILL-OPEN defect that the lint correctly reports.
+# Format:  <path-relative-to-src>|<KIND>|<detail>  # why it is here
+# The key deliberately has no line number, so it survives edits elsewhere
+# in the file.
+#
+# Adding a line needs the same justification as raising a ratchet
+# baseline: it makes a real defect invisible to CI. Every entry is
+# reprinted loudly on every run, and an entry that stops matching is
+# reported as stale so it gets deleted when the bug is fixed.
+#
+# Get the key for a finding with:
+#   sh scripts/check-sql-literals.sh --keys
+# Verify the true state of the tree, ignoring this file, with:
+#   sh scripts/check-sql-literals.sh --strict
+#
+# CURRENTLY EMPTY. It was created 2026-08-10 with one entry —
+# MonsterKillQuest::save()'s `executeQuery("-_-")`, which is how this gate
+# proved itself on a live defect — and that entry was deleted the same day
+# because the defect was fixed. Zero entries is the state to keep it in.

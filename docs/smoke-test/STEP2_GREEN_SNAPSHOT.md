@@ -82,7 +82,7 @@ Four real bugs + one config fix, in order discovered:
    the `find(':')` check, throwing `IOException("missing separator")`.
    One-line fix: strip trailing `\r` before the empty/comment check.
    This also silently fixed a would-have-been-next-issue: values like
-   `DB_PASSWORD : elca110` were parsing as `elca110\r`, which would
+   `DB_PASSWORD : password` were parsing as `password\r`, which would
    have failed MySQL auth and looked like a wrong-password bug.
 
 5. **Config — `odk-mysql` hostname in `WorldDBInfo`**. The shipped

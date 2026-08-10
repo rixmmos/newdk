@@ -15,6 +15,10 @@
 GameServerInfoManager::GameServerInfoManager()
 
 {
+    // load() calls clear() before anything is allocated, and clear() tests
+    // `m_pGameServerInfos != NULL` then delete[]s it -- an indeterminate
+    // pointer passes that test. Same defect as GameServerGroupInfoManager.
+    m_pGameServerInfos = NULL;
     m_MaxWorldID = 0;
     m_MaxServerGroupID = 0;
 }

@@ -229,41 +229,44 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         Result* pResult = NULL;
 
 
+        // A PreparedStatement owns the Result that execute() hands back and
+        // deletes it in its destructor, so the statement must outlive every use
+        // of pResult. Select the query here and construct the statement in the
+        // same scope as pResult: declaring it inside the branches below frees
+        // the Result at the branch's closing brace and leaves pResult dangling
+        // for the rest of this function (Bug 18-B).
+        const char* loginSql = NULL;
+        bool bBindPassword = false;
+
         if (bWebLogin) {
-            PreparedStatement webLoginStmt(pConn, "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, LoginIP, "
-                                                  "PayType, PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate "
-                                                  "FROM Player WHERE PlayerID = ?");
-            webLoginStmt.bindString(1, ID);
-            pResult = webLoginStmt.execute();
+            loginSql = "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, LoginIP, "
+                       "PayType, PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate "
+                       "FROM Player WHERE PlayerID = ?";
         } else if (bFreePass) // by sigi. 2002.10.23
         {
-            PreparedStatement freePassStmt(pConn,
-                                           "SELECT PlayerID, CurrentServerGroupID, LogOn, Access, LoginIP, PayType, "
-                                           "PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate FROM Player "
-                                           "WHERE PlayerID = ?");
-            freePassStmt.bindString(1, ID);
-            pResult = freePassStmt.execute();
+            loginSql = "SELECT PlayerID, CurrentServerGroupID, LogOn, Access, LoginIP, PayType, "
+                       "PayPlayDate, PayPlayHours, PayPlayFlag, FamilyPayPlayDate FROM Player "
+                       "WHERE PlayerID = ?";
+        } else if (g_pConfig->hasKey("DB_VERSION") && g_pConfig->getProperty("DB_VERSION")[0] == '4') {
+            loginSql = "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, "
+                       "ZipCode, LoginIP, PayType, PayPlayDate, PayPlayHours, "
+                       "PayPlayFlag, FamilyPayPlayDate FROM Player WHERE PlayerID = ? "
+                       "AND Password = OLD_PASSWORD(?)";
+            bBindPassword = true;
         } else {
-            if (g_pConfig->hasKey("DB_VERSION") && g_pConfig->getProperty("DB_VERSION")[0] == '4') {
-                PreparedStatement oldPasswordStmt(pConn,
-                                                  "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, "
-                                                  "ZipCode, LoginIP, PayType, PayPlayDate, PayPlayHours, "
-                                                  "PayPlayFlag, FamilyPayPlayDate FROM Player WHERE PlayerID = ? "
-                                                  "AND Password = OLD_PASSWORD(?)");
-                oldPasswordStmt.bindString(1, ID);
-                oldPasswordStmt.bindString(2, PASSWORD);
-                pResult = oldPasswordStmt.execute();
-            } else {
-                PreparedStatement passwordStmt(pConn,
-                                               "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, ZipCode, "
-                                               "LoginIP, PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
-                                               "FamilyPayPlayDate FROM Player WHERE PlayerID = ? AND "
-                                               "Password = ?");
-                passwordStmt.bindString(1, ID);
-                passwordStmt.bindString(2, PASSWORD);
-                pResult = passwordStmt.execute();
-            }
+            loginSql = "SELECT PlayerID, SSN, CurrentServerGroupID, LogOn, Access, ZipCode, "
+                       "LoginIP, PayType, PayPlayDate, PayPlayHours, PayPlayFlag, "
+                       "FamilyPayPlayDate FROM Player WHERE PlayerID = ? AND "
+                       "Password = ?";
+            bBindPassword = true;
         }
+
+        PreparedStatement loginStmt(pConn, loginSql);
+        loginStmt.bindString(1, ID);
+        if (bBindPassword) {
+            loginStmt.bindString(2, PASSWORD);
+        }
+        pResult = loginStmt.execute();
 
         // by sigi. 2002.10.30
 
@@ -671,9 +674,13 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     PreparedStatement eventStmt(pConn, "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND "
                                                        "RecvPremiumDate = '0000-00-00'");
                     eventStmt.bindString(1, pLoginPlayer->getID());
-                    pResult = eventStmt.execute();
+                    // Scoped to eventStmt, which owns this Result and frees it at the
+                    // closing brace below. Reassigning the function-scope pResult here
+                    // would leave it dangling for the rest of execute() -- exactly the
+                    // shape of Bug 18-B, which this same function used to have.
+                    Result* pEventResult = eventStmt.execute();
 
-                    if (pResult->next()) {
+                    if (pEventResult->next()) {
                         PreparedStatement payPlayDateStmt(pConn,
                                                           "UPDATE Player SET PayPlayDate = IF (PayPlayDate < NOW(), "
                                                           "NOW() + INTERVAL 7 DAY, PayPlayDate + INTERVAL 7 DAY ) "

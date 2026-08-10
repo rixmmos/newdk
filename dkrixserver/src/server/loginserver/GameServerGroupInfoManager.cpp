@@ -19,6 +19,9 @@
 // constructor
 //----------------------------------------------------------------------
 GameServerGroupInfoManager::GameServerGroupInfoManager() noexcept {
+    // See the gameserver copy: clear() runs delete[] on this pointer before it
+    // is ever assigned, so it must start NULL.
+    m_GameServerGroupInfos = NULL;
     m_MaxWorldID = 0;
 }
 

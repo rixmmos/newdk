@@ -937,7 +937,16 @@ PhoneNumber_t Slayer::getPhoneSlotNumber(SlotID_t SlotID)
 {
     __BEGIN_TRY
 
-    Assert(SlotID <= MAX_PHONE_SLOT);
+    // SlotID reaches here straight off the wire (CGPhoneSayHandler,
+    // CGPhoneDisconnectHandler) and SlotID_t is a BYTE, so 0-255 against a
+    // 3-element array. The old guard was Assert(SlotID <= MAX_PHONE_SLOT):
+    // off by one -- it admitted SlotID == 3 -- and it vanishes under NDEBUG.
+    // 0 is the "empty slot" value everywhere else in this class, so returning
+    // it puts a bad SlotID on the ordinary not-connected path.
+    if (SlotID >= MAX_PHONE_SLOT)
+        return 0;
+
+    Assert(SlotID < MAX_PHONE_SLOT);
 
     return m_PhoneSlot[SlotID];
 
@@ -948,6 +957,14 @@ void Slayer::setPhoneSlotNumber(SlotID_t SlotID, PhoneNumber_t PhoneNumber)
 
 {
     __BEGIN_TRY
+
+    // Had no bounds check at all: a wire-supplied SlotID (see
+    // CGPhoneDisconnectHandler) was an arbitrary-offset write inside a live
+    // Slayer. getSlotWithPhoneNumber/findEmptyPhoneSlot also return
+    // MAX_PHONE_SLOT as their not-found sentinel, which callers pass straight
+    // back in here. A real runtime check, not Assert().
+    if (SlotID >= MAX_PHONE_SLOT)
+        return;
 
     __ENTER_CRITICAL_SECTION(m_Mutex)
 
@@ -1596,6 +1613,12 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     SLAYER_RECORD prev;
 
+    // Part can arrive from a client packet (see CGAddGearToMouseHandler), and
+    // this function both reads m_pWearItem[Part] and later writes NULL to it --
+    // an out-of-range value is an arbitrary-offset read *and* write inside a
+    // live Slayer. Reject it outright; a real check, not Assert().
+    if (Part < 0 || Part >= WEAR_MAX)
+        return;
 
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);

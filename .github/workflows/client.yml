@@ -18,17 +18,26 @@ name: Client (dkrix)
 # windows-latest ships vcpkg preinstalled and exports VCPKG_INSTALLATION_ROOT,
 # so no third-party action is needed.
 
+# Trigger policy [changed 2026-08-10] — same change and same reasoning as
+# server.yml: the [main, "modernize/**"] allowlist silently disabled CI for
+# every branch outside it, which is how 27 commits of security fixes on
+# fix/bug-18b-loginserver-result-uaf went unbuilt. Extending the allowlist
+# only moves the trap to the next prefix nobody anticipated. The `paths:`
+# filter still skips pushes that touch nothing here.
 on:
   push:
-    branches: [main, "modernize/**"]
     paths:
       - "dkrix/**"
       - ".github/workflows/client.yml"
+      - "tools/ci/**"
   pull_request:
     branches: [main]
     paths:
       - "dkrix/**"
       - ".github/workflows/client.yml"
+      - "tools/ci/**"
+  # Push-triggered runs have lagged 20+ minutes; workflow_dispatch returns
+  # in seconds. Keep it on every workflow.
   workflow_dispatch:
 
 jobs:

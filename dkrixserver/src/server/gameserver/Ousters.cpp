@@ -1259,6 +1259,11 @@ void Ousters::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     OUSTERS_RECORD prev;
 
+    // See Slayer::takeOffItem -- Part can come from a client packet and this
+    // function both reads and writes m_pWearItem[Part].
+    if (Part < 0 || Part >= OUSTERS_WEAR_MAX)
+        return;
+
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);
 

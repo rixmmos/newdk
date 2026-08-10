@@ -6,6 +6,22 @@
 
 #include "CLCreatePC.h"
 
+namespace {
+
+// Bounds-safe table lookup for toString(). SocketInputStream::readPacket()
+// calls toString() on every packet it receives, so toString() must never be
+// able to fault -- independently of what read() rejects, and independently of
+// how a locally built packet was populated. "UNKNOWN" for an out-of-domain
+// value matches the existing idiom in CGLearnSkill::toString().
+template <size_t N> string enumName(const string (&table)[N], size_t index) {
+    if (index >= N)
+        return "UNKNOWN";
+
+    return table[index];
+}
+
+} // namespace
+
 void CLCreatePC::read(SocketInputStream& iStream)
 
 {
@@ -25,10 +41,28 @@ void CLCreatePC::read(SocketInputStream& iStream)
 
     BYTE slot;
     iStream.read(slot);
+
+    // SECURITY: Slot defines three values but this is a raw wire BYTE, so
+    // 0-255 arrives here and is indexed into the three-entry Slot2String[] by
+    // toString() and by CLCreatePCHandler when it builds its SQL. Reject it at
+    // the wire boundary, the same way the name length above is.
+    if (slot >= SLOT_MAX)
+        throw InvalidProtocolException("invalid slot");
+
     m_Slot = Slot(slot);
 
     BYTE flags;
     iStream.read(flags);
+
+    // SECURITY: bit 0 carries the sex, bits 1-2 the hair style. getHairStyle()
+    // masks those two bits and so yields 0-3, while HairStyle defines only
+    // three styles and HairStyle2String[] holds three entries. There is no
+    // fourth hair style -- the client picks from a three-element table
+    // (UIMessageManager.cpp) and the DB decoders only know HAIR_STYLE1..3 --
+    // so the fourth encoding is rejected here rather than the table widened.
+    if (((flags >> SLAYER_BIT_HAIRSTYLE) & 3) > HAIR_STYLE3)
+        throw InvalidProtocolException("invalid hair style");
+
     m_BitSet = flags;
 
     for (uint i = 0; i < SLAYER_COLOR_MAX; i++)
@@ -91,8 +125,8 @@ string CLCreatePC::toString() const
     __BEGIN_TRY
 
     StringStream msg;
-    msg << "CLCreatePC(Name: " << m_Name << ",Slot:" << Slot2String[m_Slot] << ",Sex:" << Sex2String[getSex()]
-        << ",HairStyle:" << HairStyle2String[getHairStyle()] << ",HairColor:" << (int)getHairColor()
+    msg << "CLCreatePC(Name: " << m_Name << ",Slot:" << enumName(Slot2String, m_Slot) << ",Sex:" << Sex2String[getSex()]
+        << ",HairStyle:" << enumName(HairStyle2String, getHairStyle()) << ",HairColor:" << (int)getHairColor()
         << ",SkinColor:" << (int)getSkinColor() << ",STR:" << (int)m_STR << ",DEX:" << (int)m_DEX
         << ",INT:" << (int)m_INT << ",Race:" << (int)m_Race << ")";
     return msg.toString();

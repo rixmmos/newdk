@@ -1,7 +1,7 @@
 # LOGIN_SMOKE.md — end-to-end login + character create + enter world
 
 **Prereqs satisfied:** client+server binaries built; MariaDB 10.6 installed
-with `DARKEDEN` + `USERINFO` schemas loaded; user `elcastle` / `elca110`
+with `DARKEDEN` + `USERINFO` schemas loaded; user `elcastle` / `password`
 reachable on `127.0.0.1:3306`.
 
 This runbook picks up where `STEP3_CLIENT.md` stopped (title screen,
@@ -29,7 +29,7 @@ a legacy-operator config:
 | `dkrixserver/conf/gameserver.conf` | Same IP + HomePath sweep (BillingServerIP left at `111.111.111.111` — fake, unused on `IsNetMarble=0` path) |
 | `Darkeden data/Data/Info/ServerInfo.inf` | `LoginServerAddress : 61.160.221.177` → `127.0.0.1`; `LoginServerPort : 6999` → `9999`; `LoginServerBasePort : 9996` → `9900` (matched to `loginserver.conf`) |
 
-Credentials (`elcastle` / `elca110`) stay in plaintext in the confs for
+Credentials (`elcastle` / `password`) stay in plaintext in the confs for
 this local smoke run. The `${DKRIX_*}` env-var template re-application
 is still a separate follow-up; see SMOKE_TEST_RESULTS.md step 3.
 
@@ -42,8 +42,8 @@ Run these on WSL, from any directory. Paste output if something is red.
 ```bash
 # MySQL: reachable and schemas present?
 systemctl is-active mariadb 2>/dev/null || sudo service mariadb status
-mysql -uelcastle -pelca110 -e "SHOW DATABASES;"
-mysql -uelcastle -pelca110 DARKEDEN -e "SHOW TABLES LIKE 'Player'; DESCRIBE Player;" | head -10
+mysql -uelcastle -ppassword -e "SHOW DATABASES;"
+mysql -uelcastle -ppassword DARKEDEN -e "SHOW TABLES LIKE 'Player'; DESCRIBE Player;" | head -10
 
 # No stale server processes on the target ports?
 ss -ltnp | grep -E ':(3306|9977|9998|9999) '
@@ -61,7 +61,7 @@ table with `PlayerID`/`Password` columns, ports 9977/9998/9999 free.
 ## 3. Create the test account
 
 ```bash
-mysql -uelcastle -pelca110 DARKEDEN < /mnt/c/dev/newdk/create_test_account.sql
+mysql -uelcastle -ppassword DARKEDEN < /mnt/c/dev/newdk/create_test_account.sql
 ```
 
 Expected final `SELECT` row:

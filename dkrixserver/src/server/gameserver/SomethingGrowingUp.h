@@ -19,10 +19,17 @@ public:
     static const LevelType MaxLevel = _MaxLevel;
     static const LevelType MinLevel = _MinLevel;
 
-    ExpTable() : m_Records(MaxLevel) {}
+    // Levels run MinLevel..MaxLevel *inclusive* (MinLevel is 1 for most tables
+    // but 0 for AdvancementClassExpTable), and every access
+    // indexes m_Records[level] directly (load() below, plus getGoalExp/
+    // getAccumExp). Sizing to MaxLevel leaves the last level out of bounds:
+    // AddressSanitizer reports a 4-byte heap-buffer-overflow WRITE in load()
+    // for level == MaxLevel. Size to MaxLevel + 1 so index MaxLevel is valid;
+    // slot 0 is unused, which is what the 1-based indexing already assumes.
+    ExpTable() : m_Records(MaxLevel + 1) {}
     virtual ~ExpTable() {}
 
-    
+
     virtual void load();
     virtual const string getDBTableName() const = 0;
     virtual const string getDBGoalExpFieldName() const {
@@ -38,7 +45,7 @@ public:
         return "";
     }
 
-    
+
     GoalExpType getGoalExp(LevelType level) const {
         Assert(level <= MaxLevel && level >= MinLevel);
         return m_Records[level].m_GoalExp;
@@ -65,24 +72,47 @@ void ExpTable<GoalExpType, LevelType, MinLevel, MaxLevel, TotalExpType>::load() 
 
     const string QueryTemplate = "SELECT %s, %s, %s FROM %s %s";
 
-    
+
     int size = QueryTemplate.size() + getDBTableName().size() + getDBGoalExpFieldName().size() +
                getDBAccumExpFieldName().size() + getDBLevelFieldName().size() + getDBQueryCondition().size();
-    char* query = new char[size];
 
-    snprintf(query, size, QueryTemplate.c_str(), getDBLevelFieldName().c_str(), getDBGoalExpFieldName().c_str(),
+    // Was new char[size] freed by a SAFE_DELETE_ARRAY placed *after* END_DB, so
+    // the buffer leaked on every path END_DB rethrows on. A vector frees on both
+    // paths and removes the manual delete entirely.
+    vector<char> query(size);
+
+    snprintf(&query[0], size, QueryTemplate.c_str(), getDBLevelFieldName().c_str(), getDBGoalExpFieldName().c_str(),
              getDBAccumExpFieldName().c_str(), getDBTableName().c_str(), getDBQueryCondition().c_str());
 
-    Statement* pStmt;
+    // Was uninitialised: END_DB below does delete STMT on the catch path, which
+    // createStatement() itself can reach, so a throw there deleted an
+    // indeterminate pointer.
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        Result* pResult = pStmt->executeQuery(query);
+
+        // executeQuery() is printf-style variadic (database/Statement.h:44), so
+        // handing it a runtime-built buffer makes that buffer the *format
+        // string*: a '%' arriving from a table or field name would be read as a
+        // conversion specifier against no argument. The SQL is already fully
+        // expanded by the snprintf above, so use the non-format overload.
+        Result* pResult = pStmt->executeQueryString(&query[0]);
 
         while (pResult->next()) {
             LevelType level = pResult->getInt(1);
             Assert(level >= MinLevel);
             Assert(level <= MaxLevel);
+
+            // Real check as well as the Asserts: this indexes a heap vector with
+            // a value that comes from the database, and Assert vanishes under
+            // NDEBUG. Widened to long so the comparison is not tautological when
+            // LevelType is unsigned and MinLevel is 0. Debug behaviour is
+            // unchanged -- the Asserts above still throw first.
+            const long checkedLevel = static_cast<long>(level);
+            if (checkedLevel < static_cast<long>(MinLevel) || checkedLevel > static_cast<long>(MaxLevel))
+                continue;
+
             m_Records[level].m_GoalExp = pResult->getInt(2);
             m_Records[level].m_AccumExp = pResult->getInt(3);
         }
@@ -90,8 +120,6 @@ void ExpTable<GoalExpType, LevelType, MinLevel, MaxLevel, TotalExpType>::load() 
         SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
-
-    SAFE_DELETE(query);
 
     __END_CATCH
 }
@@ -122,7 +150,7 @@ public:
     bool levelUp();
     bool levelDown();
 
-    
+
     bool SET_LEVEL(LevelType level);
 
 private:

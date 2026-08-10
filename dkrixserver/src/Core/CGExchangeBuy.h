@@ -51,7 +51,8 @@ public:
     PacketID_t getPacketID() const { return Packet::PACKET_CG_EXCHANGE_BUY; }
     PacketSize_t getPacketMaxSize() const {
         return sizeof(uint64_t) + // listingID
-               64;                 // idempotencyKey (max 64 chars)
+               szBYTE +           // idempotencyKey length prefix
+               64;                // idempotencyKey (max 64 chars)
     }
 };
 

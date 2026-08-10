@@ -209,7 +209,7 @@ ss -ltnp | grep -E ':(9977|9998|9999)\s'
   not created for the `localhost` host. Rerun the `CREATE USER
   'elcastle'@'localhost'` block from step 1 section 3.
 - **"Unknown database 'DARKEDEN'"** — the schema dump didn't land.
-  Reverify with `mysql -u elcastle -pelca110 -e "SHOW DATABASES;"`.
+  Reverify with `mysql -u elcastle -ppassword -e "SHOW DATABASES;"`.
 - **Segfault on startup with Xerces error** — XML config somewhere
   (not the `.conf`; there's a separate XML file for item data).
   Check `dkrixserver/data/` for `.xml` files and look at the

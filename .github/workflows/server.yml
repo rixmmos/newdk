@@ -4,12 +4,26 @@ name: Server (dkrixserver)
 # verification path from the workspace-root CLAUDE.md, run on every push instead of
 # only on this workstation.
 
+# Trigger policy [changed 2026-08-10]. The branch allowlist was
+# [main, "modernize/**"]. `fix/bug-18b-loginserver-result-uaf` matched
+# neither and no PR existed, so all 27 commits of the Phase 18 security
+# work — every one of them a fix to a crash or a memory-safety defect —
+# were never built by CI at all. Two format-only commits were written on
+# that branch to satisfy a gate that never ran.
+#
+# The allowlist is now gone rather than extended with `fix/**`. Adding a
+# pattern only moves the trap: the next branch prefix nobody thought of
+# fails exactly the same way, silently, and the failure is invisible
+# precisely when it matters (a branch created in a hurry to fix
+# something). This repo is public, so Actions minutes are free, and the
+# `paths:` filter below still skips docs-only pushes. Running on every
+# branch costs runner time; not running is how 27 unbuilt commits happen.
 on:
   push:
-    branches: [main, "modernize/**"]
     paths:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
+      - "tools/ci/**"
       # The packet-duplicates ratchet reads this client dir too; without
       # this filter a client-side packet add would skip the gate.
       - "dkrix/Client/Packet/Cpackets/**"
@@ -18,7 +32,10 @@ on:
     paths:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
+      - "tools/ci/**"
       - "dkrix/Client/Packet/Cpackets/**"
+  # Push-triggered runs have lagged 20+ minutes; workflow_dispatch returns
+  # in seconds. Keep it on every workflow.
   workflow_dispatch:
 
 # NOTE: working-directory is set per-job, NOT at workflow level. A workflow-level
@@ -186,6 +203,131 @@ jobs:
             echo "ok: bin/$b"
           done
 
+  boot-asan:
+    # WHAT THIS JOB IS, HONESTLY: it boots the three servers under
+    # AddressSanitizer against a freshly seeded MySQL and asserts each one
+    # reaches its listening socket with no sanitizer report. That is all.
+    # It does NOT log in, does NOT send a packet, and does NOT exercise a
+    # single handler.
+    #
+    # It exists because the `sanitizers` matrix above is build-only, and a
+    # build-only ASan job cannot catch anything ASan is for — ASan reports
+    # at runtime. Two green ASan builds sat in CI while every login
+    # segfaulted (docs/SECURITY-AUDIT-2026-08-10.md §4).
+    #
+    # Boot is not a small slice of this tree. Of the fourteen Phase 18
+    # bugs, five fire before the listening socket: 18-A (malformed SQL
+    # literal, killed the gameserver in KeyInfoManager::load()), 18-D
+    # (`new char[]` freed with plain `delete` in Zone.cpp), 18-E (4-byte
+    # heap overflow in ExpTable on every boot), 18-J (PetAttrInfo writing
+    # into unconstructed storage) and 18-L (uninitialised
+    # GameServerPlayer* array in the sharedserver). This job would have
+    # caught all five. It would have caught none of 18-B, 18-C, 18-G,
+    # 18-H, 18-I or 18-N, which all need a client on the wire.
+    #
+    # The packet driver that would close that gap is specified in
+    # docs/ci-runtime-sanitizer-plan.md. It is not implemented.
+    name: boot under asan (boot-only, no packets)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # NON-BLOCKING on introduction, same flip rule the sanitizer matrix
+    # uses (MODERNIZATION.md Phase 10 bullet 3): becomes blocking after
+    # >=5 consecutive green runs of this leg. It has never run. The parts
+    # of it that could be tested off a runner were: the boot/wait/assert
+    # logic was fault-injected locally on 2026-08-10 (server dies before
+    # binding; sanitizer report present; port already squatted; all-clear)
+    # and behaves. What has NOT been tested anywhere is whether the real
+    # servers reach a listening socket on a runner at all — in particular
+    # whether the gameserver blocks on the billing or log server its conf
+    # names, neither of which exists here.
+    continue-on-error: true
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          # Local to this ephemeral service container, reachable only from
+          # this job, destroyed when the job ends. Not a credential.
+          MYSQL_ROOT_PASSWORD: ci-root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libmysqlclient-dev \
+            liblua5.1-0-dev \
+            libxerces-c-dev \
+            libnsl-dev \
+            mysql-client
+
+      - name: Cache ASan build tree
+        uses: actions/cache@v4
+        with:
+          path: dkrixserver/build-asan
+          key: server-build-asan-${{ runner.os }}-${{ hashFiles('dkrixserver/**/CMakeLists.txt') }}
+          restore-keys: server-build-asan-${{ runner.os }}-
+
+      - name: Build (debug-asan)
+        working-directory: dkrixserver
+        run: make debug-asan
+
+      # Seeds DARKEDEN + USERINFO from dkrixserver/initdb/ — the same
+      # dumps docker/docker-compose.yml mounts — and repoints the
+      # WorldDBInfo rows, which ship pointing at the compose service name
+      # `odk-mysql`.
+      - name: Seed database
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root
+          DB_HOST: 127.0.0.1
+        run: bash dkrixserver/scripts/ci-boot-smoke.sh seed
+
+      # Materialises conf/*.conf from the tracked *.conf.template files
+      # (the real ones are untracked; they carry credentials) and rewrites
+      # HomePath to this checkout.
+      - name: Write configs
+        run: bash dkrixserver/scripts/ci-boot-smoke.sh conf
+
+      - name: Boot all three under ASan
+        env:
+          DKRIX_DB_HOST: 127.0.0.1
+          DKRIX_DB_USER: elcastle
+          DKRIX_DB_PASSWORD: password
+          DKRIX_UI_DB_HOST: 127.0.0.1
+          DKRIX_UI_DB_USER: elcastle
+          DKRIX_UI_DB_PASSWORD: password
+          DKRIX_DIST_DB_HOST: 127.0.0.1
+          DKRIX_DIST_DB_USER: elcastle
+          DKRIX_DIST_DB_PASSWORD: password
+          DKRIX_LOGIN_SERVER_IP: 127.0.0.1
+          DKRIX_SHARED_SERVER_IP: 127.0.0.1
+          DKRIX_BILLING_SERVER_IP: 127.0.0.1
+          DKRIX_LOG_SERVER_IP: 127.0.0.1
+          DKRIX_MONITOR_CLIENT_IP1: 127.0.0.1
+          DKRIX_MONITOR_CLIENT_IP2: 127.0.0.1
+          BOOT_TIMEOUT: 420
+        run: bash dkrixserver/scripts/ci-boot-smoke.sh boot
+
+      - name: Upload server and sanitizer logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boot-asan-logs
+          path: dkrixserver/ci-boot-logs/
+          if-no-files-found: warn
+          retention-days: 14
+
   format:
     name: clang-format
     runs-on: ubuntu-latest
@@ -208,9 +350,25 @@ jobs:
           which clang-format
           clang-format --version
 
-      # Only checks files this change actually touched, so the existing
-      # unformatted backlog does not block every PR.
-      - name: Check changed C++ files
+      # Changed LINES, not changed files [2026-08-10] — adopting the same
+      # tools/ci/clang-format-changed-lines.sh the client gate has used
+      # since 2026-08-09.
+      #
+      # The whole-file form this replaces was a tax on touching legacy
+      # code: Zone.cpp carried 535 pre-existing violations and
+      # CLSelectPCHandler 16, so a three-line use-after-free fix demanded a
+      # 1,188-line reformat first. That is exactly backwards — it makes the
+      # cheapest safety fix the most expensive one, and it cost this branch
+      # two separate format-only commits (3ca03fe, c8fbd67).
+      #
+      # This is not a weaker gate for new code: every line the change
+      # actually adds or edits is still required to be clang-format clean,
+      # and the script refuses to pass when a non-empty change list
+      # inspects nothing. What it stops doing is charging an author for
+      # drift that was already in the file.
+      #
+      # The clang-format==18.1.8 pin above is load-bearing and must stay.
+      - name: Check changed C++ lines
         run: |
           # Base selection [fixed 2026-08-09] — same bug and same fix as
           # client.yml. On a push the range is github.event.before..HEAD, the
@@ -237,30 +395,10 @@ jobs:
             exit 0
           fi
 
-          checked=0
-          failed=0
-          for f in $changed; do
-            if [ ! -f "$f" ]; then
-              echo "::warning file=$f::listed as changed but not present in the worktree; skipped"
-              continue
-            fi
-            checked=$((checked + 1))
-            if ! diff -q "$f" <(clang-format "$f") >/dev/null; then
-              echo "::error file=$f::Not clang-format clean. Run 'make fmt' in dkrixserver/."
-              failed=1
-            fi
-          done
-
-          # Guard against the failure mode this job had before: if every file is
-          # skipped, the loop body never runs and the job passes green having
-          # verified nothing. A non-empty change list that checks zero files is
-          # a bug in this workflow, not a passing format check.
-          echo "Checked $checked of $(echo "$changed" | wc -l) changed file(s)."
-          if [ "$checked" -eq 0 ]; then
-            echo "::error::Change list was non-empty but no file was readable — path resolution is wrong in this workflow."
-            exit 1
-          fi
-          exit $failed
+          # Paths here are repo-relative and this step runs from the repo
+          # root (there is deliberately no workflow-level working-directory
+          # — see the NOTE at the top of this file), so they resolve as-is.
+          echo "$changed" | BASE="$base" bash tools/ci/clang-format-changed-lines.sh "server C++ file(s)"
 
   ratchets:
     name: ratchets
@@ -289,14 +427,38 @@ jobs:
       # re-chmods after COPY) is 100644 in HEAD despite being run as a
       # script. `sh script.sh` works regardless of the stored mode.
 
-      # Phase 8C ratchet. Counts variadic/format-string SQL API call
-      # sites (executeQuery/setStatement/Statement with a %[sdluxc]
-      # format spec) in compiled server sources. Baseline 542, measured
-      # fresh for this tree — the parked line's own baseline (567 at
-      # introduction, 540 by the tag tip) reflects PreparedStatement
-      # migrations (Phase 11) that do not exist here.
+      # Phase 8C ratchet. Counts every site where the SQL text handed to
+      # MySQL is assembled at runtime, in three separately-ratcheted
+      # categories: `format` (a variadic API vsprintf's caller values into
+      # the SQL), `stream` (StringStream + operator<< + .toString()), and
+      # `splice` (a C++ expression concatenated into the SQL text).
+      #
+      # Baseline 70/24/164 = 258 [measured 2026-08-10]. The previous
+      # revision counted only `format` and reported 70 while 188
+      # stream/splice sites sat next to it unseen — 41 of them in
+      # loginserver/ItemDestroyer.cpp, each splicing an ownerID straight
+      # into a quoted SQL literal. The `format` set is unchanged and
+      # byte-for-byte identical to what that revision reported; the other
+      # two categories are new coverage, not a re-interpretation.
       - name: SQL-injection ratchet
         run: sh dkrixserver/scripts/check-sql-injection.sh
+
+      # SQL literal syntax gate [new 2026-08-10]. Concatenates the adjacent
+      # string literals of every SQL call site exactly as the compiler
+      # would and checks the result: fused statements, keywords glued to
+      # the preceding word, stray `;`, missing statement verb, unbalanced
+      # parens/quotes, quoted `?`, and placeholder/bind-index mismatch.
+      #
+      # This is the gate whose absence let Bug 18-A ship — two SQL
+      # statements fused into one literal, which meant the gameserver
+      # could not boot at all for a day. Verified against that exact
+      # defect: run over `git show 9422e9c^:.../item/Key.cpp` it reports
+      # three independent errors and exits 1.
+      #
+      # Not a ratchet. Every finding is a real defect, so it fails on the
+      # first one.
+      - name: SQL literal syntax lint
+        run: sh dkrixserver/scripts/check-sql-literals.sh
 
       # Phase 12.0 ratchet. Counts filename-identical packet classes
       # duplicated between dkrixserver/src/Core/ and

@@ -13,7 +13,15 @@
 // class GameServerInfoManager member methods
 //////////////////////////////////////////////////////////////////////////////
 
-GameServerInfoManager::GameServerInfoManager() throw() {}
+GameServerInfoManager::GameServerInfoManager() throw() {
+    // This constructor was empty, leaving both members indeterminate -- the
+    // destructor and clear() use m_MaxServerGroupID as a loop bound and
+    // delete[] m_pGameServerInfos. (This class has no m_MaxWorldID; the
+    // gameserver copy does.) Same defect as the gameserver copy and as
+    // GameServerGroupInfoManager.
+    m_pGameServerInfos = NULL;
+    m_MaxServerGroupID = 0;
+}
 
 
 GameServerInfoManager::~GameServerInfoManager() throw() {

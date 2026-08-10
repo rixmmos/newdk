@@ -115,6 +115,10 @@ void CastleShrineInfoManager::load()
 
             addShrineSet(pShrineSet);
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

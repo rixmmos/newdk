@@ -929,7 +929,9 @@ void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* p
         remainTraceLog(pNewItem, pNPC->getName(), pCreature->getName(), ITEM_LOG_CREATE, DETAIL_SHOPBUY);
     }
 
-    Assert(pInventory->addItem(pNewItem, tp));
+    // Hoisted out of Assert(): NDEBUG would skip the call entirely.
+    bool bAdded = pInventory->addItem(pNewItem, tp);
+    Assert(bAdded);
 
     pNewItem->create(pPC->getName(), STORAGE_INVENTORY, 0, tp.x, tp.y);
 

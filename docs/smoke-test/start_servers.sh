@@ -13,7 +13,7 @@
 #
 # Assumes:
 #   - Binaries already built at dkrixserver/bin/{shared,login,game}server
-#   - MariaDB/MySQL reachable at 127.0.0.1:3306 as elcastle/elca110
+#   - MariaDB/MySQL reachable at 127.0.0.1:3306 as elcastle/password
 #   - DARKEDEN and USERINFO dbs exist with schemas loaded
 #   - conf/*.conf already patched to 127.0.0.1
 #

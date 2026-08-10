@@ -1,6 +1,6 @@
 -- Test Player account for DarkEden smoke-test login.
 -- Run against DARKEDEN db:
---   mysql -uelcastle -pelca110 DARKEDEN < /mnt/c/dev/newdk/create_test_account.sql
+--   mysql -uelcastle -ppassword DARKEDEN < /mnt/c/dev/newdk/create_test_account.sql
 --
 -- Login creds: testuser / testpass
 -- (loginserver.conf has IsNetMarble=0, so the auto-insert branch

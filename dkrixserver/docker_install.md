@@ -63,11 +63,19 @@ docker build . -t darkeden:latest -f Dockerfile.pub
 
 ### Run using docker-compose
 
+`docker-compose.yml` holds no credentials since 2026-08-10 — this
+repository is public. Create your `.env` first, or compose will abort and
+tell you to:
 
 ```sh
 cd docker
+cp .env.example .env
+$EDITOR .env            # set MYSQL_ROOT_PASSWORD and the three DKRIX_* values
 docker-compose up -d
 ```
+
+If you set `DKRIX_DB_PASSWORD` to anything other than `password`, also fix
+the seeded `WorldDBInfo` row — see the note in `.env.example`.
 
 Login to server container:
 
@@ -103,7 +111,7 @@ docker-compose down
 ### Login to the MySQL
 
 ```sh
-docker exec -it docker_odk-mysql_1 mysql -u elcastle -pelca110
+docker exec -it docker_odk-mysql_1 mysql -u elcastle -ppassword
 ```
 
 ```SQL

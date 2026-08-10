@@ -272,6 +272,9 @@ public:
         m_PhoneNumber = PhoneNumber;
     }
 
+    // Both bounds-check SlotID against MAX_PHONE_SLOT at the accessor: it
+    // arrives from client packets as a raw BYTE and m_PhoneSlot holds 3.
+    // See the notes on the definitions in Slayer.cpp.
     PhoneNumber_t getPhoneSlotNumber(SlotID_t SlotID);
     void setPhoneSlotNumber(SlotID_t SlotID, PhoneNumber_t PhoneNumber);
     SlotID_t getSlotWithPhoneNumber(PhoneNumber_t PhoneNumber);
@@ -459,18 +462,43 @@ public:
     
     //////////////////////////////////////////////////////////////
 public:
+    // Part arrives from client packets cast straight from a BYTE (0-255) while
+    // m_pWearItem holds WEAR_MAX entries, so this is bounds-checked here rather
+    // than at each call site -- several handlers passed it through unchecked.
+    // A real runtime check, not Assert(), so it survives a Release build.
     bool isWear(WearPart Part) {
+        if (Part < 0 || Part >= WEAR_MAX)
+            return false;
+
         return m_pWearItem[Part] != NULL ? true : false;
     }
     void addWearItem(WearPart Part, Item* pItem) {
-        Assert(m_pWearItem[Part] = NULL);
+        // Was `Assert(m_pWearItem[Part] = NULL)` -- an assignment, not a
+        // comparison. It nulled the slot and then asserted on NULL, so in Debug
+        // this threw unconditionally and in Release the check vanished along
+        // with the write. Vampire and Ousters do not carry the typo.
+        if (Part < 0 || Part >= WEAR_MAX)
+            return;
+
+        Assert(m_pWearItem[Part] == NULL);
         m_pWearItem[Part] = pItem;
     }
     void deleteWearItem(WearPart Part) {
+        // The last unguarded write accessor for m_pWearItem. isWear,
+        // getWearItem, addWearItem and takeOffItem were all bounds-checked;
+        // this one was missed, so the stated invariant ("wear-part indices are
+        // checked here rather than at each call site") was not actually true.
+        // Callers pass server-side values today, but the check belongs here.
+        if (Part < 0 || Part >= WEAR_MAX)
+            return;
+
         Assert(m_pWearItem[Part] != NULL);
         m_pWearItem[Part] = NULL;
     }
     Item* getWearItem(WearPart Part) {
+        if (Part < 0 || Part >= WEAR_MAX)
+            return NULL;
+
         return m_pWearItem[Part];
     }
     void wearItem(WearPart Part);

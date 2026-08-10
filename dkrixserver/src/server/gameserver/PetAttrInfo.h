@@ -15,18 +15,31 @@ class PetInfo;
 class PetAttrInfo {
 public:
     PetAttrInfo(PetAttr_t PetAttr) : m_PetAttr(PetAttr) {
-        m_PetAttrLevels.reserve(PetMaxLevel);
-        m_PetAttrLevels.clear();
+        // reserve() sets capacity, not size, and clear() then leaves size 0 --
+        // so every m_PetAttrLevels[PetLevel] below wrote into unconstructed
+        // storage. AddressSanitizer reports a heap-buffer-overflow WRITE in
+        // setPetAttrLevel during PetAttrInfoManager::load(). assign() gives the
+        // vector a real size. PetMaxLevel + 1 because levels are 0-based and
+        // inclusive: PetAttrBalanceInfo carries Level 0..50 [measured].
+        m_PetAttrLevels.assign(PetMaxLevel + 1, 0);
         m_EnchantRatio = 0;
     }
     PetAttr_t getPetAttr() const {
         return m_PetAttr;
     }
 
+    // Bounds-checked: PetLevel comes from a database column, so a bad row must
+    // not corrupt the heap. Real runtime checks, not Assert().
     PetAttrLevel_t getPetAttrLevel(PetLevel_t PetLevel) {
+        if (PetLevel >= m_PetAttrLevels.size())
+            return 0;
+
         return m_PetAttrLevels[PetLevel];
     }
     void setPetAttrLevel(PetLevel_t PetLevel, PetAttrLevel_t PetAttrLevel) {
+        if (PetLevel >= m_PetAttrLevels.size())
+            return;
+
         m_PetAttrLevels[PetLevel] = PetAttrLevel;
     }
 

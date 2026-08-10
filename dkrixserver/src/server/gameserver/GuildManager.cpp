@@ -88,6 +88,12 @@ void GuildManager::init()
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
+        // A PreparedStatement owns the Result that execute() hands back and deletes
+        // it in its destructor, so each Result is bound to the scope of the statement
+        // that produced it. The inner queries below therefore take their own local
+        // Result* instead of reassigning the outer pResult, which would leave it
+        // dangling past the branch's closing brace -- the shape that made Bug 18-B a
+        // use-after-free in CLLoginHandler.
         PreparedStatement countStmt(pConn, "SELECT COUNT(*) FROM GuildInfo");
         Result* pResult = countStmt.execute();
 
@@ -99,9 +105,9 @@ void GuildManager::init()
         } else {
             // get & set MaxGuildID
             PreparedStatement maxIdStmt(pConn, "SELECT MAX(GuildID) FROM GuildInfo");
-            pResult = maxIdStmt.execute();
-            pResult->next();
-            Guild::setMaxGuildID(pResult->getInt(1));
+            Result* pMaxIdResult = maxIdStmt.execute();
+            pMaxIdResult->next();
+            Guild::setMaxGuildID(pMaxIdResult->getInt(1));
         }
 
         PreparedStatement slayerCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
@@ -115,9 +121,9 @@ void GuildManager::init()
             // get & set MaxSlayerZoneID
             PreparedStatement slayerZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
             slayerZoneStmt.bindInt(1, Guild::GUILD_RACE_SLAYER);
-            pResult = slayerZoneStmt.execute();
-            pResult->next();
-            Guild::setMaxSlayerZoneID(max(pResult->getInt(1), Guild::getMaxSlayerZoneID() + 1));
+            Result* pSlayerZoneResult = slayerZoneStmt.execute();
+            pSlayerZoneResult->next();
+            Guild::setMaxSlayerZoneID(max(pSlayerZoneResult->getInt(1), Guild::getMaxSlayerZoneID() + 1));
         }
 
         PreparedStatement vampireCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
@@ -131,9 +137,9 @@ void GuildManager::init()
             // get & set MaxVampireZoneID
             PreparedStatement vampireZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
             vampireZoneStmt.bindInt(1, Guild::GUILD_RACE_VAMPIRE);
-            pResult = vampireZoneStmt.execute();
-            pResult->next();
-            Guild::setMaxVampireZoneID(max(pResult->getInt(1), Guild::getMaxVampireZoneID() + 1));
+            Result* pVampireZoneResult = vampireZoneStmt.execute();
+            pVampireZoneResult->next();
+            Guild::setMaxVampireZoneID(max(pVampireZoneResult->getInt(1), Guild::getMaxVampireZoneID() + 1));
         }
 
         PreparedStatement oustersCountStmt(pConn, "SELECT COUNT(*) FROM GuildInfo WHERE GuildRace = ?");
@@ -147,9 +153,9 @@ void GuildManager::init()
             // get & set MaxOustersZoneID
             PreparedStatement oustersZoneStmt(pConn, "SELECT MAX(GuildZoneID) FROM GuildInfo WHERE GuildRace = ?");
             oustersZoneStmt.bindInt(1, Guild::GUILD_RACE_OUSTERS);
-            pResult = oustersZoneStmt.execute();
-            pResult->next();
-            Guild::setMaxOustersZoneID(max(pResult->getInt(1), Guild::getMaxOustersZoneID() + 1));
+            Result* pOustersZoneResult = oustersZoneStmt.execute();
+            pOustersZoneResult->next();
+            Guild::setMaxOustersZoneID(max(pOustersZoneResult->getInt(1), Guild::getMaxOustersZoneID() + 1));
         }
     }
     END_DB(pStmt)

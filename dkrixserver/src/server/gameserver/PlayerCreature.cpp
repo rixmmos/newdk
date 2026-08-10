@@ -1356,14 +1356,27 @@ GCMonsterKillQuestInfo::QuestInfo* PlayerCreature::getPetQuestInfo() const {
     return pQI;
 }
 
+// Both accessors were guarded only by Assert(idx >= 0 && idx <= MAX_PET_STASH),
+// which is off by one -- m_PetStash holds exactly MAX_PET_STASH elements, so
+// idx == MAX_PET_STASH was admitted -- and vanishes under NDEBUG. The two CG
+// handlers do bound getIndex(), but PetItem::whenPCLoad passes a StorageID
+// straight from the item row. Real checks here, mirroring the Inventory/
+// getWearItem accessors: the getter returns NULL, the mutator does nothing.
 void PlayerCreature::addPetStashItem(int idx, Item* pPetItem) {
     Assert(pPetItem == NULL || pPetItem->getItemClass() == Item::ITEM_CLASS_PET_ITEM);
-    Assert(idx >= 0 && idx <= MAX_PET_STASH);
+
+    if (idx < 0 || idx >= MAX_PET_STASH)
+        return;
+
+    Assert(idx >= 0 && idx < MAX_PET_STASH);
     m_PetStash[idx] = pPetItem;
 }
 
 Item* PlayerCreature::getPetStashItem(int idx) {
-    Assert(idx >= 0 && idx <= MAX_PET_STASH);
+    if (idx < 0 || idx >= MAX_PET_STASH)
+        return NULL;
+
+    Assert(idx >= 0 && idx < MAX_PET_STASH);
     return m_PetStash[idx];
 }
 

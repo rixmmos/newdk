@@ -10,6 +10,7 @@
 
 #include <list>
 
+#include "Exception.h"
 #include "InventorySlot.h"
 #include "Item.h"
 #include "Types.h"
@@ -128,7 +129,17 @@ public:
 public:
     Item* getItem(CoordInven_t X, CoordInven_t Y) const;
 
+    // Bounds-checked at the accessor rather than at each call site. X/Y reach
+    // here straight from client packets (CoordInven_t is a BYTE, so 0-255) and
+    // m_pInventorySlot is only m_Width pointers wide, so an unchecked X
+    // dereferences a wild pointer rather than merely reading a neighbouring
+    // slot. Enforcing it here means no present or future caller can get it
+    // wrong; several already did. This is a real runtime check on purpose --
+    // Assert() would vanish under NDEBUG.
     InventorySlot& getInventorySlot(CoordInven_t X, CoordInven_t Y) const {
+        if (X >= m_Width || Y >= m_Height)
+            throw OutOfBoundException("Inventory::getInventorySlot: coordinates out of range");
+
         return m_pInventorySlot[X][Y];
     }
 

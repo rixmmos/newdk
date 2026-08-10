@@ -17,6 +17,15 @@ void CGConnect::read(SocketInputStream& iStream)
     // read PC type
     BYTE pcType;
     iStream.read(pcType);
+
+    // SECURITY: PCType defines three values but this is a raw wire BYTE, so
+    // 0-255 arrives here. It is then indexed into the three-entry
+    // PCType2String[] by toString(), which SocketInputStream::readPacket()
+    // calls on every packet -- before this connection is authenticated.
+    // Reject it at the wire boundary, the same way the name length below is.
+    if (pcType > PC_OUSTERS)
+        throw InvalidProtocolException("invalid pc type");
+
     m_PCType = PCType(pcType);
 
     // read PC name
@@ -78,8 +87,18 @@ void CGConnect::execute(Player* pPlayer)
 string CGConnect::toString() const
 
 {
+    // SECURITY: bounded independently of read()'s check above. toString() is
+    // called by SocketInputStream::readPacket() on every packet received, so
+    // it must not be able to fault whatever reaches it -- and it is also
+    // called on locally built CGConnects (LCReconnectHandler) whose PCType
+    // never went through read(). "UNKNOWN" matches CGLearnSkill::toString().
+    const unsigned int pcTypeIndex = (unsigned int)m_PCType;
+    string pcType = "UNKNOWN";
+    if (pcTypeIndex <= (unsigned int)PC_OUSTERS)
+        pcType = PCType2String[pcTypeIndex];
+
     StringStream msg;
     msg << "CGConnect("
-        << "KEY:" << m_Key << ",PCType:" << PCType2String[m_PCType] << ",PCName:" << m_PCName << ")";
+        << "KEY:" << m_Key << ",PCType:" << pcType << ",PCName:" << m_PCName << ")";
     return msg.toString();
 }

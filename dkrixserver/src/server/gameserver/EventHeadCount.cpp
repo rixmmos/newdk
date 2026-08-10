@@ -67,6 +67,10 @@ void EventHeadCount::activate()
         pStmt->executeQuery(
             "INSERT INTO HeadCount (Name, Time, FirstLevel, LastLevel, HeadCount) VALUES ('%s', now(), %u, %u, %u)",
             pPC->getName().c_str(), m_LastLevel, level, m_Count);
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns on every call.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
