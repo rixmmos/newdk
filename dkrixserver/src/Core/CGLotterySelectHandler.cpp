@@ -60,16 +60,25 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
     switch (pPacket->getType()) {
     case TYPE_SELECT_LOTTERY: {
         // Check quest status for lottery rewards
-        QuestID_t qID;
+        QuestID_t qID = 0;
         EventQuestAdvance::Status status =
             pPC->getQuestManager()->getEventQuestAdvanceManager()->getStatus(pPacket->getQuestLevel());
         int ownerQuestLevel = pPC->getQuestManager()->getEventQuestAdvanceManager()->getQuestLevel();
-        if ((ownerQuestLevel > pPacket->getQuestLevel() && status == EventQuestAdvance::EVENT_QUEST_ADVANCED) ||
-            (pPacket->getQuestLevel() == 4 && ownerQuestLevel == -1) ||
-            pPC->getQuestManager()->successEventQuest(pPacket->getQuestLevel(), qID)) {
+        // Only successEventQuest() assigns qID. The other two ways in short-circuit
+        // before it is called, leaving qID unassigned -- and questRewarded() erases
+        // whatever quest that ID names. Same defect as ActionGiveLotto::execute().
+        // The evaluation order is unchanged from the original || chain.
+        const bool bAlreadyAdvanced =
+            (ownerQuestLevel > pPacket->getQuestLevel() && status == EventQuestAdvance::EVENT_QUEST_ADVANCED);
+        const bool bFinalLevelNotStarted =
+            (!bAlreadyAdvanced && pPacket->getQuestLevel() == 4 && ownerQuestLevel == -1);
+        const bool bQuestSucceeded = (!bAlreadyAdvanced && !bFinalLevelNotStarted &&
+                                      pPC->getQuestManager()->successEventQuest(pPacket->getQuestLevel(), qID));
+        if (bAlreadyAdvanced || bFinalLevelNotStarted || bQuestSucceeded) {
             pPC->getQuestManager()->getEventQuestAdvanceManager()->rewarded(pPacket->getQuestLevel());
             pPC->getQuestManager()->getEventQuestAdvanceManager()->save();
-            pPC->getQuestManager()->questRewarded(qID);
+            if (bQuestSucceeded)
+                pPC->getQuestManager()->questRewarded(qID);
             pPC->sendCurrentQuestInfo();
 
             list<Item*> iList;

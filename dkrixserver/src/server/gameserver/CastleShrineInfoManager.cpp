@@ -366,7 +366,10 @@ bool CastleShrineInfoManager::isDefenderOfGuardShrine(PlayerCreature* pPC, Monst
 
 
     ZoneID_t guardZoneID = pZone->getZoneID();
-    ZoneID_t castleZoneID;
+    // Initialised because getCastleZoneID() leaves the out-param untouched when it
+    // returns false; the Assert below is compiled out under NDEBUG, so castleZoneID
+    // would otherwise be read indeterminate in a release build.
+    ZoneID_t castleZoneID = 0;
 
     bool isCastle = g_pCastleInfoManager->getCastleZoneID(guardZoneID, castleZoneID);
     Assert(isCastle == true);
@@ -413,7 +416,10 @@ bool CastleShrineInfoManager::canPickupCastleSymbol(Race_t race, CastleSymbol* p
     }
 
     ZoneID_t guardZoneID = pShrineSet->m_GuardShrine.getZoneID();
-    ZoneID_t castleZoneID;
+    // Initialised because getCastleZoneID() leaves the out-param untouched when it
+    // returns false; the Assert below is compiled out under NDEBUG, so castleZoneID
+    // would otherwise be read indeterminate in a release build.
+    ZoneID_t castleZoneID = 0;
 
     bool isCastle = g_pCastleInfoManager->getCastleZoneID(guardZoneID, castleZoneID);
     Assert(isCastle == true);
@@ -626,7 +632,10 @@ bool CastleShrineInfoManager::putCastleSymbol(PlayerCreature* pPC, Item* pItem, 
         return false;
 
     ZoneID_t guardZoneID = pShrineSet->m_GuardShrine.getZoneID();
-    ZoneID_t castleZoneID;
+    // Initialised because getCastleZoneID() leaves the out-param untouched when it
+    // returns false; the Assert below is compiled out under NDEBUG, so castleZoneID
+    // would otherwise be read indeterminate in a release build.
+    ZoneID_t castleZoneID = 0;
 
     bool isCastle = g_pCastleInfoManager->getCastleZoneID(guardZoneID, castleZoneID);
     Assert(isCastle == true);
