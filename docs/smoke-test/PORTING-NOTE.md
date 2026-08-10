@@ -133,17 +133,20 @@ misses this row breaks the server even with perfect conf files.
 | Table.column | Was (restore this) | Set to (smoke-test only) |
 |---|---|---|
 | `WorldDBInfo.Host` (both rows) | `odk-mysql` | `127.0.0.1` |
-| `WorldDBInfo.Password` (both rows) | `elca110` | the rotated password |
+| `WorldDBInfo.Password` (both rows) | the pre-rotation dev credential | the rotated password |
 | `GameServerInfo.IP` | `90.190.31.134` | `127.0.0.1` |
 
 `GameServerInfo.IP` is the address the login flow hands to clients as
 "where the gameserver is" — leaving it at `127.0.0.1` would send every
 tester to their own machine. Both tables are inside the full dumps above.
 
-**Credential note:** `WorldDBInfo.Password` still held `elca110` on
-2026-08-10 — the value published in the public repo — i.e. the 2026-08-09
-rotation had not reached the container's `elcastle` user or this row.
-Both were rotated during run 1. `docker-compose.yml`'s
+**Credential note:** `WorldDBInfo.Password` still held the old dev
+credential on 2026-08-10 — the value published in the public repo — i.e.
+the 2026-08-09 rotation had not reached the container's `elcastle` user or
+this row. Both were rotated during run 1. That published value was swept
+out of every tracked file later the same day and replaced by the
+placeholder `password`; the seeded `WorldDBInfo` row in
+`initdb/DARKEDEN.sql` now carries the placeholder. `docker-compose.yml`'s
 `MYSQL_ROOT_PASSWORD: 123456` is likewise public and still current unless
 separately rotated.
 

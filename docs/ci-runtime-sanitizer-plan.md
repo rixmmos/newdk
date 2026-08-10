@@ -38,7 +38,7 @@ Nothing here needed inventing; the pieces were in the tree.
 | Piece | Where | State |
 |---|---|---|
 | Schema + content dumps | `dkrixserver/initdb/DARKEDEN.sql` (3.4 MB, 374 tables), `USERINFO.sql` | tracked |
-| DB/user/grant bootstrap | `dkrixserver/initdb/a-setup.sql` | tracked, creates `elcastle`/`elca110` |
+| DB/user/grant bootstrap | `dkrixserver/initdb/a-setup.sql` | tracked; grants `DARKEDEN`/`USERINFO` to `elcastle`. Since 2026-08-10 it no longer creates the account — the MySQL image does that from `MYSQL_USER`/`MYSQL_PASSWORD` |
 | A MySQL 5.7 + server compose file | `dkrixserver/docker/docker-compose.yml` | tracked; mounts `../initdb` as `docker-entrypoint-initdb.d` |
 | Config templates with `${DKRIX_*}` placeholders | `dkrixserver/conf/*.conf.template` | tracked; `Properties::load()` expands them from the environment (`src/Core/Properties.cpp:169`) |
 | Start ordering | `docker/start-servers.sh`, `docs/smoke-test/start_servers.sh` | shared → login → game |

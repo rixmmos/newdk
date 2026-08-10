@@ -2,7 +2,7 @@
 
 Goal: bring up a local MariaDB on WSL2, create the two databases the
 server expects (`DARKEDEN`, `USERINFO`), create user `elcastle`@`%` with
-password `elca110`, grant it privileges, and load the two schema dumps.
+password `password`, grant it privileges, and load the two schema dumps.
 
 Why MariaDB (not MySQL 8)? The dumps in `dkrixserver/initdb/` were taken
 from MySQL 5.7.35 and the server uses the libmysqlclient C API. MariaDB
@@ -12,7 +12,7 @@ and is a single-package install. MySQL 8.0 also works but enforces
 dumps trip on; if you already have MySQL 8 installed, skip to the
 "MySQL 8 notes" section at the bottom.
 
-Why user `elcastle` / password `elca110` and not `rixpass`? Those creds
+Why user `elcastle` / password `password` and not `rixpass`? Those creds
 are hardcoded in three server config files (`gameserver.conf`,
 `loginserver.conf`, `sharedserver.conf`) as `DB_USER` / `DB_PASSWORD` /
 `UI_DB_USER` / `UI_DB_PASSWORD` / `DIST_DB_USER` / `DIST_DB_PASSWORD`.
@@ -88,9 +88,9 @@ connects over TCP to 127.0.0.1:
 
 ```bash
 sudo mysql <<'SQL'
-CREATE USER IF NOT EXISTS 'elcastle'@'%'         IDENTIFIED BY '<db-password>';
-CREATE USER IF NOT EXISTS 'elcastle'@'localhost' IDENTIFIED BY '<db-password>';
-CREATE USER IF NOT EXISTS 'elcastle'@'127.0.0.1' IDENTIFIED BY '<db-password>';
+CREATE USER IF NOT EXISTS 'elcastle'@'%'         IDENTIFIED BY 'password';
+CREATE USER IF NOT EXISTS 'elcastle'@'localhost' IDENTIFIED BY 'password';
+CREATE USER IF NOT EXISTS 'elcastle'@'127.0.0.1' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'%';
 GRANT ALL PRIVILEGES ON USERINFO.* TO 'elcastle'@'%';
 GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'localhost';
@@ -101,17 +101,19 @@ FLUSH PRIVILEGES;
 SQL
 ```
 
-Substitute your own value for `<db-password>`. The rest of this runbook,
-the `conf/*.conf` bootstrap and `DARKEDEN.sql`'s seeded `WorldDBInfo` row
-still carry the historical throwaway value inline; it is published and
-therefore burned. Never use it for anything a network can reach, and
-never reuse it for the live server. Replacing it everywhere is a single
-coordinated pass across ~40 sites — tracked as follow-up, not done here.
+`password` is the placeholder this runbook uses end to end — the rest of
+these steps, the `conf/*.conf` bootstrap and `DARKEDEN.sql`'s seeded
+`WorldDBInfo` row all use the same literal, so the whole procedure is
+copy-pasteable as written. It is a throwaway local-only value: never use
+it for anything a network can reach, and never reuse it for the live
+server. If you substitute your own value, change it in all four places.
+(The historical dev credential that used to appear inline here was swept
+out of every tracked file on 2026-08-10; it is published and burned.)
 
 Verify login as `elcastle`:
 
 ```bash
-mysql -h 127.0.0.1 -u elcastle -pelca110 -e "SHOW DATABASES;"
+mysql -h 127.0.0.1 -u elcastle -ppassword -e "SHOW DATABASES;"
 # expect to see DARKEDEN and USERINFO in the list
 ```
 
@@ -120,8 +122,8 @@ mysql -h 127.0.0.1 -u elcastle -pelca110 -e "SHOW DATABASES;"
 ```bash
 cd /mnt/c/dev/newdk/dkrixserver/initdb
 
-mysql -h 127.0.0.1 -u elcastle -pelca110 DARKEDEN < DARKEDEN.sql
-mysql -h 127.0.0.1 -u elcastle -pelca110 USERINFO < USERINFO.sql
+mysql -h 127.0.0.1 -u elcastle -ppassword DARKEDEN < DARKEDEN.sql
+mysql -h 127.0.0.1 -u elcastle -ppassword USERINFO < USERINFO.sql
 ```
 
 Expected: silent success. If you see warnings about `NO_AUTO_CREATE_USER`
@@ -131,14 +133,14 @@ and the dump's SET statement is a no-op.
 Verify row counts:
 
 ```bash
-mysql -h 127.0.0.1 -u elcastle -pelca110 DARKEDEN <<'SQL'
+mysql -h 127.0.0.1 -u elcastle -ppassword DARKEDEN <<'SQL'
 SHOW TABLES;
 SELECT COUNT(*) AS tables_in_DARKEDEN
   FROM information_schema.tables
   WHERE table_schema='DARKEDEN';
 SQL
 
-mysql -h 127.0.0.1 -u elcastle -pelca110 USERINFO <<'SQL'
+mysql -h 127.0.0.1 -u elcastle -ppassword USERINFO <<'SQL'
 SHOW TABLES;
 SELECT COUNT(*) AS tables_in_USERINFO
   FROM information_schema.tables
@@ -175,7 +177,7 @@ If you already have MySQL 8 installed, two gotchas:
    enough that MySQL 8's default `caching_sha2_password` auth plugin
    will reject it. Create the user with the legacy plugin instead:
    ```sql
-   CREATE USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'elca110';
+   CREATE USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
    ```
    Same for the `localhost` and `127.0.0.1` variants.
 

@@ -171,29 +171,29 @@ mysql_root < "$REPO_ROOT/dkrixserver/initdb/a-setup.sql"
 # 3.3 — flip elcastle to native_password (MySQL 8 legacy-client compatibility)
 echo "    flipping elcastle to mysql_native_password plugin..."
 mysql_root -e "
-    ALTER USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'elca110';
+    ALTER USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
     FLUSH PRIVILEGES;
 " >/dev/null
 
 # 3.4 — load schemas
 echo "    loading DARKEDEN.sql..."
-mysql -uelcastle -pelca110 DARKEDEN < "$REPO_ROOT/dkrixserver/initdb/DARKEDEN.sql" 2>&1 \
+mysql -uelcastle -ppassword DARKEDEN < "$REPO_ROOT/dkrixserver/initdb/DARKEDEN.sql" 2>&1 \
     | grep -Ev '^(mysql: \[Warning\]|Warning)' || true
 
 echo "    loading USERINFO.sql..."
-mysql -uelcastle -pelca110 USERINFO < "$REPO_ROOT/dkrixserver/initdb/USERINFO.sql" 2>&1 \
+mysql -uelcastle -ppassword USERINFO < "$REPO_ROOT/dkrixserver/initdb/USERINFO.sql" 2>&1 \
     | grep -Ev '^(mysql: \[Warning\]|Warning)' || true
 
 # 3.5 — patch WorldDBInfo hostname
 echo "    patching WorldDBInfo hostname to 127.0.0.1..."
-mysql -uelcastle -pelca110 DARKEDEN -e "
+mysql -uelcastle -ppassword DARKEDEN -e "
     UPDATE WorldDBInfo SET HostName='127.0.0.1' WHERE HostName='odk-mysql';
     SELECT WorldID, HostName, DBName FROM WorldDBInfo;
 " 2>&1 | grep -Ev '^(mysql: \[Warning\])' || true
 
 # 3.6 — verify GameServerInfo
 echo "    verifying GameServerInfo..."
-mysql -uelcastle -pelca110 DARKEDEN -e "SELECT * FROM GameServerInfo;" 2>&1 \
+mysql -uelcastle -ppassword DARKEDEN -e "SELECT * FROM GameServerInfo;" 2>&1 \
     | grep -Ev '^(mysql: \[Warning\])' || true
 
 #================================================================
@@ -234,15 +234,15 @@ export DKRIX_DB_HOST=127.0.0.1
 export DKRIX_DB_PORT=3306
 export DKRIX_DB_NAME=DARKEDEN
 export DKRIX_DB_USER=elcastle
-export DKRIX_DB_PASSWORD=elca110
+export DKRIX_DB_PASSWORD=password
 export DKRIX_UI_DB_HOST=127.0.0.1
 export DKRIX_UI_DB_NAME=USERINFO
 export DKRIX_UI_DB_USER=elcastle
-export DKRIX_UI_DB_PASSWORD=elca110
+export DKRIX_UI_DB_PASSWORD=password
 export DKRIX_DIST_DB_HOST=127.0.0.1
 export DKRIX_DIST_DB_NAME=DARKEDEN
 export DKRIX_DIST_DB_USER=elcastle
-export DKRIX_DIST_DB_PASSWORD=elca110
+export DKRIX_DIST_DB_PASSWORD=password
 export DKRIX_BILLING_SERVER_IP=127.0.0.1
 ENV_EOF
 echo "    wrote ~/.dkrix-env"

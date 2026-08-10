@@ -355,9 +355,12 @@ per-area status doc, this file wins.
   `base`/`math`/`string` only (`b204ebd`), and the four enum-cast sites
   go through range-checked `lua_toboundedenum<T>` (`9b1756f`). See
   Phase 9 for the build verification.
-- `conf/gameserver.conf` contains plaintext `DB_PASSWORD: elca110`,
+- `conf/gameserver.conf` contains a plaintext `DB_PASSWORD` line,
   dev IPs (`192.168.0.16`), and double-encoded Chinese comments from
-  a prior encoding migration.
+  a prior encoding migration. **[2026-08-10]** The `.conf` files are
+  untracked now (`conf/*.conf.template` + `${DKRIX_*}` expansion replace
+  them), and the burned dev credential was swept out of every tracked
+  file in favour of the placeholder `password`.
 
 ### Docs (`docs/`)
 - Mixed-language reference material (mostly Chinese filenames) plus

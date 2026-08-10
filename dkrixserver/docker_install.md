@@ -74,7 +74,7 @@ $EDITOR .env            # set MYSQL_ROOT_PASSWORD and the three DKRIX_* values
 docker-compose up -d
 ```
 
-If you set `DKRIX_DB_PASSWORD` to anything other than `elca110`, also fix
+If you set `DKRIX_DB_PASSWORD` to anything other than `password`, also fix
 the seeded `WorldDBInfo` row — see the note in `.env.example`.
 
 Login to server container:
@@ -111,7 +111,7 @@ docker-compose down
 ### Login to the MySQL
 
 ```sh
-docker exec -it docker_odk-mysql_1 mysql -u elcastle -pelca110
+docker exec -it docker_odk-mysql_1 mysql -u elcastle -ppassword
 ```
 
 ```SQL

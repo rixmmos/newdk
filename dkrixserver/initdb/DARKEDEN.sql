@@ -11565,7 +11565,7 @@ CREATE TABLE `WorldDBInfo` (
 
 LOCK TABLES `WorldDBInfo` WRITE;
 /*!40000 ALTER TABLE `WorldDBInfo` DISABLE KEYS */;
-INSERT INTO `WorldDBInfo` VALUES (0,'odk-mysql','DARKEDEN','elcastle','elca110',3306),(1,'odk-mysql','DARKEDEN','elcastle','elca110',3306);
+INSERT INTO `WorldDBInfo` VALUES (0,'odk-mysql','DARKEDEN','elcastle','password',3306),(1,'odk-mysql','DARKEDEN','elcastle','password',3306);
 /*!40000 ALTER TABLE `WorldDBInfo` ENABLE KEYS */;
 UNLOCK TABLES;
 

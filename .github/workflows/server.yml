@@ -303,13 +303,13 @@ jobs:
         env:
           DKRIX_DB_HOST: 127.0.0.1
           DKRIX_DB_USER: elcastle
-          DKRIX_DB_PASSWORD: elca110
+          DKRIX_DB_PASSWORD: password
           DKRIX_UI_DB_HOST: 127.0.0.1
           DKRIX_UI_DB_USER: elcastle
-          DKRIX_UI_DB_PASSWORD: elca110
+          DKRIX_UI_DB_PASSWORD: password
           DKRIX_DIST_DB_HOST: 127.0.0.1
           DKRIX_DIST_DB_USER: elcastle
-          DKRIX_DIST_DB_PASSWORD: elca110
+          DKRIX_DIST_DB_PASSWORD: password
           DKRIX_LOGIN_SERVER_IP: 127.0.0.1
           DKRIX_SHARED_SERVER_IP: 127.0.0.1
           DKRIX_BILLING_SERVER_IP: 127.0.0.1

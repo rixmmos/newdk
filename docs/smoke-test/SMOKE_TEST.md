@@ -113,15 +113,16 @@ cd ~/work/dkrix-upstream/dkrixserver/initdb
 # the account from MYSQL_USER/MYSQL_PASSWORD (docker/.env), so on a native
 # install you do it by hand. Run both as root.
 mysql -uroot -p < a-setup.sql
-mysql -uroot -p -e "CREATE USER IF NOT EXISTS 'elcastle'@'%' IDENTIFIED BY '<db-password>'; FLUSH PRIVILEGES;"
+mysql -uroot -p -e "CREATE USER IF NOT EXISTS 'elcastle'@'%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;"
 
 # Load the DARKEDEN and USERINFO schema dumps as the elcastle user.
-mysql -uelcastle -pelca110 DARKEDEN  < DARKEDEN.sql
-mysql -uelcastle -pelca110 USERINFO  < USERINFO.sql
+mysql -uelcastle -ppassword DARKEDEN  < DARKEDEN.sql
+mysql -uelcastle -ppassword USERINFO  < USERINFO.sql
 ```
 
-`elca110` is a throwaway local-only credential; it is published and
-therefore burned. See `STEP1_MYSQL.md` §3 for the fuller version,
+`password` is the placeholder credential this runbook uses throughout —
+throwaway and local-only. Never point it at anything a network can reach.
+See `STEP1_MYSQL.md` §3 for the fuller version,
 including the `localhost` / `127.0.0.1` grants MariaDB needs.
 
 You WILL see warnings ("Using a password on the command line interface can
@@ -135,7 +136,7 @@ service name from the Docker deploy). For a single-host local test, the
 three server binaries need to resolve the MySQL host as `127.0.0.1`:
 
 ```sh
-mysql -uelcastle -pelca110 DARKEDEN -e "
+mysql -uelcastle -ppassword DARKEDEN -e "
   UPDATE WorldDBInfo SET HostName='127.0.0.1' WHERE HostName='odk-mysql';
   SELECT * FROM WorldDBInfo;
 "
@@ -146,7 +147,7 @@ Both rows (WorldID 0 and 1) should now show `127.0.0.1` for HostName.
 ### 2.5 Verify GameServerInfo is ready
 
 ```sh
-mysql -uelcastle -pelca110 DARKEDEN -e "SELECT * FROM GameServerInfo;"
+mysql -uelcastle -ppassword DARKEDEN -e "SELECT * FROM GameServerInfo;"
 ```
 
 Expected: one row, ID=1, name `game1`, IP `127.0.0.1`, port 9998. If the
@@ -255,15 +256,15 @@ export DKRIX_DB_HOST=127.0.0.1
 export DKRIX_DB_PORT=3306
 export DKRIX_DB_NAME=DARKEDEN
 export DKRIX_DB_USER=elcastle
-export DKRIX_DB_PASSWORD=elca110
+export DKRIX_DB_PASSWORD=password
 export DKRIX_UI_DB_HOST=127.0.0.1
 export DKRIX_UI_DB_NAME=USERINFO
 export DKRIX_UI_DB_USER=elcastle
-export DKRIX_UI_DB_PASSWORD=elca110
+export DKRIX_UI_DB_PASSWORD=password
 export DKRIX_DIST_DB_HOST=127.0.0.1
 export DKRIX_DIST_DB_NAME=DARKEDEN
 export DKRIX_DIST_DB_USER=elcastle
-export DKRIX_DIST_DB_PASSWORD=elca110
+export DKRIX_DIST_DB_PASSWORD=password
 export DKRIX_BILLING_SERVER_IP=127.0.0.1
 ```
 
@@ -319,7 +320,7 @@ Expected readiness log: a GC/CG packet handler registration block then
 - "Access denied for user 'elcastle'@'localhost'" — the mysql user was
   created with `'elcastle'@'%'` but MySQL 8's auth plugin
   `caching_sha2_password` + localhost-bound client can wedge. Fix:
-  `mysql -uroot -p -e "ALTER USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'elca110'; FLUSH PRIVILEGES;"`
+  `mysql -uroot -p -e "ALTER USER 'elcastle'@'%' IDENTIFIED WITH mysql_native_password BY 'password'; FLUSH PRIVILEGES;"`
 - "Can't connect to MySQL server on '127.0.0.1'" — check
   `sudo systemctl status mysql`.
 - "Unknown database 'DARKEDEN'" — step 2.3 didn't run cleanly; paste
@@ -360,7 +361,7 @@ At the login screen: account `test` / password `test` is the legacy test
 credential but the row won't exist yet. Instead, create an account first:
 
 ```sh
-mysql -uelcastle -pelca110 USERINFO -e "
+mysql -uelcastle -ppassword USERINFO -e "
   INSERT INTO UserInfo (userID, password, status, regDate)
   VALUES ('smoketest', MD5('smoketest'), 0, NOW());
 "

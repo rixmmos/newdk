@@ -53,7 +53,7 @@
 #   DB_PORT            default 3306
 #   MYSQL_ROOT_USER    default root
 #   MYSQL_ROOT_PASSWORD  required for `seed`
-#   GAME_USER/GAME_PASSWORD  default elcastle/elca110 — these are the
+#   GAME_USER/GAME_PASSWORD  default elcastle/password — these are the
 #                      credentials baked into initdb/DARKEDEN.sql's
 #                      WorldDBInfo rows, not a secret and not the live ones
 #   BOOT_TIMEOUT       seconds to wait for each port, default 300
@@ -71,7 +71,7 @@ DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-3306}"
 MYSQL_ROOT_USER="${MYSQL_ROOT_USER:-root}"
 GAME_USER="${GAME_USER:-elcastle}"
-GAME_PASSWORD="${GAME_PASSWORD:-elca110}"
+GAME_PASSWORD="${GAME_PASSWORD:-password}"
 BOOT_TIMEOUT="${BOOT_TIMEOUT:-300}"
 BIN_DIR="${BIN_DIR:-$server_dir/bin}"
 LOG_DIR="${LOG_DIR:-$server_dir/ci-boot-logs}"
