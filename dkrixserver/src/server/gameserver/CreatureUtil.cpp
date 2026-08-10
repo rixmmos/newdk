@@ -950,8 +950,13 @@ bool isAbleToUseInventorySkill(Creature* pCreature, BYTE X, BYTE Y, BYTE TX, BYT
         return false;
 
 
-    // if (X >= 10 || Y >= 6 || TX >= 10 || TY >= 6) return false;
-    if (X >= 10 || Y >= 6)
+    // TX/TY are validated again. They are wire-controlled just like X/Y, and
+    // the Create* skills (CreateBomb, CreateMine, CreateHolyWater,
+    // CreateHolyPotion) index the inventory with the *target* coordinates --
+    // both to read and, via Inventory::addItem, to write. The combined check
+    // had been commented out in favour of an X/Y-only one, leaving TX/TY
+    // unvalidated on every one of those paths.
+    if (X >= 10 || Y >= 6 || TX >= 10 || TY >= 6)
         return false;
     if (pCreature->isFlag(Effect::EFFECT_CLASS_HIDE) || pCreature->isFlag(Effect::EFFECT_CLASS_CASKET) ||
         pCreature->isFlag(Effect::EFFECT_CLASS_COMA) || pCreature->isDead() ||

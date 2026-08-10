@@ -344,7 +344,12 @@ public:
     
     ////////////////////////////////////////////////////
 public:
+    // Bounds-checked here: Part comes from client packets as a raw BYTE.
+    // See the matching note in Slayer.h.
     bool isWear(WearPart Part) {
+        if (Part < 0 || Part >= VAMPIRE_WEAR_MAX)
+            return false;
+
         return m_pWearItem[Part] != NULL ? true : false;
     }
     void addWearItem(WearPart Part, Item* pItem) {
@@ -355,6 +360,9 @@ public:
         m_pWearItem[Part] = NULL;
     }
     Item* getWearItem(WearPart Part) {
+        if (Part < 0 || Part >= VAMPIRE_WEAR_MAX)
+            return NULL;
+
         return m_pWearItem[Part];
     }
 

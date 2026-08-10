@@ -907,6 +907,13 @@ Item* Inventory::getItem(CoordInven_t X, CoordInven_t Y) const
 {
     __BEGIN_TRY
 
+    // Out-of-range coordinates return NULL rather than throwing: every caller
+    // already handles "no item here", and a great many of them pass X/Y
+    // straight from a client packet without checking. Returning NULL turns a
+    // wild-pointer dereference into the ordinary empty-slot path.
+    if (X >= getWidth() || Y >= getHeight())
+        return NULL;
+
     InventorySlot& slot = getInventorySlot(X, Y);
     return slot.getItem();
 

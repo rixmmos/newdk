@@ -385,7 +385,12 @@ void CGSayHandler::opExecute(Creature* pCreature, GamePlayer* pGamePlayer, strin
         opcombat(pGamePlayer, msg, i);
     }
 
-    else if (msg.substr(i + 1, 4) == "find" || msg.substr(i + 1, 4) == "" && pCreature->isGOD()) {
+    // Parenthesised so isGOD() actually gates the command. `&&` binds tighter
+    // than `||`, so the original parsed as (=="find") || ("" && isGOD()) -- the
+    // privilege check applied only to the dead empty-string arm and any player
+    // could run *find. The other 34 commands in this dispatcher use the correct
+    // `&&` form; these three were typos.
+    else if ((msg.substr(i + 1, 4) == "find" || msg.substr(i + 1, 4) == "") && pCreature->isGOD()) {
         opfind(pGamePlayer, msg, i);
     }
 
@@ -468,13 +473,16 @@ void CGSayHandler::opExecute(Creature* pCreature, GamePlayer* pGamePlayer, strin
         }
     }
 
-    else if (msg.substr(i + 1, 10) == "OpenPayMap" || msg.substr(i + 1, 12) == "" && pCreature->isGOD()) {
+    // Same precedence fix as *find above: any player could toggle the pay-zone
+    // portal flag for everyone in zone 1013.
+    else if ((msg.substr(i + 1, 10) == "OpenPayMap" || msg.substr(i + 1, 12) == "") && pCreature->isGOD()) {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(1013);
         pZoneInfo->setNoPortalZone(true);
         GCSystemMessage gcSystemMessage;
         gcSystemMessage.setMessage("");
         pGamePlayer->sendPacket(&gcSystemMessage);
-    } else if (msg.substr(i + 1, 11) == "ClosePayMap" || msg.substr(i + 1, 12) == "" && pCreature->isGOD()) {
+        // Same precedence fix as *find / *OpenPayMap above.
+    } else if ((msg.substr(i + 1, 11) == "ClosePayMap" || msg.substr(i + 1, 12) == "") && pCreature->isGOD()) {
         ZoneInfo* pZoneInfo = g_pZoneInfoManager->getZoneInfo(1013);
         pZoneInfo->setNoPortalZone(false);
         GCSystemMessage gcSystemMessage1;
@@ -810,13 +818,13 @@ void CGSayHandler::opload(GamePlayer* pGamePlayer, string msg, int i) {
             pEvent = new EventReloadInfo(pGamePlayer, EventReloadInfo::MONSTER_INFO, SpriteType);
 
             if (SpriteType != 0) {
-                sprintf(msg, g_pStringPool->c_str(STRID_LOAD_MONSTER_INFO), load_value.c_str());
+                snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_LOAD_MONSTER_INFO), load_value.c_str());
 
             } else {
-                sprintf(msg, g_pStringPool->c_str(STRID_LOAD_ALL_MONSTER_INFO));
+                snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_LOAD_ALL_MONSTER_INFO));
             }
         } else {
-            sprintf(msg, g_pStringPool->c_str(STRID_LOAD_WRONG_MONSTER_INFO), load_value.c_str());
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_LOAD_WRONG_MONSTER_INFO), load_value.c_str());
         }
 
         gcSystemMessage.setMessage(msg);
@@ -877,7 +885,7 @@ void CGSayHandler::opload(GamePlayer* pGamePlayer, string msg, int i) {
 
 
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_LOAD_ITEM_INFO), load_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_LOAD_ITEM_INFO), load_value.c_str());
         gcSystemMessage.setMessage(msg);
     } else if (load_type == "option_info") {
         pEvent = new EventReloadInfo(pGamePlayer, EventReloadInfo::OPTION_INFO);
@@ -1002,7 +1010,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
     if (set_type == "star") {
         g_pVariableManager->setStar(atoi(set_value.c_str()));
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_STAR_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_STAR_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1027,7 +1035,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
     } else if (set_type == "event_ratio") {
         g_pVariableManager->setEventRatio(atoi(set_value.c_str()));
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_EVENT_MONSTER_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_EVENT_MONSTER_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1040,7 +1048,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setExpRatio(value);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_EXP_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_EXP_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1053,7 +1061,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setItemProbRatio(value);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_ITEM_PROBE_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_ITEM_PROBE_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1066,7 +1074,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setCombatBonusTime(bonusTime);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_COMBAT_BONUS_TIME), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_COMBAT_BONUS_TIME), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1079,7 +1087,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setCombatSlayerHPBonusRatio(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_COMBAT_SLAYER_BONUS_HP), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_COMBAT_SLAYER_BONUS_HP), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1092,7 +1100,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setCombatVampireHPBonusRatio(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_COMBAT_VAMPIRE_BONUS_HP), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_COMBAT_VAMPIRE_BONUS_HP), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1105,7 +1113,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setCombatSlayerDamageBonus(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_COMBAT_SLAYER_BONUS_DAMAGE), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_COMBAT_SLAYER_BONUS_DAMAGE), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1118,7 +1126,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setCombatVampireDamageBonus(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_COMBAT_VAMPIRE_BONUS_DAMAGE), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_COMBAT_VAMPIRE_BONUS_DAMAGE), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1131,7 +1139,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setPremiumExpBonusPercent(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_PREMIUM_EXP_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_PREMIUM_EXP_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1144,7 +1152,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setPremiumItemProbePercent(bonus);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_PREMIUM_ITEM_PROBE_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_PREMIUM_ITEM_PROBE_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1158,7 +1166,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         g_pVariableManager->setZoneGroupBalancingMinute(minute);
         g_pClientManager->setBalanceZoneGroup(minute);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_ZONE_GROUP_BALANCING_TIME), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_ZONE_GROUP_BALANCING_TIME), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1171,7 +1179,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setGambleItemTypeRatio(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_GAMBLE_ITEM_TYPE_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_GAMBLE_ITEM_TYPE_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1184,7 +1192,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setGambleItemOptionRatio(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_GAMBLE_ITEM_OPTION_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_GAMBLE_ITEM_OPTION_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1194,7 +1202,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         if (set_value == "on") {
             g_pVariableManager->setSummonMotorcycle(true);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_SUMMON_MOTORCYCLE), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_SUMMON_MOTORCYCLE), "ON");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1203,7 +1211,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         } else if (set_value == "off") {
             g_pVariableManager->setSummonMotorcycle(false);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_SUMMON_MOTORCYCLE), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_SUMMON_MOTORCYCLE), "OFF");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1217,7 +1225,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setEnemyLimitTime(enemy_limit_time);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_MONSTER_FORGET_TIME), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MONSTER_FORGET_TIME), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1230,7 +1238,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setRareItemRatio(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_RARE_ITEM_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_RARE_ITEM_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1243,7 +1251,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setUniqueItemRatio(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_UNIQUE_ITEM_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_UNIQUE_ITEM_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1261,7 +1269,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         if (set_value == "on") {
             g_pVariableManager->setActiveMasterLair(true);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_LAIR_ACTIVATE), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_LAIR_ACTIVATE), "ON");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1274,7 +1282,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         } else if (set_value == "off") {
             g_pVariableManager->setActiveMasterLair(false);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_LAIR_ACTIVATE), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_LAIR_ACTIVATE), "OFF");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1289,7 +1297,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         if (set_value == "on") {
             g_pVariableManager->setRetryMasterLair(true);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_RETRY_MASTER_LAIR), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_RETRY_MASTER_LAIR), "ON");
 
 
             gcSystemMessage.setMessage(msg);
@@ -1299,7 +1307,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         } else if (set_value == "off") {
             g_pVariableManager->setRetryMasterLair(false);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_RETRY_MASTER_LAIR), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_RETRY_MASTER_LAIR), "OFF");
 
 
             gcSystemMessage.setMessage(msg);
@@ -1316,7 +1324,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setHarvestFestivalItemRatio(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_HARVEST_FESTIVAL_ITEM_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_HARVEST_FESTIVAL_ITEM_RATIO), set_value.c_str());
 
 
         gcSystemMessage.setMessage(msg);
@@ -1330,7 +1338,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setMasterBloodDrainStartHP(percent);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_START_HP), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_START_HP), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1343,7 +1351,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setMasterBloodDrainStartBD(percent);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_START_BD), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_START_BD), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1356,7 +1364,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setMasterBloodDrainEndHP(percent);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_END_HP), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_END_HP), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1369,7 +1377,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setMasterBloodDrainEndBD(percent);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_END_BD), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_MASTER_BLOOD_DRAIN_END_BD), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1379,7 +1387,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         if (set_value == "on") {
             g_pVariableManager->setActiveChiefMonster(true);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER), "ON");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1388,7 +1396,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         } else if (set_value == "off") {
             g_pVariableManager->setActiveChiefMonster(false);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER), "OFF");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1402,7 +1410,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
 
         g_pVariableManager->setChiefMonsterRareItemPercent(ratio);
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER_RARE_ITEM_RATIO), set_value.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_CHIEF_MONSTER_RARE_ITEM_RATIO), set_value.c_str());
 
         gcSystemMessage.setMessage(msg);
         filelog("change.txt", "[%s]%s",
@@ -1412,7 +1420,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         if (set_value == "on") {
             g_pVariableManager->setNewbieTransportToGuild(true);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_NEWBIE_TRANSPORT_TO_GUILD), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_NEWBIE_TRANSPORT_TO_GUILD), "ON");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -1421,7 +1429,7 @@ void CGSayHandler::opset(GamePlayer* pGamePlayer, string msg, int i) {
         } else if (set_value == "off") {
             g_pVariableManager->setNewbieTransportToGuild(false);
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_SET_NEWBIE_TRANSPORT_TO_GUILD), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_SET_NEWBIE_TRANSPORT_TO_GUILD), "OFF");
 
             gcSystemMessage.setMessage(msg);
             filelog("change.txt", "[%s]%s",
@@ -2159,7 +2167,7 @@ void CGSayHandler::opfind(GamePlayer* pGamePlayer, string msg, int i) {
         string ServerName = g_pGameServerGroupInfoManager->getGameServerGroupInfo(ServerID, WorldID)->getGroupName();
 
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_PLAYER_IN_GAMESERVER), Name.c_str(), ServerName.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_PLAYER_IN_GAMESERVER), Name.c_str(), ServerName.c_str());
 
         GCSystemMessage gcSystemMessage;
         gcSystemMessage.setMessage(msg);
@@ -2170,7 +2178,7 @@ void CGSayHandler::opfind(GamePlayer* pGamePlayer, string msg, int i) {
 
 
         char msg[100];
-        sprintf(msg, g_pStringPool->c_str(STRID_PLAYER_NOT_IN_GAMESERVER), Name.c_str());
+        snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_PLAYER_NOT_IN_GAMESERVER), Name.c_str());
 
         GCSystemMessage gcSystemMessage;
         gcSystemMessage.setMessage(msg);
@@ -2233,7 +2241,7 @@ void CGSayHandler::opuser(GamePlayer* pGamePlayer, string msg, int i) {
 
 
     char msg[100];
-    sprintf(msg, g_pStringPool->c_str(STRID_CURRENT_NUMBER_OF_PLAYER), GroupCount);
+    snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_CURRENT_NUMBER_OF_PLAYER), GroupCount);
 
     GCSystemMessage gcSystemMessage;
     gcSystemMessage.setMessage(msg);
@@ -3210,7 +3218,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
 
         if (value1 == "on") {
             char msg[50];
-            sprintf(msg, g_pStringPool->c_str(STRID_INVINCIBLE), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_INVINCIBLE), "ON");
 
             if (bInvincible)
                 gcSystemMessage.setMessage(msg);
@@ -3223,7 +3231,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
                     gcSystemMessage.toString().c_str());
         } else if (value1 == "off") {
             char msg[50];
-            sprintf(msg, g_pStringPool->c_str(STRID_INVINCIBLE), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_INVINCIBLE), "OFF");
 
             StringStream message;
             if (!bInvincible)
@@ -3247,7 +3255,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
 
         if (value1 == "on") {
             char msg[50];
-            sprintf(msg, g_pStringPool->c_str(STRID_GHOST), "ON");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_GHOST), "ON");
 
             if (bGhost)
                 gcSystemMessage.setMessage(msg);
@@ -3284,7 +3292,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
                     gcSystemMessage.toString().c_str());
         } else if (value1 == "off") {
             char msg[50];
-            sprintf(msg, g_pStringPool->c_str(STRID_GHOST), "OFF");
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_GHOST), "OFF");
 
             StringStream message;
             if (!bGhost)
@@ -3510,13 +3518,13 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
             //			StringStream msg;
 
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_GUILD_WAR_REMOVED), (int)zoneID);
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_GUILD_WAR_REMOVED), (int)zoneID);
             gcSystemMessage.setMessage(msg);
         } else {
             //			StringStream msg;
 
             char msg[100];
-            sprintf(msg, g_pStringPool->c_str(STRID_NO_GUILD_WAR_IN_ACTIVE), (int)zoneID);
+            snprintf(msg, sizeof(msg), g_pStringPool->c_str(STRID_NO_GUILD_WAR_IN_ACTIVE), (int)zoneID);
             gcSystemMessage.setMessage(msg);
         }
         bSendPacket = true;
@@ -3609,7 +3617,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
         if (pGamePlayer != NULL) {
             WORD num = pGamePlayer->getCreature()->getZone()->getPCManager()->getSize();
             char msg[100];
-            sprintf(msg, g_pStringPool->getString(STRID_PC_NUM).c_str(), num);
+            snprintf(msg, sizeof(msg), g_pStringPool->getString(STRID_PC_NUM).c_str(), num);
             gcSystemMessage.setMessage(msg);
         }
     } else if (command == "showPKZonePCNum") {
@@ -3619,7 +3627,7 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
                 int num = g_pPKZoneInfoManager->getPKZoneInfo(zoneID)->getCurrentPCNum();
 
                 char msg[100];
-                sprintf(msg, g_pStringPool->getString(STRID_PC_NUM).c_str(), num);
+                snprintf(msg, sizeof(msg), g_pStringPool->getString(STRID_PC_NUM).c_str(), num);
                 gcSystemMessage.setMessage(msg);
             } else {
                 bSendPacket = false;
@@ -4612,7 +4620,7 @@ void CGSayHandler::oplog(GamePlayer* pPlayer, string msg, int i) {
 
     if (pTargetGamePlayer->startPacketLog(sec)) {
         char msg[100];
-        sprintf(msg, "%sPacketLog(%u)", name.c_str(), sec);
+        snprintf(msg, sizeof(msg), "%sPacketLog(%u)", name.c_str(), sec);
 
         GCSystemMessage gcMsg;
         gcMsg.setMessage(msg);

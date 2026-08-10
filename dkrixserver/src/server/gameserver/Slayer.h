@@ -459,7 +459,14 @@ public:
     
     //////////////////////////////////////////////////////////////
 public:
+    // Part arrives from client packets cast straight from a BYTE (0-255) while
+    // m_pWearItem holds WEAR_MAX entries, so this is bounds-checked here rather
+    // than at each call site -- several handlers passed it through unchecked.
+    // A real runtime check, not Assert(), so it survives a Release build.
     bool isWear(WearPart Part) {
+        if (Part < 0 || Part >= WEAR_MAX)
+            return false;
+
         return m_pWearItem[Part] != NULL ? true : false;
     }
     void addWearItem(WearPart Part, Item* pItem) {
@@ -471,6 +478,9 @@ public:
         m_pWearItem[Part] = NULL;
     }
     Item* getWearItem(WearPart Part) {
+        if (Part < 0 || Part >= WEAR_MAX)
+            return NULL;
+
         return m_pWearItem[Part];
     }
     void wearItem(WearPart Part);

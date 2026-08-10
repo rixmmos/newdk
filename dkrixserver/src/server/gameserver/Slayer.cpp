@@ -1596,6 +1596,12 @@ void Slayer::takeOffItem(WearPart Part, bool bAddOnMouse, bool bSendModifyInfo)
 
     SLAYER_RECORD prev;
 
+    // Part can arrive from a client packet (see CGAddGearToMouseHandler), and
+    // this function both reads m_pWearItem[Part] and later writes NULL to it --
+    // an out-of-range value is an arbitrary-offset read *and* write inside a
+    // live Slayer. Reject it outright; a real check, not Assert().
+    if (Part < 0 || Part >= WEAR_MAX)
+        return;
 
     Item* pItem = m_pWearItem[Part];
     Assert(pItem != NULL);
