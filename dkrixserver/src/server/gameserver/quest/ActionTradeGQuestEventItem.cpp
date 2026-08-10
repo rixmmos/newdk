@@ -160,7 +160,13 @@ void ActionTradeGQuestEventItem::execute(Creature* pCreature1, Creature* pCreatu
     pItem->setGrade(4);
 
     pPC->getZone()->registerObject(pItem);
-    Assert(pPC->getInventory()->addItem(pItem, tp));
+    // Hoisted out of Assert(): NDEBUG would skip the call entirely, so the item
+    // would never enter the in-memory inventory while pItem->create() below still
+    // wrote it to the DB as STORAGE_INVENTORY and GCCreateItem still told the
+    // client it was there -- and the slot would stay free for a second item at the
+    // same coordinates.
+    bool bAdded = pPC->getInventory()->addItem(pItem, tp);
+    Assert(bAdded);
     Assert(tp.x != -1);
 
     pItem->create(pPC->getName(), STORAGE_INVENTORY, 0, tp.x, tp.y);

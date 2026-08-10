@@ -18,8 +18,12 @@ void TriggerParser::parseTrigger(const string& type, const string& condition, co
     XMLTree* pCondition = new XMLTree("Condition");
     XMLTree* pAction = new XMLTree("Action");
 
-    Assert(parseElement(pCondition, "ConditionType", condition));
-    Assert(parseElement(pAction, "ActionType", action));
+    // Hoisted out of Assert(): NDEBUG would skip the calls entirely, so both
+    // subtrees would be attached below without ever having been populated.
+    bool bConditionParsed = parseElement(pCondition, "ConditionType", condition);
+    bool bActionParsed = parseElement(pAction, "ActionType", action);
+    Assert(bConditionParsed);
+    Assert(bActionParsed);
 
     pTrigger->AddChild(pCondition);
     pTrigger->AddChild(pAction);

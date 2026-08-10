@@ -83,7 +83,11 @@ void ActionQuestReward::execute(Creature* pCreature1, Creature* pCreature2)
                     }
 
                     pPC->getQuestManager()->questRewarded(*qitr);
-                    Assert(pRIM->getRewardClass(*itr)->giveReward(pPC) == COMPLETE_SUCCESS);
+                    // Hoisted out of Assert(): NDEBUG would skip the call entirely, so the
+                    // quest would be marked rewarded by questRewarded() above while the
+                    // reward itself was never handed out.
+                    QuestMessage rewardResult = pRIM->getRewardClass(*itr)->giveReward(pPC);
+                    Assert(rewardResult == COMPLETE_SUCCESS);
                     break;
                 }
             }

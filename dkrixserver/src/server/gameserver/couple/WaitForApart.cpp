@@ -76,8 +76,14 @@ uint WaitForApart::acceptPartner(PlayerCreature* pRequestedPC) {
     Assert(hasCoupleItem(pWaitingPC));
 
     
-    Assert(removeCoupleItem(pRequestedPC));
-    Assert(removeCoupleItem(pWaitingPC));
+    // Hoisted out of Assert(): NDEBUG would skip the calls entirely, leaving both
+    // couple rings in place while removeCouple() and the FLAGSET_IS_COUPLE clear
+    // below still run -- the pair could then re-couple and be issued a second set
+    // of rings by WaitForMeet::giveCoupleRing(). Silent item duplication.
+    bool bRequestedRemoved = removeCoupleItem(pRequestedPC);
+    bool bWaitingRemoved = removeCoupleItem(pWaitingPC);
+    Assert(bRequestedRemoved);
+    Assert(bWaitingRemoved);
 
     
     g_pCoupleManager->removeCouple(pRequestedPC, pWaitingPC);
