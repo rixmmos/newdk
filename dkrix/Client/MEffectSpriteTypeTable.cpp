@@ -44,8 +44,15 @@ void validate_effect_sprite_table_pointer(const char* location) {
 		uintptr_t ptr_addr = (uintptr_t)current_m_pTypeInfo;
 		// Check if it looks like a heap pointer that might be in a freed region
 		if (ptr_addr > 0x1000 && ptr_addr < 0x100000000ULL) {
-			// Use ASAN to check if the memory is poisoned
-			if (__asan_address_is_poisoned(current_m_pTypeInfo, sizeof(EFFECTSPRITETYPE_TABLE::TYPE))) {
+			// Use ASAN to check if the memory is poisoned.
+			// __asan_address_is_poisoned takes a single address; the (pointer,
+			// size) form is __asan_region_is_poisoned, which is what this call
+			// has always meant -- it asks about a whole TYPE, not one byte. The
+			// mismatch survived because <sanitizer/asan_interface.h> was never
+			// included here, so nothing had ever checked the signature.
+			// __asan_region_is_poisoned returns the first poisoned address, or
+			// NULL when the whole region is clean.
+			if (__asan_region_is_poisoned(current_m_pTypeInfo, sizeof(EFFECTSPRITETYPE_TABLE::TYPE)) != NULL) {
 				fprintf(stderr, "[CORRUPTION] m_pTypeInfo points to poisoned/freed memory at %s!\n", location);
 				fprintf(stderr, "[CORRUPTION] m_pTypeInfo=%p\n", current_m_pTypeInfo);
 			}
