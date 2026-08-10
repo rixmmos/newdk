@@ -1169,10 +1169,31 @@ void PacketFactoryManager::init() {
     addFactory(new SGGuildMemberLogOnOKFactory());
 #endif
 
-    // Exchange System Packets
+    // Exchange System Packets - DELIBERATELY NOT REGISTERED [2026-08-10]
+    //
+    // The exchange subsystem is unfinished and now fails closed; see the
+    // SUBSYSTEM STATUS note at the head of
+    // server/gameserver/exchange/ExchangeService.h.
+    //
+    // No shipped client can send either packet: the only code that builds them
+    // is dkrix/VS_UI/src/VS_UI_PointExchange.cpp, reachable only through
+    // C_VS_UI_POINT_EXCHANGE, which is constructed only in
+    // C_VS_UI_GAME::RunPointExchange() (VS_UI_Game.cpp:2549) -- a function with
+    // zero callers. Nor could a client read the answer: neither tree registers
+    // GCExchangeListFactory/GCExchangeBuyFactory, and dkrix has no GCExchangeBuy
+    // class at all, so the reply would fail to decode. Registering these only
+    // exposed CGExchangeListHandler, which passes an unvalidated page/pageSize
+    // straight into a SELECT's LIMIT/OFFSET, to any hand-crafted client.
+    //
+    // With no factory in the slot, createPacket() throws InvalidProtocolException
+    // -- the same clean path any unknown packet ID already takes. Re-register
+    // both lines together with the GCExchange* factories once the subsystem is
+    // finished and the client UI is reachable.
+#if 0
 #if defined(__GAME_SERVER__)
     addFactory(new CGExchangeListFactory());
     addFactory(new CGExchangeBuyFactory());
+#endif
 #endif
 
 

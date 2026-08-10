@@ -26,6 +26,20 @@ uint8_t ExchangeService::m_TaxRate = 8;  // Default 8% tax
 int ExchangeService::m_ListingDurationDays = 3;  // Default 3 days
 
 //////////////////////////////////////////////////////////////////////////////
+// Subsystem gate
+//////////////////////////////////////////////////////////////////////////////
+
+// The exchange subsystem is unfinished: its item-transfer primitives are stubs
+// (see the SUBSYSTEM STATUS note in ExchangeService.h). Every entry point that
+// would move an item or points calls this first and refuses, so an incomplete
+// flow cannot debit a buyer, credit a seller, list an item that never leaves
+// the seller's inventory, or close an order that delivered nothing.
+// Return true only once every precondition in that note holds.
+bool ExchangeService::isOperational() {
+    return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Helper functions
 //////////////////////////////////////////////////////////////////////////////
 
@@ -150,6 +164,13 @@ pair<bool, string> ExchangeService::createListing(
     int pricePoint,
     int durationHours
 ) {
+    // Refuse before any DB write. The rollback path below (createListing then
+    // cancelListing) would otherwise leave a CANCELLED row for an item that
+    // never left the seller's inventory.
+    if (!isOperational()) {
+        return make_pair(false, formatError(EXCHANGE_FAIL_NOT_IMPLEMENTED));
+    }
+
     // Validate inputs
     if (!pSeller) {
         return make_pair(false, formatError(EXCHANGE_FAIL_ITEM_NOT_FOUND));
@@ -281,6 +302,14 @@ pair<bool, string> ExchangeService::buyListing(
     int64_t listingID,
     const string& idempotencyKey
 ) {
+    // Refuse before beginTransaction(). A buy debits the buyer and credits the
+    // seller, but claimItem() cannot deliver the item, so completing this flow
+    // would take points and hand over nothing. Refusing here touches no row:
+    // no debit, no credit, no order, no listing status change.
+    if (!isOperational()) {
+        return make_pair(false, formatError(EXCHANGE_FAIL_NOT_IMPLEMENTED));
+    }
+
     if (!pBuyer) {
         return make_pair(false, formatError(EXCHANGE_FAIL_ITEM_NOT_FOUND));
     }
@@ -466,6 +495,13 @@ pair<bool, string> ExchangeService::claimItem(
     int64_t orderOrListingID,
     bool isBuyerClaim
 ) {
+    // Neither branch below can transfer an item. The checks that follow are
+    // kept as the shape of the eventual implementation, but they stay behind
+    // this gate and every one of their exits now reports failure.
+    if (!isOperational()) {
+        return make_pair(false, formatError(EXCHANGE_FAIL_NOT_IMPLEMENTED));
+    }
+
     if (!pPlayer) {
         return make_pair(false, formatError(EXCHANGE_FAIL_ITEM_NOT_FOUND));
     }
@@ -497,19 +533,11 @@ pair<bool, string> ExchangeService::claimItem(
             return make_pair(false, formatError(EXCHANGE_FAIL_LISTING_NOT_FOUND));
         }
 
-        // Load item from exchange storage
-        // Note: This requires loading the item by ObjectID from DB
-        // For now, we'll mark the order as delivered
-        // The actual item transfer should be handled by the item manager
-
-        if (!ExchangeDB::markOrderDelivered(orderOrListingID)) {
-            return make_pair(false, formatError(EXCHANGE_FAIL_DATABASE_ERROR));
-        }
-
-        // TODO: Actually transfer item to player's inventory
-        // This requires finding the item by ObjectID and moving it
-
-        return make_pair(true, "");
+        // The item still has to be loaded from exchange storage by ObjectID and
+        // inserted into the buyer's inventory. Nothing here does that, so this
+        // refuses instead of calling markOrderDelivered(): closing the order
+        // while the item stays in exchange storage loses it permanently.
+        return make_pair(false, formatError(EXCHANGE_FAIL_NOT_IMPLEMENTED));
 
     } else {
         // Seller claiming back cancelled/expired item
@@ -529,10 +557,10 @@ pair<bool, string> ExchangeService::claimItem(
             return make_pair(false, formatError(EXCHANGE_FAIL_LISTING_NOT_AVAILABLE));
         }
 
-        // TODO: Load item from exchange storage and add to inventory
-        // This requires item manager integration
-
-        return make_pair(true, "");
+        // The listed item still has to be loaded from exchange storage and put
+        // back into the seller's inventory. Returning success here changed no
+        // state at all, which made this branch an infinitely repeatable no-op.
+        return make_pair(false, formatError(EXCHANGE_FAIL_NOT_IMPLEMENTED));
     }
 }
 
@@ -608,45 +636,37 @@ string ExchangeService::getCurrentTimestamp() {
     return _getCurrentTime();
 }
 
+// NOT IMPLEMENTED - fails closed.
+//
+// A working version has to do both of these, atomically with the listing row:
+//   int storage, x, y;
+//   pPlayer->findItemOID(pItem->getObjectID(), storage, x, y);
+//   pItem->save(pPlayer->getName(), STORAGE_EXCHANGE, 0, 0, 0);
+//   pPlayer->getInventory()->deleteItem(x, y);
+//
+// Neither half was ever written; the calls above were present only as
+// comments while this returned true, so the item stayed in the seller's
+// inventory while the listing went live.
 bool ExchangeService::moveItemToExchangeStorage(PlayerCreature* pPlayer, Item* pItem) {
-    if (!pPlayer || !pItem) return false;
-
-    // Get the item's current storage location
-    int storage, x, y;
-    pPlayer->findItemOID(pItem->getObjectID(), storage, x, y);
-
-    // Save item with STORAGE_EXCHANGE type
-    // The item will be associated with the exchange system
-    string owner = pPlayer->getName();
-
-    // Call item's save method with STORAGE_EXCHANGE
-    // This is the pattern used in the codebase
-    // pItem->save(owner, STORAGE_EXCHANGE, 0, 0, 0);
-
-    // Remove from inventory
-    Inventory* pInv = pPlayer->getInventory();
-    if (pInv) {
-        // pInv->deleteItem(x, y);  // Remove from current slot
-    }
-
-    return true;
+    (void)pPlayer;
+    (void)pItem;
+    return false;
 }
 
+// NOT IMPLEMENTED - fails closed.
+//
+// A working version has to load the item out of STORAGE_EXCHANGE and place it
+// in a free inventory slot, atomically with the order or listing row it
+// settles. Nothing here did that, so returning true silently dropped the item.
 bool ExchangeService::moveItemFromExchangeStorage(
     PlayerCreature* pPlayer,
     int64_t listingID,
     Item* pItem
 ) {
-    if (!pPlayer || !pItem) return false;
-
-    // Add item to player's inventory
-    Inventory* pInv = pPlayer->getInventory();
-    if (!pInv) return false;
-
-    // Find empty slot
-    // pItem->create(pPlayer->getName(), STORAGE_INVENTORY, ...);
-
-    return true;
+    (void)pPlayer;
+    (void)listingID;
+    (void)pItem;
+    return false;
 }
 
 void ExchangeService::createItemSnapshot(Item* pItem, ExchangeListing& listing) {
@@ -739,6 +759,9 @@ string ExchangeService::formatError(ExchangeResult code, const string& detail) {
             break;
         case EXCHANGE_FAIL_IDEMPOTENCY_CONFLICT:
             error = "Duplicate transaction";
+            break;
+        case EXCHANGE_FAIL_NOT_IMPLEMENTED:
+            error = "The exchange system is currently unavailable";
             break;
         default:
             error = "Unknown error";

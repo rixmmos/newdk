@@ -208,8 +208,14 @@ bool ExchangeDB::markListingSold(int64_t listingID,
             (long long)listingID
         );
 
+        // Compare-and-swap: the WHERE clause carries "AND Status = 0", so zero
+        // affected rows means another thread sold, cancelled or expired this
+        // listing first. Returning true regardless made the guard decorative
+        // and let two concurrent buyers both "succeed" on one listing.
+        const bool bSwapped = (pStmt->getAffectedRowCount() > 0);
+
         SAFE_DELETE(pStmt);
-        return true;
+        return bSwapped;
     } END_DB(pStmt)
 
     __END_CATCH

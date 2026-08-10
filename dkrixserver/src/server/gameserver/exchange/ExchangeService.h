@@ -4,6 +4,41 @@
 // Description : Core business logic service for Exchange System
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+// SUBSYSTEM STATUS: UNFINISHED - FAILS CLOSED  [2026-08-10]
+//
+// This subsystem is half-wired and must not be enabled. Its item-transfer
+// primitives are stubs, so every entry point that would move an item or points
+// refuses through isOperational(). Do not remove that guard to "make it work".
+//
+// What is stubbed or missing:
+//   - moveItemToExchangeStorage()   never persists the item under
+//                                   STORAGE_EXCHANGE and never removes it from
+//                                   the seller's inventory.
+//   - moveItemFromExchangeStorage() never loads the item and never inserts it
+//                                   into the receiving inventory.
+//   - claimItem()                   transfers nothing, for buyer or seller.
+//   - ExchangeDB::cancelListing(), expireListing() and markOrderDelivered()
+//                                   ignore getAffectedRowCount(), so their
+//                                   "AND Status = 0" guards are decorative.
+//                                   markListingSold() was fixed 2026-08-10.
+//   - No shipped client can reach any of this: the client's RunPointExchange()
+//     has no callers, and neither tree registers the GCExchange* factories, so
+//     a reply packet would not even be decodable.
+//
+// All of the following must hold before this is wired up, and only then may
+// isOperational() return true:
+//   1. Both move*ExchangeStorage() primitives are implemented, and each is
+//      atomic with the listing or order row it belongs to.
+//   2. Every DB mutation checks getAffectedRowCount() and reports the loss
+//      instead of returning an unconditional true.
+//   3. buyListing() re-reads the listing status inside its transaction. The
+//      status check it does today happens before beginTransaction() and races
+//      between zone-group threads.
+//   4. The GCExchange* packet factories are registered on both sides and the
+//      client UI that drives them is reachable.
+//////////////////////////////////////////////////////////////////////////////
+
 #ifndef __EXCHANGE_SERVICE_H__
 #define __EXCHANGE_SERVICE_H__
 
@@ -38,7 +73,9 @@ enum ExchangeResult {
     EXCHANGE_FAIL_DATABASE_ERROR,
     EXCHANGE_FAIL_TRANSACTION_ERROR,
     EXCHANGE_FAIL_IDEMPOTENCY_CONFLICT,
-    EXCHANGE_FAIL_UNKNOWN
+    EXCHANGE_FAIL_UNKNOWN,
+    // Returned by every entry point while the subsystem is unfinished.
+    EXCHANGE_FAIL_NOT_IMPLEMENTED
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -209,6 +246,11 @@ private:
     ////////////////////////////////////////////////////////////////////
     // Helper methods
     ////////////////////////////////////////////////////////////////////
+
+    // False while the item-transfer primitives are stubs. Guards every entry
+    // point that would move an item or points. See the SUBSYSTEM STATUS note
+    // at the head of this file.
+    static bool isOperational();
 
     // Calculate tax amount
     static int calculateTax(int price);
