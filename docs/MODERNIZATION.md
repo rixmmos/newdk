@@ -4433,8 +4433,9 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
 |---|---|
 | STEP1_MYSQL | verified, with drift (live DB is the Docker container, not WSL; `WorldDBInfo` schema differs from the initdb seed) |
 | STEP2_SERVER | verified, with drift (stale CMake caches, root-owned `lib/`+`bin/`) |
-| STEP2_GREEN_SNAPSHOT | partial — sharedserver + loginserver green; gameserver died → **Bug 18-A** |
-| STEP3_CLIENT / LOGIN_SMOKE | not yet reached |
+| STEP2_GREEN_SNAPSHOT | **verified** after the Bug 18-A fix — all three servers green, incl. the `GSRequestGuildInfo`→`SGGuildInfo()` round trip |
+| STEP3_CLIENT | **verified** — login screen renders from the fresh VS2022 Debug build (art, SPK sprites, text). Three Windows-route divergences from the doc, recorded in `PORTING-NOTE.md` under "STEP3 drift" |
+| LOGIN_SMOKE | **blocked — Bug 18-B.** Both client→login packets are received and parsed; the loginserver then segfaults |
 
 - **Bug 18-A — the gameserver could not boot; every build since
   2026-08-09 was dead on arrival.** [measured] `KeyInfoManager::load()`
@@ -4451,8 +4452,12 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
   batch's own checks; `PreparedStatement` sends it to MySQL at
   *construction*, so the migration turned latent garbage into a boot-time
   fatal. Fix: delete the dead 7-column tail; the 9-column form is what the
-  April binaries ran every boot. Status: **fixed** (commit carrying this
-  note). Found by: Phase 18 run 1, first gameserver launch.
+  April binaries ran every boot. Status: **fixed and runtime-verified** —
+  after the fix the gameserver reaches `>>> ALL INITIALIZATIONS ARE
+  COMPLETED SUCCESSFULLY.` and `ClientManager->start() INFINITE LOOP`,
+  connects to sharedserver, and completes a `GSRequestGuildInfo` →
+  `SGGuildInfo()` round trip [measured 2026-08-10, run 1]. Found by:
+  Phase 18 run 1, first gameserver launch.
 - **Why no gate caught it, and what would.** [measured] Prepared SQL is a
   string literal — it compiles regardless, so neither CI, the ratchets, nor
   `clang-format` can see it, and the migrated call site is *syntactically*
@@ -4466,11 +4471,135 @@ Route: servers in WSL (fresh `build-smoke/`), client Route A
   `INSERT` / `UPDATE` / `DELETE` / `REPLACE`; one hit, this one]. The other
   43 files in batch 10 and the other 11.2 batches are unaffected by this
   pattern.
-- **[unverified] Did `c3a9f96`'s prepare-failure logging fire?** The wave
-  added `DBError.log` logging for exactly this failure class (prepare-time
-  `SQLException`). Run 1 should have produced its first real-world entry —
-  check `dkrixserver/DBError.log` and record the answer here; if it is
-  empty, `c3a9f96` needs a second look.
+- **`c3a9f96`'s prepare-failure logging works — first real-world proof.**
+  [measured 2026-08-10] The wave added `DBError.log` logging for exactly
+  this failure class (prepare-time `SQLException`, which `END_DB` used to
+  swallow), and Bug 18-A produced its first genuine entry — with the
+  offending SQL echoed in full, which is what made the diagnosis a
+  one-minute job rather than a debugger session:
+
+  ```
+  2026.08.10-10:15:49:092 : PreparedStatement: mysql_stmt_prepare failed:
+  You have an error in your SQL syntax; ... near 'FROM KeyInfo' at line 1
+  [sql=SELECT ItemType, ... TargetType FROM KeyInfoSELECT ItemType, ... FROM KeyInfo]
+  ```
+
+  Worth noting what this pairs with: the crash banner itself
+  (`UNHANDLED EXCEPTION OCCURED`) named only the ctor, no SQL. Without
+  `c3a9f96` this bug would have cost the sitting far more.
+- **Bug 18-B — the loginserver segfaulted on every login attempt.
+  FIXED and runtime-verified.**
+  [measured 2026-08-10, run 1] The client reaches the login screen, and the
+  wire format is *fine* — the loginserver receives and parses both packets:
+
+  ```
+  NEW CONNECTION FROM 127.0.0.1:37744
+  RECV PACKET from NONE, CGConnectSetKey(483) 11/11
+  RECV PACKET from NONE, CLLogin(153) 32/32
+  Receive:CLLogin(ID:testuser,Password:testpass)
+  ```
+
+  The log ends there and the process is gone; the client shows
+  "Disconnected". `dmesg` confirms SIGSEGV:
+
+  ```
+  loginserver[688671]: segfault at 5af4963c171a ip 00005af11e004476
+  sp 00007ffda64be730 error 4 in loginserver[5af11ddca000+247000]
+  ```
+
+  **Deterministic**: reproduced three times, different ASLR bases,
+  byte-identical IP offset every time.
+
+  **Root cause: use-after-free of the `Result` returned by a stack-local
+  `PreparedStatement`.** [measured — gdb backtrace, run 1]
+
+  ```
+  #0 Result::getField (this=0x555555b65430, index=1)  database/Result.cpp:138
+  #1 Result::getString (index=1)                      database/Result.cpp:153
+  #2 CLLoginHandler::execute                          Core/CLLoginHandler.cpp:368
+  #3 CLLogin::execute                                 Core/CLLogin.cpp:95
+  #4 LoginPlayer::processCommand                      loginserver/LoginPlayer.cpp:223
+  ```
+
+  `CLLoginHandler.cpp:257-265` declares `PreparedStatement passwordStmt` as a
+  **stack local inside an inner `else` block** and assigns
+  `pResult = passwordStmt.execute()` to a `Result*` declared in the *outer*
+  scope (line 229). `execute()` returns `m_pResult`, which the statement owns;
+  `~PreparedStatement()` does `delete m_pResult`. So at that block's closing
+  brace the `Result` is freed, and **every** use of `pResult` from line 270
+  (`getRowCount()`) through line 381 reads freed memory. All four query
+  branches — `webLoginStmt`, `freePassStmt`, `oldPasswordStmt`,
+  `passwordStmt` — have this shape.
+
+  Why it survives as far as line 368: freed memory still reads plausibly.
+  `getRowCount()` is a plain `uint` member and returns the right value, so the
+  `bNoPlayer` check at line 270 passes. Only when `m_Rows`'s heap block has
+  been recycled does the vector's data pointer come back wild — gdb shows
+  `field = <error reading variable: Cannot access memory at address
+  0x5550009ad93a>`, `rax = 0x5550009ad93a`, at
+  `const FieldValue& field = m_Rows[m_CurrentRowIndex][index - 1];`.
+
+  This is a Phase 11 migration defect: the old `Statement*` came from
+  `pConn->createStatement()` and outlived the block, so the same code shape was
+  correct before the migration and is a use-after-free after it.
+
+  > **Correction.** An earlier revision of this entry placed the fault in
+  > `Statement::executeQuery()`. That was wrong. It came from computing the IP
+  > offset against the base in `dmesg`'s `in loginserver[<base>+<len>]` field,
+  > which is the start of the *mapped segment containing the IP*, not the ELF
+  > load base — off by `0x10000` here, which landed `addr2line` in the
+  > neighbouring function. `Statement::executeQuery()` is not implicated; the
+  > crash is on the `PreparedStatement` → `BACKEND_MATERIALIZED` path.
+  - It is **not** a bad-credentials path. It crashes identically for
+    `222222`/`222222` (no such account) and for `testuser`/`testpass` (a valid
+    row: `Access='ALLOW'`, `LogOn='LOGOFF'`). Packet length tracks the
+    credential strings (28/28 vs 32/32), so parsing is correct in both.
+  - `error 4` is a *read* fault from user mode, and both faulting addresses
+    are wild rather than null — `0x56291a2dd` (far below that run's
+    `0x56290cac5000` image base, i.e. a truncated pointer) and
+    `0x5af4963c171a`. That shape points at a corrupted or truncated pointer
+    reaching `mysql_real_query` — `m_Statement`'s buffer or
+    `m_pConnection->getMYSQL()` — rather than a missing null check.
+  - **Blast radius — candidate set, not yet a confirmed count.** [measured
+    2026-08-10] `PreparedStatement` appears in **208** `.cpp` files. Splitting
+    the `… = <local>.execute()` call sites by shape: **548** are
+    `Result* pResult = stmt.execute();` — the statement and the `Result*` are
+    declared in the same block, so the statement is destroyed *after* the last
+    use and these are safe. **203 sites across 129 files** assign to a
+    **pre-declared outer** variable (`pResult = stmt.execute();`), which is the
+    shape that bites here. That 203 is an upper bound: a pre-declared variable
+    may still be in the same block. Confirming it needs scope analysis, not
+    grep. `CLLoginHandler` is the one confirmed instance so far.
+  - **Fix applied: hoist the statement to the same scope as `pResult`.**
+    The four branches differed only in SQL text and whether `PASSWORD` is
+    bound, so the branch chain now selects a `loginSql` string and a
+    `bBindPassword` flag, and a single `PreparedStatement loginStmt` is
+    constructed next to `pResult`. Branch conditions are preserved exactly
+    (the nested `if/else` under `DB_VERSION` is flattened into the same
+    `else if` chain); no SQL text, column order, or bind order changed, so the
+    `++i` field indexing downstream is untouched. The alternative — having
+    `execute()` transfer ownership — would fix all 203 candidate sites at once
+    but is a much wider change; it is not done here.
+  - **Runtime-verified 2026-08-10** [measured]: after the fix the loginserver
+    survives login and the whole pre-gameplay flow completes —
+    `LCLoginOK` → `CLGetWorldList`/`LCWorldList(Eslanian)` →
+    `CLSelectWorld`/`LCServerList` → `CLSelectServer`/`LCPCList` (three
+    `EMPTY SLOT`s). The client advances past the login screen to **Select
+    World**. The process stays up. This is the furthest this tree has ever
+    been taken against a live client.
+  - **Still open: the other 203 candidate sites.** Only `CLLoginHandler` is
+    fixed. Every other risky-shape site remains a latent use-after-free until
+    each is checked for scope, and the two shapes are visually near-identical.
+  - **Gate implication.** Both 18-A and 18-B are Phase 11 `PreparedStatement`
+    defects that no existing gate can see — 18-A because SQL is string data,
+    18-B because the lifetime error is legal C++. An ASan build of the server
+    in CI would have caught 18-B at the first login; that is the cheapest gate
+    that would have prevented this class, and it does not exist today.
+  - Relationship to Bug 18-A: both are Phase 11 `PreparedStatement`
+    territory and both are invisible to every existing gate for the same
+    reason — SQL is string data, so nothing short of running the server sees
+    it. 18-A was a malformed literal caught at construction; 18-B is a
+    runtime memory fault. Whether they share a cause is unknown.
 
 ## Explicit non-goals
 
