@@ -34,7 +34,14 @@ private:
 class PetExpInfoManager {
 public:
     PetExpInfoManager() {
-        m_PetExpInfos.reserve(PetMaxLevel + 1);
+        // assign, not reserve: reserve() leaves size() at 0, so load()'s
+        // m_PetExpInfos[PetLevel] = new PetExpInfo(...) wrote into
+        // unconstructed storage, and clear()'s begin()..end() loop below saw an
+        // empty range and freed nothing -- leaking all 51 objects. Identical to
+        // Bug 18-J in PetAttrInfo; AddressSanitizer cannot see it because the
+        // reserved capacity covers every write. PetMaxLevel + 1 because
+        // PetExpInfo carries Level 0..50 inclusive.
+        m_PetExpInfos.assign(PetMaxLevel + 1, static_cast<PetExpInfo*>(NULL));
     }
     ~PetExpInfoManager() {
         clear();

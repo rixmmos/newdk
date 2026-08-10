@@ -214,7 +214,11 @@ the env vars in your launch shell.
 cd ~/work/dkrix-upstream/dkrixserver/conf
 cp loginserver.conf.template  loginserver.conf
 cp sharedserver.conf.template sharedserver.conf
-# gameserver.conf does NOT have a template in this tree; edit it directly.
+# gameserver.conf.template exists too -- copy all three. [corrected 2026-08-10]
+# The old instruction ("no template, edit it directly") was already wrong, and
+# became load-bearing once the real conf/*.conf were untracked: there is no
+# gameserver.conf in a fresh clone to edit.
+cp gameserver.conf.template    gameserver.conf
 ```
 
 **Patch hardcoded IPs.** All three conf files have `192.168.0.16` as
