@@ -22,7 +22,10 @@ GQuestMission* GQuestKilledElement::makeInitMission(PlayerCreature* pPC) const {
 GQuestKilledElement* GQuestKilledElement::makeElement(XMLTree* pTree) {
     GQuestKilledElement* pRet = new GQuestKilledElement;
 
-    Assert(pTree->GetAttribute("num", pRet->m_Goal));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip the parse and leave m_Goal at the ctor's 0.
+    bool bHasNum = pTree->GetAttribute("num", pRet->m_Goal);
+    Assert(bHasNum);
 
     DWORD index;
     if (pTree->GetAttribute("index", index))

@@ -17,7 +17,15 @@ GQuestElement::ResultType GQuestRemoveEffectElement::checkCondition(PlayerCreatu
 GQuestRemoveEffectElement* GQuestRemoveEffectElement::makeElement(XMLTree* pTree) {
     GQuestRemoveEffectElement* pRet = new GQuestRemoveEffectElement;
 
-    Assert(pTree->GetAttribute("effectclass", (int&)pRet->m_EffectClass));
+    // Same two fixes as GQuestAddEffectElement: no write through an (int&)
+    // aliasing the enum member, and the parse call hoisted out of Assert(),
+    // which is ((void)0) under NDEBUG. Guarded so a missing attribute still
+    // leaves m_EffectClass at the ctor's EFFECT_CLASS_MAX.
+    int effectClass = 0;
+    bool bHasEffectClass = pTree->GetAttribute("effectclass", effectClass);
+    Assert(bHasEffectClass);
+    if (bHasEffectClass)
+        pRet->m_EffectClass = (Effect::EffectClass)effectClass;
 
     return pRet;
 }

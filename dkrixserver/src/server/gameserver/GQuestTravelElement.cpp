@@ -36,8 +36,14 @@ GQuestMission* GQuestTravelElement::makeInitMission(PlayerCreature* pPC) const {
 GQuestTravelElement* GQuestTravelElement::makeElement(XMLTree* pTree) {
     GQuestTravelElement* pRet = new GQuestTravelElement;
 
-    Assert(pTree->GetAttribute("grade", pRet->m_Grade));
-    Assert(pTree->GetAttribute("basenum", pRet->m_BaseNum));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip both reads and every travel mission would be
+    // built from grade 0 / basenum 0.
+    bool bHasGrade = pTree->GetAttribute("grade", pRet->m_Grade);
+    bool bHasBaseNum = pTree->GetAttribute("basenum", pRet->m_BaseNum);
+
+    Assert(bHasGrade);
+    Assert(bHasBaseNum);
 
     DWORD index;
     if (pTree->GetAttribute("index", index))

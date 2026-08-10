@@ -40,11 +40,21 @@ GQuestTouchWayPointElement* GQuestTouchWayPointElement::makeElement(XMLTree* pTr
     DWORD type = 0;
     DWORD dir = 0;
 
-    Assert(pTree->GetAttribute("zoneid", zoneID));
-    Assert(pTree->GetAttribute("x", x));
-    Assert(pTree->GetAttribute("y", y));
-    Assert(pTree->GetAttribute("type", type));
-    Assert(pTree->GetAttribute("dir", dir));
+    // The calls are also hoisted out of Assert(). 18-AA fixed the out-of-bounds
+    // writes here but left the parse inside the macro, which is ((void)0) under
+    // NDEBUG -- a Release build would read none of these five attributes and
+    // every waypoint would sit at zone 0, (0,0).
+    bool bHasZoneID = pTree->GetAttribute("zoneid", zoneID);
+    bool bHasX = pTree->GetAttribute("x", x);
+    bool bHasY = pTree->GetAttribute("y", y);
+    bool bHasType = pTree->GetAttribute("type", type);
+    bool bHasDir = pTree->GetAttribute("dir", dir);
+
+    Assert(bHasZoneID);
+    Assert(bHasX);
+    Assert(bHasY);
+    Assert(bHasType);
+    Assert(bHasDir);
 
     pRet->m_ZoneID = (ZoneID_t)zoneID;
     pRet->m_X = (ZoneCoord_t)x;

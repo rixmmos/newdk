@@ -30,7 +30,11 @@ GQuestMission* GQuestTimeElement::makeInitMission(PlayerCreature* pPC) const {
 GQuestTimeElement* GQuestTimeElement::makeElement(XMLTree* pTree) {
     GQuestTimeElement* pRet = new GQuestTimeElement;
 
-    Assert(pTree->GetAttribute("limit", pRet->m_LimitMinutes));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip the parse and leave m_LimitMinutes at the ctor's
+    // 0 -- a timed quest that expires immediately.
+    bool bHasLimit = pTree->GetAttribute("limit", pRet->m_LimitMinutes);
+    Assert(bHasLimit);
 
     DWORD index;
     if (pTree->GetAttribute("index", index))

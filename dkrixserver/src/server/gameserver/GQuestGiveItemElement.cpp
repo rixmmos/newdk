@@ -38,7 +38,7 @@ GQuestElement::ResultType GQuestGiveItemElement::checkCondition(PlayerCreature* 
         makeGCCreateItem(&gcCreateItem, pItem, pt.x, pt.y);
         pPC->getPlayer()->sendPacket(&gcCreateItem);
 
-        
+
         if (pItem->isTraceItem()) {
             remainTraceLog(pItem, "GQuest", pPC->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
             remainTraceLogNew(pItem, pPC->getName(), ITL_GET, ITLD_EVENTNPC, pPC->getZone()->getZoneID());
@@ -55,22 +55,38 @@ GQuestElement::ResultType GQuestGiveItemElement::checkCondition(PlayerCreature* 
 GQuestGiveItemElement* GQuestGiveItemElement::makeElement(XMLTree* pTree) {
     GQuestGiveItemElement* pRet = new GQuestGiveItemElement;
 
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip both reads. `iClass` would stay empty and
+    // `itemType` uninitialised, and this element hands the resulting item to a
+    // player -- so the NDEBUG build would mint an arbitrary item type. Both
+    // locals are initialised here as well.
     string iClass;
-    Assert(pTree->GetAttribute("class", iClass));
+    bool bHasClass = pTree->GetAttribute("class", iClass);
+    Assert(bHasClass);
 
     pRet->m_ItemClass = TreasureItemClass::getItemClassFromString(iClass);
 
-    DWORD itemType;
-    Assert(pTree->GetAttribute("type", itemType));
+    DWORD itemType = 0;
+    bool bHasType = pTree->GetAttribute("type", itemType);
+    Assert(bHasType);
 
-    pRet->m_ItemType = itemType;
+    pRet->m_ItemType = (ItemType_t)itemType;
 
     string option;
     if (pTree->GetAttribute("option", option)) {
         makeOptionList(option, pRet->m_Option);
     }
 
-    if (!pTree->GetAttribute("num", (int&)pRet->m_Num))
+    // m_Num is ItemNum_t, i.e. BYTE, so the (int&) cast this replaces let
+    // GetAttribute's int& overload store four bytes through a one-byte member --
+    // three bytes past it, into the object's tail padding. Same out-of-bounds
+    // shape as GQuestTouchWayPointElement (18-AA); declaring any member after
+    // m_Num in the header would turn it into silent corruption. Read into an int
+    // and narrow explicitly. No Assert here, so nothing to hoist.
+    int num = 0;
+    if (pTree->GetAttribute("num", num))
+        pRet->m_Num = (ItemNum_t)num;
+    else
         pRet->m_Num = 1;
 
     return pRet;

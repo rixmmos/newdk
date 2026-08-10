@@ -53,8 +53,13 @@ GQuestMission* GQuestPartyDissectElement::makeInitMission(PlayerCreature* pPC) c
 GQuestPartyDissectElement* GQuestPartyDissectElement::makeElement(XMLTree* pTree) {
     GQuestPartyDissectElement* pRet = new GQuestPartyDissectElement;
 
-    Assert(pTree->GetAttribute("num", pRet->m_Goal));
-    Assert(pTree->GetAttribute("sort", pRet->m_TargetNum));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip both reads and leave m_Goal at the ctor's 0.
+    bool bHasNum = pTree->GetAttribute("num", pRet->m_Goal);
+    bool bHasSort = pTree->GetAttribute("sort", pRet->m_TargetNum);
+
+    Assert(bHasNum);
+    Assert(bHasSort);
 
     DWORD index;
     if (pTree->GetAttribute("index", index))
@@ -64,14 +69,22 @@ GQuestPartyDissectElement* GQuestPartyDissectElement::makeElement(XMLTree* pTree
         XMLTree* pChild = pTree->GetChild(i);
         Assert(pChild->GetName() == "Level");
         MonsterTemplate* pTemplate = new MonsterTemplate;
-        Assert(pChild->GetAttribute("min", pTemplate->min));
-        Assert(pChild->GetAttribute("max", pTemplate->max));
+        // Hoisted out of Assert() for the same reason. MonsterTemplate::min/max
+        // are not initialised by any ctor, so under NDEBUG the level band would
+        // be read from uninitialised heap memory.
+        bool bHasMin = pChild->GetAttribute("min", pTemplate->min);
+        bool bHasMax = pChild->GetAttribute("max", pTemplate->max);
+
+        Assert(bHasMin);
+        Assert(bHasMax);
 
         for (size_t j = 0; j < pChild->GetChildCount(); ++j) {
             XMLTree* pTarget = pChild->GetChild(j);
             Assert(pTarget->GetName() == "Target");
-            DWORD targetSType;
-            Assert(pTarget->GetAttribute("type", targetSType));
+            // Hoisted out of Assert() for the same reason.
+            DWORD targetSType = 0;
+            bool bHasType = pTarget->GetAttribute("type", targetSType);
+            Assert(bHasType);
             pTemplate->m_TargetList.push_back((SpriteType_t)targetSType);
         }
 
