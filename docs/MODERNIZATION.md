@@ -5010,9 +5010,27 @@ accessors; 4 `ItemRack` accessors. Two findings from that pass worth keeping:
 feeds it straight back into `setPhoneSlotNumber` — unreachable today only
 because of a `Success` guard; and the shop accessors had to **throw** rather
 than return `NULL`, because `CGShopRequestBuyHandler` dereferences
-`getShopItem()` unchecked at `:106`, `:194` and `:466`, so a sentinel would have
-converted an OOB read into a remote NULL-deref DoS. Those three unchecked
-dereferences remain open. This is **compile-verified only**.
+`getShopItem()` unchecked, so a sentinel would have converted an OOB read into a
+remote NULL-deref DoS. This is **compile-verified only**.
+
+**REFUTED 2026-08-10 — the "three unchecked `getShopItem()` dereferences" are not
+reachable.** The claim was recorded in `326c298`'s commit message and in an earlier
+revision of this paragraph; it does not survive checking. There are **four** such
+dereferences, not three (`CGShopRequestBuyHandler.cpp:106`, `:194`, `:466`, `:666` —
+the fourth was missed), and every one is guarded:
+- `:106` is guarded in place — `isExistShopItem()` returns early at `:98`, eleven
+  lines above it.
+- `:194`, `:466` and `:666` sit in `executeNormal`, `executeMotorcycle` and
+  `executeEvent`, whose **only** call sites tree-wide are `:132`, `:130` and `:155`
+  inside `execute()` — downstream of the same `isExistShopItem()` guard at `:98`
+  (normal/motorcycle) and `:143` (event) [measured: three call sites, no others].
+
+The underlying hazard is real and worth keeping in mind — `ItemRack::get()` returns
+`m_ppItem[index]` directly, and a NULL slot is *normal* (NULL at construction,
+`remove()` sets NULL), so `getShopItem()` legitimately returns NULL for an in-range
+empty index. The guard is simply upstream rather than local, which makes it fragile
+to a future caller but not currently a defect. Throwing rather than returning a
+sentinel from the accessors remains the right call as defence in depth.
 
 **CONFIRMED — unguarded client-controlled indices. ALL FIXED 2026-08-10.** Verified
 independently; none depended on the `Assert` question. This list was written before
