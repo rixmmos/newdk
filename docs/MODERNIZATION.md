@@ -4813,31 +4813,98 @@ occurred since the 18-C fix landed.
   narrow and cheap: *scrutinise pre-declared `Result*` pointers; ignore the
   direct-initialised ones.*
 
-  **Latent trap — the two `Result` backends have different pointer contracts.**
-  In `BACKEND_MYSQL_RES` (the legacy `Statement` path), `getField()` returns
-  `m_pRow[index-1]` (`Result.cpp:128`), which `next()` invalidates via
-  `mysql_fetch_row` — a `const char*` held across a `next()` dangles *inside*
-  the statement's own scope. In `BACKEND_MATERIALIZED` (the `PreparedStatement`
-  path) it returns a pointer into `m_Rows` (`Result.cpp:141`), stable for the
-  `Result`'s life. No current site relies on the difference, and the Phase 11
-  migration runs from the stricter backend to the safer one, so it introduces
-  nothing — but code written against materialised semantics would break if
-  moved the other way.
+  **~~Latent trap — the two `Result` backends have different pointer
+  contracts.~~ WITHDRAWN 2026-08-10 — the claim was wrong.** An earlier
+  revision of this file asserted that on the legacy `BACKEND_MYSQL_RES` path a
+  `const char*` from `getField()` is invalidated by `next()`. It is not.
+  `Statement::executeQuery()` uses **`mysql_store_result`**
+  (`Statement.cpp:116`), which buffers the entire result set client-side; each
+  row's storage is independent, so a pointer taken from row N stays valid — and
+  keeps pointing at row N — after `next()` advances. Both backends invalidate
+  only when the `Result` is destroyed. The claim would hold under
+  `mysql_use_result`, which this codebase never calls. Retaining such a pointer
+  therefore degenerates into the ordinary scope question, not a hazard of its
+  own.
 
-- **Not yet audited: the legacy `Statement` API.** [measured 2026-08-10] All of
-  the above covers `PreparedStatement` only. `Statement::executeQuery()` has
-  *identical* ownership semantics (`Statement.cpp`: `if (m_pResult != NULL)
-  delete m_pResult`), and the legacy API is still live at **472 call sites
-  across 196 files**, 233 of which capture a `Result`; **37 files** reuse one
-  statement for two or more result-producing queries. The risk is structurally
-  lower — a legacy `Statement*` is heap-allocated by
-  `pConn->createStatement()` and freed by `SAFE_DELETE(pStmt)` at function
-  end, so it normally *outlives* the block, which is precisely why the
-  pre-migration code was correct and why converting it to a block-scoped
-  `PreparedStatement` created 18-B and 18-C. A sample of the heaviest file
-  (`exchange/ExchangeDB.cpp`, 12 sites) found the idiom disciplined: one
-  statement per function, result read before the next query, `SAFE_DELETE` at
-  the end. Not cleared, just not alarming.
+- **The legacy `Statement` API — audited 2026-08-10, clean.** [measured] All
+  the audits above cover `PreparedStatement` only, and
+  `Statement::executeQuery()` has *identical* ownership semantics
+  (`Statement.cpp`: `if (m_pResult != NULL) delete m_pResult`). Five auditors
+  covered all **197 files** containing `executeQuery`, checking four shapes:
+  read after `SAFE_DELETE(pStmt)`; read after a re-execute on the same
+  statement; `Result*` escaping; and a retained `const char*` across `next()`.
+  **Zero bugs.**
+
+  **The surface is about half what a raw grep suggests.** 487 textual
+  `executeQuery` occurrences across 198 files, but the auditors'
+  comment-state scanners put **roughly half inside `/* … */` blocks** — the
+  Phase 11 migration left the old `StringStream sql; …
+  executeQueryString(sql.toString())` commented out directly above each new
+  `PreparedStatement`. Per group: 48/120 dead, 40/105, 47/93, 39/81, 40/80.
+  Whole directories are already fully migrated — **most of `item/*.cpp` has
+  zero live legacy sites.** Any future estimate of "legacy work remaining"
+  that counts raw grep hits is inflated ~2×.
+
+  Structurally the legacy path was always the safer one: a `Statement*` is
+  heap-allocated by `pConn->createStatement()` and freed at function end, so
+  it normally *outlives* the block. That is precisely why the pre-migration
+  code was correct, and why converting it to a block-scoped
+  `PreparedStatement` created 18-B and 18-C.
+
+  **Adjacent defects found but not fixed** (leaks, not use-after-free — the
+  `Statement` and its `Result` are never freed on the success path, because
+  `END_DB` only deletes on `SQLQueryException`):
+  `EventZoneInfo.cpp:74`, `skill/EffectDarkness.cpp:150`,
+  `mission/EventQuestInfoManager.cpp:132`, `CastleShrineInfoManager.cpp:119`,
+  `PetTypeInfo.cpp:56`, `skill/EffectYellowPoison.cpp:245`,
+  `skill/EffectContinualBloodyWall.cpp:151`, `EventHeadCount.cpp:71`,
+  `DefaultOptionSetInfo.cpp:33-58`, `skill/EffectIceField.cpp:165-215`,
+  `UniqueItemManager.cpp:75`, `RegenZoneManager` (both loaders),
+  `skill/EffectGreenPoison.cpp:153`, `LevelWarZoneInfoManager.cpp:144`, and
+  `StringPool.cpp` (both copies). Several are per-zone at startup.
+  Also: `MonsterKillQuest.cpp:64` executes the literal SQL string `"-_-"`,
+  which will throw on every call if that path is ever reached; and
+  `CGSayHandler.cpp:2055-2058` shadows `string PlayerID` with a second
+  declaration three lines later.
+- **Bug 18-D — `new[]` freed with plain `delete` in `Zone::load()`. FIXED.**
+  [measured 2026-08-10, AddressSanitizer] `version`, `zonename` and
+  `lwrFilename` are `new char[128]`/`new char[256]`
+  (`gameserver/Zone.cpp:798-800`) but were released with `SAFE_DELETE`, which
+  expands to plain `delete` (`Core/Utility.h:18`). ASan aborts gameserver
+  startup with `alloc-dealloc-mismatch (operator new [] vs operator delete)`
+  in `Zone::load` → `Zone::init` → `ZoneGroupManager::load`. Undefined
+  behaviour; benign in practice for `char` but heap-corrupting in general.
+  Fixed by using `SAFE_DELETE_ARRAY`, which already exists two lines below the
+  other macro and is used 52 times elsewhere. Note the same bug was fixed for
+  the sibling `pDesc` in this very function **in 2002** —
+  `// add '_ARRAY' moved to here.. by sigi 2002.5.2` at `Zone.cpp:873` — and
+  its three neighbours were missed.
+- **Bug 18-E — heap-buffer-overflow write in every `ExpTable::load()`. FIXED.**
+  [measured 2026-08-10, AddressSanitizer] `ExpTable` (`SomethingGrowingUp.h`)
+  sized its record vector `m_Records(MaxLevel)`, giving valid indices
+  `0..MaxLevel-1`, but levels are **1-based** and `load()` writes
+  `m_Records[level]` for `level` in `MinLevel..MaxLevel` inclusive — the
+  `Assert(level <= MaxLevel)` immediately above says so explicitly. At
+  `level == MaxLevel` this writes 4 bytes past the allocation. ASan:
+  `heap-buffer-overflow WRITE of size 4 ... 0 bytes after 2520-byte region`
+  (315 records × 8 bytes) in
+  `ExpTable<unsigned int, unsigned short, 1, 315, unsigned int>::load()`.
+  The out-of-range **reads** in `getGoalExp()`/`getAccumExp()` at
+  `level == MaxLevel` had the same defect. Fixed by sizing to `MaxLevel + 1`;
+  nothing reads `m_Records.size()`, so widening is behaviour-preserving and
+  slot 0 stays unused as the 1-based indexing already assumed. This is a
+  *silent heap corruption* in the shipping build — the most serious defect
+  found in this sitting, and it fires on every gameserver boot. `Zone.cpp`'s
+  `Statement`/query buffer in the same header had the 18-D mismatch too
+  (`new char[size]` + `SAFE_DELETE`), fixed alongside.
+- **Tree-wide sweep for the 18-D shape: clean.** [measured] Every variable
+  assigned from `new T[...]` was checked against `SAFE_DELETE(v)` / `delete v;`
+  across all `.cpp`, `.h` and `.hpp` under `src/`. After these two fixes there
+  are no remaining instances. The detector was validated by re-running it
+  against the pre-fix `Zone.cpp`, where it correctly flagged all three
+  variables. **Note the first pass of this sweep searched only `*.cpp` and
+  therefore missed 18-E, which lives in a header** — a reminder that a
+  file-type filter is part of a claim's scope.
 - **`CLLoginHandler.cpp:402` is truncated mid-token — pre-existing, dead.**
   [measured] Under `#ifdef __THAILAND_SERVER__`, the line reads
   `bool bChildGuardArea = onChildGuardTimeArea(g_pConfig->getPropertyInt("CHILDGUARD_START_TIME"),g_pConf`

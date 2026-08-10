@@ -1555,9 +1555,13 @@ void Zone::load(bool bOutput)
         
         initSpriteCount();
 
-        SAFE_DELETE(version);
-        SAFE_DELETE(zonename);
-        SAFE_DELETE(lwrFilename);
+        // All three are new char[...] (see the allocations above), so they must
+        // be released with delete[]. SAFE_DELETE uses plain delete, which is
+        // undefined behaviour for an array allocation -- AddressSanitizer
+        // reports it as alloc-dealloc-mismatch and aborts gameserver startup.
+        SAFE_DELETE_ARRAY(version);
+        SAFE_DELETE_ARRAY(zonename);
+        SAFE_DELETE_ARRAY(lwrFilename);
 
         /*	if ( m_ZoneID == 1410 )
             {

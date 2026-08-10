@@ -19,10 +19,16 @@ public:
     static const LevelType MaxLevel = _MaxLevel;
     static const LevelType MinLevel = _MinLevel;
 
-    ExpTable() : m_Records(MaxLevel) {}
+    // Levels are 1-based and run MinLevel..MaxLevel inclusive, and every access
+    // indexes m_Records[level] directly (load() below, plus getGoalExp/
+    // getAccumExp). Sizing to MaxLevel leaves the last level out of bounds:
+    // AddressSanitizer reports a 4-byte heap-buffer-overflow WRITE in load()
+    // for level == MaxLevel. Size to MaxLevel + 1 so index MaxLevel is valid;
+    // slot 0 is unused, which is what the 1-based indexing already assumes.
+    ExpTable() : m_Records(MaxLevel + 1) {}
     virtual ~ExpTable() {}
 
-    
+
     virtual void load();
     virtual const string getDBTableName() const = 0;
     virtual const string getDBGoalExpFieldName() const {
@@ -38,7 +44,7 @@ public:
         return "";
     }
 
-    
+
     GoalExpType getGoalExp(LevelType level) const {
         Assert(level <= MaxLevel && level >= MinLevel);
         return m_Records[level].m_GoalExp;
@@ -65,7 +71,7 @@ void ExpTable<GoalExpType, LevelType, MinLevel, MaxLevel, TotalExpType>::load() 
 
     const string QueryTemplate = "SELECT %s, %s, %s FROM %s %s";
 
-    
+
     int size = QueryTemplate.size() + getDBTableName().size() + getDBGoalExpFieldName().size() +
                getDBAccumExpFieldName().size() + getDBLevelFieldName().size() + getDBQueryCondition().size();
     char* query = new char[size];
@@ -91,7 +97,9 @@ void ExpTable<GoalExpType, LevelType, MinLevel, MaxLevel, TotalExpType>::load() 
     }
     END_DB(pStmt);
 
-    SAFE_DELETE(query);
+    // query is new char[size]; plain delete is undefined behaviour for an array
+    // allocation (same defect as Zone.cpp's version/zonename/lwrFilename).
+    SAFE_DELETE_ARRAY(query);
 
     __END_CATCH
 }
@@ -122,7 +130,7 @@ public:
     bool levelUp();
     bool levelDown();
 
-    
+
     bool SET_LEVEL(LevelType level);
 
 private:
