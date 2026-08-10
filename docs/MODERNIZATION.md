@@ -5513,6 +5513,63 @@ the cheap systemic fix.**
    a live gameserver segfault if wired to an NPC an Ousters can reach.
 6. `FameLimitInfo` is the closest untested twin of the `getDomainInfo` defect.
 
+### Phase 18 — wave 5 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AK | All three accept paths refuse descriptors past the `fd_set` bound instead of writing past it. The **sharedserver was worse than the reported bug** — no check at all against a 100-entry array |
+| 18-AL | Four more constant-guard-vs-DB-sized-array defects, incl. `EventQuestAdvance`, which was live and leaking every instance ever allocated |
+| 18-AM | Four Ousters NULL dereferences that **crash the process**; two are live in the shipped trigger data |
+| — | A CI leg that can finally emit optimisation-dependent warnings, plus a `paths:` blind spot that skipped CI entirely for `shared/Packets/**` |
+
+**`FameLimitInfo` — named as the highest-value follow-up — is dead code.** Not in
+any CMake list (0 hits, versus 20 each for its live siblings), all wiring
+commented out, zero call sites, and the table exists in neither dump. Left
+untouched deliberately: editing an uncompiled, unverifiable file only signals to
+the next auditor that it matters. **Recommend deleting `FameLimitInfo.{h,cpp}`.**
+
+**Two claims from earlier waves were wrong and are corrected here.** The idle
+timeout *does* fire on a silent connection — the check lives in `processCommand`,
+driven by an **ungated** `processCommands()` loop with no `FD_ISSET` filter, and
+the deadline is armed in the constructor. And `RareOptionUpgradeInfo` is **not**
+dead: it is live on the rare-enchant path, loaded at startup from a table whose
+absence throws. Both were relayed as fact before being checked.
+
+**`reserve()` where `resize()` was meant is now a named pattern in this tree** —
+three instances found (`RareOptionUpgradeInfo`, `EventQuestAdvance`,
+`PetTypeInfo`). It is particularly nasty because `reserve()` allocates capacity,
+so the writes often land inside the allocation and the code appears to work,
+while `size()` stays 0 — so every range-based loop, `clear()` and iteration sees
+an empty container. `EventQuestAdvance` leaked every object it ever allocated for
+exactly this reason.
+
+**Measured negatives, recorded so they are not re-swept:** `SkillParentInfo`,
+`RankEXPInfo` and `AttrBalanceInfo` already bound on loaded counts; `MonsterAI`'s
+input is validated upstream; `War.cpp`'s status is an SQL `enum` and cannot
+drift; `SweeperSet`'s race column has one distinct value.
+
+**Raising `FD_SETSIZE` does not work on glibc** — `fd_set` is sized by
+`__FD_SETSIZE`, fixed at 1024 in `bits/typesizes.h`, and defining `FD_SETSIZE`
+first silently does nothing. It works that way on Winsock, which is probably why
+the current state looks deliberate. Not compile-confirmed; worth a two-line test
+before anyone acts on it.
+
+**Still open, owner decisions** (unchanged from wave 4 except where noted):
+
+1. **UDP DoS needing no bug** — ~144 kbit/s of spoofed traffic saturates the
+   receive loop and the dropped datagrams include the login handoff.
+2. **The speed hack** — telemetry now lands in `MoveRate.log`; enforcement needs
+   movement-speed data the server does not have.
+3. **The login-failure lockout** — one word at four sites.
+4. **Lower `nMaxPlayers` 2000 → 1024** so the header stops reading as a capacity
+   promise. Deliberately not bundled with a security fix; it is a shared header
+   and a wide recompile.
+5. `CGSilverCoatingHandler:39` — no Ousters arm, reachable only by a crafted
+   packet.
+6. Delete `FameLimitInfo.{h,cpp}`.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
