@@ -24,9 +24,9 @@
 //////////////////////////////////////////////////////////////////////
 Player::Player() : m_pSocket(NULL), m_pInputStream(NULL), m_pOutputStream(NULL) {
     // add by viva
-    // Must be initialised: setKey() below tests `pHashTable != NULL` on the
-    // first call, so leaving it indeterminate is an uninitialised read whose
-    // outcome decides whether the exit(0) branch is taken.
+    // Must be initialised: setKey() below reads pHashTable to release the
+    // previously allocated table, so leaving it indeterminate is an
+    // uninitialised read followed by a delete[] of a garbage pointer.
     pHashTable = NULL;
 }
 
@@ -46,9 +46,9 @@ Player::Player(Socket* pSocket) : m_pSocket(pSocket), m_pInputStream(NULL), m_pO
     Assert(m_pOutputStream != NULL);
 
     // add by viva
-    // Must be initialised: setKey() below tests `pHashTable != NULL` on the
-    // first call, so leaving it indeterminate is an uninitialised read whose
-    // outcome decides whether the exit(0) branch is taken.
+    // Must be initialised: setKey() below reads pHashTable to release the
+    // previously allocated table, so leaving it indeterminate is an
+    // uninitialised read followed by a delete[] of a garbage pointer.
     pHashTable = NULL;
     __END_CATCH
 }
@@ -239,10 +239,12 @@ string Player::toString() const {
 // add by viva 2008-12-31
 void Player::setKey(WORD EncryptKey, WORD HashKey) {
     __BEGIN_TRY
-    if (pHashTable != NULL) {
-        if (EncryptKey == 0xAEB7 && HashKey == 0x9B3E)
-            exit(0);
-    }
+    // Removed: a 2008-era anti-cheat branch here called exit(0) when the client
+    // sent two hardcoded key constants. CGConnectSetKey is registered on both the
+    // login and the game server with no authentication gate, so this was an
+    // unauthenticated remote shutdown of either server for anyone who knew the
+    // constants. Do not reinstate it.
+
     // Each call allocated a fresh table and never released the previous one:
     // 512 bytes leaked per CGConnectSetKey packet, which a client may send
     // repeatedly. The old table cannot be freed before the streams below are
