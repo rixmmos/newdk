@@ -4905,6 +4905,91 @@ occurred since the 18-C fix landed.
   variables. **Note the first pass of this sweep searched only `*.cpp` and
   therefore missed 18-E, which lives in a header** — a reminder that a
   file-type filter is part of a claim's scope.
+### Phase 18 — client-to-server packet audit (2026-08-10)
+
+Five auditors covered all 216 `CG*`/`CL*` packet and handler files, then five
+more independently **verified** the highest-severity claims adversarially. The
+verification round mattered: it refuted a major claim, resolved a direct
+contradiction between two reviewers, and found a bug none of them had claimed.
+Treat unverified audit output as a lead, not a finding.
+
+**Fixed in this sitting** (see the commits): the store index off-by-one
+(`> MAX_ITEM_NUM` where the vectors hold exactly `MAX_ITEM_NUM`, letting index
+20 through, in `CGDisplayItemHandler:52`, `CGUndisplayItemHandler:40`,
+`CGBuyStoreItemHandler:54`), and `Player::setKey`'s uninitialised `pHashTable`
+plus its 512-byte-per-packet leak.
+
+**REFUTED — `Assert` is *not* compiled out of the shipping build.** Two
+auditors reported exploitable overflows on the premise that `make` builds
+Release and `Assert` becomes `((void)0)` under `NDEBUG`. `Makefile:11` is
+`all: debug`; CI (`server.yml:76`) and the smoke-test runbook both use
+`make debug`; no configured build tree sets `NDEBUG`; and the deployed
+`bin/gameserver` still contains the stringified assert expressions
+(`"verifyIndex(index)"`, `"SlotID <= MAX_PHONE_SLOT"`) — impossible if `NDEBUG`
+were set [measured 2026-08-10]. `Assert` throws `AssertionError`
+(`src/Core/Assert.h:34-35`). **Root cause of the wrong conclusion:
+`dkrixserver/CLAUDE.md` documented `make` as Release.** That line has been
+corrected; it is load-bearing and misled two independent reviews. The residual
+risk is real but different from what was reported: bounds enforcement is one
+`make release` away from vanishing, and `Slayer::setPhoneSlotNumber` has no
+assert at all on its 3-element array while `getPhoneSlotNumber` asserts
+`<= MAX_PHONE_SLOT`, which is itself off by one.
+
+**CONFIRMED and still open — unguarded client-controlled indices.** Verified
+independently; none depends on the `Assert` question:
+- `CGReloadFromInventoryHandler.cpp:52-54` — wire `BYTE` X/Y reach
+  `Inventory::getInventorySlot` (`Inventory.h:131`, `m_pInventorySlot[X][Y]`,
+  no check) with no guard on any path. Inventories are 10×6 and the outer
+  dimension is a pointer array, so `X=255` dereferences a wild pointer. Judged
+  the most severe: cheapest to reach, no grooming needed.
+- `CGUseItemFromGearHandler.cpp:68-74` and `CGAddGearToMouseHandler.cpp:48-94`
+  — wire `BYTE` cast to `WearPart` and used directly in
+  `m_pWearItem[Part]` (`Slayer.h:473`, `Vampire.h:357`, `Ousters.h:370`);
+  arrays are 21/22/22 elements, no bounds check in any of the three races.
+- `CGSkillToInventoryHandler.cpp:61-69` — the `SKILL_INSTALL_MINE` branch sets
+  `bSuccess = true` unconditionally, skipping the *only* coordinate check
+  (`CreatureUtil.cpp:954`, `X >= 10 || Y >= 6`) and leaving `pSkillSlot` NULL
+  on entry to `InstallMine::execute`.
+- `CGAddItemToCodeSheetHandler.cpp` — `IndexNum = (y*10 + x)/2` from two wire
+  `BYTE`s, guarded only by `if (OptionType.size() < 30) return;`, a lower bound
+  on the container rather than an upper bound on the index. Max index ~1402
+  against ~30 elements; OOB read at `:104`, OOB write at `:131`.
+
+**PARTIALLY CONFIRMED — `toString()` table lookups.** `readPacket()` calls
+`pPacket->toString()` unconditionally right after `read()`
+(`SocketInputStream.cpp:181`), on all three servers — confirmed. Seven of nine
+`*2String[` lookups inside `toString()` bodies index small tables with
+unvalidated wire bytes. But the blanket "pre-auth" framing is **overbroad**: a
+packet-ID state machine (`PacketValidator`) gates `readPacket`, and only
+`CGConnect`'s `PCType2String[m_PCType]` (3 elements, raw `BYTE`) is genuinely
+reachable before authentication. A reviewer's claim that `CLCreatePC::toString()`
+is never called was **wrong** — `LoginPlayer.cpp:217` calls `readPacket`, which
+calls `toString`. Two of the nine are safe (`CLSelectPC` validates in `read()`;
+`CLCreatePC`'s `Sex2String` is bit-width-bounded). **Newly found, unclaimed:**
+`CLCreatePC::toString()`'s `HairStyle2String[(bits>>1) & 3]` yields 0..3 into a
+3-element table — a genuine off-by-one.
+
+**Confirmed but deliberately not fixed — `Player::setKey` killswitch.**
+`src/Core/Player.cpp:236-239`: two magic constants (`0xAEB7`/`0x9B3E`) trigger
+`exit(0)`, and `CGConnectSetKey` is registered on **both** login and game
+servers with no auth gate, so any client can terminate the process. This is
+intentional 2008-era anti-cheat (`// add by viva 2008-12-31`); removing it is a
+policy decision for the owner, not a mechanical fix. The uninitialised-read and
+leak around it *were* fixed.
+
+**Confirmed, needs a wire-format decision — `CGExchangeBuy`.**
+`read()` calls `iStream.read(m_IdempotencyKey)` on a `std::string`. There is no
+one-argument `read(string&)` overload, so it binds to the raw template
+(`SocketInputStream.h:157`, `buf = *(T*)(m_Buffer + m_Head)`), reinterpreting 32
+wire bytes as a live `std::string` — the client controls both the data pointer
+and the length, giving an arbitrary-address read, and the ring-buffer-wrap
+branch `memcpy`s over the string's internals so the destructor frees an
+attacker-chosen pointer. **The only such site tree-wide** [measured]. Not
+fixed here because `write()` emits the raw bytes with no length prefix, so the
+two sides never agreed on a format and the packet cannot have worked; the
+client (`dkrix/Client/Packet/Cpackets/CGExchangeBuy.cpp`) also implements it,
+so per the house rule a format change must ship to both trees together.
+
 - **`CLLoginHandler.cpp:402` is truncated mid-token — pre-existing, dead.**
   [measured] Under `#ifdef __THAILAND_SERVER__`, the line reads
   `bool bChildGuardArea = onChildGuardTimeArea(g_pConfig->getPropertyInt("CHILDGUARD_START_TIME"),g_pConf`

@@ -19,7 +19,17 @@ make clean
 ```
 
 The project uses CMake. The Makefile wraps CMake commands for convenience:
-- `make` - Builds with CMake in Release mode (`-DCMAKE_BUILD_TYPE=Release`)
+- `make` - **Builds Debug** (`Makefile:11` is `all: debug`). This line previously
+  said Release; that was wrong and is load-bearing, because `Assert()` is
+  `((void)0)` only under `NDEBUG` — which Debug does not set. Two separate
+  security reviews concluded from this doc line that every `Assert`-based bounds
+  check is compiled out in production and reported exploitable overflows on that
+  basis. They are not: the deployed binaries are Debug, `Assert` throws
+  `AssertionError` (`src/Core/Assert.h:34-35`), and the stringified assert
+  expressions are present in `bin/gameserver` [measured 2026-08-10].
+- `make release` - Release (`-O2 -DNDEBUG`). **This is the configuration where
+  every `Assert`-based bounds check disappears.** Nothing in CI or the smoke-test
+  runbook builds it.
 - `make debug` - Builds with CMake in Debug mode (`-DCMAKE_BUILD_TYPE=Debug`)
 - Build output binaries go to `bin/` directory
 - Build output libraries go to `lib/` directory
