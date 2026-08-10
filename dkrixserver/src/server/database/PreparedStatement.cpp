@@ -286,8 +286,15 @@ Result* PreparedStatement::execute() {
         }
     }
 
+    // No memset here. `std::vector<MYSQL_BIND> binds(n)` value-initialises its
+    // elements, and MYSQL_BIND is a plain C aggregate, so value-initialisation
+    // is zero-initialisation -- every member and every padding bit is already
+    // zero. The memset that used to follow this line was redundant, and for a
+    // parameterless statement (m_nParamCount == 0) the vector is empty, so
+    // data() returned nullptr and memset declares argument 1 nonnull. That is
+    // what the first UBSan boot run (2026-08-10) reported here, via
+    // VariableManager::load() and GuildManager::init().
     std::vector<MYSQL_BIND> binds(m_nParamCount);
-    std::memset(binds.data(), 0, sizeof(MYSQL_BIND) * m_nParamCount);
 
     for (uint i = 0; i < m_nParamCount; ++i) {
         Param& p = m_Params[i];
@@ -359,10 +366,10 @@ Result* PreparedStatement::execute() {
         uint fieldCount = (uint)mysql_num_fields(pMetadata);
         MYSQL_FIELD* pFields = mysql_fetch_fields(pMetadata);
         std::vector<PreparedResultColumn> columns(fieldCount);
+        // Redundant for the same reason as the parameter binds above; the
+        // fieldCount > 0 guard that wrapped it was only there to dodge the
+        // nullptr-to-memset case.
         std::vector<MYSQL_BIND> resultBinds(fieldCount);
-        if (fieldCount > 0) {
-            std::memset(resultBinds.data(), 0, sizeof(MYSQL_BIND) * fieldCount);
-        }
 
         for (uint i = 0; i < fieldCount; ++i) {
             PreparedResultColumn& column = columns[i];

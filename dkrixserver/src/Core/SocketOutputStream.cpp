@@ -38,8 +38,6 @@ SocketOutputStream::SocketOutputStream(Socket* sock, uint BufferLen)
 //////////////////////////////////////////////////////////////////////
 SocketOutputStream::~SocketOutputStream() noexcept {
     if (m_Buffer != NULL) {
-        
-        
         // flush();
         delete[] m_Buffer;
         m_Buffer = NULL;
@@ -63,16 +61,11 @@ SocketOutputStream::~SocketOutputStream() noexcept {
 uint SocketOutputStream::write(const char* buf, uint len) {
     __BEGIN_TRY
 
-    
-    
-    
-    
-    
-    
+
     uint nFree = ((m_Head <= m_Tail) ? m_BufferLen - m_Tail + m_Head - 1 : m_Head - m_Tail - 1);
     // m_Tail - m_Head - 1 );
 
-    
+
     if (len >= nFree)
         resize(len - nFree + 1);
 
@@ -195,7 +188,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                
+
                 if (nSent == 0)
                     return 0;
 
@@ -220,7 +213,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                
+
                 if (nSent == 0)
                     return 0;
 
@@ -240,7 +233,7 @@ uint SocketOutputStream::flush() {
             while (nLeft > 0) {
                 nSent = m_Socket->send(&m_Buffer[m_Head], nLeft, MSG_NOSIGNAL);
 
-                
+
                 if (nSent == 0)
                     return 0;
 
@@ -259,7 +252,6 @@ uint SocketOutputStream::flush() {
         }
 
     } catch (NonBlockingIOException&) {
-        
         // by sigi. 2002.9.27
         if (nSent > 0) {
             m_Head += nSent;
@@ -268,7 +260,6 @@ uint SocketOutputStream::flush() {
         cerr << "SocketOutputStream NonBlockingIOException Check! " << endl;
         throw NonBlockingIOException("SocketOutputStream NonBlockingIOException Check");
     } catch (InvalidProtocolException& t) {
-        
         // by sigi. 2002.9.27
         if (nSent > 0) {
             m_Head += nSent;
@@ -285,7 +276,7 @@ uint SocketOutputStream::flush() {
     file.close();
     */
 
-    
+
     m_Head = m_Tail = 0;
 
     return nFlushed;
@@ -305,22 +296,20 @@ void SocketOutputStream::resize(int size) {
 
     int orgSize = size;
 
-    
+
     size = max(size, (int)(m_BufferLen >> 1));
     uint newBufferLen = m_BufferLen + size;
     uint len = length();
 
     if (size < 0) {
-        
-        
         if (newBufferLen < 0 || newBufferLen < len)
             throw IOException("new buffer is too small!");
     }
 
-    
+
     char* newBuffer = new char[newBufferLen];
 
-    
+
     if (m_Head < m_Tail) {
         //
         //    H   T
@@ -341,10 +330,10 @@ void SocketOutputStream::resize(int size) {
         memcpy(&newBuffer[m_BufferLen - m_Head], m_Buffer, m_Tail);
     }
 
-    
+
     delete[] m_Buffer;
 
-    
+
     m_Buffer = newBuffer;
     m_BufferLen = newBufferLen;
     m_Head = 0;
@@ -353,9 +342,13 @@ void SocketOutputStream::resize(int size) {
     VSDateTime current = VSDateTime::currentDateTime();
 
     if (m_Socket == NULL) {
-        
-        
-        filelog("packetsizeerror.txt", "PacketID = %u", *(PacketID_t*)m_Buffer);
+        // Same type-punning shape as the write<T>() stores fixed after the first
+        // UBSan boot run (2026-08-10). m_Buffer is freshly allocated here so the
+        // offset happens to be aligned, but the cast is still undefined; read the
+        // bytes out with memcpy instead. Diagnostic only -- no wire effect.
+        PacketID_t packetID;
+        std::memcpy(&packetID, m_Buffer, sizeof(packetID));
+        filelog("packetsizeerror.txt", "PacketID = %u", (unsigned int)packetID);
     } else {
         ofstream ofile("buffer_resized.log", ios::app);
         ofile << "[" << current.toString().c_str() << "] " << m_Socket->getHost().c_str()
