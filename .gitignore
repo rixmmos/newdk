@@ -7,6 +7,9 @@ build-asan/
 build-ubsan/
 build-tsan/
 build-smoke/
+# Reproducing the CI warning-scan leg locally (.github/workflows/server.yml)
+build-warnings/
+dkrixserver/ci-warning-logs/
 dkrixserver/bin.pre-smoke-*/
 dkrixserver/bin.nonasan-backup/
 # Server runtime logs written next to the binaries during a smoke run.
