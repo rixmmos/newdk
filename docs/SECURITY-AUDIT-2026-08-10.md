@@ -47,6 +47,14 @@ gameplay with **zero ASan reports** — a first for this tree. Movement and clea
 logout were verified in the earlier non-ASan run (`e362ca2`). Character creation
 (`CLCreatePC`) was **never exercised** in any run.
 
+**Superseded 2026-08-10 (later the same day):** character creation *has* now been
+exercised. A real client completed login → **character creation** → enter world →
+item pickup → equip → unequip against the live server, with zero exceptions or
+assertions in any server log. That was a `make debug` build, not ASan, so it does
+not restore the ASan-clean claim above — it closes the `CLCreatePC` gap only. See
+`MODERNIZATION.md`, "Phase 18 — hardening wave", for exactly which items this
+promotes and which remain compile-verified.
+
 Also landed, non-bug: two format-only commits (`3ca03fe`, `c8fbd67` — Zone.cpp's
 1,188-line reformat, verified token- and assembly-equivalent) and the secret
 untracking below.

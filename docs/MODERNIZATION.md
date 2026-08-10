@@ -5261,6 +5261,34 @@ account (it carried a credential and the repo is public), which the seed script
 had not been told about. Verified end-to-end: seed exits 0, all three host rows
 have passwords, and the game user connects to both databases.
 
+**RUNTIME-VERIFIED 2026-08-10, after the wave.** Enrico ran the real client against
+the live server on the workstation and completed **login → character creation →
+enter world → pick up items → equip → unequip**. All three servers stayed up;
+`gameserver.log` and `loginserver.log` contain **zero** exceptions or assertions for
+the session, and `assertion_failed.log` was not touched (its only entry predates the
+session). This was a plain `make debug` build, **not** ASan.
+
+This promotes several items in this section from *compile-verified only*:
+
+| Now runtime-verified | Path exercised |
+|---|---|
+| 18-T `CLCreatePC::read()` — Slot and HairStyle rejection | character creation. **`CLCreatePC` had never been exercised in any previous run** (see §1's milestone note), so this closes the single largest untested gap on the login path |
+| 18-T `CGConnect::read()` PCType rejection | entering the world |
+| 18-Y killswitch removal (`Player::setKey`) | login, on both servers |
+| 18-V `CLLoginHandler` `Result` scoping | login |
+| 18-U wear-slot accessors, 18-I inventory accessors | equip / unequip / item pickup |
+| 18-W, 18-X boot-path loaders | all three servers booted clean |
+
+**Still not exercised at runtime**, and still compile-verified only: the `NPC`
+shop-rack accessors (no buy/sell was performed), `CGAddItemToCodeSheet`, the phone
+slots, the pet stash, and the whole `Datagram`/`SerialDatagram` UDP path. Nor does
+this run touch the restored seed dump — the live database already holds intact zone
+data, so `18-Z`/the dump swap remains verified only by the CI boot smoke.
+
+**The ASan smoke test has still not been re-run since the wave.** It is the only
+gate in this project's history that has caught a runtime bug, and this clean session
+is not a substitute for it.
+
 **Open, deliberately untouched:** the `CGConnectSetKey` → `exit(0)` killswitch
 (audit §2 row 1 — an owner policy call, not a mechanical fix); the
 `CGExchangeBuy` client/server wire mismatch (row 8 — house rule ships both trees
