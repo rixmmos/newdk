@@ -99,8 +99,13 @@ enum OptionGroup {
 class RareOptionUpgradeInfo {
 public:
     RareOptionUpgradeInfo(int level, int grade) : m_Level(level), m_TotalGrade(grade) {
-        m_UpgradeRatio[0].reserve(grade);
-        m_UpgradeRatio[1].reserve(grade);
+        // resize(), not reserve(): setRatio() indexes these vectors with
+        // operator[], which only reaches constructed elements. reserve() left
+        // size() at 0, so every write landed in raw capacity -- undefined
+        // behaviour that happened to stay inside the allocation only because
+        // RareEnchantInfo.Grade is always < TotalGrade in the shipped data.
+        m_UpgradeRatio[0].resize(grade < 0 ? 0 : grade, 0);
+        m_UpgradeRatio[1].resize(grade < 0 ? 0 : grade, 0);
     }
 
     int getKey() const {
@@ -109,10 +114,16 @@ public:
 
     int getRatio(int grade, bool success) const {
         Assert(grade < m_TotalGrade);
+        // The Assert is compiled out in Release; a rare option whose grade is
+        // out of range for its class must not read past the vector.
+        if (grade < 0 || (size_t)grade >= m_UpgradeRatio[(int)success].size())
+            return 0;
         return m_UpgradeRatio[(int)success][grade];
     }
     void setRatio(int grade, bool success, int ratio) {
         Assert(grade < m_TotalGrade);
+        if (grade < 0 || (size_t)grade >= m_UpgradeRatio[(int)success].size())
+            return;
         m_UpgradeRatio[(int)success][grade] = ratio;
     }
 

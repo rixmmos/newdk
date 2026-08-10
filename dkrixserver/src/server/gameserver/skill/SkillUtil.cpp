@@ -247,7 +247,10 @@ Damage_t computeDamage(Creature* pCreature, Creature* pTargetCreature, int Criti
             Assert(pMonster != NULL);
             Damage = computeMonsterDamage(pMonster, pTargetCreature, bCriticalHit);
         } else {
-            
+            // Attacker is none of the four damage-dealing kinds (an NPC). No
+            // damage is computed, so report no critical: returning here without
+            // writing the out-param left the caller's bool indeterminate.
+            bCritical = false;
             return 0;
         }
     } catch (Throwable& t) {

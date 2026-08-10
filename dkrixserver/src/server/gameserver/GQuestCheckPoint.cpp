@@ -70,8 +70,20 @@ void GQuestCheckPoint::load() {
 
         Assert(bHasRace);
         Assert(bHasGrade);
+        Assert(!grade.empty());
+        // Under NDEBUG every Assert here is ((void)0), so a malformed TravelWay
+        // entry would index an empty string and then index m_EventWayPoints --
+        // a fixed [3][4] array -- with whatever came out. Skip the entry
+        // instead. In Debug the Asserts still fire first, so this changes
+        // nothing there.
+        if (!bHasRace || !bHasGrade || grade.empty())
+            continue;
+
         DWORD nGrade = grade[0] - 'A';
         Assert(nGrade <= 3);
+        if (race >= 3 || nGrade > 3)
+            continue;
+
         vector<DWORD>& target = m_EventWayPoints[race][nGrade];
         for (size_t j = 0; j < pChild->GetChildCount(); ++j) {
             XMLTree* pWay = pChild->GetChild(j);
