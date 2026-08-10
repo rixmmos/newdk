@@ -14,14 +14,27 @@ void GQuestCheckPoint::load() {
     XMLTree* pTree = new XMLTree;
     pTree->LoadFromFile((g_pConfig->getProperty("HomePath") + "/data/EventCheckPoint.xml").c_str());
 
-    DWORD type, zoneid, x, y, id;
+    // Every GetAttribute below is hoisted out of Assert(). That macro is
+    // ((void)0) under NDEBUG and never evaluates its argument, so a Release
+    // build would read none of EventCheckPoint.xml: these five locals are
+    // declared outside the loop and never initialised, so each checkpoint would
+    // be spawned from stack garbage -- getZoneByZoneID(zoneid) on an arbitrary
+    // id, addItem at arbitrary coordinates -- or, worse, silently reuse the
+    // previous iteration's values for every entry.
+    DWORD type = 0, zoneid = 0, x = 0, y = 0, id = 0;
     for (size_t i = 0; i < pTree->GetChildCount(); ++i) {
         XMLTree* pChild = pTree->GetChild(i);
-        Assert(pChild->GetAttribute("type", type));
-        Assert(pChild->GetAttribute("zoneid", zoneid));
-        Assert(pChild->GetAttribute("x", x));
-        Assert(pChild->GetAttribute("y", y));
-        Assert(pChild->GetAttribute("id", id));
+        bool bHasType = pChild->GetAttribute("type", type);
+        bool bHasZoneID = pChild->GetAttribute("zoneid", zoneid);
+        bool bHasX = pChild->GetAttribute("x", x);
+        bool bHasY = pChild->GetAttribute("y", y);
+        bool bHasID = pChild->GetAttribute("id", id);
+
+        Assert(bHasType);
+        Assert(bHasZoneID);
+        Assert(bHasX);
+        Assert(bHasY);
+        Assert(bHasID);
 
         MonsterCorpse* pMonsterCorpse = new MonsterCorpse(type, "", 2);
         pMonsterCorpse->setTreasureCount(255);
@@ -47,18 +60,27 @@ void GQuestCheckPoint::load() {
     for (size_t i = 0; i < pTree->GetChildCount(); ++i) {
         XMLTree* pChild = pTree->GetChild(i);
         Assert(pChild->GetName() == "TravelWay");
-        DWORD race;
+        // Hoisted out of Assert() for the same reason. Under NDEBUG `race` would
+        // be uninitialised and index m_EventWayPoints, and `grade` would be an
+        // empty string whose grade[0] below is an out-of-range access.
+        DWORD race = 0;
         string grade;
-        Assert(pChild->GetAttribute("race", race));
-        Assert(pChild->GetAttribute("grade", grade));
+        bool bHasRace = pChild->GetAttribute("race", race);
+        bool bHasGrade = pChild->GetAttribute("grade", grade);
+
+        Assert(bHasRace);
+        Assert(bHasGrade);
         DWORD nGrade = grade[0] - 'A';
         Assert(nGrade <= 3);
         vector<DWORD>& target = m_EventWayPoints[race][nGrade];
         for (size_t j = 0; j < pChild->GetChildCount(); ++j) {
             XMLTree* pWay = pChild->GetChild(j);
             Assert(pWay->GetName() == "Way");
-            DWORD id;
-            Assert(pWay->GetAttribute("id", id));
+            // Hoisted out of Assert() for the same reason -- under NDEBUG every
+            // waypoint id pushed here would be an uninitialised local.
+            DWORD id = 0;
+            bool bHasWayID = pWay->GetAttribute("id", id);
+            Assert(bHasWayID);
             target.push_back(id);
         }
     }

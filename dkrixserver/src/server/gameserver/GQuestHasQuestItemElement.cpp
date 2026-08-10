@@ -26,9 +26,14 @@ GQuestElement::ResultType GQuestHasQuestItemElement::checkCondition(PlayerCreatu
 GQuestHasQuestItemElement* GQuestHasQuestItemElement::makeElement(XMLTree* pTree) {
     GQuestHasQuestItemElement* pRet = new GQuestHasQuestItemElement;
 
-    DWORD type;
-    Assert(pTree->GetAttribute("type", type));
-    pRet->m_Type = type;
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip the read and assign an uninitialised `type` to
+    // m_Type -- the quest would then test for an arbitrary item. Initialised
+    // here as well.
+    DWORD type = 0;
+    bool bHasType = pTree->GetAttribute("type", type);
+    Assert(bHasType);
+    pRet->m_Type = (ItemType_t)type;
 
     DWORD num;
     if (pTree->GetAttribute("num", num))

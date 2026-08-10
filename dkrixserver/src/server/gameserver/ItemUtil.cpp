@@ -2630,7 +2630,16 @@ Item* fitToPC(Item* pItem, PlayerCreature* pPC) {
         ElementalDomain maxDomain = ELEMENTAL_DOMAIN_FIRE;
         SkillBonus_t maxBonus = pOusters->getSkillPointCount(maxDomain);
 
-        for (ElementalDomain domain = ELEMENTAL_DOMAIN_WATER; domain <= ELEMENTAL_DOMAIN_COMBAT; ++(int&)domain) {
+        // Increment the value, not an (int&) aliasing the enum object. Same
+        // width here (ElementalDomain has a negative enumerator, so its
+        // underlying type is int), so this is not the out-of-bounds shape fixed
+        // in GQuestTouchWayPointElement (18-AA) -- but it is still a write
+        // through a reference of the wrong type, and it would become a real
+        // overflow if the enum ever lost ELEMENTAL_DOMAIN_NO_DOMAIN = -1 and the
+        // compiler picked a narrower underlying type. Iteration order and bounds
+        // are unchanged.
+        for (ElementalDomain domain = ELEMENTAL_DOMAIN_WATER; domain <= ELEMENTAL_DOMAIN_COMBAT;
+             domain = (ElementalDomain)(domain + 1)) {
             if (domain == ELEMENTAL_DOMAIN_WIND)
                 continue;
             SkillBonus_t bonus = pOusters->getSkillPointCount(domain);
@@ -2680,7 +2689,10 @@ Item* fitToPC(Item* pItem, PlayerCreature* pPC) {
         ElementalDomain maxDomain = ELEMENTAL_DOMAIN_FIRE;
         SkillBonus_t maxBonus = pOusters->getSkillPointCount(maxDomain);
 
-        for (ElementalDomain domain = ELEMENTAL_DOMAIN_WATER; domain <= ELEMENTAL_DOMAIN_EARTH; ++(int&)domain) {
+        // Increment the value, not an (int&) aliasing the enum object -- see the
+        // matching loop above.
+        for (ElementalDomain domain = ELEMENTAL_DOMAIN_WATER; domain <= ELEMENTAL_DOMAIN_EARTH;
+             domain = (ElementalDomain)(domain + 1)) {
             SkillBonus_t bonus = pOusters->getSkillPointCount(domain);
             if (bonus > maxBonus) {
                 maxBonus = bonus;

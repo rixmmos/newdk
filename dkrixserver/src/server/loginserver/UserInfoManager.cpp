@@ -18,7 +18,10 @@
 //----------------------------------------------------------------------
 // constructor
 //----------------------------------------------------------------------
-UserInfoManager::UserInfoManager() noexcept {}
+// m_UserInfos and m_MaxWorldID were left uninitialized here. load() sets both,
+// but the destructor and the bounds check in getUserInfo() run whether or not
+// load() got that far, so give them a defined empty state.
+UserInfoManager::UserInfoManager() noexcept : m_UserInfos(NULL), m_MaxWorldID(0) {}
 
 //----------------------------------------------------------------------
 // destructor
@@ -160,6 +163,17 @@ UserInfo* UserInfoManager::getUserInfo(ZoneGroupID_t ServerGroupID, WorldID_t Wo
     __BEGIN_TRY
 
     UserInfo* pUserInfo = NULL;
+
+    // WorldID indexes the m_UserInfos array directly, and one caller
+    // (GMServerInfoHandler) takes it straight off the wire, so it must be
+    // range-checked before use. m_UserInfos has m_MaxWorldID entries of which
+    // index 0 is never populated by load(). Reported the same way as a missing
+    // key so callers need no new handling.
+    if (m_UserInfos == NULL || WorldID == 0 || WorldID >= m_MaxWorldID) {
+        StringStream msg;
+        msg << "WorldID : " << (int)WorldID;
+        throw NoSuchElementException(msg.toString());
+    }
 
     HashMapUserInfo::const_iterator itr = m_UserInfos[WorldID].find(ServerGroupID);
 

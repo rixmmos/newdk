@@ -8,7 +8,12 @@
 
 GQuestInfo::GQuestInfo(XMLTree* pInfo) {
     Assert(pInfo->GetName() == "Quest");
-    Assert(pInfo->GetAttribute("id", m_QuestID));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would never read the quest id and every GQuestInfo would
+    // share id 0 -- m_QuestID has no ctor initialiser either, so it would be
+    // whatever the allocation happened to contain.
+    bool bHasID = pInfo->GetAttribute("id", m_QuestID);
+    Assert(bHasID);
 
     m_CheckTypes[HAPPEN] = SEQUENCE;
     m_CheckTypes[COMPLETE] = SEQUENCE;

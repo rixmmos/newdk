@@ -18,8 +18,12 @@ void TriggerParser::parseTrigger(const string& type, const string& condition, co
     XMLTree* pCondition = new XMLTree("Condition");
     XMLTree* pAction = new XMLTree("Action");
 
-    Assert(parseElement(pCondition, "ConditionType", condition));
-    Assert(parseElement(pAction, "ActionType", action));
+    // Hoisted out of Assert(): NDEBUG would skip the calls entirely, so both
+    // subtrees would be attached below without ever having been populated.
+    bool bConditionParsed = parseElement(pCondition, "ConditionType", condition);
+    bool bActionParsed = parseElement(pAction, "ActionType", action);
+    Assert(bConditionParsed);
+    Assert(bActionParsed);
 
     pTrigger->AddChild(pCondition);
     pTrigger->AddChild(pAction);
@@ -93,8 +97,14 @@ bool TriggerParser::findText(XMLTree* pTree) {
         }*/
     if (pTree->GetName() == "AnsweredBy") {
         uint scriptID = 0, answerID = 0;
-        Assert(pTree->GetAttribute("ScriptID", scriptID));
-        Assert(pTree->GetAttribute("AnswerID", answerID));
+        // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG and never
+        // evaluates its argument, so a Release build would leave both at 0 and
+        // every AnsweredBy trigger would bind to script 0 / answer 0.
+        bool bHasScriptID = pTree->GetAttribute("ScriptID", scriptID);
+        bool bHasAnswerID = pTree->GetAttribute("AnswerID", answerID);
+
+        Assert(bHasScriptID);
+        Assert(bHasAnswerID);
         m_TargetScriptID = scriptID;
         m_TargetContentID = answerID;
         return false;
@@ -102,8 +112,14 @@ bool TriggerParser::findText(XMLTree* pTree) {
     }
     if (pTree->GetName() == "RandomSay") {
         uint start = 0, end = 0;
-        Assert(pTree->GetAttribute("StartScriptID", start));
-        Assert(pTree->GetAttribute("EndScriptID", end));
+        // Hoisted out of Assert() for the same reason -- under NDEBUG the
+        // RandomSay range would collapse to [0,0] and the loop below would
+        // register script 0 instead of the scripted range.
+        bool bHasStart = pTree->GetAttribute("StartScriptID", start);
+        bool bHasEnd = pTree->GetAttribute("EndScriptID", end);
+
+        Assert(bHasStart);
+        Assert(bHasEnd);
 
         for (uint i = start; i <= end; ++i) {
             XMLTree* pScriptTree = m_ScriptMap[i];

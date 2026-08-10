@@ -43,8 +43,14 @@ GQuestMission* GQuestKillMonsterElement::makeInitMission(PlayerCreature* pPC) co
 GQuestKillMonsterElement* GQuestKillMonsterElement::makeElement(XMLTree* pTree) {
     GQuestKillMonsterElement* pRet = new GQuestKillMonsterElement;
 
-    Assert(pTree->GetAttribute("num", pRet->m_Goal));
-    Assert(pTree->GetAttribute("sort", pRet->m_TargetNum));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip both reads and leave m_Goal at the ctor's 0 --
+    // a kill mission that is complete before the first monster dies.
+    bool bHasNum = pTree->GetAttribute("num", pRet->m_Goal);
+    bool bHasSort = pTree->GetAttribute("sort", pRet->m_TargetNum);
+
+    Assert(bHasNum);
+    Assert(bHasSort);
 
     DWORD index;
     if (pTree->GetAttribute("index", index))
@@ -53,8 +59,12 @@ GQuestKillMonsterElement* GQuestKillMonsterElement::makeElement(XMLTree* pTree) 
     for (size_t i = 0; i < pTree->GetChildCount(); ++i) {
         XMLTree* pChild = pTree->GetChild(i);
         Assert(pChild->GetName() == "Target");
-        DWORD targetSType;
-        Assert(pChild->GetAttribute("type", targetSType));
+        // Hoisted out of Assert() for the same reason -- under NDEBUG every
+        // target would be pushed as sprite type 0 (and from an uninitialised
+        // local at that).
+        DWORD targetSType = 0;
+        bool bHasType = pChild->GetAttribute("type", targetSType);
+        Assert(bHasType);
         m_TargetList.push_back((SpriteType_t)targetSType);
     }
 

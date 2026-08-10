@@ -11,6 +11,7 @@
 
 // include files
 #include <algorithm>
+#include <cstring>
 
 #include <type_traits>
 
@@ -173,6 +174,15 @@ template <typename T> uint SocketOutputStream::write(T buf) {
     if (len >= nFree)
         resize(len - nFree + 1);
 
+    // The three stores below used to be `*((T*)(m_Buffer + m_Tail)) = buf`, a
+    // type-punned store of T at an arbitrary byte offset into the ring buffer.
+    // The first UBSan boot run (2026-08-10) flagged it on every packet the
+    // server writes: "store to misaligned address ... for type 'unsigned int',
+    // which requires 4 byte alignment". std::memcpy is the well-defined way to
+    // say the same thing: it copies the object representation of buf to the
+    // same offset, byte for byte, so the wire format is unchanged, and every
+    // mainstream compiler lowers a fixed-size memcpy to the same single store.
+    // It also matches the wraparound branch, which already used memcpy.
     if (m_Head <= m_Tail) // normal order
     {
         //
@@ -183,11 +193,11 @@ template <typename T> uint SocketOutputStream::write(T buf) {
 
         if (m_Head == 0) {
             nFree = m_BufferLen - m_Tail - 1;
-            *((T*)(m_Buffer + m_Tail)) = buf;
+            std::memcpy(m_Buffer + m_Tail, &buf, len);
         } else {
             nFree = m_BufferLen - m_Tail;
             if (len <= nFree) {
-                *((T*)(m_Buffer + m_Tail)) = buf;
+                std::memcpy(m_Buffer + m_Tail, &buf, len);
             } else {
                 memcpy(&m_Buffer[m_Tail], (char*)&buf, nFree);
                 memcpy(m_Buffer, (((char*)&buf) + nFree), len - nFree);
@@ -200,7 +210,7 @@ template <typename T> uint SocketOutputStream::write(T buf) {
         // 0123456789
         // abcd...efg
         //
-        *((T*)(m_Buffer + m_Tail)) = buf;
+        std::memcpy(m_Buffer + m_Tail, &buf, len);
     }
 
     // advance m_Tail

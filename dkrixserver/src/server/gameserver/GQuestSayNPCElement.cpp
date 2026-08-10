@@ -21,9 +21,13 @@ GQuestMission* GQuestSayNPCElement::makeInitMission(PlayerCreature* pPC) const {
 GQuestSayNPCElement* GQuestSayNPCElement::makeElement(XMLTree* pTree) {
     GQuestSayNPCElement* pRet = new GQuestSayNPCElement;
 
-    int target;
-    Assert(pTree->GetAttribute("target", target));
-    pRet->m_Target = target;
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip the read and assign an uninitialised `target` to
+    // m_Target. Initialised here as well.
+    int target = 0;
+    bool bHasTarget = pTree->GetAttribute("target", target);
+    Assert(bHasTarget);
+    pRet->m_Target = (NPCID_t)target;
 
     DWORD index;
     if (pTree->GetAttribute("index", index))

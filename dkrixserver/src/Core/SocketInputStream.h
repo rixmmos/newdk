@@ -21,6 +21,7 @@
 
 // include files
 #include <algorithm>
+#include <cstring>
 
 #include <type_traits>
 
@@ -161,6 +162,14 @@ template <typename T> uint SocketInputStream::read(T& buf) {
     if (len > length())
         throw InsufficientDataException(len - length());
 
+    // Read-side twin of the misaligned store fixed in SocketOutputStream.h.
+    // These two loads used to be `buf = *(T*)(m_Buffer + m_Head)`, a type-punned
+    // load of T from an arbitrary byte offset into the ring buffer -- the same
+    // undefined behaviour the first UBSan boot run (2026-08-10) reported on the
+    // write side. std::memcpy copies the same bytes from the same offset into
+    // the same object representation, so nothing about the wire format or the
+    // decoded value changes, and it matches the wraparound branch below, which
+    // already used memcpy.
     if (m_Head < m_Tail) // normal order
     {
         //
@@ -168,7 +177,7 @@ template <typename T> uint SocketInputStream::read(T& buf) {
         // 0123456789
         // ...abcd...
         //
-        buf = *(T*)(m_Buffer + m_Head);
+        std::memcpy(&buf, m_Buffer + m_Head, len);
 
     } else // reversed order ( m_Head > m_Tail )
     {
@@ -179,7 +188,7 @@ template <typename T> uint SocketInputStream::read(T& buf) {
         //
         uint rightLen = m_BufferLen - m_Head;
         if (len <= rightLen) {
-            buf = *(T*)(m_Buffer + m_Head);
+            std::memcpy(&buf, m_Buffer + m_Head, len);
         } else {
             memcpy((char*)&buf, &m_Buffer[m_Head], rightLen);
             memcpy(((char*)(&buf) + rightLen), m_Buffer, len - rightLen);

@@ -21,9 +21,14 @@ GQuestMission* GQuestEnterDynamicZoneElement::makeInitMission(PlayerCreature* pP
 GQuestEnterDynamicZoneElement* GQuestEnterDynamicZoneElement::makeElement(XMLTree* pTree) {
     GQuestEnterDynamicZoneElement* pRet = new GQuestEnterDynamicZoneElement;
 
-    int temp;
-    Assert(pTree->GetAttribute("zoneid", temp));
-    pRet->m_TargetZoneID = temp;
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip the read and assign an uninitialised `temp` to
+    // m_TargetZoneID. Initialised here as well, so the NDEBUG path is at worst
+    // zone 0 rather than stack garbage.
+    int temp = 0;
+    bool bHasZoneID = pTree->GetAttribute("zoneid", temp);
+    Assert(bHasZoneID);
+    pRet->m_TargetZoneID = (ZoneID_t)temp;
 
     DWORD index;
     if (pTree->GetAttribute("index", index))

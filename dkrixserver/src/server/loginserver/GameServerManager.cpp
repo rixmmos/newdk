@@ -10,12 +10,121 @@
 
 #include <unistd.h>
 
+#include <set>
+
 #include "DB.h"
 #include "Datagram.h"
 #include "DatagramPacket.h"
+#include "GameServerInfoManager.h"
 #include "LGKickCharacter.h"
 #include "LogClient.h"
 #include "Properties.h"
+
+//////////////////////////////////////////////////////////////////////
+// Source-address gate for the login server's UDP port.
+//
+// Unlike the game server's UDP port, this one is not client-facing at all: it
+// carries only inter-server datagrams from peer game servers. Those datagrams
+// carry no authentication of any kind, and PACKET_GG_COMMAND -- the GM command
+// packet -- has a factory registered on this server too
+// (PacketFactoryManager.cpp, the `defined(__GAME_SERVER__) ||
+// defined(__LOGIN_SERVER__)` block), so it can be constructed here from any
+// source. Everything is therefore accepted only from an address this server
+// would itself exchange inter-server datagrams with.
+//
+// The allowlist below names the client-facing packets rather than the peer-only
+// ones, so any datagram packet added later is peer-gated by default. It is the
+// same shape as the game server's gate in
+// server/gameserver/LoginServerManager.cpp.
+//////////////////////////////////////////////////////////////////////
+namespace {
+
+// Datagram packet IDs a game client may legitimately send to this port.
+//
+// Deliberately empty. Cross-checking Datagram::isDatagram() (Core/Datagram.cpp)
+// against the factories registered under __LOGIN_SERVER__ leaves only GG_/GL_/
+// LG_/GM_ packets, every one of which is sent by a game server. The one
+// client-originated datagram in the protocol, PACKET_CG_PORT_CHECK, has its
+// factory registered under __GAME_SERVER__ only and is addressed to the game
+// server's UDP port; it cannot even be constructed here. The function is kept
+// so a future client-facing datagram has one obvious place to be declared, and
+// so anything not named here stays gated.
+bool isClientDatagramPacket(PacketID_t packetID) {
+    switch (packetID) {
+    default:
+        return false;
+    }
+}
+
+// A source counts as a peer when it is the local host or the IP of any row
+// GameServerInfoManager loaded from the GameServerInfo table -- exactly the
+// game servers this login server serves. There is no configured peer address to
+// add: unlike the game server, which knows "LoginServerIP", the login server
+// never initiates an inter-server datagram; it only replies to the source of
+// the datagram it just received (see GLIncomingConnectionHandler::execute).
+//
+// Loopback is always accepted. A single-host deployment -- including the Docker
+// image, whose start-servers.sh runs all three servers in one container with
+// LoginServerIP 127.0.0.1 -- delivers those datagrams with that source, and the
+// kernel discards 127.0.0.0/8 source addresses seen on a non-loopback
+// interface, so this cannot be reached from off-box.
+bool isKnownPeerHost(const string& host) {
+    if (host.compare(0, 4, "127.") == 0)
+        return true;
+
+    if (g_pGameServerInfoManager == NULL)
+        return false;
+
+    HashMapGameServerInfo** pGameServerInfos = g_pGameServerInfoManager->getGameServerInfos();
+
+    if (pGameServerInfos == NULL)
+        return false;
+
+    // WorldID indices start at 1; index 0 is never allocated by
+    // GameServerInfoManager::load().
+    const int maxWorldID = g_pGameServerInfoManager->getMaxWorldID();
+    const int maxServerGroupID = g_pGameServerInfoManager->getMaxServerGroupID();
+
+    for (int worldID = 1; worldID < maxWorldID; worldID++) {
+        for (int groupID = 0; groupID < maxServerGroupID; groupID++) {
+            const HashMapGameServerInfo& infos = pGameServerInfos[worldID][groupID];
+
+            for (HashMapGameServerInfo::const_iterator itr = infos.begin(); itr != infos.end(); itr++) {
+                if (itr->second != NULL && itr->second->getIP() == host)
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Log a dropped datagram once per source host. The set is capped so a flood
+// with spoofed source addresses cannot grow it without bound; this runs only on
+// the single GameServerManager thread, so no locking is needed.
+void logRejectedDatagram(const string& host, uint port, PacketID_t packetID) {
+    const size_t MAX_LOGGED_HOSTS = 64;
+
+    static set<string> loggedHosts;
+    static bool capReported = false;
+
+    if (loggedHosts.size() >= MAX_LOGGED_HOSTS) {
+        if (!capReported) {
+            capReported = true;
+            filelog("datagram.txt", "peer-only datagram: further drops suppressed after %u distinct sources",
+                    (uint)MAX_LOGGED_HOSTS);
+        }
+        return;
+    }
+
+    if (!loggedHosts.insert(host).second)
+        return;
+
+    filelog("datagram.txt", "dropped peer-only datagram id:%u from %s:%u (not a known peer)", (uint)packetID,
+            host.c_str(), port);
+}
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -110,10 +219,19 @@ void GameServerManager::run() {
                     pDatagram->read(pDatagramPacket);
 
                     if (pDatagramPacket != NULL) {
-                        
-                        pDatagramPacket->execute(NULL);
+                        // Datagram::read() has already stamped the sender's
+                        // address onto the packet. Fail closed: anything that is
+                        // not client traffic must come from a known peer.
+                        const PacketID_t packetID = pDatagramPacket->getPacketID();
+                        const string sourceHost = pDatagramPacket->getHost();
 
-                        
+                        if (!isClientDatagramPacket(packetID) && !isKnownPeerHost(sourceHost)) {
+                            logRejectedDatagram(sourceHost, pDatagramPacket->getPort(), packetID);
+                        } else {
+                            pDatagramPacket->execute(NULL);
+                        }
+
+
                         delete pDatagramPacket;
                         pDatagramPacket = NULL;
                     }

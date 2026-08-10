@@ -81,9 +81,18 @@ string CLSelectPC::toString() const
 {
     __BEGIN_TRY
 
+    // SECURITY: bounded independently of read()'s check above. toString() is
+    // called by SocketInputStream::readPacket() on every packet received, so it
+    // must never be able to fault -- including on locally built packets whose
+    // PCType never went through read(). PCType2String[] holds three entries.
+    // "UNKNOWN" matches CGConnect::toString().
+    string pcType = "UNKNOWN";
+    if ((unsigned int)m_PCType <= (unsigned int)PC_OUSTERS)
+        pcType = PCType2String[m_PCType];
+
     StringStream msg;
     msg << "CLSelectPC("
-        << "PCName:" << m_PCName << ",PCType:" << PCType2String[m_PCType] << ")";
+        << "PCName:" << m_PCName << ",PCType:" << pcType << ")";
     return msg.toString();
 
     __END_CATCH

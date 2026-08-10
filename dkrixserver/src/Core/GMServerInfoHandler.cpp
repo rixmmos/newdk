@@ -36,10 +36,14 @@ void GMServerInfoHandler::execute(GMServerInfo* pPacket)
     ServerGroupID_t ServerGroupID = pPacket->getServerID();
     BYTE MaxCount = pPacket->getZoneUserCount();
 
+    // WorldID and ServerGroupID come off the wire. getUserInfo() range-checks
+    // WorldID and throws NoSuchElementException for an unknown pair, which the
+    // datagram receive loop already treats as "drop this datagram". The Assert
+    // used to sit after the first dereference, where it could not help.
     UserInfo* pUserInfo = g_pUserInfoManager->getUserInfo(ServerGroupID, WorldID);
+    Assert(pUserInfo != NULL);
 
     pUserInfo->setUserNum(0);
-    Assert(pUserInfo != NULL);
     for (int count = 0; count < MaxCount; count++) {
         pPacket->popZoneUserData(rData);
         pUserInfo->setUserNum(pUserInfo->getUserNum() + rData.UserNum);

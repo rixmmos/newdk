@@ -43,6 +43,14 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
 
     BYTE sex;
     iStream.read(sex);
+
+    // SECURITY: Sex defines two values but this is a raw wire BYTE, so 0-255
+    // arrives here. It is indexed into the two-entry Sex2String[] by toString()
+    // and by CLRegisterPlayerHandler:158, which binds the result into SQL.
+    // Reject it at the wire boundary, the same way the field lengths above are.
+    if (sex > MALE)
+        throw InvalidProtocolException("invalid sex");
+
     m_Sex = (Sex)sex;
 
     BYTE szSSN;
@@ -88,6 +96,13 @@ void CLRegisterPlayer::read(SocketInputStream& iStream)
 
     BYTE nation;
     iStream.read(nation);
+
+    // SECURITY: Nation defines three values but this is a raw wire BYTE, so
+    // 0-255 arrives here and is indexed into the three-entry Nation2String[]
+    // by toString(). Reject it at the wire boundary.
+    if (nation > JAPAN)
+        throw InvalidProtocolException("invalid nation");
+
     m_Nation = (Nation)nation;
 
     
@@ -249,13 +264,24 @@ string CLRegisterPlayer::toString() const
 {
     __BEGIN_TRY
 
+    // SECURITY: bounded independently of read()'s checks above. toString() is
+    // called by SocketInputStream::readPacket() on every packet received, so it
+    // must never be able to fault -- whatever reaches it, and however a locally
+    // built packet was populated. "UNKNOWN" matches CGConnect::toString().
+    string sex = "UNKNOWN";
+    if ((unsigned int)m_Sex <= (unsigned int)MALE)
+        sex = Sex2String[m_Sex];
+
+    string nation = "UNKNOWN";
+    if ((unsigned int)m_Nation <= (unsigned int)JAPAN)
+        nation = Nation2String[m_Nation];
+
     StringStream msg;
     msg << "CLRegisterPlayer("
-        << "ID:" << m_ID << ",Password:" << m_Password << ",Name:" << m_Name << ",Sex:" << Sex2String[m_Sex]
-        << ",SSN:" << m_SSN << ",Telephone:" << m_Telephone << ",Cellular:" << m_Cellular << ",ZipCode:" << m_ZipCode
-        << ",Address:" << m_Address << ",Nation:" << Nation2String[m_Nation] << ",e-mail:" << m_Email
-        << ",Homepage:" << m_Homepage << ",Profile:" << m_Profile
-        << ",Public:" << ((m_bPublic == true) ? "PUBLIC" : "PRIVATE") << ")";
+        << "ID:" << m_ID << ",Password:" << m_Password << ",Name:" << m_Name << ",Sex:" << sex << ",SSN:" << m_SSN
+        << ",Telephone:" << m_Telephone << ",Cellular:" << m_Cellular << ",ZipCode:" << m_ZipCode
+        << ",Address:" << m_Address << ",Nation:" << nation << ",e-mail:" << m_Email << ",Homepage:" << m_Homepage
+        << ",Profile:" << m_Profile << ",Public:" << ((m_bPublic == true) ? "PUBLIC" : "PRIVATE") << ")";
     return msg.toString();
 
     __END_CATCH

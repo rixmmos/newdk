@@ -153,12 +153,23 @@ jobs:
           - sanitizer: asan
             make_target: debug-asan
             non_blocking: false
-          # NON-BLOCKING. [measured] `build (ubsan)` has failed its own
-          # `make debug-ubsan` step on every run it has ever had —
-          # #15 (eb9fd2d1) through #31 (cc4ea8ba), 17 for 17, including
-          # the 13 runs where both the plain build and the asan leg were
-          # green. Consecutive greens: 0, and it has never had one.
-          # Diagnosis: docs/ci-server-ubsan.md.
+          # NON-BLOCKING, and staying that way for now. [measured]
+          # `build (ubsan)` has failed its own `make debug-ubsan` step on
+          # every run it has ever had — #15 (eb9fd2d1) through #31
+          # (cc4ea8ba), 17 for 17, including the 13 runs where both the
+          # plain build and the asan leg were green.
+          #
+          # The cause is now understood and fixed: the link died on three
+          # `typeinfo for GC*` symbols that -fsanitize=vptr invents, and
+          # dkrixserver/CMakeLists.txt now appends -fno-sanitize=vptr.
+          # Full diagnosis in docs/ci-server-ubsan.md.
+          #
+          # It does NOT become blocking on the strength of that. The rule
+          # this repo already uses (MODERNIZATION.md Phase 10 bullet 3, and
+          # the asan entry above) is >=5 consecutive green runs of the leg
+          # itself, and the counter here is still 0 — the fix was verified
+          # in one local WSL build, not on a runner, and this leg has never
+          # produced a single green. Flip it after five, same as asan.
           - sanitizer: ubsan
             make_target: debug-ubsan
             non_blocking: true
@@ -203,17 +214,21 @@ jobs:
             echo "ok: bin/$b"
           done
 
-  boot-asan:
-    # WHAT THIS JOB IS, HONESTLY: it boots the three servers under
-    # AddressSanitizer against a freshly seeded MySQL and asserts each one
+  boot:
+    # WHAT THIS JOB IS, HONESTLY: it boots the three servers under a
+    # sanitizer against a freshly seeded MySQL and asserts each one
     # reaches its listening socket with no sanitizer report. That is all.
     # It does NOT log in, does NOT send a packet, and does NOT exercise a
     # single handler.
     #
     # It exists because the `sanitizers` matrix above is build-only, and a
-    # build-only ASan job cannot catch anything ASan is for — ASan reports
-    # at runtime. Two green ASan builds sat in CI while every login
-    # segfaulted (docs/SECURITY-AUDIT-2026-08-10.md §4).
+    # build-only sanitizer job cannot catch anything a sanitizer is for —
+    # they report at runtime. Two green ASan builds sat in CI while every
+    # login segfaulted (docs/SECURITY-AUDIT-2026-08-10.md §4). The ubsan
+    # leg of that matrix has exactly the same shape of hole, which is why
+    # it gets a boot leg here the moment it can link at all: a green
+    # `build (ubsan)` on its own would prove only that the tree compiles
+    # under UBSan, and UBSan finds nothing at compile time.
     #
     # Boot is not a small slice of this tree. Of the fourteen Phase 18
     # bugs, five fire before the listening socket: 18-A (malformed SQL
@@ -227,20 +242,51 @@ jobs:
     #
     # The packet driver that would close that gap is specified in
     # docs/ci-runtime-sanitizer-plan.md. It is not implemented.
-    name: boot under asan (boot-only, no packets)
+    #
+    # The sanitizer is a matrix axis rather than a copied job:
+    # ci-boot-smoke.sh is sanitizer-agnostic (it detects a finding by the
+    # presence of a report file, not by a dead process or an exit code),
+    # so the only per-leg differences are the make target, the build-dir
+    # cache key, and the artifact name. Duplicating ~90 lines of MySQL
+    # service + seed + conf + env to change three strings is how the two
+    # copies drift.
+    name: boot under ${{ matrix.sanitizer }} (boot-only, no packets)
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    # NON-BLOCKING on introduction, same flip rule the sanitizer matrix
-    # uses (MODERNIZATION.md Phase 10 bullet 3): becomes blocking after
-    # >=5 consecutive green runs of this leg. It has never run. The parts
-    # of it that could be tested off a runner were: the boot/wait/assert
-    # logic was fault-injected locally on 2026-08-10 (server dies before
-    # binding; sanitizer report present; port already squatted; all-clear)
-    # and behaves. What has NOT been tested anywhere is whether the real
-    # servers reach a listening socket on a runner at all — in particular
-    # whether the gameserver blocks on the billing or log server its conf
-    # names, neither of which exists here.
-    continue-on-error: true
+    # NON-BLOCKING, per-leg, same flip rule as the sanitizer matrix
+    # (MODERNIZATION.md Phase 10 bullet 3): a leg becomes blocking after
+    # >=5 consecutive green runs of that leg. See the matrix entries.
+    continue-on-error: ${{ matrix.non_blocking }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [asan, ubsan]
+        include:
+          # The boot/wait/assert logic was fault-injected locally on
+          # 2026-08-10 (server dies before binding; sanitizer report
+          # present; port already squatted; all-clear) and behaves, and a
+          # full end-to-end run passed locally the same day. On a runner
+          # it is still young — consecutive greens well under 5.
+          - sanitizer: asan
+            make_target: debug-asan
+            non_blocking: true
+          # UBSan boot [new]. Strictly more speculative than the asan leg:
+          # no UBSan-instrumented server binary has ever been EXECUTED
+          # anywhere, so what it reports at runtime is completely unknown,
+          # and a 2000s-era C++ tree is likely to produce a substantial
+          # first inventory (signed overflow, misaligned loads, null
+          # `this`). That inventory is the point of the leg; it is also
+          # exactly why it must not be able to fail the workflow.
+          #
+          # UBSan reports and CONTINUES by default, and ci-boot-smoke.sh
+          # keeps that (halt_on_error=0 — reasoning in do_boot() there), so
+          # one run enumerates every distinct site rather than stopping at
+          # the first. The job still fails on any finding: detection is by
+          # report file, not by exit status.
+          - sanitizer: ubsan
+            make_target: debug-ubsan
+            non_blocking: true
 
     services:
       mysql:
@@ -270,18 +316,25 @@ jobs:
             liblua5.1-0-dev \
             libxerces-c-dev \
             libnsl-dev \
-            mysql-client
+            mysql-client \
+            llvm
+        # llvm: for llvm-symbolizer. Both runtimes are asked for stack
+        # traces below (ASAN_OPTIONS symbolize/print_stacktrace,
+        # UBSAN_OPTIONS print_stacktrace) and without a symbolizer on PATH
+        # GCC's libsanitizer emits raw addresses, which makes a finding
+        # nearly unactionable from a log artifact. Cheap insurance on a
+        # leg whose entire output is those reports.
 
-      - name: Cache ASan build tree
+      - name: Cache ${{ matrix.sanitizer }} build tree
         uses: actions/cache@v4
         with:
-          path: dkrixserver/build-asan
-          key: server-build-asan-${{ runner.os }}-${{ hashFiles('dkrixserver/**/CMakeLists.txt') }}
-          restore-keys: server-build-asan-${{ runner.os }}-
+          path: dkrixserver/build-${{ matrix.sanitizer }}
+          key: server-build-${{ matrix.sanitizer }}-${{ runner.os }}-${{ hashFiles('dkrixserver/**/CMakeLists.txt') }}
+          restore-keys: server-build-${{ matrix.sanitizer }}-${{ runner.os }}-
 
-      - name: Build (debug-asan)
+      - name: Build (${{ matrix.make_target }})
         working-directory: dkrixserver
-        run: make debug-asan
+        run: make ${{ matrix.make_target }}
 
       # Seeds DARKEDEN + USERINFO from dkrixserver/initdb/ — the same
       # dumps docker/docker-compose.yml mounts — and repoints the
@@ -299,7 +352,7 @@ jobs:
       - name: Write configs
         run: bash dkrixserver/scripts/ci-boot-smoke.sh conf
 
-      - name: Boot all three under ASan
+      - name: Boot all three under ${{ matrix.sanitizer }}
         env:
           DKRIX_DB_HOST: 127.0.0.1
           DKRIX_DB_USER: elcastle
@@ -317,13 +370,17 @@ jobs:
           DKRIX_MONITOR_CLIENT_IP1: 127.0.0.1
           DKRIX_MONITOR_CLIENT_IP2: 127.0.0.1
           BOOT_TIMEOUT: 420
+          # Report-and-continue (the UBSan default). Ignored by the asan
+          # leg. Set to 1 only to bisect a cascade where one early finding
+          # buries the rest — see do_boot() in ci-boot-smoke.sh.
+          UBSAN_HALT_ON_ERROR: 0
         run: bash dkrixserver/scripts/ci-boot-smoke.sh boot
 
       - name: Upload server and sanitizer logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: boot-asan-logs
+          name: boot-${{ matrix.sanitizer }}-logs
           path: dkrixserver/ci-boot-logs/
           if-no-files-found: warn
           retention-days: 14

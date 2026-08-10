@@ -12,10 +12,10 @@
 #include "skill/SkillUtil.h"
 
 Exp_t ExpRewardTable[3][25] = {
-    
+
     {40,   50,   80,   135,  225,  360,   550,   800,   1130,  1530,  2030,  2620, 3320,
      4140, 5090, 6170, 7390, 8780, 10300, 12000, 13900, 16000, 18300, 20700, 23400},
-    
+
     {110,  150,  190,  150,  320,  420,  540,   700,   920,   1200,  1550,  2020,
      2620, 3400, 4430, 5760, 7490, 9730, 12650, 16450, 20560, 25700, 32120, 40150},
     {110,  150,  190,  150,  320,  420,  540,   700,   920,   1200,  1550,  2020,
@@ -98,10 +98,17 @@ GQuestElement::ResultType GQuestGiveEventQuestItemElement::checkCondition(Player
 GQuestGiveEventQuestItemElement* GQuestGiveEventQuestItemElement::makeElement(XMLTree* pTree) {
     GQuestGiveEventQuestItemElement* pRet = new GQuestGiveEventQuestItemElement;
 
-    Assert(pTree->GetAttribute("type", pRet->m_Type));
+    // Hoisted out of Assert(): that macro is ((void)0) under NDEBUG, so a
+    // Release build would skip both reads. m_Type would stay at the ctor's 0 --
+    // outside the 1..3 range the Assert below is meant to enforce, and this
+    // element hands out reward items -- and `grade` would stay empty, so the
+    // grade[0] switch below would index an empty string.
+    bool bHasType = pTree->GetAttribute("type", pRet->m_Type);
+    Assert(bHasType);
     Assert(pRet->m_Type <= 3 && pRet->m_Type >= 1);
     string grade;
-    Assert(pTree->GetAttribute("grade", grade));
+    bool bHasGrade = pTree->GetAttribute("grade", grade);
+    Assert(bHasGrade);
     switch (grade[0]) {
     case 'A':
         pRet->m_Grade = 0;

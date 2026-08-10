@@ -2453,7 +2453,13 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
             //	<< (int)pCreature->getX() << "," << (int)pCreature->getY()
             //	<< ") to (" << (int)cx << "," << (int)cy << ")";
 
-            GCMoveError gcMoveError(cx, cy);
+            // Answer with the authoritative server position, not the coordinates the
+            // client claimed. The client feeds this packet straight into
+            // SetServerPosition(), so echoing (cx, cy) confirmed the client's own wrong
+            // guess and left it desynced permanently -- every later CGMove missed the
+            // equality test above and was rejected here again. Only reachable once the
+            // client is already more than `threshold` tiles out of sync.
+            GCMoveError gcMoveError(pCreature->getX(), pCreature->getY());
             pPlayer->sendPacket(&gcMoveError);
             filelog("ZoneDebug.txt", "movePC - 3\n\r");
             return;
@@ -2472,9 +2478,19 @@ void Zone::movePC(Creature* pCreature, ZoneCoord_t cx, ZoneCoord_t cy, Dir_t dir
     nx = nx + dirMoveMask[dir].x;
     ny = ny + dirMoveMask[dir].y;
 
+    // A step that would leave the zone is refused through the recoverable move-error
+    // path instead of by throwing. The throw was caught by the catch-all around
+    // pPacket->execute() in GamePlayer::processInput and rethrown as a
+    // DisconnectException, so a client on an edge tile stepping outward was kicked
+    // rather than corrected. (cx, cy) equals the creature's position here -- the
+    // equality test above guarantees it.
     VSRect rect(0, 0, m_Width - 1, m_Height - 1);
-    if (!rect.ptInRect(nx, ny))
-        throw InvalidProtocolException("invalid coordination");
+    if (!rect.ptInRect(nx, ny)) {
+        GCMoveError gcMoveError(pCreature->getX(), pCreature->getY());
+        pPlayer->sendPacket(&gcMoveError);
+        filelog("ZoneDebug.txt", "movePC - 5\n\r");
+        return;
+    }
 
     ////////////////////////////////////////////////////////////
 
