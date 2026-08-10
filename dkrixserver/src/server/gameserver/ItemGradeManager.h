@@ -9,7 +9,14 @@
 class ItemGradeManager {
 public:
     ItemGradeManager() {
-        m_GradeRatios.reserve(10);
+        // assign, not reserve: reserve() leaves size() at 0, so load()'s
+        // m_GradeXxx[Grade - 1] writes were indexing an empty container.
+        // All three are sized here, not just m_GradeRatios -- the other two
+        // were unsized until load() ran, so getRandomGambleGrade() /
+        // getRandomBeadGrade() would have read out of bounds before that.
+        m_GradeRatios.assign(10, 0);
+        m_GradeGambleRatios.assign(10, 0);
+        m_GradeBeadRatios.assign(10, 0);
     }
     void load();
     Grade_t getRandomGrade() const;

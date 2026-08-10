@@ -353,7 +353,6 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
     const int minLoadGap = 20;
     const int averageLoadPercent = 90;
 
-    int i;
 
     // LOAD_INFOS 	loadInfos;
     GROUPS groups;
@@ -444,10 +443,10 @@ bool ZoneGroupManager::makeBalancedLoadInfo(LOAD_INFOS& loadInfos, bool bForce)
     int avgLoad = totalLoad * averageLoadPercent / maxGroup / 100;
 
 
-    groups.reserve(maxGroup);
-    for (i = 0; i < maxGroup; i++) {
-        groups[i] = 0;
-    }
+    // assign, not reserve: reserve() sets capacity but leaves size() at 0, so
+    // the groups[i] writes below were indexing a container the standard says is
+    // empty -- undefined behaviour, and any iteration would have seen nothing.
+    groups.assign(maxGroup, 0);
 
 
     // outputLoadValue();

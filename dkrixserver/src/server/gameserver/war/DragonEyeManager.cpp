@@ -21,8 +21,11 @@ const int nDragonEyes = 9;
 DragonEyeManager::DragonEyeManager() {
     __BEGIN_TRY
 
-    m_DragonEyes.reserve(nDragonEyes);
-    m_DefaultPositions.reserve(nDragonEyes);
+    // assign, not reserve: reserve() leaves size() at 0, so the indexed writes
+    // below were undefined behaviour. WarItem* here are owned by the zone
+    // (registerObject), and the destructor is empty, so this cannot double-free.
+    m_DragonEyes.assign(nDragonEyes, static_cast<WarItem*>(NULL));
+    m_DefaultPositions.assign(nDragonEyes, ZONE_COORD());
 
     initDefaultPositions();
 
