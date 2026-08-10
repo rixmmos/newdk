@@ -1,8 +1,21 @@
 # Why the server `build (ubsan)` CI leg is red
 
-**Status:** diagnosed 2026-08-09, fix identified and verified locally, **not
-applied**. The fix is a one-line change to `dkrixserver/CMakeLists.txt`, which
-was outside the file scope of the session that diagnosed it.
+**Status:** diagnosed 2026-08-09. **Fix applied 2026-08-10** to
+`dkrixserver/CMakeLists.txt` (the `USE_UBSAN` branch now appends
+`-fno-sanitize=vptr` after `-fsanitize=undefined` on both the compile flags and
+`CMAKE_EXE_LINKER_FLAGS`). Verified by a from-scratch local WSL build on
+2026-08-09; **not yet verified on a runner** — `build (ubsan)` has still never
+produced a green, and until it does the count of consecutive greens is 0. The
+leg therefore stays `non_blocking: true` in `server.yml` under the repo's
+existing rule (≥5 consecutive greens of that leg, the same bar `asan` cleared on
+2026-08-09).
+
+Also landed 2026-08-10, because a green build proves very little on its own: the
+`boot under asan (boot-only, no packets)` job in `server.yml` became a matrix
+over `asan` and `ubsan`, so a UBSan-instrumented binary now gets *executed*
+against a seeded database. `dkrixserver/scripts/ci-boot-smoke.sh` was already
+sanitizer-agnostic in its detection; it is now agnostic in its log cleanup too,
+and it sets `UBSAN_OPTIONS` explicitly.
 
 **Scope of this note:** it explains one specific, reproducible link failure. It
 does *not* claim the tree is otherwise UBSan-clean — no server binary has ever
@@ -109,9 +122,10 @@ vtable, no typeinfo, and links clean. `-fsanitize=vptr` is what invents the
 dependency. That is also why `asan` is unaffected: `-fsanitize=address` emits no
 RTTI references.
 
-## The fix
+## The fix (applied 2026-08-10)
 
-Turn `vptr` off for this tree, in `dkrixserver/CMakeLists.txt:72-75`:
+Turn `vptr` off for this tree, in `dkrixserver/CMakeLists.txt`. This is what is
+now in the file, modulo the explanatory comment block above it:
 
 ```cmake
         if(USE_UBSAN)
@@ -172,9 +186,26 @@ above.
 
 ## What is still unverified
 
-- What UBSan reports at *runtime*. No server binary has ever been executed under
-  it, and the CI leg only builds and checks that the binaries exist — even fully
-  green it proves the tree compiles and links under UBSan, nothing more.
+- **That the fix works on a runner.** It was verified once, locally, in WSL
+  (Ubuntu 24.04, g++ 13.3.0) at `cd8c3c6`, via a compiler-launcher wrapper
+  rather than the committed `CMakeLists.txt` edit — see the method note above.
+  CI runs a different g++ on a different image against a later tip. Until
+  `build (ubsan)` is observed green, "fixed" means "diagnosed and locally
+  reproduced", not "measured in CI".
+- **What UBSan reports at *runtime*.** Still completely unknown: no server
+  binary has ever been executed under UBSan, anywhere. As of 2026-08-10 there is
+  now a job that would find out — `boot under ubsan (boot-only, no packets)`,
+  added alongside the ASan boot leg — but it has never run, and it cannot run
+  until the ubsan build links on a runner. Expect a substantial first inventory
+  from a 2000s-era C++ tree (signed overflow, misaligned loads, null `this`);
+  that inventory is the point, which is why the leg is non-blocking and runs
+  with `halt_on_error=0` so a single boot enumerates every distinct site instead
+  of stopping at the first.
+- **Everything past the listening socket.** Even a green ubsan boot leg covers
+  only `main()` → `listen()`. Nothing logs in and no packet is sent, so the
+  whole handler surface is untested under UBSan. The packet driver that would
+  close that gap is specified in `docs/ci-runtime-sanitizer-plan.md` and is not
+  implemented.
 - Whether the same `vptr` problem exists in the client tree's `sanitizers-linux`
   ubsan leg. That leg still dies during compilation, well before any link, so
   the question has not come up yet.

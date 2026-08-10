@@ -58,6 +58,13 @@
 #                      WorldDBInfo rows, not a secret and not the live ones
 #   BOOT_TIMEOUT       seconds to wait for each port, default 300
 #   BIN_DIR            default <repo>/dkrixserver/bin
+#   UBSAN_HALT_ON_ERROR  default 0 — see the comment in do_boot()
+#
+# SANITIZER-AGNOSTIC. Nothing here knows or cares which sanitizer the
+# binaries in BIN_DIR were built with; it sets the options blocks for all
+# of them and detects a finding by the presence of a report file. Point it
+# at bin/ from `make debug-asan` or from `make debug-ubsan` (or at an
+# uninstrumented `make debug`, where it degrades to a plain boot check).
 #
 # Exit status: 0 all three listening and no sanitizer report; 1 otherwise.
 #--------------------------------------------------------------------------------
@@ -87,6 +94,15 @@ declare -A PORT=(
     [gameserver]="${GAME_PORT:-9998}"
 )
 ORDER=(sharedserver loginserver gameserver)
+
+# Every sanitizer runtime this script may be pointed at, as the log_path
+# basename given to it below. ONE list, consumed by both the pre-boot
+# cleanup and the post-boot detection, so the two cannot drift apart —
+# they did: cleanup removed only `asan.*` while detection already looked
+# for `ubsan.*` too, so a stale UBSan report left behind by an earlier
+# run (or by a cached build tree) would fail the next, clean run.
+# Add a prefix here and both halves pick it up.
+SAN_LOG_PREFIXES=(asan ubsan tsan)
 
 log() { printf '[boot-smoke] %s\n' "$*"; }
 die() { printf '[boot-smoke] FAIL: %s\n' "$*" >&2; exit 1; }
@@ -184,7 +200,8 @@ port_open() {
 
 do_boot() {
     mkdir -p "$LOG_DIR"
-    rm -f "$LOG_DIR"/asan.* "$LOG_DIR"/*.log
+    for p in "${SAN_LOG_PREFIXES[@]}"; do rm -f "$LOG_DIR/$p".*; done
+    rm -f "$LOG_DIR"/*.log
 
     # symbolize=1 gives a usable stack; detect_leaks=0 because these
     # processes are killed, not shut down, and the tree's leak backlog
@@ -192,7 +209,26 @@ do_boot() {
     # exit-on-report behaviour, which is what makes a missing port a
     # reliable signal.
     export ASAN_OPTIONS="detect_leaks=0:symbolize=1:print_stacktrace=1:log_path=$LOG_DIR/asan"
-    export UBSAN_OPTIONS="print_stacktrace=1:log_path=$LOG_DIR/ubsan"
+
+    # UBSan, unlike ASan, REPORTS AND CONTINUES by default. That is kept
+    # (halt_on_error defaults to 0 here) because it is the property that
+    # makes a UBSan boot worth running at all: one boot surfaces every
+    # distinct undefined-behaviour site between main() and the listening
+    # socket instead of only the first, and libubsan already dedups by
+    # source location so the output stays bounded. Halting would also
+    # kill the process before it binds, and the run would then report the
+    # far less useful "did not reach TCP <port>" instead of the finding
+    # itself.
+    #
+    # This does NOT weaken the gate: detection below is by report FILE,
+    # not by exit status, so a run that continues past its findings still
+    # fails. Set UBSAN_HALT_ON_ERROR=1 to bisect a cascade where one
+    # early finding corrupts state and buries the rest in noise.
+    #
+    # log_path is owned by this script — detection depends on it — so the
+    # halt knob is a separate variable rather than letting a caller
+    # replace UBSAN_OPTIONS wholesale and silently disable reporting.
+    export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=${UBSAN_HALT_ON_ERROR:-0}:log_path=$LOG_DIR/ubsan"
 
     declare -A PID=()
     cd "$server_dir" || die "cannot cd to $server_dir"
@@ -264,10 +300,20 @@ do_boot() {
 }
 
 # Returns 0 (true) when a report exists — i.e. when something is wrong.
+#
+# Detection is by report FILE, driven by SAN_LOG_PREFIXES above, and is
+# deliberately independent of which sanitizer the binary was built with
+# and of whether that sanitizer aborts on a finding. ASan exits on its
+# first report; UBSan by default does not. Keying off the file rather
+# than off a dead process or an exit status is what lets one boot leg
+# serve both.
 report_sanitizer() {
-    local f
+    local f p
+    local files=()
     shopt -s nullglob
-    local files=( "$LOG_DIR"/asan.* "$LOG_DIR"/ubsan.* )
+    for p in "${SAN_LOG_PREFIXES[@]}"; do
+        files+=( "$LOG_DIR/$p".* )
+    done
     shopt -u nullglob
     [ ${#files[@]} -gt 0 ] || return 1
     printf '\n[boot-smoke] SANITIZER REPORTS (%d file(s)):\n' "${#files[@]}"

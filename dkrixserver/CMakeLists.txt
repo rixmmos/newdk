@@ -69,9 +69,35 @@ if(USE_ASAN OR USE_TSAN OR USE_UBSAN)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
         endif()
 
+        # `vptr` is deliberately excluded from the `undefined` group — see
+        # docs/ci-server-ubsan.md for the full diagnosis. Short version:
+        # -fsanitize=vptr emits a reference to `typeinfo for T` at every
+        # member access through a polymorphic reference. Three such sites in
+        # sharedserver (Guild.cpp, GuildManager.cpp x2) name GC* packet
+        # classes whose key function — and therefore whose vtable and
+        # typeinfo — lives only in the GameServerPackets library, which
+        # sharedserver deliberately does not link. The link fails on exactly
+        # those three symbols and nothing else.
+        #
+        # Disabling the check is preferred over linking GameServerPackets
+        # into sharedserver: that would drag the whole gameserver packet set
+        # across a real layering boundary purely to satisfy a sanitizer, for
+        # no runtime benefit. vptr is also the least valuable member of the
+        # group in this tree (bad-downcast detection, in code that uses
+        # hand-rolled packet factories rather than dynamic_cast), while the
+        # checks that actually pay off on 2000s-era C++ — signed overflow,
+        # shift, null deref, alignment, bounds — all stay on.
+        #
+        # ORDER IS LOAD-BEARING: GCC applies these left to right, so
+        # -fno-sanitize=vptr must come AFTER -fsanitize=undefined or it is
+        # silently re-enabled. For the same reason this cannot be injected
+        # from the Makefile via -DCMAKE_CXX_FLAGS (CMake places the cache
+        # value before the appended SANITIZER_FLAGS) nor via
+        # -DCMAKE_CXX_FLAGS_DEBUG (line 35 above is a plain `set`, which
+        # overrides the cache). It has to be here.
         if(USE_UBSAN)
-            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=undefined")
-            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+            set(SANITIZER_FLAGS "${SANITIZER_FLAGS} -fsanitize=undefined -fno-sanitize=vptr")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined -fno-sanitize=vptr")
         endif()
 
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
