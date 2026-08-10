@@ -4409,14 +4409,68 @@ server-only fields and a client `write()` that hardcodes a login-mode
 value: a real wire-shape gap needing manual protocol review, not
 reformatting.
 
-### Phase 18 — End-to-end runtime smoke test against `main` (not run)
+### Phase 18 — End-to-end runtime smoke test against `main` (run 1 started 2026-08-10)
 The validation gate for the whole 08-06/07 wave, and the top open item
-after CI-on-tip. The runbook is already lifted to `docs/smoke-test/`
-(2026-08-06, paths derived at runtime); **nothing in it has been run
-against `main`**. Its output is a runtime-bug list — the parked run's
-Phase 18 kept finding bugs (PP, QQ, …) in a tree where phases 1–17 all
-compiled clean, which is exactly why a green build does not close this.
-Fold Phase 5's glyph check into the same session. Workstation only.
+after CI-on-tip. The runbook is lifted to `docs/smoke-test/` (2026-08-06,
+paths derived at runtime); the sitting prep pack is
+`C:\dev\_incoming\wave-2026-08-09\w6-prep\` (`PREFLIGHT.md`,
+`W6-PREP.md`, `RUN-2026-08-10.md`). Its output is a runtime-bug list — the
+parked run's Phase 18 kept finding bugs (PP, QQ, …) in a tree where phases
+1–17 all compiled clean, which is exactly why a green build does not close
+this. Fold Phase 5's glyph check into the same session. Workstation only.
+
+**Run 1 vindicated that premise within its first hour**: the gameserver has
+been unable to boot at all since 2026-08-09, and both CIs were green across
+every commit in between (see Bug 18-A).
+
+#### Phase 18 run 1 — 2026-08-10 (`main` @ `6d6059e`)
+
+Route: servers in WSL (fresh `build-smoke/`), client Route A
+(Windows/VS2022). Steps reached — full detail and the environment drift in
+`docs/smoke-test/PORTING-NOTE.md`:
+
+| Step | Verdict |
+|---|---|
+| STEP1_MYSQL | verified, with drift (live DB is the Docker container, not WSL; `WorldDBInfo` schema differs from the initdb seed) |
+| STEP2_SERVER | verified, with drift (stale CMake caches, root-owned `lib/`+`bin/`) |
+| STEP2_GREEN_SNAPSHOT | partial — sharedserver + loginserver green; gameserver died → **Bug 18-A** |
+| STEP3_CLIENT / LOGIN_SMOKE | not yet reached |
+
+- **Bug 18-A — the gameserver could not boot; every build since
+  2026-08-09 was dead on arrival.** [measured] `KeyInfoManager::load()`
+  (`dkrixserver/src/server/gameserver/item/Key.cpp`) throws inside
+  `PreparedStatement::PreparedStatement(Connection*, const std::string&)`;
+  the process prints `UNHANDLED EXCEPTION OCCURED` and exits long before
+  `>>> ALL INITIALIZATIONS ARE COMPLETED SUCCESSFULLY.` Cause: `6822f0b`
+  (Phase 11.2 batch 10) folded the live 9-column query and the dead
+  7-column alternative into a single string literal and dropped the `//`
+  that had commented the second one out, yielding
+  `… TargetType FROM KeyInfoSELECT ItemType, … FROM KeyInfo` — one
+  malformed statement. The old `executeQuery` call passed SQL text through
+  at *call* time and this code path evidently never re-ran during the
+  batch's own checks; `PreparedStatement` sends it to MySQL at
+  *construction*, so the migration turned latent garbage into a boot-time
+  fatal. Fix: delete the dead 7-column tail; the 9-column form is what the
+  April binaries ran every boot. Status: **fixed** (commit carrying this
+  note). Found by: Phase 18 run 1, first gameserver launch.
+- **Why no gate caught it, and what would.** [measured] Prepared SQL is a
+  string literal — it compiles regardless, so neither CI, the ratchets, nor
+  `clang-format` can see it, and the migrated call site is *syntactically*
+  perfect. The cheap future gate is a SQL-syntax lint over the literals
+  passed to `PreparedStatement`/`executeQuery*` (a `sqlparse`/`sqlglot`
+  pass in the `ratchets` job); the expensive one is booting the server in
+  CI against a seeded MySQL service container. Neither exists today.
+- **Blast-radius sweep: exactly one instance tree-wide** [measured
+  2026-08-10 — multiline scan of every `dkrixserver/src/**/*.cpp` for
+  adjacent string literals where the next literal opens with `SELECT` /
+  `INSERT` / `UPDATE` / `DELETE` / `REPLACE`; one hit, this one]. The other
+  43 files in batch 10 and the other 11.2 batches are unaffected by this
+  pattern.
+- **[unverified] Did `c3a9f96`'s prepare-failure logging fire?** The wave
+  added `DBError.log` logging for exactly this failure class (prepare-time
+  `SQLException`). Run 1 should have produced its first real-world entry —
+  check `dkrixserver/DBError.log` and record the answer here; if it is
+  empty, `c3a9f96` needs a second look.
 
 ## Explicit non-goals
 

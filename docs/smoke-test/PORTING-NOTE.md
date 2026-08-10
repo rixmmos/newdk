@@ -8,9 +8,12 @@ That line got a client and server to **end-to-end login → gameplay** on
 the only repeatable client+server validation path this project has ever had,
 and `main` did not have it.
 
-## Status: inherited, not yet verified on this line
+## Status: run 1 in progress (2026-08-10)
 
-**Nothing here has been run against `main`.** It was written against a tree
+**First run against `main` started 2026-08-10** — STEP1 and STEP2 are
+through (with the drift recorded at the bottom of this file), STEP3 and
+LOGIN_SMOKE are not. Historical framing below is kept as written; the
+per-step table at the end is the current truth. It was written against a tree
 that had Phases 1–17 applied. When lifted (2026-08-06), `main` had none of
 them; as of 2026-08-07 `main` carries Phases 1, 2 (partial), 3.1, 4 (safe
 items), 7, and 9 (mechanical), so the build-step divergence risk below has
@@ -76,8 +79,78 @@ inherited at a glance.
 
 | Step | Verified on `main`? | Notes |
 |---|---|---|
-| STEP1_MYSQL | not yet | |
-| STEP2_SERVER | not yet | |
-| STEP2_GREEN_SNAPSHOT | not yet | |
+| STEP1_MYSQL | **verified 2026-08-10, with drift** | See "Run 1 drift" below — the database is not where the runbook assumes, and `WorldDBInfo`'s live schema differs from the initdb seed. |
+| STEP2_SERVER | **verified 2026-08-10, with drift** | Build needed a fresh build dir and an ownership fix; conf sweep applied as written otherwise. |
+| STEP2_GREEN_SNAPSHOT | **partial 2026-08-10** | sharedserver + loginserver reached their green banners; gameserver died in `KeyInfoManager::load()` → Bug 18-A (MODERNIZATION.md Phase 18). Re-run after the fix. |
 | STEP3_CLIENT | not yet | |
 | LOGIN_SMOKE | not yet | |
+
+## Run 1 drift (2026-08-10, `main` @ `6d6059e`)
+
+Environment and data findings. Per the house convention these are *not*
+Phase 18 bug letters — only runtime defects in the code get those.
+
+**The database is a Docker container, not a WSL service.** WSL has no
+`mysqld` at all (`service mysql start` → unit not found); the live data
+lives in `docker-odk-mysql-1` (compose project `docker`, from
+`dkrixserver/docker/docker-compose.yml`), up for 9 days. That compose
+service **publishes no ports** — only the sibling `odk-server` container
+ever reached it, by service name on the internal network — so nothing on
+the host or in WSL can connect until a proxy exists:
+
+```bash
+docker run -d --name odk-mysql-proxy --network docker_odk-network -p 3306:3306 \
+  alpine/socat tcp-listen:3306,fork,reuseaddr tcp-connect:odk-mysql:3306
+```
+
+After that, `mysql -h127.0.0.1 -uelcastle` works from WSL. Two more
+container facts: it has **no named volume**, so the live database exists
+only inside that container — `docker compose down`/`rm` destroys it, use
+`stop`/`start` only; and its `sql_mode`
+(`ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`)
+already satisfies the repo rule, so PREFLIGHT §4's `SET GLOBAL` is a no-op
+here.
+
+**`mysqldump` needs `--no-tablespaces`** — `elcastle` has database-level
+grants only, and MySQL 5.7.31+ demands the global `PROCESS` privilege for
+the tablespace probe. Full dumps of both databases are in
+`_server_logs_tmp/smoke18/` (2026-08-10 10:0x).
+
+**`WorldDBInfo`'s live schema is not the initdb seed's.** The runbook's
+`UPDATE WorldDBInfo SET HostName=…` fails with `Unknown column 'HostName'`.
+The live columns are the ones the server actually reads [measured,
+`DatabaseManager.cpp:109` — `SELECT WorldID, Host, DB, User, Password, Port
+FROM WorldDBInfo`]. Note the consequence: **the gameserver takes its
+world-DB credentials from this table, not from `conf/`** — a rotation that
+misses this row breaks the server even with perfect conf files.
+
+### Values changed in the live database — RESTORE BEFORE THE NEXT TESTER RELEASE
+
+| Table.column | Was (restore this) | Set to (smoke-test only) |
+|---|---|---|
+| `WorldDBInfo.Host` (both rows) | `odk-mysql` | `127.0.0.1` |
+| `WorldDBInfo.Password` (both rows) | `elca110` | the rotated password |
+| `GameServerInfo.IP` | `90.190.31.134` | `127.0.0.1` |
+
+`GameServerInfo.IP` is the address the login flow hands to clients as
+"where the gameserver is" — leaving it at `127.0.0.1` would send every
+tester to their own machine. Both tables are inside the full dumps above.
+
+**Credential note:** `WorldDBInfo.Password` still held `elca110` on
+2026-08-10 — the value published in the public repo — i.e. the 2026-08-09
+rotation had not reached the container's `elcastle` user or this row.
+Both were rotated during run 1. `docker-compose.yml`'s
+`MYSQL_ROOT_PASSWORD: 123456` is likewise public and still current unless
+separately rotated.
+
+**Server build drift.** `dkrixserver/build/` and `build-wsl/` carry
+`CMakeCache.txt` files generated on other machines/paths
+(`/home/darkeden/vs`, `/mnt/c/newdk`) and cannot be reused — cmake refuses.
+Build in a fresh directory (`build-smoke/` was used; binaries still land in
+`dkrixserver/bin/` regardless). Both stale trees plus `lib/` and `bin/`
+were **root-owned from an old `sudo` build**, which fails at the archive
+step with `ar: could not create temporary file … Permission denied`. With
+no known WSL `sudo` password, the fix is from Windows: delete `lib/` and
+`bin/` in PowerShell (Windows ignores Linux ownership), let the build
+recreate them. Back up `bin/` first if the previous release's binaries
+matter.

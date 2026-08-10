@@ -311,8 +311,7 @@ void KeyInfoManager::load()
             m_pItemInfos[i] = NULL;
 
         PreparedStatement selectKeyInfoSELECTStmt(
-            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionType, TargetType FROM "
-                   "KeyInfoSELECT ItemType, Name, EName, Price, Volume, Weight, Ratio FROM KeyInfo");
+            pConn, "SELECT ItemType, Name, EName, Price, Volume, Weight, Ratio, OptionType, TargetType FROM KeyInfo");
         pResult = selectKeyInfoSELECTStmt.execute();
 
         while (pResult->next()) {
