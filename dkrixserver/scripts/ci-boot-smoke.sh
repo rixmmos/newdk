@@ -107,13 +107,28 @@ do_seed() {
     mysql_root -e "SET GLOBAL sql_mode='ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';" \
         || die "could not reach MySQL at $DB_HOST:$DB_PORT"
 
-    log "creating databases and the game user"
-    mysql_root < "$server_dir/initdb/a-setup.sql" || die "a-setup.sql failed"
-    # a-setup.sql only grants to 'elcastle'@'%'. Some MySQL builds resolve a
-    # TCP connection from the same host to 'localhost' and miss that grant.
+    # The account must exist BEFORE a-setup.sql runs. a-setup.sql grants to
+    # 'elcastle'@'%' but no longer creates it -- the CREATE USER carried a
+    # password and this repo is public, so it was removed and the Docker path
+    # now relies on the image's MYSQL_USER/MYSQL_PASSWORD instead. A service
+    # container has no such bootstrap, and MySQL 5.7's default sql_mode
+    # includes NO_AUTO_CREATE_USER, so a GRANT to a missing user is an error
+    # rather than an implicit create. Creating all three hosts up front makes
+    # this independent of what a-setup.sql does.
+    #
+    # '%' does not cover 'localhost': MySQL matches the more specific host row
+    # first, and some builds resolve a TCP connection from the same host to
+    # 'localhost', so both are needed.
+    log "creating the game user"
     mysql_root -e "
+        CREATE USER IF NOT EXISTS '$GAME_USER'@'%'         IDENTIFIED BY '$GAME_PASSWORD';
         CREATE USER IF NOT EXISTS '$GAME_USER'@'localhost' IDENTIFIED BY '$GAME_PASSWORD';
         CREATE USER IF NOT EXISTS '$GAME_USER'@'127.0.0.1' IDENTIFIED BY '$GAME_PASSWORD';
+        FLUSH PRIVILEGES;" || die "could not create $GAME_USER"
+
+    log "creating databases and granting"
+    mysql_root < "$server_dir/initdb/a-setup.sql" || die "a-setup.sql failed"
+    mysql_root -e "
         GRANT ALL PRIVILEGES ON DARKEDEN.* TO '$GAME_USER'@'localhost';
         GRANT ALL PRIVILEGES ON USERINFO.* TO '$GAME_USER'@'localhost';
         GRANT ALL PRIVILEGES ON DARKEDEN.* TO '$GAME_USER'@'127.0.0.1';

@@ -5225,6 +5225,39 @@ to the default DB, then fail on the world connection. Documented in
 sites across `README.md`, `docker_install.md` and `docs/smoke-test/`; replacing
 it is one coordinated pass, not a partial edit.
 
+**The seed dump has never been loadable** [measured 2026-08-10, mysql:5.7 in a
+throwaway container]. `initdb/DARKEDEN.sql` fails with `ERROR 1062 Duplicate entry`
+in **six** tables — `FlagSet`, `NicknameBook`, `Slang`, `Slayer`, `SpecialEvent`,
+`Vampire` — the last two being the player-character tables, both keyed on `Name`.
+The offending keys are `''`, `'0-'` and `'?'`, the signature of a charset pass that
+collapsed distinct multi-byte keys into ASCII fallbacks; `backup_darkeden_after_
+english_20260424.sql` in the tree suggests the English translation pass. A
+`mysqldump` of a live table cannot emit duplicate primary keys, so the blanking
+happened after the dump was taken.
+
+Verified byte-level that this is real data loss, not a client-side decode problem:
+the entire `Slayer` INSERT contains zero non-ASCII bytes, and `Name` is genuinely
+empty. Nothing is recoverable. Those seed rows were junk anyway — the first
+"Slayer" row carries `Race = 'VAMPIRE'`, and blank-named characters cannot be
+logged into.
+
+Fixed by changing exactly those six statements to `INSERT IGNORE` (6 insertions,
+6 deletions, no other bytes touched). That preserves every value, makes the dump
+loadable, and reproduces precisely what `mysql --force` produced. Deleting the
+offending tuples was rejected as more invasive and harder to review inside a
+10,000-line file. **This affects the human runbook too, not just CI** — anyone
+seeding a database from scratch by following `docs/smoke-test/` would have hit it.
+The live database is unaffected; it predates the dump.
+
+Two related fixes in `scripts/ci-boot-smoke.sh`: the game account is now created
+explicitly before `a-setup.sql` instead of being auto-created as a side effect of
+its `GRANT`. That side effect was real but silent — relaxing `sql_mode` drops
+`NO_AUTO_CREATE_USER`, so the `GRANT` created `elcastle@%` **with an empty
+password** — and it only worked at all because `a-setup.sql` stopped creating the
+account (it carried a credential and the repo is public), which the seed script
+had not been told about. Verified end-to-end: seed exits 0, all three host rows
+have passwords, and the game user connects to both databases.
+
 **Open, deliberately untouched:** the `CGConnectSetKey` → `exit(0)` killswitch
 (audit §2 row 1 — an owner policy call, not a mechanical fix); the
 `CGExchangeBuy` client/server wire mismatch (row 8 — house rule ships both trees
