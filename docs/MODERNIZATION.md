@@ -4449,12 +4449,35 @@ store info. On screen: Limbo Castle rendering isometrically with HP/MP bars, a
 minimap, NPCs, and a working NPC dialogue (Bricolacas). Client working set
 ~1 GB, TCP `127.0.0.1:9998 Established`.
 
-Two things this run did **not** establish, and they should not be read into
-the result: **character creation was never exercised** — the account already
-had `rixvamp`, so `CLCreatePC` is still untested — and **movement was not
-tested**, so "walk one step" from LOGIN_SMOKE's goal 3 remains open. What is
-proven is that a client can log in, select an existing character, enter the
-world, and render and interact with it.
+**Movement and logout verified too**, completing LOGIN_SMOKE goal 3 [measured]:
+
+```
+Receive:CGMove(X:32,Y:36,Dir:UP)
+Send:284[3,72] GCMoveOK(X:32,Y:35,Dir:UP)
+Receive:CGMove(X:32,Y:35,Dir:UP)
+Send:284[3,73] GCMoveOK(X:32,Y:34,Dir:UP)
+Receive:CGLogout
+Send:320[18,74] GCReconnectLogin(LoginServerIP:127.0.0.1,LoginServerPort:9999,...)
+```
+
+Walk requests round-trip with `GCMoveOK`, and the session ends with a clean
+`CGLogout` → `GCReconnectLogin` handoff rather than a disconnect — 74 packets
+in the session.
+
+One thing this run did **not** establish, and it should not be read into the
+result: **character creation was never exercised.** The account already had
+`rixvamp`, so `CLCreatePC` is still untested. Note that `CLCreatePCHandler` is
+one of the files carrying eight assignment-form `execute()` sites (audited and
+judged safe in the 18-C sweep, but never run).
+
+**On the third segfault in `dmesg`.** Three `loginserver` SIGSEGVs are on
+record for this sitting; two are the Bug 18-B crashes. The third is not
+attributable with confidence — the binary has been rebuilt twice since, so
+resolving its address against the current build is unsound, and it most likely
+corresponds to the deliberately crashed `gdb`-hosted run. It is **not live**:
+the loginserver instance running the end-to-end session started at 12:22:12
+and is still up, and nothing restarts it automatically, so no segfault has
+occurred since the 18-C fix landed.
 
 - **Bug 18-A — the gameserver could not boot; every build since
   2026-08-09 was dead on arrival.** [measured] `KeyInfoManager::load()`
