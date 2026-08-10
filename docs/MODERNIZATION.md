@@ -4905,6 +4905,37 @@ occurred since the 18-C fix landed.
   variables. **Note the first pass of this sweep searched only `*.cpp` and
   therefore missed 18-E, which lives in a header** — a reminder that a
   file-type filter is part of a claim's scope.
+### Phase 18 — Bugs 18-F … 18-N (2026-08-10)
+
+Recorded compactly; each has a commit on
+`fix/bug-18b-loginserver-result-uaf` carrying the full reasoning. Verification
+level is stated per bug and is the thing to trust.
+
+| Bug | Defect | Found by | Verified |
+|---|---|---|---|
+| 18-F | `GameServerGroupInfoManager` / `GameServerInfoManager` (6 copies) never initialised their array members while `load()` calls `clear()` first, so `clear()` `delete[]`s an indeterminate pointer | ASan, gameserver boot | runtime |
+| 18-G | Store index guard read `> MAX_ITEM_NUM` where the vectors hold exactly `MAX_ITEM_NUM` (20), letting client index 20 through to an OOB read and write. `CGDisplayItem`/`CGUndisplayItem`/`CGBuyStoreItem` | packet audit | compile only |
+| 18-H | `CGExchangeBuy::read` called `iStream.read()` on a `std::string`, binding to the raw template — 32 wire bytes reinterpreted as a live `std::string`, giving an arbitrary-address read | packet audit, 2 auditors + hand-check | compile only |
+| 18-I | Client-controlled indices bounds-checked at the accessors: `Inventory::getInventorySlot`/`getItem`, `isWear`/`getWearItem`/`takeOffItem` ×3 races. Also the `SKILL_INSTALL_MINE` branch no longer resurrects `bSuccess`, and 3 GM commands were ungated by an operator-precedence typo | packet audit | runtime (smoke test) |
+| 18-J | `PetAttrInfo` ctor did `reserve(); clear();` — capacity without size, so every `m_PetAttrLevels[i]` wrote into unconstructed storage | ASan, gameserver boot | runtime |
+| 18-K | Five mutating calls inside `Assert(...)`, whose argument is unevaluated under `NDEBUG` — `Assert(pStore->removeStoreItem(...))` would leave the listing while the gold change ran. Silent item duplication in a Release build | anti-cheat audit | compile only |
+| 18-L | `GameServerManager::m_pGameServerPlayers` never initialised; `!= NULL` tests passed on garbage. Only reachable once the gameserver booted far enough to connect | ASan, sharedserver | runtime |
+| 18-M | A bug in the 18-H fix: `write()` narrowed to `BYTE` *before* the cap check, so a 256-byte key truncated to 0 and passed. Plus `Zone`'s ctor left `m_ppLevel`/`m_pSectors` indeterminate while `~Zone()` frees them, and `Slayer::addWearItem` had `Assert(x = NULL)` — an assignment | adversarial branch review | compile only |
+| 18-N | `CLGetWorldListHandler` sized a stack VLA `[Num]` but wrote and read it at index `Num` with 1-based loops — aborts every login under ASan | ASan, during smoke test | runtime |
+
+**Milestone [measured 2026-08-10]: all three servers boot clean under
+AddressSanitizer (zero reports) and a client completes login → character
+select → enter world → gameplay.** The cluster has never previously been
+sanitizer-clean. Each ASan fix exposed the next defect — 18-L in particular was
+unreachable until the gameserver booted far enough to connect to the
+sharedserver.
+
+**What this says about where bugs live.** Nine of the fourteen Phase 18 bugs are
+uninitialised memory or off-by-one container sizing, not logic errors — and
+every one of the ASan-found ones was invisible to the compiler, to CI, and to
+static review until the code actually ran. The single highest-value gate
+remains a boot-under-ASan CI job; see the CI notes below.
+
 ### Phase 18 — client-to-server packet audit (2026-08-10)
 
 Five auditors covered all 216 `CG*`/`CL*` packet and handler files, then five

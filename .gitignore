@@ -8,6 +8,12 @@ build-ubsan/
 build-tsan/
 build-smoke/
 dkrixserver/bin.pre-smoke-*/
+dkrixserver/bin.nonasan-backup/
+# Server runtime logs written next to the binaries during a smoke run.
+dkrixserver/GamePlayer.txt
+dkrixserver/PayPlayDateLog.txt
+dkrixserver/WarLog.txt
+dkrixserver/balanceZoneGroup.txt
 dkrix/build/
 dkrix/publish/
 dkrix/test-install/
