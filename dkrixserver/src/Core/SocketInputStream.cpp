@@ -178,7 +178,25 @@ void SocketInputStream::readPacket(Packet* pPacket) {
     
     // cout<<"Receive_before:"<<pPacket->toString()<<endl;
     pPacket->read(*this);
+
+    // This trace ran unconditionally on every packet the server received, and
+    // the cost is not the write alone: Packet::toString() builds a StringStream,
+    // which is a list<string> that heap-allocates one node per field, then
+    // concatenates. So every CGMove -- 10 bytes on the wire -- cost a handful of
+    // allocations, a string concatenation, and a ~33 byte line on stdout, which
+    // docker/start-servers.sh redirects into gameserver.out. That is an
+    // unbounded log file driven directly by client packet rate: a connected
+    // client that spams movement fills the disk, and every player pays the
+    // allocation cost during normal play.
+    //
+    // The diagnostic is not lost. GamePlayer already carries a better one --
+    // m_bPacketLog writes pPacket->toString() to a per-player, time-bounded file
+    // (GamePlayer::processInput and ::sendPacket) -- which is targeted rather
+    // than global. Define __TRACE_PACKETS__ to get the firehose back.
+#ifdef __TRACE_PACKETS__
     cout << "Receive:" << pPacket->toString() << endl;
+#endif
+
     __END_CATCH
 }
 

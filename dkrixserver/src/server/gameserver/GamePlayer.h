@@ -254,6 +254,11 @@ private:
     // add by Coffee 2007-6-25
     void tv_sub(struct timeval* out, struct timeval* in);
 
+    // Movement-rate telemetry. Writes one summary line for the intervals
+    // collected since the last flush, then starts a new window.
+    // Measurement only: it never rejects a move and never disconnects anybody.
+    void flushMoveStats(const char* reason);
+
 private:
     // creature
     Creature* m_pCreature;
@@ -274,9 +279,27 @@ private:
 
     
     Timeval m_SpeedVerify;
+    // Timestamp of the previous CGMove packet from this player. This is the
+    // last-move timestamp; verifySpeed() computes the interval from it.
     Timeval m_MoveSpeedVerify;
     Timeval m_AttackSpeedVerify;
     Timeval m_SkillSpeedVerify[SKILL_MAX];
+
+    // ---- Movement-rate telemetry (measurement only) ------------------------
+    // Distribution of the interval between successive CGMove packets, so the
+    // real numbers can be inspected before anyone decides on a limit. Nothing
+    // here rejects a move or drops a connection; see GamePlayer::verifySpeed()
+    // and GamePlayer::flushMoveStats().
+    enum { MOVE_STAT_BUCKET_MAX = 6 };
+
+    Timeval m_MoveStatWindowStart;                // start of the current reporting window
+    uint m_MoveStatBuckets[MOVE_STAT_BUCKET_MAX]; // interval histogram for the window
+    uint m_MoveStatSamples;                       // intervals recorded in the window
+    uint m_MoveStatFastSamples;                   // intervals below MoveIntervalSuspectMS
+    uint m_MoveStatMinIntervalMS;                 // smallest interval seen in the window
+    uint m_MoveStatBurst;                         // current run of moves sharing one server clock tick
+    uint m_MoveStatMaxBurst;                      // longest such run in the window
+    bool m_bMoveStatPrimed;                       // false until the first CGMove has been seen
 
     // mutex
     mutable Mutex m_Mutex;

@@ -72,6 +72,51 @@ static int SpeedCheckDelay = 60;
 const int PCRoomLottoSec = 3600;
 const int PCRoomLottoMaxAmount = 3;
 
+//////////////////////////////////////////////////////////////////////////////
+// Movement-rate telemetry constants.
+//
+// Everything guarded by these constants is measurement only. None of it can
+// reject a move, throttle a player, or drop a connection.
+//////////////////////////////////////////////////////////////////////////////
+
+// Candidate "impossible for an honest client" interval between two CGMove
+// packets, in milliseconds.
+//
+// UNVALIDATED. It is used for exactly one thing: deciding which samples get
+// counted in m_MoveStatFastSamples, so the collected histogram can be read
+// against a candidate line. It gates no behaviour.
+//
+// Where the number comes from: the stock client drives movement off a fixed
+// logic tick. dkrix Client/Client.h defines DELAY_UPDATE_GAME as 62 and
+// Client/CGameUpdate.cpp pins g_UpdateDelay to 62. One tile costs several of
+// those ticks; how many is per-creature-type data in the client's own creature
+// table - MoveTimes, MoveTimesMotor and MoveRatio in dkrix
+// Client/MCreatureTable.h - which the server has no copy of. So no honest
+// client should emit two CGMove packets closer together than one tick. 20 ms
+// is deliberately far below that: it is meant to be obviously impossible
+// rather than correct.
+//
+// What would validate a real threshold: a capture of this histogram from a
+// population of known-good clients covering every movement form - walking,
+// MOVE_DEVICE_RIDE (bike), summoned sylph, and the flying and burrowing
+// MoveModes - on both LAN and high-latency links, showing where the honest
+// distribution's lower tail actually ends. Note that the client is allowed to
+// catch up several logic ticks in one frame (ClientConfig MAX_UPDATE_ONETIME
+// is 6), so an honest client legitimately emits short bursts; the tail will
+// not be a clean floor. Until that capture exists, any enforcing threshold is
+// a guess.
+static const uint MoveIntervalSuspectMS = 20;
+
+// How often, in seconds, a player's accumulated histogram is written out. The
+// flush is time-gated rather than packet-gated on purpose: a client that
+// floods CGMove cannot make the server write more log lines.
+static const int MoveStatReportSec = 300;
+
+// Upper edges of the interval histogram, in milliseconds; the last bucket is
+// open-ended. Edges are aligned to the client's 62 ms logic tick. There must be
+// MOVE_STAT_BUCKET_MAX - 1 entries here.
+static const uint MoveIntervalBucketUpperMS[] = {16, 32, 62, 124, 248};
+
 void addLogoutPlayerData(Player* pPlayer);
 
 
@@ -121,6 +166,18 @@ GamePlayer::GamePlayer(Socket* pSocket)
 
     m_VerifyCount = 0;
 
+    // Movement-rate telemetry (measurement only).
+    getCurrentTime(m_MoveStatWindowStart);
+    for (int i = 0; i < MOVE_STAT_BUCKET_MAX; i++) {
+        m_MoveStatBuckets[i] = 0;
+    }
+    m_MoveStatSamples = 0;
+    m_MoveStatFastSamples = 0;
+    m_MoveStatMinIntervalMS = 0;
+    m_MoveStatBurst = 0;
+    m_MoveStatMaxBurst = 0;
+    m_bMoveStatPrimed = false;
+
     m_SpecialEventCount = 0;
 
     m_bKickForLogin = false;
@@ -162,6 +219,10 @@ GamePlayer::~GamePlayer() {
 
     //__ENTER_CRITICAL_SECTION(m_Mutex)
 
+
+    // Movement-rate telemetry: emit whatever is left in the current window
+    // while the creature and socket are still readable. Cannot throw.
+    flushMoveStats("logout");
 
     Assert(m_PlayerStatus == GPS_END_SESSION);
 
@@ -466,6 +527,17 @@ void GamePlayer::processCommand(bool Option) {
                     endProfileEx(pPacket->getPacketName().c_str());
 
 #else
+                    // The return value is deliberately discarded here. This call
+                    // exists so verifySpeed() sees every packet, which is what
+                    // the movement-rate telemetry needs; the CGVerifyTime
+                    // verdict is consumed in CGVerifyTimeHandler instead.
+                    //
+                    // Note that this call also has a side effect on that
+                    // verdict: it advances m_SpeedVerify and m_VerifyCount, so
+                    // by the time CGVerifyTimeHandler calls verifySpeed() again
+                    // for the same packet the test there can never fail. See the
+                    // comment on the PACKET_CG_VERIFY_TIME branch in
+                    // verifySpeed() before changing either call site.
                     verifySpeed(pPacket);
                     pPacket->execute(this);
 #endif
@@ -885,6 +957,28 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
 
     //
 
+    // This branch is inert as written, in two independent ways. Left exactly as
+    // it was on purpose: repairing it would turn a path that currently never
+    // disconnects anybody into one that does, and that is a behaviour change
+    // nobody has signed off on.
+    //
+    // 1. Double call. processCommand() calls verifySpeed() for every packet and
+    //    throws the result away, then CGVerifyTimeHandler calls it again for the
+    //    same packet and acts on the result. The first call has already set
+    //    m_SpeedVerify to now + SpeedCheckDelay, so the second call's test
+    //    "now > m_SpeedVerify - maxTimeGap" is false and it always takes the
+    //    else path. The first call decrements m_VerifyCount and the second
+    //    increments it 1:1, so m_VerifyCount can never climb past
+    //    maxVerifyCount and SpeedCheck is never false.
+    // 2. No traffic. The current client never sends CGVerifyTime at all - the
+    //    send site in dkrix Client/CGameUpdate.cpp is commented out and
+    //    g_MyCheckTime is pinned to 0 - so this branch does not execute in
+    //    practice regardless of the logic above.
+    //
+    // Making it live again needs all of: the client resuming CGVerifyTime
+    // traffic on a known cadence, the double call collapsed to one, and a
+    // threshold validated against real data. Until then the movement-rate
+    // telemetry below is the measurement path.
     if (PacketID == Packet::PACKET_CG_VERIFY_TIME) {
         if (m_SpeedVerify.tv_sec == 0) {
             m_SpeedVerify.tv_sec = CurrentTime.tv_sec + SpeedCheckDelay;
@@ -917,20 +1011,68 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
 
     //////////////////////////////////////////////////////////////////////////
 
-    // Add by Coffee 2007-6-25 E-mail: kf_168@hotmail.com
+    // Movement-rate telemetry. m_MoveSpeedVerify holds the timestamp of this
+    // player's previous CGMove packet, so the subtraction below is the interval
+    // between successive moves. The interval used to be computed here and
+    // thrown away; it is now accumulated into a per-player histogram that is
+    // summarised periodically and on logout.
+    //
+    // This branch counts and nothing else. It returns no verdict - SpeedCheck
+    // is untouched - so it cannot reject a move or disconnect a player.
     if (PacketID == Packet::PACKET_CG_MOVE) {
-        if (CurrentTime <= m_MoveSpeedVerify) {
-        }
-        // Timeval UseTimer=CurrentTime-m_MoveSpeedVerify;
+        // tv_sub() mutates its first argument: after this call CurrentTime
+        // holds the elapsed interval, not the current time.
         tv_sub(&CurrentTime, &m_MoveSpeedVerify);
-        double rtt;
 
-        rtt = CurrentTime.tv_sec * 1000 + CurrentTime.tv_usec / 1000;
+        // Clamped at 0. Packets that arrive out of order relative to the cached
+        // clock, or that share a clock tick, must not produce a negative value.
+        uint intervalMS = 0;
+        if (CurrentTime.tv_sec > 0 || (CurrentTime.tv_sec == 0 && CurrentTime.tv_usec > 0)) {
+            intervalMS = (uint)(CurrentTime.tv_sec * 1000 + CurrentTime.tv_usec / 1000);
+        }
 
         getCurrentTime(m_MoveSpeedVerify);
-        // add by viva for notice
-        // filelog("MoveLog.txt", "MoveTime:=%.3f ms\n",rtt);
-        // end
+
+        if (!m_bMoveStatPrimed) {
+            // The first CGMove of a session measures time since connect, not a
+            // movement interval. Prime on it and drop the sample.
+            m_bMoveStatPrimed = true;
+        } else {
+            int bucket = 0;
+            while (bucket < MOVE_STAT_BUCKET_MAX - 1 && intervalMS >= MoveIntervalBucketUpperMS[bucket]) {
+                bucket++;
+            }
+            m_MoveStatBuckets[bucket]++;
+
+            if (m_MoveStatSamples == 0 || intervalMS < m_MoveStatMinIntervalMS) {
+                m_MoveStatMinIntervalMS = intervalMS;
+            }
+            m_MoveStatSamples++;
+
+            if (intervalMS < MoveIntervalSuspectMS) {
+                m_MoveStatFastSamples++;
+            }
+
+            // Under __GAME_SERVER__ getCurrentTime() reads gCurrentTime, a
+            // clock refreshed once per ClientManager loop iteration, and
+            // processCommand() drains every buffered packet inside one such
+            // iteration. So a flood of CGMove packets reads as a run of zero
+            // intervals. That run length is the sharpest signal available at
+            // this clock resolution: an honest client cannot put many tiles
+            // into a single server loop iteration.
+            if (intervalMS == 0) {
+                m_MoveStatBurst++;
+            } else {
+                m_MoveStatBurst = 1;
+            }
+            if (m_MoveStatBurst > m_MoveStatMaxBurst) {
+                m_MoveStatMaxBurst = m_MoveStatBurst;
+            }
+
+            if (m_MoveSpeedVerify.tv_sec - m_MoveStatWindowStart.tv_sec >= MoveStatReportSec) {
+                flushMoveStats("periodic");
+            }
+        }
     }
 
     // End by Coffee
@@ -940,6 +1082,48 @@ bool GamePlayer::verifySpeed(Packet* pPacket) {
     return SpeedCheck;
 
     __END_CATCH
+}
+
+//////////////////////////////////////////////////////////////////////
+//
+// flushMoveStats
+//
+// Emits one summary line for the movement intervals collected since the last
+// flush, then starts a new window. Called from verifySpeed() at most once per
+// MoveStatReportSec per player, and once more on logout.
+//
+// Measurement only. It writes a log line and resets counters; it has no way to
+// reject a move or drop a connection, and __END_CATCH_NO_RETHROW guarantees a
+// logging failure cannot escape into the caller either.
+//
+//////////////////////////////////////////////////////////////////////
+void GamePlayer::flushMoveStats(const char* reason) {
+    __BEGIN_TRY
+
+    if (m_MoveStatSamples != 0) {
+        Creature* pCreature = getCreature();
+
+        filelog("MoveRate.log",
+                "[%s] ID[%s] Name[%s] Host[%s] samples[%u] min[%u ms] below%ums[%u] maxPerServerTick[%u] "
+                "hist[0-15:%u 16-31:%u 32-61:%u 62-123:%u 124-247:%u 248+:%u]",
+                reason, m_ID.c_str(), (pCreature == NULL ? "NULL" : pCreature->getName().c_str()),
+                (getSocket() == NULL ? "NULL" : getSocket()->getHost().c_str()), m_MoveStatSamples,
+                m_MoveStatMinIntervalMS, MoveIntervalSuspectMS, m_MoveStatFastSamples, m_MoveStatMaxBurst,
+                m_MoveStatBuckets[0], m_MoveStatBuckets[1], m_MoveStatBuckets[2], m_MoveStatBuckets[3],
+                m_MoveStatBuckets[4], m_MoveStatBuckets[5]);
+
+        for (int i = 0; i < MOVE_STAT_BUCKET_MAX; i++) {
+            m_MoveStatBuckets[i] = 0;
+        }
+        m_MoveStatSamples = 0;
+        m_MoveStatFastSamples = 0;
+        m_MoveStatMinIntervalMS = 0;
+        m_MoveStatMaxBurst = 0;
+    }
+
+    getCurrentTime(m_MoveStatWindowStart);
+
+    __END_CATCH_NO_RETHROW
 }
 
 void GamePlayer::loadSpecialEventCount(void) {

@@ -10,6 +10,7 @@
 #include "Datagram.h"
 
 #include <stdio.h>
+#include <time.h>
 
 #include <exception>
 
@@ -17,6 +18,59 @@
 #include "DatagramPacket.h"
 #include "Packet.h"
 #include "PacketFactoryManager.h"
+
+namespace {
+
+// Rate-limit the "packet is not UDP" drop log.
+//
+// The check below is reached by any datagram whose header parses but whose
+// packet ID is not in Datagram::isDatagram(). That is unauthenticated,
+// connectionless and source-spoofable: UDP 9997 is port-forwarded, so a ~10
+// byte datagram carrying, say, a CG_* packet ID cost one full
+// open()/write()/close() on datagram.txt per packet, plus the exception the
+// throw below raises, which the receive loops log again. Roughly 30x
+// amplification by volume and, more importantly, two file opens per attacker
+// packet and a log file that grows without bound until the disk fills.
+//
+// The information is kept, not dropped: up to kMaxLinesPerWindow lines are
+// still written each window, and when the window closes with drops suppressed
+// a single summary line records how many were hidden. That bounds the path to
+// ~17 file writes per minute regardless of inbound rate.
+//
+// Datagram::read() is called only from LoginServerManager::run() (gameserver)
+// and GameServerManager::run() (loginserver), one dedicated thread per
+// process, so these statics need no locking -- the same invariant
+// LoginServerManager's logRejectedDatagram() relies on.
+void logNonDatagramPacket(PacketID_t packetID, const string& host) {
+    const int kMaxLinesPerWindow = 16;
+    const time_t kWindowSeconds = 60;
+
+    static time_t windowStart = 0;
+    static int loggedThisWindow = 0;
+    static unsigned long suppressedThisWindow = 0;
+
+    const time_t now = time(NULL);
+
+    if (now - windowStart >= kWindowSeconds) {
+        if (suppressedThisWindow > 0)
+            filelog("datagram.txt", "non-UDP packet ids: %lu further drops suppressed in the last %ld seconds",
+                    suppressedThisWindow, (long)kWindowSeconds);
+
+        windowStart = now;
+        loggedThisWindow = 0;
+        suppressedThisWindow = 0;
+    }
+
+    if (loggedThisWindow >= kMaxLinesPerWindow) {
+        suppressedThisWindow++;
+        return;
+    }
+
+    loggedThisWindow++;
+    filelog("datagram.txt", "id:%u host:%s", (uint)packetID, host.c_str());
+}
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 // constructor
@@ -172,7 +226,7 @@ void Datagram::read(DatagramPacket*& pPacket) {
 
     
     if (!isDatagram(packetID)) {
-        filelog("datagram.txt", "id:%u host:%s", packetID, getHost().c_str());
+        logNonDatagramPacket(packetID, getHost());
         throw InvalidProtocolException("packet is not UDP");
     }
 
