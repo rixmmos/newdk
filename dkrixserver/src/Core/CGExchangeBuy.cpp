@@ -50,9 +50,13 @@ void CGExchangeBuy::write(SocketOutputStream& oStream) const {
     // Mirror read(): length-prefixed, so the two sides agree on a format.
     // Previously this wrote the raw bytes with no prefix, which no reader could
     // have parsed.
-    BYTE szKey = (BYTE)m_IdempotencyKey.size();
-    if (szKey > 64)
+    // Check the real size BEFORE narrowing to BYTE. Casting first was a bug:
+    // a 256-byte key truncates to szKey == 0, sails past a `szKey > 64` test,
+    // and then write() emits one byte while getPacketSize() reports 1 + 256.
+    if (m_IdempotencyKey.size() > 64)
         throw InvalidProtocolException("CGExchangeBuy: idempotency key too long");
+
+    BYTE szKey = (BYTE)m_IdempotencyKey.size();
 
     oStream.write(szKey);
     if (szKey > 0)

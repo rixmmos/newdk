@@ -470,7 +470,14 @@ public:
         return m_pWearItem[Part] != NULL ? true : false;
     }
     void addWearItem(WearPart Part, Item* pItem) {
-        Assert(m_pWearItem[Part] = NULL);
+        // Was `Assert(m_pWearItem[Part] = NULL)` -- an assignment, not a
+        // comparison. It nulled the slot and then asserted on NULL, so in Debug
+        // this threw unconditionally and in Release the check vanished along
+        // with the write. Vampire and Ousters do not carry the typo.
+        if (Part < 0 || Part >= WEAR_MAX)
+            return;
+
+        Assert(m_pWearItem[Part] == NULL);
         m_pWearItem[Part] = pItem;
     }
     void deleteWearItem(WearPart Part) {

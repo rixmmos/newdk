@@ -568,6 +568,19 @@ Zone::Zone(ZoneID_t zoneID)
     m_Width = 0;
     m_Height = 0;
     m_pTiles = NULL;
+
+    // ~Zone() tests these against NULL and delete[]s them, looping to
+    // m_SectorWidth -- but they were left indeterminate here while their real
+    // assignments happen hundreds of lines into Zone::load(), with several
+    // `throw FileNotExistException` sites in between. A zone whose .smp or .ssi
+    // fails to open therefore destructs on garbage pointers and garbage loop
+    // bounds. Same defect as GameServerGroupInfoManager (18-F) and
+    // GameServerManager (18-L); a normal build survives only because fresh
+    // pages happen to be zero.
+    m_ppLevel = NULL;
+    m_pSectors = NULL;
+    m_SectorWidth = 0;
+    m_SectorHeight = 0;
     m_NPCCount = 0;
     m_MonsterCount = 0;
     m_pPCManager = new PCManager();

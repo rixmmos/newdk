@@ -19,7 +19,8 @@ public:
     static const LevelType MaxLevel = _MaxLevel;
     static const LevelType MinLevel = _MinLevel;
 
-    // Levels are 1-based and run MinLevel..MaxLevel inclusive, and every access
+    // Levels run MinLevel..MaxLevel *inclusive* (MinLevel is 1 for most tables
+    // but 0 for AdvancementClassExpTable), and every access
     // indexes m_Records[level] directly (load() below, plus getGoalExp/
     // getAccumExp). Sizing to MaxLevel leaves the last level out of bounds:
     // AddressSanitizer reports a 4-byte heap-buffer-overflow WRITE in load()
