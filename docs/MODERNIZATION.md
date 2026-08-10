@@ -4765,6 +4765,79 @@ occurred since the 18-C fix landed.
   positive independently (7 hits each in `CGSayHandler.cpp` and
   `CGConnectHandler.cpp`) before correcting for it. Only the second argument
   onward is SQL.
+- **Two further `Result` lifetime shapes audited — both clean, and one gives
+  the rule that explains 18-B and 18-C.** [measured 2026-08-10] The earlier
+  sweep only covered "statement in an inner block, `Result*` in an outer one".
+  Two other ways a `Result` can outlive its owner were audited by five
+  auditors:
+
+  **Shape: re-execute invalidation.** `PreparedStatement::execute()` opens with
+  `if (m_pResult != NULL) { delete m_pResult; }`, so re-executing a statement
+  frees the `Result` its previous execute returned. Three auditors covered the
+  33 files where a statement name carries more than one `.execute()`: **0
+  bugs**. An independent tree-wide count then showed the real surface is far
+  smaller — comparing `PreparedStatement <name>(` declarations against
+  `<name>.execute()` calls per file, exactly **two** objects in all 208 files
+  are genuinely executed more than declared, both in
+  `Core/GCFriendChattingHandler.cpp` (`insertStmt` 40/44, `deleteStmt`
+  294/298). Both are INSERT/DELETE: `execute()` returns `NULL` on the
+  non-SELECT path (`PreparedStatement.cpp`, after `mysql_stmt_affected_rows`)
+  and both return values are discarded, so no `Result` exists to dangle.
+  Hand-verified.
+
+  *Methodology note:* the 33-file shortlist was built on **variable-name**
+  recurrence per file, which badly over-selects — the same name (`updateStmt`,
+  `guildIdStmt`) is reused across different functions and across mutually
+  exclusive `#ifdef` or `if/else` arms. Two auditors independently dissolved
+  all 18 and all 21 of their candidate groups on exactly that basis. Compare
+  declarations to executes, not names.
+
+  **Shape: the `Result` escapes its statement's scope** — returned from a
+  function, stored in a member/global/static/container, or a raw
+  `char*`/`const char*` from `getString()`/`getField()` retained past the
+  statement. Two auditors covered all 208 files: **0 bugs**. Supporting
+  tree-wide facts they established: `new PreparedStatement` and
+  `PreparedStatement*` do not appear anywhere in `src/`, and no header declares
+  one as a member — **every `PreparedStatement` in the codebase is a stack
+  local**, so no site is exempt via a longer-lived statement. Of ~211
+  `getString()` sinks checked, every consumer takes `const string&` or `string`
+  by value, so the pointer is always copied.
+
+  **The rule worth remembering.** In `Result* pX = stmt.execute();` the
+  statement must already be in scope at that line, so `pX`'s scope is
+  necessarily a *subset* of the statement's — **that form is safe by
+  construction**. All 359 direct-initialised sites are safe for this reason
+  alone. Only a **pre-declared** `Result*` (declared before, assigned inside a
+  narrower block) can break the invariant; there are 25 such sites, all
+  checked. Both 18-B and 18-C were exactly this shape. So the review rule is
+  narrow and cheap: *scrutinise pre-declared `Result*` pointers; ignore the
+  direct-initialised ones.*
+
+  **Latent trap — the two `Result` backends have different pointer contracts.**
+  In `BACKEND_MYSQL_RES` (the legacy `Statement` path), `getField()` returns
+  `m_pRow[index-1]` (`Result.cpp:128`), which `next()` invalidates via
+  `mysql_fetch_row` — a `const char*` held across a `next()` dangles *inside*
+  the statement's own scope. In `BACKEND_MATERIALIZED` (the `PreparedStatement`
+  path) it returns a pointer into `m_Rows` (`Result.cpp:141`), stable for the
+  `Result`'s life. No current site relies on the difference, and the Phase 11
+  migration runs from the stricter backend to the safer one, so it introduces
+  nothing — but code written against materialised semantics would break if
+  moved the other way.
+
+- **Not yet audited: the legacy `Statement` API.** [measured 2026-08-10] All of
+  the above covers `PreparedStatement` only. `Statement::executeQuery()` has
+  *identical* ownership semantics (`Statement.cpp`: `if (m_pResult != NULL)
+  delete m_pResult`), and the legacy API is still live at **472 call sites
+  across 196 files**, 233 of which capture a `Result`; **37 files** reuse one
+  statement for two or more result-producing queries. The risk is structurally
+  lower — a legacy `Statement*` is heap-allocated by
+  `pConn->createStatement()` and freed by `SAFE_DELETE(pStmt)` at function
+  end, so it normally *outlives* the block, which is precisely why the
+  pre-migration code was correct and why converting it to a block-scoped
+  `PreparedStatement` created 18-B and 18-C. A sample of the heaviest file
+  (`exchange/ExchangeDB.cpp`, 12 sites) found the idiom disciplined: one
+  statement per function, result read before the next query, `SAFE_DELETE` at
+  the end. Not cleared, just not alarming.
 - **`CLLoginHandler.cpp:402` is truncated mid-token — pre-existing, dead.**
   [measured] Under `#ifdef __THAILAND_SERVER__`, the line reads
   `bool bChildGuardArea = onChildGuardTimeArea(g_pConfig->getPropertyInt("CHILDGUARD_START_TIME"),g_pConf`
