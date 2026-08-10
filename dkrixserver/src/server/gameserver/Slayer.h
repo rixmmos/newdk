@@ -272,6 +272,9 @@ public:
         m_PhoneNumber = PhoneNumber;
     }
 
+    // Both bounds-check SlotID against MAX_PHONE_SLOT at the accessor: it
+    // arrives from client packets as a raw BYTE and m_PhoneSlot holds 3.
+    // See the notes on the definitions in Slayer.cpp.
     PhoneNumber_t getPhoneSlotNumber(SlotID_t SlotID);
     void setPhoneSlotNumber(SlotID_t SlotID, PhoneNumber_t PhoneNumber);
     SlotID_t getSlotWithPhoneNumber(PhoneNumber_t PhoneNumber);

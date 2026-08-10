@@ -49,6 +49,13 @@ SerialDatagram::~SerialDatagram() noexcept {
 void SerialDatagram::read(char* buf, uint len) {
     __BEGIN_TRY
 
+    // See Datagram::read -- identical buffer and identical exposure: packet
+    // read() bodies pass wire-supplied lengths straight in here, and the
+    // Assert disappears under NDEBUG. Written subtractively so m_InputOffset +
+    // len cannot wrap.
+    if (m_InputOffset > m_Length || len > m_Length - m_InputOffset)
+        throw InsufficientDataException("SerialDatagram::read: read past end of datagram");
+
     // boundary check
     Assert(m_InputOffset + len <= m_Length);
 
@@ -65,6 +72,11 @@ void SerialDatagram::read(char* buf, uint len) {
 //////////////////////////////////////////////////////////////////////
 void SerialDatagram::read(string& str, uint len) {
     __BEGIN_TRY
+
+    // See SerialDatagram::read(char*, uint) -- this is the overload the
+    // wire-supplied string lengths actually reach.
+    if (m_InputOffset > m_Length || len > m_Length - m_InputOffset)
+        throw InsufficientDataException("SerialDatagram::read: read past end of datagram");
 
     // boundary check
     Assert(m_InputOffset + len <= m_Length);
@@ -153,12 +165,14 @@ void SerialDatagram::read(SerialDatagramPacket*& pPacket) {
 void SerialDatagram::write(const char* buf, uint len) {
     __BEGIN_TRY
 
+    // See Datagram::write -- overflowing m_Data here is a heap write. This
+    // replaces a commented-out `if` with the same condition that the original
+    // author left unfinished.
+    if (m_OutputOffset > m_Length || len > m_Length - m_OutputOffset)
+        throw OutOfBoundException("SerialDatagram::write: write past end of datagram");
+
     // boundary check
     Assert(m_OutputOffset + len <= m_Length);
-    //	if (m_OutputOffset + len > m_Length)
-    //	{
-    
-    //	}
 
     memcpy(&m_Data[m_OutputOffset], buf, len);
 

@@ -231,9 +231,32 @@ void NPC::act(const Timeval& currentTime)
     __END_CATCH
 }
 
+// The eleven accessors below index m_pRack[SHOP_RACK_TYPE_MAX] -- three
+// elements -- and every one of them was guarded only by
+// Assert(type < SHOP_RACK_TYPE_MAX). ShopRackType_t is a BYTE and `type`
+// arrives raw off the wire: CGShopRequestBuyHandler takes it from
+// pPacket->getShopType() and CGShopRequestListHandler from getRackType(),
+// neither of which bounds it -- the `type == SHOP_RACK_MYSTERIOUS` tests in
+// those handlers select a branch, they do not validate. insertShopItem and
+// removeShopItem then write through the out-of-range ItemRack, so this is a
+// heap write, not only a read.
+//
+// These throw rather than returning a sentinel because several callers
+// dereference the result unchecked (CGShopRequestBuyHandler:106, :194, :466
+// all do pItem->... with no NULL test), so a sentinel would trade an
+// out-of-bounds read for a NULL dereference. Same reasoning as
+// Inventory::getInventorySlot. Throwing also preserves today's behaviour
+// exactly: Assert already throws in a Debug build, and both AssertionError and
+// OutOfBoundException are caught by the same catch (Throwable&) in
+// GamePlayer. GCShopVersion.h already guards its own copy of this index with
+// a real `if`. A legitimate client sends 0..2 and never reaches any of this.
+//
 // getShopVersion()
 
 ShopVersion_t NPC::getShopVersion(ShopRackType_t type) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].getVersion();
 }
@@ -241,6 +264,9 @@ ShopVersion_t NPC::getShopVersion(ShopRackType_t type) const {
 // setShopVersion()
 
 void NPC::setShopVersion(ShopRackType_t type, ShopVersion_t ver) {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     m_pRack[type].setVersion(ver);
 }
@@ -248,6 +274,9 @@ void NPC::setShopVersion(ShopRackType_t type, ShopVersion_t ver) {
 // increaseShopVersion()
 
 void NPC::increaseShopVersion(ShopRackType_t type) {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     m_pRack[type].increaseVersion();
 }
@@ -255,6 +284,9 @@ void NPC::increaseShopVersion(ShopRackType_t type) {
 // isExistShopItem()
 
 bool NPC::isExistShopItem(ShopRackType_t type, BYTE index) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].isExist(index);
 }
@@ -262,6 +294,9 @@ bool NPC::isExistShopItem(ShopRackType_t type, BYTE index) const {
 // insertShopItem()
 
 void NPC::insertShopItem(ShopRackType_t type, BYTE index, Item* pItem) {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     m_pRack[type].insert(index, pItem);
 }
@@ -269,6 +304,9 @@ void NPC::insertShopItem(ShopRackType_t type, BYTE index, Item* pItem) {
 // removeShopItem()
 
 void NPC::removeShopItem(ShopRackType_t type, BYTE index) {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].remove(index);
 }
@@ -276,6 +314,9 @@ void NPC::removeShopItem(ShopRackType_t type, BYTE index) {
 // getShopItem()
 
 Item* NPC::getShopItem(ShopRackType_t type, BYTE index) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].get(index);
 }
@@ -290,6 +331,9 @@ void NPC::clearShopItem(void) {
 // getFirstEmptySlot()
 
 BYTE NPC::getFirstEmptySlot(ShopRackType_t type) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].getFirstEmptySlot();
 }
@@ -297,6 +341,9 @@ BYTE NPC::getFirstEmptySlot(ShopRackType_t type) const {
 // getLastEmptySlot()
 
 BYTE NPC::getLastEmptySlot(ShopRackType_t type) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].getLastEmptySlot();
 }
@@ -304,6 +351,9 @@ BYTE NPC::getLastEmptySlot(ShopRackType_t type) const {
 // isFull()
 
 bool NPC::isFull(ShopRackType_t type) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].isFull();
 }
@@ -311,6 +361,9 @@ bool NPC::isFull(ShopRackType_t type) const {
 // isEmpty
 
 bool NPC::isEmpty(ShopRackType_t type) const {
+    if (type >= SHOP_RACK_TYPE_MAX)
+        throw OutOfBoundException("NPC: shop rack type out of range");
+
     Assert(type < SHOP_RACK_TYPE_MAX);
     return m_pRack[type].isEmpty();
 }

@@ -90,35 +90,56 @@ bool ItemRack::isEmpty(void) const {
     return true;
 }
 
+// The four index accessors below were guarded only by Assert(verifyIndex(...)),
+// which disappears under NDEBUG. `index` is the NPC shop slot and reaches here
+// as a raw BYTE off the wire (CGShopRequestBuyHandler's pPacket->getShopIndex(),
+// via NPC::getShopItem/insertShopItem/removeShopItem/isExistShopItem), while
+// m_ppItem holds only m_nSize pointers. insert() and remove() write, so this is
+// an arbitrary-offset heap write and not merely a read.
+//
+// They throw rather than returning a sentinel, for the same reason as the NPC
+// accessors that call them: the buy handler dereferences get()'s result without
+// a NULL test. Throwing also matches today's Debug behaviour, where the Assert
+// already throws. verifyIndex() itself is unchanged and still the single
+// definition of "in range".
+
 bool ItemRack::isExist(BYTE index) const {
-    
+    if (!verifyIndex(index))
+        throw OutOfBoundException("ItemRack::isExist: index out of range");
+
     Assert(verifyIndex(index));
 
-    
+
     return (m_ppItem[index] == NULL ? false : true);
 }
 
 void ItemRack::insert(BYTE index, Item* pItem) {
-    
+    if (!verifyIndex(index))
+        throw OutOfBoundException("ItemRack::insert: index out of range");
+
     Assert(verifyIndex(index));
 
-    
+
     Assert(m_ppItem[index] == NULL);
 
-    
+
     m_ppItem[index] = pItem;
 }
 
 void ItemRack::remove(BYTE index) {
-    
+    if (!verifyIndex(index))
+        throw OutOfBoundException("ItemRack::remove: index out of range");
+
     Assert(verifyIndex(index));
 
-    
+
     m_ppItem[index] = NULL;
 }
 
 Item* ItemRack::get(BYTE index) {
-    
+    if (!verifyIndex(index))
+        throw OutOfBoundException("ItemRack::get: index out of range");
+
     Assert(verifyIndex(index));
 
     return m_ppItem[index];
