@@ -194,13 +194,13 @@ void EffectProminenceLoader::load(Zone* pZone)
     __BEGIN_TRY
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pResult = pStmt->executeQuery("SELECT LeftX, TopY, RightX, BottomY, Value1, Value2, Value3 FROM ZoneEffectInfo "
-                                      "WHERE ZoneID = %d AND EffectID = %d",
-                                      pZone->getZoneID(), (int)Effect::EFFECT_CLASS_PROMINENCE_3);
+        Result* pResult =
+            pStmt->executeQuery("SELECT LeftX, TopY, RightX, BottomY, Value1, Value2, Value3 FROM ZoneEffectInfo "
+                                "WHERE ZoneID = %d AND EffectID = %d",
+                                pZone->getZoneID(), (int)Effect::EFFECT_CLASS_PROMINENCE_3);
 
         while (pResult->next()) {
             int count = 0;
@@ -235,6 +235,10 @@ void EffectProminenceLoader::load(Zone* pZone)
                     }
                 }
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns, once per zone.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

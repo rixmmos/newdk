@@ -23,7 +23,9 @@ void PetTypeInfoManager::clear() {
 void PetTypeInfoManager::load() {
     clear();
 
-    Statement* pStmt;
+    // Must be NULL-initialised: END_DB's `delete STMT` runs on the catch path, which
+    // is reachable before the assignment below.
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
@@ -52,6 +54,10 @@ void PetTypeInfoManager::load() {
 
             addPetTypeInfo(pPetTypeInfo);
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 }

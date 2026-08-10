@@ -82,7 +82,9 @@ RegenZoneManager::~RegenZoneManager() {
 void RegenZoneManager::reload() {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    // Must be NULL-initialised: END_DB's `delete STMT` runs on the catch path, which
+    // is reachable before the assignment below.
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
@@ -138,6 +140,10 @@ void RegenZoneManager::reload() {
 
             __LEAVE_CRITICAL_SECTION((*pZone))
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 
@@ -149,7 +155,9 @@ void RegenZoneManager::reload() {
 void RegenZoneManager::load() {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    // Must be NULL-initialised: END_DB's `delete STMT` runs on the catch path, which
+    // is reachable before the assignment below.
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
@@ -188,6 +196,10 @@ void RegenZoneManager::load() {
 
             m_pStatusPacket->setStatus(ID, Owner);
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt);
 

@@ -71,8 +71,14 @@ bool UniqueItemManager::isPossibleCreate(Item::ItemClass itemClass, ItemType_t i
         if (pResult->next()) {
             int limitNumber = pResult->getInt(1);
             int currentNumber = pResult->getInt(2);
+            bool bPossibleCreate = limitNumber == 0 || currentNumber < limitNumber;
 
-            return limitNumber == 0 || currentNumber < limitNumber;
+            // Free before returning: this early return jumped over the
+            // SAFE_DELETE below, leaking the Statement and the Result it owns on
+            // every lookup that found a row.
+            SAFE_DELETE(pStmt);
+
+            return bPossibleCreate;
         }
 
         SAFE_DELETE(pStmt);

@@ -128,6 +128,10 @@ void EventQuestInfoManager::load(const string& name) {
 
             cout << "Loading Quest Info : " << pMiniGameQI->toString() << endl;
         }
+
+        // END_DB frees the Statement only on the exception path; without this the
+        // success path leaks the Statement and the Result it owns, once per NPC.
+        SAFE_DELETE(pStmt);
     }
     END_DB(pStmt)
 

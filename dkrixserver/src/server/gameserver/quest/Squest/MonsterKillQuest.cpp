@@ -54,18 +54,21 @@ void MonsterKillQuest::create() throw(Error) {
 //--------------------------------------------------------------------------------
 // save
 //--------------------------------------------------------------------------------
+// Never implemented upstream: the body was a placeholder that ran the literal SQL
+// "-_-" against the DARKEDEN connection, which can only fail. It cannot be written
+// correctly from the surrounding code either -- SimpleQuest rows are keyed only by
+// OwnerID (see create() above and SimpleQuestLoader::load()), so there is no way to
+// address a single quest for an UPDATE, and guessing one would write to live game
+// data. The dead query and its Statement are removed; the call still fails loudly
+// rather than silently dropping the save, which is what the bogus SQL did.
+//
+// This whole translation unit is out of the build (absent from
+// server/gameserver/CMakeLists.txt) and its only call path is gated on
+// __ACTIVE_QUEST__, which is commented out at Squest/Quest.h:38.
 void MonsterKillQuest::save() throw(Error) {
     __BEGIN_TRY
 
-    Statement* pStmt = NULL;
-
-    BEGIN_DB {
-        pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-        pStmt->executeQuery("-_-");
-
-        SAFE_DELETE(pStmt);
-    }
-    END_DB(pStmt)
+    throw Error("MonsterKillQuest::save() is not implemented");
 
     __END_CATCH
 }
