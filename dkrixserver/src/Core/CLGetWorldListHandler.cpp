@@ -38,7 +38,14 @@ void CLGetWorldListHandler::execute(CLGetWorldList* pPacket, Player* pPlayer)
 
         // cout << "WorldNum : " << Num << endl;
 
-        WorldInfo* aWorldInfo[Num];
+        // Num + 1, not Num: both loops below are 1-based and run to Num
+        // inclusive (world IDs start at 1), so sizing this to Num made
+        // aWorldInfo[Num] a write and then a read one element past the end of a
+        // stack VLA. AddressSanitizer reports it as a dynamic-stack-buffer-
+        // overflow and aborts the loginserver on the first CLGetWorldList --
+        // i.e. every login. Slot 0 stays unused, which is what the 1-based
+        // indexing already assumed. Same off-by-one shape as Bug 18-E.
+        WorldInfo* aWorldInfo[Num + 1];
 
         for (int i = 1; i < Num + 1; i++) {
             WorldInfo* pWorldInfo = new WorldInfo();
