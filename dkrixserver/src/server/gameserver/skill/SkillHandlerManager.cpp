@@ -846,13 +846,19 @@ SkillHandler* SkillHandlerManager::getSkillHandler(SkillType_t SkillType)
             SkillType = SKILL_ACID_STORM;
         }
     */
+    // Range check first. SkillType originates as a raw WORD on the wire, and
+    // m_SkillHandlers holds exactly m_Size (== SKILL_MAX) entries. The previous
+    // order indexed the table before testing the range, and tested `>` against a
+    // 0-based array, so the guard could never fire before the out-of-bounds read.
+    if (SkillType >= m_Size) {
+        StringStream msg;
+        msg << "Skill Handler Upper Bound";
+        throw Error(msg.toString());
+    }
+
     if (m_SkillHandlers[SkillType] == NULL) {
         StringStream msg;
         msg << "None Skill Handler (Type : " << (int)SkillType << ")";
-        throw Error(msg.toString());
-    } else if (SkillType > SKILL_MAX) {
-        StringStream msg;
-        msg << "Skill Handler Upper Bound";
         throw Error(msg.toString());
     }
 

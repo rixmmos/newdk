@@ -527,6 +527,21 @@ void CGLearnSkillHandler::executeSlayerSkill(CGLearnSkill* pPacket, Player* pPla
     if (actualDomainType == SKILL_DOMAIN_ETC)
         actualDomainType = pSlayer->getHighestSkillDomain();
 
+    // actualDomainType is a raw BYTE off the wire and is used below to index
+    // Slayer::m_SkillDomainLevels, which has SKILL_DOMAIN_VAMPIRE entries
+    // (valid 0..SKILL_DOMAIN_ETC). The DOMAIN_DIFFER check further down already
+    // rejects anything above SKILL_DOMAIN_ETC, but it is skipped for
+    // SKILL_SOUL_CHAIN, which leaves that read unbounded. Bound it here; a
+    // legitimate client sends Soul Chain's own domain (5 == SKILL_DOMAIN_ETC,
+    // per SkillBalance), which the substitution above maps into range.
+    if (actualDomainType > SKILL_DOMAIN_ETC) {
+        GCLearnSkillFailed failpkt;
+        failpkt.setSkillType(targetSkillType);
+        failpkt.setDesc(DOMAIN_DIFFER);
+        pPlayer->sendPacket(&failpkt);
+        return;
+    }
+
     if (targetSkillType >= SKILL_MAX && targetSkillType < SKILL_DOUBLE_IMPACT) {
         GCLearnSkillFailed failpkt;
         failpkt.setSkillType(targetSkillType);
