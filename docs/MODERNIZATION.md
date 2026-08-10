@@ -4706,6 +4706,74 @@ occurred since the 18-C fix landed.
   `Core/CGUsePotionFromQuickSlotHandler.cpp:270`.
   Also noted: `ctf/FlagManager.cpp:317` assigns the result of a `DELETE` and
   never reads it — dead assignment, harmless.
+- **Bind-correctness audit of the whole Phase 11 migration — clean.**
+  [measured 2026-08-10] Five parallel auditors covered **all 1,575
+  `PreparedStatement` constructions** across the 208 files that use the class,
+  partitioned by construction count. Each reconstructed the concatenated SQL,
+  counted `?` placeholders outside quoted literals, and matched them against
+  the bind calls scoped to that statement object.
+
+  | Group | Files | Statements | Defects |
+  |---|---|---|---|
+  | 1 | 42 | 397 | 0 |
+  | 2 | 42 | 352 | 0 |
+  | 3 | 42 | 343 | 0 |
+  | 4 | 41 | 246 | 0 |
+  | 5 | 41 | 237 | 0 |
+  | **total** | **208** | **1,575** | **0** |
+
+  Checked: placeholder/bind count mismatch; bad indices (0-based, duplicate,
+  gap, out of range); binds naming a different statement object; `?` in
+  identifier position or inside a quoted literal; and the adjacent-literal
+  concatenation accident that caused Bug 18-A. Placeholder and bind totals
+  agree exactly where counted (group 3: 746/746; group 5: 720/720), and every
+  index set is a contiguous `1..N`. Group 4 additionally cross-checked the
+  migration commits themselves (`ab67704`, `1ef2643`, `c13508f`, `1ebedbe`,
+  `825fa92`, `0893e29`, `068712b`, `6822f0b`, `5a10cb1`, `38dfbbc`), comparing
+  each hunk's removed `printf` format-specifier count against its added `?`
+  and bind counts — 64 flagged hunks, all resolving to benign causes.
+
+  **Conclusion: the migration was mechanically sound on parameter binding.**
+  Its damage was concentrated in *object lifetime* (18-B, 18-C) and in one
+  malformed literal (18-A), not in the SQL or the binds. That is worth knowing
+  before spending more effort hunting SQL-shaped defects.
+
+  **One real finding, fixed:** `item/Cross.cpp:175` bound `storageID` with
+  `bindInt`. `StorageID_t` is `DWORD` (unsigned 32-bit,
+  `Core/types/ItemTypes.h:29`) and `bindInt` takes a signed `int`, so an ID at
+  or above 2^31 binds negative. It was the only `bindInt(n, storageID)` in the
+  tree against **83** `bindLong` — including Cross.cpp's own INSERT eleven
+  lines earlier at `:93`. Not reachable with current storage IDs, so no
+  observable behavior changed.
+
+  **Deliberate residual injection surface, not defects:** ~22 sites splice a
+  C++ expression into the SQL instead of binding it — the `tinysave(field)`
+  family in the item classes, plus table-name splices
+  (`getObjectTableName()`, `ItemObjectTableName[...]`). A placeholder cannot
+  bind an identifier, so these cannot be parameterised; each carries an
+  explanatory comment. Three auditors independently flagged them as UNCERTAIN
+  and independently concluded they are correct. Their literal portions are
+  verified; the spliced fragments are fixed `Column=value` strings or fixed
+  identifiers, never user input.
+
+  **Trap for any future automated pass over this tree:** these constructors
+  take the connection as the *first* argument
+  (`g_pDatabaseManager->getConnection("DARKEDEN")`). Naively harvesting every
+  string literal in the constructor call concatenates the connection name onto
+  the SQL and produces exactly the Bug 18-A signature —
+  `DARKEDENSELECT Fame, ... FROM Slayer`. Two auditors generated this false
+  positive independently (7 hits each in `CGSayHandler.cpp` and
+  `CGConnectHandler.cpp`) before correcting for it. Only the second argument
+  onward is SQL.
+- **`CLLoginHandler.cpp:402` is truncated mid-token — pre-existing, dead.**
+  [measured] Under `#ifdef __THAILAND_SERVER__`, the line reads
+  `bool bChildGuardArea = onChildGuardTimeArea(g_pConfig->getPropertyInt("CHILDGUARD_START_TIME"),g_pConf`
+  — unclosed paren, no semicolon. That guard cannot compile. It is **not**
+  migration damage: `git log -L 402,402` dates it to `4123ff3` (2026-04-17),
+  the initial import of `dkrixserver` as a regular folder, and
+  `__THAILAND_SERVER__` is never defined anywhere in the build. Left alone
+  deliberately — repairing it means inventing the missing second argument.
+  Recorded so the next person who enables that guard knows what they will hit.
   - **Gate implication.** Both 18-A and 18-B are Phase 11 `PreparedStatement`
     defects that no existing gate can see — 18-A because SQL is string data,
     18-B because the lifetime error is legal C++. An ASan build of the server
