@@ -411,22 +411,24 @@ void CGSayHandler::opExecute(Creature* pCreature, GamePlayer* pGamePlayer, strin
             return;
         }
 
+        // The report is chat text. It used to be hand-sanitised here, but
+        // find_first_of() was called once per character class, so only the
+        // first quote and the first backslash were ever neutered and "a''b"
+        // still reached the query intact. Bound parameters remove the need for
+        // any sanitising, and the report is now stored verbatim.
         string report = msg.substr(j + 1, msg.size() - j - 1);
-        if ((j = report.find_first_of('\'')) != string::npos)
-            report[j] = '_';
-        if ((j = report.find_first_of('\\')) != string::npos)
-            report[j] = '_';
 
         Statement* pStmt = NULL;
 
         try {
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery("INSERT INTO BugReportLog(PlayerID, Name, ReportTime, ReportLog) VALUES "
-                                    "('%s', '%s', now(), '%s')",
-                                    pGamePlayer->getID().c_str(), pCreature->getName().c_str(), report.c_str());
-
-                SAFE_DELETE(pStmt);
+                PreparedStatement insertStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                             "INSERT INTO BugReportLog(PlayerID, Name, ReportTime, ReportLog) VALUES "
+                                             "(?, ?, now(), ?)");
+                insertStmt.bindString(1, pGamePlayer->getID());
+                insertStmt.bindString(2, pCreature->getName());
+                insertStmt.bindString(3, report);
+                insertStmt.execute();
             }
             END_DB(pStmt)
 
@@ -457,14 +459,20 @@ void CGSayHandler::opExecute(Creature* pCreature, GamePlayer* pGamePlayer, strin
 
         try {
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery("INSERT INTO CrashLog (PlayerID, Name, ReportTime, ExecutableTime, Version, "
-                                    "Address, Message) VALUES "
-                                    "('%s', '%s', now(), '%s', '%s', '%s', '%s')",
-                                    pGamePlayer->getID().c_str(), pCreature->getName().c_str(), ExecutableTime.c_str(),
-                                    Version.c_str(), Address.c_str(), Message.c_str());
-
-                SAFE_DELETE(pStmt);
+                // ExecutableTime/Version/Address/Message are all chat-derived
+                // and were interpolated unescaped; bind them instead.
+                PreparedStatement insertStmt(
+                    g_pDatabaseManager->getConnection("DARKEDEN"),
+                    "INSERT INTO CrashLog (PlayerID, Name, ReportTime, ExecutableTime, Version, "
+                    "Address, Message) VALUES "
+                    "(?, ?, now(), ?, ?, ?, ?)");
+                insertStmt.bindString(1, pGamePlayer->getID());
+                insertStmt.bindString(2, pCreature->getName());
+                insertStmt.bindString(3, ExecutableTime);
+                insertStmt.bindString(4, Version);
+                insertStmt.bindString(5, Address);
+                insertStmt.bindString(6, Message);
+                insertStmt.execute();
             }
             END_DB(pStmt)
 
@@ -2695,16 +2703,12 @@ void CGSayHandler::opcreate(GamePlayer* pGamePlayer, string msg, int i) {
 
         Statement* pStmt = NULL;
         BEGIN_DB {
-            StringStream sql;
-            sql << "INSERT INTO OpCreate (OpName, DateTime, ItemDesc) VALUES ("
-                << "'" << pCreature->getName() << "',"
-                << "'" << VSDateTime::currentDateTime().toString() << "',"
-                << "'" << pItem->toString() << "'"
-                << ")";
-
-            pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-            pStmt->executeQueryString(sql.toString());
-            SAFE_DELETE(pStmt);
+            PreparedStatement insertStmt(g_pDatabaseManager->getConnection("DARKEDEN"),
+                                         "INSERT INTO OpCreate (OpName, DateTime, ItemDesc) VALUES (?, ?, ?)");
+            insertStmt.bindString(1, pCreature->getName());
+            insertStmt.bindString(2, VSDateTime::currentDateTime().toString());
+            insertStmt.bindString(3, pItem->toString());
+            insertStmt.execute();
         }
         END_DB(pStmt);
 
@@ -3148,6 +3152,53 @@ static const Effect::EffectClass FirecrackerEffects[] = {
     Effect::EFFECT_CLASS_FIRE_CRACKER_STORM          // 13
 };
 
+namespace {
+
+// opcommand() is reachable with pGamePlayer == NULL: GGCommandHandler
+// dispatches *command over the inter-server (GG) path, which has no player
+// behind it, and that is also how *allworld *command fans out to peer
+// gameservers. Most branches of opcommand() dereference pGamePlayer without a
+// check, so the ones that do not have been enumerated here, branch by branch.
+//
+// Everything absent from this list needs the issuing GM's own creature -- its
+// zone, inventory, or client connection -- and simply has no meaning without
+// one, so it is refused rather than crashing the server. New commands are
+// player-requiring by default, which is the safe direction.
+//
+// Deliberately excluded even though they look player-independent:
+//   showWarList  - WarSystem::broadcastWarList() dereferences pGamePlayer.
+//   GuildRecall  - its own branch condition already requires a player.
+bool isPlayerIndependentCommand(const string& command) {
+    static const char* const commands[] = {"balanceZoneGroup",
+                                           "regenMasterLair",
+                                           "showMasterLairStatus",
+                                           "setCastleOwnerGuild",
+                                           "startRaceWar",
+                                           "removeWar",
+                                           "removeRaceWar",
+                                           "LevelWar",
+                                           "saveBloodBibleOwner",
+                                           "killAllMonster",
+                                           "killAllPC",
+                                           "showZonePCNum",
+                                           "showPKZonePCNum",
+                                           "setPKZonePCNum",
+                                           "NotifyWin",
+                                           "CTF",
+                                           "StartGDRLair",
+                                           "ResetGDRLair",
+                                           "addDynamicZone"};
+
+    for (size_t n = 0; n < sizeof(commands) / sizeof(commands[0]); n++) {
+        if (command == commands[n])
+            return true;
+    }
+
+    return false;
+}
+
+} // namespace
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
@@ -3161,6 +3212,11 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
     if (pGamePlayer != NULL) {
         Creature* pCreature = pGamePlayer->getCreature();
         filelog("change.txt", "%s , %s , %s", pCreature->getName().c_str(), command.c_str(), value1.c_str());
+    } else if (!isPlayerIndependentCommand(command)) {
+        // Inter-server path with no player behind it -- see
+        // isPlayerIndependentCommand(). Refuse instead of dereferencing NULL.
+        filelog("ggCommand.txt", "opcommand: '%s' needs a player, ignored on the inter-server path", command.c_str());
+        return;
     }
 
     GCSystemMessage gcSystemMessage;
@@ -4235,15 +4291,18 @@ void CGSayHandler::opcommand(GamePlayer* pGamePlayer, string msg, int i) {
             gcSystemMessage.setMessage(".");
         } else {
             PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pTargetCreature);
-            Statement* pStmt;
+            Statement* pStmt = NULL;
 
             BEGIN_DB {
-                pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
-                pStmt->executeQuery(
+                // `nick` is raw chat text. Same idiom as RemoveNick below.
+                PreparedStatement replaceStmt(
+                    g_pDatabaseManager->getConnection("DARKEDEN"),
                     "REPLACE INTO NicknameBook (nID, OwnerID, NickType, Nickname, NickIndex, Time) VALUES "
-                    "(100, '%s', %u, '%s', 0, now())",
-                    pPC->getName().c_str(), NicknameInfo::NICK_CUSTOM_FORCED, nick.c_str());
-                SAFE_DELETE(pStmt);
+                    "(100, ?, ?, ?, 0, now())");
+                replaceStmt.bindString(1, pPC->getName());
+                replaceStmt.bindUInt(2, (uint)NicknameInfo::NICK_CUSTOM_FORCED);
+                replaceStmt.bindString(3, nick);
+                replaceStmt.execute();
             }
             END_DB(pStmt)
 
