@@ -1,28 +1,81 @@
 #!/usr/bin/env python3
-"""Count format-string SQL call sites in the server tree.
+"""Count runtime-assembled SQL sites in the server tree.
 
 Used by check-sql-injection.sh. See that script's header for what the gate
 means and what it deliberately does not measure.
 
-What counts as a site: a call to one of
+--------------------------------------------------------------------------
+WHAT COUNTS AS A SITE
+--------------------------------------------------------------------------
 
-    executeQuery( executeQueryString( setStatement( Statement(
+A *SQL sink* is one of
 
-whose argument list contains a string literal holding a real printf
-conversion specifier (%%s, %%d, %%lld, ...). `%%%%` is not a specifier.
+    pStmt->executeQuery( SQL , ... )        variadic, vsprintf'd
+    pStmt->executeQueryString( SQL )        pass-through
+    pStmt->setStatement( SQL , ... )        variadic, vsprintf'd
+    Statement  name( pConn, SQL , ... )     stack construction, variadic
+    Statement( pConn, SQL , ... )           call form
+    PreparedStatement name( pConn, SQL )    parameterised
 
-How it avoids the failure modes of the grep it replaces:
+For each sink the *SQL argument* is isolated (argument 0 for the method
+forms, argument 1 for the constructor forms — the connection is argument
+0, and folding it into the SQL is exactly how a naive scan invents the
+Bug 18-A signature `DARKEDENSELECT ...`). The argument expression is then
+classified with its string literals masked out:
 
-  * comments are removed first (`//` and `/* */`), so the ~half of the
-    legacy `executeQuery` occurrences that are dead SQL kept as reference
-    comments do not count;
+  format  the argument is entirely string literals AND one of them carries
+          a printf conversion specifier, AND the sink is a variadic one.
+          The caller's values are vsprintf'd into the SQL text with no
+          escaping: the classic injection shape.
+
+  stream  the argument is not a pure literal and mentions `.toString()`.
+          This is the `StringStream sql; sql << "..." << value; ...
+          executeQueryString(sql.toString())` shape — SQL assembled by
+          operator<< over many lines, the dominant legacy construction in
+          this tree, and completely invisible to every earlier revision of
+          this gate.
+
+  splice  the argument is not a pure literal and does not mention
+          toString(). This is `"UPDATE " + getObjectTableName() + " SET
+          ..."` and friends: a C++ expression concatenated into the SQL
+          text. Includes the ~20 deliberate identifier splices that cannot
+          be parameterised (a placeholder cannot bind a table or column
+          name) and the handful of sinks whose SQL arrives through a local
+          variable the checker cannot see through.
+
+`format` + `stream` + `splice` = every site where the SQL text handed to
+MySQL is not a compile-time constant. That total is the injection
+*surface*. Whether a given site is exploitable depends on whether the
+interpolated value can carry player-controlled text, which this gate does
+not and cannot decide.
+
+Sites whose SQL argument is a pure string literal with no conversion
+specifier are *static* and are not counted at all: MySQL receives exactly
+what is in the source.
+
+--------------------------------------------------------------------------
+HOW IT AVOIDS THE FAILURE MODES OF ITS PREDECESSORS
+--------------------------------------------------------------------------
+
+  * comments are removed first (`//` and `/* */`), so the large body of
+    dead pre-migration SQL kept as reference comments does not count;
   * the argument list is found by a balanced-paren scan with string and
-    char literals masked, so `VALUES('%%s')` and `MAX(Level)` are handled;
-  * calls split across many lines are handled, because the scan is over
-    the whole file, not line by line;
-  * `PreparedStatement(` -- the safe form -- is excluded by an
-    identifier-boundary lookbehind on the bare `Statement` alternative;
-  * one call site counts once, however many lines or literals it spans.
+    char literals masked, so `VALUES('%s')` and `MAX(Level)` are handled;
+  * calls split across any number of lines are handled, because the scan
+    is over the whole file rather than line by line — this is what makes
+    the multi-line StringStream and multi-line PreparedStatement shapes
+    visible;
+  * the argument list is split on *top-level* commas, so the connection
+    argument is excluded from the SQL and nested calls stay intact;
+  * `PreparedStatement(` is excluded from the bare `Statement`
+    alternative by an identifier-boundary lookbehind, and is matched
+    separately in its own declaration form;
+  * one call site counts once, however many lines or literals it spans;
+  * `%%` is not a conversion specifier;
+  * a conversion specifier inside a *PreparedStatement* literal is NOT a
+    format site — that API never vsprintfs. `DATE_FORMAT(t,'%y%m%d')` in
+    GuildUnion.cpp:609 is the one such literal in the tree and counting it
+    would be a false positive.
 """
 
 import argparse
@@ -30,11 +83,24 @@ import os
 import re
 import sys
 
-TARGETS = ("executeQueryString", "executeQuery", "setStatement", "Statement")
+# Sinks taking the SQL as argument 0.
+METHOD_SINKS = ("executeQueryString", "executeQuery", "setStatement")
+# Sinks taking the connection as argument 0 and the SQL as argument 1.
+CTOR_SINKS = ("PreparedStatement", "Statement")
 
-# Identifier boundary on the left keeps `PreparedStatement(` and
-# `setStatement(` from also matching the bare `Statement` alternative.
-CALL_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(TARGETS) + r")\s*\(")
+# Variadic sinks: these vsprintf the SQL argument. A conversion specifier
+# in one of their literals is a format-string SQL site.
+VARIADIC = ("executeQuery", "setStatement", "Statement")
+
+METHOD_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(METHOD_SINKS) + r")\s*\(")
+# `PreparedStatement stmt(` / `Statement stmt(` — a stack construction with
+# the type name separated from the paren by the variable name.
+CTOR_DECL_RE = re.compile(
+    r"(?<![A-Za-z0-9_])(" + "|".join(CTOR_SINKS) + r")\s+([A-Za-z_][A-Za-z0-9_]*)\s*\("
+)
+# `Statement(` / `new Statement(` call form. The lookbehind keeps
+# `PreparedStatement(` and `setStatement(` out.
+CTOR_CALL_RE = re.compile(r"(?<![A-Za-z0-9_])Statement\s*\(")
 
 # A printf conversion specifier, minus the `%` and minus `%%`.
 CONV_RE = re.compile(
@@ -44,6 +110,14 @@ CONV_RE = re.compile(
 SOURCE_EXTS = (".cpp", ".h", ".inl")
 
 MASK = "\x01"  # stands in for one character of masked literal/comment text
+
+# The database API's own declarations and definitions. Their parameter
+# lists look exactly like sink calls with a non-literal SQL argument
+# (`executeQuery(const char* fmt, ...)`), so scanning them would report
+# the gate's own plumbing as five dynamic-SQL sites.
+API_FILES = ("Statement.cpp", "Statement.h", "PreparedStatement.cpp", "PreparedStatement.h")
+
+CATEGORIES = ("format", "stream", "splice")
 
 
 def strip_comments_and_mask_literals(text):
@@ -143,47 +217,95 @@ def matching_paren(code, open_idx):
     return n
 
 
+def split_args(code, open_idx, close_idx):
+    """Yield (start, end) of each top-level argument between the parens.
+
+    Literals are already masked, so a comma inside SQL text cannot split an
+    argument. Nesting is tracked so `getConnection("DARKEDEN")` and
+    `IN(1, 2, 3)` stay inside one argument.
+    """
+    depth = 0
+    start = open_idx + 1
+    for k in range(open_idx + 1, close_idx):
+        ch = code[k]
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            yield (start, k)
+            start = k + 1
+    yield (start, close_idx)
+
+
+def find_sinks(code):
+    """Yield (match, label, sql_arg_index, variadic) for every SQL sink."""
+    for m in METHOD_RE.finditer(code):
+        yield (m, m.group(1), 0, m.group(1) in VARIADIC)
+    for m in CTOR_DECL_RE.finditer(code):
+        yield (m, m.group(1), 1, m.group(1) in VARIADIC)
+    for m in CTOR_CALL_RE.finditer(code):
+        # `PreparedStatement(` — the lookbehind above only guards the
+        # identifier characters immediately before, and `Prepared` ends in
+        # one, so this cannot actually fire; keep the guard anyway in case
+        # the regex is loosened later.
+        if code[max(0, m.start() - 20) : m.start()].rstrip().endswith("Prepared"):
+            continue
+        yield (m, "Statement", 1, True)
+
+
+def classify(seg, arg_literals, variadic):
+    """Return a category for one SQL argument, or None if it is static."""
+    # Remove the masked literals from the expression; what is left is the
+    # C++ that contributes to the SQL text at runtime. `+` and whitespace
+    # are just concatenation glue.
+    rem = re.sub(r'"[^"\n]*"', "", seg.replace(MASK, ""))
+    rem = re.sub(r"'[^'\n]*'", "", rem)
+    rem = re.sub(r"[\s+]", "", rem)
+    if rem:
+        return "stream" if ".toString" in seg else "splice"
+    if not arg_literals:
+        return None  # no SQL at all (a declaration, or an empty arg list)
+    if variadic and any(has_conversion(lit) for lit in arg_literals):
+        return "format"
+    return None
+
+
+def line_of(code, offset):
+    return code.count("\n", 0, offset) + 1
+
+
 def scan_file(path):
-    """Yield (line_no, callee, first_offending_literal) for each site."""
+    """Yield (line_no, category, callee, snippet) for each site in path."""
     with open(path, "r", encoding="utf-8", errors="replace") as fh:
         text = fh.read()
-    if not any(name in text for name in TARGETS):
+    if not any(name in text for name in METHOD_SINKS + CTOR_SINKS):
         return
     code, literals = strip_comments_and_mask_literals(text)
     lit_offsets = sorted(literals)
-    line_starts = [0]
-    for m in re.finditer("\n", code):
-        line_starts.append(m.end())
 
-    for m in CALL_RE.finditer(code):
-        callee = m.group(1)
+    for m, label, sql_arg, variadic in find_sinks(code):
         open_idx = m.end() - 1
         close_idx = matching_paren(code, open_idx)
-        hit = None
-        for off in lit_offsets:
-            if off < open_idx:
-                continue
-            if off > close_idx:
-                break
-            if has_conversion(literals[off]):
-                hit = literals[off]
-                break
-        if hit is None:
+        args = list(split_args(code, open_idx, close_idx))
+        if sql_arg >= len(args):
             continue
-        # bisect without importing: line_starts is sorted and small enough
-        lo, hi = 0, len(line_starts) - 1
-        while lo < hi:
-            mid = (lo + hi + 1) // 2
-            if line_starts[mid] <= m.start():
-                lo = mid
-            else:
-                hi = mid - 1
-        yield (lo + 1, callee, hit)
+        start, end = args[sql_arg]
+        seg = code[start:end]
+        arg_literals = [literals[o] for o in lit_offsets if start <= o < end]
+        cat = classify(seg, arg_literals, variadic)
+        if cat is None:
+            continue
+        if cat == "format":
+            snippet = next(lit for lit in arg_literals if has_conversion(lit))
+        else:
+            snippet = " ".join(seg.split())
+        yield (line_of(code, m.start()), cat, label, snippet)
 
 
 def excluded(path):
     base = os.path.basename(path)
-    if base == "testdb.cpp":
+    if base == "testdb.cpp" or base in API_FILES:
         return True
     if ".backup" in base or base.endswith(".txt"):
         return True
@@ -202,30 +324,56 @@ def iter_sources(root):
             yield path
 
 
+def collect(root):
+    """Return (counts_by_category, per_file_counts, sites)."""
+    counts = dict((c, 0) for c in CATEGORIES)
+    per_file = {}
+    sites = []
+    for path in iter_sources(root):
+        rel = os.path.relpath(path, root).replace(os.sep, "/")
+        for line_no, cat, callee, snippet in scan_file(path):
+            counts[cat] += 1
+            per_file[rel] = per_file.get(rel, 0) + 1
+            sites.append((rel, line_no, cat, callee, snippet))
+    return counts, per_file, sites
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("root")
     ap.add_argument("--list", action="store_true", help="print each site")
     ap.add_argument("--by-file", action="store_true", help="print per-file totals")
+    ap.add_argument(
+        "--breakdown", action="store_true", help="print per-category counts (key=value)"
+    )
+    ap.add_argument(
+        "--only", choices=CATEGORIES, help="restrict --list/--by-file to one category"
+    )
     args = ap.parse_args()
 
-    total = 0
-    per_file = {}
-    for path in iter_sources(args.root):
-        rel = os.path.relpath(path, args.root).replace(os.sep, "/")
-        for line_no, callee, lit in scan_file(path):
-            total += 1
+    counts, per_file, sites = collect(args.root)
+
+    if args.only:
+        sites = [s for s in sites if s[2] == args.only]
+        per_file = {}
+        for rel, _line, _cat, _callee, _snip in sites:
             per_file[rel] = per_file.get(rel, 0) + 1
-            if args.list:
-                snippet = lit.strip()
-                if len(snippet) > 90:
-                    snippet = snippet[:90] + "..."
-                print("%s:%d: %s(  \"%s\"" % (rel, line_no, callee, snippet))
+
+    if args.list:
+        for rel, line_no, cat, callee, snippet in sites:
+            text = snippet.strip()
+            if len(text) > 90:
+                text = text[:90] + "..."
+            print("%s:%d: [%s] %s( %s" % (rel, line_no, cat, callee, text))
     if args.by_file:
         for rel, n in sorted(per_file.items(), key=lambda kv: (-kv[1], kv[0])):
             print("%4d  %s" % (n, rel))
-    if not args.list and not args.by_file:
-        print(total)
+    if args.breakdown:
+        for cat in CATEGORIES:
+            print("%s=%d" % (cat, counts[cat]))
+        print("total=%d" % sum(counts.values()))
+    if not (args.list or args.by_file or args.breakdown):
+        print(sum(counts.values()))
     return 0
 
 
