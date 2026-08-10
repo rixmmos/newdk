@@ -858,10 +858,14 @@ neighbour. Practical rule for this tree:
    rides the tail of this queue.
 4. **Sanitizer legs** — largely done 2026-08-09; see Phase 10 bullet 3 for
    the measured per-leg table. Server asan reached 5 consecutive greens and
-   is now blocking (`71e2381`). What is left is one line, already verified
-   against a full local build: apply `-fno-sanitize=vptr` **after**
-   `-fsanitize=undefined` in `dkrixserver/CMakeLists.txt` per
-   `docs/ci-server-ubsan.md`, then let server ubsan earn its own 5 greens.
+   is now blocking (`71e2381`). The `-fno-sanitize=vptr` line was **applied
+   2026-08-10** (`docs/ci-server-ubsan.md`); server ubsan now has to earn
+   its own 5 greens on a runner before it flips. Also 2026-08-10: the
+   build-only sanitizer matrix was joined by a runtime one — the
+   `boot under <san> (boot-only, no packets)` job is now a matrix over
+   `asan`/`ubsan` rather than an asan-only job, so a UBSan binary is
+   actually *executed*. Both boot legs are non-blocking; the ubsan boot leg
+   runs with `halt_on_error=0` so one run enumerates every finding.
    The two client legs are gated on the Linux client port finishing, not on a
    rule — and that port moved a long way on 2026-08-09 (see thread 2 below:
    `SDLMain.cpp` was never the blocker, a local Linux client build now exists,
@@ -2279,7 +2283,15 @@ to `main` at authoring time, each independently green under
       the unfixed build dies [measured 2026-08-09]. It is one line in
       `dkrixserver/CMakeLists.txt`, the flag order is load-bearing, and
       that file was outside the flipping session's scope — so only the
-      write-up landed. Note also
+      write-up landed.
+
+      **Applied 2026-08-10.** `dkrixserver/CMakeLists.txt` now appends
+      `-fno-sanitize=vptr` after `-fsanitize=undefined` on both the
+      compile flags and `CMAKE_EXE_LINKER_FLAGS`, with the rationale and
+      the flag-order trap recorded inline. The leg stays
+      `non_blocking: true`: the flip rule is ≥5 consecutive greens *of
+      that leg*, its counter is still 0, and the fix has been verified in
+      one local WSL build but never on a runner. Note also
       that the leg's ~12m runtime is misleading — it fails at ~26% and
       `make` keeps compiling `gameserver` to the end — and that
       Actions logs return 403 unauthenticated even on this public
@@ -5098,11 +5110,36 @@ one-argument `read(string&)` overload, so it binds to the raw template
 wire bytes as a live `std::string` — the client controls both the data pointer
 and the length, giving an arbitrary-address read, and the ring-buffer-wrap
 branch `memcpy`s over the string's internals so the destructor frees an
-attacker-chosen pointer. **The only such site tree-wide** [measured]. Not
+attacker-chosen pointer. Not
 fixed here because `write()` emits the raw bytes with no length prefix, so the
 two sides never agreed on a format and the packet cannot have worked; the
 client (`dkrix/Client/Packet/Cpackets/CGExchangeBuy.cpp`) also implements it,
 so per the house rule a format change must ship to both trees together.
+
+**Resolved 2026-08-10 — the client half landed.** The server format
+(`uint64` listing ID, `BYTE` key length capped at 64, key bytes) is now
+mirrored in `dkrix/Client/Packet/Cpackets/CGExchangeBuy.{h,cpp}`:
+`m_ListingID` became `int64_t`, `m_IdempotencyKey` was added, and both
+`getPacketSize()` and `getPacketMaxSize()` (73) agree with the server. The
+client has no 64-bit stream overload, so the listing ID uses the raw
+`read(char*, uint)` / `write(const char*, uint)` form — byte-identical to
+what the server's `read<T>()`/`write<T>()` templates do. Safe to land because
+the feature is dead on both sides [measured]: nothing calls
+`C_VS_UI_GAME::RunPointExchange()`, so `BuyItem()` is unreachable, and
+`GCExchangeBuyFactory`/`GCExchangeListFactory` are registered in *neither*
+tree, so no client can parse a reply. Client change is CI-verified only.
+
+**Correction — `CGExchangeBuy` was not "the only such site tree-wide".**
+An earlier revision of this paragraph claimed that as [measured]. A re-scan of
+`dkrixserver/src/Core/*.cpp` and `shared/Packets/*.cpp` for one-argument
+`read()` calls on a `std::string` finds a second live instance:
+`GCExchangeBuy::read()` (`dkrixserver/src/Core/GCExchangeBuy.cpp:23`,
+`iStream.read(m_Message)`) — the identical template binding, with `write()`
+likewise emitting the string with no length prefix. It is latent, not
+exploitable: `GCExchangeBuyFactory` is registered nowhere, so no dispatcher
+ever calls that `read()`, and the client does not implement `GCExchangeBuy`
+at all. Left alone deliberately — fixing it is a second wire-format change,
+and the house rule wants that shipped as its own both-trees commit.
 
 - **`CLLoginHandler.cpp:402` is truncated mid-token — pre-existing, dead.**
   [measured] Under `#ifdef __THAILAND_SERVER__`, the line reads
@@ -5161,6 +5198,65 @@ patching each use site so the handler files stay untouched:
   reachability path, not the defect. Removing the unconditional
   `toString()` would alter observable logging and leave every other caller
   exposed.
+
+**Packet-entry rejection, sweep for the same shape.** 18-T fixed three
+instances; the tree was then swept mechanically for the whole pattern — a wire
+integer converted to an enum with no range check, or a `*2String[]` table
+indexed by an unvalidated wire field inside `toString()`. The packet layer holds
+exactly **six** explicit enum conversions [measured 2026-08-10: `shared/Packets/`
+118 `.cpp` + `src/Core/C[GL]*.cpp` 216 `.cpp`]; three were 18-T's, and all three
+of the rest were unguarded:
+
+| Site | Enum | Valid | Table | Feeds |
+|---|---|---|---|---|
+| `shared/Packets/CLDeletePC.cpp:27` | `Slot` | 0–2 (`SLOT_MAX` 3) | `Slot2String[3]` | 6 SQL binds in `CLDeletePCHandler` |
+| `shared/Packets/CLRegisterPlayer.cpp:46` | `Sex` | 0–1 | `Sex2String[2]` | `toString()`, SQL bind at handler `:158` |
+| `shared/Packets/CLRegisterPlayer.cpp:91` | `Nation` | 0–2 | `Nation2String[3]` | `toString()` |
+
+**`CLDeletePC` is the one that mattered, and 18-T's own commit message points at
+it by accident**: it credits the `CLCreatePC` fix with covering
+"`CLDeletePCHandler.cpp:73-129`", but that handler takes a **`CLDeletePC`**
+packet, whose `read()` was never touched. The six `Slot2String[getSlot()]` SQL
+binds at `:73`, `:80`, `:105`, `:111`, `:123`, `:129` were still driven by a raw
+0–255 wire `BYTE` against a 3-element table. It is reachable from
+`LPS_PC_MANAGEMENT`, i.e. any authenticated account. `CLRegisterPlayer` is the
+same shape but currently **unreachable**: `PacketValidator` only admits it from
+`LPS_WAITING_FOR_CL_REGISTER_PLAYER`, and the only packet that sets that state
+(`CL_QUERY_PLAYER_ID`, `CLQueryPlayerIDHandler:64`) is itself admitted *only*
+from that same state — a closed loop, because `PacketValidator.cpp:177-178`
+commented both out of `LPS_BEGIN_SESSION`. Fixed anyway: it is UB regardless,
+and one uncommented line re-opens it.
+
+Four `toString()` lookups were additionally bounded with the `CGConnect`
+`"UNKNOWN"` idiom, since `readPacket()` calls `toString()` on every packet
+received and it must not fault however the object was built:
+`CLRegisterPlayer` (`Sex2String`, `Nation2String`), `CLSelectPC`
+(`PCType2String`; `read()` validates, the lookup did not), and **`CGMove` /
+`CGUnburrow`**, where `Dir2String[]` holds **8** entries (`LEFT`..`LEFTUP`) but
+`m_Dir` is a raw `Dir_t` (`BYTE`), so 0–255 reaches the lookup. `CGMove` is the
+highest-frequency packet in the game.
+
+**Deliberately *not* rejected in `read()`: the two `Dir` fields.** `DIR_NONE`
+aliases `DIR_MAX` (`CreatureTypes.h:339`), so 8 is a live sentinel — `calcDirection`
+returns it (`Utility.cpp:122`) and `BombMask[5][9][9]` is sized to accept it — and
+the client's direction range could not be proved to exclude it. For `CGMove` a
+rejection would also *change* behaviour: `Zone::movePC` already treats
+`dir >= DIR_MAX` as a recoverable error and answers `GCMoveError`
+(`Zone.cpp:2426`), so an out-of-range direction is an anticipated value, not a
+protocol violation. **Residual, recorded not fixed:** the `CGUnburrow` path has
+no such guard — `addUnburrowCreature` → `Creature::setXYDir` (`Creature.h:234`)
+stores `dir` verbatim, so an out-of-range direction persists into creature state
+and later reaches `Dir2String[]` via `PCVampireInfo3::toString()`. Bounding the
+lookups closes the `readPacket()` fault but not that persistence.
+
+**Incidental, unfixed, needs a wire decision — `CGMove` field order.** The
+server's non-encrypted branch reads `Dir, X, Y` (`CGMove.cpp:29-31`) while the
+client's writes `X, Y, Dir` (`dkrix/Client/Packet/Cpackets/CGMove.cpp:59-61`);
+all three are `BYTE`, so the fields are silently permuted. Both
+`SHUFFLE_STATEMENT_3` branches agree on `X, Y, Dir`, so only the
+`getEncryptCode() == 0` fallback is affected. The client does send `CGMove`
+(`MPlayer.cpp:5641`). Not touched here — it is a wire-semantics change and the
+house rule requires both trees together.
 
 **DB object lifetime** (audit §2 rows 6 and 7). 21 legacy blocks across 20
 files gained a success-path `SAFE_DELETE(pStmt)`; 8 files' pre-declared
@@ -5290,9 +5386,10 @@ gate in this project's history that has caught a runtime bug, and this clean ses
 is not a substitute for it.
 
 **Open, deliberately untouched:** the `CGConnectSetKey` → `exit(0)` killswitch
-(audit §2 row 1 — an owner policy call, not a mechanical fix); the
-`CGExchangeBuy` client/server wire mismatch (row 8 — house rule ships both trees
-together); and the three unchecked `getShopItem()` dereferences noted above.
+(audit §2 row 1 — an owner policy call, not a mechanical fix) and the three
+unchecked `getShopItem()` dereferences noted above. The `CGExchangeBuy`
+client/server wire mismatch (row 8) is **closed** — the client half landed
+once both trees had a green CI gate; see the `CGExchangeBuy` entry above.
 
 ## Explicit non-goals
 

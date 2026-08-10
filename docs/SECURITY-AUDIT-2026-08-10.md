@@ -65,9 +65,10 @@ untracking below.
 
 > **Updated later on 2026-08-10 — rows 2, 3, 4, 5, 6, 7 and 9 are now CLOSED.**
 > A five-way hardening wave landed against this list; see `MODERNIZATION.md`
-> "Phase 18 — hardening wave (2026-08-10)". Rows **1** (the `exit(0)`
-> killswitch) and **8** (the `CGExchangeBuy` wire mismatch) remain open by
-> choice, unchanged. Two corrections to the table below: row 9 was **already
+> "Phase 18 — hardening wave (2026-08-10)". Row **1** (the `exit(0)`
+> killswitch) remains open by choice, unchanged. Row **8** (the
+> `CGExchangeBuy` wire mismatch) is now **closed** — the client half landed
+> once both trees had a green CI gate. Two corrections to the table below: row 9 was **already
 > fixed** by `2c5ebe9` before this document was written and its path is wrong
 > (`src/Core/CGSayHandler.cpp`), and row 6's site list was both incomplete (4
 > missing) and wrong about `UniqueItemManager.cpp:75`. All new work is
@@ -87,7 +88,7 @@ untracking below.
 | 5 | **All Assert-based bounds enforcement is one `make release` away from vanishing** — including checks landed in 18-I's neighbourhood. Separately `Slayer::setPhoneSlotNumber` has no assert at all on a 3-element array, and `getPhoneSlotNumber` asserts `<= MAX_PHONE_SLOT`, itself off by one | `Slayer.h`, tree-wide | convert security-relevant `Assert`s to real runtime checks (18-I did this at the accessors) | open |
 | 6 | Resource exhaustion at startup: ~15 legacy `Statement`/`Result` leak sites (several per-zone), `END_DB` frees only on exception. Also `MonsterKillQuest.cpp:64` executes the literal SQL `"-_-"` | list in `MOD` (legacy `Statement` audit) | free on the success path | open, **not** use-after-free |
 | 7 | 7 "near-miss" dangling `Result` sites — dangling but never read; one edit from becoming a live 18-B | `sharedserver/GuildManager.cpp:92,108,124,140`, `Key.cpp:198`, `CLLoginHandler.cpp:677`, others in `MOD` | apply the 18-B hoist pattern | open by choice |
-| 8 | Wire-format mismatch: server `CGExchangeBuy` now uses a `BYTE`-length-prefixed key capped at 64; the client still sends a bare 4-byte uint | `dkrix/Client/Packet/Cpackets/CGExchangeBuy.cpp` | `uint`→`uint64_t` + length prefix, shipped with the server change | **deliberately not fixed** — house rule: both trees together; the packet never worked, so nothing regresses (`a29ee09`) |
+| 8 | Wire-format mismatch: server `CGExchangeBuy` now uses a `BYTE`-length-prefixed key capped at 64; the client still sends a bare 4-byte uint | `dkrix/Client/Packet/Cpackets/CGExchangeBuy.cpp` | `uint`→`uint64_t` + length prefix, shipped with the server change | **CLOSED** — client now matches: `int64_t` listing ID, `BYTE` length prefix capped at 64, `getPacketMaxSize()` 73 on both sides. Feature is dead end-to-end (no caller opens the exchange UI; no `GCExchange*` factory is registered in either tree), so nothing in the field regresses. Client is CI-verified only |
 | 9 | Hardcoded remote DB `Connection(...)` in a GM path | `CGSayHandler.cpp:2934` | remove / parameterize | open (`c587490`) |
 
 **(D2)** `MOD`'s "CONFIRMED and still open" list also names

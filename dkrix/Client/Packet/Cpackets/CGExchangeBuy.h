@@ -14,6 +14,11 @@
 // class CGExchangeBuy;
 //////////////////////////////////////////////////////////////////////////////
 
+// Maximum idempotency key length on the wire. Must stay equal to the cap in
+// dkrixserver/src/Core/CGExchangeBuy.cpp, which in turn matches USERINFO.sql's
+// IdempotencyKey VARCHAR(64).
+const uint szMaxIdempotencyKey = 64;
+
 class CGExchangeBuy : public Packet
 {
 public:
@@ -24,19 +29,23 @@ public:
 	void write(SocketOutputStream& oStream) const;
 	void execute(Player* pPlayer);
 
-	PacketSize_t getPacketSize() const { return szint; }  // listingID
+	// uint64 listingID + BYTE key length + key bytes.
+	PacketSize_t getPacketSize() const { return sizeof(m_ListingID) + szBYTE + m_IdempotencyKey.size(); }
 	PacketID_t getPacketID() const { return PACKET_CG_EXCHANGE_BUY; }
 	string getPacketName() const { return "CGExchangeBuy"; }
 	string toString() const;
 
 	// Getters
-	uint getListingID() const { return m_ListingID; }
+	int64_t getListingID() const { return m_ListingID; }
+	const string& getIdempotencyKey() const { return m_IdempotencyKey; }
 
 	// Setters
-	void setListingID(uint listingID) { m_ListingID = listingID; }
+	void setListingID(int64_t listingID) { m_ListingID = listingID; }
+	void setIdempotencyKey(const string& key) { m_IdempotencyKey = key; }
 
 private:
-	uint	m_ListingID;
+	int64_t	m_ListingID;
+	string	m_IdempotencyKey;	// empty means "server, generate one"
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -49,7 +58,7 @@ public:
 	Packet* createPacket() throw() { return new CGExchangeBuy(); }
 	string getPacketName() const throw() { return "CGExchangeBuy"; }
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	PacketSize_t getPacketMaxSize() const throw() { return szint; }
+	PacketSize_t getPacketMaxSize() const throw() { return sizeof(int64_t) + szBYTE + szMaxIdempotencyKey; }
 };
 
 #endif
