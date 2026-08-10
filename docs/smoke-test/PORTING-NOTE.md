@@ -10,11 +10,13 @@ and `main` did not have it.
 
 ## Status: run 1 in progress (2026-08-10)
 
-**First run against `main` started 2026-08-10** — STEP1, STEP2, and STEP3 are
-through (with the drift recorded at the bottom of this file). LOGIN_SMOKE is
-**blocked on Bug 18-B**: the client reaches the loginserver and both packets
-parse, then the loginserver segfaults. Two runtime defects found in the
-sitting: Bug 18-A (fixed) and Bug 18-B (open) — MODERNIZATION.md Phase 18. Historical framing below is kept as written; the
+**Run 1 against `main` COMPLETED 2026-08-10 — every step through
+LOGIN_SMOKE is verified, reaching end-to-end login → gameplay for the first
+time on this tree.** Three runtime defects were found and fixed in the sitting,
+all in the Phase 11 `PreparedStatement` migration: Bug 18-A (gameserver boot),
+Bug 18-B (login), Bug 18-C (character select) — MODERNIZATION.md Phase 18.
+Still untested: character *creation* (`CLCreatePC`), because the test account
+already had a character. Historical framing below is kept as written; the
 per-step table at the end is the current truth. It was written against a tree
 that had Phases 1–17 applied. When lifted (2026-08-06), `main` had none of
 them; as of 2026-08-07 `main` carries Phases 1, 2 (partial), 3.1, 4 (safe
