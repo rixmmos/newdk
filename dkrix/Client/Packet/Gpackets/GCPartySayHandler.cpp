@@ -31,21 +31,20 @@ throw ( ProtocolException , Error )
 		&& g_pUserInformation!=NULL
 		&& g_pChatManager!=NULL)
 	{
-		//g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
-		// 256: a 128-byte message plus NUL does not fit char[128]. Capping the
-		// read alone is not enough -- the cap and the buffer must not be equal.
-		char str[256];
-		char strName[256];
-		strcpy(str, pPacket->getMessage().c_str());
-		strcpy(strName, pPacket->getName().c_str());
+        //g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
+        // 256: a 128-byte message plus NUL does not fit char[128]. Capping the
+        // read alone is not enough -- the cap and the buffer must not be equal.
+        char str[256];
+        char strName[256];
+        strcpy(str, pPacket->getMessage().c_str());
+        strcpy(strName, pPacket->getName().c_str());
 
-		//bool bMasterWords = (strstr(strName, "GM")!=NULL);
-		bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;
+        //bool bMasterWords = (strstr(strName, "GM")!=NULL);
+        bool bMasterWords = strncmp(strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(),
+                                    (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength()) == 0;
 
-		if (bMasterWords 
-			|| g_pChatManager->IsAcceptID( strName ))
-		{
-			//--------------------------------------------------
+        if (bMasterWords || g_pChatManager->IsAcceptID(strName)) {
+            //--------------------------------------------------
 			
 			
 			
@@ -75,8 +74,8 @@ throw ( ProtocolException , Error )
 //			__BEGIN_HELP_EVENT
 ////				ExecuteHelpEvent( HE_CHAT_WHISPERED );	
 //			__END_HELP_EVENT
-		}
-	}
+        }
+    }
 		
 #endif
 

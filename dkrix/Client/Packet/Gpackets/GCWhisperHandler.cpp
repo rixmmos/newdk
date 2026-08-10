@@ -31,22 +31,20 @@ throw ( ProtocolException , Error )
 #ifdef __GAME_CLIENT__
 
 
-	
-	// 256: GCWhisper's read() cap of 128 matches the server exactly, so the
-	// only defect was the missing room for the NUL. Enlarge rather than tighten
-	// the cap, which would silently drop the longest legal whisper.
-	char str[256];
-	char strName[256];
-	strcpy(str, pPacket->getMessage().c_str());
-	strcpy(strName, pPacket->getName().c_str());
+    // 256: GCWhisper's read() cap of 128 matches the server exactly, so the
+    // only defect was the missing room for the NUL. Enlarge rather than tighten
+    // the cap, which would silently drop the longest legal whisper.
+    char str[256];
+    char strName[256];
+    strcpy(str, pPacket->getMessage().c_str());
+    strcpy(strName, pPacket->getName().c_str());
 
-//	bool bMasterWords = (strstr(strName, "GM")!=NULL);
-	bool bMasterWords = strncmp( strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(), (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength() ) == 0;
+    //	bool bMasterWords = (strstr(strName, "GM")!=NULL);
+    bool bMasterWords = strncmp(strName, (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetString(),
+                                (*g_pGameStringTable)[UI_STRING_MESSAGE_MASTER_NAME].GetLength()) == 0;
 
-	if (bMasterWords 
-		|| g_pChatManager->IsAcceptID( strName ))
-	{
-		//--------------------------------------------------
+    if (bMasterWords || g_pChatManager->IsAcceptID(strName)) {
+        //--------------------------------------------------
 		
 		
 		
@@ -105,7 +103,7 @@ throw ( ProtocolException , Error )
 //		__BEGIN_HELP_EVENT
 ////			ExecuteHelpEvent( HE_CHAT_WHISPERED );	
 //		__END_HELP_EVENT
-	}
+    }
 
 
 #endif
