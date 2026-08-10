@@ -107,14 +107,22 @@ From `~/work/dkrix-upstream/dkrixserver/initdb/`:
 ```sh
 cd ~/work/dkrix-upstream/dkrixserver/initdb
 
-# a-setup.sql creates DBs and the 'elcastle' user (password elca110).
-# Run this as root.
+# a-setup.sql creates the two databases and grants them to 'elcastle'.
+# Since 2026-08-10 it does NOT create the account: that statement carried
+# a password and this repository is public. The Docker MySQL image creates
+# the account from MYSQL_USER/MYSQL_PASSWORD (docker/.env), so on a native
+# install you do it by hand. Run both as root.
 mysql -uroot -p < a-setup.sql
+mysql -uroot -p -e "CREATE USER IF NOT EXISTS 'elcastle'@'%' IDENTIFIED BY '<db-password>'; FLUSH PRIVILEGES;"
 
 # Load the DARKEDEN and USERINFO schema dumps as the elcastle user.
 mysql -uelcastle -pelca110 DARKEDEN  < DARKEDEN.sql
 mysql -uelcastle -pelca110 USERINFO  < USERINFO.sql
 ```
+
+`elca110` is a throwaway local-only credential; it is published and
+therefore burned. See `STEP1_MYSQL.md` §3 for the fuller version,
+including the `localhost` / `127.0.0.1` grants MariaDB needs.
 
 You WILL see warnings ("Using a password on the command line interface can
 be insecure", charset warnings). Harmless. What you should NOT see is

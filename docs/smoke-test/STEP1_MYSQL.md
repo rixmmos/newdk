@@ -69,40 +69,44 @@ sudo mysql_secure_installation
 
 ## 3. Create databases, user, grants
 
-`dkrixserver/initdb/a-setup.sql` already has the right CREATE/GRANT
-statements:
-
-```sql
-CREATE DATABASE IF NOT EXISTS DARKEDEN;
-CREATE DATABASE IF NOT EXISTS USERINFO;
-CREATE USER 'elcastle'@'%' IDENTIFIED BY 'elca110';
-GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'%';
-GRANT ALL PRIVILEGES ON USERINFO.* TO 'elcastle'@'%';
-```
-
-Run it as root (unix_socket auth, no password needed):
+`dkrixserver/initdb/a-setup.sql` creates the databases and issues the
+grants, but **as of 2026-08-10 it no longer creates the account** — that
+statement carried a password, and this repository has been public since
+2026-08-08. The file is mounted into the Docker MySQL container, where
+the image creates the account from `MYSQL_USER` / `MYSQL_PASSWORD`
+(see `dkrixserver/docker/.env.example`). On a native install there is no
+image to do that, so you create the account yourself, one extra step:
 
 ```bash
 cd /mnt/c/dev/newdk/dkrixserver
-sudo mysql < initdb/a-setup.sql
-sudo mysql -e "FLUSH PRIVILEGES;"
+sudo mysql < initdb/a-setup.sql        # databases + grants only
 ```
 
-Add a `'elcastle'@'localhost'` grant too — some MariaDB configs treat
-`localhost` and `%` as distinct hosts and the server will connect over
-TCP to 127.0.0.1:
+Create the account. Add `localhost` and `127.0.0.1` as well as `%` —
+some MariaDB configs treat them as distinct hosts and the server
+connects over TCP to 127.0.0.1:
 
 ```bash
 sudo mysql <<'SQL'
-CREATE USER IF NOT EXISTS 'elcastle'@'localhost' IDENTIFIED BY 'elca110';
+CREATE USER IF NOT EXISTS 'elcastle'@'%'         IDENTIFIED BY '<db-password>';
+CREATE USER IF NOT EXISTS 'elcastle'@'localhost' IDENTIFIED BY '<db-password>';
+CREATE USER IF NOT EXISTS 'elcastle'@'127.0.0.1' IDENTIFIED BY '<db-password>';
+GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'%';
+GRANT ALL PRIVILEGES ON USERINFO.* TO 'elcastle'@'%';
 GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'localhost';
 GRANT ALL PRIVILEGES ON USERINFO.* TO 'elcastle'@'localhost';
-CREATE USER IF NOT EXISTS 'elcastle'@'127.0.0.1' IDENTIFIED BY 'elca110';
 GRANT ALL PRIVILEGES ON DARKEDEN.* TO 'elcastle'@'127.0.0.1';
 GRANT ALL PRIVILEGES ON USERINFO.* TO 'elcastle'@'127.0.0.1';
 FLUSH PRIVILEGES;
 SQL
 ```
+
+Substitute your own value for `<db-password>`. The rest of this runbook,
+the `conf/*.conf` bootstrap and `DARKEDEN.sql`'s seeded `WorldDBInfo` row
+still carry the historical throwaway value inline; it is published and
+therefore burned. Never use it for anything a network can reach, and
+never reuse it for the live server. Replacing it everywhere is a single
+coordinated pass across ~40 sites — tracked as follow-up, not done here.
 
 Verify login as `elcastle`:
 

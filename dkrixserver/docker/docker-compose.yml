@@ -1,5 +1,17 @@
 version: '3'
 
+# Credentials come from the environment, never from this file. `MYSQL_ROOT_PASSWORD`
+# used to be a literal here and this repository has been public since 2026-08-08.
+#
+# Compose automatically reads `.env` from the directory holding this file, and
+# `.env.example` is the tracked reference copy, so a fresh clone starts with:
+#
+#     cd dkrixserver/docker && cp .env.example .env && $EDITOR .env
+#
+# Every variable below is required (`${VAR:?message}`). Compose aborts with that
+# message when one is unset rather than silently falling back to a weak default —
+# a loud failure with instructions, not a hidden one.
+
 services:
 
   odk-mysql:
@@ -7,7 +19,14 @@ services:
     volumes:
       - ../initdb:/docker-entrypoint-initdb.d/
     environment:
-        MYSQL_ROOT_PASSWORD: 123456
+        MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?unset - cp dkrixserver/docker/.env.example to .env and fill it in}"
+        # The MySQL image creates this account before it runs anything in
+        # /docker-entrypoint-initdb.d/, which is why initdb/a-setup.sql now only
+        # hands out grants and carries no password of its own. The user name is
+        # not a secret and is pinned here because docker/conf/*.conf.template
+        # hardcode `DB_USER : elcastle` (likewise UI_DB_USER, DIST_DB_USER).
+        MYSQL_USER: elcastle
+        MYSQL_PASSWORD: "${DKRIX_DB_PASSWORD:?unset - cp dkrixserver/docker/.env.example to .env and fill it in}"
     restart: on-failure
     command: mysqld --sql_mode="ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
     networks:
@@ -19,6 +38,16 @@ services:
       context: ..
       dockerfile: Dockerfile.pub
     command: ["/home/darkeden/vs/start-servers.sh"]
+    # docker/conf/*.conf.template carry ${DKRIX_*} placeholders that
+    # Properties::expandEnvVars (src/Core/Properties.cpp:46) resolves when the
+    # server loads its config, so the values have to be present in this container
+    # too. If one is missing the placeholder is left literal and the server fails
+    # at its first SQL connect. All three name the same `elcastle` account on
+    # odk-mysql, so all three must hold the same value here.
+    environment:
+        DKRIX_DB_PASSWORD: "${DKRIX_DB_PASSWORD:?unset - cp dkrixserver/docker/.env.example to .env and fill it in}"
+        DKRIX_UI_DB_PASSWORD: "${DKRIX_UI_DB_PASSWORD:?unset - cp dkrixserver/docker/.env.example to .env and fill it in}"
+        DKRIX_DIST_DB_PASSWORD: "${DKRIX_DIST_DB_PASSWORD:?unset - cp dkrixserver/docker/.env.example to .env and fill it in}"
     ports:
       - "9999:9999"
       - "9998:9998"

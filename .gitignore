@@ -48,6 +48,18 @@ __pycache__/
 dkrixserver/conf/*.conf
 dkrixserver/docker/conf/*.conf
 !dkrixserver/conf/*.conf.template
+# The same stale credential also lives in the alternate host profile and in the
+# local backup copies, which the rules above do not reach: `*.conf` does not
+# match `.new`, and it does not cross a `/` into `backup/`. Untracked 2026-08-10
+# alongside the set above. These are host-specific local copies with no template
+# counterpart; `conf/*.conf.template` is the reference for all of them.
+dkrixserver/conf/*.new
+dkrixserver/conf/backup/
+# docker/.env holds MYSQL_ROOT_PASSWORD and the DKRIX_* database passwords that
+# docker-compose.yml interpolates. `.env.example` is the tracked reference copy
+# and must stay free of real values.
+.env
+!.env.example
 
 Darkeden/
 # Darkeden-debug/ is the side-by-side runtime dir for the VS2022 Debug client

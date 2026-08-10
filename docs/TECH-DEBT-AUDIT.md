@@ -312,14 +312,19 @@ Remote branches present: `main`, `modernize/phase1-dead-code`,
 > mechanism. Priority unchanged until that happens.
 
 34 `PASSWORD` lines across 13 tracked files in `dkrixserver/conf/`, including a
-`conf/backup/` set that duplicates them. Sample: `DB_PASSWORD : elca005` appears in
-`excel96-gameserver.conf`, `excel96-gameserver2.conf`, `excel96-loginserver.conf`,
-`excel96-sharedserver.conf`; `gameserver.conf` carries `elca110`. Dev IPs
-(`192.168.0.16`) are alongside them.
+`conf/backup/` set that duplicates them. Sample: a `DB_PASSWORD : <redacted>` line
+appears in `excel96-gameserver.conf`, `excel96-gameserver2.conf`,
+`excel96-loginserver.conf`, `excel96-sharedserver.conf`; `gameserver.conf` carries a
+second one. Dev IPs (`192.168.0.16`) are alongside them.
 
-Impact on daily work is low — hence I=2 — but risk is maximal if this repo ever
-becomes public, and it is already in git history. Cheapest meaningful security fix
-available.
+**Resolved 2026-08-10.** All 13 are untracked: `c587490` and `0bdc648` took
+`conf/{game,login,shared}server.conf` and `docker/conf/*.conf`; the remaining 10
+(`excel96-*`, `.new`, `conf/backup/*`, `updateserver.conf`) went in this wave, with
+`.gitignore` widened to cover `*.new` and `conf/backup/` — neither of which the
+pre-existing `conf/*.conf` rule matched. Only the three `.conf.template` files remain
+tracked. The literal values are redacted above because this repo has been public since
+2026-08-08; the committed credential is stale, and the live one was never committed
+(`docs/SECURITY-AUDIT-2026-08-10.md` §3). Rotation is still an open operator action.
 
 ### 6. Duplicate-symbol files — Priority 24
 
