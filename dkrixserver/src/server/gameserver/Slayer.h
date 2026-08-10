@@ -481,6 +481,14 @@ public:
         m_pWearItem[Part] = pItem;
     }
     void deleteWearItem(WearPart Part) {
+        // The last unguarded write accessor for m_pWearItem. isWear,
+        // getWearItem, addWearItem and takeOffItem were all bounds-checked;
+        // this one was missed, so the stated invariant ("wear-part indices are
+        // checked here rather than at each call site") was not actually true.
+        // Callers pass server-side values today, but the check belongs here.
+        if (Part < 0 || Part >= WEAR_MAX)
+            return;
+
         Assert(m_pWearItem[Part] != NULL);
         m_pWearItem[Part] = NULL;
     }

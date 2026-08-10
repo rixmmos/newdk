@@ -32,8 +32,10 @@ throw ( ProtocolException , Error )
 		&& g_pChatManager!=NULL)
 	{
 		//g_pClientCommunicationManager->sendPacket( pPacket->getHost() , pPacket->getPort() , &glIncomingConnectionOK );
-		char str[128];
-		char strName[128];
+		// 256: a 128-byte message plus NUL does not fit char[128]. Capping the
+		// read alone is not enough -- the cap and the buffer must not be equal.
+		char str[256];
+		char strName[256];
 		strcpy(str, pPacket->getMessage().c_str());
 		strcpy(strName, pPacket->getName().c_str());
 

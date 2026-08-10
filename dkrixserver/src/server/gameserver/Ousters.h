@@ -370,6 +370,10 @@ public:
         m_pWearItem[Part] = pItem;
     }
     void deleteWearItem(WearPart Part) {
+        // See Slayer.h -- last unguarded write accessor for m_pWearItem.
+        if (Part < 0 || Part >= OUSTERS_WEAR_MAX)
+            return;
+
         m_pWearItem[Part] = NULL;
     }
     Item* getWearItem(WearPart Part) {

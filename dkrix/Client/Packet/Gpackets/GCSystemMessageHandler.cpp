@@ -24,7 +24,10 @@ throw ( ProtocolException , Error )
 	__BEGIN_TRY
 	
 #ifdef __GAME_CLIENT__
-	static char previous1[128] = { NULL, };
+	// 256 with bounded copies: the message is uncapped on the wire (BYTE, so up
+	// to 255) while these were 128. They are only dedupe keys -- the message
+	// itself is passed on separately -- so truncation is harmless.
+	static char previous1[256] = { NULL, };
 	switch(pPacket->getType())
 	{ 
 		case SYSTEM_MESSAGE_HOLY_LAND :		
@@ -97,7 +100,8 @@ throw ( ProtocolException , Error )
 // 				{
 					g_pPlayerMessage->Add( message );
 
-					strcpy( previous1, pPacket->getMessage().c_str() );
+					strncpy( previous1, pPacket->getMessage().c_str(), sizeof(previous1) - 1 );
+					previous1[sizeof(previous1) - 1] = 0;
 //				}
 			}
 			return;
@@ -105,7 +109,8 @@ throw ( ProtocolException , Error )
 			
 	}
 
-	static char previous[128] = { NULL, };
+	// 512: this one also receives a prefixed form built with new char[len+20].
+	static char previous[512] = { NULL, };
 
 	// Fix: Store string in local variable to avoid use-after-free
 	// The temporary string returned by getMessage() is destroyed at end of statement
@@ -158,7 +163,8 @@ throw ( ProtocolException , Error )
 	{
 		g_pSystemMessage->Add( message );
 
-		strcpy( previous, pPacket->getMessage().c_str() );
+		strncpy( previous, pPacket->getMessage().c_str(), sizeof(previous) - 1 );
+		previous[sizeof(previous) - 1] = 0;
 	}
 
 #endif

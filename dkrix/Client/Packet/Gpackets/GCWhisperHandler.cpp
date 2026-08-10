@@ -32,8 +32,11 @@ throw ( ProtocolException , Error )
 
 
 	
-	char str[128];
-	char strName[128];
+	// 256: GCWhisper's read() cap of 128 matches the server exactly, so the
+	// only defect was the missing room for the NUL. Enlarge rather than tighten
+	// the cap, which would silently drop the longest legal whisper.
+	char str[256];
+	char strName[256];
 	strcpy(str, pPacket->getMessage().c_str());
 	strcpy(strName, pPacket->getName().c_str());
 

@@ -19,12 +19,25 @@ void GCPartySay::read ( SocketInputStream & iStream )
 {
 	__BEGIN_TRY
 
+	// Wire order is unchanged: nameLen, name, colour, messageLen, message.
+	// The lengths were previously read into one reused variable with no cap,
+	// and the handler strcpy's both into fixed 128-byte buffers -- a hostile or
+	// MITM server could overflow them. Caps mirror the server's own write():
+	// character names are varchar(10) and chat messages are capped at 128,
+	// exactly as GCWhisper and GCGuildChat already do here.
 	BYTE szName;
 	iStream.read(szName);
+	if ( szName > 10 )
+		throw InvalidProtocolException("too large name length");
 	iStream.read(m_Name,szName);
+
 	iStream.read(m_Color);
-	iStream.read(szName);
-	iStream.read(m_Message,szName);
+
+	BYTE szMessage;
+	iStream.read(szMessage);
+	if ( szMessage > 128 )
+		throw InvalidProtocolException("too large message length");
+	iStream.read(m_Message,szMessage);
 		
 	__END_CATCH
 }

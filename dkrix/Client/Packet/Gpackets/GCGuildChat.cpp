@@ -24,8 +24,14 @@ void GCGuildChat::read ( SocketInputStream & iStream )
 
 	if ( m_Type != 0 )
 	{
+		// The sender name and message are capped below, but the guild name was
+		// not -- and the handler sprintf's "[%s]%s" into a fixed 128-byte buffer.
+		// 20 is the hard DB column width (GuildInfo.GuildName varchar(20)), so
+		// this can never reject a name the server is able to send.
 		BYTE szGName;
 		iStream.read(szGName);
+		if ( szGName > 20 )
+			throw InvalidProtocolException("too long guild name length");
 		if ( szGName != 0 ) iStream.read( m_SendGuildName, szGName );
 	}
 
