@@ -37,28 +37,56 @@ void EventQuestAdvance::save(const string& name) {
 }
 
 EventQuestAdvanceManager::EventQuestAdvanceManager(PlayerCreature* pPC) {
-    m_Advances.reserve(EVENT_QUEST_LEVEL_MAX);
-    m_Advances.clear();
-    for (int i = 0; i < EVENT_QUEST_LEVEL_MAX; ++i)
-        m_Advances[i] = NULL;
+    // This was reserve() followed by clear() and then five writes through
+    // operator[]. reserve() sets capacity, not size, so the vector was left
+    // empty and every one of those writes -- and every m_Advances[i] in this
+    // file thereafter -- indexed past size() into the reserved-but-unconstructed
+    // buffer. It only appeared to work because libstdc++'s operator[] is
+    // unchecked and the writes stayed inside the reserved block. The visible
+    // consequence was in clear(): for_each(begin(), end(), ...) spans nothing on
+    // an empty vector, so every EventQuestAdvance ever allocated was leaked.
+    //
+    // resize() gives the vector the five NULL elements the rest of the class
+    // already assumes it has.
+    m_Advances.resize(EVENT_QUEST_LEVEL_MAX, NULL);
 
     m_pOwner = pPC;
-}
-
-template <typename T> inline void SafeDelete(T* pT) {
-    SAFE_DELETE(pT);
 }
 
 EventQuestAdvanceManager::~EventQuestAdvanceManager() {
     clear();
 }
 
+// The old body was for_each(begin(), end(), SafeDelete<EventQuestAdvance>)
+// followed by m_Advances.clear(). Two problems, both now fixed by the ctor's
+// resize() plus this loop:
+//   - SafeDelete took its pointer by value, so SAFE_DELETE nulled a copy and
+//     left the vector holding dangling pointers;
+//   - clear() dropped the size back to zero, so load() -- which calls this
+//     first -- then wrote m_Advances[qLevel] into an empty vector again.
+// The slot count is fixed at EVENT_QUEST_LEVEL_MAX for the object's lifetime;
+// clearing means emptying the slots, not the vector.
 void EventQuestAdvanceManager::clear() {
-    for_each(m_Advances.begin(), m_Advances.end(), SafeDelete<EventQuestAdvance>);
-    m_Advances.clear();
+    for (size_t i = 0; i < m_Advances.size(); ++i)
+        SAFE_DELETE(m_Advances[i]);
+}
+
+// Every public entry point below took an unvalidated level and reached
+// m_Advances[questLevel] with nothing but an Assert in front of it. At least one
+// of them is fed straight off the wire -- CGLotterySelectHandler passes
+// pPacket->getQuestLevel() to getStatus() and rewarded() -- and load() takes its
+// index straight out of the EventQuestAdvance table. Each check below is a real
+// `if` in front of the surviving Assert, so Debug and Release take the same
+// branch, and each returns the value the function already produces for a level
+// with nothing recorded against it. No in-range level (0..4) changes behaviour.
+static inline bool isValidQuestLevel(int questLevel) {
+    return questLevel >= 0 && questLevel < EventQuestAdvanceManager::EVENT_QUEST_LEVEL_MAX;
 }
 
 bool EventQuestAdvanceManager::start(int questLevel) {
+    if (!isValidQuestLevel(questLevel))
+        return false;
+
     Assert(questLevel >= 0);
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
     if (m_Advances[questLevel] == NULL)
@@ -67,6 +95,9 @@ bool EventQuestAdvanceManager::start(int questLevel) {
 }
 
 bool EventQuestAdvanceManager::success(int questLevel) {
+    if (!isValidQuestLevel(questLevel))
+        return false;
+
     Assert(questLevel >= 0);
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
     if (m_Advances[questLevel] != NULL)
@@ -75,6 +106,9 @@ bool EventQuestAdvanceManager::success(int questLevel) {
 }
 
 bool EventQuestAdvanceManager::rewarded(int questLevel) {
+    if (!isValidQuestLevel(questLevel))
+        return false;
+
     Assert(questLevel >= 0);
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
     /*	if ( m_Advances[questLevel] != NULL )
@@ -91,6 +125,9 @@ bool EventQuestAdvanceManager::rewarded(int questLevel) {
 }
 
 bool EventQuestAdvanceManager::advanced(int questLevel) {
+    if (!isValidQuestLevel(questLevel))
+        return false;
+
     Assert(questLevel >= 0);
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
     if (m_Advances[questLevel] != NULL)
@@ -99,8 +136,14 @@ bool EventQuestAdvanceManager::advanced(int questLevel) {
 }
 
 EventQuestAdvance::Status EventQuestAdvanceManager::getStatus(int questLevel) {
-    Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
+    // Not isValidQuestLevel(): a negative level is meaningful here. getQuestLevel()
+    // returns -1 for "every level advanced" and callers depend on that mapping, so
+    // only the upper bound is new. Out of range above the set answers the same as
+    // an empty slot, matching the sentinel this function already returns below.
+    if (questLevel >= EVENT_QUEST_LEVEL_MAX)
+        return EventQuestAdvance::EVENT_QUEST_INIT;
 
+    Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
 
     if (questLevel < 0)
         return EventQuestAdvance::EVENT_QUEST_ADVANCED;
@@ -122,6 +165,9 @@ void EventQuestAdvanceManager::save() {
 
 void EventQuestAdvanceManager::save(int questLevel) {
     __BEGIN_TRY
+
+    if (!isValidQuestLevel(questLevel))
+        return;
 
     Assert(questLevel >= 0);
     Assert(questLevel < EVENT_QUEST_LEVEL_MAX);
@@ -149,6 +195,21 @@ void EventQuestAdvanceManager::load() {
             int qLevel = pResult->getInt(1);
             EventQuestAdvance::Status status = (EventQuestAdvance::Status)pResult->getInt(2);
 
+            // QuestLevel is a plain int column with no CHECK constraint, and this
+            // index had no guard at all -- not even an Assert. A single bad row
+            // was an arbitrary heap write. The shipped EventQuestAdvance table is
+            // empty [measured 2026-08-11, initdb/DARKEDEN.sql and
+            // backup_darkeden_after_english_20260424.sql: 0 rows], so nothing in
+            // the current data reaches this, but the rows are written at runtime
+            // by EventQuestAdvance::save(). Skip a row we cannot store rather
+            // than failing the owner's whole quest load.
+            if (!isValidQuestLevel(qLevel)) {
+                filelog("EventQuest.log", "EventQuestAdvanceManager::load : skipping out-of-range QuestLevel %d for %s",
+                        qLevel, m_pOwner->getName().c_str());
+                continue;
+            }
+
+            SAFE_DELETE(m_Advances[qLevel]);
             m_Advances[qLevel] = new EventQuestAdvance(qLevel, status);
         }
     }
