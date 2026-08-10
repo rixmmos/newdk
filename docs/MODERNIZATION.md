@@ -4774,11 +4774,21 @@ occurred since the 18-C fix landed.
   `__THAILAND_SERVER__` is never defined anywhere in the build. Left alone
   deliberately — repairing it means inventing the missing second argument.
   Recorded so the next person who enables that guard knows what they will hit.
-  - **Gate implication.** Both 18-A and 18-B are Phase 11 `PreparedStatement`
-    defects that no existing gate can see — 18-A because SQL is string data,
-    18-B because the lifetime error is legal C++. An ASan build of the server
-    in CI would have caught 18-B at the first login; that is the cheapest gate
-    that would have prevented this class, and it does not exist today.
+  - **Gate implication — and a correction about ASan.** Both 18-A and 18-B are
+    Phase 11 `PreparedStatement` defects that no existing gate can see: 18-A
+    because SQL is string data, 18-B because the lifetime error is legal C++.
+    It is tempting to conclude "add an ASan job to CI", and an earlier revision
+    of this file said exactly that — but **a build-only ASan job would not have
+    caught either bug.** ASan reports at *runtime*, when the faulting code
+    executes; `make debug-asan` compiling cleanly proves nothing about a
+    use-after-free on the login path. CI never logs in, so there is nothing to
+    instrument. What actually catches this class is *running* the server under
+    ASan while exercising the path — i.e. the smoke test, under an ASan build.
+    That is cheap to do locally today (`make debug-asan`, then the normal
+    `docs/smoke-test/` procedure) and needs no CI work. Making it a CI gate
+    additionally requires a seeded MySQL service container and a synthetic
+    packet driver to stand in for the client, which is a much larger piece of
+    work and should not be confused with "turn on a sanitizer".
   - Relationship to Bug 18-A: both are Phase 11 `PreparedStatement`
     territory and both are invisible to every existing gate for the same
     reason — SQL is string data, so nothing short of running the server sees
