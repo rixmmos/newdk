@@ -47,13 +47,15 @@ FlagManager::~FlagManager() {}
 void FlagManager::init() {
     SYSTEM_RETURN_IF_NOT(SYSTEM_FLAG_WAR);
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement selectFlagPoleStmt(
             pConn, "SELECT ZoneID, CenterX, CenterY, Width, Height, Race-1, MonsterType FROM FlagPolePosition");
-        pResult = selectFlagPoleStmt.execute();
+        // Declared here, not above BEGIN_DB: the statement owns the Result and frees
+        // it at this block's closing brace, so a pointer that outlives the block can
+        // only dangle (Bug 18-B).
+        Result* pResult = selectFlagPoleStmt.execute();
 
         while (pResult->next()) {
             ZoneID_t zoneID = (ZoneID_t)pResult->getInt(1);
@@ -309,12 +311,12 @@ void FlagManager::resetFlagCounts() {
 
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement deleteFlagWarStatStmt(pConn, "DELETE FROM FlagWarStat");
-        pResult = deleteFlagWarStatStmt.execute();
+        // DELETE: the Result is never read, and the statement frees it here anyway.
+        deleteFlagWarStatStmt.execute();
     }
     END_DB(pStmt)
 }
@@ -335,14 +337,14 @@ void FlagManager::recordPutFlag(PlayerCreature* pPC, Item* pItem)
 
 {
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
 
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
         PreparedStatement selectStatStmt(pConn, "SELECT Name FROM FlagWarStat WHERE Name = ? AND ItemID = ?");
         selectStatStmt.bindString(1, pPC->getName());
         selectStatStmt.bindInt(2, pItem->getItemID());
-        pResult = selectStatStmt.execute();
+        // Scoped to the statement that owns it -- see Bug 18-B.
+        Result* pResult = selectStatStmt.execute();
 
 
         if (!pResult->next()) {
@@ -353,7 +355,9 @@ void FlagManager::recordPutFlag(PlayerCreature* pPC, Item* pItem)
             insertStatStmt.bindInt(3, (int)pPC->getRace());
             insertStatStmt.bindInt(4, g_pConfig->getPropertyInt("ServerID"));
             insertStatStmt.bindInt(5, pItem->getItemID());
-            pResult = insertStatStmt.execute();
+            // INSERT: the Result is never read, and reassigning the enclosing pResult
+            // would leave it dangling at this branch's closing brace.
+            insertStatStmt.execute();
         }
     }
     END_DB(pStmt)
@@ -364,14 +368,13 @@ void FlagManager::recordFlagWarHistory()
 {
     Statement* pStmt = NULL;
 
-    Result* pResult = NULL;
-
     BEGIN_DB {
         Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
 
         PreparedStatement selectStatsStmt(
             pConn, "SELECT PlayerID, Name, Race, ServerID, count(*) FROM FlagWarStat GROUP BY Name, ServerID");
-        pResult = selectStatsStmt.execute();
+        // Scoped to the statement that owns it -- see Bug 18-B.
+        Result* pResult = selectStatsStmt.execute();
 
         PreparedStatement insertHistoryStmt(pConn,
                                             "INSERT INTO FlagWarHistory (FlagWarID, PlayerID, Name, Race, ServerID, "

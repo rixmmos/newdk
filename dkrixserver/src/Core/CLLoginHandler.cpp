@@ -674,9 +674,13 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     PreparedStatement eventStmt(pConn, "SELECT PlayerID FROM Event200501Main WHERE PlayerID = ? AND "
                                                        "RecvPremiumDate = '0000-00-00'");
                     eventStmt.bindString(1, pLoginPlayer->getID());
-                    pResult = eventStmt.execute();
+                    // Scoped to eventStmt, which owns this Result and frees it at the
+                    // closing brace below. Reassigning the function-scope pResult here
+                    // would leave it dangling for the rest of execute() -- exactly the
+                    // shape of Bug 18-B, which this same function used to have.
+                    Result* pEventResult = eventStmt.execute();
 
-                    if (pResult->next()) {
+                    if (pEventResult->next()) {
                         PreparedStatement payPlayDateStmt(pConn,
                                                           "UPDATE Player SET PayPlayDate = IF (PayPlayDate < NOW(), "
                                                           "NOW() + INTERVAL 7 DAY, PayPlayDate + INTERVAL 7 DAY ) "

@@ -1049,8 +1049,6 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
     ItemID_t targetID = dynamic_cast<Key*>(pItem)->getTarget();
 
     Statement* pStmt = NULL;
-    Result* pResult = NULL;
-
 
     // by sigi. 2002.12.25 x-mas T_T;
     if (targetID == 0) {
@@ -1064,7 +1062,10 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
             Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
             PreparedStatement selectMotorcycleItemIDStmt(pConn, "SELECT ItemID FROM MotorcycleObject WHERE ItemID=?");
             selectMotorcycleItemIDStmt.bindULong(1, targetID);
-            pResult = selectMotorcycleItemIDStmt.execute();
+            // The statement owns the Result and frees it at this block's closing
+            // brace, so the pointer is scoped to the statement rather than to the
+            // function -- the shape that made Bug 18-B a use-after-free.
+            Result* pResult = selectMotorcycleItemIDStmt.execute();
 
             if (!pResult->next()) {
                 Key* pKey = dynamic_cast<Key*>(pItem);
@@ -1123,7 +1124,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
         PreparedStatement selectMotorcycleObjectStmt(
             pConn, "SELECT ItemID, ItemType, OptionType, Durability FROM MotorcycleObject WHERE ItemID=?");
         selectMotorcycleObjectStmt.bindULong(1, targetID);
-        pResult = selectMotorcycleObjectStmt.execute();
+        Result* pResult = selectMotorcycleObjectStmt.execute();
 
         ItemID_t itemID;
         ItemType_t itemType;

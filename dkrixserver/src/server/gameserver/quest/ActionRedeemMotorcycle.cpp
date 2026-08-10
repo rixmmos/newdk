@@ -119,8 +119,6 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
 
     try {
         Statement* pStmt = NULL;
-        Result* pResult = NULL;
-
 
         // by sigi. 2002.12.25 x-mas T_T;
         if (targetID == 0) {
@@ -131,7 +129,10 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
                 Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
                 PreparedStatement selectMotorcycleIDStmt(pConn, "SELECT ItemID FROM MotorcycleObject WHERE ItemID=?");
                 selectMotorcycleIDStmt.bindULong(1, targetID);
-                pResult = selectMotorcycleIDStmt.execute();
+                // The statement owns the Result and frees it at this block's closing
+                // brace, so the pointer is scoped to the statement rather than to the
+                // function -- the shape that made Bug 18-B a use-after-free.
+                Result* pResult = selectMotorcycleIDStmt.execute();
 
                 if (!pResult->next()) {
                     Key* pKey = dynamic_cast<Key*>(pItem);
@@ -165,7 +166,7 @@ bool ActionRedeemMotorcycle::load(Item* pItem, Slayer* pSlayer, Zone* pZone, Zon
             PreparedStatement selectMotorcycleObjectStmt(
                 pConn, "SELECT ItemID, ItemType, OptionType, Durability FROM MotorcycleObject where ItemID = ?");
             selectMotorcycleObjectStmt.bindULong(1, targetID);
-            pResult = selectMotorcycleObjectStmt.execute();
+            Result* pResult = selectMotorcycleObjectStmt.execute();
 
             // by sigi. 2002.10.14
 
