@@ -38,57 +38,55 @@ void CGExchangeBuy::read(SocketInputStream& iStream)
 {
 	__BEGIN_TRY
 
-	uint64_t listingID = 0;
-	iStream.read((char*)&listingID, (uint)sizeof(listingID));
-	m_ListingID = (int64_t)listingID;
+    uint64_t listingID = 0;
+    iStream.read((char*)&listingID, (uint)sizeof(listingID));
+    m_ListingID = (int64_t)listingID;
 
-	BYTE szKey;
-	iStream.read(szKey);
+    BYTE szKey;
+    iStream.read(szKey);
 
-	if ((uint)szKey > szMaxIdempotencyKey)
-		throw InvalidProtocolException("CGExchangeBuy: idempotency key too long");
+    if ((uint)szKey > szMaxIdempotencyKey)
+        throw InvalidProtocolException("CGExchangeBuy: idempotency key too long");
 
-	m_IdempotencyKey.clear();
+    m_IdempotencyKey.clear();
 
-	if (szKey > 0)
-		iStream.read(m_IdempotencyKey, szKey);
+    if (szKey > 0)
+        iStream.read(m_IdempotencyKey, szKey);
 
-	__END_CATCH
+    __END_CATCH
 }
 
 void CGExchangeBuy::write(SocketOutputStream& oStream) const
 {
 	__BEGIN_TRY
 
-	// Check the real size before narrowing to BYTE. Narrowing first would let a
-	// 256-byte key truncate to 0, sail past the cap, and leave write() emitting
-	// one byte while getPacketSize() reports 1 + 256.
-	if (m_IdempotencyKey.size() > szMaxIdempotencyKey)
-		throw InvalidProtocolException("CGExchangeBuy: idempotency key too long");
+    // Check the real size before narrowing to BYTE. Narrowing first would let a
+    // 256-byte key truncate to 0, sail past the cap, and leave write() emitting
+    // one byte while getPacketSize() reports 1 + 256.
+    if (m_IdempotencyKey.size() > szMaxIdempotencyKey)
+        throw InvalidProtocolException("CGExchangeBuy: idempotency key too long");
 
-	const uint64_t listingID = (uint64_t)m_ListingID;
-	oStream.write((const char*)&listingID, (uint)sizeof(listingID));
+    const uint64_t listingID = (uint64_t)m_ListingID;
+    oStream.write((const char*)&listingID, (uint)sizeof(listingID));
 
-	BYTE szKey = (BYTE)m_IdempotencyKey.size();
+    BYTE szKey = (BYTE)m_IdempotencyKey.size();
 
-	oStream.write(szKey);
+    oStream.write(szKey);
 
-	if (szKey > 0)
-		oStream.write(m_IdempotencyKey);
+    if (szKey > 0)
+        oStream.write(m_IdempotencyKey);
 
-	__END_CATCH
+    __END_CATCH
 }
 
 string CGExchangeBuy::toString() const
 {
 	StringStream msg;
-	// StringStream has no 64-bit overload; the cast mirrors the server's
-	// toString() and only affects the debug text, not the wire.
-	msg << "CGExchangeBuy("
-		<< "ListingID:" << (int)m_ListingID
-		<< ",IdempotencyKey:" << m_IdempotencyKey
-		<< ")";
-	return msg.toString();
+    // StringStream has no 64-bit overload; the cast mirrors the server's
+    // toString() and only affects the debug text, not the wire.
+    msg << "CGExchangeBuy("
+        << "ListingID:" << (int)m_ListingID << ",IdempotencyKey:" << m_IdempotencyKey << ")";
+    return msg.toString();
 }
 
 void CGExchangeBuy::execute(Player* pPlayer)

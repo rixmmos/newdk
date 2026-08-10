@@ -29,23 +29,37 @@ public:
 	void write(SocketOutputStream& oStream) const;
 	void execute(Player* pPlayer);
 
-	// uint64 listingID + BYTE key length + key bytes.
-	PacketSize_t getPacketSize() const { return sizeof(m_ListingID) + szBYTE + m_IdempotencyKey.size(); }
-	PacketID_t getPacketID() const { return PACKET_CG_EXCHANGE_BUY; }
-	string getPacketName() const { return "CGExchangeBuy"; }
-	string toString() const;
+    // uint64 listingID + BYTE key length + key bytes.
+    PacketSize_t getPacketSize() const {
+        return sizeof(m_ListingID) + szBYTE + m_IdempotencyKey.size();
+    }
+    PacketID_t getPacketID() const {
+        return PACKET_CG_EXCHANGE_BUY;
+    }
+    string getPacketName() const {
+        return "CGExchangeBuy";
+    }
+    string toString() const;
 
 	// Getters
-	int64_t getListingID() const { return m_ListingID; }
-	const string& getIdempotencyKey() const { return m_IdempotencyKey; }
+    int64_t getListingID() const {
+        return m_ListingID;
+    }
+    const string& getIdempotencyKey() const {
+        return m_IdempotencyKey;
+    }
 
-	// Setters
-	void setListingID(int64_t listingID) { m_ListingID = listingID; }
-	void setIdempotencyKey(const string& key) { m_IdempotencyKey = key; }
+    // Setters
+    void setListingID(int64_t listingID) {
+        m_ListingID = listingID;
+    }
+    void setIdempotencyKey(const string& key) {
+        m_IdempotencyKey = key;
+    }
 
 private:
-	int64_t	m_ListingID;
-	string	m_IdempotencyKey;	// empty means "server, generate one"
+    int64_t m_ListingID;
+    string m_IdempotencyKey; // empty means "server, generate one"
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +72,9 @@ public:
 	Packet* createPacket() throw() { return new CGExchangeBuy(); }
 	string getPacketName() const throw() { return "CGExchangeBuy"; }
 	PacketID_t getPacketID() const throw() { return Packet::PACKET_CG_EXCHANGE_BUY; }
-	PacketSize_t getPacketMaxSize() const throw() { return sizeof(int64_t) + szBYTE + szMaxIdempotencyKey; }
+    PacketSize_t getPacketMaxSize() const throw() {
+        return sizeof(int64_t) + szBYTE + szMaxIdempotencyKey;
+    }
 };
 
 #endif
