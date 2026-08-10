@@ -246,6 +246,34 @@ bool isInSafeZone(Creature* pCreature);
 bool isValidZoneCoord(Zone* pZone, ZoneCoord_t x, ZoneCoord_t y, int offset = 0);
 
 //////////////////////////////////////////////////////////////////////////////
+// Anti-cheat reach test: is (x,y) close enough to pCreature to interact with?
+//
+// Chebyshev distance in tiles, matching the metric SkillUtil::verifyDistance
+// ends with. Deliberately NOT verifyDistance itself: that function first runs
+// ~8 safe-zone gates and returns false outright inside a COMPLETE_SAFE_ZONE
+// (SkillUtil.cpp:3185). Towns are safe zones, so using it to gate shops, NPC
+// talk, stores or pickup would break all town commerce. This helper is a pure
+// distance test with no zone-level policy.
+//
+// Callers should stay at or below maxSight (13, CreatureTypes.h) so the check
+// can never reject something the player can actually see on screen.
+//////////////////////////////////////////////////////////////////////////////
+inline bool isWithinReach(Creature* pCreature, ZoneCoord_t x, ZoneCoord_t y, int range) {
+    if (pCreature == NULL)
+        return false;
+
+    int dx = (int)pCreature->getX() - (int)x;
+    int dy = (int)pCreature->getY() - (int)y;
+
+    if (dx < 0)
+        dx = -dx;
+    if (dy < 0)
+        dy = -dy;
+
+    return dx <= range && dy <= range;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 bool enterMasterLair(Zone* pZone, Creature* pCreature);

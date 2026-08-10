@@ -76,6 +76,14 @@ void CGAddZoneToInventoryHandler::execute(CGAddZoneToInventory* pPacket, Player*
         if (!isValidZoneCoord(pZone, ZoneX, ZoneY))
             goto ERROR;
 
+        // Anti-cheat: the coordinates were bounds-checked but never range-checked,
+        // so a modified client could loot any tile in the zone -- vacuuming every
+        // drop the instant it landed. 8 tiles is under maxSight (13), so this can
+        // never reject an item the player can actually see, and it leaves ~2 tiles
+        // of slack for a client acting on a slightly stale position.
+        if (!isWithinReach(pPC, ZoneX, ZoneY, 8))
+            goto ERROR;
+
         Tile& _Tile = pZone->getTile(ZoneX, ZoneY);
 
         // The tile must contain an item.

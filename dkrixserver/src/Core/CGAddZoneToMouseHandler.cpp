@@ -70,6 +70,11 @@ void CGAddZoneToMouseHandler::execute(CGAddZoneToMouse* pPacket, Player* pPlayer
         if (!isValidZoneCoord(pZone, ZoneX, ZoneY))
             goto ERROR;
 
+        // Anti-cheat: reach test. See CGAddZoneToInventoryHandler -- same
+        // zone-wide loot exploit, same 8-tile radius (under maxSight 13).
+        if (!isWithinReach(pPC, ZoneX, ZoneY, 8))
+            goto ERROR;
+
         Tile& _Tile = pZone->getTile(ZoneX, ZoneY);
 
 

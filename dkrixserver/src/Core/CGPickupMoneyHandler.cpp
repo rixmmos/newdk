@@ -74,6 +74,16 @@ void CGPickupMoneyHandler::execute(CGPickupMoney* pPacket, Player* pPlayer)
             return;
         }
 
+        // Anti-cheat: reach test. Without it a modified client could sweep every
+        // dropped money pile in the zone. 8 tiles is under maxSight (13), so a
+        // pile the player can see is always reachable.
+        if (!isWithinReach(pCreature, ZoneX, ZoneY, 8)) {
+            GCCannotAdd _GCCannotAdd;
+            _GCCannotAdd.setObjectID(pPacket->getObjectID());
+            pPlayer->sendPacket(&_GCCannotAdd);
+            return;
+        }
+
         
         Tile& _Tile = pZone->getTile(ZoneX, ZoneY);
         if (!_Tile.hasItem()) {
