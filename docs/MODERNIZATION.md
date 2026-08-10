@@ -5391,6 +5391,63 @@ unchecked `getShopItem()` dereferences noted above. The `CGExchangeBuy`
 client/server wire mismatch (row 8) is **closed** — the client half landed
 once both trees had a green CI gate; see the `CGExchangeBuy` entry above.
 
+### Phase 18 — waves 2 and 3 (2026-08-10, late)
+
+Two further five-way waves after the first. **Everything here is compile-verified
+only** (`make debug`, WSL, all three binaries) unless a row says otherwise. The
+security audit (`docs/SECURITY-AUDIT-2026-08-10.md`) was rewritten from the
+repository at the end of wave 2 and therefore does **not** yet carry 18-AE, 18-AF
+or 18-AG.
+
+| ID | What | Severity |
+|---|---|---|
+| 18-AA | First runtime UB this tree has ever reported. Misaligned type-punned stores in the packet write path (`SocketOutputStream.h`, every packet the server writes) → `memcpy`; a null `memset` in `PreparedStatement`; and five out-of-bounds writes in `GQuestTouchWayPointElement` that worked only by declaration order | high |
+| 18-AB | **Unauthenticated remote admin over UDP.** `GGCommandHandler` dispatched `*shutdown`, `setGold`, `killAllPC`, `*kick`, `*set` with no privilege check, reachable by one datagram on a port-forwarded UDP 9997. Gated on source address in both servers. Plus `opcommand`'s 45 unguarded NULL dereferences, a remote OOB read in `UserInfoManager`, and 4 SQL concatenations parameterised | **critical** |
+| 18-AC | The last three unguarded wire-sourced enum conversions, incl. `CLDeletePC` — which 18-T's message wrongly claimed to cover | high |
+| 18-AD | 6 mutating calls hoisted out of `Assert()`, one a **live item-duplication bug** (couple rings, unbounded, Release-only) | high |
+| 18-AE | Live client-reachable OOB read on the learn-skill path (`SOUL_CHAIN` carve-out lets a wire `BYTE` index a 6-element array); `SkillHandlerManager` read-before-bound-check; two `Zone::movePC` bugs | high |
+| 18-AF | The half-wired exchange subsystem now fails closed; its compare-and-swap made real; both packet factories unregistered | medium |
+| 18-AG | 47 `Assert`-wrapped XML parse calls hoisted across 18 files, plus the last 6 `(T&)` reference casts | medium |
+
+**The UBSan leg links for the first time in the project's history** (`8bb1118`) —
+17 consecutive failures before, and it had therefore never reported a single UB
+finding because it died at link time. One flag, `-fno-sanitize=vptr`, whose
+diagnosis had been written up and unapplied since 2026-08-09. It now boots servers
+rather than only building them.
+
+**Verdicts worth as much as the findings.** Combat is genuinely authoritative: the
+client sends intent only, and no damage, hit, crit, EXP or cooldown value exists on
+any `CG*` packet in the path (all 216 definitions checked). Movement geometry is
+solid — `CGMove` is not a teleport, and `verifyDistance` is applied at ~200 call
+sites. The item economy's core paths — player trade, NPC buy/sell, personal stores,
+ground pickup, container moves, stack arithmetic, quest reward claims — were all
+audited and **cleared**.
+
+**Open, and needing an owner decision rather than a fix:**
+
+1. **A working speed hack.** `GamePlayer::verifySpeed`'s `PACKET_CG_MOVE` branch is
+   an empty body; there is no last-move timestamp on `Creature`. The `CGVerifyTime`
+   gate meant to catch it is dead by construction — `verifySpeed` runs twice per
+   packet, the outer call pushes the deadline 60s ahead so the inner test is always
+   false, and the two calls decrement and increment one counter 1:1, so it can never
+   reach the disconnect threshold. A correct check needs per-race and per-effect
+   movement intervals plus jitter tolerance, i.e. tuning against real play.
+   **Recommendation: land a logging-only detector first** and set any threshold from
+   measured data.
+2. **`ActionGiveLotto.cpp:57`** — an uninitialised `QuestID_t` reaches
+   `questRewarded()`, erasing an arbitrary in-progress quest. Live data loss.
+3. **`Zone::getTile`'s bounds are `Assert`-only** and become an unchecked 2-D index
+   under `make release` — the most load-bearing unguarded accessor in the combat path.
+4. Two `grade[0]` reads on a possibly-empty string in the `GQuest*` parsers; the
+   `CGMove` field-order divergence between the trees; and the `CGExchangeList`
+   desync — the last two both need a coordinated two-tree change.
+
+**A process note worth keeping.** PR #2 was **squash-merged**, so `main` carries one
+squashed commit rather than the 42 individual ones, and `git branch --contains`
+misleads about what is actually on `main`. Wave 2's commits — including the critical
+18-AB — were **not** on `main` until PR #3. Check `git log origin/main` rather than
+containment when deciding what is deployed.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
