@@ -5448,6 +5448,71 @@ misleads about what is actually on `main`. Wave 2's commits — including the cr
 18-AB — were **not** on `main` until PR #3. Check `git log origin/main` rather than
 containment when deciding what is deployed.
 
+### Phase 18 — wave 4 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AH | `Assert`-only accessors hardened (`Zone::getTile`/`getSector`, Slayer domain accessors, `SkillDomainInfoManager`, `VampEXPInfo`, `OustersEXPInfo`, `SkillUtil`). **Two are live OOB reads today, not `NDEBUG`-only** |
+| 18-AI | Two uninitialised `QuestID_t`s reaching an unconditional `m_Quests.erase()`; a discarded return value deciding castle-dungeon entry; 3 `Assert`-guarded castle zone IDs |
+| 18-AJ | 41 SQL splices parameterised (ratchet **164 → 123**); two amplification vectors closed; measurement-only move-rate telemetry |
+
+**`SkillDomainInfoManager::getDomainInfo` has been out of bounds in the deployed
+Debug build all along** [measured against the shipped dump]. `init()` sizes each
+domain from its own DB rows, but the guard was the constant `Level < 151`.
+Domains 0–4 hold 151 entries, 6–7 hold 150, and **domain 5 (`ETC`) holds 101** —
+fifty short. Levelling `ETC` past 100 is an OOB pointer read that the `Assert`
+then dereferences, and the destructor was freeing fifty slots past the end.
+
+**`ActionTeachSkill` is reachable by walking into a vampire town.** It dispatches
+on the *player's* race rather than the NPC's, and live `Triggers` rows 672 (Kaim)
+and 727 (Bricolacas) carry `DomainType : VAMPIRE`, so a Slayer at a vampire
+trainer indexed `m_GoalExp[6]` on a six-entry array. This is the case where
+hardening the accessor **alone** would have broken legitimate play — a real NPC
+conversation would have started throwing. Fixed at both ends.
+
+**A recurring shape worth naming: controls that exist but do nothing.** Four
+found so far. The login-failure lockout never increments, because `++nFailed`
+lived inside a `cout` that was commented out. The `CGVerifyTime` speed gate is
+dead three ways over — a double call that pushes its own deadline 60s ahead, a
+counter incremented and decremented 1:1, and a client that no longer sends the
+packet. The SQL-injection ratchet reported `0` while 188 sites were invisible to
+it. The `sanitizers` matrix was build-only, so it could not see the entire bug
+class it appeared to cover. **When a gate here reports "clean", check that it can
+report anything else.**
+
+**Why the uninitialised-variable class keeps recurring** [measured]:
+`-Wmaybe-uninitialized` cannot fire in any configuration this project builds.
+`CMAKE_CXX_FLAGS_DEBUG` is `-g` with **no `-O` flag**, and GCC's analysis is a
+dataflow pass that only runs under optimisation; every `make` target and every CI
+job is `CMAKE_BUILD_TYPE=Debug`. A real build log shows 31 warnings, none
+containing "uninitialized". 18-F, 18-L, 18-M(b), 18-W, 18-AA and 18-AI all share
+this root. **Adding `-Og` to the Debug flags, or a warnings-only `-O2` CI leg, is
+the cheap systemic fix.**
+
+**Open, owner decisions.** Ranked:
+
+1. **`FD_SETSIZE` overflow — internet-exposed memory corruption.** `fd_set
+   m_ReadFDs[2]` uses glibc's 1024-bit default (`FD_SETSIZE` is never defined in
+   the tree) but `nMaxPlayers` is 2000 and the accept path only rejects at 2000.
+   Descriptors 1024–1999 are accepted and `FD_SET` writes out of bounds into the
+   adjacent `m_WriteFDs`. Made cheap by a second bug: the idle timeout lives
+   inside `processInput`, which only runs for readable sockets, so a silent
+   connection holds its slot forever. **A global concurrent cap below 1024 closes
+   it outright** and is config-shaped, not a tuning judgement.
+2. **UDP denial of service needing no bug.** The receive loop `usleep`s twice per
+   iteration and handles one datagram per iteration — ~500/s ceiling, so ~144
+   kbit/s of spoofed traffic saturates it, and the dropped datagrams include the
+   `GL`/`LG` login handoff. Nobody can log in.
+3. **The speed hack.** Measurement now exists; enforcement needs movement-speed
+   data the server does not have.
+4. **The login-failure lockout** — one word (`nFailed++`) at four sites, but it
+   changes who gets disconnected during real play.
+5. `ActionGiveEventItem` has no Ousters branch but dereferences unconditionally —
+   a live gameserver segfault if wired to an NPC an Ousters can reach.
+6. `FameLimitInfo` is the closest untested twin of the `getDomainInfo` defect.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
