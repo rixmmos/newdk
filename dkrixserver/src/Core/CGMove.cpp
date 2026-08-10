@@ -72,9 +72,21 @@ string CGMove::toString() const
 {
     __BEGIN_TRY
 
+    // SECURITY: Dir2String[] holds eight entries (LEFT..LEFTUP) but m_Dir is a
+    // raw wire BYTE, so 0-255 reaches this lookup -- and toString() is called by
+    // SocketInputStream::readPacket() on every packet received, before any
+    // handler runs. Bounded here rather than rejected in read(): Zone::movePC
+    // treats dir >= DIR_MAX as a recoverable error (it answers GCMoveError and
+    // returns, Zone.cpp:2426), so an out-of-range direction is an anticipated
+    // value with defined behaviour, not a protocol violation. "UNKNOWN" matches
+    // CGConnect::toString().
+    string dir = "UNKNOWN";
+    if (m_Dir < DIR_MAX)
+        dir = Dir2String[m_Dir];
+
     StringStream msg;
     msg << "CGMove("
-        << "X:" << (int)m_X << ",Y:" << (int)m_Y << ",Dir:" << Dir2String[m_Dir] << ")";
+        << "X:" << (int)m_X << ",Y:" << (int)m_Y << ",Dir:" << dir << ")";
     return msg.toString();
 
     __END_CATCH

@@ -24,6 +24,16 @@ void CLDeletePC::read(SocketInputStream& iStream)
 
     BYTE slot;
     iStream.read(slot);
+
+    // SECURITY: Slot defines three values but this is a raw wire BYTE, so
+    // 0-255 arrives here. CLDeletePCHandler indexes the three-entry
+    // Slot2String[] with the unvalidated getSlot() at six sites (:73, :80,
+    // :105, :111, :123, :129) and binds the result into SQL. Reject it at the
+    // wire boundary, the same way the name length above is. This is the twin
+    // of CLCreatePC's check (18-T), which did not cover this packet.
+    if (slot >= SLOT_MAX)
+        throw InvalidProtocolException("invalid slot");
+
     m_Slot = Slot(slot);
 
     BYTE szSSN;
