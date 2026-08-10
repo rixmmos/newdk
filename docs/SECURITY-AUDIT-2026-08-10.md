@@ -55,6 +55,21 @@ untracking below.
 
 ## 2. Open, ranked by exploit value
 
+> **Updated later on 2026-08-10 — rows 2, 3, 4, 5, 6, 7 and 9 are now CLOSED.**
+> A five-way hardening wave landed against this list; see `MODERNIZATION.md`
+> "Phase 18 — hardening wave (2026-08-10)". Rows **1** (the `exit(0)`
+> killswitch) and **8** (the `CGExchangeBuy` wire mismatch) remain open by
+> choice, unchanged. Two corrections to the table below: row 9 was **already
+> fixed** by `2c5ebe9` before this document was written and its path is wrong
+> (`src/Core/CGSayHandler.cpp`), and row 6's site list was both incomplete (4
+> missing) and wrong about `UniqueItemManager.cpp:75`. All new work is
+> **compile-verified only** — no ASan run has been done since.
+>
+> This document's own **(D1)** is also stale: `5962635` recorded Bugs
+> 18-F…18-N in `MODERNIZATION.md` six commits after this was written.
+> **(D2)** was real and is now fixed at `MODERNIZATION.md`'s packet-audit
+> section.
+
 | # | Gain to attacker/cheater | Where | Fix | Status |
 |---|---|---|---|---|
 | 1 | **Unauthenticated remote shutdown of any server.** Two magic key constants trigger `exit(0)`; `CGConnectSetKey` is registered on both login and game servers with no auth gate | `Core/Player.cpp:236-239` | delete the `exit(0)` branch | **deliberately not fixed** — intentional 2008-era anti-cheat (`// add by viva`); a policy call for the owner, not a mechanical fix (`MOD`) |
@@ -117,16 +132,29 @@ That is why the check was commented out upstream. No security was lost: the
 | `clang-format` job | red on legacy files you touch | It checks whole changed files. Zone.cpp carried 535 pre-existing violations, `CLSelectPCHandler` 16 — a bias against touching old code, absorbed here by two separate format-only commits |
 | SQL syntax lint over prepared literals | — | Does not exist. This is the cheap gate that would have caught 18-A |
 
+### 4.1 Repairs, 2026-08-10
+
+Every row above was addressed the same day. The table is left as written —
+it is the record of what was broken — and this is what changed.
+
+| Gate | Now |
+|---|---|
+| SQL-injection ratchet | Rewritten to see **multi-line `StringStream` construction and expression splices**, not only single-line printf-format calls. Three separately-ratcheted categories, baseline `format=70 stream=24 splice=164` = **258**. The old gate's 70 is unchanged and byte-for-byte the same site set; the other 188 were always there and always invisible — 41 of them in `loginserver/ItemDestroyer.cpp`, each splicing an `ownerID` straight into a quoted SQL literal. Per-category so a new `format` site cannot hide behind two removed `splice` sites. The script now prints what it covers and what it still cannot see on every run |
+| SQL syntax lint over literals | **Exists**: `dkrixserver/scripts/check-sql-literals.sh`. Concatenates adjacent literals as the compiler would and checks for fused statements, glued keywords, stray `;`, missing statement verb, unbalanced parens/quotes, quoted `?`, and placeholder/bind-index mismatch. **Verified against the defect it exists for:** run over `git show 9422e9c^:.../item/Key.cpp` it reports three independent errors and exits 1; over the fixed file, 0. It also found a live one on landing — `MonsterKillQuest::save()`'s `executeQuery("-_-")`, §2 item 6 — which was fixed the same day. Not a ratchet: it fails on the first finding, and its allowlist is empty |
+| `sanitizers` matrix | Still build-only, unchanged. A **new, separate** job `boot under asan (boot-only, no packets)` seeds a MySQL 5.7 service container from `initdb/` and boots all three servers under ASan, asserting each binds its port with no sanitizer report. That covers 18-A/D/E/J/L — five of fourteen, up from zero — and covers none of the packet-handler class. Non-blocking until it has five consecutive greens; it has never run on a runner. Plan and remaining work: `docs/ci-runtime-sanitizer-plan.md` |
+| CI triggers | The `[main, "modernize/**"]` branch allowlist is **removed** from both workflows; push now triggers on every branch, still filtered by `paths:`. Extending the allowlist to `fix/**` would only move the trap to the next unanticipated prefix. `workflow_dispatch` is on both |
+| `clang-format` job | Server now checks **changed lines**, via the same `tools/ci/clang-format-changed-lines.sh` the client has used since 2026-08-09. Measured on this branch: the whole-file gate fails **29 of 43** changed server files on 871 lines of pre-existing drift; the changed-lines gate passes all 43. New code is still fully gated. `clang-format==18.1.8` stays pinned |
+
 ---
 
 ## 5. Operational actions
 
 1. **Rotate the DB credential.** The stale password is in public history since 2026-08-08. Do it even though the live value was never published — assume the stale one is burned.
-2. **Untrack the 10 remaining `.conf` copies** carrying that same stale secret: `dkrixserver/conf/excel96-*.conf` (+ `.new`, `gameserver2`), `conf/updateserver.conf`, and all 4 under `conf/backup/`. `conf/{game,login,shared}server.conf` and `docker/conf/*.conf` are already untracked (`c587490`, `0bdc648`); the `.template` files stay.
-3. **Replace `docker-compose.yml`'s `MYSQL_ROOT_PASSWORD`** (a trivial literal) and parameterize `initdb/a-setup.sql`.
+2. ~~**Untrack the 10 remaining `.conf` copies**~~ — **DONE 2026-08-10.** carrying that same stale secret: `dkrixserver/conf/excel96-*.conf` (+ `.new`, `gameserver2`), `conf/updateserver.conf`, and all 4 under `conf/backup/`. `conf/{game,login,shared}server.conf` and `docker/conf/*.conf` are already untracked (`c587490`, `0bdc648`); the `.template` files stay.
+3. ~~**Replace `docker-compose.yml`'s `MYSQL_ROOT_PASSWORD`**~~ — **DONE 2026-08-10**, both now `${VAR:?}` from `docker/.env`; see `.env.example`. Note `WorldDBInfo` in `DARKEDEN.sql:11568` is a fourth copy that cannot be parameterized. (a trivial literal) and parameterize `initdb/a-setup.sql`.
 4. **Decide the `Player::setKey` killswitch** — keep or delete. Until then any client can terminate either server at will.
 5. **Answer the UDP question:** confirm whether the gameserver's UDP 9997 is reachable off-LAN and firewall it if so. `docs/smoke-test/PORTING-NOTE.md:57` records that `CLAUDE.md` had conflated this port with another — nobody has checked its exposure.
-6. **Get CI onto this work** — open a PR to `main` (or push the branch under `modernize/**`). 21 commits, including two format commits written to satisfy a gate that never ran.
+6. **Get CI onto this work** — *partly done 2026-08-10:* the branch allowlist was removed from both workflows, so any branch now triggers CI (still `paths:`-filtered), and the server `clang-format` job checks changed lines instead of whole files. A PR is still the missing step. — open a PR to `main` (or push the branch under `modernize/**`). 21 commits, including two format commits written to satisfy a gate that never ran.
 7. **Re-run the smoke test under ASan after every further fix.** It is the only gate that has caught anything at runtime, it is cheap locally, and it found 18-D/E/F/J/L/N in one sitting.
 8. **Do not run `make release`** without first converting the security-relevant `Assert`s to real checks (§3 row 1).
 9. **Do not rewrite history** — no live secret is published, and a rewrite breaks the parked archive tag and every published SHA.

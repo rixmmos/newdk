@@ -4385,6 +4385,37 @@ count.
   Phase 11.2 run finished the job the parked line started.) The 598 in Ground truth is a narrower
   `executeQuery`-only grep; both are recorded, and the script's own
   count is what the gate enforces.
+
+  **[rewritten 2026-08-10 — that "0" measured nothing.]** The gate saw
+  only *single-line* printf-format calls. Multi-line `StringStream`
+  construction, the dominant legacy shape, was invisible to it; so were
+  expression splices; so was Bug 18-A by construction. It now classifies
+  the SQL argument of every sink — `executeQuery`, `executeQueryString`,
+  `setStatement`, `Statement`, and `PreparedStatement <name>(` — into
+  three separately-ratcheted categories:
+  **`format=70` (unchanged, and byte-for-byte the same 70 sites the old
+  gate reported), `stream=24`, `splice=164`; total 258** [measured
+  2026-08-10]. Per-category so a new format site cannot hide behind two
+  removed splice sites. The largest single cluster is
+  `loginserver/ItemDestroyer.cpp` — 41 sites splicing an `ownerID`
+  straight into a quoted SQL literal, all of them reported as 0 by the
+  previous gate. The baseline file is now `key=value`, not a bare
+  integer; an old-format baseline exits 2 with an explanation rather than
+  passing.
+- `check-sql-literals.sh` — **new 2026-08-10.** The gate whose absence
+  let Bug 18-A ship. Concatenates the adjacent string literals of every
+  SQL sink exactly as the compiler would, then checks the result for
+  fused statements (`FROM KeyInfoSELECT ...`), keywords glued to the
+  preceding word, stray `;`, a missing leading statement verb,
+  unbalanced parens/quotes, `'?'`, and placeholder/bind-index mismatch on
+  every `PreparedStatement`. **Verified against the defect it exists
+  for:** run over `git show 9422e9c^:.../item/Key.cpp` it reports three
+  independent errors and exits 1; over the fixed file, 0. Its
+  placeholder/bind check independently reproduces the manual bind audit's
+  result — 0 defects over all 1,572 `PreparedStatement` literals. Not a
+  ratchet: it fails on the first finding. It found one on landing
+  (`MonsterKillQuest::save()`'s `executeQuery("-_-")`), which was fixed
+  the same day, so its allowlist is empty.
 - `check-packet-duplicates.sh` — same-named packet files present in both
   `dkrixserver/src/Core/` and `dkrix/Client/Packet/Cpackets/`.
   **Baseline 326** — every client packet file has a server sibling.
@@ -4966,25 +4997,56 @@ risk is real but different from what was reported: bounds enforcement is one
 assert at all on its 3-element array while `getPhoneSlotNumber` asserts
 `<= MAX_PHONE_SLOT`, which is itself off by one.
 
-**CONFIRMED and still open — unguarded client-controlled indices.** Verified
-independently; none depends on the `Assert` question:
+**Residual risk addressed 2026-08-10.** 25 security-relevant `Assert`s on
+wire-reachable indices were converted to real runtime checks that survive
+`NDEBUG`, using the `1019602` chokepoint idiom (real `if` placed *before* the
+`Assert`, so Debug and Release take the same branch). Covered: both `Slayer`
+phone accessors including the off-by-one; `Datagram`/`SerialDatagram`
+`read`/`write` (the UDP twin of a check `SocketInputStream::read` has always
+had); `PlayerCreature` pet-stash, another `<=` off-by-one; 11 `NPC` shop-rack
+accessors; 4 `ItemRack` accessors. Two findings from that pass worth keeping:
+`getSlotWithPhoneNumber()` and `findEmptyPhoneSlot()` both return
+`MAX_PHONE_SLOT` as their *not-found sentinel* and `CGPhoneDisconnectHandler:69`
+feeds it straight back into `setPhoneSlotNumber` — unreachable today only
+because of a `Success` guard; and the shop accessors had to **throw** rather
+than return `NULL`, because `CGShopRequestBuyHandler` dereferences
+`getShopItem()` unchecked at `:106`, `:194` and `:466`, so a sentinel would have
+converted an OOB read into a remote NULL-deref DoS. Those three unchecked
+dereferences remain open. This is **compile-verified only**.
+
+**CONFIRMED — unguarded client-controlled indices. ALL FIXED 2026-08-10.** Verified
+independently; none depended on the `Assert` question. This list was written before
+`1019602`, `3e02f6c` and the 2026-08-10 hardening wave and read as open long after it
+was not — `docs/SECURITY-AUDIT-2026-08-10.md` flagged the staleness as **(D2)**. Kept
+below for the reachability analysis, which is still accurate; each entry now carries
+its fix. All are **compile-verified only** unless stated — none of these paths was
+exercised at runtime.
 - `CGReloadFromInventoryHandler.cpp:52-54` — wire `BYTE` X/Y reach
   `Inventory::getInventorySlot` (`Inventory.h:131`, `m_pInventorySlot[X][Y]`,
   no check) with no guard on any path. Inventories are 10×6 and the outer
   dimension is a pointer array, so `X=255` dereferences a wild pointer. Judged
   the most severe: cheapest to reach, no grooming needed.
+  **Fixed `1019602`** — real bounds check at the `Inventory` accessor chokepoint.
 - `CGUseItemFromGearHandler.cpp:68-74` and `CGAddGearToMouseHandler.cpp:48-94`
   — wire `BYTE` cast to `WearPart` and used directly in
   `m_pWearItem[Part]` (`Slayer.h:473`, `Vampire.h:357`, `Ousters.h:370`);
   arrays are 21/22/22 elements, no bounds check in any of the three races.
+  **Fixed `1019602`** — `isWear`/`getWearItem`/`takeOffItem` guarded in all three
+  races.
 - `CGSkillToInventoryHandler.cpp:61-69` — the `SKILL_INSTALL_MINE` branch sets
   `bSuccess = true` unconditionally, skipping the *only* coordinate check
   (`CreatureUtil.cpp:954`, `X >= 10 || Y >= 6`) and leaving `pSkillSlot` NULL
-  on entry to `InstallMine::execute`.
+  on entry to `InstallMine::execute`. **Fixed `3e02f6c`.**
 - `CGAddItemToCodeSheetHandler.cpp` — `IndexNum = (y*10 + x)/2` from two wire
   `BYTE`s, guarded only by `if (OptionType.size() < 30) return;`, a lower bound
   on the container rather than an upper bound on the index. Max index ~1402
   against ~30 elements; OOB read at `:104`, OOB write at `:131`.
+  **Fixed 2026-08-10** — `x`/`y` are now rejected against the grid at packet entry,
+  before any helper runs, so the worst in-grid index is 29. The container is
+  **exactly 30**, not "~30": the grid is 10×6 packed two cells per byte and the
+  `CodeSheet` ctor pads `m_OptionType` to 30 (`item/CodeSheet.cpp:37-56`)
+  [measured]. The magic `10`/`30`/`9`/`5` literals were replaced by named
+  constants so the bound and the arithmetic cannot drift apart again.
 
 **PARTIALLY CONFIRMED — `toString()` table lookups.** `readPacket()` calls
 `pPacket->toString()` unconditionally right after `read()`
@@ -5050,6 +5112,105 @@ so per the house rule a format change must ship to both trees together.
     reason — SQL is string data, so nothing short of running the server sees
     it. 18-A was a malformed literal caught at construction; 18-B is a
     runtime memory fault. Whether they share a cause is unknown.
+
+### Phase 18 — hardening wave (2026-08-10)
+
+Five parallel workstreams against the open items in
+`docs/SECURITY-AUDIT-2026-08-10.md` §2. **Everything below is compile-verified
+only** (`make debug` in WSL, all three binaries) — no smoke run, no ASan run.
+Re-run the ASan smoke test before trusting any of it at runtime.
+
+**Packet-entry rejection.** Three `read()`-side validations, chosen over
+patching each use site so the handler files stay untouched:
+- `CGConnect` (now `shared/Packets/`, moved by Phase 12 Wave 1 — the audit's
+  path is stale) rejects `PCType > PC_OUSTERS`, closing the pre-auth
+  `PCType2String[3]` read. `toString()` was *also* bounded independently,
+  because `LCReconnectHandler` builds `CGConnect` objects that never pass
+  through `read()`. Matches the existing `CLSelectPC.cpp:31-32` idiom.
+- `CLCreatePC` rejects both `HairStyle > HAIR_STYLE3` and — the worse defect,
+  unnamed by any audit — `Slot >= SLOT_MAX`. `m_Slot` is a raw wire `BYTE`
+  (0..255) indexing a **3-element** table, against the hair style's 0..3, and
+  the same unvalidated `getSlot()` feeds six sites in `CLCreatePCHandler.cpp`
+  and `CLDeletePCHandler.cpp:73-129` where the result is spliced into SQL.
+  There is no legitimate 4th hair style: the enum has 3, every DB decoder
+  knows 3, and the client picks from a literal `HairStyle hairStyle[3]`
+  (`dkrix/Client/UIMessageManager.cpp:1213`) [measured] — so rejection, not
+  table widening, is the correct fix.
+- `SocketInputStream.cpp:181` deliberately **not** changed: it is the
+  reachability path, not the defect. Removing the unconditional
+  `toString()` would alter observable logging and leave every other caller
+  exposed.
+
+**DB object lifetime** (audit §2 rows 6 and 7). 21 legacy blocks across 20
+files gained a success-path `SAFE_DELETE(pStmt)`; 8 files' pre-declared
+`Result*` were scoped to their statements. The 18-B fix is a *rule* — the
+statement owns the `Result` and deletes it in its destructor — not a code
+shape; every site here was already the audit's "safe by construction" form and
+needed scoping, not hoisting. Hoisting would have moved `PreparedStatement`
+constructions out of `else` branches, adding unconditional prepare round-trips.
+Corrections to this file's own lists: 4 leak sites were **missing**
+(`EffectAcidSwamp.cpp:234`, `EffectProminence.cpp:199`, `EffectOnBridge.cpp:88`,
+`ItemMineInfo.cpp:69`), `FlagManager.cpp:355` was missing from the near-miss
+list, and `UniqueItemManager.cpp:75` was **mischaracterised** — all four blocks
+already free on success; the real defect is a `return` that jumps over the free.
+Also fixed: 3 uninitialised `Statement* pStmt;` where `END_DB`'s `delete STMT`
+is reachable before assignment. `EventHeadCount.cpp:65` leaks per-PC on a
+timer, so this is not purely a startup concern.
+
+Corrected counts [measured 2026-08-10] — the raw grep figure overstates the
+remaining Phase 11 work by ~2.8×:
+
+| Metric | Count |
+|---|---|
+| Raw `executeQuery` text hits | 489 in 200 files |
+| Live after stripping comments | 261 in 104 files (1.87× inflation) |
+| Live `createStatement()` — the honest measure | **172 in 101 files** |
+| Legacy blocks with no success-path free | **0** (was 21) |
+| Tree-wide `Result` use-after-free candidates, brace-accurate | **0** |
+
+`MonsterKillQuest::save()`'s `executeQuery("-_-")` is now a documented `throw`
+rather than invented SQL. The literal is in the original import, untouched by
+any commit; the TU is in no CMake list and its only caller is gated on
+`__ACTIVE_QUEST__`, commented out at its sole definition; and `SimpleQuest` rows
+are keyed only by `OwnerID`, so any `UPDATE` would have clobbered every quest
+the player holds. The throw preserves the observable outcome — nothing persists
+— while failing loudly if the flag is ever re-enabled.
+
+**Two changes no compiler will ever see**, carried deliberately and flagged:
+`gameserver/GuildManager.cpp`'s `init()` body is inside `#ifdef
+__SHARED_SERVER__` but the file is only ever built as `__GAME_SERVER__`
+(`server/gameserver/CMakeLists.txt:6,84`) — kept for twin-file parity with the
+`sharedserver` copy. `MonsterKillQuest.cpp` is likewise uncompiled. A typo in
+either would not surface.
+
+**Secrets.** The remaining 10 tracked `conf/` copies of the stale credential are
+untracked (`excel96-*`, `.new`, `conf/backup/*`, `updateserver.conf`); only the
+three `.conf.template` files remain. `.gitignore` was widened because the
+pre-existing `dkrixserver/conf/*.conf` rule reached only 8 of 10 — `*.conf` does
+not match `.new` and does not cross a `/` into `backup/`. `docker-compose.yml`
+and `initdb/a-setup.sql` no longer carry literals; both take `${VAR:?}` from
+`docker/.env` (template: `docker/.env.example`). Audit §2 row 9 was already
+fixed by `2c5ebe9` and its path is wrong (`src/Core/`, not
+`src/server/gameserver/`).
+
+Found while there, **a live break nobody had hit**: since `a894d7c` the
+`odk-server` container had no `DKRIX_*` variables set at all, so
+`Properties::expandEnvVars` left the placeholders literal and the servers would
+have failed at first SQL connect. The Docker stack was broken and unrun.
+
+**Still unparameterised, by necessity:** `initdb/DARKEDEN.sql:11568` seeds the
+`WorldDBInfo` table with `Host`/`User`/`Password` as *data*, and
+`DatabaseManager.cpp:108-134` reads it at startup to open the per-world
+connection. No env var reaches it — change the password and the servers connect
+to the default DB, then fail on the world connection. Documented in
+`.env.example`. The historical throwaway credential also remains inline at ~40
+sites across `README.md`, `docker_install.md` and `docs/smoke-test/`; replacing
+it is one coordinated pass, not a partial edit.
+
+**Open, deliberately untouched:** the `CGConnectSetKey` → `exit(0)` killswitch
+(audit §2 row 1 — an owner policy call, not a mechanical fix); the
+`CGExchangeBuy` client/server wire mismatch (row 8 — house rule ships both trees
+together); and the three unchecked `getShopItem()` dereferences noted above.
 
 ## Explicit non-goals
 
