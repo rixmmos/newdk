@@ -70,6 +70,15 @@ public:
         return m_StringList.size();
     }
     string popString() {
+        // The list is filled straight from the wire and may legitimately be
+        // empty; front() on an empty list is undefined behaviour. Two of the
+        // three call sites (CGTypeStringListHandler couple register/unregister)
+        // have no size guard at all and the third only has an Assert(), which
+        // vanishes under NDEBUG. An empty name matches no player, so returning
+        // one puts every caller on its existing not-found path.
+        if (m_StringList.empty())
+            return string();
+
         string ret = m_StringList.front();
         m_StringList.pop_front();
         return ret;

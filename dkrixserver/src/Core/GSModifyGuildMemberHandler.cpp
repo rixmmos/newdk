@@ -112,10 +112,12 @@ void GSModifyGuildMemberHandler::execute(GSModifyGuildMember* pPacket, Player* p
         
         pGuild->setMaster(pGuildMember->getName());
 
-        
-        char field[30];
-        sprintf(field, "Master='%s'", pGuildMember->getName().c_str());
-        pGuild->tinysave(field);
+
+        // Character names are varchar(30) in the DB, so the previous fixed
+        // char[30] buffer overflowed for any name longer than 20 characters
+        // ("Master='" + name + "'" + NUL).
+        string field = "Master='" + pGuildMember->getName() + "'";
+        pGuild->tinysave(field.c_str());
     } else if (pGuildMember->getRank() == GuildMember::GUILDMEMBER_RANK_NORMAL &&
                pPacket->getGuildMemberRank() == GuildMember::GUILDMEMBER_RANK_SUBMASTER) {
         

@@ -52,6 +52,14 @@ void GSAddGuildMemberHandler::execute(GSAddGuildMember* pPacket, Player* pPlayer
 
     
     Guild* pGuild = g_pGuildManager->getGuild(pPacket->getGuildID());
+    // The GuildID originates from a client packet (CGJoinGuild) and is not
+    // validated before being forwarded here, so it may name no guild at all.
+    // Fail safe instead of dereferencing NULL, as every sibling GS* handler does.
+    if (pGuild == NULL) {
+        SAFE_DELETE(pGuildMember);
+        return;
+    }
+
     pGuild->addMember(pGuildMember);
 
     

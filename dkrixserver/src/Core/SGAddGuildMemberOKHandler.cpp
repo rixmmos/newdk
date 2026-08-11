@@ -51,6 +51,13 @@ void SGAddGuildMemberOKHandler::execute(SGAddGuildMemberOK* pPacket)
 
     
     Guild* pGuild = g_pGuildManager->getGuild(pGuildMember->getGuildID());
+    // This gameserver may not have the guild loaded. Fail safe instead of
+    // dereferencing NULL, as every sibling SG* handler does.
+    if (pGuild == NULL) {
+        SAFE_DELETE(pGuildMember);
+        return;
+    }
+
     pGuild->addMember(pGuildMember);
 
     
