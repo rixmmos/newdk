@@ -1270,7 +1270,16 @@ void SocketAPI::shutdown_ex(SOCKET s, uint how) {
 int SocketAPI::select_ex(int maxfdp1, fd_set* readset, fd_set* writeset, fd_set* exceptset, struct timeval* timeout) {
     __BEGIN_TRY
 #if defined(__LINUX__) || defined(__APPLE__)
-    int result;
+    // The catch below is deliberately empty (it predates this change; the
+    // commented-out TimeoutException shows the original intent) and select() is
+    // a syscall wrapper that cannot throw, so the handler is effectively dead.
+    // It is kept, but result is now seeded with select()'s own error value
+    // rather than left indeterminate: if the handler ever did run, `return
+    // result` returned stack garbage as a ready-descriptor count. -1 is the
+    // defined "call failed" answer and matches what every caller of select()
+    // expects. All five call sites currently discard the return value, so this
+    // changes no observable behaviour.
+    int result = -1;
 
     try {
         result = select(maxfdp1, readset, writeset, exceptset, timeout);
@@ -1280,11 +1289,7 @@ int SocketAPI::select_ex(int maxfdp1, fd_set* readset, fd_set* writeset, fd_set*
             return 0;
         // throw TimeoutException();
 
-         
-
     } catch (Throwable& t) {
-        
-        
         //		throw TimeoutException();
     }
 

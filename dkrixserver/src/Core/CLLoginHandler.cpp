@@ -196,11 +196,21 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
     string lastMacAddress = "";
 
 
-    PayType payType;
+    // Three of the four result-row branches below assign these; the fourth
+    // (bFreePass with an empty result set) sends LCLoginError and falls through
+    // instead of returning, leaving them indeterminate on the way to
+    // setPayPlayValue()/loginPayPlay(). Today that fall-through is caught a few
+    // lines earlier by the `access != "ALLOW"` test -- access is initialised to
+    // "" above -- so the pay call is not actually reached, but the safety of a
+    // security-relevant decision input should not rest on the initialiser of an
+    // unrelated variable. The defaults are the ones PaySystem's own constructor
+    // uses (m_PayType = PAY_TYPE_FREE, m_PayPlayFlag = 0), so a value that does
+    // reach setPayPlayValue() leaves the object in the state it already had.
+    PayType payType = PAY_TYPE_FREE;
     string payPlayDate;
     string familyPayPlayDate;
-    uint payPlayHours;
-    uint payPlayFlag;
+    uint payPlayHours = 0;
+    uint payPlayFlag = 0;
     bool bAdult = false;
 
     try {

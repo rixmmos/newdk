@@ -58,7 +58,10 @@ void ZoneGroupInfoManager::init() noexcept(false) {
 void ZoneGroupInfoManager::load() noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    // Assigned as the first statement inside the try below, but the catch's
+    // `delete pStmt` is reachable before that if getConnection() or
+    // createStatement() throws -- delete on an indeterminate pointer.
+    Statement* pStmt = NULL;
 
     try {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();
