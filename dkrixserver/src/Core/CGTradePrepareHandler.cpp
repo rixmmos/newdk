@@ -7,6 +7,7 @@
 #include "CGTradePrepare.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCTradeError.h"
 #include "GCTradePrepare.h"
 #include "GCTradeVerify.h"
@@ -33,7 +34,7 @@ void CGTradePrepareHandler::execute(CGTradePrepare* pPacket, Player* pPlayer)
 
     ObjectID_t TargetOID = pPacket->getTargetObjectID();
     BYTE CODE = pPacket->getCode();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     GCTradePrepare gcTradePrepare;
 
     Creature* pSender = pGamePlayer->getCreature();
@@ -87,8 +88,8 @@ void CGTradePrepareHandler::execute(CGTradePrepare* pPacket, Player* pPlayer)
 
     
     if (pSender->isSlayer() && pReceiver->isSlayer()) {
-        Slayer* pSlayer1 = dynamic_cast<Slayer*>(pSender);
-        Slayer* pSlayer2 = dynamic_cast<Slayer*>(pReceiver);
+        Slayer* pSlayer1 = checkedCast<Slayer*>(pSender);
+        Slayer* pSlayer2 = checkedCast<Slayer*>(pReceiver);
 
         if (pSlayer1->hasRideMotorcycle() || pSlayer2->hasRideMotorcycle()) {
             pTradeManager->cancelTrade(pSender);
@@ -98,8 +99,8 @@ void CGTradePrepareHandler::execute(CGTradePrepare* pPacket, Player* pPlayer)
     }
 
     if (pSender->isOusters() && pReceiver->isOusters()) {
-        Ousters* pOusters1 = dynamic_cast<Ousters*>(pSender);
-        Ousters* pOusters2 = dynamic_cast<Ousters*>(pReceiver);
+        Ousters* pOusters1 = checkedCast<Ousters*>(pSender);
+        Ousters* pOusters2 = checkedCast<Ousters*>(pReceiver);
 
         if (pOusters1->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
             pOusters2->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {

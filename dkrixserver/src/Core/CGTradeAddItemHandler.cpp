@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include "AR.h"
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "FlagSet.h"
 #include "GCTradeAddItem.h"
 #include "GCTradeError.h"
@@ -42,7 +43,7 @@ void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) {
     Assert(pPlayer != NULL);
 
     ObjectID_t TargetOID = pPacket->getTargetObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
 
     Creature* pPC = pGamePlayer->getCreature();
     Assert(pPC != NULL);
@@ -92,8 +93,8 @@ void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) {
 
     
     if (pPC->isSlayer() && pTargetPC->isSlayer()) {
-        Slayer* pSlayer1 = dynamic_cast<Slayer*>(pPC);
-        Slayer* pSlayer2 = dynamic_cast<Slayer*>(pTargetPC);
+        Slayer* pSlayer1 = checkedCast<Slayer*>(pPC);
+        Slayer* pSlayer2 = checkedCast<Slayer*>(pTargetPC);
 
         if (pSlayer1->hasRideMotorcycle() || pSlayer2->hasRideMotorcycle()) {
             pTradeManager->cancelTrade(pPC);
@@ -103,8 +104,8 @@ void CGTradeAddItemHandler::execute(CGTradeAddItem* pPacket, Player* pPlayer) {
     }
 
     if (pPC->isOusters() && pTargetPC->isOusters()) {
-        Ousters* pOusters1 = dynamic_cast<Ousters*>(pPC);
-        Ousters* pOusters2 = dynamic_cast<Ousters*>(pTargetPC);
+        Ousters* pOusters1 = checkedCast<Ousters*>(pPC);
+        Ousters* pOusters2 = checkedCast<Ousters*>(pTargetPC);
 
         if (pOusters1->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
             pOusters2->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
@@ -147,7 +148,7 @@ void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlay
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -156,7 +157,7 @@ void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlay
     if (pTargetPC == NULL)
         return;
 
-    Slayer* pSender = dynamic_cast<Slayer*>(pPC);
+    Slayer* pSender = checkedCast<Slayer*>(pPC);
 
     TradeManager* pTradeManager = pZone->getTradeManager();
     Assert(pTradeManager != NULL);
@@ -179,7 +180,7 @@ void CGTradeAddItemHandler::executeSlayer(CGTradeAddItem* pPacket, Player* pPlay
     
     
     if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX) {
-        PlayerCreature* pReceiver = dynamic_cast<PlayerCreature*>(pTargetPC);
+        PlayerCreature* pReceiver = checkedCast<PlayerCreature*>(pTargetPC);
         Item* pExtraSlotItem = pReceiver->getExtraInventorySlotItem();
 
         
@@ -305,7 +306,7 @@ void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPla
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -314,7 +315,7 @@ void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPla
     if (pTargetPC == NULL)
         return;
 
-    Vampire* pSender = dynamic_cast<Vampire*>(pPC);
+    Vampire* pSender = checkedCast<Vampire*>(pPC);
 
     TradeManager* pTradeManager = pZone->getTradeManager();
     Assert(pTradeManager != NULL);
@@ -338,7 +339,7 @@ void CGTradeAddItemHandler::executeVampire(CGTradeAddItem* pPacket, Player* pPla
     
     
     if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX) {
-        PlayerCreature* pReceiver = dynamic_cast<PlayerCreature*>(pTargetPC);
+        PlayerCreature* pReceiver = checkedCast<PlayerCreature*>(pTargetPC);
         Item* pExtraSlotItem = pReceiver->getExtraInventorySlotItem();
 
         if (pItem->getItemType() == 0) {
@@ -449,7 +450,7 @@ void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPla
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -458,7 +459,7 @@ void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPla
     if (pTargetPC == NULL)
         return;
 
-    Ousters* pSender = dynamic_cast<Ousters*>(pPC);
+    Ousters* pSender = checkedCast<Ousters*>(pPC);
 
     TradeManager* pTradeManager = pZone->getTradeManager();
     Assert(pTradeManager != NULL);
@@ -482,7 +483,7 @@ void CGTradeAddItemHandler::executeOusters(CGTradeAddItem* pPacket, Player* pPla
     
     
     if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX) {
-        PlayerCreature* pReceiver = dynamic_cast<PlayerCreature*>(pTargetPC);
+        PlayerCreature* pReceiver = checkedCast<PlayerCreature*>(pTargetPC);
         Item* pExtraSlotItem = pReceiver->getExtraInventorySlotItem();
 
         if (pItem->getItemType() == 0) {
@@ -608,7 +609,7 @@ void CGTradeAddItemHandler::makeGCTradeAddItemPacket(GCTradeAddItem* pPacket, Ob
     Item::ItemClass IClass = pItem->getItemClass();
 
     if (IClass == Item::ITEM_CLASS_PET_ITEM) {
-        PetItem* pPetItem = dynamic_cast<PetItem*>(pItem);
+        PetItem* pPetItem = checkedCast<PetItem*>(pItem);
 
         if (pPetItem->getPetInfo() != NULL) {
             list<OptionType_t> olist;
@@ -630,22 +631,22 @@ void CGTradeAddItemHandler::makeGCTradeAddItemPacket(GCTradeAddItem* pPacket, Ob
     }
     
     else if (IClass == Item::ITEM_CLASS_AR) {
-        AR* pAR = dynamic_cast<AR*>(pItem);
+        AR* pAR = checkedCast<AR*>(pItem);
         pPacket->setItemNum(pAR->getBulletCount());
     } else if (IClass == Item::ITEM_CLASS_SR) {
-        SR* pSR = dynamic_cast<SR*>(pItem);
+        SR* pSR = checkedCast<SR*>(pItem);
         pPacket->setItemNum(pSR->getBulletCount());
     } else if (IClass == Item::ITEM_CLASS_SG) {
-        SG* pSG = dynamic_cast<SG*>(pItem);
+        SG* pSG = checkedCast<SG*>(pItem);
         pPacket->setItemNum(pSG->getBulletCount());
     } else if (IClass == Item::ITEM_CLASS_SMG) {
-        SMG* pSMG = dynamic_cast<SMG*>(pItem);
+        SMG* pSMG = checkedCast<SMG*>(pItem);
         pPacket->setItemNum(pSMG->getBulletCount());
     }
     
     
     else if (IClass == Item::ITEM_CLASS_BELT) {
-        Belt* pBelt = dynamic_cast<Belt*>(pItem);
+        Belt* pBelt = checkedCast<Belt*>(pItem);
         Inventory* pBeltInventory = pBelt->getInventory();
         BYTE SubItemCount = 0;
 
@@ -669,7 +670,7 @@ void CGTradeAddItemHandler::makeGCTradeAddItemPacket(GCTradeAddItem* pPacket, Ob
     
     
     else if (IClass == Item::ITEM_CLASS_OUSTERS_ARMSBAND) {
-        OustersArmsband* pOustersArmsband = dynamic_cast<OustersArmsband*>(pItem);
+        OustersArmsband* pOustersArmsband = checkedCast<OustersArmsband*>(pItem);
         Inventory* pOustersArmsbandInventory = pOustersArmsband->getInventory();
         BYTE SubItemCount = 0;
 

@@ -7,6 +7,7 @@
 #include "CGStashDeposit.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCDeleteObject.h"
 #include "GCDeleteandPickUpOK.h"
 #include "GamePlayer.h"
@@ -30,7 +31,7 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
     Gold_t amount = pPacket->getAmount();
 
@@ -45,7 +46,7 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
         return;
 
     if (pPC->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+        Slayer* pSlayer = checkedCast<Slayer*>(pPC);
 
         if (pSlayer->getGold() < amount)
             return;
@@ -71,7 +72,7 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
             log(LOG_STASH_ADD_MONEY, pSlayer->getName(), "", itos(amount));
         }
     } else if (pPC->isVampire()) {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+        Vampire* pVampire = checkedCast<Vampire*>(pPC);
 
         if (pVampire->getGold() < amount)
             return;
@@ -93,7 +94,7 @@ void CGStashDepositHandler::execute(CGStashDeposit* pPacket, Player* pPlayer) {
             log(LOG_STASH_ADD_MONEY, pVampire->getName(), "", itos(amount));
         }
     } else if (pPC->isOusters()) {
-        Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+        Ousters* pOusters = checkedCast<Ousters*>(pPC);
 
         if (pOusters->getGold() < amount)
             return;

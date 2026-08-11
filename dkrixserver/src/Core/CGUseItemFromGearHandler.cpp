@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include <stdio.h>
 
+#include "CheckedCast.h"
 #include "Creature.h"
 #include "CreatureUtil.h"
 #include "DB.h"
@@ -64,13 +65,13 @@ void CGUseItemFromGearHandler::execute(CGUseItemFromGear* pPacket, Player* pPlay
     Item* pItem;
 
     if (pCreature->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+        Slayer* pSlayer = checkedCast<Slayer*>(pPC);
         pItem = pSlayer->getWearItem((Slayer::WearPart)(pPacket->getPart()));
     } else if (pCreature->isVampire()) {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+        Vampire* pVampire = checkedCast<Vampire*>(pPC);
         pItem = pVampire->getWearItem((Vampire::WearPart)(pPacket->getPart()));
     } else if (pCreature->isOusters()) {
-        Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+        Ousters* pOusters = checkedCast<Ousters*>(pPC);
         pItem = pOusters->getWearItem((Ousters::WearPart)(pPacket->getPart()));
     } else {
         Assert(false);
@@ -131,17 +132,17 @@ void CGUseItemFromGearHandler::executeCoupleRing(CGUseItemFromGear* pPacket, Gam
     
     
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     CoupleRingBase* pCoupleRing = NULL;
 
     Zone* pZone = pPC->getZone();
     Assert(pZone != NULL);
 
     if (pCreature->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+        Slayer* pSlayer = checkedCast<Slayer*>(pPC);
         pCoupleRing = dynamic_cast<CoupleRingBase*>(pSlayer->getWearItem((Slayer::WearPart)(pPacket->getPart())));
     } else if (pCreature->isVampire()) {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+        Vampire* pVampire = checkedCast<Vampire*>(pPC);
         pCoupleRing = dynamic_cast<CoupleRingBase*>(pVampire->getWearItem((Vampire::WearPart)(pPacket->getPart())));
     } else {
         Assert(false);

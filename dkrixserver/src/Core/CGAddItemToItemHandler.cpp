@@ -11,6 +11,7 @@
 #ifdef __GAME_SERVER__
 #include <stdio.h>
 
+#include "CheckedCast.h"
 #include "CreatureUtil.h"
 #include "EventStar.h"
 #include "GCAddItemToItemVerify.h"
@@ -76,7 +77,7 @@ void CGAddItemToItemHandler::execute(CGAddItemToItem* pPacket, Player* pPlayer) 
         SYSTEM_ASSERT(SYSTEM_ENCHANT);
 
         Creature* pCreature = pGamePlayer->getCreature();
-        PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+        PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
         ObjectID_t objectID = pPacket->getObjectID();
         Inventory* pInventory = pPC->getInventory();
         CoordInven_t invenX = pPacket->getX();
@@ -478,7 +479,7 @@ void executeUpGrade(GamePlayer* pGamePlayer, Item* pMouseItem, Item* pItem) {
     __BEGIN_TRY
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
 
     const ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
@@ -513,7 +514,7 @@ void executeEnchantRareThreeOption(GamePlayer* pGamePlayer, Item* pMouseItem, It
     __BEGIN_TRY
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     //		Inventory* 		pInventory  = pPC->getInventory();
 
     
@@ -717,7 +718,7 @@ void executeEnchantRareOption(GamePlayer* pGamePlayer, Item* pMouseItem, Item* p
     __BEGIN_TRY
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     //		Inventory* 		pInventory  = pPC->getInventory();
 
     
@@ -949,7 +950,7 @@ void executeEnchantOption(GamePlayer* pGamePlayer, Item* pMouseItem, Item* pItem
     __BEGIN_TRY
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
 
     
@@ -1098,7 +1099,7 @@ void executeAddOption(GamePlayer* pGamePlayer, Item* pMouseItem, Item* pItem, Op
     __BEGIN_TRY
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
 
     
     /*		if (!pGamePlayer->isPayPlaying()
@@ -1186,7 +1187,7 @@ void executeTransKit(GamePlayer* pGamePlayer, Item* pMouseItem, Item* pItem) {
     pGamePlayer->sendPacket(&gcResult);
 
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
 
     pPC->deleteItemFromExtraInventorySlot();
     pMouseItem->destroy();

@@ -7,6 +7,7 @@
 #include "CGPickupMoney.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "Item.h"
 #include "ItemUtil.h"
@@ -38,7 +39,7 @@ void CGPickupMoneyHandler::execute(CGPickupMoney* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     try {
-        GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+        GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
         Creature* pCreature = pGamePlayer->getCreature();
         bool bSuccess = false;
         bool bMargin = false;
@@ -53,13 +54,13 @@ void CGPickupMoneyHandler::execute(CGPickupMoney* pPacket, Player* pPlayer)
         Coord_t ZoneY = pPacket->getZoneY();
 
         if (pCreature->isSlayer()) {
-            pSlayer = dynamic_cast<Slayer*>(pCreature);
+            pSlayer = checkedCast<Slayer*>(pCreature);
             pZone = pSlayer->getZone();
         } else if (pCreature->isVampire()) {
-            pVampire = dynamic_cast<Vampire*>(pCreature);
+            pVampire = checkedCast<Vampire*>(pCreature);
             pZone = pVampire->getZone();
         } else if (pCreature->isOusters()) {
-            pOusters = dynamic_cast<Ousters*>(pCreature);
+            pOusters = checkedCast<Ousters*>(pCreature);
             pZone = pOusters->getZone();
         } else
             throw ProtocolException("CGDropMoneyHandler::execute() :     .");
@@ -100,7 +101,7 @@ void CGPickupMoneyHandler::execute(CGPickupMoney* pPacket, Player* pPlayer)
 
         
         if ((IClass == Item::ITEM_CLASS_MONEY) && (ObjectID == pPacket->getObjectID())) {
-            Money* pMoney = dynamic_cast<Money*>(pItem);
+            Money* pMoney = checkedCast<Money*>(pItem);
             itemGold = pMoney->getAmount();
             marginGold = 0;
 

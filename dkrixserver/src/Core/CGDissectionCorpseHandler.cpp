@@ -13,6 +13,7 @@
 #include "BloodBible.h"
 #include "CastleInfoManager.h"
 #include "CastleShrineInfoManager.h"
+#include "CheckedCast.h"
 #include "CombatInfoManager.h"
 #include "Corpse.h"
 #include "CreatureUtil.h"
@@ -73,7 +74,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
     Assert(pPlayer != NULL);
 
     try {
-        GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+        GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
 
         if (pGamePlayer->getPlayerStatus() != GPS_NORMAL)
             return;
@@ -98,7 +99,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
 
 
         if (pCreature->isSlayer()) {
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+            Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
             if (pSlayer->hasRideMotorcycle()) {
                 return;
             }
@@ -106,7 +107,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
 
 
         if (pCreature->isOusters()) {
-            Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+            Ousters* pOusters = checkedCast<Ousters*>(pCreature);
             if (pOusters->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
                 return;
             }
@@ -215,14 +216,14 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                 return;
             if (!pZone->isPKZone()) {
                 if (pItem->getItemType() == SLAYER_CORPSE && pCreature->isSlayer()) {
-                    SlayerCorpse* pSlayerCorpse = dynamic_cast<SlayerCorpse*>(pItem);
+                    SlayerCorpse* pSlayerCorpse = checkedCast<SlayerCorpse*>(pItem);
 
                     PCSlayerInfo3& rPCSlayerInfo = pSlayerCorpse->getSlayerInfo();
 
 
                     if (rPCSlayerInfo.getName() != pCreature->getName()) {
                         if (g_pAlignmentManager->getAlignmentType(rPCSlayerInfo.getAlignment()) >= NEUTRAL) {
-                            Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+                            Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
 
 
                             Alignment_t NewAlignment = max(-10000, pSlayer->getAlignment() - 500);
@@ -239,7 +240,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
 
                     if (rPCVampireInfo.getName() != pCreature->getName()) {
                         if (g_pAlignmentManager->getAlignmentType(rPCVampireInfo.getAlignment()) >= NEUTRAL) {
-                            Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
+                            Vampire* pVampire = checkedCast<Vampire*>(pCreature);
 
 
                             Alignment_t NewAlignment = max(-10000, pVampire->getAlignment() - 500);
@@ -256,7 +257,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
 
                     if (rPCOustersInfo.getName() != pCreature->getName()) {
                         if (g_pAlignmentManager->getAlignmentType(rPCOustersInfo.getAlignment()) >= NEUTRAL) {
-                            Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+                            Ousters* pOusters = checkedCast<Ousters*>(pCreature);
 
 
                             Alignment_t NewAlignment = max(-10000, pOusters->getAlignment() - 500);
@@ -299,7 +300,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                     return;
 
                 if (pPC->isSlayer()) {
-                    Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                    Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                     if (pSlayer->hasRideMotorcycle())
                         return;
                 }
@@ -319,7 +320,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
             //			}
         }
 
-        Corpse* pCorpse = dynamic_cast<Corpse*>(pItem);
+        Corpse* pCorpse = checkedCast<Corpse*>(pItem);
         bool bDissectAll = false;
 
 
@@ -529,8 +530,8 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                                 Assert(false);
                             }
 
-                            const SweeperInfo* pSweeperInfo = dynamic_cast<SweeperInfo*>(
-                                g_pSweeperInfoManager->getItemInfo(pTreasure->getItemType()));
+                            const SweeperInfo* pSweeperInfo =
+                                checkedCast<SweeperInfo*>(g_pSweeperInfoManager->getItemInfo(pTreasure->getItemType()));
 
                             char msg[100];
                             sprintf(msg, g_pStringPool->c_str(STRID_PULL_OUT_SWEEPER), safeRace,

@@ -7,6 +7,7 @@
 #include "CGTradeMoney.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCTradeError.h"
 #include "GCTradeMoney.h"
 #include "GCTradeVerify.h"
@@ -31,7 +32,7 @@ void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     ObjectID_t TargetOID = pPacket->getTargetObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
 
     Creature* pPC = pGamePlayer->getCreature();
     Assert(pPC != NULL);
@@ -74,8 +75,8 @@ void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer)
 
     
     if (pPC->isSlayer() && pTargetPC->isSlayer()) {
-        Slayer* pSlayer1 = dynamic_cast<Slayer*>(pPC);
-        Slayer* pSlayer2 = dynamic_cast<Slayer*>(pTargetPC);
+        Slayer* pSlayer1 = checkedCast<Slayer*>(pPC);
+        Slayer* pSlayer2 = checkedCast<Slayer*>(pTargetPC);
 
         if (pSlayer1->hasRideMotorcycle() || pSlayer2->hasRideMotorcycle()) {
             pTradeManager->cancelTrade(pPC);
@@ -85,8 +86,8 @@ void CGTradeMoneyHandler::execute(CGTradeMoney* pPacket, Player* pPlayer)
     }
 
     if (pPC->isOusters() && pTargetPC->isOusters()) {
-        Ousters* pOusters1 = dynamic_cast<Ousters*>(pPC);
-        Ousters* pOusters2 = dynamic_cast<Ousters*>(pTargetPC);
+        Ousters* pOusters1 = checkedCast<Ousters*>(pPC);
+        Ousters* pOusters2 = checkedCast<Ousters*>(pTargetPC);
 
         if (pOusters1->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
             pOusters2->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
@@ -131,7 +132,7 @@ void CGTradeMoneyHandler::executeSlayer(CGTradeMoney* pPacket, Player* pPlayer)
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     Gold_t Amount = pPacket->getAmount();
     BYTE Code = pPacket->getCode();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -140,8 +141,8 @@ void CGTradeMoneyHandler::executeSlayer(CGTradeMoney* pPacket, Player* pPlayer)
     if (pTargetPC == NULL)
         return;
 
-    Slayer* pSender = dynamic_cast<Slayer*>(pPC);
-    Slayer* pReceiver = dynamic_cast<Slayer*>(pTargetPC);
+    Slayer* pSender = checkedCast<Slayer*>(pPC);
+    Slayer* pReceiver = checkedCast<Slayer*>(pTargetPC);
     Player* pTargetPlayer = pTargetPC->getPlayer();
     Gold_t finalAmount = Amount;
     Gold_t margin = 0;
@@ -264,7 +265,7 @@ void CGTradeMoneyHandler::executeVampire(CGTradeMoney* pPacket, Player* pPlayer)
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     Gold_t Amount = pPacket->getAmount();
     BYTE Code = pPacket->getCode();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -273,8 +274,8 @@ void CGTradeMoneyHandler::executeVampire(CGTradeMoney* pPacket, Player* pPlayer)
     if (pTargetPC == NULL)
         return;
 
-    Vampire* pSender = dynamic_cast<Vampire*>(pPC);
-    Vampire* pReceiver = dynamic_cast<Vampire*>(pTargetPC);
+    Vampire* pSender = checkedCast<Vampire*>(pPC);
+    Vampire* pReceiver = checkedCast<Vampire*>(pTargetPC);
     Player* pTargetPlayer = pTargetPC->getPlayer();
     Gold_t finalAmount = Amount;
     Gold_t margin = 0;
@@ -398,7 +399,7 @@ void CGTradeMoneyHandler::executeOusters(CGTradeMoney* pPacket, Player* pPlayer)
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     Gold_t Amount = pPacket->getAmount();
     BYTE Code = pPacket->getCode();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -407,8 +408,8 @@ void CGTradeMoneyHandler::executeOusters(CGTradeMoney* pPacket, Player* pPlayer)
     if (pTargetPC == NULL)
         return;
 
-    Ousters* pSender = dynamic_cast<Ousters*>(pPC);
-    Ousters* pReceiver = dynamic_cast<Ousters*>(pTargetPC);
+    Ousters* pSender = checkedCast<Ousters*>(pPC);
+    Ousters* pReceiver = checkedCast<Ousters*>(pTargetPC);
     Player* pTargetPlayer = pTargetPC->getPlayer();
     Gold_t finalAmount = Amount;
     Gold_t margin = 0;

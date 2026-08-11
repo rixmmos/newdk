@@ -7,6 +7,7 @@
 #include "CGSilverCoating.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "ItemInfo.h"
 #include "ItemInfoManager.h"
@@ -35,7 +36,7 @@ void CGSilverCoatingHandler::execute(CGSilverCoating* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     ObjectID_t ITEMOID = pPacket->getObjectID();
-    Creature* pPC = dynamic_cast<GamePlayer*>(pPlayer)->getCreature();
+    Creature* pPC = checkedCast<GamePlayer*>(pPlayer)->getCreature();
     bool bSlayer = true;
     Gold_t playerMoney = 0;
     Price_t coatingPrice = 0;
@@ -55,11 +56,11 @@ void CGSilverCoatingHandler::execute(CGSilverCoating* pPacket, Player* pPlayer)
 
     
     if (bSlayer) {
-        pSlayer = dynamic_cast<Slayer*>(pPC);
+        pSlayer = checkedCast<Slayer*>(pPC);
         playerMoney = pSlayer->getGold();
         pItem = pSlayer->findItemOID(ITEMOID, storage, X, Y);
     } else {
-        pVampire = dynamic_cast<Vampire*>(pPC);
+        pVampire = checkedCast<Vampire*>(pPC);
         playerMoney = pVampire->getGold();
         pItem = pVampire->findItemOID(ITEMOID, storage, X, Y);
     }

@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include <math.h>
 
+#include "CheckedCast.h"
 #include "EffectHPRecovery.h"
 #include "EffectMPRecovery.h"
 #include "GCCannotUse.h"
@@ -124,15 +125,15 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
             bool HPRegen = false, MPRegen = false;
             HP_t CurrentHP = 0, MaxHP = 0;
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 CurrentHP = pSlayer->getHP();
                 MaxHP = pSlayer->getHP(ATTR_MAX);
             } else if (pPC->isVampire()) {
-                Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+                Vampire* pVampire = checkedCast<Vampire*>(pPC);
                 CurrentHP = pVampire->getHP();
                 MaxHP = pVampire->getHP(ATTR_MAX);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 CurrentHP = pOusters->getHP();
                 MaxHP = pOusters->getHP(ATTR_MAX);
             }
@@ -148,24 +149,24 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
                 HPRegen = true;
 
                 if (pPC->isSlayer()) {
-                    Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                    Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                     pSlayer->setHP(CurrentHP);
                 } else if (pPC->isVampire()) {
-                    Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+                    Vampire* pVampire = checkedCast<Vampire*>(pPC);
                     pVampire->setHP(CurrentHP);
                 } else if (pPC->isOusters()) {
-                    Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                    Ousters* pOusters = checkedCast<Ousters*>(pPC);
                     pOusters->setHP(CurrentHP);
                 }
             }
 
             MP_t CurrentMP = 0, MaxMP = 0;
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 CurrentMP = pSlayer->getMP();
                 MaxMP = pSlayer->getMP(ATTR_MAX);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 CurrentMP = pOusters->getMP();
                 MaxMP = pOusters->getMP(ATTR_MAX);
             }
@@ -176,10 +177,10 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
                 MPRegen = true;
 
                 if (pPC->isSlayer()) {
-                    Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                    Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                     pSlayer->setMP(CurrentMP);
                 } else if (pPC->isOusters()) {
-                    Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                    Ousters* pOusters = checkedCast<Ousters*>(pPC);
                     pOusters->setMP(CurrentMP);
                 }
             }
@@ -207,13 +208,13 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
     }
 
     if (pCreature->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+        Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
 
         HP_t MaxHP = pSlayer->getHP(ATTR_MAX);
         HP_t CurrentHP = pSlayer->getHP(ATTR_CURRENT);
         MP_t MaxMP = pSlayer->getMP(ATTR_MAX);
         MP_t CurrentMP = pSlayer->getMP(ATTR_CURRENT);
-        Potion* pPotion = dynamic_cast<Potion*>(pItem);
+        Potion* pPotion = checkedCast<Potion*>(pItem);
 
         
         int HPQuantity = pPotion->getHPQuantity();
@@ -259,7 +260,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
                 if (pSlayer->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                     Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                    EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                    EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
                     
                     
@@ -352,7 +353,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
                 if (pSlayer->isFlag(Effect::EFFECT_CLASS_MP_RECOVERY)) {
                     Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
-                    EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
+                    EffectMPRecovery* pEffectMPRecoveryEffect = checkedCast<EffectMPRecovery*>(pEffect);
 
                     
                     
@@ -426,7 +427,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
             decreaseItemNum(pItem, pInventory, pSlayer->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
         }
     } else if (pCreature->isVampire()) {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
+        Vampire* pVampire = checkedCast<Vampire*>(pCreature);
 
         if (pItem->getItemClass() != Item::ITEM_CLASS_SERUM
             
@@ -439,7 +440,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
         HP_t MaxHP = pVampire->getHP(ATTR_MAX);
         HP_t CurrentHP = pVampire->getHP(ATTR_CURRENT);
-        Serum* pSerum = dynamic_cast<Serum*>(pItem);
+        Serum* pSerum = checkedCast<Serum*>(pItem);
 
         int RegenHP = 0;
 
@@ -462,7 +463,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
                 if (pVampire->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                     Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                    EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                    EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
                     
                     Turn_t OldCount = pEffectHPRecoveryEffect->getPeriod();
@@ -536,7 +537,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
         decreaseItemNum(pItem, pInventory, pVampire->getName(), STORAGE_INVENTORY, 0, InvenX, InvenY);
     } else if (pCreature->isOusters()) {
-        Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+        Ousters* pOusters = checkedCast<Ousters*>(pCreature);
 
         bool regenHP = false;
         bool regenMP = false;
@@ -552,7 +553,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
             MaxHP = pOusters->getHP(ATTR_MAX);
             CurrentHP = pOusters->getHP(ATTR_CURRENT);
 
-            Pupa* pPupa = dynamic_cast<Pupa*>(pItem);
+            Pupa* pPupa = checkedCast<Pupa*>(pItem);
 
             
             HPQuantity = pPupa->getHPQuantity();
@@ -567,7 +568,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
             MaxHP = pOusters->getHP(ATTR_MAX);
             CurrentHP = pOusters->getHP(ATTR_CURRENT);
 
-            ComposMei* pComposMei = dynamic_cast<ComposMei*>(pItem);
+            ComposMei* pComposMei = checkedCast<ComposMei*>(pItem);
 
             
             HPQuantity = pComposMei->getHPQuantity();
@@ -591,7 +592,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
                 if (pOusters->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                     Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                    EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                    EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
                     
                     
@@ -680,7 +681,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
         if (pItem->getItemClass() == Item::ITEM_CLASS_COMPOS_MEI) {
             MaxMP = pOusters->getMP(ATTR_MAX);
             CurrentMP = pOusters->getMP(ATTR_CURRENT);
-            ComposMei* pComposMei = dynamic_cast<ComposMei*>(pItem);
+            ComposMei* pComposMei = checkedCast<ComposMei*>(pItem);
 
             
             MPQuantity = pComposMei->getMPQuantity();
@@ -696,7 +697,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
         } else if (pItem->getItemClass() == Item::ITEM_CLASS_PUPA) {
             MaxMP = pOusters->getMP(ATTR_MAX);
             CurrentMP = pOusters->getMP(ATTR_CURRENT);
-            Pupa* pPupa = dynamic_cast<Pupa*>(pItem);
+            Pupa* pPupa = checkedCast<Pupa*>(pItem);
 
             
             MPQuantity = pPupa->getMPQuantity();
@@ -722,7 +723,7 @@ void CGUsePotionFromInventoryHandler::execute(CGUsePotionFromInventory* pPacket,
 
                 if (pOusters->isFlag(Effect::EFFECT_CLASS_MP_RECOVERY)) {
                     Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
-                    EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
+                    EffectMPRecovery* pEffectMPRecoveryEffect = checkedCast<EffectMPRecovery*>(pEffect);
 
                     
                     

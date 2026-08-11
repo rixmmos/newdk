@@ -9,6 +9,7 @@
 
 #ifdef __GAME_SERVER__
 #include "CastleInfoManager.h"
+#include "CheckedCast.h"
 #include "CreatureUtil.h"
 #include "DB.h"
 #include "GCCannotUse.h"
@@ -137,7 +138,7 @@ void CGUseMessageItemFromInventoryHandler::executeEventTree(CGUseMessageItemFrom
 
     
     
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
@@ -242,9 +243,9 @@ void CGUseMessageItemFromInventoryHandler::executeEventFromMessage(CGUseMessageI
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();

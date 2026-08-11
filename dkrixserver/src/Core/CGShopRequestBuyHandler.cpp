@@ -7,6 +7,7 @@
 #include "CGShopRequestBuy.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "ItemFactoryManager.h"
 #include "ItemInfo.h"
@@ -53,7 +54,7 @@ void CGShopRequestBuyHandler::execute(CGShopRequestBuy* pPacket, Player* pPlayer
     ShopRackType_t shopType = pPacket->getShopType();
     BYTE shopIndex = pPacket->getShopIndex();
     ItemNum_t itemNum = pPacket->getItemNum();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pNPCBase = NULL;
 
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pGamePlayer->getCreature());
@@ -89,7 +90,7 @@ void CGShopRequestBuyHandler::execute(CGShopRequestBuy* pPacket, Player* pPlayer
         return;
     }
 
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
 
      
 
@@ -180,9 +181,9 @@ void CGShopRequestBuyHandler::executeNormal(CGShopRequestBuy* pPacket, Player* p
     ItemNum_t itemNum = pPacket->getItemNum();
     Coord_t x = pPacket->getX();
     Coord_t y = pPacket->getY();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Zone* pZone = pPC->getZone();
     NPC* pNPC = dynamic_cast<NPC*>(pZone->getCreature(NPCID));
     Gold_t itemTax = 0;
@@ -453,9 +454,9 @@ void CGShopRequestBuyHandler::executeMotorcycle(CGShopRequestBuy* pPacket, Playe
     BYTE shopIndex = pPacket->getShopIndex();
     ZoneCoord_t x = pPacket->getX();
     ZoneCoord_t y = pPacket->getY();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Zone* pZone = pPC->getZone();
     NPC* pNPC = dynamic_cast<NPC*>(pZone->getCreature(NPCID));
 
@@ -653,9 +654,9 @@ void CGShopRequestBuyHandler::executeEvent(CGShopRequestBuy* pPacket, Player* pP
     ItemNum_t itemNum = pPacket->getItemNum();
     Coord_t x = pPacket->getX();
     Coord_t y = pPacket->getY();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Zone* pZone = pPC->getZone();
     NPC* pNPC = dynamic_cast<NPC*>(pZone->getCreature(NPCID));
 

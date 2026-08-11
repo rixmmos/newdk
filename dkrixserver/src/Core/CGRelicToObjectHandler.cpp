@@ -12,6 +12,7 @@
 #include <map>
 
 #include "CastleShrineInfoManager.h"
+#include "CheckedCast.h"
 #include "CombatInfoManager.h"
 #include "Corpse.h"
 #include "EffectHasSlayerRelic.h"
@@ -64,7 +65,7 @@ void CGRelicToObjectHandler::execute(CGRelicToObject* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
 
 
@@ -181,11 +182,11 @@ void CGRelicToObjectHandler::executeRelic(CGRelicToObject* pPacket, Player* pPla
 #ifdef __GAME_SERVER__
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
 
 
-    PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPlayerCreature = checkedCast<PlayerCreature*>(pCreature);
 
 
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
@@ -428,13 +429,13 @@ void CGRelicToObjectHandler::executeBloodBible(CGRelicToObject* pPacket, Player*
 
 #ifdef __GAME_SERVER__
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
 
-    PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPlayerCreature = checkedCast<PlayerCreature*>(pCreature);
 
 
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
@@ -484,13 +485,13 @@ void CGRelicToObjectHandler::executeCastleSymbol(CGRelicToObject* pPacket, Playe
 
 #ifdef __GAME_SERVER__
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
 
-    PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPlayerCreature = checkedCast<PlayerCreature*>(pCreature);
 
 
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
@@ -550,13 +551,13 @@ void CGRelicToObjectHandler::executeFlag(CGRelicToObject* pPacket, Player* pPlay
     if (!g_pFlagManager->hasFlagWar())
         return;
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
 
 
-    PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPlayerCreature = checkedCast<PlayerCreature*>(pCreature);
 
 
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
@@ -612,7 +613,7 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
 
 #ifdef __GAME_SERVER__
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     Zone* pZone = pCreature->getZone();
     Assert(pZone != NULL);
@@ -623,7 +624,7 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
     if (!pLevelWarManager->hasWar())
         return;
 
-    PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPlayerCreature = checkedCast<PlayerCreature*>(pCreature);
 
     InventorySlot* pExtraInventorySlot = pPlayerCreature->getExtraInventorySlot();
     Item* pItem = pExtraInventorySlot->getItem();
@@ -631,7 +632,7 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
     Item* pTableItem = pZone->getItem(pPacket->getObjectID());
 
     const SweeperInfo* pSweeperInfo =
-        dynamic_cast<SweeperInfo*>(g_pSweeperInfoManager->getItemInfo(pItem->getItemType()));
+        checkedCast<SweeperInfo*>(g_pSweeperInfoManager->getItemInfo(pItem->getItemType()));
 
 
     if (pTableItem == NULL || pTableItem->getItemClass() != Item::ITEM_CLASS_CORPSE ||

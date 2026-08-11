@@ -7,6 +7,7 @@
 #include "CGStashList.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCStashList.h"
 #include "GamePlayer.h"
 #include "Ousters.h"
@@ -26,7 +27,7 @@ void CGStashListHandler::execute(CGStashList* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     ObjectID_t PlayerOID = pPacket->getObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
 
     
@@ -34,7 +35,7 @@ void CGStashListHandler::execute(CGStashList* pPacket, Player* pPlayer)
         return;
 
     if (pPC->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+        Slayer* pSlayer = checkedCast<Slayer*>(pPC);
         Stash* pStash = pSlayer->getStash();
         Item* pItem = NULL;
         GCStashList pkt;
@@ -50,7 +51,7 @@ void CGStashListHandler::execute(CGStashList* pPacket, Player* pPlayer)
         pkt.setStashGold(pSlayer->getStashGold());
         pPlayer->sendPacket(&pkt);
     } else if (pPC->isVampire()) {
-        Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+        Vampire* pVampire = checkedCast<Vampire*>(pPC);
         Stash* pStash = pVampire->getStash();
         Item* pItem = NULL;
         GCStashList pkt;
@@ -66,7 +67,7 @@ void CGStashListHandler::execute(CGStashList* pPacket, Player* pPlayer)
         pkt.setStashGold(pVampire->getStashGold());
         pPlayer->sendPacket(&pkt);
     } else if (pPC->isOusters()) {
-        Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+        Ousters* pOusters = checkedCast<Ousters*>(pPC);
         Stash* pStash = pOusters->getStash();
         Item* pItem = NULL;
         GCStashList pkt;

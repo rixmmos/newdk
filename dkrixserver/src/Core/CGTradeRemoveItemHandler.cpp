@@ -7,6 +7,7 @@
 #include "CGTradeRemoveItem.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCTradeError.h"
 #include "GCTradeRemoveItem.h"
 #include "GCTradeVerify.h"
@@ -33,7 +34,7 @@ void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlay
     Assert(pPlayer != NULL);
 
     ObjectID_t TargetOID = pPacket->getTargetObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
 
     Creature* pPC = pGamePlayer->getCreature();
     Assert(pPC != NULL);
@@ -77,8 +78,8 @@ void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlay
 
     
     if (pPC->isSlayer() && pTargetPC->isSlayer()) {
-        Slayer* pSlayer1 = dynamic_cast<Slayer*>(pPC);
-        Slayer* pSlayer2 = dynamic_cast<Slayer*>(pTargetPC);
+        Slayer* pSlayer1 = checkedCast<Slayer*>(pPC);
+        Slayer* pSlayer2 = checkedCast<Slayer*>(pTargetPC);
 
         if (pSlayer1->hasRideMotorcycle() || pSlayer2->hasRideMotorcycle()) {
             pTradeManager->cancelTrade(pPC);
@@ -88,8 +89,8 @@ void CGTradeRemoveItemHandler::execute(CGTradeRemoveItem* pPacket, Player* pPlay
     }
 
     if (pPC->isOusters() && pTargetPC->isOusters()) {
-        Ousters* pOusters1 = dynamic_cast<Ousters*>(pPC);
-        Ousters* pOusters2 = dynamic_cast<Ousters*>(pTargetPC);
+        Ousters* pOusters1 = checkedCast<Ousters*>(pPC);
+        Ousters* pOusters2 = checkedCast<Ousters*>(pTargetPC);
 
         if (pOusters1->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH) ||
             pOusters2->isFlag(Effect::EFFECT_CLASS_SUMMON_SYLPH)) {
@@ -133,7 +134,7 @@ void CGTradeRemoveItemHandler::executeSlayer(CGTradeRemoveItem* pPacket, Player*
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -142,7 +143,7 @@ void CGTradeRemoveItemHandler::executeSlayer(CGTradeRemoveItem* pPacket, Player*
     if (pTargetPC == NULL)
         return;
 
-    Slayer* pSender = dynamic_cast<Slayer*>(pPC);
+    Slayer* pSender = checkedCast<Slayer*>(pPC);
 
     
     CoordInven_t X, Y;
@@ -216,7 +217,7 @@ void CGTradeRemoveItemHandler::executeVampire(CGTradeRemoveItem* pPacket, Player
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -225,7 +226,7 @@ void CGTradeRemoveItemHandler::executeVampire(CGTradeRemoveItem* pPacket, Player
     if (pTargetPC == NULL)
         return;
 
-    Vampire* pSender = dynamic_cast<Vampire*>(pPC);
+    Vampire* pSender = checkedCast<Vampire*>(pPC);
 
     TradeManager* pTradeManager = pZone->getTradeManager();
     Assert(pTradeManager != NULL);
@@ -296,7 +297,7 @@ void CGTradeRemoveItemHandler::executeOusters(CGTradeRemoveItem* pPacket, Player
         
         ObjectID_t TargetOID = pPacket->getTargetObjectID();
     ObjectID_t ItemOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     Zone* pZone = pPC->getZone();
     Creature* pTargetPC = pZone->getCreature(TargetOID);
@@ -305,7 +306,7 @@ void CGTradeRemoveItemHandler::executeOusters(CGTradeRemoveItem* pPacket, Player
     if (pTargetPC == NULL)
         return;
 
-    Ousters* pSender = dynamic_cast<Ousters*>(pPC);
+    Ousters* pSender = checkedCast<Ousters*>(pPC);
 
     TradeManager* pTradeManager = pZone->getTradeManager();
     Assert(pTradeManager != NULL);
