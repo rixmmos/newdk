@@ -5650,6 +5650,54 @@ NULL)` on the next line **cannot detect**; and the destructor leaks every
    `CGQuitGuild` and `CGExpelGuildMember` no-ops — doing so resurrects dormant
    guild operations.
 
+### Phase 18 — wave 7 (2026-08-11)
+
+**18-AQ — `checkedCast`.** The follow-up wave 6 named as highest-leverage,
+landed. `Core/CheckedCast.{h,cpp}`: mirrors `dynamic_cast`'s spelling so a
+conversion is a pure token rename, with an out-of-line `[[noreturn]]` cold path
+so GCC can prove the result non-NULL downstream — that is the mechanism that
+retires the `-Wnull-dereference` findings, the same trick `Assert.h` uses.
+
+**What it throws was the hard part, and both obvious answers are traps.**
+`__END_DEBUG_EX` rethrows `Error` and `ProtocolException` but **swallows every
+other `Exception`** into `packet_exception.txt` and lets the handler return
+normally — and **456 files under `Core/` close their handlers with that
+macro**. So `NoSuchElementException` or `InvalidArgumentException` would have
+turned a failed cast into *a packet that quietly appears to have succeeded*.
+`InvalidProtocolException` is also wrong: `GamePlayer::sendPacket()` silently
+swallows it, and a failed downcast is a server-side type-invariant violation,
+not malformed client input. `InvalidCastError` therefore derives from
+`AssertionError`, hence `Error`.
+
+**A conversion rule worth keeping:** any handler invoked *outside* the packet
+boundary cannot take a throwing cast. `CGLogoutHandler` is called directly by
+`ZonePlayerManager`, outside `pPacket->execute()`'s `catch (...)`, so a throw
+would escape into the zone loop. `CGSayHandler` catches `Error` **by value**,
+which would swallow it. Both excluded.
+
+**The remaining work is now quantified** [measured, function-scoped,
+deliberately conservative] over 3,645 sites in `dkrixserver/src`:
+
+| Category | Sites | % |
+|---|---:|---:|
+| **Unchecked and dereferenced** | **1,930** | 52.9% |
+| Guarded by `Assert(pX != NULL)` | 1,039 | 28.5% |
+| Deliberately NULL-tested | 485 | 13.3% |
+| Used inline, not bound | 174 | 4.8% |
+| Bound but never dereferenced | 17 | 0.5% |
+
+250 converted (13% of the unchecked set). The rest is led by `Zone.cpp` (84),
+`skill/SkillUtil.cpp` (52), `CreatureUtil.cpp` (36) — **none of them packet
+handlers**, so the packet-boundary catch argument must be re-established per
+call path before converting them. The 1,039 `Assert`-guarded sites are a
+separate later question: correct in Debug, gone under `make release`.
+
+**Measured effect of `[[noreturn]]` (18-AN):** the `server-warning-scan`
+artifact fell from **82,374 to 66,224 bytes** between runs `31440542647` and
+`31444606202`. Directional only — the artifact covers all warnings, not just
+the family — but consistent with the 90–140 retirement predicted by counting
+`Assert(false)` sites.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
