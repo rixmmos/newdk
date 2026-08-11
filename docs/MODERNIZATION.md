@@ -5695,8 +5695,34 @@ separate later question: correct in Debug, gone under `make release`.
 **Measured effect of `[[noreturn]]` (18-AN):** the `server-warning-scan`
 artifact fell from **82,374 to 66,224 bytes** between runs `31440542647` and
 `31444606202`. Directional only — the artifact covers all warnings, not just
-the family — but consistent with the 90–140 retirement predicted by counting
-`Assert(false)` sites.
+the family.
+
+**MEASURED EFFECT OF `checkedCast` — and it refutes the claim that prompted it.**
+Run `31447699566`, immediately after the 250 conversions: **66,224 → 65,695
+bytes.** A 529-byte drop. Essentially nothing, against a predicted 40–90
+findings retired.
+
+The reason is the dedup mechanism, reasoned through properly only after the
+measurement: **findings key to the inlined-callee header line.** A warning on
+`Inventory.h:96` disappears only when the **last** unchecked caller of that
+getter is converted. Converting 250 of 1,930 sites (13%) removes almost no
+header lines, because nearly every one still has other unconverted callers.
+
+So the wave-6 note calling this "the highest-leverage follow-up — retires ~75%
+of the family in one reviewable change" is **wrong as stated**, and the
+correct framing is close to its inverse: the remaining ~1,680 conversions are
+not 87% of the work for 87% of the benefit, they are **nearly all of the
+benefit**, because the metric only moves on the last caller of each getter.
+Partial conversion of this idiom is worth very little *as measured*, however
+much it improves the code.
+
+Two things follow. **Artifact size is a poor proxy** and should not be quoted
+as one again — the earlier 82K→66K drop was real but for a different reason
+(`[[noreturn]]` affects whole diagnostic classes, not individual call sites).
+And **the correctness value of the 250 conversions stands regardless**: one
+turns a live remote gameserver kill into a dropped connection, and the
+`Assert`-adjacent sites now fail identically in Debug and Release. It is the
+warning-count claim that was wrong, not the change.
 
 ## Explicit non-goals
 
