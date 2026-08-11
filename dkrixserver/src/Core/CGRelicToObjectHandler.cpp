@@ -671,13 +671,13 @@ void CGRelicToObjectHandler::executeSweeper(CGRelicToObject* pPacket, Player* pP
         }
 
 
-        char race[15];
+        char race[15] = "";
         if (pCreature->isSlayer()) {
-            sprintf(race, g_pStringPool->c_str(STRID_SLAYER));
+            snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_SLAYER));
         } else if (pCreature->isVampire()) {
-            sprintf(race, g_pStringPool->c_str(STRID_VAMPIRE));
+            snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_VAMPIRE));
         } else if (pCreature->isOusters()) {
-            sprintf(race, g_pStringPool->c_str(STRID_OUSTERS));
+            snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_OUSTERS));
         } else {
             Assert(false);
         }

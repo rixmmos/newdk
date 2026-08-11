@@ -753,7 +753,7 @@ void CBillingPlayer::executeMinusPoint(CBillingPacketHeader& header, CBillingPac
             } else if (body.Player_Type == CBILLING_PLAYER_TYPE_MONTHLY) {
                 
                 char m[200];
-                sprintf(m, g_pStringPool->c_str(STRID_CB_CHANGE_TO_MONTHLY_PLAYER));
+                snprintf(m, sizeof(m), "%s", g_pStringPool->c_str(STRID_CB_CHANGE_TO_MONTHLY_PLAYER));
 
                 GCSystemMessage msg;
                 msg.setMessage(m);

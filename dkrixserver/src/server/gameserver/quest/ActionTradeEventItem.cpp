@@ -122,32 +122,32 @@ void ActionTradeEventItem::execute(Creature* pCreature1, Creature* pCreature2)
             case 100:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 0, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 0, option4);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_1));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_1));
                 break;
             case 125:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 2, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 2, option5);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_2));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_2));
                 break;
             case 175:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 4, option1);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 4, option1);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_3));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_3));
                 break;
             case 225:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 4, option2);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 4, option2);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_4));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_4));
                 break;
             case 275:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 4, option3);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 4, option3);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_5));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_5));
                 break;
             default:
                 return;
@@ -157,32 +157,32 @@ void ActionTradeEventItem::execute(Creature* pCreature1, Creature* pCreature2)
             case 100:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 1, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 1, option4);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_6));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_6));
                 break;
             case 125:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 3, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 3, option5);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_7));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_7));
                 break;
             case 175:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 5, option1);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 5, option1);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_8));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_8));
                 break;
             case 225:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 5, option2);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 5, option2);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_9));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_9));
                 break;
             case 275:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_COAT, 5, option3);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_TROUSER, 5, option3);
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_10));
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_10));
                 break;
             default:
                 return;
@@ -196,37 +196,37 @@ void ActionTradeEventItem::execute(Creature* pCreature1, Creature* pCreature2)
             case 100:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 1, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 2, option4);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_11));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_11));
                 break;
             case 125:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 3, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 3, option4);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_12));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_12));
                 break;
             case 175:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 3, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 4, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_13));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_13));
                 break;
             case 225:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 3, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 5, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_14));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_14));
                 break;
             case 275:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 3, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 6, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_15));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_15));
                 break;
             default:
                 return;
@@ -236,37 +236,37 @@ void ActionTradeEventItem::execute(Creature* pCreature1, Creature* pCreature2)
             case 100:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 0, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 2, option4);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_16));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_16));
                 break;
             case 125:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 2, option4);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 3, option4);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_17));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_17));
                 break;
             case 175:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 2, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 4, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_18));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_18));
                 break;
             case 225:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 2, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 5, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_19));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_19));
                 break;
             case 275:
                 pItem1 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_COAT, 2, option5);
                 pItem2 = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_VAMPIRE_NECKLACE, 6, option3);
-                
-                
-                sprintf(message, g_pStringPool->c_str(STRID_KOREA_FIGHTING_20));
+
+
+                snprintf(message, sizeof(message), "%s", g_pStringPool->c_str(STRID_KOREA_FIGHTING_20));
                 break;
             default:
                 return;

@@ -8678,7 +8678,7 @@ void Zone::remainPayPlayer()
 
                 char msg[100];
 
-                sprintf(msg, g_pStringPool->c_str(STRID_LEVEL_WAR_ZONE_FREE_CLOSE_1));
+                snprintf(msg, sizeof(msg), "%s", g_pStringPool->c_str(STRID_LEVEL_WAR_ZONE_FREE_CLOSE_1));
 
                 GCSystemMessage gcSystemMessage;
                 gcSystemMessage.setMessage(msg);

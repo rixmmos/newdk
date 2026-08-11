@@ -505,26 +505,26 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                             }
 
 
-                            char safeRace[15];
+                            char safeRace[15] = "";
                             if (pZone->getLevelWarManager()->getSafeIndex(pMonsterCorpse) == 0) {
-                                sprintf(safeRace, g_pStringPool->c_str(STRID_SLAYER));
+                                snprintf(safeRace, sizeof(safeRace), "%s", g_pStringPool->c_str(STRID_SLAYER));
                             } else if (pZone->getLevelWarManager()->getSafeIndex(pMonsterCorpse) == 1) {
-                                sprintf(safeRace, g_pStringPool->c_str(STRID_VAMPIRE));
+                                snprintf(safeRace, sizeof(safeRace), "%s", g_pStringPool->c_str(STRID_VAMPIRE));
                             } else if (pZone->getLevelWarManager()->getSafeIndex(pMonsterCorpse) == 2) {
-                                sprintf(safeRace, g_pStringPool->c_str(STRID_OUSTERS));
+                                snprintf(safeRace, sizeof(safeRace), "%s", g_pStringPool->c_str(STRID_OUSTERS));
                             } else if (pZone->getLevelWarManager()->getSafeIndex(pMonsterCorpse) == 3) {
-                                sprintf(safeRace, g_pStringPool->c_str(STRID_CENTER));
+                                snprintf(safeRace, sizeof(safeRace), "%s", g_pStringPool->c_str(STRID_CENTER));
                             } else {
                                 Assert(false);
                             }
 
-                            char race[15];
+                            char race[15] = "";
                             if (pCreature->isSlayer()) {
-                                sprintf(race, g_pStringPool->c_str(STRID_SLAYER));
+                                snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_SLAYER));
                             } else if (pCreature->isVampire()) {
-                                sprintf(race, g_pStringPool->c_str(STRID_VAMPIRE));
+                                snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_VAMPIRE));
                             } else if (pCreature->isOusters()) {
-                                sprintf(race, g_pStringPool->c_str(STRID_OUSTERS));
+                                snprintf(race, sizeof(race), "%s", g_pStringPool->c_str(STRID_OUSTERS));
                             } else {
                                 Assert(false);
                             }

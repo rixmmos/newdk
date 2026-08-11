@@ -21,6 +21,10 @@ void GCModifyGuildMemberInfo::read(SocketInputStream& iStream)
 
     iStream.read(m_GuildID);
 
+    // Read the length off the wire before validating it. The guard below used
+    // to run against an uninitialized local, making the bounds check useless.
+    iStream.read(szGuildName);
+
     // if (szGuildName == 0 )
     //	throw InvalidProtocolException("szGuildName == 0");
 
@@ -28,9 +32,8 @@ void GCModifyGuildMemberInfo::read(SocketInputStream& iStream)
         throw InvalidProtocolException("too long GuildName length");
 
     if (szGuildName != 0)
-        iStream.read(szGuildName);
+        iStream.read(m_GuildName, szGuildName);
 
-    iStream.read(m_GuildName, szGuildName);
     iStream.read(m_GuildMemberRank);
 
     __END_CATCH

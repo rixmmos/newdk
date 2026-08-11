@@ -2339,13 +2339,19 @@ void CGSayHandler::oppay(GamePlayer* pGamePlayer, string msg, int i) {
             strcpy(str, "[Metrotech][] ");
         }
 
+        // Append to str. The original passed str as both destination and a %s
+        // source, which is undefined behaviour (-Wrestrict); write past the
+        // existing content instead so the produced string is unchanged.
+        size_t len = strlen(str);
+
         if (pGamePlayer->getPayType() == PAY_TYPE_FREE) {
             strcat(str, ".");
         } else if (pGamePlayer->getPayType() == PAY_TYPE_PERIOD) {
-            sprintf(str, "%s%s.", str, pGamePlayer->getPayPlayAvailableDateTime().toString().c_str());
+            snprintf(str + len, sizeof(str) - len, "%s.",
+                     pGamePlayer->getPayPlayAvailableDateTime().toString().c_str());
         } else {
-            sprintf(str, "%s : %d / %d ", str, (int)(payTime.tv_sec / 60),
-                    (int)pGamePlayer->getPayPlayAvailableHours());
+            snprintf(str + len, sizeof(str) - len, " : %d / %d ", (int)(payTime.tv_sec / 60),
+                     (int)pGamePlayer->getPayPlayAvailableHours());
         }
     } else {
         strcpy(str, "[Metrotech] .");
