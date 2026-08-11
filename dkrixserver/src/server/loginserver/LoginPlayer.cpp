@@ -459,10 +459,29 @@ void LoginPlayer::sendLGKickCharacter() {
     Statement* pStmt1 = NULL;
 
     string characterName = getLastCharacterName();
-    int serverID, serverGroupID, worldID, lastSlot;
+
+    // All four were declared indeterminate, and two paths below reach a use
+    // without writing them. (a) The else branch -- isSetWorldGroupID() true,
+    // i.e. the normal re-login path -- assigns serverID, worldID and
+    // serverGroupID but never lastSlot, which is then fed to the SLOT<n> bind
+    // of the character-name query. (b) The if branch assigns all four only
+    // when the Player row exists, so a missing row left serverID and worldID
+    // indeterminate before getGameServerInfo() below. serverID is 1 because
+    // that is the only value either branch ever assigns; lastSlot is 0 to
+    // match the constructor's m_LastSlot; worldID/serverGroupID are 0 so that
+    // a missing row fails the getGameServerInfo() lookup cleanly (login is
+    // refused) rather than resolving a server from stack garbage.
+    int serverID = 1;
+    int serverGroupID = 0;
+    int worldID = 0;
+    int lastSlot = 0;
 
     string gameServerIP;
-    uint gameServerPort;
+    // Same shape: assigned only inside `if (pGameServerInfo != NULL)` below, yet
+    // read unconditionally by the sendPacket() at the end of that loop body. If
+    // the lookup returns NULL instead of throwing, this was an indeterminate
+    // port. gameServerIP is a std::string and already defaults to "".
+    uint gameServerPort = 0;
 
     //----------------------------------------------------------------------
 
@@ -494,6 +513,11 @@ void LoginPlayer::sendLGKickCharacter() {
         serverID = 1;
         worldID = getWorldID();
         serverGroupID = getGroupID();
+        // The if branch above stores the row's LastSlot via setLastSlot() before
+        // it sets the world-group flag, so on this path the member is the value
+        // that branch read from the DB. Reading it back is what the SLOT<n> bind
+        // below has always been meant to use.
+        lastSlot = (int)getLastSlot();
     }
 
 

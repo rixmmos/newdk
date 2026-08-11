@@ -2302,6 +2302,16 @@ void Zone::initSpriteCount()
         }
 
         if (bAdd) {
+            // m_NPCTypes is a fixed maxNPCPerZone member array and the loop is
+            // driven by however many distinct NPC sprite types the zone's DB
+            // rows produced -- with no check at all here, and only an Assert on
+            // the monster loop below. Both are member-array *writes*, so stop
+            // filling rather than run past the end; the counts are what the
+            // GCUpdateInfo loops in PacketUtil then iterate over, so keeping
+            // them truthful keeps that side in range too.
+            if (m_NPCCount >= maxNPCPerZone)
+                break;
+
             m_NPCTypes[m_NPCCount] = pNPC->getSpriteType();
             m_NPCCount++;
         }
@@ -2310,6 +2320,11 @@ void Zone::initSpriteCount()
 
     const unordered_map<SpriteType_t, MonsterCounter*>& MONSTER = m_pMonsterManager->getMonsters();
     for (unordered_map<SpriteType_t, MonsterCounter*>::const_iterator i = MONSTER.begin(); i != MONSTER.end(); i++) {
+        // See the NPC loop above -- same fixed member array, same DB-driven
+        // count, and the Assert here disappears under NDEBUG.
+        if (m_MonsterCount >= maxMonsterPerZone)
+            break;
+
         Assert(m_MonsterCount < maxMonsterPerZone); // by sigi
 
         m_MonsterTypes[m_MonsterCount] = i->first;
@@ -2343,10 +2358,29 @@ ZoneLevel_t Zone::getZoneLevel(ZoneCoord_t x, ZoneCoord_t y) const
 //////////////////////////////////////////////////////////////////////////////
 // getTile
 //////////////////////////////////////////////////////////////////////////////
+// Both overloads return a *reference*, so there is no sentinel to return: the
+// non-const one hands the caller a writable Tile whose creature and item lists
+// are then mutated (addCreature/deleteCreature/addItem), and a shared static
+// dummy would silently swallow creatures and items and answer isBlocked() for
+// the wrong square, on every zone and every thread at once. So they throw.
+//
+// The condition is character-for-character the one the Assert already tested --
+// ZoneCoord_t is a WORD, so `x < m_Width` alone is a complete bound -- which
+// makes this a no-op in the deployed Debug build, where Assert already throws
+// AssertionError. It only changes `make release`, where the Assert becomes
+// ((void)0) and m_pTiles[x][y] is an unchecked 2-D index. Both AssertionError
+// and OutOfBoundException are Throwable and land in the same catch.
+//
+// No wire coordinate reaches here unvalidated today (tile skills clip with
+// ptInRect, CGThrowBomb uses isValidZoneCoord, movePC derives the destination
+// itself), but there are 583 call sites and this is the chokepoint.
 const Tile& Zone::getTile(ZoneCoord_t x, ZoneCoord_t y) const
 
 {
     __BEGIN_TRY
+
+    if (x >= m_Width || y >= m_Height)
+        throw OutOfBoundException("Zone::getTile: coordinate outside zone");
 
     Assert(x < m_Width && y < m_Height);
     return m_pTiles[x][y];
@@ -2359,6 +2393,9 @@ Tile& Zone::getTile(ZoneCoord_t x, ZoneCoord_t y)
 {
     __BEGIN_TRY
 
+    if (x >= m_Width || y >= m_Height)
+        throw OutOfBoundException("Zone::getTile: coordinate outside zone");
+
     Assert(x < m_Width && y < m_Height);
     return m_pTiles[x][y];
 
@@ -2368,17 +2405,28 @@ Tile& Zone::getTile(ZoneCoord_t x, ZoneCoord_t y)
 //////////////////////////////////////////////////////////////////////////////
 // getSector
 //////////////////////////////////////////////////////////////////////////////
+// Same treatment as getTile, and the second Assert also had a typo: it tested
+// `y < m_SectorHeight` where it meant `sy`, so the row bound was never really
+// checked even in Debug. Nothing calls this today (Tile::getSector() has no
+// callers either), so hardening it is free -- and it is the one that would be
+// wrong first if a caller appeared.
 Sector* Zone::getSector(ZoneCoord_t x, ZoneCoord_t y)
 
 {
     __BEGIN_TRY
+
+    if (x >= m_Width || y >= m_Height)
+        throw OutOfBoundException("Zone::getSector: coordinate outside zone");
 
     Assert(x < m_Width && y < m_Height);
 
     int sx = x / SECTOR_SIZE;
     int sy = y / SECTOR_SIZE;
 
-    Assert(sx < m_SectorWidth && y < m_SectorHeight);
+    if (sx >= m_SectorWidth || sy >= m_SectorHeight)
+        throw OutOfBoundException("Zone::getSector: sector outside zone");
+
+    Assert(sx < m_SectorWidth && sy < m_SectorHeight);
 
     return &(m_pSectors[sx][sy]);
 
@@ -8630,7 +8678,7 @@ void Zone::remainPayPlayer()
 
                 char msg[100];
 
-                sprintf(msg, g_pStringPool->c_str(STRID_LEVEL_WAR_ZONE_FREE_CLOSE_1));
+                snprintf(msg, sizeof(msg), "%s", g_pStringPool->c_str(STRID_LEVEL_WAR_ZONE_FREE_CLOSE_1));
 
                 GCSystemMessage gcSystemMessage;
                 gcSystemMessage.setMessage(msg);

@@ -33,9 +33,15 @@ void CGSMSAddressListHandler::execute(CGSMSAddressList* pPacket, Player* pPlayer
 
     SMSAddressBook* pBook = pPC->getAddressBook();
     if (pBook != NULL) {
-        GCSMSAddressList* pPacket = pBook->getGCSMSAddressList();
-        if (pPacket != NULL)
-            pGamePlayer->sendPacket(pPacket);
+        // getGCSMSAddressList() allocates the packet and one AddressUnit per
+        // entry; sendPacket() serializes synchronously and does not take
+        // ownership, so the caller must free it. Leaked once per request
+        // before, and a client may send this packet freely.
+        GCSMSAddressList* pAddressList = pBook->getGCSMSAddressList();
+        if (pAddressList != NULL) {
+            pGamePlayer->sendPacket(pAddressList);
+            SAFE_DELETE(pAddressList);
+        }
     }
 
 #endif // __GAME_SERVER__

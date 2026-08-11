@@ -69,7 +69,10 @@ void UserInfoManager::init() noexcept(false) {
 void UserInfoManager::load() noexcept(false) {
     __BEGIN_TRY
 
-    Statement* pStmt;
+    // Assigned as the first statement inside the BEGIN_DB block, but END_DB's
+    // `delete pStmt` (DB.h) is reachable before that if getConnection() or
+    // createStatement() throws -- delete on an indeterminate pointer.
+    Statement* pStmt = NULL;
 
     BEGIN_DB {
         pStmt = g_pDatabaseManager->getConnection("DARKEDEN")->createStatement();

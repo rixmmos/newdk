@@ -10,6 +10,7 @@
 #include <math.h>
 
 #include "CGRideMotorCycle.h"
+#include "CheckedCast.h"
 #include "EffectHPRecovery.h"
 #include "EffectMPRecovery.h"
 #include "EffectRecallMotorcycle.h"
@@ -61,15 +62,15 @@ bool UseYellowCandy(PlayerCreature* pPC, Item* pItem) {
             bool HPRegen = false, MPRegen = false;
             HP_t CurrentHP = 0, MaxHP = 0;
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 CurrentHP = pSlayer->getHP();
                 MaxHP = pSlayer->getHP(ATTR_MAX);
             } else if (pPC->isVampire()) {
-                Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+                Vampire* pVampire = checkedCast<Vampire*>(pPC);
                 CurrentHP = pVampire->getHP();
                 MaxHP = pVampire->getHP(ATTR_MAX);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 CurrentHP = pOusters->getHP();
                 MaxHP = pOusters->getHP(ATTR_MAX);
             }
@@ -85,24 +86,24 @@ bool UseYellowCandy(PlayerCreature* pPC, Item* pItem) {
                 HPRegen = true;
 
                 if (pPC->isSlayer()) {
-                    Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                    Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                     pSlayer->setHP(CurrentHP);
                 } else if (pPC->isVampire()) {
-                    Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+                    Vampire* pVampire = checkedCast<Vampire*>(pPC);
                     pVampire->setHP(CurrentHP);
                 } else if (pPC->isOusters()) {
-                    Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                    Ousters* pOusters = checkedCast<Ousters*>(pPC);
                     pOusters->setHP(CurrentHP);
                 }
             }
 
             MP_t CurrentMP = 0, MaxMP = 0;
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 CurrentMP = pSlayer->getMP();
                 MaxMP = pSlayer->getMP(ATTR_MAX);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 CurrentMP = pOusters->getMP();
                 MaxMP = pOusters->getMP(ATTR_MAX);
             }
@@ -113,10 +114,10 @@ bool UseYellowCandy(PlayerCreature* pPC, Item* pItem) {
                 MPRegen = true;
 
                 if (pPC->isSlayer()) {
-                    Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                    Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                     pSlayer->setMP(CurrentMP);
                 } else if (pPC->isOusters()) {
-                    Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                    Ousters* pOusters = checkedCast<Ousters*>(pPC);
                     pOusters->setMP(CurrentMP);
                 }
             }
@@ -166,7 +167,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             if (!pCreature->isSlayer())
                 return;
 
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+            Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
             Zone* pZone = pSlayer->getZone();
             Item* pBelt = pSlayer->getWearItem(Slayer::WEAR_BELT);
 
@@ -432,7 +433,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             HP_t CurrentHP = pSlayer->getHP(ATTR_CURRENT);
             MP_t MaxMP = pSlayer->getMP(ATTR_MAX);
             MP_t CurrentMP = pSlayer->getMP(ATTR_CURRENT);
-            Potion* pPotion = dynamic_cast<Potion*>(pBeltItem);
+            Potion* pPotion = checkedCast<Potion*>(pBeltItem);
 
 
             int HPQuantity = pPotion->getHPQuantity();
@@ -477,7 +478,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                     if (pSlayer->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                        EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                        EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
 
                         int PrevHPAmount =
@@ -569,7 +570,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                     if (pSlayer->isFlag(Effect::EFFECT_CLASS_MP_RECOVERY)) {
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
-                        EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
+                        EffectMPRecovery* pEffectMPRecoveryEffect = checkedCast<EffectMPRecovery*>(pEffect);
 
 
                         int PrevMPAmount =
@@ -644,7 +645,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                                 0);
             }
         } else if (pCreature->isOusters()) {
-            Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+            Ousters* pOusters = checkedCast<Ousters*>(pCreature);
             Zone* pZone = pOusters->getZone();
 
 
@@ -724,7 +725,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 MaxHP = pOusters->getHP(ATTR_MAX);
                 CurrentHP = pOusters->getHP(ATTR_CURRENT);
 
-                Pupa* pPupa = dynamic_cast<Pupa*>(pOustersArmsbandItem);
+                Pupa* pPupa = checkedCast<Pupa*>(pOustersArmsbandItem);
 
 
                 HPQuantity = pPupa->getHPQuantity();
@@ -739,7 +740,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
                 MaxHP = pOusters->getHP(ATTR_MAX);
                 CurrentHP = pOusters->getHP(ATTR_CURRENT);
 
-                ComposMei* pComposMei = dynamic_cast<ComposMei*>(pOustersArmsbandItem);
+                ComposMei* pComposMei = checkedCast<ComposMei*>(pOustersArmsbandItem);
 
 
                 HPQuantity = pComposMei->getHPQuantity();
@@ -763,7 +764,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                     if (pOusters->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                        EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                        EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
 
                         int PrevHPAmount =
@@ -854,7 +855,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             if (pOustersArmsbandItem->getItemClass() == Item::ITEM_CLASS_COMPOS_MEI) {
                 MaxMP = pOusters->getMP(ATTR_MAX);
                 CurrentMP = pOusters->getMP(ATTR_CURRENT);
-                ComposMei* pComposMei = dynamic_cast<ComposMei*>(pOustersArmsbandItem);
+                ComposMei* pComposMei = checkedCast<ComposMei*>(pOustersArmsbandItem);
 
 
                 MPQuantity = pComposMei->getMPQuantity();
@@ -871,7 +872,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
             } else if (pOustersArmsbandItem->getItemClass() == Item::ITEM_CLASS_PUPA) {
                 MaxMP = pOusters->getMP(ATTR_MAX);
                 CurrentMP = pOusters->getMP(ATTR_CURRENT);
-                Pupa* pPupa = dynamic_cast<Pupa*>(pOustersArmsbandItem);
+                Pupa* pPupa = checkedCast<Pupa*>(pOustersArmsbandItem);
 
 
                 MPQuantity = pPupa->getMPQuantity();
@@ -898,7 +899,7 @@ void CGUsePotionFromQuickSlotHandler::execute(CGUsePotionFromQuickSlot* pPacket,
 
                     if (pOusters->isFlag(Effect::EFFECT_CLASS_MP_RECOVERY)) {
                         Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
-                        EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
+                        EffectMPRecovery* pEffectMPRecoveryEffect = checkedCast<EffectMPRecovery*>(pEffect);
 
 
                         int PrevMPAmount =

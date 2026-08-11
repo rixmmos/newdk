@@ -76,9 +76,12 @@ bool ConditionEnterCastleDungeon::isSatisfied(Creature* pCreature1, Creature* pC
         }
 
         if (hasGuildWar) {
-            GuildID_t AttackGuildID;
-            g_pWarSystem->getAttackGuildID(m_CastleZoneID, AttackGuildID);
-            if (GuildID == AttackGuildID) {
+            // getAttackGuildID() only writes the out-param when it returns true, and it
+            // takes the active-war lock separately from hasCastleActiveWar() above -- the
+            // war can end in between. Without the return check, AttackGuildID would then
+            // be read uninitialised and could grant entry by chance.
+            GuildID_t AttackGuildID = 0;
+            if (g_pWarSystem->getAttackGuildID(m_CastleZoneID, AttackGuildID) && GuildID == AttackGuildID) {
                 return true;
             }
         }

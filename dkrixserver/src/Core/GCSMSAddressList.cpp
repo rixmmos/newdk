@@ -69,6 +69,18 @@ GCSMSAddressList::~GCSMSAddressList()
 
 {
     __BEGIN_TRY
+
+    // The packet owns the units handed to it by SMSAddressBook::
+    // getGCSMSAddressList(), which allocates a fresh AddressUnit per entry.
+    vector<AddressUnit*>::iterator itr = m_Addresses.begin();
+    vector<AddressUnit*>::iterator endItr = m_Addresses.end();
+
+    for (; itr != endItr; ++itr) {
+        SAFE_DELETE(*itr);
+    }
+
+    m_Addresses.clear();
+
     __END_CATCH_NO_RETHROW
 }
 

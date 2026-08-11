@@ -247,7 +247,10 @@ Damage_t computeDamage(Creature* pCreature, Creature* pTargetCreature, int Criti
             Assert(pMonster != NULL);
             Damage = computeMonsterDamage(pMonster, pTargetCreature, bCriticalHit);
         } else {
-            
+            // Attacker is none of the four damage-dealing kinds (an NPC). No
+            // damage is computed, so report no critical: returning here without
+            // writing the out-param left the caller's bool indeterminate.
+            bCritical = false;
             return 0;
         }
     } catch (Throwable& t) {
@@ -4359,17 +4362,32 @@ bool increaseDomainExp(Slayer* pSlayer, SkillDomainType_t Domain, Exp_t Point, M
             
             stable_sort(ds, ds + SKILL_DOMAIN_VAMPIRE, isBig());
 
-            
+            // Range test moved ahead of the read and corrected from `>` to
+            // `>=`: ds holds exactly SKILL_DOMAIN_VAMPIRE entries and is
+            // 0-based, so the old form read ds[j] before testing j at all, and
+            // the test it did make would then have admitted
+            // j == SKILL_DOMAIN_VAMPIRE. Same read-before-check shape 89b2892
+            // fixed in SkillHandlerManager.
+            //
+            // Unreachable in practice -- ds carries one entry per domain, so at
+            // most one of them can equal Domain and a real run stops at j <= 1.
+            // If it ever did fire there would be no other domain to demote, so
+            // fall back to the last entry (ds is sorted descending by level, so
+            // that is the weakest one) rather than reading past the array. It
+            // must not return: the level-up bookkeeping below this block still
+            // has to run.
             int j = 0;
-            while (ds[j].DomainType == Domain) {
+            while (j < SKILL_DOMAIN_VAMPIRE && ds[j].DomainType == Domain) {
                 j++;
-                if (j > SKILL_DOMAIN_VAMPIRE) {
-                    cerr << "Out of Skill Domain Range!!!" << endl;
-                    Assert(false);
-                }
             }
 
-            
+            if (j >= SKILL_DOMAIN_VAMPIRE) {
+                cerr << "Out of Skill Domain Range!!!" << endl;
+                Assert(false);
+                j = SKILL_DOMAIN_VAMPIRE - 1;
+            }
+
+
             SkillDomainType_t DownDomainType = ds[j].DomainType;
             Level_t DownDomainLevel = ds[j].DomainLevel;
 

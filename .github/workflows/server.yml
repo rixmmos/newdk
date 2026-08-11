@@ -24,6 +24,11 @@ on:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
       - "tools/ci/**"
+      # Compiled into all three servers via dkrixserver/CMakeLists.txt's
+      # add_subdirectory. Omitting it meant a change confined to
+      # shared/Packets/ triggered NO server CI -- the same shape as the
+      # branch-allowlist trap described above.
+      - "shared/Packets/**"
       # The packet-duplicates ratchet reads this client dir too; without
       # this filter a client-side packet add would skip the gate.
       - "dkrix/Client/Packet/Cpackets/**"
@@ -33,6 +38,7 @@ on:
       - "dkrixserver/**"
       - ".github/workflows/server.yml"
       - "tools/ci/**"
+      - "shared/Packets/**"
       - "dkrix/Client/Packet/Cpackets/**"
   # Push-triggered runs have lagged 20+ minutes; workflow_dispatch returns
   # in seconds. Keep it on every workflow.
@@ -213,6 +219,247 @@ jobs:
             fi
             echo "ok: bin/$b"
           done
+
+  warning-scan:
+    # WHY THIS JOB EXISTS [new 2026-08-11].
+    #
+    # `-Wmaybe-uninitialized` cannot fire in any configuration this project
+    # builds. CMAKE_CXX_FLAGS_DEBUG is "-g" with no -O flag
+    # (dkrixserver/CMakeLists.txt:35), GCC's uninitialised analysis is a
+    # dataflow pass that only runs under optimisation, and every Makefile
+    # target — debug, debug-asan, debug-tsan, debug-ubsan — is
+    # CMAKE_BUILD_TYPE=Debug. So is every job above. A real Debug build log
+    # shows 31 warnings, none containing "uninitialized"
+    # (MODERNIZATION.md, "Why the uninitialised-variable class keeps
+    # recurring" [measured]).
+    #
+    # Six Phase 18 bugs share that root — 18-F (uninitialised member
+    # pointers delete[]'d), 18-L (uninitialised player array dereferenced),
+    # 18-M(b), 18-W (three uninitialised Statement* reaching delete), 18-AA,
+    # 18-AI (two uninitialised QuestID_t erasing arbitrary quests). Every one
+    # was found by a person reading code, because the compiler was
+    # structurally unable to say anything. This job gives the compiler the
+    # one thing it was missing: an -O flag.
+    #
+    # WHY A SEPARATE LEG RATHER THAN -Og IN CMAKE_CXX_FLAGS_DEBUG.
+    # `make debug` is what runs in production here — the deployed binaries
+    # are the Debug ones (dkrixserver/CLAUDE.md is explicit that Assert() is
+    # live precisely because Debug does not set NDEBUG). Putting -Og there
+    # changes the codegen of the shipping server, and of the asan/ubsan/boot
+    # legs with it, as a side effect of a diagnostics change. On a tree whose
+    # UB inventory is literally unknown (no UBSan-instrumented binary has
+    # ever been executed here — see the boot matrix) optimisation is not a
+    # behaviour-neutral edit. And the payoff would be identical anyway:
+    # nothing in this repo builds with -Werror, so -Og in Debug would print
+    # warnings and gate nothing — exactly what this job does, minus the risk.
+    # The one thing the -Og route buys that this does not is putting the
+    # warning in front of a developer at their own terminal; the step summary
+    # below is the substitute, and it is a weaker one. Revisit if this leg
+    # produces findings nobody reads.
+    #
+    # NOT CACHED, DELIBERATELY. Every other build leg caches its build tree.
+    # This one must not: an incremental build recompiles only what changed
+    # and therefore re-emits warnings only for what changed, so a cache hit
+    # would silently turn a 400-warning inventory into "3 warnings" and read
+    # as an improvement. That is the same failure shape as the SQL ratchet
+    # reporting 0 while 188 sites were invisible to it. A warning scan is
+    # only meaningful over a full compile, so it pays for one every run.
+    #
+    # This leg produces NO deliverable. It does not verify binaries and
+    # uploads none. (CMAKE_RUNTIME_OUTPUT_DIRECTORY is pinned to
+    # ${CMAKE_SOURCE_DIR}/bin, so the -O2 executables do land in
+    # dkrixserver/bin/ — on a fresh runner, discarded with the job. Nothing
+    # downstream reads them, and nothing should: they are not the shipped
+    # configuration.)
+    name: warning scan (-O2, informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # NON-BLOCKING, and unlike the sanitizer legs there is no plan to flip
+    # it. The repo's flip rule (MODERNIZATION.md Phase 10 bullet 3) is >=5
+    # consecutive greens of a leg, but that rule is for legs that assert
+    # something. This one reports a count. It becomes enforceable only by
+    # being turned into a ratchet — see "SEEDING A RATCHET" below — and not
+    # before a real run has produced a real number.
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same dependency set as every other build leg, libnsl-dev included:
+      # this job links the three executables like the others do, so it hits
+      # the same `ld: cannot find -lnsl` at 86% without it. It links only
+      # because CMake's default target does; the binaries are unused.
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libmysqlclient-dev \
+            liblua5.1-0-dev \
+            libxerces-c-dev \
+            libnsl-dev
+
+      - name: Show toolchain
+        run: |
+          cmake --version
+          g++ --version
+
+      # FLAG INJECTION, AND WHY IT GOES IN CMAKE_CXX_FLAGS AND NOT
+      # CMAKE_CXX_FLAGS_DEBUG. CMakeLists.txt:35 is a plain
+      # `set(CMAKE_CXX_FLAGS_DEBUG "-g")`, which overrides the cache — a
+      # -DCMAKE_CXX_FLAGS_DEBUG=... on the command line is silently
+      # discarded. (Same trap documented at CMakeLists.txt:93-97 for the
+      # UBSan flags.) CMAKE_CXX_FLAGS is only ever appended to, so it
+      # survives. Resulting compile line, in order:
+      #   <-O2 …>  -g  -Wall -Wno-format -Wno-format-security
+      # i.e. CMAKE_CXX_FLAGS, then CMAKE_CXX_FLAGS_DEBUG, then the
+      # add_compile_options set. Nothing later carries an -O, so -O2 stands.
+      #
+      # Build type stays Debug ON PURPOSE. Release would add -DNDEBUG, which
+      # compiles Assert() down to ((void)0) (src/Core/Assert.h) and deletes
+      # whole branches from the dataflow the analysis walks. The point is to
+      # analyse the configuration that ships, with optimisation added — not a
+      # different configuration.
+      #
+      # -O2 rather than -Og: more inlining means more interprocedural
+      # dataflow means more findings, and since this build ships nothing,
+      # none of the -Og-preserves-debuggability argument applies here.
+      #
+      # The four explicit -W flags: -Wuninitialized/-Wmaybe-uninitialized are
+      # already in -Wall and are restated because they are the reason this
+      # job exists. -Wnull-dereference is NOT in -Wall and also needs
+      # optimisation. -Winit-self catches `int x = x;`. No `=level` suffixes
+      # are used: -Wall re-enables its constituents at its own default level
+      # and would fight an earlier explicit level.
+      - name: Configure and build at -O2
+        working-directory: dkrixserver
+        run: |
+          set -o pipefail
+          mkdir -p ci-warning-logs
+          cmake -B build-warnings \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-O2 -Wuninitialized -Wmaybe-uninitialized -Winit-self -Wnull-dereference"
+          status=0
+          cmake --build build-warnings -j"$(nproc)" 2>&1 \
+            | tee ci-warning-logs/build.log || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::warning::the -O2 scan build did not complete (exit $status) — the report below covers only the translation units that compiled"
+          fi
+          # Deliberately does not propagate $status. A -O2 build breaking
+          # where the Debug build does not is a finding in its own right, and
+          # it is recorded by the ::warning:: above and by the uploaded log;
+          # it must not cost us the partial warning inventory.
+
+      # Report is line-oriented on purpose: a parallel build interleaves
+      # output, so multi-line diagnostic context (the source excerpt, the
+      # "note:" follow-ups) cannot be reassembled reliably — but the
+      # `file:line:col: warning: … [-Wopt]` line itself is atomic.
+      #
+      # Two numbers are produced. The FAMILY count is the one that matters:
+      # the optimisation-dependent diagnostics, i.e. the ones the Debug legs
+      # are structurally unable to emit. They map onto the Phase 18 inventory
+      # directly — uninitialized/init-self (18-F, 18-L, 18-M(b), 18-W, 18-AA,
+      # 18-AI), use-after-free/dangling-pointer (18-B, the branch this landed
+      # on), array-bounds/stringop-* (18-E, a 4-byte heap overflow on every
+      # boot), mismatched-new-delete/free-nonheap-object (18-D, `new char[]`
+      # freed with plain `delete`).
+      #
+      # The TOTAL count is context only, and is expected to be large and
+      # mostly -Wunused-variable / -Wparentheses / -Wdeprecated-declarations
+      # noise on a 1.29M-LOC 2000s-era tree. It is reported so that the
+      # family count can be read as a fraction rather than in a vacuum, and
+      # so a sudden collapse in it (a cache slipping in, a build dying early)
+      # is visible rather than looking like progress.
+      #
+      # Both are deduplicated: a warning in a header is re-emitted once per
+      # translation unit that includes it, and this tree has headers included
+      # hundreds of times. Raw counts would be dominated by include fan-out.
+      - name: Report optimisation-dependent warnings
+        if: always()
+        working-directory: dkrixserver
+        run: |
+          log=ci-warning-logs/build.log
+          if [ ! -s "$log" ]; then
+            echo "::warning::no build log was produced; nothing to report"
+            exit 0
+          fi
+
+          # Strip the runner-specific path prefix so the report is stable
+          # across runs and diffable by eye between branches.
+          grep -E ' warning: ' "$log" \
+            | sed -e "s#${GITHUB_WORKSPACE}/##g" -e 's#^ *##' \
+            | sort -u > ci-warning-logs/all-warnings.txt
+
+          family='\[-W(maybe-uninitialized|uninitialized|init-self|null-dereference|array-bounds[^]]*|stringop-(overflow|overread|truncation)[^]]*|use-after-free[^]]*|dangling-pointer[^]]*|mismatched-new-delete|free-nonheap-object|return-local-addr|alloc-size-larger-than[^]]*|restrict)\]'
+          grep -E "$family" ci-warning-logs/all-warnings.txt \
+            > ci-warning-logs/family-warnings.txt || true
+
+          total=$(wc -l < ci-warning-logs/all-warnings.txt)
+          fam=$(wc -l < ci-warning-logs/family-warnings.txt)
+
+          {
+            echo "## Optimisation-dependent warnings (-O2, Debug config)"
+            echo
+            echo "| | count (unique) |"
+            echo "|---|---|"
+            echo "| **Uninit / lifetime / bounds family** | **${fam}** |"
+            echo "| All warnings | ${total} |"
+            echo
+            echo "This leg is informational and cannot fail the workflow."
+            echo "The Debug legs above emit **none** of the family warnings —"
+            echo "not because they are absent, but because \`-g\` with no \`-O\`"
+            echo "cannot run the dataflow pass that finds them."
+            echo
+            echo "### By diagnostic"
+            echo
+            echo '```'
+            grep -oE '\[-W[a-zA-Z0-9=_-]+\]' ci-warning-logs/all-warnings.txt \
+              | sort | uniq -c | sort -rn | head -40
+            echo '```'
+            echo
+            echo "### Family findings"
+            echo
+            if [ "$fam" -eq 0 ]; then
+              echo "None. Treat with suspicion on a first run — check the"
+              echo "\`by diagnostic\` block above actually lists something,"
+              echo "and that the build reached the end."
+            else
+              echo '```'
+              head -200 ci-warning-logs/family-warnings.txt
+              echo '```'
+              if [ "$fam" -gt 200 ]; then
+                echo
+                echo "_… ${fam} total; full list in the \`server-warning-scan\` artifact._"
+              fi
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "family=${fam} total=${total}"
+
+          # SEEDING A RATCHET — the intended follow-up, deliberately NOT done
+          # here. No number is committed today because no run has happened
+          # and a guessed baseline is worse than none: too high and it never
+          # bites, too low and it fails green trees on arrival. After the
+          # first full run on `main`, take the FAMILY count from this step,
+          # commit it as dkrixserver/scripts/.warning-scan-baseline, and add
+          # a compare here that fails when the count rises — same shape and
+          # same `--update` discipline as check-sql-injection.sh and
+          # check-packet-duplicates.sh. Ratchet the family count only. The
+          # total is noise and ratcheting it would just tax anyone who adds a
+          # file.
+
+      - name: Upload warning scan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-warning-scan
+          path: |
+            dkrixserver/ci-warning-logs/all-warnings.txt
+            dkrixserver/ci-warning-logs/family-warnings.txt
+            dkrixserver/ci-warning-logs/build.log
+          if-no-files-found: warn
+          retention-days: 14
 
   boot:
     # WHAT THIS JOB IS, HONESTLY: it boots the three servers under a

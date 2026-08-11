@@ -60,16 +60,25 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
     switch (pPacket->getType()) {
     case TYPE_SELECT_LOTTERY: {
         // Check quest status for lottery rewards
-        QuestID_t qID;
+        QuestID_t qID = 0;
         EventQuestAdvance::Status status =
             pPC->getQuestManager()->getEventQuestAdvanceManager()->getStatus(pPacket->getQuestLevel());
         int ownerQuestLevel = pPC->getQuestManager()->getEventQuestAdvanceManager()->getQuestLevel();
-        if ((ownerQuestLevel > pPacket->getQuestLevel() && status == EventQuestAdvance::EVENT_QUEST_ADVANCED) ||
-            (pPacket->getQuestLevel() == 4 && ownerQuestLevel == -1) ||
-            pPC->getQuestManager()->successEventQuest(pPacket->getQuestLevel(), qID)) {
+        // Only successEventQuest() assigns qID. The other two ways in short-circuit
+        // before it is called, leaving qID unassigned -- and questRewarded() erases
+        // whatever quest that ID names. Same defect as ActionGiveLotto::execute().
+        // The evaluation order is unchanged from the original || chain.
+        const bool bAlreadyAdvanced =
+            (ownerQuestLevel > pPacket->getQuestLevel() && status == EventQuestAdvance::EVENT_QUEST_ADVANCED);
+        const bool bFinalLevelNotStarted =
+            (!bAlreadyAdvanced && pPacket->getQuestLevel() == 4 && ownerQuestLevel == -1);
+        const bool bQuestSucceeded = (!bAlreadyAdvanced && !bFinalLevelNotStarted &&
+                                      pPC->getQuestManager()->successEventQuest(pPacket->getQuestLevel(), qID));
+        if (bAlreadyAdvanced || bFinalLevelNotStarted || bQuestSucceeded) {
             pPC->getQuestManager()->getEventQuestAdvanceManager()->rewarded(pPacket->getQuestLevel());
             pPC->getQuestManager()->getEventQuestAdvanceManager()->save();
-            pPC->getQuestManager()->questRewarded(qID);
+            if (bQuestSucceeded)
+                pPC->getQuestManager()->questRewarded(qID);
             pPC->sendCurrentQuestInfo();
 
             list<Item*> iList;
@@ -151,8 +160,11 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
 
         } else {
             // Otherwise, hand out consolation rewards
-            Item::ItemClass iClass;
-            ItemType_t iType;
+            // ITEM_CLASS_MAX doubles as the "nothing selected" sentinel, matching the
+            // way the lair path below initializes ITEM_TEMPLATE. The switch has a
+            // default: that sets neither, so both must start from a defined value.
+            Item::ItemClass iClass = Item::ITEM_CLASS_MAX;
+            ItemType_t iType = 0;
             list<OptionType_t> oList;
             bool isTimeLimit = false;
             bool isLairItem = false;
@@ -374,7 +386,10 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
                 break;
             }
 
-            Item* pItem;
+            // Every branch below is conditional, so pItem must start NULL: an empty
+            // treasure list, or a Treasure that yields no item, would otherwise leave
+            // it holding stack garbage.
+            Item* pItem = NULL;
 
             if (isLairItem) {
                 const MonsterInfo* pMonsterInfo = g_pMonsterInfoManager->getMonsterInfo(masterType);
@@ -409,7 +424,7 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
                     }
                 }
 
-            } else {
+            } else if (iClass != Item::ITEM_CLASS_MAX) {
                 pItem = g_pItemFactoryManager->createItem(iClass, iType, oList);
             }
 
@@ -425,7 +440,8 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
                 break;
             }
 
-            setItemGender(pItem, gender);
+            if (pItem != NULL)
+                setItemGender(pItem, gender);
 
             _TPOINT tp;
 
@@ -443,7 +459,9 @@ void CGLotterySelectHandler::execute(CGLotterySelect* pPacket, Player* pPlayer)
                 pPC->getPlayer()->sendPacket(&gcCreateItem);
 
                 remainTraceLog(pItem, "GOD", pCreature->getName(), ITEM_LOG_CREATE, DETAIL_EVENTNPC);
-            } else {
+            } else if (pItem != NULL) {
+                // Guarded: the condition above short-circuits on a NULL pItem, so this
+                // branch used to be reachable with pItem == NULL and dereference it.
                 if (isUnique)
                     pItem->setUnique();
 

@@ -54,7 +54,7 @@ void ActionGiveLotto::execute(Creature* pCreature1, Creature* pCreature2)
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature2);
     Assert(pPC != NULL);
 
-    QuestID_t qID;
+    QuestID_t qID = 0;
     int questLevel = m_QuestLevel;
 
     if (questLevel < 0)
@@ -65,8 +65,17 @@ void ActionGiveLotto::execute(Creature* pCreature1, Creature* pCreature2)
     EventQuestAdvance::Status status = pPC->getQuestManager()->getEventQuestAdvanceManager()->getStatus(questLevel);
     int ownerQuestLevel = pPC->getQuestManager()->getEventQuestAdvanceManager()->getQuestLevel();
 
-    if ((ownerQuestLevel > questLevel && status == EventQuestAdvance::EVENT_QUEST_ADVANCED) ||
-        ((questLevel == 4 && ownerQuestLevel == -1) || pPC->getQuestManager()->successEventQuest(questLevel, qID))) {
+    // Only successEventQuest() assigns qID. The other two ways into the branch below
+    // short-circuit before it is ever called, so qID stays unassigned on those paths --
+    // and questRewarded() erases whatever quest that ID names. Track which way we got
+    // in, so the erase can only run on the path that actually produced an ID.
+    // The evaluation order is unchanged from the original || chain.
+    const bool bAlreadyAdvanced = (ownerQuestLevel > questLevel && status == EventQuestAdvance::EVENT_QUEST_ADVANCED);
+    const bool bFinalLevelNotStarted = (!bAlreadyAdvanced && questLevel == 4 && ownerQuestLevel == -1);
+    const bool bQuestSucceeded =
+        (!bAlreadyAdvanced && !bFinalLevelNotStarted && pPC->getQuestManager()->successEventQuest(questLevel, qID));
+
+    if (bAlreadyAdvanced || bFinalLevelNotStarted || bQuestSucceeded) {
         GamePlayer* pGP = dynamic_cast<GamePlayer*>(pPC->getPlayer());
         Assert(pGP != NULL);
 
@@ -74,9 +83,12 @@ void ActionGiveLotto::execute(Creature* pCreature1, Creature* pCreature2)
         if (true) {
             pPC->getQuestManager()->getEventQuestAdvanceManager()->rewarded(questLevel);
             pPC->getQuestManager()->getEventQuestAdvanceManager()->save();
-            if (questLevel != 4)
-                pPC->getQuestManager()->questRewarded(qID);
-            else
+            if (questLevel != 4) {
+                // bAlreadyAdvanced means ActionAdvanceEventQuest already called
+                // questRewarded() for this level, so there is nothing left to erase.
+                if (bQuestSucceeded)
+                    pPC->getQuestManager()->questRewarded(qID);
+            } else
                 pPC->getQuestManager()->cancelQuest();
 
             pPC->setLottoQuestLevel(questLevel);

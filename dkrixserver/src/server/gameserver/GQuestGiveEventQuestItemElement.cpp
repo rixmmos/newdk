@@ -109,7 +109,13 @@ GQuestGiveEventQuestItemElement* GQuestGiveEventQuestItemElement::makeElement(XM
     string grade;
     bool bHasGrade = pTree->GetAttribute("grade", grade);
     Assert(bHasGrade);
-    switch (grade[0]) {
+    Assert(!grade.empty());
+    // Both Asserts above are ((void)0) under NDEBUG, so in Release a missing or
+    // empty "grade" attribute would reach grade[0] as an out-of-range read.
+    // Feed the switch a sentinel instead and let it take the default arm, which
+    // is where an unrecognised grade letter already ends up: m_Grade keeps the
+    // constructor's 0.
+    switch (grade.empty() ? '\0' : grade[0]) {
     case 'A':
         pRet->m_Grade = 0;
         break;

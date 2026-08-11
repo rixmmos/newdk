@@ -46,7 +46,10 @@ void SMSAddressBook::load() {
                                                                 pResult->getString(3), pResult->getString(4));
 
             //			Assert( addAddressElement( pElement ) );
-            Assert(m_Addresses[pElement->getID()] == NULL);
+            // Use find() rather than operator[]: the latter inserts a default
+            // entry, i.e. it mutates the map from inside an Assert, which
+            // disappears entirely under NDEBUG.
+            Assert(m_Addresses.find(pElement->getID()) == m_Addresses.end());
             m_Addresses[pElement->getID()] = pElement;
             if (m_NextEID <= pElement->getID())
                 m_NextEID = pElement->getID() + 1;
@@ -72,9 +75,15 @@ GCSMSAddressList* SMSAddressBook::getGCSMSAddressList() const {
 }
 
 int SMSAddressBook::addAddressElement(SMSAddressElement* pElement) {
-    if (m_Addresses.size() > MAX_ADDRESS_NUM)
+    // ">=" not ">": GCSMSAddressList is declared to hold at most
+    // MAX_ADDRESS_NUM units, so a book that reached MAX_ADDRESS_NUM + 1
+    // produced a packet larger than its own declared maximum and was dropped
+    // by the receiver's size check, making the whole list unreadable.
+    if (m_Addresses.size() >= MAX_ADDRESS_NUM)
         return GCAddressListVerify::ADD_FAIL_MAX_NUM_EXCEEDED;
-    if (m_Addresses[pElement->getID()] != NULL)
+    // find() rather than operator[], which would insert a stray NULL entry
+    // and inflate size() on every rejected add.
+    if (m_Addresses.find(pElement->getID()) != m_Addresses.end())
         return GCAddressListVerify::ADD_FAIL_INVALID_DATA;
 
     m_Addresses[pElement->getID()] = pElement;
@@ -104,6 +113,9 @@ int SMSAddressBook::removeAddressElement(DWORD eID) {
     if (itr == m_Addresses.end())
         return GCAddressListVerify::DELETE_FAIL_NO_SUCH_EID;
 
+    // The book owns its elements (see the destructor); erasing without
+    // deleting leaked one element per client-issued delete.
+    SAFE_DELETE(itr->second);
     m_Addresses.erase(itr);
 
     Statement* pStmt = NULL;

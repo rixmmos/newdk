@@ -30,12 +30,19 @@ on:
       - "dkrix/**"
       - ".github/workflows/client.yml"
       - "tools/ci/**"
+      # Absorbed into the DarkEden target via shared_packets_cl /
+      # shared_packets_cg (dkrix/CMakeLists.txt). Without this a change
+      # confined to shared/Packets/ triggered no client CI, even though it
+      # compiles into the client -- and it is the one tree this workstation
+      # cannot build locally, so CI is its only gate.
+      - "shared/Packets/**"
   pull_request:
     branches: [main]
     paths:
       - "dkrix/**"
       - ".github/workflows/client.yml"
       - "tools/ci/**"
+      - "shared/Packets/**"
   # Push-triggered runs have lagged 20+ minutes; workflow_dispatch returns
   # in seconds. Keep it on every workflow.
   workflow_dispatch:

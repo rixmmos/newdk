@@ -30,8 +30,16 @@ void CGExpelGuildMemberHandler::execute(CGExpelGuildMember* pPacket, Player* pPl
         Assert(pPacket != NULL);
     Assert(pPlayer != NULL);
 
+    // NOTE: Player and PlayerCreature are unrelated hierarchies (Player is the
+    // session, PlayerCreature derives from Creature), so this cast always
+    // yields NULL and this handler has never done anything. Every sibling
+    // handler goes GamePlayer -> getCreature() -> PlayerCreature instead.
+    // Correcting the cast would make a dormant guild operation live again, so
+    // it is left for the owner to decide; the check below only stops the
+    // dereference below from being a NULL deref once Assert() is compiled out.
     PlayerCreature* pPlayerCreature = dynamic_cast<PlayerCreature*>(pPlayer);
-    Assert(pPlayerCreature != NULL);
+    if (pPlayerCreature == NULL)
+        return;
 
     SYSTEM_ASSERT(SYSTEM_GUILD);
 

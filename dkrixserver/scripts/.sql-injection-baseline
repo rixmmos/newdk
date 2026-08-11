@@ -2,7 +2,7 @@
 # Ratchet: CI fails if ANY category exceeds its number here.
 # Lower it when sites are removed; never raise it silently.
 # Regenerate with: dkrixserver/scripts/check-sql-injection.sh --update
-format=70
-stream=24
-splice=164
-total=258
+format=67
+stream=23
+splice=123
+total=213

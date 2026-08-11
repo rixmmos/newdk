@@ -791,8 +791,18 @@ bool Slayer::load()
             Assert(pSkillInfo != NULL);
 
 
-            if (pSkillInfo->getLevel() > m_SkillDomainLevels[pSkillInfo->getDomainType()] &&
-                pSkillInfo->getDomainType() != SKILL_DOMAIN_ETC) {
+            // getDomainType() is the SkillBalance `Domain` column for whatever
+            // skill this character's SlayerSkill row named, so a Vampire or
+            // Ousters skill (Domain 6 or 7) indexed one or two past the end of
+            // the six-entry m_SkillDomainLevels. A Slayer cannot have a domain
+            // outside its own set, so such a row is corrupt; disable the slot
+            // rather than reading past the array, which is what the comparison
+            // below would have done for any real domain level anyway.
+            const SkillDomainType_t domainType = pSkillInfo->getDomainType();
+
+            if (domainType >= SKILL_DOMAIN_VAMPIRE) {
+                pSkillSlot->setDisable();
+            } else if (pSkillInfo->getLevel() > m_SkillDomainLevels[domainType] && domainType != SKILL_DOMAIN_ETC) {
                 pSkillSlot->setDisable();
             }
 
@@ -2300,6 +2310,16 @@ void Slayer::sendSlayerSkillInfo()
 
                 SDomainType = pSkillInfo->getDomainType();
 
+                // pSlayerSkillInfo and SkillCount are stack arrays of
+                // SKILL_DOMAIN_VAMPIRE entries and SDomainType is the
+                // SkillBalance `Domain` column, so a Vampire or Ousters skill
+                // row on a Slayer character wrote past both -- SkillCount[]++
+                // is a stack write, not merely a read. Skip such a slot: it is
+                // not a Slayer skill and has no domain tab to be listed under.
+                if (SDomainType >= SKILL_DOMAIN_VAMPIRE) {
+                    SDomainType = 0;
+                    continue;
+                }
 
                 SubSlayerSkillInfo* pSubSlayerSkillInfo = new SubSlayerSkillInfo();
                 pSubSlayerSkillInfo->setSkillType(pSkillSlot->getSkillType());

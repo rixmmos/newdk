@@ -7,6 +7,7 @@
 #include "CGRequestRepair.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "ItemInfo.h"
 #include "ItemInfoManager.h"
@@ -39,7 +40,7 @@ void CGRequestRepairHandler::execute(CGRequestRepair* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     ObjectID_t ITEMOID = pPacket->getObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pPC = pGamePlayer->getCreature();
     bool bSlayer = false;
     bool bVampire = false;
@@ -99,7 +100,7 @@ void CGRequestRepairHandler::executeNormal(CGRequestRepair* pPacket, Player* pPl
 #ifdef __GAME_SERVER__
 
         ObjectID_t ITEMOID = pPacket->getObjectID();
-    Creature* pPC = dynamic_cast<GamePlayer*>(pPlayer)->getCreature();
+    Creature* pPC = checkedCast<GamePlayer*>(pPlayer)->getCreature();
     bool bSlayer = false;
     bool bVampire = false;
     bool bOusters = false;
@@ -201,10 +202,10 @@ void CGRequestRepairHandler::executeNormal(CGRequestRepair* pPacket, Player* pPl
         char pField[80];
 
         if (pItem->getItemClass() == Item::ITEM_CLASS_SLAYER_PORTAL_ITEM) {
-            SlayerPortalItem* pSPItem = dynamic_cast<SlayerPortalItem*>(pItem);
+            SlayerPortalItem* pSPItem = checkedCast<SlayerPortalItem*>(pItem);
             sprintf(pField, "Charge=%d", pSPItem->getCharge());
         } else if (pItem->getItemClass() == Item::ITEM_CLASS_OUSTERS_SUMMON_ITEM) {
-            OustersSummonItem* pOSItem = dynamic_cast<OustersSummonItem*>(pItem);
+            OustersSummonItem* pOSItem = checkedCast<OustersSummonItem*>(pItem);
             sprintf(pField, "Charge=%d", pOSItem->getCharge());
         } else {
             sprintf(pField, "Durability=%d", pItem->getDurability());
@@ -238,7 +239,7 @@ void CGRequestRepairHandler::executeMotorcycle(CGRequestRepair* pPacket, Player*
 
         
         ObjectID_t ITEMOID = pPacket->getObjectID();
-    Creature* pPC = dynamic_cast<GamePlayer*>(pPlayer)->getCreature();
+    Creature* pPC = checkedCast<GamePlayer*>(pPlayer)->getCreature();
     Zone* pZone = pPC->getZone();
     Gold_t playerMoney = 0;
     ZoneCoord_t CenterX = pPC->getX();
@@ -347,7 +348,7 @@ void CGRequestRepairHandler::executeAll(CGRequestRepair* pPacket, Player* pPlaye
 
 #ifdef __GAME_SERVER__
 
-        Creature* pPC = dynamic_cast<GamePlayer*>(pPlayer)->getCreature();
+        Creature* pPC = checkedCast<GamePlayer*>(pPlayer)->getCreature();
     Price_t repairPrice = 0;
     GCNPCResponse response;
 

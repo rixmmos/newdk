@@ -135,6 +135,13 @@ public:
 
 private:
     DomainInfo** m_DomainInfoLists[SKILL_DOMAIN_MAX];
+
+    // Number of entries actually allocated in m_DomainInfoLists[i]. init()
+    // sizes each domain to MAX(Level) + 1 from its own SkillDomainInfo rows,
+    // which is not the same for every domain -- in the live data SKILL_DOMAIN_ETC
+    // stops at level 100 while the others reach 150 -- so 151 is not a usable
+    // bound and there was previously nothing that recorded the real one.
+    int m_DomainInfoCounts[SKILL_DOMAIN_MAX];
 };
 
 extern SkillDomainInfoManager* g_pSkillDomainInfoManager;

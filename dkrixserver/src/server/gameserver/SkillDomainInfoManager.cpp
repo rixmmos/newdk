@@ -48,17 +48,19 @@ string DomainInfo::toString() const
 //--------------------------------------------------------------------
 SkillDomainInfoManager::SkillDomainInfoManager()
 
-    {__BEGIN_TRY
+{
+    __BEGIN_TRY
 
-         /*
-          for (int i = 0 ; i < SKILL_DOMAIN_MAX; i ++) {
-              for(int j = 0; j <= 100; i++) {
-                  m_DomainInfoLists[i][j] = NULL;
-              }
-          }
-          */
+    // The original loop here was commented out (and had `i++` where it meant
+    // `j++`), so every member was left indeterminate until init() succeeded --
+    // and the destructor walks these unconditionally. Zero them.
+    for (int i = 0; i < SKILL_DOMAIN_MAX; i++) {
+        m_DomainInfoLists[i] = NULL;
+        m_DomainInfoCounts[i] = 0;
+    }
 
-         __END_CATCH}
+    __END_CATCH
+}
 
 //--------------------------------------------------------------------
 //
@@ -70,9 +72,16 @@ SkillDomainInfoManager::~SkillDomainInfoManager()
 {
     __BEGIN_TRY
 
-    for (int i = 0; i < SKILL_DOMAIN_MAX; i++)
-        for (int j = 0; j <= 150; j++)
+    // Was `j <= 150` against arrays that init() sized to MAX(Level) + 1 per
+    // domain, so this read past the end and called delete on whatever it found
+    // -- 50 slots past the end for SKILL_DOMAIN_ETC in the live data.
+    for (int i = 0; i < SKILL_DOMAIN_MAX; i++) {
+        if (m_DomainInfoLists[i] == NULL)
+            continue;
+
+        for (int j = 0; j < m_DomainInfoCounts[i]; j++)
             SAFE_DELETE(m_DomainInfoLists[i][j]);
+    }
 
     __END_CATCH_NO_RETHROW
 }
@@ -109,6 +118,7 @@ void SkillDomainInfoManager::init()
             Assert(Count <= 151);
 
             m_DomainInfoLists[i] = new DomainInfo*[Count];
+            m_DomainInfoCounts[i] = Count;
 
             for (int j = 0; j < Count; j++)
                 m_DomainInfoLists[i][j] = NULL;
@@ -140,11 +150,30 @@ void SkillDomainInfoManager::init()
 //--------------------------------------------------------------------------------
 // get item info
 //--------------------------------------------------------------------------------
+// `Level < 151` was never the right bound: init() allocates MAX(Level) + 1
+// entries for each domain independently, and in the live data
+// SKILL_DOMAIN_ETC has rows only up to level 100 (101 entries) while the
+// Vampire and Ousters domains stop at 149. Reading m_DomainInfoLists[5][101]
+// is an out-of-bounds *pointer* read, and the Assert on the next line then
+// dereferences whatever it found -- so this is already live in the Debug
+// build, not only under NDEBUG. increaseDomainExp reaches it directly:
+// levelling SKILL_DOMAIN_ETC from 100 asks for the level-101 row.
+//
+// Bounded against the count init() actually allocated, and it throws rather
+// than returning NULL because all four callers dereference the result on the
+// spot (SkillUtil.cpp:4308, :4409, :5766 and GQuestAdvanceClassElement.cpp:20),
+// so a sentinel would trade an out-of-bounds read for a NULL dereference --
+// the same reasoning as the NPC shop accessors in 326c298.
 DomainInfo* SkillDomainInfoManager::getDomainInfo(SkillDomain DomainType, Level_t Level) const {
     __BEGIN_TRY
 
+    if (DomainType >= SKILL_DOMAIN_MAX)
+        throw OutOfBoundException("SkillDomainInfoManager::getDomainInfo: domain out of range");
+
+    if (m_DomainInfoLists[DomainType] == NULL || Level >= m_DomainInfoCounts[DomainType])
+        throw OutOfBoundException("SkillDomainInfoManager::getDomainInfo: no such domain level");
+
     Assert(DomainType < SKILL_DOMAIN_MAX);
-    Assert(Level < 151);
     Assert(m_DomainInfoLists[DomainType] != NULL);
     Assert(m_DomainInfoLists[DomainType][Level] != NULL);
 
@@ -164,8 +193,16 @@ void SkillDomainInfoManager::addDomainInfo(DomainInfo* pDomainInfo) const
     SkillDomainType_t DomainType = pDomainInfo->getType();
     Level_t Level = pDomainInfo->getLevel();
 
+    // Same real bound on the write side. Both values come straight off the
+    // SkillDomainInfo row, and this is a store into a heap array, so a stray
+    // row was an out-of-bounds pointer write at startup.
+    if (DomainType >= SKILL_DOMAIN_MAX)
+        throw OutOfBoundException("SkillDomainInfoManager::addDomainInfo: domain out of range");
+
+    if (m_DomainInfoLists[DomainType] == NULL || Level >= m_DomainInfoCounts[DomainType])
+        throw OutOfBoundException("SkillDomainInfoManager::addDomainInfo: level out of range");
+
     Assert(DomainType < SKILL_DOMAIN_MAX);
-    Assert(Level < 151);
     Assert(m_DomainInfoLists[DomainType][Level] == NULL);
 
     m_DomainInfoLists[DomainType][Level] = pDomainInfo;
@@ -185,7 +222,11 @@ string SkillDomainInfoManager::toString() const
     msg << "SkillDomainInfoManager(";
 
     for (uint i = 0; i < SKILL_DOMAIN_MAX; i++) {
-        for (int j = 0; j <= 150; j++) {
+        if (m_DomainInfoLists[i] == NULL)
+            continue;
+
+        // Same `j <= 150` overrun as the destructor had.
+        for (int j = 0; j < m_DomainInfoCounts[i]; j++) {
             if (m_DomainInfoLists[i][j] == NULL) {
                 msg << "NULL";
             } else {

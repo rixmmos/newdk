@@ -5442,11 +5442,261 @@ audited and **cleared**.
    `CGMove` field-order divergence between the trees; and the `CGExchangeList`
    desync — the last two both need a coordinated two-tree change.
 
-**A process note worth keeping.** PR #2 was **squash-merged**, so `main` carries one
-squashed commit rather than the 42 individual ones, and `git branch --contains`
-misleads about what is actually on `main`. Wave 2's commits — including the critical
-18-AB — were **not** on `main` until PR #3. Check `git log origin/main` rather than
-containment when deciding what is deployed.
+**A process note worth keeping — and the note itself was wrong the first time.**
+Wave 2's commits, including the critical 18-AB, were **not** on `main` until PR #3.
+That much is true and worth remembering: work pushed *after* a PR is merged does not
+retroactively join it.
+
+An earlier revision of this paragraph explained it by claiming PR #2 was
+**squash-merged** and that `git branch --contains` therefore misleads. **That is
+false** [measured 2026-08-11]: `669a9fe` has parents `9422e9c` and `d9b6af2`, and
+`90a926e` has `669a9fe` and `fc7fae7` — both are ordinary merge commits, every
+individual commit is reachable from `main`, and `--contains` is reliable. The claim
+came from a subagent report, was relayed here without checking `git log --format=%p`,
+and was believed for two waves.
+
+The real lesson is the one that keeps recurring in §3.2 of the security audit: **a
+claim about the repository is one command away from being verified, and relaying it
+unverified has now been wrong four times in this effort.** `git log origin/main` is
+still the right habit for deciding what is deployed — not because containment lies,
+but because it answers the question directly.
+
+### Phase 18 — wave 4 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AH | `Assert`-only accessors hardened (`Zone::getTile`/`getSector`, Slayer domain accessors, `SkillDomainInfoManager`, `VampEXPInfo`, `OustersEXPInfo`, `SkillUtil`). **Two are live OOB reads today, not `NDEBUG`-only** |
+| 18-AI | Two uninitialised `QuestID_t`s reaching an unconditional `m_Quests.erase()`; a discarded return value deciding castle-dungeon entry; 3 `Assert`-guarded castle zone IDs |
+| 18-AJ | 41 SQL splices parameterised (ratchet **164 → 123**); two amplification vectors closed; measurement-only move-rate telemetry |
+
+**`SkillDomainInfoManager::getDomainInfo` has been out of bounds in the deployed
+Debug build all along** [measured against the shipped dump]. `init()` sizes each
+domain from its own DB rows, but the guard was the constant `Level < 151`.
+Domains 0–4 hold 151 entries, 6–7 hold 150, and **domain 5 (`ETC`) holds 101** —
+fifty short. Levelling `ETC` past 100 is an OOB pointer read that the `Assert`
+then dereferences, and the destructor was freeing fifty slots past the end.
+
+**`ActionTeachSkill` is reachable by walking into a vampire town.** It dispatches
+on the *player's* race rather than the NPC's, and live `Triggers` rows 672 (Kaim)
+and 727 (Bricolacas) carry `DomainType : VAMPIRE`, so a Slayer at a vampire
+trainer indexed `m_GoalExp[6]` on a six-entry array. This is the case where
+hardening the accessor **alone** would have broken legitimate play — a real NPC
+conversation would have started throwing. Fixed at both ends.
+
+**A recurring shape worth naming: controls that exist but do nothing.** Four
+found so far. The login-failure lockout never increments, because `++nFailed`
+lived inside a `cout` that was commented out. The `CGVerifyTime` speed gate is
+dead three ways over — a double call that pushes its own deadline 60s ahead, a
+counter incremented and decremented 1:1, and a client that no longer sends the
+packet. The SQL-injection ratchet reported `0` while 188 sites were invisible to
+it. The `sanitizers` matrix was build-only, so it could not see the entire bug
+class it appeared to cover. **When a gate here reports "clean", check that it can
+report anything else.**
+
+**Why the uninitialised-variable class keeps recurring** [measured]:
+`-Wmaybe-uninitialized` cannot fire in any configuration this project builds.
+`CMAKE_CXX_FLAGS_DEBUG` is `-g` with **no `-O` flag**, and GCC's analysis is a
+dataflow pass that only runs under optimisation; every `make` target and every CI
+job is `CMAKE_BUILD_TYPE=Debug`. A real build log shows 31 warnings, none
+containing "uninitialized". 18-F, 18-L, 18-M(b), 18-W, 18-AA and 18-AI all share
+this root. **Adding `-Og` to the Debug flags, or a warnings-only `-O2` CI leg, is
+the cheap systemic fix.**
+
+**Open, owner decisions.** Ranked:
+
+1. **`FD_SETSIZE` overflow — internet-exposed memory corruption.** `fd_set
+   m_ReadFDs[2]` uses glibc's 1024-bit default (`FD_SETSIZE` is never defined in
+   the tree) but `nMaxPlayers` is 2000 and the accept path only rejects at 2000.
+   Descriptors 1024–1999 are accepted and `FD_SET` writes out of bounds into the
+   adjacent `m_WriteFDs`. Made cheap by a second bug: the idle timeout lives
+   inside `processInput`, which only runs for readable sockets, so a silent
+   connection holds its slot forever. **A global concurrent cap below 1024 closes
+   it outright** and is config-shaped, not a tuning judgement.
+2. **UDP denial of service needing no bug.** The receive loop `usleep`s twice per
+   iteration and handles one datagram per iteration — ~500/s ceiling, so ~144
+   kbit/s of spoofed traffic saturates it, and the dropped datagrams include the
+   `GL`/`LG` login handoff. Nobody can log in.
+3. **The speed hack.** Measurement now exists; enforcement needs movement-speed
+   data the server does not have.
+4. **The login-failure lockout** — one word (`nFailed++`) at four sites, but it
+   changes who gets disconnected during real play.
+5. `ActionGiveEventItem` has no Ousters branch but dereferences unconditionally —
+   a live gameserver segfault if wired to an NPC an Ousters can reach.
+6. `FameLimitInfo` is the closest untested twin of the `getDomainInfo` defect.
+
+### Phase 18 — wave 5 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AK | All three accept paths refuse descriptors past the `fd_set` bound instead of writing past it. The **sharedserver was worse than the reported bug** — no check at all against a 100-entry array |
+| 18-AL | Four more constant-guard-vs-DB-sized-array defects, incl. `EventQuestAdvance`, which was live and leaking every instance ever allocated |
+| 18-AM | Four Ousters NULL dereferences that **crash the process**; two are live in the shipped trigger data |
+| — | A CI leg that can finally emit optimisation-dependent warnings, plus a `paths:` blind spot that skipped CI entirely for `shared/Packets/**` |
+
+**`FameLimitInfo` — named as the highest-value follow-up — is dead code.** Not in
+any CMake list (0 hits, versus 20 each for its live siblings), all wiring
+commented out, zero call sites, and the table exists in neither dump. Left
+untouched deliberately: editing an uncompiled, unverifiable file only signals to
+the next auditor that it matters. **Recommend deleting `FameLimitInfo.{h,cpp}`.**
+
+**Two claims from earlier waves were wrong and are corrected here.** The idle
+timeout *does* fire on a silent connection — the check lives in `processCommand`,
+driven by an **ungated** `processCommands()` loop with no `FD_ISSET` filter, and
+the deadline is armed in the constructor. And `RareOptionUpgradeInfo` is **not**
+dead: it is live on the rare-enchant path, loaded at startup from a table whose
+absence throws. Both were relayed as fact before being checked.
+
+**`reserve()` where `resize()` was meant is now a named pattern in this tree** —
+three instances found (`RareOptionUpgradeInfo`, `EventQuestAdvance`,
+`PetTypeInfo`). It is particularly nasty because `reserve()` allocates capacity,
+so the writes often land inside the allocation and the code appears to work,
+while `size()` stays 0 — so every range-based loop, `clear()` and iteration sees
+an empty container. `EventQuestAdvance` leaked every object it ever allocated for
+exactly this reason.
+
+**Measured negatives, recorded so they are not re-swept:** `SkillParentInfo`,
+`RankEXPInfo` and `AttrBalanceInfo` already bound on loaded counts; `MonsterAI`'s
+input is validated upstream; `War.cpp`'s status is an SQL `enum` and cannot
+drift; `SweeperSet`'s race column has one distinct value.
+
+**Raising `FD_SETSIZE` does not work on glibc** — `fd_set` is sized by
+`__FD_SETSIZE`, fixed at 1024 in `bits/typesizes.h`, and defining `FD_SETSIZE`
+first silently does nothing. It works that way on Winsock, which is probably why
+the current state looks deliberate. Not compile-confirmed; worth a two-line test
+before anyone acts on it.
+
+**Still open, owner decisions** (unchanged from wave 4 except where noted):
+
+1. **UDP DoS needing no bug** — ~144 kbit/s of spoofed traffic saturates the
+   receive loop and the dropped datagrams include the login handoff.
+2. **The speed hack** — telemetry now lands in `MoveRate.log`; enforcement needs
+   movement-speed data the server does not have.
+3. **The login-failure lockout** — one word at four sites.
+4. **Lower `nMaxPlayers` 2000 → 1024** so the header stops reading as a capacity
+   promise. Deliberately not bundled with a security fix; it is a shared header
+   and a wide recompile.
+5. `CGSilverCoatingHandler:39` — no Ousters arm, reachable only by a crafted
+   packet.
+6. Delete `FameLimitInfo.{h,cpp}`.
+
+### Phase 18 — wave 6 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AN | `[[noreturn]]` on both assert helpers; six wild `delete`s; `LoginPlayer`'s always-uninitialised `lastSlot` on the normal re-login path |
+| 18-AO | A parser that validated a length byte **before reading it**; 41 format-string sites; a self-aliasing `sprintf`; an `m_HotKey[8]` off-by-one |
+| 18-AP | A **remote sharedserver crash**, a **stack overflow** on guild-master transfer, UB reachable in every build config, and unbounded remote memory growth |
+
+**The `-O2` warning-scan leg paid for itself on its first run.** 198 findings in
+the target family, 727 total — but 83% is `-Wnull-dereference` and ~150 of those
+are **one copy-pasted idiom**: an unchecked `dynamic_cast` dereferenced
+immediately. It reads as 164 problems only because the deref lands inside a
+trivial inline getter, so GCC reports the *callee's* header line. One file
+contributes 18 findings from 17 byte-identical copies of the same two lines.
+**The tree has 3,722 `dynamic_cast<T*>` sites** — its entire type dispatch is
+unchecked downcasting. A `checked_cast<T>()` helper would retire ~75% of the
+family in one reviewable change, and is the highest-leverage follow-up available.
+
+**`Assert1.h` reuses `Assert.h`'s include guard.** 101 files include one, 256 the
+other, and only one is live per translation unit. Any tree-wide change to the
+assert machinery must touch both or it silently misses 28% of the codebase.
+
+**Do not ratchet the warning count yet**, for a reason worth recording: because
+findings key to inlined-callee header lines, the number moves with GCC's
+*inlining decisions*. An unrelated refactor shifts it; a genuinely new
+null-deref in an already-warned header shifts it by zero. It would fire on noise
+and stay silent on regressions. Pin the compiler version first, land
+`[[noreturn]]`, then split the counter — `-Wnull-dereference` on its own versus
+everything else (~34 findings, mostly real, zero a credible destination).
+
+**The scan is structurally blind to Bug 18-B's class.** No `use-after-free` or
+`mismatched-new-delete` findings, but all four such diagnostics are
+intraprocedural: without `-flto` GCC cannot see an allocation in one TU freed in
+another. Read the zeros as "not looked for", not "not present".
+
+**Corrections landed this wave**, all verified rather than relayed:
+
+- **PR #2 was *not* squash-merged.** Both PRs are ordinary merges; every commit is
+  reachable from `main`; `--contains` is reliable. The earlier note here was
+  wrong — see the process note above.
+- `Core/Assert.h` is **not** shared with the client; `dkrix` has its own copy.
+- The Assert fall-throughs are unreachable in **Debug** (what ships) and real
+  only under `make release`. The earlier framing was inverted.
+- `CLLoginHandler`'s pay-type finding was **overstated** — the unset path exists
+  but returns three lines before the consumer.
+- The format-string class was **41 sites**, not "4+".
+- **`EventBallInfo` is not a live NULL deref** (18-AL said it was) — it is
+  uncompiled dead code, like `FameLimitInfo`. Recommend deleting both pairs.
+
+**A fourth `reserve()`-for-`resize()`, live and open:** `OptionInfo.cpp:433`
+reserves where it must resize; `OptionInfo.h:541` then does indexed assignment
+into a size-0 vector; `:1016` reads indeterminate memory that the `if (pOCI ==
+NULL)` on the next line **cannot detect**; and the destructor leaks every
+`OptionClassInfo`. Reachable from `CGAddItemToItemHandler` at three sites.
+
+**Open, owner decisions** — added this wave:
+
+7. **A submaster can promote themselves to guild master**
+   (`GSModifyGuildMemberHandler.cpp:56-58`) — the 18-I precedence shape again.
+8. **The missing `return` in `CLLoginHandler`'s fall-through** — wire-observable,
+   since that path currently emits *two* `LCLoginError` packets.
+9. Whether to correct the two always-NULL `dynamic_cast`s that make
+   `CGQuitGuild` and `CGExpelGuildMember` no-ops — doing so resurrects dormant
+   guild operations.
+
+### Phase 18 — wave 7 (2026-08-11)
+
+**18-AQ — `checkedCast`.** The follow-up wave 6 named as highest-leverage,
+landed. `Core/CheckedCast.{h,cpp}`: mirrors `dynamic_cast`'s spelling so a
+conversion is a pure token rename, with an out-of-line `[[noreturn]]` cold path
+so GCC can prove the result non-NULL downstream — that is the mechanism that
+retires the `-Wnull-dereference` findings, the same trick `Assert.h` uses.
+
+**What it throws was the hard part, and both obvious answers are traps.**
+`__END_DEBUG_EX` rethrows `Error` and `ProtocolException` but **swallows every
+other `Exception`** into `packet_exception.txt` and lets the handler return
+normally — and **456 files under `Core/` close their handlers with that
+macro**. So `NoSuchElementException` or `InvalidArgumentException` would have
+turned a failed cast into *a packet that quietly appears to have succeeded*.
+`InvalidProtocolException` is also wrong: `GamePlayer::sendPacket()` silently
+swallows it, and a failed downcast is a server-side type-invariant violation,
+not malformed client input. `InvalidCastError` therefore derives from
+`AssertionError`, hence `Error`.
+
+**A conversion rule worth keeping:** any handler invoked *outside* the packet
+boundary cannot take a throwing cast. `CGLogoutHandler` is called directly by
+`ZonePlayerManager`, outside `pPacket->execute()`'s `catch (...)`, so a throw
+would escape into the zone loop. `CGSayHandler` catches `Error` **by value**,
+which would swallow it. Both excluded.
+
+**The remaining work is now quantified** [measured, function-scoped,
+deliberately conservative] over 3,645 sites in `dkrixserver/src`:
+
+| Category | Sites | % |
+|---|---:|---:|
+| **Unchecked and dereferenced** | **1,930** | 52.9% |
+| Guarded by `Assert(pX != NULL)` | 1,039 | 28.5% |
+| Deliberately NULL-tested | 485 | 13.3% |
+| Used inline, not bound | 174 | 4.8% |
+| Bound but never dereferenced | 17 | 0.5% |
+
+250 converted (13% of the unchecked set). The rest is led by `Zone.cpp` (84),
+`skill/SkillUtil.cpp` (52), `CreatureUtil.cpp` (36) — **none of them packet
+handlers**, so the packet-boundary catch argument must be re-established per
+call path before converting them. The 1,039 `Assert`-guarded sites are a
+separate later question: correct in Debug, gone under `make release`.
+
+**Measured effect of `[[noreturn]]` (18-AN):** the `server-warning-scan`
+artifact fell from **82,374 to 66,224 bytes** between runs `31440542647` and
+`31444606202`. Directional only — the artifact covers all warnings, not just
+the family — but consistent with the 90–140 retirement predicted by counting
+`Assert(false)` sites.
 
 ## Explicit non-goals
 

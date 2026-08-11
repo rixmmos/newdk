@@ -7,6 +7,7 @@
 #include "GameServerManager.h"
 
 #include <stdio.h>
+#include <time.h>
 
 #include <algorithm>
 
@@ -18,6 +19,57 @@
 #include "Properties.h"
 #include "Socket.h"
 #include "SocketAPI.h"
+#include "Utility.h"
+
+namespace {
+
+// Rate-limit the "descriptor is not selectable" rejection log.
+//
+// This accept path had no bound check on the accepted descriptor at all, and
+// it indexes two fixed-size structures with it: m_pGameServerPlayers, which
+// holds nMaxGameServers (100) pointers, and m_ReadFDs / m_WriteFDs /
+// m_ExceptFDs, which glibc lays out as fixed FD_SETSIZE-bit bitmaps
+// (FD_SETSIZE is not overridden anywhere in this tree, so 1024 bits). The
+// array is the tighter of the two: descriptor 100 or above wrote a pointer
+// past the end of m_pGameServerPlayers. Refusing those descriptors removes
+// the out-of-bounds write without removing any capacity that ever worked.
+//
+// Bounded rather than per-connection logging, matching the accept paths in
+// loginserver and gameserver and Datagram.cpp's logNonDatagramPacket().
+//
+// acceptNewConnection() is reached only from processInputs(), which runs on a
+// single thread, so these statics need no locking of their own.
+void logRejectedDescriptor(int fd, int limit, const string& host) {
+    const int kMaxLinesPerWindow = 8;
+    const time_t kWindowSeconds = 60;
+
+    static time_t windowStart = 0;
+    static int loggedThisWindow = 0;
+    static unsigned long suppressedThisWindow = 0;
+
+    const time_t now = time(NULL);
+
+    if (now - windowStart >= kWindowSeconds) {
+        if (suppressedThisWindow > 0)
+            filelog("sharedserver_fdlimit.txt",
+                    "unselectable descriptors: %lu further rejections suppressed in the last %ld seconds",
+                    suppressedThisWindow, (long)kWindowSeconds);
+
+        windowStart = now;
+        loggedThisWindow = 0;
+        suppressedThisWindow = 0;
+    }
+
+    if (loggedThisWindow >= kMaxLinesPerWindow) {
+        suppressedThisWindow++;
+        return;
+    }
+
+    loggedThisWindow++;
+    filelog("sharedserver_fdlimit.txt", "rejected fd:%d (limit %d) host:%s", fd, limit, host.c_str());
+}
+
+} // namespace
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -506,10 +558,21 @@ void GameServerManager::acceptNewConnection() {
         return;
     }
 
+    // Refuse descriptors this manager cannot index, before anything touches
+    // FD_SET or m_pGameServerPlayers. The ceiling is the smaller of
+    // nMaxGameServers (the m_pGameServerPlayers array bound) and FD_SETSIZE
+    // (the fd_set bitmap width); see the note on logRejectedDescriptor()
+    // above. ~Socket closes the descriptor.
+    const int kMaxSelectableFD = ((int)nMaxGameServers < FD_SETSIZE) ? (int)nMaxGameServers : FD_SETSIZE;
+    const int acceptedFD = (int)client->getSOCKET();
+
+    if (acceptedFD < 0 || acceptedFD >= kMaxSelectableFD) {
+        logRejectedDescriptor(acceptedFD, kMaxSelectableFD, client->getHost());
+        delete client;
+        return;
+    }
+
     try {
-        
-        
-        
         if (client->getSockError())
             throw Error();
         client->setNonBlocking(true);

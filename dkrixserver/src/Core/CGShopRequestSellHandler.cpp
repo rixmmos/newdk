@@ -7,6 +7,7 @@
 #include "CGShopRequestSell.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "FlagSet.h"
 #include "GCCreateItem.h"
 #include "GCDeleteObject.h"
@@ -48,9 +49,9 @@ void CGShopRequestSellHandler::execute(CGShopRequestSell* pPacket, Player* pPlay
 
     ObjectID_t ITEMOID = pPacket->getItemObjectID();
     BYTE OPCODE = pPacket->getOpCode();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
 
     if (OPCODE == SHOP_REQUEST_SELL_NORMAL) {
         
@@ -112,9 +113,9 @@ void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player*
 
         ObjectID_t NPCID = pPacket->getObjectID();
     ObjectID_t ITEMOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     BYTE index = 0;
     bool bSpecialItem = false;
 
@@ -140,7 +141,7 @@ void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player*
     if (pNPCBase == NULL || !pNPCBase->isNPC())
         return sendFailPacket(pPacket, pPlayer);
 
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
 
     
     Inventory* pInventory = pPC->getInventory();
@@ -162,7 +163,7 @@ void CGShopRequestSellHandler::executeNormal(CGShopRequestSell* pPacket, Player*
     
     
     if (pItem->getItemClass() == Item::ITEM_CLASS_BELT) {
-        Inventory* pBeltInventory = dynamic_cast<Belt*>(pItem)->getInventory();
+        Inventory* pBeltInventory = checkedCast<Belt*>(pItem)->getInventory();
         for (int y = 0; y < pBeltInventory->getHeight(); y++) {
             for (int x = 0; x < pBeltInventory->getWidth(); x++) {
                 Item* pBeltItem = pBeltInventory->getItem(x, y);
@@ -337,9 +338,9 @@ void CGShopRequestSellHandler::executeMotorcycle(CGShopRequestSell* pPacket, Pla
         
         ObjectID_t NPCID = pPacket->getObjectID();
     ObjectID_t ITEMOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
 
     Zone* pZone = pPC->getZone();
     if (pZone == NULL)
@@ -363,7 +364,7 @@ void CGShopRequestSellHandler::executeMotorcycle(CGShopRequestSell* pPacket, Pla
     if (pNPCBase == NULL || !pNPCBase->isNPC())
         return sendFailPacket(pPacket, pPlayer);
 
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
     int CenterX = pNPC->getX();
     int CenterY = pNPC->getY();
 
@@ -476,9 +477,9 @@ void CGShopRequestSellHandler::executeOpAllSkull(CGShopRequestSell* pPacket, Pla
 #ifdef __GAME_SERVER__
 
         ObjectID_t NPCID = pPacket->getObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
 
     Zone* pZone = pPC->getZone();
     if (pZone == NULL)
@@ -502,7 +503,7 @@ void CGShopRequestSellHandler::executeOpAllSkull(CGShopRequestSell* pPacket, Pla
     if (pNPCBase == NULL || !pNPCBase->isNPC())
         return sendFailPacket(pPacket, pPlayer);
 
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
     Inventory* pInventory = pPC->getInventory();
     // by sigi. 2002.9.4
     // Gold_t     playerMoney = pPC->getGold();
@@ -558,7 +559,7 @@ void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* p
 
     ObjectID_t NPCID = pPacket->getObjectID();
     ObjectID_t ITEMOID = pPacket->getItemObjectID();
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
 
@@ -573,7 +574,7 @@ void CGShopRequestSellHandler::executeOpSwapAdvancementItem(CGShopRequestSell* p
     Creature* pNPCBase = pZone->getCreature(NPCID);
     if (pNPCBase == NULL || !pNPCBase->isNPC())
         return sendFailPacket(pPacket, pPlayer);
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
 
     Inventory* pInventory = pPC->getInventory();
     Item* pItem = pInventory->getItemWithObjectID(ITEMOID);

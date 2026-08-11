@@ -175,13 +175,25 @@ void ActionGiveEventItem::execute(Creature* pCreature1, Creature* pCreature2)
         luaFileName = m_VampireFilename;
     }
 
-    //--------------------------------------------------------
-    
-    
-     
-    //--------------------------------------------------------
+    // There is no Ousters branch: this action only ever builds a Slayer and a
+    // Vampire LuaSelectItem, and the trigger data carries only SlayerFilename
+    // and VampireFilename -- no Ousters script exists to run. Falling through
+    // dereferenced a NULL pLuaSelectItem and took the whole gameserver down as
+    // soon as an Ousters used the event NPC. Fail safe instead: tell the player
+    // the item cannot be given now and leave the flag untouched, so nothing is
+    // consumed and the dialogue ends the way every other failure path here ends.
+    if (pLuaSelectItem == NULL) {
+        GCNPCResponse response;
+        response.setCode(NPC_RESPONSE_GIVE_EVENT_ITEM_FAIL_NOW);
+        pPlayer->sendPacket(&response);
 
-    
+        GCNPCResponse quit;
+        quit.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
+        pPlayer->sendPacket(&quit);
+
+        return;
+    }
+
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);

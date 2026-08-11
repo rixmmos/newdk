@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "CheckedCast.h"
 #include "CreatureUtil.h"
 #include "DB.h"
 #include "DynamicZone.h"
@@ -284,7 +285,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -294,7 +295,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
     Assert(pCreature->isSlayer());
 
-    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+    Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
 
 
     if (pSlayer->isFlag(Effect::EFFECT_CLASS_COMA)
@@ -310,7 +311,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
     HP_t CurrentHP = pSlayer->getHP(ATTR_CURRENT);
     MP_t MaxMP = pSlayer->getMP(ATTR_MAX);
     MP_t CurrentMP = pSlayer->getMP(ATTR_CURRENT);
-    Potion* pPotion = dynamic_cast<Potion*>(pItem);
+    Potion* pPotion = checkedCast<Potion*>(pItem);
 
     int HPQuantity = pPotion->getHPQuantity();
     int MPQuantity = pPotion->getMPQuantity();
@@ -355,7 +356,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
             if (pSlayer->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
 
                 int PrevHPAmount = pEffectHPRecoveryEffect->getHPQuantity() * pEffectHPRecoveryEffect->getPeriod();
@@ -448,7 +449,7 @@ void CGUseItemFromInventoryHandler::executePotion(CGUseItemFromInventory* pPacke
 
             if (pSlayer->isFlag(Effect::EFFECT_CLASS_MP_RECOVERY)) {
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_MP_RECOVERY);
-                EffectMPRecovery* pEffectMPRecoveryEffect = dynamic_cast<EffectMPRecovery*>(pEffect);
+                EffectMPRecovery* pEffectMPRecoveryEffect = checkedCast<EffectMPRecovery*>(pEffect);
 
 
                 int PrevMPAmount = pEffectMPRecoveryEffect->getMPQuantity() * pEffectMPRecoveryEffect->getPeriod();
@@ -539,9 +540,9 @@ void CGUseItemFromInventoryHandler::executeMagazine(CGUseItemFromInventory* pPac
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     // Zone*           pZone        = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -609,9 +610,9 @@ void CGUseItemFromInventoryHandler::executeETC(CGUseItemFromInventory* pPacket, 
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     // Zone*           pZone        = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -649,7 +650,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -659,7 +660,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
     Assert(pCreature->isVampire());
 
-    Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
+    Vampire* pVampire = checkedCast<Vampire*>(pCreature);
 
 
     if (pVampire->isFlag(Effect::EFFECT_CLASS_COMA)
@@ -673,7 +674,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
     HP_t MaxHP = pVampire->getHP(ATTR_MAX);
     HP_t CurrentHP = pVampire->getHP(ATTR_CURRENT);
-    Serum* pSerum = dynamic_cast<Serum*>(pItem);
+    Serum* pSerum = checkedCast<Serum*>(pItem);
     int RegenHP = 0;
 
     RegenHP = pSerum->getHPAmount();
@@ -693,7 +694,7 @@ void CGUseItemFromInventoryHandler::executeSerum(CGUseItemFromInventory* pPacket
 
             if (pVampire->isFlag(Effect::EFFECT_CLASS_HP_RECOVERY)) {
                 Effect* pEffect = pEffectManager->findEffect(Effect::EFFECT_CLASS_HP_RECOVERY);
-                EffectHPRecovery* pEffectHPRecoveryEffect = dynamic_cast<EffectHPRecovery*>(pEffect);
+                EffectHPRecovery* pEffectHPRecoveryEffect = checkedCast<EffectHPRecovery*>(pEffect);
 
 
                 Turn_t OldCount = pEffectHPRecoveryEffect->getPeriod();
@@ -803,9 +804,9 @@ void CGUseItemFromInventoryHandler::executeSlayerPortalItem(CGUseItemFromInvento
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -887,9 +888,9 @@ void CGUseItemFromInventoryHandler::executeOustersSummonItem(CGUseItemFromInvent
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -1012,7 +1013,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
 
     GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -1030,7 +1031,7 @@ void CGUseItemFromInventoryHandler::executeKeyItem(CGUseItemFromInventory* pPack
 
     Assert(pCreature->isSlayer());
 
-    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+    Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
 
 
     if (!g_pVariableManager->isSummonMotorcycle() || pSlayer->hasRideMotorcycle() ||
@@ -1254,9 +1255,9 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -1275,15 +1276,15 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
         bool HPRegen = false, MPRegen = false;
         HP_t CurrentHP = 0, MaxHP = 0;
         if (pPC->isSlayer()) {
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+            Slayer* pSlayer = checkedCast<Slayer*>(pPC);
             CurrentHP = pSlayer->getHP();
             MaxHP = pSlayer->getHP(ATTR_MAX);
         } else if (pPC->isVampire()) {
-            Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+            Vampire* pVampire = checkedCast<Vampire*>(pPC);
             CurrentHP = pVampire->getHP();
             MaxHP = pVampire->getHP(ATTR_MAX);
         } else if (pPC->isOusters()) {
-            Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+            Ousters* pOusters = checkedCast<Ousters*>(pPC);
             CurrentHP = pOusters->getHP();
             MaxHP = pOusters->getHP(ATTR_MAX);
         }
@@ -1299,24 +1300,24 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
             HPRegen = true;
 
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 pSlayer->setHP(CurrentHP);
             } else if (pPC->isVampire()) {
-                Vampire* pVampire = dynamic_cast<Vampire*>(pPC);
+                Vampire* pVampire = checkedCast<Vampire*>(pPC);
                 pVampire->setHP(CurrentHP);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 pOusters->setHP(CurrentHP);
             }
         }
 
         MP_t CurrentMP = 0, MaxMP = 0;
         if (pPC->isSlayer()) {
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+            Slayer* pSlayer = checkedCast<Slayer*>(pPC);
             CurrentMP = pSlayer->getMP();
             MaxMP = pSlayer->getMP(ATTR_MAX);
         } else if (pPC->isOusters()) {
-            Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+            Ousters* pOusters = checkedCast<Ousters*>(pPC);
             CurrentMP = pOusters->getMP();
             MaxMP = pOusters->getMP(ATTR_MAX);
         }
@@ -1327,10 +1328,10 @@ void CGUseItemFromInventoryHandler::executeFirecraker(CGUseItemFromInventory* pP
             MPRegen = true;
 
             if (pPC->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+                Slayer* pSlayer = checkedCast<Slayer*>(pPC);
                 pSlayer->setMP(CurrentMP);
             } else if (pPC->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pPC);
+                Ousters* pOusters = checkedCast<Ousters*>(pPC);
                 pOusters->setMP(CurrentMP);
             }
         }
@@ -1416,9 +1417,9 @@ void CGUseItemFromInventoryHandler::executeDyePotion(CGUseItemFromInventory* pPa
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -1754,7 +1755,7 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
@@ -1842,7 +1843,7 @@ void CGUseItemFromInventoryHandler::executeResurrectItem(CGUseItemFromInventory*
 
                 if (pSlayer->isFlag(Effect::EFFECT_CLASS_AFTERMATH)) {
                     Effect* pEffect = pSlayer->getEffectManager()->findEffect(Effect::EFFECT_CLASS_AFTERMATH);
-                    EffectAftermath* pEffectAftermath = dynamic_cast<EffectAftermath*>(pEffect);
+                    EffectAftermath* pEffectAftermath = checkedCast<EffectAftermath*>(pEffect);
                     pEffectAftermath->setDeadline(5 * 600);
                 } else {
                     EffectAftermath* pEffectAftermath = new EffectAftermath(pSlayer);
@@ -1928,9 +1929,9 @@ void CGUseItemFromInventoryHandler::executeTranslator(CGUseItemFromInventory* pP
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -1982,9 +1983,9 @@ void CGUseItemFromInventoryHandler::executeEffectItem(CGUseItemFromInventory* pP
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -2038,7 +2039,7 @@ void CGUseItemFromInventoryHandler::executePetItem(CGUseItemFromInventory* pPack
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
     //	Zone*			pZone		 = pPC->getZone();
@@ -2053,7 +2054,7 @@ void CGUseItemFromInventoryHandler::executePetItem(CGUseItemFromInventory* pPack
     }
 
     if (pPC != NULL && pPC->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pPC);
+        Slayer* pSlayer = checkedCast<Slayer*>(pPC);
         if (pSlayer->hasRideMotorcycle()) {
             sendCannotUse(pPacket, pPlayer);
             return;
@@ -2110,9 +2111,9 @@ void CGUseItemFromInventoryHandler::executePetFood(CGUseItemFromInventory* pPack
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     CoordInven_t InvenX = pPacket->getX();
     CoordInven_t InvenY = pPacket->getY();
@@ -2180,9 +2181,9 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     Zone* pZone = pPC->getZone();
     CoordInven_t InvenX = pPacket->getX();
@@ -2390,17 +2391,17 @@ void CGUseItemFromInventoryHandler::executeEventGiftBox(CGUseItemFromInventory* 
     int chargeNum = 0;
 
     if (pResultItem->getItemClass() == Item::ITEM_CLASS_SLAYER_PORTAL_ITEM) {
-        SlayerPortalItem* pSlayerPortalItem = dynamic_cast<SlayerPortalItem*>(pResultItem);
+        SlayerPortalItem* pSlayerPortalItem = checkedCast<SlayerPortalItem*>(pResultItem);
         pSlayerPortalItem->setCharge(pSlayerPortalItem->getMaxCharge());
         isChargingItem = true;
         chargeNum = pSlayerPortalItem->getMaxCharge();
     } else if (pResultItem->getItemClass() == Item::ITEM_CLASS_VAMPIRE_PORTAL_ITEM) {
-        VampirePortalItem* pVampirePortalItem = dynamic_cast<VampirePortalItem*>(pResultItem);
+        VampirePortalItem* pVampirePortalItem = checkedCast<VampirePortalItem*>(pResultItem);
         pVampirePortalItem->setCharge(pVampirePortalItem->getMaxCharge());
         isChargingItem = true;
         chargeNum = pVampirePortalItem->getMaxCharge();
     } else if (pResultItem->getItemClass() == Item::ITEM_CLASS_OUSTERS_SUMMON_ITEM) {
-        OustersSummonItem* pOustersSummonItem = dynamic_cast<OustersSummonItem*>(pResultItem);
+        OustersSummonItem* pOustersSummonItem = checkedCast<OustersSummonItem*>(pResultItem);
         pOustersSummonItem->setCharge(pOustersSummonItem->getMaxCharge());
         isChargingItem = true;
         chargeNum = pOustersSummonItem->getMaxCharge();
@@ -2461,9 +2462,9 @@ void CGUseItemFromInventoryHandler::executeTrapItem(CGUseItemFromInventory* pPac
     Assert(pPlayer != NULL);
 
 
-    GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+    GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
     Creature* pCreature = pGamePlayer->getCreature();
-    PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+    PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
     Inventory* pInventory = pPC->getInventory();
     CoordInven_t InvenX = pPacket->getX();
     CoordInven_t InvenY = pPacket->getY();

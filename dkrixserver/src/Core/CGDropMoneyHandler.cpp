@@ -7,6 +7,7 @@
 #include "CGDropMoney.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "Item.h"
 #include "ItemUtil.h"
@@ -41,7 +42,7 @@ void CGDropMoneyHandler::execute(CGDropMoney* pPacket, Player* pPlayer)
     Assert(pPlayer != NULL);
 
     try {
-        GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
+        GamePlayer* pGamePlayer = checkedCast<GamePlayer*>(pPlayer);
         Creature* pPC = pGamePlayer->getCreature();
         Gold_t amount = pPacket->getAmount();
         Slayer* pSlayer = NULL;
@@ -58,13 +59,13 @@ void CGDropMoneyHandler::execute(CGDropMoney* pPacket, Player* pPlayer)
         }
 
         if (pPC->isSlayer()) {
-            pSlayer = dynamic_cast<Slayer*>(pPC);
+            pSlayer = checkedCast<Slayer*>(pPC);
             pZone = pSlayer->getZone();
         } else if (pPC->isVampire()) {
-            pVampire = dynamic_cast<Vampire*>(pPC);
+            pVampire = checkedCast<Vampire*>(pPC);
             pZone = pVampire->getZone();
         } else if (pPC->isOusters()) {
-            pOusters = dynamic_cast<Ousters*>(pPC);
+            pOusters = checkedCast<Ousters*>(pPC);
             pZone = pOusters->getZone();
         } else
             throw ProtocolException("CGDropMoneyHandler::execute() :     .");

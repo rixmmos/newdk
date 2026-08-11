@@ -20,7 +20,10 @@
 
 //
 //--------------------------------------------------------------------------------
-void __assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {
+// [[noreturn]] is repeated on the definition so the compiler verifies the body
+// really cannot fall off the end (-Winvalid-noreturn); the header carries the
+// declaration every caller sees.
+[[noreturn]] void __assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {
     StringStream msg;
 
     msg << "\n"
@@ -46,7 +49,7 @@ void __assert__(const char* file, uint line, const char* func, const char* expr)
 
 //
 //--------------------------------------------------------------------------------
-void __protocol_assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {
+[[noreturn]] void __protocol_assert__(const char* file, uint line, const char* func, const char* expr) noexcept(false) {
     StringStream msg;
 
     msg << "\n"

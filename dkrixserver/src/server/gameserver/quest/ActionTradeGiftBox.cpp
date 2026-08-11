@@ -175,13 +175,19 @@ void ActionTradeGiftBox::execute(Creature* pCreature1, Creature* pCreature2)
         luaFileName = m_VampireFilename;
     }
 
-    //--------------------------------------------------------
-    
-    
-     
-    //--------------------------------------------------------
+    // Same shape as ActionGiveEventItem: there is no Ousters branch, no Ousters
+    // LuaSelectItem and no OustersFilename in the trigger data, so an Ousters
+    // reached prepare() through a NULL pointer and crashed the gameserver. Fail
+    // safe -- end the dialogue without consuming the gift box, exactly like the
+    // invalid-ItemClass path below.
+    if (pLuaSelectItem == NULL) {
+        GCNPCResponse quit;
+        quit.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
+        pPlayer->sendPacket(&quit);
 
-    
+        return;
+    }
+
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);

@@ -11,6 +11,7 @@ set(CORE_SOURCES
     BloodBibleBonusInfo.cpp
     Assert.cpp
 #    Assert1.cpp
+    CheckedCast.cpp
     Datagram.cpp
     SerialDatagram.cpp
     DatagramSocket.cpp

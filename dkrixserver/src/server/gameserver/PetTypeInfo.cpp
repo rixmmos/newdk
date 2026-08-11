@@ -36,7 +36,19 @@ void PetTypeInfoManager::load() {
 
         PetType_t MaxPetType = pResult->getInt(1);
 
-        m_PetTypeInfos.reserve(MaxPetType + 1);
+        // Was reserve(), which sets capacity and leaves size() at 0. Every slot
+        // addPetTypeInfo wrote and getPetTypeInfo read was therefore past the end
+        // of the vector, and the slots no row filled held indeterminate pointers
+        // rather than NULL -- reserve() does not value-initialise. That is live in
+        // the shipped data: PetTypeInfo holds PetType 1..5, so MAX is 5, the
+        // allocation is 6 wide, and slot 0 is never written [measured 2026-08-11,
+        // initdb/DARKEDEN.sql]. getPetTypeInfo(0) passed its bounds check and
+        // returned a garbage pointer for the caller to dereference.
+        //
+        // resize() gives real, NULL-filled elements, which is what the NULL checks
+        // at the call sites already assume, and it makes clear() free them instead
+        // of iterating an empty range and leaking every PetTypeInfo.
+        m_PetTypeInfos.resize(MaxPetType + 1, NULL);
 
         pResult = pStmt->executeQuery("SELECT PetType, OriginalMonsterType, CreatureType1, CreatureType2, "
                                       "CreatureType3, CreatureType4, CreatureType5, FoodType "
@@ -62,15 +74,19 @@ void PetTypeInfoManager::load() {
     END_DB(pStmt)
 }
 
+// Both bounds were capacity(), not size(). capacity() is only ever >= size(), and
+// the standard lets an implementation hand back more than reserve() asked for, so
+// an index in [size, capacity) passed the check and then indexed past the last
+// element. size() is the number of elements that actually exist.
 void PetTypeInfoManager::addPetTypeInfo(PetTypeInfo* pPetTypeInfo) {
-    if (pPetTypeInfo->m_PetType >= m_PetTypeInfos.capacity())
-        throw Error("Pet Type  ");
+    if (pPetTypeInfo->m_PetType >= m_PetTypeInfos.size())
+        throw Error("PetTypeInfoManager::addPetTypeInfo: PetType out of range");
 
     m_PetTypeInfos[pPetTypeInfo->m_PetType] = pPetTypeInfo;
 }
 
 PetTypeInfo* PetTypeInfoManager::getPetTypeInfo(PetType_t PetType) {
-    if (PetType >= m_PetTypeInfos.capacity())
+    if (PetType >= m_PetTypeInfos.size())
         return NULL;
 
     return m_PetTypeInfos[PetType];

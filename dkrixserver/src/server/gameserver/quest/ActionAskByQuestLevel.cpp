@@ -54,7 +54,17 @@ void ActionAskByQuestLevel::execute(Creature* pCreature1, Creature* pCreature2)
     PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature2);
     Assert(pPC != NULL);
 
-    ScriptID_t sID = m_ScriptID[pPC->getQuestManager()->getEventQuestAdvanceManager()->getQuestLevel()];
+    // getQuestLevel() returns -1 when every event quest level has been advanced,
+    // and m_ScriptID is a plain ScriptID_t[5] -- so this indexed one element
+    // *before* the array for any player who had finished the chain. The -1 return
+    // is not exotic: CGLotterySelectHandler tests for it explicitly.
+    //
+    // Treated as "no script", which is the reply this action already sends when
+    // the slot holds 0, so a finished player gets the quit-dialogue response
+    // instead of whatever stack bytes preceded the array.
+    const int questLevel = pPC->getQuestManager()->getEventQuestAdvanceManager()->getQuestLevel();
+    const ScriptID_t sID =
+        (questLevel >= 0 && questLevel < EventQuestAdvanceManager::EVENT_QUEST_LEVEL_MAX) ? m_ScriptID[questLevel] : 0;
 
     if (sID == 0) {
         GCNPCResponse gcNPCResponse;

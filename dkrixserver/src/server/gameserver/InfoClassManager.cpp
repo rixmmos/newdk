@@ -54,24 +54,23 @@ void InfoClassManager::init()
         Ratio_t itemRatio = m_pItemInfos[i]->getRatio();
 
         if (itemRatio > 0) {
-            
             m_TotalRatio += itemRatio;
 
-            
+
             m_AveragePrice += m_pItemInfos[i]->getPrice();
 
             count++;
         }
     }
 
-    
+
     if (count > 1) {
         m_AveragePrice /= count;
     }
 
     Assert(m_pItemInfos[0] != NULL);
 
-    
+
     m_AveragePrice /= 1000;
     m_AveragePrice *= 100;
 
@@ -102,7 +101,17 @@ void InfoClassManager::addItemInfo(ItemInfo* pItemInfo)
     __BEGIN_TRY
 
     Assert(pItemInfo != NULL);
-    Assert(pItemInfo->getItemType() < Item::ITEM_CLASS_MAX);
+
+    // The bound here was Item::ITEM_CLASS_MAX -- the number of item *classes*
+    // (90), used to bound an item *type*. Wrong dimension, and only coincidentally
+    // large enough: load() sizes m_pItemInfos to MAX(ItemType) + 1 from each
+    // class's own table, and the largest of those in the shipped data is SkullInfo
+    // at ItemType 75 [measured 2026-08-11, initdb/DARKEDEN.sql, 88 tables]. A class
+    // that grows past 89 types would start failing this Assert at startup while
+    // still fitting its own array. Bounded against what load() actually allocated.
+    if (m_pItemInfos == NULL || pItemInfo->getItemType() > m_InfoCount)
+        throw OutOfBoundException("InfoClassManager::addItemInfo: item type out of range");
+
     Assert(m_pItemInfos[pItemInfo->getItemType()] == NULL);
 
     m_pItemInfos[pItemInfo->getItemType()] = pItemInfo;
@@ -114,10 +123,27 @@ void InfoClassManager::addItemInfo(ItemInfo* pItemInfo)
 //--------------------------------------------------------------------------------
 // get item info
 //--------------------------------------------------------------------------------
+// The only bounds check this ever had was commented out, and it was against the
+// wrong dimension anyway (item classes, not item types -- see addItemInfo). With
+// it gone the surviving `Assert(m_pItemInfos[itemType] != NULL)` *is* the
+// out-of-bounds read: it indexes the array in order to test the element, so a
+// stray itemType faults inside the guard rather than being caught by it. Same
+// shape as SkillDomainInfoManager::getDomainInfo in 00a5372.
+//
+// load() allocates m_InfoCount + 1 entries from each class's own
+// SELECT MAX(ItemType), so m_InfoCount is the real last valid index.
+// ItemInfoManager::isPossibleItem already gates on getInfoCount() before calling
+// here, which is the idiom this restores.
+//
+// Throws rather than returning NULL: every caller dereferences the result
+// immediately (getVolumeWidth/getWeight/getPrice/... on the returned pointer), so
+// a NULL sentinel would only move the fault one line down.
 ItemInfo* InfoClassManager::getItemInfo(ItemType_t itemType) const {
     __BEGIN_TRY
 
-    // Assert(itemType < Item::ITEM_CLASS_MAX);
+    if (m_pItemInfos == NULL || itemType > m_InfoCount)
+        throw OutOfBoundException("InfoClassManager::getItemInfo: item type out of range");
+
     Assert(m_pItemInfos[itemType] != NULL);
 
     return m_pItemInfos[itemType];
@@ -149,14 +175,14 @@ ItemType_t InfoClassManager::getRandomItemType() const
 {
     __BEGIN_TRY
 
-    
+
     if (m_TotalRatio == 0 || m_InfoCount == 0)
         return 0;
 
     int gambleRatio = g_pVariableManager->getGambleItemTypeRatio(); // 200%
-    int failRatio = m_pItemInfos[0]->getRatio();                    
-    int succeedRatio = m_TotalRatio - failRatio;                    
-    int newTotalRatio = failRatio + getPercentValue(succeedRatio, gambleRatio); 
+    int failRatio = m_pItemInfos[0]->getRatio();
+    int succeedRatio = m_TotalRatio - failRatio;
+    int newTotalRatio = failRatio + getPercentValue(succeedRatio, gambleRatio);
     int itemTypeRatio = rand() % newTotalRatio;
     int ratio;
     int ratioSum = 0;
@@ -168,13 +194,12 @@ ItemType_t InfoClassManager::getRandomItemType() const
         << ", select = " << itemTypeRatio << endl;
     */
 
-    
+
     for (uint i = 0; i <= m_InfoCount; i++) {
         ItemInfo* pInfo = m_pItemInfos[i];
         ratio = pInfo->getRatio();
 
-        
-        
+
         if (i != 0) {
             // cout << "[" << i << "] " << ratio;
             ratio = getPercentValue(ratio, gambleRatio);
@@ -189,13 +214,11 @@ ItemType_t InfoClassManager::getRandomItemType() const
         // cout << " , ratioSum/Select = " << ratioSum << "/" << itemTypeRatio << endl;
 
         if (itemTypeRatio < ratioSum) {
-            
             return pInfo->getItemType();
         }
     }
 
-    
-    
+
     return 0;
 
     __END_CATCH

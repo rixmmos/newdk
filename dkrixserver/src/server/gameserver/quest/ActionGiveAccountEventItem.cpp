@@ -189,7 +189,22 @@ void ActionGiveAccountEventItem::execute(Creature* pCreature1, Creature* pCreatu
         luaFileName = m_VampireFilename;
     }
 
-    
+    // Same shape as ActionGiveEventItem: there is no Ousters branch, no Ousters
+    // LuaSelectItem and no OustersFilename in the trigger data, so an Ousters
+    // reached prepare() through a NULL pointer and crashed the gameserver. Fail
+    // safe -- nothing is given, no flag is touched, the dialogue just ends.
+    if (pLuaSelectItem == NULL) {
+        GCNPCResponse response;
+        response.setCode(NPC_RESPONSE_GIVE_EVENT_ITEM_FAIL_NOW);
+        pPlayer->sendPacket(&response);
+
+        GCNPCResponse quit;
+        quit.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
+        pPlayer->sendPacket(&quit);
+
+        return;
+    }
+
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);

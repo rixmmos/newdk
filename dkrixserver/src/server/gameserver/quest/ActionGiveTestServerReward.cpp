@@ -160,7 +160,22 @@ void ActionGiveTestServerReward::execute(Creature* pCreature1, Creature* pCreatu
         luaFileName = m_VampireFilename;
     }
 
-    
+    // Same shape as ActionGiveEventItem: there is no Ousters branch, no Ousters
+    // LuaSelectItem and no OustersFilename in the trigger data, so an Ousters
+    // reached prepare() through a NULL pointer and crashed the gameserver. Fail
+    // safe -- report the reward as unavailable and end the dialogue.
+    if (pLuaSelectItem == NULL) {
+        GCNPCResponse response;
+        response.setCode(NPC_RESPONSE_REWARD_FAIL);
+        pPlayer->sendPacket(&response);
+
+        GCNPCResponse quit;
+        quit.setCode(NPC_RESPONSE_QUIT_DIALOGUE);
+        pPlayer->sendPacket(&quit);
+
+        return;
+    }
+
     pLuaSelectItem->prepare();
 
     int result = pLuaSelectItem->executeFile(luaFileName);
