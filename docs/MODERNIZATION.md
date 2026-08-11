@@ -5442,11 +5442,24 @@ audited and **cleared**.
    `CGMove` field-order divergence between the trees; and the `CGExchangeList`
    desync — the last two both need a coordinated two-tree change.
 
-**A process note worth keeping.** PR #2 was **squash-merged**, so `main` carries one
-squashed commit rather than the 42 individual ones, and `git branch --contains`
-misleads about what is actually on `main`. Wave 2's commits — including the critical
-18-AB — were **not** on `main` until PR #3. Check `git log origin/main` rather than
-containment when deciding what is deployed.
+**A process note worth keeping — and the note itself was wrong the first time.**
+Wave 2's commits, including the critical 18-AB, were **not** on `main` until PR #3.
+That much is true and worth remembering: work pushed *after* a PR is merged does not
+retroactively join it.
+
+An earlier revision of this paragraph explained it by claiming PR #2 was
+**squash-merged** and that `git branch --contains` therefore misleads. **That is
+false** [measured 2026-08-11]: `669a9fe` has parents `9422e9c` and `d9b6af2`, and
+`90a926e` has `669a9fe` and `fc7fae7` — both are ordinary merge commits, every
+individual commit is reachable from `main`, and `--contains` is reliable. The claim
+came from a subagent report, was relayed here without checking `git log --format=%p`,
+and was believed for two waves.
+
+The real lesson is the one that keeps recurring in §3.2 of the security audit: **a
+claim about the repository is one command away from being verified, and relaying it
+unverified has now been wrong four times in this effort.** `git log origin/main` is
+still the right habit for deciding what is deployed — not because containment lies,
+but because it answers the question directly.
 
 ### Phase 18 — wave 4 (2026-08-11)
 
@@ -5569,6 +5582,73 @@ before anyone acts on it.
 5. `CGSilverCoatingHandler:39` — no Ousters arm, reachable only by a crafted
    packet.
 6. Delete `FameLimitInfo.{h,cpp}`.
+
+### Phase 18 — wave 6 (2026-08-11)
+
+Compile-verified only (`make debug`, all three binaries).
+
+| ID | What |
+|---|---|
+| 18-AN | `[[noreturn]]` on both assert helpers; six wild `delete`s; `LoginPlayer`'s always-uninitialised `lastSlot` on the normal re-login path |
+| 18-AO | A parser that validated a length byte **before reading it**; 41 format-string sites; a self-aliasing `sprintf`; an `m_HotKey[8]` off-by-one |
+| 18-AP | A **remote sharedserver crash**, a **stack overflow** on guild-master transfer, UB reachable in every build config, and unbounded remote memory growth |
+
+**The `-O2` warning-scan leg paid for itself on its first run.** 198 findings in
+the target family, 727 total — but 83% is `-Wnull-dereference` and ~150 of those
+are **one copy-pasted idiom**: an unchecked `dynamic_cast` dereferenced
+immediately. It reads as 164 problems only because the deref lands inside a
+trivial inline getter, so GCC reports the *callee's* header line. One file
+contributes 18 findings from 17 byte-identical copies of the same two lines.
+**The tree has 3,722 `dynamic_cast<T*>` sites** — its entire type dispatch is
+unchecked downcasting. A `checked_cast<T>()` helper would retire ~75% of the
+family in one reviewable change, and is the highest-leverage follow-up available.
+
+**`Assert1.h` reuses `Assert.h`'s include guard.** 101 files include one, 256 the
+other, and only one is live per translation unit. Any tree-wide change to the
+assert machinery must touch both or it silently misses 28% of the codebase.
+
+**Do not ratchet the warning count yet**, for a reason worth recording: because
+findings key to inlined-callee header lines, the number moves with GCC's
+*inlining decisions*. An unrelated refactor shifts it; a genuinely new
+null-deref in an already-warned header shifts it by zero. It would fire on noise
+and stay silent on regressions. Pin the compiler version first, land
+`[[noreturn]]`, then split the counter — `-Wnull-dereference` on its own versus
+everything else (~34 findings, mostly real, zero a credible destination).
+
+**The scan is structurally blind to Bug 18-B's class.** No `use-after-free` or
+`mismatched-new-delete` findings, but all four such diagnostics are
+intraprocedural: without `-flto` GCC cannot see an allocation in one TU freed in
+another. Read the zeros as "not looked for", not "not present".
+
+**Corrections landed this wave**, all verified rather than relayed:
+
+- **PR #2 was *not* squash-merged.** Both PRs are ordinary merges; every commit is
+  reachable from `main`; `--contains` is reliable. The earlier note here was
+  wrong — see the process note above.
+- `Core/Assert.h` is **not** shared with the client; `dkrix` has its own copy.
+- The Assert fall-throughs are unreachable in **Debug** (what ships) and real
+  only under `make release`. The earlier framing was inverted.
+- `CLLoginHandler`'s pay-type finding was **overstated** — the unset path exists
+  but returns three lines before the consumer.
+- The format-string class was **41 sites**, not "4+".
+- **`EventBallInfo` is not a live NULL deref** (18-AL said it was) — it is
+  uncompiled dead code, like `FameLimitInfo`. Recommend deleting both pairs.
+
+**A fourth `reserve()`-for-`resize()`, live and open:** `OptionInfo.cpp:433`
+reserves where it must resize; `OptionInfo.h:541` then does indexed assignment
+into a size-0 vector; `:1016` reads indeterminate memory that the `if (pOCI ==
+NULL)` on the next line **cannot detect**; and the destructor leaks every
+`OptionClassInfo`. Reachable from `CGAddItemToItemHandler` at three sites.
+
+**Open, owner decisions** — added this wave:
+
+7. **A submaster can promote themselves to guild master**
+   (`GSModifyGuildMemberHandler.cpp:56-58`) — the 18-I precedence shape again.
+8. **The missing `return` in `CLLoginHandler`'s fall-through** — wire-observable,
+   since that path currently emits *two* `LCLoginError` packets.
+9. Whether to correct the two always-NULL `dynamic_cast`s that make
+   `CGQuitGuild` and `CGExpelGuildMember` no-ops — doing so resurrects dormant
+   guild operations.
 
 ## Explicit non-goals
 
