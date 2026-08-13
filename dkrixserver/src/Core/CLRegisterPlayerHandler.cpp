@@ -243,6 +243,8 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
 
         pLoginPlayer->setID(pPacket->getID());
 
+        // Registration succeeded: clear the failure count accumulated on this connection.
+        pLoginPlayer->setFailureCount(0);
 
         pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
 
@@ -260,9 +262,10 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         //--------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------
-        uint nFailed = pLoginPlayer->getFailureCount();
+        // Count this failure. Once the count exceeds 3, terminate the connection.
+        uint nFailed = pLoginPlayer->getFailureCount() + 1;
 
-        // cout << pLoginPlayer->getID() << "'s Failure Count = " << ++nFailed << endl;
+        // cout << pLoginPlayer->getID() << "'s Failure Count = " << nFailed << endl;
 
         if (nFailed > 3)
             throw DisconnectException("too many failure");
@@ -288,9 +291,10 @@ void CLRegisterPlayerHandler::execute(CLRegisterPlayer* pPacket, Player* pPlayer
         //--------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------
-        uint nFailed = pLoginPlayer->getFailureCount();
+        // Count this failure. Once the count exceeds 3, terminate the connection.
+        uint nFailed = pLoginPlayer->getFailureCount() + 1;
 
-        // cout << pLoginPlayer->getID() << "'s Failure Count = " << ++nFailed << endl;
+        // cout << pLoginPlayer->getID() << "'s Failure Count = " << nFailed << endl;
 
         if (nFailed > 3)
             throw DisconnectException("too many failure");

@@ -293,8 +293,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
             filelog("loginfail.txt", "Error Code: INVALID_ID_PASSWORD, 3, PlayerID : %s", pPacket->getID().c_str());
 
 
-            uint nFailed = pLoginPlayer->getFailureCount();
-
+            // Count this failure. Once the count exceeds 3, terminate the connection.
+            uint nFailed = pLoginPlayer->getFailureCount() + 1;
 
             if (nFailed > 3) {
                 SAFE_DELETE(pStmt);
@@ -479,7 +479,8 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                             pPacket->getID().c_str());
 
 
-                    uint nFailed = pLoginPlayer->getFailureCount();
+                    // Count this failure. Once the count exceeds 3, terminate the connection.
+                    uint nFailed = pLoginPlayer->getFailureCount() + 1;
 
                     if (nFailed > 3) {
                         SAFE_DELETE(pStmt);
@@ -532,6 +533,9 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
 
                 pLoginPlayer->setAdult(bAdult);
+
+                // Login succeeded: clear the failure count accumulated on this connection.
+                pLoginPlayer->setFailureCount(0);
 
                 pLoginPlayer->sendLGKickCharacter();
 
@@ -726,6 +730,9 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                     cout << "true - " << pLoginPlayer->getID() << endl;
                 }
 #endif
+
+                // Login succeeded: clear the failure count accumulated on this connection.
+                pLoginPlayer->setFailureCount(0);
 
                 pLoginPlayer->sendPacket(&lcLoginOK);
                 pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
