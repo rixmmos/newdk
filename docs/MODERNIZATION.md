@@ -5800,6 +5800,91 @@ test, the only gate in this project’s history that has ever caught a runtime
 bug, has not run since wave 1. Merging did not change that; it only removed
 the reason it was being deferred.
 
+### Phase 18 — wave 9 (2026-08-13)
+
+Seven commits, `a8503bf`…`821d5e5`, **committed directly onto `main`** rather
+than through a branch and a PR. Five parallel agent workstreams, each scoped to
+a disjoint set of files, run against the open backlog in
+`docs/SECURITY-AUDIT-2026-08-10.md` §1 and §7 — the first wave whose input was
+that document's own open items rather than a fresh sweep.
+
+**Verification: `make debug` green in WSL, all three binaries relinked; `make
+fmt-check` green.** `make fmt` was deliberately not used — its target is
+`find src … -exec clang-format -i`, i.e. the whole tree — so the four files that
+failed the gate were passed to clang-format 18.1.8 individually (matching the
+CI pin). The churn was trailing whitespace with no content change. **Still
+compile-verified only**; see the ASan note at the end.
+
+**18-AU — the UDP throughput ceiling** (§1 row 1, the audit's highest-ranked
+open item). Both peer receive loops handled one datagram per pass around a 1 ms
+sleep, capping the internet-facing UDP port at ~500 datagram/s, which is enough
+that ~144 kbit/s of junk pushed the `GL`/`LG` login handoff out of the queue and
+**nobody could log in**. The fix is a bounded drain, not the shape originally
+specified: **the socket is blocking**, so the sleeps were never busy-spin
+protection and a drain-to-`EWOULDBLOCK` loop could not terminate. It ends on
+`FIONREAD == 0` instead, capped at 256 datagrams per pass.
+
+**18-AV — `CGSilverCoatingHandler`'s missing Ousters arm** (§1 row 6), the
+fifth race-chain instance, rebuilt against `CGRequestRepairHandler`'s shape. A
+sweep for a sixth came back clean.
+
+**18-AW — two startup loaders hardened** (§1 row 12): `InfoClassManager::init()`
+and `SkillParentInfoManager`'s destructor leak plus its `tempSkillType` cursor.
+
+**18-AX — `memoryError()` → `abort()`** in login and shared (§1 row 15).
+
+**18-AY — the login-failure counter now counts** (§1 row 4), with the
+reset-on-success that was missing entirely.
+
+**Two dead files deleted** — `FameLimitInfo.{h,cpp}`, `EventBall.{h,cpp}`
+(audit open action 14), each verified dead rather than assumed, which matters in
+a tree where two prior "provably dead" claims turned out to be live.
+
+**A `reserve()`-for-`resize()` ratchet** (open action 17), baseline 2. It is the
+first gate in this project validated **against history**: run over the pre-fix
+tree at `3e02f6c^` it reports 17 sites containing every one of the ten
+historical call sites, 0 false positives, with per-wave counts falling
+17→16→9→8→6→4→2. It found instance 7 on its first run.
+
+**What this wave is worth reading for is the corrections, not the fixes.** Five
+workstreams produced six corrections to the audit that commissioned them:
+
+1. `GuildManager`'s "`init()` compiles to nothing" note is **refuted** — there
+   are two files of that name, and the sharedserver's copy is live. The
+   gameserver's is a replicated cache fed by `SGGuildInfo`, so the empty `init()`
+   is correct by design.
+2. `MonsterKillQuest.cpp` is **superseded, not fallen out** — 1 of 13 files in
+   an uncompiled legacy `quest/Squest/` subsystem, whose `QuestManager` shares a
+   class name with the live `mission/` one and could never co-link.
+3. §1 row 1's file paths were missing the `server/` level, and the loginserver
+   was never the exact mirror the row claimed (one sleep, not two).
+4. §1 row 6's "the `dynamic_cast` returns NULL" — it is a `checkedCast` since
+   18-AQ, so it threw instead.
+5. §1 row 15 omitted that the gameserver already called `abort()`; this was
+   inconsistency between three binaries, not a uniform bug.
+6. §3.1's "measured negatives" row credited `RankEXPInfo` and `AttrBalanceInfo`
+   with correct bounds; both are in fact uncompiled.
+
+**A complete measurement that had never been taken:** 82 `.cpp` files under
+`dkrixserver/src/` are in no CMake source list, with 0 dangling entries in the
+other direction. The tree links, so no orphan can define a symbol compiled code
+calls; the residual is silent shadowing (6 files) and unregistered runtime types
+(8 packets).
+
+**Three items opened, two of them consequences of closing others.** §1 row 16:
+18-AY makes the login counter count, but it is per-TCP-connection and the stock
+client reconnects per attempt, so **the login server still has no brute-force
+protection** and the row must not be read as having provided it. §1 row 17:
+`UserGateway` instance 7, latent only because the file is uncompiled. §1 row 18:
+delete `quest/Squest/` wholesale, an owner decision.
+
+**The ASan gap is now wider, not narrower.** Waves 2–9 are ~35 defects deep with
+nothing executed, and wave 9 added a drain loop resting on `FIONREAD`-on-UDP
+semantics taken from `udp(7)` and never observed — on the `Datagram` path that
+open action 12 records as **never having been executed at all** — plus a change
+to who gets disconnected during live authentication. `dkrixserver/build-asan/`
+is still configured from wave 1, so open action 9 is cheap to run.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
