@@ -773,3 +773,29 @@ jobs:
       # toward 0 do not exist here.
       - name: Packet-duplicates ratchet
         run: sh dkrixserver/scripts/check-packet-duplicates.sh
+
+      # `reserve()`-for-`resize()` ratchet [new 2026-08-13]. Open action 17
+      # of docs/SECURITY-AUDIT-2026-08-10.md, and the cheapest gate on that
+      # list. Counts every `reserve()` whose container is then indexed,
+      # `at()`ed, or walked `begin()`..`end()` without any `resize()`,
+      # `assign()` or `push_back()` sizing it first. `reserve()` sets
+      # capacity, not size: those writes are out of bounds, the walks are
+      # empty, and the code looks like it works because the storage is
+      # allocated.
+      #
+      # Ten call sites of this had to be found by hand across five waves
+      # (18-J, 18-P, 18-Q, 18-AL, 18-AR), and five of the six instances the
+      # audit names were found only AFTER the pattern had been written
+      # down. Verified against exactly those defects: run over the tree at
+      # `3e02f6c^`, before the first fix, it reports 17 sites and every
+      # historical instance is among them, with no false positives and no
+      # false negatives.
+      #
+      # Baseline 2 [measured 2026-08-13]: `PacketValidator` (real shape,
+      # but PLAYER_STATUS_MAX is 0 in all three server binaries) and
+      # `UserGateway` (instance 7, found by this gate rather than a human;
+      # not in any CMake source list). Both latent, which is the only
+      # reason the gate can start green. `reserve()` + `push_back()` is the
+      # correct idiom and is never counted.
+      - name: reserve()-sizing ratchet
+        run: sh dkrixserver/scripts/check-reserve-sizing.sh
