@@ -35,8 +35,9 @@
 # `DragonEyeManager` sites, `OptionInfoManager`, `SkillPropertyManager`,
 # `PetAttrInfo`, `PetExpInfo`, `PetTypeInfo`, `EventQuestAdvance` and
 # `ZoneGroupManager`. No false negatives, and no false positives: the
-# other two sites it reports are `PacketValidator` and `UserGateway`,
-# which are the same defect and are still in the tree. [measured 2026-08-13]
+# other two sites it reported were `PacketValidator` and `UserGateway`,
+# the same defect, both still in the tree at that point. [measured
+# 2026-08-13]
 #
 # The counting is done by scripts/reserve_sizing_sites.py, which lexes
 # each file rather than grepping it — comments are stripped, which is
@@ -65,21 +66,27 @@
 #--------------------------------------------------------------------------------
 #
 # `.reserve-sizing-baseline` records today's count. CI fails if the count
-# goes above it. Baseline 2 [measured 2026-08-13]:
+# goes above it. Baseline 1 [measured 2026-08-13, lowered from 2]:
 #
 #   Core/PacketValidator.cpp:18   m_PacketIDSets   — the shape is real but
 #       `PLAYER_STATUS_MAX` is 0 in all three server binaries (the enum
 #       body is behind `#if defined(__GAME_CLIENT__)`), so the loop never
 #       runs. Known and deliberately unfixed: §5 of the audit.
-#   server/UserGateway.cpp:32     m_UserInfos      — instance 7, and the
-#       first one this gate found rather than a human. Not compiled:
-#       `UserGateway.cpp` is in no CMake source list and every caller is
-#       commented out. Reported, not fixed — a separate change.
 #
-# Both are latent rather than live, which is the only reason this gate
-# can start green at 2 instead of demanding a fix first. Lower the
-# baseline. Never raise it. A new site is not a baseline update, it is a
-# `resize()`/`assign()`.
+# It is latent rather than live, which is the only reason this gate could
+# start green instead of demanding a fix first.
+#
+# The gate opened at baseline 2. The second site — `UserGateway.cpp:32`,
+# instance 7 of the pattern and the first one this gate found rather than
+# a human — was **deleted** rather than fixed, because the file could not
+# have compiled in any build: its header declared six members with no
+# exception specification while the `.cpp` defined all six `throw(Error)`,
+# which is ill-formed in C++11. That is a stronger death certificate than
+# "absent from every CMake source list", which was also true. So the
+# ratchet's first catch closed by deletion, not by repair.
+#
+# Lower the baseline. Never raise it. A new site is not a baseline update,
+# it is a `resize()`/`assign()`.
 #
 # Usage:
 #   dkrixserver/scripts/check-reserve-sizing.sh            # CI mode

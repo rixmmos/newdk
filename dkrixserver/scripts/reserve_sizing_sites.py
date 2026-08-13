@@ -65,18 +65,24 @@ WHAT IT CANNOT SEE
   * Two different classes in one group that happen to share a member
     name. One class's `push_back` would suppress the other's site.
   * Whether the site is reachable. `PacketValidator`'s loop is bounded by
-    a constant that is 0 in all three server binaries, and
-    `UserGateway.cpp` is not in any CMake source list — both are counted,
-    because the gate measures the shape, not the reachability. Deciding
-    reachability is a human's job and it is what the audit is for.
+    a constant that is 0 in all three server binaries; it is counted
+    anyway, because the gate measures the shape, not the reachability.
+    Deciding reachability is a human's job and it is what the audit is
+    for. That division of labour is what the gate's first catch showed:
+    it reported `UserGateway.cpp:32` knowing nothing about whether the
+    file was built, and the humans then found the file could not compile
+    at all and deleted it.
   * Anything a `#define` hides, and anything outside the scanned tree.
   * `map`/`set`-family containers are excluded by declared type:
     `reserve()` then `operator[]` on an `unordered_map` is correct code.
     The exclusion is lexical, so a container reached only through a
     typedef whose name does not say `map`/`set` is not excluded — but a
     typedef of a *vector* must not be excluded, which is why the test is
-    an exclusion of map/set rather than a requirement of `vector<`.
-    `UserGateway`'s `USER_INFO` is exactly such a vector typedef.
+    an exclusion of map/set rather than a requirement of `vector<`. The
+    case that forced this shape was `UserGateway`'s `USER_INFO`, a
+    `typedef vector<int>` that a `vector<`-requiring test would have
+    missed entirely — the file has since been deleted, but the rule it
+    justified is why the next such typedef will still be caught.
 """
 
 import argparse
