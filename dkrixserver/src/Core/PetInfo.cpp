@@ -4,17 +4,26 @@
 
 PetInfo::PetInfo() {
     m_PetType = PET_NONE;
-    m_PetLevel = 0;
+    m_PetCreatureType = 0;
     m_PetLevel = 0;
     m_PetExp = 0;
     m_PetHP = 0;
     m_PetAttr = 0;
+    m_PetAttrLevel = 0;
     m_PetOption = 0;
+    m_PetFoodType = 0;
     m_IsSummonInfo = 0;
 
     m_CanCutHead = 0;
     m_CanAttack = 0;
     m_CanGamble = 0;
+
+    // m_PetCreatureType, m_PetAttrLevel, m_PetFoodType and m_pPetItem were left
+    // indeterminate. read() returns early on PET_NONE without assigning any of
+    // them, write() emits the first three onto the wire, and getItemObjectID()
+    // tests m_pPetItem against NULL -- a comparison against an indeterminate
+    // pointer that it then dereferences.
+    m_pPetItem = NULL;
 
     // #ifdef __GAME_SERVER__
     m_FeedTurn = 1;
