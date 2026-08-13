@@ -5724,6 +5724,70 @@ turns a live remote gameserver kill into a dropped connection, and the
 `Assert`-adjacent sites now fail identically in Debug and Release. It is the
 warning-count claim that was wrong, not the change.
 
+### Phase 18 — wave 8 (2026-08-11, committed 2026-08-13)
+
+Four commits, `4fb9591`…`6e7cc2b`. Written 2026-08-11 by the session that ran
+concurrently with wave 7 — the audit's §8 flagged them as uncommitted working-
+tree changes at the time — reviewed, build-verified and committed 2026-08-13.
+
+**18-AR — `reserve()`-for-`resize()`, instances 5 and 6.** Closes the audit's
+§1 row 4 and open action 12. `OptionInfoManager::m_OptionClassInfos` was the
+one the wave-6 rewrite found and left unfixed, and it is live on the
+rare-enchant path: `getRareUpgradeRatio()` is reached from
+`CGAddItemToItemHandler` at three sites, its read returned indeterminate memory
+that the `if (pOCI == NULL)` guard on the next line could not detect, and
+`release()`'s `begin()`…`end()` walk over an empty range leaked every
+`OptionClassInfo` ever loaded.
+
+`SkillPropertyManager::m_SkillProperties` was found while fixing the first and
+is the more direct bug of the two: `init()` NULL-filled `[0, SKILL_MAX)`
+through `operator[]` on an unsized vector, so **the fill itself was the
+out-of-bounds write** — not merely a later read of uninitialised storage.
+
+Both become `assign(N, NULL)`. Loop bounds in `clear()`/`toString()` now come
+from the vector's own `size()`, because both run from the destructor and are
+reachable without `init()` having sized anything.
+
+**The pattern's count is now 6 and it has not stopped recurring** — five of the
+six were found after the pattern was named. That is the argument for a grep
+gate over `reserve(` in a constructor or `init()`, which does not exist yet.
+
+**18-AS — a two-byte stack overflow in `getDBString`.** `CGModifyNicknameHandler`'s
+free function escaped into a 100-byte stack array and checked its bound *after*
+both writes, so a 100-character input wrote `ret[100]` and then the terminator
+at `ret[101]`, the first of the two bytes taken verbatim from the input. Escaped
+characters consume two slots per iteration, so 50 quotes reached the same place.
+Rewritten over `std::string` — the shape `SMSServiceThread`'s identically-named
+member function already used correctly. It has **no callers left** (the tree
+binds these values as parameters now; two stale `extern` declarations remain in
+`PetItem.cpp` and `NicknameBook.cpp`), which is why it survived this long.
+
+**18-AT — uninitialised `PetInfo` fields and three NULL derefs.**
+`PetInfo::PetInfo()` assigned `m_PetLevel = 0` **twice** and left
+`m_PetCreatureType`, `m_PetAttrLevel`, `m_PetFoodType` and `m_pPetItem`
+indeterminate. The duplicated line is what hid it — it reads as a complete
+initialiser list. `write()` emits three of those fields onto the wire and
+`getItemObjectID()` branches on the indeterminate pointer before dereferencing
+it. Add to §4's patterns: **a duplicated assignment in a constructor is a
+reliable tell for a missing one.**
+
+The pet-stash handlers both dereferenced `getPetItem()->getPetInfo()`
+unguarded; `CGDepositPetHandler`'s very next statement already tested it for
+NULL, so the deref simply ran three lines ahead of its own check.
+`CGThrowBombHandler` dereferenced `hasSkill(SKILL_THROW_BOMB)`'s NULL return —
+**not** absorbed by the enclosing `catch`, because a NULL dereference is a
+SIGSEGV rather than a Throwable, so the gameserver died rather than logged.
+
+**18-AQ cont. — 24 further `checkedCast` conversions.** 274 of 1,930 now
+converted (14.2%). Per wave 7's measurement, expect no movement in the warning
+artifact from this: the metric only moves on the **last** unconverted caller of
+each inlined getter.
+
+**Verification: compile-verified only.** `make debug` in WSL, all three
+binaries, plus `git-clang-format` clean on the changed lines. Nothing here has
+been executed, and the ASan gap called out in the audit's §5 is unchanged —
+still nothing since wave 1.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization

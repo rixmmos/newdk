@@ -24,23 +24,21 @@ place.
 
 | # | Gain to attacker / cheater | Where | Status |
 |---|---|---|---|
-| **1** | **Waves 4 and 5 are not on `main`.** 11 commits, carrying: two live out-of-bounds reads in the deployed Debug build (18-AH); four NULL dereferences that **SIGSEGV the gameserver**, two of them armed by rows in the shipped `Triggers` table (18-AM); and an internet-exposed `fd_set` overflow on login TCP 9999 where descriptors 1024–1999 were accepted and `FD_SET` wrote past `m_ReadFDs` into `m_WriteFDs` (18-AK). The fixes exist and are compile-verified; the running binaries do not have them. **Which binary is actually deployed decides current exposure and this document cannot tell you** | `git log origin/main..HEAD` = 11 commits, `00a5372`…`0b10827` | **open — operational, highest value** |
-| **2** | **UDP denial of service that needs no bug at all.** The gameserver's peer receive loop `usleep(1000)`s **twice** per iteration and handles **one** datagram per iteration (`LoginServerManager.cpp:200,272`; loginserver mirror at `GameServerManager.cpp:268`) — a ~500 datagram/s ceiling. Roughly 144 kbit/s of spoofed traffic saturates it, and the datagrams then dropped include the `GL`/`LG` login handoff: **nobody can log in.** UDP 9997 is deliberately port-forwarded. 18-AB gated *authorisation* on this path; it did not change the throughput ceiling, and 18-AJ's rate-limited rejection log removed the ~36× amplification but not the drop | `gameserver/LoginServerManager.cpp:198-275`, `loginserver/GameServerManager.cpp:268` | **open** (`4d92150`, `72d392e` reported; unfixed) |
-| **3** | **A working speed hack.** `GamePlayer::verifySpeed`'s `PACKET_CG_MOVE` branch computed a round-trip interval and discarded it; there is no last-move timestamp on `Creature`. The `CGVerifyTime` gate meant to catch it is dead three ways over — `verifySpeed` runs twice per packet (`GamePlayer.cpp:541` + `CGVerifyTimeHandler.cpp:34`), the outer call pushes the deadline 60s ahead so the inner test is always false, the two calls decrement and increment one counter 1:1, and the current client never sends `CGVerifyTime` at all. 18-AJ added **measurement only** — a histogram plus min-interval and max-per-tick counters flushed to `MoveRate.log` (`GamePlayer.cpp:1106`). **Enforcement is still impossible**: every "speed" identifier under `dkrixserver/src` is *weapon attack* speed; movement cadence lives in the client's binary `MCreatureTable` (`MoveTimes`, `MoveTimesMotor`, `MoveRatio`) and `CreatureTable` appears nowhere server-side | `gameserver/GamePlayer.cpp:943-1110` | **open — needs data, then an owner decision** (`89b2892`, `72d392e`) |
-| **4** | **`OptionInfoManager::m_OptionClassInfos` is the fourth instance of the `reserve()`-for-`resize()` pattern, and it is live on the rare-enchant path.** `OptionInfo.cpp:432-433` does `clear()` then `reserve((int)OPTION_MAX)` — the *dimension* is right, the *call* is not — and `OptionInfo.h:541` then writes `m_OptionClassInfos[pInfo->getOptionClass()] = pInfo`, an indexed assignment into a vector whose `size()` is 0. `reserve()` does not value-initialise, so the read at `OptionInfo.cpp:1016` returns indeterminate memory that the `if (pOCI == NULL)` guard on the next line cannot detect — exactly the shape 18-AL measured for `PetTypeInfo`. Reachable: `getRareUpgradeRatio()` is called from `CGAddItemToItemHandler` at three sites. The destructor's `begin()`…`end()` walk at `OptionInfo.cpp:476-484` iterates an empty range, so **every `OptionClassInfo` ever allocated leaks**, the same mechanism that made `EventQuestAdvance` leak in 18-AL | `gameserver/OptionInfo.cpp:433,476-484,1016`, `OptionInfo.h:541` | **open — new, found by this rewrite, unfixed** [verified in-tree at `0b10827`] |
-| **5** | **`CGMove` field order disagrees between the trees.** Server's non-encrypted branch reads `Dir, X, Y` (`dkrixserver/src/Core/CGMove.cpp:29-31`); client writes `X, Y, Dir` (`dkrix/Client/Packet/Cpackets/CGMove.cpp:59-61`). All three are `BYTE`, so the fields are silently permuted and the server loads the client's X into `m_Dir`. Both `SHUFFLE_STATEMENT_3` branches agree, so only the `getEncryptCode() == 0` fallback is affected — but the client does send `CGMove` live and it is the highest-frequency packet in the game | both trees | **open — needs a coordinated two-tree commit** (`6f45414`) |
-| 6 | **The login-failure lockout never locks anyone out.** All four sites read the counter, compare it, and write back **the value they read**. At `CLRegisterPlayerHandler.cpp:263-270` and `:291-298` the only `++nFailed` in the tree survives inside a commented-out `cout` (`:265`, `:293`); at `CLLoginHandler.cpp:286-294` and `:472-480` there is no increment at all, just a blank gap where one was. `setFailureCount` has no other call site, so the `> 3` threshold at four sites is unreachable from any of them. One word at four sites — but it changes who gets disconnected during real play [verified in-tree 2026-08-11] | `Core/CLRegisterPlayerHandler.cpp`, `Core/CLLoginHandler.cpp` | **open, owner decision** |
-| 7 | `nMaxPlayers` is 2000 (`server/PlayerManager.h:43`) against glibc's fixed 1024-bit `fd_set`. 18-AK made the excess a clean refusal, so nothing corrupts any more — but the header still reads as a capacity promise the process cannot keep. Effective ceiling ~1000 concurrent connections. **Raising `FD_SETSIZE` does not work on glibc** — `fd_set` is sized by `__FD_SETSIZE`, fixed in `bits/typesizes.h`, and defining `FD_SETSIZE` before the include silently does nothing (it *does* work that way on Winsock, which is probably why the current state looks deliberate). **Not compile-confirmed on the CI glibc**; worth a two-line test first | `server/PlayerManager.h:43` | **open, cosmetic-but-misleading** (`2e73f5c`) |
-| 8 | `CGSilverCoatingHandler.cpp:39` — `bool bSlayer = true` with no Ousters arm, so an Ousters takes the Slayer branch and the `dynamic_cast` returns NULL. The fifth instance of §4's race-chain pattern. Not reachable through a real client (it only sends that packet for an item an Ousters cannot hold) — reachable by a crafted packet | `Core/CGSilverCoatingHandler.cpp:39` | **open, latent** (`d70271e`) |
-| 9 | `GCExchangeBuy::read()` still carries 18-H's arbitrary-read primitive: `iStream.read(m_Message)` on a `std::string` binds to the raw template `read<T>()`, reinterpreting wire bytes as a live `std::string` — attacker-chosen source pointer and length, and the wrap branch frees an attacker-chosen pointer. `write()` emits it unprefixed. **Now doubly latent**: no factory registers it, and 18-AF `#if 0`'d both `CGExchange*` registrations too (`PacketFactoryManager.cpp:1193-1197`), so the whole subsystem is off the wire | `Core/GCExchangeBuy.cpp:23` | **open, latent — downgraded by `ec27e95`** |
-| 10 | `CGExchangeList` desyncs the stream — server reads a trailing length-prefixed seller filter, client writes 19 bytes and stops. Same downgrade as row 9: `CGExchangeListFactory` is no longer registered | both trees | **open, latent** (`b9fac7d`, `ec27e95`) |
-| 11 | `CGUnburrow` direction persists unbounded. 18-AC deliberately did **not** reject `Dir` in `read()` — `DIR_NONE` aliases `DIR_MAX`, so 8 is a live sentinel and a range check would be unsafe. Lookups are bounded, but `addUnburrowCreature` → `Creature::setXYDir` stores the out-of-range `dir` verbatim into creature state, where it resurfaces through `PCVampireInfo3::toString()` | `gameserver/`, `Creature.h:234` | **open — sentinel contract must be decided first** (`6f45414`) |
-| 12 | Assert residual. 18-U converted the 25 wire-reachable bounds Asserts, 18-AD hoisted 6 mutating calls, 18-AG hoisted 47 parse calls, and 18-AH/AL hardened the surviving accessors — so `make release` is far less dangerous than it was. But the conversions were scoped to *wire-reachable* checks; server-side-index Asserts in `ItemInfoManager` and friends were deliberately left, as were `CGSMSSend`'s size caps (policy limits; converting them turns soft caps into disconnects) | tree-wide | **open, much reduced** |
-| 13 | `TradeManager` residuals: `processTrade` has a partial-commit path (items **lost**, not duped) currently unreachable behind `canTrade`; `cancelTrade` skips the partner's refund when they have left the zone | `gameserver/TradeManager.cpp` | **open, low** (`053b69f`) |
-| 14 | Startup-fragility reported by the wave-5 sweep and not fixed: `InfoClassManager::init()` dereferences `m_pItemInfos[i]` unconditionally, safe only because all 88 item tables are measured dense from 0 — one gapped row is a startup NULL deref. `SkillParentInfo::load()` would NULL-deref on a `SkillType` 0 row (shipped MIN is 5) and leaks all 106 objects | `gameserver/InfoClassManager.cpp:40-60`, `SkillParentInfo.cpp` | **open, low** (`1f1ded5`) |
-| 15 | `initdb/DARKEDEN.sql:11568` seeds `WorldDBInfo` with Host/User/Password **as data**, read at startup by `DatabaseManager.cpp:108-134`. No env var reaches it, so changing the DB password requires an `UPDATE` | seed dump | **open by necessity** (`3dcfb1b`) |
-| 16 | `DB_PORT` is hardcoded to 3306 in the conf templates, so the boot script's `DB_PORT` reaches the seeding step but not the servers. CI works only because the service container happens to be on 3306 | `dkrixserver/conf/*.template` | **open, CI/repro only** (`cc1fcd4`) |
-| 17 | Both `memoryError()` handlers (login and shared `main.cpp`) `exit(0)` on a fatal OOM, so a supervisor sees a clean exit for a crash | `*/main.cpp` | **open, cosmetic** (`5e088a4`) |
+| **1** | **UDP denial of service that needs no bug at all.** The gameserver's peer receive loop `usleep(1000)`s **twice** per iteration and handles **one** datagram per iteration (`LoginServerManager.cpp:200,272`; loginserver mirror at `GameServerManager.cpp:268`) — a ~500 datagram/s ceiling. Roughly 144 kbit/s of spoofed traffic saturates it, and the datagrams then dropped include the `GL`/`LG` login handoff: **nobody can log in.** UDP 9997 is deliberately port-forwarded. 18-AB gated *authorisation* on this path; it did not change the throughput ceiling, and 18-AJ's rate-limited rejection log removed the ~36× amplification but not the drop | `gameserver/LoginServerManager.cpp:198-275`, `loginserver/GameServerManager.cpp:268` | **open** (`4d92150`, `72d392e` reported; unfixed) |
+| **2** | **A working speed hack.** `GamePlayer::verifySpeed`'s `PACKET_CG_MOVE` branch computed a round-trip interval and discarded it; there is no last-move timestamp on `Creature`. The `CGVerifyTime` gate meant to catch it is dead three ways over — `verifySpeed` runs twice per packet (`GamePlayer.cpp:541` + `CGVerifyTimeHandler.cpp:34`), the outer call pushes the deadline 60s ahead so the inner test is always false, the two calls decrement and increment one counter 1:1, and the current client never sends `CGVerifyTime` at all. 18-AJ added **measurement only** — a histogram plus min-interval and max-per-tick counters flushed to `MoveRate.log` (`GamePlayer.cpp:1106`). **Enforcement is still impossible**: every "speed" identifier under `dkrixserver/src` is *weapon attack* speed; movement cadence lives in the client's binary `MCreatureTable` (`MoveTimes`, `MoveTimesMotor`, `MoveRatio`) and `CreatureTable` appears nowhere server-side | `gameserver/GamePlayer.cpp:943-1110` | **open — needs data, then an owner decision** (`89b2892`, `72d392e`) |
+| **3** | **`CGMove` field order disagrees between the trees.** Server's non-encrypted branch reads `Dir, X, Y` (`dkrixserver/src/Core/CGMove.cpp:29-31`); client writes `X, Y, Dir` (`dkrix/Client/Packet/Cpackets/CGMove.cpp:59-61`). All three are `BYTE`, so the fields are silently permuted and the server loads the client's X into `m_Dir`. Both `SHUFFLE_STATEMENT_3` branches agree, so only the `getEncryptCode() == 0` fallback is affected — but the client does send `CGMove` live and it is the highest-frequency packet in the game | both trees | **open — needs a coordinated two-tree commit** (`6f45414`) |
+| **4** | **The login-failure lockout never locks anyone out.** All four sites read the counter, compare it, and write back **the value they read**. At `CLRegisterPlayerHandler.cpp:263-270` and `:291-298` the only `++nFailed` in the tree survives inside a commented-out `cout` (`:265`, `:293`); at `CLLoginHandler.cpp:286-294` and `:472-480` there is no increment at all, just a blank gap where one was. `setFailureCount` has no other call site, so the `> 3` threshold at four sites is unreachable from any of them. One word at four sites — but it changes who gets disconnected during real play [verified in-tree 2026-08-11] | `Core/CLRegisterPlayerHandler.cpp`, `Core/CLLoginHandler.cpp` | **open, owner decision** |
+| **5** | `nMaxPlayers` is 2000 (`server/PlayerManager.h:43`) against glibc's fixed 1024-bit `fd_set`. 18-AK made the excess a clean refusal, so nothing corrupts any more — but the header still reads as a capacity promise the process cannot keep. Effective ceiling ~1000 concurrent connections. **Raising `FD_SETSIZE` does not work on glibc** — `fd_set` is sized by `__FD_SETSIZE`, fixed in `bits/typesizes.h`, and defining `FD_SETSIZE` before the include silently does nothing (it *does* work that way on Winsock, which is probably why the current state looks deliberate). **Not compile-confirmed on the CI glibc**; worth a two-line test first | `server/PlayerManager.h:43` | **open, cosmetic-but-misleading** (`2e73f5c`) |
+| 6 | `CGSilverCoatingHandler.cpp:39` — `bool bSlayer = true` with no Ousters arm, so an Ousters takes the Slayer branch and the `dynamic_cast` returns NULL. The fifth instance of §4's race-chain pattern. Not reachable through a real client (it only sends that packet for an item an Ousters cannot hold) — reachable by a crafted packet | `Core/CGSilverCoatingHandler.cpp:39` | **open, latent** (`d70271e`) |
+| 7 | `GCExchangeBuy::read()` still carries 18-H's arbitrary-read primitive: `iStream.read(m_Message)` on a `std::string` binds to the raw template `read<T>()`, reinterpreting wire bytes as a live `std::string` — attacker-chosen source pointer and length, and the wrap branch frees an attacker-chosen pointer. `write()` emits it unprefixed. **Now doubly latent**: no factory registers it, and 18-AF `#if 0`'d both `CGExchange*` registrations too (`PacketFactoryManager.cpp:1193-1197`), so the whole subsystem is off the wire | `Core/GCExchangeBuy.cpp:23` | **open, latent — downgraded by `ec27e95`** |
+| 8 | `CGExchangeList` desyncs the stream — server reads a trailing length-prefixed seller filter, client writes 19 bytes and stops. Same downgrade as row 9: `CGExchangeListFactory` is no longer registered | both trees | **open, latent** (`b9fac7d`, `ec27e95`) |
+| 9 | `CGUnburrow` direction persists unbounded. 18-AC deliberately did **not** reject `Dir` in `read()` — `DIR_NONE` aliases `DIR_MAX`, so 8 is a live sentinel and a range check would be unsafe. Lookups are bounded, but `addUnburrowCreature` → `Creature::setXYDir` stores the out-of-range `dir` verbatim into creature state, where it resurfaces through `PCVampireInfo3::toString()` | `gameserver/`, `Creature.h:234` | **open — sentinel contract must be decided first** (`6f45414`) |
+| 10 | Assert residual. 18-U converted the 25 wire-reachable bounds Asserts, 18-AD hoisted 6 mutating calls, 18-AG hoisted 47 parse calls, and 18-AH/AL hardened the surviving accessors — so `make release` is far less dangerous than it was. But the conversions were scoped to *wire-reachable* checks; server-side-index Asserts in `ItemInfoManager` and friends were deliberately left, as were `CGSMSSend`'s size caps (policy limits; converting them turns soft caps into disconnects) | tree-wide | **open, much reduced** |
+| 11 | `TradeManager` residuals: `processTrade` has a partial-commit path (items **lost**, not duped) currently unreachable behind `canTrade`; `cancelTrade` skips the partner's refund when they have left the zone | `gameserver/TradeManager.cpp` | **open, low** (`053b69f`) |
+| 12 | Startup-fragility reported by the wave-5 sweep and not fixed: `InfoClassManager::init()` dereferences `m_pItemInfos[i]` unconditionally, safe only because all 88 item tables are measured dense from 0 — one gapped row is a startup NULL deref. `SkillParentInfo::load()` would NULL-deref on a `SkillType` 0 row (shipped MIN is 5) and leaks all 106 objects | `gameserver/InfoClassManager.cpp:40-60`, `SkillParentInfo.cpp` | **open, low** (`1f1ded5`) |
+| 13 | `initdb/DARKEDEN.sql:11568` seeds `WorldDBInfo` with Host/User/Password **as data**, read at startup by `DatabaseManager.cpp:108-134`. No env var reaches it, so changing the DB password requires an `UPDATE` | seed dump | **open by necessity** (`3dcfb1b`) |
+| 14 | `DB_PORT` is hardcoded to 3306 in the conf templates, so the boot script's `DB_PORT` reaches the seeding step but not the servers. CI works only because the service container happens to be on 3306 | `dkrixserver/conf/*.template` | **open, CI/repro only** (`cc1fcd4`) |
+| 15 | Both `memoryError()` handlers (login and shared `main.cpp`) `exit(0)` on a fatal OOM, so a supervisor sees a clean exit for a crash | `*/main.cpp` | **open, cosmetic** (`5e088a4`) |
 
 **Two changes no compiler will ever see**, carried deliberately and flagged
 (`c5bebb7`, `65c07ad`): `gameserver/GuildManager.cpp`'s `init()` body is inside
@@ -55,11 +53,11 @@ surface. Two more files are in the same state — see §3.
 One row per ID, sorted by ID, each citing its commit. Verification uses §5's
 vocabulary strictly.
 
-**Cut line for `main`** [measured 2026-08-11 by `git merge-base --is-ancestor`]:
-**everything up to and including 18-AG is on `main`**, via merge commits
-`669a9fe` (PR #2) and `90a926e` (PR #3). **18-AH … 18-AM are not.** That single
-sentence is the only place merge state appears in this table; update it here when
-the tail lands.
+**Cut line for `main`** [measured 2026-08-13 by `git branch -r --contains`]:
+**everything up to and including 18-AQ is on `main`**, via merge commits
+`669a9fe` (PR #2), `90a926e` (PR #3) and `760b48f` (PR #4). **18-AR … 18-AT —
+wave 8 — are not yet.** That single sentence is the only place merge state
+appears in this table; update it here when the tail lands.
 
 | ID | What | Where | Commit | Verification |
 |---|---|---|---|---|
@@ -102,6 +100,13 @@ the tail lands.
 | 18-AK | **`fd_set` overflow made a refusal on all three servers.** `m_ReadFDs`/`m_WriteFDs` are glibc's default 1024-bit sets (`FD_SETSIZE` is never defined anywhere in this tree) but `nMaxPlayers` is 2000 and the accept paths did not bound against 1024 — descriptors 1024–1999 were accepted and `FD_SET` wrote out of bounds past `m_ReadFDs` into the adjacent `m_WriteFDs`. Crossing the limit was **memory corruption, not refusal**, on a login server internet-exposed on TCP 9999. All three accept paths now reject at `min(FD_SETSIZE, capacity)` before any `FD_SET`, close cleanly, and log once per rate-limited window (8 lines/60s, 18-AJ's pattern — an unbounded per-connection log would be its own amplifier). **The sharedserver was worse than the reported bug and had no check at all**: `addGameServerPlayer` writes `m_pGameServerPlayers[fd]` into a **100**-entry array, so descriptor ≥ 100 was an unconditional out-of-bounds pointer write — a bound ten times tighter. Mitigated only by 9977 not being in the Docker port list. No working capacity removed: nothing above 1023 ever worked | all three servers' accept paths, `sharedserver/GameServerManager.cpp` | `2e73f5c` | compile-verified |
 | 18-AL | Four more **constant-guard-vs-DB-sized-array** defects. Method validated by first reproducing 18-AH's measured numbers exactly before being trusted on anything new. (1) **`EventQuestAdvance` is live, one instance per player**, and had the `reserve()`-for-`resize()` landmine 18-AH reported as merely latent — except compiled and running: `size()` stayed 0, so every `m_Advances[i]` indexed past the end and `clear()` iterated `begin()`…`end()` over nothing, **leaking every `EventQuestAdvance` ever allocated**; `getStatus`/`rewarded` take a client-supplied level via `CGLotterySelectHandler`. (2) `InfoClassManager::getItemInfo` had **no bounds check at all** — the only one was commented out, leaving `Assert(m_pItemInfos[itemType] != NULL)`, which **is** the out-of-bounds read because it indexes in order to test; `addItemInfo`'s `Assert` was the wrong dimension entirely (`ITEM_CLASS_MAX` = 90, an item *class* count, bounding an item *type* that reaches 75). (3) `ActionAskByQuestLevel` indexes `m_ScriptID[getQuestLevel()]` on a `ScriptID_t[5]` and `getQuestLevel()` returns **−1** once all five levels are advanced — a read *before* the array. (4) `PetTypeInfo`: `reserve()` again, and both bounds checked `capacity()` rather than `size()`; measured PetType 1..5 so slot 0 is never written, and `reserve()` does not value-initialise, so `getPetTypeInfo(0)` **passed its check and returned an indeterminate pointer** | `gameserver/EventQuestAdvance.*`, `InfoClassManager.cpp`, `quest/ActionAskByQuestLevel.cpp`, `PetTypeInfo.*` | `1f1ded5` | compile-verified |
 | 18-AM | **Four Ousters NULL dereferences that crash the process.** A pointer initialised to NULL, assigned only inside a race chain that does not cover all three races, then dereferenced unconditionally — a SIGSEGV rather than a `Throwable` `__END_CATCH` could absorb, **so the gameserver dies, it does not log**. All four are the same Lua copy-paste. **Two are live in the shipped trigger data**: `ActionGiveAccountEventItem` (rows 26 Smirovich, 634 Ayman) and `ActionGiveTestServerReward` (rows 678 Kaim, 841 Smith, 1013 Stormov); `ActionGiveEventItem` and `ActionTradeGiftBox` are latent but any live-DB row arms them. What the Ousters path should do was proved *structurally*: the headers declare only Slayer and Vampire members, no `LuaTradeEventOustersItem` class exists anywhere, `read()` never parses an `OustersFilename`, and grep for that property across the whole repo returns nothing — the case is **unimplemented, not broken**. Each now returns the file's own failure reply plus `QUIT_DIALOGUE` and deliberately does **not** set `m_FlagSetType`, so the character is not burned if an Ousters script is ever added; Slayer and Vampire behaviour byte-for-byte unchanged. Also: `SkillUtil`'s 4-arg `computeDamage` returned 0 before assigning its `bCritical` out-param; the two `grade[0]` reads on a possibly-empty string that 18-AG hoisted the Asserts for; `GQuestCheckPoint`'s unbounded race index straight from XML; and `RareOptionUpgradeInfo` changed to `resize()` with Release-safe range guards | `gameserver/quest/`, `SkillUtil.cpp`, `GQuest*`, `OptionInfo.cpp` | `d70271e` | compile-verified |
+| 18-AN | `[[noreturn]]` on both assert helpers (so GCC can prove the post-assert path non-NULL); six wild `delete`s; `LoginPlayer`'s `lastSlot` left uninitialised on the **normal** re-login path | `Assert.*`, `LoginPlayer.*` | wave 6 | compile-verified |
+| 18-AO | A parser that validated a length byte **before reading it**; 41 format-string sites; a self-aliasing `sprintf`; an `m_HotKey[8]` off-by-one | various | wave 6 | compile-verified |
+| 18-AP | A **remote sharedserver crash**, a **stack overflow** on guild-master transfer, UB reachable in every build config, and unbounded remote memory growth | `sharedserver/`, guild | `ca17d9a` | compile-verified |
+| 18-AQ | **`checkedCast` introduced** — a `dynamic_cast` that raises `InvalidCastError` (derived from `AssertionError`, hence `Error`) instead of yielding NULL to a caller that dereferences it on the next line. Deriving it from anything in the `Exception` family would have been silently wrong: `__END_DEBUG_EX`, which closes handlers in **456 files** under `Core/`, swallows every non-`Error` `Exception` and returns normally. 250 sites converted, +24 in wave 8 = **274 of 1,930** (14.2%). Handlers invoked *outside* the packet boundary (`CGLogoutHandler`, `CGSayHandler`) deliberately excluded | `Core/CheckedCast.*` + 274 call sites | `91bdfbf`, `6e7cc2b` | compile-verified |
+| 18-AR | **`reserve()`-for-`resize()`, instances 5 and 6 — closes the previous revision's §1 row 4 and open action 12.** `OptionInfoManager::m_OptionClassInfos` is live on the rare-enchant path (`getRareUpgradeRatio()` from `CGAddItemToItemHandler`, 3 sites): indexed writes into a `size()`-0 vector, a read of indeterminate memory that the `if (pOCI == NULL)` guard on the next line **cannot** detect, and a `begin()`…`end()` walk over an empty range leaking every `OptionClassInfo` ever loaded. `SkillPropertyManager::m_SkillProperties` was found while fixing it and is worse in kind — `init()`'s defensive NULL-fill of `[0, SKILL_MAX)` **was itself the out-of-bounds write**. Both → `assign(N, NULL)`; `clear()`/`toString()` rebounded on `size()` because both run from the destructor; `getOptionClassInfo()` now returns NULL out of range and `CGMixItemHandler` absorbs it, along with two `Assert`-only `front()`-on-empty-list checks it needed anyway | `gameserver/OptionInfo.*`, `SkillPropertyManager.cpp`, `Core/CGMixItemHandler.cpp` | `4fb9591` | compile-verified |
+| 18-AS | **Two-byte stack overflow in `getDBString`**, the second byte attacker-supplied. Escaped into `char ret[100]` and checked the bound **after** both writes, so a 100-character nickname wrote `ret[100]` then the terminator at `ret[101]`; an escaped character consumes two slots, so 50 quotes reached the same place. Rewritten over `std::string` — the shape `SMSServiceThread`'s identically-named member already used correctly. **No callers left** (two stale `extern`s in `PetItem.cpp`, `NicknameBook.cpp`), which is why it survived | `Core/CGModifyNicknameHandler.cpp` | `d281882` | compile-verified |
+| 18-AT | `PetInfo::PetInfo()` assigned `m_PetLevel = 0` **twice** and left `m_PetCreatureType`, `m_PetAttrLevel`, `m_PetFoodType` and `m_pPetItem` indeterminate — `write()` puts three of them on the wire, `getItemObjectID()` branches on the indeterminate pointer then dereferences it. Plus three NULL derefs: both pet-stash handlers dereferenced `getPetInfo()` unguarded (`CGDepositPetHandler`'s **very next statement** already tested it), and `CGThrowBombHandler` dereferenced `hasSkill()`'s NULL return — a SIGSEGV, not a `Throwable`, so the gameserver died rather than logged | `Core/PetInfo.cpp`, `CGDepositPetHandler.cpp`, `CGWithdrawPetHandler.cpp`, `CGThrowBombHandler.cpp` | `6ea0086` | compile-verified |
 
 **Unnumbered, same effort:**
 
@@ -178,7 +183,7 @@ new file. Each carries its instance count as of 2026-08-11.
 
 **1. Controls that exist but do nothing — 4 instances.** The login-failure
 lockout never increments because `++nFailed` lives inside a commented-out `cout`
-(§1 row 6). The `CGVerifyTime` speed gate is dead three ways over (§1 row 3). The
+(§1 row 4). The `CGVerifyTime` speed gate is dead three ways over (§1 row 2). The
 SQL-injection ratchet reported `0` while 188 sites were invisible to it. The
 `sanitizers` matrix was build-only, so it could not see the class it appeared to
 cover. **Rule: when a gate here reports clean, check that it CAN report anything
@@ -188,7 +193,7 @@ else.**
 build, so these are not all NDEBUG-only theory — but `Assert(m_pItemInfos[t] !=
 NULL)` **is** the out-of-bounds read, because it indexes in order to test
 (18-AL). Instances: 18-K (5), 18-U (25), 18-AD (6), 18-AG (47), 18-AH, 18-AL,
-18-AI (3 castle IDs). Residual scoped and recorded at §1 row 12.
+18-AI (3 castle IDs). Residual scoped and recorded at §1 row 10.
 
 **3. A constant guard against a DB-sized array.** A container is sized from its
 own DB rows at load, but access is bounded by a hardcoded constant that was true
@@ -201,17 +206,25 @@ holds 101) and `ActionTeachSkill` (`m_GoalExp[6]`, six entries); 18-AL's
 find the `load()` that sizes the container, then diff its real row counts against
 every constant used to bound it.
 
-**4. `reserve()` where `resize()` was meant — 4 instances.** Nastier than it
+**4. `reserve()` where `resize()` was meant — 6 instances.** Nastier than it
 looks: `reserve()` *allocates*, so writes usually land inside the allocation and
 the code appears to work, while `size()` stays 0 — which silently empties every
 range-based loop, `clear()` and iteration over the container. That is how
 `EventQuestAdvance` leaked every object it ever allocated. And `reserve()` does
 not value-initialise, so a NULL check on a "reserved" slot tests indeterminate
 memory. Named instances: `RareOptionUpgradeInfo`, `EventQuestAdvance`,
-`PetTypeInfo` (all fixed), plus **`OptionInfoManager::m_OptionClassInfos`, found
-by this rewrite and still open** (§1 row 4). The same family had already appeared
-as 18-J, 18-P (3 sites) and 18-Q under the label "`reserve()` without
-`assign()`".
+`PetTypeInfo`, plus `OptionInfoManager::m_OptionClassInfos` and
+`SkillPropertyManager::m_SkillProperties` — **all six now fixed** (18-AR). The
+same family had already appeared as 18-J, 18-P (3 sites) and 18-Q under the
+label "`reserve()` without `assign()`".
+
+**Five of the six were found *after* the pattern was named here**, which is the
+argument for a mechanical gate: a grep for `reserve(` inside a constructor or
+`init()` would have found all six at once, and does not exist yet. The
+`SkillPropertyManager` instance is also the sharpest illustration of why the
+family is hard to see by reading — its `init()` NULL-filled `[0, SKILL_MAX)`
+through `operator[]`, so **the defensive fill was itself the out-of-bounds
+write**.
 
 **5. An incomplete race chain, then an unconditional dereference — 5
 instances.** A pointer initialised to NULL, assigned only inside a
@@ -219,7 +232,7 @@ Slayer/Vampire chain that has no Ousters arm, then dereferenced. It is a SIGSEGV
 not a `Throwable` that `__END_CATCH` absorbs, **so the gameserver dies without
 logging**. 18-AM fixed four (`ActionGiveAccountEventItem`,
 `ActionGiveTestServerReward`, `ActionGiveEventItem`, `ActionTradeGiftBox`); the
-fifth, `CGSilverCoatingHandler.cpp:39`, is open (§1 row 8). Verified false
+fifth, `CGSilverCoatingHandler.cpp:39`, is open (§1 row 6). Verified false
 positives are recorded in §3.1 so they are not re-swept.
 
 **6. Gates that report clean because they are structurally blind — 4
@@ -304,7 +317,7 @@ smoke covers **boot only, never packets**; its own job name says so.
   both trees and both trigger types" for waves 2–3; there is no equivalent
   statement for waves 4–5 and no CLI is available in this environment to query
   Actions.
-- **Which binary is actually deployed.** §1 row 1.
+- **Which binary is actually deployed.** Waves 4–7 are on `main` as of `760b48f` (PR #4, 2026-08-11), so the question is no longer "are the fixes merged" but "was the running binary rebuilt from the merged tip". This document cannot answer that; only the workstation can.
 - **The client half of 18-R and the `CGExchangeBuy` client change.** This
   workstation cannot build the client; CI is the only possible gate.
 
@@ -352,39 +365,50 @@ The "was" column is preserved deliberately; it is the part worth remembering.
 6. ~~**Answer the UDP question.**~~ **Answered the hard way.** UDP 9997 *is*
    reachable off-LAN and carried an unauthenticated admin channel (18-AB).
 7. ~~**Merge 18-AB to `main`.**~~ **DONE** — PR #3, `90a926e`, 2026-08-11.
+8. ~~**Merge waves 4 and 5.**~~ **DONE** — PR #4, `760b48f`, 2026-08-11, which
+   carried waves 4 through 7 (`00a5372`…`5e8e153`). The residual is **not**
+   merge state any more, it is deployment state: whether the running binaries
+   were rebuilt from that tip. See §5.
+9. ~~**Fix `OptionInfoManager::m_OptionClassInfos`.**~~ **DONE** — 18-AR,
+   `4fb9591`. It was not one instance but two: `SkillPropertyManager` fell out
+   of the same fix. The prescription written here — "one-line `reserve` →
+   `resize(OPTION_MAX, NULL)`" — **understated it**; `release()` runs from
+   `init()` as well as the destructor, so a plain `clear()` there re-arms the
+   same bug on the next load, and `clear()`/`toString()` had to be rebounded on
+   `size()` rather than on the constant.
 
 ### Open
 
-8. **Merge waves 4 and 5** — the 11 commits `00a5372`…`0b10827`. Then **confirm
-   the deployed binaries were built from it.** This is §1 row 1 and it is the
-   highest-value action on this page.
-9. **Re-run the smoke test under ASan.** Nothing since wave 1 has been through
-   it, and it is the only gate that has ever caught a runtime bug here. Cheap
-   locally. Do it after the merge, not before.
+9. **Re-run the smoke test under ASan — now the highest-value action on this
+   page.** Nothing since wave 1 has been through it, and it is the only gate
+   that has ever caught a runtime bug here. The merge blocker it was waiting
+   on is gone (action 8), and waves 2–8 are 30-odd fixes deep with nothing
+   executed. Cheap locally; only the workstation can do it.
 10. **Re-run the servers under UBSan** to confirm 18-AA's three reports are
     actually gone — `9cfe522` explicitly does not claim they are — and to
     establish whether the CI UBSan boot leg passes at all (§5).
 11. **Read the `-O2` warning-scan leg's first output and seed a baseline.**
     `ff62f9a` deliberately shipped it un-baselined and unable to fail; if its
     findings go unread, that is the trigger to revisit `-Og`.
-12. **Fix `OptionInfoManager::m_OptionClassInfos`** — §1 row 4, one-line
-    `reserve` → `resize(OPTION_MAX, NULL)` plus a real bound at
-    `OptionInfo.h:541` and `OptionInfo.cpp:1016`, matching 18-AL's treatment of
-    `PetTypeInfo`.
-13. **Exercise the paths still never run**: NPC shop rack (no buy or sell has
+12. **Exercise the paths still never run**: NPC shop rack (no buy or sell has
     ever been performed), `CGAddItemToCodeSheet`, phone slots, pet stash, and the
     entire `Datagram`/`SerialDatagram` UDP path — which is exactly where 18-AB
     and 18-U's UDP bounds checks live.
-14. **Schedule the coordinated wire changes** — `CGMove` field order (§1 row 5)
+13. **Schedule the coordinated wire changes** — `CGMove` field order (§1 row 3)
     and, if the exchange subsystem is ever enabled, `GCExchangeBuy` /
-    `CGExchangeList` (§1 rows 9, 10). House rule: both trees in one commit.
-15. **Delete `FameLimitInfo.{h,cpp}` and `EventBall.{h,cpp}`** — both uncompiled
+    `CGExchangeList` (§1 rows 7, 8). House rule: both trees in one commit.
+14. **Delete `FameLimitInfo.{h,cpp}` and `EventBall.{h,cpp}`** — both uncompiled
     (§3.1). Deleting is the honest signal; leaving them invites a third auditor
     to "fix" them.
-16. **Decide the pre-authentication idle deadline** (§3.2, idle-timeout row) —
+15. **Decide the pre-authentication idle deadline** (§3.2, idle-timeout row) —
     the residual after 18-AK, and the only remaining structural lever on
     connection parking.
-17. **Do not run `make release` casually.** §1 row 12.
+16. **Do not run `make release` casually.** §1 row 10.
+17. **Add a `reserve()` grep gate.** §4 pattern 4 reached 6 instances and five
+    of them were found *after* the pattern was named — by hand, one wave at a
+    time. A grep for `reserve(` inside a constructor or `init()` would have
+    found all six at once and would keep instance 7 from being written. This
+    is the cheapest unbuilt gate on the list.
 18. **Do not rewrite history.** No live secret was ever committed, and a rewrite
     breaks the `archive/modernization-phases-1-17` tag and every published SHA.
 
@@ -398,25 +422,31 @@ to move.
 
 | | |
 |---|---|
-| Branch | `fix/bug-18b-loginserver-result-uaf`, tip `0b10827` |
-| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-11 (`0b10827`), **64 non-merge commits** since `9422e9c` |
-| On `main` | Through **18-AG** (`fc7fae7`), via merge commits `669a9fe` (PR #2) and `90a926e` (PR #3, 2026-08-11 00:30 UTC). **Both are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2) |
-| **Not on `main`** | **11 commits**: `00a5372` (18-AH), `1177bd0` (18-AI), `72d392e` (18-AJ), `09a15d9`, `e417ca2`, `2e73f5c` (18-AK), `1f1ded5` (18-AL), `d70271e` (18-AM), `ff62f9a` (CI), `314e0dd`, `0b10827` |
-| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM |
+| Branch | `fix/bug-18b-loginserver-result-uaf`, tip `6e7cc2b` |
+| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`6e7cc2b`), **75 non-merge commits** since `9422e9c` |
+| On `main` | Through **wave 7** (`5e8e153`), via merge commits `669a9fe` (PR #2), `90a926e` (PR #3) and `760b48f` (PR #4, 2026-08-11). **All three are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2) |
+| **Not on `main`** | **5 commits**: `d3cc0de` (docs), and wave 8 — `4fb9591` (18-AR), `d281882` (18-AS), `6ea0086` (18-AT), `6e7cc2b` (18-AQ cont.) |
+| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT |
+| Defect count | **46** numbered, 18-A…18-AT |
 | Companion record | `docs/MODERNIZATION.md`, "Phase 18 —" sections. This document does not own it |
 
-**Measured against the committed tip `0b10827`.** At the time of writing the
-working tree also carried **uncommitted** changes to **22 source files** from a
-concurrent session — `Core/CGSayHandler.cpp`, five guild handlers,
-`CGTypeStringList.h`, `SMSAddressBook.cpp`, three `CG*` pickup/dissection
-handlers, `CGLotterySelectHandler.cpp`, `gameserver/Zone.cpp`,
-`quest/ActionTradeEventItem.cpp` and `shared/Packets/CGSetVampireHotKey.cpp`.
-**Nothing below counts that work**, and several §1 rows touch those files.
-Re-check §1 against `git log` before acting. `OptionInfo.cpp` — §1 row 4 — is
-**not** among them.
+**Measured against the committed tip `6e7cc2b`, working tree clean.** The
+previous revision recorded **uncommitted** changes to 22 source files from a
+concurrent session and warned that nothing in it counted them. **That work is
+now committed** — 25 files across `4fb9591`…`6e7cc2b`, reviewed and built
+before committing (`make debug` in WSL, all three binaries; `git-clang-format`
+clean on the changed lines). It is wave 8 above, and it is what closed the
+previous revision's §1 row 4.
 
-**Filename.** This file is named for a single day and now spans two, five waves
-and 39 defects — the name is itself a staleness generator, and a reader who sees
+**§1 was renumbered when rows 1 and 4 closed.** Old → new: 2→1, 3→2, 5→3,
+6→4, 7→5, 8→6, 9→7, 10→8, 11→9, 12→10, 13→11, 14→12, 15→13, 16→14,
+17→15. Cross-references elsewhere in this file were updated with it; **any
+external citation of a §1 row number predating 2026-08-13 is off by one or
+two.** This is the cost of ranked-by-number rows and is worth remembering before
+citing one from outside.
+
+**Filename.** This file is named for a single day and now spans four, eight waves
+and 46 defects — the name is itself a staleness generator, and a reader who sees
 `2026-08-10` reasonably assumes the content stops there. **Recommend renaming to
 `docs/SECURITY-AUDIT-PHASE-18.md`** (a `git mv`, plus the four referrers:
 `docs/MODERNIZATION.md`, and the cross-references in `docs/ci-server-ubsan.md`
@@ -430,21 +460,21 @@ call because `MOD` cites the old path.
 The previous two revisions were snapshots, and both were superseded before they
 were committed. The rule that follows from that:
 
-1. **Never write "as of this rewrite."** Every row carries its own commit or
+18. **Never write "as of this rewrite."** Every row carries its own commit or
    date, so a stale row is visible locally instead of invalidating the page.
-2. **§1 is the only ranked prose.** Closing an item means deleting its row from
+19. **§1 is the only ranked prose.** Closing an item means deleting its row from
    §1 and adding a row to §2 — never editing §1 in place to say "now fixed".
-3. **§2 is append-only and keyed by ID.** A new wave adds rows. The only
+20. **§2 is append-only and keyed by ID.** A new wave adds rows. The only
    merge-state fact in it is one sentence above the table.
-4. **§3 is append-only, and rows are never deleted.** It is the reason this
+21. **§3 is append-only, and rows are never deleted.** It is the reason this
    effort has not re-chased the same dead leads five times. When a claim you
    acted on turns out wrong, §3.2 is where it goes — not the commit message
    alone, and not nowhere.
-5. **§4 counts go up, never down.** A pattern that stops recurring stays listed
+22. **§4 counts go up, never down.** A pattern that stops recurring stays listed
    with its final count.
-6. **§8 absorbs all volatility.** Merge state, commit counts, wave boundaries.
-7. **Verification vocabulary is §5's and is not negotiable.** If you cannot cite
+23. **§8 absorbs all volatility.** Merge state, commit counts, wave boundaries.
+24. **Verification vocabulary is §5's and is not negotiable.** If you cannot cite
    the run, it is compile-verified. "The CI leg exists" is not "the CI leg
    passed".
-8. **The commit messages outrank this file.** If they disagree, the commits are
+25. **The commit messages outrank this file.** If they disagree, the commits are
    right and this file has a bug — fix it here and note the correction in §3.2.
