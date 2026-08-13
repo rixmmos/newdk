@@ -7,6 +7,7 @@
 #include "ComposMei.h"
 
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "DB.h"
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
@@ -262,7 +263,7 @@ int ComposMei::getHPAmount(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPAmount();
 
     __END_CATCH
@@ -273,7 +274,7 @@ int ComposMei::getMPAmount(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPAmount();
 
     __END_CATCH
@@ -284,7 +285,7 @@ int ComposMei::getHPDelay(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPDelay();
 
     __END_CATCH
@@ -295,7 +296,7 @@ int ComposMei::getMPDelay(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPDelay();
 
     __END_CATCH
@@ -306,7 +307,7 @@ int ComposMei::getHPQuantity(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPQuantity();
 
     __END_CATCH
@@ -317,7 +318,7 @@ int ComposMei::getMPQuantity(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPQuantity();
 
     __END_CATCH
@@ -328,7 +329,7 @@ int ComposMei::getHPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPRecoveryUnit();
 
     __END_CATCH
@@ -339,7 +340,7 @@ int ComposMei::getMPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    ComposMeiInfo* pInfo = dynamic_cast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
+    ComposMeiInfo* pInfo = checkedCast<ComposMeiInfo*>(g_pComposMeiInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPRecoveryUnit();
 
     __END_CATCH

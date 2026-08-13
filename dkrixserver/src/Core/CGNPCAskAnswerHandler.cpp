@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include <fstream>
 
+#include "CheckedCast.h"
 #include "GCNPCResponse.h"
 #include "GamePlayer.h"
 #include "NPC.h"
@@ -61,7 +62,7 @@ void CGNPCAskAnswerHandler::execute(CGNPCAskAnswer* pPacket, Player* pPlayer)
         return;
     }
 
-    NPC* pNPC = dynamic_cast<NPC*>(pCreature);
+    NPC* pNPC = checkedCast<NPC*>(pCreature);
 
     COND_ANSWERED_BY cond;
     cond.ScriptID = pPacket->getScriptID();

@@ -7,6 +7,7 @@
 #include "Potion.h"
 
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "DB.h"
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
@@ -277,7 +278,7 @@ int Potion::getHPAmount(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPAmount();
 
     __END_CATCH
@@ -288,7 +289,7 @@ int Potion::getMPAmount(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPAmount();
 
     __END_CATCH
@@ -300,7 +301,7 @@ int Potion::getHPDelay(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPDelay();
 
     __END_CATCH
@@ -311,7 +312,7 @@ int Potion::getMPDelay(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPDelay();
 
     __END_CATCH
@@ -323,7 +324,7 @@ int Potion::getHPQuantity(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPQuantity();
 
     __END_CATCH
@@ -334,7 +335,7 @@ int Potion::getMPQuantity(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPQuantity();
 
     __END_CATCH
@@ -346,7 +347,7 @@ int Potion::getHPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getHPRecoveryUnit();
 
     __END_CATCH
@@ -357,7 +358,7 @@ int Potion::getMPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    PotionInfo* pInfo = dynamic_cast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
+    PotionInfo* pInfo = checkedCast<PotionInfo*>(g_pPotionInfoManager->getItemInfo(getItemType()));
     return pInfo->getMPRecoveryUnit();
 
     __END_CATCH

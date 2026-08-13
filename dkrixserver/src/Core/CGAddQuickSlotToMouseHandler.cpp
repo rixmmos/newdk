@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include <stdio.h>
 
+#include "CheckedCast.h"
 #include "GCCannotAdd.h"
 #include "GamePlayer.h"
 #include "Inventory.h"
@@ -37,7 +38,7 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
 
     try {
         if (pCreature->isSlayer()) {
-            Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+            Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
             SlotID_t SlotID = pPacket->getSlotID();
 
             if (!pSlayer->isWear(Slayer::WEAR_BELT)) {
@@ -78,7 +79,7 @@ void CGAddQuickSlotToMouseHandler::execute(CGAddQuickSlotToMouse* pPacket, Playe
         }
 
         if (pCreature->isOusters()) {
-            Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+            Ousters* pOusters = checkedCast<Ousters*>(pCreature);
             SlotID_t SlotID = pPacket->getSlotID();
 
             Ousters::WearPart part = (SlotID > 2 ? Ousters::WEAR_ARMSBAND2 : Ousters::WEAR_ARMSBAND1);

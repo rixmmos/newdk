@@ -90,11 +90,10 @@ void CGDropMoneyHandler::execute(CGDropMoney* pPacket, Player* pPlayer)
             pItem = g_pItemFactoryManager->createItem(Item::ITEM_CLASS_MONEY, 2, optionNULL);
         }
 
-        
 
-        dynamic_cast<Money*>(pItem)->setAmount(amount);
+        checkedCast<Money*>(pItem)->setAmount(amount);
 
-        
+
         pZone->getObjectRegistry().registerObject(pItem);
 
         

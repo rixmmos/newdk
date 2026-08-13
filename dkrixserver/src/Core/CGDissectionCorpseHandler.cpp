@@ -252,7 +252,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                         }
                     }
                 } else if (pItem->getItemType() == OUSTERS_CORPSE && pCreature->isOusters()) {
-                    PCOustersInfo3& rPCOustersInfo = dynamic_cast<OustersCorpse*>(pItem)->getOustersInfo();
+                    PCOustersInfo3& rPCOustersInfo = checkedCast<OustersCorpse*>(pItem)->getOustersInfo();
 
 
                     if (rPCOustersInfo.getName() != pCreature->getName()) {
@@ -337,7 +337,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
         do // while (bDissectAll);
         {
             if (pPacket->isPet() && pCorpse->getItemType() == MONSTER_CORPSE) {
-                MonsterCorpse* pMonsterCorpse = dynamic_cast<MonsterCorpse*>(pItem);
+                MonsterCorpse* pMonsterCorpse = checkedCast<MonsterCorpse*>(pItem);
                 PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
                 PetInfo* pPetInfo = pPC->getPetInfo();
 
@@ -382,7 +382,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                             TPOINT pt = pZone->addItem(pTreasure, ZoneX, ZoneY);
                             if (pt.x != -1) {
                                 if (pItem->getItemType() == MONSTER_CORPSE) {
-                                    MonsterCorpse* pMonsterCorpse = dynamic_cast<MonsterCorpse*>(pItem);
+                                    MonsterCorpse* pMonsterCorpse = checkedCast<MonsterCorpse*>(pItem);
 
 
                                     const string& HostName = pMonsterCorpse->getHostName();
@@ -484,7 +484,7 @@ void CGDissectionCorpseHandler::execute(CGDissectionCorpse* pPacket, Player* pPl
                 TPOINT pt = pZone->addItem(pTreasure, ZoneX, ZoneY, true, 0, PetOID);
                 if (pt.x != -1) {
                     if (pItem->getItemType() == MONSTER_CORPSE) {
-                        MonsterCorpse* pMonsterCorpse = dynamic_cast<MonsterCorpse*>(pItem);
+                        MonsterCorpse* pMonsterCorpse = checkedCast<MonsterCorpse*>(pItem);
 
                         if (dissectionRelicItem(pCorpse, pTreasure, pt)) {
                         }

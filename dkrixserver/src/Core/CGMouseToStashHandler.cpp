@@ -7,6 +7,7 @@
 #include "CGMouseToStash.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GamePlayer.h"
 #include "Item.h"
 #include "ItemInfo.h"
@@ -41,7 +42,7 @@ void CGMouseToStashHandler::execute(CGMouseToStash* pPacket, Player* pPlayer)
     try {
         GamePlayer* pGamePlayer = dynamic_cast<GamePlayer*>(pPlayer);
         Creature* pCreature = pGamePlayer->getCreature();
-        PlayerCreature* pPC = dynamic_cast<PlayerCreature*>(pCreature);
+        PlayerCreature* pPC = checkedCast<PlayerCreature*>(pCreature);
         Stash* pStash = pPC->getStash();
         Item* pMouseItem = pPC->getExtraInventorySlotItem();
         bool Success = false;

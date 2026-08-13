@@ -7,6 +7,7 @@
 #include "CGShopRequestList.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCNPCResponse.h"
 #include "GCShopList.h"
 #include "GCShopListMysterious.h"
@@ -61,7 +62,7 @@ void CGShopRequestListHandler::execute(CGShopRequestList* pPacket, Player* pPlay
         return;
     }
 
-    NPC* pNPC = dynamic_cast<NPC*>(pNPCBase);
+    NPC* pNPC = checkedCast<NPC*>(pNPCBase);
 
     if (type == SHOP_RACK_SPECIAL) {
         

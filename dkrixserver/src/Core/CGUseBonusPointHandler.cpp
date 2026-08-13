@@ -7,6 +7,7 @@
 #include "CGUseBonusPoint.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "Creature.h"
 #include "GamePlayer.h"
 #include "SkillHandlerManager.h"
@@ -41,7 +42,7 @@ void CGUseBonusPointHandler::execute(CGUseBonusPoint* pPacket, Player* pPlayer)
     Attr_t cur = 0;
 
     if (pCreature->isSlayer()) {
-        Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+        Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
         if (pSlayer->getBonus() <= 0) {
             GCUseBonusPointFail failPkt;
             pPlayer->sendPacket(&failPkt);
@@ -69,8 +70,7 @@ void CGUseBonusPointHandler::execute(CGUseBonusPoint* pPacket, Player* pPlayer)
             return;
         }
     } else if (pCreature->isVampire()) {
-        
-        Vampire* pVampire = dynamic_cast<Vampire*>(pCreature);
+        Vampire* pVampire = checkedCast<Vampire*>(pCreature);
         if (pVampire->getBonus() <= 0) {
             GCUseBonusPointFail failPkt;
             pPlayer->sendPacket(&failPkt);
@@ -135,8 +135,7 @@ void CGUseBonusPointHandler::execute(CGUseBonusPoint* pPacket, Player* pPlayer)
         pVampire->sendModifyInfo(oldRecord);
         pVampire->sendRealWearingInfo();
     } else if (pCreature->isOusters()) {
-        
-        Ousters* pOusters = dynamic_cast<Ousters*>(pCreature);
+        Ousters* pOusters = checkedCast<Ousters*>(pCreature);
         if (pOusters->getBonus() <= 0) {
             GCUseBonusPointFail failPkt;
             pPlayer->sendPacket(&failPkt);
