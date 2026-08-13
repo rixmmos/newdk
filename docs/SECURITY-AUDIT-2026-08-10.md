@@ -54,10 +54,11 @@ One row per ID, sorted by ID, each citing its commit. Verification uses §5's
 vocabulary strictly.
 
 **Cut line for `main`** [measured 2026-08-13 by `git branch -r --contains`]:
-**everything up to and including 18-AQ is on `main`**, via merge commits
-`669a9fe` (PR #2), `90a926e` (PR #3) and `760b48f` (PR #4). **18-AR … 18-AT —
-wave 8 — are not yet.** That single sentence is the only place merge state
-appears in this table; update it here when the tail lands.
+**every ID in this table is on `main`** — 18-A … 18-AT, the whole effort — via
+merge commits `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4) and
+`e86a9dd` (wave 8, merged directly rather than by PR). **There is no tail.**
+That single sentence is the only place merge state appears in this table;
+update it here when that stops being true.
 
 | ID | What | Where | Commit | Verification |
 |---|---|---|---|---|
@@ -422,21 +423,28 @@ to move.
 
 | | |
 |---|---|
-| Branch | `fix/bug-18b-loginserver-result-uaf`, tip `6e7cc2b` |
-| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`6e7cc2b`), **75 non-merge commits** since `9422e9c` |
-| On `main` | Through **wave 7** (`5e8e153`), via merge commits `669a9fe` (PR #2), `90a926e` (PR #3) and `760b48f` (PR #4, 2026-08-11). **All three are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2) |
-| **Not on `main`** | **5 commits**: `d3cc0de` (docs), and wave 8 — `4fb9591` (18-AR), `d281882` (18-AS), `6ea0086` (18-AT), `6e7cc2b` (18-AQ cont.) |
+| Branch | `fix/bug-18b-loginserver-result-uaf`, tip `3b77c4e` — **fully merged**, retained but no longer ahead of `main` |
+| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`3b77c4e`), **75 non-merge commits** since `9422e9c` |
+| On `main` | **All of it**, through wave 8, via `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4) and `e86a9dd` (wave 8, 2026-08-13). **All four are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2) |
+| **Not on `main`** | **Nothing.** For the first time since 2026-08-10 this row is empty |
 | Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT |
 | Defect count | **46** numbered, 18-A…18-AT |
 | Companion record | `docs/MODERNIZATION.md`, "Phase 18 —" sections. This document does not own it |
 
-**Measured against the committed tip `6e7cc2b`, working tree clean.** The
+**Measured against `main` @ `e86a9dd`, working tree clean.** The
 previous revision recorded **uncommitted** changes to 22 source files from a
 concurrent session and warned that nothing in it counted them. **That work is
 now committed** — 25 files across `4fb9591`…`6e7cc2b`, reviewed and built
 before committing (`make debug` in WSL, all three binaries; `git-clang-format`
 clean on the changed lines). It is wave 8 above, and it is what closed the
 previous revision's §1 row 4.
+
+**One commit on the way in has a junk message.** `2c53137` is titled `sd` and
+carries the wave-8 refresh of this document and of `MODERNIZATION.md`. It is not
+being fixed: it is published, and §7 action 18 forbids rewriting history for
+exactly this kind of reason. `e86a9dd`, the merge commit, carries the real
+description. **Rule 8 of §9 — "the commit messages outrank this file" — has one
+documented exception, and this is it.**
 
 **§1 was renumbered when rows 1 and 4 closed.** Old → new: 2→1, 3→2, 5→3,
 6→4, 7→5, 8→6, 9→7, 10→8, 11→9, 12→10, 13→11, 14→12, 15→13, 16→14,

@@ -5788,6 +5788,18 @@ binaries, plus `git-clang-format` clean on the changed lines. Nothing here has
 been executed, and the ASan gap called out in the audit's §5 is unchanged —
 still nothing since wave 1.
 
+**Merged to `main` 2026-08-13** as `e86a9dd`, together with the three doc
+commits that trailed wave 7. That closes Phase 18: every one of the 46
+numbered defects is on the line of record, and for the first time since
+2026-08-10 the branch is not ahead of `main`. The audit's §8 "not on `main`"
+row is empty.
+
+**What is emphatically *not* closed is verification.** Waves 2 through 8 —
+roughly 30 defects — are compile-verified and nothing more. The ASan smoke
+test, the only gate in this project’s history that has ever caught a runtime
+bug, has not run since wave 1. Merging did not change that; it only removed
+the reason it was being deferred.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
