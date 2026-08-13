@@ -16,6 +16,22 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Select the target schema.
+--
+-- This dump was produced by `mysqldump DARKEDEN` without --databases, so
+-- unlike USERINFO.sql it carried no CREATE DATABASE and no USE. Fed to the
+-- MySQL image's /docker-entrypoint-initdb.d/ -- which is exactly what
+-- docker/docker-compose.yml mounts it as -- it aborted at the first DROP
+-- TABLE with `ERROR 1046 (3D000): No database selected`, leaving DARKEDEN
+-- empty and only USERINFO loaded. CI never saw it because
+-- scripts/ci-boot-smoke.sh seeds with an explicit `mysql -D DARKEDEN`.
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `DARKEDEN` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `DARKEDEN`;
+
+--
 -- Table structure for table `ARInfo`
 --
 

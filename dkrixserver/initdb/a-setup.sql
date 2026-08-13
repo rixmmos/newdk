@@ -15,6 +15,16 @@
 -- this file and carry their own `CREATE DATABASE ... ; USE ...;`. The
 -- IF NOT EXISTS statements below are kept so this file is still correct when run
 -- on its own against an empty server.
+--
+-- That was only half true until 2026-08-13: USERINFO.sql was dumped with
+-- --databases and DARKEDEN.sql was not, so DARKEDEN.sql carried neither
+-- statement. Under docker-compose the entrypoint therefore aborted it at its
+-- first DROP TABLE with `ERROR 1046 (3D000): No database selected`, and the
+-- DARKEDEN created here -- last, by the IF NOT EXISTS below -- stayed empty.
+-- DARKEDEN.sql now carries both statements and the sentence above is true of
+-- both dumps. Verified by seeding a clean mysql/mysql-server:5.7 container from
+-- this directory: 374 DARKEDEN tables and 7 USERINFO tables [measured
+-- 2026-08-13].
 
 CREATE DATABASE IF NOT EXISTS DARKEDEN;
 CREATE DATABASE IF NOT EXISTS USERINFO;
