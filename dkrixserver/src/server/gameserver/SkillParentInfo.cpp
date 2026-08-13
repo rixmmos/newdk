@@ -150,7 +150,13 @@ SkillParentInfoManager::SkillParentInfoManager()
 {
     __BEGIN_TRY
 
-    
+    // The array of pointers was freed but never its elements, so every
+    // SkillParentInfo load() allocated leaked. Same shape as
+    // InfoClassManager::~InfoClassManager(): delete the elements, then the array.
+    if (m_SkillParentInfoList != NULL) {
+        for (uint i = 0; i < m_SkillCount; i++)
+            SAFE_DELETE(m_SkillParentInfoList[i]);
+    }
 
     SAFE_DELETE_ARRAY(m_SkillParentInfoList);
 
@@ -211,19 +217,29 @@ void SkillParentInfoManager::load()
 
         // cout<<"======= SkillParentInfo Manager ==========="<<endl;
 
-        SkillType_t tempSkillType = 0;
-
+        // Grouping used to be inferred from a `tempSkillType` cursor seeded with 0,
+        // so a row with SkillType 0 compared equal on the very first iteration and
+        // dereferenced the still-NULL slot 0. The shipped table's MIN(SkillType) is 5,
+        // which is the only reason that never fired. Keying off the slot itself
+        // removes the assumption that rows arrive grouped (the query has no ORDER BY)
+        // and yields the same result on grouped data.
         while (pResult->next()) {
             int i = 0;
             SkillType_t SkillType = pResult->getInt(++i);
+            SkillType_t Parent = pResult->getInt(++i);
 
-            if (tempSkillType != SkillType) {
+            if (SkillType >= m_SkillCount) {
+                cerr << "SkillParentInfoManager::load() : SkillType " << (int)SkillType
+                     << " is out of bounds; row skipped" << endl;
+                continue;
+            }
+
+            if (m_SkillParentInfoList[SkillType] == NULL) {
                 SkillParentInfo* pSkillParentInfo = new SkillParentInfo(SkillType);
-                pSkillParentInfo->addParents(pResult->getInt(++i));
+                pSkillParentInfo->addParents(Parent);
                 addSkillParentInfo(pSkillParentInfo);
-                tempSkillType = SkillType;
             } else {
-                m_SkillParentInfoList[SkillType]->addParents(pResult->getInt(++i));
+                m_SkillParentInfoList[SkillType]->addParents(Parent);
             }
         }
 

@@ -50,7 +50,25 @@ void InfoClassManager::init()
     m_AveragePrice = 0;
     int count = 0;
 
+    // load() sizes m_pItemInfos to MAX(ItemType) + 1 from this class's own table and
+    // addItemInfo() fills it by ItemType, so a table whose ItemType column has a hole
+    // leaves a NULL slot here. Every shipped table happens to be dense from 0
+    // [measured 2026-08-11, 88 tables], which is the only reason the unguarded
+    // dereference below has never turned one bad DB row into a startup SIGSEGV.
+    if (m_pItemInfos == NULL) {
+        filelog("ItemError.log", "InfoClassManager::init() : itemClass %d loaded no item info table.",
+                (int)getItemClass());
+        return;
+    }
+
     for (uint i = 0; i <= m_InfoCount; i++) {
+        if (m_pItemInfos[i] == NULL) {
+            filelog("ItemError.log",
+                    "InfoClassManager::init() : itemClass %d has no item info for itemType %u; skipped.",
+                    (int)getItemClass(), (uint)i);
+            continue;
+        }
+
         Ratio_t itemRatio = m_pItemInfos[i]->getRatio();
 
         if (itemRatio > 0) {
@@ -68,7 +86,16 @@ void InfoClassManager::init()
         m_AveragePrice /= count;
     }
 
-    Assert(m_pItemInfos[0] != NULL);
+    // getRandomItemType() reads slot 0 unconditionally as the "fail" ratio, so a
+    // missing itemType 0 has to disable the random draw rather than fault inside it.
+    // This was a bare Assert(m_pItemInfos[0] != NULL), which indexed the array in
+    // order to test it and aborted startup instead of degrading.
+    if (m_pItemInfos[0] == NULL) {
+        filelog("ItemError.log",
+                "InfoClassManager::init() : itemClass %d has no item info for itemType 0; random draw disabled.",
+                (int)getItemClass());
+        m_TotalRatio = 0;
+    }
 
 
     m_AveragePrice /= 1000;
