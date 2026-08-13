@@ -23,26 +23,38 @@ Nothing else belongs above this section. Each row is either exploitable today or
 blocks something that is. Rows close by moving to §2, not by being edited in
 place.
 
+**Highest-value row right now is 19 — gold duplication in `TradeManager`.** It
+is live rather than latent, it is the only *duplication* defect this effort has
+found (every other custody bug destroyed value rather than creating it), and it
+needs a decision on fix shape rather than an obvious patch. Rows are otherwise
+in their original rank order; 19 was found late, by wave 10, and is not
+re-numbered because rows close by moving, not by renumbering.
+
 | # | Gain to attacker / cheater | Where | Status |
 |---|---|---|---|
 | ~~**1**~~ | ~~UDP denial of service that needs no bug at all~~ — **fixed 2026-08-13 as 18-AU, moved to §2.** |  |  |
 | **2** | **A working speed hack.** `GamePlayer::verifySpeed`'s `PACKET_CG_MOVE` branch computed a round-trip interval and discarded it; there is no last-move timestamp on `Creature`. The `CGVerifyTime` gate meant to catch it is dead three ways over — `verifySpeed` runs twice per packet (`GamePlayer.cpp:541` + `CGVerifyTimeHandler.cpp:34`), the outer call pushes the deadline 60s ahead so the inner test is always false, the two calls decrement and increment one counter 1:1, and the current client never sends `CGVerifyTime` at all. 18-AJ added **measurement only** — a histogram plus min-interval and max-per-tick counters flushed to `MoveRate.log` (`GamePlayer.cpp:1106`). **Enforcement is still impossible**: every "speed" identifier under `dkrixserver/src` is *weapon attack* speed; movement cadence lives in the client's binary `MCreatureTable` (`MoveTimes`, `MoveTimesMotor`, `MoveRatio`) and `CreatureTable` appears nowhere server-side | `gameserver/GamePlayer.cpp:943-1110` | **open — needs data, then an owner decision** (`89b2892`, `72d392e`) |
 | **3** | **`CGMove` field order disagrees between the trees.** Server's non-encrypted branch reads `Dir, X, Y` (`dkrixserver/src/Core/CGMove.cpp:29-31`); client writes `X, Y, Dir` (`dkrix/Client/Packet/Cpackets/CGMove.cpp:59-61`). All three are `BYTE`, so the fields are silently permuted and the server loads the client's X into `m_Dir`. Both `SHUFFLE_STATEMENT_3` branches agree, so only the `getEncryptCode() == 0` fallback is affected — but the client does send `CGMove` live and it is the highest-frequency packet in the game | both trees | **open — needs a coordinated two-tree commit** (`6f45414`) |
 | ~~**4**~~ | ~~The login-failure lockout never locks anyone out~~ — **fixed 2026-08-13 as 18-AY, moved to §2. Read the new §1 row 16 before treating this as closed:** the counter now counts, but it is per-TCP-connection, so it does not constitute brute-force protection. |  |  |
-| **5** | `nMaxPlayers` is 2000 (`server/PlayerManager.h:43`) against glibc's fixed 1024-bit `fd_set`. 18-AK made the excess a clean refusal, so nothing corrupts any more — but the header still reads as a capacity promise the process cannot keep. Effective ceiling ~1000 concurrent connections. **Raising `FD_SETSIZE` does not work on glibc** — `fd_set` is sized by `__FD_SETSIZE`, fixed in `bits/typesizes.h`, and defining `FD_SETSIZE` before the include silently does nothing (it *does* work that way on Winsock, which is probably why the current state looks deliberate). **Not compile-confirmed on the CI glibc**; worth a two-line test first | `server/PlayerManager.h:43` | **open, cosmetic-but-misleading** (`2e73f5c`) |
+| ~~**5**~~ | ~~`nMaxPlayers` is 2000 against glibc's fixed 1024-bit `fd_set`~~ — **fixed 2026-08-13 as 18-BB, moved to §2.** The row asked for a two-line test first; it was run, and confirmed the claim empirically. |  |  |
 | ~~6~~ | ~~`CGSilverCoatingHandler.cpp:39` race chain~~ — **fixed 2026-08-13 as 18-AV, moved to §2.** The row's "`dynamic_cast` returns NULL" was wrong; it is a `checkedCast` since 18-AQ, so it threw `InvalidCastError` instead. |  |  |
 | 7 | `GCExchangeBuy::read()` still carries 18-H's arbitrary-read primitive: `iStream.read(m_Message)` on a `std::string` binds to the raw template `read<T>()`, reinterpreting wire bytes as a live `std::string` — attacker-chosen source pointer and length, and the wrap branch frees an attacker-chosen pointer. `write()` emits it unprefixed. **Now doubly latent**: no factory registers it, and 18-AF `#if 0`'d both `CGExchange*` registrations too (`PacketFactoryManager.cpp:1193-1197`), so the whole subsystem is off the wire | `Core/GCExchangeBuy.cpp:23` | **open, latent — downgraded by `ec27e95`** |
 | 8 | `CGExchangeList` desyncs the stream — server reads a trailing length-prefixed seller filter, client writes 19 bytes and stops. Same downgrade as row 9: `CGExchangeListFactory` is no longer registered | both trees | **open, latent** (`b9fac7d`, `ec27e95`) |
 | 9 | `CGUnburrow` direction persists unbounded. 18-AC deliberately did **not** reject `Dir` in `read()` — `DIR_NONE` aliases `DIR_MAX`, so 8 is a live sentinel and a range check would be unsafe. Lookups are bounded, but `addUnburrowCreature` → `Creature::setXYDir` stores the out-of-range `dir` verbatim into creature state, where it resurfaces through `PCVampireInfo3::toString()` | `gameserver/`, `Creature.h:234` | **open — sentinel contract must be decided first** (`6f45414`) |
 | 10 | Assert residual. 18-U converted the 25 wire-reachable bounds Asserts, 18-AD hoisted 6 mutating calls, 18-AG hoisted 47 parse calls, and 18-AH/AL hardened the surviving accessors — so `make release` is far less dangerous than it was. But the conversions were scoped to *wire-reachable* checks; server-side-index Asserts in `ItemInfoManager` and friends were deliberately left, as were `CGSMSSend`'s size caps (policy limits; converting them turns soft caps into disconnects) | tree-wide | **open, much reduced** |
-| 11 | `TradeManager` residuals: `processTrade` has a partial-commit path (items **lost**, not duped) currently unreachable behind `canTrade`; `cancelTrade` skips the partner's refund when they have left the zone | `gameserver/TradeManager.cpp` | **open, low** (`053b69f`) |
+| ~~11~~ | ~~`TradeManager` residuals~~ — **fixed 2026-08-13 as 18-BD, moved to §2.** The row was wrong on both counts: the item-loss path was *reachable*, not gated by `canTrade`, and the asset `cancelTrade` stranded is **gold**, not items — items are never escrowed. **Superseded by row 19**, a third and worse defect found in the same file. |  |  |
 | ~~12~~ | ~~Startup fragility in `InfoClassManager::init()` and `SkillParentInfo::load()`~~ — **fixed 2026-08-13 as 18-AW, moved to §2.** |  |  |
 | 13 | `initdb/DARKEDEN.sql:11568` seeds `WorldDBInfo` with Host/User/Password **as data**, read at startup by `DatabaseManager.cpp:108-134`. No env var reaches it, so changing the DB password requires an `UPDATE` | seed dump | **open by necessity** (`3dcfb1b`) |
 | 14 | `DB_PORT` is hardcoded to 3306 in the conf templates, so the boot script's `DB_PORT` reaches the seeding step but not the servers. CI works only because the service container happens to be on 3306 | `dkrixserver/conf/*.template` | **open, CI/repro only** (`cc1fcd4`) |
 | ~~15~~ | ~~Both `memoryError()` handlers `exit(0)` on a fatal OOM~~ — **fixed 2026-08-13 as 18-AX, moved to §2.** The row did not say that the *gameserver* already called `abort()`; this was inconsistency between the three binaries, not a uniform bug. |  |  |
 | **16** | **The login server still has no brute-force protection**, and 18-AY must not be read as having provided it. `LoginPlayer::m_FailureCount` is a `uint` in memory, allocated per accepted TCP connection and destroyed with it — per-connection, not per-account or per-IP, nothing persisted. The stock client opens a **new connection for every login attempt** (`Execute_UI_LOGIN` → `InitSocket` → `ReleaseSocket` + reconnect), so an attacker who reconnects per guess — which is exactly what the normal client does — is entirely unaffected. 18-AY caps *pipelined* guesses on one socket at 3, which was previously unlimited; that is its whole value. Real protection is a per-account or per-IP counter with a time window, i.e. a **new control to be designed**, not a bug to be fixed | `loginserver/LoginPlayer.h:217`, `Core/CLLoginHandler.cpp` | **open — needs an owner decision on policy** (`fd98c81`) |
-| **17** | **`UserGateway::clear()` reserves 20 then writes `m_UserInfos[i] = 0` across `[0,20)` into a `size()`-0 vector** — instance 7 of §4 pattern 4, and the first one found by a gate rather than a person (`821d5e5`). `passUser()`, `getInfo()`, `getTotalInfo()` and `toString()` all index it, and `clear()` runs from the constructor, so with a live `UserGateway` every one of those is out of bounds. **Latent: the file is in no CMake source list**, every call site in `IncomingPlayerManager`/`ZonePlayerManager`/`ClientManager` is commented out, and the only live `#include` is a test file that is also unlisted. Fix it or delete it — the same call as the `quest/Squest/` decision in row 18 | `server/UserGateway.cpp:32` | **open, latent** (`821d5e5`) |
-| **18** | **`quest/Squest/` — a 13-file legacy subsystem that is entirely uncompiled.** There is no `CMakeLists.txt` in that directory and no `add_subdirectory(Squest)` anywhere. It is **superseded, not fallen out**: monster-kill quests are live via `gameserver/mission/`, whose `MonsterKillQuestInfo`/`MonsterKillQuestStatus` *are* listed and are what `CGSayHandler.cpp:3842` casts to. `Squest/QuestManager.h:18` and `mission/QuestManager.h:23` declare **two classes of the same name** and could never co-link. Open action 14 named only `MonsterKillQuest.cpp`; deleting 1 of 13 files from a self-consistent subsystem is incoherent, so nothing was deleted. **Recommend deleting `quest/Squest/` wholesale as one owner decision** | `gameserver/quest/Squest/` | **open, owner decision** (`a8503bf`) |
+| ~~**17**~~ | ~~`UserGateway::clear()` reserves 20 then indexes `[0,20)`~~ — **closed 2026-08-13 as 18-AZ by deletion, moved to §2.** The file could not have compiled in any build: header declared six members with no exception specification, `.cpp` defined all six `throw(Error)`. |  |  |
+| ~~**18**~~ | ~~`quest/Squest/`~~ — **closed 2026-08-13 as 18-BA, moved to §2.** 29 files, not 13. |  |  |
+| **19** | **Gold duplication on the trade-completion path — live, and the only defect this effort has found that *creates* value rather than destroying it.** After the trade commits and gold is credited via `setGoldEx` (which persists), `processTrade` still dereferences `getPlayer()->getSocket()->getHost()` and runs a `TradeLog` `INSERT` under `BEGIN_DB`/`END_DB` **before** `pInfo1->clearAll()`/`pInfo2->clearAll()`. `END_DB` rethrows on any SQL failure, so a failed log insert — or a NULL socket — aborts with `TradeInfo::m_Gold` still populated on both sides; the disconnect that follows calls `cancelTrade`, which credits that gold **a second time**. Items are not duplicated (the stale pointer list is never re-applied); gold is. Two candidate fixes — clear the escrow immediately after the credit, or contain the logging tail — and choosing between them is a decision about what a failed `TradeLog` write should mean | `gameserver/TradeManager.cpp:823-870` | **open, live — owner decision on fix shape** (`f33e12a`) |
+| **20** | **The gameserver has the same connection-parking gap the loginserver just closed.** `GPS_BEGIN_SESSION` carries a 300s deadline that **slides** — refreshed by every accepted packet, exactly the shape 18-BC replaced on the login side, where one cheap packet every few minutes parked a descriptor forever. Same fix applies; it was simply outside the scope wave 10 was given | `gameserver/GamePlayer.cpp:66` | **open** (`b3e9322`) |
+| **21** | **`acceptNewConnection` is an unrate-limited log amplifier.** Every accepted connection on internet-facing TCP 9999 does a `log()` plus `cout` plus `cerr` ("NEW CONNECTION FROM…") — a file write per connection *attempt*, sitting three lines from 18-AK's carefully rate-limited **rejection** log. Now that 18-BC caps how long a connection can park, this is the cheapest remaining thing to hammer | `loginserver/LoginPlayerManager.cpp:490-494` | **open** (`b3e9322`) |
+| **22** | **`Ousters.h:369` and `Vampire.h:356` — `addWearItem` has no bounds check**, so `m_pWearItem[Part] = pItem` is an arbitrary-offset heap write. Every neighbour in both classes (`isWear`, `deleteWearItem`, `getWearItem`) has `if (Part < 0 || Part >= *_WEAR_MAX) return;`. Slayer's got one from 18-R, **whose commit message calls it "the last wear-slot write" — it was not**, and the two twins were missed. Latent: `addWearItem` has no callers anywhere in the tree. Found by the pattern-2 gate, not by a person | `gameserver/Ousters.h:369`, `Vampire.h:356` | **open, latent** (`f73767b`) |
+| **23** | **`addSkillParentInfo` is the residue of 18-AW** — that fix bounded `load()` and `getSkillParentInfo()` but left `if (m_SkillParentInfoList[pSkillParentInfo->getSkillType()] != NULL)` indexing the raw DB-sourced `SkillType` in order to test it, one function away from the code it fixed. `SkillInfo.cpp:404`, `RankBonusInfo.cpp:173` and three `AttrBalanceInfo` sites are identical twins — the load-time duplicate-key check is a recurring shape in its own right | `gameserver/SkillParentInfo.cpp:288` + 5 twins | **open, low** (`f73767b`) |
 
 **Two changes no compiler will ever see**, carried deliberately and flagged
 (`c5bebb7`, `65c07ad`): `gameserver/GuildManager.cpp`'s `init()` body is inside
@@ -72,10 +84,10 @@ One row per ID, sorted by ID, each citing its commit. Verification uses §5's
 vocabulary strictly.
 
 **Cut line for `main`** [measured 2026-08-13 by `git branch -r --contains`]:
-**every ID in this table is on `main`** — 18-A … 18-AY, the whole effort — via
+**every ID in this table is on `main`** — 18-A … 18-BD, the whole effort — via
 merge commits `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4),
-`e86a9dd` (wave 8, merged directly rather than by PR), and wave 9
-(18-AU … 18-AY, `a8503bf`…`821d5e5`) committed straight onto `main` on
+`e86a9dd` (wave 8, merged directly rather than by PR), and waves 9 and 10
+(18-AU … 18-BD, `a8503bf`…`f73767b`) committed straight onto `main` on
 2026-08-13. **There is no tail.** That single sentence is the only place merge
 state appears in this table; update it here when that stops being true.
 
@@ -132,6 +144,11 @@ state appears in this table; update it here when that stops being true.
 | 18-AW | **Two startup loaders hardened against one bad DB row** (§1 row 12). `InfoClassManager::init()`'s unconditional `m_pItemInfos[i]` deref is guarded — and so is the `Assert(m_pItemInfos[0] != NULL)` one line later, which the row missed and which **indexes the array in order to test it**, faulting rather than catching (§4 pattern 2 again); slot 0 is a real invariant, so it degrades to `m_TotalRatio = 0` and `getRandomItemType()`'s existing early return. `SkillParentInfoManager`'s destructor freed the pointer array but never its elements; and `load()`'s `tempSkillType` cursor seeded with 0 made a `SkillType` 0 row deref the still-NULL slot 0. Keying off the slot also drops an unstated assumption that rows arrive grouped — **the query has no `ORDER BY`**, so non-adjacent duplicates previously threw `DuplicatedException` and leaked | `gameserver/InfoClassManager.cpp`, `SkillParentInfo.cpp` | `b2e7d48` | compile-verified |
 | 18-AX | **`memoryError()` → `abort()`** in login and shared (§1 row 15). The row omitted that the **gameserver already did this correctly**, so it was inconsistency, not a uniform bug; both now match its body verbatim. `abort()` is specifically right for a `new_handler`: one that cannot free memory must not return, and unlike `exit()` it skips `atexit` handlers and static destructors that would allocate on an exhausted heap. Yields SIGABRT, which a supervisor reads as a crash | `loginserver/main.cpp`, `sharedserver/main.cpp` | `0e8e489` | compile-verified |
 | 18-AY | **The login-failure counter now counts** (§1 row 4). All four sites stored the value they read; each now stores the incremented one, and the **reset on success — missing entirely — is added at three places**. Deliberately *not* placed at "credentials verified", because `CLLoginHandler.cpp:482` counts failures occurring *after* verification. Two corrections to the row: the two `CLLoginHandler` sites **never** had an increment in this repo's history (`git log -S'++nFailed'` on that file is empty — upstream shipped it half broken), and the two register sites are dead code on this build (`PACKET_CL_REGISTER_PLAYER` is a closed state loop with no entry point). **This is not brute-force protection — see §1 row 16** | `Core/CLLoginHandler.cpp`, `CLRegisterPlayerHandler.cpp` | `fd98c81` | compile-verified |
+| 18-AZ | **`UserGateway` deleted — the `reserve()` gate's first catch, and closed by deletion rather than repair.** Instance 7 of §4 pattern 4: `clear()` reserved 20 then wrote `m_UserInfos[i] = 0` across `[0,20)` into a `size()`-0 vector, with four readers indexing it and `clear()` called from the constructor. The death certificate is stronger than §1 row 17's build-system argument: **the file cannot compile** — the header declares six members with no exception specification while the `.cpp` defines all six `throw(Error)`, ill-formed in C++11. The test file went with it (absent even from the legacy `test/Makefile` `OBJS` list that names its seven siblings). Retirement was **deliberate, not rot** — ~40 call sites commented out across four files *including the `#include` lines*, signed `// by sigi. 2002.12.30`, and predating this repository | `server/UserGateway.*`, `gameserver/test/GameServerUserGatewayTest.*` | `dbddf7b` | compile-verified |
+| 18-BA | **`quest/Squest/` deleted — 29 files, not the 13 §1 row 18 named.** Beyond the 13 `.cpp`/`.h` pairs: two headers with no `.cpp` (the real risk, since a header can be included by live code — both had zero outside includes), a `Makefile`, a `ResultBug.log` and a `vssver.scc`. Three references looked live and were each run to ground: `Zone.cpp:19`'s **unqualified** `#include "QuestManager.h"` resolves to `mission/` (the directory is on no include path — `GAMESERVER_INCLUDE_DIRS` lists `mission`, `quest`, `quest/luaScript`, never `quest/Squest`); the `PlayerCreature.cpp` and `NPC.cpp` uses sit inside block comments **and** behind `#ifdef __ACTIVE_QUEST__`, defined nowhere. The two `QuestManager` classes share the class name **and** the include guard `__QUEST_MANAGER_H__`, so one would silently suppress the other. Genuine successor: `mission/`'s takes a `PlayerCreature*` owner and carries DB `load()`, packets and rewards; Squest's is an owner-less `list<Quest*>`. `quest/Makefile:219`'s uncommented `$(MAKE) -C Squest clean` was the one dangling reference and is commented to match its siblings | `gameserver/quest/Squest/` | `229340d` | compile-verified |
+| 18-BB | **`nMaxPlayers` 2000 → 1024** (§1 row 5). The row asked for a two-line test before acting; it was run. On glibc 2.39 / g++ 13.3.0, `#define FD_SETSIZE 4096` before `<sys/select.h>` leaves `FD_SETSIZE` at 1024 and `sizeof(fd_set)` at 128 bytes — byte-identical to the control. glibc `#undef`s the user value and re-derives from `__FD_SETSIZE`, hard-wired in `bits/typesizes.h`. **Confirmed empirically rather than by citation.** All 28 readers checked first: every index is an accepted file descriptor, with no config bound, DB column or printed capacity, so the value was free to change. 1024 not 1000, because the array is fd-indexed and a lower bound would refuse descriptors `select()` can represent; the ~1000 usable ceiling is now stated rather than implied. A guarded `static_assert` ties the two together | `server/PlayerManager.h` | `c7c5728` | compile-verified |
+| 18-BC | **An absolute pre-authentication deadline** (open action 15). The gap was not a missing deadline — `maxIdleSec` = 900s already existed, but it **slides**, refreshed by every accepted packet, and `LPS_BEGIN_SESSION` accepts `CL_VERSION_CHECK` and `CG_ENCODE_KEY`, so **one cheap packet every 14 minutes parked a descriptor forever**. The 900s was never the problem; its refresh was. The new deadline is armed at accept, never refreshed, and consulted only in `LPS_NONE`/`LPS_BEGIN_SESSION` — leaving that state *is* "credentials accepted", so a logged-in session is unaffected. Checked ahead of the `LPS_WAITING_FOR_GL_KICK_VERIFY` early return so it cannot be skipped, and `processCommands()` walks every player rather than only readable sockets, so a silent connection is still evaluated. 30s chosen against measured client behaviour (socket opened *after* credentials are typed; `CLLogin` sub-second; failure reconnects) — ~30× headroom, 30× tighter than the 900s it backstops. Cost to hold 1000 slots rises ~1.1 → ~34 conn/s. Tunable via optional `MaxPreAuthIdleSeconds` | `loginserver/LoginPlayer.*`, `conf/loginserver.conf.template` | `b3e9322` | compile-verified |
+| 18-BD | **The trade swap is atomic, and cancelled trades no longer strand gold** (§1 row 11, which was wrong on both counts). The item-loss path was **reachable**, not gated: `canTrade` returns 0/1/**2** and the guard was `if (!canTrade(...))`, so `2` — the one verdict the swap cannot honour — passed through, kept out only by `CGTradeFinishHandler` separately testing `== 1`; and `canTrade` never calls `getBlackGiftBoxType`, which `processTrade` called mid-placement. Now three passes — inspect, detach, place — with rollback restoring exact original slots newest-first, the original `throw` preserved, and a commit point separating all non-undoable work. Callback order is unchanged, and the reordering is safe because no callback reads the inventory (`Item::whenPCLost` touches the Store listing; `PetItem`'s touches `petInfo`/`getPetItems()`/`HAS_PET`). **Items are never escrowed** — only pointers are recorded — so what `cancelTrade` stranded was **gold**; the refund is now unconditional via in-zone → `g_pPCFinder` → a direct `Gold` `UPDATE`, the same mechanism `GSQuitGuildHandler.cpp:217` uses for absent guild members. **Superseded by §1 row 19** | `gameserver/TradeManager.cpp` | `f33e12a` | compile-verified |
 
 **Unnumbered, same effort:**
 
@@ -226,6 +243,31 @@ build, so these are not all NDEBUG-only theory — but `Assert(m_pItemInfos[t] !
 NULL)` **is** the out-of-bounds read, because it indexes in order to test
 (18-AL). Instances: 18-K (5), 18-U (25), 18-AD (6), 18-AG (47), 18-AH, 18-AL,
 18-AI (3 castle IDs). Residual scoped and recorded at §1 row 10.
+
+**One sub-shape of this is now gated** — `f73767b`,
+`scripts/check-guard-index.sh`, baseline **25**. It counts guards that
+subscript a container *in order to test whether the element exists*, which is
+the question that cannot be asked without already being in bounds. Validated
+the same way the `reserve()` gate was: counts across the pre-fix trees run
+43 → 42 → 41 → 41 → 41 → 34 → 34 → 27 → 25, and **all 18 drops are accounted
+for** by a named fix or a file deletion, none by the checker changing its mind.
+
+**Read the scope limit before trusting it.** 18-K, 18-AD, 18-AG and 18-AI show
+*no movement*, correctly: they are this pattern's other sub-shapes —
+side-effecting calls inside `Assert`, and `Assert(index < MAX)` comparisons —
+and 18-U's other conversions (`Zone::getTile`, the NPC shop rack, `Datagram`,
+the Slayer phone accessors) contain no `Assert` with a subscript at all. **The
+gate covers one sub-shape of pattern 2, not pattern 2.** Two further limits are
+written into the script: a *written* bound is taken at face value and never
+checked for correctness (18-AH's `j <= 150` over arrays of 101 was a bound, and
+wrong — that is pattern 3), and **another `Assert` is never accepted as a
+bound**, since under NDEBUG both vanish together. `TimeChecker.cpp:118` is the
+cleanest illustration: `Assert(type >= 0 && type < TIME_PERIOD_MAX)` sits
+directly above the site.
+
+Two of the 25 look like real defects rather than deliberate residue and are now
+§1 rows 22 and 23 — including a wear-slot write that **18-R's own commit message
+claimed was the last one**.
 
 **3. A constant guard against a DB-sized array.** A container is sized from its
 own DB rows at load, but access is bounded by a hardcoded constant that was true
@@ -338,9 +380,16 @@ runtime bug — it found 18-D/E/F/J/L/N in one sitting. Everything from 18-O
 onward, and every fix in waves 2 through **9**, is unexercised by it. The CI boot
 smoke covers **boot only, never packets**; its own job name says so.
 
-**Wave 9 widened this gap rather than narrowing it** [2026-08-13]. It is now
-roughly 35 defects deep, and two of wave 9's changes are specifically the kind
-that a compiler cannot judge:
+**Waves 9 and 10 widened this gap rather than narrowing it** [2026-08-13]. It is
+now roughly 40 defects deep. **Wave 10 added the single change in this whole
+effort that most needs execution: 18-BD restructured the trade item swap into
+detach/place passes with a rollback path that has never been run.** The
+rollback is reached only on a failure that is itself hard to provoke, so
+neither the compiler nor a normal play session will exercise it; a bug there
+destroys player property. 18-BC likewise changes who gets disconnected on the
+live login path, on a 30s timer no one has watched fire.
+
+Two of wave 9's changes are the same kind of thing a compiler cannot judge:
 
 - **18-AU's drain loop depends on `FIONREAD`-on-UDP semantics** — including the
   documented case where a pending *zero-length* datagram also reads 0. That
@@ -469,9 +518,12 @@ The "was" column is preserved deliberately; it is the part worth remembering.
     anyone tried to use it. The action's third file, `MonsterKillQuest.cpp`,
     was **not** deleted — it turned out to be one of 13 files in an uncompiled
     legacy subsystem. That is now §1 row 18.
-15. **Decide the pre-authentication idle deadline** (§3.2, idle-timeout row) —
-    the residual after 18-AK, and the only remaining structural lever on
-    connection parking.
+15. ~~**Decide the pre-authentication idle deadline**~~ — **done 2026-08-13**
+    (`b3e9322`, 18-BC), 30s, tunable via `MaxPreAuthIdleSeconds`. The action
+    was framed as "decide a deadline"; the finding was that **a deadline
+    already existed and slid**, which is a different and worse bug than having
+    none. The same shape is still live on the gameserver — §1 row 20 — and the
+    cheapest thing to flood is now the accept-path log, §1 row 21.
 16. **Do not run `make release` casually.** §1 row 10.
 17. ~~**Add a `reserve()` grep gate.**~~ — **done 2026-08-13** (`821d5e5`).
     `dkrixserver/scripts/check-reserve-sizing.sh`, wired into the `ratchets`
@@ -497,13 +549,33 @@ to move.
 
 | | |
 |---|---|
-| Branch | Wave 9 works **directly on `main`** — no feature branch. `fix/bug-18b-loginserver-result-uaf` (tip `3b77c4e`) is fully merged and retained but dormant |
-| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`821d5e5`), **82 non-merge commits** since `9422e9c` |
-| On `main` | **All of it.** Waves 1–8 via `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4) and `e86a9dd` (wave 8). **All four are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2). Wave 9 is `a8503bf`…`821d5e5`, committed straight onto `main` |
+| Branch | Waves 9 and 10 work **directly on `main`** — no feature branch. `fix/bug-18b-loginserver-result-uaf` (tip `3b77c4e`) is fully merged and retained but dormant |
+| Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`f73767b`), **89 non-merge commits** since `9422e9c` |
+| On `main` | **All of it.** Waves 1–8 via `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4) and `e86a9dd` (wave 8). **All four are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2). Waves 9–10 are `a8503bf`…`f73767b`, committed straight onto `main` |
 | **Not on `main`** | **Nothing.** Empty since 2026-08-10 |
-| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT; 9 = 18-AU…18-AY |
-| Defect count | **51** numbered, 18-A…18-AY |
+| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT; 9 = 18-AU…18-AY; 10 = 18-AZ…18-BD |
+| Defect count | **56** numbered, 18-A…18-BD |
+| Gates | Four ratchets in the `ratchets` job: SQL injection **213**, packet duplicates **90**, `reserve()`-sizing **1** (`821d5e5`), guard-indexes-container **25** (`f73767b`). The last two are **validated against history** — each was run over the pre-fix trees and every count change is accounted for by a named fix or deletion |
 | Companion record | `docs/MODERNIZATION.md`, "Phase 18 —" sections. This document does not own it |
+
+**Wave 10 — 2026-08-13, five parallel workstreams, immediately after wave 9.**
+Six commits, `dbddf7b`…`f73767b`, on `main`. `make debug` green (all three
+binaries) and `make fmt-check` green at the tip.
+
+It closed §1 rows 5, 11, 17 and 18 plus open action 15, and **opened rows 19
+through 23**. That ratio is the point: two consecutive waves aimed at this
+section's backlog have each opened roughly as many rows as they closed, because
+fixing a defect properly means reading the code around it. Row 19 — live gold
+duplication — is now the highest-value row on the page, and it was found by an
+agent sent to fix something else in the same file.
+
+**Three more of this document's claims were wrong.** §1 row 5's `FD_SETSIZE`
+assertion was never tested and is now measured. §1 row 11 was wrong twice over:
+the item-loss path was reachable rather than gated, and the asset `cancelTrade`
+stranded is gold, because items are never escrowed. Open action 15 asked for a
+deadline to be *decided* when one already existed and slid — a worse bug than
+having none. Two deletions also came in bigger than recorded: `quest/Squest/` is
+29 files rather than 13, and `UserGateway` could not have compiled at all.
 
 **Wave 9 — 2026-08-13, five parallel workstreams against this section's own
 backlog.** Seven commits, `a8503bf`…`821d5e5`, on `main`, working tree clean.

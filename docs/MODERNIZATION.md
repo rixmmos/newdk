@@ -5885,6 +5885,68 @@ open action 12 records as **never having been executed at all** — plus a chang
 to who gets disconnected during live authentication. `dkrixserver/build-asan/`
 is still configured from wave 1, so open action 9 is cheap to run.
 
+### Phase 18 — wave 10 (2026-08-13)
+
+Six commits, `dbddf7b`…`f73767b`, on `main`, immediately after wave 9 and run
+the same way: five parallel agent workstreams on disjoint files, aimed at the
+open backlog in `docs/SECURITY-AUDIT-2026-08-10.md`. **`make debug` green, all
+three binaries; `make fmt-check` green.**
+
+Closed: §1 rows 5, 11, 17, 18 and open action 15. Opened: rows 19–23.
+
+**18-AZ / 18-BA — two deletions, both bigger than the audit recorded.**
+`UserGateway` was not merely unlisted in CMake — **it could not compile**: the
+header declared six members with no exception specification while the `.cpp`
+defined all six `throw(Error)`, ill-formed in C++11. `quest/Squest/` was 29
+files, not 13, including two orphan headers (the real risk, since a header can
+be included by live code even when no `.cpp` is built) and an uncommented
+`$(MAKE) -C Squest clean` that the deletion would have broken.
+
+**18-BB — the `FD_SETSIZE` claim, finally measured.** The audit had recorded
+"raising `FD_SETSIZE` does not work on glibc" as an untested assertion. Test
+run: on glibc 2.39, `#define FD_SETSIZE 4096` leaves `FD_SETSIZE` at 1024 and
+`sizeof(fd_set)` at 128 bytes, byte-identical to the control. `nMaxPlayers`
+2000 → 1024 with a `static_assert` tying it to the bitmap width.
+
+**18-BC — the deadline that already existed and slid.** Open action 15 asked
+for a pre-auth deadline to be *decided*. One existed: 900s, refreshed by every
+accepted packet, on a state that accepts two cheap packets — so one packet
+every 14 minutes parked a descriptor forever. Replaced by an absolute 30s
+deadline chosen against measured client behaviour.
+
+**18-BD — the trade swap made atomic.** The audit called the item-loss path
+"unreachable behind `canTrade`". That was incidental: `canTrade` returns
+0/1/**2** and the guard was `if (!canTrade(...))`, so the one verdict the swap
+cannot honour passed through. And items are **never escrowed** — only pointers
+are recorded — so what a cancelled trade stranded was *gold*, not items.
+
+**A second history-validated gate** (`f73767b`), for §4 pattern 2's
+index-in-order-to-test shape, baseline 25. Counts across the pre-fix trees run
+43 → 42 → 41 → 41 → 41 → 34 → 34 → 27 → 25, and all 18 drops are accounted for
+by a named fix or a deletion. Its scope limit is written down rather than
+implied: it covers **one sub-shape** of pattern 2, and it refuses to accept
+another `Assert` as a bound, since under NDEBUG both vanish together.
+
+**The pattern worth extracting from waves 9 and 10.** Both were pointed at a
+document's open items rather than at fresh code, and both **opened roughly as
+many items as they closed** — nine corrections to the audit across the two, and
+eight new rows. Two gates found defects no human sweep had, including one that
+18-R's own commit message had claimed was the last of its kind. The lesson is
+not that the audit was careless; it is that a defect list written by reading is
+a hypothesis, and the act of fixing an entry is what tests it.
+
+**Live and unresolved, needing an owner decision rather than an agent:** §1 row
+19, gold duplication on the trade-completion path — a failed `TradeLog` insert
+rethrows before the escrow is cleared, and the following disconnect credits the
+gold a second time. It is the only defect this whole effort has found that
+*creates* value rather than destroying it.
+
+**Verification is unchanged and the gap is now ~40 defects deep.** Nothing in
+waves 2–10 has been executed. 18-BD is the sharpest case in the entire effort:
+its rollback path is reached only on a failure that is hard to provoke, so
+neither the compiler nor ordinary play will touch it, and a bug there destroys
+player property. `dkrixserver/build-asan/` is still configured from wave 1.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization
