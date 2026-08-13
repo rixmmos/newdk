@@ -5947,6 +5947,61 @@ its rollback path is reached only on a failure that is hard to provoke, so
 neither the compiler nor ordinary play will touch it, and a bug there destroys
 player property. `dkrixserver/build-asan/` is still configured from wave 1.
 
+### Phase 18 — owner-directed follow-up and the first ASan run since wave 1 (2026-08-13)
+
+Three commits plus docs, not a sweep: the owner picked the fix shape for the
+one live duplication defect, approved a new control, and left the verification
+call open. `0b8f560`, `b236e70`, `3bf0db4`.
+
+**18-BE — gold duplication closed** (audit §1 row 19). `processTrade` cleared
+the escrow only after a logging tail that can throw in two places, so a failed
+`TradeLog` insert left `TradeInfo::m_Gold` populated and the following
+disconnect credited it twice. `clearAll()` now runs immediately after the
+credit. Owner-approved shape: clear the escrow rather than contain the tail.
+
+**18-BF — a real brute-force limit** (audit §1 row 16). Owner-approved as a new
+control, since 18-AY's counter was per-connection and the stock client
+reconnects per attempt. Two fixed 4096-entry tables, 384 KiB total, never
+grown — both key spaces are attacker-chosen, so a per-key allocation would be
+the memory-exhaustion primitive. The judgement that matters most is what is
+*not* counted: `ALREADY_CONNECTED` means the password was right, so counting it
+would lock players out of their own accounts during the stuck-in-`LOGON` retry
+loop.
+
+**A repo bug found off to the side, and the more interesting one.**
+`docker compose up` produced an **empty `DARKEDEN`**: `DARKEDEN.sql` was dumped
+without `--databases` so it carries no `CREATE DATABASE`/`USE`, and the MySQL
+entrypoint aborted it at its first `DROP TABLE` with `ERROR 1046`. `a-setup.sql`
+asserted the opposite in a comment. Fixed in `3bf0db4` and verified both ways on
+clean containers — 0 tables before, 374 after.
+
+**Why that one matters beyond the fix:** CI's boot smoke was green throughout,
+because `ci-boot-smoke.sh` never uses the entrypoint — it seeds with an explicit
+`mysql -D DARKEDEN`. So a gate that read as "the servers boot against a seeded
+database" was exercising a different seeding path from the one
+`dkrixserver/CLAUDE.md` documents. Not a false green: a *true* green about a
+path nobody meant to be asking about.
+
+**The ASan gap is now half closed, and the honest form of that sentence
+matters.** `make debug-asan` on the wave-10 tip, all three binaries confirmed to
+carry `__asan_init` first, booted against a freshly seeded MySQL: all three
+reached their ports and held 30s with **zero sanitizer reports**, verified by
+the absence of any `asan.*` file rather than by trusting the script's verdict.
+That is the first ASan execution since wave 1, and it does mean 40-odd defects
+deep the tree still starts cleanly.
+
+It also exercised the five new conf keys from 18-BC and 18-BF, so their
+optional-key fallbacks are executed rather than argued.
+
+**But it exercised no packets, and packets are where ASan earned its reputation
+here** — 18-D/E/F/J/L/N were found by playing, not booting. So: **boot-clean
+through 18-BF, packet-unverified from 18-O onward.** The remaining action is
+one end-to-end client session against these binaries, aimed at 18-BD's rollback
+path, 18-AU's `FIONREAD` drain, 18-BF's counting and 18-BC's timer. Setup cost
+is now zero — `build-asan/` holds current binaries and
+`scripts/ci-boot-smoke.sh seed|conf|boot` brings the world up in one step — but
+it needs the Windows client and a person at the keyboard.
+
 ## Explicit non-goals
 
 The following are deliberately out of scope for this modernization

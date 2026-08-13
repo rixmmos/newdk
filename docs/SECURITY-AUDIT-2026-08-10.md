@@ -47,10 +47,10 @@ re-numbered because rows close by moving, not by renumbering.
 | 13 | `initdb/DARKEDEN.sql:11568` seeds `WorldDBInfo` with Host/User/Password **as data**, read at startup by `DatabaseManager.cpp:108-134`. No env var reaches it, so changing the DB password requires an `UPDATE` | seed dump | **open by necessity** (`3dcfb1b`) |
 | 14 | `DB_PORT` is hardcoded to 3306 in the conf templates, so the boot script's `DB_PORT` reaches the seeding step but not the servers. CI works only because the service container happens to be on 3306 | `dkrixserver/conf/*.template` | **open, CI/repro only** (`cc1fcd4`) |
 | ~~15~~ | ~~Both `memoryError()` handlers `exit(0)` on a fatal OOM~~ — **fixed 2026-08-13 as 18-AX, moved to §2.** The row did not say that the *gameserver* already called `abort()`; this was inconsistency between the three binaries, not a uniform bug. |  |  |
-| **16** | **The login server still has no brute-force protection**, and 18-AY must not be read as having provided it. `LoginPlayer::m_FailureCount` is a `uint` in memory, allocated per accepted TCP connection and destroyed with it — per-connection, not per-account or per-IP, nothing persisted. The stock client opens a **new connection for every login attempt** (`Execute_UI_LOGIN` → `InitSocket` → `ReleaseSocket` + reconnect), so an attacker who reconnects per guess — which is exactly what the normal client does — is entirely unaffected. 18-AY caps *pipelined* guesses on one socket at 3, which was previously unlimited; that is its whole value. Real protection is a per-account or per-IP counter with a time window, i.e. a **new control to be designed**, not a bug to be fixed | `loginserver/LoginPlayer.h:217`, `Core/CLLoginHandler.cpp` | **open — needs an owner decision on policy** (`fd98c81`) |
+| ~~**16**~~ | ~~The login server still has no brute-force protection~~ — **closed 2026-08-13 as 18-BF, moved to §2.** Owner-approved as a new control. Residuals it does *not* close are recorded in that row. Original text: **The login server still has no brute-force protection**, and 18-AY must not be read as having provided it. `LoginPlayer::m_FailureCount` is a `uint` in memory, allocated per accepted TCP connection and destroyed with it — per-connection, not per-account or per-IP, nothing persisted. The stock client opens a **new connection for every login attempt** (`Execute_UI_LOGIN` → `InitSocket` → `ReleaseSocket` + reconnect), so an attacker who reconnects per guess — which is exactly what the normal client does — is entirely unaffected. 18-AY caps *pipelined* guesses on one socket at 3, which was previously unlimited; that is its whole value. Real protection is a per-account or per-IP counter with a time window, i.e. a **new control to be designed**, not a bug to be fixed | `loginserver/LoginPlayer.h:217`, `Core/CLLoginHandler.cpp` | **open — needs an owner decision on policy** (`fd98c81`) |
 | ~~**17**~~ | ~~`UserGateway::clear()` reserves 20 then indexes `[0,20)`~~ — **closed 2026-08-13 as 18-AZ by deletion, moved to §2.** The file could not have compiled in any build: header declared six members with no exception specification, `.cpp` defined all six `throw(Error)`. |  |  |
 | ~~**18**~~ | ~~`quest/Squest/`~~ — **closed 2026-08-13 as 18-BA, moved to §2.** 29 files, not 13. |  |  |
-| **19** | **Gold duplication on the trade-completion path — live, and the only defect this effort has found that *creates* value rather than destroying it.** After the trade commits and gold is credited via `setGoldEx` (which persists), `processTrade` still dereferences `getPlayer()->getSocket()->getHost()` and runs a `TradeLog` `INSERT` under `BEGIN_DB`/`END_DB` **before** `pInfo1->clearAll()`/`pInfo2->clearAll()`. `END_DB` rethrows on any SQL failure, so a failed log insert — or a NULL socket — aborts with `TradeInfo::m_Gold` still populated on both sides; the disconnect that follows calls `cancelTrade`, which credits that gold **a second time**. Items are not duplicated (the stale pointer list is never re-applied); gold is. Two candidate fixes — clear the escrow immediately after the credit, or contain the logging tail — and choosing between them is a decision about what a failed `TradeLog` write should mean | `gameserver/TradeManager.cpp:823-870` | **open, live — owner decision on fix shape** (`f33e12a`) |
+| ~~**19**~~ | ~~Gold duplication on the trade-completion path~~ — **fixed 2026-08-13 as 18-BE, moved to §2**, owner-approved fix shape (clear the escrow). Original text: **Gold duplication on the trade-completion path — live, and the only defect this effort has found that *creates* value rather than destroying it.** After the trade commits and gold is credited via `setGoldEx` (which persists), `processTrade` still dereferences `getPlayer()->getSocket()->getHost()` and runs a `TradeLog` `INSERT` under `BEGIN_DB`/`END_DB` **before** `pInfo1->clearAll()`/`pInfo2->clearAll()`. `END_DB` rethrows on any SQL failure, so a failed log insert — or a NULL socket — aborts with `TradeInfo::m_Gold` still populated on both sides; the disconnect that follows calls `cancelTrade`, which credits that gold **a second time**. Items are not duplicated (the stale pointer list is never re-applied); gold is. Two candidate fixes — clear the escrow immediately after the credit, or contain the logging tail — and choosing between them is a decision about what a failed `TradeLog` write should mean | `gameserver/TradeManager.cpp:823-870` | **open, live — owner decision on fix shape** (`f33e12a`) |
 | **20** | **The gameserver has the same connection-parking gap the loginserver just closed.** `GPS_BEGIN_SESSION` carries a 300s deadline that **slides** — refreshed by every accepted packet, exactly the shape 18-BC replaced on the login side, where one cheap packet every few minutes parked a descriptor forever. Same fix applies; it was simply outside the scope wave 10 was given | `gameserver/GamePlayer.cpp:66` | **open** (`b3e9322`) |
 | **21** | **`acceptNewConnection` is an unrate-limited log amplifier.** Every accepted connection on internet-facing TCP 9999 does a `log()` plus `cout` plus `cerr` ("NEW CONNECTION FROM…") — a file write per connection *attempt*, sitting three lines from 18-AK's carefully rate-limited **rejection** log. Now that 18-BC caps how long a connection can park, this is the cheapest remaining thing to hammer | `loginserver/LoginPlayerManager.cpp:490-494` | **open** (`b3e9322`) |
 | **22** | **`Ousters.h:369` and `Vampire.h:356` — `addWearItem` has no bounds check**, so `m_pWearItem[Part] = pItem` is an arbitrary-offset heap write. Every neighbour in both classes (`isWear`, `deleteWearItem`, `getWearItem`) has `if (Part < 0 || Part >= *_WEAR_MAX) return;`. Slayer's got one from 18-R, **whose commit message calls it "the last wear-slot write" — it was not**, and the two twins were missed. Latent: `addWearItem` has no callers anywhere in the tree. Found by the pattern-2 gate, not by a person | `gameserver/Ousters.h:369`, `Vampire.h:356` | **open, latent** (`f73767b`) |
@@ -84,10 +84,10 @@ One row per ID, sorted by ID, each citing its commit. Verification uses §5's
 vocabulary strictly.
 
 **Cut line for `main`** [measured 2026-08-13 by `git branch -r --contains`]:
-**every ID in this table is on `main`** — 18-A … 18-BD, the whole effort — via
+**every ID in this table is on `main`** — 18-A … 18-BF, the whole effort — via
 merge commits `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4),
 `e86a9dd` (wave 8, merged directly rather than by PR), and waves 9 and 10
-(18-AU … 18-BD, `a8503bf`…`f73767b`) committed straight onto `main` on
+(18-AU … 18-BF, `a8503bf`…`b236e70`) committed straight onto `main` on
 2026-08-13. **There is no tail.** That single sentence is the only place merge
 state appears in this table; update it here when that stops being true.
 
@@ -149,6 +149,8 @@ state appears in this table; update it here when that stops being true.
 | 18-BB | **`nMaxPlayers` 2000 → 1024** (§1 row 5). The row asked for a two-line test before acting; it was run. On glibc 2.39 / g++ 13.3.0, `#define FD_SETSIZE 4096` before `<sys/select.h>` leaves `FD_SETSIZE` at 1024 and `sizeof(fd_set)` at 128 bytes — byte-identical to the control. glibc `#undef`s the user value and re-derives from `__FD_SETSIZE`, hard-wired in `bits/typesizes.h`. **Confirmed empirically rather than by citation.** All 28 readers checked first: every index is an accepted file descriptor, with no config bound, DB column or printed capacity, so the value was free to change. 1024 not 1000, because the array is fd-indexed and a lower bound would refuse descriptors `select()` can represent; the ~1000 usable ceiling is now stated rather than implied. A guarded `static_assert` ties the two together | `server/PlayerManager.h` | `c7c5728` | compile-verified |
 | 18-BC | **An absolute pre-authentication deadline** (open action 15). The gap was not a missing deadline — `maxIdleSec` = 900s already existed, but it **slides**, refreshed by every accepted packet, and `LPS_BEGIN_SESSION` accepts `CL_VERSION_CHECK` and `CG_ENCODE_KEY`, so **one cheap packet every 14 minutes parked a descriptor forever**. The 900s was never the problem; its refresh was. The new deadline is armed at accept, never refreshed, and consulted only in `LPS_NONE`/`LPS_BEGIN_SESSION` — leaving that state *is* "credentials accepted", so a logged-in session is unaffected. Checked ahead of the `LPS_WAITING_FOR_GL_KICK_VERIFY` early return so it cannot be skipped, and `processCommands()` walks every player rather than only readable sockets, so a silent connection is still evaluated. 30s chosen against measured client behaviour (socket opened *after* credentials are typed; `CLLogin` sub-second; failure reconnects) — ~30× headroom, 30× tighter than the 900s it backstops. Cost to hold 1000 slots rises ~1.1 → ~34 conn/s. Tunable via optional `MaxPreAuthIdleSeconds` | `loginserver/LoginPlayer.*`, `conf/loginserver.conf.template` | `b3e9322` | compile-verified |
 | 18-BD | **The trade swap is atomic, and cancelled trades no longer strand gold** (§1 row 11, which was wrong on both counts). The item-loss path was **reachable**, not gated: `canTrade` returns 0/1/**2** and the guard was `if (!canTrade(...))`, so `2` — the one verdict the swap cannot honour — passed through, kept out only by `CGTradeFinishHandler` separately testing `== 1`; and `canTrade` never calls `getBlackGiftBoxType`, which `processTrade` called mid-placement. Now three passes — inspect, detach, place — with rollback restoring exact original slots newest-first, the original `throw` preserved, and a commit point separating all non-undoable work. Callback order is unchanged, and the reordering is safe because no callback reads the inventory (`Item::whenPCLost` touches the Store listing; `PetItem`'s touches `petInfo`/`getPetItems()`/`HAS_PET`). **Items are never escrowed** — only pointers are recorded — so what `cancelTrade` stranded was **gold**; the refund is now unconditional via in-zone → `g_pPCFinder` → a direct `Gold` `UPDATE`, the same mechanism `GSQuitGuildHandler.cpp:217` uses for absent guild members. **Superseded by §1 row 19** | `gameserver/TradeManager.cpp` | `f33e12a` | compile-verified |
+| 18-BE | **The trade escrow is cleared before the logging tail, not after it** (§1 row 19). `processTrade` credited both sides with `setGoldEx` (which persists), then ran trace logging and a `TradeLog` `INSERT`, and cleared `TradeInfo::m_Gold` only at the very end. Every line of that tail can throw — the `getSocket()->getHost()` dereference is unguarded and `END_DB` rethrows a failed insert — and any throw left the escrow populated, so the following disconnect called `cancelTrade()` and credited the same gold **a second time**. `clearAll()` now runs immediately after the credit. Safe to move, checked not assumed: `tradeGold1`/`tradeGold2` are copied into locals ~240 lines earlier and nothing between the credit and the old position reads `pInfo1`/`pInfo2`. Also disposes of the NULL-socket variant. **Owner-approved fix shape** | `gameserver/TradeManager.cpp` | `0b8f560` | compile-verified |
+| 18-BF | **A cross-connection brute-force rate limit** (§1 row 16), owner-approved as a new control. Two fixed tables — by source address and by account — of `Entry[4096]` at 48 bytes, **384 KiB total, allocated with the object and never grown**, because both key spaces are attacker-chosen and anything allocating per distinct key would itself be the memory-exhaustion primitive. Open addressing, 8-slot probe; a full window **fails open** (failing closed would let an attacker deny login to everyone by stuffing the table), with eviction by fewest-failures/oldest-window so a tripped record is the hardest thing to displace and the ~7N failures needed to evict it are counted by the *other* table. 30/300s per IP, 10/600s per account, bucketed windows never extended by traffic. **Only wrong-credential failures count** — `ALREADY_CONNECTED` above all is excluded, since it means the password was *right* and is the stuck-in-`LOGON` retry loop; that exclusion is what makes a loose per-IP threshold safe on a household, PC-bang or CGNAT gateway. Success clears the account record but deliberately **not** the IP record (registering an account is free, so an attacker could otherwise reset their own budget). Residuals recorded in the commit: targeted lockout DoS is inherent to any per-account limiter, and spraying is metered only per-IP | `loginserver/LoginThrottle.*`, `Core/CLLoginHandler.cpp`, `conf/loginserver.conf.template` | `b236e70` | **boot-verified** (conf keys parsed, §5 event 5) |
 
 **Unnumbered, same effort:**
 
@@ -373,12 +375,45 @@ risk.
 4. **A UBSan boot that produced 18-AA's findings** (`9cfe522`) — all three
    servers came up under UBSan and stayed up, yielding the first runtime UB
    reports in this project's history. Raw logs kept outside the repo.
+5. **An ASan boot smoke on the wave-10 tip** [2026-08-13, workstation WSL,
+   glibc 2.39 / g++ 13.3.0] — **the first ASan execution since wave 1.** Built
+   with `make debug-asan`; all three binaries confirmed to carry `__asan_init`
+   before the run, because an "ASan run" on an uninstrumented binary proves
+   nothing. Seeded a clean MySQL 5.7 from `initdb/`, materialised `conf/*.conf`
+   from the templates, booted sharedserver → loginserver → gameserver, all
+   three reached their ports (9977 / 9999 / 9998) and held 30s.
+   **Zero sanitizer reports** — verified independently of the script's own
+   verdict by confirming no `asan.*` log file was produced at all. The only
+   output from this run was 5 `luaError.log` lines reading `unknown error`,
+   the same shape and message the 2026-08-10 run produced 60 of; pre-existing,
+   and uninformative enough to be its own small observability gap.
 
-**The gap, and it is the important one: no ASan smoke test has been run since
-wave 1.** ASan is the only gate in this project's history that has ever caught a
-runtime bug — it found 18-D/E/F/J/L/N in one sitting. Everything from 18-O
-onward, and every fix in waves 2 through **9**, is unexercised by it. The CI boot
-smoke covers **boot only, never packets**; its own job name says so.
+   **Read what this does and does not cover.** It exercised process startup,
+   config parsing — including the five *new* keys from 18-BC and 18-BF, so
+   their optional-key fallbacks are executed rather than merely argued — DB
+   connection, the load of all 374 `DARKEDEN` tables, and 30s of idle
+   operation. It exercised **no packets**. So 18-BD's rollback, 18-AU's
+   `FIONREAD` drain, 18-BF's throttle counting and 18-BC's 30s timer are all
+   still unexecuted. This is the CI boot leg reproduced locally on a tip CI
+   has not yet run, not the end-to-end session of event 1.
+
+**The gap, narrowed at one end and unchanged at the other** [2026-08-13].
+Event 5 above ran ASan on the wave-10 tip, so "nothing since wave 1 has been
+through ASan at all" is no longer true — every fix through 18-BF has now at
+least been *loaded and started* under it, which was worth having: 40-odd
+defects deep, a startup-order or initialisation fault would have shown here.
+
+**But ASan's actual value in this project came from packets, and that half is
+untouched.** It found 18-D/E/F/J/L/N in one sitting by playing the game, not by
+booting. The boot leg covers **boot only, never packets** — its own job name
+says so — and event 5 is that leg, run locally. So every wire-reachable fix
+from 18-O onward remains unexercised, and the honest summary is: **boot-clean
+through 18-BF, packet-unverified from 18-O onward.**
+
+The remaining action is unchanged and is now the *only* thing standing between
+this effort and real verification: one end-to-end client session against ASan
+binaries, of the kind event 1 recorded. That needs the Windows client and a
+person at the keyboard.
 
 **Waves 9 and 10 widened this gap rather than narrowing it** [2026-08-13]. It is
 now roughly 40 defects deep. **Wave 10 added the single change in this whole
@@ -487,16 +522,22 @@ The "was" column is preserved deliberately; it is the part worth remembering.
 
 ### Open
 
-9. **Re-run the smoke test under ASan — still the highest-value action on this
-   page, and more so after wave 9.** Nothing since wave 1 has been through it,
-   and it is the only gate that has ever caught a runtime bug here. The merge
-   blocker it was waiting on is gone (action 8), and waves 2–9 are now ~35
-   fixes deep with nothing executed. Wave 9 specifically added a UDP drain loop
-   resting on `FIONREAD` semantics that were reasoned about but never observed,
-   on a path open action 12 says has **never been executed at all** — and a
-   change to who gets disconnected on the live login path (§5). Cheap locally:
-   `build-asan/` is still configured from wave 1. Only the workstation can do
-   it.
+9. **Run an end-to-end client session against ASan binaries — still the
+   highest-value action on this page, now narrowed to exactly one thing.**
+   The *boot* half was done 2026-08-13 (§5 event 5): all three servers built
+   with `make debug-asan`, instrumentation confirmed, booted against a freshly
+   seeded MySQL, zero sanitizer reports. What that leaves is the half that
+   actually earned ASan its reputation here — **packets**. 18-D/E/F/J/L/N were
+   all found by playing, not by booting.
+
+   Specifically unexecuted and specifically worth aiming at: **18-BD's rollback
+   path** (reached only on a failure that is hard to provoke, and it moves
+   player property), **18-AU's `FIONREAD` drain** on the `Datagram` path that
+   action 12 records as never having been run at all, **18-BF's throttle
+   counting**, and **18-BC's 30s pre-auth timer**. The setup cost is now
+   nothing: `build-asan/` holds current instrumented binaries, and
+   `scripts/ci-boot-smoke.sh seed|conf|boot` brings the world up in one step.
+   It needs the Windows client and a person at the keyboard.
 10. **Re-run the servers under UBSan** to confirm 18-AA's three reports are
     actually gone — `9cfe522` explicitly does not claim they are — and to
     establish whether the CI UBSan boot leg passes at all (§5).
@@ -553,8 +594,8 @@ to move.
 | Effort span | 2026-08-10 (`f15bb13`) → 2026-08-13 (`f73767b`), **89 non-merge commits** since `9422e9c` |
 | On `main` | **All of it.** Waves 1–8 via `669a9fe` (PR #2), `90a926e` (PR #3), `760b48f` (PR #4) and `e86a9dd` (wave 8). **All four are real merges, not squashes** — individual commits are reachable and `--contains` is reliable (§3.2). Waves 9–10 are `a8503bf`…`f73767b`, committed straight onto `main` |
 | **Not on `main`** | **Nothing.** Empty since 2026-08-10 |
-| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT; 9 = 18-AU…18-AY; 10 = 18-AZ…18-BD |
-| Defect count | **56** numbered, 18-A…18-BD |
+| Waves | 1 = 18-A…18-Z; 2 = 18-AA…18-AD; 3 = 18-AE…18-AG; 4 = 18-AH…18-AJ; 5 = 18-AK…18-AM; 6 = 18-AN…18-AP; 7 = 18-AQ; 8 = 18-AR…18-AT; 9 = 18-AU…18-AY; 10 = 18-AZ…18-BD; 11 = 18-BE, 18-BF (owner-directed, not a sweep) |
+| Defect count | **58** numbered, 18-A…18-BF |
 | Gates | Four ratchets in the `ratchets` job: SQL injection **213**, packet duplicates **90**, `reserve()`-sizing **1** (`821d5e5`), guard-indexes-container **25** (`f73767b`). The last two are **validated against history** — each was run over the pre-fix trees and every count change is accounted for by a named fix or deletion |
 | Companion record | `docs/MODERNIZATION.md`, "Phase 18 —" sections. This document does not own it |
 
