@@ -46,6 +46,7 @@
 #include "LCLoginError.h"
 #include "LCLoginOK.h"
 #include "LoginPlayer.h"
+#include "LoginThrottle.h"
 #include "PreparedStatement.h"
 #include "Properties.h"
 #include "UserInfoManager.h"
@@ -65,6 +66,48 @@ bool isAdultByBirthday(const string& birthday);
 void addLoginPlayerData(const string& ID, const string& ip, const string& SSN, const string& zipcode);
 
 bool isBlockIP(const string& ip);
+
+#ifdef __LOGIN_SERVER__
+//////////////////////////////////////////////////////////////////////////////
+//
+// Feed one failed authentication to the cross-connection rate limit.
+//
+// WHICH FAILURES COUNT. Only the ones where the *credentials* were wrong:
+// the ID/password pair matched no row, or the pair could not even be looked
+// up because it carries a quote or a backslash. Those are the only paths a
+// password guess can take, and they are the only ones a legitimate player
+// reaches by their own mistake.
+//
+// Everything else this handler can reject is deliberately NOT counted, and
+// that exclusion is what makes a generous per-IP threshold safe:
+//
+//   IP_DENYED         - already an explicit block, nothing to meter.
+//   ETC_ERROR         - account Access is not ALLOW, or the free-pass lookup
+//                       came back empty. A server-side state, not a guess.
+//   CHILDGUARD_DENYED - a time-of-day policy. Would fire for whole
+//                       populations at once, every night.
+//   NOT_PAY_ACCOUNT   - billing. Same: correlated across many players, and
+//                       correct credentials.
+//   ALREADY_CONNECTED - the account is flagged LOGON, or LOGON/GAME from a
+//                       different address. This is the familiar "stuck after
+//                       a crash" retry loop, it means the password was RIGHT,
+//                       and counting it would lock a player out of their own
+//                       account precisely when they are trying hardest to get
+//                       back in. It is the single most dangerous thing that
+//                       could be counted here.
+//
+// A dead server, a bad billing day or a mass reconnect therefore moves
+// neither counter.
+//
+//////////////////////////////////////////////////////////////////////////////
+void recordLoginFailure(const string& ip, const string& ID) {
+    if (g_pLoginThrottle == NULL)
+        return;
+
+    g_pLoginThrottle->recordIPFailure(ip);
+    g_pLoginThrottle->recordAccountFailure(ID);
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -112,6 +155,33 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
         filelog("loginfail.txt", "Error Code: IP_DENYED, 1, PlayerID : %s", pPacket->getID().c_str());
         return;
+    }
+
+    //--------------------------------------------------------------------------------
+    // Brute-force rate limit, source-address half (see LoginThrottle.h).
+    //
+    // Checked here, ahead of every database round trip on this path, so an
+    // address that is over its limit costs the login server a packet parse and
+    // nothing more. The account half is checked further down, once the ID has
+    // been through the test-client and free-pass rewrites and is the string
+    // that will actually be authenticated.
+    //
+    // The response is the same LCLoginError the real credential failure sends,
+    // followed by DisconnectException: LoginPlayerManager::processCommands
+    // catches that as a ProtocolException and calls disconnect(UNDISCONNECTED),
+    // which flushes the output stream before closing, so the packet is
+    // delivered. Reusing INVALID_ID_PASSWORD leaks nothing the attacker did not
+    // already know and gives a legitimate player who shares an address with one
+    // -- a household, a PC-bang, a CGNAT range -- the error the client knows how
+    // to display instead of a bare disconnect. No ban, no account flag, no DB
+    // write; the limit is a delay and nothing else.
+    //--------------------------------------------------------------------------------
+    if (g_pLoginThrottle != NULL && g_pLoginThrottle->isIPThrottled(connectIP)) {
+        LCLoginError lcLoginError;
+        lcLoginError.setErrorID(INVALID_ID_PASSWORD);
+        pLoginPlayer->sendPacket(&lcLoginError);
+
+        throw DisconnectException("login failure rate limit (ip)");
     }
 
 
@@ -185,6 +255,27 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
         */
     }
 
+    //--------------------------------------------------------------------------------
+    // Brute-force rate limit, account half (see LoginThrottle.h).
+    //
+    // Placed here rather than next to the IP check above because ID is only
+    // final at this point: the test-client ('#') and free-pass ('@') branches
+    // strip their prefix, and the throttle has to be keyed on the same string
+    // the credential query is about to use, or an attacker gets a distinct
+    // budget per prefix.
+    //
+    // pStmt is still NULL here -- it is declared at the top of the function and
+    // is never assigned in it -- so there is nothing to release before
+    // throwing, unlike the failure sites inside the try block below.
+    //--------------------------------------------------------------------------------
+    if (g_pLoginThrottle != NULL && g_pLoginThrottle->isAccountThrottled(ID)) {
+        LCLoginError lcLoginError;
+        lcLoginError.setErrorID(INVALID_ID_PASSWORD);
+        pLoginPlayer->sendPacket(&lcLoginError);
+
+        throw DisconnectException("login failure rate limit (account)");
+    }
+
     string PASSWORD = pPacket->getPassword();
     string SSN = "";
     ServerGroupID_t CurrentServerGroupID = 0;
@@ -232,6 +323,14 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
             pLoginPlayer->sendPacket(&lcLoginError);
 
             filelog("loginfail.txt", "Error Code: INVALID_ID_PASSWORD, 2, PlayerID : %s", pPacket->getID().c_str());
+
+            // A quote or a backslash in either field. This is an injection
+            // probe far more often than a typo, and it is counted on that
+            // basis. The residual is that an account whose stored password
+            // actually contains one of those characters would burn budget on
+            // every attempt -- but it can never log in at all through this
+            // validator, so the throttle does not take anything away from it.
+            recordLoginFailure(connectIP, ID);
             return;
         }
 
@@ -292,6 +391,10 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
             pLoginPlayer->sendPacket(&lcLoginError);
             filelog("loginfail.txt", "Error Code: INVALID_ID_PASSWORD, 3, PlayerID : %s", pPacket->getID().c_str());
 
+            // The main brute-force path: the ID/password pair did not match a
+            // row. Recorded before the per-connection counter below, which the
+            // attacker sheds by reconnecting.
+            recordLoginFailure(connectIP, ID);
 
             // Count this failure. Once the count exceeds 3, terminate the connection.
             uint nFailed = pLoginPlayer->getFailureCount() + 1;
@@ -537,6 +640,12 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
                 // Login succeeded: clear the failure count accumulated on this connection.
                 pLoginPlayer->setFailureCount(0);
 
+                // ... and the account's cross-connection record with it. The
+                // source address keeps its record; see clearAccount() in
+                // LoginThrottle.h for why a success must not clear that one.
+                if (g_pLoginThrottle != NULL)
+                    g_pLoginThrottle->clearAccount(ID);
+
                 pLoginPlayer->sendLGKickCharacter();
 
                 SAFE_DELETE(pStmt);
@@ -733,6 +842,12 @@ void CLLoginHandler::execute(CLLogin* pPacket, Player* pPlayer)
 
                 // Login succeeded: clear the failure count accumulated on this connection.
                 pLoginPlayer->setFailureCount(0);
+
+                // ... and the account's cross-connection record with it. The
+                // source address keeps its record; see clearAccount() in
+                // LoginThrottle.h for why a success must not clear that one.
+                if (g_pLoginThrottle != NULL)
+                    g_pLoginThrottle->clearAccount(ID);
 
                 pLoginPlayer->sendPacket(&lcLoginOK);
                 pLoginPlayer->setPlayerStatus(LPS_WAITING_FOR_CL_GET_PC_LIST);
@@ -1027,6 +1142,20 @@ bool CLLoginHandler::checkWebLogin(CLLogin* pPacket, Player* pPlayer) {
 
     LoginPlayer* pLoginPlayer = dynamic_cast<LoginPlayer*>(pPlayer);
 
+    // Account half of the rate limit, again. execute() checks it too, but
+    // only after this function has already run -- the ID is not final there
+    // until the prefix rewrites are done. Checking here as well means the web
+    // flow cannot be used to skip the account limit, and it happens before
+    // the key lookup below so a limited account costs no query. The source
+    // address was already checked at the top of execute().
+    if (g_pLoginThrottle != NULL && g_pLoginThrottle->isAccountThrottled(pPacket->getID())) {
+        LCLoginError lcLoginError;
+        lcLoginError.setErrorID(INVALID_ID_PASSWORD);
+        pLoginPlayer->sendPacket(&lcLoginError);
+
+        throw DisconnectException("login failure rate limit (account)");
+    }
+
     Statement* pStmt = NULL;
 
     try {
@@ -1058,6 +1187,15 @@ bool CLLoginHandler::checkWebLogin(CLLogin* pPacket, Player* pPlayer) {
                     filelog("keydiff.txt", "db key: %s, packet key: %s, Player ID: %s", key.c_str(),
                             pPacket->getPassword().c_str(), pPacket->getID().c_str());
 
+                    // A wrong web-login key is a credential guess like any
+                    // other, and this path is reachable from any client:
+                    // m_LoginMode comes off the wire, so anyone can ask for
+                    // the web flow. execute() checks the source-address limit
+                    // before it gets here, but it checks the account limit
+                    // after, so without this the web flow would be a way to
+                    // grind one account's keys without ever feeding a counter.
+                    recordLoginFailure(pLoginPlayer->getSocket()->getHost(), pPacket->getID());
+
                     cout << "33333" << endl;
                     return false;
                 }
@@ -1084,6 +1222,12 @@ bool CLLoginHandler::checkWebLogin(CLLogin* pPacket, Player* pPlayer) {
                 lcLoginError.setErrorID(NOT_FOUND_KEY);
                 pLoginPlayer->sendPacket(&lcLoginError);
                 filelog("loginfail.txt", "Error Code: NOT_FOUND_KEY, 11, PlayerID : %s", pPacket->getID().c_str());
+
+                // No pending key row for this ID -- the same "no such
+                // credential" answer the main path's bNoPlayer branch gives,
+                // and counted the same way. KEY_EXPIRED above is deliberately
+                // not counted: the key matched, only the clock did not.
+                recordLoginFailure(pLoginPlayer->getSocket()->getHost(), pPacket->getID());
 
                 // cout << "4" << endl;
                 return false;

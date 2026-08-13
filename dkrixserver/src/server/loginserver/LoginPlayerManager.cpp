@@ -18,6 +18,7 @@
 #include "DB.h"
 #include "LogClient.h"
 #include "LoginPlayer.h"
+#include "LoginThrottle.h"
 #include "PreparedStatement.h"
 #include "Properties.h"
 #include "ReconnectLoginInfoManager.h"
@@ -98,6 +99,12 @@ LoginPlayerManager::LoginPlayerManager() : m_pServerSocket(NULL), m_ServerFD(INV
 
     g_pReconnectLoginInfoManager = new ReconnectLoginInfoManager();
 
+    // Failed-authentication rate limit. Owned here because it has to outlive
+    // every LoginPlayer -- state that dies with the socket is exactly what
+    // made the per-connection failure counter useless. Constructed after
+    // main() has loaded g_pConfig, so it can read its own policy.
+    g_pLoginThrottle = new LoginThrottle();
+
     __END_CATCH
 }
 
@@ -123,6 +130,12 @@ LoginPlayerManager::~LoginPlayerManager() {
     if (g_pReconnectLoginInfoManager != NULL) {
         delete g_pReconnectLoginInfoManager;
         g_pReconnectLoginInfoManager = NULL;
+    }
+
+
+    if (g_pLoginThrottle != NULL) {
+        delete g_pLoginThrottle;
+        g_pLoginThrottle = NULL;
     }
 
     __END_CATCH_NO_RETHROW

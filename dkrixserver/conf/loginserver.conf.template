@@ -70,6 +70,38 @@ ServerInfoReloadTime : 1
 MaxPreAuthIdleSeconds : 30
 
 #--------------------------------------------------
+# Failed-login rate limit
+#--------------------------------------------------
+# Cross-connection brute-force protection. Failures are counted per source
+# address and per account name, independently, in fixed tables that never
+# grow. Only wrong-credential failures count -- "already connected", billing
+# and access-flag rejections do not -- so a mass reconnect or a bad billing
+# day cannot lock anyone out.
+#
+# Failures age out: each record counts within a window that starts at its
+# first failure and is never pushed forward, so the longest anyone can be
+# held out is one window. Crossing a limit rejects the connection and nothing
+# else -- no ban, no account flag, no database write.
+#
+# Per address: loose threshold, short window. It has to tolerate a household,
+# a LAN party, a PC-bang or a whole CGNAT range sharing one address, and the
+# cost of a false positive is a bystander waiting, so the wait is kept short.
+# 30 wrong passwords in 5 minutes from one address means 30 different people
+# each mistyping inside the same 5 minutes.
+LoginFailureIPThreshold : 30
+LoginFailureIPWindowSeconds : 300
+
+# Per account: strict, because an account has exactly one legitimate owner
+# and the client does not auto-retry a rejected password. 10 failures in 10
+# minutes is one guess a minute sustained, from any number of hosts, which is
+# where a distributed attack on a single account stops.
+LoginFailureAccountThreshold : 10
+LoginFailureAccountWindowSeconds : 600
+
+# All four keys are optional; omitting one keeps the built-in default shown
+# above. Set either threshold to 0 to disable that half of the limit.
+
+#--------------------------------------------------
 # DB connection
 #--------------------------------------------------
 DB_HOST : ${DKRIX_DB_HOST}

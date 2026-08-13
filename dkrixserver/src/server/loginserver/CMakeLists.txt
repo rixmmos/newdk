@@ -10,6 +10,7 @@ set(LOGINSERVER_SOURCES
     LoginPlayer.cpp
     LoginPlayerManager.cpp
     LoginServer.cpp
+    LoginThrottle.cpp
     ZoneGroupInfoManager.cpp
     ZoneInfoManager.cpp
     main.cpp
