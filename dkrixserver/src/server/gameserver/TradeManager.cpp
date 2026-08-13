@@ -819,6 +819,21 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
         pOusters2->setGoldEx(pOusters2->getGold() + tradeGold1);
     }
 
+    // Clear the escrow the instant the gold has been credited, and before any
+    // of the logging below, because every line of it can throw: the socket
+    // dereference two lines down is unguarded, and END_DB rethrows a failed
+    // TradeLog insert. These used to sit at the very end of the function, so
+    // any of those throws left m_Gold populated on both sides -- and the
+    // disconnect that followed called cancelTrade(), which credited the same
+    // gold a second time. The trade is already committed at this point; the
+    // logging is a record of it, not part of it, and must not be able to undo
+    // it or repeat it.
+    //
+    // Safe to move: tradeGold1/tradeGold2 were copied into locals long before
+    // (see their declarations above), and nothing between here and the old
+    // position reads pInfo1 or pInfo2.
+    pInfo1->clearAll();
+    pInfo2->clearAll();
 
     string ip1 = pCreature1->getPlayer()->getSocket()->getHost();
     string ip2 = pCreature2->getPlayer()->getSocket()->getHost();
@@ -867,8 +882,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
 
     // removeTradeInfo(pCreature1->getObjectID());
     // removeTradeInfo(pCreature2->getObjectID());
-    pInfo1->clearAll();
-    pInfo2->clearAll();
+    // The escrow was cleared immediately after the gold credit above, not here.
 
     __END_CATCH
 }
