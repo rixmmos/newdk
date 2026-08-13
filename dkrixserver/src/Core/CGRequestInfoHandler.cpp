@@ -7,6 +7,7 @@
 #include "CGRequestInfo.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCOtherGuildName.h"
 #include "GCOtherModifyInfo.h"
 #include "GamePlayer.h"
@@ -46,15 +47,15 @@ void CGRequestInfoHandler::execute(CGRequestInfo* pPacket, Player* pPlayer) {
         if (pTargetCreature != NULL && pTargetCreature->isPC()) {
             
             if (pTargetCreature->isSlayer()) {
-                Slayer* pSlayer = dynamic_cast<Slayer*>(pTargetCreature);
+                Slayer* pSlayer = checkedCast<Slayer*>(pTargetCreature);
                 if (pSlayer->getCompetenceShape() != 1)
                     return;
             } else if (pTargetCreature->isVampire()) {
-                Vampire* pVampire = dynamic_cast<Vampire*>(pTargetCreature);
+                Vampire* pVampire = checkedCast<Vampire*>(pTargetCreature);
                 if (pVampire->getCompetenceShape() != 1)
                     return;
             } else if (pTargetCreature->isOusters()) {
-                Ousters* pOusters = dynamic_cast<Ousters*>(pTargetCreature);
+                Ousters* pOusters = checkedCast<Ousters*>(pTargetCreature);
                 if (pOusters->getCompetenceShape() != 1)
                     return;
             }

@@ -10,7 +10,7 @@ this `CLAUDE.md`. Commands are written to be run from there. Nothing in the tree
 hardcodes an absolute path any more, so the workspace can live anywhere;
 `C:\dev\newdk` is the intended home.
 
-This is a private DarkEden-like MMORPG project: a C++11 server, a C++11
+This is a personal DarkEden-like MMORPG project (public repo since 2026-08-08): a C++11 server, a C++11
 isometric client mid-migration from Win32/DirectX to SDL2, plus the release,
 launcher, and update-server tooling used to ship builds to testers.
 

@@ -7,6 +7,7 @@
 #include "CGGetOffMotorCycle.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "GCGetOffMotorCycle.h"
 #include "GCGetOffMotorCycleFailed.h"
 #include "GCGetOffMotorCycleOK.h"
@@ -46,7 +47,7 @@ void CGGetOffMotorCycleHandler::execute(CGGetOffMotorCycle* pPacket, Player* pPl
         return;
     }
 
-    Slayer* pSlayer = dynamic_cast<Slayer*>(pCreature);
+    Slayer* pSlayer = checkedCast<Slayer*>(pCreature);
     Motorcycle* pMotorcycle = pSlayer->getMotorcycle();
     bool bSuccess = false;
     Zone* pZone = pSlayer->getZone();

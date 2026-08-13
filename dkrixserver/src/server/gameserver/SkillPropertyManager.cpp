@@ -80,11 +80,12 @@ void SkillPropertyManager::init()
 {
     __BEGIN_TRY
 
-    m_SkillProperties.reserve(SKILL_MAX);
-
-    for (int i = 0; i < SKILL_MAX; i++) {
-        m_SkillProperties[i] = NULL;
-    }
+    // reserve() only allocates capacity -- size() stays 0, so every
+    // m_SkillProperties[i] below (and in clear(), getSkillProperty() and
+    // addSkillProperty()) indexed past the end into unconstructed storage.
+    // assign() sizes the vector and NULL-fills it in one step, and is correct
+    // if init() is called again after clear().
+    m_SkillProperties.assign((size_t)SKILL_MAX, (SkillProperty*)NULL);
 
     initDefaultSkillProperty();
 
@@ -96,7 +97,9 @@ void SkillPropertyManager::clear()
 {
     __BEGIN_TRY
 
-    for (int i = 0; i < SKILL_MAX; i++) {
+    // Bound on the vector's own size, not on SKILL_MAX: clear() also runs from
+    // the destructor, which is reachable without init() having sized it.
+    for (size_t i = 0; i < m_SkillProperties.size(); i++) {
         SAFE_DELETE(m_SkillProperties[i]);
     }
 
@@ -169,8 +172,11 @@ string SkillPropertyManager::toString() const
 
     msg << "SkillPropertyManager(\n";
 
-    for (int i = 0; i < (int)SKILL_MAX; i++) {
-        msg << m_SkillProperties[i]->toString() << ",";
+    // Most slots are legitimately NULL -- only the skill types that
+    // initDefaultSkillProperty()/addSkillProperty() populate are set.
+    for (size_t i = 0; i < m_SkillProperties.size(); i++) {
+        if (m_SkillProperties[i] != NULL)
+            msg << m_SkillProperties[i]->toString() << ",";
     }
 
     msg << "\n)";

@@ -24,22 +24,25 @@
 #include "item/PetItem.h"
 #endif
 
+// Backslash-escapes quotes for embedding into a raw SQL literal. The whole tree
+// now binds these values as parameters instead, so this has no callers left --
+// only two stale extern declarations in PetItem.cpp and NicknameBook.cpp. It is
+// kept, and corrected, rather than deleted: the previous body checked its bound
+// *after* both writes, so a 100-character input wrote ret[100] and then the
+// terminator at ret[101], two bytes past a 100-byte stack array, with the
+// overflowing byte taken straight from the input.
 string getDBString(const string& str) {
-    char ret[100];
-    int index = 0;
+    string ret;
+    ret.reserve(str.size());
 
-    for (int i = 0; i < str.size(); ++i) {
-        char c = str[i];
-        if (c == '\\' || c == '\'') {
-            ret[index++] = '\\';
-        }
-        ret[index++] = c;
-        if (index >= 100)
-            break;
+    for (string::const_iterator itr = str.begin(); itr != str.end(); ++itr) {
+        char c = *itr;
+        if (c == '\\' || c == '\'')
+            ret += '\\';
+        ret += c;
     }
-    ret[index] = 0;
 
-    return string(ret);
+    return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////////

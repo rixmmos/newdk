@@ -7,6 +7,7 @@
 #include "CGRideMotorCycle.h"
 
 #ifdef __GAME_SERVER__
+#include "CheckedCast.h"
 #include "Creature.h"
 #include "CreatureUtil.h"
 #include "Effect.h"
@@ -97,7 +98,7 @@ void CGRideMotorCycleHandler::execute(CGRideMotorCycle* pPacket, Player* pPlayer
                 }
 
                 if (pItem->getItemClass() == Item::ITEM_CLASS_MOTORCYCLE && pMotor == NULL) {
-                    Motorcycle* pMotorcycle = dynamic_cast<Motorcycle*>(pItem);
+                    Motorcycle* pMotorcycle = checkedCast<Motorcycle*>(pItem);
                     ItemID_t TargetItemID = pMotorcycle->getItemID();
                     Inventory* pInventory = pSlayer->getInventory();
 

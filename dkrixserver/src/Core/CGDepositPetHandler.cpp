@@ -63,7 +63,12 @@ void CGDepositPetHandler::execute(CGDepositPet* pPacket, Player* pPlayer) {
     sprintf(pField, "Storage=%d, StorageID=%d ", STORAGE_PET_STASH, pPacket->getIndex());
     pPetItem->tinysave(pField);
 
-    pPetItem->getPetInfo()->setFeedTurn(2);
+    // A PetItem may legitimately carry no PetInfo -- PetItem's constructors set
+    // m_pPetInfo to NULL and create()/save() branch on it, so a pet item minted
+    // by a non-pet path (e.g. a quest ActionGiveItem row) has none. The check
+    // three lines below already knows this; this call must not run ahead of it.
+    if (pPetItem->getPetInfo() != NULL)
+        pPetItem->getPetInfo()->setFeedTurn(2);
 
     if (pPetItem != NULL && pPetItem->getPetInfo() != NULL && pPetItem->getPetInfo() == pPC->getPetInfo()) {
         pPC->setPetInfo(NULL);

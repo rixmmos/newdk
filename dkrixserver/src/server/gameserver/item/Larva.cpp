@@ -7,6 +7,7 @@
 #include "Larva.h"
 
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "DB.h"
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
@@ -254,7 +255,7 @@ int Larva::getHPAmount(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPAmount();
 
     __END_CATCH
@@ -265,7 +266,7 @@ int Larva::getMPAmount(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPAmount();
 
     __END_CATCH
@@ -276,7 +277,7 @@ int Larva::getHPDelay(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPDelay();
 
     __END_CATCH
@@ -287,7 +288,7 @@ int Larva::getMPDelay(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPDelay();
 
     __END_CATCH
@@ -298,7 +299,7 @@ int Larva::getHPQuantity(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPQuantity();
 
     __END_CATCH
@@ -309,7 +310,7 @@ int Larva::getMPQuantity(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPQuantity();
 
     __END_CATCH
@@ -320,7 +321,7 @@ int Larva::getHPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPRecoveryUnit();
 
     __END_CATCH
@@ -331,7 +332,7 @@ int Larva::getMPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    LarvaInfo* pInfo = dynamic_cast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
+    LarvaInfo* pInfo = checkedCast<LarvaInfo*>(g_pLarvaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPRecoveryUnit();
 
     __END_CATCH

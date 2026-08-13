@@ -9,6 +9,7 @@
 #ifdef __GAME_SERVER__
 #include <list>
 
+#include "CheckedCast.h"
 #include "GCSkillFailed1.h"
 #include "GCSkillFailed2.h"
 #include "GCStatusCurrentHP.h"
@@ -149,15 +150,24 @@ void CGThrowBombHandler::execute(CGThrowBomb* pPacket, Player* pPlayer)
             return;
         }
 
-         
 
-        
-        Bomb* pBomb = dynamic_cast<Bomb*>(pItem);
+        Bomb* pBomb = checkedCast<Bomb*>(pItem);
         ItemType_t BombType = pBomb->getItemType();
         Damage_t MinDamage = pBomb->getMinDamage();
         Damage_t MaxDamage = pBomb->getMaxDamage();
         SkillSlot* pSkillSlot = pSlayer->hasSkill(SKILL_THROW_BOMB);
         SkillInfo* pSkillInfo = g_pSkillInfoManager->getSkillInfo(SKILL_THROW_BOMB);
+
+        // hasSkill() returns NULL when the skill was never learned, and holding
+        // a bomb does not imply holding the skill. A NULL dereference here is a
+        // SIGSEGV, not a Throwable the catch below could absorb, so the process
+        // would die rather than log.
+        if (pSkillSlot == NULL || pSkillInfo == NULL) {
+            GCSkillFailed1 _GCSkillFailed1;
+            pPlayer->sendPacket(&_GCSkillFailed1);
+            return;
+        }
+
         Level_t SkillLevel = pSkillSlot->getExpLevel();
         Damage_t RealDamage = MinDamage + (max(0, ((int)MaxDamage * (int)SkillLevel / 100) - MinDamage));
 

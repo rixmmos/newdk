@@ -67,7 +67,9 @@ void CGWithdrawPetHandler::execute(CGWithdrawPet* pPacket, Player* pPlayer)
             gcPetStashVerify.setCode(PET_STASH_OK);
             pGamePlayer->sendPacket(&gcPetStashVerify);
 
-            pPetItem->getPetInfo()->setFeedTurn(1);
+            // A PetItem may legitimately carry no PetInfo; see CGDepositPetHandler.
+            if (pPetItem->getPetInfo() != NULL)
+                pPetItem->getPetInfo()->setFeedTurn(1);
         }
     }
 

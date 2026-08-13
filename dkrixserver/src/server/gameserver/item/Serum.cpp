@@ -7,6 +7,7 @@
 #include "Serum.h"
 
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "DB.h"
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
@@ -221,21 +222,21 @@ Weight_t Serum::getWeight() const
 int Serum::getHPAmount(void) const
 
 {
-    SerumInfo* pInfo = dynamic_cast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
+    SerumInfo* pInfo = checkedCast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPAmount();
 }
 
 int Serum::getPeriod(void) const
 
 {
-    SerumInfo* pInfo = dynamic_cast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
+    SerumInfo* pInfo = checkedCast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
     return pInfo->getPeriod();
 }
 
 int Serum::getCount(void) const
 
 {
-    SerumInfo* pInfo = dynamic_cast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
+    SerumInfo* pInfo = checkedCast<SerumInfo*>(g_pSerumInfoManager->getItemInfo(m_ItemType));
     return pInfo->getCount();
 }
 

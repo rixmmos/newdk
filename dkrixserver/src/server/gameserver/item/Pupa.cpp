@@ -7,6 +7,7 @@
 #include "Pupa.h"
 
 #include "Belt.h"
+#include "CheckedCast.h"
 #include "DB.h"
 #include "ItemInfoManager.h"
 #include "ItemUtil.h"
@@ -253,7 +254,7 @@ int Pupa::getHPAmount(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPAmount();
 
     __END_CATCH
@@ -264,7 +265,7 @@ int Pupa::getMPAmount(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPAmount();
 
     __END_CATCH
@@ -275,7 +276,7 @@ int Pupa::getHPDelay(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPDelay();
 
     __END_CATCH
@@ -286,7 +287,7 @@ int Pupa::getMPDelay(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPDelay();
 
     __END_CATCH
@@ -297,7 +298,7 @@ int Pupa::getHPQuantity(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPQuantity();
 
     __END_CATCH
@@ -308,7 +309,7 @@ int Pupa::getMPQuantity(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPQuantity();
 
     __END_CATCH
@@ -319,7 +320,7 @@ int Pupa::getHPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getHPRecoveryUnit();
 
     __END_CATCH
@@ -330,7 +331,7 @@ int Pupa::getMPRecoveryUnit(void) const
 {
     __BEGIN_TRY
 
-    PupaInfo* pInfo = dynamic_cast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
+    PupaInfo* pInfo = checkedCast<PupaInfo*>(g_pPupaInfoManager->getItemInfo(m_ItemType));
     return pInfo->getMPRecoveryUnit();
 
     __END_CATCH

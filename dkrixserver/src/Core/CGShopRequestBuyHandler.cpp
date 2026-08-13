@@ -684,7 +684,7 @@ void CGShopRequestBuyHandler::executeEvent(CGShopRequestBuy* pPacket, Player* pP
     
     switch (pItem->getItemClass()) {
     case Item::ITEM_CLASS_POTION:
-        dynamic_cast<Potion*>(pItem)->setNum(itemNum);
+        checkedCast<Potion*>(pItem)->setNum(itemNum);
         break;
     case Item::ITEM_CLASS_MAGAZINE:
         dynamic_cast<Magazine*>(pItem)->setNum(itemNum);
