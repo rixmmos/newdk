@@ -19,6 +19,7 @@
 #include "LGKickCharacter.h"
 #include "LogClient.h"
 #include "Properties.h"
+#include "SocketAPI.h"
 
 //////////////////////////////////////////////////////////////////////
 // Source-address gate for the login server's UDP port.
@@ -188,65 +189,96 @@ void GameServerManager::run() {
         Connection* pConnection = new Connection(host, db, user, password, port);
         g_pDatabaseManager->addConnection((int)(long)Thread::self(), pConnection);
 
+        // How many datagrams one pass of the loop below may handle.
+        //
+        // This loop used to sleep 1ms per pass and handle exactly one datagram
+        // per pass, capping the login server's UDP port at roughly 1000
+        // datagrams a second (the game server's mirror of this loop slept
+        // twice, for half that). The socket is blocking, so the sleep was not
+        // guarding against a busy spin on an empty socket -- receive() already
+        // parks the thread until a datagram arrives. It was a pure throughput
+        // throttle, and the datagrams it could drop include the GL_/LG_ login
+        // handoff, so saturating it stops anyone from logging in. Each pass now
+        // drains what is queued instead.
+        //
+        // The bound keeps a flood from running the drain forever, so the pass
+        // still returns to the top of the loop where the exception handlers and
+        // any future periodic work live. 256 matches the game server's bound in
+        // server/gameserver/LoginServerManager.cpp and is far above any
+        // legitimate burst on this port, which carries only inter-server
+        // traffic.
+        const int MAX_DATAGRAMS_PER_PASS = 256;
+
         while (true) {
             Datagram* pDatagram = NULL;
             DatagramPacket* pDatagramPacket = NULL;
 
             try {
-                
-                pDatagram = m_pDatagramSocket->receive();
+                for (int drained = 0; drained < MAX_DATAGRAMS_PER_PASS; drained++) {
+                    pDatagram = NULL;
+                    pDatagramPacket = NULL;
 
-                if (pDatagram != NULL) 
-                {
-                    // cout << pDatagramPacket->toString() << endl;
+                    // Blocking receive. On an empty socket this parks the
+                    // thread, which is this thread's idle state; NULL means the
+                    // datagram that arrived carried no payload.
+                    pDatagram = m_pDatagramSocket->receive();
 
-                    /*
-                    // UDP test
-                    cout << "[DatagramPacket] " << pDatagram->getHost() << ":"
-                                                << pDatagram->getPort() << endl;
+                    if (pDatagram != NULL) {
+                        // cout << pDatagramPacket->toString() << endl;
 
-                    if (pDatagram->getPort()!=9997)
-                    {
-                        LGKickCharacter lg;
-                        lg.setPCName("111");
-                        lg.setID(111);
+                        /*
+                        // UDP test
+                        cout << "[DatagramPacket] " << pDatagram->getHost() << ":"
+                                                    << pDatagram->getPort() << endl;
 
-                        sendPacket(pDatagram->getHost(), pDatagram->getPort(), &lg);
-                    }
-                    */
+                        if (pDatagram->getPort()!=9997)
+                        {
+                            LGKickCharacter lg;
+                            lg.setPCName("111");
+                            lg.setID(111);
 
-                    
-                    pDatagram->read(pDatagramPacket);
+                            sendPacket(pDatagram->getHost(), pDatagram->getPort(), &lg);
+                        }
+                        */
 
-                    if (pDatagramPacket != NULL) {
-                        // Datagram::read() has already stamped the sender's
-                        // address onto the packet. Fail closed: anything that is
-                        // not client traffic must come from a known peer.
-                        const PacketID_t packetID = pDatagramPacket->getPacketID();
-                        const string sourceHost = pDatagramPacket->getHost();
+                        pDatagram->read(pDatagramPacket);
 
-                        if (!isClientDatagramPacket(packetID) && !isKnownPeerHost(sourceHost)) {
-                            logRejectedDatagram(sourceHost, pDatagramPacket->getPort(), packetID);
-                        } else {
-                            pDatagramPacket->execute(NULL);
+                        if (pDatagramPacket != NULL) {
+                            // Datagram::read() has already stamped the sender's
+                            // address onto the packet. Fail closed: anything that is
+                            // not client traffic must come from a known peer.
+                            const PacketID_t packetID = pDatagramPacket->getPacketID();
+                            const string sourceHost = pDatagramPacket->getHost();
+
+                            if (!isClientDatagramPacket(packetID) && !isKnownPeerHost(sourceHost)) {
+                                logRejectedDatagram(sourceHost, pDatagramPacket->getPort(), packetID);
+                            } else {
+                                pDatagramPacket->execute(NULL);
+                            }
+
+
+                            delete pDatagramPacket;
+                            pDatagramPacket = NULL;
                         }
 
 
-                        delete pDatagramPacket;
-                        pDatagramPacket = NULL;
+                        delete pDatagram;
+                        pDatagram = NULL;
                     }
 
-                    
-                    delete pDatagram;
-                    pDatagram = NULL;
+                    // Nothing more is queued, so end the pass here rather than
+                    // block inside it. FIONREAD also reads 0 when the next
+                    // queued datagram is zero-length; that one is consumed by
+                    // the blocking receive at the top of the next pass, so no
+                    // datagram is lost and the loop cannot spin.
+                    if (SocketAPI::availablesocket_ex(m_pDatagramSocket->getSOCKET()) == 0)
+                        break;
                 }
             } catch (ProtocolException& pe) {
                 cout << "GameServerManager::run Exception Check(ProtocolException)" << endl;
                 cout << pe.toString() << endl;
 
-                
-                
-                
+
                 // throw Error( pe.toString() );
                 delete pDatagramPacket;
                 delete pDatagram;
@@ -254,8 +286,7 @@ void GameServerManager::run() {
                 cout << "GameServerManager::run Exception Check(ConnectException)" << endl;
                 cout << ce.toString() << endl;
 
-                
-                
+
                 // throw Error( ce.toString() );
                 delete pDatagramPacket;
                 delete pDatagram;
@@ -265,7 +296,6 @@ void GameServerManager::run() {
                 delete pDatagramPacket;
                 delete pDatagram;
             }
-            usleep(1000); 
         }
 
         cout << "GameServerManager thread exiting... " << endl;
@@ -305,24 +335,24 @@ void GameServerManager::sendPacket(string host, uint port, DatagramPacket* pPack
     try {
         //	try
         //	{
-        
-        
+
+
         Datagram datagram;
 
         datagram.setHost(host);
         datagram.setPort(port);
 
-        
+
         datagram.write(pPacket);
 
-        
+
         m_pDatagramSocket->send(&datagram);
         //	}
         //	catch ( ConnectException & t )
         //	{
         //		cout << "GameServerManager::sendDatagram Exception Check!!" << endl;
         //		cout << t.toString() << endl;
-        
+
         //	}
 
     } catch (Throwable& t) {
