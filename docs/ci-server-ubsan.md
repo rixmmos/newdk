@@ -1,14 +1,14 @@
-# Why the server `build (ubsan)` CI leg is red
+# Why the server `build (ubsan)` CI leg was red — resolved 2026-08-10
 
 **Status:** diagnosed 2026-08-09. **Fix applied 2026-08-10** to
 `dkrixserver/CMakeLists.txt` (the `USE_UBSAN` branch now appends
 `-fno-sanitize=vptr` after `-fsanitize=undefined` on both the compile flags and
-`CMAKE_EXE_LINKER_FLAGS`). Verified by a from-scratch local WSL build on
-2026-08-09; **not yet verified on a runner** — `build (ubsan)` has still never
-produced a green, and until it does the count of consecutive greens is 0. The
-leg therefore stays `non_blocking: true` in `server.yml` under the repo's
-existing rule (≥5 consecutive greens of that leg, the same bar `asan` cleared on
-2026-08-09).
+`CMAKE_EXE_LINKER_FLAGS`). Verified by a from-scratch local WSL build on 2026-08-09, then **confirmed on a
+runner**: `build (ubsan)` now links and the `boot under ubsan` leg has run green
+(`docs/SECURITY-AUDIT-2026-08-10.md` §5, Actions run `31440542647`). The leg
+stays `non_blocking: true` in `server.yml` until it clears the repo's bar of ≥5
+consecutive greens (the same bar `asan` cleared on 2026-08-09). *The rest of this
+note is the original diagnosis, kept as history.*
 
 Also landed 2026-08-10, because a green build proves very little on its own: the
 `boot under asan (boot-only, no packets)` job in `server.yml` became a matrix

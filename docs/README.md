@@ -1,7 +1,7 @@
 # docs
 
 Cross-cutting documentation for the project. Everything now lives in **one
-repository** — `newdk`, GitHub `rixmmos/newdk` (private).
+repository** — `newdk`, GitHub `rixmmos/newdk` (**public since 2026-08-08**).
 
 Earlier revisions of this file described three sibling repositories checked out
 side by side. **That was true once and is no longer.** `rixmmos` still hosts the
@@ -10,9 +10,9 @@ public — and they are what this file was written against. The consolidated
 `newdk` repo superseded them; the loose paths that revision gave (`client/`,
 `server/`) never matched the fork names either way.
 
-If you are looking for this project on GitHub and see only those three public
-repos, you are on the public profile view. `newdk` is private and will not
-appear there — go directly to `github.com/rixmmos/newdk` while signed in.
+`newdk` went **public on 2026-08-08** (flipped to clear a GitHub Actions
+billing/spending-limit block), so it now appears on the `rixmmos` profile
+alongside those three forks: `github.com/rixmmos/newdk`.
 
 The real tree:
 
