@@ -12,6 +12,7 @@
 #include "ItemInfo.h"
 #include "ItemInfoManager.h"
 #include "NPC.h"
+#include "Ousters.h"
 #include "PriceManager.h"
 #include "Slayer.h"
 #include "Vampire.h"
@@ -37,42 +38,52 @@ void CGSilverCoatingHandler::execute(CGSilverCoating* pPacket, Player* pPlayer)
 
     ObjectID_t ITEMOID = pPacket->getObjectID();
     Creature* pPC = checkedCast<GamePlayer*>(pPlayer)->getCreature();
-    bool bSlayer = true;
+    bool bSlayer = false;
+    bool bVampire = false;
+    bool bOusters = false;
     Gold_t playerMoney = 0;
     Price_t coatingPrice = 0;
     Item* pItem = NULL;
     Slayer* pSlayer = NULL;
     Vampire* pVampire = NULL;
+    Ousters* pOusters = NULL;
     int storage = 0;
     int X = 0;
     int Y = 0;
     GCNPCResponse response;
 
-    
+
     if (pPC->isSlayer())
         bSlayer = true;
     else if (pPC->isVampire())
-        bSlayer = false;
+        bVampire = true;
+    else if (pPC->isOusters())
+        bOusters = true;
 
-    
+
     if (bSlayer) {
         pSlayer = checkedCast<Slayer*>(pPC);
         playerMoney = pSlayer->getGold();
         pItem = pSlayer->findItemOID(ITEMOID, storage, X, Y);
-    } else {
+    } else if (bVampire) {
         pVampire = checkedCast<Vampire*>(pPC);
         playerMoney = pVampire->getGold();
         pItem = pVampire->findItemOID(ITEMOID, storage, X, Y);
+    } else if (bOusters) {
+        pOusters = checkedCast<Ousters*>(pPC);
+        playerMoney = pOusters->getGold();
+        pItem = pOusters->findItemOID(ITEMOID, storage, X, Y);
     }
 
-    
+    // An unrecognised race leaves pItem NULL and falls into the not-found
+    // response below rather than dereferencing a failed downcast.
     if (pItem == NULL) {
         response.setCode(NPC_RESPONSE_SILVER_COATING_FAIL_ITEM_NOT_EXIST);
         pPlayer->sendPacket(&response);
         return;
     }
 
-    
+
     switch (pItem->getItemClass()) {
     case Item::ITEM_CLASS_BLADE:
     case Item::ITEM_CLASS_SWORD:
@@ -92,35 +103,35 @@ void CGSilverCoatingHandler::execute(CGSilverCoating* pPacket, Player* pPlayer)
         return;
     }
 
-    
+
     ItemInfo* pItemInfo = g_pItemInfoManager->getItemInfo(pItem->getItemClass(), pItem->getItemType());
     pItem->setSilver(pItemInfo->getMaxSilver());
 
-    
+
     if (bSlayer) {
         // pSlayer->setGoldEx(playerMoney - coatingPrice);
 
         // by sigi. 2002.9.4
         pSlayer->decreaseGoldEx(coatingPrice);
         // log(LOG_REPAIR_ITEM, pSlayer->getName(), "", pItem->toString());
-    } else {
+    } else if (bVampire) {
         // pVampire->setGoldEx(playerMoney - coatingPrice);
 
         // by sigi. 2002.9.4
         pVampire->decreaseGoldEx(coatingPrice);
         // log(LOG_REPAIR_ITEM, pVampire->getName(), "", pItem->toString());
+    } else if (bOusters) {
+        // by sigi. 2002.9.4
+        pOusters->decreaseGoldEx(coatingPrice);
+        // log(LOG_REPAIR_ITEM, pOusters->getName(), "", pItem->toString());
     }
 
-    
-    
+
     char pField[80];
     sprintf(pField, "Silver=%d", pItem->getSilver());
     pItem->tinysave(pField);
 
-    
-    
-    
-    
+
     /*
     switch (storage)
     {
@@ -136,7 +147,7 @@ void CGSilverCoatingHandler::execute(CGSilverCoating* pPacket, Player* pPlayer)
     }
     */
 
-    
+
     response.setCode(NPC_RESPONSE_SILVER_COATING_OK);
     response.setParameter(playerMoney - coatingPrice);
     pPlayer->sendPacket(&response);
