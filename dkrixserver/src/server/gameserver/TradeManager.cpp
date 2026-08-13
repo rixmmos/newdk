@@ -6,6 +6,8 @@
 
 #include "TradeManager.h"
 
+#include <vector>
+
 #include "Creature.h"
 #include "DB.h"
 #include "EventItemUtil.h"
@@ -18,7 +20,9 @@
 #include "ItemUtil.h"
 #include "LogClient.h"
 #include "Ousters.h"
+#include "PCFinder.h"
 #include "Player.h"
+#include "PreparedStatement.h"
 #include "Slayer.h"
 #include "VSDateTime.h"
 #include "Vampire.h"
@@ -196,7 +200,7 @@ void TradeManager::removeTradeInfo(const string& Name) {
     unordered_map<string, TradeInfo*>::iterator itr = m_InfoMap.find(Name);
     if (itr == m_InfoMap.end()) {
         cerr << "TradeManager::removeTradeInfo() : NoSuchElementException" << endl;
-        
+
         // by sigi. 2002.8.31
         // throw NoSuchElementException();
         return;
@@ -213,7 +217,7 @@ void TradeManager::initTrade(Creature* pCreature1, Creature* pCreature2)
 {
     __BEGIN_TRY
 
-    
+
     if (hasTradeInfo(pCreature1->getName()) || hasTradeInfo(pCreature2->getName())) {
         throw("TradeManager::initTrade() : Trade info already exist!");
     }
@@ -239,19 +243,18 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
     __BEGIN_TRY
 
     try {
-        
         if (pCreature1 == NULL || pCreature2 == NULL)
             return 0;
 
-        
+
         if (!pCreature1->isPC() || !pCreature2->isPC())
             return 0;
 
-        
+
         if (!isSameRace(pCreature1, pCreature2))
             return 0;
 
-        
+
         if (!isTrading(pCreature1, pCreature2))
             return 0;
 
@@ -261,11 +264,11 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
         if (pInfo1 == NULL || pInfo2 == NULL) // by sigi. 2002.12.25
             return 0;
 
-        
+
         if (pInfo1->getStatus() != TRADE_FINISH || pInfo2->getStatus() != TRADE_FINISH)
             return 0;
 
-        
+
         list<Item*> tradeList1 = pInfo1->getItemList();
         list<Item*> tradeList2 = pInfo2->getItemList();
         ItemMap itemMap1;
@@ -301,13 +304,12 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
             pInventory1->setDeleteAllFlag(false);
             pInventory2->setDeleteAllFlag(false);
         } else
-            throw Error("TradeManager::canTrade() :  !"); 
+            throw Error("TradeManager::canTrade() :  !");
 
-        
+
         for (list<Item*>::iterator itr = tradeList1.begin(); itr != tradeList1.end(); itr++) {
             Item* pItem = (*itr);
             if (pInventory1->hasItem(pItem->getObjectID())) {
-                
                 if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
                     pItem->getItemType() < 6) {
                     /*
@@ -332,7 +334,6 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
         for (list<Item*>::iterator itr = tradeList2.begin(); itr != tradeList2.end(); itr++) {
             Item* pItem = (*itr);
             if (pInventory2->hasItem(pItem->getObjectID())) {
-                
                 if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
                     pItem->getItemType() < 6) {
                     /*
@@ -340,7 +341,7 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
                         goto ErrorCode;
                     */
 
-                    
+
                     if (!bTradeGiftBox) {
                         SAFE_DELETE(pInventory1);
                         SAFE_DELETE(pInventory2);
@@ -361,24 +362,24 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
                 goto ErrorCode;
         }
 
-        
+
         if (bTradeGiftBox || EventGiftBoxCount != 0) {
             SAFE_DELETE(pInventory1);
             SAFE_DELETE(pInventory2);
             return 2;
         }
 
-        
+
         for (ItemMap::iterator itr = itemMap1.begin(); itr != itemMap1.end(); itr++) {
             Item* pItem = itr->second;
-            
+
             if (!pInventory2->addItem(pItem))
                 goto ErrorCode;
         }
 
         for (ItemMap::iterator itr = itemMap2.begin(); itr != itemMap2.end(); itr++) {
             Item* pItem = itr->second;
-            
+
             if (!pInventory1->addItem(pItem))
                 goto ErrorCode;
         }
@@ -386,7 +387,7 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
         SAFE_DELETE(pInventory1);
         SAFE_DELETE(pInventory2);
 
-        
+
         return 1;
 
     ErrorCode:
@@ -399,23 +400,176 @@ int TradeManager::canTrade(Creature* pCreature1, Creature* pCreature2)
         filelog("tradeError.txt", "C1=%s, C2=%s, %s", pCreature1->getName().c_str(), pCreature2->getName().c_str(),
                 t.toString().c_str());
 
-        
+
         return 0;
     }
 
     __END_CATCH
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Trade commit helpers
+//
+// processTrade() moves items by hand between two live inventories. Each step
+// below records what it did, so a swap that cannot be completed can be undone
+// instead of being abandoned half-applied: the old code threw from the middle
+// of the move, leaving the staked items detached from both inventories and
+// owned by nobody.
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// One item and the inventory slot it currently occupies.
+struct TradeItemSlot {
+    Item* pItem;
+    Inventory* pInventory;
+    CoordInven_t x;
+    CoordInven_t y;
+
+    TradeItemSlot() : pItem(NULL), pInventory(NULL), x(0), y(0) {}
+};
+
+// Take pItem out of pInventory, remembering the slot it came from. Returns
+// false, having changed nothing, if the item is not actually there.
+bool detachTradeItem(Inventory* pInventory, Item* pItem, vector<TradeItemSlot>& slots) {
+    if (pInventory == NULL || pItem == NULL)
+        return false;
+
+    CoordInven_t x = 0;
+    CoordInven_t y = 0;
+
+    if (pInventory->findItemOID(pItem->getObjectID(), x, y) != pItem)
+        return false;
+
+    TradeItemSlot slot;
+    slot.pItem = pItem;
+    slot.pInventory = pInventory;
+    slot.x = x;
+    slot.y = y;
+    slots.push_back(slot);
+
+    pInventory->deleteItem(x, y);
+    return true;
+}
+
+// Put pItem into pInventory, remembering where it landed. Returns false,
+// having changed nothing, if there is no room.
+bool placeTradeItem(Inventory* pInventory, Item* pItem, vector<TradeItemSlot>& slots) {
+    if (pInventory == NULL || pItem == NULL)
+        return false;
+
+    TPOINT pt;
+    pt.x = 0;
+    pt.y = 0;
+
+    if (!pInventory->addItem(pItem, pt))
+        return false;
+
+    TradeItemSlot slot;
+    slot.pItem = pItem;
+    slot.pInventory = pInventory;
+    slot.x = (CoordInven_t)pt.x;
+    slot.y = (CoordInven_t)pt.y;
+    slots.push_back(slot);
+
+    return true;
+}
+
+// Undo a half-finished swap: pull back everything that was placed, then return
+// everything that was detached to the slot it came from. Both lists are walked
+// newest first, so every slot is free again by the time it is refilled.
+void rollbackTradeItems(vector<TradeItemSlot>& placed, vector<TradeItemSlot>& detached) {
+    for (vector<TradeItemSlot>::reverse_iterator itr = placed.rbegin(); itr != placed.rend(); ++itr)
+        itr->pInventory->deleteItem(itr->x, itr->y);
+
+    placed.clear();
+
+    for (vector<TradeItemSlot>::reverse_iterator itr = detached.rbegin(); itr != detached.rend(); ++itr) {
+        if (itr->pInventory->addItem(itr->x, itr->y, itr->pItem))
+            continue;
+
+        // Unreachable: the original slot was free a moment ago and nothing else
+        // touched these inventories in between. Fall back to any free slot
+        // rather than let the item fall out of the world, and log it, because a
+        // broken invariant here is worth seeing.
+        if (!itr->pInventory->addItem(itr->pItem))
+            filelog("tradeError.txt", "[rollback] could not restore item OID %u",
+                    (unsigned int)itr->pItem->getObjectID());
+    }
+
+    detached.clear();
+}
+
+// Credit gold to a character who is no longer in this process, with the same
+// direct Gold update the guild refund path uses (GSQuitGuildHandler). Called
+// when a trade is cancelled after the partner has gone: the escrow is about to
+// be deleted, so the gold has to go back to the stored character or it is
+// simply destroyed.
+void refundStoredTradeGold(Creature* pPC, const string& targetName, Gold_t gold) {
+    if (pPC == NULL || gold == 0)
+        return;
+
+    // Trades are same-race only -- CGTradePrepareHandler rejects a mixed pair
+    // before initTrade() -- so the partner's table is the caller's table.
+    string table;
+    if (pPC->isSlayer())
+        table = "Slayer";
+    else if (pPC->isVampire())
+        table = "Vampire";
+    else if (pPC->isOusters())
+        table = "Ousters";
+
+    if (table.empty()) {
+        filelog("tradeError.txt", "[2] cannot refund %u gold to absent partner [%s] : unknown race", (unsigned int)gold,
+                targetName.c_str());
+        return;
+    }
+
+    Statement* pStmt = NULL;
+    bool bRefunded = false;
+
+    // END_DB rethrows a query failure as a const char*, and cancelTrade() runs
+    // from the character destructors and the logout path, where an escaping
+    // exception is fatal. Contain it here.
+    try {
+        BEGIN_DB {
+            Connection* pConn = g_pDatabaseManager->getConnection("DARKEDEN");
+
+            // table is one of the three fixed literals above and is never
+            // user-controlled, so splicing it into the SQL text is safe; the
+            // amount, the cap and the name stay bound parameters.
+            PreparedStatement goldStmt(pConn, "UPDATE " + table + " SET Gold = LEAST(Gold + ?, ?) WHERE Name = ?");
+            goldStmt.bindUInt(1, gold);
+            goldStmt.bindUInt(2, (uint)MAX_MONEY);
+            goldStmt.bindString(3, targetName);
+            goldStmt.execute();
+        }
+        END_DB(pStmt)
+
+        bRefunded = true;
+    } catch (...) {
+        // Already logged to DBError.log by END_DB.
+    }
+
+    filelog("tradeError.txt", "[2] %s %u escrowed gold to absent trade partner [%s]",
+            bRefunded ? "refunded" : "FAILED to refund", (unsigned int)gold, targetName.c_str());
+}
+
+} // namespace
+
 void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
 
 {
     __BEGIN_TRY
 
-    if (!canTrade(pCreature1, pCreature2)) {
-        throw("TradeManager::processTrade() : , .   ,  ?");
+    // canTrade() returns 1 for "go ahead", 2 for a rejected event-gift-box
+    // pairing and 0 for everything else. The test used to be !canTrade(), which
+    // let 2 through -- the one return value the swap below cannot honour.
+    if (canTrade(pCreature1, pCreature2) != 1) {
+        throw("TradeManager::processTrade() : the trade is no longer valid!");
     }
 
-    
+
     TradeInfo* pInfo1 = getTradeInfo(pCreature1->getName());
     TradeInfo* pInfo2 = getTradeInfo(pCreature2->getName());
     list<Item*> tradeList1 = pInfo1->getItemList();
@@ -439,13 +593,13 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
     bool check2 = pPlayerCreature2->checkDBGold(pPlayerCreature2->getGold() + tradeGold2);
 
     if (!check1) {
-        filelog("GoldBug.log", "TradeManager::processTrade :   . [%s:%s]",
-                pPlayerCreature1->getName().c_str(), pPlayerCreature1->getPlayer()->getID().c_str());
+        filelog("GoldBug.log", "TradeManager::processTrade :   . [%s:%s]", pPlayerCreature1->getName().c_str(),
+                pPlayerCreature1->getPlayer()->getID().c_str());
     }
 
     if (!check2) {
-        filelog("GoldBug.log", "TradeManager::processTrade :   . [%s:%s]",
-                pPlayerCreature2->getName().c_str(), pPlayerCreature2->getPlayer()->getID().c_str());
+        filelog("GoldBug.log", "TradeManager::processTrade :   . [%s:%s]", pPlayerCreature2->getName().c_str(),
+                pPlayerCreature2->getPlayer()->getID().c_str());
     }
 
     if (!check1 || !check2) {
@@ -491,78 +645,113 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
     } else
         throw("TradeManager::processTrade() :      !");
 
-    
+    // Pass 1 -- inspect only. Every reason to refuse the trade is found before a
+    // single item leaves an inventory. The gift-box pairing in particular used
+    // to be resolved in the middle of the swap, where a refusal threw with both
+    // inventories already emptied and the staked items owned by nobody.
     for (list<Item*>::iterator itr = tradeList1.begin(); itr != tradeList1.end(); itr++) {
         Item* pItem = (*itr);
-        if (pInventory1->hasItem(pItem->getObjectID())) {
-            
-            if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
-                pItem->getItemType() < 6) {
-                 
-
-                bTradeGiftBox = true;
-
-                giftBoxType1 = pItem->getItemType();
-            }
-
-            pInventory1->deleteItem(pItem->getObjectID());
-            itemMap1.addItem(pItem);
-            pItem->whenPCLost(pPlayerCreature1);
-        } else
-            throw("TradeManager::processTrade() : ?  !");
+        if (pItem != NULL && pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
+            pItem->getItemType() < 6) {
+            bTradeGiftBox = true;
+            giftBoxType1 = pItem->getItemType();
+        }
     }
     for (list<Item*>::iterator itr = tradeList2.begin(); itr != tradeList2.end(); itr++) {
         Item* pItem = (*itr);
-        if (pInventory2->hasItem(pItem->getObjectID())) {
-            
-            if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
-                pItem->getItemType() < 6) {
-                 
+        if (pItem != NULL && pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
+            pItem->getItemType() < 6) {
+            // A black gift box is only made by trading one gift box for
+            // another, so a one-sided stake is refused.
+            if (!bTradeGiftBox)
+                throw("TradeManager::processTrade() : an event gift box was staked on one side only!");
 
-                
-                if (!bTradeGiftBox)
-                    throw("TradeManager::processTrade() :        !");
-
-                giftBoxType2 = pItem->getItemType();
-            }
-
-            pInventory2->deleteItem(pItem->getObjectID());
-            itemMap2.addItem(pItem);
-            pItem->whenPCLost(pPlayerCreature2);
-        } else
-            throw("TradeManager::processTrade() : ?  !");
+            giftBoxType2 = pItem->getItemType();
+        }
     }
 
-    
+    // Resolve the combined box up front. getBlackGiftBoxType() returns 0 for any
+    // pairing it does not know -- including the one-sided case, where
+    // giftBoxType2 is still 0 -- and that used to be a throw from the middle of
+    // the swap.
+    int blackGiftBoxType = 0;
+    if (bTradeGiftBox) {
+        blackGiftBoxType = getBlackGiftBoxType(giftBoxType1, giftBoxType2);
+        if (blackGiftBoxType == 0)
+            throw("TradeManager::processTrade() : the two staked event gift boxes do not combine!");
+    }
+
+    // Pass 2 -- detach every staked item from its owner, recording where it came
+    // from. Nothing is destroyed on the failure path: the whole move is undone.
+    vector<TradeItemSlot> detached;
+    vector<TradeItemSlot> placed;
+
+    for (list<Item*>::iterator itr = tradeList1.begin(); itr != tradeList1.end(); itr++) {
+        Item* pItem = (*itr);
+        if (!detachTradeItem(pInventory1, pItem, detached) || !itemMap1.addItem(pItem)) {
+            rollbackTradeItems(placed, detached);
+            throw("TradeManager::processTrade() : a staked item is no longer in its owner's inventory!");
+        }
+    }
+    for (list<Item*>::iterator itr = tradeList2.begin(); itr != tradeList2.end(); itr++) {
+        Item* pItem = (*itr);
+        if (!detachTradeItem(pInventory2, pItem, detached) || !itemMap2.addItem(pItem)) {
+            rollbackTradeItems(placed, detached);
+            throw("TradeManager::processTrade() : a staked item is no longer in its owner's inventory!");
+        }
+    }
+
+    // Pass 3 -- place every detached item with its new owner. Still undoable.
+    for (ItemMap::iterator itr = itemMap1.begin(); itr != itemMap1.end(); itr++) {
+        if (!placeTradeItem(pInventory2, itr->second, placed)) {
+            rollbackTradeItems(placed, detached);
+            throw("TradeManager::processTrade() : not enough inventory space to complete the trade.");
+        }
+    }
+    for (ItemMap::iterator itr = itemMap2.begin(); itr != itemMap2.end(); itr++) {
+        if (!placeTradeItem(pInventory1, itr->second, placed)) {
+            rollbackTradeItems(placed, detached);
+            throw("TradeManager::processTrade() : not enough inventory space to complete the trade.");
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Commit point. Both inventories now hold the other side's items and nothing
+    // below can fail the trade, so the ownership callbacks and the item-type
+    // rewrites can run without any risk of stranding an item.
+    // ------------------------------------------------------------------------
+
+    // whenPCLost() before whenPCTake(), and in stake order, exactly as before.
+    for (list<Item*>::iterator itr = tradeList1.begin(); itr != tradeList1.end(); itr++)
+        (*itr)->whenPCLost(pPlayerCreature1);
+    for (list<Item*>::iterator itr = tradeList2.begin(); itr != tradeList2.end(); itr++)
+        (*itr)->whenPCLost(pPlayerCreature2);
+
+
     for (ItemMap::iterator itr = itemMap1.begin(); itr != itemMap1.end(); itr++) {
         Item* pItem = itr->second;
-        
-        if (!pInventory2->addItem(pItem)) {
-            throw("TradeManager::processTrade() : ,  .");
-        }
 
         pItem->whenPCTake(pPlayerCreature2);
 
-        
-        
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() == 0) {
             pItem->setItemType(1);
 
-            
+
             FlagSet* pFlagSet = pPlayerCreature2->getFlagSet();
             Assert(pFlagSet != NULL);
             pFlagSet->turnOn(FLAGSET_RECEIVE_GREEN_GIFT_BOX);
             pFlagSet->save(pCreature2->getName());
         }
 
+        // Resolved before anything moved, so it is never 0 here. The guard is
+        // kept only so an NDEBUG build cannot write a 0 item type if that ever
+        // stops holding -- a wrong box beats a destroyed trade.
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
             pItem->getItemType() < 6) {
-            int blackGiftBoxType = getBlackGiftBoxType(giftBoxType1, giftBoxType2);
+            Assert(blackGiftBoxType != 0);
 
             if (blackGiftBoxType != 0)
                 pItem->setItemType(blackGiftBoxType);
-            else
-                throw("TradeManager::processTrade() : ,  .");
         }
 
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() >= 16 &&
@@ -570,7 +759,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
             pItem->setItemType(pItem->getItemType() + 3);
         }
 
-        
+
         if (pItem != NULL && pItem->isTraceItem()) {
             remainTraceLog(pItem, pCreature1->getName(), pCreature2->getName(), ITEM_LOG_TRADE, DETAIL_TRADE);
             remainTraceLogNew(pItem, pCreature1->getName(), ITL_DROP, ITLD_TRADE);
@@ -579,33 +768,26 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
     }
     for (ItemMap::iterator itr = itemMap2.begin(); itr != itemMap2.end(); itr++) {
         Item* pItem = itr->second;
-        
-        if (!pInventory1->addItem(pItem)) {
-            throw("TradeManager::processTrade() : ,  .");
-        }
 
         pItem->whenPCTake(pPlayerCreature1);
 
-        
-        
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() == 0) {
             pItem->setItemType(1);
 
-            
+
             FlagSet* pFlagSet = pPlayerCreature1->getFlagSet();
             Assert(pFlagSet != NULL);
             pFlagSet->turnOn(FLAGSET_RECEIVE_GREEN_GIFT_BOX);
             pFlagSet->save(pCreature1->getName());
         }
 
+        // See the note on the matching block above.
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() > 1 &&
             pItem->getItemType() < 6) {
-            int blackGiftBoxType = getBlackGiftBoxType(giftBoxType1, giftBoxType2);
+            Assert(blackGiftBoxType != 0);
 
             if (blackGiftBoxType != 0)
                 pItem->setItemType(blackGiftBoxType);
-            else
-                throw("TradeManager::processTrade() : ,  .");
         }
 
         if (pItem->getItemClass() == Item::ITEM_CLASS_EVENT_GIFT_BOX && pItem->getItemType() >= 16 &&
@@ -613,7 +795,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
             pItem->setItemType(pItem->getItemType() + 3);
         }
 
-        
+
         if (pItem != NULL && pItem->isTraceItem()) {
             remainTraceLog(pItem, pCreature2->getName(), pCreature1->getName(), ITEM_LOG_TRADE, DETAIL_TRADE);
             remainTraceLogNew(pItem, pCreature2->getName(), ITL_DROP, ITLD_TRADE);
@@ -621,11 +803,11 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
         }
     }
 
-    
+
     pInventory1->save(pCreature1->getName());
     pInventory2->save(pCreature2->getName());
 
-    
+
     if (pCreature1->isSlayer()) {
         pSlayer1->setGoldEx(pSlayer1->getGold() + tradeGold2);
         pSlayer2->setGoldEx(pSlayer2->getGold() + tradeGold1);
@@ -637,7 +819,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
         pOusters2->setGoldEx(pOusters2->getGold() + tradeGold1);
     }
 
-    
+
     string ip1 = pCreature1->getPlayer()->getSocket()->getHost();
     string ip2 = pCreature2->getPlayer()->getSocket()->getHost();
     StringStream msg;
@@ -651,7 +833,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
     for (ItemMap::iterator itr = itemMap2.begin(); itr != itemMap2.end(); itr++)
         msg << itr->second->toString() << "\n";
 
-    
+
     if (tradeGold1 >= g_pVariableManager->getMoneyTraceLogLimit()) {
         remainMoneyTraceLog(pCreature1->getName(), pCreature2->getName(), ITEM_LOG_TRADE, DETAIL_TRADE, tradeGold1);
     }
@@ -682,9 +864,7 @@ void TradeManager::processTrade(Creature* pCreature1, Creature* pCreature2)
     }
     END_DB(pStmt);
 
-    
-    
-    
+
     // removeTradeInfo(pCreature1->getObjectID());
     // removeTradeInfo(pCreature2->getObjectID());
     pInfo1->clearAll();
@@ -705,19 +885,19 @@ void TradeManager::cancelTrade(Creature* pCreature1, Creature* pCreature2)
     try {
         int nCondition = 0;
 
-        
+
         if (pCreature1 == NULL || pCreature2 == NULL)
             nCondition = 1;
 
-        
+
         if (!pCreature1->isPC() || !pCreature2->isPC())
             nCondition = 2;
 
-        
+
         if (!isSameRace(pCreature1, pCreature2))
             nCondition = 3;
 
-        
+
         if (!isTrading(pCreature1, pCreature2))
             nCondition = 4;
 
@@ -725,7 +905,7 @@ void TradeManager::cancelTrade(Creature* pCreature1, Creature* pCreature2)
             StringStream msg;
             msg << "TradeManager::cancelTrade()  ... CODE(" << nCondition << ")";
             filelog("tradeError.txt", "[1] %s", msg.toString().c_str());
-            
+
 
             return;
         }
@@ -733,7 +913,7 @@ void TradeManager::cancelTrade(Creature* pCreature1, Creature* pCreature2)
         TradeInfo* pInfo1 = getTradeInfo(pCreature1->getName());
         TradeInfo* pInfo2 = getTradeInfo(pCreature2->getName());
 
-        
+
         if (pCreature1->isSlayer()) {
             Slayer* pSlayer1 = dynamic_cast<Slayer*>(pCreature1);
             if (pInfo1)
@@ -748,7 +928,7 @@ void TradeManager::cancelTrade(Creature* pCreature1, Creature* pCreature2)
                 pOusters1->setGold(pOusters1->getGold() + pInfo1->getGold());
         }
 
-        
+
         if (pCreature2->isSlayer()) {
             Slayer* pSlayer2 = dynamic_cast<Slayer*>(pCreature2);
             if (pInfo2)
@@ -763,7 +943,7 @@ void TradeManager::cancelTrade(Creature* pCreature1, Creature* pCreature2)
                 pOusters2->setGold(pOusters2->getGold() + pInfo2->getGold());
         }
 
-        
+
         if (pInfo1)
             removeTradeInfo(pCreature1->getName());
         if (pInfo2)
@@ -787,7 +967,6 @@ void TradeManager::cancelTrade(Creature* pPC)
     __BEGIN_TRY
 
     try {
-        
         if (pPC == NULL)
             return;
 
@@ -801,7 +980,7 @@ void TradeManager::cancelTrade(Creature* pPC)
             pInfo2 = getTradeInfo(pInfo1->getTargetName());
             TargetName = pInfo1->getTargetName();
 
-            
+
             if (pPC->isSlayer()) {
                 Slayer* pSlayer1 = dynamic_cast<Slayer*>(pPC);
                 pSlayer1->setGold(pSlayer1->getGold() + pInfo1->getGold());
@@ -813,40 +992,51 @@ void TradeManager::cancelTrade(Creature* pPC)
                 pOusters1->setGold(pOusters1->getGold() + pInfo1->getGold());
             }
 
-            /*
-            try { pTargetPC = pZone->getCreature(TargetName); }
-            catch (NoSuchElementException) { pTargetPC = NULL; }
-            */
+            // The partner's escrowed gold has to come back too, and
+            // removeTradeInfo() below deletes the escrow whether or not it did.
+            // The zone lookup alone was not enough: a partner who left the zone
+            // without their own cancelTrade() running is simply absent here, and
+            // their gold used to be destroyed at that point. Widen the search to
+            // the whole process, then fall back to a direct credit on the stored
+            // character.
+            Creature* pInZonePC = (pZone != NULL) ? pZone->getCreature(TargetName) : NULL;
 
-            
-            pTargetPC = pZone->getCreature(TargetName);
+            pTargetPC = pInZonePC;
+            if (pTargetPC == NULL || !pTargetPC->isPC())
+                pTargetPC = g_pPCFinder->getCreature(TargetName);
 
-            
-            
-            
-            if (pTargetPC != NULL && pTargetPC->isPC() && pInfo2 != NULL) {
-                
-                if (pTargetPC->isSlayer()) {
-                    Slayer* pSlayer2 = dynamic_cast<Slayer*>(pTargetPC);
-                    pSlayer2->setGold(pSlayer2->getGold() + pInfo2->getGold());
-                } else if (pTargetPC->isVampire()) {
-                    Vampire* pVampire2 = dynamic_cast<Vampire*>(pTargetPC);
-                    pVampire2->setGold(pVampire2->getGold() + pInfo2->getGold());
-                } else if (pTargetPC->isOusters()) {
-                    Ousters* pOusters2 = dynamic_cast<Ousters*>(pTargetPC);
-                    pOusters2->setGold(pOusters2->getGold() + pInfo2->getGold());
+            if (pInfo2 != NULL) {
+                if (pTargetPC != NULL && pTargetPC->isPC()) {
+                    if (pTargetPC->isSlayer()) {
+                        Slayer* pSlayer2 = dynamic_cast<Slayer*>(pTargetPC);
+                        pSlayer2->setGold(pSlayer2->getGold() + pInfo2->getGold());
+                    } else if (pTargetPC->isVampire()) {
+                        Vampire* pVampire2 = dynamic_cast<Vampire*>(pTargetPC);
+                        pVampire2->setGold(pVampire2->getGold() + pInfo2->getGold());
+                    } else if (pTargetPC->isOusters()) {
+                        Ousters* pOusters2 = dynamic_cast<Ousters*>(pTargetPC);
+                        pOusters2->setGold(pOusters2->getGold() + pInfo2->getGold());
+                    }
+                } else {
+                    // Not in this process any more.
+                    refundStoredTradeGold(pPC, TargetName, pInfo2->getGold());
                 }
+            }
 
-                
+            // Tell the partner's client the trade is off -- but only if they are
+            // still in this zone. One who has already left has torn the trade
+            // window down and would have no object to attach this to.
+            if (pInZonePC != NULL && pInZonePC->isPC() && pInfo2 != NULL) {
                 GCTradeFinish gcTradeFinish;
                 gcTradeFinish.setTargetObjectID(pPC->getObjectID());
                 gcTradeFinish.setCode(GC_TRADE_FINISH_REJECT);
 
-                Player* pTargetPlayer = pTargetPC->getPlayer();
-                pTargetPlayer->sendPacket(&gcTradeFinish);
+                Player* pTargetPlayer = pInZonePC->getPlayer();
+                if (pTargetPlayer != NULL)
+                    pTargetPlayer->sendPacket(&gcTradeFinish);
             }
 
-            
+
             removeTradeInfo(pPC->getName());
             removeTradeInfo(TargetName);
         }
