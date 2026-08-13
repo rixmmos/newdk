@@ -23,9 +23,18 @@
 #include "StringStream.h"
 #include "Types.h"
 
+// A fatal OOM used to exit(0), so a supervisor read the crash as a clean,
+// successful shutdown and would not restart or alert on it. abort() is what the
+// gameserver's handleMemoryError() already does: it is the only correct ending
+// for a new_handler that cannot free memory (returning would loop forever), and
+// unlike exit() it does not run atexit handlers or static destructors -- code
+// that would itself try to allocate on an already-exhausted heap.
 void memoryError() {
-    cout << "CRITICAL ERROR! NOT ENOUGH MEMORY!" << endl;
-    exit(0);
+    cerr << "==============================================================================" << endl;
+    cerr << "CRITICAL ERROR! NOT ENOUGH MEMORY!" << endl;
+    cerr << "==============================================================================" << endl;
+    filelog("CriticalError.log", "CRITICAL ERROR! NOT ENOUGH MEMORY!");
+    abort();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -34,7 +43,6 @@ void memoryError() {
 //
 //////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[]) {
-    
     set_new_handler(memoryError);
 
     if (argc < 3) {
@@ -42,23 +50,20 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    
+
     string* Argv;
 
     Argv = new string[argc];
     for (int i = 0; i < argc; i++)
         Argv[i] = argv[i];
 
-    
-    
-    
 
     try {
         if (Argv[1] != "-f") {
             throw Error("Usage : loginserver -f  [-p port]");
         }
 
-        
+
         g_pConfig = new Properties();
         g_pConfig->load(Argv[2]);
 
@@ -73,7 +78,7 @@ int main(int argc, char* argv[]) {
             if (argc < 5 || Argv[3] != "-i")
                 throw Error("Usage : loginserver -f  [-i ID]");
 
-            
+
             char sLoginServerPort[5], sLoginServerUDPPort[5], sLoginServerID[5];
             sprintf(sLoginServerPort, "%d", g_pConfig->getPropertyInt("LoginServerBasePort") + atoi(argv[4]));
             sprintf(sLoginServerUDPPort, "%d", g_pConfig->getPropertyInt("LoginServerBaseUDPPort") + atoi(argv[4]));
@@ -93,12 +98,6 @@ int main(int argc, char* argv[]) {
     }
 
 
-    
-    
-    
-    
-    
-
     try {
         string LogServerIP = g_pConfig->getProperty("LogServerIP");
         int LogServerPort = g_pConfig->getPropertyInt("LogServerPort");
@@ -111,7 +110,7 @@ int main(int argc, char* argv[]) {
     }
 
     //
-    
+
     //
     try {
         struct rlimit rl;
@@ -119,29 +118,26 @@ int main(int argc, char* argv[]) {
         rl.rlim_max = RLIM_INFINITY;
         setrlimit(RLIMIT_CORE, &rl);
 
-        
+
         g_pLoginServer = new LoginServer();
 
-        
+
         g_pLoginServer->init();
 
-        
+
         g_pLoginServer->start();
     } catch (Throwable& e) {
-        
         ofstream ofile("../log/instant.log", ios::out);
         ofile << e.toString() << endl;
         ofile.close();
 
-        
-        
+
         log(LOG_LOGINSERVER_ERROR, "", "", e.toString());
 
-        
+
         cout << e.toString() << endl;
 
-        
-        
+
         g_pLoginServer->stop();
     }
 }
