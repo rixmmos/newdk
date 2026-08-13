@@ -429,8 +429,11 @@ OptionInfoManager::OptionInfoManager()
     __BEGIN_TRY
 
     m_nOptionCount = 0;
-    m_OptionClassInfos.clear();
-    m_OptionClassInfos.reserve((int)OPTION_MAX);
+    // reserve() only allocates capacity -- size() stayed 0, so
+    // addOptionClassInfo() wrote through operator[] into unconstructed storage,
+    // getOptionClassInfo() read past the end, and release()'s begin()..end()
+    // walk iterated nothing and leaked every OptionClassInfo ever loaded.
+    m_OptionClassInfos.assign((size_t)OPTION_MAX, (OptionClassInfo*)NULL);
     m_ToTalPetEnchantOption = 0;
     m_PetEnchantOptionList.clear();
 
@@ -481,7 +484,10 @@ void OptionInfoManager::release()
             SAFE_DELETE(*citr);
     }
 
-    m_OptionClassInfos.clear();
+    // release() runs from init() as well as from the destructor, so re-size
+    // rather than empty: a plain clear() would leave the next load()'s
+    // addOptionClassInfo() writing past the end again.
+    m_OptionClassInfos.assign((size_t)OPTION_MAX, (OptionClassInfo*)NULL);
 
     list<PetEnchantOption*>::iterator pitr = m_PetEnchantOptionList.begin();
     list<PetEnchantOption*>::iterator endpItr = m_PetEnchantOptionList.end();
@@ -1012,6 +1018,9 @@ int OptionInfoManager::getRareUpgradeRatio(OptionType_t optionType, bool success
     OptionInfo* pOI = getOptionInfo(optionType);
     if (pOI == NULL)
         throw Error("OptionInfoManager::getRareUpgradeRatio() :   .");
+
+    if ((uint)pOI->getClass() >= (uint)OPTION_MAX)
+        throw Error("OptionInfoManager::getRareUpgradeRatio() : OptionClass out of range");
 
     OptionClassInfo* pOCI = m_OptionClassInfos[pOI->getClass()];
     if (pOCI == NULL)

@@ -519,6 +519,11 @@ public:
     
     int getRareUpgradeRatio(OptionType_t optionType, bool success);
     const OptionClassInfo* getOptionClassInfo(OptionClass oc) {
+        // oc arrives from OptionInfo::getClass(), which is cast straight from a
+        // DB int with no validation and whose constructor default is OPTION_MAX
+        // -- already one past the end.
+        if ((uint)oc >= (uint)OPTION_MAX)
+            return NULL;
         return m_OptionClassInfos[oc];
     }
 
@@ -538,6 +543,14 @@ public:
 
 private:
     void addOptionClassInfo(OptionClassInfo* pInfo) {
+        // OptionClassInfo.OptionClassType is an unvalidated DB int. Dropping an
+        // out-of-range row is the only option that does not corrupt the vector;
+        // the sole caller new's pInfo immediately before this call and keeps no
+        // other reference to it.
+        if ((uint)pInfo->getOptionClass() >= (uint)OPTION_MAX) {
+            delete pInfo;
+            return;
+        }
         m_OptionClassInfos[pInfo->getOptionClass()] = pInfo;
     }
 

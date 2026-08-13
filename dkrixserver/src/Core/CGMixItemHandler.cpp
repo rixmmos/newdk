@@ -260,18 +260,37 @@ void CGMixItemHandler::executeMix(CGMixItem* pPacket, Player* pPlayer, Item* pIt
 
     GCAddItemToItemVerify gcVerify;
 
+    // Assert() is compiled out under NDEBUG, and front() on an empty list is
+    // undefined -- refuse for real instead.
     const list<OptionType_t>& oList1 = pTargetItem1->getOptionTypeList();
-    Assert(!oList1.empty());
+    const list<OptionType_t>& oList2 = pTargetItem2->getOptionTypeList();
+    if (oList1.empty() || oList2.empty()) {
+        sendCannotUse(pPacket, pPlayer);
+        return;
+    }
+
     OptionType_t option1 = oList1.front();
     OptionInfo* pOptionInfo1 = g_pOptionInfoManager->getOptionInfo(option1);
 
-    const list<OptionType_t>& oList2 = pTargetItem2->getOptionTypeList();
-    Assert(!oList2.empty());
     OptionType_t option2 = oList2.front();
     OptionInfo* pOptionInfo2 = g_pOptionInfoManager->getOptionInfo(option2);
 
-    if (g_pOptionInfoManager->getOptionClassInfo(pOptionInfo1->getClass())->getOptionGroup() ==
-        g_pOptionInfoManager->getOptionClassInfo(pOptionInfo2->getClass())->getOptionGroup()) {
+    if (pOptionInfo1 == NULL || pOptionInfo2 == NULL) {
+        sendCannotUse(pPacket, pPlayer);
+        return;
+    }
+
+    // getOptionClassInfo() returns NULL for an option whose Class column is out
+    // of range, and for a class the OptionClassInfo table never supplied.
+    const OptionClassInfo* pOptionClassInfo1 = g_pOptionInfoManager->getOptionClassInfo(pOptionInfo1->getClass());
+    const OptionClassInfo* pOptionClassInfo2 = g_pOptionInfoManager->getOptionClassInfo(pOptionInfo2->getClass());
+
+    if (pOptionClassInfo1 == NULL || pOptionClassInfo2 == NULL) {
+        sendCannotUse(pPacket, pPlayer);
+        return;
+    }
+
+    if (pOptionClassInfo1->getOptionGroup() == pOptionClassInfo2->getOptionGroup()) {
         //		sendCannotUse(pPacket, pPlayer);
         gcVerify.setCode(ADD_ITEM_TO_ITEM_VERIFY_MIXING_FAILED_SAME_OPTION_GROUP);
         pPlayer->sendPacket(&gcVerify);
