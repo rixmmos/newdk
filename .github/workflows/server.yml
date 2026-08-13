@@ -799,3 +799,37 @@ jobs:
       # correct idiom and is never counted.
       - name: reserve()-sizing ratchet
         run: sh dkrixserver/scripts/check-reserve-sizing.sh
+
+      # Guard-indexes-container ratchet [new 2026-08-13]. Section 4 pattern 2
+      # of docs/SECURITY-AUDIT-2026-08-10.md. Counts every `Assert(...)`, and
+      # every `if (...)` whose whole body is one `return`/`throw`, that tests
+      # an indexed element for existence — `Assert(m_pItemInfos[t] != NULL)`.
+      # The subscript happens before anything has established the subscript is
+      # in range, so the guard IS the out-of-bounds read: it faults instead of
+      # catching, and under NDEBUG the Assert form disappears and the caller
+      # reads the slot anyway.
+      #
+      # The audit files this as recurring across 18-K, 18-U, 18-AD, 18-AG,
+      # 18-AH, 18-AL and 18-AI — and it recurred again on 2026-08-13, when
+      # 18-AW (`b2e7d48`) found `Assert(m_pItemInfos[0] != NULL)` one line
+      # below a defect the audit's own §1 row 12 had described without
+      # noticing it.
+      #
+      # Validated against pre-fix trees rather than asserted: the count falls
+      # 43 → 42 → 41 → 34 → 27 → 25 across `3e02f6c^`…HEAD, and every one of
+      # the 18 drops is a named fix (18-I/18-R Slayer wear slot, 18-U
+      # ItemRack, 18-AH SkillDomainInfoManager/VampEXPInfo/OustersEXPInfo,
+      # 18-AL InfoClassManager/EventQuestAdvance, 18-AW InfoClassManager::init)
+      # or a file deletion. No drop is the checker changing its mind.
+      #
+      # It covers one sub-shape of pattern 2, not the pattern: 18-K, 18-AD,
+      # 18-AG and 18-AI are side-effecting calls inside `Assert` and
+      # `Assert(index < MAX)` comparisons, and the gate is correctly silent
+      # on all four.
+      #
+      # Baseline 25 [measured 2026-08-13] — deliberately NOT near zero. §1
+      # row 10 records that 18-U's conversions were scoped to wire-reachable
+      # checks and that the server-side-index Asserts in `ItemInfoManager`
+      # and friends were kept on purpose. Breakdown in the script header.
+      - name: Guard-indexes-container ratchet
+        run: sh dkrixserver/scripts/check-guard-index.sh
