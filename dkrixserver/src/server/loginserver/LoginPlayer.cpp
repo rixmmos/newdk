@@ -23,6 +23,7 @@
 #include "PacketValidator.h"
 #include "PreparedStatement.h"
 #include "Profile.h"
+#include "Properties.h"
 #include "gameserver/billing/BillingPlayerManager.h"
 
 // by sigi. 2002.11.12
@@ -30,6 +31,56 @@ const int defaultLoginPlayerInputStreamSize = 1024;
 const int defaultLoginPlayerOutputStreamSize = 4096;
 
 static int maxIdleSec = 60 * 15;
+
+//--------------------------------------------------------------------------------
+// Pre-authentication deadline.
+//
+// maxIdleSec above is a *sliding* deadline -- every accepted packet pushes it
+// out again. LPS_BEGIN_SESSION accepts CL_VERSION_CHECK and CG_ENCODE_KEY
+// (PacketValidator.cpp), so a connection that never authenticates can hold its
+// descriptor open forever by sending one cheap packet every few minutes. With
+// only ~1000 usable descriptors (PlayerManager::nMaxPlayers, bounded by the
+// fd_set width) that is a cheap denial of service on an internet-facing port.
+//
+// This deadline is therefore *absolute*: armed once at accept, never
+// refreshed. It applies only while the player is still in LPS_BEGIN_SESSION,
+// and leaving that state is exactly "the credentials were accepted" -- so an
+// authenticated session is governed by maxIdleSec alone and nothing here can
+// disconnect a player who is sitting on the character-select screen.
+//
+// The 30s default is chosen against what the real client does. It opens the
+// socket inside Execute_UI_LOGIN (client tree, UIMessageManager.cpp), i.e.
+// only after the user has already typed ID and password, and sends
+// CLVersionCheck, CGConnectSetKey and CLLogin from that same call with a
+// single Sleep(500) in between. Accept-to-CLLogin for a legitimate client is
+// therefore well under a second plus round-trip time; 30s leaves roughly 30x
+// headroom and is still 30x tighter than the 900s it backstops. Login failure
+// does not need to fit inside one connection's window either: the client
+// calls ReleaseSocket() and reconnects (GameMain.cpp, MODE_LOGIN_WRONG).
+//
+// Override with MaxPreAuthIdleSeconds in loginserver.conf. A value <= 0
+// disables the deadline. Conf files that predate the key keep the default.
+//--------------------------------------------------------------------------------
+static const int defaultMaxPreAuthSec = 30;
+
+static int loadMaxPreAuthSec() {
+    if (g_pConfig != NULL) {
+        try {
+            return g_pConfig->getPropertyInt("MaxPreAuthIdleSeconds");
+        } catch (Throwable&) {
+            // Key absent from this conf file. Fall through to the default.
+        }
+    }
+
+    return defaultMaxPreAuthSec;
+}
+
+static int maxPreAuthSec() {
+    // Every caller runs on the single ClientManager thread today; the
+    // function-local static is thread-safe in C++11 regardless.
+    static const int value = loadMaxPreAuthSec();
+    return value;
+}
 
 
 static uint maxWaitForKickCharacter = 3;
@@ -72,6 +123,11 @@ LoginPlayer::LoginPlayer(Socket* pSocket)
 
     getCurrentTime(m_ExpireTime);
     m_ExpireTime.tv_sec += maxIdleSec;
+
+    // Absolute pre-authentication deadline; see maxPreAuthSec() above. Armed
+    // here, at accept, so a client that never sends a byte still has one.
+    getCurrentTime(m_PreAuthExpireTime);
+    m_PreAuthExpireTime.tv_sec += maxPreAuthSec();
 
     m_bSetWorldGroupID = false;
     m_WorldID = 1;
@@ -131,6 +187,17 @@ void LoginPlayer::processCommand(bool Option) {
 
     //	static Timeval currentTime;
 
+    // Absolute pre-authentication deadline. Evaluated ahead of the
+    // LPS_WAITING_FOR_GL_KICK_VERIFY early return below so it cannot be
+    // skipped by a connection parked in that state. See maxPreAuthSec() above
+    // for the policy and the number behind it.
+    if (maxPreAuthSec() > 0 && (m_PlayerStatus == LPS_NONE || m_PlayerStatus == LPS_BEGIN_SESSION)) {
+        Timeval preAuthNow;
+        getCurrentTime(preAuthNow);
+
+        if (preAuthNow >= m_PreAuthExpireTime)
+            throw DisconnectException("pre-authentication deadline expired");
+    }
 
     if (m_PlayerStatus == LPS_WAITING_FOR_GL_KICK_VERIFY) {
         Timeval currentTime;

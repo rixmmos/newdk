@@ -210,8 +210,13 @@ private:
     // player status
     PlayerStatus m_PlayerStatus;
 
-    // expire time
+    // expire time -- sliding idle deadline, refreshed by every packet
     Timeval m_ExpireTime;
+
+    // Absolute deadline for reaching an authenticated state. Armed at accept
+    // and never refreshed; only consulted while the player is still in
+    // LPS_BEGIN_SESSION. See maxPreAuthSec() in LoginPlayer.cpp.
+    Timeval m_PreAuthExpireTime;
 
     
     uint m_FailureCount;

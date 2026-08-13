@@ -55,8 +55,19 @@ BillingGameNo : 1
 FreePlaySlayerSum : 30
 FreePlayVampireLevel : 30
 
-# WorldInfo, GameServerGroupInfo 
+# WorldInfo, GameServerGroupInfo
 ServerInfoReloadTime : 1
+
+#--------------------------------------------------
+# Connection policy
+#--------------------------------------------------
+# Seconds a connection may stay unauthenticated (LPS_BEGIN_SESSION) before it
+# is dropped. Absolute from accept, not refreshed by traffic, and cleared the
+# moment credentials are accepted -- it never touches a logged-in session.
+# A real client sends CLLogin under a second after connecting, so this is pure
+# headroom. Set to 0 to disable. Optional: omitting the key keeps the built-in
+# default of 30.
+MaxPreAuthIdleSeconds : 30
 
 #--------------------------------------------------
 # DB connection
